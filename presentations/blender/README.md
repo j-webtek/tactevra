@@ -126,17 +126,24 @@ camera edit.
 ### Generate the editorial shot library
 
 The master edit is not the only available coverage. Generate the shot-library
-manifest to create primary and alternate angles for every scene plus dedicated
-toolhead and contact inserts:
+manifest to create primary and alternate angles plus two independently animated
+cinematic treatments for every scene, along with dedicated toolhead and contact
+inserts:
 
 ```powershell
 python presentations/blender/create_storyboard_v21_shot_library.py
 ```
 
-Each of the 36 assets records its scene, action, stage, camera rig, framing,
+Each of the 70 assets records its scene, action, stage, camera rig, framing,
 lens, motion, frame range, exact duration, recommended edit range, continuity
 requirement, intended purpose, review status, and output paths in
 `storyboard_v21_shot_library.json`.
+
+The cinematic treatments add scene-specific pans, lateral tracks, low and high
+arcs, crane moves, push-ins, pullbacks, and overhead drift. They move only the
+editorial camera: robot articulation, device state, timing, and one-contact
+permit semantics remain identical to the canonical storyboard. The generated
+HTML gallery can filter by variant and search by scene, subject, or motion.
 
 After building the canonical `.blend`, render the complete draft library:
 
@@ -154,6 +161,15 @@ gallery under `tmp/blender-storyboard-v21-shot-library/`. Use repeated
 `review` or `master` after an angle is approved. Every alternative uses the
 same animated robot, device state, permit state, and timeline; only the camera
 coverage changes.
+
+To render only the 34 animated cinematic variants into an existing library:
+
+```powershell
+& "C:\Program Files\Blender Foundation\Blender 4.3\blender.exe" `
+  --background tmp/blender-storyboard-v21/tactevra_storyboard_v21_benchmark.blend `
+  --python presentations/blender/render_storyboard_v21_shot_library.py -- `
+  --profile draft --variant cinematic_a --variant cinematic_b
+```
 
 To replace the fallback voice without rerendering the 3D picture, generate the
 fourteen clips in `ELEVENLABS_NARRATION.md`, then run:
