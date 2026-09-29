@@ -6605,3 +6605,86 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: isolate or resolve the OpenUSD asset-converter warning,
   define the governed RoArm import inputs, and begin WP1 joint/link/axis/unit
   mapping plus deterministic FK parity before reviewing a selected lock.
+
+### E-20260929-INT-429 — initial Isaac URDF joint mapping assumption failed closed
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `8594c10b6a757e743388c7440aab2f31014ac463`.
+- Change: ran the first governed import probe against the pinned meshless
+  RoArm-M3 URDF and required every source joint to appear as a USD Physics
+  joint.
+- Inputs/fixtures: governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  Isaac Sim 6.1.0.0 installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`;
+  NVIDIA driver 595.97.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-001a --receipt C:\IsaacSim\evidence\urdf_import_001.json --status-output C:\IsaacSim\evidence\urdf_import_001.status.json`.
+- Result: FAIL. Isaac emitted all nine source links and six movable joints but
+  did not emit `world_to_base_link` or `link5_to_hand_tcp` as Physics joint
+  prims. The explicit status was `RuntimeError: imported joint mismatch:
+  missing=['link5_to_hand_tcp', 'world_to_base_link'], extra=[]`.
+- Artifacts: failed status and 11,450-byte generated USD retained externally
+  under `C:\IsaacSim\evidence` and
+  `C:\IsaacSim\artifacts\issue190\wp1-import-001a`; neither is promoted as
+  passing evidence.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: importer representation discovery only. No physics step, FK
+  parity, collision/contact result, rendering, robot transport, or physical
+  qualification was attempted.
+- Supersedes: none; this failed assumption remains visible beside INT-430.
+- Next dependency: classify the two fixed source joints from their imported
+  nested transforms while continuing to require exact movable-joint and link
+  sets.
+
+### E-20260929-INT-430 — governed RoArm URDF import and mapping retained
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `8594c10b6a757e743388c7440aab2f31014ac463`.
+- Change: implemented the bounded Isaac URDF import probe, retained a compact
+  canonical mapping receipt, explicitly represented the two collapsed fixed
+  joints, bound the external generated USD manifest, added hardware-free
+  receipt tests, and documented reproduction and scope.
+- Inputs/fixtures: governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  probe SHA-256
+  `ff3b6575376b1d7e037d3b45dbdcc06e9c3da9e6d0b0c99c121812f669f27fff`;
+  committed receipt file SHA-256
+  `d537aa8aa0c4dc30eff62fd918b45c6afb103a8a81fd2180cdb7add757139ae1`;
+  receipt content SHA-256
+  `24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343`;
+  test SHA-256
+  `6007d4ec370bc1fcbde9423543ceaadf97b1a216126f9764b99e4d85a323b596`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-002 --receipt C:\IsaacSim\evidence\urdf_import_002.json --status-output C:\IsaacSim\evidence\urdf_import_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/urdf_import_probe.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS. The receipt binds nine unique links, six unique movable Physics
+  joints, and both source fixed joints as collapsed nested transforms. The one
+  external 11,450-byte USD has SHA-256
+  `492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6`;
+  its canonical manifest digest is
+  `b84b6b6542c76dbffa4f43446db53d724a9c6e44333a43654eb351ca40e7d378`.
+  The focused suite passed 22 tests in 1.06 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json`;
+  `software/integrations/isaac_sim/urdf_import_probe.py`;
+  `software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: meshless kinematic-import evidence only. The source retains zero
+  effort and velocity placeholders and lacks inertial, visual, and collision
+  geometry. No dynamics, FK parity, trajectory, clearance, contact, render,
+  hardware, or physical qualification claim is made. RTX 3090 remains outside
+  NVIDIA's documented Isaac 6.1.0 minimum GPU set, and the toolchain lock
+  remains `UNSELECTED`.
+- Supersedes: none. INT-429 remains retained failed evidence.
+- Next dependency: set actual Isaac articulation states for the fixed zero,
+  home, and ready corpus and compare the imported `hand_tcp` world pose against
+  governed FK values before reviewing runner selection.
