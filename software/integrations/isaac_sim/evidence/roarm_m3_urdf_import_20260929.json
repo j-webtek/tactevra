@@ -1,15 +1,28 @@
 {
+  "articulation_root_normalization": {
+    "demoted_importer_root_path": "/roarm_m3/Geometry/world/base_link/link1",
+    "expected_live_dof_order": [
+      "base_link_to_link1",
+      "link1_to_link2",
+      "link2_to_link3",
+      "link3_to_link4",
+      "link4_to_link5",
+      "link5_to_gripper_link"
+    ],
+    "promoted_root_path": "/roarm_m3/Geometry/world/base_link",
+    "reason": "PRESERVE_BASE_ROTATION_DOF_AFTER_FIXED_JOINT_COLLAPSE"
+  },
   "default_prim": "/roarm_m3",
   "driver_version": "595.97",
   "evidence_class": "KINEMATIC_IMPORT_ONLY",
   "external_files": [
     {
       "path": "roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda",
-      "sha256": "492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6",
-      "size_bytes": 11450
+      "sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2",
+      "size_bytes": 11589
     }
   ],
-  "external_files_manifest_sha256": "b84b6b6542c76dbffa4f43446db53d724a9c6e44333a43654eb351ca40e7d378",
+  "external_files_manifest_sha256": "a90723acc972d8346d716fdda633084464990fd73eff1ad0e33f8c6cf62bad0f",
   "fixed_joint_resolution": [
     {
       "imported_child_local_transform": [
@@ -598,7 +611,7 @@
       "type": "PhysicsRevoluteJoint"
     }
   ],
-  "receipt_sha256": "24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343",
+  "receipt_sha256": "ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85",
   "schema": "tactevra.isaac_sim_urdf_import.v1",
   "source": {
     "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",

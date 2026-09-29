@@ -113,7 +113,7 @@ links, six movable USD Physics joints, and the two source fixed joints that the
 Isaac importer represents as nested transforms.
 
 The generated USD is deliberately retained outside Git at
-`C:\IsaacSim\artifacts\issue190\wp1-import-002`. Its manifest is committed,
+`C:\IsaacSim\artifacts\issue190\wp1-import-003`. Its manifest is committed,
 but the stage itself is not. The receipt is kinematic import evidence only: it
 contains no trajectory, wire command, hardware access, physical authority,
 dynamics qualification, or FK parity claim.
@@ -124,13 +124,24 @@ Reproduce the bounded import on the designated runner from the repository root:
 $env:OMNI_KIT_ACCEPT_EULA = 'YES'
 C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py `
   --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf `
-  --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-002 `
-  --receipt C:\IsaacSim\evidence\urdf_import_002.json `
-  --status-output C:\IsaacSim\evidence\urdf_import_002.status.json
+  --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-003 `
+  --receipt C:\IsaacSim\evidence\urdf_import_003.json `
+  --status-output C:\IsaacSim\evidence\urdf_import_003.status.json
 ```
 
-The output directory must be absent or empty. The next WP1 gate is measured
-forward-kinematics parity at the fixed zero, home, and ready corpus poses.
+The importer promotes `base_link` to the USD articulation root after Isaac's
+fixed-joint collapse. This preserves all six source movable joints in the live
+articulation DOF view. The original unnormalized import and its missing-base-DOF
+diagnostic remain retained evidence.
+
+[`fk_parity_probe.py`](fk_parity_probe.py) teleports only the live in-memory
+articulation through the governed zero, home, and ready corpus and reads the
+`link5` physics transform plus the imported fixed `hand_tcp` transform. The
+retained [`FK receipt`](evidence/roarm_m3_fk_parity_20260929.json) exposes the
+complete six-DOF order and passes all three cases at a worst translation error
+below 0.00013 mm. This is kinematic parity only. The imported model has invalid
+mass and inertia placeholders, and no dynamics, collision, contact, rendering,
+hardware, or physical qualification follows from this result.
 
 ## Verify WP0
 

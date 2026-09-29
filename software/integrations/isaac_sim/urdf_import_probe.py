@@ -15,14 +15,15 @@ import subprocess
 
 
 EXPECTED_URDF_SHA256 = "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
-EXPECTED_MOVABLE_JOINTS = {
+EXPECTED_MOVABLE_JOINT_ORDER = [
     "base_link_to_link1",
     "link1_to_link2",
     "link2_to_link3",
     "link3_to_link4",
     "link4_to_link5",
     "link5_to_gripper_link",
-}
+]
+EXPECTED_MOVABLE_JOINTS = set(EXPECTED_MOVABLE_JOINT_ORDER)
 EXPECTED_LINKS = {
     "world", "base_link", "link1", "link2", "link3", "link4", "link5",
     "gripper_link", "hand_tcp",
@@ -31,6 +32,8 @@ EXPECTED_FIXED_JOINT_CHILDREN = {
     "world_to_base_link": "base_link",
     "link5_to_hand_tcp": "hand_tcp",
 }
+BASE_LINK_PATH = "/roarm_m3/Geometry/world/base_link"
+IMPORTED_ROOT_LINK_PATH = f"{BASE_LINK_PATH}/link1"
 
 
 def digest_bytes(value: bytes) -> str:
@@ -92,7 +95,7 @@ def main() -> int:
 
         app = SimulationApp({"headless": True, "multi_gpu": False})
         from isaacsim.asset.importer.urdf import URDFImporter, URDFImporterConfig
-        from pxr import Usd, UsdGeom
+        from pxr import Usd, UsdGeom, UsdPhysics
 
         import_config = {
             "merge_fixed_joints": False,
@@ -124,6 +127,29 @@ def main() -> int:
         stage = Usd.Stage.Open(str(usd_path))
         if stage is None:
             raise RuntimeError("generated USD stage could not be opened")
+        # The meshless source's fixed world/base links are collapsed by the
+        # importer. Without this normalization Isaac chooses link1 as the
+        # articulation root and drops the inbound base rotation from its DOF
+        # view. Promote base_link to a rigid articulation root so the complete
+        # six-DOF source ordering is observable by the live articulation.
+        base_link = stage.GetPrimAtPath(BASE_LINK_PATH)
+        imported_root_link = stage.GetPrimAtPath(IMPORTED_ROOT_LINK_PATH)
+        if not base_link.IsValid() or not imported_root_link.IsValid():
+            raise RuntimeError("expected imported articulation root paths are unavailable")
+        UsdPhysics.RigidBodyAPI.Apply(base_link)
+        UsdPhysics.ArticulationRootAPI.Apply(base_link)
+        base_link.AddAppliedSchema("NewtonArticulationRootAPI")
+        base_link.AddAppliedSchema("IsaacLinkAPI")
+        imported_root_link.RemoveAPI(UsdPhysics.ArticulationRootAPI)
+        imported_root_link.RemoveAppliedSchema("NewtonArticulationRootAPI")
+        robot_links = stage.GetDefaultPrim().GetRelationship("isaac:physics:robotLinks")
+        robot_link_targets = list(robot_links.GetTargets())
+        if base_link.GetPath() not in robot_link_targets:
+            robot_links.SetTargets([base_link.GetPath(), *robot_link_targets])
+        stage.GetRootLayer().Save()
+        stage = Usd.Stage.Open(str(usd_path))
+        if stage is None:
+            raise RuntimeError("normalized USD stage could not be reopened")
         default_prim = stage.GetDefaultPrim()
         prims = []
         joints = []
@@ -201,6 +227,12 @@ def main() -> int:
             },
             "import_config": import_config,
             "import_config_sha256": canonical_sha256(import_config),
+            "articulation_root_normalization": {
+                "promoted_root_path": BASE_LINK_PATH,
+                "demoted_importer_root_path": IMPORTED_ROOT_LINK_PATH,
+                "reason": "PRESERVE_BASE_ROTATION_DOF_AFTER_FIXED_JOINT_COLLAPSE",
+                "expected_live_dof_order": EXPECTED_MOVABLE_JOINT_ORDER,
+            },
             "driver_version": _driver_version(),
             "default_prim": str(default_prim.GetPath()),
             "prims": prims,

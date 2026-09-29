@@ -58,14 +58,27 @@ def test_import_receipt_records_fixed_joint_collapse_explicitly() -> None:
     assert {entry["source_child_link"] for entry in fixed} == {"base_link", "hand_tcp"}
 
 
+def test_import_receipt_normalizes_root_for_complete_live_dof_order() -> None:
+    normalization = _load()["articulation_root_normalization"]
+    assert normalization == {
+        "promoted_root_path": "/roarm_m3/Geometry/world/base_link",
+        "demoted_importer_root_path": "/roarm_m3/Geometry/world/base_link/link1",
+        "reason": "PRESERVE_BASE_ROTATION_DOF_AFTER_FIXED_JOINT_COLLAPSE",
+        "expected_live_dof_order": [
+            "base_link_to_link1", "link1_to_link2", "link2_to_link3",
+            "link3_to_link4", "link4_to_link5", "link5_to_gripper_link",
+        ],
+    }
+
+
 def test_import_receipt_binds_external_usd_without_committing_it() -> None:
     receipt = _load()
     files = receipt["external_files"]
     assert canonical_sha256(files) == receipt["external_files_manifest_sha256"]
     assert files == [{
         "path": "roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda",
-        "sha256": "492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6",
-        "size_bytes": 11450,
+        "sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2",
+        "size_bytes": 11589,
     }]
     assert not (WORKSPACE / files[0]["path"]).exists()
 
