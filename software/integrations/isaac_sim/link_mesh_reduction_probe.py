@@ -26,6 +26,7 @@ IDENTITY_ROTATION = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
 CONTAINMENT_TOLERANCE_MM = 1e-9
 MINIMUM_HALF_EXTENT_MM = 1e-6
 MAX_PRIMITIVES_PER_BODY = 64
+SERIALIZATION_CONTAINMENT_PADDING_MM = 2e-6
 
 
 def digest_bytes(value: bytes) -> str:
@@ -96,13 +97,20 @@ def main() -> int:
                 maximum = vertices.max(axis=0)
                 center = (minimum + maximum) / 2.0
                 raw_half_extents = (maximum - minimum) / 2.0
-                half_extents = np.maximum(raw_half_extents, MINIMUM_HALF_EXTENT_MM)
-                normalized = np.abs(vertices - center) - half_extents
+                half_extents = (
+                    np.maximum(raw_half_extents, MINIMUM_HALF_EXTENT_MM)
+                    + SERIALIZATION_CONTAINMENT_PADDING_MM
+                )
+                serialized_center = np.round(center, 6)
+                serialized_half_extents = np.round(half_extents, 6)
+                normalized = (
+                    np.abs(vertices - serialized_center) - serialized_half_extents
+                )
                 overflow = max(0.0, float(normalized.max()))
                 maximum_overflow = max(maximum_overflow, overflow)
                 if overflow > CONTAINMENT_TOLERANCE_MM:
                     raise RuntimeError(f"{link_name} component {component_index} escapes its box")
-                box_volume = float(np.prod(2.0 * half_extents))
+                box_volume = float(np.prod(2.0 * serialized_half_extents))
                 watertight = bool(component.is_watertight)
                 source_volume = abs(float(component.volume)) if watertight else None
                 inflation = (
@@ -127,8 +135,8 @@ def main() -> int:
                     ),
                     "candidate_primitive": {
                         "kind": "oriented_box",
-                        "center_mm": _round(center),
-                        "half_extents_mm": _round(half_extents),
+                        "center_mm": _round(serialized_center),
+                        "half_extents_mm": _round(serialized_half_extents),
                         "rotation_row_major": IDENTITY_ROTATION,
                     },
                     "candidate_box_volume_mm3": round(box_volume, 6),
@@ -184,6 +192,7 @@ def main() -> int:
                 "component_sort": "LEXICOGRAPHIC_PROCESSED_BOUNDS",
                 "containment_tolerance_mm": CONTAINMENT_TOLERANCE_MM,
                 "minimum_half_extent_mm": MINIMUM_HALF_EXTENT_MM,
+                "serialization_containment_padding_mm": SERIALIZATION_CONTAINMENT_PADDING_MM,
                 "maximum_primitives_per_body": MAX_PRIMITIVES_PER_BODY,
                 "component_limit_fallback": "ONE_WHOLE_LINK_ENVELOPE",
                 "volume_ratio_scope": "WATERTIGHT_COMPONENTS_ONLY",

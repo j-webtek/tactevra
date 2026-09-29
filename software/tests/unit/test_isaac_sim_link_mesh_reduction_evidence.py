@@ -84,7 +84,7 @@ def test_candidates_remain_uninstalled_and_unqualified() -> None:
     assert receipt["raw_mesh_collision_admissible"] is False
     assert receipt["reduced_collision_geometry_admissible"] is False
     assert receipt["clearance_replay_admissible"] is False
-    assert receipt["summary"]["maximum_watertight_volume_ratio"] == 21.140792
+    assert receipt["summary"]["maximum_watertight_volume_ratio"] == 21.140797
     assert receipt["summary"]["non_watertight_component_count"] == 2
     assert {
         "SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED",
