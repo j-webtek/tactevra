@@ -143,6 +143,37 @@ below 0.00013 mm. This is kinematic parity only. The imported model has invalid
 mass and inertia placeholders, and no dynamics, collision, contact, rendering,
 hardware, or physical qualification follows from this result.
 
+## Nominal RC03 rigid scene
+
+[`rc03_scene_probe.py`](rc03_scene_probe.py) consumes the existing strict RC03
+scene loader and composes an external metre-based USD stage containing the
+governed board, keyboard and phone envelopes, three conservative station
+proxies, six nominal fiducials, the nominal `H` target marker, and a reference
+to the normalized robot USD at the frozen nominal board transform. The compact
+[`scene receipt`](evidence/rc03_nominal_rigid_scene_20260929.json) binds every
+source file, the external stage, six static collision prims, and the six
+composed robot joints.
+
+This is scene-composition evidence only. Collision queries and hover replay
+remain explicitly inadmissible because robot-link and tool collision geometry,
+valid inertial properties, camera-support solids, controlled fixture heights,
+measured robot placement, and a selected Isaac toolchain lock are unavailable.
+The probe does not accept or derive a trajectory.
+
+Reproduce it on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_scene_probe.py `
+  --workspace . `
+  --rc03-root active-project\RoCell_v0_3 `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --robot-import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp2-scene-002 `
+  --receipt C:\IsaacSim\evidence\rc03_scene_002.json `
+  --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
