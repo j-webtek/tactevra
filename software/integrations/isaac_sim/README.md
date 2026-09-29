@@ -103,6 +103,35 @@ proxy setting, and an OpenUSD asset-converter build warning. WP1 must resolve
 or explicitly isolate the OpenUSD importer warning and prove import/FK parity
 before a runner-selection change can be reviewed.
 
+## Governed RoArm URDF import
+
+[`urdf_import_probe.py`](urdf_import_probe.py) imports the pinned, meshless
+RoArm-M3 kinematic URDF into a caller-supplied external directory. The compact
+[`import receipt`](evidence/roarm_m3_urdf_import_20260929.json) binds the exact
+source URDF, importer configuration, generated USD manifest, all nine source
+links, six movable USD Physics joints, and the two source fixed joints that the
+Isaac importer represents as nested transforms.
+
+The generated USD is deliberately retained outside Git at
+`C:\IsaacSim\artifacts\issue190\wp1-import-002`. Its manifest is committed,
+but the stage itself is not. The receipt is kinematic import evidence only: it
+contains no trajectory, wire command, hardware access, physical authority,
+dynamics qualification, or FK parity claim.
+
+Reproduce the bounded import on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py `
+  --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-002 `
+  --receipt C:\IsaacSim\evidence\urdf_import_002.json `
+  --status-output C:\IsaacSim\evidence\urdf_import_002.status.json
+```
+
+The output directory must be absent or empty. The next WP1 gate is measured
+forward-kinematics parity at the fixed zero, home, and ready corpus poses.
+
 ## Verify WP0
 
 From `software/`:
