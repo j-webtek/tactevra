@@ -23,6 +23,44 @@ It does **not** import Isaac Sim, load a USD scene, use a GPU, run physics, or
 produce clearance/contact evidence. A fake-adapter `PASS` has evidence class
 `CONTRACT_TEST_ONLY` and expressly establishes only contract behavior.
 
+## Windows runner candidate installed 2026-09-29
+
+The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
+containing CPython 3.12, `torch==2.11.0+cu130`, and
+`isaacsim[all,extscache]==6.1.0.0`. Torch enumerates both installed NVIDIA
+GeForce RTX 3090 GPUs. The compact
+[`host probe`](evidence/windows_dual_rtx3090_candidate_20260929.json) binds 26
+Isaac/Torch distributions through their installed `METADATA` and `RECORD`
+hashes and records zero hardware writes and zero physical movements.
+
+This is a blocked candidate, not a selected runner. Isaac Sim has not been
+launched, no NVIDIA terms were accepted by automation, and the settings
+profile remains unavailable. NVIDIA documents driver 595.97 as tested for
+Isaac Sim 6.1.0 on Windows; the host currently reports 591.86. The RTX 3090 is
+also outside NVIDIA's documented minimum GPU set for 6.1.0 even though each
+card has 24 GiB VRAM and RT capability. Compatibility must therefore be
+measured after a reviewed driver and license decision.
+
+The exact package installation commands were:
+
+```powershell
+py -3.12 -m venv C:\IsaacSim\env_6_1_0
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install --upgrade pip
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install "isaacsim[all,extscache]==6.1.0.0" --extra-index-url https://pypi.nvidia.com
+```
+
+Reproduce the non-launching probe from the repository root:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path 'software/src').Path
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_probe `
+  --output software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json
+```
+
+The probe imports neither Isaac Sim nor Torch. It cannot accept a license,
+start a simulator, open robot transport, or generate wire commands.
+
 ## Verify WP0
 
 From `software/`:
@@ -72,4 +110,3 @@ operation is asset import and kinematic parity (WP1), not trajectory execution:
 
 See the full [integration plan](../../docs/ISAAC_SIM_INTEGRATION_PLAN.md) for
 work packages, acceptance gates, ownership, evidence, and limitations.
-
