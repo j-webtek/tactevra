@@ -6405,3 +6405,88 @@ rewriting history. New entries must use a unique evidence ID.
   can choose exact-input reuse only for qualified lifecycle/build/calibration
   identities while preserving complete-solve fallback and zero automatic
   retry. Do not attach physical authority at that gate.
+
+### E-20260929-INT-424 — Isaac WP0 test checkout was incomplete
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `2973bf912445ce70be26c8e88c6eb6ae256b4611`.
+- Change: ran the merged Isaac request/receipt contract suite beside the new
+  runner-probe tests in the issue #190 worktree before the sparse checkout had
+  materialized every tracked WP0 input.
+- Inputs/fixtures: tracked paths
+  `software/tests/fixtures/isaac_sim/` and `software/schemas/`; contract-test
+  source SHA-256
+  `01bc2497819d266ee7081646a3e7d4a2ea6557130eac30a222a422ee21805e2b`.
+- Command: `python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`; then
+  `git sparse-checkout add software/tests/fixtures software/integrations; python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`.
+- Result: BLOCKED. The first attempt reported 8 failed and 6 passed because all
+  tracked Isaac fixtures were absent. The second reported 2 failed and 12
+  passed because both tracked JSON schemas were still absent. Both failures
+  were checkout-materialization errors; no validator behavior was changed.
+- Artifacts: console results only; tracked fixtures and schemas remain the
+  unchanged test inputs.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is worktree setup evidence. It evaluates no Isaac physics,
+  USD asset, collision, contact, camera, arm command, or physical outcome.
+- Supersedes: none; both failed attempts remain recorded here.
+- Next dependency: materialize `software/schemas/` and rerun the identical
+  focused suite before relying on WP0 results.
+
+### E-20260929-INT-425 — Isaac Sim 6.1.0 runner candidate installed and bound
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `2973bf912445ce70be26c8e88c6eb6ae256b4611`.
+- Change: installed the exact Isaac Sim 6.1.0 Python distribution and CUDA 13
+  Torch in a dedicated external environment; added a standard-library-only
+  host probe that hashes installed distribution metadata without importing or
+  launching Isaac; retained a compact zero-authority candidate report; and
+  added deterministic, fail-closed hardware-free tests and runner guidance.
+- Inputs/fixtures: host-probe artifact SHA-256
+  `063a4fe5afae0f786043b9eae36cad28b69ca224eddb8e47c84252dc757eb017`;
+  probe source SHA-256
+  `d911c6d30fc365e78b943712db2abeedb72326ef3dd2ce7b8b6315ffbc750914`;
+  probe-test SHA-256
+  `2b72270544a3919256a4b52dad0d96bbdef5473a3ccdcd40d55ae97281186b1f`;
+  unchanged fail-closed toolchain-lock SHA-256
+  `171da8d802226145f382041e1ca321cc1665ecb1f356933e48b4a5989928d42e`.
+  The report binds 26 distributions, installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`,
+  extension digest
+  `3a510e375fc27c0ac2b540e14976ef6ae4255286d43753b45fc999ce2188e8bc`,
+  driver 591.86, and two RTX 3090 GPUs with 24576 MiB each.
+- Command: `py -3.12 -m venv C:\IsaacSim\env_6_1_0`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install --upgrade pip`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install "isaacsim[all,extscache]==6.1.0.0" --extra-index-url https://pypi.nvidia.com`;
+  `$env:PYTHONPATH = (Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_probe --output software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json`;
+  `git sparse-checkout add software/schemas; python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_repository_artifacts.py`.
+- Result: PASS for installation, non-launching evidence capture, and repository
+  checks. Exact installed versions are Isaac Sim 6.1.0.0 and Torch
+  2.11.0+cu130; Torch reports CUDA available with two RTX 3090 devices. The
+  focused suite passed 14 tests in 0.53 seconds. Documentation, evidence-scope,
+  and repository-artifact audits passed. The candidate correctly reports
+  `CANDIDATE_BLOCKED` with four named blockers.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json`;
+  `software/src/rocell/integrations/isaac_sim/host_probe.py`;
+  `software/tests/unit/test_isaac_sim_host_probe.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: Isaac Sim was not launched and no NVIDIA license/EULA was
+  accepted by automation. The host driver 591.86 is below NVIDIA's documented
+  tested Windows driver 595.97, and RTX 3090 is outside the documented 6.1.0
+  minimum GPU set. No settings profile, live extension export, USD import,
+  kinematic parity, simulation data, collision/contact evidence, controller
+  access, or physical qualification exists. The repository lock remains
+  `UNSELECTED`; this result changes no AI lane, arm lane, or integration gate.
+- Supersedes: none. INT-424 remains visible failed setup evidence.
+- Next dependency: obtain explicit acceptance for NVIDIA's applicable terms
+  and a reviewed driver update, then run a first standalone/headless
+  compatibility launch and retain the live version, extension, and settings
+  identities before proposing a selected toolchain lock.
