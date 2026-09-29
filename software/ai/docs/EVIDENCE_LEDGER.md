@@ -6781,3 +6781,72 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: define and import governed reduced collision geometry and
   valid inertial properties before any dynamics, clearance, or contact oracle
   work; runner lock selection remains a separate review decision.
+
+### E-20260929-INT-433 — nominal RC03 rigid scene retained with collision blockers
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `0ffb24b5860cea90ad3338429a4adf19134f0727`.
+- Change: projected the strict RC03 nominal scene into a metre-based external
+  Isaac USD, referenced the normalized six-DOF robot at the frozen nominal
+  board transform, retained six static rigid obstacle envelopes, six nominal
+  fiducials and the nominal `H` target marker, and added a compact canonical
+  receipt plus hardware-free validation. Collision queries and hover replay
+  are explicitly inadmissible.
+- Inputs/fixtures: scene-probe SHA-256
+  `69fb0caa5045e8fb3938f2ad71859f0da35963ddd85dfe847a593a5dd4a4f945`;
+  test SHA-256
+  `af86a721b2b3a584a1d0894f5c3b67e5f7082353f197d040235d6b4674752a0f`;
+  committed receipt file SHA-256
+  `df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b`;
+  receipt content SHA-256
+  `0d080880e6c7915cae43d04771c9a17748060c4d682a1de86003d54021067bcd`;
+  target-profile SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  simulation-hardware-profile SHA-256
+  `6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190`;
+  RC03 layout SHA-256
+  `e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1`;
+  AprilTag-map SHA-256
+  `81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700`;
+  normalized robot-import receipt file SHA-256
+  `f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_scene_probe.py --workspace . --rc03-root active-project\RoCell_v0_3 --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --robot-import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --output-dir C:\IsaacSim\artifacts\issue190\wp2-scene-002 --receipt C:\IsaacSim\evidence\rc03_scene_002.json --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/rc03_scene_probe.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_fk_evidence.py software/tests/unit/test_isaac_sim_import_evidence.py software/tests/unit/test_isaac_sim_host_evidence.py -q`;
+  `python -m pytest software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for bounded rigid scene composition. The external
+  6,847-byte stage SHA-256 is
+  `77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35`,
+  with canonical external-manifest digest
+  `fcd219cab737e48ccffd464360705a9de931ab46a23640f4336bc4223b662664`.
+  Reopening the stage found exactly six collision prims and all six composed
+  robot joints. The corrected focused suite passed 32 tests in 1.49 seconds,
+  and all four repository audits passed. The earlier focused-test command
+  failed before collection because it named three nonexistent test files;
+  that failed attempt is retained here and was corrected without rewriting it.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/rc03_nominal_rigid_scene_20260929.json`;
+  `software/integrations/isaac_sim/rc03_scene_probe.py`;
+  `software/tests/unit/test_isaac_sim_rc03_scene_evidence.py`;
+  external USD and status evidence under
+  `C:\IsaacSim\artifacts\issue190\wp2-scene-002` and
+  `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the board, keyboard, phone and three station bodies are static
+  nominal envelopes. The station heights are 35 mm conservative proxies. Arm
+  links, the tool and camera support have no collision geometry; source
+  inertial properties are invalid; robot placement is nominal and unmeasured;
+  and the Isaac toolchain lock remains `UNSELECTED`. This evidence provides no
+  dynamics, trajectory, clearance, contact, rendering, controller, hardware or
+  physical qualification, and changes no AI, arm or integration gate status.
+- Supersedes: none. INT-431 and INT-432 remain the governing topology and FK
+  evidence.
+- Next dependency: define reviewed reduced collision geometry for the arm,
+  tool and camera support, replace fixture proxies with governed solid heights,
+  and obtain measured robot placement before any clearance or hover oracle is
+  admissible.

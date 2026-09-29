@@ -1031,7 +1031,6 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| SIM/WP2 | S2/S3 | hash-governed nominal RC03 rigid scene composition and explicit collision blockers | `issue/190-isaac-sim-host` / PR #192 | IN_PROGRESS |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
