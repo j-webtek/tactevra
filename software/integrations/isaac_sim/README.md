@@ -235,6 +235,17 @@ python software\integrations\isaac_sim\upstream_link_mesh_binding_probe.py `
   --status-output C:\IsaacSim\evidence\upstream_link_mesh_binding_001.status.json
 ```
 
+Reproduce the conservative candidate reduction without installing a profile:
+
+```powershell
+$env:PYTHONUTF8='1'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\link_mesh_reduction_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json `
+  --output C:\IsaacSim\evidence\link_mesh_reduction_003.json `
+  --status-output C:\IsaacSim\evidence\link_mesh_reduction_003.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
