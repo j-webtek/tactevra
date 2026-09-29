@@ -6490,3 +6490,118 @@ rewriting history. New entries must use a unique evidence ID.
   and a reviewed driver update, then run a first standalone/headless
   compatibility launch and retain the live version, extension, and settings
   identities before proposing a selected toolchain lock.
+
+### E-20260929-INT-426 — NVIDIA outer installer failed before driver update
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: downloaded the official NVIDIA 595.97 Windows package after owner
+  authorization, verified its Windows signature, and attempted its outer
+  self-extracting silent installer.
+- Inputs/fixtures: official 957,358,592-byte installer SHA-256
+  `979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`;
+  valid Authenticode signer `NVIDIA Corporation`, certificate thumbprint
+  `B66776FC8E70C58ED98199E8391264C827AAC534`.
+- Command: `Start-Process -FilePath C:\IsaacSim\installers\595.97-desktop-win10-win11-64bit-international-dch-whql.exe -ArgumentList '-s','-noreboot' -Verb RunAs -PassThru -Wait`.
+- Result: FAIL. The signed outer installer exited `-2147024891`
+  (`0x80070005`, access denied), and both GPUs continued to report driver
+  591.86. No retry result was substituted for this failed attempt.
+- Artifacts: installer retained externally at the hash above; console result
+  only. No installer binary or extracted driver payload is committed.
+- Hardware writes: 0 robot/controller writes. The unsuccessful driver
+  installer may have updated NVIDIA application support files but did not
+  change the active display driver.
+- Physical movements: 0.
+- Limitations: operating-system driver installation evidence only. It tests no
+  Isaac process, scene, robot model, physics, rendering, or physical system.
+- Supersedes: none; INT-425 remains the prelaunch candidate boundary.
+- Next dependency: extract the same verified package and run its signed inner
+  display-driver installer with NVIDIA's documented silent switches.
+
+### E-20260929-INT-427 — initial headless receipt extraction failed closed
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: attempted to retain structured evidence from the newly installed
+  Isaac environment after driver correction.
+- Inputs/fixtures: Isaac Sim 6.1.0.0 installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`;
+  NVIDIA driver 595.97; external smoke scripts and logs.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\smoke_6_1_0.py *> C:\IsaacSim\evidence\first_launch_6_1_0.log` and two corrected reruns of the same command.
+- Result: FAIL in retained stages. The first command could not create its log
+  because the evidence directory was absent. After creating the directory,
+  Isaac started and shut down but the script called nonexistent
+  `IApp.get_version`, initially without a durable error receipt and then with a
+  retained `AttributeError` status. Isaac's shutdown forced process exit zero,
+  demonstrating that exit code alone is insufficient evidence.
+- Artifacts: external logs SHA-256
+  `53bf754512d4bd640b576a8ecf1037221347a10c281141f640e4fda08f1789c3`
+  and failed status JSON; neither is promoted as a passing receipt.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the Isaac application did initialize, but these attempts do not
+  provide a valid version/extension/settings receipt and cannot select the
+  repository lock. No USD scene or robot asset was loaded.
+- Supersedes: none; these failures remain visible alongside the later corrected
+  probe.
+- Next dependency: use Kit 6.1's `get_app_version` API, write an explicit PASS
+  or ERROR sidecar before shutdown, and validate the resulting canonical
+  receipt in hardware-free CI.
+
+### E-20260929-INT-428 — driver-qualified Isaac headless launch verified
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: extracted the verified 595.97 package, verified the inner NVIDIA
+  `setup.exe` signature, installed the display driver directly, confirmed CUDA
+  health, implemented a current-API headless launch probe with an explicit
+  status sidecar, retained its canonical receipt, and added hardware-free
+  receipt validation.
+- Inputs/fixtures: first-launch receipt file SHA-256
+  `bc41e5070109de62a1a78388e9b46ebd8a0882cecc567141ad43ea9ba90b20ee`;
+  receipt content SHA-256
+  `fa28e3a5878f77cc928a93861b35cdf9fac53b857840fbdacef9907aefc1d0ee`;
+  probe source SHA-256
+  `db9df17670a32d134f54030883288359803852031a6caab37efccf57ff103b0e`;
+  test source SHA-256
+  `e23fe207f0a03ef69b018af6158bb3f27d0763873134af69503a89ec880e9280`;
+  installer and installation identities from INT-426 and INT-425.
+- Command: `C:\IsaacSim\tools\7zr.exe x C:\IsaacSim\installers\595.97-desktop-win10-win11-64bit-international-dch-whql.exe -oC:\IsaacSim\installers\595.97-extracted -y`;
+  `Start-Process -FilePath C:\IsaacSim\installers\595.97-extracted\setup.exe -WorkingDirectory C:\IsaacSim\installers\595.97-extracted -ArgumentList '-s','-n','Display.Driver' -Verb RunAs -PassThru -Wait`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_launch_probe.py --output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.json --status-output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.status.json --installation-sha256 ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258 --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`;
+  `python -m py_compile software/integrations/isaac_sim/first_launch_probe.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS for the bounded compatibility launch and repository checks.
+  Both RTX 3090s report driver 595.97 and Torch 2.11.0+cu130 retained CUDA 13.0
+  access. Isaac Sim 6.1.0.0 / Kit 6.1.0 started headlessly and shut down; the
+  receipt binds 303 unique enabled extensions at digest
+  `6e0d70db81fe16273341e65bd3cf0bc70dffe4a88a5cc0a7bacf51110dd27c70`
+  and the launch settings at digest
+  `0cbc21c4dbeeb7b2a0ce6c4c4875681834da8c12c83aa49cd36f09654b3ea473`.
+  The focused suite passed 17 tests in 0.82 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/windows_dual_rtx3090_first_launch_20260929.json`;
+  `software/integrations/isaac_sim/first_launch_probe.py`;
+  `software/tests/unit/test_isaac_sim_first_launch_evidence.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0 robot/controller writes. One authorized operating-system
+  display-driver update occurred and is outside the robot authority boundary.
+- Physical movements: 0.
+- Limitations: this is compatibility-startup evidence only. No USD scene,
+  RoArm asset, physics step, rendered frame, collision/contact check, trajectory,
+  robot transport, or physical qualification exists. RTX 3090 remains outside
+  NVIDIA's documented 6.1.0 minimum GPU set. The log reports device 0 at PCIe
+  x4 versus x16 maximum, no CUDA peer access, a stale localhost Omniverse proxy,
+  and an OpenUSD asset-converter build warning. The toolchain lock remains
+  `UNSELECTED`, and no AI, arm, or integration gate status changed.
+- Supersedes: none. INT-426 and INT-427 remain visible failed evidence.
+- Next dependency: isolate or resolve the OpenUSD asset-converter warning,
+  define the governed RoArm import inputs, and begin WP1 joint/link/axis/unit
+  mapping plus deterministic FK parity before reviewing a selected lock.
