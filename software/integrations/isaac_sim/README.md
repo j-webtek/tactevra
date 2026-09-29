@@ -23,7 +23,7 @@ It does **not** import Isaac Sim, load a USD scene, use a GPU, run physics, or
 produce clearance/contact evidence. A fake-adapter `PASS` has evidence class
 `CONTRACT_TEST_ONLY` and expressly establishes only contract behavior.
 
-## Windows runner candidate installed 2026-09-29
+## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
 containing CPython 3.12, `torch==2.11.0+cu130`, and
@@ -41,7 +41,9 @@ also outside NVIDIA's documented minimum GPU set for 6.1.0 even though each
 card has 24 GiB VRAM and RT capability. Compatibility must therefore be
 measured after a reviewed driver and license decision.
 
-The exact package installation commands were:
+The initial candidate report is retained as historical prelaunch evidence. The
+driver and launch blockers in that report were subsequently addressed as
+described below. The exact package installation commands were:
 
 ```powershell
 py -3.12 -m venv C:\IsaacSim\env_6_1_0
@@ -60,6 +62,46 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_p
 
 The probe imports neither Isaac Sim nor Torch. It cannot accept a license,
 start a simulator, open robot transport, or generate wire commands.
+
+## Driver-qualified compatibility launch
+
+The project owner authorized NVIDIA's terms for internal use and installation
+of the tested Windows driver. The signed NVIDIA 595.97 installer has SHA-256
+`979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`.
+The outer self-extractor failed once with Windows access denied; extracting the
+same signed archive and running its signed `setup.exe -s -n Display.Driver`
+succeeded. Both GPUs then reported driver 595.97 and Torch retained CUDA access.
+
+[`first_launch_probe.py`](first_launch_probe.py) subsequently started Isaac Sim
+headlessly and shut it down without creating a scene. The retained
+[`launch receipt`](evidence/windows_dual_rtx3090_first_launch_20260929.json)
+binds:
+
+- Isaac Sim distribution 6.1.0.0 and Kit application 6.1.0;
+- the exact 26-distribution installation digest;
+- driver 595.97 and both 24 GiB RTX 3090 identities;
+- 303 live enabled extensions and their canonical digest;
+- the five-field headless launch profile and its canonical digest; and
+- zero hardware writes, movements, wire commands, or physical authority.
+
+Reproduce the compatibility launch only in the installed external environment:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_launch_probe.py `
+  --output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.json `
+  --status-output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.status.json `
+  --installation-sha256 ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258 `
+  --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122
+```
+
+The compatibility launch passes, but the repository toolchain lock remains
+`UNSELECTED`. The RTX 3090 remains outside NVIDIA's documented 6.1.0 minimum
+GPU set. The launch also reported PCIe device 0 at width x4 versus its x16
+maximum, no CUDA peer access between the GPUs, a stale localhost Omniverse
+proxy setting, and an OpenUSD asset-converter build warning. WP1 must resolve
+or explicitly isolate the OpenUSD importer warning and prove import/FK parity
+before a runner-selection change can be reviewed.
 
 ## Verify WP0
 
