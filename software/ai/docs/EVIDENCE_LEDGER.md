@@ -6688,3 +6688,96 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: set actual Isaac articulation states for the fixed zero,
   home, and ready corpus and compare the imported `hand_tcp` world pose against
   governed FK values before reviewing runner selection.
+
+### E-20260929-INT-431 — unnormalized Isaac articulation omitted base rotation DOF
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `21cd36177f37e788bca8951d664a804398826155`.
+- Change: opened the retained unnormalized USD in a live Isaac physics
+  articulation, enumerated its DOFs, teleported the exposed joints through the
+  fixed corpus, and retained the topology blocker separately from its otherwise
+  passing base-zero pose measurements.
+- Inputs/fixtures: unnormalized import receipt content SHA-256
+  `24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343`;
+  preserved unnormalized receipt file SHA-256
+  `5113c2ba391cfd8720358ce0386dcdb34c01a8afcb0bd27296eb322a395fccca`;
+  unnormalized external USD SHA-256
+  `492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\fk_parity_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-002\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --output C:\IsaacSim\evidence\fk_parity_001.json --status-output C:\IsaacSim\evidence\fk_parity_001.status.json`.
+- Result: BLOCKED. The three base-zero corpus poses passed the provisional
+  0.1 mm / 0.05 degree thresholds, but the live articulation exposed only five
+  DOFs and omitted `base_link_to_link1`. The status receipt recorded
+  `parity_pass=true`, `status=BLOCKED`, content SHA-256
+  `0e5f00a8ea1ec378f35823026efa41a467503e65652604d63eaffe5dfece2017`.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_unnormalized_20260929.json`;
+  blocked parity receipt and logs retained externally in `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: base-zero kinematic diagnostic only. It could not test nonzero
+  base rotation, performed no dynamics step, and provides no collision,
+  contact, render, hardware, or physical qualification.
+- Supersedes: none. INT-429 and INT-430 remain visible import evidence.
+- Next dependency: deterministically promote the collapsed `base_link` to the
+  articulation root and rerun the identical corpus with all six DOFs visible.
+
+### E-20260929-INT-432 — complete six-DOF Isaac FK corpus passes
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `21cd36177f37e788bca8951d664a804398826155`.
+- Change: normalized the generated USD articulation root to `base_link`,
+  preserved all six source movable joints in live Isaac order, implemented the
+  live articulation FK probe, retained canonical import and parity receipts,
+  added hardware-free evidence tests, and documented the bounded result.
+- Inputs/fixtures: normalized import receipt file SHA-256
+  `f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde`;
+  import receipt content SHA-256
+  `ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85`;
+  parity receipt file SHA-256
+  `73568d4d8387426345d8df47eb23509866d307e39c55061a18a847e4698bba0e`;
+  parity receipt content SHA-256
+  `baa6fd635e3004f75426234cc3ff72da240dae8c0b69074e7882dfbdbea2287e`;
+  normalized external USD SHA-256
+  `a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2`;
+  import probe SHA-256
+  `c12cddef1b972b96bc53303aaa92341f6f54c3b78d0dac0cc08f9f5bc4923d55`;
+  FK probe SHA-256
+  `0426a628b51420998486fb5c58f97cd393f915a3edbe791dd81518bbc3e7fcbf`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-003 --receipt C:\IsaacSim\evidence\urdf_import_003.json --status-output C:\IsaacSim\evidence\urdf_import_003.status.json`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\fk_parity_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt C:\IsaacSim\evidence\urdf_import_003.json --output C:\IsaacSim\evidence\fk_parity_002.json --status-output C:\IsaacSim\evidence\fk_parity_002.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS for the bounded kinematic parity corpus. The live articulation
+  exposes the exact six-DOF source order. Zero, home, and ready all pass at
+  thresholds 0.1 mm translation and 0.05 degrees rotation; worst translation
+  error is 0.00012833903159220256 mm and reported rotation error is 0 degrees.
+  The focused suite passed 27 tests in 1.29 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_fk_parity_20260929.json`;
+  `software/integrations/isaac_sim/urdf_import_probe.py`;
+  `software/integrations/isaac_sim/fk_parity_probe.py`;
+  `software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `software/tests/unit/test_isaac_sim_fk_parity_evidence.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: parity uses instantaneous articulation teleport and the imported
+  fixed `hand_tcp` transform without a dynamics step. The meshless source has
+  invalid mass and inertia placeholders and no visual or collision geometry.
+  This result makes no dynamics, trajectory, clearance, contact, rendering,
+  controller, hardware, or physical qualification claim. RTX 3090 remains
+  outside NVIDIA's documented Isaac 6.1.0 minimum GPU set, and the repository
+  toolchain lock remains `UNSELECTED`. No AI, arm, or integration gate status
+  changed.
+- Supersedes: INT-431's missing-base-DOF topology for the normalized artifact
+  only; INT-431 remains retained failed evidence.
+- Next dependency: define and import governed reduced collision geometry and
+  valid inertial properties before any dynamics, clearance, or contact oracle
+  work; runner lock selection remains a separate review decision.
