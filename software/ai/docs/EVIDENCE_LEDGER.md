@@ -6850,3 +6850,62 @@ rewriting history. New entries must use a unique evidence ID.
   tool and camera support, replace fixture proxies with governed solid heights,
   and obtain measured robot placement before any clearance or hover oracle is
   admissible.
+
+### E-20260929-INT-450 — AI batch to governed Isaac scene alignment
+
+- Stage: S2/S3 simulation process alignment, WP2.
+- Lane: INTEGRATION.
+- Commit: `296de99bd6ad9232d856fb5c8eb0aca365a3da0e`.
+- Change: added a zero-write Isaac overlay for an actual AI-produced
+  `ModelMotionBatchV2`. The probe strict-decodes the canonical batch, verifies
+  its exact target-catalog and RC03-scene bindings, preserves action order and
+  repeated targets, infers one synthetic rigid keyboard placement from unique
+  target correspondences, checks each uncertainty disk against its placed key
+  safe region, and authors proposal centers, safe regions, and uncertainty
+  disks into an external USD. It never accepts a trajectory, changes the
+  articulation, steps physics, encodes a controller command, or accesses
+  hardware.
+- Inputs/fixtures: RC03 workcell layout SHA-256
+  `e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1`;
+  retained scene USD/receipt SHA-256
+  `77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35` /
+  `df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b`;
+  AI batch/metadata file SHA-256
+  `26fa25a5824c2bd3e1b8312f91b801afa02c240487771533b8faed5c4bd531c5` /
+  `930cab4459878911069043e99b6718113971fc6c7fee78c6a4d29501462b7afd`;
+  probe SHA-256
+  `9da9c8b4ea14763c19a9a0cc6017efce9662203fe38f86298c108c6e5d85ecd4`;
+  integration/evidence test SHA-256
+  `a105bbf2f682771ce82a6fa69685bfb5d849e1970f11ffb7d63bba9957f7cfbf` /
+  `9459193a0df8edfca1a83c18557dae18966ea8e32e304169f9f6f705c3b6f18a`;
+  committed receipt/status file SHA-256
+  `1e88fa086b37d882b4527a6138ad764b9590add883efef6de7257e19e89d682c` /
+  `8f72143ae1feb4ca0931f26e3d29d6c14ca78169fa2e686da86fdbb5f62dbcc5`;
+  external overlay USD SHA-256
+  `a7dcc53a5ed5d83d47aa524818978e5b7d363008c452a81c5d30e59e6703532b`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\model_motion_scene_overlay_probe.py --workspace . --scene-usd C:\IsaacSim\artifacts\issue190\wp2-scene-002\rc03_nominal_rigid_scene.usda --scene-receipt software\integrations\isaac_sim\evidence\rc03_nominal_rigid_scene_20260929.json --batch software\ai\eval\precision_adapter_batch_v2_contract_fixture.json --batch-metadata software\ai\eval\precision_adapter_batch_v2_contract_fixture_metadata.json --output-dir C:\IsaacSim\artifacts\issue190\wp2-command-overlay-001 --receipt C:\IsaacSim\evidence\model_motion_overlay_001.json --status-output C:\IsaacSim\evidence\model_motion_overlay_001.status.json`;
+  `$env:PYTHONPATH=(Resolve-Path software/src).Path; python -m pytest software/tests/integration/test_model_motion_scene_overlay_probe.py software/tests/unit/test_isaac_sim_model_motion_scene_overlay_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/integration/test_model_motion_v2_shared_gate.py software/ai/tests/test_precision_adapter_v2.py software/ai/tests/test_batch_emitter_v2.py -q`;
+  `python scripts/maintain_repository.py verify`; `git diff --check`.
+- Result: `BLOCKED_UNCERTAINTY_CROSSES_INFERRED_SAFE_REGIONS`. Four actions and
+  twelve overlay prims preserved `H, H, 1, PERIOD`, including the repeated H at
+  action index 1. Three unique target correspondences fit one rigid synthetic
+  placement with maximum residual `7.105427357601002e-14` mm. Every proposal
+  center sits at its inferred placed key center, leaving 7 mm to each edge,
+  while the qualified synthetic planar disk is `14.400834977163141` mm. Thus
+  zero of four uncertainty disks fit. Forty-five focused boundary, producer,
+  precision-adapter, scene, and retained-evidence tests passed in 3.15 seconds.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the RC03 board, keyboard, phone, station, locator, and tag values
+  are governed design/simulation geometry. They are not installed measurements;
+  the batch is a synthetic contract fixture whose metadata explicitly denies
+  deployment qualification. The inferred placement is visualization-only and
+  cannot replace camera or robot calibration. No joint schedule, articulation
+  replay, physics contact, collision clearance, controller encoding, or
+  task-effect observation ran. No lane or integration-gate status changed.
+- Next dependency: consume the arm typing pipeline's exact source-bound
+  zero-write joint schedule for a representative batch that uses these same
+  target coordinates and satisfies the safe-region uncertainty gate. Replay
+  the schedule only in Isaac, compare simulated TCP contact to ordered targets,
+  and retain misses, collisions, and ordering failures without hardware or
+  physical authority.

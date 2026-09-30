@@ -1163,6 +1163,14 @@ pre-admission cancellation performs no solver work. Timing is diagnostic only,
 and the synthetic fixture grants no camera, deployment, controller, or motion
 qualification.
 
+The process-alignment overlay in `E-20260929-INT-450` binds an AI-produced
+`ModelMotionBatchV2` carrying ordered `H, H, 1, PERIOD` proposals to the
+governed RC03 Isaac scene. Target centers share one rigid synthetic placement
+within numerical precision, but the 14.400834977 mm localization disk exceeds
+each 7 mm key-edge margin. The replay therefore stops before a joint schedule.
+Its next simulation input is the exact zero-write schedule from the arm typing
+pipeline after the source batch passes the safe-region uncertainty gate.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
