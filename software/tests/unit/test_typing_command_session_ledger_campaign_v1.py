@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -12,6 +13,10 @@ import rocell.application.typing_command_session_ledger_v1 as ledger
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/typing_command_session_ledger_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/typing_command_session_ledger_campaign_v1.json"
+RETAINED_FILE_SHA256 = "dcd7ee9dac114c8d0b3fd1716c1e9ab73a842ac24293e027eb9a1581007690cb"
+RETAINED_CAMPAIGN_SHA256 = "c7f77b605a400b1b502bbb999a2b82d8c8db4b65446f10c4be5da6e987ee52f0"
+RETAINED_SOURCE_COMMIT = "3ead0cc33124ff464922019b08a01aad450a39d8"
 
 
 def _environment():
@@ -98,3 +103,24 @@ def test_campaign_rejects_chain_and_hash_drift():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.TypingCommandSessionLedgerCampaignV1Error, match="hash"):
         campaign.parse_typing_command_session_ledger_campaign_v1(changed)
+
+
+def test_retained_campaign_is_pinned_hash_chained_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_typing_command_session_ledger_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    indexed = {item["case"]: item for item in value["cases"]}
+    assert indexed["COMPLETED_CHAIN"]["outcome_receipt"]["status"] == "SHADOW_COMPLETED"
+    assert indexed["IDEMPOTENT_REPLAY"]["initial_receipt"] == indexed["IDEMPOTENT_REPLAY"]["outcome_receipt"]
+    assert indexed["CANCELED_CHAIN"]["outcome_receipt"]["status"] == "CANCELED_BEFORE_ADMISSION"
+    assert indexed["STALE_CHAIN"]["outcome_receipt"]["status"] == "STALE_GENERATION_REJECTED"
+    assert indexed["CONFLICTING_DUPLICATE_REJECTION"]["outcome_receipt"] is None
+    assert indexed["TERMINAL_LOOKUP_REPLAY"]["observed"] == "IDENTICAL_RECEIPT_REPLAYED"
+    assert value["automatic_retry_allowed"] is False
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is False

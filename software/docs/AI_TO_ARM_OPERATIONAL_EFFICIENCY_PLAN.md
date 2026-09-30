@@ -880,6 +880,17 @@ records eight passing cases. It does not attach an executor or controller and
 therefore adds no movement authority; the efficiency gain is a deterministic,
 low-friction handoff that does not weaken lifecycle or backpressure controls.
 
+ARM-141 removes ambiguity after admission without adding work to the physical
+path. Its bounded ledger retains a mission/request fingerprint, the signed
+admission result, and a hash-chained terminal shadow result. Exact duplicate
+submissions become constant-time receipt replay instead of duplicate planning;
+changed duplicates are rejected, and cancellation, stale lifecycle, queue
+rejection, and capacity exhaustion remain explicit. The retained
+[`typing_command_session_ledger_campaign_v1.json`](../ai/eval/typing_command_session_ledger_campaign_v1.json)
+covers eight outcomes with zero retry and zero authority. This prepares a
+future executor handoff to consume one unambiguous terminally qualified request,
+but does not itself encode or send a controller command.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

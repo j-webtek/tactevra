@@ -1220,6 +1220,16 @@ replacement, while every rejection remains nonretrying. This is the shared
 AI/arm handoff for supervised shadow planning only: no executor, controller,
 transport, command encoding, or physical authority is attached.
 
+ARM-141 provides the shared request-lifecycle contract above ARM-140. A model
+caller supplies a mission ID and request ID once; the ledger fingerprints the
+canonical payload, chains the admission receipt to exactly one terminal shadow
+receipt, and supports deterministic lookup. An identical duplicate returns the
+same receipt without re-planning, while a changed duplicate fails closed.
+Cancellation, stale lifecycle, admission rejection, and bounded-capacity
+outcomes are explicit and nonretrying. The retained eight-case campaign uses
+the actual shared emitter and grants no executor, controller, transport, or
+physical authority.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

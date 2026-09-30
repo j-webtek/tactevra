@@ -871,6 +871,14 @@ the exact reference shadow result through warm admission, complete-solve
 fallback, and qualified replacement. The gateway remains deliberately detached
 from every executor, controller, and transport: it proves safe model-to-planner
 admission, not physical dispatch or typing.
+ARM-141 adds the bounded command-session ledger above that gateway. Every
+retained request now has one mission identity, ingress fingerprint, admission
+receipt, and hash-chained terminal shadow outcome. Identical resubmission is an
+idempotent lookup; changed reuse of the same request ID fails closed. Completion,
+cancellation, stale-generation rejection, admission rejection, capacity
+exhaustion, and terminal lookup are all retained in an eight-case campaign.
+This resolves caller-side outcome ambiguity only; the ledger remains detached
+from execution, transport, controller writes, and physical movement.
 
 ## How to interpret results
 
