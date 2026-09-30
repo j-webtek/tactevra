@@ -943,6 +943,16 @@ and audit-safe rather than a hidden replan, while incomplete lifecycle states
 cannot expose a partial planning bundle. This removes duplicated planning work
 from later review without removing any physical admission gate.
 
+ARM-146 makes the remaining path explicit and cheap to inspect. The
+`typing_permit_review_readiness_v1` report reuses ARM-145's content-addressed
+stage bodies and returns an ordered blocker-to-adapter map without rerunning
+planning. It currently remains blocked on deployment-qualified model output, a
+measured trajectory envelope, installed and continuous collision qualification,
+fresh observed/controller state, independent effect verification, and
+per-action review binding. That report is intentionally incapable of accepting
+informal readiness flags, issuing a review or permit, or producing wire bytes.
+Optimization may remove repeated computation, but never these evidence gates.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

@@ -1283,6 +1283,19 @@ materialization for queued, canceled, stale, or unknown requests. All results
 remain offline and zero-authority; the governed matrix passes 883 tests after
 evidence pinning.
 
+ARM-146 introduces
+[`typing_permit_review_readiness_v1.py`](../../src/rocell/application/typing_permit_review_readiness_v1.py)
+as the shared handoff map from retained shadow planning into the existing
+physical review stack. It records the exact materialization and five stage
+hashes, recognizes only the three planning-retention prerequisites already
+proved, and assigns each remaining blocker to its required adapter. V1 is
+deliberately blocked-only: model qualification, a measured trajectory envelope,
+installed and continuous collision evidence, fresh observed and controller
+state, an independent effect verifier, and per-action review binding must be
+authenticated by typed adapters. No AI or arm worker may replace those inputs
+with a Boolean readiness claim or an untyped digest.
+The full governed offline matrix passes 887 tests at this boundary.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

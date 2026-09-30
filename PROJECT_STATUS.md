@@ -923,6 +923,15 @@ generated from clean framework commit
 retention, repeat and post-invalidation retrieval, content-tamper rejection,
 and absence for queued, canceled, stale, and unknown requests. The governed
 offline matrix now passes 883 tests after evidence pinning.
+ARM-146 adds a deterministic, non-dispatching readiness map between that
+retained batch-level evidence and the existing per-action physical review
+contracts. It confirms the three satisfied shadow prerequisites, then reports
+eight exact blockers and their owning adapters. The current report is always
+blocked: it refuses to accept caller-supplied booleans or hashes as substitutes
+for typed physical-original evidence, and cannot issue a review, permit, wire
+command, or hardware access. This prevents ARM-145's synthetic materialization
+from being accidentally promoted into execution eligibility. The governed
+offline matrix passes 887 tests with ARM-146 included.
 
 ## How to interpret results
 
