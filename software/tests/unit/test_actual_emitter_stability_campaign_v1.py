@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,10 @@ import rocell.application.actual_emitter_stability_campaign_v1 as campaign
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/actual_emitter_stability_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/actual_emitter_stability_campaign_v1.json"
+RETAINED_FILE_SHA256 = "861aa95f7737ab077a0549ae18ce622620141b07f38968260a202eddf8cb2f09"
+RETAINED_CAMPAIGN_SHA256 = "de0271761424d5065f8e7e0571823e75a55690a9207676a15aedbcba40c7d29e"
+RETAINED_SOURCE_COMMIT = "82501906f291761fa5e81eddfb7775242ccf2caf"
 
 
 def _environment():
@@ -62,3 +67,20 @@ def test_stability_campaign_rejects_receipt_cache_and_hash_drift():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.ActualEmitterStabilityCampaignV1Error, match="hash"):
         campaign.parse_actual_emitter_stability_campaign_v1(changed)
+
+
+def test_retained_stability_campaign_is_pinned_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_actual_emitter_stability_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    assert value["cycle_count"] == 20 and value["samples_per_lane"] == 100
+    assert value["all_receipts_equivalent"] is True
+    assert value["lifecycle_replacement_cold_confirmed"] is True
+    assert value["resource_bounds"]["observed_capacity_skips"] == 0
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is value["timing_used_for_admission"] is False

@@ -838,6 +838,15 @@ the warm round reused 186 of 186. Recorded cold p50/p95 were
 five-sample host diagnostics only. They do not establish stable tails,
 controller throughput, physical typing speed, or deployment authority; the
 campaign opened no transport and produced zero hardware writes and movements.
+ARM-137 repeats that workload across 20 isolated cold/prewarmed service pairs.
+All 200 measured requests retained FIFO order and exact cold/warm shadow-receipt
+equivalence. The 100-sample cold p50/p95/p99 were
+0.2736679/1.4014767/1.4241501 seconds; warm values were
+0.1959784/0.3044458/0.3157095 seconds. Each replacement paid the expected cold
+solve cost, each measured warm lane hit 186/186 exact inputs, and the bounded
+cache reported no capacity skips. This strengthens the software case for a
+long-lived qualified service, but it remains synthetic host evidence with no
+controller, physical motion, key contact, or independent device effect.
 
 ## How to interpret results
 

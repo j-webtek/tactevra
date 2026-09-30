@@ -834,6 +834,19 @@ not a latency threshold, physical-rate claim, or permission to skip checks.
 The retained artifact is
 [`actual_emitter_mixed_queue_campaign_v1.json`](../ai/eval/actual_emitter_mixed_queue_campaign_v1.json).
 
+ARM-137 repeats the mixed queue through 20 isolated cold/prewarmed lifecycle
+pairs, producing 100 measured samples per lane. Exact cold/warm shadow receipts
+matched for every request, each replacement began cold, every measured warm
+round hit the exact-input cache completely, and all services were retired after
+measurement. Host p50/p95/p99 were 0.2736679/1.4014767/1.4241501 seconds cold
+and 0.1959784/0.3044458/0.3157095 seconds warm, with zero capacity skips. The
+campaign therefore supports keeping a qualified immutable service warm, while
+also showing that lifecycle replacement must expect cold-tail cost. These
+measurements remain diagnostic and cannot become admission limits until the
+final deployment host and physical execution path are measured. Retained
+evidence is
+[`actual_emitter_stability_campaign_v1.json`](../ai/eval/actual_emitter_stability_campaign_v1.json).
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

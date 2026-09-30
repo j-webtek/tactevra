@@ -1175,6 +1175,19 @@ admission criteria, controller timing, or physical typing-speed evidence. The
 retained campaign used no transport, controller, executor, hardware write, or
 physical movement.
 
+ARM-137 replaces the five-sample timing indication with a repeated isolated
+stability campaign. Twenty cycles each create a cold service and a separate
+prewarmed service, measure the same five actual-emitter requests, compare exact
+shadow-receipt hashes, and retire both lifecycles. All 100 cold and 100 warm
+requests were FIFO-complete and decision-equivalent. Cold p50/p95/p99 were
+0.2736679/1.4014767/1.4241501 seconds; warm values were
+0.1959784/0.3044458/0.3157095 seconds. Every replacement began with the expected
+48 complete solves, every measured warm lane hit 186/186 inputs, and no capacity
+skip occurred under the frozen 256-entry, 8-queued, 16-request bounds. This is
+still host-measured synthetic integration evidence: it neither fixes production
+latency thresholds nor predicts controller, motion, contact, or device-effect
+time.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
