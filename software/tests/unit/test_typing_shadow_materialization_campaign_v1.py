@@ -16,9 +16,9 @@ VALIDATOR = Draft202012Validator(json.loads((
     ROOT / "software/ai/schemas/typing_shadow_materialization_campaign_v1.schema.json"
 ).read_text(encoding="utf-8")))
 RETAINED = ROOT / "software/ai/eval/typing_shadow_materialization_campaign_v1.json"
-RETAINED_FILE_SHA256 = "PENDING"
-RETAINED_CAMPAIGN_SHA256 = "PENDING"
-RETAINED_SOURCE_COMMIT = "PENDING"
+RETAINED_FILE_SHA256 = "877d6cc106fcf8e6b855a1d54ac263ea72a1d7a70ec934831b3f47dc63f380f5"
+RETAINED_CAMPAIGN_SHA256 = "6f79d08427d1182c1c4af1096ef192654bc24ccc918c0c309e0ca94fd7b5769d"
+RETAINED_SOURCE_COMMIT = "81d25e1a06484b7c89f6048e5795c8372769dcbb"
 
 
 def _environment():

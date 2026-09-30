@@ -1274,6 +1274,14 @@ The shadow service now captures and immutably retains the execution plan,
 trajectory, IK screen, joint schedule, and collision intake, with every body
 verified against the terminal receipt. The bundle is synthetic shadow evidence,
 not a permit-review package, and it grants no controller or physical authority.
+The retained
+[`typing_shadow_materialization_campaign_v1.json`](../eval/typing_shadow_materialization_campaign_v1.json)
+records eight lifecycle and integrity cases against clean framework commit
+`81d25e1a06484b7c89f6048e5795c8372769dcbb`: exact five-stage retention,
+deterministic repeat and post-invalidation retrieval, tamper rejection, and no
+materialization for queued, canceled, stale, or unknown requests. All results
+remain offline and zero-authority; the governed matrix passes 883 tests after
+evidence pinning.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

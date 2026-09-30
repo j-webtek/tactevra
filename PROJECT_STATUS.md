@@ -916,6 +916,13 @@ all five back to the terminal shadow receipt. The bundle remains explicitly
 installed-collision, fresh observed/controller state, and independent-verifier
 requirements. Incomplete requests produce no bundle; completed materialization
 remains immutable and audit-readable after runtime invalidation.
+The retained eight-case campaign is
+[`typing_shadow_materialization_campaign_v1.json`](software/ai/eval/typing_shadow_materialization_campaign_v1.json),
+generated from clean framework commit
+`81d25e1a06484b7c89f6048e5795c8372769dcbb`. It proves exact five-stage
+retention, repeat and post-invalidation retrieval, content-tamper rejection,
+and absence for queued, canceled, stale, and unknown requests. The governed
+offline matrix now passes 883 tests after evidence pinning.
 
 ## How to interpret results
 

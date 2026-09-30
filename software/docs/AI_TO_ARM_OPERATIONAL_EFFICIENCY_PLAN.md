@@ -935,6 +935,13 @@ reviewed execution plan, trajectory, IK result, schedule, and collision intake
 without rerunning the model-to-plan path or trusting hashes with missing
 content. Retention happens before completion is reported, remains bounded and
 immutable, and does not label synthetic evidence as permit-review-ready.
+The retained
+[`typing_shadow_materialization_campaign_v1.json`](../ai/eval/typing_shadow_materialization_campaign_v1.json)
+binds the eight-case qualification to clean framework commit
+`81d25e1a06484b7c89f6048e5795c8372769dcbb`. It confirms that reuse is exact
+and audit-safe rather than a hidden replan, while incomplete lifecycle states
+cannot expose a partial planning bundle. This removes duplicated planning work
+from later review without removing any physical admission gate.
 
 ## Completion definition
 
