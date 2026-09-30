@@ -99,6 +99,8 @@ TESTS = (
     "software/tests/unit/test_typing_execution_handoff_candidate_campaign_v1.py",
     "software/tests/unit/test_typing_shadow_artifact_store_v1.py",
     "software/tests/unit/test_typing_shadow_artifact_store_campaign_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_assembler_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_assembler_campaign_v1.py",
     "software/tests/unit/test_pre_camera_host_benchmark_v1.py",
     "software/tests/unit/test_assess_r97_external_review_decision.py",
     "software/tests/unit/test_model_motion_sequence_coordinator.py",

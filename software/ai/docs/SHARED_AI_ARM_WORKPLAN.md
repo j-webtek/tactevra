@@ -1255,6 +1255,14 @@ Its immutable evidence is
 generated from clean framework commit
 `69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`.
 
+ARM-144 reduces the public handoff operation to `(ledger, request_id)`. The
+assembler obtains all four exact ARM-142 inputs from the canonical ledger and
+ARM-143 store, validates their lineage through the existing candidate builder,
+and never re-runs planning. Incomplete, rejected, stale, and unknown sessions
+cannot assemble a candidate. Completed evidence remains reconstructable after
+runtime invalidation for audit, while every execution blocker and zero-
+authority field remains unchanged.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

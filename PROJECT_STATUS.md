@@ -898,6 +898,13 @@ controller, transport, automatic retry, hardware write, or movement.
 The retained eight-case campaign was generated from clean framework commit
 `69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`; the governed offline matrix passes
 863 tests after its evidence pin is enabled.
+ARM-144 adds one canonical ledger-owned assembly API above ARM-143. A caller
+provides only the completed request ID; the assembler retrieves the signed
+session, admission, terminal service receipt, and exact retained shadow
+artifact, then returns the existing blocked ARM-142 candidate without running
+the planner again. Queued, canceled, stale, rejected, and unknown requests fail
+closed. Candidate reconstruction remains available after supervisor
+invalidation for audit, but never becomes permit- or executor-eligible.
 
 ## How to interpret results
 

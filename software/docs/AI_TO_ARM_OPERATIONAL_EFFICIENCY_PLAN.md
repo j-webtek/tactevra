@@ -916,6 +916,15 @@ The retained
 records all eight outcomes against clean framework commit
 `69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`.
 
+ARM-144 removes caller-side handoff choreography. The caller supplies only a
+completed request ID; one canonical assembler retrieves the four signed source
+records, validates the existing ARM-142 lineage, and returns the same blocked
+candidate without solver work. This shortens the future executor-facing path
+and prevents callers from accidentally mixing evidence from different
+requests. Audit reconstruction remains possible after runtime invalidation,
+but no permit, command, controller access, retry, or physical authority is
+created.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact
