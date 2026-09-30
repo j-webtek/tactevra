@@ -1230,6 +1230,17 @@ outcomes are explicit and nonretrying. The retained eight-case campaign uses
 the actual shared emitter and grants no executor, controller, transport, or
 physical authority.
 
+ARM-142 defines the last zero-authority artifact before future physical
+qualification: a deterministic execution-handoff candidate. It binds the
+ARM-141 terminal session to its signed admission, terminal service receipt,
+and full shadow-planning receipt, preserving the execution-plan, trajectory,
+IK, schedule, and collision-intake hashes. The candidate is intentionally
+blocked until installed collision evidence, fresh observed and controller
+state, a one-use permit, and independent effect verification exist. An eight-
+case campaign rejects noncompleted sessions, lineage substitution, and
+authority tampering; no candidate is executor-eligible or physically
+authoritative.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

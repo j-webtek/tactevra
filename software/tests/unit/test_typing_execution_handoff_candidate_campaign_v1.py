@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -13,6 +14,10 @@ from software.tests.unit.test_typing_execution_handoff_candidate_v1 import _evid
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/typing_execution_handoff_candidate_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/typing_execution_handoff_candidate_campaign_v1.json"
+RETAINED_FILE_SHA256 = "79808f9e3b47f05677ca1cb34b652d4b8a181f29d0baa364e81fc4e2e9be5621"
+RETAINED_CAMPAIGN_SHA256 = "720d2863ec75d333d44cb29ce41e13f19dfaa8ab640ae67f7c0d33b09bc40203"
+RETAINED_SOURCE_COMMIT = "8ab089228c868b1bb4cf57c8840f9ec0e57778e1"
 
 
 def _environment():
@@ -58,3 +63,25 @@ def test_campaign_rejects_reference_and_hash_drift():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.TypingExecutionHandoffCandidateCampaignV1Error, match="hash"):
         campaign.parse_typing_execution_handoff_candidate_campaign_v1(changed)
+
+
+def test_retained_campaign_is_pinned_blocked_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_typing_execution_handoff_candidate_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    indexed = {item["case"]: item for item in value["cases"]}
+    valid = indexed["VALID_COMPLETED_CHAIN"]["candidate"]
+    assert valid["status"] == handoff.STATUS
+    assert valid["required_blockers"] == list(handoff.REQUIRED_BLOCKERS)
+    assert indexed["DETERMINISTIC_REBUILD"]["candidate"] == valid
+    assert indexed["NONCOMPLETED_SESSION_REJECTED"]["candidate"] is None
+    assert indexed["AUTHORITY_TAMPER_REJECTED"]["candidate"] is None
+    assert value["eligible_for_executor"] is False
+    assert value["permit_issued"] is False
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is False

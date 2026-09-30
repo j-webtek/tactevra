@@ -891,6 +891,17 @@ covers eight outcomes with zero retry and zero authority. This prepares a
 future executor handoff to consume one unambiguous terminally qualified request,
 but does not itself encode or send a controller command.
 
+ARM-142 packages that unambiguous terminal record for future execution review.
+The candidate binds five expensive planning-stage results by hash, so a future
+qualified boundary can consume the exact reviewed lineage instead of silently
+re-solving or accepting a look-alike request. It is deliberately marked
+`BLOCKED_PENDING_EXECUTION_QUALIFICATION`: installed collision evidence, fresh
+observed/controller state, a one-use permit, and an independent effect verifier
+remain mandatory. The retained
+[`typing_execution_handoff_candidate_campaign_v1.json`](../ai/eval/typing_execution_handoff_candidate_campaign_v1.json)
+shows deterministic reconstruction and fail-closed lineage checks while keeping
+executor eligibility, transport, commands, and physical authority false.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

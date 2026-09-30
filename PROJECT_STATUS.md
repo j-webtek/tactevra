@@ -879,6 +879,14 @@ cancellation, stale-generation rejection, admission rejection, capacity
 exhaustion, and terminal lookup are all retained in an eight-case campaign.
 This resolves caller-side outcome ambiguity only; the ledger remains detached
 from execution, transport, controller writes, and physical movement.
+ARM-142 seals the completed session, original admission, terminal service
+receipt, and detailed shadow-planning receipt into one deterministic execution-
+handoff candidate. It preserves the exact execution-plan, trajectory, IK,
+schedule, and collision-intake hashes but explicitly remains blocked on
+installed collision evidence, fresh observed/controller state, a one-use
+permit, and independent effect verification. Cross-request lineage swaps,
+noncompleted sessions, and authority tampering fail closed. The candidate is
+not eligible for an executor and creates no permit or controller command.
 
 ## How to interpret results
 
