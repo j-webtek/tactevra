@@ -847,6 +847,14 @@ solve cost, each measured warm lane hit 186/186 exact inputs, and the bounded
 cache reported no capacity skips. This strengthens the software case for a
 long-lived qualified service, but it remains synthetic host evidence with no
 controller, physical motion, key contact, or independent device effect.
+ARM-138 now covers the long-lived warm service under bounded disturbances. It
+preserves FIFO completion at the eight-request queue limit, rejects overflow,
+cancels selected work before planning, and rejects three malformed or duplicate
+submissions with zero cache activity. Reload and restart reject stale queued
+requests and retire cache eligibility; no request is automatically retried.
+Only a new explicitly qualified service restores the warm path, and its output
+matches the retained reference receipt. The seven-case result remains synthetic
+and zero-authority, with no controller, transport, hardware write, or movement.
 
 ## How to interpret results
 

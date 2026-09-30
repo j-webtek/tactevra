@@ -847,6 +847,17 @@ final deployment host and physical execution path are measured. Retained
 evidence is
 [`actual_emitter_stability_campaign_v1.json`](../ai/eval/actual_emitter_stability_campaign_v1.json).
 
+ARM-138 tests whether the fast path stays fail-closed under bounded operational
+disturbances. The service drains its full eight-request queue FIFO, rejects the
+ninth request, handles three pre-admission cancellations without cache work,
+and rejects malformed identity, forbidden owner input, and reused request IDs
+before planning. Reload and restart reject already queued work as stale, retire
+exact reuse, and use the complete solver without retry for new work. Fast reuse
+returns only after a separately requalified replacement, whose measured output
+matches the original reference receipt exactly. The retained
+[`actual_emitter_disturbance_campaign_v1.json`](../ai/eval/actual_emitter_disturbance_campaign_v1.json)
+contains seven passing cases and no controller or physical authority.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

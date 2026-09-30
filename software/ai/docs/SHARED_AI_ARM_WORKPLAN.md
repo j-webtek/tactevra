@@ -1188,6 +1188,17 @@ still host-measured synthetic integration evidence: it neither fixes production
 latency thresholds nor predicts controller, motion, contact, or device-effect
 time.
 
+ARM-138 qualifies bounded disturbance behavior around that warm service. A full
+eight-request queue completed FIFO with 313/313 exact-input hits while a ninth
+submission failed closed. Three of eight queued requests were canceled before
+admission; the five survivors completed FIFO with 175/175 hits and no cache work
+from canceled requests. Identity mismatch, owner-input override, and request-ID
+reuse were rejected before any lookup. Reload and restart made queued work stale,
+disabled exact reuse, and allowed only complete-solve fallback with no automatic
+retry. A separately requalified replacement restored the warm path and produced
+the exact reference shadow receipt. This retained campaign opened no controller
+or transport and generated no hardware command or motion.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

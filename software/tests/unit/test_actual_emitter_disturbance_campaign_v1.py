@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,10 @@ import rocell.application.actual_emitter_disturbance_campaign_v1 as campaign
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/actual_emitter_disturbance_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/actual_emitter_disturbance_campaign_v1.json"
+RETAINED_FILE_SHA256 = "904241adddcb218f314df6c4d27c9fcfa66e3ddc9c25d28a7d2d1e3671280ebf"
+RETAINED_CAMPAIGN_SHA256 = "b47c01533b6fad040ed3ef0cd13efb22f49b11af2af2318d3880d02ae7d931f1"
+RETAINED_SOURCE_COMMIT = "aacc219a008ebb4ae047fbf3f5774d198d1dd163"
 
 
 def _environment():
@@ -66,3 +71,24 @@ def test_disturbance_campaign_rejects_cache_retry_and_hash_drift():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.ActualEmitterDisturbanceCampaignV1Error, match="hash"):
         campaign.parse_actual_emitter_disturbance_campaign_v1(changed)
+
+
+def test_retained_disturbance_campaign_is_pinned_fail_closed_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_actual_emitter_disturbance_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    indexed = {item["case"]: item for item in value["cases"]}
+    assert indexed["QUEUE_SATURATION"]["cache_activity"]["hits"] == 313
+    assert indexed["CANCEL_PRESSURE"]["cache_activity"]["hits"] == 175
+    assert indexed["MALFORMED_REJECTION"]["cache_activity"]["lookups"] == 0
+    assert indexed["RELOAD_STALE_AND_FALLBACK"]["exact_reuse_enabled_after"] is False
+    assert indexed["RESTART_STALE_AND_FALLBACK"]["exact_reuse_enabled_after"] is False
+    assert indexed["QUALIFIED_REPLACEMENT_RECOVERY"]["reference_equivalent"] is True
+    assert all(item["automatic_retries"] == 0 for item in value["cases"])
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is False
