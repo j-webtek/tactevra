@@ -1250,6 +1250,10 @@ allowed, but replacement, wrong content address, unknown request, and capacity
 overflow fail closed. Canceled and stale requests cannot produce artifacts.
 The retained eight-case campaign remains synthetic and zero-authority; it adds
 no executor, permit, controller command, transport access, or physical motion.
+Its immutable evidence is
+[`typing_shadow_artifact_store_campaign_v1.json`](../eval/typing_shadow_artifact_store_campaign_v1.json),
+generated from clean framework commit
+`69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

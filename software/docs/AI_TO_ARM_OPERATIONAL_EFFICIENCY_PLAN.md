@@ -911,6 +911,10 @@ second solver run. Wrong hashes, replacement attempts, unknown IDs, and
 capacity exhaustion fail closed; canceled and stale work leaves no artifact.
 The optimization changes evidence reuse only and grants no execution or
 physical authority.
+The retained
+[`typing_shadow_artifact_store_campaign_v1.json`](../ai/eval/typing_shadow_artifact_store_campaign_v1.json)
+records all eight outcomes against clean framework commit
+`69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`.
 
 ## Completion definition
 

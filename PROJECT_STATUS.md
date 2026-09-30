@@ -895,6 +895,9 @@ unknown request, and capacity overflow fail closed. Canceled and stale requests
 retain no artifact. This closes the caller-side reconstruction gap used by
 ARM-142 but remains an in-memory, zero-authority store with no executor,
 controller, transport, automatic retry, hardware write, or movement.
+The retained eight-case campaign was generated from clean framework commit
+`69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`; the governed offline matrix passes
+863 tests after its evidence pin is enabled.
 
 ## How to interpret results
 

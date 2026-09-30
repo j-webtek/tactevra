@@ -19,9 +19,9 @@ VALIDATOR = Draft202012Validator(json.loads((
     ROOT / "software/ai/schemas/typing_shadow_artifact_store_campaign_v1.schema.json"
 ).read_text(encoding="utf-8")))
 RETAINED = ROOT / "software/ai/eval/typing_shadow_artifact_store_campaign_v1.json"
-RETAINED_FILE_SHA256 = "PENDING"
-RETAINED_CAMPAIGN_SHA256 = "PENDING"
-RETAINED_SOURCE_COMMIT = "PENDING"
+RETAINED_FILE_SHA256 = "ef2f445f811739715f2145a6f9fa5441791f7bcbd2c011616eea1c6970264de6"
+RETAINED_CAMPAIGN_SHA256 = "944492b10f1218dd15b542570fb5d7d613deaeb34da37242aae5a2bbb0ecdba0"
+RETAINED_SOURCE_COMMIT = "69ef09bab0b62cceb2ab78b35e4f3c733137fd8d"
 
 
 def _environment():
@@ -100,7 +100,6 @@ def test_campaign_rejects_reference_and_hash_drift():
         campaign.parse_typing_shadow_artifact_store_campaign_v1(changed)
 
 
-@pytest.mark.skipif(RETAINED_SOURCE_COMMIT == "PENDING", reason="framework phase")
 def test_retained_campaign_is_pinned_and_zero_authority():
     raw = RETAINED.read_bytes()
     assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
