@@ -88,6 +88,7 @@ TESTS = (
     "software/tests/unit/test_actual_emitter_profiled_service_campaign_v1.py",
     "software/tests/unit/test_actual_emitter_mixed_queue_campaign_v1.py",
     "software/tests/unit/test_actual_emitter_stability_campaign_v1.py",
+    "software/tests/unit/test_actual_emitter_disturbance_campaign_v1.py",
     "software/tests/unit/test_pre_camera_host_benchmark_v1.py",
     "software/tests/unit/test_assess_r97_external_review_decision.py",
     "software/tests/unit/test_model_motion_sequence_coordinator.py",
