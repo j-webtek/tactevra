@@ -1262,6 +1262,10 @@ and never re-runs planning. Incomplete, rejected, stale, and unknown sessions
 cannot assemble a candidate. Completed evidence remains reconstructable after
 runtime invalidation for audit, while every execution blocker and zero-
 authority field remains unchanged.
+The retained evidence is
+[`typing_execution_handoff_assembler_campaign_v1.json`](../eval/typing_execution_handoff_assembler_campaign_v1.json),
+generated from clean framework commit
+`5fb4801956c800dba75c56722911acaf99493fb2`.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

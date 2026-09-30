@@ -924,6 +924,10 @@ and prevents callers from accidentally mixing evidence from different
 requests. Audit reconstruction remains possible after runtime invalidation,
 but no permit, command, controller access, retry, or physical authority is
 created.
+The retained
+[`typing_execution_handoff_assembler_campaign_v1.json`](../ai/eval/typing_execution_handoff_assembler_campaign_v1.json)
+records the eight-case result against clean framework commit
+`5fb4801956c800dba75c56722911acaf99493fb2`.
 
 ## Completion definition
 

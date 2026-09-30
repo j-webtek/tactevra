@@ -19,9 +19,9 @@ VALIDATOR = Draft202012Validator(json.loads((
     ROOT / "software/ai/schemas/typing_execution_handoff_assembler_campaign_v1.schema.json"
 ).read_text(encoding="utf-8")))
 RETAINED = ROOT / "software/ai/eval/typing_execution_handoff_assembler_campaign_v1.json"
-RETAINED_FILE_SHA256 = "PENDING"
-RETAINED_CAMPAIGN_SHA256 = "PENDING"
-RETAINED_SOURCE_COMMIT = "PENDING"
+RETAINED_FILE_SHA256 = "fd9c6135f059aceebc7f03e0c3ae9b9e35293fa0afaf36f63c4023415e528ada"
+RETAINED_CAMPAIGN_SHA256 = "62ab46d572c303db03f8137d82a4e09087c8145e3eb28e524dd73fc11e18d18a"
+RETAINED_SOURCE_COMMIT = "5fb4801956c800dba75c56722911acaf99493fb2"
 
 
 def _environment():
@@ -99,7 +99,6 @@ def test_campaign_rejects_reference_and_hash_drift():
         campaign.parse_typing_execution_handoff_assembler_campaign_v1(changed)
 
 
-@pytest.mark.skipif(RETAINED_SOURCE_COMMIT == "PENDING", reason="framework phase")
 def test_retained_campaign_is_pinned_blocked_and_zero_authority():
     raw = RETAINED.read_bytes()
     assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256

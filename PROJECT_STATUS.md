@@ -905,6 +905,9 @@ artifact, then returns the existing blocked ARM-142 candidate without running
 the planner again. Queued, canceled, stale, rejected, and unknown requests fail
 closed. Candidate reconstruction remains available after supervisor
 invalidation for audit, but never becomes permit- or executor-eligible.
+Its retained eight-case campaign was generated from clean framework commit
+`5fb4801956c800dba75c56722911acaf99493fb2`; the governed offline matrix now
+passes 873 tests after evidence pinning.
 
 ## How to interpret results
 
