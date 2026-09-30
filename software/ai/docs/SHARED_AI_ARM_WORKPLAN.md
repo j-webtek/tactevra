@@ -1199,6 +1199,17 @@ retry. A separately requalified replacement restored the warm path and produced
 the exact reference shadow receipt. This retained campaign opened no controller
 or transport and generated no hardware command or motion.
 
+ARM-139 converts those observations into an explicit zero-authority runtime
+supervisor. `WARM` is available only while the frozen profile remains eligible;
+startup mismatch enters `FULL_SOLVE_ONLY`; reload or restart enters
+`REQUALIFICATION_REQUIRED` and blocks new submissions while already queued work
+is returned stale. Continuing without a new qualification requires an explicit
+transition to `FULL_SOLVE_ONLY`, which cannot retain exact reuse. Returning to
+`WARM` requires a separately qualified replacement. The retained seven-case
+campaign preserves the reference plan through both startup full-solve fallback
+and qualified replacement, permits no automatic retry, and remains detached
+from the controller and executor.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -12,6 +13,10 @@ from rocell.application.typing_runtime_supervisor_v1 import FULL_SOLVE_ONLY, REQ
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/typing_runtime_supervisor_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/typing_runtime_supervisor_campaign_v1.json"
+RETAINED_FILE_SHA256 = "7425d80e772a3111ec4570dd05199e092b1cb71440d9da85f0960aea287f3668"
+RETAINED_CAMPAIGN_SHA256 = "6cfc3e51d8ee016ab901d12123c1366c6b6ad456dfb4acd85f8bd2927f234334"
+RETAINED_SOURCE_COMMIT = "72bdfe8643a934773312b61e6f61c9121e269fbd"
 
 
 def _environment():
@@ -69,3 +74,23 @@ def test_supervisor_campaign_rejects_state_retry_and_hash_drift():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.TypingRuntimeSupervisorCampaignV1Error, match="hash"):
         campaign.parse_typing_runtime_supervisor_campaign_v1(changed)
+
+
+def test_retained_supervisor_campaign_is_pinned_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_typing_runtime_supervisor_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    indexed = {item["case"]: item for item in value["cases"]}
+    assert indexed["QUALIFIED_WARM_START"]["state"] == WARM
+    assert indexed["STARTUP_MISMATCH_FULL_SOLVE"]["state"] == FULL_SOLVE_ONLY
+    assert indexed["RELOAD_REQUIRES_REQUALIFICATION"]["state"] == REQUALIFICATION_REQUIRED
+    assert indexed["RESTART_REQUIRES_REQUALIFICATION"]["state"] == REQUALIFICATION_REQUIRED
+    assert indexed["QUALIFIED_REPLACEMENT_WARM"]["reference_equivalent"] is True
+    assert all(item["automatic_retries"] == 0 for item in value["cases"])
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is False

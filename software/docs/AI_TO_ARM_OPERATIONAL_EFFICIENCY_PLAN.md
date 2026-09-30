@@ -858,6 +858,17 @@ matches the original reference receipt exactly. The retained
 [`actual_emitter_disturbance_campaign_v1.json`](../ai/eval/actual_emitter_disturbance_campaign_v1.json)
 contains seven passing cases and no controller or physical authority.
 
+ARM-139 implements the operating policy implied by ARM-138. The new supervisor
+publishes three mutually exclusive states: `WARM`, `FULL_SOLVE_ONLY`, and
+`REQUALIFICATION_REQUIRED`. Only `WARM` exposes exact reuse. Known startup
+profile mismatch can safely plan through the complete solver. Reload/restart
+blocks new work until the caller explicitly accepts full-solve-only operation or
+constructs a separately qualified replacement; neither path retries stale work.
+The retained
+[`typing_runtime_supervisor_campaign_v1.json`](../ai/eval/typing_runtime_supervisor_campaign_v1.json)
+shows exact reference equivalence across fallback and replacement while keeping
+all execution, transport, and physical authority absent.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

@@ -855,6 +855,14 @@ requests and retire cache eligibility; no request is automatically retried.
 Only a new explicitly qualified service restores the warm path, and its output
 matches the retained reference receipt. The seven-case result remains synthetic
 and zero-authority, with no controller, transport, hardware write, or movement.
+ARM-139 adds a runtime supervisor so cache eligibility is no longer an implicit
+service detail. Qualified startup is `WARM`; known mismatch is
+`FULL_SOLVE_ONLY`; reload, restart, and invalidation are
+`REQUALIFICATION_REQUIRED`. New submissions are blocked in the latter state,
+stale work is not retried, and explicit fallback cannot retain exact reuse. A
+separately qualified replacement restores `WARM` and reproduces the reference
+plan. This remains shadow-only software scaffolding with no controller or
+physical authority.
 
 ## How to interpret results
 
