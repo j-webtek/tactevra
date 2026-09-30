@@ -902,6 +902,16 @@ remain mandatory. The retained
 shows deterministic reconstruction and fail-closed lineage checks while keeping
 executor eligibility, transport, commands, and physical authority false.
 
+ARM-143 removes the remaining duplicate-planning step from that handoff. The
+FIFO service now commits the complete canonical shadow artifact to a bounded,
+immutable in-memory store before it reports completion. The ledger retrieves
+that artifact by request ID plus the hash already sealed in the terminal
+receipt, so ARM-142 can be built from the exact reviewed output without a
+second solver run. Wrong hashes, replacement attempts, unknown IDs, and
+capacity exhaustion fail closed; canceled and stale work leaves no artifact.
+The optimization changes evidence reuse only and grants no execution or
+physical authority.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

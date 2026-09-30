@@ -887,6 +887,14 @@ installed collision evidence, fresh observed/controller state, a one-use
 permit, and independent effect verification. Cross-request lineage swaps,
 noncompleted sessions, and authority tampering fail closed. The candidate is
 not eligible for an executor and creates no permit or controller command.
+ARM-143 retains the exact full shadow-planning receipt inside the bounded
+runtime before `SHADOW_COMPLETED` can be reported. Retrieval requires both the
+request identity and terminal content hash; repeat reads return the same
+canonical artifact without re-planning, while changed replacement, wrong hash,
+unknown request, and capacity overflow fail closed. Canceled and stale requests
+retain no artifact. This closes the caller-side reconstruction gap used by
+ARM-142 but remains an in-memory, zero-authority store with no executor,
+controller, transport, automatic retry, hardware write, or movement.
 
 ## How to interpret results
 

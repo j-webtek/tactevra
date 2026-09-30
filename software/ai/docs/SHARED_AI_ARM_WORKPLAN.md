@@ -1241,6 +1241,16 @@ case campaign rejects noncompleted sessions, lineage substitution, and
 authority tampering; no candidate is executor-eligible or physically
 authoritative.
 
+ARM-143 makes that detailed shadow receipt retrievable from the shared runtime
+instead of requiring a caller to run the planner a second time. The service
+stores the canonical artifact before declaring completion, addresses it by the
+terminal receipt hash, and exposes it through the supervisor, gateway, and
+session ledger. Storage is bounded and immutable: exact repeated retrieval is
+allowed, but replacement, wrong content address, unknown request, and capacity
+overflow fail closed. Canceled and stale requests cannot produce artifacts.
+The retained eight-case campaign remains synthetic and zero-authority; it adds
+no executor, permit, controller command, transport access, or physical motion.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

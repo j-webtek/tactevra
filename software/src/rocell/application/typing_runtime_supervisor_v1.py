@@ -126,6 +126,14 @@ class TypingRuntimeSupervisorV1:
             self._require_active()
             return self._service.cancel(request_id)
 
+    def shadow_artifact(self, request_id: str, expected_sha256: str):
+        with self._lock:
+            return self._service.shadow_artifact(request_id, expected_sha256)
+
+    def artifact_store_snapshot(self):
+        with self._lock:
+            return self._service.artifact_store_snapshot()
+
     def reload_sources(self, *, issued_monotonic_ns: int) -> None:
         with self._lock:
             self._require_active()

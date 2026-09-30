@@ -153,9 +153,9 @@ def parse_typing_shadow_pipeline_v1(
     ):
         raise TypingShadowPipelineV1Error("ordered targets or action count is invalid")
     hashes = document["stage_hashes"]
-    if not isinstance(hashes, Mapping) or tuple(hashes) != STAGE_HASH_KEYS:
+    if not isinstance(hashes, Mapping) or set(hashes) != set(STAGE_HASH_KEYS):
         raise TypingShadowPipelineV1Error(
-            "stage hashes must use the exact canonical stage order"
+            "stage hashes must use the exact canonical stage keys"
         )
     for key in STAGE_HASH_KEYS:
         _digest(hashes[key], f"stage_hashes.{key}")
@@ -175,7 +175,9 @@ def parse_typing_shadow_pipeline_v1(
         raise TypingShadowPipelineV1Error("shadow receipt violates zero authority")
     frozen = dict(document)
     frozen["ordered_target_ids"] = tuple(targets)
-    frozen["stage_hashes"] = MappingProxyType(dict(hashes))
+    frozen["stage_hashes"] = MappingProxyType(
+        {key: hashes[key] for key in STAGE_HASH_KEYS}
+    )
     frozen["terminal_blockers"] = tuple(document["terminal_blockers"])
     frozen["controller_commands"] = ()
     return MappingProxyType(frozen)

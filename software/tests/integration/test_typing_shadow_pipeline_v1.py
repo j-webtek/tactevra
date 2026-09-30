@@ -195,6 +195,11 @@ def test_real_boundaries_produce_one_deterministic_honest_blocker_receipt():
     jsonschema.Draft202012Validator(schema).validate(first)
     parsed = parse_typing_shadow_pipeline_v1(first)
     assert tuple(parsed["ordered_target_ids"]) == ("H", "I")
+    canonical_round_trip = json.loads(
+        json.dumps(first, sort_keys=True, separators=(",", ":"))
+    )
+    parsed_round_trip = parse_typing_shadow_pipeline_v1(canonical_round_trip)
+    assert tuple(parsed_round_trip["stage_hashes"]) == tuple(first["stage_hashes"])
 
 
 def test_epoch_prepared_pipeline_is_exactly_equivalent_to_full_source_path():
@@ -469,7 +474,7 @@ def test_rehashed_receipt_mutations_still_fail_the_owning_rule(
     receipt = run_typing_shadow_pipeline_v1(**_inputs())
     changed = json.loads(json.dumps(receipt))
     if mutation == "profile_hash":
-        changed["stage_hashes"] = dict(reversed(changed["stage_hashes"].items()))
+        changed["stage_hashes"].pop("typing_execution_plan_sha256")
     elif mutation == "timestamp_lineage":
         changed["terminal_blockers"] = list(reversed(changed["terminal_blockers"]))
     elif mutation == "action_count":

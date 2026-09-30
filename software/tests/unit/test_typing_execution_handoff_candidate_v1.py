@@ -14,16 +14,15 @@ from rocell.application.typing_execution_handoff_candidate_v1 import (
     build_typing_execution_handoff_candidate_v1,
     parse_typing_execution_handoff_candidate_v1,
 )
-from rocell.application.typing_shadow_pipeline_v1 import run_typing_shadow_pipeline_v1
 from software.scripts import run_typing_command_session_ledger_campaign_v1 as runner
 
 
 def _evidence():
     ledger, supervisor = runner._ledger()
     inputs = runner._inputs(ledger, "handoff")
-    shadow = run_typing_shadow_pipeline_v1(**inputs)
     queued = ledger.submit("mission-handoff", "handoff", inputs)
     terminal = ledger.run_next_shadow()
+    shadow = ledger.shadow_artifact("handoff")
     service = ledger.terminal_service_receipt("handoff")
     admission = ledger.admission_receipt("handoff")
     assert admission["admission_receipt_sha256"] == queued[

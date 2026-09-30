@@ -256,6 +256,22 @@ class TypingCommandSessionLedgerV1:
                 )
             return dict(receipt)
 
+    def shadow_artifact(self, request_id: str) -> dict[str, Any]:
+        request_id = _identifier(request_id, "request_id")
+        with self._lock:
+            record = self._records.get(request_id)
+            if (record is None or record["status"] != "SHADOW_COMPLETED"
+                    or record["shadow_receipt_sha256"] is None):
+                raise TypingCommandSessionLedgerV1Error(
+                    "completed shadow artifact is unavailable"
+                )
+            return self._gateway.shadow_artifact(
+                request_id, record["shadow_receipt_sha256"])
+
+    def artifact_store_snapshot(self) -> dict[str, object]:
+        with self._lock:
+            return self._gateway.artifact_store_snapshot()
+
     def snapshot(self) -> dict[str, object]:
         with self._lock:
             queued = sum(item["status"] == QUEUED for item in self._records.values())

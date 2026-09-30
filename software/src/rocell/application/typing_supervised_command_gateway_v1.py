@@ -153,6 +153,15 @@ class TypingSupervisedCommandGatewayV1:
         with self._lock:
             return self._supervisor.cancel(request_id)
 
+    def shadow_artifact(self, request_id: str, expected_sha256: str):
+        with self._lock:
+            return self._supervisor.shadow_artifact(
+                request_id, expected_sha256)
+
+    def artifact_store_snapshot(self):
+        with self._lock:
+            return self._supervisor.artifact_store_snapshot()
+
     def snapshot(self) -> dict[str, object]:
         with self._lock:
             supervisor = self._supervisor.snapshot()
