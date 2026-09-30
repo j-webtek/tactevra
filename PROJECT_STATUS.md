@@ -932,6 +932,13 @@ for typed physical-original evidence, and cannot issue a review, permit, wire
 command, or hardware access. This prevents ARM-145's synthetic materialization
 from being accidentally promoted into execution eligibility. The governed
 offline matrix passes 887 tests with ARM-146 included.
+ARM-147 implements the first typed prerequisite adapter. It binds one fresh
+`ObservedPlannerStartState` and one independently approved installed-controller
+qualification to the retained plan's exact calibration and controller session.
+Only the fresh-observed-state and fresh-controller blockers are resolved; six
+model, trajectory, collision, verifier, and per-action blockers remain. The
+sealed binding is still ineligible for review, permit, encoding, or execution.
+The governed offline matrix passes 890 tests with ARM-147 included.
 
 ## How to interpret results
 

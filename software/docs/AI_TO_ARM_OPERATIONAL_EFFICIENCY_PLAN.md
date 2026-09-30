@@ -953,6 +953,12 @@ per-action review binding. That report is intentionally incapable of accepting
 informal readiness flags, issuing a review or permit, or producing wire bytes.
 Optimization may remove repeated computation, but never these evidence gates.
 
+ARM-147 safely reuses two existing physical-state contracts. A single binding
+operation correlates fresh feedback, calibration, installed-controller review,
+and controller session, avoiding repeated parsing at each later review stage.
+It resolves only those two blockers and remains non-dispatching; all route,
+collision, effect-verification, and per-action gates remain unchanged.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

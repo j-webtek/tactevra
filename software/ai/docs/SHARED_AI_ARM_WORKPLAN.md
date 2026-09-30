@@ -1296,6 +1296,16 @@ authenticated by typed adapters. No AI or arm worker may replace those inputs
 with a Boolean readiness claim or an untyped digest.
 The full governed offline matrix passes 887 tests at this boundary.
 
+ARM-147 begins resolving the readiness map through typed evidence rather than
+flags. `typing_state_prerequisite_binding_v1` requires an authenticated observed
+planner state plus the existing independently approved installed-controller
+evidence and its zero-write qualification report. It binds calibration digest,
+freshness windows, evidence digest, and controller session, then removes exactly
+the two state blockers. Deployment-qualified planning, measured trajectory,
+installed/continuous collision, independent effect verification, and per-action
+review binding remain mandatory and unresolved.
+The full governed offline matrix passes 890 tests with this binding included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
