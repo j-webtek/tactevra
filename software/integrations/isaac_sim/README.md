@@ -174,6 +174,42 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_sc
   --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json
 ```
 
+## Model-motion command overlay
+
+[`model_motion_scene_overlay_probe.py`](model_motion_scene_overlay_probe.py)
+strictly decodes an actual AI-produced `ModelMotionBatchV2`, binds it to the
+retained RC03 scene and nominal target source, preserves requested order and
+repeated targets, and authors proposal centers, inferred placed key regions,
+and uncertainty disks into an external Isaac USD. The retained
+[`overlay receipt`](evidence/model_motion_scene_overlay_20260929.json) evaluates
+`H, H, 1, PERIOD`. All proposal centers share one synthetic rigid placement to
+numerical precision, but the 14.400834977 mm localization disk exceeds every
+7 mm key-edge margin. The rehearsal therefore stops at
+`BLOCKED_UNCERTAINTY_CROSSES_INFERRED_SAFE_REGIONS` before any joint schedule.
+
+The inferred placement is a visualization transform reconstructed from the
+synthetic batch; it is not runtime calibration. The probe changes zero
+articulation positions, takes zero physics steps, emits no controller or wire
+commands, and grants no hardware or physical authority. Its next input must be
+a source-bound joint schedule from the arm typing pipeline. That later replay
+must compare the simulated TCP at each contact sample with the same ordered
+batch targets rather than using separately invented points.
+
+Reproduce the overlay on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\model_motion_scene_overlay_probe.py `
+  --workspace . `
+  --scene-usd C:\IsaacSim\artifacts\issue190\wp2-scene-002\rc03_nominal_rigid_scene.usda `
+  --scene-receipt software\integrations\isaac_sim\evidence\rc03_nominal_rigid_scene_20260929.json `
+  --batch software\ai\eval\precision_adapter_batch_v2_contract_fixture.json `
+  --batch-metadata software\ai\eval\precision_adapter_batch_v2_contract_fixture_metadata.json `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp2-command-overlay-001 `
+  --receipt C:\IsaacSim\evidence\model_motion_overlay_001.json `
+  --status-output C:\IsaacSim\evidence\model_motion_overlay_001.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
