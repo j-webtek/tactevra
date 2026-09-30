@@ -17,7 +17,7 @@ import json
 import math
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 
 from rocell.calibration import PlannerCalibrationSnapshot
 from rocell.geometry import JointPosition, Point3Mm, RigidTransform
@@ -51,6 +51,9 @@ from .typing_ik_effort_telemetry_v1 import TypingIkEffortRecorderV1
 from .typing_exact_ik_result_cache_v1 import ExactTypingIkResultCacheV1
 from .typing_endpoint_atlas_observer_v1 import TypingEndpointAtlasRecorderV1
 from .typing_endpoint_reuse_verifier_v1 import TypingEndpointReuseVerifierV1
+
+if TYPE_CHECKING:
+    from .typing_observed_ik_seed_v1 import TypingObservedIkSeedV1
 
 
 SCHEMA = "rocell.typing_trajectory_ik_screen.v1"
@@ -225,7 +228,7 @@ def screen_typing_trajectory_ik_v1(
     plan: TypingTrajectoryPlanV1,
     context: SimulationContext,
     snapshot: PlannerCalibrationSnapshot,
-    seed: TypingTrajectoryIkSeedV1,
+    seed: TypingTrajectoryIkSeedV1 | TypingObservedIkSeedV1,
     *,
     policy: TrajectorySimulationPolicy | None = None,
     prepared_planner: PreparedTypingPlannerV1 | None = None,
@@ -246,8 +249,12 @@ def screen_typing_trajectory_ik_v1(
         raise TypeError("context must be a SimulationContext")
     if not isinstance(snapshot, PlannerCalibrationSnapshot):
         raise TypeError("snapshot must be a PlannerCalibrationSnapshot")
-    if not isinstance(seed, TypingTrajectoryIkSeedV1):
-        raise TypeError("seed must be a TypingTrajectoryIkSeedV1")
+    from .typing_observed_ik_seed_v1 import TypingObservedIkSeedV1
+
+    if not isinstance(seed, (TypingTrajectoryIkSeedV1, TypingObservedIkSeedV1)):
+        raise TypeError(
+            "seed must be a TypingTrajectoryIkSeedV1 or TypingObservedIkSeedV1"
+        )
     if effort_recorder is not None and not isinstance(
         effort_recorder, TypingIkEffortRecorderV1
     ):

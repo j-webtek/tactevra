@@ -187,6 +187,12 @@ class TypingObservedIkSeedV1:
     def observed_ik_seed_sha256(self) -> str:
         return self.to_dict()["observed_ik_seed_sha256"]
 
+    @property
+    def seed_sha256(self) -> str:
+        """Canonical alias used by the shared deterministic IK screen."""
+
+        return self.observed_ik_seed_sha256
+
 
 def build_typing_observed_ik_seed_v1(
     materialization: Mapping[str, Any],

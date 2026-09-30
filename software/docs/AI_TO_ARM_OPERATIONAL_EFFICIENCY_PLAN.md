@@ -968,6 +968,13 @@ not perform the screen and cannot skip measured dynamics or installed continuous
 collision qualification; this keeps the optimization honest while removing
 future lineage-reconstruction work from the time-critical path.
 
+ARM-149 performs the expensive deterministic IK pass directly from the bound
+observed seed while reusing the already retained execution and Cartesian plans.
+This avoids rerunning AI interpretation or trajectory compilation and preserves
+the canonical solver's decisions. Its output intentionally identifies the
+observed-pose-to-PARK entry envelope as separate work; speed optimization cannot
+turn joint continuity into an unmeasured collision or dynamics claim.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

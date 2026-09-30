@@ -20,6 +20,7 @@ from rocell.application.typing_observed_ik_seed_v1 import (
 from rocell.application.typing_state_prerequisite_binding_v1 import (
     bind_typing_state_prerequisites_v1,
 )
+from rocell.kinematics import ARM_JOINT_NAMES
 from software.scripts import run_typing_command_session_ledger_campaign_v1 as runner
 
 import test_installed_controller_qualification_v1 as controller
@@ -38,6 +39,9 @@ def _inputs():
     report = assess_installed_controller_qualification_v1(
         profile, evidence, evaluated_monotonic_ns=200
     )
+    retained_seed = materialization["stage_artifacts"][
+        "typing_trajectory_ik_screen"
+    ]["seed"]["joint_positions_rad"]
     observed = ObservedPlannerStartState(
         run_id="run-observed-seed",
         arm_identity_sha256="1" * 64,
@@ -55,8 +59,12 @@ def _inputs():
             "t": 0.4, "r": 0.5, "g": 0.6,
         },
         model_joint_positions_rad={
-            "b_base": 0.1, "s_shoulder": 0.2, "e_elbow": 0.3,
-            "t_wrist_pitch": 0.4, "r_wrist_roll": 0.5, "g_gripper": 0.6,
+            "b_base": retained_seed[ARM_JOINT_NAMES[0]],
+            "s_shoulder": retained_seed[ARM_JOINT_NAMES[1]],
+            "e_elbow": retained_seed[ARM_JOINT_NAMES[2]],
+            "t_wrist_pitch": retained_seed[ARM_JOINT_NAMES[3]],
+            "r_wrist_roll": retained_seed[ARM_JOINT_NAMES[4]],
+            "g_gripper": 0.6,
         },
     )
     binding = bind_typing_state_prerequisites_v1(

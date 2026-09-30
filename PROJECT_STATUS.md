@@ -952,6 +952,18 @@ re-screen the retained route from this observed seed, then qualify installed
 geometry and measured dynamics before any per-action review can begin.
 The governed offline matrix passes 893 tests with ARM-148 included.
 
+ARM-149 now re-screens the retained Cartesian route through the unchanged
+deterministic IK implementation using the ARM-148 measured joint seed. It
+reconstructs and byte-compares the retained execution and trajectory plans,
+binds the resulting joint sequence to the active build, calibration, observed
+state, and controller session, and keeps the original synthetic seed contract
+separate. A passing result establishes bounded numerical IK and joint continuity
+from that seed only. It does not establish a safe physical transition from the
+observed pose into the retained PARK entry, physical dynamics, installed or
+continuous collision clearance, device-effect verification, review, permit, or
+execution eligibility.
+The governed offline matrix passes 896 tests with ARM-149 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

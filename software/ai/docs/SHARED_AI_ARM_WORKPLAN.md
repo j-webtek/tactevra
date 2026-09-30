@@ -1320,6 +1320,20 @@ IK/trajectory result, and continue to fail closed on installed geometry,
 measured dynamics, continuous collision, and effect-verifier prerequisites.
 The governed offline matrix passes 893 tests with this bridge included.
 
+ARM-149 consumes that exact observed seed and replays the retained execution and
+Cartesian trajectory bodies before invoking the canonical deterministic IK
+screen. The output binds every evaluated joint result back to the retained
+materialization, active build/calibration, controller session, observed state,
+and seed. The original synthetic seed class remains distinct and supported;
+only those two concrete typed seed classes can reach the shared solver.
+Successful IK is deliberately not described as a measured trajectory envelope:
+the observed physical pose may differ from the retained route's modeled PARK
+entry. ARM-149 therefore leaves an explicit observed-start-to-route-entry
+envelope, physically qualified dynamics, installed/continuous collision,
+effect-verifier, and per-action review requirements closed. It produces no
+controller or wire commands and grants no permit or execution authority.
+The governed offline matrix passes 896 tests with this re-screen included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
