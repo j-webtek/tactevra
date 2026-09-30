@@ -908,6 +908,14 @@ invalidation for audit, but never becomes permit- or executor-eligible.
 Its retained eight-case campaign was generated from clean framework commit
 `5fb4801956c800dba75c56722911acaf99493fb2`; the governed offline matrix now
 passes 873 tests after evidence pinning.
+ARM-145 closes the materialization gap discovered before permit review. The
+runtime now retains the actual execution-plan, trajectory, IK-screen,
+joint-schedule, and collision-intake documents—not only their hashes—and binds
+all five back to the terminal shadow receipt. The bundle remains explicitly
+`SYNTHETIC_OFFLINE_SHADOW_ONLY`, is not permit-review-ready, and preserves the
+installed-collision, fresh observed/controller state, and independent-verifier
+requirements. Incomplete requests produce no bundle; completed materialization
+remains immutable and audit-readable after runtime invalidation.
 
 ## How to interpret results
 

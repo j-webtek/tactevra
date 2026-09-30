@@ -169,6 +169,10 @@ class TypingProfiledShadowServiceV1:
     def artifact_store_snapshot(self):
         return self._service.artifact_store_snapshot()
 
+    def shadow_materialization(self, request_id: str, shadow_pipeline_sha256: str):
+        return self._service.shadow_materialization(
+            request_id, shadow_pipeline_sha256)
+
     def reload_sources(self, *, issued_monotonic_ns: int) -> None:
         self._service.reload_sources(issued_monotonic_ns=issued_monotonic_ns)
 

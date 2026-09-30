@@ -929,6 +929,13 @@ The retained
 records the eight-case result against clean framework commit
 `5fb4801956c800dba75c56722911acaf99493fb2`.
 
+ARM-145 retains the five materialized planning-stage bodies during the same
+solver pass. Future physical requalification can therefore consume the exact
+reviewed execution plan, trajectory, IK result, schedule, and collision intake
+without rerunning the model-to-plan path or trusting hashes with missing
+content. Retention happens before completion is reported, remains bounded and
+immutable, and does not label synthetic evidence as permit-review-ready.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

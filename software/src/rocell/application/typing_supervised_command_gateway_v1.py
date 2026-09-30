@@ -162,6 +162,11 @@ class TypingSupervisedCommandGatewayV1:
         with self._lock:
             return self._supervisor.artifact_store_snapshot()
 
+    def shadow_materialization(self, request_id: str, shadow_pipeline_sha256: str):
+        with self._lock:
+            return self._supervisor.shadow_materialization(
+                request_id, shadow_pipeline_sha256)
+
     def snapshot(self) -> dict[str, object]:
         with self._lock:
             supervisor = self._supervisor.snapshot()

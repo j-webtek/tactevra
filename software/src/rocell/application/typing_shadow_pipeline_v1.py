@@ -206,6 +206,7 @@ def run_typing_shadow_pipeline_v1(
     endpoint_atlas_recorder: TypingEndpointAtlasRecorderV1 | None = None,
     endpoint_reuse_verifier: TypingEndpointReuseVerifierV1 | None = None,
     exact_ik_result_cache: ExactTypingIkResultCacheV1 | None = None,
+    materialization_recorder: Any | None = None,
 ) -> dict[str, Any]:
     """Run exact production boundaries through their honest offline blocker.
 
@@ -276,6 +277,21 @@ def run_typing_shadow_pipeline_v1(
         prepared_planner=prepared_planner,
         context_lifecycle=context_lifecycle,
     )
+    if materialization_recorder is not None:
+        from .typing_shadow_materialization_v1 import (
+            TypingShadowMaterializationRecorderV1,
+        )
+        if not isinstance(
+            materialization_recorder, TypingShadowMaterializationRecorderV1
+        ):
+            raise TypingShadowPipelineV1Error(
+                "materialization recorder type differs"
+            )
+        materialization_recorder.capture(
+            request_id=batch.request_id, execution=execution,
+            trajectory=trajectory, ik=ik, schedule=schedule,
+            collision=collision,
+        )
     ordered_targets = [action.target_id for action in execution.actions]
     if ordered_targets != [proposal.target_id for proposal in batch.proposals]:
         raise TypingShadowPipelineV1Error("action order changed during composition")

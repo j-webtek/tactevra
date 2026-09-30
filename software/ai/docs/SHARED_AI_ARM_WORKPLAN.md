@@ -1267,6 +1267,14 @@ The retained evidence is
 generated from clean framework commit
 `5fb4801956c800dba75c56722911acaf99493fb2`.
 
+ARM-145 corrects an evidence-body gap before permit review. ARM-142 through
+ARM-144 bound five planning stages by hash, but a future physical review must
+also possess their canonical bodies to rerun collision and start-state checks.
+The shadow service now captures and immutably retains the execution plan,
+trajectory, IK screen, joint schedule, and collision intake, with every body
+verified against the terminal receipt. The bundle is synthetic shadow evidence,
+not a permit-review package, and it grants no controller or physical authority.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

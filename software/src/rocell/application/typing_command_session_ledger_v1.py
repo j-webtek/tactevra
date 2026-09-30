@@ -272,6 +272,18 @@ class TypingCommandSessionLedgerV1:
         with self._lock:
             return self._gateway.artifact_store_snapshot()
 
+    def shadow_materialization(self, request_id: str) -> dict[str, Any]:
+        request_id = _identifier(request_id, "request_id")
+        with self._lock:
+            record = self._records.get(request_id)
+            if (record is None or record["status"] != "SHADOW_COMPLETED"
+                    or record["shadow_receipt_sha256"] is None):
+                raise TypingCommandSessionLedgerV1Error(
+                    "completed shadow materialization is unavailable"
+                )
+            return self._gateway.shadow_materialization(
+                request_id, record["shadow_receipt_sha256"])
+
     def snapshot(self) -> dict[str, object]:
         with self._lock:
             queued = sum(item["status"] == QUEUED for item in self._records.values())

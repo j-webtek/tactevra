@@ -13,6 +13,10 @@ from typing import Any, Mapping
 from .context import SimulationContext
 from .typing_exact_ik_cache_owner_v1 import TypingExactIkCacheOwnerV1
 from .typing_shadow_artifact_store_v1 import TypingShadowArtifactStoreV1
+from .typing_shadow_materialization_v1 import (
+    TypingShadowMaterializationRecorderV1,
+    TypingShadowMaterializationStoreV1,
+)
 
 
 RECEIPT_SCHEMA = "rocell.typing_shadow_service_receipt.v1"
@@ -26,6 +30,7 @@ _TERMINAL = frozenset({
 })
 _FORBIDDEN_INPUTS = frozenset({
     "context_lifecycle", "prepared_planner", "exact_ik_result_cache",
+    "materialization_recorder",
 })
 
 
@@ -172,6 +177,8 @@ class TypingShadowServiceV1:
         self._owner = owner
         self._artifact_store = TypingShadowArtifactStoreV1(
             maximum_entries=maximum_requests)
+        self._materialization_store = TypingShadowMaterializationStoreV1(
+            maximum_entries=maximum_requests)
         self._maximum_queued = maximum_queued
         self._maximum_requests = maximum_requests
         self._queue: OrderedDict[str, _QueuedRequest] = OrderedDict()
@@ -296,13 +303,21 @@ class TypingShadowServiceV1:
                     blocker="SUBMITTED_LIFECYCLE_IS_STALE",
                 )
             try:
-                shadow = self._owner.run_shadow_pipeline(**queued.pipeline_inputs)
+                recorder = TypingShadowMaterializationRecorderV1()
+                shadow = self._owner.run_shadow_pipeline(
+                    **queued.pipeline_inputs,
+                    materialization_recorder=recorder,
+                )
+                materialization = recorder.finalize(shadow)
                 retained_sha256 = self._artifact_store.put(
                     queued.request_id, shadow)
                 if retained_sha256 != shadow.get("typing_shadow_pipeline_sha256"):
                     raise TypingShadowServiceV1Error(
                         "retained shadow artifact hash differs"
                     )
+                self._materialization_store.put(
+                    queued.request_id, materialization
+                )
                 completed_receipt = _receipt(
                     queued,
                     status="SHADOW_COMPLETED",
@@ -335,6 +350,13 @@ class TypingShadowServiceV1:
 
     def artifact_store_snapshot(self) -> dict[str, object]:
         return self._artifact_store.snapshot()
+
+    def shadow_materialization(
+        self, request_id: str, shadow_pipeline_sha256: str,
+    ) -> dict[str, Any]:
+        return self._materialization_store.get(
+            request_id, shadow_pipeline_sha256
+        )
 
     def reload_sources(self, *, issued_monotonic_ns: int) -> None:
         with self._lock:
