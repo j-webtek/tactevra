@@ -959,6 +959,15 @@ and controller session, avoiding repeated parsing at each later review stage.
 It resolves only those two blockers and remains non-dispatching; all route,
 collision, effect-verification, and per-action gates remain unchanged.
 
+ARM-148 prepares the measured-route lane without repeating model interpretation
+or synthetic planning. One immutable observed-state IK seed now carries the
+exact retained materialization, ARM-147 binding, active build/calibration,
+controller session, freshness window, and five measured arm joints. Later IK
+screening can begin directly from that authenticated state. The adapter does
+not perform the screen and cannot skip measured dynamics or installed continuous
+collision qualification; this keeps the optimization honest while removing
+future lineage-reconstruction work from the time-critical path.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

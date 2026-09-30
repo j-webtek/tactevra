@@ -1306,6 +1306,20 @@ installed/continuous collision, independent effect verification, and per-action
 review binding remain mandatory and unresolved.
 The full governed offline matrix passes 890 tests with this binding included.
 
+ARM-148 adds the next non-authoritative bridge without prematurely certifying
+collision. `typing_observed_ik_seed_v1` binds the retained materialization,
+ARM-147 state binding, active build, calibration, controller session, freshness
+window, and exact five-joint observed pose into one immutable
+`PHYSICAL_OBSERVED_STATE` seed. It performs no IK or collision qualification and
+cannot produce review, permit, controller, wire, or executor authority. This
+ordering is intentional: the current collision intake was derived from the
+synthetic shadow seed, so installed continuous-collision evidence must be built
+only after the retained route is re-screened from this observed seed. The next
+adapter must consume this exact seed and retained trajectory, produce a measured
+IK/trajectory result, and continue to fail closed on installed geometry,
+measured dynamics, continuous collision, and effect-verifier prerequisites.
+The governed offline matrix passes 893 tests with this bridge included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

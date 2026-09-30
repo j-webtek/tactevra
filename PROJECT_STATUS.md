@@ -940,6 +940,18 @@ model, trajectory, collision, verifier, and per-action blockers remain. The
 sealed binding is still ineligible for review, permit, encoding, or execution.
 The governed offline matrix passes 890 tests with ARM-147 included.
 
+ARM-148 now converts that authenticated fresh state into the exact seed required
+for deterministic trajectory re-screening. The seed binds the retained request
+and materialization, ARM-147 binding, active build and calibration snapshots,
+controller session, freshness window, and measured five-joint pose. It truthfully
+declares physical-feedback provenance while declaring IK and collision incomplete
+and emitting no controller or wire commands. This corrects an ordering hazard:
+the synthetic shadow collision intake cannot be promoted into installed
+continuous-collision evidence. A future measured-trajectory adapter must first
+re-screen the retained route from this observed seed, then qualify installed
+geometry and measured dynamics before any per-action review can begin.
+The governed offline matrix passes 893 tests with ARM-148 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.
