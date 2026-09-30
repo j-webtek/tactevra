@@ -14,6 +14,7 @@ from typing import Any
 
 
 SCHEMA = "tactevra.arm_joint_schedule_replay_bundle.v1"
+ACTUAL_EMITTER_SCHEMA = "tactevra.arm_joint_schedule_replay_bundle.v2"
 EXPECTED_ARM_JOINTS = (
     "base_link_to_link1",
     "link1_to_link2",
@@ -36,6 +37,7 @@ def _digest(value: bytes) -> str:
 
 def build_replay_bundle(
     report: dict[str, Any], report_bytes: bytes, expected_arm_commit: str,
+    *, require_actual_emitter: bool = False,
 ) -> dict[str, Any]:
     if report.get("arm_source_commit") != expected_arm_commit:
         raise ValueError("arm source commit differs from the requested source")
@@ -109,14 +111,33 @@ def build_replay_bundle(
         raise ValueError("contact endpoint order or repetitions differ from the request")
     ik_position_errors = [float(item["position_error_mm"]) for item in ik_results]
     ik_margins = [float(item["minimum_normalized_arm_joint_margin"]) for item in ik_results]
+    batch_sha256 = _digest(_canonical(report["batch"]))
+    producer: dict[str, Any] | None = None
+    if require_actual_emitter:
+        input_sha256 = report.get("actual_emitter_input_sha256")
+        payload_sha256 = report.get("actual_emitter_payload_sha256")
+        if report.get("actual_shared_emitter_used") is not True:
+            raise ValueError("arm report does not attest to the actual shared emitter")
+        if not isinstance(input_sha256, str) or len(input_sha256) != 64:
+            raise ValueError("actual-emitter input digest is invalid")
+        if payload_sha256 != batch_sha256:
+            raise ValueError("actual-emitter payload does not bind the retained batch")
+        producer = {
+            "kind": "ACTUAL_SHARED_EMITTER",
+            "input_sha256": input_sha256,
+            "payload_sha256": payload_sha256,
+            "synthetic_observations": True,
+            "deployment_qualification_claimed": False,
+        }
+
     bundle: dict[str, Any] = {
-        "schema": SCHEMA,
+        "schema": ACTUAL_EMITTER_SCHEMA if producer else SCHEMA,
         "source": {
             "arm_commit": expected_arm_commit,
             "arm_report_sha256": _digest(report_bytes),
             "geometry_variant": report["geometry_variant"],
             "virtual_profile_sha256": report["virtual_profile_sha256"],
-            "batch_sha256": _digest(_canonical(report["batch"])),
+            "batch_sha256": batch_sha256,
             "trajectory_plan_sha256": schedule["source_trajectory_plan_sha256"],
             "ik_screen_sha256": schedule["source_ik_screen_sha256"],
             "schedule_profile_sha256": schedule["profile_sha256"],
@@ -140,6 +161,8 @@ def build_replay_bundle(
         "hardware_writes": 0,
         "physical_movements": 0,
     }
+    if producer is not None:
+        bundle["producer"] = producer
     bundle["bundle_sha256"] = _digest(_canonical(bundle))
     return bundle
 
@@ -148,11 +171,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm-report", type=Path, required=True)
     parser.add_argument("--arm-commit", required=True)
+    parser.add_argument("--require-actual-emitter", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     raw = args.arm_report.resolve(strict=True).read_bytes()
     report = json.loads(raw)
-    bundle = build_replay_bundle(report, raw, args.arm_commit)
+    bundle = build_replay_bundle(
+        report, raw, args.arm_commit,
+        require_actual_emitter=args.require_actual_emitter,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8"

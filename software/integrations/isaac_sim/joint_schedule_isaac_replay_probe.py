@@ -72,7 +72,10 @@ def _driver_version() -> str:
 
 
 def _validate_bundle(bundle: dict[str, Any]) -> None:
-    if bundle.get("schema") != "tactevra.arm_joint_schedule_replay_bundle.v1":
+    if bundle.get("schema") not in {
+        "tactevra.arm_joint_schedule_replay_bundle.v1",
+        "tactevra.arm_joint_schedule_replay_bundle.v2",
+    }:
         raise ValueError("unsupported replay bundle schema")
     claimed = bundle.get("bundle_sha256")
     unsigned = dict(bundle)
@@ -97,6 +100,19 @@ def _validate_bundle(bundle: dict[str, Any]) -> None:
     ]
     if contacts != bundle.get("ordered_target_ids"):
         raise ValueError("contact order or repeated targets changed")
+    if bundle["schema"].endswith(".v2"):
+        producer = bundle.get("producer")
+        if not isinstance(producer, dict) or producer != {
+            "kind": "ACTUAL_SHARED_EMITTER",
+            "input_sha256": producer.get("input_sha256") if isinstance(producer, dict) else None,
+            "payload_sha256": bundle.get("source", {}).get("batch_sha256"),
+            "synthetic_observations": True,
+            "deployment_qualification_claimed": False,
+        }:
+            raise ValueError("actual-emitter producer lineage is invalid")
+        if not isinstance(producer["input_sha256"], str) \
+                or len(producer["input_sha256"]) != 64:
+            raise ValueError("actual-emitter input digest is invalid")
 
 
 def main() -> int:

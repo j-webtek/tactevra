@@ -123,3 +123,35 @@ def test_isaac_intake_rejects_changed_bundle_digest():
     bundle["samples"][0]["target_id"] = "1"
     with pytest.raises(ValueError, match="digest"):
         REPLAY._validate_bundle(bundle)
+
+
+def test_v2_bundle_binds_actual_emitter_payload_to_retained_batch():
+    report = _report()
+    report["actual_shared_emitter_used"] = True
+    report["actual_emitter_input_sha256"] = "e" * 64
+    report["actual_emitter_payload_sha256"] = BUNDLE._digest(
+        BUNDLE._canonical(report["batch"])
+    )
+    raw = json.dumps(report, sort_keys=True).encode()
+    bundle = BUNDLE.build_replay_bundle(
+        report, raw, COMMIT, require_actual_emitter=True
+    )
+    assert bundle["schema"].endswith(".v2")
+    assert bundle["producer"]["kind"] == "ACTUAL_SHARED_EMITTER"
+    assert bundle["producer"]["payload_sha256"] == bundle["source"][
+        "batch_sha256"
+    ]
+    assert bundle["producer"]["deployment_qualification_claimed"] is False
+    REPLAY._validate_bundle(bundle)
+
+
+def test_v2_bundle_rejects_unbound_actual_emitter_claim():
+    report = _report()
+    report["actual_shared_emitter_used"] = True
+    report["actual_emitter_input_sha256"] = "e" * 64
+    report["actual_emitter_payload_sha256"] = "f" * 64
+    raw = json.dumps(report, sort_keys=True).encode()
+    with pytest.raises(ValueError, match="payload"):
+        BUNDLE.build_replay_bundle(
+            report, raw, COMMIT, require_actual_emitter=True
+        )
