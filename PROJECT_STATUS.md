@@ -863,6 +863,14 @@ stale work is not retried, and explicit fallback cannot retain exact reuse. A
 separately qualified replacement restores `WARM` and reproduces the reference
 plan. This remains shadow-only software scaffolding with no controller or
 physical authority.
+ARM-140 places the canonical model-command bytes behind that supervisor. The
+gateway returns signed `ADMITTED` or `REJECTED` receipts, distinguishes queue
+pressure, request bounds, malformed input, and requalification blockers, and
+never permits an automatic retry. Its retained eight-case campaign preserves
+the exact reference shadow result through warm admission, complete-solve
+fallback, and qualified replacement. The gateway remains deliberately detached
+from every executor, controller, and transport: it proves safe model-to-planner
+admission, not physical dispatch or typing.
 
 ## How to interpret results
 

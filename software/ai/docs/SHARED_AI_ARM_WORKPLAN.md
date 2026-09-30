@@ -1210,6 +1210,16 @@ campaign preserves the reference plan through both startup full-solve fallback
 and qualified replacement, permits no automatic retry, and remains detached
 from the controller and executor.
 
+ARM-140 connects the actual-emitter boundary to that supervisor through a
+signed command-admission gateway. Valid canonical model bytes can be admitted
+in `WARM` or `FULL_SOLVE_ONLY`; malformed or duplicate input, queue saturation,
+request exhaustion, and requalification state each return a distinct signed
+rejection. The retained eight-case campaign preserves the exact reference
+shadow receipt across normal admission, startup fallback, and qualified
+replacement, while every rejection remains nonretrying. This is the shared
+AI/arm handoff for supervised shadow planning only: no executor, controller,
+transport, command encoding, or physical authority is attached.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

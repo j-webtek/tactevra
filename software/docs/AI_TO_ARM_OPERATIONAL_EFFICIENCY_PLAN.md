@@ -869,6 +869,17 @@ The retained
 shows exact reference equivalence across fallback and replacement while keeping
 all execution, transport, and physical authority absent.
 
+ARM-140 gives model callers one bounded gateway into that supervised runtime.
+The gateway consumes the same canonical bytes emitted by the AI boundary and
+returns a signed admission receipt before any planning work is run. Warm and
+complete-solve admissions preserve the reference shadow result; queue-full,
+request-bound, malformed-input, and requalification cases fail closed with
+specific nonretrying blockers. The retained
+[`typing_supervised_command_gateway_campaign_v1.json`](../ai/eval/typing_supervised_command_gateway_campaign_v1.json)
+records eight passing cases. It does not attach an executor or controller and
+therefore adds no movement authority; the efficiency gain is a deterministic,
+low-friction handoff that does not weaken lifecycle or backpressure controls.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

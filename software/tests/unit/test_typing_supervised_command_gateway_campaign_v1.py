@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -12,6 +13,10 @@ import rocell.application.typing_supervised_command_gateway_v1 as gateway
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/typing_supervised_command_gateway_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/typing_supervised_command_gateway_campaign_v1.json"
+RETAINED_FILE_SHA256 = "448fb55c63b62808f5e1b0a415b22220a7efafb3f994f932c312cc3c6b148cbb"
+RETAINED_CAMPAIGN_SHA256 = "9946b729459163b80495673e8ea8ce606cabe98848bcb4c91c71edccfb625c3b"
+RETAINED_SOURCE_COMMIT = "4b4d9480ef7c1fd6e7c3cf0897a22e03b6ccb87c"
 
 
 def _environment():
@@ -85,3 +90,24 @@ def test_gateway_campaign_rejects_disposition_equivalence_and_hash_drift():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.TypingSupervisedCommandGatewayCampaignV1Error, match="hash"):
         campaign.parse_typing_supervised_command_gateway_campaign_v1(changed)
+
+
+def test_retained_gateway_campaign_is_pinned_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_typing_supervised_command_gateway_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    indexed = {item["case"]: item for item in value["cases"]}
+    assert indexed["WARM_ADMISSION"]["admission_receipt"]["status"] == gateway.ADMITTED
+    assert indexed["FULL_SOLVE_ADMISSION"]["reference_equivalent"] is True
+    assert indexed["QUALIFIED_REPLACEMENT_ADMISSION"]["reference_equivalent"] is True
+    assert indexed["QUEUE_BACKPRESSURE"]["admission_receipt"]["blocker"] == "BACKPRESSURE_QUEUE_FULL"
+    assert indexed["REQUEST_BOUND_BACKPRESSURE"]["admission_receipt"]["blocker"] == "BACKPRESSURE_REQUEST_BOUND"
+    assert indexed["REQUALIFICATION_REJECTION"]["admission_receipt"]["blocker"] == "REQUALIFICATION_REQUIRED"
+    assert all(item["admission_receipt"]["automatic_retry_allowed"] is False for item in value["cases"])
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is False
