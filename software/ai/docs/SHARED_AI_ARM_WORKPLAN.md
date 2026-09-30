@@ -1163,6 +1163,18 @@ pre-admission cancellation performs no solver work. Timing is diagnostic only,
 and the synthetic fixture grants no camera, deployment, controller, or motion
 qualification.
 
+ARM-136 extends that same actual-emitter boundary from one word to a sustained
+mixed FIFO queue: `H,I`; `R,O,B,O,T`; `H,H,1,PERIOD`; `A,Z`; and
+`1,SPACE,ENTER`. Across each cold and warm round, all five shadow receipts
+completed in order. The cold round made 186 exact solver-input lookups, reused
+138 values shared within and across requests, and performed 48 complete solves;
+the warm round reused all 186. On the recorded host, cold p50/p95 were
+0.2685515/1.3913187 seconds and warm p50/p95 were 0.1982934/0.2997009 seconds.
+These five-sample timing observations are diagnostic, not stable latency bounds,
+admission criteria, controller timing, or physical typing-speed evidence. The
+retained campaign used no transport, controller, executor, hardware write, or
+physical movement.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

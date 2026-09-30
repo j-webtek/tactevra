@@ -822,6 +822,18 @@ and evidence mismatch, reload, restart, and cancellation preserved their safe
 fallback semantics. The measured durations are single-host diagnostics and are
 not admission thresholds or physical typing-speed evidence.
 
+ARM-136 exercises that same seam as a mixed sustained FIFO queue rather than a
+single repeated word. Five representative actual-emitter batches cover home-row
+travel, `robot`, repetition plus number and punctuation, alphabetic extremes,
+and number/Space/Enter. The retained cold round performed 48 complete solves
+among 186 lookups because identical solver inputs were already reusable within
+and across requests; the immediate warm round hit 186/186. Observed p50/p95
+changed from 0.2685515/1.3913187 seconds cold to 0.1982934/0.2997009 seconds
+warm. This is a one-host, five-sample synthetic integration diagnostic. It is
+not a latency threshold, physical-rate claim, or permission to skip checks.
+The retained artifact is
+[`actual_emitter_mixed_queue_campaign_v1.json`](../ai/eval/actual_emitter_mixed_queue_campaign_v1.json).
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,10 @@ import rocell.application.actual_emitter_mixed_queue_campaign_v1 as campaign
 
 ROOT = Path(__file__).resolve().parents[3]
 VALIDATOR = Draft202012Validator(json.loads((ROOT / "software/ai/schemas/actual_emitter_mixed_queue_campaign_v1.schema.json").read_text()))
+RETAINED = ROOT / "software/ai/eval/actual_emitter_mixed_queue_campaign_v1.json"
+RETAINED_FILE_SHA256 = "9e4d60617131f4d05db455dd0d85200595d43582bb801fb542367b79c5dcee32"
+RETAINED_CAMPAIGN_SHA256 = "0ca85b439959f3f5078f6b038efd63340affb7ae3596373f2726e0a5718f47a2"
+RETAINED_SOURCE_COMMIT = "c6cb76900d5b91394377291b9514a8db4fff23a3"
 
 
 def _environment():
@@ -52,3 +57,25 @@ def test_campaign_rejects_bad_percentile_warm_miss_and_hash():
     changed = copy.deepcopy(value); changed["campaign_sha256"] = "f" * 64
     with pytest.raises(campaign.ActualEmitterMixedQueueCampaignV1Error, match="hash"):
         campaign.parse_actual_emitter_mixed_queue_campaign_v1(changed)
+
+
+def test_retained_campaign_is_pinned_clean_and_zero_authority():
+    raw = RETAINED.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == RETAINED_FILE_SHA256
+    value = json.loads(raw)
+    VALIDATOR.validate(value)
+    assert campaign.parse_actual_emitter_mixed_queue_campaign_v1(value) == value
+    assert value["campaign_sha256"] == RETAINED_CAMPAIGN_SHA256
+    assert value["environment"]["repository_commit"] == RETAINED_SOURCE_COMMIT
+    assert value["environment"]["repository_dirty"] is False
+    assert value["request_order_preserved"] is True
+    assert value["rounds"][0]["cache_delta"] == {
+        "capacity_skips": 0, "hits": 138, "lookups": 186,
+        "misses": 48, "stores": 48,
+    }
+    assert value["rounds"][1]["cache_delta"] == {
+        "capacity_skips": 0, "hits": 186, "lookups": 186,
+        "misses": 0, "stores": 0,
+    }
+    assert value["hardware_writes"] == value["physical_movements"] == 0
+    assert value["physical_authority"] is value["timing_used_for_admission"] is False

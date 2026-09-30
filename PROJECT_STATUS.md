@@ -830,6 +830,14 @@ exact-cache hit, while calibration/evidence mismatch and lifecycle transitions
 remain complete-solve-only. One host observation improved from 2.3158146 s cold
 to 0.3004444 s warm, but this is diagnostic software timing—not final-camera,
 controller, device-effect, or physical typing evidence.
+ARM-136 broadens the same integration to five mixed actual-emitter sequences in
+one FIFO service generation. Both cold and warm rounds completed all requests in
+order. The cold round reused 138 of 186 exact solver inputs and fully solved 48;
+the warm round reused 186 of 186. Recorded cold p50/p95 were
+0.2685515/1.3913187 seconds, versus 0.1982934/0.2997009 seconds warm. Those are
+five-sample host diagnostics only. They do not establish stable tails,
+controller throughput, physical typing speed, or deployment authority; the
+campaign opened no transport and produced zero hardware writes and movements.
 
 ## How to interpret results
 
