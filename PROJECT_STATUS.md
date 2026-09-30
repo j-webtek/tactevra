@@ -964,6 +964,19 @@ continuous collision clearance, device-effect verification, review, permit, or
 execution eligibility.
 The governed offline matrix passes 896 tests with ARM-149 included.
 
+ARM-150 now expands the authenticated observed joint state through the first
+retained route waypoint (PARK) as a deterministic bounded joint-space sample
+envelope. Every sample is ordered, content-addressed, and constrained by a
+sealed maximum-joint-step policy; the parser also binds the nested ARM-149 seed
+back to the same request, materialization, build, calibration, observed state,
+and controller session. This closes the previously missing *representation* of
+the observed-to-route-entry transition. It does not claim that the transition
+is collision-free or dynamically executable: installed geometry, continuous
+collision screening, physically qualified dynamics, independent effect
+verification, per-action review, permit, and execution remain closed. It emits
+no controller or wire commands and performs no hardware access.
+The governed offline matrix passes 899 tests with ARM-150 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

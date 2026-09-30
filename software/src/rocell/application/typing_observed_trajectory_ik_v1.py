@@ -235,6 +235,11 @@ def parse_typing_observed_trajectory_ik_v1(
     canonical_screen = value["canonical_ik_screen"]
     if not isinstance(canonical_screen, Mapping):
         raise TypingObservedTrajectoryIkV1Error("canonical IK screen is absent")
+    canonical_seed = canonical_screen.get("seed")
+    if not isinstance(canonical_seed, Mapping):
+        raise TypingObservedTrajectoryIkV1Error(
+            "canonical IK screen observed seed is absent"
+        )
     screen_hash = canonical_screen.get("typing_trajectory_ik_screen_sha256")
     unsigned_screen = dict(canonical_screen)
     unsigned_screen.pop("typing_trajectory_ik_screen_sha256", None)
@@ -256,6 +261,24 @@ def parse_typing_observed_trajectory_ik_v1(
         or _SHA.fullmatch(screen_hash) is None
         or screen_hash != _sha(unsigned_screen)
         or value["canonical_ik_screen_sha256"] != screen_hash
+        or canonical_seed.get("source_kind") != "PHYSICAL_OBSERVED_STATE"
+        or canonical_seed.get("request_id") != value["request_id"]
+        or canonical_seed.get("materialization_sha256")
+        != value["materialization_sha256"]
+        or canonical_seed.get("observed_ik_seed_sha256")
+        != value["observed_ik_seed_sha256"]
+        or canonical_seed.get("seed_sha256")
+        != value["observed_ik_seed_sha256"]
+        or canonical_seed.get("observed_start_state_sha256")
+        != value["observed_start_state_sha256"]
+        or canonical_seed.get("calibration_snapshot_sha256")
+        != value["calibration_snapshot_sha256"]
+        or canonical_seed.get("build_snapshot_sha256")
+        != value["build_snapshot_sha256"]
+        or canonical_seed.get("controller_session_id")
+        != value["controller_session_id"]
+        or canonical_seed.get("controller_feedback_claimed") is not True
+        or canonical_seed.get("physical_measurement_claimed") is not True
         or value["status"] != expected_status
         or not isinstance(value["sample_count"], int)
         or isinstance(value["sample_count"], bool)

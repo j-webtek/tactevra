@@ -1334,6 +1334,18 @@ effect-verifier, and per-action review requirements closed. It produces no
 controller or wire commands and grants no permit or execution authority.
 The governed offline matrix passes 896 tests with this re-screen included.
 
+ARM-150 consumes the exact ARM-149 report and ARM-148 observed seed to retain a
+bounded joint-space envelope from the measured pose to the route's first PARK
+solution. The shared sampler limits every adjacent joint step and the strict
+decoder verifies sample order, interpolation, hashes, endpoints, policy limits,
+and complete nested observed-state lineage. This gives both workstreams one
+explicit route-entry artifact instead of an implicit jump from physical state
+to modeled route. It remains an offline planning artifact: installed geometry,
+continuous collision clearance, measured dynamics, effect verification,
+per-action review, permit, and execution authority are still required. No
+controller or wire commands are produced and no hardware is accessed.
+The governed offline matrix passes 899 tests with this envelope included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

@@ -975,6 +975,14 @@ the canonical solver's decisions. Its output intentionally identifies the
 observed-pose-to-PARK entry envelope as separate work; speed optimization cannot
 turn joint continuity into an unmeasured collision or dynamics claim.
 
+ARM-150 materializes that entry envelope once with the shared bounded
+joint-space sampler. The runtime can now pass a sealed, deterministic sample
+sequence to later installed-geometry and dynamics qualifiers without rebuilding
+lineage or interpolation on the critical path. This is a latency optimization
+and an auditability improvement, not a motion approval: collision, dynamics,
+effect verification, review, permit, and execution gates remain closed, and the
+artifact contains no controller or wire commands.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact
