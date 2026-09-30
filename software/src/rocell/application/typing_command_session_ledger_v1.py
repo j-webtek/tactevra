@@ -126,6 +126,8 @@ class TypingCommandSessionLedgerV1:
         self._gateway = gateway
         self._maximum_sessions = maximum_sessions
         self._records: OrderedDict[str, dict[str, object]] = OrderedDict()
+        self._admission_receipts: dict[str, dict[str, object]] = {}
+        self._service_receipts: dict[str, dict[str, Any]] = {}
         self._fingerprints: dict[str, str] = {}
         self._missions: dict[str, str] = {}
         self._duplicate_replays = 0
@@ -180,6 +182,7 @@ class TypingCommandSessionLedgerV1:
                 previous_session_receipt_sha256=None,
             )
             self._records[request_id] = record
+            self._admission_receipts[request_id] = dict(admission)
             self._fingerprints[request_id] = fingerprint
             self._missions[request_id] = mission_id
             return dict(record)
@@ -208,6 +211,7 @@ class TypingCommandSessionLedgerV1:
             previous_session_receipt_sha256=prior["session_receipt_sha256"],
         )
         self._records[request_id] = record
+        self._service_receipts[request_id] = dict(service)
         return dict(record)
 
     def run_next_shadow(self) -> dict[str, object]:
@@ -231,6 +235,26 @@ class TypingCommandSessionLedgerV1:
             if record is None:
                 raise TypingCommandSessionLedgerV1Error("session is unknown")
             return dict(record)
+
+    def terminal_service_receipt(self, request_id: str) -> dict[str, Any]:
+        request_id = _identifier(request_id, "request_id")
+        with self._lock:
+            receipt = self._service_receipts.get(request_id)
+            if receipt is None:
+                raise TypingCommandSessionLedgerV1Error(
+                    "terminal service receipt is unavailable"
+                )
+            return dict(receipt)
+
+    def admission_receipt(self, request_id: str) -> dict[str, object]:
+        request_id = _identifier(request_id, "request_id")
+        with self._lock:
+            receipt = self._admission_receipts.get(request_id)
+            if receipt is None:
+                raise TypingCommandSessionLedgerV1Error(
+                    "admission receipt is unavailable"
+                )
+            return dict(receipt)
 
     def snapshot(self) -> dict[str, object]:
         with self._lock:

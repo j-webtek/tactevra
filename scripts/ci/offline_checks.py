@@ -95,6 +95,8 @@ TESTS = (
     "software/tests/unit/test_typing_supervised_command_gateway_campaign_v1.py",
     "software/tests/unit/test_typing_command_session_ledger_v1.py",
     "software/tests/unit/test_typing_command_session_ledger_campaign_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_candidate_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_candidate_campaign_v1.py",
     "software/tests/unit/test_pre_camera_host_benchmark_v1.py",
     "software/tests/unit/test_assess_r97_external_review_decision.py",
     "software/tests/unit/test_model_motion_sequence_coordinator.py",
