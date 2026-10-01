@@ -1004,6 +1004,19 @@ review, permit, and execution remain closed. Current passing evidence is based
 on accepted-measured test fixtures, not lab-installed qualification.
 The governed offline matrix passes 905 tests with ARM-152 included.
 
+ARM-153 now time-scales the exact cached ARM-150 entry samples against a fresh,
+build- and controller-session-bound installed dynamics profile. The resulting
+cadence-aligned schedule deterministically screens planned joint velocity,
+acceleration, and jerk, binds the settling policy, and can be reproduced by the
+strict parser from the sealed samples and profile. This removes dynamics
+calculation from the eventual critical execution path without treating a
+planned schedule as observed behavior. Controller tracking, actual settling,
+continuous-collision proof beyond ARM-152's supplied bounds, effect
+verification, review, permit, and execution remain closed. Passing automated
+evidence uses a physically-qualified-class test fixture, not an installed-lab
+measurement, and produces no controller or wire commands.
+The governed offline matrix passes 908 tests with ARM-153 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

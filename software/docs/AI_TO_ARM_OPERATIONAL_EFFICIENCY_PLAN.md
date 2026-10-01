@@ -999,6 +999,16 @@ remain explicit inputs. This removes duplicated critical-path computation while
 keeping geometry-limited clearance distinct from measured speed/dynamics and
 physical release authority.
 
+ARM-153 reuses the same cached entry samples and clear ARM-152 record to perform
+bounded time scaling once, before any execution review. A fresh profile pins
+installed joint velocity, acceleration, jerk, controller cadence, and settling
+policy to the active build and controller session. The strict parser
+reconstructs the schedule from its signed inputs, preventing modified timing
+from passing by hash resealing alone. This moves deterministic dynamics work off
+the future dispatch path while keeping planned limits separate from measured
+controller tracking and settling. It remains zero-authority and emits no wire
+commands.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

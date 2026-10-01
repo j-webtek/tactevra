@@ -1369,6 +1369,18 @@ review, permit, and execution gates. Automated evidence still uses measured-
 classified fixtures and is not deployment qualification.
 The governed offline matrix passes 905 tests with this sweep bridge included.
 
+ARM-153 adds the arm-owned measured-dynamics bridge without changing AI target
+coordinates or action ordering. It consumes the already cached entry samples
+and ARM-152 clearance record, then creates a cadence-aligned schedule under a
+fresh installed-limit profile for joint velocity, acceleration, jerk, and
+settling policy. The strict decoder reconstructs both profile and schedule, so
+resealing altered timing cannot create acceptable evidence. This is planned
+dynamics evidence only: controller tracking and settling must still be observed
+on the installed system, and all review, permit, execution, and effect gates
+remain closed. Current passing evidence is a physical-qualified-class fixture,
+not a physical qualification.
+The governed offline matrix passes 908 tests with this dynamics bridge included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
