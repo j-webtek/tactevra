@@ -1381,6 +1381,17 @@ remain closed. Current passing evidence is a physical-qualified-class fixture,
 not a physical qualification.
 The governed offline matrix passes 908 tests with this dynamics bridge included.
 
+ARM-154 adds the evidence contract needed to compare installed controller
+feedback with ARM-153 without changing AI-owned target content. It requires an
+observation at every scheduled entry sample plus an endpoint window long enough
+to satisfy the pinned settling dwell, and it binds all samples to one build,
+controller session, retained export, native identity, and acquisition
+qualification. The result deliberately says sampled tracking rather than
+continuous tracking. Independent task-effect verification and all review,
+permit, and execution gates stay closed. Automated passing evidence remains a
+physical-qualified-class fixture, not installed-controller evidence.
+The governed offline matrix passes 911 tests with this tracking bridge included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

@@ -1009,6 +1009,15 @@ the future dispatch path while keeping planned limits separate from measured
 controller tracking and settling. It remains zero-authority and emits no wire
 commands.
 
+ARM-154 prepares the next latency-safe evidence step: retained joint feedback
+is compared with the cached ARM-153 schedule without rerunning perception,
+planning, IK, collision checks, or time scaling. Exact scheduled-sample timing
+and position residuals are computed once, followed by a profile-bound endpoint
+settling window. The evidence is content-addressed and reconstructable, allowing
+later review to consume a compact qualification rather than replay raw analysis
+on the dispatch path. This only qualifies sampled observations; continuous
+tracking and independent task effect remain separate required evidence.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

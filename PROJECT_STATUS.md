@@ -1017,6 +1017,20 @@ evidence uses a physically-qualified-class test fixture, not an installed-lab
 measurement, and produces no controller or wire commands.
 The governed offline matrix passes 908 tests with ARM-153 included.
 
+ARM-154 now binds retained, installed-policy-qualified joint observations to
+every exact ARM-153 scheduled entry sample and to a separate endpoint settling
+window. It checks controller-session/build identity, capture ordering, schedule
+timing error, per-joint tracking error, endpoint position and velocity, and the
+required settling dwell. The strict parser reconstructs the observation policy,
+all retained samples, and the complete analysis, so altered telemetry or timing
+cannot pass through hash resealing. A passing result establishes sampled
+schedule agreement and observed endpoint settling only; it does not establish
+continuous controller tracking, continuous collision clearance, device effect,
+review, permit, or execution eligibility. Current automated evidence uses
+physical-qualified-class fixtures rather than retained installed-lab telemetry,
+and the adapter has no transport or command surface.
+The governed offline matrix passes 911 tests with ARM-154 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

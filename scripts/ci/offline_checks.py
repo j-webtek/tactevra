@@ -111,6 +111,7 @@ TESTS = (
     "software/tests/unit/test_typing_observed_route_entry_collision_v1.py",
     "software/tests/unit/test_typing_observed_route_entry_sweep_v1.py",
     "software/tests/unit/test_typing_observed_route_entry_dynamics_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_tracking_v1.py",
     "software/tests/unit/test_pre_camera_host_benchmark_v1.py",
     "software/tests/unit/test_assess_r97_external_review_decision.py",
     "software/tests/unit/test_model_motion_sequence_coordinator.py",
