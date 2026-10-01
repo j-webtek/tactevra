@@ -1392,6 +1392,16 @@ permit, and execution gates stay closed. Automated passing evidence remains a
 physical-qualified-class fixture, not installed-controller evidence.
 The governed offline matrix passes 911 tests with this tracking bridge included.
 
+ARM-155 extends the arm-owned evidence lane from scheduled-point checks to
+bounded coverage across the complete entry interval. A dense retained stream is
+matched to interpolated ARM-153 joint targets, with exact motion boundaries and
+a qualified maximum observation gap. AI target coordinates and ordering remain
+unchanged; this stage only tests whether installed feedback stayed within the
+arm-owned envelope at the retained sample times. The result cannot claim what
+happened between samples, so continuous tracking, device effect, review, permit,
+and execution remain separate gates. Passing CI evidence remains fixture-only.
+The governed offline matrix passes 914 tests with this coverage bridge included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

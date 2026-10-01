@@ -1031,6 +1031,19 @@ physical-qualified-class fixtures rather than retained installed-lab telemetry,
 and the adapter has no transport or command surface.
 The governed offline matrix passes 911 tests with ARM-154 included.
 
+ARM-155 now qualifies a denser retained joint-telemetry stream across the full
+ARM-153 motion interval. The stream must include the exact scheduled start and
+end, remain strictly ordered, stay within a physically qualified maximum sample
+gap, and agree with linearly interpolated scheduled joint positions under
+per-joint bounds. The strict parser reconstructs every sample and the complete
+coverage analysis, rejecting missing intervals, excessive residuals, crossed
+sessions, and resealed changes. This closes the software contract for bounded
+telemetry coverage while explicitly retaining the continuous-tracking blocker:
+finite samples cannot prove behavior between samples. Collision, device effect,
+review, permit, and execution gates remain closed. Current automated evidence
+uses physical-qualified-class fixtures rather than installed retained exports.
+The governed offline matrix passes 914 tests with ARM-155 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

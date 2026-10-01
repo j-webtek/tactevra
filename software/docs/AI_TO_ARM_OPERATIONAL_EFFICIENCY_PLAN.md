@@ -1018,6 +1018,14 @@ later review to consume a compact qualification rather than replay raw analysis
 on the dispatch path. This only qualifies sampled observations; continuous
 tracking and independent task effect remain separate required evidence.
 
+ARM-155 performs dense retained-stream analysis against the cached schedule
+without repeating any upstream computation. Exact start/end coverage, maximum
+sample gap, and interpolated joint residuals are sealed into one compact result
+for later review. This is the efficient handoff for a future telemetry collector:
+capture once, analyze once, and reuse the content-addressed qualification. The
+bounded sampling result intentionally retains the continuous-tracking blocker
+and grants no dispatch or retry authority.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact
