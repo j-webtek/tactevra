@@ -1402,6 +1402,17 @@ happened between samples, so continuous tracking, device effect, review, permit,
 and execution remain separate gates. Passing CI evidence remains fixture-only.
 The governed offline matrix passes 914 tests with this coverage bridge included.
 
+ARM-156 provides the shared commissioning backbone after camera arrival. Its
+ten-stage fixture-replacement registry connects the existing 15-slot arrival
+orchestrator and physical localization evaluator to installed geometry and the
+ARM-149-ARM-155 observed-entry chain, ending at independent single-key effect
+verification. Each stage names its native schema, expected status, physical
+replacement, and earlier dependencies, so AI and arm work cannot silently use
+different evidence or promote fixtures. The companion runbook preserves the
+AI/arm ownership split and requires exact build, epoch, session, and evidence
+lineage. It remains a zero-authority pre-commissioning record.
+The governed offline matrix passes 917 tests with ARM-156 included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

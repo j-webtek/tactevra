@@ -1044,6 +1044,19 @@ review, permit, and execution gates remain closed. Current automated evidence
 uses physical-qualified-class fixtures rather than installed retained exports.
 The governed offline matrix passes 914 tests with ARM-155 included.
 
+ARM-156 now joins the completed PC0-PC18 camera-arrival workflow to the
+ARM-149-ARM-155 observed-entry evidence chain. A machine-readable ten-stage
+registry names each synthetic or accepted-measured-class fixture, its exact
+physical replacement, native source contract, expected status, and prerequisite
+order. The companion camera-to-first-key runbook covers configuration freeze,
+15-slot arrival review, measured epoch and localization, installed collision
+geometry, read-only observed pose, offline entry qualification, one separately
+authorized non-contact run, one independently verified key, expansion order,
+and stop conditions. Registry tests ensure all source boundaries exist,
+dependencies are ordered, and no stage grants camera, controller, movement, or
+physical authority. This is commissioning preparation, not physical evidence.
+The governed offline matrix passes 917 tests with ARM-156 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

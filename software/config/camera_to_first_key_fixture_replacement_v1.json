@@ -1,0 +1,122 @@
+{
+  "schema": "rocell.camera_to_first_key_fixture_replacement.v1",
+  "status": "AWAITING_PHYSICAL_ORIGINALS",
+  "evidence_class": "PRE_COMMISSIONING_REQUIREMENTS_ONLY",
+  "stages": [
+    {
+      "stage_id": "camera_arrival_offline_review",
+      "order": 1,
+      "source_path": "software/src/rocell/application/camera_arrival_commissioning_orchestrator_v1.py",
+      "required_schema": "rocell.camera_arrival_commissioning_orchestrator.v1",
+      "required_status": "COMPLETE_FOR_OFFLINE_REVIEW",
+      "fixture_replaced": "synthetic 15-slot camera-arrival tree and receipts",
+      "physical_replacement": "15 immutable physical originals, accepted sidecars, native consumer outputs, and exact receipts",
+      "prerequisite_stage_ids": [],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "measured_configuration_epoch",
+      "order": 2,
+      "source_path": "software/src/rocell/application/model_arm_operational_readiness_v1.py",
+      "required_schema": "rocell.model_arm_operational_readiness.v1",
+      "required_status": "READY_FOR_SINGLE_ACTION_REVIEW",
+      "fixture_replaced": "synthetic and partial camera/support/calibration bindings",
+      "physical_replacement": "one accepted epoch binding camera, support, board, robot base, keyboard, tool, controls, and calibration identities",
+      "prerequisite_stage_ids": ["camera_arrival_offline_review"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "physical_localization_qualification",
+      "order": 3,
+      "source_path": "software/ai/eval/evaluate_physical_camera_localization.py",
+      "required_schema": "rocell.physical_camera_localization_evaluation_result.v1",
+      "required_status": "QUALIFICATION_RECOMMENDED",
+      "fixture_replaced": "synthetic KeyboardPoseNet localization and nominal placement",
+      "physical_replacement": "disjoint final-camera calibration and held-out campaigns with independently surveyed truth and bounded uncertainty",
+      "prerequisite_stage_ids": ["measured_configuration_epoch"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "installed_collision_qualification",
+      "order": 4,
+      "source_path": "software/src/rocell/application/installed_collision_geometry.py",
+      "required_schema": "rocell.installed_collision_geometry_profile.v1",
+      "required_status": "VALIDATED_INSTALLED_PROFILE",
+      "fixture_replaced": "accepted-measured-class rigid, attachment, cable, clearance, and exclusion fixtures",
+      "physical_replacement": "reviewed installed geometry, configuration-sampled cable envelopes, uncertainty, and accepted global exclusions",
+      "prerequisite_stage_ids": ["measured_configuration_epoch"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "observed_pose_entry",
+      "order": 5,
+      "source_path": "software/src/rocell/application/typing_observed_route_entry_v1.py",
+      "required_schema": "rocell.typing_observed_route_entry.v1",
+      "required_status": "READY_FOR_ENTRY_COLLISION_AND_DYNAMICS_QUALIFICATION",
+      "fixture_replaced": "authenticated observed-state test fixture",
+      "physical_replacement": "fresh read-only installed joint state bound to the active build, calibration, configuration epoch, and controller session",
+      "prerequisite_stage_ids": ["physical_localization_qualification", "installed_collision_qualification"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "entry_conservative_sweep",
+      "order": 6,
+      "source_path": "software/src/rocell/application/typing_observed_route_entry_sweep_v1.py",
+      "required_schema": "rocell.typing_observed_route_entry_sweep.v1",
+      "required_status": "ENTRY_CONSERVATIVE_SWEEPS_CLEAR_DYNAMICS_REQUIRED",
+      "fixture_replaced": "profile-bound conservative sweep fixtures",
+      "physical_replacement": "installed-profile-bound rigid and deformable envelopes for every observed-to-PARK sample pair",
+      "prerequisite_stage_ids": ["observed_pose_entry"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "measured_entry_dynamics",
+      "order": 7,
+      "source_path": "software/src/rocell/application/typing_observed_route_entry_dynamics_v1.py",
+      "required_schema": "rocell.typing_observed_route_entry_dynamics.v1",
+      "required_status": "READY_FOR_CONTROLLER_TRACKING_AND_SETTLING_QUALIFICATION",
+      "fixture_replaced": "physical-qualified-class dynamics policy fixture",
+      "physical_replacement": "installed velocity, acceleration, jerk, cadence, settling tolerance, and dwell qualification",
+      "prerequisite_stage_ids": ["entry_conservative_sweep"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "sampled_tracking_and_settling",
+      "order": 8,
+      "source_path": "software/src/rocell/application/typing_observed_route_entry_tracking_v1.py",
+      "required_schema": "rocell.typing_observed_route_entry_tracking.v1",
+      "required_status": "SAMPLED_TRACKING_AND_ENDPOINT_SETTLING_OBSERVED",
+      "fixture_replaced": "retained joint-observation fixtures",
+      "physical_replacement": "installed retained feedback for every scheduled entry sample plus a dwell-spanning endpoint window",
+      "prerequisite_stage_ids": ["measured_entry_dynamics"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "bounded_telemetry_coverage",
+      "order": 9,
+      "source_path": "software/src/rocell/application/typing_observed_route_entry_coverage_v1.py",
+      "required_schema": "rocell.typing_observed_route_entry_coverage.v1",
+      "required_status": "BOUNDED_MOTION_TELEMETRY_COVERAGE_QUALIFIED",
+      "fixture_replaced": "dense retained telemetry fixtures",
+      "physical_replacement": "installed retained stream covering exact motion boundaries with qualified maximum gap and interpolated residual bounds",
+      "prerequisite_stage_ids": ["sampled_tracking_and_settling"],
+      "motion_authority": false
+    },
+    {
+      "stage_id": "independent_key_effect",
+      "order": 10,
+      "source_path": "software/src/rocell/application/typing_permit_review_readiness_v1.py",
+      "required_schema": "rocell.independent_key_effect_verification.v1",
+      "required_status": "INTENDED_KEY_EFFECT_VERIFIED",
+      "fixture_replaced": "effect-verification fixture placeholders",
+      "physical_replacement": "independently captured proof that exactly the intended key registered once, with no neighboring or repeated effect",
+      "prerequisite_stage_ids": ["bounded_telemetry_coverage"],
+      "motion_authority": false
+    }
+  ],
+  "camera_open_authorized": false,
+  "controller_start_authorized": false,
+  "movement_authorized": false,
+  "hardware_commands_generated": 0,
+  "physical_authority": false
+}
