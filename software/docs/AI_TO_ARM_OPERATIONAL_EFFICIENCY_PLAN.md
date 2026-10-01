@@ -983,6 +983,14 @@ and an auditability improvement, not a motion approval: collision, dynamics,
 effect verification, review, permit, and execution gates remain closed, and the
 artifact contains no controller or wire commands.
 
+ARM-151 reuses the existing FK collision kernel directly over that cached entry
+envelope. It avoids recompiling the route and makes installed-profile rejection
+an explicit arm-owned stage. Because the result retains the expanded route and
+FK evidence hashes, later continuous-sweep qualification can consume it without
+repeating model interpretation or losing observed-state lineage. Discrete sample
+clearance is not promoted into physical clearance or speed authority; measured
+dynamics and continuous collision remain mandatory before review.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

@@ -977,6 +977,19 @@ verification, per-action review, permit, and execution remain closed. It emits
 no controller or wire commands and performs no hardware access.
 The governed offline matrix passes 899 tests with ARM-150 included.
 
+ARM-151 now adapts ARM-150's exact observed-to-PARK sample envelope into the
+existing FK-derived installed-collision boundary. It requires the same active
+build and calibration plus an installed collision profile, measured rigid
+attachment transforms, and profile-bound configuration geometry for every
+sample. The resulting report retains the complete FK collision evidence and
+distinguishes collision detection, incomplete evidence, and sample clearance.
+Sample clearance deliberately stops at the continuous-sweep gate: measured
+dynamics, independent effect verification, per-action review, permit, and
+execution remain closed. No controller or wire commands are generated and no
+hardware is accessed. Current passing evidence uses accepted-measured test
+fixtures only; it is not an installed-lab qualification.
+The governed offline matrix passes 902 tests with ARM-151 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

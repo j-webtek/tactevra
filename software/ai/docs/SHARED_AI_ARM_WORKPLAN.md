@@ -1346,6 +1346,18 @@ per-action review, permit, and execution authority are still required. No
 controller or wire commands are produced and no hardware is accessed.
 The governed offline matrix passes 899 tests with this envelope included.
 
+ARM-151 connects that envelope to the arm-owned installed-collision stack. It
+recomputes robot-link transforms from every exact bounded joint sample and the
+pinned URDF, admits only profile-bound measured attachment and
+configuration-geometry evidence, and seals the nested collision result back to
+the observed request/session lineage. This is the common handoff point at which
+AI-owned targets remain unchanged while arm-owned geometry can reject an unsafe
+entry. A clear discrete-sample result still cannot imply continuous clearance,
+measured dynamics, verification, review, permit, or execution. The current
+automated evidence uses accepted-measured fixtures and grants no deployment or
+physical qualification.
+The governed offline matrix passes 902 tests with this adapter included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
