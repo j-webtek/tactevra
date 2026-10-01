@@ -1358,6 +1358,17 @@ automated evidence uses accepted-measured fixtures and grants no deployment or
 physical qualification.
 The governed offline matrix passes 902 tests with this adapter included.
 
+ARM-152 supplies the continuous-entry bridge after ARM-151. It evaluates every
+adjacent bounded sample pair using URDF-derived rigid motion inflation and one
+profile-bound measured envelope per deformable body. The AI target and ordered
+typing plan remain untouched; the arm lane can now reject a route because its
+inter-sample swept envelope is unsafe, not merely because an endpoint collides.
+Even a clear result is limited to the bound geometry and retains global
+pair-exclusion, phase-contact, installed physical, dynamics, verification,
+review, permit, and execution gates. Automated evidence still uses measured-
+classified fixtures and is not deployment qualification.
+The governed offline matrix passes 905 tests with this sweep bridge included.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

@@ -990,6 +990,20 @@ hardware is accessed. Current passing evidence uses accepted-measured test
 fixtures only; it is not an installed-lab qualification.
 The governed offline matrix passes 902 tests with ARM-151 included.
 
+ARM-152 now evaluates conservative swept-volume envelopes between every
+adjacent ARM-150 entry sample without rerunning model interpretation or the
+ARM-151 discrete FK screen. Rigid-body bounds come from the pinned URDF,
+installed geometry, and exact adjacent joint deltas; every deformable or
+configuration-sampled body requires a measured, installed-profile-bound root
+frame envelope for each sample pair. The result distinguishes clear sweeps,
+envelope collisions, and incomplete evidence while preserving the exact
+observed request/session lineage. Clearance applies only to the supplied bound
+geometry. Global pair-exclusion acceptance, phase-local contact policy,
+installed physical qualification, measured dynamics, effect verification,
+review, permit, and execution remain closed. Current passing evidence is based
+on accepted-measured test fixtures, not lab-installed qualification.
+The governed offline matrix passes 905 tests with ARM-152 included.
+
 ## How to interpret results
 
 - **Simulation:** a result under modeled geometry and assumptions.

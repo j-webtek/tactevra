@@ -991,6 +991,14 @@ repeating model interpretation or losing observed-state lineage. Discrete sample
 clearance is not promoted into physical clearance or speed authority; measured
 dynamics and continuous collision remain mandatory before review.
 
+ARM-152 consumes that retained FK result and cached joint samples directly. It
+adds conservative inter-sample sweep evaluation without repeating perception,
+trajectory compilation, IK, or discrete FK collision work. Exact adjacent joint
+deltas drive URDF rigid-body inflation, while measured deformable-body envelopes
+remain explicit inputs. This removes duplicated critical-path computation while
+keeping geometry-limited clearance distinct from measured speed/dynamics and
+physical release authority.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact
