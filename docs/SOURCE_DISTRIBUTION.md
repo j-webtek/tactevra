@@ -160,6 +160,13 @@ before any render. Images and receipts remain external. The exact tracked-file
 count and governed ceiling are therefore 6,356; every byte, blob, duplicate,
 and reduction limit remains unchanged.
 
+The bounded Isaac subset implementation adds two reviewed source files: one
+transport-incapable simulator/CPU comparator and one focused test module. The
+162 exact render identities and all image/semantic outputs are generated from
+the retained fixture and remain external. The exact tracked-file count and
+governed ceiling are therefore 6,358; every byte, blob, duplicate, and reduction
+limit remains unchanged.
+
 The issue 190 v14 synthetic evaluation adds three small, reviewed source files:
 the deterministic static-pose fixture builder, its retained JSON fixture, and
 its focused test. The tracked-file ceiling is therefore 6,103. This adjustment
