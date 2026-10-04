@@ -16,6 +16,8 @@
 | Phase 3 staged rehearsal | `d94d3259aa5c852856346b421452f3b630c87e3facaf705679b3152c952d9d5e` | `7128ef369ec5de2194dcb928fc0fa46ca8fd182bf5b399fe0e9f66406ca7a352` | Stage A stops before simulated motion; B-F are upstream-blocked. |
 | Phase 4 wrong-model drills | `36356eb981c694532033ddd22864738da7bba226a62cc1a001eb088faf85eb95` | `8b8d5341cf26fd5642c638b340353d53f863429ee3c661167f911c3d79e3d813` | 30/63 injections detected before contact; 33 geometry/zero cases remain gaps. |
 | Phase 5 scenario regression | `4bc2d5e590db4acc908b49e2b5adf9c39e1929595a0923db634c45b58322906b` | `7ebd04c2da191971a623abee5715df231c937f764dfa575572f9977d26b42234` | CI 6/7 and nightly 51/84; 33 false acceptances remain visible. |
+| Phase 7 independent-observer drill | `46a6610ae7842e7b68d5e38a9776800c358c8d0f3e91d9897fdac5b407bfe95d` | `b7e768d99bdd9da3c7db002629d29e0618498ef32a3f574282fe42b63a062448` | Under frozen synthetic ranges, 16/33 old gaps can be consequential and fused simulated observers leave zero consequential gaps undetected. No physical observer is qualified. |
+| Phase 7 candidate A-F shadow | `d57688b29625cdb4409efe4604513a0709d923e5da5bd8cd8cbe2d835001a845` | `48d0f77011445be3e900d9323061248b6057789c2cbe9a3db3879dd58747c3e5` | A-F produce 198 predicted telemetry samples in a separate shadow path. Candidate collision remains `STOP`; the official Stage A stop is unchanged. |
 
 The governing fixture is
 [`first_motion_readiness_v1.json`](../ai/sim/evidence/first_motion_readiness_v1.json),
@@ -23,6 +25,13 @@ file SHA-256
 `6bcfa546d39c5fb11b6231ee3fe79078fe5eaf34ff78e74bf7105d0005faf780`
 and canonical fixture SHA-256
 `50c7b0e6623f9a85168428aafe130982749ad30d85ef56a36257cfef35f3b167`.
+
+The Phase 7 extension is governed by
+[`first_motion_independent_observation_v1.json`](../ai/sim/evidence/first_motion_independent_observation_v1.json),
+canonical fixture SHA-256
+`638ebd2aa7837ade1090b506a702b569b9800e7b3fa444a7310bd30588261f5e`.
+It does not revise the Phase 4 or Phase 5 failures. Its A-F rehearsal is a
+shadow-coverage result using explicitly uninstalled candidate geometry.
 
 ## Global prerequisites
 
