@@ -62,9 +62,24 @@ def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]
         "model_family", "physical_footprint_mm", "feature_channels", "conv_channels",
         "normalization", "spatial_feature_map", "optimizer", "maximum_epochs",
         "batch_size", "learning_rate", "weight_decay", "training_seed",
+        "feature_encoding", "input_channel_count", "parameter_count",
     )
     if any(candidates[0][field] != candidates[1][field] for field in parity_fields):
         raise ValueError("resolution must be the only candidate difference")
+    expected_encoding = {
+        "CURRENT_RGB": 3,
+        "REFERENCE_RGB": 3,
+        "ABS_RGB_DIFFERENCE": 3,
+        "SOBEL_MAGNITUDE_DIFFERENCE": 1,
+        "LOCAL_TEXTURE_DIFFERENCE": 1,
+        "SAFE_REGION_MASK": 1,
+    }
+    if candidates[0]["feature_encoding"] != expected_encoding:
+        raise ValueError("feature channel expansion differs from the frozen contract")
+    if candidates[0]["input_channel_count"] != 12:
+        raise ValueError("frozen model must consume twelve scalar channels")
+    if candidates[0]["parameter_count"] != 43_321:
+        raise ValueError("frozen parameter count differs")
     if value.get("evaluation_opened") is not False:
         raise ValueError("evaluation must remain unopened")
     if value.get("physical_authority") is not False:

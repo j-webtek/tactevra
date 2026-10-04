@@ -38,6 +38,8 @@ def test_frozen_resolution_noise_experiment_and_decision_rules() -> None:
         "ASSUMED_LOW", "ASSUMED_MODERATE", "ASSUMED_HIGH"
     ]
     assert [row["input_resolution_px"] for row in value["candidates"]] == [96, 192]
+    assert {row["input_channel_count"] for row in value["candidates"]} == {12}
+    assert {row["parameter_count"] for row in value["candidates"]} == {43_321}
     assert len(value["run_matrix"]) == 6
 
     def profile(winner: str) -> dict:
