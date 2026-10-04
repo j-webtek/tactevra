@@ -45,9 +45,20 @@
     "layout": "THREE_BY_THREE_CENTER_TARGET_WITH_MEASURED_CANDIDATE_PITCH",
     "numerical_contact": "MUJOCO_DEFAULT_RIGID_CONTACT_RECORDED_AS_NUMERICAL_NOT_MEASURED",
     "physical_profile_design": {
+      "axes": [
+        "keycap_width_height_mm",
+        "keycap_thickness_mm",
+        "keycap_mass_kg",
+        "travel_mm",
+        "actuation_fraction",
+        "bottom_out_fraction",
+        "spring_n_per_mm",
+        "damping_n_s_per_mm",
+        "friction_coefficient"
+      ],
       "baseline": "ARITHMETIC_RANGE_MIDPOINT_AS_EXPLORATORY_SAMPLE",
       "method": "ONE_FACTOR_AT_A_TIME",
-      "profile_count": 21,
+      "profile_count": 19,
       "samples": "BASELINE_PLUS_EACH_RANGE_ENDPOINT"
     },
     "timestep_seconds": 0.002,
@@ -149,7 +160,7 @@
       "NONZERO_AUTHORITY_COUNTER"
     ]
   },
-  "fixture_sha256": "07808ec0248d50f137656d191323643cd1d404ed75bb81d97a628bd6544d093b",
+  "fixture_sha256": "c09bcf628c98694167e1804668704a98b1c533caf41a1ec633fe4c6d61baac51",
   "gpu_execution_authorized": false,
   "landing_model": {
     "algorithm": "MW2UC_EXACT_FIXED_APPROACH_CARTESIAN_RESIDUAL_REPLAY_STANDARD_MUJOCO_CPU_PREPASS",
@@ -234,6 +245,7 @@
     ]
   },
   "physical_authority": false,
+  "pre_results_amendment": "2026-10-04: separate nine key-mechanism OAT axes from recipe available force and fingertip geometry after the first CPU smoke stopped on the inconsistent 21-versus-25 profile count; no physics result existed.",
   "recipe_design": {
     "algorithm": "PCG64_STRATIFIED_MIDPOINT_PERMUTATION",
     "os_repeat_delay_ms_samples": [
