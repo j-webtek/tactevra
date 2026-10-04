@@ -1,0 +1,171 @@
+{
+  "schema": "tactevra.first_motion_controller_emulator_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "branch": "issue/190-isaac-sim-host",
+  "claim_commit": "06ec419fa679d01c371e53965846b8c73b4623a1",
+  "bindings": {
+    "t102_encoder": {
+      "path": "software/src/rocell/arm/all_joint_command.py",
+      "sha256": "3647f6575de09a521503d02d192a8c5396ff5537015f946ef5d571c3f4a9a933"
+    },
+    "joint_map": {
+      "path": "software/src/rocell/arm/joint_mapping.py",
+      "sha256": "b99bd3590c1cd4855535863a9d19a873bb2643be24403f9760f376150a71483f"
+    },
+    "wire_protocol": {
+      "path": "software/src/rocell/arm/protocol.py",
+      "sha256": "9a738dc766bf1ae96f243cb0b0d2cc3d9f3dcb1966a8396d44fe3e9049dc7bf6"
+    },
+    "feedback_emulator": {
+      "path": "software/src/rocell/arm/protocol_emulator.py",
+      "sha256": "25f1eb70a436c31ba9328a266b02f54d3e8a2102da4d1c063d4e310cbcee9d8e"
+    },
+    "all_joint_transaction": {
+      "path": "software/src/rocell/arm/all_joint_transaction.py",
+      "sha256": "ae4f5cf599156e1cf70e0adeae071ad4176804ee1294f765b8f3a636e1505a61"
+    },
+    "simulation_profile": {
+      "path": "software/config/simulation_hardware_profile.json",
+      "sha256": "6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190"
+    },
+    "urdf": {
+      "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    }
+  },
+  "controller_emulator": {
+    "protocol": {
+      "command_family": "T102_ALL_JOINT_ABSOLUTE",
+      "message_keys": [
+        "T",
+        "base",
+        "shoulder",
+        "elbow",
+        "wrist",
+        "roll",
+        "hand",
+        "spd",
+        "acc"
+      ],
+      "angle_unit": "radian",
+      "speed_unit": "OPAQUE_FIRMWARE_SETTING",
+      "acceleration_unit": "OPAQUE_FIRMWARE_SETTING",
+      "logical_joint_order": [
+        "base",
+        "shoulder",
+        "elbow",
+        "wrist",
+        "roll",
+        "hand"
+      ],
+      "logical_joint_ids": {
+        "base": 1,
+        "shoulder": 2,
+        "elbow": 3,
+        "wrist": 4,
+        "roll": 5,
+        "hand": 6
+      },
+      "servo_ids": {
+        "base": [
+          11
+        ],
+        "shoulder": [
+          12,
+          13
+        ],
+        "elbow": [
+          14
+        ],
+        "wrist": [
+          15
+        ],
+        "roll": [
+          16
+        ],
+        "hand": [
+          17
+        ]
+      },
+      "servo_ids_on_wire": false,
+      "zero_convention": "REFERENCE_REGISTER_OFFSETS_ONLY_NOT_INSTALLED_ZERO_ATTESTATION",
+      "production_transport_gap": "ArmTransport exposes permit-gated T104 and T105 only; no T101/T102 production send adapter exists. Emulator conformance cannot claim full live runtime-path parity."
+    },
+    "servo_ranges": {
+      "command_latency_ms": [
+        5,
+        250
+      ],
+      "response_time_constant_ms": [
+        25,
+        1000
+      ],
+      "settling_time_ms": [
+        100,
+        3000
+      ],
+      "encoder_step_rad_reference": 0.0015339807878856412,
+      "encoder_quantization_counts": [
+        1,
+        4
+      ],
+      "directional_backlash_rad": [
+        0,
+        0.008
+      ],
+      "telemetry_noise_rad": [
+        0,
+        0.004
+      ],
+      "speed_setting": [
+        1,
+        200
+      ],
+      "acceleration_setting": [
+        1,
+        20
+      ],
+      "simulation_probe_delta_rad": [
+        -0.02,
+        0.02
+      ],
+      "response_samples": 33
+    },
+    "faults": [
+      "DROPPED_MESSAGE",
+      "DELAYED_TELEMETRY",
+      "SERVO_NOT_RESPONDING",
+      "STALL_OVERLOAD",
+      "ESTOP",
+      "POWER_INTERRUPTION"
+    ],
+    "seed": 1907002,
+    "metrics": [
+      "exact_message_roundtrip",
+      "logical_joint_id_mapping",
+      "servo_id_mapping",
+      "direction",
+      "magnitude",
+      "radian_unit",
+      "zero_convention",
+      "measured_not_commanded_telemetry",
+      "fault_detection",
+      "real_transport_open_count"
+    ],
+    "decision": "Pass requires exact T102 message acceptance, every logical and physical servo ID accounted for, correct sign and magnitude relative to the reference mapping, telemetry independently simulated and quantized, all faults fail closed, and real transport opens remain zero. The absent production T101/T102 transport adapter remains a reported gap and prevents full runtime-path parity.",
+    "hardware_write_count": 0,
+    "physical_movement_count": 0,
+    "real_transport_count": 0,
+    "physical_authority": false,
+    "section_sha256": "4eac70c7cf64219bba259ed8ad254d6a192bc90804b736280ee6651d5c26eb8c"
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "permits": 0,
+    "transports": 0,
+    "gpu_jobs": 0
+  },
+  "fixture_sha256": "896e80d22defa892986a3b2707c8f32c1f767a8b175ee1b66dad072ba303ee32"
+}
