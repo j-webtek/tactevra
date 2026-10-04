@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from copy import deepcopy
+import importlib.util
 import json
 from pathlib import Path
 
@@ -21,6 +23,14 @@ from rocell_ai.simulation_program_cpu import (
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json"
+WS2_FIXTURE = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v1.json"
+WS2_SPEC = importlib.util.spec_from_file_location(
+    "mujoco_warp_key_press_physics_probe",
+    ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
+)
+WS2_PROBE = importlib.util.module_from_spec(WS2_SPEC)
+assert WS2_SPEC.loader is not None
+WS2_SPEC.loader.exec_module(WS2_PROBE)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -110,3 +120,57 @@ def test_phase0_collision_candidate_runs_but_cannot_release_gates():
     assert result["status_counts"].get("BLOCKED_INCOMPLETE_POSE", 0) == 0
     assert result["status_counts"].get("COLLISION_DETECTED", 0) > 0
     assert result["hardware_write_count"] == result["physical_movement_count"] == 0
+
+
+def test_ws2_executable_manifest_is_exact_and_zero_authority():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    first = WS2_PROBE.build_manifest(fixture, workspace=ROOT)
+    second = WS2_PROBE.build_manifest(fixture, workspace=ROOT)
+    assert first == second
+    assert first["target_count"] == 51
+    assert first["physical_profile_count"] == 19
+    assert first["tip_geometry_count"] == 12
+    assert first["recipe_count"] == 96
+    assert first["landing_scenario_count"] == 4
+    assert first["physics_world_count"] == 285_769_728
+    assert first["physical_authority"] is False
+    assert not first["real_commands"]
+
+
+def test_ws2_tampering_and_cross_gpu_drift_stop():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    left = {
+        "device": "cuda:0",
+        "fixture_sha256": fixture["fixture_sha256"],
+        "rows": [
+            {
+                "row_id": "sentinel",
+                "actuation_count": 1,
+                "auto_repeat_count": 0,
+                "neighbor_contact": False,
+                "bottom_out_overflow": False,
+                "release_complete": True,
+                "peak_penetration_mm": 2.0,
+                "peak_required_force_n": 0.5,
+                "dwell_above_actuation_ms": 100.0,
+            }
+        ],
+    }
+    right = deepcopy(left)
+    right["device"] = "cuda:1"
+    assert WS2_PROBE.compare_receipts(fixture, left, right)["row_count"] == 1
+    right["rows"][0]["peak_required_force_n"] += 2e-6
+    try:
+        WS2_PROBE.compare_receipts(fixture, left, right)
+    except ValueError as exc:
+        assert "continuous disagreement" in str(exc)
+    else:
+        raise AssertionError("cross-GPU metric drift was admitted")
+
+
+def test_ws2_phone_state_model_preserves_long_press_failures():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    rows = WS2_PROBE.phone_cells(fixture)
+    assert len(rows) == 27
+    assert any(row["admitted"] for row in rows)
+    assert any(row["long_press"] and not row["admitted"] for row in rows)

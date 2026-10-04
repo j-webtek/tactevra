@@ -167,6 +167,13 @@ the retained fixture and remain external. The exact tracked-file count and
 governed ceiling are therefore 6,358; every byte, blob, duplicate, and reduction
 limit remains unchanged.
 
+The Workstream 2 executable preparation adds one reviewed, transport-incapable
+MuJoCo contact-model source file. It generates the 285,769,728-world logical
+population and every future receipt outside the repository; focused checks are
+added to an existing test module. The exact tracked-file count and governed
+ceiling are therefore 6,360; every byte, blob, duplicate, and reduction limit
+remains unchanged.
+
 The issue 190 v14 synthetic evaluation adds three small, reviewed source files:
 the deterministic static-pose fixture builder, its retained JSON fixture, and
 its focused test. The tracked-file ceiling is therefore 6,103. This adjustment
