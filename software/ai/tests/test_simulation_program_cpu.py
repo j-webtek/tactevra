@@ -20,6 +20,8 @@ FIXTURE = ROOT / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.js
 def test_fixture_is_section_hashed_and_zero_authority():
     fixture = load_program_fixture(FIXTURE)
     assert fixture["gpu_execution_authorized"] is False
+    assert fixture["runtime_stack"]["nvidia_driver"] == "595.97"
+    assert fixture["runtime_stack"]["warp"] == "1.17.0"
     assert set(fixture["counters"].values()) == {0}
     assert set(fixture["sections"]) == {"workstream_1_cpu", "workstream_2",
                                          "workstream_3", "workstream_4",

@@ -177,6 +177,7 @@ def run_all(fixture_path: Path) -> dict[str, Any]:
     fixture = load_program_fixture(fixture_path)
     core = {"schema": "tactevra.simulation_program_cpu_receipt.v1", "scope": SCOPE,
             "fixture_sha256": fixture["fixture_sha256"],
+            "runtime_stack": fixture["runtime_stack"],
             "candidate_catalog": candidate_catalog_semantic_check(fixture),
             "workstream_2_smoke": actuation_smoke(fixture),
             "workstream_4": recovery_sweep(fixture),
