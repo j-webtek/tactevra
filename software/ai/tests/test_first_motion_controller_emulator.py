@@ -22,6 +22,10 @@ from rocell_ai.first_motion_controller_emulator import (
     run_controller_emulator,
     run_staged_bringup_rehearsal,
 )
+from rocell_ai.first_motion_collision_design import (
+    _pad_variants,
+    load_collision_design_fixture,
+)
 from rocell_ai.first_motion_drills import (
     load_collision_attribution_fixture,
     load_independent_observation_fixture,
@@ -38,6 +42,7 @@ SOURCE = ROOT / "software/ai/rocell_ai/first_motion_controller_emulator.py"
 READINESS_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_readiness_v1.json"
 OBSERVATION_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_independent_observation_v1.json"
 COLLISION_ATTRIBUTION_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_candidate_collision_attribution_v1.json"
+COLLISION_DESIGN_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_collision_design_v1.json"
 
 
 def _sample() -> ServoRangeSample:
@@ -254,3 +259,14 @@ def test_candidate_collision_attribution_preserves_unknown_stages_and_authority(
     assert report["hardware_write_count"] == report["physical_movement_count"] == 0
     assert report["real_command_count"] == report["permit_count"] == 0
     assert report["transport_count"] == 0
+
+
+def test_collision_design_fixture_is_bounded_and_zero_authority() -> None:
+    fixture = load_collision_design_fixture(COLLISION_DESIGN_FIXTURE)
+    assert fixture["scope"] == "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+    assert not any(fixture["counters"].values())
+    assert fixture["cable_design"]["anchor_height_board_z_mm_range"] == [90.0, 110.0]
+    assert fixture["stage_trajectories"]["samples_per_segment"] == 33
+    assert len(_pad_variants(fixture["test_pad_design"])) == 13
+    assert fixture["structural_review"]["candidate_rule"].endswith(
+        "No pair is installed automatically.")

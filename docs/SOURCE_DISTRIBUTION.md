@@ -486,3 +486,6 @@ The tracked-file ceiling is 6,364 after freezing the compact Workstream 7 candid
 
 The tracked-file ceiling is 6,365 after freezing the compact Workstream 7 collision-design fixture; generated trajectories and receipts remain external and hash-bound.
 
+
+The tracked-file ceiling is 6,366 after adding the zero-authority Workstream 7 collision-design runner; complete generated screens remain external.
+
