@@ -379,7 +379,8 @@ def phase0_collision_intake(fixture: dict[str, Any], *, workspace: Path) -> dict
         Vec3(overlay[3], overlay[7], overlay[11]),
     )
     robot = []
-    body_name = lambda link: f"robot:{'gripper' if link == 'gripper_link' else link}"
+    def body_name(link: str) -> str:
+        return f"robot:{'gripper' if link == 'gripper_link' else link}"
     for link in reduction["links"]:
         robot.append(CollisionBody(
             body_name(link["link_name"]), link["link_name"], CollisionBodyRole.ROBOT_LINK,
