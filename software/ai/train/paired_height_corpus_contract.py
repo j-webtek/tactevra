@@ -115,6 +115,11 @@ def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]
         "selection_effect"
     ) != "DIAGNOSTIC_BENCHMARK_ONLY":
         raise ValueError("training-free baseline scope differs")
+    mask_contract = value.get("safe_region_mask_contract", {})
+    if mask_contract.get("operation") != (
+        "INTERSECTION_OF_SAFE_REGION_WITH_VISIBLE_MODEL_CROP"
+    ) or mask_contract.get("binary_values") != [0, 1]:
+        raise ValueError("safe-region mask intersection rule differs")
     if value.get("evaluation_opened") is not False:
         raise ValueError("evaluation must remain unopened")
     if value.get("physical_authority") is not False:
@@ -633,10 +638,12 @@ def _construct_features_from_model_inputs(
     import numpy as np
 
     if len(safe_half_extent_mm) != 2 or any(
-        not 0.0 < float(item) <= physical_footprint_mm / 2.0
-        for item in safe_half_extent_mm
+        not 0.0 < float(item) for item in safe_half_extent_mm
     ):
-        raise ValueError("safe half extents must fit inside the physical crop")
+        raise ValueError("safe half extents must be positive")
+    visible_half_extent = [
+        min(float(item), physical_footprint_mm / 2.0) for item in safe_half_extent_mm
+    ]
     reference_normalized = _self_crop_p05_p95(reference, np)
     observation_normalized = _self_crop_p05_p95(observation, np)
     difference = np.abs(reference_normalized - observation_normalized)
@@ -654,8 +661,8 @@ def _construct_features_from_model_inputs(
         - physical_footprint_mm / 2.0
     )
     safe_mask = (
-        (np.abs(coordinate[:, None]) <= float(safe_half_extent_mm[1]))
-        & (np.abs(coordinate[None, :]) <= float(safe_half_extent_mm[0]))
+        (np.abs(coordinate[:, None]) <= visible_half_extent[1])
+        & (np.abs(coordinate[None, :]) <= visible_half_extent[0])
     ).astype(np.float32)[..., None]
     features = np.concatenate(
         (

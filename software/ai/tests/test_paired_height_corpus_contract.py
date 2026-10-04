@@ -243,6 +243,27 @@ def test_training_free_score_uses_only_safe_region_rgb_difference() -> None:
     assert training_free_difference_score(features) == pytest.approx(0.25)
 
 
+def test_wide_safe_region_is_intersected_with_visible_physical_crop() -> None:
+    import numpy as np
+
+    profile, _ = load_resolution_noise_experiment(RESOLUTION_EXPERIMENT)
+    camera = profile["noise_profiles"][0]["camera_profile"]
+    native = np.full((400, 400, 3), 120, dtype=np.uint8)
+    features = construct_paired_height_features(
+        native,
+        native,
+        reference_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+        observation_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+        output_size_px=96,
+        reference_seed=1,
+        observation_seed=1,
+        camera_profile=camera,
+        safe_half_extent_mm=[48.0, 7.0],
+    )
+    assert np.all(features[11].sum(axis=1) % 96 == 0)
+    assert features[11].sum() == 96 * 28
+
+
 def test_frozen_fixture_counts_and_balances_heights() -> None:
     fixture, _ = load_fixture(FIXTURE)
     assert len(fixture["targets"]) == 80
