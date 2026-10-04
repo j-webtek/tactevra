@@ -36,8 +36,10 @@ from train.paired_height_corpus_contract import (  # noqa: E402
     sha256_bytes,
 )
 from train.run_residual_obstruction_v4_2_memorization import (  # noqa: E402
+    paired_height_features_from_normalized_torch,
     paired_height_resolution_spatial_model,
 )
+from train import paired_height_corpus_contract as paired_height_contract  # noqa: E402
 
 
 ROOT = AI_ROOT
@@ -126,6 +128,29 @@ def test_paired_height_model_retains_192_detail_until_final_pool() -> None:
         96: (1, 64, 24, 24),
         192: (1, 64, 48, 48),
     }
+
+
+def test_torch_feature_expansion_matches_frozen_numpy_contract() -> None:
+    np = pytest.importorskip("numpy")
+    torch = pytest.importorskip("torch")
+    rng = np.random.default_rng(55001)
+    reference = rng.integers(0, 256, size=(96, 96, 3), dtype=np.uint8)
+    observation = rng.integers(0, 256, size=(96, 96, 3), dtype=np.uint8)
+    expected = paired_height_contract._construct_features_from_model_inputs(
+        reference,
+        observation,
+        output_size_px=96,
+        safe_half_extent_mm=[6.0, 6.0],
+        physical_footprint_mm=48.0,
+    )
+    actual = paired_height_features_from_normalized_torch(
+        torch.from_numpy(expected[0:3][None]),
+        torch.from_numpy(expected[3:6][None]),
+        torch.from_numpy(expected[11:12][None]),
+        torch.zeros(11),
+        torch.ones(11),
+    )[0].numpy()
+    np.testing.assert_allclose(actual, expected, rtol=2.0e-5, atol=2.0e-5)
 
 
 def test_twelve_channel_features_are_deterministic_and_preserve_thin_line() -> None:

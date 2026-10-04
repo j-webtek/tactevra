@@ -156,6 +156,75 @@ def paired_height_resolution_spatial_model(torch: Any, input_size_px: int) -> An
     )
 
 
+def paired_height_features_from_normalized_torch(
+    observation: Any,
+    reference: Any,
+    safe_mask: Any,
+    feature_mean: Any,
+    feature_scale: Any,
+) -> Any:
+    """Expand cached normalized RGB pairs into the frozen twelve channels.
+
+    Caching the six normalized RGB channels avoids storing the derived Sobel and
+    texture planes.  This function is the CUDA equivalent of the frozen NumPy
+    feature contract; the safe-region mask is deliberately left unstandardized.
+    """
+
+    import torch
+    import torch.nn.functional as functional
+
+    if observation.ndim != 4 or observation.shape[1] != 3:
+        raise ValueError("observation must have shape Bx3xHxW")
+    if reference.shape != observation.shape:
+        raise ValueError("reference must match observation shape")
+    if safe_mask.shape != (observation.shape[0], 1, *observation.shape[2:]):
+        raise ValueError("safe_mask must have shape Bx1xHxW")
+    if feature_mean.numel() != 11 or feature_scale.numel() != 11:
+        raise ValueError("feature statistics must contain eleven values")
+    if bool(torch.any(feature_scale < 1.0e-6)):
+        raise ValueError("feature scales must be at least 1e-6")
+
+    weights = observation.new_tensor((0.2126, 0.7152, 0.0722)).view(1, 3, 1, 1)
+
+    def luminance(value: Any) -> Any:
+        return torch.sum(value * weights, dim=1, keepdim=True)
+
+    sobel_x = observation.new_tensor(
+        ((-1.0, 0.0, 1.0), (-2.0, 0.0, 2.0), (-1.0, 0.0, 1.0))
+    ).view(1, 1, 3, 3)
+    sobel_y = observation.new_tensor(
+        ((-1.0, -2.0, -1.0), (0.0, 0.0, 0.0), (1.0, 2.0, 1.0))
+    ).view(1, 1, 3, 3)
+
+    def sobel(value: Any) -> Any:
+        padded = functional.pad(luminance(value), (1, 1, 1, 1), mode="reflect")
+        gradient_x = functional.conv2d(padded, sobel_x)
+        gradient_y = functional.conv2d(padded, sobel_y)
+        return torch.sqrt(gradient_x * gradient_x + gradient_y * gradient_y) / 4.0
+
+    def texture(value: Any) -> Any:
+        padded = functional.pad(luminance(value), (2, 2, 2, 2), mode="reflect")
+        mean = functional.avg_pool2d(padded, kernel_size=5, stride=1)
+        squared_mean = functional.avg_pool2d(padded * padded, kernel_size=5, stride=1)
+        return torch.sqrt(torch.clamp(squared_mean - mean * mean, min=0.0))
+
+    features = torch.cat(
+        (
+            observation,
+            reference,
+            torch.abs(reference - observation),
+            torch.abs(sobel(reference) - sobel(observation)),
+            torch.abs(texture(reference) - texture(observation)),
+        ),
+        dim=1,
+    )
+    mean = feature_mean.reshape(1, 11, 1, 1).to(device=features.device, dtype=features.dtype)
+    scale = feature_scale.reshape(1, 11, 1, 1).to(
+        device=features.device, dtype=features.dtype
+    )
+    return torch.cat(((features - mean) / scale, safe_mask), dim=1)
+
+
 def train_one(
     arrays: np.ndarray, labels: np.ndarray, settings: dict[str, Any], seed: int
 ) -> dict[str, Any]:
