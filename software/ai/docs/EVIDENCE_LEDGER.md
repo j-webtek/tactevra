@@ -6044,6 +6044,7 @@ rewriting history. New entries must use a unique evidence ID.
   the measured `ROBOT` sequence. It does not measure controller, settling,
   contact, verification, or physical typing speed and grants no deployment or
   physical authority.
+
 - Supersedes: ARM-121 only for its retained timing and invalidation dependency;
   ARM-121 remains authoritative for cache mechanics and integrity semantics.
 - Next dependency: design bounded cache ownership and observability for runtime
@@ -6909,3 +6910,33 @@ rewriting history. New entries must use a unique evidence ID.
   the schedule only in Isaac, compare simulated TCP contact to ordered targets,
   and retain misses, collisions, and ordering failures without hardware or
   physical authority.
+
+### E-20261004-INT-453 — retained first noncontact H-hover proof
+
+- Stage: S2/S3 simulation process alignment, WP2.
+- Lane: INTEGRATION.
+- Change: extracted the actual-emitter schedule/replay implementation and its
+  retained evidence from the superseded integration branch. Added a portable
+  verifier that checks both content digests, exact bundle-file binding, arm and
+  robot USD lineage, zero authority, full-route acceptance, and contiguous
+  sample order before deriving only samples `0..34`. The endpoint is action 0,
+  target `H`, phase `HOVER`, at board `[216.55, 154.0, 26.0]` mm; the prefix
+  contains zero contact samples.
+- Result: `PASS_KINEMATIC_HOVER_WITH_BLOCKERS`. The retained Isaac receipt says
+  all 133 samples passed, so its maximum tool-tip error `0.07684842940066568`
+  mm and joint readback error `5.923525581152944e-08` rad conservatively bound
+  the 35-sample prefix. The proof digest is
+  `8a109db4798a3e54febc55bb9b285dbe705cdbc7bb8811f7f8e907e1739305a7`.
+- Tests: focused bundle, replay-evidence, and first-hover tests; full offline
+  repository verification is recorded by the associated pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: this is a derived proof from an already-retained Isaac run, not
+  a fresh simulator execution. The producer observations are synthetic and
+  deny deployment qualification. Joints were teleported with zero physics
+  steps. The 14.400834977 mm localization uncertainty still exceeds the 7 mm
+  safe-region margin. Installed collision clearance, valid dynamics, controller
+  tracking, measured calibration/start state, hardware, and physical
+  qualification remain absent. No physical or deployment gate changes.
+- Next dependency: safe-region-fitting final-camera output and accepted
+  installed collision geometry, followed by a source-bound dynamic replay.

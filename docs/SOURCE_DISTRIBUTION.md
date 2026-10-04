@@ -62,10 +62,11 @@ policy baseline now points to this merged commit so future checks have a stable,
 post-reduction reference. Containment ceilings remain deliberately above the
 baseline to detect material growth without making normal small changes brittle.
 
-The issue #190 model-to-scene overlay adds five net governed paths beyond the
-preceding merged snapshot: one probe, two tests, and two compact evidence
-records. The reviewed tracked-file ceiling therefore moves only from 6,250 to
-the exact observed 6,253 files. The measured tree remains 649,295,202 logical
+The issue #190 first-hover extraction adds ten net governed paths beyond the
+preceding merged snapshot: three replay/verifier modules, three tests, and four
+retained or derived evidence records. The reviewed tracked-file ceiling
+therefore moves only from 6,253 to the exact observed 6,263 files. The measured
+tree remains 649,432,899 logical
 bytes with 4,890,152 governed duplicate bytes; the logical-byte, single-blob,
 duplicate-byte, and reduction limits are unchanged.
 

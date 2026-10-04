@@ -1171,6 +1171,16 @@ each 7 mm key-edge margin. The replay therefore stops before a joint schedule.
 Its next simulation input is the exact zero-write schedule from the arm typing
 pipeline after the source batch passes the safe-region uncertainty gate.
 
+`E-20261004-INT-453` separately makes an older retained simulator result usable
+without weakening that gate. It binds the actual-emitter schedule bundle to its
+full-route Isaac receipt and derives the contiguous `0..34` prefix ending at
+the first noncontact `H` hover. The prefix contains no contact sample and is
+conservatively bounded by the passing full-route maximum of 0.07684843 mm.
+This satisfies the issue's kinematic replay evidence milestone only. Its
+synthetic observations, unmeasured layout/tool geometry, zero physics steps,
+and unsafe 14.400834977 mm localization bound remain explicit blockers; the
+derived proof cannot authorize deployment or physical motion.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
