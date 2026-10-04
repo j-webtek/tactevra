@@ -1,0 +1,348 @@
+{
+  "schema": "tactevra.first_motion_readiness_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "branch": "issue/190-isaac-sim-host",
+  "claim_commit": "389ca3e017ae93bdf4434e04c024596b5d2aa9cc",
+  "bindings": {
+    "phase2_receipt": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\phase2\\controller_emulator_v2.json",
+      "sha256": "70ed11203d0fa0f603210815d01cf46d2200cc5667fe226e870a9da7b4ab2ef1",
+      "receipt_sha256": "94e67a752045f9a8a99483cf763a6fe8cec4c2aa6fd219584bd1246a751c3aa2"
+    },
+    "phase0_collision_receipt": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\simulation_program\\phase0\\phase0_collision_intake_v1.json",
+      "sha256": "4cc5956e209c36001b9eb22739918e87cc1fbc8d063c9512dfab2813dca8a640",
+      "receipt_sha256": "11bc5106c5b1b9e74be5b78300ba01bbacefecbb282f531aa46cb4b740075aae"
+    },
+    "mujoco_cpu_replay": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\simulation_program\\workstream_1\\mujoco_cpu_replay_v1.json",
+      "sha256": "ad71bea50a9a15c10ba3ccd249d64ca2359814964ef8892e15ffe5e2afa9fbbf",
+      "receipt_sha256": "1912654e09e1c4f18c247507398710eae722fee11dba3d5a11b1f8f9742cd424"
+    },
+    "semantic_full_receipt": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\simulation_program\\workstream_1\\semantic_full_v1.json",
+      "sha256": "fbe5e0232c028c9c68b590c74081a9c0d712a87df15a3ec0484f618afa9bc205"
+    },
+    "controller_emulator": {
+      "path": "software/ai/rocell_ai/first_motion_controller_emulator.py",
+      "sha256": "1c76a2a46132f0f69b11dbfa4f846904fd8f6512d968ed5931b0ee35106471b1"
+    },
+    "typing_twin": {
+      "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
+      "sha256": "50f83bc49765fcce32aa41b67e7a972680e33f15af622f10d053f0cc542e7442"
+    },
+    "collision_harness": {
+      "path": "software/ai/rocell_ai/simulation_program_cpu.py",
+      "sha256": "8922a97b4455c6b515ecdcb8a828a807799b674af9ffc01c1ce845c4547a9a5b"
+    },
+    "controller_fk": {
+      "path": "software/src/rocell/simulation/controller.py",
+      "sha256": "3f24c6fa2bc3e5d4e397090ac86ea3639807e269310bec79e403daca351818cc"
+    },
+    "simulation_profile": {
+      "path": "software/config/simulation_hardware_profile.json",
+      "sha256": "6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190"
+    }
+  },
+  "phase3": {
+    "seed": 1907003,
+    "stages": [
+      {
+        "id": "A",
+        "objective": "ONE_JOINT_SMALL_MOVE_LOW_SPEED",
+        "contact": false,
+        "joint": "base",
+        "delta_rad_range": [
+          0.005,
+          0.02
+        ],
+        "speed_range": [
+          1,
+          20
+        ],
+        "acceleration_range": [
+          1,
+          5
+        ]
+      },
+      {
+        "id": "B",
+        "objective": "ALL_JOINTS_TO_PARKED_POSE",
+        "contact": false,
+        "park_pose_source": "COMMISSIONED_PHYSICAL_IDENTITY_REQUIRED"
+      },
+      {
+        "id": "C",
+        "objective": "HOVER_ABOVE_KEYBOARD_NO_CONTACT",
+        "contact": false,
+        "hover_height_mm_range": [
+          5,
+          30
+        ]
+      },
+      {
+        "id": "D",
+        "objective": "SINGLE_PRESS_TEST_PAD",
+        "contact": true,
+        "press_depth_mm_range": [
+          0.5,
+          6.0
+        ],
+        "dwell_ms_range": [
+          30,
+          120
+        ]
+      },
+      {
+        "id": "E",
+        "objective": "TYPE_ONE_CHARACTER",
+        "contact": true,
+        "text": "a"
+      },
+      {
+        "id": "F",
+        "objective": "TYPE_SHORT_STRING",
+        "contact": true,
+        "text": "Hello 2026!"
+      }
+    ],
+    "telemetry_envelope": {
+      "samples_per_trace": 33,
+      "joint_position_tolerance_rad_range": [
+        0.0015339807878856412,
+        0.015
+      ],
+      "tool_tip_tolerance_mm_range": [
+        0.5,
+        10.0
+      ],
+      "time_scale_multiplier_range": [
+        0.5,
+        2.0
+      ]
+    },
+    "preflight_order": [
+      "ZERO_AUTHORITY_GUARD",
+      "PHASE2_RECEIPT_BINDING",
+      "COLLISION_DIAGNOSTIC_CLEAR",
+      "LIMIT_CHECK",
+      "STAGE_INPUTS_COMPLETE",
+      "STRICT_RUNTIME_REHEARSAL",
+      "DEVICE_EFFECT_VERIFICATION"
+    ],
+    "no_go": [
+      "WRONG_DIRECTION",
+      "MAGNITUDE_OUTSIDE_ENVELOPE",
+      "POSE_MISMATCH",
+      "COLLISION_WARNING",
+      "LIMIT_WARNING",
+      "LANDING_OUTSIDE_ENVELOPE",
+      "WRONG_KEY_REGISTERED",
+      "VERIFICATION_FAILURE",
+      "UNREVIEWED_COLLISION_EXCLUSIONS",
+      "MISSING_PHYSICAL_IDENTITY"
+    ],
+    "decision": "Run stages in A-F order. Stop before simulated motion at the first failed preflight or no-go. Emit a hash-bound blocked envelope for that stage and NOT_RUN_UPSTREAM_BLOCKED for every successor. Never reinterpret the uninstalled collision candidate as installed evidence.",
+    "section_sha256": "5244ca34f9da180aa0a9e4da97217cc4f6d7b3caaaad4f4eb23c015dd3d09463"
+  },
+  "phase4": {
+    "seed": 1907004,
+    "single_drills": [
+      {
+        "id": "LINK_LENGTH",
+        "range_mm": [
+          1,
+          3
+        ]
+      },
+      {
+        "id": "JOINT_ZERO",
+        "range_deg": [
+          0.5,
+          2
+        ]
+      },
+      {
+        "id": "FLIPPED_JOINT_SIGN",
+        "values": [
+          "base",
+          "shoulder",
+          "elbow",
+          "wrist"
+        ]
+      },
+      {
+        "id": "SWAPPED_SERVO_IDS",
+        "values": [
+          [
+            11,
+            12
+          ],
+          [
+            12,
+            13
+          ],
+          [
+            14,
+            15
+          ],
+          [
+            16,
+            17
+          ]
+        ]
+      },
+      {
+        "id": "DEGREES_RADIANS_MIXUP",
+        "scale_factors": [
+          0.017453292519943295,
+          57.29577951308232
+        ]
+      },
+      {
+        "id": "KEYBOARD_TRANSLATION",
+        "range_mm": [
+          2,
+          10
+        ]
+      },
+      {
+        "id": "KEYBOARD_ROTATION",
+        "range_deg": [
+          1,
+          3
+        ]
+      },
+      {
+        "id": "STALE_TELEMETRY",
+        "age_ms_range": [
+          251,
+          5000
+        ]
+      },
+      {
+        "id": "DROPPED_CONNECTION",
+        "drop_fraction_range": [
+          0,
+          1
+        ]
+      },
+      {
+        "id": "DELAYED_TELEMETRY",
+        "latency_ms_range": [
+          251,
+          5000
+        ]
+      }
+    ],
+    "paired_drills": [
+      [
+        "LINK_LENGTH",
+        "JOINT_ZERO"
+      ],
+      [
+        "FLIPPED_JOINT_SIGN",
+        "SWAPPED_SERVO_IDS"
+      ],
+      [
+        "KEYBOARD_TRANSLATION",
+        "KEYBOARD_ROTATION"
+      ],
+      [
+        "STALE_TELEMETRY",
+        "DELAYED_TELEMETRY"
+      ]
+    ],
+    "mechanism_order": [
+      "CONTRACT_MAPPING_REJECTION",
+      "FRESHNESS_REJECTION",
+      "LIMIT_CHECK",
+      "PREDICTION_MISMATCH",
+      "FIXTURE_RELOCALIZATION",
+      "VERIFICATION_FAILURE"
+    ],
+    "gap_rule": "Any injection without a pre-contact detector is a retained GAP. No threshold or mechanism changes after results; a proposal is recorded separately.",
+    "section_sha256": "8010353aa5367df77aa88ed337bca391a8616248615a89ec4e3db648206806d8"
+  },
+  "phase5": {
+    "seeds": {
+      "ci": 1907005,
+      "nightly": 1907050
+    },
+    "required_categories": [
+      "NOMINAL",
+      "BOUNDARY",
+      "FAULT",
+      "ENVIRONMENT",
+      "HUMAN",
+      "WRONG_MODEL"
+    ],
+    "required_identities": {
+      "NOMINAL": [
+        "LONG_STRING",
+        "REPEATED_KEYS",
+        "EVERY_SHIFT_TRANSITION",
+        "PHONE_LAYERS"
+      ],
+      "BOUNDARY": [
+        "GRAVE",
+        "EQUAL",
+        "Z",
+        "SHIFT",
+        "JOINT_LIMIT_EDGES",
+        "REACH_EXTREMES"
+      ],
+      "FAULT": [
+        "DROPPED_MESSAGE",
+        "DELAYED_TELEMETRY",
+        "SERVO_NOT_RESPONDING",
+        "STALL_OVERLOAD",
+        "ESTOP",
+        "POWER_INTERRUPTION"
+      ],
+      "ENVIRONMENT": [
+        "FIXTURE_SHIFT",
+        "OBSTRUCTION",
+        "LIGHTING_CHANGE",
+        "STALE_REFERENCE"
+      ],
+      "HUMAN": [
+        "HAND_ENTRY"
+      ],
+      "WRONG_MODEL": [
+        "LINK_LENGTH",
+        "JOINT_ZERO",
+        "FLIPPED_JOINT_SIGN",
+        "SWAPPED_SERVO_IDS",
+        "DEGREES_RADIANS_MIXUP",
+        "KEYBOARD_TRANSLATION",
+        "KEYBOARD_ROTATION",
+        "STALE_TELEMETRY",
+        "DROPPED_CONNECTION"
+      ]
+    },
+    "outcomes": [
+      "PROCEED",
+      "ABSTAIN",
+      "RETRY",
+      "STOP"
+    ],
+    "decision": "CI and nightly entries must match exact expected outcome and detector with zero false acceptance. RETRY is permitted only for the unchanged WS4 recovery transition that explicitly requires re-observation; controller writes are never retried.",
+    "section_sha256": "38511819dae929fc20e89dd0c0f2716c566c8b69fbc386a6d361345667fea8c0"
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "permits": 0,
+    "transports": 0,
+    "gpu_jobs": 0
+  },
+  "limitations": [
+    "All ranges are exploratory and unmeasured",
+    "The uninstalled collision candidate is diagnostic only",
+    "No stage result can authorize hardware",
+    "Physical parked pose and installed collision exclusions are absent"
+  ],
+  "fixture_sha256": "fe94c7a6ded2b047f5621924ec3147e99a4fd6a879f1545ddd3ac2298fffc6e8"
+}
