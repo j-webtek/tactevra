@@ -22,6 +22,7 @@ from rocell_ai.first_motion_controller_emulator import (
     run_controller_emulator,
     run_staged_bringup_rehearsal,
 )
+from rocell_ai.first_motion_drills import run_wrong_model_drills
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_controller_emulator_v1.json"
@@ -158,3 +159,17 @@ def test_first_motion_fixture_rejects_changed_external_collision_receipt(
     path.write_text(json.dumps(fixture), encoding="utf-8")
     with pytest.raises(ValueError):
         load_first_motion_fixture(path)
+
+
+def test_wrong_model_drills_retain_external_geometry_gaps() -> None:
+    report = run_wrong_model_drills(load_first_motion_fixture(READINESS_FIXTURE))
+    assert report["case_count"] == 63
+    assert report["detected_count"] == report["precontact_detected_count"] == 30
+    assert report["gap_count"] == 33
+    assert report["collision_no_go_detection_credits"] == 0
+    assert {row["injection"].get("type") for row in report["gaps"] if "type" in row["injection"]} == {
+        "LINK_LENGTH", "JOINT_ZERO"}
+    assert report["decision"] == "GAPS_RETAINED_NO_THRESHOLD_CHANGE"
+    assert report["hardware_write_count"] == report["physical_movement_count"] == 0
+    assert report["real_command_count"] == report["permit_count"] == 0
+    assert report["transport_count"] == 0
