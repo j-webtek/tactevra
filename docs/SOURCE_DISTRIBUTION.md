@@ -128,6 +128,14 @@ to 6,341 before this plan; the governed tracked-file ceiling is therefore 6,342.
 No simulator cache, image, checkpoint, model, or physical artifact is added, and
 all byte, blob, duplicate, and reduction limits remain unchanged.
 
+The Workstream 7 controller emulator adds three reviewed text files: one
+hash-bound fixture, one transport-incapable simulation module, and one focused
+test. All generated receipts remain external and hash-bound. The exact observed
+tracked-file count is therefore 6,352, and the governed tracked-file ceiling is
+6,352. No simulator cache, trace, image, checkpoint, model, or physical artifact
+is tracked; all byte, single-blob, duplicate-byte, and reduction limits remain
+unchanged.
+
 The issue 190 v14 synthetic evaluation adds three small, reviewed source files:
 the deterministic static-pose fixture builder, its retained JSON fixture, and
 its focused test. The tracked-file ceiling is therefore 6,103. This adjustment
