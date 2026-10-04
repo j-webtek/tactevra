@@ -460,7 +460,21 @@
           0.5,
           0.75,
           1
-        ]
+        ],
+        "route_family": {
+          "moving_anchor_frame": "gripper_link",
+          "fixed_anchor_board_x_mm_range": [
+            225,
+            385
+          ],
+          "fixed_anchor_board_y_mm": 457,
+          "fixed_anchor_board_z_mm_range": [
+            -80,
+            100
+          ],
+          "sag_axis": "negative_board_z",
+          "rule": "configuration capsule polyline from gripper anchor through sampled sag midpoint to fixed rear-edge anchor; no robot-pair exclusions"
+        }
       },
       "camera_contract": "STATIC_OVERHEAD_CAGE_AND_CARRIAGE_REPLACE_LEGACY_ARM_CAMERA_FRAMES",
       "self_collision_exclusions": {
@@ -473,7 +487,46 @@
       ],
       "screen_scope": "ROBOT_AND_TOOL_AGAINST_BOARD_KEYBOARD_PHONE_STATIONS_STATIC_CAMERA_AND_CABLE_SWEEP",
       "decision": "Every range endpoint and cable sample must be screened. Any collision or incomplete transform stops that case. Mode cannot satisfy or be converted to InstalledCollisionGeometryProfile.",
-      "section_sha256": "74cd6454b062abe7babff9969590c78af83625ade6afbf80b4c633e327c31532"
+      "installed_base_clamp": {
+        "arm_axis_board_x_mm_range": [
+          225,
+          385
+        ],
+        "rear_edge_board_y_mm": 457,
+        "half_extents_mm_ranges": {
+          "x": [
+            25,
+            100
+          ],
+          "y": [
+            10,
+            80
+          ],
+          "z": [
+            10,
+            80
+          ]
+        },
+        "placement_rule": "center on sampled arm-axis X at board rear edge; all Cartesian range endpoints screened"
+      },
+      "static_camera": {
+        "optical_center_board_xy_mm": [
+          333.504403,
+          228.5
+        ],
+        "height_mm_samples": [
+          700,
+          850,
+          1000
+        ],
+        "module_depth_mm_range": [
+          3,
+          30
+        ],
+        "placement_rule": "nadir static environment; cage and carriage local mesh bounds translated to each height sample"
+      },
+      "pre_results_amendment": "2026-10-04: placement ranges added before any phase-zero collision evaluation because the original freeze named bodies but did not bind their placement.",
+      "section_sha256": "7595f465a7d4c821d28f6c4725dd8b3c441f424ff1454604032e2209c2998a91"
     },
     "phase0_landing_sensors": {
       "trial_count": 2000,
@@ -554,5 +607,5 @@
     "isaac_kit": "6.1.0",
     "isaac_version_source": "C:/IsaacSim/evidence/first_launch_receipt_6_1_0.json"
   },
-  "fixture_sha256": "5c92f4ab834a1805b319a8cf89000cd8435e3854c9dffcd87e0c146ed59f04a2"
+  "fixture_sha256": "edc742ce3f3391b0315661f4a9123406d3f47e64e2c1d910ead2e8a84c744ec7"
 }
