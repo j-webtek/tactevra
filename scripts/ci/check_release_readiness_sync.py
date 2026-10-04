@@ -31,6 +31,22 @@ def load_registry(path: Path = REGISTRY) -> dict:
             raise ValueError(f"cleared blocker {item['id']} has no resolution")
         if item["status"] == "open" and item.get("resolution") is not None:
             raise ValueError(f"open blocker {item['id']} must not claim a resolution")
+    candidate = data.get("candidate")
+    required = {
+        "status", "sha", "record", "ai_disposition", "arm_disposition",
+        "audit_status", "maintainer_review_status", "publication_status",
+    }
+    if not isinstance(candidate, dict) or set(candidate) != required:
+        raise ValueError("release-readiness candidate has invalid fields")
+    if candidate["status"] not in {"unselected", "qualified"}:
+        raise ValueError("release-readiness candidate has unsupported status")
+    if candidate["status"] == "qualified":
+        if not re.fullmatch(r"[0-9a-f]{40}", candidate.get("sha", "")):
+            raise ValueError("qualified release candidate needs a full lowercase SHA")
+        if candidate["audit_status"] != "pass":
+            raise ValueError("qualified release candidate needs a passing audit")
+        if any(item["status"] == "open" for item in data["blockers"]):
+            raise ValueError("release candidate cannot be qualified while blockers are open")
     return data
 
 
@@ -41,7 +57,16 @@ def issue_number(blocker: dict) -> str:
 def render_dashboard_status(registry: dict) -> str:
     opened = [item for item in registry["blockers"] if item["status"] == "open"]
     suffix = "s" if len(opened) != 1 else ""
-    lines = [BEGIN, f"**Registry status:** {len(opened)} open blocker{suffix}.", "", "| Blocker | Owner | State |", "| --- | --- | --- |"]
+    candidate = registry["candidate"]
+    lines = [BEGIN, f"**Registry status:** {len(opened)} open blocker{suffix}."]
+    if candidate["status"] == "qualified":
+        lines.extend([
+            "",
+            f"**Candidate:** [`{candidate['sha']}`]({Path(candidate['record']).name}) is technically qualified; publication is not approved.",
+        ])
+    else:
+        lines.extend(["", "**Candidate:** Not selected."])
+    lines.extend(["", "| Blocker | Owner | State |", "| --- | --- | --- |"])
     for item in registry["blockers"]:
         number = issue_number(item)
         state = "Open" if item["status"] == "open" else "Cleared"
@@ -55,15 +80,16 @@ def render_tracker_body(registry: dict) -> str:
     suffix = "s" if len(opened) != 1 else ""
     lines = [
         "## Objective", "",
-        "Track the source-only experimental preview from the reviewed readiness registry. This issue records status; it does not select a candidate or authorize publication.", "",
+        "Track the source-only experimental preview from the reviewed readiness registry. This issue records status and the selected candidate identity; it does not authorize publication.", "",
         "## Current state", "", f"The registry has **{len(opened)} open blocker{suffix}**.",
     ]
+    candidate = registry["candidate"]
     if opened:
         lines.extend([
             "", "**Phase:** Readiness-blocker resolution. Candidate selection remains held.",
             "", "**Candidate:** Not selected.",
         ])
-    else:
+    elif candidate["status"] == "unselected":
         lines.extend([
             "", "**Phase:** Candidate qualification is ready to begin.",
             "", "**Candidate:** Not selected. No tag, release notes, or asset set is approved.",
@@ -75,20 +101,42 @@ def render_tracker_body(registry: dict) -> str:
             "3. abandon this preview milestone, record the reason, and close the tracker as not planned.", "",
             "Candidate selection begins review; it does not authorize publication.",
         ])
+    else:
+        sha = candidate["sha"]
+        record_url = f"https://github.com/j-webtek/tactevra/blob/main/{candidate['record']}"
+        lines.extend([
+            "", "**Phase:** Candidate qualification complete; maintainer review and explicit publication approval remain pending.",
+            "", f"**Candidate:** [`{sha}`]({record_url}) on protected `main`.",
+            "", "**Publication:** Not approved. No tag or GitHub release has been created.",
+            "", "**Decision owner:** @j-webtek, as repository maintainer.",
+            "", "## Next accountable decision", "",
+            "The maintainer must review the exact release notes and source-only asset boundary, then choose one bounded path:", "",
+            "1. explicitly approve the exact tag, SHA, title, notes, and GitHub-generated source archives;",
+            "2. defer publication and leave this tracker open; or",
+            "3. abandon the preview milestone, record the reason, and close the tracker as not planned.", "",
+            "Technical qualification does not authorize publication.",
+        ])
     lines.extend([
         "", "## Registry-controlled blockers", "",
     ])
     for item in registry["blockers"]:
         mark = " " if item["status"] == "open" else "x"
         lines.append(f"- [{mark}] #{issue_number(item)} — {item['requirement']}")
+    selected = candidate["status"] == "qualified"
+    ai_done = selected and candidate["ai_disposition"] == "compatible-offline-with-limitations"
+    arm_done = selected and candidate["arm_disposition"] == "compatible-offline-with-limitations"
+    audit_done = selected and candidate["audit_status"] == "pass"
+    review_done = selected and candidate["maintainer_review_status"] == "complete"
+    publication_done = selected and candidate["publication_status"] in {"approved", "published"}
+    check = lambda done: "x" if done else " "
     lines.extend([
         "", "## Candidate qualification", "",
-        "- [ ] **Maintainer:** select one full commit SHA already on protected `main`.",
-        "- [ ] **AI owner:** record the AI compatibility disposition against that exact SHA.",
-        "- [ ] **Arm owner:** record the runtime/controller compatibility disposition against that exact SHA.",
-        "- [ ] **Release administrator:** run the exact-SHA candidate audit and fresh-checkout verification, retaining the evidence.",
-        "- [ ] **Maintainer:** review release notes, third-party notices, known limitations, and the source-only asset boundary.",
-        "- [ ] **Maintainer:** explicitly approve the tag, SHA, title, notes, and assets.",
+        f"- [{check(selected)}] **Maintainer:** select one full commit SHA already on protected `main`.",
+        f"- [{check(ai_done)}] **AI owner:** record the AI compatibility disposition against that exact SHA.",
+        f"- [{check(arm_done)}] **Arm owner:** record the runtime/controller compatibility disposition against that exact SHA.",
+        f"- [{check(audit_done)}] **Release administrator:** run the exact-SHA candidate audit and fresh-checkout verification, retaining the evidence.",
+        f"- [{check(review_done)}] **Maintainer:** review release notes, third-party notices, known limitations, and the source-only asset boundary.",
+        f"- [{check(publication_done)}] **Maintainer:** explicitly approve the tag, SHA, title, notes, and assets.",
         "", "## Closure routes", "",
         "- **Completed:** publish the explicitly approved experimental preview, verify its public tag/SHA/assets, and record the result.",
         "- **Not planned:** explicitly abandon the milestone and record why no preview will be published.",
@@ -103,7 +151,12 @@ def render_tracker_body(registry: dict) -> str:
 def render_milestone_description(registry: dict) -> str:
     opened = [f"#{issue_number(item)}" for item in registry["blockers"] if item["status"] == "open"]
     blockers = ", ".join(opened) if opened else "none"
-    phase = "blocker resolution" if opened else "candidate qualification ready; candidate unselected"
+    if opened:
+        phase = "blocker resolution"
+    elif registry["candidate"]["status"] == "qualified":
+        phase = "candidate technically qualified; publication unapproved"
+    else:
+        phase = "candidate qualification ready; candidate unselected"
     return ("Source-only experimental preview readiness. "
             f"Registry-controlled open blockers: {blockers}. "
             f"Phase: {phase}. "

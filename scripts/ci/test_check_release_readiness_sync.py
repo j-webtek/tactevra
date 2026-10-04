@@ -41,14 +41,17 @@ class ReleaseReadinessSyncTests(unittest.TestCase):
         self.assertIn("**0 open blockers**", tracker)
         self.assertIn("- [x] #88", tracker)
         self.assertIn("- [x] #167", tracker)
-        self.assertIn("**Phase:** Candidate qualification is ready to begin.", tracker)
+        self.assertIn("**Phase:** Candidate qualification complete", tracker)
+        self.assertIn("ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3", tracker)
         self.assertIn("**Decision owner:** @j-webtek", tracker)
-        self.assertIn("**AI owner:** record the AI compatibility disposition", tracker)
-        self.assertIn("**Arm owner:** record the runtime/controller compatibility disposition", tracker)
+        self.assertIn("- [x] **AI owner:** record the AI compatibility disposition", tracker)
+        self.assertIn("- [x] **Arm owner:** record the runtime/controller compatibility disposition", tracker)
+        self.assertIn("- [ ] **Maintainer:** review release notes", tracker)
         self.assertIn("**Not planned:** explicitly abandon the milestone", tracker)
         self.assertIn("open blockers: none", milestone)
-        self.assertIn("candidate qualification ready; candidate unselected", milestone)
+        self.assertIn("candidate technically qualified; publication unapproved", milestone)
         self.assertIn("0 open blockers", dashboard)
+        self.assertIn("technically qualified; publication is not approved", dashboard)
 
     def test_open_blocker_state_keeps_candidate_selection_held(self):
         registry = load_registry()
@@ -60,6 +63,16 @@ class ReleaseReadinessSyncTests(unittest.TestCase):
         self.assertIn("**Phase:** Readiness-blocker resolution.", tracker)
         self.assertNotIn("## Next accountable decision", tracker)
         self.assertIn("Phase: blocker resolution", milestone)
+
+    def test_loader_rejects_qualified_candidate_with_open_blocker(self):
+        registry = load_registry()
+        registry["blockers"][0]["status"] = "open"
+        registry["blockers"][0]["resolution"] = None
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "readiness.json"
+            path.write_text(json.dumps(registry), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "cannot be qualified"):
+                load_registry(path)
 
     def test_dashboard_drift_is_detected_and_repairable(self):
         registry = load_registry()

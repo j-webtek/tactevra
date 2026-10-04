@@ -27,6 +27,8 @@ DOCS = (
     'docs/SOURCE_DISTRIBUTION.md',
     'docs/releases/EXPERIMENTAL_PREVIEW_DRAFT.md',
     'docs/releases/CANDIDATE_DCD87DB.md',
+    'docs/releases/CANDIDATE_ED29E82F.md',
+    'docs/releases/TACTEVRA_V0.1.0_ALPHA.1_NOTES.md',
     'docs/releases/BASELINE_2026-09-26.md',
     'docs/releases/NEWCOMER_CHECK_2026-09-26.md',
     'docs/releases/COMPATIBILITY_CONTENT_REVIEW_2026-09-26.md',
@@ -139,8 +141,8 @@ REQUIRED_PHRASES = {
     ),
     'docs/releases/READINESS.md': (
         '**Document status:** Current release-readiness dashboard',
-        '**Authority:** Status and routing only; this page does not select a candidate, approve publication, or authorize hardware operation',
-        '**Not selected**',
+        '**Authority:** Status and routing only; this page does not approve publication or authorize hardware operation',
+        '**Selected and technically qualified**',
         '**Not approved or published**',
         'https://github.com/j-webtek/tactevra/issues/56',
         'https://github.com/j-webtek/tactevra/issues/61',
@@ -193,6 +195,11 @@ REQUIRED_PHRASES = {
     ),
     'docs/releases/CANDIDATE_DCD87DB.md': (
         '**Disposition: SUPERSEDED WITHOUT PUBLICATION.**',
+    ),
+    'docs/releases/CANDIDATE_ED29E82F.md': (
+        '**Disposition: TECHNICALLY QUALIFIED; PUBLICATION NOT APPROVED.**',
+        'ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3',
+        'https://github.com/j-webtek/tactevra/actions/runs/37175363712',
     ),
 }
 
