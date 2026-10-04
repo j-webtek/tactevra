@@ -28,6 +28,7 @@ def build(
     coverage_path: Path,
     capsule_path: Path,
     mesh_path: Path,
+    smoke_path: Path,
     output: Path,
     source_commit: str,
 ) -> dict[str, Any]:
@@ -36,6 +37,7 @@ def build(
     coverage_raw = coverage_path.resolve(strict=True).read_bytes()
     capsule_raw = capsule_path.resolve(strict=True).read_bytes()
     mesh_raw = mesh_path.resolve(strict=True).read_bytes()
+    smoke_raw = smoke_path.resolve(strict=True).read_bytes()
     v5 = json.loads(v5_raw)
     candidate = json.loads(candidate_raw)
     training_scenes = list(v5["split_identities"]["scenes"]["training"])
@@ -55,6 +57,7 @@ def build(
         "source_commit": source_commit,
         "bindings": {
             "rejected_v1_3_fixture_file_sha256": "cf51c934646fbb928e2ccc17f82169561fb8aafee07757126b32a97247bb4654",
+            "pre_smoke_v1_4_fixture_file_sha256": "d1ecfedc02d0493aa5589e09d794d683ac1dc82708f1fa39e76ba9789fd08db6",
             "superseded_v1_2_fixture_file_sha256": "2ab9382feb524c9787653f06eedb38684caae37ef57ef541e6582bf9a6241b3a",
             "superseded_v1_1_fixture_file_sha256": "2376dd8f1e38c5f479311f1054837ca3d1f76e133d80329d9242424a968b6476",
             "superseded_pre_render_fixture_file_sha256": "c90f8cdbc6835e01a099265da6c238d01d982b343d667f0e57484d2c5a49fbe9",
@@ -64,7 +67,7 @@ def build(
             "complete_crop_coverage_result_sha256": sha256_bytes(coverage_raw),
             "height_admission_result_sha256": sha256_bytes(capsule_raw),
             "official_mesh_result_sha256": sha256_bytes(mesh_raw),
-            "affected_phone_smoke_result_sha256": None,
+            "affected_phone_smoke_result_sha256": sha256_bytes(smoke_raw),
         },
         "camera": {
             "orientation": "EXACT_NADIR_FIXED",
@@ -167,7 +170,7 @@ def build(
             "complete_crop_coverage": "PASS_SYNTHETIC_FULL_CROP_COVERAGE",
             "parked_arm_capsule": "PASS_PROVISIONAL_CAPSULE_HEIGHT_ADMISSION",
             "official_visual_mesh": "PASS_SIMULATION_ONLY",
-            "affected_phone_smoke": "PENDING",
+            "affected_phone_smoke": "PASS_EXACT_PHONE_EDGE_SMOKE",
         },
         "rerender_contract": {
             "complete_training_rerender_required": True,
@@ -206,6 +209,7 @@ def main() -> int:
     parser.add_argument("--coverage-result", type=Path, required=True)
     parser.add_argument("--capsule-result", type=Path, required=True)
     parser.add_argument("--mesh-result", type=Path, required=True)
+    parser.add_argument("--smoke-result", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source-commit", required=True)
     args = parser.parse_args()
@@ -215,6 +219,7 @@ def main() -> int:
         args.coverage_result,
         args.capsule_result,
         args.mesh_result,
+        args.smoke_result,
         args.output,
         args.source_commit,
     )
