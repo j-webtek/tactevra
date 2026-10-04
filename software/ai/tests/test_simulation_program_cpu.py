@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json"
 WS2_FIXTURE = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v1.json"
 WS2_EXECUTION = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v1.json"
+WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json"
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
     ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
@@ -128,6 +129,9 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
     execution = WS2_PROBE.load_execution_fixture(
         WS2_EXECUTION, workspace=ROOT, parent=fixture
     )
+    staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED, workspace=ROOT, parent=fixture, execution=execution
+    )
     first = WS2_PROBE.build_manifest(fixture, workspace=ROOT)
     second = WS2_PROBE.build_manifest(fixture, workspace=ROOT)
     assert first == second
@@ -141,6 +145,10 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
     assert not first["real_commands"]
     assert execution["smoke"]["expected_world_count"] == 64
     assert execution["smoke"]["devices"] == ["cuda:0", "cuda:1"]
+    assert staged["stage_a_coarse"]["expected_worlds"] == 4_465_152
+    assert WS2_PROBE.coarse_recipe_indices(fixture, staged) == [
+        0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
+    ]
 
 
 def test_ws2_tampering_and_cross_gpu_drift_stop():
@@ -181,3 +189,44 @@ def test_ws2_phone_state_model_preserves_long_press_failures():
     assert len(rows) == 27
     assert any(row["admitted"] for row in rows)
     assert any(row["long_press"] and not row["admitted"] for row in rows)
+
+
+def test_ws2_staged_refinement_is_deterministic_and_boundary_only():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION, workspace=ROOT, parent=fixture
+    )
+    staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED, workspace=ROOT, parent=fixture, execution=execution
+    )
+    coarse = WS2_PROBE.coarse_recipe_indices(fixture, staged)
+    rows = []
+    for recipe_index in coarse:
+        for landing_index in staged["stage_a_coarse"]["landing_sample_indices"]:
+            admitted = not (recipe_index == 0 and landing_index == 0)
+            rows.append(
+                {
+                    "target_id": "GRAVE",
+                    "profile_id": "BASELINE",
+                    "tip_id": "sphere-r1",
+                    "scenario_id": "HIGH_SOURCE_LOW_RESIDUAL",
+                    "recipe_index": recipe_index,
+                    "landing_sample_index": landing_index,
+                    "admitted": admitted,
+                    "actuation_count": int(admitted),
+                    "partial_press": not admitted,
+                    "auto_repeat_count": 0,
+                    "neighbor_contact": False,
+                    "bottom_out_overflow": False,
+                    "release_complete": True,
+                    "force_within_available": True,
+                }
+            )
+    first = WS2_PROBE.refinement_plan(fixture, staged, rows)
+    assert first == WS2_PROBE.refinement_plan(fixture, staged, rows)
+    assert first["boundary_count"] > 0
+    assert first["refinement_identity_count"] > 0
+    assert all(
+        row["recipe_index"] not in coarse for row in first["refinement_identities"]
+    )
+    assert first["physical_authority"] is False

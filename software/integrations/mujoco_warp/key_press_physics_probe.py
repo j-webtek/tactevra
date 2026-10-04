@@ -123,6 +123,39 @@ def load_execution_fixture(
     return fixture
 
 
+def load_staged_fixture(
+    path: Path,
+    *,
+    workspace: Path,
+    parent: dict[str, Any],
+    execution: dict[str, Any],
+) -> dict[str, Any]:
+    fixture = json.loads(path.read_text(encoding="utf-8"))
+    claimed = fixture.pop("fixture_sha256")
+    if _sha_value(fixture) != claimed:
+        raise ValueError("WS2 staged-search fixture self-hash mismatch")
+    fixture["fixture_sha256"] = claimed
+    if fixture.get("scope") != SCOPE or fixture.get("physical_authority") is not False:
+        raise ValueError("WS2 staged-search fixture is not zero-authority simulation")
+    if fixture.get("gpu_execution_authorized") is not False:
+        raise ValueError("WS2 staged-search fixture unexpectedly authorizes execution")
+    if any(fixture.get("counters", {}).values()):
+        raise ValueError("WS2 staged-search fixture contains nonzero authority counters")
+    for name, binding in fixture["bindings"].items():
+        source = _resolve(workspace, binding["path"])
+        if _sha_file(source) != binding["sha256"]:
+            raise ValueError(f"staged-search binding changed: {name}")
+    if fixture["bindings"]["campaign_fixture"]["fixture_sha256"] != parent[
+        "fixture_sha256"
+    ]:
+        raise ValueError("staged-search campaign identity mismatch")
+    if fixture["bindings"]["execution_fixture"]["fixture_sha256"] != execution[
+        "fixture_sha256"
+    ]:
+        raise ValueError("staged-search execution identity mismatch")
+    return fixture
+
+
 def _target_records(catalog: dict[str, Any]) -> list[dict[str, Any]]:
     keyboard = catalog["keyboard"]
     default_extent = keyboard["key_half_extent_mm"]
@@ -213,6 +246,134 @@ def recipe_rows(fixture: dict[str, Any]) -> list[dict[str, float | int]]:
             row[name] = float(bounds[0]) + fraction * (float(bounds[1]) - float(bounds[0]))
         rows.append(row)
     return rows
+
+
+def _normalized_recipe_vectors(fixture: dict[str, Any]) -> dict[int, tuple[float, ...]]:
+    dimensions = fixture["recipe_design"]["ranges"]
+    vectors = {}
+    for row in recipe_rows(fixture):
+        vectors[int(row["recipe_index"])] = tuple(
+            (float(row[name]) - float(bounds[0]))
+            / (float(bounds[1]) - float(bounds[0]))
+            for name, bounds in dimensions.items()
+        )
+    return vectors
+
+
+def _distance(left: tuple[float, ...], right: tuple[float, ...]) -> float:
+    return math.sqrt(sum((a - b) ** 2 for a, b in zip(left, right, strict=True)))
+
+
+def coarse_recipe_indices(
+    fixture: dict[str, Any], staged: dict[str, Any]
+) -> list[int]:
+    vectors = _normalized_recipe_vectors(fixture)
+    count = staged["stage_a_coarse"]["recipe_selection"]["count"]
+    selected = [min(vectors)]
+    while len(selected) < count:
+        remaining = [index for index in vectors if index not in selected]
+        selected.append(
+            min(
+                remaining,
+                key=lambda index: (
+                    -min(_distance(vectors[index], vectors[used]) for used in selected),
+                    index,
+                ),
+            )
+        )
+    return selected
+
+
+def primary_failure(row: dict[str, Any]) -> str:
+    if not row.get("finite", True) or not row.get("overflow_zero", True):
+        return "NONFINITE_OR_OVERFLOW"
+    if row.get("neighbor_contact"):
+        return "NEIGHBOR_CONTACT"
+    if row.get("bottom_out_overflow"):
+        return "BOTTOM_OUT"
+    if row.get("auto_repeat_count", 0):
+        return "AUTO_REPEAT"
+    if row.get("double_actuation") or row.get("actuation_count", 0) > 1:
+        return "DOUBLE_ACTUATION"
+    if row.get("partial_press") or row.get("actuation_count", 0) == 0:
+        return "PARTIAL_PRESS"
+    if not row.get("release_complete"):
+        return "RELEASE_INCOMPLETE"
+    if not row.get("force_within_available"):
+        return "FORCE_EXCEEDED"
+    return "ADMITTED"
+
+
+def refinement_plan(
+    fixture: dict[str, Any], staged: dict[str, Any], rows: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Apply the frozen coarse-boundary rule without changing any gate."""
+    coarse = coarse_recipe_indices(fixture, staged)
+    vectors = _normalized_recipe_vectors(fixture)
+    grouped: dict[tuple[str, ...], dict[int, list[dict[str, Any]]]] = {}
+    identity_fields = ("target_id", "profile_id", "tip_id", "scenario_id")
+    for row in rows:
+        key = tuple(str(row[field]) for field in identity_fields)
+        grouped.setdefault(key, {}).setdefault(int(row["recipe_index"]), []).append(row)
+    boundaries = []
+    refine = []
+    for key, recipes in sorted(grouped.items()):
+        if set(recipes) != set(coarse):
+            raise ValueError(f"coarse recipe population incomplete for {key}")
+        admission = {
+            index: {bool(row["admitted"]) for row in sample_rows}
+            for index, sample_rows in recipes.items()
+        }
+        failures = {
+            index: {primary_failure(row) for row in sample_rows}
+            for index, sample_rows in recipes.items()
+        }
+        for index in coarse:
+            nearest = sorted(
+                (other for other in coarse if other != index),
+                key=lambda other: (_distance(vectors[index], vectors[other]), other),
+            )[:3]
+            boundary = (
+                len(admission[index]) > 1
+                or any(admission[index] != admission[other] for other in nearest)
+                or any(failures[index] != failures[other] for other in nearest)
+            )
+            if not boundary:
+                continue
+            boundary_id = {
+                **dict(zip(identity_fields, key, strict=True)),
+                "recipe_index": index,
+            }
+            boundaries.append(boundary_id)
+            unrun = sorted(
+                (candidate for candidate in vectors if candidate not in coarse),
+                key=lambda candidate: (
+                    _distance(vectors[index], vectors[candidate]),
+                    candidate,
+                ),
+            )[: staged["stage_b_refinement"]["maximum_new_recipe_indices_per_boundary"]]
+            refine.extend({**boundary_id, "recipe_index": candidate} for candidate in unrun)
+    unique = {
+        tuple(row[field] for field in (*identity_fields, "recipe_index")): row
+        for row in refine
+    }
+    result = {
+        "schema": "tactevra.ws2_refinement_plan.v1",
+        "scope": SCOPE,
+        "campaign_fixture_sha256": fixture["fixture_sha256"],
+        "staged_fixture_sha256": staged["fixture_sha256"],
+        "coarse_recipe_indices": coarse,
+        "group_count": len(grouped),
+        "boundary_count": len(boundaries),
+        "boundaries": boundaries,
+        "refinement_identity_count": len(unique),
+        "refinement_identities": [unique[key] for key in sorted(unique)],
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "physical_authority": False,
+    }
+    result["plan_sha256"] = _sha_value(result)
+    return result
 
 
 def build_manifest(fixture: dict[str, Any], *, workspace: Path) -> dict[str, Any]:
@@ -596,13 +757,16 @@ def run_smoke_worker(
         target["half_extent_mm"],
         float(catalog["keyboard"]["pitch_mm"]),
     )
+    overall_started = time.perf_counter()
     model = mujoco.MjModel.from_xml_string(xml)
     seed_data = mujoco.MjData(model)
     wp.init()
     wp.set_device(device_name)
     device = wp.get_device()
+    free_before = int(device.free_memory)
     warp_model = mjw.put_model(model)
     data = mjw.put_data(model, seed_data, nworld=nworld)
+    free_after_allocation = int(device.free_memory)
     zeros = np.zeros((nworld, model.nq), dtype=np.float32)
     data.qpos.assign(zeros)
     data.qvel.assign(zeros)
@@ -700,6 +864,8 @@ def run_smoke_worker(
             )
     wp.synchronize_device(device)
     elapsed_seconds = time.perf_counter() - started
+    free_after_run = int(device.free_memory)
+    memory_delta = max(0, free_before - min(free_after_allocation, free_after_run))
     final_qpos = np.asarray(data.qpos.numpy(), dtype=np.float64)
     final_qvel = np.asarray(data.qvel.numpy(), dtype=np.float64)
     overflow = np.asarray(data.overflow.numpy(), dtype=np.int64)
@@ -765,6 +931,10 @@ def run_smoke_worker(
         "settle_steps": settle_steps,
         "motion_steps": total_steps if settle_pass else 0,
         "elapsed_seconds": elapsed_seconds,
+        "wall_elapsed_seconds": time.perf_counter() - overall_started,
+        "device_total_memory_bytes": int(device.total_memory),
+        "device_memory_delta_bytes": memory_delta,
+        "device_memory_delta_fraction": memory_delta / int(device.total_memory),
         "finite": finite,
         "overflow_zero": bool((overflow == 0).all()),
         "rows": rows,
