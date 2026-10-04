@@ -1,0 +1,150 @@
+{
+  "bindings": {
+    "collision_design_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_collision_design_v1.json",
+      "sha256": "ac85a5debd5609f2660baa923effa1a3220cb7c883c3c5ff52469cff74f16dc8"
+    },
+    "park_screen": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\joint_park_camera_screen_v1.json",
+      "sha256": "9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed"
+    },
+    "pose_bundle": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2u\\nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+    }
+  },
+  "claim_commit": "83bc24bbe9270e65f1bb501fd88d46a7fa1491f0",
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "A route passes only if every Cartesian waypoint has IK and every discrete sample is clear of potentially consequential collision.",
+    "B/C robustness requires every frozen cable and tool endpoint to pass; reference park feasibility is ranking evidence only.",
+    "Every collision is attributed to stage, ASCEND/TRANSIT/DESCEND or pad phase, exact body pair, and endpoint identity.",
+    "Pad mode removes the keyboard body and adds the pad; tool-pad contact is expected only during PRESS and within the frozen contact-depth range.",
+    "Any other pad contact, IK failure, nonfinite value, unclassified pair, or missing target stops the applicable claim.",
+    "No production park pose, planner, collision exclusion, or installed geometry is created."
+  ],
+  "fixture_sha256": "e112e6991042a0766c8567dc6595f76e4d22b212b7efce0c6edc15d010f5ff57",
+  "limitations": [
+    "All waypoint heights, cable/tool endpoints, tray dimensions, locating repeatability, and contact depths are synthetic ranges.",
+    "Discrete collision samples do not prove continuous swept-volume clearance.",
+    "RRT-Connect is a named arm-runtime fallback, not implemented here.",
+    "Physical visibility, repeatability, contact, and collision qualification remain blocked."
+  ],
+  "outputs": [
+    "park_path_feasibility_ranking",
+    "stage_b_c_phase_collision_attribution",
+    "swappable_pad_screen",
+    "preserved_failures"
+  ],
+  "ownership": {
+    "ai_boundary_changed": false,
+    "motion_policy_installed": false,
+    "production_planning_owner": "deterministic arm runtime",
+    "prototype_location": "AI/model simulation lane"
+  },
+  "schema": "tactevra.first_motion_clearance_waypoint_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "swappable_pad": {
+    "approach_mm_range": [
+      2.0,
+      5.0
+    ],
+    "center_board_xy_mm": [
+      242.5,
+      158.5
+    ],
+    "contact_depth_mm_range": [
+      0.5,
+      3.0
+    ],
+    "depth_mm_range": [
+      100.0,
+      147.0
+    ],
+    "expected_contact_condition": "only target surface, only PRESS, only within frozen contact-depth range",
+    "expected_contact_pair": "attachment:contact_tool|workcell:test_pad",
+    "expected_contact_phase": "PRESS",
+    "hover_mm_range": [
+      10.0,
+      30.0
+    ],
+    "keyboard_present_in_pad_mode": false,
+    "locating_repeatability_mm_range": [
+      0.1,
+      1.0
+    ],
+    "locating_yaw_deg_range": [
+      0.05,
+      0.5
+    ],
+    "mount": "KEYBOARD_REPLACEMENT_TRAY_WITH_LOCATING_PINS",
+    "section_sha256": "5123b3b71e67c3efc47af6c70cca836f1a17e0ded2cfe74b10e52030c4f942f7",
+    "thickness_mm_range": [
+      3.0,
+      15.0
+    ],
+    "top_board_z_mm_range": [
+      8.0,
+      21.0
+    ],
+    "variant_sampling": "baseline plus one-factor endpoint variants",
+    "width_mm_range": [
+      250.0,
+      315.0
+    ]
+  },
+  "waypoint_study": {
+    "fallback": "If clearance waypoints fail, record RRT_CONNECT_REQUIRED_FOR_ARM_RUNTIME_STUDY; do not implement an AI-lane planner.",
+    "hover_height_above_contact_mm_range": [
+      5.0,
+      30.0
+    ],
+    "park_feasibility_target_scope": "ALL_46_BOUND_KEYBOARD_TARGETS",
+    "park_pose_ids": [
+      "halton-0299",
+      "halton-0258",
+      "halton-0573"
+    ],
+    "park_score_order": [
+      "feasible_target_count_desc",
+      "camera_rank_asc",
+      "minimum_joint_margin_desc"
+    ],
+    "reference_screen_for_park_scoring": {
+      "cable_anchor_x_mm": 225.0,
+      "cable_anchor_z_mm": 100.0,
+      "cable_radius_mm": 2.0,
+      "cable_sag_fraction": 0.25,
+      "tool_length_mm": 80.0,
+      "tool_radius_mm": 1.0
+    },
+    "robust_screen": "ALL_16_CABLE_AND_4_TOOL_ENDPOINTS_FOR_STAGE_B_AND_STAGE_C_G",
+    "samples_per_cartesian_leg": 9,
+    "section_sha256": "0f6f4d758e04305758db033753a09a79edb2d0b8290834decb77e5644ef47383",
+    "stage_b_route": [
+      "ASCEND",
+      "TRANSIT",
+      "DESCEND"
+    ],
+    "stage_c_route": [
+      "ASCEND",
+      "TRANSIT",
+      "DESCEND"
+    ],
+    "target_ids_for_stage_c": [
+      "G"
+    ],
+    "transit_height_board_z_mm_range": [
+      60.0,
+      100.0,
+      140.0
+    ]
+  }
+}

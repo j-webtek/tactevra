@@ -492,3 +492,7 @@ The tracked-file ceiling is 6,366 after adding the zero-authority Workstream 7 c
 The tracked-file ceiling is 6,368 after adding the evidence-ledger append-only
 policy check and its regression tests. The check compares the current ledger
 with its Git-history prefix and rejects deletion, rewriting, or reordering.
+
+The tracked-file ceiling is 6,369 after freezing the compact Workstream 7
+clearance-waypoint and swappable-pad fixture. Generated routes, collision rows,
+and receipts remain external and hash-bound.
