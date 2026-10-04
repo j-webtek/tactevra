@@ -1,0 +1,30 @@
+{
+  "camera_center_board_xy_mm": [
+    333.5044034818228,
+    228.5
+  ],
+  "capsule_result_sha256": "3424b3f5b90ff9fff06202e0192b14d5b8f8059b365c2c08fda146e7bb34d5a0",
+  "exact_command": "$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\\IsaacSim\\env_6_1_0\\Scripts\\python.exe C:\\IsaacSim\\evidence\\issue190\\camera_family\\run_nadir_height_official_mesh_gate_v1_4.py",
+  "fixture": {
+    "path": "C:\\IsaacSim\\evidence\\issue190\\camera_family\\nadir_height_official_mesh_gate_v1_4.json",
+    "sha256": "c6bdbdc3ab216cd2e4e6fdb01c67975f43dc16c664af08e68555c82f18767f04"
+  },
+  "hardware_writes": 0,
+  "heights_board_mm": [
+    700,
+    850,
+    1000
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "pose_id": "halton-0157",
+  "renderer": {
+    "path": "C:\\IsaacSim\\evidence\\issue190\\camera_family\\run_nadir_height_official_mesh_gate_v1_4.py",
+    "sha256": "1683b7896057b6fc23bfb840fd9967428a3fa85d99dfd60c8a47feebdf8e212a"
+  },
+  "result_present": false,
+  "schema": "tactevra.ai_paired_height_v1_4_official_mesh_plan.v1",
+  "scope": "SYNTHETIC_OFFICIAL_VISUAL_MESH_GATE_NO_PHYSICAL_AUTHORITY",
+  "source_commit": "1b4f319f",
+  "status": "FROZEN_BEFORE_RESULT"
+}
