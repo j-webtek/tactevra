@@ -22,7 +22,7 @@ class StoryboardShotLibraryTest(unittest.TestCase):
         cls.canonical = json.loads(CANONICAL.read_text(encoding="utf-8"))
         cls.library = json.loads(LIBRARY.read_text(encoding="utf-8"))
 
-    def test_every_scene_has_primary_and_alternate_coverage(self):
+    def test_every_scene_has_four_way_coverage(self):
         for scene_id in range(1, 18):
             variants = {
                 asset["variant"]
@@ -31,6 +31,22 @@ class StoryboardShotLibraryTest(unittest.TestCase):
             }
             self.assertIn("primary", variants)
             self.assertIn("alternate", variants)
+            self.assertIn("cinematic_a", variants)
+            self.assertIn("cinematic_b", variants)
+
+    def test_cinematic_coverage_has_explicit_motion_designs(self):
+        cinematic = [
+            asset for asset in self.library["assets"]
+            if asset["variant"].startswith("cinematic_")
+        ]
+        self.assertEqual(len(cinematic), 34)
+        self.assertEqual(
+            {asset["motion_design"]["type"] for asset in cinematic},
+            {"radial", "orbit", "offset", "pan"},
+        )
+        for asset in cinematic:
+            self.assertEqual(asset["camera_motion"], asset["motion_design"]["name"])
+            self.assertEqual(asset["editorial_role"], "cinematic_motion_coverage")
 
     def test_primary_coverage_matches_canonical_timing_and_rig(self):
         primary = {
@@ -46,7 +62,7 @@ class StoryboardShotLibraryTest(unittest.TestCase):
 
     def test_assets_are_unique_renderable_and_timed(self):
         assets = self.library["assets"]
-        self.assertEqual(self.library["asset_count"], 36)
+        self.assertEqual(self.library["asset_count"], 70)
         self.assertEqual(len({asset["asset_id"] for asset in assets}), len(assets))
         for asset in assets:
             self.assertIn(asset["rig"], KNOWN_RIGS)
@@ -61,6 +77,15 @@ class StoryboardShotLibraryTest(unittest.TestCase):
         self.assertEqual(profiles["draft"]["resolution"], [640, 360])
         self.assertEqual(profiles["review"]["resolution"], [960, 540])
         self.assertEqual(profiles["master"]["resolution"], [1920, 1080])
+
+    def test_coverage_summary_matches_assets(self):
+        summary = self.library["coverage_summary"]
+        self.assertEqual(summary["scene_count"], 17)
+        self.assertEqual(summary["choices_per_scene"], 4)
+        self.assertEqual(summary["detail_insert_count"], 2)
+        self.assertEqual(summary["cinematic_asset_count"], 34)
+        self.assertIn("arc_left_to_right", summary["motion_palette"])
+        self.assertIn("truck_left_to_right", summary["motion_palette"])
 
 
 if __name__ == "__main__":

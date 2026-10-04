@@ -80,6 +80,44 @@ ALTERNATES = {
     17: ("dolly", "closer_brand_resolve_with_workcell_context"),
 }
 
+MOTION_DESIGNS = {
+    "slow_push": {"type": "radial", "start_scale": 1.12, "end_scale": 0.92, "z_start": 0.025, "z_end": 0.0},
+    "slow_pull": {"type": "radial", "start_scale": 0.92, "end_scale": 1.16, "z_start": 0.0, "z_end": 0.04},
+    "micro_push": {"type": "radial", "start_scale": 1.06, "end_scale": 0.95, "z_start": 0.012, "z_end": 0.0},
+    "arc_left_to_right": {"type": "orbit", "start_degrees": -13, "end_degrees": 13, "z_start": 0.035, "z_end": 0.0},
+    "arc_right_to_left": {"type": "orbit", "start_degrees": 13, "end_degrees": -13, "z_start": 0.02, "z_end": 0.0},
+    "low_arc": {"type": "orbit", "start_degrees": -9, "end_degrees": 10, "z_start": -0.025, "z_end": -0.015},
+    "truck_left_to_right": {"type": "offset", "start_offset_m": [-0.16, -0.02, 0.02], "end_offset_m": [0.16, 0.02, 0.02]},
+    "truck_right_to_left": {"type": "offset", "start_offset_m": [0.16, -0.01, 0.02], "end_offset_m": [-0.16, 0.02, 0.02]},
+    "crane_down": {"type": "offset", "start_offset_m": [-0.04, -0.07, 0.18], "end_offset_m": [0.05, 0.03, -0.02]},
+    "crane_up": {"type": "offset", "start_offset_m": [0.04, 0.03, -0.02], "end_offset_m": [-0.05, -0.08, 0.20]},
+    "diagonal_drift": {"type": "offset", "start_offset_m": [-0.13, -0.05, 0.08], "end_offset_m": [0.13, 0.04, -0.015]},
+    "pan_left_to_center": {"type": "pan", "aim_start_offset_m": [-0.07, 0.0, 0.01], "aim_end_offset_m": [0.0, 0.0, 0.0]},
+    "pan_right_to_center": {"type": "pan", "aim_start_offset_m": [0.07, 0.0, 0.01], "aim_end_offset_m": [0.0, 0.0, 0.0]},
+    "pan_left_to_right": {"type": "pan", "aim_start_offset_m": [-0.07, 0.0, 0.01], "aim_end_offset_m": [0.07, 0.0, 0.01]},
+    "overhead_drift": {"type": "offset", "start_offset_m": [-0.10, -0.08, 0.05], "end_offset_m": [0.10, 0.08, -0.03]},
+}
+
+CINEMATIC = {
+    1: (("micro_push", "tension_building_stylus_push"), ("low_arc", "low_contact_reveal")),
+    2: (("pan_left_to_center", "request_console_pan_reveal"), ("slow_push", "request_in_context_push")),
+    3: (("crane_down", "workcell_crane_reveal"), ("arc_left_to_right", "workcell_orbit_reveal")),
+    4: (("truck_left_to_right", "proposal_lateral_track"), ("slow_push", "proposal_context_push")),
+    5: (("overhead_drift", "localization_map_drift"), ("crane_down", "camera_to_workcell_crane")),
+    6: (("slow_push", "rejection_tension_push"), ("pan_right_to_center", "stationary_arm_reveal_pan")),
+    7: (("arc_left_to_right", "permit_toolhead_arc"), ("micro_push", "permit_detail_push")),
+    8: (("low_arc", "joint_chain_contact_arc"), ("micro_push", "key_contact_micro_push")),
+    9: (("truck_left_to_right", "typing_rhythm_track"), ("arc_right_to_left", "typing_rhythm_arc")),
+    10: (("slow_pull", "receipt_reveal_pullback"), ("pan_left_to_center", "display_receipt_pan")),
+    11: (("truck_left_to_right", "parallel_crossing_track"), ("crane_up", "high_clearance_crane")),
+    12: (("arc_left_to_right", "phone_state_orbit"), ("slow_push", "messages_entry_push")),
+    13: (("truck_right_to_left", "phone_tap_lateral_track"), ("arc_right_to_left", "phone_tap_orbit")),
+    14: (("micro_push", "send_permission_push"), ("low_arc", "send_contact_low_arc")),
+    15: (("slow_pull", "dual_receipt_pullback"), ("crane_up", "dual_receipt_crane")),
+    16: (("pan_left_to_right", "evidence_line_pan"), ("diagonal_drift", "evidence_context_drift")),
+    17: (("crane_up", "brand_resolve_crane"), ("slow_pull", "brand_resolve_pullback")),
+}
+
 SUBJECTS = {
     1: "stylus hovering over keyboard r",
     2: "operator display request console",
@@ -168,6 +206,20 @@ def main() -> None:
         assets.append(asset_record(shot, shot["rig"], "primary", "canonical storyboard coverage"))
         alternate_rig, purpose = ALTERNATES[shot["id"]]
         assets.append(asset_record(shot, alternate_rig, "alternate", purpose))
+        for variant, rig, motion in (
+            ("cinematic_a", shot["rig"], CINEMATIC[shot["id"]][0]),
+            ("cinematic_b", alternate_rig, CINEMATIC[shot["id"]][1]),
+        ):
+            motion_name, cinematic_purpose = motion
+            cinematic = asset_record(shot, rig, variant, cinematic_purpose)
+            cinematic["editorial_role"] = "cinematic_motion_coverage"
+            cinematic["motion_design"] = {"name": motion_name, **MOTION_DESIGNS[motion_name]}
+            cinematic["camera_motion"] = motion_name
+            cinematic["system_truth"] = (
+                "presentation simulation; derived camera motion only; robot action, device state, "
+                "timing, and permit semantics remain canonical storyboard v2.1"
+            )
+            assets.append(cinematic)
 
     inserts = [
         {
@@ -234,16 +286,26 @@ def main() -> None:
             "review": {"resolution": [960, 540], "samples": 32, "codec": "h264", "quality": "high"},
             "master": {"resolution": [1920, 1080], "samples": 64, "codec": "h264", "quality": "perc_lossless"},
         },
+        "coverage_summary": {
+            "scene_count": len(canonical["shots"]),
+            "choices_per_scene": 4,
+            "detail_insert_count": len(inserts),
+            "cinematic_asset_count": len(canonical["shots"]) * 2,
+            "motion_palette": sorted(MOTION_DESIGNS),
+        },
         "selection_guidance": {
             "primary": "preserves the current planned edit",
             "alternate": "offers a different scale or spatial reading without changing action",
+            "cinematic_a": "adds a scene-specific moving-camera treatment to the canonical rig",
+            "cinematic_b": "adds a second moving-camera treatment from the alternate rig",
             "insert": "short detail coverage intended to be cut inside its parent scene",
             "continuity_rule": "never join shots that imply a different robot, tool, device placement, state, or permit scope",
         },
         "asset_count": len(assets),
         "assets": assets,
     }
-    OUTPUT.write_text(json.dumps(library, indent=2) + "\n", encoding="utf-8")
+    with OUTPUT.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(library, indent=2) + "\n")
     print(f"WROTE {OUTPUT} ({len(assets)} assets)")
 
 

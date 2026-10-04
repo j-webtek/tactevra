@@ -33,13 +33,38 @@
       "quality": "perc_lossless"
     }
   },
+  "coverage_summary": {
+    "scene_count": 17,
+    "choices_per_scene": 4,
+    "detail_insert_count": 2,
+    "cinematic_asset_count": 34,
+    "motion_palette": [
+      "arc_left_to_right",
+      "arc_right_to_left",
+      "crane_down",
+      "crane_up",
+      "diagonal_drift",
+      "low_arc",
+      "micro_push",
+      "overhead_drift",
+      "pan_left_to_center",
+      "pan_left_to_right",
+      "pan_right_to_center",
+      "slow_pull",
+      "slow_push",
+      "truck_left_to_right",
+      "truck_right_to_left"
+    ]
+  },
   "selection_guidance": {
     "primary": "preserves the current planned edit",
     "alternate": "offers a different scale or spatial reading without changing action",
+    "cinematic_a": "adds a scene-specific moving-camera treatment to the canonical rig",
+    "cinematic_b": "adds a second moving-camera treatment from the alternate rig",
     "insert": "short detail coverage intended to be cut inside its parent scene",
     "continuity_rule": "never join shots that imply a different robot, tool, device placement, state, or permit scope"
   },
-  "asset_count": 36,
+  "asset_count": 70,
   "assets": [
     {
       "asset_id": "s01_cold-open-r-hover__primary",
@@ -100,6 +125,80 @@
       "poster_path": "posters/s01_cold-open-r-hover__alternate.jpg"
     },
     {
+      "asset_id": "s01_cold-open-r-hover__cinematic_a",
+      "scene_id": 1,
+      "scene_slug": "cold-open-r-hover",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "tension_building_stylus_push",
+      "stage": null,
+      "subject": "stylus hovering over keyboard r",
+      "rig": "macro",
+      "framing": "extreme_close_up",
+      "lens_mm": 72,
+      "camera_motion": "micro_push",
+      "editorial_strength": "detail and contact mechanics",
+      "frame_start": 1,
+      "frame_end": 96,
+      "frame_count": 96,
+      "duration_seconds": 4.0,
+      "recommended_edit_seconds": [
+        1.25,
+        4.0
+      ],
+      "continuity_requirement": "hold unresolved uncertainty; no contact",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s01_cold-open-r-hover__cinematic_a.mp4",
+      "poster_path": "posters/s01_cold-open-r-hover__cinematic_a.jpg",
+      "motion_design": {
+        "name": "micro_push",
+        "type": "radial",
+        "start_scale": 1.06,
+        "end_scale": 0.95,
+        "z_start": 0.012,
+        "z_end": 0.0
+      }
+    },
+    {
+      "asset_id": "s01_cold-open-r-hover__cinematic_b",
+      "scene_id": 1,
+      "scene_slug": "cold-open-r-hover",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "low_contact_reveal",
+      "stage": null,
+      "subject": "stylus hovering over keyboard r",
+      "rig": "low_three_quarter",
+      "framing": "low_three_quarter_medium",
+      "lens_mm": 58,
+      "camera_motion": "low_arc",
+      "editorial_strength": "arm silhouette and toolhead readability",
+      "frame_start": 1,
+      "frame_end": 96,
+      "frame_count": 96,
+      "duration_seconds": 4.0,
+      "recommended_edit_seconds": [
+        1.25,
+        4.0
+      ],
+      "continuity_requirement": "hold unresolved uncertainty; no contact",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s01_cold-open-r-hover__cinematic_b.mp4",
+      "poster_path": "posters/s01_cold-open-r-hover__cinematic_b.jpg",
+      "motion_design": {
+        "name": "low_arc",
+        "type": "orbit",
+        "start_degrees": -9,
+        "end_degrees": 10,
+        "z_start": -0.025,
+        "z_end": -0.015
+      }
+    },
+    {
       "asset_id": "s02_operator-request__primary",
       "scene_id": 2,
       "scene_slug": "operator-request",
@@ -156,6 +255,86 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s02_operator-request__alternate.mp4",
       "poster_path": "posters/s02_operator-request__alternate.jpg"
+    },
+    {
+      "asset_id": "s02_operator-request__cinematic_a",
+      "scene_id": 2,
+      "scene_slug": "operator-request",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "request_console_pan_reveal",
+      "stage": null,
+      "subject": "operator display request console",
+      "rig": "macro",
+      "framing": "extreme_close_up",
+      "lens_mm": 72,
+      "camera_motion": "pan_left_to_center",
+      "editorial_strength": "detail and contact mechanics",
+      "frame_start": 97,
+      "frame_end": 216,
+      "frame_count": 120,
+      "duration_seconds": 5.0,
+      "recommended_edit_seconds": [
+        1.25,
+        5.0
+      ],
+      "continuity_requirement": "display remains physically separate from both controlled devices",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s02_operator-request__cinematic_a.mp4",
+      "poster_path": "posters/s02_operator-request__cinematic_a.jpg",
+      "motion_design": {
+        "name": "pan_left_to_center",
+        "type": "pan",
+        "aim_start_offset_m": [
+          -0.07,
+          0.0,
+          0.01
+        ],
+        "aim_end_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "asset_id": "s02_operator-request__cinematic_b",
+      "scene_id": 2,
+      "scene_slug": "operator-request",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "request_in_context_push",
+      "stage": null,
+      "subject": "operator display request console",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "slow_push",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 97,
+      "frame_end": 216,
+      "frame_count": 120,
+      "duration_seconds": 5.0,
+      "recommended_edit_seconds": [
+        1.25,
+        5.0
+      ],
+      "continuity_requirement": "display remains physically separate from both controlled devices",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s02_operator-request__cinematic_b.mp4",
+      "poster_path": "posters/s02_operator-request__cinematic_b.jpg",
+      "motion_design": {
+        "name": "slow_push",
+        "type": "radial",
+        "start_scale": 1.12,
+        "end_scale": 0.92,
+        "z_start": 0.025,
+        "z_end": 0.0
+      }
     },
     {
       "asset_id": "s03_workcell-reveal__primary",
@@ -216,6 +395,86 @@
       "poster_path": "posters/s03_workcell-reveal__alternate.jpg"
     },
     {
+      "asset_id": "s03_workcell-reveal__cinematic_a",
+      "scene_id": 3,
+      "scene_slug": "workcell-reveal",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "workcell_crane_reveal",
+      "stage": null,
+      "subject": "complete measured workcell",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "crane_down",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 217,
+      "frame_end": 360,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "preserve board, device, arm, and operator-display placement",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s03_workcell-reveal__cinematic_a.mp4",
+      "poster_path": "posters/s03_workcell-reveal__cinematic_a.jpg",
+      "motion_design": {
+        "name": "crane_down",
+        "type": "offset",
+        "start_offset_m": [
+          -0.04,
+          -0.07,
+          0.18
+        ],
+        "end_offset_m": [
+          0.05,
+          0.03,
+          -0.02
+        ]
+      }
+    },
+    {
+      "asset_id": "s03_workcell-reveal__cinematic_b",
+      "scene_id": 3,
+      "scene_slug": "workcell-reveal",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "workcell_orbit_reveal",
+      "stage": null,
+      "subject": "complete measured workcell",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "arc_left_to_right",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 217,
+      "frame_end": 360,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "preserve board, device, arm, and operator-display placement",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s03_workcell-reveal__cinematic_b.mp4",
+      "poster_path": "posters/s03_workcell-reveal__cinematic_b.jpg",
+      "motion_design": {
+        "name": "arc_left_to_right",
+        "type": "orbit",
+        "start_degrees": -13,
+        "end_degrees": 13,
+        "z_start": 0.035,
+        "z_end": 0.0
+      }
+    },
+    {
       "asset_id": "s04_amber-model-proposal__primary",
       "scene_id": 4,
       "scene_slug": "amber-model-proposal",
@@ -272,6 +531,86 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s04_amber-model-proposal__alternate.mp4",
       "poster_path": "posters/s04_amber-model-proposal__alternate.jpg"
+    },
+    {
+      "asset_id": "s04_amber-model-proposal__cinematic_a",
+      "scene_id": 4,
+      "scene_slug": "amber-model-proposal",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "proposal_lateral_track",
+      "stage": "UNDERSTAND",
+      "subject": "amber model proposal and locked runtime fields",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "truck_left_to_right",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 361,
+      "frame_end": 504,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "amber means proposal, never authority",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s04_amber-model-proposal__cinematic_a.mp4",
+      "poster_path": "posters/s04_amber-model-proposal__cinematic_a.jpg",
+      "motion_design": {
+        "name": "truck_left_to_right",
+        "type": "offset",
+        "start_offset_m": [
+          -0.16,
+          -0.02,
+          0.02
+        ],
+        "end_offset_m": [
+          0.16,
+          0.02,
+          0.02
+        ]
+      }
+    },
+    {
+      "asset_id": "s04_amber-model-proposal__cinematic_b",
+      "scene_id": 4,
+      "scene_slug": "amber-model-proposal",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "proposal_context_push",
+      "stage": "UNDERSTAND",
+      "subject": "amber model proposal and locked runtime fields",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "slow_push",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 361,
+      "frame_end": 504,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "amber means proposal, never authority",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s04_amber-model-proposal__cinematic_b.mp4",
+      "poster_path": "posters/s04_amber-model-proposal__cinematic_b.jpg",
+      "motion_design": {
+        "name": "slow_push",
+        "type": "radial",
+        "start_scale": 1.12,
+        "end_scale": 0.92,
+        "z_start": 0.025,
+        "z_end": 0.0
+      }
     },
     {
       "asset_id": "s05_camera-to-overhead__primary",
@@ -332,6 +671,92 @@
       "poster_path": "posters/s05_camera-to-overhead__alternate.jpg"
     },
     {
+      "asset_id": "s05_camera-to-overhead__cinematic_a",
+      "scene_id": 5,
+      "scene_slug": "camera-to-overhead",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "localization_map_drift",
+      "stage": "LOCATE",
+      "subject": "camera localization of keyboard and phone",
+      "rig": "overhead",
+      "framing": "top_down_wide",
+      "lens_mm": 48,
+      "camera_motion": "overhead_drift",
+      "editorial_strength": "device localization and spatial truth",
+      "frame_start": 505,
+      "frame_end": 672,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "overhead is the camera view, not an omniscient editor view",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s05_camera-to-overhead__cinematic_a.mp4",
+      "poster_path": "posters/s05_camera-to-overhead__cinematic_a.jpg",
+      "motion_design": {
+        "name": "overhead_drift",
+        "type": "offset",
+        "start_offset_m": [
+          -0.1,
+          -0.08,
+          0.05
+        ],
+        "end_offset_m": [
+          0.1,
+          0.08,
+          -0.03
+        ]
+      }
+    },
+    {
+      "asset_id": "s05_camera-to-overhead__cinematic_b",
+      "scene_id": 5,
+      "scene_slug": "camera-to-overhead",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "camera_to_workcell_crane",
+      "stage": "LOCATE",
+      "subject": "camera localization of keyboard and phone",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "crane_down",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 505,
+      "frame_end": 672,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "overhead is the camera view, not an omniscient editor view",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s05_camera-to-overhead__cinematic_b.mp4",
+      "poster_path": "posters/s05_camera-to-overhead__cinematic_b.jpg",
+      "motion_design": {
+        "name": "crane_down",
+        "type": "offset",
+        "start_offset_m": [
+          -0.04,
+          -0.07,
+          0.18
+        ],
+        "end_offset_m": [
+          0.05,
+          0.03,
+          -0.02
+        ]
+      }
+    },
+    {
       "asset_id": "s06_stale-evidence-reject__primary",
       "scene_id": 6,
       "scene_slug": "stale-evidence-reject",
@@ -388,6 +813,86 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s06_stale-evidence-reject__alternate.mp4",
       "poster_path": "posters/s06_stale-evidence-reject__alternate.jpg"
+    },
+    {
+      "asset_id": "s06_stale-evidence-reject__cinematic_a",
+      "scene_id": 6,
+      "scene_slug": "stale-evidence-reject",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "rejection_tension_push",
+      "stage": "CHECK",
+      "subject": "stale evidence rejection with stationary arm",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "slow_push",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 673,
+      "frame_end": 792,
+      "frame_count": 120,
+      "duration_seconds": 5.0,
+      "recommended_edit_seconds": [
+        1.25,
+        5.0
+      ],
+      "continuity_requirement": "arm must remain visibly stationary throughout rejection",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s06_stale-evidence-reject__cinematic_a.mp4",
+      "poster_path": "posters/s06_stale-evidence-reject__cinematic_a.jpg",
+      "motion_design": {
+        "name": "slow_push",
+        "type": "radial",
+        "start_scale": 1.12,
+        "end_scale": 0.92,
+        "z_start": 0.025,
+        "z_end": 0.0
+      }
+    },
+    {
+      "asset_id": "s06_stale-evidence-reject__cinematic_b",
+      "scene_id": 6,
+      "scene_slug": "stale-evidence-reject",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "stationary_arm_reveal_pan",
+      "stage": "CHECK",
+      "subject": "stale evidence rejection with stationary arm",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "pan_right_to_center",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 673,
+      "frame_end": 792,
+      "frame_count": 120,
+      "duration_seconds": 5.0,
+      "recommended_edit_seconds": [
+        1.25,
+        5.0
+      ],
+      "continuity_requirement": "arm must remain visibly stationary throughout rejection",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s06_stale-evidence-reject__cinematic_b.mp4",
+      "poster_path": "posters/s06_stale-evidence-reject__cinematic_b.jpg",
+      "motion_design": {
+        "name": "pan_right_to_center",
+        "type": "pan",
+        "aim_start_offset_m": [
+          0.07,
+          0.0,
+          0.01
+        ],
+        "aim_end_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
     },
     {
       "asset_id": "s07_fresh-evidence-one-permit__primary",
@@ -448,6 +953,80 @@
       "poster_path": "posters/s07_fresh-evidence-one-permit__alternate.jpg"
     },
     {
+      "asset_id": "s07_fresh-evidence-one-permit__cinematic_a",
+      "scene_id": 7,
+      "scene_slug": "fresh-evidence-one-permit",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "permit_toolhead_arc",
+      "stage": "CHECK",
+      "subject": "fresh evidence and one-contact permit",
+      "rig": "low_three_quarter",
+      "framing": "low_three_quarter_medium",
+      "lens_mm": 58,
+      "camera_motion": "arc_left_to_right",
+      "editorial_strength": "arm silhouette and toolhead readability",
+      "frame_start": 793,
+      "frame_end": 960,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "permit is short-lived and limited to the next contact",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s07_fresh-evidence-one-permit__cinematic_a.mp4",
+      "poster_path": "posters/s07_fresh-evidence-one-permit__cinematic_a.jpg",
+      "motion_design": {
+        "name": "arc_left_to_right",
+        "type": "orbit",
+        "start_degrees": -13,
+        "end_degrees": 13,
+        "z_start": 0.035,
+        "z_end": 0.0
+      }
+    },
+    {
+      "asset_id": "s07_fresh-evidence-one-permit__cinematic_b",
+      "scene_id": 7,
+      "scene_slug": "fresh-evidence-one-permit",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "permit_detail_push",
+      "stage": "CHECK",
+      "subject": "fresh evidence and one-contact permit",
+      "rig": "macro",
+      "framing": "extreme_close_up",
+      "lens_mm": 72,
+      "camera_motion": "micro_push",
+      "editorial_strength": "detail and contact mechanics",
+      "frame_start": 793,
+      "frame_end": 960,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "permit is short-lived and limited to the next contact",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s07_fresh-evidence-one-permit__cinematic_b.mp4",
+      "poster_path": "posters/s07_fresh-evidence-one-permit__cinematic_b.jpg",
+      "motion_design": {
+        "name": "micro_push",
+        "type": "radial",
+        "start_scale": 1.06,
+        "end_scale": 0.95,
+        "z_start": 0.012,
+        "z_end": 0.0
+      }
+    },
+    {
       "asset_id": "s08_r-contact-benchmark__primary",
       "scene_id": 8,
       "scene_slug": "r-contact-benchmark",
@@ -504,6 +1083,80 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s08_r-contact-benchmark__alternate.mp4",
       "poster_path": "posters/s08_r-contact-benchmark__alternate.jpg"
+    },
+    {
+      "asset_id": "s08_r-contact-benchmark__cinematic_a",
+      "scene_id": 8,
+      "scene_slug": "r-contact-benchmark",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "joint_chain_contact_arc",
+      "stage": "ACT",
+      "subject": "seven-phase keyboard r contact",
+      "rig": "contact_three_quarter",
+      "framing": "contact_three_quarter_close",
+      "lens_mm": 62,
+      "camera_motion": "low_arc",
+      "editorial_strength": "joint chain and contact depth",
+      "frame_start": 961,
+      "frame_end": 1152,
+      "frame_count": 192,
+      "duration_seconds": 8.0,
+      "recommended_edit_seconds": [
+        1.25,
+        8.0
+      ],
+      "continuity_requirement": "same articulated arm, bare stylus, keyboard, and r key across cut",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s08_r-contact-benchmark__cinematic_a.mp4",
+      "poster_path": "posters/s08_r-contact-benchmark__cinematic_a.jpg",
+      "motion_design": {
+        "name": "low_arc",
+        "type": "orbit",
+        "start_degrees": -9,
+        "end_degrees": 10,
+        "z_start": -0.025,
+        "z_end": -0.015
+      }
+    },
+    {
+      "asset_id": "s08_r-contact-benchmark__cinematic_b",
+      "scene_id": 8,
+      "scene_slug": "r-contact-benchmark",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "key_contact_micro_push",
+      "stage": "ACT",
+      "subject": "seven-phase keyboard r contact",
+      "rig": "macro",
+      "framing": "extreme_close_up",
+      "lens_mm": 72,
+      "camera_motion": "micro_push",
+      "editorial_strength": "detail and contact mechanics",
+      "frame_start": 961,
+      "frame_end": 1152,
+      "frame_count": 192,
+      "duration_seconds": 8.0,
+      "recommended_edit_seconds": [
+        1.25,
+        8.0
+      ],
+      "continuity_requirement": "same articulated arm, bare stylus, keyboard, and r key across cut",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s08_r-contact-benchmark__cinematic_b.mp4",
+      "poster_path": "posters/s08_r-contact-benchmark__cinematic_b.jpg",
+      "motion_design": {
+        "name": "micro_push",
+        "type": "radial",
+        "start_scale": 1.06,
+        "end_scale": 0.95,
+        "z_start": 0.012,
+        "z_end": 0.0
+      }
     },
     {
       "asset_id": "s09_eady-key-rhythm__primary",
@@ -564,6 +1217,86 @@
       "poster_path": "posters/s09_eady-key-rhythm__alternate.jpg"
     },
     {
+      "asset_id": "s09_eady-key-rhythm__cinematic_a",
+      "scene_id": 9,
+      "scene_slug": "eady-key-rhythm",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "typing_rhythm_track",
+      "stage": "ACT",
+      "subject": "e a d y keyboard rhythm",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "truck_left_to_right",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 1153,
+      "frame_end": 1320,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "simplified graphics after the first fully taught contact",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s09_eady-key-rhythm__cinematic_a.mp4",
+      "poster_path": "posters/s09_eady-key-rhythm__cinematic_a.jpg",
+      "motion_design": {
+        "name": "truck_left_to_right",
+        "type": "offset",
+        "start_offset_m": [
+          -0.16,
+          -0.02,
+          0.02
+        ],
+        "end_offset_m": [
+          0.16,
+          0.02,
+          0.02
+        ]
+      }
+    },
+    {
+      "asset_id": "s09_eady-key-rhythm__cinematic_b",
+      "scene_id": 9,
+      "scene_slug": "eady-key-rhythm",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "typing_rhythm_arc",
+      "stage": "ACT",
+      "subject": "e a d y keyboard rhythm",
+      "rig": "contact_three_quarter",
+      "framing": "contact_three_quarter_close",
+      "lens_mm": 62,
+      "camera_motion": "arc_right_to_left",
+      "editorial_strength": "joint chain and contact depth",
+      "frame_start": 1153,
+      "frame_end": 1320,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "simplified graphics after the first fully taught contact",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s09_eady-key-rhythm__cinematic_b.mp4",
+      "poster_path": "posters/s09_eady-key-rhythm__cinematic_b.jpg",
+      "motion_design": {
+        "name": "arc_right_to_left",
+        "type": "orbit",
+        "start_degrees": 13,
+        "end_degrees": -13,
+        "z_start": 0.02,
+        "z_end": 0.0
+      }
+    },
+    {
       "asset_id": "s10_ready-local-receipt__primary",
       "scene_id": 10,
       "scene_slug": "ready-local-receipt",
@@ -620,6 +1353,86 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s10_ready-local-receipt__alternate.mp4",
       "poster_path": "posters/s10_ready-local-receipt__alternate.jpg"
+    },
+    {
+      "asset_id": "s10_ready-local-receipt__cinematic_a",
+      "scene_id": 10,
+      "scene_slug": "ready-local-receipt",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "receipt_reveal_pullback",
+      "stage": "ACT",
+      "subject": "ready receipt on operator display",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "slow_pull",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 1321,
+      "frame_end": 1464,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "operator display reads lowercase ready",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s10_ready-local-receipt__cinematic_a.mp4",
+      "poster_path": "posters/s10_ready-local-receipt__cinematic_a.jpg",
+      "motion_design": {
+        "name": "slow_pull",
+        "type": "radial",
+        "start_scale": 0.92,
+        "end_scale": 1.16,
+        "z_start": 0.0,
+        "z_end": 0.04
+      }
+    },
+    {
+      "asset_id": "s10_ready-local-receipt__cinematic_b",
+      "scene_id": 10,
+      "scene_slug": "ready-local-receipt",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "display_receipt_pan",
+      "stage": "ACT",
+      "subject": "ready receipt on operator display",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "pan_left_to_center",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 1321,
+      "frame_end": 1464,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "operator display reads lowercase ready",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s10_ready-local-receipt__cinematic_b.mp4",
+      "poster_path": "posters/s10_ready-local-receipt__cinematic_b.jpg",
+      "motion_design": {
+        "name": "pan_left_to_center",
+        "type": "pan",
+        "aim_start_offset_m": [
+          -0.07,
+          0.0,
+          0.01
+        ],
+        "aim_end_offset_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
     },
     {
       "asset_id": "s11_keyboard-to-phone-crossing__primary",
@@ -680,6 +1493,92 @@
       "poster_path": "posters/s11_keyboard-to-phone-crossing__alternate.jpg"
     },
     {
+      "asset_id": "s11_keyboard-to-phone-crossing__cinematic_a",
+      "scene_id": 11,
+      "scene_slug": "keyboard-to-phone-crossing",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "parallel_crossing_track",
+      "stage": "ACT",
+      "subject": "high-clearance keyboard-to-phone crossing",
+      "rig": "arm_follow",
+      "framing": "medium_action",
+      "lens_mm": 52,
+      "camera_motion": "truck_left_to_right",
+      "editorial_strength": "continuous physical action",
+      "frame_start": 1465,
+      "frame_end": 1608,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "no contact authority during high-clearance crossing",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s11_keyboard-to-phone-crossing__cinematic_a.mp4",
+      "poster_path": "posters/s11_keyboard-to-phone-crossing__cinematic_a.jpg",
+      "motion_design": {
+        "name": "truck_left_to_right",
+        "type": "offset",
+        "start_offset_m": [
+          -0.16,
+          -0.02,
+          0.02
+        ],
+        "end_offset_m": [
+          0.16,
+          0.02,
+          0.02
+        ]
+      }
+    },
+    {
+      "asset_id": "s11_keyboard-to-phone-crossing__cinematic_b",
+      "scene_id": 11,
+      "scene_slug": "keyboard-to-phone-crossing",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "high_clearance_crane",
+      "stage": "ACT",
+      "subject": "high-clearance keyboard-to-phone crossing",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "crane_up",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 1465,
+      "frame_end": 1608,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "no contact authority during high-clearance crossing",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s11_keyboard-to-phone-crossing__cinematic_b.mp4",
+      "poster_path": "posters/s11_keyboard-to-phone-crossing__cinematic_b.jpg",
+      "motion_design": {
+        "name": "crane_up",
+        "type": "offset",
+        "start_offset_m": [
+          0.04,
+          0.03,
+          -0.02
+        ],
+        "end_offset_m": [
+          -0.05,
+          -0.08,
+          0.2
+        ]
+      }
+    },
+    {
       "asset_id": "s12_phone-state-and-messages__primary",
       "scene_id": 12,
       "scene_slug": "phone-state-and-messages",
@@ -736,6 +1635,80 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s12_phone-state-and-messages__alternate.mp4",
       "poster_path": "posters/s12_phone-state-and-messages__alternate.jpg"
+    },
+    {
+      "asset_id": "s12_phone-state-and-messages__cinematic_a",
+      "scene_id": 12,
+      "scene_slug": "phone-state-and-messages",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "phone_state_orbit",
+      "stage": "ACT",
+      "subject": "phone screen-state check and Messages entry",
+      "rig": "arm_follow",
+      "framing": "medium_action",
+      "lens_mm": 52,
+      "camera_motion": "arc_left_to_right",
+      "editorial_strength": "continuous physical action",
+      "frame_start": 1609,
+      "frame_end": 1776,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "show expected-screen check before first phone tap",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s12_phone-state-and-messages__cinematic_a.mp4",
+      "poster_path": "posters/s12_phone-state-and-messages__cinematic_a.jpg",
+      "motion_design": {
+        "name": "arc_left_to_right",
+        "type": "orbit",
+        "start_degrees": -13,
+        "end_degrees": 13,
+        "z_start": 0.035,
+        "z_end": 0.0
+      }
+    },
+    {
+      "asset_id": "s12_phone-state-and-messages__cinematic_b",
+      "scene_id": 12,
+      "scene_slug": "phone-state-and-messages",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "messages_entry_push",
+      "stage": "ACT",
+      "subject": "phone screen-state check and Messages entry",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "slow_push",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 1609,
+      "frame_end": 1776,
+      "frame_count": 168,
+      "duration_seconds": 7.0,
+      "recommended_edit_seconds": [
+        1.25,
+        7.0
+      ],
+      "continuity_requirement": "show expected-screen check before first phone tap",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s12_phone-state-and-messages__cinematic_b.mp4",
+      "poster_path": "posters/s12_phone-state-and-messages__cinematic_b.jpg",
+      "motion_design": {
+        "name": "slow_push",
+        "type": "radial",
+        "start_scale": 1.12,
+        "end_scale": 0.92,
+        "z_start": 0.025,
+        "z_end": 0.0
+      }
     },
     {
       "asset_id": "s13_phone-on-my-way__primary",
@@ -796,6 +1769,86 @@
       "poster_path": "posters/s13_phone-on-my-way__alternate.jpg"
     },
     {
+      "asset_id": "s13_phone-on-my-way__cinematic_a",
+      "scene_id": 13,
+      "scene_slug": "phone-on-my-way",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "phone_tap_lateral_track",
+      "stage": "ACT",
+      "subject": "on my way phone tap sequence",
+      "rig": "arm_follow",
+      "framing": "medium_action",
+      "lens_mm": 52,
+      "camera_motion": "truck_right_to_left",
+      "editorial_strength": "continuous physical action",
+      "frame_start": 1777,
+      "frame_end": 1968,
+      "frame_count": 192,
+      "duration_seconds": 8.0,
+      "recommended_edit_seconds": [
+        1.25,
+        8.0
+      ],
+      "continuity_requirement": "show 2x disclosure during compressed middle taps",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s13_phone-on-my-way__cinematic_a.mp4",
+      "poster_path": "posters/s13_phone-on-my-way__cinematic_a.jpg",
+      "motion_design": {
+        "name": "truck_right_to_left",
+        "type": "offset",
+        "start_offset_m": [
+          0.16,
+          -0.01,
+          0.02
+        ],
+        "end_offset_m": [
+          -0.16,
+          0.02,
+          0.02
+        ]
+      }
+    },
+    {
+      "asset_id": "s13_phone-on-my-way__cinematic_b",
+      "scene_id": 13,
+      "scene_slug": "phone-on-my-way",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "phone_tap_orbit",
+      "stage": "ACT",
+      "subject": "on my way phone tap sequence",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "arc_right_to_left",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 1777,
+      "frame_end": 1968,
+      "frame_count": 192,
+      "duration_seconds": 8.0,
+      "recommended_edit_seconds": [
+        1.25,
+        8.0
+      ],
+      "continuity_requirement": "show 2x disclosure during compressed middle taps",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s13_phone-on-my-way__cinematic_b.mp4",
+      "poster_path": "posters/s13_phone-on-my-way__cinematic_b.jpg",
+      "motion_design": {
+        "name": "arc_right_to_left",
+        "type": "orbit",
+        "start_degrees": 13,
+        "end_degrees": -13,
+        "z_start": 0.02,
+        "z_end": 0.0
+      }
+    },
+    {
       "asset_id": "s14_phone-send-permit__primary",
       "scene_id": 14,
       "scene_slug": "phone-send-permit",
@@ -852,6 +1905,80 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s14_phone-send-permit__alternate.mp4",
       "poster_path": "posters/s14_phone-send-permit__alternate.jpg"
+    },
+    {
+      "asset_id": "s14_phone-send-permit__cinematic_a",
+      "scene_id": 14,
+      "scene_slug": "phone-send-permit",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "send_permission_push",
+      "stage": "ACT",
+      "subject": "separately permitted Send tap",
+      "rig": "macro",
+      "framing": "extreme_close_up",
+      "lens_mm": 72,
+      "camera_motion": "micro_push",
+      "editorial_strength": "detail and contact mechanics",
+      "frame_start": 1969,
+      "frame_end": 2088,
+      "frame_count": 120,
+      "duration_seconds": 5.0,
+      "recommended_edit_seconds": [
+        1.25,
+        5.0
+      ],
+      "continuity_requirement": "Send receives its own final permit and result reads Sent",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s14_phone-send-permit__cinematic_a.mp4",
+      "poster_path": "posters/s14_phone-send-permit__cinematic_a.jpg",
+      "motion_design": {
+        "name": "micro_push",
+        "type": "radial",
+        "start_scale": 1.06,
+        "end_scale": 0.95,
+        "z_start": 0.012,
+        "z_end": 0.0
+      }
+    },
+    {
+      "asset_id": "s14_phone-send-permit__cinematic_b",
+      "scene_id": 14,
+      "scene_slug": "phone-send-permit",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "send_contact_low_arc",
+      "stage": "ACT",
+      "subject": "separately permitted Send tap",
+      "rig": "arm_follow",
+      "framing": "medium_action",
+      "lens_mm": 52,
+      "camera_motion": "low_arc",
+      "editorial_strength": "continuous physical action",
+      "frame_start": 1969,
+      "frame_end": 2088,
+      "frame_count": 120,
+      "duration_seconds": 5.0,
+      "recommended_edit_seconds": [
+        1.25,
+        5.0
+      ],
+      "continuity_requirement": "Send receives its own final permit and result reads Sent",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s14_phone-send-permit__cinematic_b.mp4",
+      "poster_path": "posters/s14_phone-send-permit__cinematic_b.jpg",
+      "motion_design": {
+        "name": "low_arc",
+        "type": "orbit",
+        "start_degrees": -9,
+        "end_degrees": 10,
+        "z_start": -0.025,
+        "z_end": -0.015
+      }
     },
     {
       "asset_id": "s15_independent-receipts__primary",
@@ -912,6 +2039,86 @@
       "poster_path": "posters/s15_independent-receipts__alternate.jpg"
     },
     {
+      "asset_id": "s15_independent-receipts__cinematic_a",
+      "scene_id": 15,
+      "scene_slug": "independent-receipts",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "dual_receipt_pullback",
+      "stage": "VERIFY",
+      "subject": "local and phone receipts",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "slow_pull",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 2089,
+      "frame_end": 2232,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "receipts belong to separate local and phone workflows",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s15_independent-receipts__cinematic_a.mp4",
+      "poster_path": "posters/s15_independent-receipts__cinematic_a.jpg",
+      "motion_design": {
+        "name": "slow_pull",
+        "type": "radial",
+        "start_scale": 0.92,
+        "end_scale": 1.16,
+        "z_start": 0.0,
+        "z_end": 0.04
+      }
+    },
+    {
+      "asset_id": "s15_independent-receipts__cinematic_b",
+      "scene_id": 15,
+      "scene_slug": "independent-receipts",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "dual_receipt_crane",
+      "stage": "VERIFY",
+      "subject": "local and phone receipts",
+      "rig": "arm_follow",
+      "framing": "medium_action",
+      "lens_mm": 52,
+      "camera_motion": "crane_up",
+      "editorial_strength": "continuous physical action",
+      "frame_start": 2089,
+      "frame_end": 2232,
+      "frame_count": 144,
+      "duration_seconds": 6.0,
+      "recommended_edit_seconds": [
+        1.25,
+        6.0
+      ],
+      "continuity_requirement": "receipts belong to separate local and phone workflows",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s15_independent-receipts__cinematic_b.mp4",
+      "poster_path": "posters/s15_independent-receipts__cinematic_b.jpg",
+      "motion_design": {
+        "name": "crane_up",
+        "type": "offset",
+        "start_offset_m": [
+          0.04,
+          0.03,
+          -0.02
+        ],
+        "end_offset_m": [
+          -0.05,
+          -0.08,
+          0.2
+        ]
+      }
+    },
+    {
       "asset_id": "s16_evidence-trail__primary",
       "scene_id": 16,
       "scene_slug": "evidence-trail",
@@ -970,6 +2177,92 @@
       "poster_path": "posters/s16_evidence-trail__alternate.jpg"
     },
     {
+      "asset_id": "s16_evidence-trail__cinematic_a",
+      "scene_id": 16,
+      "scene_slug": "evidence-trail",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "evidence_line_pan",
+      "stage": null,
+      "subject": "compact evidence trail",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "pan_left_to_right",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 2233,
+      "frame_end": 2304,
+      "frame_count": 72,
+      "duration_seconds": 3.0,
+      "recommended_edit_seconds": [
+        1.25,
+        3.0
+      ],
+      "continuity_requirement": "show evidence summary, not an unreadable log wall",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s16_evidence-trail__cinematic_a.mp4",
+      "poster_path": "posters/s16_evidence-trail__cinematic_a.jpg",
+      "motion_design": {
+        "name": "pan_left_to_right",
+        "type": "pan",
+        "aim_start_offset_m": [
+          -0.07,
+          0.0,
+          0.01
+        ],
+        "aim_end_offset_m": [
+          0.07,
+          0.0,
+          0.01
+        ]
+      }
+    },
+    {
+      "asset_id": "s16_evidence-trail__cinematic_b",
+      "scene_id": 16,
+      "scene_slug": "evidence-trail",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "evidence_context_drift",
+      "stage": null,
+      "subject": "compact evidence trail",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "diagonal_drift",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 2233,
+      "frame_end": 2304,
+      "frame_count": 72,
+      "duration_seconds": 3.0,
+      "recommended_edit_seconds": [
+        1.25,
+        3.0
+      ],
+      "continuity_requirement": "show evidence summary, not an unreadable log wall",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s16_evidence-trail__cinematic_b.mp4",
+      "poster_path": "posters/s16_evidence-trail__cinematic_b.jpg",
+      "motion_design": {
+        "name": "diagonal_drift",
+        "type": "offset",
+        "start_offset_m": [
+          -0.13,
+          -0.05,
+          0.08
+        ],
+        "end_offset_m": [
+          0.13,
+          0.04,
+          -0.015
+        ]
+      }
+    },
+    {
       "asset_id": "s17_brand-resolve__primary",
       "scene_id": 17,
       "scene_slug": "brand-resolve",
@@ -1026,6 +2319,86 @@
       "review_status": "generated_for_editorial_review",
       "clip_path": "clips/s17_brand-resolve__alternate.mp4",
       "poster_path": "posters/s17_brand-resolve__alternate.jpg"
+    },
+    {
+      "asset_id": "s17_brand-resolve__cinematic_a",
+      "scene_id": 17,
+      "scene_slug": "brand-resolve",
+      "variant": "cinematic_a",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "brand_resolve_crane",
+      "stage": null,
+      "subject": "Tactevra brand resolve",
+      "rig": "hero",
+      "framing": "wide_establishing",
+      "lens_mm": 44,
+      "camera_motion": "crane_up",
+      "editorial_strength": "whole-workcell geography",
+      "frame_start": 2305,
+      "frame_end": 2400,
+      "frame_count": 96,
+      "duration_seconds": 4.0,
+      "recommended_edit_seconds": [
+        1.25,
+        4.0
+      ],
+      "continuity_requirement": "logo, one tagline, and simulation qualifier only",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s17_brand-resolve__cinematic_a.mp4",
+      "poster_path": "posters/s17_brand-resolve__cinematic_a.jpg",
+      "motion_design": {
+        "name": "crane_up",
+        "type": "offset",
+        "start_offset_m": [
+          0.04,
+          0.03,
+          -0.02
+        ],
+        "end_offset_m": [
+          -0.05,
+          -0.08,
+          0.2
+        ]
+      }
+    },
+    {
+      "asset_id": "s17_brand-resolve__cinematic_b",
+      "scene_id": 17,
+      "scene_slug": "brand-resolve",
+      "variant": "cinematic_b",
+      "editorial_role": "cinematic_motion_coverage",
+      "purpose": "brand_resolve_pullback",
+      "stage": null,
+      "subject": "Tactevra brand resolve",
+      "rig": "dolly",
+      "framing": "medium_wide",
+      "lens_mm": 58,
+      "camera_motion": "slow_pull",
+      "editorial_strength": "system relationship and overlays",
+      "frame_start": 2305,
+      "frame_end": 2400,
+      "frame_count": 96,
+      "duration_seconds": 4.0,
+      "recommended_edit_seconds": [
+        1.25,
+        4.0
+      ],
+      "continuity_requirement": "logo, one tagline, and simulation qualifier only",
+      "system_truth": "presentation simulation; derived camera motion only; robot action, device state, timing, and permit semantics remain canonical storyboard v2.1",
+      "audio_strategy": "narration_and_score_from_master; clip is rendered silent",
+      "review_status": "generated_for_editorial_review",
+      "clip_path": "clips/s17_brand-resolve__cinematic_b.mp4",
+      "poster_path": "posters/s17_brand-resolve__cinematic_b.jpg",
+      "motion_design": {
+        "name": "slow_pull",
+        "type": "radial",
+        "start_scale": 0.92,
+        "end_scale": 1.16,
+        "z_start": 0.0,
+        "z_end": 0.04
+      }
     },
     {
       "asset_id": "s07_toolhead-permit__insert",
