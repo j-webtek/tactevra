@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -14,10 +15,12 @@ from train.paired_height_corpus_contract import (  # noqa: E402
     SHARD_SCHEMA,
     admit_shard_manifest,
     canonical,
+    decide_resolution,
     derive_model_input,
     expected_counts,
     iter_row_identities,
     load_fixture,
+    load_resolution_noise_experiment,
     noise_stddev_for_linear_brightness,
     spatially_correlate_noise,
     sha256_bytes,
@@ -26,6 +29,56 @@ from train.paired_height_corpus_contract import (  # noqa: E402
 
 ROOT = AI_ROOT
 FIXTURE = ROOT / "sim/evidence/residual_obstruction_paired_height_v1_4.json"
+RESOLUTION_EXPERIMENT = ROOT / "sim/evidence/paired_height_resolution_noise_experiment_v1.json"
+
+
+def test_frozen_resolution_noise_experiment_and_decision_rules() -> None:
+    value, _ = load_resolution_noise_experiment(RESOLUTION_EXPERIMENT)
+    assert [row["profile_id"] for row in value["noise_profiles"]] == [
+        "ASSUMED_LOW", "ASSUMED_MODERATE", "ASSUMED_HIGH"
+    ]
+    assert [row["input_resolution_px"] for row in value["candidates"]] == [96, 192]
+    assert len(value["run_matrix"]) == 6
+
+    def profile(winner: str) -> dict:
+        eligible = {"memorization_pass": True, "all_development_gates_pass": True}
+        if winner == "192":
+            delta = {
+                "q05_target_auc_point_192_minus_96": 0.02,
+                "q05_target_auc_lower_95": 0.01,
+                "dark_cable_auc_point_192_minus_96": 0.01,
+            }
+        else:
+            delta = {
+                "q05_target_auc_point_192_minus_96": 0.003,
+                "q05_target_auc_lower_95": -0.002,
+                "dark_cable_auc_point_192_minus_96": 0.002,
+            }
+        return {"96": copy.deepcopy(eligible), "192": eligible, "paired_delta": delta}
+
+    all_192 = {key: profile("192") for key in (
+        "ASSUMED_LOW", "ASSUMED_MODERATE", "ASSUMED_HIGH"
+    )}
+    assert decide_resolution(all_192)["global_decision"] == "SELECT_192_EXPLORATORY"
+    mixed = {
+        "ASSUMED_LOW": profile("96"),
+        "ASSUMED_MODERATE": profile("192"),
+        "ASSUMED_HIGH": profile("96"),
+    }
+    assert decide_resolution(mixed)["global_decision"] == (
+        "NOISE_DEPENDENT_DEFER_TO_MEASURED_CAMERA_PROFILE"
+    )
+
+
+def test_resolution_noise_experiment_rejects_qualifying_claim(tmp_path: Path) -> None:
+    value = json.loads(RESOLUTION_EXPERIMENT.read_text(encoding="utf-8"))
+    value["loader_mode"] = "QUALIFYING"
+    core = {key: item for key, item in value.items() if key != "bundle_sha256"}
+    value["bundle_sha256"] = sha256_bytes(canonical(core))
+    path = tmp_path / "bad.json"
+    path.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(ValueError, match="qualifying mode is forbidden"):
+        load_resolution_noise_experiment(path)
 
 
 def test_frozen_fixture_counts_and_balances_heights() -> None:

@@ -16,6 +16,8 @@ from typing import Any, Iterator
 
 FIXTURE_SCHEMA = "tactevra.ai_residual_obstruction_paired_height_fixture.v1_4"
 SHARD_SCHEMA = "tactevra.ai_residual_obstruction_paired_height_shard.v1_4"
+RESOLUTION_NOISE_SCHEMA = "tactevra.ai_paired_height_resolution_noise_experiment.v1"
+ASSUMED_NOISE_PROFILE_IDS = ("ASSUMED_LOW", "ASSUMED_MODERATE", "ASSUMED_HIGH")
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
@@ -25,6 +27,94 @@ def canonical(value: object) -> bytes:
 
 def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
+
+
+def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]:
+    """Load the frozen, explicitly exploratory 96-versus-192 experiment."""
+    raw = path.resolve(strict=True).read_bytes()
+    value = json.loads(raw)
+    if value.get("schema") != RESOLUTION_NOISE_SCHEMA:
+        raise ValueError("unsupported resolution/noise experiment")
+    core = {key: item for key, item in value.items() if key != "bundle_sha256"}
+    if value.get("bundle_sha256") != sha256_bytes(canonical(core)):
+        raise ValueError("experiment canonical hash mismatch")
+    if value.get("scope") != "EXPLORATORY_SYNTHETIC_ASSUMED_NOISE_NO_QUALIFICATION":
+        raise ValueError("experiment scope must remain exploratory")
+    if value.get("loader_mode") != "EXPLORATORY":
+        raise ValueError("measured qualifying mode is forbidden")
+    profiles = value.get("noise_profiles")
+    if not isinstance(profiles, list) or tuple(
+        row.get("profile_id") for row in profiles
+    ) != ASSUMED_NOISE_PROFILE_IDS:
+        raise ValueError("noise profiles must be frozen low, moderate, and high")
+    for profile in profiles:
+        camera = profile.get("camera_profile")
+        if camera.get("measurement_scope") != "ASSUMED_EXPLORATORY_NOT_MEASURED":
+            raise ValueError("assumed noise may not claim camera measurement")
+        if camera.get("spatial_noise_kernel") != [[1.0]]:
+            raise ValueError("assumed profiles freeze independent noise only")
+    candidates = value.get("candidates")
+    if not isinstance(candidates, list) or tuple(
+        row.get("input_resolution_px") for row in candidates
+    ) != (96, 192):
+        raise ValueError("candidate resolutions must be exactly 96 and 192")
+    parity_fields = (
+        "model_family", "physical_footprint_mm", "feature_channels", "conv_channels",
+        "normalization", "spatial_feature_map", "optimizer", "maximum_epochs",
+        "batch_size", "learning_rate", "weight_decay", "training_seed",
+    )
+    if any(candidates[0][field] != candidates[1][field] for field in parity_fields):
+        raise ValueError("resolution must be the only candidate difference")
+    if value.get("evaluation_opened") is not False:
+        raise ValueError("evaluation must remain unopened")
+    if value.get("physical_authority") is not False:
+        raise ValueError("experiment may not create physical authority")
+    return value, raw
+
+
+def decide_resolution(profile_results: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Apply the frozen per-profile and cross-noise resolution rules."""
+    if tuple(profile_results) != ASSUMED_NOISE_PROFILE_IDS:
+        raise ValueError("profile results must preserve frozen profile order")
+    winners: dict[str, str] = {}
+    for profile_id, results in profile_results.items():
+        if set(results) != {"96", "192", "paired_delta"}:
+            raise ValueError(f"malformed profile result: {profile_id}")
+        low, high = results["96"], results["192"]
+        eligible_low = bool(low["memorization_pass"] and low["all_development_gates_pass"])
+        eligible_high = bool(high["memorization_pass"] and high["all_development_gates_pass"])
+        if eligible_high and not eligible_low:
+            winner = "192"
+        elif eligible_low and not eligible_high:
+            winner = "96"
+        elif not eligible_low and not eligible_high:
+            winner = "UNRESOLVED"
+        else:
+            delta = results["paired_delta"]
+            if (
+                float(delta["q05_target_auc_point_192_minus_96"]) >= 0.01
+                and float(delta["q05_target_auc_lower_95"]) > 0.0
+                and float(delta["dark_cable_auc_point_192_minus_96"]) >= 0.0
+            ):
+                winner = "192"
+            elif (
+                float(delta["q05_target_auc_point_192_minus_96"]) <= 0.005
+                and float(delta["dark_cable_auc_point_192_minus_96"]) <= 0.005
+            ):
+                winner = "96"
+            else:
+                winner = "UNRESOLVED"
+        winners[profile_id] = winner
+    unique = set(winners.values())
+    if unique == {"192"}:
+        decision = "SELECT_192_EXPLORATORY"
+    elif unique == {"96"}:
+        decision = "SELECT_96_EXPLORATORY"
+    elif "UNRESOLVED" in unique:
+        decision = "UNRESOLVED_WAIT_FOR_MEASURED_CAMERA_PROFILE"
+    else:
+        decision = "NOISE_DEPENDENT_DEFER_TO_MEASURED_CAMERA_PROFILE"
+    return {"per_profile_winner": winners, "global_decision": decision}
 
 
 def load_fixture(path: Path) -> tuple[dict[str, Any], bytes]:
