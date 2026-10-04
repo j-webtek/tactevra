@@ -279,8 +279,7 @@ This small corpus does not establish workspace coverage or authorize an
 exclusion policy. The probe pins the exact `python-fcl 0.7.0.11` CPython 3.12
 wheel by SHA-256 and remains offline, zero-write, and non-installing. Candidate
 installation, collision admission, and clearance replay remain denied until
-the self-collision pair policy and broader joint-space differential are
-reviewed.
+the self-collision pair policy is reviewed.
 
 Reproduce the comparison from an isolated Python 3.12 environment containing
 the exact pinned wheel and `trimesh 4.11.1`:
@@ -294,6 +293,41 @@ python software\integrations\isaac_sim\collision_differential_probe.py `
   --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl `
   --output C:\IsaacSim\evidence\collision_differential_004.json `
   --status-output C:\IsaacSim\evidence\collision_differential_004.status.json
+```
+
+## Governed joint-space collision differential
+
+[`collision_joint_space_probe.py`](collision_joint_space_probe.py) expands the
+same source-mesh-versus-box comparison to a deterministic 49-pose corpus. The
+corpus contains the three governed anchors, lower/upper/midpoint limit anchors,
+12 single-joint limit poses, and 32 Halton interior samples derived from the
+governed URDF limits. The retained
+[`joint-space receipt`](evidence/roarm_m3_collision_joint_space_20261004.json)
+records 1,029 pair-pose cases: 780 free-space agreements, 57 collision
+agreements, 192 candidate false positives, and zero observed candidate false
+negatives.
+
+The result isolates 191 false positives to adjacent links and one to the
+nonadjacent `link2/gripper_link` pair. That makes the larger corpus useful for
+targeted refinement, but it does not justify installing the candidates or
+silently excluding any pair. Finite sampling is not continuous workspace
+coverage, the source includes non-watertight meshes, and tool, camera, support,
+and environment geometry are still absent. Collision admission and clearance
+replay therefore remain denied.
+
+Reproduce the summary from the same isolated Python 3.12 environment used by
+the three-pose comparison:
+
+```powershell
+python software\integrations\isaac_sim\collision_joint_space_probe.py `
+  --workspace . `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20261004.json `
+  --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl `
+  --output C:\IsaacSim\evidence\collision_joint_space_detailed_005.json `
+  --summary-output C:\IsaacSim\evidence\collision_joint_space_summary_005.json `
+  --status-output C:\IsaacSim\evidence\collision_joint_space_005.status.json
 ```
 
 ## Verify WP0
