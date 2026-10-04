@@ -18,6 +18,12 @@ from typing import Any, Mapping
 
 from rocell.arm.all_joint_command import JOINT_FIELDS, all_joint_command
 from rocell.arm.joint_mapping import mapping_for, reference_joint_goal
+from rocell.arm.protocol import decode_line, encode_line, feedback_request
+from rocell.application.production_controller_runtime_contract_v1 import (
+    ProductionControllerRuntimeContractV1,
+    ProductionControllerRuntimeManifestV1,
+    RuntimeCommandFrameV1,
+)
 
 SCOPE = "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
 FIELD_TO_KEY = dict(zip(JOINT_FIELDS, ("b", "s", "e", "t", "r", "g"), strict=True))
@@ -179,6 +185,15 @@ class InMemoryT102Controller:
             "physical_authority": False,
         }
 
+    def execute_frame(
+        self, frame: RuntimeCommandFrameV1, *, fault: str = "NONE",
+    ) -> dict[str, Any]:
+        """Apply only the exact bytes admitted by the production runtime contract."""
+
+        if not isinstance(frame, RuntimeCommandFrameV1):
+            raise TypeError("frame must be RuntimeCommandFrameV1")
+        return self.execute(decode_line(frame.wire_bytes), fault=fault)
+
     def _fault_receipt(self, fault: str, measured: tuple[float, ...], detail: str) -> dict[str, Any]:
         return {
             "status": f"FAULT_{fault}", "fault": fault, "detail": detail,
@@ -212,6 +227,81 @@ def _range_samples(section: dict[str, Any]) -> list[ServoRangeSample]:
     return result
 
 
+def _runtime_manifest(fixture: dict[str, Any]) -> ProductionControllerRuntimeManifestV1:
+    bindings = fixture["bindings"]
+    return ProductionControllerRuntimeManifestV1(
+        runtime_id="first-motion-simulation-runtime",
+        candidate_app_sha256=fixture["fixture_sha256"],
+        protocol_source_sha256=bindings["wire_protocol"]["sha256"],
+        controller_joint_mapping_sha256=bindings["joint_map"]["sha256"],
+        configuration_epoch_sha256=bindings["simulation_profile"]["sha256"],
+        expected_encoding_profile_sha256=fixture["controller_emulator"]["section_sha256"],
+        controller_session_id="simulation-controller-session",
+    )
+
+
+def _runtime_frame(
+    fixture: dict[str, Any], command: Mapping[str, Any], *, case_id: str,
+) -> RuntimeCommandFrameV1:
+    manifest = _runtime_manifest(fixture)
+    return RuntimeCommandFrameV1(
+        sequence=1,
+        correlation_id="case-" + hashlib.sha256(case_id.encode()).hexdigest()[:24],
+        writer_instance_id="simulation-writer",
+        controller_session_id=manifest.controller_session_id,
+        configuration_epoch_sha256=manifest.configuration_epoch_sha256,
+        encoding_profile_sha256=manifest.expected_encoding_profile_sha256,
+        issued_monotonic_ns=100,
+        expires_monotonic_ns=1000,
+        wire_bytes=encode_line(dict(command)),
+    )
+
+
+def _feedback_bytes(values: list[float] | tuple[float, ...]) -> bytes:
+    return encode_line({"T": 1051, **dict(zip(("b", "s", "e", "t", "r", "g"), values, strict=True))})
+
+
+def _execute_strict_runtime_path(
+    fixture: dict[str, Any], controller: InMemoryT102Controller,
+    command: Mapping[str, Any], *, case_id: str, fault: str = "NONE",
+) -> tuple[dict[str, Any], dict[str, Any], RuntimeCommandFrameV1]:
+    """Rehearse exact production framing around the exploratory dynamic plant."""
+
+    runtime = ProductionControllerRuntimeContractV1(_runtime_manifest(fixture))
+    runtime.claim_writer("simulation-writer")
+    frame = _runtime_frame(fixture, command, case_id=case_id)
+    admission = runtime.admit_t102(frame, now_monotonic_ns=150)
+    plant = controller.execute_frame(frame, fault=fault)
+    if fault == "DROPPED_MESSAGE":
+        runtime.mark_command_zero_write()
+    else:
+        runtime.rehearse_command_acknowledgment(encode_line({
+            "T": 1021, "status": "ACCEPTED_ONCE", "ordinal": 1,
+        }))
+        if fault != "DELAYED_TELEMETRY":
+            telemetry = plant.get("telemetry") or [{
+                "measured_joints_rad": plant["measured_joints_rad"],
+            }]
+            for row in telemetry:
+                runtime.rehearse_feedback_exchange(
+                    encode_line(feedback_request()),
+                    _feedback_bytes(row["measured_joints_rad"]),
+                )
+        runtime.close_single_action(settled=fault == "NONE")
+    report = runtime.report()
+    return plant, {
+        "admission": admission.to_dict(),
+        "runtime_status": report["status"],
+        "runtime_terminal_reason": report["terminal_reason"],
+        "runtime_feedback_exchange_count": report["feedback_exchange_count"],
+        "runtime_report_sha256": report["report_sha256"],
+        "runtime_hardware_write_count": report["hardware_write_count"],
+        "runtime_transport_open_count": report["transport_open_count"],
+        "runtime_physical_authority": report["physical_authority"],
+        "automatic_retry": report["automatic_retry"],
+    }, frame
+
+
 def run_controller_emulator(fixture: dict[str, Any]) -> dict[str, Any]:
     section = fixture["controller_emulator"]
     profile = json.loads(Path(fixture["bindings"]["simulation_profile"]["path"]).read_text())
@@ -236,27 +326,33 @@ def run_controller_emulator(fixture: dict[str, Any]) -> dict[str, Any]:
                 controller = InMemoryT102Controller(baseline, sample, seed=section["seed"] + sample_index * 100 + joint_index * 2 + int(delta > 0))
                 command = all_joint_command(targets, speed=sample.speed_setting,
                                             acceleration=sample.acceleration_setting)
-                receipt = controller.execute(command)
+                case_id = f"{sample.sample_id}:{field}:{delta:+.3f}"
+                receipt, runtime_row, frame = _execute_strict_runtime_path(
+                    fixture, controller, command, case_id=case_id)
                 mapping = receipt["mapping"][joint_index]
                 cases.append({
-                    "case_id": f"{sample.sample_id}:{field}:{delta:+.3f}",
+                    "case_id": case_id,
                     "sample_id": sample.sample_id, "changed_field": field,
                     "direction_correct": math.copysign(1, receipt["measured_joints_rad"][joint_index] - baseline[joint_index]) == math.copysign(1, delta),
                     "magnitude_error_rad": abs(receipt["measured_joints_rad"][joint_index] - targets[joint_index]),
                     "logical_joint_id": mapping["logical_joint_id"], "servo_ids": mapping["servo_ids"],
                     "telemetry_is_command_echo": receipt["telemetry_is_command_echo"],
-                    "status": receipt["status"],
+                    "status": receipt["status"], "wire_bytes_sha256": frame.wire_bytes_sha256,
+                    **runtime_row,
                 })
         targets = tuple(value + (deltas[1] if index % 2 == 0 else deltas[0]) for index, value in enumerate(baseline))
         controller = InMemoryT102Controller(baseline, sample, seed=section["seed"] + sample_index * 1000 + 99)
         command = all_joint_command(targets, speed=sample.speed_setting,
                                     acceleration=sample.acceleration_setting)
-        receipt = controller.execute(command)
+        case_id = f"{sample.sample_id}:all"
+        receipt, runtime_row, frame = _execute_strict_runtime_path(
+            fixture, controller, command, case_id=case_id)
         cases.append({"case_id": f"{sample.sample_id}:all", "sample_id": sample.sample_id,
                       "changed_field": "ALL", "direction_correct": all(math.copysign(1, observed - start) == math.copysign(1, target - start) for observed, target, start in zip(receipt["measured_joints_rad"], targets, baseline, strict=True)),
                       "magnitude_error_rad": max(abs(observed - target) for observed, target in zip(receipt["measured_joints_rad"], targets, strict=True)),
                       "logical_joint_id": None, "servo_ids": sorted({servo for row in receipt["mapping"] for servo in row["servo_ids"]}),
-                      "telemetry_is_command_echo": receipt["telemetry_is_command_echo"], "status": receipt["status"]})
+                      "telemetry_is_command_echo": receipt["telemetry_is_command_echo"], "status": receipt["status"],
+                      "wire_bytes_sha256": frame.wire_bytes_sha256, **runtime_row})
     fault_rows = []
     baseline_sample = samples[0]
     for index, fault in enumerate(section["faults"]):
@@ -264,7 +360,10 @@ def run_controller_emulator(fixture: dict[str, Any]) -> dict[str, Any]:
         command = all_joint_command(tuple(value + 0.01 for value in baseline),
                                     speed=baseline_sample.speed_setting,
                                     acceleration=baseline_sample.acceleration_setting)
-        fault_rows.append({"fault": fault, **controller.execute(command, fault=fault)})
+        receipt, runtime_row, frame = _execute_strict_runtime_path(
+            fixture, controller, command, case_id=f"fault:{fault}", fault=fault)
+        fault_rows.append({"fault": fault, **receipt, **runtime_row,
+                           "wire_bytes_sha256": frame.wire_bytes_sha256})
     source = inspect.getsource(InMemoryT102Controller)
     result = {
         "schema": "tactevra.first_motion_controller_emulator_receipt.v1",
@@ -283,12 +382,20 @@ def run_controller_emulator(fixture: dict[str, Any]) -> dict[str, Any]:
             "constructor_accepts_transport": "transport" in inspect.signature(InMemoryT102Controller).parameters,
         },
         "production_transport_gap": section["protocol"]["production_transport_gap"],
-        "decision": "PARTIAL_PASS_PROTOCOL_EMULATION_RUNTIME_PATH_GAP_RETAINED",
+        "strict_runtime_path_case_count": sum(
+            row["runtime_status"] == "TERMINAL_NO_RETRY" for row in cases),
+        "strict_runtime_fault_case_count": sum(
+            row["runtime_status"] == "TERMINAL_NO_RETRY" for row in fault_rows),
+        "all_runtime_cases_terminal_no_retry": all(
+            row["runtime_status"] == "TERMINAL_NO_RETRY"
+            and row["automatic_retry"] is False for row in [*cases, *fault_rows]),
+        "decision": "PASS_STRICT_RUNTIME_CONTRACT_SIMULATED_PLANT_ONLY",
         "hardware_write_count": 0, "physical_movement_count": 0,
         "real_command_count": 0, "permit_count": 0, "transport_count": 0,
         "physical_authority": False,
     }
-    if not result["all_direction_correct"] or result["fault_detection_rate"] != 1.0:
+    if (not result["all_direction_correct"] or result["fault_detection_rate"] != 1.0
+            or not result["all_runtime_cases_terminal_no_retry"]):
         result["decision"] = "STOP"
     if result["transport_isolation"]["live_transport_import_present"] or result["transport_isolation"]["constructor_accepts_transport"]:
         result["decision"] = "STOP"

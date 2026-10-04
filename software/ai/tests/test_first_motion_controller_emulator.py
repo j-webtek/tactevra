@@ -7,9 +7,15 @@ from pathlib import Path
 import pytest
 
 from rocell.arm.all_joint_command import all_joint_command
+from rocell.application.production_controller_runtime_contract_v1 import (
+    ProductionControllerRuntimeContractError,
+    ProductionControllerRuntimeContractV1,
+)
 from rocell_ai.first_motion_controller_emulator import (
     InMemoryT102Controller,
     ServoRangeSample,
+    _runtime_frame,
+    _runtime_manifest,
     load_emulator_fixture,
     run_controller_emulator,
 )
@@ -28,12 +34,13 @@ def test_fixture_is_hash_bound_and_zero_authority() -> None:
     assert fixture["scope"] == "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
     assert not any(fixture["counters"].values())
     assert fixture["controller_emulator"]["protocol"]["command_family"] == "T102_ALL_JOINT_ABSOLUTE"
-    assert "no T101/T102 production send adapter" in fixture["controller_emulator"]["protocol"]["production_transport_gap"]
+    assert "Production T102 runtime" in fixture["controller_emulator"]["protocol"]["production_transport_gap"]
+    assert fixture["amendments"][0]["timing"] == "PRE_CORRECTED_RESULT"
 
 
 def test_full_roundtrip_covers_ids_directions_ranges_and_faults() -> None:
     result = run_controller_emulator(load_emulator_fixture(FIXTURE))
-    assert result["decision"] == "PARTIAL_PASS_PROTOCOL_EMULATION_RUNTIME_PATH_GAP_RETAINED"
+    assert result["decision"] == "PASS_STRICT_RUNTIME_CONTRACT_SIMULATED_PLANT_ONLY"
     assert result["sample_count"] == 14
     assert result["roundtrip_case_count"] == 182
     assert result["all_direction_correct"] is True
@@ -41,6 +48,11 @@ def test_full_roundtrip_covers_ids_directions_ranges_and_faults() -> None:
     assert result["all_servo_ids"] == [11, 12, 13, 14, 15, 16, 17]
     assert result["non_echo_case_count"] == result["roundtrip_case_count"]
     assert result["fault_detection_rate"] == 1.0
+    assert result["strict_runtime_path_case_count"] == 182
+    assert result["strict_runtime_fault_case_count"] == 6
+    assert result["all_runtime_cases_terminal_no_retry"] is True
+    assert all(row["runtime_feedback_exchange_count"] == 33 for row in result["cases"])
+    assert all(row["runtime_hardware_write_count"] == 0 for row in result["cases"])
     assert result["transport_isolation"] == {
         "real_transport_open_count": 0,
         "live_transport_import_present": False,
@@ -89,3 +101,26 @@ def test_module_has_no_live_transport_import_or_open_surface() -> None:
     assert "transport" not in inspect.signature(InMemoryT102Controller).parameters
     assert not hasattr(InMemoryT102Controller, "connect")
     assert not hasattr(InMemoryT102Controller, "open")
+
+
+def test_strict_runtime_rejects_wire_mutation_before_plant() -> None:
+    fixture = load_emulator_fixture(FIXTURE)
+    command = all_joint_command((0.02, 0, 1.4, 0, 0, 2.4), speed=20, acceleration=1)
+    frame = _runtime_frame(fixture, command, case_id="mutation-test")
+    mutated = type(frame)(
+        sequence=frame.sequence,
+        correlation_id=frame.correlation_id,
+        writer_instance_id=frame.writer_instance_id,
+        controller_session_id=frame.controller_session_id,
+        configuration_epoch_sha256=frame.configuration_epoch_sha256,
+        encoding_profile_sha256=frame.encoding_profile_sha256,
+        issued_monotonic_ns=frame.issued_monotonic_ns,
+        expires_monotonic_ns=frame.expires_monotonic_ns,
+        wire_bytes=frame.wire_bytes.replace(b'"T":102', b'"T":105'),
+    )
+    runtime = ProductionControllerRuntimeContractV1(_runtime_manifest(fixture))
+    runtime.claim_writer("simulation-writer")
+    with pytest.raises(ProductionControllerRuntimeContractError):
+        runtime.admit_t102(mutated, now_monotonic_ns=150)
+    assert runtime.report()["status"] == "TERMINAL_NO_RETRY"
+    assert runtime.report()["hardware_write_count"] == 0
