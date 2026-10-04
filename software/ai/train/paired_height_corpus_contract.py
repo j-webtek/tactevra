@@ -82,6 +82,25 @@ def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]
         raise ValueError("frozen parameter count differs")
     if candidates[0]["final_pooling"] != "ADAPTIVE_AVERAGE_6X6":
         raise ValueError("frozen final pooling differs")
+    standardization = value.get("input_standardization", {})
+    if standardization.get("scope") != "PER_PROFILE_PER_RESOLUTION_TRAINING_ONLY":
+        raise ValueError("input standardization scope differs")
+    if standardization.get("fit_split") != "training":
+        raise ValueError("input standardization may only fit training rows")
+    if standardization.get("continuous_channel_indices") != list(range(11)):
+        raise ValueError("continuous channel standardization differs")
+    if standardization.get("binary_mask_channel_index") != 11:
+        raise ValueError("safe mask must remain an unstandardized binary channel")
+    if not all(
+        standardization.get(field) is True
+        for field in (
+            "development_refit_forbidden",
+            "evaluation_refit_forbidden",
+            "cross_resolution_statistic_reuse_forbidden",
+            "cross_profile_statistic_reuse_forbidden",
+        )
+    ):
+        raise ValueError("input standardization isolation rules differ")
     if value.get("evaluation_opened") is not False:
         raise ValueError("evaluation must remain unopened")
     if value.get("physical_authority") is not False:
@@ -632,6 +651,79 @@ def construct_paired_height_features(
     if features.shape != (output_size_px, output_size_px, 12):
         raise ValueError("paired-height feature expansion produced the wrong shape")
     return np.ascontiguousarray(features.transpose(2, 0, 1), dtype=np.float32)
+
+
+def new_feature_statistics_accumulator() -> dict[str, Any]:
+    """Create a float64 streaming accumulator for channels 0 through 10."""
+    import numpy as np
+
+    return {
+        "pixel_count": 0,
+        "row_count": 0,
+        "sum": np.zeros(11, dtype=np.float64),
+        "sum_squares": np.zeros(11, dtype=np.float64),
+    }
+
+
+def update_feature_statistics(accumulator: dict[str, Any], features: Any) -> None:
+    """Accumulate one training tensor without retaining it in memory."""
+    import numpy as np
+
+    value = np.asarray(features)
+    if value.ndim != 3 or value.shape[0] != 12 or value.dtype != np.float32:
+        raise ValueError("features must be float32 12xHxW")
+    if not np.isfinite(value).all():
+        raise ValueError("features contain a nonfinite value")
+    continuous = value[:11].astype(np.float64, copy=False)
+    accumulator["pixel_count"] += int(value.shape[1] * value.shape[2])
+    accumulator["row_count"] += 1
+    accumulator["sum"] += continuous.sum(axis=(1, 2), dtype=np.float64)
+    accumulator["sum_squares"] += np.square(continuous).sum(
+        axis=(1, 2), dtype=np.float64
+    )
+
+
+def finalize_feature_statistics(
+    accumulator: dict[str, Any], *, minimum_standard_deviation: float = 1e-6
+) -> dict[str, Any]:
+    """Finalize population moments for one profile/resolution training split."""
+    import numpy as np
+
+    count = int(accumulator["pixel_count"])
+    if count <= 0 or int(accumulator["row_count"]) <= 0:
+        raise ValueError("feature statistics require at least one training row")
+    mean = accumulator["sum"] / count
+    variance = np.maximum(accumulator["sum_squares"] / count - mean * mean, 0.0)
+    standard_deviation = np.sqrt(variance)
+    applied = np.maximum(standard_deviation, float(minimum_standard_deviation))
+    return {
+        "scope": "MATCHED_PROFILE_RESOLUTION_TRAINING_ONLY",
+        "row_count": int(accumulator["row_count"]),
+        "pixel_count": count,
+        "mean": mean.tolist(),
+        "population_standard_deviation": standard_deviation.tolist(),
+        "applied_standard_deviation": applied.tolist(),
+        "minimum_standard_deviation": float(minimum_standard_deviation),
+        "binary_mask_channel_index": 11,
+    }
+
+
+def apply_feature_standardization(features: Any, statistics: dict[str, Any]) -> Any:
+    """Apply matched training-only statistics while preserving the binary mask."""
+    import numpy as np
+
+    value = np.asarray(features)
+    if value.ndim != 3 or value.shape[0] != 12 or value.dtype != np.float32:
+        raise ValueError("features must be float32 12xHxW")
+    mean = np.asarray(statistics.get("mean"), dtype=np.float32)
+    scale = np.asarray(statistics.get("applied_standard_deviation"), dtype=np.float32)
+    if mean.shape != (11,) or scale.shape != (11,) or np.any(scale < 1e-6):
+        raise ValueError("matched feature statistics are malformed")
+    output = value.copy()
+    output[:11] = (output[:11] - mean[:, None, None]) / scale[:, None, None]
+    if not np.array_equal(output[11], value[11]):
+        raise ValueError("safe mask changed during standardization")
+    return np.ascontiguousarray(output, dtype=np.float32)
 
 
 def admit_shard_manifest(

@@ -15,16 +15,20 @@ sys.path.insert(0, str(AI_ROOT / "train"))
 from train.paired_height_corpus_contract import (  # noqa: E402
     SHARD_SCHEMA,
     admit_shard_manifest,
+    apply_feature_standardization,
     canonical,
     construct_paired_height_features,
     decide_resolution,
     derive_model_input,
     expected_counts,
+    finalize_feature_statistics,
     iter_row_identities,
     load_fixture,
     load_resolution_noise_experiment,
+    new_feature_statistics_accumulator,
     noise_stddev_for_linear_brightness,
     spatially_correlate_noise,
+    update_feature_statistics,
     sha256_bytes,
 )
 from train.run_residual_obstruction_v4_2_memorization import (  # noqa: E402
@@ -49,6 +53,8 @@ def test_frozen_resolution_noise_experiment_and_decision_rules() -> None:
         "ADAPTIVE_AVERAGE_6X6"
     }
     assert len(value["run_matrix"]) == 6
+    assert value["input_standardization"]["fit_split"] == "training"
+    assert value["input_standardization"]["cross_resolution_statistic_reuse_forbidden"]
 
     def profile(winner: str) -> dict:
         eligible = {"memorization_pass": True, "all_development_gates_pass": True}
@@ -150,6 +156,31 @@ def test_twelve_channel_features_are_deterministic_and_preserve_thin_line() -> N
         assert set(np.unique(first[11])) == {0.0, 1.0}
         outputs[size] = first
     assert outputs[192][11].sum() > outputs[96][11].sum() * 3.5
+
+
+def test_training_statistics_scale_each_resolution_and_preserve_mask() -> None:
+    import numpy as np
+
+    rng = np.random.default_rng(771)
+    base = rng.normal(0.5, 0.2, (12, 24, 24)).astype(np.float32)
+    base[11] = 0.0
+    base[11, 6:18, 6:18] = 1.0
+    low_resolution = base.copy()
+    high_resolution = np.repeat(np.repeat(base, 2, axis=1), 2, axis=2)
+    high_resolution[:11] *= 0.5
+    standardized = {}
+    for name, value in (("96", low_resolution), ("192", high_resolution)):
+        accumulator = new_feature_statistics_accumulator()
+        update_feature_statistics(accumulator, value)
+        statistics = finalize_feature_statistics(accumulator)
+        result = apply_feature_standardization(value, statistics)
+        assert np.allclose(result[:11].mean(axis=(1, 2)), 0.0, atol=2e-5)
+        assert np.allclose(result[:11].std(axis=(1, 2)), 1.0, atol=2e-5)
+        assert np.array_equal(result[11], value[11])
+        standardized[name] = result
+    assert np.allclose(
+        standardized["96"][:11], standardized["192"][:11, ::2, ::2], atol=2e-5
+    )
 
 
 def test_frozen_fixture_counts_and_balances_heights() -> None:
