@@ -396,3 +396,5 @@ or superseded records remain tracked; Git history is not rewritten.
 
 
 The one-file increase from 6,342 to 6,343 retains the hash-bound Workstream 1 end-to-end typing-twin fixture. Scenario populations are generated from seeds inside that single manifest, avoiding thousands of tracked case files.
+
+The two-file increase from 6,343 to 6,345 retains the Workstream 1 semantic/device-state implementation and its focused tests. Generated run receipts remain external and are represented in Git by one ledger entry.
