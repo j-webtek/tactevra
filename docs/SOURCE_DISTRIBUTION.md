@@ -462,3 +462,10 @@ mechanical/contact quantity as an endpoint-and-midpoint range design, freezes
 cross-GPU agreement and stop rules, and keeps all generated rows and receipts
 external. The exact tracked-file count and governed ceiling are therefore
 6,359; every byte, blob, duplicate, and reduction limit remains unchanged.
+
+The Workstream 2 execution freeze adds one compact fixture for a bounded,
+dual-GPU contact smoke and its numerical settle, event, force-screen, and
+cross-GPU stop rules. It binds external landing inputs by exact hashes and keeps
+all generated simulator output outside Git. The exact tracked-file count and
+governed ceiling are therefore 6,361; every byte, blob, duplicate, and reduction
+limit remains unchanged.
