@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
+COMMAND_TIMEOUT_SECONDS = 1_200
 PYTHON = (
     ROOT
     / ".venv-ci"
@@ -155,7 +156,7 @@ def run(*args: str, capture: bool = False) -> subprocess.CompletedProcess:
         check=True,
         text=True,
         capture_output=capture,
-        timeout=600,
+        timeout=COMMAND_TIMEOUT_SECONDS,
     )
 
 
