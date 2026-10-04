@@ -1,12 +1,22 @@
 {
   "version": 1,
   "release_scope": "source-only-experimental-preview",
-  "authority": "This registry blocks candidate validation; it does not select a candidate or authorize publication.",
+  "authority": "This registry records readiness and the selected candidate identity; it does not authorize publication.",
   "tracker": {
     "issue": 57,
     "expected_state": "open",
     "milestone": "Tactevra v0.1 experimental preview",
     "milestone_state": "open"
+  },
+  "candidate": {
+    "status": "qualified",
+    "sha": "ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3",
+    "record": "docs/releases/CANDIDATE_ED29E82F.md",
+    "ai_disposition": "compatible-offline-with-limitations",
+    "arm_disposition": "compatible-offline-with-limitations",
+    "audit_status": "pass",
+    "maintainer_review_status": "pending",
+    "publication_status": "not-approved"
   },
   "blockers": [
     {

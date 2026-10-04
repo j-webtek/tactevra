@@ -3,7 +3,8 @@
 **Document status:** Current release index  
 **Authority:** Navigation and readiness context only; this page does not approve or publish a release
 
-Tactevra has not published a GitHub release. Start with the
+Tactevra has not published a GitHub release. Candidate `ed29e82f` is technically
+qualified, but its tag and publication remain unapproved. Start with the
 [current readiness dashboard](READINESS.md), then use
 [issue #57](https://github.com/j-webtek/tactevra/issues/57) for the actionable
 checklist. Dated documents in this directory preserve evidence for the exact
@@ -11,17 +12,12 @@ revisions they name and must not be silently updated to describe newer source.
 
 ## Current readiness path
 
-1. Resolve the owner-evidence dependencies shown on the readiness dashboard and
-   in issue #57. A repository or CI improvement cannot substitute for AI- or
-   arm-owner evidence.
-2. Select one full commit SHA on protected `main` only after those dependencies
-   close.
-3. Follow the [experimental release procedure](../RELEASING.md), including the
-   fresh-checkout, content, provenance, compatibility, and exact-SHA checks.
-4. Create a new candidate record for that SHA. Do not reuse or relabel an older
-   record.
-5. Publish a tag or pre-release only after explicit maintainer approval for the
-   exact SHA, notes, and asset scope.
+1. Review the [current candidate record](CANDIDATE_ED29E82F.md) and
+   [proposed notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md).
+2. Reconcile any change to the candidate identity by selecting a new protected-
+   `main` SHA and repeating the exact-SHA checks; do not move the current record.
+3. Publish a tag or pre-release only after explicit maintainer approval for the
+   exact SHA, title, notes, and GitHub-generated source-only assets.
 
 The read-only Preview candidate audit can validate a selected SHA, but a passing
 run is evidence—not publication approval. It cannot clear an open owner review,
@@ -32,6 +28,8 @@ promote a model, qualify physical behavior, or authorize hardware activity.
 | Record | Lifecycle | Use |
 | --- | --- | --- |
 | [Current readiness dashboard](READINESS.md) | Current status | Concise gate state, ownership, and next actions; not release approval |
+| [Candidate `ed29e82f`](CANDIDATE_ED29E82F.md) | Technically qualified; unpublished | Exact-SHA audits, bounded AI/arm dispositions, limitations, and pending approval inputs |
+| [Proposed alpha.1 notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md) | Prepared; unapproved | Exact release text for maintainer review |
 | [Experimental preview draft](EXPERIMENTAL_PREVIEW_DRAFT.md) | Superseded, unpublished | Historical proposed scope and limitations |
 | [Candidate `dcd87db`](CANDIDATE_DCD87DB.md) | Superseded without publication | Exact-revision validation and unresolved gates |
 | [Baseline from September 26, 2026](BASELINE_2026-09-26.md) | Historical evidence | Earlier pinned source qualification |

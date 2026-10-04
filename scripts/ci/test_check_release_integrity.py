@@ -39,6 +39,16 @@ def readiness(*, blockers=None) -> dict:
             "milestone": "Tactevra v0.1 experimental preview",
             "milestone_state": "open",
         },
+        "candidate": {
+            "status": "unselected",
+            "sha": None,
+            "record": None,
+            "ai_disposition": None,
+            "arm_disposition": None,
+            "audit_status": None,
+            "maintainer_review_status": None,
+            "publication_status": None,
+        },
         "blockers": blockers or [],
     }
 
@@ -166,6 +176,27 @@ class ReleaseIntegrityTests(unittest.TestCase):
         path.write_text(json.dumps(readiness(blockers=[blocker])), encoding="utf-8")
         with self.assertRaises(ValueError):
             load_readiness(path)
+
+    def test_qualified_candidate_requires_exact_identity_and_record(self):
+        registry = readiness()
+        registry["candidate"] = {
+            "status": "qualified",
+            "sha": "e" * 40,
+            "record": "docs/releases/CANDIDATE_E.md",
+            "ai_disposition": "compatible-offline-with-limitations",
+            "arm_disposition": "compatible-offline-with-limitations",
+            "audit_status": "pass",
+            "maintainer_review_status": "pending",
+            "publication_status": "not-approved",
+        }
+        path = self.root / "readiness.json"
+        path.write_text(json.dumps(registry), encoding="utf-8")
+        loaded = load_readiness(path)
+        self.assertTrue(any("missing candidate record" in error for error in
+                            readiness_errors(self.root, loaded)))
+        self.write("docs/releases/CANDIDATE_E.md")
+        self.assertEqual(readiness_errors(
+            self.root, loaded, ["docs/releases/CANDIDATE_E.md"]), [])
 
     def test_normalize_rejects_escape(self):
         with self.assertRaises(ValueError):

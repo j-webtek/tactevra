@@ -33,8 +33,14 @@ TOP_LEVEL_FIELDS = {
     "allowed_tracked_files",
     "candidate_blockers",
 }
-READINESS_FIELDS = {"version", "release_scope", "authority", "tracker", "blockers"}
+READINESS_FIELDS = {
+    "version", "release_scope", "authority", "tracker", "candidate", "blockers",
+}
 READINESS_TRACKER_FIELDS = {"issue", "expected_state", "milestone", "milestone_state"}
+READINESS_CANDIDATE_FIELDS = {
+    "status", "sha", "record", "ai_disposition", "arm_disposition",
+    "audit_status", "maintainer_review_status", "publication_status",
+}
 READINESS_BLOCKER_FIELDS = {
     "id", "issue", "owner", "requirement", "status", "resolution",
 }
@@ -145,6 +151,29 @@ def load_readiness(path: Path = READINESS_PATH) -> dict:
         raise ValueError("readiness tracker milestone_state must be open or closed")
     if not isinstance(tracker["milestone"], str) or not tracker["milestone"].strip():
         raise ValueError("readiness tracker milestone must be a non-empty string")
+    candidate = readiness["candidate"]
+    if not isinstance(candidate, dict) or set(candidate) != READINESS_CANDIDATE_FIELDS:
+        raise ValueError(
+            f"readiness candidate must contain exactly {sorted(READINESS_CANDIDATE_FIELDS)}")
+    if candidate["status"] not in {"unselected", "qualified"}:
+        raise ValueError("readiness candidate status must be unselected or qualified")
+    if candidate["status"] == "qualified":
+        if not isinstance(candidate["sha"], str) or not re.fullmatch(
+                r"[0-9a-f]{40}", candidate["sha"]):
+            raise ValueError("qualified readiness candidate needs a full lowercase SHA")
+        candidate["record"] = normalize(candidate["record"])
+        if candidate["ai_disposition"] != "compatible-offline-with-limitations":
+            raise ValueError("qualified candidate needs the bounded AI disposition")
+        if candidate["arm_disposition"] != "compatible-offline-with-limitations":
+            raise ValueError("qualified candidate needs the bounded arm disposition")
+        if candidate["audit_status"] != "pass":
+            raise ValueError("qualified candidate needs a passing audit")
+    elif any(candidate[field] is not None for field in READINESS_CANDIDATE_FIELDS - {"status"}):
+        raise ValueError("unselected candidate fields must be null")
+    if candidate["maintainer_review_status"] not in {None, "pending", "complete"}:
+        raise ValueError("invalid maintainer review status")
+    if candidate["publication_status"] not in {None, "not-approved", "approved", "published"}:
+        raise ValueError("invalid publication status")
     blockers = readiness["blockers"]
     if not isinstance(blockers, list):
         raise ValueError("readiness blockers must be a list")
@@ -195,6 +224,9 @@ def load_readiness(path: Path = READINESS_PATH) -> dict:
         else:
             raise ValueError(
                 f"invalid status for readiness blocker {blocker_id}: {status!r}")
+    if candidate["status"] == "qualified" and any(
+            entry["status"] == "open" for entry in blockers):
+        raise ValueError("readiness candidate cannot be qualified while blockers are open")
     return readiness
 
 
@@ -202,6 +234,12 @@ def readiness_errors(root: Path, readiness: dict, tracked: list[str] | None = No
                      *, candidate: bool = False) -> list[str]:
     errors: list[str] = []
     tracked_set = set(tracked) if tracked is not None else None
+    candidate_record = readiness["candidate"].get("record")
+    if candidate_record:
+        if not (root / candidate_record).is_file():
+            errors.append(f"missing candidate record: {candidate_record}")
+        elif tracked_set is not None and candidate_record not in tracked_set:
+            errors.append(f"untracked candidate record: {candidate_record}")
     for entry in readiness["blockers"]:
         if entry["status"] == "cleared":
             for evidence in entry["resolution"]["evidence"]:
