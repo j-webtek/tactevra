@@ -102,6 +102,10 @@ flowchart TD
     W4 --> W5
     W3 --> W6[WS6 mid-motion Isaac observation]
     W4 --> W6
+    W1 --> W7[WS7 first-motion readiness]
+    W4 --> W7
+    W5 --> W7
+    W2 -. selected tool .-> W7
 ```
 
 Workstreams execute in numerical order. The graph identifies implementation
@@ -228,7 +232,7 @@ in WS3.
 
 Step 0, admitted schemas/catalogs, existing compiler/runtime interfaces, and the
 finished 96/192 job are required. CPU implementation and analytic runs are
-estimated at 30–90 minutes. The exact Isaac subset is estimated at 15–45 GPU
+estimated at 30â€“90 minutes. The exact Isaac subset is estimated at 15â€“45 GPU
 minutes total. MuJoCo replay is estimated below 15 GPU minutes. The workstream
 must benchmark a smoke before scheduling the full subset.
 
@@ -253,28 +257,28 @@ All values are exploratory until measured:
 
 | Parameter | Range |
 |---|---:|
-| keycap top width and height | 11–15 mm each |
-| key travel | 1–5 mm |
-| actuation depth | 30–90% of travel |
-| bottom-out depth | 90–110% of declared travel |
-| key spring rate | 0.1–2.5 N/mm |
-| key damping | 0.001–0.2 N·s/mm |
-| actuation force | 0.2–3.0 N |
-| fingertip sphere/capsule radius | 1–6 mm |
-| commanded press depth | 0.5–7 mm |
-| dwell | 10–750 ms |
-| approach speed | 2–120 mm/s |
-| release speed | 2–160 mm/s |
-| OS repeat delay | 200–1,200 ms |
-| OS repeat period | 20–250 ms |
-| phone effective contact radius | 1–7 mm |
-| phone accepted contact duration | 20–500 ms |
-| phone long-press threshold | 250–1,200 ms |
+| keycap top width and height | 11â€“15 mm each |
+| key travel | 1â€“5 mm |
+| actuation depth | 30â€“90% of travel |
+| bottom-out depth | 90â€“110% of declared travel |
+| key spring rate | 0.1â€“2.5 N/mm |
+| key damping | 0.001â€“0.2 NÂ·s/mm |
+| actuation force | 0.2â€“3.0 N |
+| fingertip sphere/capsule radius | 1â€“6 mm |
+| commanded press depth | 0.5â€“7 mm |
+| dwell | 10â€“750 ms |
+| approach speed | 2â€“120 mm/s |
+| release speed | 2â€“160 mm/s |
+| OS repeat delay | 200â€“1,200 ms |
+| OS repeat period | 20â€“250 ms |
+| phone effective contact radius | 1â€“7 mm |
+| phone accepted contact duration | 20â€“500 ms |
+| phone long-press threshold | 250â€“1,200 ms |
 
 Landing errors use the frozen MW2UC fixed-approach/calibrated-residual ranges,
-including 3–4 mm effective regions, random noise `0.001–0.002 rad`, fixed-source
-magnitude `0.002–0.008 rad`, and residual fractions `0–0.25` for focused runs.
-Broader failure controls retain residual `0.5–1.0`.
+including 3â€“4 mm effective regions, random noise `0.001â€“0.002 rad`, fixed-source
+magnitude `0.002â€“0.008 rad`, and residual fractions `0â€“0.25` for focused runs.
+Broader failure controls retain residual `0.5â€“1.0`.
 
 ### Model and outputs
 
@@ -312,8 +316,8 @@ the declared bottom-out tolerance, or cross-GPU disagreement stops the run.
 ### Dependencies and compute estimate
 
 WS1 actuation/event interfaces, MW2UC landing model, and a frozen contact asset
-are required. A power smoke determines shard count. Expected compute is 1–4 GPU
-hours across both RTX 3090s, plus 30–90 minutes for admission and summarization.
+are required. A power smoke determines shard count. Expected compute is 1â€“4 GPU
+hours across both RTX 3090s, plus 30â€“90 minutes for admission and summarization.
 
 ## Workstream 3: continuous typing motion policy
 
@@ -334,13 +338,13 @@ device effect.
 - Exact simulation catalog frozen after WS1.
 - WS2 press envelopes and fingertip families.
 - Every ordered key-to-key pair, including repeated-key self transitions.
-- Hover height `2–30 mm`.
-- Cartesian transition speed `10–400 mm/s`.
+- Hover height `2â€“30 mm`.
+- Cartesian transition speed `10â€“400 mm/s`.
 - approach and release speed within the WS2 admitted envelope;
 - dwell within the WS2 admitted envelope;
-- random noise `0–0.002 rad`;
-- constant approach-direction backlash `0–0.008 rad`; and
-- per-key residual correction `0–0.25` of the fixed simulated bias.
+- random noise `0â€“0.002 rad`;
+- constant approach-direction backlash `0â€“0.008 rad`; and
+- per-key residual correction `0â€“0.25` of the fixed simulated bias.
 
 ### Outputs and metrics
 
@@ -362,9 +366,9 @@ continuous class satisfies those rules, the result recommends parking.
 
 ### Dependencies and compute estimate
 
-WS1 and WS2 must complete. Expected Warp compute is 2–8 GPU hours depending on
+WS1 and WS2 must complete. Expected Warp compute is 2â€“8 GPU hours depending on
 catalog cardinality and power analysis. CPU collision admission and summary are
-estimated at 1–3 hours.
+estimated at 1â€“3 hours.
 
 ## Workstream 4: fixture drift and recovery
 
@@ -382,10 +386,10 @@ and incorrect simulated device effects.
 
 ### Inputs and ranges
 
-- Keyboard and phone translations independently swept over `±1–10 mm` in X/Y.
-- In-plane rotation `±0.25–5 degrees`.
+- Keyboard and phone translations independently swept over `Â±1â€“10 mm` in X/Y.
+- In-plane rotation `Â±0.25â€“5 degrees`.
 - Single and burst missed presses, wrong keys, and double presses.
-- Observation/readback delay `0–2 seconds`.
+- Observation/readback delay `0â€“2 seconds`.
 - Drift onset before planning, during travel, immediately before contact, and
   after effect verification.
 
@@ -421,15 +425,15 @@ or continuing after an ambiguous readback stops the workstream.
 ### Dependencies and compute estimate
 
 WS1 must complete; WS2 recipes are used when available but are not required for
-state-machine unit tests. Expected CPU time is 30–120 minutes and optional Warp
-replay is 15–60 GPU minutes.
+state-machine unit tests. Expected CPU time is 30â€“120 minutes and optional Warp
+replay is 15â€“60 GPU minutes.
 
 ## Workstream 5: calibration procedure budget
 
 ### Objective
 
 Estimate how many per-key probes are needed to reduce fixed landing bias to the
-MW2UC 10–25% residual range and how frequently recalibration would be needed
+MW2UC 10â€“25% residual range and how frequently recalibration would be needed
 under a declared drift range.
 
 ### Questions answered
@@ -441,12 +445,12 @@ under a declared drift range.
 ### Inputs and ranges
 
 - Probe counts `1, 2, 3, 5, 8, 13, 21, 34` per key.
-- Landing-observation noise `0.1–2.0 mm`.
-- Outlier probability `0–5%` with bounded `1–5 mm` magnitude.
+- Landing-observation noise `0.1â€“2.0 mm`.
+- Outlier probability `0â€“5%` with bounded `1â€“5 mm` magnitude.
 - Fixed landing bias corresponding to MW2UC source ranges.
-- Linear translational drift `0.01–0.5 mm/hour`.
-- rotational drift `0.01–0.25 degree/hour`.
-- Session duration `0.25–8 hours`.
+- Linear translational drift `0.01â€“0.5 mm/hour`.
+- rotational drift `0.01â€“0.25 degree/hour`.
+- Session duration `0.25â€“8 hours`.
 - Residual target `10%, 15%, 20%, 25%` of initial fixed landing bias.
 
 ### Outputs and metrics
@@ -468,7 +472,7 @@ insufficient. It does not relax the target or extrapolate beyond the grid.
 ### Dependencies and compute estimate
 
 WS2 supplies contact-valid probes; WS4 supplies detection/relocalization
-semantics. Expected compute is CPU dominated, 30–120 minutes, with less than 30
+semantics. Expected compute is CPU dominated, 30â€“120 minutes, with less than 30
 GPU minutes for optional Warp validation.
 
 ## Workstream 6: mid-motion observation in Isaac
@@ -491,7 +495,7 @@ regions with visible targets.
 - Frozen exact-nadir camera family at 700, 850, and 1,000 mm.
 - Frame rate fixed at 9 fps for the primary family.
 - Exposure duration `1/120, 1/60, 1/30, 1/15, 1/9 second`.
-- Joint-state/capture timestamp offset `0–111 ms`.
+- Joint-state/capture timestamp offset `0â€“111 ms`.
 - Projection dilation derived only as a range from the unmeasured MW2UC joint
   profiles; it is never installed as a physical margin.
 - Held-out simulator audit masks disjoint by trajectory, lighting appearance,
@@ -523,9 +527,185 @@ leakage, or use of perfect simulator masks as runtime inputs stops the gate.
 ### Dependencies and compute estimate
 
 WS3 trajectories and WS4 recovery behavior must be frozen. Estimated Isaac
-render time is 3–10 GPU hours after a smoke-derived throughput estimate;
-evaluation and mask scoring are estimated at 1–3 CPU hours. Isaac work never
+render time is 3â€“10 GPU hours after a smoke-derived throughput estimate;
+evaluation and mask scoring are estimated at 1â€“3 CPU hours. Isaac work never
 runs while a higher-priority GPU campaign is active.
+
+## Workstream 7: first-motion readiness
+
+### Objective
+
+Build a CPU-first rehearsal and evidence package for a future staged hardware
+bring-up while preserving zero transport and zero physical authority. The
+workstream exercises the exact controller encoding boundary against a guarded
+software emulator, predicts telemetry envelopes for stages A-F, tests whether
+wrong models and controller faults are detected before simulated contact, and
+collects all results in a scenario regression library and human-controlled
+readiness checklist.
+
+Simulation results from this workstream cannot authorize a powered session.
+The first powered motion requires Jack's explicit approval after the applicable
+physical measurements and checklist items are complete.
+
+### Questions answered
+
+- Does the real runtime encoder round-trip the intended joint, sign, magnitude,
+  unit, controller ID, and zero convention through an isolated emulator?
+- Can emulator mode prove that serial and every other real transport are
+  unreachable?
+- What measured-position telemetry envelopes should stages A-F produce across
+  predeclared latency, response, encoder, backlash, and noise ranges?
+- Which wrong-model, controller, environment, and human-entry conditions stop
+  before simulated contact, and which remain detection gaps?
+- Which exact simulation artifacts and physical measurements are prerequisites
+  for each future hardware stage?
+
+### Frozen implementation phases
+
+#### Phase 2 - controller emulator
+
+The emulator accepts only bytes or typed messages emitted by the repository's
+existing runtime encoder and controller contract. Servo IDs, message format,
+units, direction, and zero convention are derived from those sources. An
+undocumented field becomes a named assumption requiring later controller
+confirmation; it is never silently guessed.
+
+The real runtime path runs end to end with only the physical transport replaced
+by a guarded in-memory transport. A hard guard plus a negative test must prove
+that emulator mode cannot import, enumerate, or open a serial port, socket,
+device file, or real controller transport.
+
+Unmeasured servo properties remain sampled ranges: command latency, response
+lag and settling, encoder resolution, direction-dependent backlash, measured
+position noise, and overload or stall behavior. Telemetry reports simulated
+measured position rather than echoing commanded position. Fault hooks cover a
+dropped message, delayed telemetry, nonresponding servo, stall or overload,
+e-stop, and power interruption.
+
+#### Phase 3 - staged bring-up rehearsal
+
+The deterministic stage sequence is:
+
+1. A: one joint, small displacement, low speed;
+2. B: all joints to the parked pose;
+3. C: noncontact hover above the keyboard;
+4. D: one simulated press on a test pad;
+5. E: one simulated character; and
+6. F: one simulated short string.
+
+Each stage emits a hash-bound predicted telemetry envelope containing joint
+position over time, measured-position uncertainty, tool-tip position, collision
+and limit diagnostics, expected device effect, and verification result.
+Exploratory tolerances are ranges fixed before rehearsal. A stage stops on
+wrong direction, magnitude outside its envelope, pose mismatch, collision or
+limit warning, landing outside its envelope, wrong simulated key, or any
+verification disagreement.
+
+#### Phase 4 - wrong-model drills
+
+Drills inject one condition at a time and declared pairs: link-length error
+`1-3 mm`, joint-zero error `0.5-2 degrees`, flipped joint sign, swapped servo
+IDs, degree/radian confusion, keyboard translation `2-10 mm`, keyboard rotation
+`1-3 degrees`, stale telemetry, dropped connection, and delayed telemetry.
+Each receipt records whether detection occurred, the first detecting mechanism,
+the first affected stage, and whether detection preceded simulated contact.
+An undetected condition is retained as a gap with a proposed new detection
+mechanism. No tolerance changes after drill results; any amendment starts a new
+pre-result fixture revision.
+
+#### Phase 5 - scenario library and regression runner
+
+One scenario catalog gives every case an ID, category, preconditions, injected
+condition, expected outcome (`PROCEED`, `ABSTAIN`, `RETRY`, or `STOP`), and
+expected detection mechanism. Categories cover nominal long strings, repeats,
+modifier and phone-layer transitions; `GRAVE`, `EQUAL`, `Z`, `SHIFT`, joint
+limits, and reach extremes; all controller faults; fixture shift, obstruction,
+lighting change, and stale references; hand entry; and every wrong-model drill.
+The runner composes the WS1 fault hooks and WS4 recovery machine and exposes a
+fixed fast CI subset plus a full nightly identity set.
+
+#### Phase 6 - readiness checklist
+
+`software/docs/FIRST_MOTION_READINESS.md` lists, for stages A-F, the required
+simulation artifact hashes, physical measurements, no-go criteria, abort
+procedure, and explicit human approval. Every item is labeled satisfied,
+blocked on simulation, or blocked on physical measurement. The checklist
+records status; it cannot create an execution permit or authorize transport.
+
+### Inputs and parameter ranges
+
+- Existing runtime command encoder, controller contract, joint map, unit and
+  frame contracts, pinned URDF, collision kernel, and simulator-only transport.
+- WS1 semantic twin and fault hooks; WS4 recovery state machine; WS5 calibration
+  findings; candidate collision intake retained only as exploratory evidence.
+- Servo latency, lag, settling, resolution, backlash, noise, speed, acceleration,
+  and overload thresholds are fixture ranges derived from repository bounds or
+  explicitly labeled assumptions. No range endpoint becomes a nominal hardware
+  constant.
+- Stage displacement, speed, duration, and telemetry tolerance are separately
+  frozen ranges. Phase 2 does not begin until these ranges, protocol bindings,
+  random seeds, fault identities, metrics, and stop rules are hash-bound.
+- WS2 may later replace the provisional contact tool. Any replacement creates a
+  new collision-candidate and telemetry-envelope revision rather than rewriting
+  prior evidence.
+
+### Outputs
+
+- A transport-isolated controller emulator and exact encoder/decoder conformance
+  receipt.
+- Per-stage A-F scripts and predicted telemetry-envelope artifacts.
+- A wrong-model drill matrix with precontact-detection results and retained gaps.
+- A versioned scenario catalog, fast CI runner, full nightly runner, and
+  category-level summary.
+- `FIRST_MOTION_READINESS.md` with artifact hashes and physical dependencies.
+- One compact external evidence manifest and verified backup inventory per
+  phase, including zero-authority counters and exact environment versions.
+
+### Metrics
+
+- Exact command-byte acceptance and round-trip field agreement by joint.
+- Servo-ID coverage, sign, magnitude, unit, and zero mismatches, plus false
+  telemetry agreement between commanded and simulated measured state.
+- Transport-open attempts, all of which must remain zero.
+- Stage envelope coverage, limit or collision warnings, predicted landing error,
+  device-effect agreement, and verification agreement.
+- Fault and wrong-model detection rate, first-detection stage, precontact
+  detection rate, and undetected-gap count.
+- Scenario pass rate and false acceptance by category; recovery success and
+  wrong characters committed before detection.
+- Hardware writes, physical movements, real commands, permits, transports, and
+  physical authority, all required to remain zero.
+
+### Pass and stop rules
+
+Phase 2 passes only with 100% exact protocol round-trip across every joint and
+the all-joint message, correct measured-position telemetry semantics, detection
+of every deterministic controller fault, and zero real-transport opens. Any
+undocumented protocol detail is a blocker for the affected claim.
+
+Phase 3 passes only when each stage remains inside every frozen envelope and
+produces the expected independent simulated effect. A later stage cannot run
+after an earlier no-go result. Phase 4 reports gaps rather than claiming pass
+when any drill reaches simulated contact before detection. Phase 5 requires the
+fixed CI and full identity sets to match their declared outcomes with zero false
+acceptance. Phase 6 is complete only as a checklist artifact; every physical
+measurement and human-approval row remains blocked until supplied outside this
+simulation program.
+
+Any serial, socket, or device open; real controller discovery; hardware write;
+physical movement; command or permit creation; transport authorization; silent
+protocol guess; post-result tolerance change; or physical-readiness claim stops
+the workstream and preserves the attempt as failed evidence.
+
+### Dependencies and compute estimate
+
+Phases 2-5 are CPU-only and may proceed while the no-preemption residual job
+runs. Phase 3 consumes Phase 2; Phase 4 consumes the unchanged Phase 3
+envelopes; Phase 5 consumes Phases 2-4 plus WS1 and WS4 hooks; Phase 6 summarizes
+all preceding evidence. WS2's later nominal tool selection triggers a bounded
+artifact revision. Estimated CPU time is 1-3 hours for emulator implementation
+and tests, 1-4 hours for staged and wrong-model sweeps, and under 1 hour for
+catalog regression and checklist generation. No GPU allocation is required.
 
 ## Program execution and reporting protocol
 
@@ -554,7 +734,7 @@ stops at that dependency and asks the operator before any physical procedure.
 
 ## Completion definition
 
-The program completes when all six workstreams have final simulation receipts,
+The program completes when all seven workstreams have final simulation receipts,
 all external evidence has two verified copies, failures remain visible, and the
 shared workplan identifies every remaining physical dependency. Completion does
 not authorize hardware use. It produces a prioritized measurement and design
