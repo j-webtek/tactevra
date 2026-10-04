@@ -3,9 +3,8 @@
 **Document status:** Current release index  
 **Authority:** Navigation and readiness context only; this page does not approve or publish a release
 
-Tactevra has not yet published a GitHub release. Candidate `ed29e82f` is
-technically qualified and its exact source-only publication set is approved.
-Start with the
+Tactevra published its first source-only experimental preview from candidate
+`ed29e82f`. Start with the
 [current readiness dashboard](READINESS.md), then use
 [issue #57](https://github.com/j-webtek/tactevra/issues/57) for the actionable
 checklist. Dated documents in this directory preserve evidence for the exact
@@ -13,12 +12,13 @@ revisions they name and must not be silently updated to describe newer source.
 
 ## Current readiness path
 
-1. Review the [current candidate record](CANDIDATE_ED29E82F.md) and
-   [proposed notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md).
+1. Review the [published candidate record](CANDIDATE_ED29E82F.md),
+   [release notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md), and
+   [public prerelease](https://github.com/j-webtek/tactevra/releases/tag/tactevra-v0.1.0-alpha.1).
 2. Reconcile any change to the candidate identity by selecting a new protected-
    `main` SHA and repeating the exact-SHA checks; do not move the current record.
-3. Publish and independently verify only the approved tag, SHA, title, notes,
-   and GitHub-generated source-only assets before closing issue #57.
+3. Treat any future candidate as a new decision requiring its own exact-SHA
+   qualification and explicit approval.
 
 The read-only Preview candidate audit can validate a selected SHA, but a passing
 run is evidence—not publication approval. It cannot clear an open owner review,
@@ -29,8 +29,8 @@ promote a model, qualify physical behavior, or authorize hardware activity.
 | Record | Lifecycle | Use |
 | --- | --- | --- |
 | [Current readiness dashboard](READINESS.md) | Current status | Concise gate state, ownership, and next actions; not release approval |
-| [Candidate `ed29e82f`](CANDIDATE_ED29E82F.md) | Technically qualified and approved; unpublished | Exact-SHA audits, bounded AI/arm dispositions, limitations, and publication approval |
-| [Approved alpha.1 notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md) | Approved; unpublished | Exact release text for the source-only prerelease |
+| [Candidate `ed29e82f`](CANDIDATE_ED29E82F.md) | Published and verified | Exact-SHA audits, bounded AI/arm dispositions, limitations, approval, and publication result |
+| [Alpha.1 notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md) | Published | Exact release text for the source-only prerelease |
 | [Experimental preview draft](EXPERIMENTAL_PREVIEW_DRAFT.md) | Superseded, unpublished | Historical proposed scope and limitations |
 | [Candidate `dcd87db`](CANDIDATE_DCD87DB.md) | Superseded without publication | Exact-revision validation and unresolved gates |
 | [Baseline from September 26, 2026](BASELINE_2026-09-26.md) | Historical evidence | Earlier pinned source qualification |
