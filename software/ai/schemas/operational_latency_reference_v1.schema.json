@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/operational_latency_reference_v1.schema.json",
+  "title": "OperationalLatencyReferenceV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "report_id", "evidence_class", "upstream_input_mode", "terminal_scope", "run_class_definitions", "environment", "trace_count", "traces", "summaries", "decision_hashes_unchanged", "timing_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "report_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.operational_latency_reference.v1"},
+    "report_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "upstream_input_mode": {"const": "PRESEALED_SYNTHETIC_FIXTURE"},
+    "terminal_scope": {"const": "T5_FIRST_PLAN_READY_NO_PERMIT_REQUESTED"},
+    "run_class_definitions": {
+      "type": "object", "additionalProperties": false, "required": ["COLD", "WARM"],
+      "properties": {"COLD": {"type": "string"}, "WARM": {"type": "string"}}
+    },
+    "environment": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "captured_at_utc", "repository_commit", "repository_dirty", "python_version", "python_implementation", "platform_system", "platform_release", "platform_machine", "logical_cpu_count", "perf_counter_resolution_ns", "benchmark_entrypoint", "environment_sha256"],
+      "properties": {
+        "schema": {"const": "rocell.operational_benchmark_environment.v1"},
+        "captured_at_utc": {"type": "string", "minLength": 1},
+        "repository_commit": {"$ref": "#/$defs/gitRevision"},
+        "repository_dirty": {"const": false},
+        "python_version": {"type": "string", "minLength": 1},
+        "python_implementation": {"type": "string", "minLength": 1},
+        "platform_system": {"type": "string", "minLength": 1},
+        "platform_release": {"type": "string", "minLength": 1},
+        "platform_machine": {"type": "string", "minLength": 1},
+        "logical_cpu_count": {"type": "integer", "minimum": 1},
+        "perf_counter_resolution_ns": {"type": "integer", "minimum": 1},
+        "benchmark_entrypoint": {"const": "software/scripts/run_operational_latency_reference_v1.py"},
+        "environment_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "trace_count": {"type": "integer", "minimum": 40, "maximum": 4096},
+    "traces": {"type": "array", "minItems": 40, "maxItems": 4096, "items": {"type": "object"}},
+    "summaries": {
+      "type": "object", "additionalProperties": false, "required": ["COLD", "WARM", "ALL"],
+      "properties": {"COLD": {"$ref": "#/$defs/summary"}, "WARM": {"$ref": "#/$defs/summary"}, "ALL": {"$ref": "#/$defs/summary"}}
+    },
+    "decision_hashes_unchanged": {"const": true},
+    "timing_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "gitRevision": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "nullableInteger": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+    "distribution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["minimum", "p50", "p95", "p99", "maximum"],
+      "properties": {"minimum": {"type": "integer", "minimum": 0}, "p50": {"type": "integer", "minimum": 0}, "p95": {"type": "integer", "minimum": 0}, "p99": {"$ref": "#/$defs/nullableInteger"}, "maximum": {"type": "integer", "minimum": 0}}
+    },
+    "durations": {
+      "type": "object", "additionalProperties": false,
+      "required": ["request_to_intent_ns", "request_to_batch_ns", "batch_to_admission_ns", "admission_to_first_plan_ns"],
+      "properties": {"request_to_intent_ns": {"$ref": "#/$defs/distribution"}, "request_to_batch_ns": {"$ref": "#/$defs/distribution"}, "batch_to_admission_ns": {"$ref": "#/$defs/distribution"}, "admission_to_first_plan_ns": {"$ref": "#/$defs/distribution"}}
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false, "required": ["trace_count", "durations_ns"],
+      "properties": {"trace_count": {"type": "integer", "minimum": 1}, "durations_ns": {"$ref": "#/$defs/durations"}}
+    }
+  }
+}

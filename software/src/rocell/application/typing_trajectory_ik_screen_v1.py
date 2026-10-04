@@ -12,8 +12,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import inspect
 import json
 import math
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
@@ -28,6 +30,10 @@ from rocell.kinematics import (
 
 from ._pinned_model import load_pinned_urdf
 from .context import SimulationContext, revalidate_simulation_context
+from .context_lifecycle_v1 import (
+    SimulationContextLifecycleBindingV1,
+    SimulationContextLifecycleV1,
+)
 from .measured_trajectory_screening import _compatibility_blockers, _planner_bounds
 from .trajectory_simulation import (
     CartesianRouteWaypoint,
@@ -37,12 +43,21 @@ from .trajectory_simulation import (
 from .typing_execution_plan_v1 import TypingExecutionPlanV1
 from .typing_trajectory_plan_v1 import TypingTrajectoryPlanV1
 from .typing_trajectory_plan_v1 import compile_typing_trajectory_plan_v1
+from .typing_planner_preparation_v1 import (
+    PreparedTypingPlannerV1,
+    validate_prepared_typing_planner_v1,
+)
+from .typing_ik_effort_telemetry_v1 import TypingIkEffortRecorderV1
+from .typing_exact_ik_result_cache_v1 import ExactTypingIkResultCacheV1
+from .typing_endpoint_atlas_observer_v1 import TypingEndpointAtlasRecorderV1
+from .typing_endpoint_reuse_verifier_v1 import TypingEndpointReuseVerifierV1
 
 
 SCHEMA = "rocell.typing_trajectory_ik_screen.v1"
 SEED_SCHEMA = "rocell.typing_trajectory_ik_seed.v1"
 READY_STATUS = "READY_FOR_INSTALLED_GEOMETRY_COLLISION_SCREENING"
 BLOCKED_STATUS = "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY"
+EVIDENCE_FLOAT_DECIMAL_PLACES = 6
 
 
 class TypingTrajectoryIkScreenV1Error(ValueError):
@@ -61,6 +76,38 @@ def _canonical(value: object) -> bytes:
 
 def _sha256(value: object) -> str:
     return hashlib.sha256(_canonical(value)).hexdigest()
+
+
+def canonicalize_typing_ik_evidence_v1(value: Any) -> Any:
+    """Quantize numerical IK evidence at a platform-independent boundary.
+
+    The bounded numerical solver can produce sub-micrometre or sub-microradian
+    differences across otherwise equivalent Python/BLAS platforms.  Those
+    differences are irrelevant to the safety decisions, but hashing the raw
+    floats would give equivalent command plans different evidence identities.
+    Six decimal places remains far finer than the installed arm can resolve
+    while providing one stable representation for retained evidence.
+    """
+
+    if value is None or isinstance(value, (bool, str, int)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise TypingTrajectoryIkScreenV1Error(
+                "IK evidence must contain only finite numbers"
+            )
+        quantized = round(value, EVIDENCE_FLOAT_DECIMAL_PLACES)
+        return 0.0 if quantized == 0.0 else quantized
+    if isinstance(value, Mapping):
+        return {
+            key: canonicalize_typing_ik_evidence_v1(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [canonicalize_typing_ik_evidence_v1(item) for item in value]
+    raise TypingTrajectoryIkScreenV1Error(
+        f"unsupported IK evidence value type: {type(value).__name__}"
+    )
 
 
 def _digest(value: object, label: str) -> str:
@@ -181,6 +228,13 @@ def screen_typing_trajectory_ik_v1(
     seed: TypingTrajectoryIkSeedV1,
     *,
     policy: TrajectorySimulationPolicy | None = None,
+    prepared_planner: PreparedTypingPlannerV1 | None = None,
+    context_lifecycle: SimulationContextLifecycleV1 | None = None,
+    effort_recorder: TypingIkEffortRecorderV1 | None = None,
+    endpoint_atlas_recorder: TypingEndpointAtlasRecorderV1 | None = None,
+    endpoint_reuse_verifier: TypingEndpointReuseVerifierV1 | None = None,
+    exact_result_cache: ExactTypingIkResultCacheV1 | None = None,
+    _lifecycle_binding: SimulationContextLifecycleBindingV1 | None = None,
 ) -> dict[str, Any]:
     """Run the canonical deterministic IK gates over every exact T2A sample."""
 
@@ -194,7 +248,73 @@ def screen_typing_trajectory_ik_v1(
         raise TypeError("snapshot must be a PlannerCalibrationSnapshot")
     if not isinstance(seed, TypingTrajectoryIkSeedV1):
         raise TypeError("seed must be a TypingTrajectoryIkSeedV1")
-    revalidate_simulation_context(context)
+    if effort_recorder is not None and not isinstance(
+        effort_recorder, TypingIkEffortRecorderV1
+    ):
+        raise TypeError("effort_recorder must be a TypingIkEffortRecorderV1")
+    if endpoint_atlas_recorder is not None and not isinstance(
+        endpoint_atlas_recorder, TypingEndpointAtlasRecorderV1
+    ):
+        raise TypeError(
+            "endpoint_atlas_recorder must be a TypingEndpointAtlasRecorderV1"
+        )
+    if endpoint_reuse_verifier is not None and not isinstance(
+        endpoint_reuse_verifier, TypingEndpointReuseVerifierV1
+    ):
+        raise TypeError(
+            "endpoint_reuse_verifier must be a TypingEndpointReuseVerifierV1"
+        )
+    if exact_result_cache is not None and not isinstance(
+        exact_result_cache, ExactTypingIkResultCacheV1
+    ):
+        raise TypeError("exact_result_cache must be an ExactTypingIkResultCacheV1")
+    if (
+        (exact_result_cache is not None or endpoint_reuse_verifier is not None)
+        and context_lifecycle is None
+        and _lifecycle_binding is None
+    ):
+        raise TypingTrajectoryIkScreenV1Error(
+            "IK reuse experiments require lifecycle-managed admission"
+        )
+    if context_lifecycle is not None:
+        if _lifecycle_binding is not None:
+            raise TypingTrajectoryIkScreenV1Error(
+                "nested context lifecycle binding is invalid"
+            )
+        if not isinstance(context_lifecycle, SimulationContextLifecycleV1):
+            raise TypeError("context_lifecycle must be SimulationContextLifecycleV1")
+        if not isinstance(prepared_planner, PreparedTypingPlannerV1):
+            raise TypingTrajectoryIkScreenV1Error(
+                "lifecycle-managed IK requires prepared planner resources"
+            )
+        with context_lifecycle.validation_scope(context) as binding:
+            validate_prepared_typing_planner_v1(prepared_planner, binding)
+            return screen_typing_trajectory_ik_v1(
+                source_plan,
+                plan,
+                context,
+                snapshot,
+                seed,
+                policy=policy,
+                prepared_planner=prepared_planner,
+                effort_recorder=effort_recorder,
+                endpoint_atlas_recorder=endpoint_atlas_recorder,
+                endpoint_reuse_verifier=endpoint_reuse_verifier,
+                exact_result_cache=exact_result_cache,
+                _lifecycle_binding=binding,
+            )
+    if _lifecycle_binding is None:
+        if prepared_planner is not None:
+            raise TypingTrajectoryIkScreenV1Error(
+                "prepared planner requires lifecycle-managed admission"
+            )
+        revalidate_simulation_context(context)
+    else:
+        if not isinstance(prepared_planner, PreparedTypingPlannerV1):
+            raise TypingTrajectoryIkScreenV1Error(
+                "lifecycle binding requires prepared planner resources"
+            )
+        validate_prepared_typing_planner_v1(prepared_planner, _lifecycle_binding)
     if (
         source_plan.plan_sha256 != plan.source_plan_sha256
         or source_plan.config.calibration_snapshot_sha256 != snapshot.snapshot_sha256
@@ -262,10 +382,14 @@ def screen_typing_trajectory_ik_v1(
     results: list[dict[str, Any]] = []
     ik_executed = False
     if not blockers:
-        model = load_pinned_urdf(
-            context.scenario.model_path,
-            context.scenario.model_sha256,
-        ).model
+        model = (
+            prepared_planner.loaded_model.model
+            if prepared_planner is not None
+            else load_pinned_urdf(
+                context.scenario.model_path,
+                context.scenario.model_sha256,
+            ).model
+        )
         solver = RoArmM3NumericalIk(
             model=model,
             board_T_world=RigidTransform(
@@ -289,18 +413,113 @@ def screen_typing_trajectory_ik_v1(
             ),
             joint_bounds_rad=bounds,
         )
+        solver_source_sha256 = None
+        if (
+            effort_recorder is not None
+            or exact_result_cache is not None
+            or endpoint_reuse_verifier is not None
+        ):
+            solver_source = inspect.getsourcefile(type(solver))
+            if solver_source is None:
+                raise TypingTrajectoryIkScreenV1Error(
+                    "IK telemetry cannot bind the active solver source"
+                )
+            solver_source_path = Path(solver_source).resolve()
+            if solver_source_path.stat().st_size > 2_000_000:
+                raise TypingTrajectoryIkScreenV1Error(
+                    "IK solver source exceeds its telemetry hash bound"
+                )
+            solver_source_sha256 = hashlib.sha256(
+                solver_source_path.read_bytes()
+            ).hexdigest()
+        endpoint_reuse_context_sha256 = _sha256({
+            "schema": "rocell.typing_endpoint_reuse_context.v1",
+            "build_snapshot_sha256": context.snapshot.snapshot_hash,
+            "kinematic_model_sha256": context.scenario.model_sha256,
+            "calibration_snapshot_sha256": snapshot.snapshot_sha256,
+            "joint_bounds_rad": {
+                name: list(bounds[name]) for name in ARM_JOINT_NAMES
+            },
+            "fixed_gripper_position_rad": (
+                context.scenario.fixed_gripper_position.value
+            ),
+            "ik_options": {
+                "max_attempts": context.scenario.ik_policy.max_attempts,
+                "max_iterations_per_attempt": (
+                    context.scenario.ik_policy.max_iterations_per_attempt
+                ),
+            },
+            "algorithm": "DETERMINISTIC_BOUNDED_DLS_V1",
+            "solver_implementation": (
+                f"{type(solver).__module__}.{type(solver).__qualname__}"
+            ),
+            "solver_source_sha256": solver_source_sha256,
+        })
         ik_executed = True
         for index in range(len(samples)):
             waypoint = _waypoint(plan, index)
-            solved = solver.solve(
-                BoardToolTipTarget(waypoint.point_board),
-                seed_joint_positions=(
-                    {
-                        name: JointPosition.radians(value)
-                        for name, value in previous.items()
-                    },
+            solver_input_sha256 = _sha256({
+                "schema": "rocell.typing_ik_solver_input.v1",
+                "build_snapshot_sha256": context.snapshot.snapshot_hash,
+                "kinematic_model_sha256": context.scenario.model_sha256,
+                "calibration_snapshot_sha256": snapshot.snapshot_sha256,
+                "target_board_mm": {
+                    "frame": waypoint.point_board.frame,
+                    "x": waypoint.point_board.x,
+                    "y": waypoint.point_board.y,
+                    "z": waypoint.point_board.z,
+                },
+                "incoming_seed_joint_positions_rad": {
+                    name: previous[name] for name in ARM_JOINT_NAMES
+                },
+                "joint_bounds_rad": {
+                    name: list(bounds[name]) for name in ARM_JOINT_NAMES
+                },
+                "fixed_gripper_position_rad": (
+                    context.scenario.fixed_gripper_position.value
                 ),
-            )
+                "ik_options": {
+                    "max_attempts": context.scenario.ik_policy.max_attempts,
+                    "max_iterations_per_attempt": (
+                        context.scenario.ik_policy.max_iterations_per_attempt
+                    ),
+                },
+                "algorithm": "DETERMINISTIC_BOUNDED_DLS_V1",
+                "solver_implementation": (
+                    f"{type(solver).__module__}.{type(solver).__qualname__}"
+                ),
+                "solver_source_sha256": solver_source_sha256,
+            })
+            solved = None
+            if exact_result_cache is not None:
+                if _lifecycle_binding is None:
+                    raise TypingTrajectoryIkScreenV1Error(
+                        "exact IK cache lost its lifecycle binding"
+                    )
+                solved = exact_result_cache.lookup(
+                    solver_input_sha256, _lifecycle_binding
+                )
+            if solved is None:
+                solved = solver.solve(
+                    BoardToolTipTarget(waypoint.point_board),
+                    seed_joint_positions=(
+                        {
+                            name: JointPosition.radians(value)
+                            for name, value in previous.items()
+                        },
+                    ),
+                )
+                if exact_result_cache is not None:
+                    exact_result_cache.remember(
+                        solver_input_sha256, solved, _lifecycle_binding
+                    )
+            if effort_recorder is not None:
+                effort_recorder.observe(
+                    index,
+                    solved,
+                    solver_input_sha256=solver_input_sha256,
+                    previous_solution_seed_supplied=index > 0,
+                )
             evaluated = evaluate_joint_trajectory_solution(
                 waypoint,
                 solved,
@@ -309,10 +528,34 @@ def screen_typing_trajectory_ik_v1(
                 previous,
                 selected_policy,
             )
-            results.append(evaluated.to_dict())
+            if endpoint_atlas_recorder is not None:
+                endpoint_atlas_recorder.observe(
+                    plan.screening_samples[index],
+                    evaluated,
+                    incoming_joint_positions_rad=previous,
+                    solver_input_sha256=solver_input_sha256,
+                )
+            if endpoint_reuse_verifier is not None:
+                if _lifecycle_binding is None:
+                    raise TypingTrajectoryIkScreenV1Error(
+                        "endpoint reuse verifier lost its lifecycle binding"
+                    )
+                endpoint_reuse_verifier.observe(
+                    plan.screening_samples[index],
+                    evaluated,
+                    decision_context_sha256=endpoint_reuse_context_sha256,
+                    binding=_lifecycle_binding,
+                )
+            canonical_result = canonicalize_typing_ik_evidence_v1(
+                evaluated.to_dict()
+            )
+            results.append(canonical_result)
             if not evaluated.accepted:
                 blockers.append(f"IK_ROUTE_REJECTED:{evaluated.failure_reason}")
                 break
+            # Keep full solver precision inside the current screening run.  The
+            # canonicalized representation is an evidence boundary, not a new
+            # numerical input or a change to endpoint-reuse behavior.
             previous = dict(evaluated.solution_arm_joint_positions_rad)
 
     all_accepted = (
@@ -365,7 +608,9 @@ __all__ = [
     "SEED_SCHEMA",
     "READY_STATUS",
     "BLOCKED_STATUS",
+    "EVIDENCE_FLOAT_DECIMAL_PLACES",
     "TypingTrajectoryIkScreenV1Error",
     "TypingTrajectoryIkSeedV1",
+    "canonicalize_typing_ik_evidence_v1",
     "screen_typing_trajectory_ik_v1",
 ]

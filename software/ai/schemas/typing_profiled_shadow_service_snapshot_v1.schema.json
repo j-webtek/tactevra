@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_profiled_shadow_service_snapshot_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "profile_decision", "profile_decision_sha256", "exact_reuse_enabled", "complete_solve_fallback_required", "automatic_retry_allowed", "service_snapshot_sha256", "owner_snapshot_sha256", "cache_counters", "executor_attached", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "profiled_service_snapshot_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_profiled_shadow_service_snapshot.v1"}, "profile_decision": {"enum": ["EXACT_INPUT_REUSE_SHADOW_ELIGIBLE", "FULL_SOLVE_ONLY"]}, "profile_decision_sha256": {"$ref": "#/$defs/hash"}, "exact_reuse_enabled": {"type": "boolean"}, "complete_solve_fallback_required": {"const": true}, "automatic_retry_allowed": {"const": false}, "service_snapshot_sha256": {"$ref": "#/$defs/hash"}, "owner_snapshot_sha256": {"$ref": "#/$defs/hash"},
+    "cache_counters": {"type": "object", "additionalProperties": false, "required": ["lookups", "hits", "misses", "stores", "capacity_skips"], "properties": {"lookups": {"type": "integer", "minimum": 0}, "hits": {"type": "integer", "minimum": 0}, "misses": {"type": "integer", "minimum": 0}, "stores": {"type": "integer", "minimum": 0}, "capacity_skips": {"type": "integer", "minimum": 0}}},
+    "executor_attached": {"const": false}, "controller_opened": {"const": false}, "transport_opened": {"const": false}, "controller_commands": {"const": []}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false}, "profiled_service_snapshot_sha256": {"$ref": "#/$defs/hash"}
+  }, "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

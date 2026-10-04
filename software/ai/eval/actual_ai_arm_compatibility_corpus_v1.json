@@ -1,0 +1,97 @@
+{
+  "schema": "rocell.actual_ai_arm_compatibility_corpus.v1",
+  "corpus_id": "pc18-actual-ai-arm-compatibility-v1",
+  "evidence_class": "SYNTHETIC_OFFLINE_ONLY",
+  "retained_files": {
+    "actual_emitter_hhi": {
+      "relative_path": "actual_ai_emitter_hhi_batch_v2.json",
+      "sha256": "59beb8375008d44951a206a135ba0e6094509f04b58d948c6ba7741d9d841299"
+    },
+    "actual_emitter_mixed": {
+      "relative_path": "actual_ai_emitter_mixed_batch_v2.json",
+      "sha256": "986dbf665a58124147e81458e469fece4f16a41da8c43866340e7926791c9b92"
+    },
+    "actual_emitter_all46": {
+      "relative_path": "actual_ai_emitter_all46_batch_v2.json",
+      "sha256": "6f3111a6306ac6d4f3f6e5a700acfd29a4efabb8975f434eb0a1be7b5b32bdde"
+    },
+    "precision_adapter_hh1_period": {
+      "relative_path": "precision_adapter_batch_v2_contract_fixture.json",
+      "sha256": "26fa25a5824c2bd3e1b8312f91b801afa02c240487771533b8faed5c4bd531c5"
+    },
+    "localization_abstention": {
+      "relative_path": "current_checkpoint_batch_abstention_v0.json",
+      "sha256": "c5469369df0b2229cc140804e31222b524c8fecae3c448d3d160fc7486c33a94"
+    }
+  },
+  "expected_cases": {
+    "actual-emitter-hhi-supported": {
+      "disposition": "TRAJECTORY_COMPILED",
+      "blocker_code": null,
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "actual-emitter-mixed-supported": {
+      "disposition": "TRAJECTORY_COMPILED",
+      "blocker_code": null,
+      "ordered_target_ids": ["R", "O", "B", "O", "T", "SPACE", "B", "O", "O", "K", "SPACE", "1", "0", "PERIOD", "ENTER"]
+    },
+    "actual-emitter-all46-supported": {
+      "disposition": "TRAJECTORY_COMPILED",
+      "blocker_code": null,
+      "ordered_target_ids": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "APOSTROPHE", "B", "C", "COMMA", "D", "E", "ENTER", "EQUAL", "F", "G", "H", "I", "J", "K", "L", "M", "MINUS", "N", "O", "P", "PERIOD", "Q", "R", "S", "SEMICOLON", "SLASH", "SPACE", "T", "TAB", "U", "V", "W", "X", "Y", "Z"]
+    },
+    "actual-precision-hh1-period-uncertain": {
+      "disposition": "ARM_INGRESS_BLOCKED",
+      "blocker_code": "COMPOSED_UNCERTAINTY_OUTSIDE_REGION",
+      "ordered_target_ids": ["H", "H", "1", "PERIOD"]
+    },
+    "actual-localization-abstention": {
+      "disposition": "PRODUCER_ABSTAINED",
+      "blocker_code": "LOCALIZATION_UNCALIBRATED",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "unsupported-phone-request": {
+      "disposition": "PRODUCER_REJECTED",
+      "blocker_code": "UNSUPPORTED_PHONE_REQUEST",
+      "ordered_target_ids": []
+    },
+    "derived-stale-evidence": {
+      "disposition": "ARM_INGRESS_BLOCKED",
+      "blocker_code": "STALE_OR_EXPIRED_EVIDENCE",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "derived-crossed-image-identity": {
+      "disposition": "ARM_INGRESS_BLOCKED",
+      "blocker_code": "CROSSED_EVIDENCE_IDENTITY",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "derived-low-confidence": {
+      "disposition": "ARM_INGRESS_BLOCKED",
+      "blocker_code": "CONFIDENCE_BELOW_POLICY",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "derived-authority-injection": {
+      "disposition": "STRICT_DECODER_BLOCKED",
+      "blocker_code": "AUTHORITY_INJECTION",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "derived-duplicate-json": {
+      "disposition": "STRICT_DECODER_BLOCKED",
+      "blocker_code": "DUPLICATE_JSON_FIELD",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "derived-nonfinite-coordinate": {
+      "disposition": "STRICT_DECODER_BLOCKED",
+      "blocker_code": "NONFINITE_NUMBER",
+      "ordered_target_ids": ["H", "H", "I"]
+    },
+    "derived-reordered-actions": {
+      "disposition": "STRICT_DECODER_BLOCKED",
+      "blocker_code": "REORDERED_ACTIONS",
+      "ordered_target_ids": ["I", "H", "H"]
+    }
+  },
+  "controller_commands": [],
+  "hardware_access": false,
+  "physical_authority": false
+}

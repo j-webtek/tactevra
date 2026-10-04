@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/typing_shadow_pipeline_v1.schema.json",
+  "title": "RoCell golden typing shadow pipeline receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "request_id", "ordered_target_ids", "action_count",
+    "stage_hashes", "terminal_stage", "terminal_stage_status",
+    "terminal_blockers", "controller_commands", "hardware_commands_generated",
+    "hardware_access", "physical_authority", "typing_shadow_pipeline_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.typing_shadow_pipeline.v1"},
+    "status": {"const": "BLOCKED_AT_HONEST_COLLISION_EVIDENCE_BOUNDARY"},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "ordered_target_ids": {
+      "type": "array", "minItems": 1, "maxItems": 64,
+      "items": {"type": "string", "minLength": 1, "maxLength": 128}
+    },
+    "action_count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "stage_hashes": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "payload_sha256", "batch_sha256", "ingress_sha256",
+        "freshness_sha256", "typing_execution_plan_sha256",
+        "typing_trajectory_plan_sha256", "typing_trajectory_ik_screen_sha256",
+        "typing_joint_schedule_sha256", "typing_collision_intake_sha256"
+      ],
+      "properties": {
+        "payload_sha256": {"$ref": "#/$defs/hash"},
+        "batch_sha256": {"$ref": "#/$defs/hash"},
+        "ingress_sha256": {"$ref": "#/$defs/hash"},
+        "freshness_sha256": {"$ref": "#/$defs/hash"},
+        "typing_execution_plan_sha256": {"$ref": "#/$defs/hash"},
+        "typing_trajectory_plan_sha256": {"$ref": "#/$defs/hash"},
+        "typing_trajectory_ik_screen_sha256": {"$ref": "#/$defs/hash"},
+        "typing_joint_schedule_sha256": {"$ref": "#/$defs/hash"},
+        "typing_collision_intake_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "terminal_stage": {"const": "COLLISION_EVIDENCE_INTAKE"},
+    "terminal_stage_status": {"const": "BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED"},
+    "terminal_blockers": {
+      "const": [
+        "INSTALLED_COLLISION_PROFILE_REQUIRED",
+        "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION"
+      ]
+    },
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_commands_generated": {"const": 0},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "typing_shadow_pipeline_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

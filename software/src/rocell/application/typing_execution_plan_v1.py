@@ -34,6 +34,7 @@ METRICS_SCHEMA = "rocell.typing_execution_metrics.v1"
 ACCEPTED_INGRESS_STATUS = "ACCEPTED_V2_FOR_FRESH_SEQUENTIAL_PLANNER_GATES"
 MAX_ACTIONS = 64
 MAX_PLAN_BYTES = 1_048_576
+EVIDENCE_FLOAT_DECIMAL_PLACES = 9
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 
@@ -137,6 +138,12 @@ def _distance(left: Point3Mm, right: Point3Mm) -> float:
 
 def _close(left: float, right: float) -> bool:
     return math.isclose(left, right, rel_tol=1e-12, abs_tol=1e-9)
+
+
+def _evidence_float(value: float) -> float:
+    """Remove sub-nanometre runtime noise from retained aggregate evidence."""
+    result = round(float(value), EVIDENCE_FLOAT_DECIMAL_PLACES)
+    return 0.0 if result == 0.0 else result
 
 
 @dataclass(frozen=True, slots=True)
@@ -557,13 +564,13 @@ def _metrics(
     saved = max(0.0, park_total - direct_total)
     fraction = saved / park_total if park_total else 0.0
     return TypingExecutionMetricsV1(
-        direct_transit_distance_mm=direct_transit,
-        park_transit_distance_mm=park_transit,
-        local_cycle_distance_mm=local,
-        direct_total_distance_mm=direct_total,
-        park_total_distance_mm=park_total,
-        distance_saved_mm=saved,
-        distance_reduction_fraction=fraction,
+        direct_transit_distance_mm=_evidence_float(direct_transit),
+        park_transit_distance_mm=_evidence_float(park_transit),
+        local_cycle_distance_mm=_evidence_float(local),
+        direct_total_distance_mm=_evidence_float(direct_total),
+        park_total_distance_mm=_evidence_float(park_total),
+        distance_saved_mm=_evidence_float(saved),
+        distance_reduction_fraction=_evidence_float(fraction),
     )
 
 

@@ -55,6 +55,12 @@ preparation does not satisfy any missing physical-original or calibration gate.
 
 ## Purpose
 
+The arm lane's ordered, camera-independent implementation backlog is maintained
+in the
+[pre-camera arm integration completion plan](../../docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md).
+It operationalizes the arm-side portions of S2, S4, and S7 without changing the
+shared stage gates or granting physical authority.
+
 This is the common working backbone for two independently advancing workstreams:
 
 1. **AI/model lane:** understand the user's request, assess the scene, localize
@@ -389,6 +395,200 @@ the existing FK/collision/sweep pipeline. It refuses to substitute nominal
 geometry for a measured installed profile and never presents its synthetic seed
 as observed feedback. Physical evidence population and a fresh observed start
 state remain the next dependencies.
+ARM-077 freezes the PC0 pre-camera typing qualification basis. The retained
+artifact pins canonical typing sequences, source hashes, synthetic-only
+calibration/dynamics/controller identities, Cartesian policy, status codes,
+resource ceilings, and benchmark requirements. A strict loader verifies those
+sources and rejects authority promotion, reordered fixtures, crossed identities,
+unsafe paths, non-finite limits, and physical claims. This establishes the
+repeatable offline basis for PC1 joint-space timing; it does not qualify any
+installed dynamics, controller timing, camera, collision profile, or movement.
+ARM-078 begins PC1 with a typed canonical joint-schedule boundary over the exact
+accepted T2B-IK samples. It closes the semantic-PC0-to-URDF joint-name seam,
+preserves sample/action order, generates strictly monotonic host timestamps,
+and deterministically rescales the route until synthetic velocity,
+acceleration, and jerk ceilings are satisfied or the bounded scale is rejected.
+The receipt remains zero-authority and explicitly blocks on measured installed
+dynamics, controller tracking, installed collision evidence, and a fresh
+observed start. PC1 is still in progress pending per-segment reporting and the
+remaining boundary/reversal/duration qualification matrix.
+ARM-079 completes the synthetic offline PC1 gate. The schedule now retains a
+diagnostic record for every adjacent joint sample, including duration,
+velocity, acceleration, jerk, remaining margin, and limiting joint/constraint.
+A strict parser reconstructs the typed artifact and rejects crossed profile
+hashes, timestamps, segment lineage, or unsupported fields. Tests cover every
+dynamic dimension at bounded just-inside/just-outside scale limits plus
+stationary and direction-reversal cases. PC2 shadow-pipeline composition may
+begin, but measured installed dynamics, controller tracking, collision
+evidence, fresh state, and all physical authority remain blocked.
+ARM-080 begins PC2 by composing the actual V2 decoder and every existing
+optimized typing boundary through collision-evidence intake behind one
+zero-I/O API. Golden `robot` and `H,H,1,PERIOD` receipts bind nine stage hashes,
+preserve repeats and action order, and deterministically stop at the missing
+installed collision profile and fresh-state requirements. The checkpoint has
+no transport or writer surface. PC2 remains in progress pending a canonical
+receipt parser/schema and the full field-by-field owner-boundary mutation set.
+ARM-081 completes PC2 with a strict canonical receipt schema/parser and an
+owner-boundary mutation matrix. Independently rehashed changes to stage order,
+terminal lineage, action count, authority, or field set still reject, while
+duplicate JSON, crossed batch/intent/calibration/seed identities, stale
+admission, expired freshness, and dynamics overflow fail at their earliest real
+stage. PC3 rolling-horizon/restart work is ready; no physical blocker changes.
+ARM-082 completes PC3 with a one-action current slot and one zero-authority
+preview slot bound to observed state, feedback, controller session,
+configuration epoch, calibration, tool, dynamics, freshness, and deadline.
+Any drift discards the horizon. Pre-dispatch restart reconstructs intent without
+replay; restart after retained dispatch intent becomes `OUTCOME_UNCERTAIN` with
+retry forbidden. PC4 zero-write controller encoding is now ready; measured
+workcell evidence and physical authority remain unchanged.
+ARM-083 completes PC4. One PC3 current action is selected from the exact timed
+joint schedule, checked against its trajectory semantics, and encoded into
+pinned deterministic T=102 bytes with arm-owned joint order, firmware settings,
+timing, and gripper policy. The receipt binds all execution identities and
+requires bounded correlated T=1051 feedback, but opens no transport, consumes
+no physical permit, and grants no authority. PC5 adversarial campaigns are now
+ready; camera and installed-workcell blockers are unchanged.
+ARM-084 begins PC5 with a canonical six-family, 35-case fault-campaign receipt
+and stricter resource boundaries at AI V2 ingress, rolling-horizon parsing, and
+controller-preview reconstruction. Malformed, duplicate, missing, oversized,
+non-finite, and deeply nested model inputs now have bounded rejection tests;
+campaign observations cannot record authority, retries, reordering, fallback,
+or escaped exceptions. PC5 remains in progress while the planner, transport,
+process-crash, and cache cases are connected to their actual owning boundaries.
+This checkpoint performs no hardware I/O and changes no physical qualification.
+ARM-085 completes PC5 by driving all 35 declared cases through the actual
+decoder, lineage/order, IK, joint-limit, Jacobian, trajectory, dynamics,
+collision-intake, clearance, transaction, protocol-emulator, sequence,
+restart-reconciliation, rolling-horizon, and bounded-cache owner boundaries.
+The hash-bound observation cache is capped at 64 entries and rejects corruption,
+identity crossing, malformed contents, duplicates, and exhaustion. The 145-test
+affected suite passes with no physical transport, permit, movement, retry, or
+authority. PC6 unified journaling and deterministic replay may now begin; all
+measured-workcell and camera qualification blockers remain unchanged.
+ARM-086 begins PC6 with a canonical, replay-only trace manifest. Fourteen exact
+stages are bounded and hash-chained from request/AI input through planning,
+controller rehearsal, feedback rehearsal, and the effect-verification
+placeholder. The journal retains only identifiers, sizes, and hashes; replay
+detects missing, changed, truncated, extra, reordered, and identity-crossed
+artifacts without parsing them into commands or exposing any execution surface.
+PC6 remains in progress pending adapters for retained PC2-PC5 artifacts, a
+clean-checkout replay command, and path-containment/redaction qualification.
+ARM-087 connects that backbone to the actual strict PC2-PC5 contracts. The
+adapter parses and cross-binds the V2 batch, golden shadow receipt, rolling
+horizon, zero-write controller preview, and completed fault campaign before it
+derives replay artifacts. Crossed request, target order, horizon, or schedule
+identity rejects before journal creation. The journal still retains hashes and
+sizes only and the effect stage remains explicitly not observed. PC6 now waits
+on the contained clean-checkout replay command and redaction/path qualification.
+ARM-088 adds that contained package and `replay-typing-trace` CLI. Packages are
+confined beneath an explicit nonsymlink evidence root, use fixed filenames and
+bounded canonical JSON, and reject path escape, symlinks, sensitive keys,
+absolute paths, mutation, deletion, or unexpected entries. Replay compares
+bytes and hashes only; it never decodes retained material into an execution
+request. PC6 now waits only on retaining and replaying one actual
+adapter-produced golden package from a clean checkout.
+ARM-089 retains that package and completes PC6. It is produced through the
+actual ARM-087 PC2-PC5 adapter, contains the exact 14-stage trace, and is
+regenerated byte-for-byte in test. The checked-in package also replays through
+the CLI from an isolated workspace as `IDENTICAL` while reporting zero
+hardware authority. The affected 119-test suite passes. PC7 safe transition
+cache work is now unblocked; camera and measured-workcell gates are unchanged.
+ARM-090 begins PC7 with a bounded shadow-only directional transition cache.
+The key binds source/destination, direction, calibration, target catalog, tool,
+arm model, dynamics, planner policy, and device-pose epoch. A hit returns only
+a planning seed and timing estimate after fresh start-state, IK, collision,
+dynamics, and permit-policy validation; fresh planning and all safety gates
+remain mandatory. No command, permit, admission, or physical authority is
+cached. The focused 14-test and affected 133-test suites pass. Broader pair,
+repeat, identity-churn, and randomized equivalence testing remains for PC7.
+ARM-091 completes PC7. Equivalence now covers all canonical PC0 typing
+fixtures, reverse travel, repeats, number/punctuation, and single-key routes.
+Every bound identity dimension is invalidation-tested, and a seeded
+128-operation capacity campaign remains deterministic and bounded. The 31
+focused and 150 affected tests pass with identical cached-versus-uncached
+receipts and schedule hashes and zero authority. PC8 performance benchmarking
+may now begin.
+ARM-092 begins PC8 with the shared bounded performance-report contract. Nine
+required scenarios each need at least 50 samples; reports include exact stage
+CPU distributions, resource maxima, cache behavior, route-duration prediction,
+and direct-versus-park comparison. PC0 ceilings reject rather than being
+silently exceeded, and simulated timing can never be labeled measured typing
+speed. Eight focused and 158 affected tests pass. The instrumented runner and
+retained readiness report remain outstanding.
+ARM-093 adds the actual zero-I/O PC2 instrumentation runner. It measures the
+existing decode-through-collision path, process CPU, peak working set, screening
+samples, receipt bytes, predicted route duration, and cache estimates without
+changing the ordinary receipt. Preview and encoding remain measured as zero
+when the honest collision-evidence blocker prevents those stages. Ten focused
+and 160 affected tests pass. PC8 still needs the retained multi-scenario run and
+readiness interpretation.
+ARM-094 completes PC8 with the retained 450-observation campaign and readiness
+interpretation. All nine required scenarios contain 50 samples, every PC0
+resource ceiling passes, and 50/50 malformed batches reject. IK is the dominant
+measured CPU bottleneck at 8.953 seconds p95. The same synthetic `ROBOT` route
+predicts an 8.98 percent shorter direct-hover duration than park-between-keys;
+this is not measured physical speed. Exact retained hashes, 12 focused tests,
+and 162 affected tests pass with zero hardware access or physical authority.
+PC9 camera-arrival evidence tooling is now the next pre-camera plan stage.
+ARM-095 begins PC9 with a shared 15-slot arrival map. Each required physical
+original has an external destination, strict sidecar schema, review fields,
+units/uncertainty requirements, and named downstream consumers. The exact
+synthetic dry run retains blank measured slots and rejects any attempt to imply
+epoch advancement, registry update, qualification, camera access, controller
+access, writes, movement, or authority. Thirty-three combined cross-lane tests
+pass. The arrival-day checklist is ready; remaining calibration and installed-
+geometry consumer dry runs keep PC9 in progress.
+ARM-096 completes PC9 by resolving and hash-binding every arrival slot to its
+actual downstream consumer and aggregate schema. The consolidated 225-test
+matrix covers capture originals through localization evaluation. Zero measured
+originals are consumed, no physical-admission flag becomes true, and the
+camera hold remains active. PC10 clean-checkout closure is the next pre-camera
+stage.
+ARM-097 completes PC10 against detached clean-checkout implementation commit
+`baa5745a966284bb94204307f1d37994e4e5bf3c`. The controlled FREEZE-013 rebind
+preserves the reconciled AI/arm geometry and authority boundary while updating
+the dependent deterministic evidence lineage. The clean Windows/Python 3.10.10
+checkout passes 507 governed portable tests, 194 explicit PC0-PC9 tests, 115
+repository-policy tests, and all maintained policy audits. No camera,
+controller, transport, torque, or movement authority was used. The next shared
+dependency is final-camera commissioning under the existing physical hold.
+ARM-098 adds a deterministic read-only inventory between physical collection
+and offline qualification. It validates all 15 canonical sidecars and their
+source bytes, rejected reviews, and configuration-epoch consistency without
+opening either device or mutating any registry. A structurally complete result
+is only ready for offline qualification review; it grants no perception,
+controller, contact, or movement authority. The governed offline matrix passes
+514 tests.
+ARM-099 freezes the preflight output schema and a hash-verifying downstream
+parser, and exposes the same implementation as an installed Python module. The
+installed-package smoke test produced the expected blocked 15-slot report with
+zero authority. Rehashed semantic mutations reject, package metadata remains
+unchanged, and the governed offline matrix passes 518 tests.
+ARM-100 joins that verified preflight to the repository-bound 15-slot consumer
+map. Each route now carries the original sidecar/source hashes, shared epoch,
+consumer source/schema hashes, and exact consumer binding. A complete set is
+ready only for offline consumer validation: no consumer has run, no
+qualification is installed, and no physical-admission or execution authority
+is created. The governed offline matrix passes 527 tests.
+ARM-101 defines the return path from those consumers. Exact hash-bound PASS or
+BLOCKED receipts now aggregate without losing failures or accepting duplicate,
+wrong-route, or authority-bearing records. All 15 routes must pass before the
+assessment becomes complete for offline review, and even that state cannot
+commission an epoch, install qualification, or authorize hardware. The
+governed offline matrix passes 534 tests.
+ARM-102 adds domain adapters for the existing camera/support assessment,
+physical-camera campaign preflight, and held-out localization evaluator. Their
+eight routes now preserve native output hashes and failures in the shared
+receipt format. The remaining planner-calibration and installed-collision/cable
+routes stay pending, so partial adapter coverage cannot complete the aggregate.
+The governed offline matrix passes 540 tests.
+ARM-103 adds the typed planner-snapshot and installed-collision/cable emitters,
+covering all 15 route identities. Planner receipts require a keyboard
+`PlannerCalibrationSnapshot`; geometry receipts require an
+`InstalledCollisionGeometryProfile`. The cable route requires physical
+geometry completeness rather than diagnostic readiness, so the current sampled
+cable evidence stays blocked. Full route accounting therefore cannot be
+mistaken for full validation. The governed offline matrix passes 543 tests.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained
@@ -869,6 +1069,99 @@ Each worker follows this process for every increment:
   order. Never discard another worker's evidence to resolve a Git conflict.
 
 ## Immediate coordinated work order
+
+The arm lane's current offline sequence is PC11 through PC18 in the
+[pre-camera arm integration completion plan](../../docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md).
+It begins with one-command arrival orchestration, then proceeds through a
+synthetic fault campaign, domain wrappers, resumable session state,
+geometry/cable rehearsal, immutable capture replay, observability, and an
+actual AI-producer compatibility corpus. These stages do not replace the
+camera-dependent S2/S3 and S4 gates and cannot create physical authority.
+PC14 is complete at ARM-107: retained arrival sessions now reconstruct exactly
+or stop. PC15 is complete at ARM-109: the typed sampled-cable contract,
+rigid/attachment templates, exact missing-measurement diagnostics, boundary
+fixtures, and retained zero-authority campaign now pass the real collision
+consumer boundary. PC16 is complete at ARM-110: frozen image/metadata bytes,
+camera/support/model/calibration identities, retained AI outputs, and expected
+consumer decisions now replay identically or reject, while original,
+synthetic, and replay provenance remain distinct. The runner deliberately does
+not execute the vision model; AI-lane inference produces the retained outputs.
+PC17 is complete at ARM-112. ARM-111 froze the decision-neutral observation
+contract; ARM-112 retained 120 host-measured observations across the real
+offline PC11-PC16 boundaries, split evenly between fresh and retained artifact
+trees and covering pass, blocked, and pending outcomes. Every timed decision
+matched an independent verification hash. The measurements expose software
+bottlenecks but cannot influence admission or claim model, controller, or
+physical typing performance. PC18 is complete at ARM-113. Its retained corpus
+binds exact output bytes from the actual shared emitter, precision adapter, and
+localization-abstention path. H,H,I reaches zero-authority trajectory
+compilation in exact order; the actual H,H,1,PERIOD precision fixture is
+decoded in exact order but correctly blocked because its 14.400834977 mm bound
+does not fit measured key-safe regions. Unsupported, stale, crossed-identity,
+low-confidence, and uncalibrated cases stop at their declared owner. This
+proves contract compatibility, not localization accuracy or physical typing.
+ARM-114 refines PC18 with retained actual-emitter outputs for a 15-action mixed
+phrase and all 46 named keyboard targets, exact strict-decoder dispositions for
+four hostile mutations, and explicit input-resource ceilings. Exact order is
+preserved through offline trajectory compilation for both new accepted cases.
+The refinement remains zero-authority and does not turn catalog coverage into
+IK, collision, calibration, contact, or physical typing evidence.
+
+The arm-owned operational-efficiency lane is current through ARM-132. ARM-128's
+clean-commit representative endpoint atlas covers the five established typing
+patterns and preserves every reference shadow receipt. The corpus contains 40
+unique endpoint identities; seven recur and all seven have one observed solved
+joint-state hash. That supports a bounded exact-reuse experiment but does not
+authorize atlas use, warm starts, controller access, or physical motion.
+ARM-129 supplies a decision-neutral, lifecycle-bound verifier that compares
+endpoint candidates against complete canonical solves. Its focused tests cover
+equivalence, integrity, capacity, reload, restart, crossed context, decision
+context, and deliberate conflicts, while candidates remain excluded from the
+decision path. ARM-130 retains the clean-commit qualification: all five
+representative patterns preserve their canonical receipts across 186 samples,
+40 unique endpoints, and 18 exact recurrence matches, with zero conflicts. Its
+ten-case fault matrix bounds capacity and rejects sample exhaustion,
+invalidation, corruption, conflict, changed decision context, reload, restart,
+crossed context, and unmanaged use. This evidence still authorizes neither
+candidate substitution nor a performance behavior change.
+ARM-131 then qualifies the existing exact solver-input cache across the same
+five patterns rather than creating an unsafe endpoint-only decision cache.
+Reference, cold, and warm receipts and stage hashes remain identical over 186
+lookups; cold runs reuse 26 exact inputs and warm runs reuse all 186. Every miss
+still falls back to the complete solve. The retained timing is host-only and
+grants no controller or physical authority.
+ARM-132 retains the corresponding shadow-service lifecycle campaign. Five
+mixed requests complete in FIFO order with 138 exact hits and 48 full-solve
+misses. Cancellation causes no cache work; reload and restart reject stale
+queued work and begin the replacement generation cold. Automatic retry,
+executor attachment, controller access, and physical authority remain absent.
+ARM-133 converts that evidence into a frozen, zero-authority runtime profile
+gate rather than enabling reuse by default. Exact-input reuse is shadow-eligible
+only when the active lifecycle generation, build snapshot, kinematic model,
+calibration snapshot, four retained evidence files, 256-entry bound,
+complete-solve fallback, and no-retry policy match exactly. Evidence or
+calibration drift falls back to the complete solver; unsafe settings and stale
+reload/restart objects are rejected. The retained six-case campaign passes and
+still grants no admission, controller, transport, or physical authority.
+ARM-134 integrates that decision at a new shadow-service composition boundary.
+An eligible generation passes the existing exact cache to the unchanged
+pipeline; calibration or evidence drift passes no cache and therefore performs
+the complete solve. Reload and restart retire the frozen profile and keep the
+replacement generation on complete solves until a new composition is
+explicitly qualified. Its retained five-case campaign preserves the same
+reference receipt across qualified and fallback paths, records 24 qualified
+lookups with 1 hit and 23 full-solve misses, and records zero cache activity on
+all four fallback paths. It adds no executor, retry, controller, or motion path.
+ARM-135 connects the actual shared AI `assemble()` emitter to that profiled
+service using consumer-owned synthetic integration fixtures. The retained
+`R,O,B,O,T` campaign preserves exact order. Its cold request records 57 IK
+lookups, 11 within-request exact hits, and 46 complete solves; the next request
+records 57/57 warm hits. On the measured host, that single warm observation was
+0.3004444 s versus 2.3158146 s cold. Calibration/evidence fallback and
+reload/restart complete through the full solver with zero cache activity, while
+pre-admission cancellation performs no solver work. Timing is diagnostic only,
+and the synthetic fixture grants no camera, deployment, controller, or motion
+qualification.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

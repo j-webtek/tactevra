@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_commissioning_orchestrator_v1.schema.json",
+  "title": "RoCell camera-arrival commissioning orchestrator v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "evidence_root", "receipt_root", "receipt_files",
+    "preflight", "handoff", "assessment", "complete_for_offline_review",
+    "configuration_epoch_advanced", "deployment_registry_updated",
+    "qualification_installed", "camera_opened", "transport_opened",
+    "controller_started", "controller_commands", "hardware_writes",
+    "physical_movements", "physical_authority", "orchestrator_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_commissioning_orchestrator.v1"},
+    "status": {
+      "enum": [
+        "BLOCKED_ARRIVAL_EVIDENCE_INCOMPLETE",
+        "AWAITING_CONSUMER_VALIDATION",
+        "CONSUMER_VALIDATION_BLOCKED",
+        "COMPLETE_FOR_OFFLINE_REVIEW"
+      ]
+    },
+    "evidence_root": {"type": "string", "minLength": 1},
+    "receipt_root": {"type": ["string", "null"]},
+    "receipt_files": {
+      "type": "array",
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_id", "relative_path", "size_bytes", "file_sha256", "receipt_sha256"],
+        "properties": {
+          "artifact_id": {"type": "string", "minLength": 1},
+          "relative_path": {"type": "string", "pattern": "^[A-Za-z0-9_-]+\\.json$"},
+          "size_bytes": {"type": "integer", "minimum": 1, "maximum": 262144},
+          "file_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "receipt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "preflight": {"type": "object"},
+    "handoff": {"type": "object"},
+    "assessment": {"type": "object"},
+    "complete_for_offline_review": {"type": "boolean"},
+    "configuration_epoch_advanced": {"const": false},
+    "deployment_registry_updated": {"const": false},
+    "qualification_installed": {"const": false},
+    "camera_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "orchestrator_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/installed_cable_envelope_intake_v1.schema.json",
+  "title": "Installed cable-envelope intake v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "evidence_class", "installed_collision_profile_sha256",
+    "sampled_body_id", "source_sha256", "maximum_uncertainty_mm", "postures",
+    "swept_envelopes", "template_complete", "qualification_installed",
+    "hardware_access", "controller_commands", "hardware_writes",
+    "physical_movements", "physical_authority"
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "vec3": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "capsule": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "start_mm", "end_mm", "radius_mm"],
+      "properties": {
+        "kind": {"const": "capsule"},
+        "start_mm": {"$ref": "#/$defs/vec3"},
+        "end_mm": {"$ref": "#/$defs/vec3"},
+        "radius_mm": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  },
+  "properties": {
+    "schema": {"const": "rocell.installed_cable_envelope_intake.v1"},
+    "evidence_class": {"const": "SYNTHETIC_OFFLINE_ONLY"},
+    "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "sampled_body_id": {"const": "attachment:moving_camera_cable"},
+    "source_sha256": {"$ref": "#/$defs/sha256"},
+    "maximum_uncertainty_mm": {"type": "number", "minimum": 0},
+    "postures": {
+      "type": "array", "minItems": 2, "maxItems": 64,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["sequence", "posture_id", "joint_state_sha256", "capsules"],
+        "properties": {
+          "sequence": {"type": "integer", "minimum": 0},
+          "posture_id": {"type": "string", "minLength": 1},
+          "joint_state_sha256": {"$ref": "#/$defs/sha256"},
+          "capsules": {
+            "type": "array", "minItems": 1, "maxItems": 16,
+            "items": {"$ref": "#/$defs/capsule"}
+          }
+        }
+      }
+    },
+    "swept_envelopes": {
+      "type": "array", "minItems": 1, "maxItems": 63,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["sequence", "start_posture_id", "end_posture_id", "capsules"],
+        "properties": {
+          "sequence": {"type": "integer", "minimum": 0},
+          "start_posture_id": {"type": "string", "minLength": 1},
+          "end_posture_id": {"type": "string", "minLength": 1},
+          "capsules": {
+            "type": "array", "minItems": 1, "maxItems": 16,
+            "items": {"$ref": "#/$defs/capsule"}
+          }
+        }
+      }
+    },
+    "template_complete": {"const": true},
+    "qualification_installed": {"const": false},
+    "hardware_access": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false}
+  }
+}

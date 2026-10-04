@@ -10,6 +10,12 @@ board for the AI/model and arm/runtime workstreams. Detailed results are kept in
 the separate, append-only [AI/arm evidence ledger](EVIDENCE_LEDGER.md), so the
 current plan stays readable while the complete history remains available.
 
+Cross-stack latency and throughput optimization is coordinated by the
+[AI-to-arm operational efficiency plan](../../docs/AI_TO_ARM_OPERATIONAL_EFFICIENCY_PLAN.md).
+It defines common timing milestones, immutable-versus-dynamic work, allowed
+parallelism, optimization stages, and evidence gates without granting hardware
+authority.
+
 The maintained operating procedure is the
 [AI work, testing, and evidence handbook](AI_WORK_AND_EVIDENCE_HANDBOOK.md).
 Its companion [AI work registry](AI_WORK_REGISTRY.json) assigns every tracked

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/pre_camera_observability_report_v1.schema.json",
+  "title": "RoCell PC11-PC16 decision-neutral observability report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "report_id", "evidence_class", "stage_catalog", "sample_count",
+    "samples", "stage_summaries", "overall_summary", "decision_hashes_unchanged",
+    "timing_used_for_admission", "performance_authority", "physical_speed_claimed",
+    "camera_opened", "transport_opened", "controller_started", "controller_commands",
+    "hardware_writes", "physical_movements", "physical_authority", "report_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.pre_camera_observability_report.v1"},
+    "report_id": {"$ref": "#/$defs/id"},
+    "evidence_class": {"enum": ["HOST_MEASURED_OFFLINE", "SYNTHETIC_TIMING_FIXTURE"]},
+    "stage_catalog": {
+      "const": ["PC11", "PC12", "PC13", "PC14", "PC15", "PC16"]
+    },
+    "sample_count": {"type": "integer", "minimum": 1, "maximum": 4096},
+    "samples": {
+      "type": "array", "minItems": 1, "maxItems": 4096,
+      "items": {"$ref": "#/$defs/sample"}
+    },
+    "stage_summaries": {
+      "type": "array", "minItems": 6, "maxItems": 6,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/stageSummary"}, {"properties": {"stage_id": {"const": "PC11"}}}]},
+        {"allOf": [{"$ref": "#/$defs/stageSummary"}, {"properties": {"stage_id": {"const": "PC12"}}}]},
+        {"allOf": [{"$ref": "#/$defs/stageSummary"}, {"properties": {"stage_id": {"const": "PC13"}}}]},
+        {"allOf": [{"$ref": "#/$defs/stageSummary"}, {"properties": {"stage_id": {"const": "PC14"}}}]},
+        {"allOf": [{"$ref": "#/$defs/stageSummary"}, {"properties": {"stage_id": {"const": "PC15"}}}]},
+        {"allOf": [{"$ref": "#/$defs/stageSummary"}, {"properties": {"stage_id": {"const": "PC16"}}}]}
+      ]
+    },
+    "overall_summary": {"$ref": "#/$defs/summary"},
+    "decision_hashes_unchanged": {"const": true},
+    "timing_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "physical_speed_claimed": {"const": false},
+    "camera_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "id": {
+      "type": "string", "minLength": 1, "maxLength": 192,
+      "pattern": "^[A-Za-z0-9._:@/-]+$"
+    },
+    "nullableId": {"oneOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+    "code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,95}$"},
+    "sample": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "sequence", "stage_id", "run_class", "outcome", "started_monotonic_ns",
+        "finished_monotonic_ns", "duration_ns", "item_count", "artifact_bytes",
+        "cache_outcome", "decision_code", "blocker_codes", "decision_sha256_before",
+        "decision_sha256_after", "correlation"
+      ],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 0, "maximum": 4095},
+        "stage_id": {"enum": ["PC11", "PC12", "PC13", "PC14", "PC15", "PC16"]},
+        "run_class": {"enum": ["COLD", "WARM"]},
+        "outcome": {"enum": ["PASS", "BLOCKED", "PENDING"]},
+        "started_monotonic_ns": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+        "finished_monotonic_ns": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+        "duration_ns": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+        "item_count": {"type": "integer", "minimum": 0, "maximum": 1000000},
+        "artifact_bytes": {"type": "integer", "minimum": 0, "maximum": 17179869184},
+        "cache_outcome": {"enum": ["HIT", "MISS", "NOT_APPLICABLE"]},
+        "decision_code": {"$ref": "#/$defs/code"},
+        "blocker_codes": {"type": "array", "maxItems": 64, "uniqueItems": true, "items": {"$ref": "#/$defs/code"}},
+        "decision_sha256_before": {"$ref": "#/$defs/sha256"},
+        "decision_sha256_after": {"$ref": "#/$defs/sha256"},
+        "correlation": {
+          "type": "object", "additionalProperties": false,
+          "required": ["session_sha256", "ai_batch_sha256", "target_id", "plan_sha256", "consumer_id", "receipt_sha256"],
+          "properties": {
+            "session_sha256": {"$ref": "#/$defs/sha256"},
+            "ai_batch_sha256": {"$ref": "#/$defs/nullableSha256"},
+            "target_id": {"$ref": "#/$defs/nullableId"},
+            "plan_sha256": {"$ref": "#/$defs/nullableSha256"},
+            "consumer_id": {"$ref": "#/$defs/nullableId"},
+            "receipt_sha256": {"$ref": "#/$defs/nullableSha256"}
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "COLD": {"type": "integer", "minimum": 0}, "WARM": {"type": "integer", "minimum": 0},
+        "PASS": {"type": "integer", "minimum": 0}, "BLOCKED": {"type": "integer", "minimum": 0}, "PENDING": {"type": "integer", "minimum": 0},
+        "HIT": {"type": "integer", "minimum": 0}, "MISS": {"type": "integer", "minimum": 0}, "NOT_APPLICABLE": {"type": "integer", "minimum": 0}
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sample_count", "total_duration_ns", "minimum_duration_ns", "maximum_duration_ns", "p50_duration_ns", "p95_duration_ns", "p99_duration_ns", "total_item_count", "total_artifact_bytes", "run_class_counts", "outcome_counts", "cache_outcome_counts", "decision_codes", "blocker_codes"],
+      "properties": {
+        "sample_count": {"type": "integer", "minimum": 1},
+        "total_duration_ns": {"type": "integer", "minimum": 0},
+        "minimum_duration_ns": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "maximum_duration_ns": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "p50_duration_ns": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "p95_duration_ns": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "p99_duration_ns": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]},
+        "total_item_count": {"type": "integer", "minimum": 0},
+        "total_artifact_bytes": {"type": "integer", "minimum": 0},
+        "run_class_counts": {"type": "object", "additionalProperties": false, "required": ["COLD", "WARM"], "properties": {"COLD": {"type": "integer", "minimum": 0}, "WARM": {"type": "integer", "minimum": 0}}},
+        "outcome_counts": {"type": "object", "additionalProperties": false, "required": ["BLOCKED", "PASS", "PENDING"], "properties": {"BLOCKED": {"type": "integer", "minimum": 0}, "PASS": {"type": "integer", "minimum": 0}, "PENDING": {"type": "integer", "minimum": 0}}},
+        "cache_outcome_counts": {"type": "object", "additionalProperties": false, "required": ["HIT", "MISS", "NOT_APPLICABLE"], "properties": {"HIT": {"type": "integer", "minimum": 0}, "MISS": {"type": "integer", "minimum": 0}, "NOT_APPLICABLE": {"type": "integer", "minimum": 0}}},
+        "decision_codes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/code"}},
+        "blocker_codes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/code"}}
+      }
+    },
+    "stageSummary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["stage_id", "summary"],
+      "properties": {
+        "stage_id": {"type": "string"},
+        "summary": {"$ref": "#/$defs/summary"}
+      }
+    }
+  }
+}

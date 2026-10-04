@@ -1,0 +1,1 @@
+{"bindings":{"acknowledgement_requirements_sha256":"8a62d0066180ed1926100a051df07845abc15ac882b55adaff81544fd36b9b20","completion_requires_correlated_feedback":true},"controller_commands":[],"hardware_access":false,"physical_authority":false,"schema":"rocell.typing_trace_stage_reference.v1","source":"PC4_ACKNOWLEDGEMENT_REQUIREMENTS","stage":"FEEDBACK_REHEARSAL"}

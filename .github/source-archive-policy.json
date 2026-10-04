@@ -3,7 +3,7 @@
   "archive_mode": "github-generated-source-archives",
   "archive_constraint": "GitHub-generated source archives include every tracked path and cannot apply repository-local exclusions.",
   "ceilings": {
-    "max_tracked_files": 6100,
+    "max_tracked_files": 6250,
     "max_logical_bytes": 900000000,
     "max_single_blob_bytes": 60000000,
     "duplicate_min_blob_bytes": 1048576,

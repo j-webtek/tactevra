@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_ik_reuse_profile_campaign_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "qualified_profile_sha256", "case_count", "cases", "exact_solver_input_only", "endpoint_only_substitution_authorized", "complete_solve_fallback_required", "automatic_retry_allowed", "candidate_used_for_admission", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_ik_reuse_profile_campaign.v1"}, "campaign_id": {"type": "string", "minLength": 1}, "evidence_class": {"const": "HOST_MEASURED_OFFLINE"}, "environment": {"type": "object"}, "qualified_profile_sha256": {"$ref": "#/$defs/hash"}, "case_count": {"const": 6},
+    "cases": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["case", "status", "disposition", "detail"], "properties": {"case": {"enum": ["EXACT_PROFILE_ELIGIBLE", "EVIDENCE_MISMATCH_FALLBACK", "CALIBRATION_MISMATCH_FALLBACK", "UNSAFE_SETTINGS_REJECTED", "RELOAD_STALE_REJECTED", "RESTART_STALE_REJECTED"]}, "status": {"const": "PASS"}, "disposition": {"enum": ["EXACT_INPUT_REUSE_SHADOW_ELIGIBLE", "FULL_SOLVE_ONLY", "REJECTED"]}, "detail": {"type": "string", "minLength": 1}}}},
+    "exact_solver_input_only": {"const": true}, "endpoint_only_substitution_authorized": {"const": false}, "complete_solve_fallback_required": {"const": true}, "automatic_retry_allowed": {"const": false}, "candidate_used_for_admission": {"const": false}, "controller_opened": {"const": false}, "transport_opened": {"const": false}, "controller_commands": {"const": []}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false}, "campaign_sha256": {"$ref": "#/$defs/hash"}
+  }, "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

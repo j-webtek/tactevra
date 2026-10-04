@@ -27,6 +27,10 @@ from .bounded_segment_collision_qualification import (
 )
 from .collision_readiness import assess_current_collision_readiness
 from .context import SimulationContext, revalidate_simulation_context
+from .context_lifecycle_v1 import (
+    SimulationContextLifecycleBindingV1,
+    SimulationContextLifecycleV1,
+)
 from .installed_collision_geometry import InstalledCollisionGeometryProfile
 from .typing_execution_plan_v1 import TypingExecutionPlanV1
 from .typing_trajectory_ik_screen_v1 import (
@@ -36,6 +40,10 @@ from .typing_trajectory_ik_screen_v1 import (
 from .typing_trajectory_plan_v1 import (
     TypingTrajectoryPlanV1,
     compile_typing_trajectory_plan_v1,
+)
+from .typing_planner_preparation_v1 import (
+    PreparedTypingPlannerV1,
+    validate_prepared_typing_planner_v1,
 )
 
 
@@ -98,6 +106,9 @@ def prepare_typing_collision_intake_v1(
     installed_profile: InstalledCollisionGeometryProfile | None = None,
     *,
     sampling_policy: BoundedSegmentSamplingPolicy | None = None,
+    prepared_planner: PreparedTypingPlannerV1 | None = None,
+    context_lifecycle: SimulationContextLifecycleV1 | None = None,
+    _lifecycle_binding: SimulationContextLifecycleBindingV1 | None = None,
 ) -> dict[str, Any]:
     """Describe exact collision evidence required for one accepted typing route."""
 
@@ -115,7 +126,42 @@ def prepare_typing_collision_intake_v1(
         raise TypeError(
             "installed_profile must be an InstalledCollisionGeometryProfile"
         )
-    revalidate_simulation_context(context)
+    if context_lifecycle is not None:
+        if _lifecycle_binding is not None:
+            raise TypingCollisionIntakeV1Error(
+                "nested context lifecycle binding is invalid"
+            )
+        if not isinstance(context_lifecycle, SimulationContextLifecycleV1):
+            raise TypeError("context_lifecycle must be SimulationContextLifecycleV1")
+        if not isinstance(prepared_planner, PreparedTypingPlannerV1):
+            raise TypingCollisionIntakeV1Error(
+                "lifecycle-managed collision intake requires prepared planner resources"
+            )
+        with context_lifecycle.validation_scope(context) as binding:
+            validate_prepared_typing_planner_v1(prepared_planner, binding)
+            return prepare_typing_collision_intake_v1(
+                source_plan,
+                plan,
+                ik_screen,
+                context,
+                snapshot,
+                installed_profile,
+                sampling_policy=sampling_policy,
+                prepared_planner=prepared_planner,
+                _lifecycle_binding=binding,
+            )
+    if _lifecycle_binding is None:
+        if prepared_planner is not None:
+            raise TypingCollisionIntakeV1Error(
+                "prepared planner requires lifecycle-managed collision intake"
+            )
+        revalidate_simulation_context(context)
+    else:
+        if not isinstance(prepared_planner, PreparedTypingPlannerV1):
+            raise TypingCollisionIntakeV1Error(
+                "lifecycle binding requires prepared planner resources"
+            )
+        validate_prepared_typing_planner_v1(prepared_planner, _lifecycle_binding)
 
     ik = _validated_ik_report(ik_screen)
     replayed = compile_typing_trajectory_plan_v1(source_plan, policy=plan.policy)
@@ -185,12 +231,14 @@ def prepare_typing_collision_intake_v1(
         ]
         next_stage = "SUPPLY_PROFILE_BOUND_COLLISION_EVIDENCE"
 
-    model_link_names = set(
-        load_pinned_urdf(
+    model_link_names = set((
+        prepared_planner.loaded_model.model
+        if prepared_planner is not None
+        else load_pinned_urdf(
             context.scenario.model_path,
             context.scenario.model_sha256,
-        ).model.link_names
-    )
+        ).model
+    ).link_names)
     rigid_attachment_frames = sorted(
         {
             body.parent_frame

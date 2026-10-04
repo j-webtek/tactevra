@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_session_manifest_v1.schema.json",
+  "title": "RoCell camera-arrival session manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "session_id", "configuration_epoch_candidate",
+    "camera_profile_id", "camera_profile_sha256", "tool_profile_id",
+    "tool_profile_sha256", "state", "orchestrator_sha256", "orchestrator",
+    "originals", "routes", "receipts", "restart_reconstruction_required",
+    "measured_commissioning_held", "configuration_epoch_advanced",
+    "deployment_registry_updated", "qualification_installed", "camera_opened",
+    "transport_opened", "controller_started", "controller_commands",
+    "hardware_writes", "physical_movements", "physical_authority",
+    "manifest_sha256"
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "original": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id", "status", "sidecar_relative_path", "sidecar_sha256",
+        "source_relative_path", "source_sha256", "configuration_epoch_id"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/identifier"},
+        "status": {"type": "string"},
+        "sidecar_relative_path": {"type": ["string", "null"]},
+        "sidecar_sha256": {"type": ["string", "null"]},
+        "source_relative_path": {"type": ["string", "null"]},
+        "source_sha256": {"type": ["string", "null"]},
+        "configuration_epoch_id": {"type": ["string", "null"]}
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id", "consumer_source_sha256", "downstream_schema_sha256",
+        "consumer_binding", "ready"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/identifier"},
+        "consumer_source_sha256": {"type": ["string", "null"]},
+        "downstream_schema_sha256": {"type": ["string", "null"]},
+        "consumer_binding": {"type": ["string", "object", "null"]},
+        "ready": {"type": "boolean"}
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id", "status", "relative_path", "file_sha256",
+        "receipt_sha256", "output_sha256", "blockers"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/identifier"},
+        "status": {"type": "string"},
+        "relative_path": {"type": ["string", "null"]},
+        "file_sha256": {"type": ["string", "null"]},
+        "receipt_sha256": {"type": ["string", "null"]},
+        "output_sha256": {"type": ["string", "null"]},
+        "blockers": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_session_manifest.v1"},
+    "session_id": {"$ref": "#/$defs/identifier"},
+    "configuration_epoch_candidate": {"$ref": "#/$defs/identifier"},
+    "camera_profile_id": {"$ref": "#/$defs/identifier"},
+    "camera_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "tool_profile_id": {"$ref": "#/$defs/identifier"},
+    "tool_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "state": {
+      "enum": [
+        "COLLECTION_INCOMPLETE", "STRUCTURALLY_COMPLETE", "VALIDATION_PENDING",
+        "VALIDATION_BLOCKED",
+        "OFFLINE_REVIEW_COMPLETE_MEASURED_COMMISSIONING_HELD"
+      ]
+    },
+    "orchestrator_sha256": {"$ref": "#/$defs/sha256"},
+    "orchestrator": {"type": "object"},
+    "originals": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/original"}
+    },
+    "routes": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/route"}
+    },
+    "receipts": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/receipt"}
+    },
+    "restart_reconstruction_required": {"const": true},
+    "measured_commissioning_held": {"const": true},
+    "configuration_epoch_advanced": {"const": false},
+    "deployment_registry_updated": {"const": false},
+    "qualification_installed": {"const": false},
+    "camera_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "manifest_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}

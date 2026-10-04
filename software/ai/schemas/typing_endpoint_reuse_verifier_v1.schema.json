@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_endpoint_reuse_verifier_v1.schema.json",
+  "title": "TypingEndpointReuseVerifierV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "context_epoch_sha256", "service_instance_id", "generation", "decision_context_sha256", "maximum_entries", "maximum_samples", "entry_count", "active", "observed_sample_count", "endpoint_observation_count", "lookups", "hits", "misses", "stores", "capacity_skips", "canonical_matches", "canonical_conflicts", "entries", "candidate_used_for_decision", "diagnostics_used_for_admission", "warm_start_authorized", "controller_commands", "hardware_commands_generated", "hardware_access", "physical_authority", "verifier_snapshot_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_endpoint_reuse_verifier_snapshot.v1"},
+    "context_epoch_sha256": {"$ref": "#/$defs/sha256"},
+    "service_instance_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "generation": {"type": "integer", "minimum": 0},
+    "decision_context_sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "maximum_entries": {"type": "integer", "minimum": 1, "maximum": 4096},
+    "maximum_samples": {"type": "integer", "minimum": 1, "maximum": 16384},
+    "entry_count": {"type": "integer", "minimum": 0},
+    "active": {"type": "boolean"},
+    "observed_sample_count": {"type": "integer", "minimum": 0},
+    "endpoint_observation_count": {"type": "integer", "minimum": 0},
+    "lookups": {"type": "integer", "minimum": 0},
+    "hits": {"type": "integer", "minimum": 0},
+    "misses": {"type": "integer", "minimum": 0},
+    "stores": {"type": "integer", "minimum": 0},
+    "capacity_skips": {"type": "integer", "minimum": 0},
+    "canonical_matches": {"type": "integer", "minimum": 0},
+    "canonical_conflicts": {"type": "integer", "minimum": 0},
+    "entries": {"type": "array", "maxItems": 4096, "items": {"$ref": "#/$defs/entry"}},
+    "candidate_used_for_decision": {"const": false},
+    "diagnostics_used_for_admission": {"const": false},
+    "warm_start_authorized": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_commands_generated": {"const": 0},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "verifier_snapshot_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint_sha256", "solution_joint_state_sha256", "observation_count", "entry_sha256"],
+      "properties": {
+        "endpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "solution_joint_state_sha256": {"$ref": "#/$defs/sha256"},
+        "observation_count": {"type": "integer", "minimum": 1},
+        "entry_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

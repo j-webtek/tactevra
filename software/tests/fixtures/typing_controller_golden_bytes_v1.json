@@ -1,0 +1,15 @@
+{
+  "case_id": "ordinary-H-action-0",
+  "ordered_wire_sha256": "d6e370a1b72579d45e2d229088ca8d9c066fec445e81e975b5c1dc55f8b1e522",
+  "payload_sha256": [
+    "b6d276ee9cecbefe777319b1861422849f5b1f084be70f96d114ab860eff99f7",
+    "eb93c77c4198c0bef956069ca0be6aa5c247259048e53e52b2bb00a29b88af28",
+    "e215ce66a57027d90106bc2b4e3229e3cf7e7b1e36313e4ecbb30a808b3a3294"
+  ],
+  "payload_utf8": [
+    "{\"T\":102,\"base\":0.2,\"shoulder\":0.1,\"elbow\":0.06666666666666667,\"wrist\":0.05,\"roll\":0.04,\"hand\":0.25,\"spd\":20,\"acc\":1}\n",
+    "{\"T\":102,\"base\":0.4,\"shoulder\":0.2,\"elbow\":0.13333333333333333,\"wrist\":0.1,\"roll\":0.08,\"hand\":0.25,\"spd\":20,\"acc\":1}\n",
+    "{\"T\":102,\"base\":0.45,\"shoulder\":0.225,\"elbow\":0.15,\"wrist\":0.1125,\"roll\":0.09,\"hand\":0.25,\"spd\":20,\"acc\":1}\n"
+  ],
+  "schema": "rocell.typing_controller_golden_bytes.v1"
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_ik_reuse_profile_decision_v1.schema.json",
+  "title": "TypingIkReuseProfileDecisionV1", "type": "object", "additionalProperties": false,
+  "required": ["schema", "decision", "blockers", "profile_id", "profile_sha256", "active_identities", "evidence_sha256", "requested_maximum_entries", "exact_solver_input_only", "endpoint_only_substitution_authorized", "complete_solve_fallback_required", "automatic_retry_allowed", "candidate_used_for_admission", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "decision_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_ik_reuse_profile_decision.v1"},
+    "decision": {"enum": ["EXACT_INPUT_REUSE_SHADOW_ELIGIBLE", "FULL_SOLVE_ONLY"]},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "profile_id": {"type": "string", "minLength": 1},
+    "profile_sha256": {"$ref": "#/$defs/hash"},
+    "active_identities": {"type": "object", "additionalProperties": false, "required": ["context_epoch_sha256", "service_instance_id", "generation", "build_snapshot_sha256", "kinematic_model_sha256", "calibration_snapshot_sha256"], "properties": {
+      "context_epoch_sha256": {"$ref": "#/$defs/hash"}, "service_instance_id": {"type": "string", "minLength": 1}, "generation": {"type": "integer", "minimum": 0}, "build_snapshot_sha256": {"$ref": "#/$defs/hash"}, "kinematic_model_sha256": {"$ref": "#/$defs/hash"}, "calibration_snapshot_sha256": {"$ref": "#/$defs/hash"}
+    }},
+    "evidence_sha256": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/hash"}},
+    "requested_maximum_entries": {"const": 256}, "exact_solver_input_only": {"const": true}, "endpoint_only_substitution_authorized": {"const": false}, "complete_solve_fallback_required": {"const": true}, "automatic_retry_allowed": {"const": false}, "candidate_used_for_admission": {"const": false}, "controller_opened": {"const": false}, "transport_opened": {"const": false}, "controller_commands": {"const": []}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false}, "decision_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

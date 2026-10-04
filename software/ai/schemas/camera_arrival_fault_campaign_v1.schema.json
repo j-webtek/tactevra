@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_fault_campaign_v1.schema.json",
+  "title": "RoCell synthetic camera-arrival fault campaign v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "case_count", "pass_count", "failure_count", "observations", "all_cases_passed", "camera_opened", "transport_opened", "controller_started", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_fault_campaign.v1"},
+    "campaign_id": {"const": "PC12_SYNTHETIC_CAMERA_ARRIVAL_FAULTS_V1"},
+    "evidence_class": {"const": "SYNTHETIC_OFFLINE"},
+    "case_count": {"const": 18},
+    "pass_count": {"type": "integer", "minimum": 0, "maximum": 18},
+    "failure_count": {"type": "integer", "minimum": 0, "maximum": 18},
+    "observations": {
+      "type": "array", "minItems": 18, "maxItems": 18,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["case_id", "expected_outcome", "observed_outcome", "expected_detail", "observed_detail", "passed"],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "expected_outcome": {"type": "string", "minLength": 1},
+          "observed_outcome": {"type": "string", "minLength": 1},
+          "expected_detail": {"type": "string", "minLength": 1},
+          "observed_detail": {"type": "string", "minLength": 1},
+          "passed": {"type": "boolean"}
+        }
+      }
+    },
+    "all_cases_passed": {"type": "boolean"},
+    "camera_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "campaign_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

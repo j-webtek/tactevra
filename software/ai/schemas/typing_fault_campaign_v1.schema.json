@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_fault_campaign_v1.schema.json",
+  "title": "RoCell typing fault campaign v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "qualification_basis_sha256", "environment",
+    "family_count", "families", "case_count", "cases", "invariants",
+    "controller_commands", "transport_opened", "transport_write_count",
+    "hardware_access", "physical_authority", "typing_fault_campaign_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.typing_fault_campaign.v1"},
+    "status": {"const": "PASS_ZERO_AUTHORITY_FAULT_CAMPAIGN"},
+    "qualification_basis_sha256": {"$ref": "#/$defs/sha256"},
+    "environment": {"const": "SYNTHETIC_OFFLINE_ZERO_IO"},
+    "family_count": {"const": 6},
+    "families": {
+      "type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true,
+      "items": {"enum": [
+        "IDENTITY_ORDER", "MODEL_INPUT", "PLANNING", "PROCESS_CRASH",
+        "RUNTIME_RESOURCE", "TRANSPORT_FEEDBACK"
+      ]}
+    },
+    "case_count": {"const": 35},
+    "cases": {
+      "type": "array", "minItems": 35, "maxItems": 35,
+      "items": {"$ref": "#/$defs/case"}
+    },
+    "invariants": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "uncaught_exceptions", "authority_leaks", "automatic_retries",
+        "reorders", "silent_fallbacks", "unbounded_allocations",
+        "inconsistent_terminal_outcomes"
+      ],
+      "properties": {
+        "uncaught_exceptions": {"const": 0},
+        "authority_leaks": {"const": 0},
+        "automatic_retries": {"const": 0},
+        "reorders": {"const": 0},
+        "silent_fallbacks": {"const": 0},
+        "unbounded_allocations": {"const": 0},
+        "inconsistent_terminal_outcomes": {"const": 0}
+      }
+    },
+    "controller_commands": {"const": []},
+    "transport_opened": {"const": false},
+    "transport_write_count": {"const": 0},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "typing_fault_campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "case_id", "family", "reason_code", "terminal_outcome",
+        "boundary_sha256", "fault_observed", "exception_escaped",
+        "automatic_retry_allowed", "order_preserved", "silent_fallback_used",
+        "bounded_resources", "controller_commands", "hardware_access",
+        "physical_authority"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "family": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "reason_code": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "terminal_outcome": {"enum": [
+          "REJECTED_BEFORE_DISPATCH", "OUTCOME_UNCERTAIN_RETRY_FORBIDDEN"
+        ]},
+        "boundary_sha256": {"$ref": "#/$defs/sha256"},
+        "fault_observed": {"const": true},
+        "exception_escaped": {"const": false},
+        "automatic_retry_allowed": {"const": false},
+        "order_preserved": {"const": true},
+        "silent_fallback_used": {"const": false},
+        "bounded_resources": {"const": true},
+        "controller_commands": {"const": []},
+        "hardware_access": {"const": false},
+        "physical_authority": {"const": false}
+      }
+    }
+  }
+}

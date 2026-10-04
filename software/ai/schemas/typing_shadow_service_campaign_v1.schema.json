@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_shadow_service_campaign_v1.schema.json",
+  "title": "TypingShadowServiceCampaignV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "case_count", "cases", "all_expected_outcomes", "decision_hashes_unchanged", "diagnostics_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_shadow_service_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"},
+    "case_count": {"const": 8},
+    "cases": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"$ref": "#/$defs/case"}},
+    "all_expected_outcomes": {"const": true},
+    "decision_hashes_unchanged": {"const": true},
+    "diagnostics_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case", "status", "observed_outcome", "service_receipt", "shadow_receipt_sha256", "owner_runs", "transition_waited", "after_service_snapshot"],
+      "properties": {
+        "case": {"enum": ["FIFO_COMPLETION", "CANCEL_BEFORE_ADMISSION", "RELOAD_STALE_REJECTION", "RESTART_STALE_REJECTION", "QUEUE_BOUND_REJECTION", "EXPLICIT_INVALIDATION", "UNEXPECTED_SHADOW_FAILURE", "ADMISSION_RELOAD_SERIALIZATION"]},
+        "status": {"const": "PASS"},
+        "observed_outcome": {"enum": ["SHADOW_COMPLETED", "CANCELED_BEFORE_ADMISSION", "STALE_GENERATION_REJECTED", "SUBMISSION_REJECTED_QUEUE_FULL", "SERVICE_INVALIDATED", "SHADOW_REJECTED"]},
+        "service_receipt": {"type": ["object", "null"]},
+        "shadow_receipt_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "owner_runs": {"type": "integer", "minimum": 0},
+        "transition_waited": {"type": "boolean"},
+        "after_service_snapshot": {"type": "object"}
+      }
+    }
+  }
+}

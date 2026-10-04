@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_endpoint_reuse_campaign_v1.schema.json",
+  "title": "TypingEndpointReuseCampaignV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "route_case_count", "route_cases", "final_verifier_snapshot", "fault_case_count", "fault_cases", "all_expected_outcomes", "decision_hashes_unchanged", "candidate_used_for_decision", "diagnostics_used_for_admission", "warm_start_authorized", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_endpoint_reuse_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"},
+    "route_case_count": {"const": 5},
+    "route_cases": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/route"}},
+    "final_verifier_snapshot": {"type": "object"},
+    "fault_case_count": {"const": 10},
+    "fault_cases": {"type": "array", "minItems": 10, "maxItems": 10, "items": {"$ref": "#/$defs/fault"}},
+    "all_expected_outcomes": {"const": true},
+    "decision_hashes_unchanged": {"const": true},
+    "candidate_used_for_decision": {"const": false},
+    "diagnostics_used_for_admission": {"const": false},
+    "warm_start_authorized": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "route": {
+      "type": "object", "additionalProperties": false,
+      "required": ["case", "target_ids", "status", "reference_receipt_sha256", "observed_receipt_sha256", "receipt_matches_reference", "after_verifier_snapshot"],
+      "properties": {
+        "case": {"enum": ["HOME_TRANSITION", "WORD_ROBOT", "REPEAT_NUMBER_PUNCTUATION", "ALPHABETIC_EXTREMES", "NUMBER_SPACE_ENTER"]},
+        "target_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "status": {"const": "PASS"},
+        "reference_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "observed_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "receipt_matches_reference": {"const": true},
+        "after_verifier_snapshot": {"type": "object"}
+      }
+    },
+    "fault": {
+      "type": "object", "additionalProperties": false,
+      "required": ["case", "status", "outcome", "canonical_receipt_preserved"],
+      "properties": {
+        "case": {"enum": ["CAPACITY_BOUNDED", "SAMPLE_BOUND_REJECTED", "INVALIDATED_REJECTED", "CORRUPTION_REJECTED", "CONFLICT_REJECTED", "DECISION_CONTEXT_REJECTED", "RELOAD_STALE_REJECTED", "RESTART_STALE_REJECTED", "CROSSED_CONTEXT_REJECTED", "UNMANAGED_REJECTED"]},
+        "status": {"const": "PASS"},
+        "outcome": {"enum": ["BOUNDED", "REJECTED"]},
+        "canonical_receipt_preserved": {"type": ["boolean", "null"]}
+      }
+    }
+  }
+}

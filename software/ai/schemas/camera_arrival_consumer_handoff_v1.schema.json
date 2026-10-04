@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_consumer_handoff_v1.schema.json",
+  "title": "Camera arrival consumer handoff v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "preflight_sha256", "consumer_map_sha256",
+    "configuration_epoch_ids", "slot_count", "ready_slot_count", "routes",
+    "ready_for_offline_consumer_validation", "consumer_validation_completed",
+    "configuration_epoch_advanced", "deployment_registry_updated",
+    "qualification_installed", "camera_opened", "controller_started",
+    "hardware_writes", "physical_movements", "physical_authority",
+    "handoff_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_consumer_handoff.v1"},
+    "status": {
+      "enum": [
+        "READY_FOR_OFFLINE_CONSUMER_VALIDATION",
+        "BLOCKED_ARRIVAL_PREFLIGHT_INCOMPLETE"
+      ]
+    },
+    "preflight_sha256": {"$ref": "#/$defs/sha256"},
+    "consumer_map_sha256": {"$ref": "#/$defs/sha256"},
+    "configuration_epoch_ids": {
+      "type": "array", "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 128}
+    },
+    "slot_count": {"const": 15},
+    "ready_slot_count": {"type": "integer", "minimum": 0, "maximum": 15},
+    "routes": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/route"}
+    },
+    "ready_for_offline_consumer_validation": {"type": "boolean"},
+    "consumer_validation_completed": {"const": false},
+    "configuration_epoch_advanced": {"const": false},
+    "deployment_registry_updated": {"const": false},
+    "qualification_installed": {"const": false},
+    "camera_opened": {"const": false},
+    "controller_started": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "handoff_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {
+      "anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id", "preflight_status", "preflight_blockers",
+        "sidecar_sha256", "source_relative_path", "source_sha256",
+        "configuration_epoch_id", "consumer_source", "consumer_source_sha256",
+        "downstream_schema", "downstream_schema_sha256", "consumer_binding",
+        "consumer_dependency_resolved",
+        "ready_for_offline_consumer_validation",
+        "consumer_validation_completed", "physical_admission_ready"
+      ],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "preflight_status": {"enum": ["MISSING", "INVALID", "VALID"]},
+        "preflight_blockers": {"type": "array", "uniqueItems": true},
+        "sidecar_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "source_relative_path": {"type": ["string", "null"]},
+        "source_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "configuration_epoch_id": {"type": ["string", "null"]},
+        "consumer_source": {"type": "string", "minLength": 1},
+        "consumer_source_sha256": {"$ref": "#/$defs/sha256"},
+        "downstream_schema": {"type": "string", "minLength": 1},
+        "downstream_schema_sha256": {"$ref": "#/$defs/sha256"},
+        "consumer_binding": {"type": "string", "minLength": 1},
+        "consumer_dependency_resolved": {"const": true},
+        "ready_for_offline_consumer_validation": {"type": "boolean"},
+        "consumer_validation_completed": {"const": false},
+        "physical_admission_ready": {"const": false}
+      }
+    }
+  }
+}

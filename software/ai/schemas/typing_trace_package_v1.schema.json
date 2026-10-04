@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_trace_package_v1.schema.json",
+  "title": "RoCell contained typing trace package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "package_id", "typing_trace_journal_sha256",
+    "journal_path", "journal_file_sha256", "correlation_id", "request_id",
+    "artifacts", "redaction_policy", "sensitive_field_count",
+    "absolute_path_count", "controller_commands", "hardware_access",
+    "physical_authority", "package_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.typing_trace_package.v1"},
+    "status": {"const": "SEALED_CONTAINED_ZERO_AUTHORITY_PACKAGE"},
+    "package_id": {"type": "string", "pattern": "^typing-trace-[0-9a-f]{24}$"},
+    "typing_trace_journal_sha256": {"$ref": "#/$defs/sha256"},
+    "journal_path": {"const": "journal.json"},
+    "journal_file_sha256": {"$ref": "#/$defs/sha256"},
+    "correlation_id": {"$ref": "#/$defs/identifier"},
+    "request_id": {"$ref": "#/$defs/identifier"},
+    "artifacts": {
+      "type": "array", "minItems": 14, "maxItems": 14,
+      "items": {"$ref": "#/$defs/artifact"}
+    },
+    "redaction_policy": {"const": "NO_SENSITIVE_KEYS_OR_ABSOLUTE_PATHS_V1"},
+    "sensitive_field_count": {"const": 0},
+    "absolute_path_count": {"const": 0},
+    "controller_commands": {"const": []},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "package_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "identifier": {
+      "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ordinal", "stage", "path", "bytes", "sha256"],
+      "properties": {
+        "ordinal": {"type": "integer", "minimum": 0, "maximum": 13},
+        "stage": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,63}$"},
+        "path": {"type": "string", "pattern": "^artifacts/[0-9]{2}-[a-z0-9-]+\\.json$"},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 262144},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

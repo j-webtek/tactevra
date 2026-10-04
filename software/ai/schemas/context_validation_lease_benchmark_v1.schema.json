@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/context_validation_lease_benchmark_v1.schema.json",
+  "title": "ContextValidationLeaseBenchmarkV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "report_id", "evidence_class", "environment", "context_epoch_sha256", "lease_sha256", "sample_count", "samples", "summaries", "semantic_equivalence", "invalidation_results", "decision_hashes_unchanged", "timing_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "report_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.context_validation_lease_benchmark.v1"},
+    "report_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"},
+    "context_epoch_sha256": {"$ref": "#/$defs/sha256"},
+    "lease_sha256": {"$ref": "#/$defs/sha256"},
+    "sample_count": {"type": "integer", "minimum": 40, "maximum": 2000},
+    "samples": {"type": "array", "minItems": 40, "maxItems": 2000, "items": {"$ref": "#/$defs/sample"}},
+    "summaries": {
+      "type": "object", "additionalProperties": false,
+      "required": ["FULL_SOURCE_REVALIDATION", "EPOCH_BOUND_LEASE", "p50_reduction_ns", "p95_reduction_ns"],
+      "properties": {
+        "FULL_SOURCE_REVALIDATION": {"$ref": "#/$defs/distribution"},
+        "EPOCH_BOUND_LEASE": {"$ref": "#/$defs/distribution"},
+        "p50_reduction_ns": {"type": "integer"},
+        "p95_reduction_ns": {"type": "integer"}
+      }
+    },
+    "semantic_equivalence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ingress_sha256", "all_outputs_identical"],
+      "properties": {"ingress_sha256": {"$ref": "#/$defs/sha256"}, "all_outputs_identical": {"const": true}}
+    },
+    "invalidation_results": {
+      "const": [
+        {"case": "CONTEXT_EPOCH_CHANGED", "status": "BLOCKED"},
+        {"case": "SERVICE_INSTANCE_RESTARTED", "status": "BLOCKED"},
+        {"case": "SERVICE_GENERATION_CHANGED", "status": "BLOCKED"},
+        {"case": "CONTEXT_OBJECT_REPLACED", "status": "BLOCKED"},
+        {"case": "LEASE_CONTENT_MUTATED", "status": "BLOCKED"}
+      ]
+    },
+    "decision_hashes_unchanged": {"const": true},
+    "timing_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sample": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sequence", "path", "duration_ns", "ingress_sha256"],
+      "properties": {"sequence": {"type": "integer", "minimum": 0}, "path": {"enum": ["FULL_SOURCE_REVALIDATION", "EPOCH_BOUND_LEASE"]}, "duration_ns": {"type": "integer", "minimum": 0}, "ingress_sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "distribution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["count", "minimum_ns", "p50_ns", "p95_ns", "p99_ns", "maximum_ns"],
+      "properties": {"count": {"type": "integer", "minimum": 20}, "minimum_ns": {"type": "integer", "minimum": 0}, "p50_ns": {"type": "integer", "minimum": 0}, "p95_ns": {"type": "integer", "minimum": 0}, "p99_ns": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]}, "maximum_ns": {"type": "integer", "minimum": 0}}
+    }
+  }
+}

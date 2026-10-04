@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/installed_geometry_cable_rehearsal_v1.schema.json",
+  "title": "RoCell synthetic installed geometry and cable rehearsal v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "evidence_class", "case_count", "matched_count", "cases", "all_declared_cases_matched", "qualification_installed", "camera_opened", "transport_opened", "controller_started", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "report_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.installed_geometry_cable_rehearsal.v1"},
+    "evidence_class": {"const": "SYNTHETIC_OFFLINE_ONLY"},
+    "case_count": {"const": 8},
+    "matched_count": {"type": "integer", "minimum": 0, "maximum": 8},
+    "cases": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case_id", "expected", "observed", "matched", "detail"],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "expected": {"enum": ["PASS", "BLOCKED", "REJECTED"]},
+          "observed": {"enum": ["PASS", "BLOCKED", "REJECTED", "ACCEPTED"]},
+          "matched": {"type": "boolean"},
+          "detail": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "all_declared_cases_matched": {"type": "boolean"},
+    "qualification_installed": {"const": false},
+    "camera_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

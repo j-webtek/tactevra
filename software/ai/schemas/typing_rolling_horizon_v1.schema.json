@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_rolling_horizon_v1.schema.json",
+  "title": "RoCell typing rolling horizon v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "phase", "request_id", "plan_sha256",
+    "configuration_epoch_sha256", "binding", "binding_sha256",
+    "action_count", "action_index", "current", "preview",
+    "deadline_monotonic_ns", "dispatch_intent_sha256",
+    "completion_receipt_sha256", "invalidation_reason",
+    "restart_reconciliation", "commit_horizon", "preview_horizon",
+    "automatic_retry_allowed", "controller_commands",
+    "hardware_commands_generated", "hardware_access", "physical_authority",
+    "rolling_horizon_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.typing_rolling_horizon.v1"},
+    "phase": {
+      "enum": [
+        "PRE_DISPATCH", "RECONSTRUCTED_PRE_DISPATCH",
+        "DISPATCH_INTENT_RETAINED", "COMPLETED", "INVALIDATED",
+        "OUTCOME_UNCERTAIN"
+      ]
+    },
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "plan_sha256": {"$ref": "#/$defs/sha256"},
+    "configuration_epoch_sha256": {"$ref": "#/$defs/sha256"},
+    "binding": {"$ref": "#/$defs/binding"},
+    "binding_sha256": {"$ref": "#/$defs/sha256"},
+    "action_count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "action_index": {"type": "integer", "minimum": 0, "maximum": 63},
+    "current": {"oneOf": [{"$ref": "#/$defs/slot"}, {"type": "null"}]},
+    "preview": {"oneOf": [{"$ref": "#/$defs/slot"}, {"type": "null"}]},
+    "deadline_monotonic_ns": {"type": "integer", "minimum": 1},
+    "dispatch_intent_sha256": {
+      "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    },
+    "completion_receipt_sha256": {
+      "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    },
+    "invalidation_reason": {
+      "oneOf": [
+        {"type": "null"},
+        {"enum": [
+          "OBSERVED_STATE_DRIFT", "CALIBRATION_CHANGED",
+          "TOOL_PROFILE_CHANGED", "DYNAMICS_PROFILE_CHANGED",
+          "CONFIGURATION_EPOCH_CHANGED", "EVIDENCE_STALE",
+          "CONTROLLER_SESSION_CHANGED", "CANCELLED", "DEADLINE_EXPIRED"
+        ]}
+      ]
+    },
+    "restart_reconciliation": {"type": ["string", "null"]},
+    "commit_horizon": {"const": 1},
+    "preview_horizon": {"const": 1},
+    "automatic_retry_allowed": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_commands_generated": {"const": 0},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "rolling_horizon_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "observed_start_state_sha256", "feedback_receipt_sha256",
+        "configuration_epoch_sha256", "calibration_snapshot_sha256",
+        "tool_profile_sha256", "dynamics_profile_sha256",
+        "controller_session_id", "valid_until_monotonic_ns"
+      ],
+      "properties": {
+        "schema": {"const": "rocell.typing_observed_execution_binding.v1"},
+        "observed_start_state_sha256": {"$ref": "#/$defs/sha256"},
+        "feedback_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "configuration_epoch_sha256": {"$ref": "#/$defs/sha256"},
+        "calibration_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+        "tool_profile_sha256": {"$ref": "#/$defs/sha256"},
+        "dynamics_profile_sha256": {"$ref": "#/$defs/sha256"},
+        "controller_session_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "valid_until_monotonic_ns": {"type": "integer", "minimum": 1}
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_index", "target_id", "action_sha256", "proposal_sha256",
+        "role", "permit_id", "permit_issued", "controller_commands",
+        "hardware_commands_generated", "hardware_access", "physical_authority"
+      ],
+      "properties": {
+        "action_index": {"type": "integer", "minimum": 0, "maximum": 63},
+        "target_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "action_sha256": {"$ref": "#/$defs/sha256"},
+        "proposal_sha256": {"$ref": "#/$defs/sha256"},
+        "role": {"enum": ["CURRENT", "PREVIEW"]},
+        "permit_id": {"type": "null"},
+        "permit_issued": {"const": false},
+        "controller_commands": {"const": []},
+        "hardware_commands_generated": {"const": 0},
+        "hardware_access": {"const": false},
+        "physical_authority": {"const": false}
+      }
+    }
+  }
+}
