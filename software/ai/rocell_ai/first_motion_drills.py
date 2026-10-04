@@ -16,7 +16,12 @@ from typing import Any
 
 from rocell.simulation.controller import ControllerJointState, controller_forward_kinematics
 
-from rocell_ai.first_motion_controller_emulator import SCOPE
+from rocell_ai.first_motion_controller_emulator import (
+    SCOPE,
+    _baseline_joints,
+    _pose,
+    run_staged_bringup_rehearsal,
+)
 from rocell_ai.simulation_program_cpu import load_program_fixture, recovery_sweep
 
 
@@ -66,6 +71,219 @@ def _nominal_xyz() -> tuple[float, float, float]:
 
 def _distance(a: tuple[float, ...], b: tuple[float, ...]) -> float:
     return math.sqrt(sum((left - right) ** 2 for left, right in zip(a, b, strict=True)))
+
+
+def load_independent_observation_fixture(path: Path) -> dict[str, Any]:
+    """Load the frozen zero-authority external-observer experiment."""
+
+    value = json.loads(path.read_text(encoding="utf-8"))
+    claimed = value.pop("fixture_sha256")
+    if _sha(value) != claimed:
+        raise ValueError("independent-observation fixture hash mismatch")
+    value["fixture_sha256"] = claimed
+    for name in (
+        "consequence", "silhouette_observer", "touch_surface_observer",
+        "fusion", "exploratory_rehearsal",
+    ):
+        section = value[name]
+        section_claimed = section.pop("section_sha256")
+        if _sha(section) != section_claimed:
+            raise ValueError(f"{name} section hash mismatch")
+        section["section_sha256"] = section_claimed
+    if value["scope"] != SCOPE or any(value["counters"].values()):
+        raise ValueError("independent-observation fixture changed zero-authority scope")
+    root = path.resolve().parents[4]
+    for binding in value["bindings"].values():
+        source = Path(binding["path"])
+        if not source.is_absolute():
+            source = root / source
+        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError(f"bound independent-observation input changed: {source}")
+    return value
+
+
+def _paired_gap_delta(fixture: dict[str, Any]) -> float:
+    model = fixture["paired_gap_model"]["LINK_LENGTH_PLUS_JOINT_ZERO"]
+    nominal = _nominal_xyz()
+    state = _nominal_state()
+    values = state.to_dict()
+    values[model["joint"]] += math.radians(model["delta_deg"])
+    changed = ControllerJointState(**values)
+    l2 = math.hypot(236.82, 30.00) + model["delta_mm"]
+    a2 = math.atan2(30.00, 236.82)
+    l3 = 144.49
+    le = math.hypot(171.67, 13.69)
+    ae = math.atan2(13.69, 171.67)
+    shoulder_elbow = changed.elbow_rad + changed.shoulder_rad
+    terminal = shoulder_elbow + changed.wrist_pitch_rad
+    rho = (l2 * math.sin(changed.shoulder_rad + a2)
+           + l3 * math.sin(shoulder_elbow)
+           + le * math.sin(terminal + ae))
+    altered = (
+        rho * math.cos(changed.base_rad), rho * math.sin(changed.base_rad),
+        l2 * math.cos(changed.shoulder_rad + a2)
+        + l3 * math.cos(shoulder_elbow)
+        + le * math.cos(terminal + ae),
+    )
+    return _distance(nominal, altered)
+
+
+def run_independent_observation_drills(
+    fixture: dict[str, Any], wrong_model_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Rescore retained gaps with independent simulated observations.
+
+    The original report is immutable.  This report only adds consequence and
+    detector columns under predeclared range-endpoint rules.
+    """
+
+    if wrong_model_report["gap_count"] != 33:
+        raise ValueError("independent-observation extension requires the frozen 33 gaps")
+    safe_min, safe_max = fixture["consequence"]["effective_safe_half_width_mm_range"]
+    silhouette = fixture["silhouette_observer"]
+    min_px_per_mm = silhouette["projected_pixels_per_mm_range"][0]
+    max_boundary_px = silhouette["detectable_boundary_shift_px_range"][1]
+    touch = fixture["touch_surface_observer"]
+    max_touch_threshold = (
+        touch["observation_noise_mm_range"][1]
+        * touch["detection_sigma_multiplier_range"][1]
+    )
+    rows = []
+    for gap in wrong_model_report["gaps"]:
+        delta = gap["signal"].get("tool_tip_delta_mm")
+        if delta is None:
+            delta = _paired_gap_delta(fixture)
+        delta = float(delta)
+        if delta <= safe_min:
+            consequence = "HARMLESS_ALL"
+        elif delta > safe_max:
+            consequence = "CONSEQUENTIAL_ALL"
+        else:
+            consequence = "CONSEQUENTIAL_SOME"
+        projected_shift = delta * min_px_per_mm
+        silhouette_detected = projected_shift > max_boundary_px
+        touch_detected = delta > max_touch_threshold
+        fused = silhouette_detected or touch_detected
+        consequential = consequence != "HARMLESS_ALL"
+        rows.append({
+            "case_id": gap["case_id"],
+            "injection": gap["injection"],
+            "simulated_landing_error_mm": delta,
+            "consequence": consequence,
+            "silhouette_worst_case_shift_px": projected_shift,
+            "silhouette_robustly_detected": silhouette_detected,
+            "touch_worst_case_threshold_mm": max_touch_threshold,
+            "touch_robustly_detected": touch_detected,
+            "fused_detected": fused,
+            "undetected_consequential": consequential and not fused,
+        })
+    consequential = [row for row in rows if row["consequence"] != "HARMLESS_ALL"]
+    undetected = [row for row in rows if row["undetected_consequential"]]
+    report = {
+        "schema": "tactevra.first_motion_independent_observation_drills.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "original_wrong_model_receipt_sha256": wrong_model_report["receipt_sha256"],
+        "original_gap_count": len(rows),
+        "harmless_all_count": sum(row["consequence"] == "HARMLESS_ALL" for row in rows),
+        "consequential_some_or_all_count": len(consequential),
+        "consequential_all_count": sum(row["consequence"] == "CONSEQUENTIAL_ALL" for row in rows),
+        "silhouette_detected_count": sum(row["silhouette_robustly_detected"] for row in rows),
+        "touch_detected_count": sum(row["touch_robustly_detected"] for row in rows),
+        "fused_detected_count": sum(row["fused_detected"] for row in rows),
+        "undetected_consequential_count": len(undetected),
+        "rows": rows,
+        "undetected_consequential": undetected,
+        "decision": "PASS_ZERO_UNDETECTED_CONSEQUENTIAL_SIMULATION_ONLY" if not undetected else "FAIL_UNDETECTED_CONSEQUENTIAL",
+        "official_wrong_model_report_changed": False,
+        "physical_observer_qualified": False,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+    }
+    report["receipt_sha256"] = _sha(report)
+    return report
+
+
+def run_exploratory_candidate_staged_rehearsal(
+    readiness_fixture: dict[str, Any], emulator_fixture: dict[str, Any],
+    observation_fixture: dict[str, Any],
+) -> dict[str, Any]:
+    """Exercise A-F in a shadow simulation without changing official gates."""
+
+    rules = observation_fixture["exploratory_rehearsal"]
+    collision = json.loads(Path(readiness_fixture["bindings"][
+        "phase0_collision_receipt"]["path"]).read_text(encoding="utf-8"))
+    if collision["installed_profile_eligible"] is not False or collision["installed"] is not False:
+        raise ValueError("exploratory rehearsal requires an uninstalled collision candidate")
+    official = run_staged_bringup_rehearsal(readiness_fixture, emulator_fixture)
+    if official["first_no_go_stage"] != "A":
+        raise ValueError("official Stage A stop changed")
+    baseline = _baseline_joints(emulator_fixture)
+    stage_rows = []
+    envelopes = []
+    for stage_index, stage in enumerate(readiness_fixture["phase3"]["stages"]):
+        samples = []
+        for sample_index in range(rules["samples_per_stage"]):
+            phase = sample_index / (rules["samples_per_stage"] - 1)
+            values = list(baseline)
+            values[stage_index % 5] += (phase - 0.5) * (0.01 + stage_index * 0.002)
+            samples.append({
+                "sample_index": sample_index,
+                "normalized_time": phase,
+                "simulated_measured_joint_positions_rad": values,
+                "predicted_tool_tip": _pose(values),
+            })
+        envelope = {
+            "stage": stage["id"],
+            "objective": stage["objective"],
+            "status": "PREDICTED_EXPLORATORY_NOT_EXECUTED",
+            "samples": samples,
+            "candidate_collision_decision": collision["decision"],
+            "candidate_collision_no_go_retained": collision["decision"] != "PASS",
+            "physical_accuracy_claim": False,
+        }
+        envelope["envelope_sha256"] = _sha(envelope)
+        envelopes.append(envelope)
+        stage_rows.append({
+            "stage": stage["id"],
+            "status": "EXERCISED_SHADOW_ONLY",
+            "predicted_telemetry_sample_count": len(samples),
+            "simulated_stage_motion_executed": False,
+            "candidate_collision_no_go_retained": True,
+            "envelope_sha256": envelope["envelope_sha256"],
+        })
+    report = {
+        "schema": "tactevra.first_motion_candidate_shadow_rehearsal.v1",
+        "scope": SCOPE,
+        "fixture_sha256": observation_fixture["fixture_sha256"],
+        "official_rehearsal_receipt_sha256": official["receipt_sha256"],
+        "official_decision_unchanged": official["decision"],
+        "official_first_no_go_stage_unchanged": official["first_no_go_stage"],
+        "collision_receipt_sha256": collision["receipt_sha256"],
+        "collision_installed": collision["installed"],
+        "collision_installed_profile_eligible": collision["installed_profile_eligible"],
+        "candidate_collision_decision": collision["decision"],
+        "stage_results": stage_rows,
+        "envelopes": envelopes,
+        "stages_exercised": [row["stage"] for row in stage_rows],
+        "predicted_telemetry_sample_count": sum(
+            row["predicted_telemetry_sample_count"] for row in stage_rows),
+        "decision": "PASS_A_TO_F_SHADOW_COVERAGE_OFFICIAL_NOT_READY",
+        "official_readiness": rules["official_readiness_must_remain"],
+        "staged_motion_executions": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+    }
+    report["receipt_sha256"] = _sha(report)
+    return report
 
 
 def _row(case_id: str, injection: dict[str, Any], *, detected: bool,
@@ -366,4 +584,8 @@ def run_scenario_regression(
     return report
 
 
-__all__ = ["run_scenario_regression", "run_wrong_model_drills"]
+__all__ = [
+    "load_independent_observation_fixture", "run_independent_observation_drills",
+    "run_exploratory_candidate_staged_rehearsal", "run_scenario_regression",
+    "run_wrong_model_drills",
+]

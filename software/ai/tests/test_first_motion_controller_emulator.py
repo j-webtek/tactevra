@@ -23,6 +23,9 @@ from rocell_ai.first_motion_controller_emulator import (
     run_staged_bringup_rehearsal,
 )
 from rocell_ai.first_motion_drills import (
+    load_independent_observation_fixture,
+    run_exploratory_candidate_staged_rehearsal,
+    run_independent_observation_drills,
     run_scenario_regression,
     run_wrong_model_drills,
 )
@@ -31,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_controller_emulator_v1.json"
 SOURCE = ROOT / "software/ai/rocell_ai/first_motion_controller_emulator.py"
 READINESS_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_readiness_v1.json"
+OBSERVATION_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_independent_observation_v1.json"
 
 
 def _sample() -> ServoRangeSample:
@@ -197,3 +201,38 @@ def test_scenario_regression_exposes_wrong_model_false_acceptances() -> None:
     assert report["ws4_recovery_case_count"] == 6
     assert report["decision"] == "STOP_FALSE_ACCEPTANCE_GAPS_RETAINED"
     assert report["hardware_write_count"] == report["physical_movement_count"] == 0
+
+
+def test_independent_observers_close_consequential_simulated_gaps_only() -> None:
+    readiness = load_first_motion_fixture(READINESS_FIXTURE)
+    fixture = load_independent_observation_fixture(OBSERVATION_FIXTURE)
+    report = run_independent_observation_drills(
+        fixture, run_wrong_model_drills(readiness))
+    assert report["original_gap_count"] == 33
+    assert report["consequential_some_or_all_count"] > 0
+    assert report["undetected_consequential_count"] == 0
+    assert report["decision"] == "PASS_ZERO_UNDETECTED_CONSEQUENTIAL_SIMULATION_ONLY"
+    assert report["official_wrong_model_report_changed"] is False
+    assert report["physical_observer_qualified"] is False
+    assert report["hardware_write_count"] == report["physical_movement_count"] == 0
+    assert report["real_command_count"] == report["permit_count"] == 0
+    assert report["transport_count"] == 0
+
+
+def test_candidate_shadow_exercises_a_to_f_without_changing_official_stop() -> None:
+    readiness = load_first_motion_fixture(READINESS_FIXTURE)
+    report = run_exploratory_candidate_staged_rehearsal(
+        readiness, load_emulator_fixture(FIXTURE),
+        load_independent_observation_fixture(OBSERVATION_FIXTURE))
+    assert report["stages_exercised"] == list("ABCDEF")
+    assert report["predicted_telemetry_sample_count"] == 6 * 33
+    assert report["official_first_no_go_stage_unchanged"] == "A"
+    assert report["official_readiness"] == "NOT_READY_FOR_FIRST_POWERED_MOTION"
+    assert report["collision_installed"] is False
+    assert report["collision_installed_profile_eligible"] is False
+    assert report["candidate_collision_decision"] != "PASS"
+    assert all(row["status"] == "EXERCISED_SHADOW_ONLY" for row in report["stage_results"])
+    assert report["staged_motion_executions"] == 0
+    assert report["hardware_write_count"] == report["physical_movement_count"] == 0
+    assert report["real_command_count"] == report["permit_count"] == 0
+    assert report["transport_count"] == 0
