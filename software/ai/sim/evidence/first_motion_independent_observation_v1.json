@@ -1,0 +1,118 @@
+{
+  "bindings": {
+    "collision": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\simulation_program\\phase0\\phase0_collision_intake_v1.json",
+      "sha256": "4cc5956e209c36001b9eb22739918e87cc1fbc8d063c9512dfab2813dca8a640"
+    },
+    "landing": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\simulation_program\\phase0\\phase0_landing_sensor_comparison_v1.json",
+      "sha256": "da151cbd1b0ca6d31049d98d916286dffdba484bcb836767d4ef20a70ff12d89"
+    },
+    "readiness": {
+      "path": "software/ai/sim/evidence/first_motion_readiness_v1.json",
+      "sha256": "6bcfa546d39c5fb11b6231ee3fe79078fe5eaf34ff78e74bf7105d0005faf780"
+    },
+    "wrong_model": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\phase4\\wrong_model_drills_v1.json",
+      "sha256": "36356eb981c694532033ddd22864738da7bba226a62cc1a001eb088faf85eb95"
+    }
+  },
+  "branch": "issue/190-isaac-sim-host",
+  "claim_commit": "b280b8737c30dd2a3d5ec41b765ef4db251e48d9",
+  "consequence": {
+    "classification": "HARMLESS_ALL when maximum simulated landing error <= 3 mm; CONSEQUENTIAL_SOME when it exceeds 3 mm; CONSEQUENTIAL_ALL when it exceeds 7 mm. UNKNOWN is consequential for the gate.",
+    "effective_safe_half_width_mm_range": [
+      3.0,
+      7.0
+    ],
+    "gate": "undetected_consequential_some_count must equal zero; old 33-gap receipt remains unchanged.",
+    "section_sha256": "f5c41c0984e233575415fe98da63086e140d8e85375749db0c263766086a1062"
+  },
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "Do not alter or rescore the original 33 gaps.",
+    "Report silhouette-only, touch-only, fused, harmless, and consequential counts.",
+    "The external-observer simulation passes only with zero fused undetected consequential-some cases.",
+    "The exploratory rehearsal passes coverage only when A-F each emit predicted telemetry; it cannot pass installed collision or readiness gates."
+  ],
+  "exploratory_rehearsal": {
+    "candidate_collision_must_remain_installed_false": true,
+    "candidate_collision_no_go_is_reported_not_overridden": true,
+    "mode": "EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_SHADOW",
+    "official_readiness_must_remain": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+    "official_rehearsal_must_remain_stage_a_stop": true,
+    "samples_per_stage": 33,
+    "section_sha256": "5ea955bc1c1c1a05fe606b2336dbcc54e44a9310515b7db88bcdfd8cebb44933",
+    "stages": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ]
+  },
+  "fixture_sha256": "638ebd2aa7837ade1090b506a702b569b9800e7b3fa444a7310bd30588261f5e",
+  "fusion": {
+    "gate": "ZERO_UNDETECTED_CONSEQUENTIAL_SOME",
+    "rule": "DETECTED when either independent observer robustly detects; no servo self-report receives geometry-detection credit",
+    "section_sha256": "1c8ad70e798e803c2863498a71c4024c59e75ee2db9bdeca54ce6c8819e12ffa"
+  },
+  "limitations": [
+    "Observer scale, detection, noise, safe-region, and paired-error values are unmeasured exploratory ranges.",
+    "Analytic silhouette shifts do not qualify real camera segmentation or calibration.",
+    "Touch-surface simulation does not select or qualify physical hardware.",
+    "Candidate collision geometry is uninstalled and currently reports collision/blocker cases."
+  ],
+  "paired_gap_model": {
+    "LINK_LENGTH_PLUS_JOINT_ZERO": {
+      "delta_deg": 2.0,
+      "delta_mm": 3.0,
+      "joint": "shoulder_rad",
+      "link": "l2"
+    },
+    "reason": "frozen representative high endpoint before extension results"
+  },
+  "schema": "tactevra.first_motion_independent_observation_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "silhouette_observer": {
+    "detectable_boundary_shift_px_range": [
+      0.5,
+      2.0
+    ],
+    "hover_pose_ids": [
+      "PARK_NOMINAL",
+      "HOVER_LEFT",
+      "HOVER_RIGHT"
+    ],
+    "mode": "ANALYTIC_OVERHEAD_PROJECTED_LINK_SHIFT_SIMULATION",
+    "physical_tolerance_installed": false,
+    "projected_pixels_per_mm_range": [
+      0.8,
+      2.0
+    ],
+    "robust_detection_rule": "minimum projected shift across hover poses and pixel scale must exceed maximum detectable boundary shift",
+    "section_sha256": "09271e8556c34b83a09db1bdf3879d3c3f78c94e784ff24c7edc4949fe60121a"
+  },
+  "touch_surface_observer": {
+    "detection_sigma_multiplier_range": [
+      2.0,
+      3.0
+    ],
+    "mode": "SIMULATED_TEMPORARY_TOUCH_SURFACE",
+    "observation_noise_mm_range": [
+      0.1,
+      2.0
+    ],
+    "physical_sensor_selected": false,
+    "robust_detection_rule": "minimum landing shift must exceed maximum noise times maximum multiplier",
+    "section_sha256": "eb64abbda27215dd8318a1db9cc7d47b3755cde68ed9ef38de432efc8dfd427d"
+  }
+}

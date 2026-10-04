@@ -477,3 +477,6 @@ refines only by fixed nearest-neighbor boundary rules, and requires exhaustive
 sampled-range confirmation for up to eight candidate recipes. Generated rows
 remain external. The exact tracked-file count and governed ceiling are therefore
 6,362; every byte, blob, duplicate, and reduction limit remains unchanged.
+
+The tracked-file ceiling is 6,363 after freezing the compact Workstream 7 independent-observation fixture; observer receipts remain external and hash-bound.
+
