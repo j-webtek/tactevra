@@ -472,12 +472,14 @@ def admit_shard_manifest(
             isinstance(bounds, list)
             and len(bounds) == 4
             and all(isinstance(item, int) for item in bounds)
+            and 0 <= bounds[0] < bounds[2] <= fixture["camera"]["native_mode_px"][0]
+            and 0 <= bounds[1] < bounds[3] <= fixture["camera"]["native_mode_px"][1]
             and bounds[0] % 2 == 0
             and bounds[2] % 2 == 0
             and bounds[2] - bounds[0] == size[0]
             and bounds[3] - bounds[1] == size[1]
         ):
-            raise ValueError("native crop is not aligned to full-frame YUY2 pairs")
+            raise ValueError("native crop is outside the full frame or not aligned to YUY2 pairs")
         if not (
             isinstance(aligned, list)
             and len(aligned) == 4

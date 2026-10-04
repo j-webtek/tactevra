@@ -127,6 +127,17 @@ def test_exact_shard_admission_and_tampering_rejection(tmp_path: Path) -> None:
         admit_shard_manifest(FIXTURE, manifest)
 
 
+def test_exact_admission_rejects_out_of_frame_crop_before_pixel_read(tmp_path: Path) -> None:
+    fixture, fixture_raw = load_fixture(FIXTURE)
+    manifest = _write_manifest(tmp_path, fixture, fixture_raw)
+    payload = json.loads(manifest.read_text())
+    native = payload["observations"][0]["native_crop"]
+    native["full_frame_integer_bounds_px"] = [5200, 200, 5600, 600]
+    manifest.write_bytes(canonical(payload) + b"\n")
+    with pytest.raises(ValueError, match="outside the full frame"):
+        admit_shard_manifest(FIXTURE, manifest)
+
+
 def test_evaluation_split_is_rejected(tmp_path: Path) -> None:
     fixture, fixture_raw = load_fixture(FIXTURE)
     manifest = _write_manifest(tmp_path, fixture, fixture_raw)
