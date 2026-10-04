@@ -1,5 +1,15 @@
 {
+  "amendments": [
+    {
+      "reason": "Bind the frozen structural/contact class definitions consumed by the design-closure runner. No result existed; ranges, metrics, and decision rules are unchanged.",
+      "timing": "PRE_IMPLEMENTATION"
+    }
+  ],
   "bindings": {
+    "attribution_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_candidate_collision_attribution_v1.json",
+      "sha256": "43198f50210c514b794d1d2b39963d607aa76d939f4f63a79bebdec22966ad5f"
+    },
     "emulator_fixture": {
       "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
       "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
@@ -66,7 +76,7 @@
     "Structural evidence may propose exclusions but never installs them.",
     "Any missing IK, stage geometry, unclassified pair, or nonfinite result stops the applicable claim."
   ],
-  "fixture_sha256": "8bcbef58278ce13e1c4c443759cac23d7e8eab1db772c17777815081b074df68",
+  "fixture_sha256": "ff7c2b36c97cb35d5f71136c85c52c2f34c34849b140194e94d966014dfd146e",
   "limitations": [
     "All dimensions and routes are unmeasured candidate ranges.",
     "Park pose is a prior exploratory candidate, not a commissioned pose.",
