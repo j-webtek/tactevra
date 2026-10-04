@@ -1,0 +1,168 @@
+{
+  "cases": {
+    "admitted_installed_subset": {
+      "expected_targets": [
+        "H",
+        "E",
+        "L",
+        "L",
+        "O",
+        "SPACE",
+        "2",
+        "0",
+        "2",
+        "6"
+      ],
+      "text": "hello 2026"
+    },
+    "blocked_missing_target": {
+      "decision": "BLOCK_BEFORE_BATCH",
+      "expected_missing_target": "SHIFT",
+      "text": "Hello 2026!"
+    }
+  },
+  "counters": {
+    "arm_commands": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "evidence": {
+    "captured_at_epoch_ms": 1800000000000,
+    "evaluated_offset_ms_range": [
+      1000,
+      2000
+    ],
+    "expires_offset_ms_range": [
+      8000,
+      10000
+    ],
+    "observation_confidence_range": [
+      0.95,
+      1.0
+    ],
+    "scene_age_ms_range": [
+      1000,
+      3000
+    ]
+  },
+  "expected_combination_count": 81,
+  "fixture_sha256": "f96c686b640c8c993667760cd7bbac7eb57fef539fbcb4dae450289965b62ffa",
+  "gates": {
+    "authority_bearing_output_count_maximum": 0,
+    "blocked_missing_shift_false_acceptance_maximum": 0,
+    "ordered_target_difference_count_maximum": 0,
+    "repeat_target_L_and_2_must_remain_in_order": true,
+    "strict_decode_pass_rate_minimum": 1.0,
+    "trajectory_build_pass_rate_minimum": 1.0,
+    "trusted_registry_ingress_pass_rate_minimum": 1.0
+  },
+  "installed_target_catalog_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2",
+  "limitations": [
+    "This increment proves the strict boundary and deterministic Cartesian trajectory only.",
+    "IK, collision, MuJoCo, Isaac, physical calibration, and physical authority remain absent."
+  ],
+  "limits": {
+    "collision_screening_in_this_increment": false,
+    "ik_screening_in_this_increment": false,
+    "maximum_batch_proposals": 64,
+    "mujoco_replay_in_this_increment": false
+  },
+  "paired_sweep_rule": "MATCH_VALUES_BY_INDEX_FOR_VELOCITY_ACCELERATION_JERK_SETTLE_DWELL;CROSS_WITH_UNCERTAINTY_HOVER_AND_CARTESIAN_STEP",
+  "parent_fixture_sha256": "105df64d3c3878bed97caddb2623c9c577a820144909cc94105b529508233bac",
+  "schema": "tactevra.end_to_end_typing_twin_boundary_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "semantic_core_result_commit": "7988cfbaa6343f3f38614acfee5244506f8ceb73",
+  "source_claim_commit": "b499f9da5f6999e65629a75bfc0165aa5637579e",
+  "sweeps": {
+    "contact_dwell_ms": {
+      "range": [
+        30,
+        120
+      ],
+      "values": [
+        30,
+        60,
+        120
+      ]
+    },
+    "hover_clearance_mm": {
+      "range": [
+        5.0,
+        30.0
+      ],
+      "values": [
+        5.0,
+        15.0,
+        25.0
+      ]
+    },
+    "hover_settle_ms": {
+      "range": [
+        50,
+        200
+      ],
+      "values": [
+        50,
+        100,
+        200
+      ]
+    },
+    "maximum_acceleration_mm_s2": {
+      "range": [
+        40.0,
+        160.0
+      ],
+      "values": [
+        40.0,
+        100.0,
+        160.0
+      ]
+    },
+    "maximum_cartesian_step_mm": {
+      "range": [
+        1.0,
+        5.0
+      ],
+      "values": [
+        1.0,
+        3.0,
+        5.0
+      ]
+    },
+    "maximum_jerk_mm_s3": {
+      "range": [
+        200.0,
+        800.0
+      ],
+      "values": [
+        200.0,
+        500.0,
+        800.0
+      ]
+    },
+    "maximum_velocity_mm_s": {
+      "range": [
+        20.0,
+        80.0
+      ],
+      "values": [
+        20.0,
+        50.0,
+        80.0
+      ]
+    },
+    "planar_uncertainty_bound_mm": {
+      "range": [
+        0.5,
+        2.0
+      ],
+      "values": [
+        0.5,
+        1.0,
+        2.0
+      ]
+    }
+  }
+}
