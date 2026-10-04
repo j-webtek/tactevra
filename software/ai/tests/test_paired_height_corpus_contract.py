@@ -16,6 +16,7 @@ from train.paired_height_corpus_contract import (  # noqa: E402
     SHARD_SCHEMA,
     admit_shard_manifest,
     canonical,
+    construct_paired_height_features,
     decide_resolution,
     derive_model_input,
     expected_counts,
@@ -107,6 +108,48 @@ def test_paired_height_model_retains_192_detail_until_final_pool() -> None:
         96: (1, 64, 24, 24),
         192: (1, 64, 48, 48),
     }
+
+
+def test_twelve_channel_features_are_deterministic_and_preserve_thin_line() -> None:
+    import numpy as np
+
+    profile, _ = load_resolution_noise_experiment(RESOLUTION_EXPERIMENT)
+    camera = profile["noise_profiles"][1]["camera_profile"]
+    reference = np.full((400, 400, 3), 150, dtype=np.uint8)
+    observation = reference.copy()
+    observation[:, 197:203] = 35
+    outputs = {}
+    for size in (96, 192):
+        first = construct_paired_height_features(
+            reference,
+            observation,
+            reference_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+            observation_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+            output_size_px=size,
+            reference_seed=101,
+            observation_seed=202,
+            camera_profile=camera,
+            safe_half_extent_mm=[7.0, 7.0],
+        )
+        second = construct_paired_height_features(
+            reference,
+            observation,
+            reference_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+            observation_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+            output_size_px=size,
+            reference_seed=101,
+            observation_seed=202,
+            camera_profile=camera,
+            safe_half_extent_mm=[7.0, 7.0],
+        )
+        assert first.shape == (12, size, size)
+        assert first.dtype == np.float32
+        assert np.array_equal(first, second)
+        assert float(first[9].max()) > 0.0
+        assert float(first[10].max()) > 0.0
+        assert set(np.unique(first[11])) == {0.0, 1.0}
+        outputs[size] = first
+    assert outputs[192][11].sum() > outputs[96][11].sum() * 3.5
 
 
 def test_frozen_fixture_counts_and_balances_heights() -> None:

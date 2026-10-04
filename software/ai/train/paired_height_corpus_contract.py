@@ -515,6 +515,125 @@ def derive_model_input(
     )
 
 
+def _self_crop_p05_p95(value: Any, np: Any) -> Any:
+    value = value.astype(np.float32) / 255.0
+    low = np.quantile(value, 0.05, axis=(0, 1))
+    high = np.quantile(value, 0.95, axis=(0, 1))
+    return np.clip((value - low) / np.maximum(high - low, 0.05), 0.0, 1.0)
+
+
+def _sobel_magnitude(value: Any, np: Any) -> Any:
+    luminance = (
+        0.2126 * value[..., 0]
+        + 0.7152 * value[..., 1]
+        + 0.0722 * value[..., 2]
+    )
+    padded = np.pad(luminance, 1, mode="reflect")
+    gx = (
+        -padded[:-2, :-2] + padded[:-2, 2:]
+        - 2.0 * padded[1:-1, :-2] + 2.0 * padded[1:-1, 2:]
+        - padded[2:, :-2] + padded[2:, 2:]
+    )
+    gy = (
+        -padded[:-2, :-2] - 2.0 * padded[:-2, 1:-1] - padded[:-2, 2:]
+        + padded[2:, :-2] + 2.0 * padded[2:, 1:-1] + padded[2:, 2:]
+    )
+    return np.sqrt(gx * gx + gy * gy, dtype=np.float32) / 4.0
+
+
+def _local_texture(value: Any, np: Any, window: int = 5) -> Any:
+    luminance = (
+        0.2126 * value[..., 0]
+        + 0.7152 * value[..., 1]
+        + 0.0722 * value[..., 2]
+    )
+    radius = window // 2
+    padded = np.pad(luminance, radius, mode="reflect")
+    total = np.zeros_like(luminance, dtype=np.float32)
+    squared = np.zeros_like(luminance, dtype=np.float32)
+    for row in range(window):
+        for column in range(window):
+            sample = padded[row:row + luminance.shape[0], column:column + luminance.shape[1]]
+            total += sample
+            squared += sample * sample
+    count = float(window * window)
+    mean = total / count
+    return np.sqrt(np.maximum(squared / count - mean * mean, 0.0), dtype=np.float32)
+
+
+def construct_paired_height_features(
+    reference_native_rgb: Any,
+    observation_native_rgb: Any,
+    *,
+    reference_aligned_crop_box_px: list[float],
+    observation_aligned_crop_box_px: list[float],
+    output_size_px: int,
+    reference_seed: int,
+    observation_seed: int,
+    camera_profile: dict[str, Any],
+    safe_half_extent_mm: list[float],
+    physical_footprint_mm: float = 48.0,
+) -> Any:
+    """Construct the frozen twelve-channel paired-height model input."""
+    import numpy as np
+
+    if len(safe_half_extent_mm) != 2 or any(
+        not 0.0 < float(item) <= physical_footprint_mm / 2.0
+        for item in safe_half_extent_mm
+    ):
+        raise ValueError("safe half extents must fit inside the physical crop")
+    reference = derive_model_input(
+        reference_native_rgb,
+        aligned_crop_box_px=reference_aligned_crop_box_px,
+        output_size_px=output_size_px,
+        seed=reference_seed,
+        camera_profile=camera_profile,
+        qualifying=False,
+    )
+    observation = derive_model_input(
+        observation_native_rgb,
+        aligned_crop_box_px=observation_aligned_crop_box_px,
+        output_size_px=output_size_px,
+        seed=observation_seed,
+        camera_profile=camera_profile,
+        qualifying=False,
+    )
+    reference_normalized = _self_crop_p05_p95(reference, np)
+    observation_normalized = _self_crop_p05_p95(observation, np)
+    difference = np.abs(reference_normalized - observation_normalized)
+    sobel_difference = np.abs(
+        _sobel_magnitude(reference_normalized, np)
+        - _sobel_magnitude(observation_normalized, np)
+    )[..., None]
+    texture_difference = np.abs(
+        _local_texture(reference_normalized, np)
+        - _local_texture(observation_normalized, np)
+    )[..., None]
+    coordinate = (
+        (np.arange(output_size_px, dtype=np.float32) + 0.5)
+        * (physical_footprint_mm / output_size_px)
+        - physical_footprint_mm / 2.0
+    )
+    safe_mask = (
+        (np.abs(coordinate[:, None]) <= float(safe_half_extent_mm[1]))
+        & (np.abs(coordinate[None, :]) <= float(safe_half_extent_mm[0]))
+    ).astype(np.float32)[..., None]
+    features = np.concatenate(
+        (
+            observation_normalized,
+            reference_normalized,
+            difference,
+            sobel_difference,
+            texture_difference,
+            safe_mask,
+        ),
+        axis=2,
+    )
+    if features.shape != (output_size_px, output_size_px, 12):
+        raise ValueError("paired-height feature expansion produced the wrong shape")
+    return np.ascontiguousarray(features.transpose(2, 0, 1), dtype=np.float32)
+
+
 def admit_shard_manifest(
     fixture_path: Path,
     manifest_path: Path,
