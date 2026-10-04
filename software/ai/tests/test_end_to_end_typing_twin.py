@@ -40,6 +40,9 @@ def test_seeded_case_population_is_exact_and_repeatable():
     assert {len(item) for item in first} == {1, 2, 4, 8, 16, 32, 64, 128}
     assert hashlib.sha256(json.dumps(first).encode()).hexdigest() == hashlib.sha256(
         json.dumps(second).encode()).hexdigest()
+    full = generate_random_cases(fixture, "phone", "full")
+    assert len(full) == 10_000
+    assert {len(item) for item in full} == {1, 2, 4, 8, 16, 32, 64, 128}
 
 
 @pytest.mark.parametrize("text", ["Hello 2026!", "AA", "!!", "aA", "A A", "[]{}\\|`~"])
