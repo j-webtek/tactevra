@@ -15,6 +15,7 @@ from rocell_ai.end_to_end_typing_twin import (  # noqa: E402
     generate_random_cases,
     load_fixture,
     replay_virtual_phone,
+    run_boundary_sweep,
     run_semantic_twin,
 )
 
@@ -71,3 +72,23 @@ def test_ci_semantic_core_is_exact_deterministic_and_zero_authority():
     assert first["hardware_writes"] == first["physical_movements"] == 0
     assert first["physical_authority"] is False
     assert "descriptive_stage_latency_ns" in first
+
+
+def test_actual_v2_boundary_sweep_preserves_order_and_zero_authority():
+    boundary = ROOT / "ai/sim/evidence/end_to_end_typing_twin_boundary_v1.json"
+    first = run_boundary_sweep(boundary, workspace=ROOT.parent)
+    second = run_boundary_sweep(boundary, workspace=ROOT.parent)
+    assert first == second
+    assert first["combination_count"] == 81
+    assert first["strict_decode_pass_count"] == 81
+    assert first["trusted_registry_ingress_pass_count"] == 81
+    assert first["trajectory_build_pass_count"] == 81
+    assert first["ordered_targets"] == [
+        "H", "E", "L", "L", "O", "SPACE", "2", "0", "2", "6"
+    ]
+    assert first["blocked_missing_target"]["expected_missing_target"] == "SHIFT"
+    assert first["blocked_missing_target"]["status"] == "BLOCK_BEFORE_BATCH"
+    assert first["authority_bearing_output_count"] == 0
+    assert first["controller_commands"] == []
+    assert first["hardware_writes"] == first["physical_movements"] == 0
+    assert first["physical_authority"] is False
