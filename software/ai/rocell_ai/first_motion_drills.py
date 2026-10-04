@@ -102,6 +102,242 @@ def load_independent_observation_fixture(path: Path) -> dict[str, Any]:
     return value
 
 
+def load_collision_attribution_fixture(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    claimed = value.pop("fixture_sha256")
+    if _sha(value) != claimed:
+        raise ValueError("collision-attribution fixture hash mismatch")
+    value["fixture_sha256"] = claimed
+    for name in ("contact_classes", "favorable_endpoint_family", "stage_mapping"):
+        section = value[name]
+        section_claimed = section.pop("section_sha256")
+        if _sha(section) != section_claimed:
+            raise ValueError(f"{name} section hash mismatch")
+        section["section_sha256"] = section_claimed
+    if value["scope"] != SCOPE or any(value["counters"].values()):
+        raise ValueError("collision-attribution fixture changed zero-authority scope")
+    root = path.resolve().parents[4]
+    for binding in value["bindings"].values():
+        source = Path(binding["path"])
+        if not source.is_absolute():
+            source = root / source
+        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError(f"bound collision-attribution input changed: {source}")
+    return value
+
+
+def run_candidate_collision_attribution(
+    fixture: dict[str, Any], *, workspace: Path,
+) -> dict[str, Any]:
+    """Retain structural contacts and isolate favorable-endpoint workcell hits."""
+
+    from itertools import product
+
+    from rocell.application.context import load_simulation_context
+    from rocell.geometry import JointPosition, RigidTransform, Rotation3, UrdfModel, Vec3
+    from rocell.simulation.collision import (
+        CapsuleMm, CollisionBindingMode, CollisionBody, CollisionBodyRequirement,
+        CollisionBodyRole, CollisionClearanceEvidenceState, CollisionClearancePolicy,
+        CollisionEvaluationPolicy, CollisionEvidenceState, CollisionGeometryContract,
+        CollisionPose, OrientedBoxMm, SampledCollisionGeometry,
+        build_roarm_m3_prehardware_collision_contract, evaluate_collision_pose,
+    )
+    from rocell_ai.simulation_program_cpu import (
+        _binary_stl_bounds, _collision_primitive, load_program_fixture,
+    )
+
+    program_path = Path(fixture["bindings"]["program_fixture"]["path"])
+    if not program_path.is_absolute():
+        program_path = workspace / program_path
+    program = load_program_fixture(program_path)
+    section = program["sections"]["phase0_collision_mode"]
+    context = load_simulation_context(
+        workspace, workspace / "software/config/system_manifest.json")
+    model = UrdfModel.from_file(context.scenario.model_path)
+    base_contract = build_roarm_m3_prehardware_collision_contract(model, context.scene)
+    workcell = [body for body in base_contract.bodies if body.body_id.startswith("workcell:")]
+    reduction = json.loads(Path(program["bindings"]["link_box_reduction"]["path"]).read_text())
+    pose_bundle = json.loads(Path(program["bindings"]["pose_bundle"]["path"]).read_text())
+    overlay = pose_bundle["layout_overlay"]["board_T_vendor_world_matrix_row_major"]
+    board_t_world = RigidTransform(
+        "board", "world",
+        Rotation3(tuple(overlay[index] for index in (0, 1, 2, 4, 5, 6, 8, 9, 10))),
+        Vec3(overlay[3], overlay[7], overlay[11]),
+    )
+    robot = []
+    for link in reduction["links"]:
+        body_id = f"robot:{'gripper' if link['link_name'] == 'gripper_link' else link['link_name']}"
+        robot.append(CollisionBody(
+            body_id, link["link_name"], CollisionBodyRole.ROBOT_LINK,
+            CollisionEvidenceState.PINNED_DIGITAL,
+            tuple(_collision_primitive(item["candidate_primitive"])
+                  for item in link["components"]),
+            CollisionBindingMode.RIGID_FRAME, f"mesh_sha256:{link['mesh_sha256']}",
+        ))
+    cage = _binary_stl_bounds(Path(program["bindings"]["camera_cage_mesh"]["path"]))
+    carriage = _binary_stl_bounds(Path(program["bindings"]["camera_carriage_mesh"]["path"]))
+    clamp_spec = section["installed_base_clamp"]
+    camera_spec = section["static_camera"]
+    cable_spec = section["moving_cable"]
+    endpoints = product(
+        clamp_spec["arm_axis_board_x_mm_range"],
+        cable_spec["configuration_samples"],
+        cable_spec["route_family"]["fixed_anchor_board_x_mm_range"],
+        cable_spec["route_family"]["fixed_anchor_board_z_mm_range"],
+    )
+    expected = set(fixture["contact_classes"]["DECLARED_EXPECTED_BUT_UNREVIEWED"])
+    consequential = set(fixture["contact_classes"]["POTENTIALLY_CONSEQUENTIAL"])
+    configuration_rows = []
+    pair_counts: dict[str, int] = {}
+    unclassified_pair_counts: dict[str, int] = {}
+    target_counts: dict[str, int] = {}
+    for config_index, (clamp_x, cable_offset, anchor_x, anchor_z) in enumerate(endpoints):
+        clamp_half = Vec3(
+            clamp_spec["half_extents_mm_ranges"]["x"][0],
+            clamp_spec["half_extents_mm_ranges"]["y"][0],
+            clamp_spec["half_extents_mm_ranges"]["z"][0],
+        )
+        clamp = CollisionBody(
+            "installation:base_and_factory_clamp", "board", CollisionBodyRole.BASE_CLAMP,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY,
+            (OrientedBoxMm(Vec3(clamp_x, clamp_spec["rear_edge_board_y_mm"],
+                                -clamp_half.z), clamp_half),),
+            CollisionBindingMode.STATIC_ROOT, "favorable size endpoints; route enumerated",
+        )
+        camera_xy = camera_spec["optical_center_board_xy_mm"]
+        camera_bodies = []
+        for name, bounds, binding in (
+            ("cage", cage, "camera_cage_mesh"),
+            ("carriage", carriage, "camera_carriage_mesh"),
+        ):
+            center = bounds["center_mm"]
+            camera_bodies.append(CollisionBody(
+                f"static_camera:{name}", "board", CollisionBodyRole.STATIC_ENVIRONMENT,
+                CollisionEvidenceState.PINNED_DIGITAL,
+                (OrientedBoxMm(Vec3(camera_xy[0] + center[0], camera_xy[1] + center[1],
+                                    camera_spec["height_mm_samples"][-1] + center[2]),
+                               Vec3(*bounds["half_extents_mm"])),),
+                CollisionBindingMode.STATIC_ROOT,
+                f"sha256:{program['bindings'][binding]['sha256']}",
+            ))
+        camera_bodies.append(CollisionBody(
+            "static_camera:module_range", "board", CollisionBodyRole.STATIC_ENVIRONMENT,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY,
+            (OrientedBoxMm(Vec3(camera_xy[0], camera_xy[1],
+                                camera_spec["height_mm_samples"][-1]
+                                - camera_spec["module_depth_mm_range"][0] / 2),
+                           Vec3(20, 20, camera_spec["module_depth_mm_range"][0] / 2)),),
+            CollisionBindingMode.STATIC_ROOT, "favorable size endpoint",
+        ))
+        tool = CollisionBody(
+            "attachment:contact_tool", "hand_tcp", CollisionBodyRole.TOOL,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY,
+            (CapsuleMm(Vec3.zero(), Vec3(0, 0, -section["tool"]["length_mm_range"][0]),
+                       section["tool"]["radius_mm_range"][0]),),
+            CollisionBindingMode.RIGID_FRAME, "favorable size endpoint",
+        )
+        cable = CollisionBody(
+            "attachment:moving_cable", "board", CollisionBodyRole.CABLE,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY, (),
+            CollisionBindingMode.CONFIGURATION_SAMPLED, "route endpoints enumerated",
+        )
+        bodies = tuple(robot + [clamp, tool, cable] + workcell + camera_bodies)
+        requirements = tuple(CollisionBodyRequirement(
+            body.body_id, body.parent_frame, body.role, body.binding_mode,
+            "favorable-endpoint attribution remains exploratory",
+        ) for body in bodies)
+        contract = CollisionGeometryContract(
+            f"TACTEVRA-ATTRIBUTION-{config_index}", "board", requirements, bodies, ())
+        policy = CollisionEvaluationPolicy(clearance_policy=CollisionClearancePolicy(
+            section["clearance_margin_mm_range"][1], 0, 0,
+            CollisionClearanceEvidenceState.SYNTHETIC_TEST_ONLY,
+            "maximum nonzero frozen clearance endpoint",
+        ))
+        config_pairs: dict[str, int] = {}
+        config_targets: set[str] = set()
+        for source_pose in pose_bundle["poses"]:
+            positions = {name: JointPosition.radians(value) for name, value in zip(
+                pose_bundle["joint_order"], source_pose["joint_positions_rad"], strict=True)}
+            positions["link5_to_gripper_link"] = context.scenario.fixed_gripper_position
+            fk = model.forward_kinematics(positions)
+            transforms = {name: board_t_world.compose(transform) for name, transform in fk.items()}
+            transforms["board"] = RigidTransform.identity("board")
+            gripper = transforms["gripper_link"].translation_mm
+            anchor = Vec3(anchor_x,
+                          cable_spec["route_family"]["fixed_anchor_board_y_mm"], anchor_z)
+            midpoint = ((gripper + anchor).scaled(0.5)
+                        + Vec3(0, 0, -cable_offset * cable_spec["swept_offset_mm_range"][1]))
+            sampled = SampledCollisionGeometry(
+                (CapsuleMm(gripper, midpoint, cable_spec["radius_mm_range"][0]),
+                 CapsuleMm(midpoint, anchor, cable_spec["radius_mm_range"][0])),
+                CollisionEvidenceState.SYNTHETIC_TEST_ONLY, "favorable radius route endpoint",
+            )
+            evaluation = evaluate_collision_pose(
+                contract,
+                CollisionPose(f"fav:{config_index}:{source_pose['target_id']}", "board",
+                              transforms, {"attachment:moving_cable": sampled}),
+                policy,
+            )
+            for collision_pair in evaluation.collisions:
+                pair = "|".join(sorted((collision_pair.first_body_id,
+                                        collision_pair.second_body_id)))
+                if pair in consequential:
+                    config_pairs[pair] = config_pairs.get(pair, 0) + 1
+                    pair_counts[pair] = pair_counts.get(pair, 0) + 1
+                    config_targets.add(source_pose["target_id"])
+                    target_counts[source_pose["target_id"]] = (
+                        target_counts.get(source_pose["target_id"], 0) + 1)
+                elif pair not in expected:
+                    # Cross-endpoint combinations can expose pairs absent from
+                    # the earlier one-factor-at-a-time receipt. Retain them as
+                    # no-go findings rather than silently treating them as an
+                    # allowed structural contact.
+                    config_pairs[pair] = config_pairs.get(pair, 0) + 1
+                    pair_counts[pair] = pair_counts.get(pair, 0) + 1
+                    unclassified_pair_counts[pair] = (
+                        unclassified_pair_counts.get(pair, 0) + 1)
+                    config_targets.add(source_pose["target_id"])
+                    target_counts[source_pose["target_id"]] = (
+                        target_counts.get(source_pose["target_id"], 0) + 1)
+        configuration_rows.append({
+            "configuration_index": config_index,
+            "clamp_x_mm": clamp_x,
+            "cable_offset_fraction": cable_offset,
+            "cable_anchor_x_mm": anchor_x,
+            "cable_anchor_z_mm": anchor_z,
+            "potentially_consequential_pair_counts": dict(sorted(config_pairs.items())),
+            "affected_target_count": len(config_targets),
+            "potentially_consequential_collision_count": sum(config_pairs.values()),
+            "corridor_clear_of_potentially_consequential_pairs": not config_pairs,
+        })
+    clear_configs = [row for row in configuration_rows
+                     if row["corridor_clear_of_potentially_consequential_pairs"]]
+    report = {
+        "schema": "tactevra.first_motion_candidate_collision_attribution.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "stage_mapping": fixture["stage_mapping"],
+        "configuration_count": len(configuration_rows),
+        "clear_configuration_count": len(clear_configs),
+        "pair_counts": dict(sorted(pair_counts.items())),
+        "unclassified_pair_counts": dict(sorted(unclassified_pair_counts.items())),
+        "target_counts": dict(sorted(target_counts.items())),
+        "configurations": configuration_rows,
+        "decision": ("FAVORABLE_ENDPOINT_ROUTE_EXISTS_FOR_E_F"
+                     if clear_configs else "REDESIGN_E_F_CORRIDOR_IN_SIMULATION"),
+        "official_collision_decision_changed": False,
+        "installed_exclusions_created": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+    }
+    report["receipt_sha256"] = _sha(report)
+    return report
+
+
 def _paired_gap_delta(fixture: dict[str, Any]) -> float:
     model = fixture["paired_gap_model"]["LINK_LENGTH_PLUS_JOINT_ZERO"]
     nominal = _nominal_xyz()
@@ -585,7 +821,8 @@ def run_scenario_regression(
 
 
 __all__ = [
-    "load_independent_observation_fixture", "run_independent_observation_drills",
+    "load_collision_attribution_fixture", "load_independent_observation_fixture",
+    "run_candidate_collision_attribution", "run_independent_observation_drills",
     "run_exploratory_candidate_staged_rehearsal", "run_scenario_regression",
     "run_wrong_model_drills",
 ]
