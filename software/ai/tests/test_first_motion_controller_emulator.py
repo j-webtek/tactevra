@@ -23,7 +23,9 @@ from rocell_ai.first_motion_controller_emulator import (
     run_staged_bringup_rehearsal,
 )
 from rocell_ai.first_motion_drills import (
+    load_collision_attribution_fixture,
     load_independent_observation_fixture,
+    run_candidate_collision_attribution,
     run_exploratory_candidate_staged_rehearsal,
     run_independent_observation_drills,
     run_scenario_regression,
@@ -35,6 +37,7 @@ FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_controller_emulator_v1.j
 SOURCE = ROOT / "software/ai/rocell_ai/first_motion_controller_emulator.py"
 READINESS_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_readiness_v1.json"
 OBSERVATION_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_independent_observation_v1.json"
+COLLISION_ATTRIBUTION_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_candidate_collision_attribution_v1.json"
 
 
 def _sample() -> ServoRangeSample:
@@ -233,6 +236,21 @@ def test_candidate_shadow_exercises_a_to_f_without_changing_official_stop() -> N
     assert report["candidate_collision_decision"] != "PASS"
     assert all(row["status"] == "EXERCISED_SHADOW_ONLY" for row in report["stage_results"])
     assert report["staged_motion_executions"] == 0
+    assert report["hardware_write_count"] == report["physical_movement_count"] == 0
+    assert report["real_command_count"] == report["permit_count"] == 0
+    assert report["transport_count"] == 0
+
+
+def test_candidate_collision_attribution_preserves_unknown_stages_and_authority() -> None:
+    report = run_candidate_collision_attribution(
+        load_collision_attribution_fixture(COLLISION_ATTRIBUTION_FIXTURE),
+        workspace=ROOT)
+    assert report["configuration_count"] == 40
+    assert report["stage_mapping"]["A"] == "NOT_EVALUATED_NO_STAGE_TRAJECTORY"
+    assert report["stage_mapping"]["D"] == "NOT_EVALUATED_TEST_PAD_ABSENT"
+    assert report["stage_mapping"]["E"] == "EVALUATED_BY_46_KEYBOARD_TARGET_POSES"
+    assert report["official_collision_decision_changed"] is False
+    assert report["installed_exclusions_created"] == 0
     assert report["hardware_write_count"] == report["physical_movement_count"] == 0
     assert report["real_command_count"] == report["permit_count"] == 0
     assert report["transport_count"] == 0

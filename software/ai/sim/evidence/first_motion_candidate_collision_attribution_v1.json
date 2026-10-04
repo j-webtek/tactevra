@@ -1,4 +1,10 @@
 {
+  "amendments": [
+    {
+      "reason": "The first focused run found that configuration_samples has five cable-offset values, so 2 x 5 x 2 x 2 produces 40 endpoint configurations, not 32. No receipt was written; ranges, classes, stage mapping, and decision rules are unchanged.",
+      "timing": "PRE_RESULT_TEST"
+    }
+  ],
   "bindings": {
     "observation_fixture": {
       "path": "software/ai/sim/evidence/first_motion_independent_observation_v1.json",
@@ -66,12 +72,12 @@
       "cable_anchor_x_mm",
       "cable_anchor_z_mm"
     ],
-    "expected_configuration_count": 32,
-    "section_sha256": "d8d871618451b3a3d0e384c49b1b81fdac23143354c4bff2cddddd395571b57e",
+    "expected_configuration_count": 40,
+    "section_sha256": "b92e0c5ff31eab61153a00a4584126b9813d40b93d21c4e2d145adad31dfaf6f",
     "tool_length_mm": "MIN",
     "tool_radius_mm": "MIN"
   },
-  "fixture_sha256": "962a0b97bf95be8a313c6c6907fbaca2375feb7e3a830cfc000b3d42774a0d53",
+  "fixture_sha256": "c26febaf550e9c1b1de79ff3ca4e1a0392d9b630726d085e37675c142a132ca5",
   "limitations": [
     "Favorable values are endpoints of unmeasured ranges, not measurements.",
     "The route family enumerates endpoints because favorable route direction is unknown.",
