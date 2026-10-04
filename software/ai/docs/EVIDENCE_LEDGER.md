@@ -10771,6 +10771,16 @@ rewriting history. New entries must use a unique evidence ID.
 - Counts and authority: full candidate training runs 2 resolution candidates under one noise profile; development CNN rows scored 0; evaluation identities/pixels opened 0; hardware-write count 0; physical-movement count 0; permits 0; transports 0; physical authority false.
 - Limitations and next dependency: low training loss proves optimization and representation fit under the assumed low-noise synthetic profile, not generalization, resolution superiority, camera transfer, or physical qualification. Run the unchanged moderate and high assumed-noise paired training profiles before opening development for the frozen scorer.
 
+### E-20261004-AI-612 — moderate-noise full paired training completion
+
+- Stage/lane: S2 AI/model and simulation. Frozen trainer/scorer commit `9b03cbd0da26639a5992df3aa803d840b1dc1e90`; external trainer SHA-256 `ba84ccd8eab30a134723c59bdf86175ae62466c06f75642f86931331bcf530eb`. No arm-lane status or integration gate changes.
+- Exact command: `python C:\IsaacSim\evidence\issue190\paired_height_resolution_training\run_full_paired_training.py --profile ASSUMED_MODERATE --workers 8 --maximum-epochs 18 --output C:\IsaacSim\evidence\issue190\paired_height_resolution_training\training_assumed_moderate.json`.
+- Completion: all 18 epochs processed the complete 46,080-row admitted training split in `9044.834118127823` seconds. Final mean training loss is `0.0012158740686142582` for 96 and `0.0001300379809704408` for 192. The unchanged run regenerated row/profile/epoch-bound native noise and preserved paired sample order across resolutions.
+- Receipt: `C:\IsaacSim\evidence\issue190\paired_height_resolution_training\training_assumed_moderate.json`; report SHA-256 `6632ad52dabd9b730d03aa723b8ae89558a6d96f531d22118607f895c1269f13`; file SHA-256 `88fa16558e669ed5bbbe275b29c8f595632b12c29aa89eb0814173de23e85f0b`. Canonical report verification passes with 18 epochs and `complete_training_split: true`.
+- Checkpoints: 96 file SHA-256 `c6aca4a308ae3205a4d38ea4bc8a1364a7230a19fe859fedbd701428fcb7515c`, tensor-state SHA-256 `84cdd499b06a7bfea0f0af81a4aa021ba7b7dd363237de12262c5fb4695069a1`; 192 file SHA-256 `b7e5dffaa47b8b3b2cfd3c6ca1a46c0805880c1df81833eb1977fdee0284b3a6`, tensor-state SHA-256 `a10033f8a33e260bc86c7c6b5e3785b3c5a7f5612ff3b885f83218735d074516`.
+- Counts and authority: full candidate training runs 2 resolution candidates under the moderate profile; cumulative completed profile/candidate runs 4; development CNN rows scored 0; evaluation identities/pixels opened 0; hardware-write count 0; physical-movement count 0; permits 0; transports 0; physical authority false.
+- Limitations and next dependency: this is synthetic training convergence under an assumed noise curve, not generalization, camera transfer, resolution selection, or qualification. The unchanged high-noise paired run is active. Development remains closed until it completes and validates.
+
 ### E-20261004-INT-611 — prioritized simulation-program plan freeze
 
 - Stage/lane: S2-S6 AI/model plus simulation planning. Claim commit `891c993a45b38a3e7ef066738af494c26c979b77`; plan-freeze commit `3a9db56d7b96276492fcffd51b4c39c0891bf1db`. Arm-lane status, integration gates, model-to-arm authority, and every physical interface remain unchanged.
