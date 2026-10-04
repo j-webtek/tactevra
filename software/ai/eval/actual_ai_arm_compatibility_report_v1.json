@@ -24,7 +24,7 @@
       "ingress_sha256": "c7a25ba7f8e5d76aa62ec8de5f4e662bdcb941605ccf35eb4bad73d0d8a48ff0",
       "preplanner_gate_sha256": "2c3161aa6061dc6a8f076f7482986a0b516c5bc44595391c1578f199ae0134a0",
       "execution_plan_sha256": "93a8af9b30556178202d35e7246abb609ea5bfd028de4b4603647398299e10e8",
-      "trajectory_plan_sha256": "34ed27d8380083b60b0e9f8d8814b367e7ba0a7ceefeaed265400ac0a95be7f5",
+      "trajectory_plan_sha256": "f185c67d776d294e4f210d1ca9670083000944226ee7029636906f9a5cd9b927",
       "controller_commands": [],
       "hardware_access": false,
       "physical_authority": false
@@ -72,7 +72,7 @@
       "ingress_sha256": "c0280fcb756974495e9de71280c001e7e3d68f279ef14fd47ca3ab9620a03dfd",
       "preplanner_gate_sha256": "7a3fbffedd0735ebc46e6423b7e5cd260cf6dca214f2235ec9df8b1512ea5d40",
       "execution_plan_sha256": "a6245a0ede18bee9139820255d7ddf557824367da295c2c042b6eb7e7a1c9861",
-      "trajectory_plan_sha256": "800841b0568f17132b5ce218f8cfe67cc2329d46f9ca688cb41e5fb4a73a03d9",
+      "trajectory_plan_sha256": "cedb8fa1d88310b19f8ae22dc95674d8ecb691e35c9568bac6138f4b6fbf832e",
       "controller_commands": [],
       "hardware_access": false,
       "physical_authority": false
@@ -182,7 +182,7 @@
       "ingress_sha256": "cfada03827cbf928be7eedbc8cb5a8fc106e57338b059ea0e47d9c52e5777b5e",
       "preplanner_gate_sha256": "7f37c356dd79a8bcf973228df6c92cf692a148e7ffd2b01447a48e67e005caa1",
       "execution_plan_sha256": "d1e65a868c8359201484df67e2f298d284785ed360231314aad1e31b3be12e42",
-      "trajectory_plan_sha256": "14d7e859e9dd46bf3a168a06d701abd89bdde5275c90624417d36e3e2ef7c29a",
+      "trajectory_plan_sha256": "c81a88252d7b90628996d61a71558f81d71ae8a01104e4825d7f872e8525e7be",
       "controller_commands": [],
       "hardware_access": false,
       "physical_authority": false
@@ -357,5 +357,5 @@
   "hardware_commands_generated": 0,
   "hardware_access": false,
   "physical_authority": false,
-  "report_sha256": "c954284e96e432807e830a246a3e2728459e01625a9349b94d60bce79b2c554b"
+  "report_sha256": "32658e367c2acfcb207c4a6505cc999492eb1355c1f555d65501afd1ef8c1c24"
 }
