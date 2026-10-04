@@ -393,3 +393,6 @@ totaling 9,833,904 bytes. Against the preceding `main` snapshot, the governed
 large-blob duplicate metric falls from 56,671,848 to 46,837,944 bytes. Source
 CAD, grounded-saddle revision evidence, the active 3MF queue, profiles, and HOLD
 or superseded records remain tracked; Git history is not rewritten.
+
+
+The one-file increase from 6,342 to 6,343 retains the hash-bound Workstream 1 end-to-end typing-twin fixture. Scenario populations are generated from seeds inside that single manifest, avoiding thousands of tracked case files.

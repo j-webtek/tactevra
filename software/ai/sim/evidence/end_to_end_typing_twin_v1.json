@@ -1,0 +1,244 @@
+{
+  "counters": {
+    "arm_commands": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "altered_quoted_payload_count_maximum": 0,
+    "authority_bearing_output_count_maximum": 0,
+    "compiler_device_state_disagreement_count_maximum": 0,
+    "deterministic_fault_detection_rate_minimum": 1.0,
+    "independent_verification_agreement_rate_minimum": 1.0,
+    "latency_is_descriptive_only": true,
+    "schema_validity_rate_minimum": 1.0,
+    "shared_identity_core_digest_mismatch_count_maximum": 0,
+    "stop_conditions": [
+      "SILENT_SUBSTITUTION",
+      "ACCEPTED_STATE_DIVERGENCE",
+      "AUTHORITY_BEARING_OUTPUT",
+      "NONDETERMINISTIC_SHARED_CORE",
+      "FIXTURE_OR_SOURCE_HASH_MISMATCH"
+    ],
+    "supported_no_fault_exact_text_rate_minimum": 1.0,
+    "target_order_difference_count_maximum": 0
+  },
+  "fault_registry": [
+    "STALE_FRAME",
+    "STALE_TELEMETRY",
+    "MISSING_TARGET",
+    "TARGET_DISPLACEMENT",
+    "PERCEPTION_ABSTENTION",
+    "FUSION_REJECTION",
+    "UNREACHABLE_IK",
+    "COLLISION_REJECTION",
+    "DROPPED_PRESS",
+    "DUPLICATE_PRESS",
+    "WRONG_PRESS",
+    "DELAYED_PRESS",
+    "STICKY_KEYS_STATE_DIVERGENCE",
+    "PHONE_LAYER_DIVERGENCE",
+    "AUTOCORRECT",
+    "PREDICTIVE_REPLACEMENT",
+    "READBACK_DELAY",
+    "VERIFICATION_MISMATCH"
+  ],
+  "fixture_sha256": "105df64d3c3878bed97caddb2623c9c577a820144909cc94105b529508233bac",
+  "input_bindings": {
+    "compiler_and_sticky_adapter": {
+      "path": "software/ai/rocell_ai/adapter.py",
+      "sha256": "a1d65ea48aee263b1af9e4856d2e8e4cfa90af248ac78feb730941d60b096b6c"
+    },
+    "exploratory_uninstalled_80_target_candidate": {
+      "installed": false,
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "installed_target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2",
+      "target_count": 75
+    },
+    "kinematic_urdf": {
+      "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    "model_motion_ingress_v2": {
+      "path": "software/src/rocell/application/model_motion_ingress_v2.py",
+      "sha256": "06666aa2860bf9c09d409f77af0026a98b5da2e9e8d60c0044eb9cb781986520"
+    },
+    "typing_execution_plan_v1": {
+      "path": "software/src/rocell/application/typing_execution_plan_v1.py",
+      "sha256": "374433ba4aa61f4035bb135abcd877528cce7c3ae638561f9087577d13b72c77"
+    },
+    "typing_trajectory_ik_screen_v1": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "ca2a5379bbd4ff94d8ba6bb333b49c99c86932d24fae5b24010f4704f7fc7237"
+    },
+    "typing_trajectory_plan_v1": {
+      "path": "software/src/rocell/application/typing_trajectory_plan_v1.py",
+      "sha256": "f73d0a7551f373c97455ad5dfb2400e0ecc646fba9fbc55e186c8d7289560530"
+    }
+  },
+  "intent_contract": {
+    "allowed_types": [
+      "TYPE_TEXT",
+      "PRESS_KEY",
+      "CLARIFY",
+      "REFUSE"
+    ],
+    "language_model_target_ids_allowed": false,
+    "quoted_payload_must_match_exactly": true,
+    "type_text_fields": [
+      "text",
+      "device"
+    ],
+    "unquoted_ambiguous_request_decision": "CLARIFY"
+  },
+  "limitations": [
+    "The 80-target candidate is uninstalled and its geometry is exploratory.",
+    "Analytic perception does not prove camera transfer or localization qualification.",
+    "Kinematic replay does not model contact dynamics or measured actuator behavior.",
+    "The phone device and ADB readback are virtual state machines only.",
+    "No result grants hardware or physical authority."
+  ],
+  "metrics": [
+    "SCHEMA_VALIDITY_RATE",
+    "EXACT_TEXT_SUCCESS_RATE",
+    "QUOTED_TEXT_PRESERVATION_RATE",
+    "TARGET_ORDER_DIFFERENCES",
+    "COMPILER_DEVICE_STATE_DISAGREEMENTS",
+    "VERIFICATION_AGREEMENT_RATE",
+    "FAULT_FALSE_ACCEPTANCE_COUNT",
+    "STAGE_LATENCY_NS_MEDIAN_P95_P99_MAX"
+  ],
+  "motion": {
+    "arm_runtime_components": [
+      "ModelMotionBatchV2",
+      "trusted_registry_ingress_v2",
+      "typing_execution_plan_v1",
+      "typing_trajectory_plan_v1",
+      "typing_trajectory_ik_screen_v1"
+    ],
+    "controller_commands": [],
+    "dynamics_claimed": false,
+    "hardware_access": false,
+    "hardware_commands_generated": 0,
+    "mujoco_mode": "KINEMATIC_REPLAY_ONLY",
+    "physical_authority": false
+  },
+  "perception": {
+    "analytic_uncertainty_bound_mm_range": [
+      0.0,
+      6.0
+    ],
+    "default_mode": "ANALYTIC_GEOMETRY",
+    "evidence_age_ms_range": [
+      0,
+      1999
+    ],
+    "isaac_subset_modes": [
+      "Hello 2026!",
+      "REPEATED_KEYS",
+      "SHIFT_TRANSITIONS",
+      "STALE_FRAME",
+      "TARGET_DISPLACEMENT",
+      "PERCEPTION_ABSTENTION"
+    ],
+    "observation_confidence_range": [
+      0.95,
+      1.0
+    ],
+    "qualification_claimed": false
+  },
+  "phone": {
+    "adb_style_readback_before_each_press": true,
+    "autocorrect_or_predictive_on_decision": "COMMISSIONING_CONFIGURATION_MISMATCH",
+    "autocorrect_required": false,
+    "predictive_text_required": false,
+    "states": [
+      "KEYBOARD_LOWER",
+      "KEYBOARD_UPPER",
+      "SYMBOLS_1",
+      "SYMBOLS_2"
+    ]
+  },
+  "prerequisites": {
+    "active_96_vs_192_process_must_finish_before_gpu_or_mujoco_execution": true,
+    "cpu_analytic_implementation_allowed_while_prerequisite_runs": true,
+    "full_ascii_geometric_runtime_uses_uninstalled_candidate_and_is_exploratory": true,
+    "isaac_subset_blocked_until_prerequisite_finishes": true,
+    "step_0_complete": true
+  },
+  "program_plan": {
+    "path": "software/docs/SIMULATION_PROGRAM_PLAN.md",
+    "sha256": "9077457d6e14c50a74d3af01cdd1d9debf126bd72027b48a7f396bc8bd529c28"
+  },
+  "reporting": {
+    "core_receipt_excludes_wall_clock_latency_for_byte_determinism": true,
+    "cross_gpu_required_for_gpu_subsets": true,
+    "external_evidence_backup_required": true,
+    "one_hash_bound_manifest_preferred": true,
+    "record_driver_warp_isaac_versions": true,
+    "timing_receipt_is_separate_and_descriptive": true
+  },
+  "scenario_generation": {
+    "ci_count_per_length_per_device": 16,
+    "ci_keyboard_seed": 1901101,
+    "ci_phone_seed": 1901102,
+    "ci_random_count_per_device": 128,
+    "fixed_texts": [
+      "Hello 2026!",
+      " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+      "AAAA",
+      "!!!!",
+      "aA",
+      "A A",
+      "A",
+      "  ",
+      "1111",
+      "[]{}\\|`~"
+    ],
+    "full_count_per_length_per_device": 1250,
+    "full_random_count_per_device": 10000,
+    "keyboard_seed": 1901001,
+    "lengths": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "negative_cases": [
+      "EMPTY_TEXT",
+      "UNSUPPORTED_NON_ASCII",
+      "AMBIGUOUS_UNQUOTED",
+      "PHONE_AUTOCORRECT_ON",
+      "PHONE_PREDICTIVE_TEXT_ON"
+    ],
+    "phone_seed": 1901002,
+    "printable_ascii_alphabet": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+  },
+  "schema": "tactevra.end_to_end_typing_twin_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "segmentation": {
+    "keyboard_contact_sequences_over_limit_are_split_in_order": true,
+    "maximum_model_motion_batch_proposals": 64,
+    "phone_requires_fresh_observation_before_each_state_changing_tap": true,
+    "repeated_targets_must_remain_repeated": true
+  },
+  "source_claim_commit": "b499f9da5f6999e65629a75bfc0165aa5637579e",
+  "sticky_keys": {
+    "consecutive_shift_decision": "REJECT_LOCK_HAZARD",
+    "enabled": true,
+    "five_shift_shortcut_disabled": true,
+    "one_shot_shift_latch": true,
+    "trailing_latch_decision": "REJECT_STATE_DIVERGENCE",
+    "turn_off_when_two_keys_pressed_disabled": true
+  }
+}
