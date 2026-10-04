@@ -941,6 +941,13 @@ After PC11-PC18 and camera arrival, work resumes at the existing shared gates:
 8. qualify one independently verified key action; and
 9. expand to held-out short strings before performance tuning.
 
+The exact transition from these camera-dependent steps into ARM-149-ARM-155 and
+one independently verified key is frozen in
+[Camera-to-First-Key Commissioning Runbook V1](CAMERA_TO_FIRST_KEY_COMMISSIONING_RUNBOOK_V1.md).
+Its companion registry at
+`software/config/camera_to_first_key_fixture_replacement_v1.json` names every
+fixture that must be replaced and never grants motion authority.
+
 The [camera integration hold](../../docs/CAMERA_INTEGRATION_HOLD.md) remains in
 force until its physical prerequisites are satisfied.
 
@@ -985,6 +992,7 @@ For every PC increment:
 - [Optimized typing execution plan](OPTIMIZED_TYPING_EXECUTION_PLAN.md)
 - [Typing performance readiness report](TYPING_PERFORMANCE_READINESS_REPORT_V1.md)
 - [Camera arrival-day checklist](CAMERA_ARRIVAL_DAY_CHECKLIST_V1.md)
+- [Camera-to-first-key commissioning runbook](CAMERA_TO_FIRST_KEY_COMMISSIONING_RUNBOOK_V1.md)
 - [Shared AI/arm workplan](../ai/docs/SHARED_AI_ARM_WORKPLAN.md)
 - [Model command runtime implementation plan](../ai/docs/MODEL_COMMAND_RUNTIME_IMPLEMENTATION_PLAN.md)
 - [Camera integration hold](../../docs/CAMERA_INTEGRATION_HOLD.md)

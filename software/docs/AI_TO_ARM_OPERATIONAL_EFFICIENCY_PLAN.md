@@ -822,6 +822,210 @@ and evidence mismatch, reload, restart, and cancellation preserved their safe
 fallback semantics. The measured durations are single-host diagnostics and are
 not admission thresholds or physical typing-speed evidence.
 
+ARM-136 exercises that same seam as a mixed sustained FIFO queue rather than a
+single repeated word. Five representative actual-emitter batches cover home-row
+travel, `robot`, repetition plus number and punctuation, alphabetic extremes,
+and number/Space/Enter. The retained cold round performed 48 complete solves
+among 186 lookups because identical solver inputs were already reusable within
+and across requests; the immediate warm round hit 186/186. Observed p50/p95
+changed from 0.2685515/1.3913187 seconds cold to 0.1982934/0.2997009 seconds
+warm. This is a one-host, five-sample synthetic integration diagnostic. It is
+not a latency threshold, physical-rate claim, or permission to skip checks.
+The retained artifact is
+[`actual_emitter_mixed_queue_campaign_v1.json`](../ai/eval/actual_emitter_mixed_queue_campaign_v1.json).
+
+ARM-137 repeats the mixed queue through 20 isolated cold/prewarmed lifecycle
+pairs, producing 100 measured samples per lane. Exact cold/warm shadow receipts
+matched for every request, each replacement began cold, every measured warm
+round hit the exact-input cache completely, and all services were retired after
+measurement. Host p50/p95/p99 were 0.2736679/1.4014767/1.4241501 seconds cold
+and 0.1959784/0.3044458/0.3157095 seconds warm, with zero capacity skips. The
+campaign therefore supports keeping a qualified immutable service warm, while
+also showing that lifecycle replacement must expect cold-tail cost. These
+measurements remain diagnostic and cannot become admission limits until the
+final deployment host and physical execution path are measured. Retained
+evidence is
+[`actual_emitter_stability_campaign_v1.json`](../ai/eval/actual_emitter_stability_campaign_v1.json).
+
+ARM-138 tests whether the fast path stays fail-closed under bounded operational
+disturbances. The service drains its full eight-request queue FIFO, rejects the
+ninth request, handles three pre-admission cancellations without cache work,
+and rejects malformed identity, forbidden owner input, and reused request IDs
+before planning. Reload and restart reject already queued work as stale, retire
+exact reuse, and use the complete solver without retry for new work. Fast reuse
+returns only after a separately requalified replacement, whose measured output
+matches the original reference receipt exactly. The retained
+[`actual_emitter_disturbance_campaign_v1.json`](../ai/eval/actual_emitter_disturbance_campaign_v1.json)
+contains seven passing cases and no controller or physical authority.
+
+ARM-139 implements the operating policy implied by ARM-138. The new supervisor
+publishes three mutually exclusive states: `WARM`, `FULL_SOLVE_ONLY`, and
+`REQUALIFICATION_REQUIRED`. Only `WARM` exposes exact reuse. Known startup
+profile mismatch can safely plan through the complete solver. Reload/restart
+blocks new work until the caller explicitly accepts full-solve-only operation or
+constructs a separately qualified replacement; neither path retries stale work.
+The retained
+[`typing_runtime_supervisor_campaign_v1.json`](../ai/eval/typing_runtime_supervisor_campaign_v1.json)
+shows exact reference equivalence across fallback and replacement while keeping
+all execution, transport, and physical authority absent.
+
+ARM-140 gives model callers one bounded gateway into that supervised runtime.
+The gateway consumes the same canonical bytes emitted by the AI boundary and
+returns a signed admission receipt before any planning work is run. Warm and
+complete-solve admissions preserve the reference shadow result; queue-full,
+request-bound, malformed-input, and requalification cases fail closed with
+specific nonretrying blockers. The retained
+[`typing_supervised_command_gateway_campaign_v1.json`](../ai/eval/typing_supervised_command_gateway_campaign_v1.json)
+records eight passing cases. It does not attach an executor or controller and
+therefore adds no movement authority; the efficiency gain is a deterministic,
+low-friction handoff that does not weaken lifecycle or backpressure controls.
+
+ARM-141 removes ambiguity after admission without adding work to the physical
+path. Its bounded ledger retains a mission/request fingerprint, the signed
+admission result, and a hash-chained terminal shadow result. Exact duplicate
+submissions become constant-time receipt replay instead of duplicate planning;
+changed duplicates are rejected, and cancellation, stale lifecycle, queue
+rejection, and capacity exhaustion remain explicit. The retained
+[`typing_command_session_ledger_campaign_v1.json`](../ai/eval/typing_command_session_ledger_campaign_v1.json)
+covers eight outcomes with zero retry and zero authority. This prepares a
+future executor handoff to consume one unambiguous terminally qualified request,
+but does not itself encode or send a controller command.
+
+ARM-142 packages that unambiguous terminal record for future execution review.
+The candidate binds five expensive planning-stage results by hash, so a future
+qualified boundary can consume the exact reviewed lineage instead of silently
+re-solving or accepting a look-alike request. It is deliberately marked
+`BLOCKED_PENDING_EXECUTION_QUALIFICATION`: installed collision evidence, fresh
+observed/controller state, a one-use permit, and an independent effect verifier
+remain mandatory. The retained
+[`typing_execution_handoff_candidate_campaign_v1.json`](../ai/eval/typing_execution_handoff_candidate_campaign_v1.json)
+shows deterministic reconstruction and fail-closed lineage checks while keeping
+executor eligibility, transport, commands, and physical authority false.
+
+ARM-143 removes the remaining duplicate-planning step from that handoff. The
+FIFO service now commits the complete canonical shadow artifact to a bounded,
+immutable in-memory store before it reports completion. The ledger retrieves
+that artifact by request ID plus the hash already sealed in the terminal
+receipt, so ARM-142 can be built from the exact reviewed output without a
+second solver run. Wrong hashes, replacement attempts, unknown IDs, and
+capacity exhaustion fail closed; canceled and stale work leaves no artifact.
+The optimization changes evidence reuse only and grants no execution or
+physical authority.
+The retained
+[`typing_shadow_artifact_store_campaign_v1.json`](../ai/eval/typing_shadow_artifact_store_campaign_v1.json)
+records all eight outcomes against clean framework commit
+`69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`.
+
+ARM-144 removes caller-side handoff choreography. The caller supplies only a
+completed request ID; one canonical assembler retrieves the four signed source
+records, validates the existing ARM-142 lineage, and returns the same blocked
+candidate without solver work. This shortens the future executor-facing path
+and prevents callers from accidentally mixing evidence from different
+requests. Audit reconstruction remains possible after runtime invalidation,
+but no permit, command, controller access, retry, or physical authority is
+created.
+The retained
+[`typing_execution_handoff_assembler_campaign_v1.json`](../ai/eval/typing_execution_handoff_assembler_campaign_v1.json)
+records the eight-case result against clean framework commit
+`5fb4801956c800dba75c56722911acaf99493fb2`.
+
+ARM-145 retains the five materialized planning-stage bodies during the same
+solver pass. Future physical requalification can therefore consume the exact
+reviewed execution plan, trajectory, IK result, schedule, and collision intake
+without rerunning the model-to-plan path or trusting hashes with missing
+content. Retention happens before completion is reported, remains bounded and
+immutable, and does not label synthetic evidence as permit-review-ready.
+The retained
+[`typing_shadow_materialization_campaign_v1.json`](../ai/eval/typing_shadow_materialization_campaign_v1.json)
+binds the eight-case qualification to clean framework commit
+`81d25e1a06484b7c89f6048e5795c8372769dcbb`. It confirms that reuse is exact
+and audit-safe rather than a hidden replan, while incomplete lifecycle states
+cannot expose a partial planning bundle. This removes duplicated planning work
+from later review without removing any physical admission gate.
+
+ARM-146 makes the remaining path explicit and cheap to inspect. The
+`typing_permit_review_readiness_v1` report reuses ARM-145's content-addressed
+stage bodies and returns an ordered blocker-to-adapter map without rerunning
+planning. It currently remains blocked on deployment-qualified model output, a
+measured trajectory envelope, installed and continuous collision qualification,
+fresh observed/controller state, independent effect verification, and
+per-action review binding. That report is intentionally incapable of accepting
+informal readiness flags, issuing a review or permit, or producing wire bytes.
+Optimization may remove repeated computation, but never these evidence gates.
+
+ARM-147 safely reuses two existing physical-state contracts. A single binding
+operation correlates fresh feedback, calibration, installed-controller review,
+and controller session, avoiding repeated parsing at each later review stage.
+It resolves only those two blockers and remains non-dispatching; all route,
+collision, effect-verification, and per-action gates remain unchanged.
+
+ARM-148 prepares the measured-route lane without repeating model interpretation
+or synthetic planning. One immutable observed-state IK seed now carries the
+exact retained materialization, ARM-147 binding, active build/calibration,
+controller session, freshness window, and five measured arm joints. Later IK
+screening can begin directly from that authenticated state. The adapter does
+not perform the screen and cannot skip measured dynamics or installed continuous
+collision qualification; this keeps the optimization honest while removing
+future lineage-reconstruction work from the time-critical path.
+
+ARM-149 performs the expensive deterministic IK pass directly from the bound
+observed seed while reusing the already retained execution and Cartesian plans.
+This avoids rerunning AI interpretation or trajectory compilation and preserves
+the canonical solver's decisions. Its output intentionally identifies the
+observed-pose-to-PARK entry envelope as separate work; speed optimization cannot
+turn joint continuity into an unmeasured collision or dynamics claim.
+
+ARM-150 materializes that entry envelope once with the shared bounded
+joint-space sampler. The runtime can now pass a sealed, deterministic sample
+sequence to later installed-geometry and dynamics qualifiers without rebuilding
+lineage or interpolation on the critical path. This is a latency optimization
+and an auditability improvement, not a motion approval: collision, dynamics,
+effect verification, review, permit, and execution gates remain closed, and the
+artifact contains no controller or wire commands.
+
+ARM-151 reuses the existing FK collision kernel directly over that cached entry
+envelope. It avoids recompiling the route and makes installed-profile rejection
+an explicit arm-owned stage. Because the result retains the expanded route and
+FK evidence hashes, later continuous-sweep qualification can consume it without
+repeating model interpretation or losing observed-state lineage. Discrete sample
+clearance is not promoted into physical clearance or speed authority; measured
+dynamics and continuous collision remain mandatory before review.
+
+ARM-152 consumes that retained FK result and cached joint samples directly. It
+adds conservative inter-sample sweep evaluation without repeating perception,
+trajectory compilation, IK, or discrete FK collision work. Exact adjacent joint
+deltas drive URDF rigid-body inflation, while measured deformable-body envelopes
+remain explicit inputs. This removes duplicated critical-path computation while
+keeping geometry-limited clearance distinct from measured speed/dynamics and
+physical release authority.
+
+ARM-153 reuses the same cached entry samples and clear ARM-152 record to perform
+bounded time scaling once, before any execution review. A fresh profile pins
+installed joint velocity, acceleration, jerk, controller cadence, and settling
+policy to the active build and controller session. The strict parser
+reconstructs the schedule from its signed inputs, preventing modified timing
+from passing by hash resealing alone. This moves deterministic dynamics work off
+the future dispatch path while keeping planned limits separate from measured
+controller tracking and settling. It remains zero-authority and emits no wire
+commands.
+
+ARM-154 prepares the next latency-safe evidence step: retained joint feedback
+is compared with the cached ARM-153 schedule without rerunning perception,
+planning, IK, collision checks, or time scaling. Exact scheduled-sample timing
+and position residuals are computed once, followed by a profile-bound endpoint
+settling window. The evidence is content-addressed and reconstructable, allowing
+later review to consume a compact qualification rather than replay raw analysis
+on the dispatch path. This only qualifies sampled observations; continuous
+tracking and independent task effect remain separate required evidence.
+
+ARM-155 performs dense retained-stream analysis against the cached schedule
+without repeating any upstream computation. Exact start/end coverage, maximum
+sample gap, and interpolated joint residuals are sealed into one compact result
+for later review. This is the efficient handoff for a future telemetry collector:
+capture once, analyze once, and reuse the content-addressed qualification. The
+bounded sampling result intentionally retains the continuous-tracking blocker
+and grants no dispatch or retry authority.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

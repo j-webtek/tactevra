@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
+COMMAND_TIMEOUT_SECONDS = 1_200
 PYTHON = (
     ROOT
     / ".venv-ci"
@@ -86,6 +87,34 @@ TESTS = (
     "software/tests/unit/test_typing_profiled_shadow_service_v1.py",
     "software/tests/unit/test_typing_profiled_shadow_service_campaign_v1.py",
     "software/tests/unit/test_actual_emitter_profiled_service_campaign_v1.py",
+    "software/tests/unit/test_actual_emitter_mixed_queue_campaign_v1.py",
+    "software/tests/unit/test_actual_emitter_stability_campaign_v1.py",
+    "software/tests/unit/test_actual_emitter_disturbance_campaign_v1.py",
+    "software/tests/unit/test_typing_runtime_supervisor_v1.py",
+    "software/tests/unit/test_typing_runtime_supervisor_campaign_v1.py",
+    "software/tests/unit/test_typing_supervised_command_gateway_v1.py",
+    "software/tests/unit/test_typing_supervised_command_gateway_campaign_v1.py",
+    "software/tests/unit/test_typing_command_session_ledger_v1.py",
+    "software/tests/unit/test_typing_command_session_ledger_campaign_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_candidate_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_candidate_campaign_v1.py",
+    "software/tests/unit/test_typing_shadow_artifact_store_v1.py",
+    "software/tests/unit/test_typing_shadow_artifact_store_campaign_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_assembler_v1.py",
+    "software/tests/unit/test_typing_execution_handoff_assembler_campaign_v1.py",
+    "software/tests/unit/test_typing_shadow_materialization_v1.py",
+    "software/tests/unit/test_typing_shadow_materialization_campaign_v1.py",
+    "software/tests/unit/test_typing_permit_review_readiness_v1.py",
+    "software/tests/unit/test_typing_state_prerequisite_binding_v1.py",
+    "software/tests/unit/test_typing_observed_ik_seed_v1.py",
+    "software/tests/unit/test_typing_observed_trajectory_ik_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_collision_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_sweep_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_dynamics_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_tracking_v1.py",
+    "software/tests/unit/test_typing_observed_route_entry_coverage_v1.py",
+    "software/tests/unit/test_camera_to_first_key_fixture_replacement_v1.py",
     "software/tests/unit/test_pre_camera_host_benchmark_v1.py",
     "software/tests/unit/test_assess_r97_external_review_decision.py",
     "software/tests/unit/test_model_motion_sequence_coordinator.py",
@@ -127,7 +156,7 @@ def run(*args: str, capture: bool = False) -> subprocess.CompletedProcess:
         check=True,
         text=True,
         capture_output=capture,
-        timeout=600,
+        timeout=COMMAND_TIMEOUT_SECONDS,
     )
 
 
