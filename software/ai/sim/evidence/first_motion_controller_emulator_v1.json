@@ -31,6 +31,26 @@
     "urdf": {
       "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
       "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    "production_runtime_contract": {
+      "path": "software/src/rocell/application/production_controller_runtime_contract_v1.py",
+      "sha256": "3a5a5bf651240211f250791d7f5a778df3e1135c49ab6b0d1d1b1ba38b110abd"
+    },
+    "reviewed_runtime_bridge": {
+      "path": "software/src/rocell/application/reviewed_t102_runtime_bridge_v1.py",
+      "sha256": "dc57e7382dd4fd1a3b61c8d0668257393ec722d7bf8e21bb9beb0aaacbc2e7bc"
+    },
+    "incapable_executor_rehearsal": {
+      "path": "software/src/rocell/application/native_t102_executor_rehearsal_v1.py",
+      "sha256": "804fd68dc4f484a24126296591f0768bf33a6ab0ab5b9f116198bd75a503aba1"
+    },
+    "production_transport_contract": {
+      "path": "software/src/rocell/application/native_t102_production_transport_v1.py",
+      "sha256": "3afe95d0591f45c9e06fe1d0ef2a15abc3ca9416e8108172a6607fdd79f45406"
+    },
+    "feedback_wire": {
+      "path": "software/src/rocell/arm/feedback_wire.py",
+      "sha256": "7f44893de215eabe56a094a844d1bd0980aff5a572b6c9999752fb1cfee38e6d"
     }
   },
   "controller_emulator": {
@@ -89,7 +109,8 @@
       },
       "servo_ids_on_wire": false,
       "zero_convention": "REFERENCE_REGISTER_OFFSETS_ONLY_NOT_INSTALLED_ZERO_ATTESTATION",
-      "production_transport_gap": "ArmTransport exposes permit-gated T104 and T105 only; no T101/T102 production send adapter exists. Emulator conformance cannot claim full live runtime-path parity."
+      "production_transport_gap": "Production T102 runtime and native transport contracts exist. No installed physical endpoint, approved execution authority, controller qualification, or measured plant profile exists; this work must use only the strict in-memory runtime contract and must never instantiate a native or Windows transport.",
+      "runtime_path": "ProductionControllerRuntimeContractV1 -> exact RuntimeCommandFrameV1 T102 wire -> in-memory dynamic plant -> exact T1021 and T105/T1051 rehearsal -> terminal single-action close"
     },
     "servo_ranges": {
       "command_latency_ms": [
@@ -152,12 +173,12 @@
       "fault_detection",
       "real_transport_open_count"
     ],
-    "decision": "Pass requires exact T102 message acceptance, every logical and physical servo ID accounted for, correct sign and magnitude relative to the reference mapping, telemetry independently simulated and quantized, all faults fail closed, and real transport opens remain zero. The absent production T101/T102 transport adapter remains a reported gap and prevents full runtime-path parity.",
+    "decision": "Pass requires strict ProductionControllerRuntimeContractV1 admission of exact RuntimeCommandFrameV1 wire bytes, exact T1021 and T105/T1051 rehearsal, every logical and physical servo ID accounted for, correct sign and magnitude, independently simulated measured telemetry, every fault terminally fail closed without retry, zero native or Windows transport imports/instances, and zero hardware writes or physical movements.",
     "hardware_write_count": 0,
     "physical_movement_count": 0,
     "real_transport_count": 0,
     "physical_authority": false,
-    "section_sha256": "4eac70c7cf64219bba259ed8ad254d6a192bc90804b736280ee6651d5c26eb8c"
+    "section_sha256": "a8de138b5cfe99793d6e69b754953c41f60d231afc640cc60be9fde0b63595f3"
   },
   "counters": {
     "hardware_writes": 0,
@@ -167,5 +188,13 @@
     "transports": 0,
     "gpu_jobs": 0
   },
-  "fixture_sha256": "896e80d22defa892986a3b2707c8f32c1f767a8b175ee1b66dad072ba303ee32"
+  "amendments": [
+    {
+      "reason": "The initial source inventory missed existing production T102 runtime and incapable transport contracts. The attempt-1 result is preserved as failed audit evidence and cannot satisfy this amended fixture.",
+      "timing": "PRE_CORRECTED_RESULT",
+      "attempt1_receipt_sha256": "1fdd45b2fb3c918fd897059035dbb7a3dace69095e2f271ac5c953599555022d",
+      "attempt1_receipt_claimed_sha256": "1da4917fca68a60a14cb90aa16265b75de93620a2ebf238ea4a3ebc6143f85e5"
+    }
+  ],
+  "fixture_sha256": "5a2ca367ce5bab635f46e7a1b24e308e57d840a6f9a0222e1a2382f68ac5b0e3"
 }
