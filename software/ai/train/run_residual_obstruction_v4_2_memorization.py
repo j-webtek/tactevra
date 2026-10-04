@@ -221,6 +221,102 @@ def train_one(
     }
 
 
+def train_paired_height_one(
+    arrays: np.ndarray,
+    labels: np.ndarray,
+    *,
+    input_size_px: int,
+    seed: int,
+    learning_rate: float = 0.003,
+    batch_size: int = 64,
+    maximum_epochs: int = 300,
+    loss_maximum: float = 0.01,
+    accuracy_minimum: float = 0.995,
+) -> dict[str, Any]:
+    """Run the frozen paired-height spatial memorization control.
+
+    This control deliberately disables augmentation, dropout, and weight decay.
+    It tests whether the exact 43,321-parameter representation can memorize a
+    fixed, training-only 500-row tensor set.  It does not produce a deployable
+    checkpoint or read development/evaluation data.
+    """
+
+    if arrays.shape != (len(labels), 12, input_size_px, input_size_px):
+        raise ValueError("paired-height memorization tensor shape mismatch")
+    if arrays.dtype != np.float32 or labels.dtype != np.float32:
+        raise ValueError("paired-height memorization tensors must be float32")
+    if len(labels) == 0 or not np.isin(labels, [0.0, 1.0]).all():
+        raise ValueError("paired-height memorization labels must be binary")
+    if batch_size <= 0 or maximum_epochs <= 0:
+        raise ValueError("paired-height memorization schedule must be positive")
+
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+    import torch
+
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cudnn.allow_tf32 = False
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = paired_height_resolution_spatial_model(torch, input_size_px).to(device)
+    optimizer = torch.optim.AdamW(
+        model.parameters(), learning_rate, weight_decay=0.0
+    )
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+    rng = np.random.default_rng(seed)
+    first_loss = None
+    final_loss = float("inf")
+    final_accuracy = 0.0
+    for epoch in range(1, maximum_epochs + 1):
+        model.train()
+        order = rng.permutation(len(labels))
+        for start in range(0, len(labels), batch_size):
+            batch = order[start : start + batch_size]
+            inputs = torch.from_numpy(arrays[batch]).to(device)
+            expected = torch.from_numpy(labels[batch]).to(device).reshape(-1, 1)
+            optimizer.zero_grad(set_to_none=True)
+            loss = loss_fn(model(inputs), expected)
+            loss.backward()
+            optimizer.step()
+        model.eval()
+        with torch.no_grad():
+            logits = model(torch.from_numpy(arrays).to(device))
+            expected = torch.from_numpy(labels).to(device).reshape(-1, 1)
+            final_loss = float(loss_fn(logits, expected).cpu())
+            probability = torch.sigmoid(logits).reshape(-1).cpu().numpy()
+        final_accuracy = float(np.mean((probability >= 0.5) == labels))
+        if first_loss is None:
+            first_loss = final_loss
+        if final_loss <= loss_maximum and final_accuracy >= accuracy_minimum:
+            break
+    return {
+        "architecture": "PAIRED_REFERENCE_SPATIAL_CNN_RESOLUTION_ONLY_V1",
+        "input_resolution_px": input_size_px,
+        "input_channel_count": 12,
+        "parameter_count": sum(parameter.numel() for parameter in model.parameters()),
+        "device": str(device),
+        "seed": seed,
+        "learning_rate": learning_rate,
+        "batch_size": batch_size,
+        "weight_decay": 0.0,
+        "maximum_epochs": maximum_epochs,
+        "epochs_run": epoch,
+        "first_loss": first_loss,
+        "final_loss": final_loss,
+        "final_accuracy": final_accuracy,
+        "loss_maximum": loss_maximum,
+        "accuracy_minimum": accuracy_minimum,
+        "gate_met": final_loss <= loss_maximum and final_accuracy >= accuracy_minimum,
+        "augmentation_enabled": False,
+        "dropout_enabled": False,
+        "checkpoint_retained": False,
+        "development_opened": False,
+        "evaluation_opened": False,
+    }
+
+
 def run(preparation_path: Path, admission_path: Path) -> dict[str, Any]:
     preparation, _ = _load_report(preparation_path, PREPARATION_SCHEMA)
     admission, _ = _load_report(admission_path, ADMISSION_SCHEMA)

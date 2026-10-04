@@ -19,6 +19,7 @@ from prepare_residual_obstruction_v4_2_gates import (  # noqa: E402
     select_memorization_subset,
 )
 from run_residual_obstruction_v4_2_memorization import (  # noqa: E402
+    train_paired_height_one,
     normalize_pair,
     paired_resolution_spatial_model,
     spatial_model,
@@ -143,6 +144,22 @@ def test_paired_resolution_model_rejects_unfrozen_size() -> None:
     torch = pytest.importorskip("torch")
     with pytest.raises(ValueError, match="96 or 192"):
         paired_resolution_spatial_model(torch, 128)
+
+
+def test_paired_height_memorization_rejects_malformed_inputs_before_training() -> None:
+    arrays = np.zeros((4, 12, 96, 96), dtype=np.float32)
+    labels = np.asarray([0.0, 1.0, 0.0, 1.0], dtype=np.float32)
+    with pytest.raises(ValueError, match="tensor shape mismatch"):
+        train_paired_height_one(
+            arrays[:, :, :-1], labels, input_size_px=96, seed=55001
+        )
+    with pytest.raises(ValueError, match="labels must be binary"):
+        train_paired_height_one(
+            arrays,
+            np.asarray([0.0, 1.0, 2.0, 1.0], dtype=np.float32),
+            input_size_px=96,
+            seed=55001,
+        )
 
 
 def test_baseline_scoring_and_frozen_tie_break() -> None:
