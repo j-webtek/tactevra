@@ -20,6 +20,7 @@
 | Phase 7 candidate A-F shadow | `d57688b29625cdb4409efe4604513a0709d923e5da5bd8cd8cbe2d835001a845` | `48d0f77011445be3e900d9323061248b6057789c2cbe9a3db3879dd58747c3e5` | A-F produce 198 predicted telemetry samples in a separate shadow path. Candidate collision remains `STOP`; the official Stage A stop is unchanged. |
 | Phase 8 candidate collision attribution | `f8603f979cce8775658fa371ec768adcff9377a1879f2364b8bc7d75a38879c5` | `885667bd60df7ac8f4d27bab23d390a3dec30fa0e3997c18d33d3a9ddec20ce1` | Fourteen of 40 favorable-size route endpoints avoid consequential contacts on the 46 keyboard poses. Remaining consequential pairs are cable-related. A-D are unevaluated, and expected structural contacts remain unreviewed blockers. |
 | Phase 9 staged collision design | `a46bb261afc6012233b3d90b222dbbebec6da749943d8a0ec588c33ab68736ed` | `3a67191eb9e19d3f3259c068047389cf4b21b58c3623ce81d0d355877c0ed73f` | Stage A clears its discrete screen. B-F stop under the frozen design ranges; C/D IK converges, isolating collision and route design as the blocker. Ten always-touching pairs are proposed only for human exclusion review; no exclusion is installed. |
+| Phase 10 clearance waypoints and swappable pad | `645319b8b73222f398e9fe2734344fa3bef06cb24f479e9606238c289d4619b5` | `bf55993e846f8bacf22ab2b5ed5576f0bda54d331dcd6b00fa18ed9740189ae2` | Clearance waypoints make all 46 reference routes feasible from `halton-0573` and 45 from `halton-0258`; the former camera-first park remains 0/46. Robust B/C endpoint screens still stop. Cable-link4 is isolated to C descent. All 13 keyboard-replacement pad variants stop on early/adjacent contact and cable/workcell conflicts. |
 
 The governing fixture is
 [`first_motion_readiness_v1.json`](../ai/sim/evidence/first_motion_readiness_v1.json),
@@ -219,6 +220,9 @@ Jack must explicitly approve Stage F after Stage E completes.
 `NOT_READY_FOR_FIRST_POWERED_MOTION`
 
 The closest stage, A, has a strict-runtime prediction envelope but no accepted
-collision-clear corridor and no measured physical plant bounds. The scenario
-regression also retains 33 geometry/zero false acceptances. No stage may advance
-from this document alone.
+collision-clear corridor and no measured physical plant bounds. Phase 10 shows
+that route-aware park scoring and clearance waypoints are materially better
+than the old camera-only park and direct interpolation, but robust endpoint
+screens still stop and the pad fixture still contacts its surrounding stations.
+The scenario regression also retains 33 geometry/zero false acceptances. No
+stage may advance from this document alone.
