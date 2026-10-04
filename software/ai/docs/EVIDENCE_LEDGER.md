@@ -11082,3 +11082,14 @@ rewriting history. New entries must use a unique evidence ID.
 - Correction: commit `a9f4a8aa` restored the complete ledger bytes from `feb1efa7^`, then appended the unchanged E-637 entry. `python scripts/ci/check_docs.py` and `git diff --check` pass after restoration.
 - Preservation: the failed commit remains in branch history; it was not amended or hidden. No prior evidence row was intentionally rewritten or discarded.
 - Authority: hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
+
+
+### E-20261004-INT-639 — append-only evidence-ledger policy
+
+- Stage/lane: shared evidence custody plus S3-S4 simulation support. Claim `8202093d02738e5bbb83d2bfcc47cf771409f3f5`; implementation `11d56f503c3f64c0ad289c1d1cefa17a79f16f3b`. No arm-lane status or integration gate changed.
+- Implementation: `scripts/ci/check_evidence_ledger_append_only.py`, SHA-256 `174263b15157504277b469b7d5270569533fd5d8c8bab84ecdb16a7a5f73f8fb`; focused tests `scripts/ci/test_check_evidence_ledger_append_only.py`, SHA-256 `eb5cf3aadb2adcbb2636e2dec917b6942a399c4c276b0356ab67bc4f7b8c71f1`. The check reads the ledger at an explicit base, the pull-request merge base, or the appropriate local Git revision and requires the current ledger to retain that byte-exact prefix.
+- Integration: maintained repository verification, pull-request policy CI, candidate-preview review packets, candidate enforcement, and clean-checkout verification now run the check. CI fetches complete history so the pull-request merge base is available.
+- Exact validation: `python -m pytest -q scripts/ci/test_check_evidence_ledger_append_only.py` returned `5 passed in 1.30s`; `python -m ruff check scripts/ci/check_evidence_ledger_append_only.py scripts/ci/test_check_evidence_ledger_append_only.py` passed; `python scripts/ci/check_evidence_ledger_append_only.py --base-ref 8202093d02738e5bbb83d2bfcc47cf771409f3f5` passed; `python scripts/ci/check_docs.py`, `python scripts/ci/check_source_archive_footprint.py --json`, and `git diff --check` passed. Regression cases cover identical bytes, append, truncation, rewrite, and reordering.
+- Source archive: 6,368 tracked files, 658,797,285 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes; all governed limits pass. The two-file increase retains only the check and its tests.
+- Limitations and next dependency: the policy protects committed Git history; it cannot recover external evidence bytes that were never committed or backed up. The next increment freezes a simulation-only clearance-waypoint, park-feasibility, managed-cable phase-attribution, and swappable-pad study.
+- Authority: GPU launches 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. The active paired residual process was not interrupted.
