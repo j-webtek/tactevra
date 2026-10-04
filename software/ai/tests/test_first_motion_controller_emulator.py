@@ -22,7 +22,10 @@ from rocell_ai.first_motion_controller_emulator import (
     run_controller_emulator,
     run_staged_bringup_rehearsal,
 )
-from rocell_ai.first_motion_drills import run_wrong_model_drills
+from rocell_ai.first_motion_drills import (
+    run_scenario_regression,
+    run_wrong_model_drills,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_controller_emulator_v1.json"
@@ -173,3 +176,24 @@ def test_wrong_model_drills_retain_external_geometry_gaps() -> None:
     assert report["hardware_write_count"] == report["physical_movement_count"] == 0
     assert report["real_command_count"] == report["permit_count"] == 0
     assert report["transport_count"] == 0
+
+
+def test_scenario_regression_exposes_wrong_model_false_acceptances() -> None:
+    fixture = load_first_motion_fixture(READINESS_FIXTURE)
+    report = run_scenario_regression(
+        fixture, run_wrong_model_drills(fixture), workspace=ROOT)
+    assert report["catalog"]["entries"]
+    assert report["nightly"]["count"] == 84
+    assert report["nightly"]["pass_count"] == 51
+    assert report["nightly"]["false_acceptance_count"] == 33
+    assert report["nightly"]["categories"]["WRONG_MODEL"] == {
+        "count": 63, "pass_count": 30, "pass_rate": 30 / 63,
+        "false_acceptance_count": 33,
+    }
+    assert report["ci"]["count"] == 7
+    assert report["ci"]["pass_count"] == 6
+    assert report["ci"]["false_acceptance_count"] == 1
+    assert report["ws1_fault_hook_count"] == 18
+    assert report["ws4_recovery_case_count"] == 6
+    assert report["decision"] == "STOP_FALSE_ACCEPTANCE_GAPS_RETAINED"
+    assert report["hardware_write_count"] == report["physical_movement_count"] == 0

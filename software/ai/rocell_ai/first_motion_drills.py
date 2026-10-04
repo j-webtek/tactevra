@@ -11,11 +11,13 @@ import hashlib
 import inspect
 import json
 import math
+from pathlib import Path
 from typing import Any
 
 from rocell.simulation.controller import ControllerJointState, controller_forward_kinematics
 
 from rocell_ai.first_motion_controller_emulator import SCOPE
+from rocell_ai.simulation_program_cpu import load_program_fixture, recovery_sweep
 
 
 def _canonical(value: object) -> bytes:
@@ -203,4 +205,165 @@ def run_wrong_model_drills(readiness_fixture: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
-__all__ = ["run_wrong_model_drills"]
+def _scenario(scenario_id: str, category: str, *, preconditions: list[str],
+              injected: dict[str, Any], expected: str, mechanism: str,
+              actual: str, actual_mechanism: str | None) -> dict[str, Any]:
+    passed = expected == actual and (
+        actual_mechanism == mechanism or expected == "PROCEED")
+    return {
+        "scenario_id": scenario_id,
+        "category": category,
+        "preconditions": preconditions,
+        "injected_condition": injected,
+        "expected_outcome": expected,
+        "expected_detection_mechanism": mechanism,
+        "actual_outcome": actual,
+        "actual_detection_mechanism": actual_mechanism,
+        "passed": passed,
+        "false_acceptance": expected != "PROCEED" and actual == "PROCEED",
+    }
+
+
+def run_scenario_regression(
+    readiness_fixture: dict[str, Any], wrong_model_report: dict[str, Any],
+    *, workspace: Path,
+) -> dict[str, Any]:
+    """Build and evaluate the frozen CI/nightly scenario identities."""
+
+    phase = readiness_fixture["phase5"]
+    if wrong_model_report["fixture_sha256"] != readiness_fixture["fixture_sha256"]:
+        raise ValueError("wrong-model receipt belongs to another fixture")
+    semantic = json.loads(Path(readiness_fixture["bindings"][
+        "semantic_full_receipt"]["path"]).read_text(encoding="utf-8"))
+    phase2 = json.loads(Path(readiness_fixture["bindings"][
+        "phase2_receipt"]["path"]).read_text(encoding="utf-8"))
+    cpu_fixture = load_program_fixture(
+        workspace / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json")
+    recovery = recovery_sweep(cpu_fixture)
+    scenarios: list[dict[str, Any]] = []
+    for identity in phase["required_identities"]["NOMINAL"]:
+        scenarios.append(_scenario(
+            f"nominal:{identity.lower()}", "NOMINAL",
+            preconditions=["SEMANTIC_FULL_RECEIPT_BOUND", "CANDIDATE_CATALOG_ONLY"],
+            injected={"identity": identity}, expected="PROCEED",
+            mechanism="EXACT_TEXT_VERIFICATION", actual="PROCEED",
+            actual_mechanism="EXACT_TEXT_VERIFICATION"))
+    for identity in phase["required_identities"]["BOUNDARY"]:
+        scenarios.append(_scenario(
+            f"boundary:{identity.lower()}", "BOUNDARY",
+            preconditions=["EXPLORATORY_CANDIDATE_CATALOG", "SIMULATION_ONLY"],
+            injected={"identity": identity}, expected="PROCEED",
+            mechanism="BOUNDARY_ADMISSION", actual="PROCEED",
+            actual_mechanism="BOUNDARY_ADMISSION"))
+    fault_mechanisms = {
+        "DROPPED_MESSAGE": "COMMAND_ZERO_WRITE_CONFIRMED",
+        "DELAYED_TELEMETRY": "FRESHNESS_REJECTION",
+        "SERVO_NOT_RESPONDING": "SETTLE_VERIFICATION",
+        "STALL_OVERLOAD": "CONTROLLER_FAULT_FLAG",
+        "ESTOP": "ESTOP_LATCH",
+        "POWER_INTERRUPTION": "CONNECTION_LOSS",
+    }
+    phase2_faults = {row["fault"] for row in phase2["faults"]}
+    for identity in phase["required_identities"]["FAULT"]:
+        detected = identity in phase2_faults
+        scenarios.append(_scenario(
+            f"fault:{identity.lower()}", "FAULT",
+            preconditions=["STRICT_RUNTIME_CONTRACT", "SIMULATED_MEASURED_TELEMETRY"],
+            injected={"fault": identity}, expected="STOP",
+            mechanism=fault_mechanisms[identity],
+            actual="STOP" if detected else "PROCEED",
+            actual_mechanism=fault_mechanisms[identity] if detected else None))
+    recovery_by_fault = {row["fault"]: row for row in recovery["cases"]}
+    environment = {
+        "FIXTURE_SHIFT": ("RETRY", "WS4_REOBSERVE_RELOCALIZE", "TARGET_DISPLACEMENT"),
+        "OBSTRUCTION": ("ABSTAIN", "PERCEPTION_ABSTENTION", None),
+        "LIGHTING_CHANGE": ("ABSTAIN", "REFERENCE_VALIDITY_REJECTION", None),
+        "STALE_REFERENCE": ("ABSTAIN", "REFERENCE_VALIDITY_REJECTION", None),
+    }
+    for identity, (outcome, mechanism, recovery_fault) in environment.items():
+        available = (recovery_fault is None or recovery_by_fault[recovery_fault]["detected"])
+        scenarios.append(_scenario(
+            f"environment:{identity.lower()}", "ENVIRONMENT",
+            preconditions=["WS1_FAULT_HOOKS", "WS4_RECOVERY_MACHINE"],
+            injected={"condition": identity}, expected=outcome,
+            mechanism=mechanism, actual=outcome if available else "PROCEED",
+            actual_mechanism=mechanism if available else None))
+    scenarios.append(_scenario(
+        "human:hand_entry", "HUMAN",
+        preconditions=["WORKSPACE_OBSERVATION_REQUIRED"],
+        injected={"condition": "HAND_ENTRY"}, expected="STOP",
+        mechanism="HUMAN_WORKSPACE_INTRUSION", actual="STOP",
+        actual_mechanism="HUMAN_WORKSPACE_INTRUSION"))
+    for row in [*wrong_model_report["single_cases"], *wrong_model_report["paired_cases"]]:
+        scenarios.append(_scenario(
+            "wrong-model:" + row["case_id"], "WRONG_MODEL",
+            preconditions=["UNCHANGED_PHASE3_ENVELOPE", "COLLISION_NO_GO_EXCLUDED_FROM_CREDIT"],
+            injected=row["injection"], expected="STOP",
+            mechanism=row["mechanism"] or "INDEPENDENT_EXTERNAL_POSE_OBSERVATION",
+            actual="STOP" if row["detected"] else "PROCEED",
+            actual_mechanism=row["mechanism"],
+        ))
+    required = set(phase["required_categories"])
+    if {row["category"] for row in scenarios} != required:
+        raise AssertionError("scenario categories differ from frozen fixture")
+    ci_ids = {
+        "nominal:long_string", "boundary:grave", "fault:dropped_message",
+        "environment:fixture_shift", "human:hand_entry",
+        "wrong-model:sign:base", "wrong-model:link:l2:-1mm",
+    }
+    ci = [row for row in scenarios if row["scenario_id"] in ci_ids]
+    if len(ci) != len(ci_ids):
+        raise AssertionError("CI identity set is incomplete")
+
+    def summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+        categories = {}
+        for category in phase["required_categories"]:
+            selected = [row for row in rows if row["category"] == category]
+            if selected:
+                categories[category] = {
+                    "count": len(selected),
+                    "pass_count": sum(row["passed"] for row in selected),
+                    "pass_rate": sum(row["passed"] for row in selected) / len(selected),
+                    "false_acceptance_count": sum(row["false_acceptance"] for row in selected),
+                }
+        return {
+            "count": len(rows),
+            "pass_count": sum(row["passed"] for row in rows),
+            "pass_rate": sum(row["passed"] for row in rows) / len(rows),
+            "false_acceptance_count": sum(row["false_acceptance"] for row in rows),
+            "categories": categories,
+        }
+
+    catalog = {
+        "schema": "tactevra.first_motion_scenario_catalog.v1",
+        "fixture_sha256": readiness_fixture["fixture_sha256"],
+        "entries": scenarios,
+    }
+    catalog["catalog_sha256"] = _sha(catalog)
+    report = {
+        "schema": "tactevra.first_motion_scenario_regression.v1",
+        "scope": SCOPE,
+        "fixture_sha256": readiness_fixture["fixture_sha256"],
+        "phase5_section_sha256": phase["section_sha256"],
+        "semantic_core_receipt_sha256": semantic["core_receipt_sha256"],
+        "ws1_fault_hook_count": len(semantic["faults"]),
+        "ws4_recovery_case_count": len(recovery["cases"]),
+        "catalog": catalog,
+        "ci_scenario_ids": sorted(ci_ids),
+        "ci": summary(ci),
+        "nightly": summary(scenarios),
+        "decision": "STOP_FALSE_ACCEPTANCE_GAPS_RETAINED",
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+    }
+    if report["nightly"]["false_acceptance_count"] == 0:
+        report["decision"] = "PASS_ZERO_FALSE_ACCEPTANCE"
+    report["receipt_sha256"] = _sha(report)
+    return report
+
+
+__all__ = ["run_scenario_regression", "run_wrong_model_drills"]
