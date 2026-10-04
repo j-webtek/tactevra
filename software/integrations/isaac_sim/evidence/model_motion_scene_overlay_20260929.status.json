@@ -1,0 +1,7 @@
+{
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "receipt_sha256": "e2f7ecf984dca7e07a3a7e760fbb894f0b5f4192e4469d215e7852a529fe25ef",
+  "schema": "tactevra.isaac_sim_model_motion_overlay.v1.status",
+  "status": "BLOCKED_UNCERTAINTY_CROSSES_INFERRED_SAFE_REGIONS"
+}
