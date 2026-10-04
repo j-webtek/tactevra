@@ -259,3 +259,36 @@ operation is asset import and kinematic parity (WP1), not trajectory execution:
 
 See the full [integration plan](../../docs/ISAAC_SIM_INTEGRATION_PLAN.md) for
 work packages, acceptance gates, ownership, evidence, and limitations.
+
+## Retained first noncontact H hover
+
+The retained actual-emitter schedule and Isaac receipt are intentionally kept
+as evidence rather than regenerated from unavailable external artifacts:
+
+- [`actual_emitter_joint_schedule_bundle_9e5c878_20260929.json`](evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json)
+  binds 133 ordered arm samples to the actual shared-emitter payload from arm
+  commit `9e5c878852da6a6e8509598bce9ce43f218efc70`;
+- [`actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json`](evidence/actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json)
+  binds that exact bundle to the governed robot USD and records a passing
+  zero-physics-step kinematic replay; and
+- [`first_noncontact_h_hover_proof_20261004.json`](evidence/first_noncontact_h_hover_proof_20261004.json)
+  derives the contiguous samples `0..34`, ending at the first `H` hover at
+  board `[216.55, 154.0, 26.0]` mm, and proves that no contact sample occurs in
+  that prefix.
+
+Reproduce the derived proof with ordinary Python; Isaac is not started:
+
+```powershell
+python software/integrations/isaac_sim/first_noncontact_hover_proof.py `
+  --bundle software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --replay software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json `
+  --output software/integrations/isaac_sim/evidence/first_noncontact_h_hover_proof_20261004.json
+```
+
+`PASS_KINEMATIC_HOVER_WITH_BLOCKERS` means only that the retained Isaac run
+included the hash-bound noncontact prefix and that the full-route maximums
+conservatively bound every prefix sample. The schedule used synthetic
+observations, the joints were teleported without dynamics, and the retained
+14.400834977 mm localization uncertainty still exceeds the 7 mm safe-region
+margin. This evidence grants no camera, collision, controller, hardware, or
+physical authority.
