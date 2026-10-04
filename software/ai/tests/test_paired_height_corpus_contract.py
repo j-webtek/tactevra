@@ -28,6 +28,8 @@ from train.paired_height_corpus_contract import (  # noqa: E402
     new_feature_statistics_accumulator,
     noise_stddev_for_linear_brightness,
     spatially_correlate_noise,
+    select_memorization_rows,
+    training_free_difference_score,
     update_feature_statistics,
     sha256_bytes,
 )
@@ -55,6 +57,12 @@ def test_frozen_resolution_noise_experiment_and_decision_rules() -> None:
     assert len(value["run_matrix"]) == 6
     assert value["input_standardization"]["fit_split"] == "training"
     assert value["input_standardization"]["cross_resolution_statistic_reuse_forbidden"]
+    assert value["pre_training_gates"]["memorization_selection"]["scope"] == (
+        "TRAINING_ONLY"
+    )
+    assert value["training_free_baseline"]["selection_effect"] == (
+        "DIAGNOSTIC_BENCHMARK_ONLY"
+    )
 
     def profile(winner: str) -> dict:
         eligible = {"memorization_pass": True, "all_development_gates_pass": True}
@@ -181,6 +189,41 @@ def test_training_statistics_scale_each_resolution_and_preserve_mask() -> None:
     assert np.allclose(
         standardized["96"][:11], standardized["192"][:11, ::2, ::2], atol=2e-5
     )
+
+
+def test_memorization_selection_is_training_only_balanced_and_deterministic() -> None:
+    rows = []
+    decisions = {"clear": "VISIBLE", "cable": "ABSTAIN"}
+    for target in ("A", "B", "C"):
+        for variant in decisions:
+            for index in range(8):
+                rows.append({
+                    "row_id": f"training:scene-{index}:{target}:{variant}",
+                    "split": "training",
+                    "device": "keyboard",
+                    "target_id": target,
+                    "variant_id": variant,
+                })
+    first = select_memorization_rows(rows, decisions, count=24)
+    second = select_memorization_rows(list(reversed(rows)), decisions, count=24)
+    assert [row["row_id"] for row in first] == [row["row_id"] for row in second]
+    strata = {(row["target_id"], decisions[row["variant_id"]]) for row in first}
+    assert len(strata) == 6
+    altered = [dict(row) for row in rows]
+    altered[0]["split"] = "development"
+    with pytest.raises(ValueError, match="training rows only"):
+        select_memorization_rows(altered, decisions, count=24)
+
+
+def test_training_free_score_uses_only_safe_region_rgb_difference() -> None:
+    import numpy as np
+
+    features = np.zeros((12, 8, 8), dtype=np.float32)
+    features[11, 2:6, 2:6] = 1.0
+    features[6:9, 2:6, 2:6] = 0.25
+    features[6:9, :2, :] = 1.0
+    features[9:11] = 10.0
+    assert training_free_difference_score(features) == pytest.approx(0.25)
 
 
 def test_frozen_fixture_counts_and_balances_heights() -> None:

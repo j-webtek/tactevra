@@ -101,6 +101,20 @@ def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]
         )
     ):
         raise ValueError("input standardization isolation rules differ")
+    memorization = value.get("pre_training_gates", {}).get("memorization_selection", {})
+    if memorization.get("scope") != "TRAINING_ONLY" or memorization.get("selection") != (
+        "ROUND_ROBIN_ONE_PER_SORTED_STRATUM_PER_PASS_UNTIL_500"
+    ):
+        raise ValueError("memorization selection differs")
+    baseline = value.get("training_free_baseline", {})
+    if baseline.get("score") != (
+        "MEAN_ABSOLUTE_NORMALIZED_RGB_DIFFERENCE_INSIDE_BINARY_SAFE_REGION"
+    ):
+        raise ValueError("training-free baseline score differs")
+    if baseline.get("split") != "development" or baseline.get(
+        "selection_effect"
+    ) != "DIAGNOSTIC_BENCHMARK_ONLY":
+        raise ValueError("training-free baseline scope differs")
     if value.get("evaluation_opened") is not False:
         raise ValueError("evaluation must remain unopened")
     if value.get("physical_authority") is not False:
@@ -724,6 +738,62 @@ def apply_feature_standardization(features: Any, statistics: dict[str, Any]) -> 
     if not np.array_equal(output[11], value[11]):
         raise ValueError("safe mask changed during standardization")
     return np.ascontiguousarray(output, dtype=np.float32)
+
+
+def select_memorization_rows(
+    rows: list[dict[str, Any]],
+    decision_by_variant: dict[str, str],
+    *,
+    count: int = 500,
+) -> list[dict[str, Any]]:
+    """Select a deterministic target/decision-balanced training-only subset."""
+    if count <= 0 or count > len(rows):
+        raise ValueError("memorization count is outside the available rows")
+    groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    seen: set[str] = set()
+    for row in rows:
+        if row.get("split") != "training":
+            raise ValueError("memorization subset may contain training rows only")
+        row_id = row.get("row_id")
+        if not isinstance(row_id, str) or row_id in seen:
+            raise ValueError("memorization rows contain a missing or duplicate identity")
+        seen.add(row_id)
+        decision = decision_by_variant.get(str(row.get("variant_id")))
+        if decision not in {"VISIBLE", "ABSTAIN"}:
+            raise ValueError("memorization row has no frozen decision")
+        key = (str(row.get("device")), str(row.get("target_id")), decision)
+        groups.setdefault(key, []).append(row)
+    for values in groups.values():
+        values.sort(key=lambda row: sha256_bytes(str(row["row_id"]).encode()))
+    ordered_keys = sorted(groups)
+    selected: list[dict[str, Any]] = []
+    offset = 0
+    while len(selected) < count:
+        progressed = False
+        for key in ordered_keys:
+            if offset < len(groups[key]):
+                selected.append(groups[key][offset])
+                progressed = True
+                if len(selected) == count:
+                    break
+        if not progressed:
+            raise ValueError("memorization groups cannot supply requested count")
+        offset += 1
+    return selected
+
+
+def training_free_difference_score(features: Any) -> float:
+    """Score mean absolute RGB change inside the physical safe-region mask."""
+    import numpy as np
+
+    value = np.asarray(features)
+    if value.ndim != 3 or value.shape[0] != 12 or value.dtype != np.float32:
+        raise ValueError("features must be float32 12xHxW")
+    mask = value[11]
+    mask_pixels = float(mask.sum())
+    if mask_pixels <= 0.0 or not np.isin(mask, [0.0, 1.0]).all():
+        raise ValueError("safe-region mask is empty or nonbinary")
+    return float((value[6:9] * mask[None, ...]).sum() / (3.0 * mask_pixels))
 
 
 def admit_shard_manifest(
