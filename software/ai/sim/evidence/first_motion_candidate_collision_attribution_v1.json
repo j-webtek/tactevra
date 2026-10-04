@@ -1,0 +1,91 @@
+{
+  "bindings": {
+    "observation_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_independent_observation_v1.json",
+      "sha256": "d83d0f7428ed516d8b9c2d843f0027a6dd388038fe255ecd1eab8f09ba73eb17"
+    },
+    "phase0_receipt": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\simulation_program\\phase0\\phase0_collision_intake_v1.json",
+      "sha256": "4cc5956e209c36001b9eb22739918e87cc1fbc8d063c9512dfab2813dca8a640"
+    },
+    "program_fixture": {
+      "path": "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json",
+      "sha256": "36301d4288164aaa54e4d549cc9944aec8d52a137cc47035835fb051dd76bafd"
+    }
+  },
+  "claim_commit": "80eb6ef071c35b705013a278eef53f5a4c1a4804",
+  "contact_classes": {
+    "DECLARED_EXPECTED_BUT_UNREVIEWED": [
+      "attachment:contact_tool|robot:gripper",
+      "attachment:contact_tool|robot:link5",
+      "attachment:moving_cable|robot:gripper",
+      "attachment:moving_cable|robot:link5",
+      "installation:base_and_factory_clamp|robot:base_link",
+      "installation:base_and_factory_clamp|workcell:board_solid",
+      "robot:base_link|robot:link1",
+      "robot:gripper|robot:link5",
+      "robot:link1|robot:link2",
+      "robot:link2|robot:link3",
+      "robot:link3|robot:link4",
+      "robot:link4|robot:link5"
+    ],
+    "POTENTIALLY_CONSEQUENTIAL": [
+      "attachment:contact_tool|workcell:keyboard",
+      "attachment:contact_tool|workcell:station:keyboard_left",
+      "attachment:contact_tool|workcell:station:keyboard_right",
+      "attachment:moving_cable|workcell:board_solid",
+      "attachment:moving_cable|workcell:station:keyboard_left",
+      "attachment:moving_cable|workcell:station:keyboard_right"
+    ],
+    "section_sha256": "c65f989adbb847fc1ee306ae140afdc017a6a025abfacb983aa6f46f5e2042ed"
+  },
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "Preserve all expected-but-unreviewed contacts; never turn them into installed exclusions.",
+    "A-D stay unknown, never clear, because applicable poses are absent.",
+    "E-F require zero potentially consequential collisions in at least one route endpoint configuration to avoid a corridor-redesign finding.",
+    "Report each potentially consequential pair by configuration and target.",
+    "A favorable-size pass remains exploratory and cannot clear the official collision gate."
+  ],
+  "favorable_endpoint_family": {
+    "cable_radius_mm": "MIN",
+    "camera_depth_mm": "MIN",
+    "camera_height_mm": "MAX",
+    "clamp_half_extents_mm": "MIN_EACH_AXIS",
+    "clearance_margin_mm": "MAX_NONZERO",
+    "enumerate_uncertain_route_endpoints": [
+      "clamp_x_mm",
+      "cable_offset_fraction",
+      "cable_anchor_x_mm",
+      "cable_anchor_z_mm"
+    ],
+    "expected_configuration_count": 32,
+    "section_sha256": "d8d871618451b3a3d0e384c49b1b81fdac23143354c4bff2cddddd395571b57e",
+    "tool_length_mm": "MIN",
+    "tool_radius_mm": "MIN"
+  },
+  "fixture_sha256": "962a0b97bf95be8a313c6c6907fbaca2375feb7e3a830cfc000b3d42774a0d53",
+  "limitations": [
+    "Favorable values are endpoints of unmeasured ranges, not measurements.",
+    "The route family enumerates endpoints because favorable route direction is unknown.",
+    "Only the retained 46 keyboard target poses are evaluated."
+  ],
+  "schema": "tactevra.first_motion_candidate_collision_attribution_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "stage_mapping": {
+    "A": "NOT_EVALUATED_NO_STAGE_TRAJECTORY",
+    "B": "NOT_EVALUATED_NO_COMMISSIONED_PARK",
+    "C": "NOT_EVALUATED_NO_HOVER_TRAJECTORY",
+    "D": "NOT_EVALUATED_TEST_PAD_ABSENT",
+    "E": "EVALUATED_BY_46_KEYBOARD_TARGET_POSES",
+    "F": "EVALUATED_BY_46_KEYBOARD_TARGET_POSES",
+    "section_sha256": "309a9a36e0c2a00ddff8a10aa0211afa9dd9bd197acb925f8ffd821c4df7902b"
+  }
+}

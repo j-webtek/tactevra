@@ -480,3 +480,6 @@ remain external. The exact tracked-file count and governed ceiling are therefore
 
 The tracked-file ceiling is 6,363 after freezing the compact Workstream 7 independent-observation fixture; observer receipts remain external and hash-bound.
 
+
+The tracked-file ceiling is 6,364 after freezing the compact Workstream 7 candidate-collision attribution fixture; detailed receipts remain external and hash-bound.
+
