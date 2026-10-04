@@ -352,5 +352,18 @@
     "transport": 0
   },
   "gpu_execution_authorized": false,
-  "fixture_sha256": "d1bcb90ff5fba828ead7d4834c5f59d52e8c65d03710faa955b26bf7c0e6e408"
+  "supersedes_fixture_sha256": "d1bcb90ff5fba828ead7d4834c5f59d52e8c65d03710faa955b26bf7c0e6e408",
+  "amendment": "Pre-result governance correction: bind the required simulator, driver, and GPU stack. Parameter ranges, section hashes, metrics, and decisions are unchanged.",
+  "runtime_stack": {
+    "gpu": [
+      "NVIDIA GeForce RTX 3090",
+      "NVIDIA GeForce RTX 3090"
+    ],
+    "nvidia_driver": "595.97",
+    "warp": "1.17.0",
+    "mujoco": "3.14.0",
+    "isaac_kit": "6.1.0",
+    "isaac_version_source": "C:/IsaacSim/evidence/first_launch_receipt_6_1_0.json"
+  },
+  "fixture_sha256": "fc9199b02027e391c41700615757439d6833b23df8a30aa3d57c9adbad5e35e3"
 }
