@@ -130,6 +130,40 @@ def recovery_sweep(fixture: dict[str, Any]) -> dict[str, Any]:
             "recoverable_success_rate": 1.0, "ambiguous_continuations": 0}
 
 
+def continuous_policy_smoke(fixture: dict[str, Any]) -> dict[str, Any]:
+    candidate = json.loads(Path(fixture["bindings"]["candidate_catalog"]["path"]).read_text())
+    ids = _catalog_ids(candidate)
+    section = fixture["sections"]["workstream_3"]
+    pairs = len(ids) * len(ids)
+    if pairs != 2601 or not all(value > 0 for value in section["hover_mm"]):
+        raise AssertionError("continuous-policy pair space or hover range changed")
+    return {"status": "CPU_ENUMERATION_READY_GPU_SCREENING_DEFERRED",
+            "catalog_mode": CANDIDATE_MODE, "target_count": len(ids),
+            "ordered_pair_count": pairs, "self_transition_count": len(ids),
+            "policy_cells": pairs * len(section["hover_mm"]) * len(section["transition_mm_s"]),
+            "recommended_policy": None}
+
+
+def mid_motion_mask_smoke(fixture: dict[str, Any]) -> dict[str, Any]:
+    section = fixture["sections"]["workstream_6"]
+    # Synthetic rectangles exercise positive overlap, uncovered admission, and
+    # conservative covered-target abstention without rendering any pixels.
+    arm = (20, 20, 60, 60)
+    targets = {"covered": (40, 40, 50, 50), "clear": (70, 70, 80, 80)}
+    def overlap(a: tuple[int, ...], b: tuple[int, ...]) -> int:
+        return max(0, min(a[2], b[2]) - max(a[0], b[0])) * max(
+            0, min(a[3], b[3]) - max(a[1], b[1]))
+    decisions = {name: "ABSTAIN_ARM_COVERED" if overlap(arm, box) else "ELIGIBLE_FOR_OBSTRUCTION_CHECK"
+                 for name, box in targets.items()}
+    if overlap(arm, targets["covered"]) <= 0 or decisions["clear"].startswith("ABSTAIN"):
+        raise AssertionError("mid-motion positive-overlap sentinel failed")
+    return {"status": "CPU_MASK_SENTINEL_READY_ISAAC_DEFERRED",
+            "positive_arm_mask_overlap": True, "decisions": decisions,
+            "exposure_cases": len(section["exposure_seconds"]),
+            "camera_height_cases": len(section["camera_height_mm"]),
+            "physical_mid_motion_use": "BLOCKED"}
+
+
 def calibration_budget(fixture: dict[str, Any]) -> dict[str, Any]:
     section = fixture["sections"]["workstream_5"]
     rng = random.Random(section["seed"])
@@ -180,8 +214,10 @@ def run_all(fixture_path: Path) -> dict[str, Any]:
             "runtime_stack": fixture["runtime_stack"],
             "candidate_catalog": candidate_catalog_semantic_check(fixture),
             "workstream_2_smoke": actuation_smoke(fixture),
+            "workstream_3_smoke": continuous_policy_smoke(fixture),
             "workstream_4": recovery_sweep(fixture),
             "workstream_5": calibration_budget(fixture),
+            "workstream_6_smoke": mid_motion_mask_smoke(fixture),
             "gpu_readiness": gpu_readiness(fixture), "counters": fixture["counters"]}
     core["receipt_sha256"] = _sha(core)
     return core

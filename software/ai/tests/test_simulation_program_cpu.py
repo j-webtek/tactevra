@@ -7,8 +7,10 @@ from rocell_ai.simulation_program_cpu import (
     CANDIDATE_MODE,
     calibration_budget,
     candidate_catalog_semantic_check,
+    continuous_policy_smoke,
     gpu_readiness,
     load_program_fixture,
+    mid_motion_mask_smoke,
     recovery_sweep,
     run_all,
 )
@@ -46,6 +48,17 @@ def test_recovery_fails_closed_and_calibration_preserves_failures():
     assert budget["status"] == "EXPLORATORY_CPU_COMPLETE"
     assert budget["admitted_rows"] > 0
     assert budget["failed_rows"] > 0
+
+
+def test_continuous_pair_enumeration_and_mid_motion_mask_sentinels():
+    fixture = load_program_fixture(FIXTURE)
+    policy = continuous_policy_smoke(fixture)
+    assert policy["ordered_pair_count"] == 51 ** 2
+    assert policy["recommended_policy"] is None
+    masks = mid_motion_mask_smoke(fixture)
+    assert masks["positive_arm_mask_overlap"] is True
+    assert masks["decisions"]["covered"] == "ABSTAIN_ARM_COVERED"
+    assert masks["physical_mid_motion_use"] == "BLOCKED"
 
 
 def test_combined_receipt_is_deterministic_and_gpu_blocked():
