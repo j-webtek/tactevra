@@ -29,6 +29,7 @@ SCHEMA = "rocell.typing_trajectory_plan.v1"
 POLICY_SCHEMA = "rocell.typing_trajectory_policy.v1"
 STATUS = "READY_FOR_DETERMINISTIC_IK_AND_COLLISION_SCREENING"
 MAX_SCREENING_SAMPLES = 16_384
+EVIDENCE_FLOAT_DECIMAL_PLACES = 9
 _QUINTIC_PEAK_VELOCITY = 1.875
 _QUINTIC_PEAK_ACCELERATION = 10.0 / math.sqrt(3.0)
 _QUINTIC_PEAK_JERK = 60.0
@@ -69,6 +70,12 @@ def _positive(value: float, label: str, *, maximum: float) -> float:
     if not math.isfinite(result) or not 0.0 < result <= maximum:
         raise TypingTrajectoryPlanV1Error(f"{label} is outside its bounded range")
     return result
+
+
+def _evidence_float(value: float) -> float:
+    """Remove sub-nanometre/runtime accumulation noise from plan evidence."""
+    result = round(float(value), EVIDENCE_FLOAT_DECIMAL_PLACES)
+    return 0.0 if result == 0.0 else result
 
 
 @dataclass(frozen=True, slots=True)
@@ -379,14 +386,17 @@ def compile_typing_trajectory_plan_v1(
     park_ms = _time_for_points(_park_baseline_points(plan), policy)
     saved = max(0.0, park_ms - direct_ms)
     metrics = TypingTrajectoryMetricsV1(
-        direct_distance_mm=sum(item.distance_mm for item in timings),
-        park_baseline_distance_mm=plan.metrics.park_total_distance_mm,
-        direct_motion_time_ms=motion_ms,
+        direct_distance_mm=_evidence_float(
+            sum(item.distance_mm for item in timings)),
+        park_baseline_distance_mm=_evidence_float(
+            plan.metrics.park_total_distance_mm),
+        direct_motion_time_ms=_evidence_float(motion_ms),
         direct_dwell_time_ms=dwell_ms,
-        direct_estimated_time_ms=direct_ms,
-        park_baseline_estimated_time_ms=park_ms,
-        estimated_time_saved_ms=saved,
-        estimated_time_reduction_fraction=saved / park_ms if park_ms else 0.0,
+        direct_estimated_time_ms=_evidence_float(direct_ms),
+        park_baseline_estimated_time_ms=_evidence_float(park_ms),
+        estimated_time_saved_ms=_evidence_float(saved),
+        estimated_time_reduction_fraction=_evidence_float(
+            saved / park_ms if park_ms else 0.0),
     )
     return TypingTrajectoryPlanV1(
         source_plan_sha256=plan.plan_sha256,

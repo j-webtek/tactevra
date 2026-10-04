@@ -64,7 +64,15 @@ def _inputs(
             ingress_fixture.WORKSPACE, ingress_fixture.MANIFEST
         )
     snapshot = ik_fixture._snapshot(context)
-    tip = ik_fixture._ready_tip(context, snapshot)
+    solved_tip = ik_fixture._ready_tip(context, snapshot)
+    # This retained-evidence fixture needs one canonical input point across
+    # supported Python/libm builds; the solver itself is tested separately.
+    tip = Point3Mm(
+        solved_tip.frame,
+        round(solved_tip.x, 6),
+        round(solved_tip.y, 6),
+        round(solved_tip.z, 6),
+    )
     plan = ActionPlan.from_text(
         device=Device.KEYBOARD,
         profile_id="keyboard-development-v1",
