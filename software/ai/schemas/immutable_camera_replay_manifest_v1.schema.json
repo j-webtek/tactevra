@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/immutable_camera_replay_manifest_v1.schema.json",
+  "title": "RoCell immutable camera replay manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "replay_id", "replay_evidence_class", "source_evidence_class", "handoff_sha256", "camera_profile_sha256", "support_profile_sha256", "model_sha256", "calibration_sha256", "validated_at_utc", "captures", "campaign_output", "localization_output", "expected_receipt_sha256", "live_camera_allowed", "qualification_installed", "controller_started", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "manifest_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.immutable_camera_replay_manifest.v1"},
+    "replay_id": {"$ref": "#/$defs/id"},
+    "replay_evidence_class": {"const": "IMMUTABLE_REPLAY"},
+    "source_evidence_class": {"enum": ["ORIGINAL_CAPTURE", "SYNTHETIC_FIXTURE"]},
+    "handoff_sha256": {"$ref": "#/$defs/sha"},
+    "camera_profile_sha256": {"$ref": "#/$defs/sha"},
+    "support_profile_sha256": {"$ref": "#/$defs/sha"},
+    "model_sha256": {"$ref": "#/$defs/sha"},
+    "calibration_sha256": {"$ref": "#/$defs/sha"},
+    "validated_at_utc": {"type": "string", "format": "date-time"},
+    "captures": {
+      "type": "array", "minItems": 1, "maxItems": 64,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["capture_id", "image", "metadata"],
+        "properties": {
+          "capture_id": {"$ref": "#/$defs/id"},
+          "image": {"$ref": "#/$defs/file"},
+          "metadata": {"$ref": "#/$defs/file"}
+        }
+      }
+    },
+    "campaign_output": {"$ref": "#/$defs/file"},
+    "localization_output": {"$ref": "#/$defs/file"},
+    "expected_receipt_sha256": {
+      "type": "object", "additionalProperties": false,
+      "required": ["localization_campaign", "localization_evaluation"],
+      "properties": {
+        "localization_campaign": {"$ref": "#/$defs/sha"},
+        "localization_evaluation": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "live_camera_allowed": {"const": false},
+    "qualification_installed": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "manifest_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,191}$"},
+    "file": {
+      "type": "object", "additionalProperties": false,
+      "required": ["relative_path", "size_bytes", "sha256"],
+      "properties": {
+        "relative_path": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "size_bytes": {"type": "integer", "minimum": 1, "maximum": 134217728},
+        "sha256": {"$ref": "#/$defs/sha"}
+      }
+    }
+  }
+}

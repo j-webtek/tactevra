@@ -1,0 +1,1 @@
+{"bindings":{"artifact_sha256":"9c372eae8247acd99077bad7abcbda38f612a3e1e60378a7e9b9afdfcbc8e31f","source_receipt_sha256":"70b6cbdf3819674a25da70ebb15c6e279849acee7d59332a49cb082bf24a30d2"},"controller_commands":[],"hardware_access":false,"physical_authority":false,"schema":"rocell.typing_trace_stage_reference.v1","source":"PC2_SHADOW_RECEIPT","stage":"TRAJECTORY_PLAN"}

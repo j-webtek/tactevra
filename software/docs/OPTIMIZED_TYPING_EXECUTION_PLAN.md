@@ -323,6 +323,12 @@ Do not publish a typing-speed claim from simulation timing alone.
 
 ## Implementation stages
 
+The implementation order, stage-specific artifacts, tests, evidence gates, and
+camera boundary for the remaining offline work are maintained in the
+[pre-camera arm integration completion plan](PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md).
+That plan operationalizes T2 through T4 below; this document remains the
+normative typing-executor architecture and physical qualification strategy.
+
 ### Implementation checkpoint — 2026-09-27
 
 The T1 foundation is now implemented in
@@ -510,6 +516,8 @@ the arm move does not alone satisfy this definition.
 
 ## Related documents
 
+- [AI-to-arm operational efficiency plan](AI_TO_ARM_OPERATIONAL_EFFICIENCY_PLAN.md)
+- [Pre-camera arm integration completion plan](PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md)
 - [Shared AI/arm workplan](../ai/docs/SHARED_AI_ARM_WORKPLAN.md)
 - [Model command runtime implementation plan](../ai/docs/MODEL_COMMAND_RUNTIME_IMPLEMENTATION_PLAN.md)
 - [Architecture](ARCHITECTURE.md)

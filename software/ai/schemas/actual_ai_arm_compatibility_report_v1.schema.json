@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/actual_ai_arm_compatibility_report_v1.schema.json",
+  "title": "Actual AI to arm compatibility report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "corpus_id", "corpus_file_sha256", "case_count",
+    "passed_case_count", "cases", "actual_sources",
+    "derived_adversarial_cases", "maximum_batch_bytes",
+    "maximum_batch_proposals", "largest_retained_batch_bytes",
+    "largest_retained_proposal_count", "production_dispatch_allowed",
+    "installation_authorized", "controller_start_authorized",
+    "execution_authorized", "automatic_retry", "controller_commands",
+    "hardware_commands_generated", "hardware_access", "physical_authority",
+    "report_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.actual_ai_arm_compatibility_report.v1"},
+    "corpus_id": {"type": "string", "minLength": 1},
+    "corpus_file_sha256": {"$ref": "#/$defs/digest"},
+    "case_count": {"type": "integer", "minimum": 1},
+    "passed_case_count": {"type": "integer", "minimum": 1},
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id", "source_class", "disposition", "ordered_target_ids",
+          "controller_commands", "hardware_access", "physical_authority"
+        ],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "source_class": {"type": "string", "minLength": 1},
+          "disposition": {"type": "string", "minLength": 1},
+          "blocker_code": {"type": "string", "minLength": 1},
+          "ordered_target_ids": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          },
+          "contact_target_ids": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          },
+          "batch_payload_sha256": {"$ref": "#/$defs/digest"},
+          "batch_sha256": {"$ref": "#/$defs/digest"},
+          "source_file_sha256": {"$ref": "#/$defs/digest"},
+          "mutated_payload_sha256": {"$ref": "#/$defs/digest"},
+          "ingress_sha256": {"$ref": "#/$defs/digest"},
+          "preplanner_gate_sha256": {"$ref": "#/$defs/digest"},
+          "execution_plan_sha256": {"$ref": "#/$defs/digest"},
+          "trajectory_plan_sha256": {"$ref": "#/$defs/digest"},
+          "controller_commands": {"const": []},
+          "hardware_access": {"const": false},
+          "physical_authority": {"const": false}
+        },
+        "additionalProperties": false
+      }
+    },
+    "actual_sources": {"const": 5},
+    "derived_adversarial_cases": {"const": 7},
+    "maximum_batch_bytes": {"const": 1048576},
+    "maximum_batch_proposals": {"const": 64},
+    "largest_retained_batch_bytes": {"type": "integer", "minimum": 1, "maximum": 1048576},
+    "largest_retained_proposal_count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "production_dispatch_allowed": {"const": false},
+    "installation_authorized": {"const": false},
+    "controller_start_authorized": {"const": false},
+    "execution_authorized": {"const": false},
+    "automatic_retry": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_commands_generated": {"const": 0},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

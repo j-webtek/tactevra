@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/immutable_camera_replay_report_v1.schema.json",
+  "title": "RoCell immutable camera replay report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "replay_id", "manifest_sha256", "replay_evidence_class", "source_evidence_class", "capture_count", "verified_file_count", "receipt_sha256", "decision_status", "identical_replay_confirmed", "live_camera_opened", "qualification_installed", "controller_started", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "report_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.immutable_camera_replay_report.v1"},
+    "replay_id": {"type": "string", "minLength": 1},
+    "manifest_sha256": {"$ref": "#/$defs/sha"},
+    "replay_evidence_class": {"const": "IMMUTABLE_REPLAY"},
+    "source_evidence_class": {"enum": ["ORIGINAL_CAPTURE", "SYNTHETIC_FIXTURE"]},
+    "capture_count": {"type": "integer", "minimum": 1, "maximum": 64},
+    "verified_file_count": {"type": "integer", "minimum": 4, "maximum": 130},
+    "receipt_sha256": {"$ref": "#/$defs/decisions"},
+    "decision_status": {
+      "type": "object", "additionalProperties": false,
+      "required": ["localization_campaign", "localization_evaluation"],
+      "properties": {
+        "localization_campaign": {"enum": ["PASS", "BLOCKED"]},
+        "localization_evaluation": {"enum": ["PASS", "BLOCKED"]}
+      }
+    },
+    "identical_replay_confirmed": {"const": true},
+    "live_camera_opened": {"const": false},
+    "qualification_installed": {"const": false},
+    "controller_started": {"const": false},
+    "controller_commands": {"type": "array", "maxItems": 0},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "decisions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["localization_campaign", "localization_evaluation"],
+      "properties": {
+        "localization_campaign": {"$ref": "#/$defs/sha"},
+        "localization_evaluation": {"$ref": "#/$defs/sha"}
+      }
+    }
+  }
+}

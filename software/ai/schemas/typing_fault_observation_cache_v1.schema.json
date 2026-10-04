@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_fault_observation_cache_v1.schema.json",
+  "title": "RoCell typing fault observation cache v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "qualification_basis_sha256", "entry_count", "entries",
+    "controller_commands", "hardware_access", "physical_authority",
+    "fault_cache_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.typing_fault_observation_cache.v1"},
+    "qualification_basis_sha256": {"$ref": "#/$defs/sha256"},
+    "entry_count": {"type": "integer", "minimum": 0, "maximum": 64},
+    "entries": {
+      "type": "array", "maxItems": 64,
+      "items": {"$ref": "#/$defs/entry"}
+    },
+    "controller_commands": {"const": []},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "fault_cache_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "observation", "entry_sha256"],
+      "properties": {
+        "case_id": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "observation": {"$ref": "#/$defs/observation"},
+        "entry_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id", "family", "reason_code", "terminal_outcome",
+        "boundary_sha256", "fault_observed", "exception_escaped",
+        "automatic_retry_allowed", "order_preserved", "silent_fallback_used",
+        "bounded_resources", "controller_commands", "hardware_access",
+        "physical_authority"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "family": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "reason_code": {"type": "string", "pattern": "^[A-Z0-9_]{1,96}$"},
+        "terminal_outcome": {"enum": [
+          "REJECTED_BEFORE_DISPATCH", "OUTCOME_UNCERTAIN_RETRY_FORBIDDEN"
+        ]},
+        "boundary_sha256": {"$ref": "#/$defs/sha256"},
+        "fault_observed": {"const": true},
+        "exception_escaped": {"const": false},
+        "automatic_retry_allowed": {"const": false},
+        "order_preserved": {"const": true},
+        "silent_fallback_used": {"const": false},
+        "bounded_resources": {"const": true},
+        "controller_commands": {"const": []},
+        "hardware_access": {"const": false},
+        "physical_authority": {"const": false}
+      }
+    }
+  }
+}

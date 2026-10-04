@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_shadow_service_reuse_campaign_v1.schema.json",
+  "title": "TypingShadowServiceReuseCampaignV1", "type": "object", "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "case_count", "cases", "request_order_preserved", "complete_solve_fallback_required", "automatic_retry_allowed", "endpoint_only_substitution_authorized", "timing_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_shadow_service_reuse_campaign.v1"}, "campaign_id": {"type": "string", "minLength": 1},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"}, "environment": {"type": "object"},
+    "case_count": {"const": 4}, "cases": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/case"}},
+    "request_order_preserved": {"const": true}, "complete_solve_fallback_required": {"const": true},
+    "automatic_retry_allowed": {"const": false}, "endpoint_only_substitution_authorized": {"const": false},
+    "timing_used_for_admission": {"const": false}, "performance_authority": {"const": false},
+    "controller_opened": {"const": false}, "transport_opened": {"const": false}, "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "campaign_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {"case": {"type": "object", "additionalProperties": false,
+    "required": ["case", "status", "request_ids", "receipt_statuses", "duration_ns", "owner_runs_delta", "cache_delta"],
+    "properties": {
+      "case": {"enum": ["MIXED_FIFO_CACHE_REUSE", "CANCEL_NO_CACHE_EFFECT", "RELOAD_STALE_THEN_COLD", "RESTART_STALE_THEN_COLD"]},
+      "status": {"const": "PASS"}, "request_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+      "receipt_statuses": {"type": "array", "minItems": 1, "items": {"enum": ["SHADOW_COMPLETED", "CANCELED_BEFORE_ADMISSION", "STALE_GENERATION_REJECTED"]}},
+      "duration_ns": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0}},
+      "owner_runs_delta": {"type": "integer", "minimum": 0}, "cache_delta": {"$ref": "#/$defs/counters"}
+    }},
+    "counters": {"type": "object", "additionalProperties": false,
+      "required": ["lookups", "hits", "misses", "stores", "capacity_skips"],
+      "properties": {"lookups": {"type": "integer", "minimum": 0}, "hits": {"type": "integer", "minimum": 0}, "misses": {"type": "integer", "minimum": 0}, "stores": {"type": "integer", "minimum": 0}, "capacity_skips": {"type": "integer", "minimum": 0}}}
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_endpoint_atlas_campaign_v1.schema.json",
+  "title": "TypingEndpointAtlasCampaignV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "case_count", "cases", "aggregate", "all_cases_passed", "decision_hashes_unchanged", "atlas_use_authorized", "warm_start_authorized", "diagnostics_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_endpoint_atlas_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"},
+    "case_count": {"const": 5},
+    "cases": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/case"}},
+    "aggregate": {"$ref": "#/$defs/aggregate"},
+    "all_cases_passed": {"const": true},
+    "decision_hashes_unchanged": {"const": true},
+    "atlas_use_authorized": {"const": false},
+    "warm_start_authorized": {"const": false},
+    "diagnostics_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "target_ids", "status", "reference_receipt_sha256", "observed_receipt_sha256", "receipt_matches_reference", "observation"],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1, "maxLength": 192},
+        "target_ids": {"type": "array", "minItems": 2, "maxItems": 5, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+        "status": {"const": "PASS"},
+        "reference_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "observed_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "receipt_matches_reference": {"const": true},
+        "observation": {"type": "object"}
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route_count", "observed_sample_count", "endpoint_observation_count", "unique_endpoint_count", "repeated_endpoint_observation_count", "repeated_endpoint_identity_count", "stable_endpoint_count", "variable_endpoint_count", "stable_reuse_candidate_count", "variable_reuse_candidate_count", "maximum_solution_variant_count", "transition_observation_count", "unique_transition_count", "repeated_transition_identity_count", "endpoint_atlas", "transition_atlas"],
+      "properties": {
+        "route_count": {"const": 5},
+        "observed_sample_count": {"type": "integer", "minimum": 1},
+        "endpoint_observation_count": {"type": "integer", "minimum": 1},
+        "unique_endpoint_count": {"type": "integer", "minimum": 1},
+        "repeated_endpoint_observation_count": {"type": "integer", "minimum": 0},
+        "repeated_endpoint_identity_count": {"type": "integer", "minimum": 0},
+        "stable_endpoint_count": {"type": "integer", "minimum": 0},
+        "variable_endpoint_count": {"type": "integer", "minimum": 0},
+        "stable_reuse_candidate_count": {"type": "integer", "minimum": 0},
+        "variable_reuse_candidate_count": {"type": "integer", "minimum": 0},
+        "maximum_solution_variant_count": {"type": "integer", "minimum": 1},
+        "transition_observation_count": {"type": "integer", "minimum": 0},
+        "unique_transition_count": {"type": "integer", "minimum": 0},
+        "repeated_transition_identity_count": {"type": "integer", "minimum": 0},
+        "endpoint_atlas": {"type": "array"},
+        "transition_atlas": {"type": "array"}
+      }
+    }
+  }
+}

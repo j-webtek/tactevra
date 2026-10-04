@@ -1,0 +1,88 @@
+{
+  "all_declared_cases_matched": true,
+  "camera_opened": false,
+  "case_count": 8,
+  "cases": [
+    {
+      "case_id": "complete_templates",
+      "detail": [],
+      "expected": "PASS",
+      "matched": true,
+      "observed": "PASS"
+    },
+    {
+      "case_id": "missing_rigid_body",
+      "detail": [
+        "GEOMETRY_REQUIRED_BODY_BINDING_MISSING:attachment:camera_holder"
+      ],
+      "expected": "BLOCKED",
+      "matched": true,
+      "observed": "BLOCKED"
+    },
+    {
+      "case_id": "unknown_attachment_evidence",
+      "detail": [
+        "GEOMETRY_REQUIRED_BODY_GEOMETRY_UNKNOWN:attachment:camera_holder"
+      ],
+      "expected": "BLOCKED",
+      "matched": true,
+      "observed": "BLOCKED"
+    },
+    {
+      "case_id": "maximum_posture_boundary",
+      "detail": [
+        "postures=64"
+      ],
+      "expected": "PASS",
+      "matched": true,
+      "observed": "PASS"
+    },
+    {
+      "case_id": "missing_swept_segment",
+      "detail": [
+        "swept envelopes do not cover every adjacent posture pair"
+      ],
+      "expected": "REJECTED",
+      "matched": true,
+      "observed": "REJECTED"
+    },
+    {
+      "case_id": "crossed_posture_lineage",
+      "detail": [
+        "sweep 0 lineage differs from adjacent postures"
+      ],
+      "expected": "REJECTED",
+      "matched": true,
+      "observed": "REJECTED"
+    },
+    {
+      "case_id": "unknown_source_hash",
+      "detail": [
+        "cable source is absent from installed profile bindings"
+      ],
+      "expected": "REJECTED",
+      "matched": true,
+      "observed": "REJECTED"
+    },
+    {
+      "case_id": "cable_used_as_rigid_geometry",
+      "detail": [
+        "cable intake can satisfy only the cable_envelope route"
+      ],
+      "expected": "REJECTED",
+      "matched": true,
+      "observed": "REJECTED"
+    }
+  ],
+  "controller_commands": [],
+  "controller_started": false,
+  "evidence_class": "SYNTHETIC_OFFLINE_ONLY",
+  "hardware_writes": 0,
+  "matched_count": 8,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "qualification_installed": false,
+  "report_sha256": "373494058fabbe118ba7073642b17f2874e874f2e73ca839b6a5934f4b1bc57e",
+  "schema": "rocell.installed_geometry_cable_rehearsal.v1",
+  "transport_opened": false
+}

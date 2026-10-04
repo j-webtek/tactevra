@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_ik_effort_campaign_v1.schema.json",
+  "title": "TypingIkEffortCampaignV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "case_count", "cases", "aggregate", "exact_reuse_analysis", "decision_hashes_unchanged", "telemetry_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_ik_effort_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"},
+    "case_count": {"type": "integer", "minimum": 5, "maximum": 64},
+    "cases": {"type": "array", "minItems": 5, "maxItems": 64, "items": {"$ref": "#/$defs/case"}},
+    "aggregate": {"$ref": "#/$defs/aggregate"},
+    "exact_reuse_analysis": {"$ref": "#/$defs/reuse"},
+    "decision_hashes_unchanged": {"const": true},
+    "telemetry_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["case_id", "target_ids", "receipt_sha256", "stage_hashes_sha256", "telemetry"],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1, "maxLength": 192},
+        "target_ids": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+        "receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "stage_hashes_sha256": {"$ref": "#/$defs/sha256"},
+        "telemetry": {"type": "object"}
+      }
+    },
+    "aggregate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["waypoint_count", "attempt_count", "total_iterations", "selected_iterations", "converged_attempt_count", "first_attempt_converged_count", "selected_first_attempt_count"],
+      "properties": {
+        "waypoint_count": {"type": "integer", "minimum": 1},
+        "attempt_count": {"type": "integer", "minimum": 1},
+        "total_iterations": {"type": "integer", "minimum": 0},
+        "selected_iterations": {"type": "integer", "minimum": 0},
+        "converged_attempt_count": {"type": "integer", "minimum": 0},
+        "first_attempt_converged_count": {"type": "integer", "minimum": 0},
+        "selected_first_attempt_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "reuse": {
+      "type": "object", "additionalProperties": false,
+      "required": ["solver_input_observation_count", "unique_solver_input_count", "repeated_observation_count", "reused_identity_count", "maximum_identity_occurrences", "first_convergence_early_exit_equivalent", "cache_authorized"],
+      "properties": {
+        "solver_input_observation_count": {"type": "integer", "minimum": 1},
+        "unique_solver_input_count": {"type": "integer", "minimum": 1},
+        "repeated_observation_count": {"type": "integer", "minimum": 0},
+        "reused_identity_count": {"type": "integer", "minimum": 0},
+        "maximum_identity_occurrences": {"type": "integer", "minimum": 1},
+        "first_convergence_early_exit_equivalent": {"type": "boolean"},
+        "cache_authorized": {"const": false}
+      }
+    }
+  }
+}

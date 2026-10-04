@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/operational_latency_trace_v1.schema.json",
+  "title": "OperationalLatencyTraceV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "trace_id", "evidence_class", "run_class", "cache_outcome",
+    "outcome", "terminal_milestone", "action_count", "blocker_codes",
+    "milestone_catalog", "milestones", "durations_ns", "correlation",
+    "resource_counts", "decision_sha256_before", "decision_sha256_after",
+    "decision_hashes_unchanged", "timing_used_for_admission",
+    "performance_authority", "physical_authority_conferred", "trace_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.operational_latency_trace.v1"},
+    "trace_id": {"$ref": "#/$defs/id"},
+    "evidence_class": {"enum": ["SYNTHETIC_TIMING_FIXTURE", "HOST_MEASURED_OFFLINE", "CONTROLLER_REPORTED", "EXTERNALLY_MEASURED", "INDEPENDENTLY_VERIFIED"]},
+    "run_class": {"enum": ["COLD", "WARM"]},
+    "cache_outcome": {"enum": ["HIT", "MISS", "DISCARDED", "NOT_APPLICABLE"]},
+    "outcome": {"enum": ["COMPLETE", "BLOCKED", "FAILED", "OUTCOME_UNCERTAIN"]},
+    "terminal_milestone": {"$ref": "#/$defs/milestoneId"},
+    "action_count": {"type": "integer", "minimum": 0, "maximum": 64},
+    "blocker_codes": {"type": "array", "maxItems": 64, "uniqueItems": true, "items": {"$ref": "#/$defs/code"}},
+    "milestone_catalog": {"const": ["T0_REQUEST_RECEIVED", "T1_INTENT_SEALED", "T2_PERCEPTION_SEALED", "T3_BATCH_EMITTED", "T4_BATCH_ADMITTED", "T5_FIRST_PLAN_READY", "T6_FIRST_PERMIT_GRANTED", "T7_FIRST_WRITE", "T8_FIRST_SETTLED", "T9_FIRST_EFFECT_VERIFIED", "T10_REQUEST_COMPLETE"]},
+    "milestones": {"type": "array", "minItems": 1, "maxItems": 11, "items": {"$ref": "#/$defs/milestone"}},
+    "durations_ns": {
+      "type": "object", "additionalProperties": false,
+      "required": ["request_to_intent_ns", "request_to_batch_ns", "batch_to_admission_ns", "admission_to_first_plan_ns", "software_decision_latency_ns", "plan_to_permit_ns", "permit_to_first_write_ns", "first_write_to_settled_ns", "settled_to_effect_verified_ns", "first_action_latency_ns", "total_request_latency_ns"],
+      "properties": {
+        "request_to_intent_ns": {"$ref": "#/$defs/nullableDuration"},
+        "request_to_batch_ns": {"$ref": "#/$defs/nullableDuration"},
+        "batch_to_admission_ns": {"$ref": "#/$defs/nullableDuration"},
+        "admission_to_first_plan_ns": {"$ref": "#/$defs/nullableDuration"},
+        "software_decision_latency_ns": {"$ref": "#/$defs/nullableDuration"},
+        "plan_to_permit_ns": {"$ref": "#/$defs/nullableDuration"},
+        "permit_to_first_write_ns": {"$ref": "#/$defs/nullableDuration"},
+        "first_write_to_settled_ns": {"$ref": "#/$defs/nullableDuration"},
+        "settled_to_effect_verified_ns": {"$ref": "#/$defs/nullableDuration"},
+        "first_action_latency_ns": {"$ref": "#/$defs/nullableDuration"},
+        "total_request_latency_ns": {"$ref": "#/$defs/nullableDuration"}
+      }
+    },
+    "correlation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["request_sha256", "session_sha256", "ai_batch_sha256", "plan_sha256", "configuration_epoch_sha256", "controller_session_sha256", "result_sha256"],
+      "properties": {
+        "request_sha256": {"$ref": "#/$defs/sha256"},
+        "session_sha256": {"$ref": "#/$defs/sha256"},
+        "ai_batch_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "plan_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "configuration_epoch_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "controller_session_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "result_sha256": {"$ref": "#/$defs/nullableSha256"}
+      }
+    },
+    "resource_counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_bytes", "ik_solve_count", "screening_sample_count", "controller_command_count", "hardware_write_count", "physical_movement_count"],
+      "properties": {
+        "artifact_bytes": {"$ref": "#/$defs/counter"},
+        "ik_solve_count": {"$ref": "#/$defs/counter"},
+        "screening_sample_count": {"$ref": "#/$defs/counter"},
+        "controller_command_count": {"$ref": "#/$defs/counter"},
+        "hardware_write_count": {"$ref": "#/$defs/counter"},
+        "physical_movement_count": {"$ref": "#/$defs/counter"}
+      }
+    },
+    "decision_sha256_before": {"$ref": "#/$defs/sha256"},
+    "decision_sha256_after": {"$ref": "#/$defs/sha256"},
+    "decision_hashes_unchanged": {"const": true},
+    "timing_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "physical_authority_conferred": {"const": false},
+    "trace_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "id": {"type": "string", "minLength": 1, "maxLength": 192, "pattern": "^[A-Za-z0-9._:@/-]+$"},
+    "code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,95}$"},
+    "counter": {"type": "integer", "minimum": 0, "maximum": 1000000},
+    "duration": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+    "nullableDuration": {"oneOf": [{"$ref": "#/$defs/duration"}, {"type": "null"}]},
+    "milestoneId": {"enum": ["T0_REQUEST_RECEIVED", "T1_INTENT_SEALED", "T2_PERCEPTION_SEALED", "T3_BATCH_EMITTED", "T4_BATCH_ADMITTED", "T5_FIRST_PLAN_READY", "T6_FIRST_PERMIT_GRANTED", "T7_FIRST_WRITE", "T8_FIRST_SETTLED", "T9_FIRST_EFFECT_VERIFIED", "T10_REQUEST_COMPLETE"]},
+    "milestone": {
+      "type": "object", "additionalProperties": false,
+      "required": ["milestone_id", "monotonic_ns"],
+      "properties": {"milestone_id": {"$ref": "#/$defs/milestoneId"}, "monotonic_ns": {"$ref": "#/$defs/duration"}}
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_original_v1.schema.json",
+  "title": "Camera arrival physical-original sidecar v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "artifact_id",
+    "artifact_class",
+    "captured_at_utc",
+    "source_relative_path",
+    "source_size_bytes",
+    "source_sha256",
+    "units",
+    "uncertainty",
+    "configuration_epoch_id",
+    "review"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_original.v1"},
+    "artifact_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "artifact_class": {
+      "enum": [
+        "CAMERA_ORIGINAL",
+        "INSTALLATION_ORIGINAL",
+        "CALIBRATION_ORIGINAL",
+        "WORKCELL_ORIGINAL",
+        "DEVICE_ORIGINAL",
+        "TOOL_ORIGINAL",
+        "CAMPAIGN_ORIGINAL",
+        "EVALUATION_ORIGINAL"
+      ]
+    },
+    "captured_at_utc": {"type": "string", "format": "date-time"},
+    "source_relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "not": {"pattern": "(^[A-Za-z]:)|(^[/\\\\])|(\\.\\.)"}
+    },
+    "source_size_bytes": {"type": "integer", "minimum": 1, "maximum": 10737418240},
+    "source_sha256": {"$ref": "#/$defs/sha256"},
+    "units": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["px", "mm", "rad"]},
+      "maxItems": 3
+    },
+    "uncertainty": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["value", "unit", "method", "evidence_sha256"],
+      "properties": {
+        "value": {"type": "number", "minimum": 0},
+        "unit": {"enum": ["px", "mm", "rad"]},
+        "method": {"type": "string", "minLength": 1, "maxLength": 256},
+        "evidence_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "configuration_epoch_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer_id", "reviewed_at_utc", "disposition", "review_sha256"],
+      "properties": {
+        "reviewer_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "reviewed_at_utc": {"type": "string", "format": "date-time"},
+        "disposition": {"enum": ["ACCEPTED", "REJECTED"]},
+        "review_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "artifact_class": {
+            "enum": [
+              "CALIBRATION_ORIGINAL",
+              "WORKCELL_ORIGINAL",
+              "DEVICE_ORIGINAL",
+              "TOOL_ORIGINAL",
+              "EVALUATION_ORIGINAL"
+            ]
+          }
+        },
+        "required": ["artifact_class"]
+      },
+      "then": {"properties": {"uncertainty": {"type": "object"}}}
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

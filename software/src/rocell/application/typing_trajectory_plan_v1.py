@@ -29,6 +29,7 @@ SCHEMA = "rocell.typing_trajectory_plan.v1"
 POLICY_SCHEMA = "rocell.typing_trajectory_policy.v1"
 STATUS = "READY_FOR_DETERMINISTIC_IK_AND_COLLISION_SCREENING"
 MAX_SCREENING_SAMPLES = 16_384
+EVIDENCE_FLOAT_DECIMAL_PLACES = 6
 _QUINTIC_PEAK_VELOCITY = 1.875
 _QUINTIC_PEAK_ACCELERATION = 10.0 / math.sqrt(3.0)
 _QUINTIC_PEAK_JERK = 60.0
@@ -69,6 +70,12 @@ def _positive(value: float, label: str, *, maximum: float) -> float:
     if not math.isfinite(result) or not 0.0 < result <= maximum:
         raise TypingTrajectoryPlanV1Error(f"{label} is outside its bounded range")
     return result
+
+
+def _evidence_float(value: float) -> float:
+    """Remove sub-nanometre/runtime accumulation noise from plan evidence."""
+    result = round(float(value), EVIDENCE_FLOAT_DECIMAL_PLACES)
+    return 0.0 if result == 0.0 else result
 
 
 @dataclass(frozen=True, slots=True)
@@ -298,11 +305,13 @@ def _timing(
     }
     limiting, duration_s = max(candidates.items(), key=lambda item: item[1])
     return QuinticTimingSegmentV1(
-        sequence, source_sequence, destination_sequence, distance_mm,
-        duration_s * 1000.0, dwell_after_ms, limiting,
-        _QUINTIC_PEAK_VELOCITY * distance_mm / duration_s,
-        _QUINTIC_PEAK_ACCELERATION * distance_mm / duration_s**2,
-        _QUINTIC_PEAK_JERK * distance_mm / duration_s**3,
+        sequence, source_sequence, destination_sequence,
+        _evidence_float(distance_mm),
+        _evidence_float(duration_s * 1000.0), dwell_after_ms, limiting,
+        _evidence_float(_QUINTIC_PEAK_VELOCITY * distance_mm / duration_s),
+        _evidence_float(
+            _QUINTIC_PEAK_ACCELERATION * distance_mm / duration_s**2),
+        _evidence_float(_QUINTIC_PEAK_JERK * distance_mm / duration_s**3),
     )
 
 
@@ -343,9 +352,15 @@ def _screening_samples(
             ratio = step / steps
             point = Point3Mm(
                 source.point.frame,
-                source.point.x + (destination.point.x - source.point.x) * ratio,
-                source.point.y + (destination.point.y - source.point.y) * ratio,
-                source.point.z + (destination.point.z - source.point.z) * ratio,
+                _evidence_float(
+                    source.point.x
+                    + (destination.point.x - source.point.x) * ratio),
+                _evidence_float(
+                    source.point.y
+                    + (destination.point.y - source.point.y) * ratio),
+                _evidence_float(
+                    source.point.z
+                    + (destination.point.z - source.point.z) * ratio),
             )
             phase = destination.phase if step == steps else (
                 MotionPhase.APPROACH
@@ -379,14 +394,17 @@ def compile_typing_trajectory_plan_v1(
     park_ms = _time_for_points(_park_baseline_points(plan), policy)
     saved = max(0.0, park_ms - direct_ms)
     metrics = TypingTrajectoryMetricsV1(
-        direct_distance_mm=sum(item.distance_mm for item in timings),
-        park_baseline_distance_mm=plan.metrics.park_total_distance_mm,
-        direct_motion_time_ms=motion_ms,
+        direct_distance_mm=_evidence_float(
+            sum(item.distance_mm for item in timings)),
+        park_baseline_distance_mm=_evidence_float(
+            plan.metrics.park_total_distance_mm),
+        direct_motion_time_ms=_evidence_float(motion_ms),
         direct_dwell_time_ms=dwell_ms,
-        direct_estimated_time_ms=direct_ms,
-        park_baseline_estimated_time_ms=park_ms,
-        estimated_time_saved_ms=saved,
-        estimated_time_reduction_fraction=saved / park_ms if park_ms else 0.0,
+        direct_estimated_time_ms=_evidence_float(direct_ms),
+        park_baseline_estimated_time_ms=_evidence_float(park_ms),
+        estimated_time_saved_ms=_evidence_float(saved),
+        estimated_time_reduction_fraction=_evidence_float(
+            saved / park_ms if park_ms else 0.0),
     )
     return TypingTrajectoryPlanV1(
         source_plan_sha256=plan.plan_sha256,

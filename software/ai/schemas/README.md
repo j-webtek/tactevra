@@ -268,3 +268,18 @@ binds an offline synthetic error bound to a checkpoint, domain, target set,
 and distinct calibration/evaluation datasets. No qualification is installed.
 The producer constructs the existing shared ModelMotionBatch only after
 precision and scene checks; scene confidence cannot fill a localization gap.
+
+The [camera-arrival consumer handoff](camera_arrival_consumer_handoff_v1.schema.json)
+binds each structurally valid arrival original to the exact consumer source,
+downstream schema, and field binding in the current checkout. The companion
+[consumer receipt](camera_arrival_consumer_validation_receipt_v1.schema.json)
+and [aggregate assessment](camera_arrival_consumer_validation_assessment_v1.schema.json)
+retain each consumer pass or blocker against those exact hashes. Completion is
+only readiness for offline review; all epoch, registry, qualification, device,
+write, movement, admission, and physical-authority fields remain false.
+Domain adapters cover the camera/support assessment, localization campaign
+preflight, held-out localization evaluation, typed planner snapshot, and typed
+installed collision/cable profile. They preserve native blocked outcomes and
+do not make the generic receipt gate responsible for domain-specific pass
+criteria. Complete route coverage therefore remains distinct from 15 passing
+receipts.

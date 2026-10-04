@@ -63,55 +63,56 @@ is neither the AI model nor the arm; it is the governed connective layer that
 lets independently developed intelligence and hardware work together without
 confusing a plausible idea with an authorized physical act.
 
-## Why Tactevra
+## Current readiness
 
-Giving an AI model a physical appendage introduces a boundary that ordinary
-software agents do not have: a plausible answer can become real motion.
-Tactevra makes that boundary explicit and inspectable.
+Tactevra has completed its planned **pre-camera software integration**. The
+repository can accept actual AI-produced action batches, validate their
+evidence, preserve ordered typing targets, generate smooth offline
+trajectories, and reject stale, malformed, uncertain, or unauthorized input.
 
-| Principle | What it means in Tactevra |
+It has **not** yet demonstrated reliable autonomous physical typing. The final
+camera, measured workcell transforms, real localization bounds, installed
+collision evidence, and independently verified key contact remain required.
+
+| State | What it means |
 | --- | --- |
-| **Semantic, not servo-level input** | AI components propose named actions and evidence-bound targets rather than writing raw motor commands. |
-| **Deterministic admission** | Runtime checks own calibration, coordinate transforms, freshness, reachability, motion policy, and execution authority. |
-| **Observable outcomes** | Proposed, accepted, transmitted, reported, and independently verified states remain distinct. |
-| **Fail-closed behavior** | Missing, stale, incompatible, or uncertain evidence blocks progress instead of being silently guessed. |
-| **Local-first development** | Core rehearsal, parsing, simulation, and validation paths can be inspected without a cloud control plane. |
+| **Ready now** | Hardware-free request parsing, versioned AI-to-arm contracts, strict admission, ordered trajectory generation, deterministic replay, fault testing, and camera-arrival tooling |
+| **Waiting on physical evidence** | Final-camera calibration, measured robot/device/tool transforms, real localization bounds, and installed cable/geometry qualification |
+| **Not yet demonstrated** | Reliable autonomous physical typing, verified strings, or phone operation |
 
-The first workcell uses a Waveshare RoArm-M3 to research interaction with tools
-designed for people—initially keyboards and phone interfaces. The architecture
-is intended to remain useful beyond one arm, model, or device.
+The latest compatibility corpus exercises mixed typing and all 46 named
+keyboard targets while retaining zero hardware authority. The current
+precision-model uncertainty remains too large for safe key contact, so the arm
+runtime correctly blocks it. See [project status](PROJECT_STATUS.md) for dated
+evidence and exact limitations.
 
-## How it works
+## Choose your path
 
-```mermaid
-flowchart LR
-    A[User request] --> B[Understand intent]
-    C[Camera evidence] --> D[Locate scene targets]
-    B --> E[Typed action proposal]
-    D --> E
-    E --> F{Deterministic admission}
-    F -->|reject or hold| G[No motion]
-    F -->|admit| H[Plan and execute]
-    H --> I[Observe outcome]
-    I --> J[Verification record]
+| If you want to… | Start here |
+| --- | --- |
+| Run the hardware-free walkthrough | [Getting started](docs/GETTING_STARTED.md) |
+| Understand the request-to-result architecture | [System overview](docs/SYSTEM_OVERVIEW.md) |
+| Review evidence, readiness, and limitations | [Project status](PROJECT_STATUS.md) |
+| Explore the local setup and diagnostic interface | [Tactevra Studio workbench](software/docs/WIZARD_WORKBENCH.md) |
+| Integrate AI output with the arm runtime | [Shared AI/arm workplan](software/ai/docs/SHARED_AI_ARM_WORKPLAN.md) |
+| Develop the runtime | [Software reference](software/README.md) |
+| Plan or source a workcell | [Workcell replication guide](docs/WORKCELL_REPLICATION.md) |
+| Build the workcell | [Hardware build guide](docs/HARDWARE_BUILD_GUIDE.md) |
+| Contribute or maintain the repository | [Contributing](CONTRIBUTING.md) · [Repository operations](docs/REPOSITORY_OPERATIONS.md) |
+| Find a specific technical document | [Documentation index](docs/README.md) · [Glossary](docs/GLOSSARY.md) |
+
+## Try the offline pipeline
+
+The hardware-free walkthrough demonstrates the AI-to-arm software boundary
+without moving an arm or downloading a model:
+
+```text
+user text
+    → ordered named actions
+    → nominal coordinate preview
+    → explicit execution blockers
+    → no controller commands
 ```
-
-The system follows five stages:
-
-1. **Perceive** — collect image and system-state evidence.
-2. **Propose** — translate intent into typed, coordinate-aware actions.
-3. **Check** — validate identity, calibration, freshness, geometry, and policy.
-4. **Execute** — convert an admitted plan into bounded controller work.
-5. **Verify** — compare the observed result with the requested outcome.
-
-This separation is the core design: model reasoning remains useful without
-making model output the final authority over physical movement.
-
-## Hardware-free software preview
-
-For reviewers and contributors, the repository includes a hardware-free path
-that demonstrates the software boundary without moving an arm or downloading a
-model. This is an engineering preview, not a general-availability release.
 
 ### 1. Install
 
@@ -133,7 +134,7 @@ python -m venv .venv
 ```
 
 The output contains an ordered proposal for H followed by I. It is a structured
-plan, not a keystroke and not permission to move hardware.
+plan—not a keystroke and not permission to move hardware.
 
 ### 3. Preview nominal targets
 
@@ -142,7 +143,8 @@ plan, not a keystroke and not permission to move hardware.
 ```
 
 This exposes candidate coordinates and the prerequisites still missing before
-execution. The preview deliberately produces no controller commands.
+execution. The preview deliberately produces no controller commands, opens no
+transport, and grants no physical authority.
 
 For expected results, troubleshooting, and the optional local interface, follow
 the complete [getting-started guide](docs/GETTING_STARTED.md).
@@ -169,68 +171,113 @@ to the authoritative BOMs:
 The replication guide is a maintained procurement index. Controlled BOMs,
 revisioned build records, and physical acceptance checks remain authoritative.
 
-## Current project surface
+## How the system works
 
-| Area | Available in the repository |
-| --- | --- |
-| Intent | Grounded parsing and deterministic compilation for supported requests |
-| Perception | Scene-quality adapters, saved-image workflows, and experimental keyboard localization |
-| AI-to-arm boundary | Versioned schemas, proposal validation, freshness checks, and compatibility profiles |
-| Motion runtime | Coordinate transforms, IK and route screening, controller-command previews, and lifecycle rehearsal |
-| Evidence | Append-only engineering records, identity-bound manifests, and explicit evidence levels |
-| Workcell | RC03 printable hardware, assembly resources, and static-camera integration designs |
-| Developer operations | Cross-platform tests, repository governance, release gates, and automated health reporting |
-
-For the precise, dated distinction between implemented software, simulation,
-controller feedback, physical measurement, and verified device input, use
-[project status](PROJECT_STATUS.md). Detailed test counts and workstream stages
-belong in the linked evidence records rather than this overview.
-
-## Architecture and workstreams
-
-```text
-User / application
-        │
-        ▼
-Tactevra AI ── typed proposal + evidence ──► Tactevra Runtime
-                                                   │
-                                      admission, planning, execution
-                                                   │
-                                                   ▼
-                                         Tactevra Workcell
-                                                   │
-                                                   ▼
-                                      observation and verification
+```mermaid
+flowchart TD
+    A[User request] --> B[Intent model or grounded parser]
+    B --> C[Ordered named actions]
+    D[Camera and system evidence] --> E[Targets plus uncertainty]
+    C --> F[Typed AI proposal]
+    E --> F
+    F --> G{Strict arm admission}
+    G -->|reject, abstain, or hold| H[No motion]
+    G -->|admit| I[Smooth trajectory planning]
+    I --> J[Reviewed single-writer execution]
+    J --> K[Feedback and independent verification]
 ```
 
-- **Tactevra AI** interprets requests, evaluates scenes, and proposes targets.
-- **Tactevra Runtime** owns validation, planning, authority, communication, and
-  result records.
-- **Tactevra Workcell** combines the arm, camera, tools, fixtures, and measured
-  environment.
-- **Tactevra Studio** is the local interface for setup, rehearsal, task review,
-  and diagnostics.
+The system follows five stages:
+
+1. **Perceive** — collect image and system-state evidence.
+2. **Propose** — translate intent into typed, coordinate-aware actions.
+3. **Check** — validate identity, calibration, freshness, uncertainty,
+   geometry, and policy.
+4. **Execute** — convert an admitted plan into bounded controller work through
+   one command owner.
+5. **Verify** — distinguish controller feedback from independent confirmation
+   that the requested device effect occurred.
+
+The ownership boundary is deliberate:
+
+- **Tactevra AI** interprets requests, evaluates scenes, and proposes named
+  targets with evidence and uncertainty. It does not write servo commands.
+- **Tactevra Runtime** owns trust decisions, coordinate transforms, planning,
+  collision policy, execution authority, controller communication, and result
+  records.
+- **Tactevra Workcell** combines the arm, camera, tools, fixtures, cables, and
+  measured environment.
+- **Tactevra Studio** provides local setup, rehearsal, task review, evidence
+  collection, and diagnostics.
 
 Shared contracts keep these workstreams compatible without collapsing their
-responsibilities. See the [system overview](docs/SYSTEM_OVERVIEW.md) for the
-full request-to-result flow and the
-[shared AI/arm workplan](software/ai/docs/SHARED_AI_ARM_WORKPLAN.md) for current
-integration ownership.
+responsibilities. A plausible model result remains only a proposal until the
+runtime admits it.
 
-## Choose your path
+## Capability and evidence surface
 
-| If you want to… | Start here |
+| Capability | Current standing | Next requirement |
+| --- | --- | --- |
+| Text interpretation | Supported keyboard requests become ordered named actions | Broader held-out language evaluation |
+| AI-to-arm interface | Actual emitter output passes the strict versioned contract | Maintain compatibility as models and contracts evolve |
+| Keyboard targets | Mixed sequences and all 46 named targets compile offline in exact order | Real-camera coordinate qualification |
+| Perception | Scene-quality, precision-adapter, saved-image, and abstention paths exist | Final-camera evaluation and a bound that fits applicable key-safe regions |
+| Motion planning | Ordered smooth trajectories and lifecycle records compile offline | Installed transforms, IK, cable, and collision qualification |
+| Controller runtime | Ownership, encoding, feedback matching, deadlines, and no-ambiguous-retry behavior are rehearsed | Installed-controller qualification and measured timing |
+| Physical interaction | Earlier supervised movement and feedback experiments provide development evidence | One measured non-contact hover, then one independently verified keypress |
+| Phone operation | Contracts and planning concepts exist | Qualified screen perception, state transitions, and verified taps |
+
+The words *implemented*, *simulated*, *measured*, and *verified* are not
+interchangeable in this project. Detailed test counts, firmware history, and
+dated evidence belong in [project status](PROJECT_STATUS.md) and the
+[evidence ledger](software/ai/docs/EVIDENCE_LEDGER.md).
+
+## Next physical milestone
+
+The next goal is not another arbitrary ghost-motion routine. It is one
+camera-guided, measured, independently checked interaction:
+
+1. Install and identify the final fixed camera.
+2. Collect the required physical-original evidence.
+3. Measure camera, board, keyboard, robot-base, and tool transforms.
+4. Commission one coherent configuration epoch.
+5. Evaluate localization on held-out real captures.
+6. Establish an uncertainty bound that fits the intended target's safe region.
+7. Screen installed robot, attachment, cable, and workspace geometry.
+8. Qualify one slow non-contact hover from a fresh observed arm state.
+9. Qualify one keypress with independent device-effect verification.
+10. Expand to held-out short strings before measuring sustainable typing speed.
+
+The prepared [camera-arrival checklist](software/docs/CAMERA_ARRIVAL_DAY_CHECKLIST_V1.md)
+and [shared AI/arm workplan](software/ai/docs/SHARED_AI_ARM_WORKPLAN.md) govern
+this transition. Passing an offline compatibility test cannot skip these steps.
+
+## Why Tactevra
+
+Giving an AI model a physical appendage introduces a boundary that ordinary
+software agents do not have: a plausible answer can become real motion.
+Tactevra makes that boundary explicit and inspectable.
+
+| Principle | What it means in Tactevra |
 | --- | --- |
-| Run the hardware-free walkthrough | [Getting started](docs/GETTING_STARTED.md) |
-| Understand the architecture | [System overview](docs/SYSTEM_OVERVIEW.md) |
-| Review current evidence and limitations | [Project status](PROJECT_STATUS.md) |
-| Explore the local interface | [Tactevra Studio workbench](software/docs/WIZARD_WORKBENCH.md) |
-| Integrate AI output with arm software | [Shared AI/arm workplan](software/ai/docs/SHARED_AI_ARM_WORKPLAN.md) |
-| Develop the runtime | [Software reference](software/README.md) |
-| Plan or source a workcell | [Workcell replication guide](docs/WORKCELL_REPLICATION.md) |
-| Build the workcell | [Hardware build guide](docs/HARDWARE_BUILD_GUIDE.md) |
-| Contribute or maintain the repository | [Contributing](CONTRIBUTING.md) · [Repository operations](docs/REPOSITORY_OPERATIONS.md) |
-| Find a specific technical document | [Documentation index](docs/README.md) · [Glossary](docs/GLOSSARY.md) |
+| **Semantic, not servo-level input** | AI components propose named actions and evidence-bound targets rather than writing raw motor commands. |
+| **Deterministic admission** | Runtime checks own calibration, coordinate transforms, freshness, reachability, motion policy, and execution authority. |
+| **Observable outcomes** | Proposed, accepted, transmitted, reported, and independently verified states remain distinct. |
+| **Fail-closed behavior** | Missing, stale, incompatible, or uncertain evidence blocks progress instead of being silently guessed. |
+| **Local-first development** | Core rehearsal, parsing, simulation, and validation paths can be inspected without a cloud control plane. |
+
+The first workcell uses a Waveshare RoArm-M3 to research interaction with tools
+designed for people—initially keyboards and phone interfaces. The architecture
+is intended to remain useful beyond one arm, model, or device.
+
+## Watch the architecture
+
+[![Watch the Tactevra system explainer](assets/media/tactevra-overview-poster.jpg)](https://j-webtek.github.io/tactevra/)
+
+[Watch the narrated explainer](https://j-webtek.github.io/tactevra/) to follow a
+request through perceive, propose, check, execute, and verify. The rendered
+keypress is labeled as a simulation and illustrates the system design rather
+than physical-qualification evidence.
 
 ## Repository map
 

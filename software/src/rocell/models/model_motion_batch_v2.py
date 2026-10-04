@@ -18,6 +18,7 @@ PROPOSAL_SCHEMA = "rocell.model_motion_proposal.v2"
 COORDINATE_PROFILE_V2 = "board_mm_xy_plane_v2"
 MAX_BATCH_PROPOSALS_V2 = 64
 MAX_BATCH_BYTES_V2 = 1_048_576
+MAX_BATCH_JSON_DEPTH_V2 = 32
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 _PROFILE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
@@ -387,13 +388,25 @@ def decode_model_motion_batch_v2_json(payload: bytes) -> ModelMotionBatchV2:
         value = json.loads(payload.decode("utf-8"), object_pairs_hook=unique,
                            parse_constant=lambda item: (_ for _ in ()).throw(
                                ModelMotionBatchV2Error(f"non-finite JSON constant {item!r}")))
+    except RecursionError as exc:
+        raise ModelMotionBatchV2Error("v2 payload exceeds JSON depth limit") from exc
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ModelMotionBatchV2Error("v2 payload is not strict UTF-8 JSON") from exc
+    stack: list[tuple[object, int]] = [(value, 1)]
+    while stack:
+        item, depth = stack.pop()
+        if depth > MAX_BATCH_JSON_DEPTH_V2:
+            raise ModelMotionBatchV2Error("v2 payload exceeds JSON depth limit")
+        if isinstance(item, Mapping):
+            stack.extend((child, depth + 1) for child in item.values())
+        elif isinstance(item, list):
+            stack.extend((child, depth + 1) for child in item)
     return ModelMotionBatchV2.from_mapping(value)
 
 
 __all__ = ["BATCH_SCHEMA", "PROPOSAL_SCHEMA", "COORDINATE_PROFILE_V2",
-           "MAX_BATCH_BYTES_V2", "MAX_BATCH_PROPOSALS_V2", "ModelMotionBatchV2",
+           "MAX_BATCH_BYTES_V2", "MAX_BATCH_JSON_DEPTH_V2",
+           "MAX_BATCH_PROPOSALS_V2", "ModelMotionBatchV2",
            "ModelMotionBatchV2Error", "ModelMotionProposalV2", "MotionCapabilityV2",
            "MotionEvidenceV2", "MotionGeometryV2", "MotionUncertaintyV2",
            "UncertaintyBoundType", "decode_model_motion_batch_v2_json"]

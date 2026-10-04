@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_exact_ik_cache_owner_campaign_v1.schema.json",
+  "title": "TypingExactIkCacheOwnerCampaignV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "case_count", "cases", "all_expected_outcomes", "decision_hashes_unchanged", "diagnostics_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_exact_ik_cache_owner_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"},
+    "case_count": {"const": 6},
+    "cases": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"$ref": "#/$defs/case"}},
+    "all_expected_outcomes": {"const": true},
+    "decision_hashes_unchanged": {"const": true},
+    "diagnostics_used_for_admission": {"const": false},
+    "performance_authority": {"const": false},
+    "controller_opened": {"const": false},
+    "transport_opened": {"const": false},
+    "controller_commands": {"const": []},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case", "status", "transition", "old_cache_retired", "execution_status", "receipt_sha256", "receipt_matches_reference", "after_owner_snapshot"],
+      "properties": {
+        "case": {"enum": ["NORMAL_COLD_WARM", "RELOAD_RETIREMENT", "RESTART_RETIREMENT", "EXPLICIT_INVALIDATION", "RELOAD_REFRESH_FAILURE", "RESTART_REFRESH_FAILURE"]},
+        "status": {"const": "PASS"},
+        "transition": {"enum": ["NONE", "RELOAD", "RESTART", "INVALIDATE"]},
+        "old_cache_retired": {"type": "boolean"},
+        "execution_status": {"enum": ["PASSED", "BLOCKED"]},
+        "receipt_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "receipt_matches_reference": {"type": ["boolean", "null"]},
+        "after_owner_snapshot": {"type": "object"}
+      }
+    }
+  }
+}

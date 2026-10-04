@@ -1,0 +1,3281 @@
+{
+  "camera_opened": false,
+  "controller_commands": [],
+  "controller_started": false,
+  "decision_hashes_unchanged": true,
+  "evidence_class": "HOST_MEASURED_OFFLINE",
+  "hardware_writes": 0,
+  "overall_summary": {
+    "blocker_codes": [
+      "ARRIVAL_EVIDENCE_INCOMPLETE",
+      "COLLECTION_INCOMPLETE",
+      "CONSUMER_VALIDATION_PENDING",
+      "EVIDENCE_STALE",
+      "LOCALIZATION_QUALIFICATION_BLOCKED",
+      "RECEIPTS_PENDING"
+    ],
+    "cache_outcome_counts": {
+      "HIT": 60,
+      "MISS": 60,
+      "NOT_APPLICABLE": 0
+    },
+    "decision_codes": [
+      "PC11_BLOCKED",
+      "PC11_PASS",
+      "PC11_PENDING",
+      "PC12_PASS",
+      "PC13_BLOCKED",
+      "PC13_PASS",
+      "PC14_BLOCKED",
+      "PC14_PASS",
+      "PC14_PENDING",
+      "PC15_PASS",
+      "PC16_BLOCKED"
+    ],
+    "maximum_duration_ns": 1340148900,
+    "minimum_duration_ns": 155600,
+    "outcome_counts": {
+      "BLOCKED": 33,
+      "PASS": 61,
+      "PENDING": 26
+    },
+    "p50_duration_ns": 2389300,
+    "p95_duration_ns": 1309216900,
+    "p99_duration_ns": 1333471900,
+    "run_class_counts": {
+      "COLD": 60,
+      "WARM": 60
+    },
+    "sample_count": 120,
+    "total_artifact_bytes": 1465685,
+    "total_duration_ns": 31714385900,
+    "total_item_count": 1160
+  },
+  "performance_authority": false,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physical_speed_claimed": false,
+  "report_id": "pc17-host-windows-py310-20260929",
+  "report_sha256": "fb893be0f4c7915e6028a069b195145b77b92937023cc623f19737bae3f96a96",
+  "sample_count": 120,
+  "samples": [
+    {
+      "artifact_bytes": 21110,
+      "blocker_codes": [
+        "ARRIVAL_EVIDENCE_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "339b268b3e275531295e169a752bc4ef3fec7d3d683e1a084d6706c9e6e8aaef",
+        "session_sha256": "3f9e20150ae09a1ef4181fdaee8ce7f4f0504e871d75e2ca0e0216da9d9bcd20",
+        "target_id": null
+      },
+      "decision_code": "PC11_BLOCKED",
+      "decision_sha256_after": "339b268b3e275531295e169a752bc4ef3fec7d3d683e1a084d6706c9e6e8aaef",
+      "decision_sha256_before": "339b268b3e275531295e169a752bc4ef3fec7d3d683e1a084d6706c9e6e8aaef",
+      "duration_ns": 16209200,
+      "finished_monotonic_ns": 1250816872657200,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 0,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250816856448000
+    },
+    {
+      "artifact_bytes": 25547,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6e26112123f19dca742a295409c8cc830451922b9d49214fce40ebee6da0f520",
+        "session_sha256": "39cb7adb09c0167d7f0b18e8509c6b467db87992414f6265b8436c01a4e418dc",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "6e26112123f19dca742a295409c8cc830451922b9d49214fce40ebee6da0f520",
+      "decision_sha256_before": "6e26112123f19dca742a295409c8cc830451922b9d49214fce40ebee6da0f520",
+      "duration_ns": 39611400,
+      "finished_monotonic_ns": 1250816940186900,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "COLD",
+      "sequence": 1,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250816900575500
+    },
+    {
+      "artifact_bytes": 31419,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b5770037efec532270cf1a177484c8016ff26867130809c85a75d523e5098969",
+        "session_sha256": "8ef7f295ee66072018348186370ffb785983833b2c0193ce4ac6bfa24d0aab13",
+        "target_id": null
+      },
+      "decision_code": "PC11_PASS",
+      "decision_sha256_after": "b5770037efec532270cf1a177484c8016ff26867130809c85a75d523e5098969",
+      "decision_sha256_before": "b5770037efec532270cf1a177484c8016ff26867130809c85a75d523e5098969",
+      "duration_ns": 97764700,
+      "finished_monotonic_ns": 1250817106824200,
+      "item_count": 15,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 2,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817009059500
+    },
+    {
+      "artifact_bytes": 21110,
+      "blocker_codes": [
+        "ARRIVAL_EVIDENCE_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "dc02d073f6e760e10c75f3bb42e12f6e65b82374ce45dac7d894955c96956538",
+        "session_sha256": "5e2397721845518a14bf737d3c462a363fa5c29d04d6badb8489e6b1fb005b31",
+        "target_id": null
+      },
+      "decision_code": "PC11_BLOCKED",
+      "decision_sha256_after": "dc02d073f6e760e10c75f3bb42e12f6e65b82374ce45dac7d894955c96956538",
+      "decision_sha256_before": "dc02d073f6e760e10c75f3bb42e12f6e65b82374ce45dac7d894955c96956538",
+      "duration_ns": 16895800,
+      "finished_monotonic_ns": 1250817151975000,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 3,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817135079200
+    },
+    {
+      "artifact_bytes": 25547,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "9601be674e8c08bf4f279ef81eab2b707477ccb849b165153f032e6e720074cc",
+        "session_sha256": "04c4f7a07e7e60ad8d44bf78bbd7c3324975d2889f798e01bde7aeedb5d561bc",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "9601be674e8c08bf4f279ef81eab2b707477ccb849b165153f032e6e720074cc",
+      "decision_sha256_before": "9601be674e8c08bf4f279ef81eab2b707477ccb849b165153f032e6e720074cc",
+      "duration_ns": 38795400,
+      "finished_monotonic_ns": 1250817216470700,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "COLD",
+      "sequence": 4,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817177675300
+    },
+    {
+      "artifact_bytes": 31419,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "e4e090655d0491dc7082c4523eaa2991eac25b7acda079c612586edc4a00f0c2",
+        "session_sha256": "97135013a923939820f1ab0783a00829d376694b93eff90af42aa7ed634aa505",
+        "target_id": null
+      },
+      "decision_code": "PC11_PASS",
+      "decision_sha256_after": "e4e090655d0491dc7082c4523eaa2991eac25b7acda079c612586edc4a00f0c2",
+      "decision_sha256_before": "e4e090655d0491dc7082c4523eaa2991eac25b7acda079c612586edc4a00f0c2",
+      "duration_ns": 89871300,
+      "finished_monotonic_ns": 1250817376680100,
+      "item_count": 15,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 5,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817286808800
+    },
+    {
+      "artifact_bytes": 21110,
+      "blocker_codes": [
+        "ARRIVAL_EVIDENCE_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "140910a87a5e746967bb637b9686d1d71951b2bea93363c5467400a781801781",
+        "session_sha256": "27c3620fe96d52af3af2f87cb67ba72eb0d181399e3e81c36a30c389c5fac2b2",
+        "target_id": null
+      },
+      "decision_code": "PC11_BLOCKED",
+      "decision_sha256_after": "140910a87a5e746967bb637b9686d1d71951b2bea93363c5467400a781801781",
+      "decision_sha256_before": "140910a87a5e746967bb637b9686d1d71951b2bea93363c5467400a781801781",
+      "duration_ns": 15870900,
+      "finished_monotonic_ns": 1250817431963600,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 6,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817416092700
+    },
+    {
+      "artifact_bytes": 25547,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "a81864046c3220775a64ff09abc9c437a75c11b6e9512f3cc7a6d248d777b585",
+        "session_sha256": "7cd679544b38cc28a5ae573c0fb24a97a2a8742d54ea805cd9a50add95fd4794",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "a81864046c3220775a64ff09abc9c437a75c11b6e9512f3cc7a6d248d777b585",
+      "decision_sha256_before": "a81864046c3220775a64ff09abc9c437a75c11b6e9512f3cc7a6d248d777b585",
+      "duration_ns": 36579600,
+      "finished_monotonic_ns": 1250817494872900,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "COLD",
+      "sequence": 7,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817458293300
+    },
+    {
+      "artifact_bytes": 31419,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "c10e33e31faad3d2b8014680cf4bdf21e8bae1ea4b9f198f32a46ca5dc1ab2f4",
+        "session_sha256": "8b69a77812db58b7da0a5e7d5a50bf510f1aa1d25fab2c80db3207ea729abf0e",
+        "target_id": null
+      },
+      "decision_code": "PC11_PASS",
+      "decision_sha256_after": "c10e33e31faad3d2b8014680cf4bdf21e8bae1ea4b9f198f32a46ca5dc1ab2f4",
+      "decision_sha256_before": "c10e33e31faad3d2b8014680cf4bdf21e8bae1ea4b9f198f32a46ca5dc1ab2f4",
+      "duration_ns": 93564000,
+      "finished_monotonic_ns": 1250817656248400,
+      "item_count": 15,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 8,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817562684400
+    },
+    {
+      "artifact_bytes": 21110,
+      "blocker_codes": [
+        "ARRIVAL_EVIDENCE_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "5dab0d21806079b5bf714ec68654f8c4e238f9cb46b2df52db377ad38874a88f",
+        "session_sha256": "6042c20b6bcd0c6b585320a6e9d13b29ff745ea8110f91c3036449de802f9def",
+        "target_id": null
+      },
+      "decision_code": "PC11_BLOCKED",
+      "decision_sha256_after": "5dab0d21806079b5bf714ec68654f8c4e238f9cb46b2df52db377ad38874a88f",
+      "decision_sha256_before": "5dab0d21806079b5bf714ec68654f8c4e238f9cb46b2df52db377ad38874a88f",
+      "duration_ns": 15604800,
+      "finished_monotonic_ns": 1250817701284600,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 9,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817685679800
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 38493400,
+      "finished_monotonic_ns": 1250817764836500,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 10,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817726343100
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 24577700,
+      "finished_monotonic_ns": 1250817812243100,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 11,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817787665400
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 24181900,
+      "finished_monotonic_ns": 1250817859770500,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 12,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817835588600
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 24747500,
+      "finished_monotonic_ns": 1250817909016000,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 13,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817884268500
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 26529900,
+      "finished_monotonic_ns": 1250817959874900,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 14,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817933345000
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 23851300,
+      "finished_monotonic_ns": 1250818007596400,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 15,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250817983745100
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 24513500,
+      "finished_monotonic_ns": 1250818057408200,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 16,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250818032894700
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 23472400,
+      "finished_monotonic_ns": 1250818105775600,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 17,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250818082303200
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 24483900,
+      "finished_monotonic_ns": 1250818153410800,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 18,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250818128926900
+    },
+    {
+      "artifact_bytes": 25543,
+      "blocker_codes": [
+        "CONSUMER_VALIDATION_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc11-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+        "session_sha256": "27da16d3a2ae8dd22a489c29897b2cbf5bd6a18e4c1dfab6bd07cec8894a953d",
+        "target_id": null
+      },
+      "decision_code": "PC11_PENDING",
+      "decision_sha256_after": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "decision_sha256_before": "1e8483d5b253eb7eb0f8251f2d7b900f213cc1875e2cd8179e450c1e85d246e1",
+      "duration_ns": 24368400,
+      "finished_monotonic_ns": 1250818202564900,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 19,
+      "stage_id": "PC11",
+      "started_monotonic_ns": 1250818178196500
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "3209ab41b83eba2b0e1cbaac2deee46052937d983bb2aee623703673bd606b3e",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1322447400,
+      "finished_monotonic_ns": 1250819549728900,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 20,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250818227281500
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "1387a9fca765aa800e6b2b1e2c384a8cfc0b96fa32f98de7397e2c1cc0a81c42",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1324148100,
+      "finished_monotonic_ns": 1250822189354800,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 21,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250820865206700
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "69ce38ed20b3e248b07ea6b4908f382d6e1804f38b9fd27f9be070e9d21fbc72",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1296690900,
+      "finished_monotonic_ns": 1250824807770000,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 22,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250823511079100
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "ec95bf811eadc00766815690d8b9649fa8a3b52ebf4869209506946388bcb76d",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1307852900,
+      "finished_monotonic_ns": 1250827416954600,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 23,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250826109101700
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "5434186a456f2aba6dd16041db204472ed0dde456174a356ea4b714e154aa6a6",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1292019200,
+      "finished_monotonic_ns": 1250830026378100,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 24,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250828734358900
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "edf97b30cc3f98e416b0feeffaa5d5aad456544644d6d00bfe82c189e6dbab99",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1291988800,
+      "finished_monotonic_ns": 1250832618468500,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 25,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250831326479700
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "88f239ea771d58f0a99de2d3e4c9bacf9f6e69010e89c6bde2d87fb5f89e33ad",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1332534600,
+      "finished_monotonic_ns": 1250835268642700,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 26,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250833936108100
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "1e2b2b96e0db53b60048a89016a50c83d4a96d0c498d7c9e788b3baf2eb997d6",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1305050000,
+      "finished_monotonic_ns": 1250837854420000,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 27,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250836549370000
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "7cab8a6e5d66fb77970f6b7d65412a2565d0755e68ee370e7ec24cd3cb16c3d3",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1320549400,
+      "finished_monotonic_ns": 1250840473636600,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 28,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250839153087200
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "874cf6e0a77b9a8c7561943b1cfeb1a8e07fad395dacd7006b40310cd6b384c5",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1294163900,
+      "finished_monotonic_ns": 1250843067044400,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 29,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250841772880500
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1294936200,
+      "finished_monotonic_ns": 1250845658845700,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 30,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250844363909500
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1340148900,
+      "finished_monotonic_ns": 1250848292146800,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 31,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250846951997900
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1309216900,
+      "finished_monotonic_ns": 1250850904847400,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 32,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250849595630500
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1333471900,
+      "finished_monotonic_ns": 1250853559752500,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 33,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250852226280600
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1283350100,
+      "finished_monotonic_ns": 1250856147581900,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 34,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250854864231800
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1266599600,
+      "finished_monotonic_ns": 1250858675027800,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 35,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250857408428200
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1274825600,
+      "finished_monotonic_ns": 1250861232711900,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 36,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250859957886300
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1271770800,
+      "finished_monotonic_ns": 1250863812129100,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 37,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250862540358300
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1282290600,
+      "finished_monotonic_ns": 1250866386446200,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 38,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250865104155600
+    },
+    {
+      "artifact_bytes": 4632,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc12-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+        "session_sha256": "cd60518c39c583302cb71bc9f6e1daace2f15e37888ed68fc44d5ac53e7e7e2b",
+        "target_id": null
+      },
+      "decision_code": "PC12_PASS",
+      "decision_sha256_after": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "decision_sha256_before": "ff70ee6f990cfcd08393cef0a705b079b3994b1f5805890786b08eec0a77acbb",
+      "duration_ns": 1281947600,
+      "finished_monotonic_ns": 1250868946570600,
+      "item_count": 18,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 39,
+      "stage_id": "PC12",
+      "started_monotonic_ns": 1250867664623000
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "31f64f615b487c492e0fa9a8c8eaf7f0292f602ba3e4a8f0f7fe998cc5e89707",
+        "session_sha256": "05de2167f814e7e3e43df8728344d956a2bb82f1c1c1035859f074e2ffbbe33a",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "31f64f615b487c492e0fa9a8c8eaf7f0292f602ba3e4a8f0f7fe998cc5e89707",
+      "decision_sha256_before": "31f64f615b487c492e0fa9a8c8eaf7f0292f602ba3e4a8f0f7fe998cc5e89707",
+      "duration_ns": 192600,
+      "finished_monotonic_ns": 1250870287771700,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 40,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870287579100
+    },
+    {
+      "artifact_bytes": 1550,
+      "blocker_codes": [
+        "EVIDENCE_STALE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "967106a6c624aa81aebe7379348b510d9683b2817e17b51ab5de8a9a2256feac",
+        "session_sha256": "664659c98afe3a1357cdb19bcc2b33151a1468015127fd15eca3ed0830a698cd",
+        "target_id": null
+      },
+      "decision_code": "PC13_BLOCKED",
+      "decision_sha256_after": "967106a6c624aa81aebe7379348b510d9683b2817e17b51ab5de8a9a2256feac",
+      "decision_sha256_before": "967106a6c624aa81aebe7379348b510d9683b2817e17b51ab5de8a9a2256feac",
+      "duration_ns": 199400,
+      "finished_monotonic_ns": 1250870325960500,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 41,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870325761100
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "e1f858cdceab4d64fce486c9f5f665f012177c075e3cd3cb0c41bdf66a65a70f",
+        "session_sha256": "3f94f2513ba1a51850c5e0b390ed0fb67ff46914936a836c8801ae703ccc387b",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "e1f858cdceab4d64fce486c9f5f665f012177c075e3cd3cb0c41bdf66a65a70f",
+      "decision_sha256_before": "e1f858cdceab4d64fce486c9f5f665f012177c075e3cd3cb0c41bdf66a65a70f",
+      "duration_ns": 189600,
+      "finished_monotonic_ns": 1250870363454200,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 42,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870363264600
+    },
+    {
+      "artifact_bytes": 1550,
+      "blocker_codes": [
+        "EVIDENCE_STALE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "70e4437e135d1e09dafe9f36ed258ebdfbcb6e28915d6d4702e76963e14e9533",
+        "session_sha256": "eedb3eaf333255a6ecb8dfb53f1f794b1ec10989d51f4ad95aed2438543f3980",
+        "target_id": null
+      },
+      "decision_code": "PC13_BLOCKED",
+      "decision_sha256_after": "70e4437e135d1e09dafe9f36ed258ebdfbcb6e28915d6d4702e76963e14e9533",
+      "decision_sha256_before": "70e4437e135d1e09dafe9f36ed258ebdfbcb6e28915d6d4702e76963e14e9533",
+      "duration_ns": 203100,
+      "finished_monotonic_ns": 1250870402469400,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 43,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870402266300
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "f503f079fadbafa7fca8ff5d2c18635f94725e8f4194bb5395908d2b3c29818b",
+        "session_sha256": "39b5013cd5e75b02280e62b0379916153a7bf3f79f42a471683a4dcbfe6a96ee",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "f503f079fadbafa7fca8ff5d2c18635f94725e8f4194bb5395908d2b3c29818b",
+      "decision_sha256_before": "f503f079fadbafa7fca8ff5d2c18635f94725e8f4194bb5395908d2b3c29818b",
+      "duration_ns": 199500,
+      "finished_monotonic_ns": 1250870441012700,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 44,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870440813200
+    },
+    {
+      "artifact_bytes": 1550,
+      "blocker_codes": [
+        "EVIDENCE_STALE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ea41c90a9fef0e626da87f828f55630c249c2b4f57b67e3d7b804a14951341cd",
+        "session_sha256": "d5064559eb51ae7e4a938a6da0fc52663bf217de82dd61bf0d720ea19a4cedb7",
+        "target_id": null
+      },
+      "decision_code": "PC13_BLOCKED",
+      "decision_sha256_after": "ea41c90a9fef0e626da87f828f55630c249c2b4f57b67e3d7b804a14951341cd",
+      "decision_sha256_before": "ea41c90a9fef0e626da87f828f55630c249c2b4f57b67e3d7b804a14951341cd",
+      "duration_ns": 200000,
+      "finished_monotonic_ns": 1250870479452500,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 45,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870479252500
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ac502ff62f0621a8c5f0910339515680c50e305aa8306203f784c8f4239c0a92",
+        "session_sha256": "5ae565fe4e91867c5e252a207291a872e6864d9d9dc46704348a5f3117394093",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "ac502ff62f0621a8c5f0910339515680c50e305aa8306203f784c8f4239c0a92",
+      "decision_sha256_before": "ac502ff62f0621a8c5f0910339515680c50e305aa8306203f784c8f4239c0a92",
+      "duration_ns": 192400,
+      "finished_monotonic_ns": 1250870516396600,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 46,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870516204200
+    },
+    {
+      "artifact_bytes": 1550,
+      "blocker_codes": [
+        "EVIDENCE_STALE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "727b832b4013f40306b7450d4639fa10750ccc7350b210167c1c362c34e83541",
+        "session_sha256": "af48abadf231023ed4d6e97418300761699f0d3c87b4129ba055d4608aab8684",
+        "target_id": null
+      },
+      "decision_code": "PC13_BLOCKED",
+      "decision_sha256_after": "727b832b4013f40306b7450d4639fa10750ccc7350b210167c1c362c34e83541",
+      "decision_sha256_before": "727b832b4013f40306b7450d4639fa10750ccc7350b210167c1c362c34e83541",
+      "duration_ns": 279800,
+      "finished_monotonic_ns": 1250870553876200,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 47,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870553596400
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "ee21ffe2ff5defff584a87dc856604db8a7806c360e1047457515c078cea8ebf",
+        "session_sha256": "5d5323aab10b1a58a3d4f2439b677ffa57d0f6b12ee7aaece7d68d37410f48e3",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "ee21ffe2ff5defff584a87dc856604db8a7806c360e1047457515c078cea8ebf",
+      "decision_sha256_before": "ee21ffe2ff5defff584a87dc856604db8a7806c360e1047457515c078cea8ebf",
+      "duration_ns": 193600,
+      "finished_monotonic_ns": 1250870591408700,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 48,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870591215100
+    },
+    {
+      "artifact_bytes": 1550,
+      "blocker_codes": [
+        "EVIDENCE_STALE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "8ac79013c16516abb617893a0fb03d3c6e2ec4870bae792fd2f4f89b6a46470d",
+        "session_sha256": "334d29a7c7fce0c4528aedeb58e9b526aaf27cb2864aa396d993cb6ab9a92914",
+        "target_id": null
+      },
+      "decision_code": "PC13_BLOCKED",
+      "decision_sha256_after": "8ac79013c16516abb617893a0fb03d3c6e2ec4870bae792fd2f4f89b6a46470d",
+      "decision_sha256_before": "8ac79013c16516abb617893a0fb03d3c6e2ec4870bae792fd2f4f89b6a46470d",
+      "duration_ns": 202200,
+      "finished_monotonic_ns": 1250870631342500,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 49,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870631140300
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 190600,
+      "finished_monotonic_ns": 1250870670221900,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 50,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870670031300
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 161300,
+      "finished_monotonic_ns": 1250870670578300,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 51,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870670417000
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 158700,
+      "finished_monotonic_ns": 1250870670932800,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 52,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870670774100
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 157400,
+      "finished_monotonic_ns": 1250870671275400,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 53,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870671118000
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 155600,
+      "finished_monotonic_ns": 1250870671613400,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 54,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870671457800
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 236000,
+      "finished_monotonic_ns": 1250870672105200,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 55,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870671869200
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 156600,
+      "finished_monotonic_ns": 1250870672451700,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 56,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870672295100
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 156400,
+      "finished_monotonic_ns": 1250870672790700,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 57,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870672634300
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 170000,
+      "finished_monotonic_ns": 1250870673144600,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 58,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870672974600
+    },
+    {
+      "artifact_bytes": 1531,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc13-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+        "session_sha256": "85a89315ccd1332795de2f645c0332f4d42512da564a979e70171c4d9ad4bcac",
+        "target_id": null
+      },
+      "decision_code": "PC13_PASS",
+      "decision_sha256_after": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "decision_sha256_before": "58583850e87ae311ea147f5f3b6f4627961b014c11137fd998b73dbc964f1d10",
+      "duration_ns": 165600,
+      "finished_monotonic_ns": 1250870673501200,
+      "item_count": 1,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 59,
+      "stage_id": "PC13",
+      "started_monotonic_ns": 1250870673335600
+    },
+    {
+      "artifact_bytes": 32366,
+      "blocker_codes": [
+        "COLLECTION_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "de807191812dd17af9183a4430c11578e1475d85b4739c746358e0b00001c779",
+        "session_sha256": "b48fe989c190586d5f76c8766c2ed500d3450ba656523851de58f4f4784d7121",
+        "target_id": null
+      },
+      "decision_code": "PC14_BLOCKED",
+      "decision_sha256_after": "de807191812dd17af9183a4430c11578e1475d85b4739c746358e0b00001c779",
+      "decision_sha256_before": "de807191812dd17af9183a4430c11578e1475d85b4739c746358e0b00001c779",
+      "duration_ns": 660200,
+      "finished_monotonic_ns": 1250870691107800,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 60,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250870690447600
+    },
+    {
+      "artifact_bytes": 39009,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "fbfaf4227dd174e5a1dabc7a0e186e5811472d068279043b024b51cb24d160a5",
+        "session_sha256": "f93b01eeaeac2294fb6d0bc79ed62ab2b86ec47ab365c816fea0964ade6f9796",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "fbfaf4227dd174e5a1dabc7a0e186e5811472d068279043b024b51cb24d160a5",
+      "decision_sha256_before": "fbfaf4227dd174e5a1dabc7a0e186e5811472d068279043b024b51cb24d160a5",
+      "duration_ns": 845400,
+      "finished_monotonic_ns": 1250870741728100,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "COLD",
+      "sequence": 61,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250870740882700
+    },
+    {
+      "artifact_bytes": 47987,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "52c955817a870de69e8b40aa4ff697fca4d163863de52269b4bfe7ddb145488f",
+        "session_sha256": "22a0db6aeede721719b69299905bb9c1d55fb88bcf0f95cddee81b67db286292",
+        "target_id": null
+      },
+      "decision_code": "PC14_PASS",
+      "decision_sha256_after": "52c955817a870de69e8b40aa4ff697fca4d163863de52269b4bfe7ddb145488f",
+      "decision_sha256_before": "52c955817a870de69e8b40aa4ff697fca4d163863de52269b4bfe7ddb145488f",
+      "duration_ns": 883700,
+      "finished_monotonic_ns": 1250870884044900,
+      "item_count": 15,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 62,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250870883161200
+    },
+    {
+      "artifact_bytes": 32366,
+      "blocker_codes": [
+        "COLLECTION_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "e9e9802994ace64e81b67b847d5c77d4077c294d965024d89467ae2d8d1c6a9a",
+        "session_sha256": "7c939ac59e134379d6aa865dfcc94d46016d7e7e6826fdddbbf503d40f0901da",
+        "target_id": null
+      },
+      "decision_code": "PC14_BLOCKED",
+      "decision_sha256_after": "e9e9802994ace64e81b67b847d5c77d4077c294d965024d89467ae2d8d1c6a9a",
+      "decision_sha256_before": "e9e9802994ace64e81b67b847d5c77d4077c294d965024d89467ae2d8d1c6a9a",
+      "duration_ns": 690100,
+      "finished_monotonic_ns": 1250870901009500,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 63,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250870900319400
+    },
+    {
+      "artifact_bytes": 39009,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b47c1e139cbc4eb9ae3615938c4d6dc1e55563a062f0bd97ff44315a1e33f3e6",
+        "session_sha256": "250778820579c7bbb38adfb87a94000a8ee8287a3577c545fddb721ed62c7eb5",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "b47c1e139cbc4eb9ae3615938c4d6dc1e55563a062f0bd97ff44315a1e33f3e6",
+      "decision_sha256_before": "b47c1e139cbc4eb9ae3615938c4d6dc1e55563a062f0bd97ff44315a1e33f3e6",
+      "duration_ns": 711600,
+      "finished_monotonic_ns": 1250870948903400,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "COLD",
+      "sequence": 64,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250870948191800
+    },
+    {
+      "artifact_bytes": 47987,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "506ed5787340c433bef0782552e144836de7b23c9db572052c567c5b14017345",
+        "session_sha256": "95fee01210ea7e4bf31a32b949396da018199913efe9361907b68241adebe14e",
+        "target_id": null
+      },
+      "decision_code": "PC14_PASS",
+      "decision_sha256_after": "506ed5787340c433bef0782552e144836de7b23c9db572052c567c5b14017345",
+      "decision_sha256_before": "506ed5787340c433bef0782552e144836de7b23c9db572052c567c5b14017345",
+      "duration_ns": 806600,
+      "finished_monotonic_ns": 1250871085955400,
+      "item_count": 15,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 65,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871085148800
+    },
+    {
+      "artifact_bytes": 32366,
+      "blocker_codes": [
+        "COLLECTION_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "2715de3176e26b1f77408451ae9a84e1414cc275844426e2972d6c8cd927f4ef",
+        "session_sha256": "d6c712b44c41555a40ddc900ff365738b842ac26f1c26a9aca605164f597be2a",
+        "target_id": null
+      },
+      "decision_code": "PC14_BLOCKED",
+      "decision_sha256_after": "2715de3176e26b1f77408451ae9a84e1414cc275844426e2972d6c8cd927f4ef",
+      "decision_sha256_before": "2715de3176e26b1f77408451ae9a84e1414cc275844426e2972d6c8cd927f4ef",
+      "duration_ns": 666900,
+      "finished_monotonic_ns": 1250871103635600,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 66,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871102968700
+    },
+    {
+      "artifact_bytes": 39009,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "0f7c6eedef6151973dd29aba48f0c16a9271d763c7b778105604660163845c6d",
+        "session_sha256": "f3a501b2de140354990ba6c300b3b8f28f0856d847eac0d5082fb56f258f572e",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "0f7c6eedef6151973dd29aba48f0c16a9271d763c7b778105604660163845c6d",
+      "decision_sha256_before": "0f7c6eedef6151973dd29aba48f0c16a9271d763c7b778105604660163845c6d",
+      "duration_ns": 683300,
+      "finished_monotonic_ns": 1250871149801100,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "COLD",
+      "sequence": 67,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871149117800
+    },
+    {
+      "artifact_bytes": 47987,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "832fd35be70981c65b92a787b65b4aa148e6ab07204af75edf8690810aa3c0c0",
+        "session_sha256": "08045ae21d4f137a843aa55e444ca9ba6443ad988f22f7e7ac4ed25aa6b40b5c",
+        "target_id": null
+      },
+      "decision_code": "PC14_PASS",
+      "decision_sha256_after": "832fd35be70981c65b92a787b65b4aa148e6ab07204af75edf8690810aa3c0c0",
+      "decision_sha256_before": "832fd35be70981c65b92a787b65b4aa148e6ab07204af75edf8690810aa3c0c0",
+      "duration_ns": 871700,
+      "finished_monotonic_ns": 1250871281795800,
+      "item_count": 15,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 68,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871280924100
+    },
+    {
+      "artifact_bytes": 32366,
+      "blocker_codes": [
+        "COLLECTION_INCOMPLETE"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "2f1027b7027db151264a7aed870c2ca5cab8901081436f60466844a8d6ce6856",
+        "session_sha256": "51acc69746957e1d501ec62388a347596c6e6f8e673d9c0a90a765aaa90c6718",
+        "target_id": null
+      },
+      "decision_code": "PC14_BLOCKED",
+      "decision_sha256_after": "2f1027b7027db151264a7aed870c2ca5cab8901081436f60466844a8d6ce6856",
+      "decision_sha256_before": "2f1027b7027db151264a7aed870c2ca5cab8901081436f60466844a8d6ce6856",
+      "duration_ns": 641700,
+      "finished_monotonic_ns": 1250871299233900,
+      "item_count": 15,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 69,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871298592200
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 720900,
+      "finished_monotonic_ns": 1250871346879400,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 70,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871346158500
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 654000,
+      "finished_monotonic_ns": 1250871348686400,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 71,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871348032400
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 648400,
+      "finished_monotonic_ns": 1250871350439300,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 72,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871349790900
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 644400,
+      "finished_monotonic_ns": 1250871352157000,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 73,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871351512600
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 649600,
+      "finished_monotonic_ns": 1250871353996900,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 74,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871353347300
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 631500,
+      "finished_monotonic_ns": 1250871355733400,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 75,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871355101900
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 733800,
+      "finished_monotonic_ns": 1250871357554500,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 76,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871356820700
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 643500,
+      "finished_monotonic_ns": 1250871359296800,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 77,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871358653300
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 663300,
+      "finished_monotonic_ns": 1250871361097200,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 78,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871360433900
+    },
+    {
+      "artifact_bytes": 39005,
+      "blocker_codes": [
+        "RECEIPTS_PENDING"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc14-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+        "session_sha256": "2e6bcc7b0d70a1f0abb4cef87964628874a70f5e695311bbe2c981a909c749e1",
+        "target_id": null
+      },
+      "decision_code": "PC14_PENDING",
+      "decision_sha256_after": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "decision_sha256_before": "709d89d00ee5ecf044432d0bf5660cc5ce9de09f94934e8a3cfc0d78b145928b",
+      "duration_ns": 645200,
+      "finished_monotonic_ns": 1250871362828200,
+      "item_count": 15,
+      "outcome": "PENDING",
+      "run_class": "WARM",
+      "sequence": 79,
+      "stage_id": "PC14",
+      "started_monotonic_ns": 1250871362183000
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "2e971edd84286bf129ed4fff7906a4b91d1487a1b7ffe1e4e7913df10857d9f0",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 268335900,
+      "finished_monotonic_ns": 1250871632565300,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 80,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250871364229400
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "74c878b56b224ad6ad65b757ecb463263c968a80e74d4dbe4563b40a362ba153",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 241360500,
+      "finished_monotonic_ns": 1250872119591900,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 81,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250871878231400
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "75e3bfab3d99630df6331b1d60543b0ba2eab5aaa2044180fbe2b947883fbab6",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 240857100,
+      "finished_monotonic_ns": 1250872600156500,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 82,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250872359299400
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "6ae602c69b5f3f7210bea2629b47489abace748a4f5473f2e87dbf441d2b5e74",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 245411800,
+      "finished_monotonic_ns": 1250873089780200,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 83,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250872844368400
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "47ea36df4ac87940d18de419c5779e91a5cf2c164c49895fe587aebff47f88a5",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 242685300,
+      "finished_monotonic_ns": 1250873573027100,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 84,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250873330341800
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "4d31ec3ec2bedb7951e7138d644b3a2eba3cf0ea3d6a833e3b11747752276895",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 241360800,
+      "finished_monotonic_ns": 1250874056863700,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 85,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250873815502900
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "02387fae8118f06f1c43a29e4910e4e5a924b4f7a52c07b758321c317737d4dc",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 243674400,
+      "finished_monotonic_ns": 1250874545766600,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 86,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250874302092200
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "5b9fb881cf6f1b0c6f5041be7d4ad11da3e68bef4ac6c7e7e54a3669117351e8",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 241060000,
+      "finished_monotonic_ns": 1250875032009900,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 87,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250874790949900
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "829b22a887c237c58cee210bfce9ede45730ddc064cdf5dbf2ca3db18c6dd6bd",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 243560300,
+      "finished_monotonic_ns": 1250875520879400,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 88,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250875277319100
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "2bc1317b7064306694d1623243839f1bab660dc978e7eea19c3e449dc000a11c",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 234462800,
+      "finished_monotonic_ns": 1250876000988200,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "COLD",
+      "sequence": 89,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250875766525400
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 239018500,
+      "finished_monotonic_ns": 1250876478696700,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 90,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250876239678200
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 256434400,
+      "finished_monotonic_ns": 1250876981113400,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 91,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250876724679000
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 250392300,
+      "finished_monotonic_ns": 1250877482793800,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 92,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250877232401500
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 245032800,
+      "finished_monotonic_ns": 1250877975739400,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 93,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250877730706600
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 242281200,
+      "finished_monotonic_ns": 1250878462110600,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 94,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250878219829400
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 247862600,
+      "finished_monotonic_ns": 1250878959158900,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 95,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250878711296300
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 244919800,
+      "finished_monotonic_ns": 1250879450663600,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 96,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250879205743800
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 243196800,
+      "finished_monotonic_ns": 1250879939877300,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 97,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250879696680500
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 248212500,
+      "finished_monotonic_ns": 1250880431010200,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 98,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250880182797700
+    },
+    {
+      "artifact_bytes": 1668,
+      "blocker_codes": [],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc15-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+        "session_sha256": "3e4d08d1ca03656fd194936501d948f165fb7f9f6c9ea00d5d65ea97f409d578",
+        "target_id": null
+      },
+      "decision_code": "PC15_PASS",
+      "decision_sha256_after": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "decision_sha256_before": "6b58b536ec148862d1bab23d8ae3e7c57b9a0c93c0031268f7a28a6a95b1368b",
+      "duration_ns": 253425700,
+      "finished_monotonic_ns": 1250880941913700,
+      "item_count": 8,
+      "outcome": "PASS",
+      "run_class": "WARM",
+      "sequence": 99,
+      "stage_id": "PC15",
+      "started_monotonic_ns": 1250880688488000
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b003c39de55a6223cc5b8cf76ce477ab82e66ca870ed8191a45ba821230b13d7",
+        "session_sha256": "e8ac68a76aeb224d439fdda5cb30cd4c8574b7409a69582fcbe3a88ac053c598",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b003c39de55a6223cc5b8cf76ce477ab82e66ca870ed8191a45ba821230b13d7",
+      "decision_sha256_before": "b003c39de55a6223cc5b8cf76ce477ab82e66ca870ed8191a45ba821230b13d7",
+      "duration_ns": 1742300,
+      "finished_monotonic_ns": 1250881241934000,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 100,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881240191700
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "e5e0f5c4c2b1efec4d22ac318d5d3d697b5129bbfedb1383b160a2a0de2dab55",
+        "session_sha256": "caf8b904dfa9f569ceb782660d0a42c997b598f5aeabfb3f8371ade1e72cd657",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "e5e0f5c4c2b1efec4d22ac318d5d3d697b5129bbfedb1383b160a2a0de2dab55",
+      "decision_sha256_before": "e5e0f5c4c2b1efec4d22ac318d5d3d697b5129bbfedb1383b160a2a0de2dab55",
+      "duration_ns": 2010000,
+      "finished_monotonic_ns": 1250881289006800,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 101,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881286996800
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "75245344c1b4142dd5396c49749950df09acfffb3bc986eda8ac2012be547347",
+        "session_sha256": "57266988b994751ff9b1e7b03b110623f2fa26a67d1a26ba7521a383a985675d",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "75245344c1b4142dd5396c49749950df09acfffb3bc986eda8ac2012be547347",
+      "decision_sha256_before": "75245344c1b4142dd5396c49749950df09acfffb3bc986eda8ac2012be547347",
+      "duration_ns": 1739500,
+      "finished_monotonic_ns": 1250881336019300,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 102,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881334279800
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "388e71aec1327924aee9364da3c4db9b2513a0ff4d18e8d48ea3c1f2b16bdabf",
+        "session_sha256": "12b9d13b63c15eadb9b21584ffece132c8448a18643b32b384e09e626a4d64ce",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "388e71aec1327924aee9364da3c4db9b2513a0ff4d18e8d48ea3c1f2b16bdabf",
+      "decision_sha256_before": "388e71aec1327924aee9364da3c4db9b2513a0ff4d18e8d48ea3c1f2b16bdabf",
+      "duration_ns": 1818900,
+      "finished_monotonic_ns": 1250881382870400,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 103,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881381051500
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "38a079a0abb941aa88cfe9581dbdf6daec1747506d34f565754409d404caad78",
+        "session_sha256": "e3f137bd30be7e1b765286e3ec947129c8b4f949af98724b47ab0b01f809a807",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "38a079a0abb941aa88cfe9581dbdf6daec1747506d34f565754409d404caad78",
+      "decision_sha256_before": "38a079a0abb941aa88cfe9581dbdf6daec1747506d34f565754409d404caad78",
+      "duration_ns": 1855800,
+      "finished_monotonic_ns": 1250881430551500,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 104,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881428695700
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "61d412277e97a832f7aaa22986eaac64ded27ce47e9e1a25b665fe0e443f1416",
+        "session_sha256": "9d1933352892070e8122e83602295b0e9aeb420a92cb2a3adde1d7f66b5a9170",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "61d412277e97a832f7aaa22986eaac64ded27ce47e9e1a25b665fe0e443f1416",
+      "decision_sha256_before": "61d412277e97a832f7aaa22986eaac64ded27ce47e9e1a25b665fe0e443f1416",
+      "duration_ns": 2153800,
+      "finished_monotonic_ns": 1250881478262400,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 105,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881476108600
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "234ee3f90aff46ef0bd5628f0bf3806d9fee54d38ee2b5d2b8386493adeb047d",
+        "session_sha256": "c52c0d4b2006f5587fcc66b7eff1736e3c06f8d22bf8912577cba41604ed41e1",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "234ee3f90aff46ef0bd5628f0bf3806d9fee54d38ee2b5d2b8386493adeb047d",
+      "decision_sha256_before": "234ee3f90aff46ef0bd5628f0bf3806d9fee54d38ee2b5d2b8386493adeb047d",
+      "duration_ns": 1879500,
+      "finished_monotonic_ns": 1250881526933000,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 106,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881525053500
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "afeb466d7049cc2cfef95439e0c9da9e726c5e8b73be08c135ba3ad57884ee68",
+        "session_sha256": "cf367e30ef785e28153b8e40c927641fc2e2f9d6190cde115ed22284ca355490",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "afeb466d7049cc2cfef95439e0c9da9e726c5e8b73be08c135ba3ad57884ee68",
+      "decision_sha256_before": "afeb466d7049cc2cfef95439e0c9da9e726c5e8b73be08c135ba3ad57884ee68",
+      "duration_ns": 1848700,
+      "finished_monotonic_ns": 1250881577317100,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 107,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881575468400
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "c31dc775097a3904cb09770c87203d7c51ecf3bdf3ba02280458b08f6329d8c7",
+        "session_sha256": "7bb5375ad8021a239df036ce05e8b4c99f4d29f17e31eb1b8fde30f23528d3dc",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "c31dc775097a3904cb09770c87203d7c51ecf3bdf3ba02280458b08f6329d8c7",
+      "decision_sha256_before": "c31dc775097a3904cb09770c87203d7c51ecf3bdf3ba02280458b08f6329d8c7",
+      "duration_ns": 1839000,
+      "finished_monotonic_ns": 1250881623749400,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 108,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881621910400
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "MISS",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b0ef7631a1a1e3ef92f3e93622effddb65ffe78f37eed44b78e0e3d043081b3d",
+        "session_sha256": "6428e483cc275605e13d976cbae4fc42d29ec734a312815cc395700cb77f02f4",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b0ef7631a1a1e3ef92f3e93622effddb65ffe78f37eed44b78e0e3d043081b3d",
+      "decision_sha256_before": "b0ef7631a1a1e3ef92f3e93622effddb65ffe78f37eed44b78e0e3d043081b3d",
+      "duration_ns": 1693900,
+      "finished_monotonic_ns": 1250881671550700,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "COLD",
+      "sequence": 109,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881669856800
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1735500,
+      "finished_monotonic_ns": 1250881719119000,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 110,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881717383500
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 2389300,
+      "finished_monotonic_ns": 1250881723467600,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 111,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881721078300
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1644100,
+      "finished_monotonic_ns": 1250881726940300,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 112,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881725296200
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1678200,
+      "finished_monotonic_ns": 1250881731050200,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 113,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881729372000
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1951400,
+      "finished_monotonic_ns": 1250881734707100,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 114,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881732755700
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1663700,
+      "finished_monotonic_ns": 1250881738092800,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 115,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881736429100
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1784900,
+      "finished_monotonic_ns": 1250881741573800,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 116,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881739788900
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1846100,
+      "finished_monotonic_ns": 1250881745402500,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 117,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881743556400
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 2056300,
+      "finished_monotonic_ns": 1250881749208500,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 118,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881747152200
+    },
+    {
+      "artifact_bytes": 885,
+      "blocker_codes": [
+        "LOCALIZATION_QUALIFICATION_BLOCKED"
+      ],
+      "cache_outcome": "HIT",
+      "correlation": {
+        "ai_batch_sha256": null,
+        "consumer_id": "pc16-offline-consumer",
+        "plan_sha256": null,
+        "receipt_sha256": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+        "session_sha256": "4f5c650cbcfb5373bfc2853e1ffc4f99e457a1f9dd0422ca8304618d35c8c8cd",
+        "target_id": null
+      },
+      "decision_code": "PC16_BLOCKED",
+      "decision_sha256_after": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "decision_sha256_before": "b2c8d7cd8117f6cebadb1844b84ab18b6e1b6cd04051292534b6092344dd4ffa",
+      "duration_ns": 1662900,
+      "finished_monotonic_ns": 1250881752895400,
+      "item_count": 1,
+      "outcome": "BLOCKED",
+      "run_class": "WARM",
+      "sequence": 119,
+      "stage_id": "PC16",
+      "started_monotonic_ns": 1250881751232500
+    }
+  ],
+  "schema": "rocell.pre_camera_observability_report.v1",
+  "stage_catalog": [
+    "PC11",
+    "PC12",
+    "PC13",
+    "PC14",
+    "PC15",
+    "PC16"
+  ],
+  "stage_summaries": [
+    {
+      "stage_id": "PC11",
+      "summary": {
+        "blocker_codes": [
+          "ARRIVAL_EVIDENCE_INCOMPLETE",
+          "CONSUMER_VALIDATION_PENDING"
+        ],
+        "cache_outcome_counts": {
+          "HIT": 10,
+          "MISS": 10,
+          "NOT_APPLICABLE": 0
+        },
+        "decision_codes": [
+          "PC11_BLOCKED",
+          "PC11_PASS",
+          "PC11_PENDING"
+        ],
+        "maximum_duration_ns": 97764700,
+        "minimum_duration_ns": 15604800,
+        "outcome_counts": {
+          "BLOCKED": 4,
+          "PASS": 3,
+          "PENDING": 13
+        },
+        "p50_duration_ns": 24513500,
+        "p95_duration_ns": 93564000,
+        "p99_duration_ns": null,
+        "run_class_counts": {
+          "COLD": 10,
+          "WARM": 10
+        },
+        "sample_count": 20,
+        "total_artifact_bytes": 510768,
+        "total_duration_ns": 719987000,
+        "total_item_count": 300
+      }
+    },
+    {
+      "stage_id": "PC12",
+      "summary": {
+        "blocker_codes": [],
+        "cache_outcome_counts": {
+          "HIT": 10,
+          "MISS": 10,
+          "NOT_APPLICABLE": 0
+        },
+        "decision_codes": [
+          "PC12_PASS"
+        ],
+        "maximum_duration_ns": 1340148900,
+        "minimum_duration_ns": 1266599600,
+        "outcome_counts": {
+          "BLOCKED": 0,
+          "PASS": 20,
+          "PENDING": 0
+        },
+        "p50_duration_ns": 1294936200,
+        "p95_duration_ns": 1333471900,
+        "p99_duration_ns": null,
+        "run_class_counts": {
+          "COLD": 10,
+          "WARM": 10
+        },
+        "sample_count": 20,
+        "total_artifact_bytes": 92640,
+        "total_duration_ns": 26026003400,
+        "total_item_count": 360
+      }
+    },
+    {
+      "stage_id": "PC13",
+      "summary": {
+        "blocker_codes": [
+          "EVIDENCE_STALE"
+        ],
+        "cache_outcome_counts": {
+          "HIT": 10,
+          "MISS": 10,
+          "NOT_APPLICABLE": 0
+        },
+        "decision_codes": [
+          "PC13_BLOCKED",
+          "PC13_PASS"
+        ],
+        "maximum_duration_ns": 279800,
+        "minimum_duration_ns": 155600,
+        "outcome_counts": {
+          "BLOCKED": 5,
+          "PASS": 15,
+          "PENDING": 0
+        },
+        "p50_duration_ns": 190600,
+        "p95_duration_ns": 236000,
+        "p99_duration_ns": null,
+        "run_class_counts": {
+          "COLD": 10,
+          "WARM": 10
+        },
+        "sample_count": 20,
+        "total_artifact_bytes": 30715,
+        "total_duration_ns": 3760400,
+        "total_item_count": 20
+      }
+    },
+    {
+      "stage_id": "PC14",
+      "summary": {
+        "blocker_codes": [
+          "COLLECTION_INCOMPLETE",
+          "RECEIPTS_PENDING"
+        ],
+        "cache_outcome_counts": {
+          "HIT": 10,
+          "MISS": 10,
+          "NOT_APPLICABLE": 0
+        },
+        "decision_codes": [
+          "PC14_BLOCKED",
+          "PC14_PASS",
+          "PC14_PENDING"
+        ],
+        "maximum_duration_ns": 883700,
+        "minimum_duration_ns": 631500,
+        "outcome_counts": {
+          "BLOCKED": 4,
+          "PASS": 3,
+          "PENDING": 13
+        },
+        "p50_duration_ns": 663300,
+        "p95_duration_ns": 871700,
+        "p99_duration_ns": null,
+        "run_class_counts": {
+          "COLD": 10,
+          "WARM": 10
+        },
+        "sample_count": 20,
+        "total_artifact_bytes": 780502,
+        "total_duration_ns": 14095800,
+        "total_item_count": 300
+      }
+    },
+    {
+      "stage_id": "PC15",
+      "summary": {
+        "blocker_codes": [],
+        "cache_outcome_counts": {
+          "HIT": 10,
+          "MISS": 10,
+          "NOT_APPLICABLE": 0
+        },
+        "decision_codes": [
+          "PC15_PASS"
+        ],
+        "maximum_duration_ns": 268335900,
+        "minimum_duration_ns": 234462800,
+        "outcome_counts": {
+          "BLOCKED": 0,
+          "PASS": 20,
+          "PENDING": 0
+        },
+        "p50_duration_ns": 243560300,
+        "p95_duration_ns": 256434400,
+        "p99_duration_ns": null,
+        "run_class_counts": {
+          "COLD": 10,
+          "WARM": 10
+        },
+        "sample_count": 20,
+        "total_artifact_bytes": 33360,
+        "total_duration_ns": 4913545500,
+        "total_item_count": 160
+      }
+    },
+    {
+      "stage_id": "PC16",
+      "summary": {
+        "blocker_codes": [
+          "LOCALIZATION_QUALIFICATION_BLOCKED"
+        ],
+        "cache_outcome_counts": {
+          "HIT": 10,
+          "MISS": 10,
+          "NOT_APPLICABLE": 0
+        },
+        "decision_codes": [
+          "PC16_BLOCKED"
+        ],
+        "maximum_duration_ns": 2389300,
+        "minimum_duration_ns": 1644100,
+        "outcome_counts": {
+          "BLOCKED": 20,
+          "PASS": 0,
+          "PENDING": 0
+        },
+        "p50_duration_ns": 1818900,
+        "p95_duration_ns": 2153800,
+        "p99_duration_ns": null,
+        "run_class_counts": {
+          "COLD": 10,
+          "WARM": 10
+        },
+        "sample_count": 20,
+        "total_artifact_bytes": 17700,
+        "total_duration_ns": 36993800,
+        "total_item_count": 20
+      }
+    }
+  ],
+  "timing_used_for_admission": false,
+  "transport_opened": false
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/actual_ai_arm_compatibility_corpus_v1.schema.json",
+  "title": "Actual AI to arm compatibility corpus v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "corpus_id", "evidence_class", "retained_files",
+    "expected_cases", "controller_commands", "hardware_access",
+    "physical_authority"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.actual_ai_arm_compatibility_corpus.v1"},
+    "corpus_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "evidence_class": {"const": "SYNTHETIC_OFFLINE_ONLY"},
+    "retained_files": {
+      "type": "object",
+      "minProperties": 3,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relative_path", "sha256"],
+        "properties": {
+          "relative_path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "expected_cases": {
+      "type": "object",
+      "minProperties": 7,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["disposition", "blocker_code", "ordered_target_ids"],
+        "properties": {
+          "disposition": {"type": "string", "minLength": 1},
+          "blocker_code": {"type": ["string", "null"]},
+          "ordered_target_ids": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "controller_commands": {"const": []},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false}
+  }
+}

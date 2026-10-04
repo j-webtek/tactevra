@@ -1,0 +1,120 @@
+{
+  "schema": "rocell.pre_camera_typing_qualification_basis.v1",
+  "basis_id": "pre-camera-typing-pc0-v1",
+  "evidence_class": "SYNTHETIC_OFFLINE_ONLY",
+  "physical_release_effect": "NONE",
+  "authority": {
+    "controller_startup": false,
+    "transport_open": false,
+    "controller_write": false,
+    "movement": false,
+    "torque_change": false,
+    "firmware_installation": false
+  },
+  "pinned_sources": [
+    {
+      "role": "model_motion_batch_v2_schema",
+      "path": "software/ai/schemas/model_motion_batch_v2.schema.json",
+      "sha256": "cec19e41edcdb169fb5809aa2c2c1c2c136e4fa79a1454b8307dc285afb1e99c"
+    },
+    {
+      "role": "synthetic_target_catalog",
+      "path": "software/config/static_nominal_target_profiles.json",
+      "sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276"
+    },
+    {
+      "role": "pinned_arm_model",
+      "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    {
+      "role": "frozen_system_manifest",
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    {
+      "role": "zero_write_controller_profile_schema",
+      "path": "software/ai/schemas/zero_write_waveshare_t102_profile_v1.schema.json",
+      "sha256": "5fd7ce1d545707d04605f37a212b0164fef40bbcae4ec7da0b7109e4a869614a"
+    }
+  ],
+  "fixture_identities": {
+    "calibration_fixture_id": "pc0-synthetic-calibration-fixture-v1",
+    "calibration_fixture_sha256": "4cb47e6b022b1409877ccee6b8424face18a05f525b831d716bde7e675699fc7",
+    "joint_dynamics_profile_id": "pc0-synthetic-joint-dynamics-v1",
+    "joint_dynamics_profile_sha256": "82d033645dc4996ab853d86c4c6afefe9719fb91b5b31b7d3dfee0515777e39a",
+    "controller_encoding_profile_id": "pc0-zero-write-t102-fixture-v1",
+    "controller_encoding_profile_sha256": "6d8ee21307c91fedd62e87b2f161e2f2367f932c5ff579ac0983ac5e9272f9b6"
+  },
+  "cartesian_policy": {
+    "policy_id": "pc0-cartesian-quintic-v1",
+    "maximum_cartesian_step_mm": 5.0,
+    "maximum_velocity_mm_s": 80.0,
+    "maximum_acceleration_mm_s2": 160.0,
+    "maximum_jerk_mm_s3": 800.0,
+    "hover_settle_ms": 100,
+    "contact_dwell_ms": 60
+  },
+  "synthetic_joint_dynamics_profile": {
+    "source_kind": "SYNTHETIC_OFFLINE",
+    "units": {
+      "position": "rad",
+      "velocity": "rad_s",
+      "acceleration": "rad_s2",
+      "jerk": "rad_s3"
+    },
+    "joint_order": ["base", "shoulder", "elbow", "wrist_pitch", "wrist_roll"],
+    "maximum_velocity_rad_s": [0.5, 0.5, 0.5, 0.5, 0.5],
+    "maximum_acceleration_rad_s2": [1.0, 1.0, 1.0, 1.0, 1.0],
+    "maximum_jerk_rad_s3": [4.0, 4.0, 4.0, 4.0, 4.0],
+    "maximum_time_scale_factor": 20.0,
+    "physical_tracking_qualification": false
+  },
+  "zero_write_controller_profile": {
+    "source_kind": "SYNTHETIC_OFFLINE",
+    "command_type": 102,
+    "joint_order": ["base", "shoulder", "elbow", "wrist_pitch", "wrist_roll", "gripper"],
+    "fixed_gripper_rad": 0.0,
+    "speed": 20,
+    "acceleration": 1,
+    "interpolation_mode": "HOST_SCHEDULED_T102_WAYPOINTS_V1",
+    "transport_enabled": false
+  },
+  "canonical_fixtures": [
+    {"fixture_id": "type-robot", "input_text": "robot", "expected_target_ids": ["R", "O", "B", "O", "T"]},
+    {"fixture_id": "type-book", "input_text": "book", "expected_target_ids": ["B", "O", "O", "K"]},
+    {"fixture_id": "type-qaz", "input_text": "qaz", "expected_target_ids": ["Q", "A", "Z"]},
+    {"fixture_id": "type-plm", "input_text": "plm", "expected_target_ids": ["P", "L", "M"]},
+    {"fixture_id": "repeat-punctuation", "input_text": "hh1.", "expected_target_ids": ["H", "H", "1", "PERIOD"]},
+    {"fixture_id": "space", "input_text": " ", "expected_target_ids": ["SPACE"]},
+    {"fixture_id": "enter", "input_text": "ENTER", "expected_target_ids": ["ENTER"]},
+    {"fixture_id": "same-key-repeat", "input_text": "aaa", "expected_target_ids": ["A", "A", "A"]}
+  ],
+  "outcome_codes": [
+    "PASS_SYNTHETIC_OFFLINE",
+    "BLOCKED_MEASURED_INSTALLED_PROFILE_REQUIRED",
+    "BLOCKED_FRESH_OBSERVED_STATE_REQUIRED",
+    "REJECTED_SOURCE_IDENTITY_MISMATCH",
+    "REJECTED_ACTION_ORDER_MISMATCH",
+    "REJECTED_UNSUPPORTED_TARGET",
+    "REJECTED_RESOURCE_LIMIT",
+    "REJECTED_IK_UNREACHABLE",
+    "REJECTED_JOINT_LIMIT",
+    "REJECTED_SINGULARITY_MARGIN",
+    "REJECTED_JOINT_DISCONTINUITY",
+    "REJECTED_JOINT_DYNAMICS",
+    "REJECTED_COLLISION_EVIDENCE",
+    "REJECTED_PREVIEW_INVALIDATED",
+    "OUTCOME_UNCERTAIN_RETRY_FORBIDDEN"
+  ],
+  "benchmark_policy": {
+    "minimum_iterations": 50,
+    "reported_percentiles": [50, 95, 99],
+    "maximum_actions_per_batch": 128,
+    "maximum_screening_samples": 4096,
+    "maximum_serialized_artifact_bytes": 2097152,
+    "maximum_peak_process_memory_mib": 256,
+    "planning_cpu_p95_ms_ceiling": 5000,
+    "simulation_timing_is_physical_claim": false
+  }
+}

@@ -137,6 +137,15 @@ from .context import (
     load_simulation_context,
     revalidate_simulation_context,
 )
+from .context_lifecycle_v1 import (
+    SimulationContextLifecycleBindingV1,
+    SimulationContextLifecycleV1,
+)
+from .typing_planner_preparation_v1 import (
+    PreparedTypingPlannerV1,
+    prepare_typing_planner_v1,
+    validate_prepared_typing_planner_v1,
+)
 from .observed_planner_start_state import (
     ObservedPlannerStartState,
     ObservedPlannerStartStateError,
@@ -215,6 +224,40 @@ from .installed_collision_geometry import (
     InstalledCollisionGeometryProfile,
     load_installed_collision_geometry_for_context,
     load_installed_collision_geometry_profile,
+)
+from .installed_cable_envelope_intake_v1 import (
+    SCHEMA as INSTALLED_CABLE_ENVELOPE_INTAKE_SCHEMA,
+    InstalledCableEnvelopeIntakeV1,
+    InstalledCableEnvelopeIntakeV1Error,
+    build_synthetic_cable_envelope_intake_v1,
+)
+from .installed_geometry_cable_rehearsal_v1 import (
+    SCHEMA as INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA,
+    InstalledGeometryCableRehearsalV1Error,
+    build_synthetic_installed_collision_profile_v1,
+    parse_installed_geometry_cable_rehearsal_v1,
+    run_installed_geometry_cable_rehearsal_v1,
+)
+from .immutable_camera_replay_v1 import (
+    MANIFEST_SCHEMA as IMMUTABLE_CAMERA_REPLAY_MANIFEST_SCHEMA,
+    REPORT_SCHEMA as IMMUTABLE_CAMERA_REPLAY_REPORT_SCHEMA,
+    ImmutableCameraReplayV1Error,
+    build_immutable_camera_replay_manifest_v1,
+    parse_immutable_camera_replay_manifest_v1,
+    parse_immutable_camera_replay_report_v1,
+    run_immutable_camera_replay_v1,
+)
+from .pre_camera_observability_v1 import (
+    SCHEMA as PRE_CAMERA_OBSERVABILITY_REPORT_V1_SCHEMA,
+    PreCameraObservabilityV1Error,
+    build_pre_camera_observability_report_v1,
+    parse_pre_camera_observability_report_v1,
+)
+from .pre_camera_host_benchmark_v1 import (
+    DEFAULT_SAMPLES_PER_STAGE as PRE_CAMERA_HOST_BENCHMARK_DEFAULT_SAMPLES,
+    MAX_SAMPLES_PER_STAGE as PRE_CAMERA_HOST_BENCHMARK_MAX_SAMPLES,
+    PreCameraHostBenchmarkV1Error,
+    run_pre_camera_host_benchmark_v1,
 )
 from .measured_waypoint_collision_sequence import (
     MAX_WAYPOINT_COLLISION_SAMPLES,
@@ -1380,6 +1423,30 @@ __all__ = [
     "INSTALLED_COLLISION_GEOMETRY_PROFILE_SCHEMA",
     "InstalledCollisionGeometryError",
     "InstalledCollisionGeometryProfile",
+    "INSTALLED_CABLE_ENVELOPE_INTAKE_SCHEMA",
+    "InstalledCableEnvelopeIntakeV1",
+    "InstalledCableEnvelopeIntakeV1Error",
+    "build_synthetic_cable_envelope_intake_v1",
+    "INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA",
+    "InstalledGeometryCableRehearsalV1Error",
+    "build_synthetic_installed_collision_profile_v1",
+    "parse_installed_geometry_cable_rehearsal_v1",
+    "run_installed_geometry_cable_rehearsal_v1",
+    "IMMUTABLE_CAMERA_REPLAY_MANIFEST_SCHEMA",
+    "IMMUTABLE_CAMERA_REPLAY_REPORT_SCHEMA",
+    "ImmutableCameraReplayV1Error",
+    "build_immutable_camera_replay_manifest_v1",
+    "parse_immutable_camera_replay_manifest_v1",
+    "parse_immutable_camera_replay_report_v1",
+    "run_immutable_camera_replay_v1",
+    "PRE_CAMERA_OBSERVABILITY_REPORT_V1_SCHEMA",
+    "PreCameraObservabilityV1Error",
+    "build_pre_camera_observability_report_v1",
+    "parse_pre_camera_observability_report_v1",
+    "PRE_CAMERA_HOST_BENCHMARK_DEFAULT_SAMPLES",
+    "PRE_CAMERA_HOST_BENCHMARK_MAX_SAMPLES",
+    "PreCameraHostBenchmarkV1Error",
+    "run_pre_camera_host_benchmark_v1",
     "MAX_WAYPOINT_COLLISION_SAMPLES",
     "MEASURED_WAYPOINT_COLLISION_SEQUENCE_SCHEMA",
     "MeasuredWaypointCollisionSample",
@@ -1843,6 +1910,7 @@ __all__ = [
     "inspect_pinned_urdf_collision_evidence",
     "load_installed_collision_geometry_for_context",
     "load_installed_collision_geometry_profile",
+    "build_synthetic_cable_envelope_intake_v1",
     "ingest_model_motion_batch",
     "run_simulation",
     "run_target_sweep",

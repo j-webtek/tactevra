@@ -4201,6 +4201,837 @@ rewriting history. New entries must use a unique evidence ID.
   physical-camera inference producer, then collect the four ARM-070 originals
   and external 300/300 campaign before running this evaluator on real evidence.
 
+### E-20260928-ARM-077 — PC0 pre-camera typing qualification basis frozen
+
+- Stage: S2/S4/S7 pre-camera arm integration; PC0.
+- Lane: Arm/runtime.
+- Commit: `a8ec13667f55329c8a3bcbdec1c0baba59962e22`.
+- Change: added the strict `rocell.pre_camera_typing_qualification_basis.v1`
+  loader and retained basis. The basis freezes eight ordered typing fixtures,
+  five content-addressed source pins, synthetic calibration/dynamics/controller
+  identities, Cartesian policy, stable outcome codes, authority-denial flags,
+  and benchmark/resource ceilings.
+- Inputs/fixtures: `robot`, `book`, `qaz`, `plm`, `H,H,1,PERIOD`, space, enter,
+  and same-key repetition; frozen system manifest; static nominal target
+  catalog; pinned RoArm-M3 URDF; V2 batch schema; zero-write T=102 profile
+  schema. All dynamics, calibration, and controller values remain explicitly
+  `SYNTHETIC_OFFLINE_ONLY`.
+- Commands: `python -m pytest tests/unit/test_pre_camera_typing_qualification_basis_v1.py -q`;
+  `python -m pytest tests/unit/test_typing_execution_plan_v1.py tests/unit/test_typing_trajectory_plan_v1.py tests/unit/test_typing_trajectory_ik_screen_v1.py -q`.
+- Result: PASS; 10 focused tests and 18 existing T1/T2 regression tests passed.
+  Mutation coverage rejects authority promotion, evidence-class promotion,
+  fixture reorder, required-outcome deletion, physical-tracking claims,
+  transport enablement, crossed source hashes, and crossed fixture identities.
+- Artifacts: `software/config/pre_camera_typing_qualification_basis_v1.json`;
+  `software/src/rocell/application/pre_camera_typing_qualification_basis_v1.py`;
+  `software/tests/unit/test_pre_camera_typing_qualification_basis_v1.py`;
+  `software/docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is an offline test-basis freeze. It does not establish
+  measured joint dynamics, controller tracking/settling, installed collision
+  geometry, camera localization, contact behavior, typing speed, or physical
+  authority.
+- Supersedes: none.
+- Next dependency: PC1 joint-space dynamics and deterministic time scaling over
+  the exact ordered T2B-IK results.
+
+### E-20260928-ARM-078 — deterministic PC1 joint schedule checkpoint
+
+- Stage: S4/S7 pre-camera arm integration; PC1 in progress.
+- Lane: Arm/runtime.
+- Commit: `7ba7c734b57ccb2ef79f6cd5e6e58abbf4a215d4`.
+- Change: added the typed, canonical
+  `rocell.typing_joint_schedule.v1` boundary. It consumes the exact ordered,
+  hash-valid T2B-IK sample results without regenerating Cartesian geometry;
+  explicitly maps the frozen semantic PC0 joint order onto canonical URDF joint
+  names; derives deterministic host timestamps from the T2A quintic sample
+  order; and time-scales until sampled velocity, acceleration, and jerk demands
+  fit the bounded synthetic PC0 profile or reject.
+- Inputs/fixtures: one compact PARK/TRANSIT/HOVER/CONTACT trajectory and
+  hash-bound synthetic IK result; the retained PC0 joint-dynamics profile;
+  existing T1, T2A, T2B-IK, shared V2, and zero-write controller fixtures.
+- Commands: `python -m pytest -q
+  tests/unit/test_typing_joint_schedule_v1.py`; `python -m pytest -q
+  tests/unit/test_pre_camera_typing_qualification_basis_v1.py
+  tests/unit/test_typing_execution_plan_v1.py
+  tests/unit/test_typing_trajectory_plan_v1.py
+  tests/unit/test_typing_trajectory_ik_screen_v1.py
+  tests/unit/test_typing_joint_schedule_v1.py
+  tests/integration/test_model_motion_v2_shared_gate.py
+  tests/integration/test_zero_write_waveshare_contract_v1.py`.
+- Result: PASS; 4 focused tests and 60 broader boundary tests passed. The first
+  adversarial focused run exposed the expected semantic-PC0 versus URDF joint
+  naming seam; the implementation was corrected with one explicit positional
+  mapping while preserving both source contracts. Tests now cover deterministic
+  bytes and hashes, strict timestamp/order retention, bounded rescaling,
+  schedule-wide limit compliance and margins, canonical-schema validation,
+  crossed semantic results, invalid report hashes, non-finite profile values,
+  and scale-bound rejection.
+- Artifacts: `software/src/rocell/application/typing_joint_schedule_v1.py`;
+  `software/ai/schemas/typing_joint_schedule_v1.schema.json`;
+  `software/tests/unit/test_typing_joint_schedule_v1.py`;
+  `software/docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: all limits and IK values are synthetic offline fixtures. The
+  checkpoint does not qualify installed velocity, acceleration, jerk,
+  controller tracking, settling, collision clearance, typing speed, or physical
+  authority. PC1 is not complete because per-segment demand/margin output and
+  the remaining exact-limit, stationary/reversal, duration-bound, and
+  cross-platform matrix are pending.
+- Supersedes: none.
+- Next dependency: complete the remaining PC1 reports/tests before composing
+  the PC2 golden end-to-end shadow pipeline.
+
+### E-20260928-ARM-079 — PC1 joint-dynamics gate completed offline
+
+- Stage: S4/S7 pre-camera arm integration; PC1 complete, PC2 ready.
+- Lane: Arm/runtime.
+- Commit: `547d3332e3e809bada20149dbc4ece94a0b5df1d`.
+- Change: completed the canonical joint-schedule artifact with one diagnostic
+  record per adjacent IK sample. Each record preserves semantic destination,
+  duration, velocity, acceleration, jerk, remaining per-joint margins, and its
+  limiting joint/constraint. Added strict canonical artifact reconstruction
+  that revalidates outer and profile hashes, typed fields, sample/segment order,
+  timestamps, and exact supported output.
+- Inputs/fixtures: ARM-078 compact PARK/TRANSIT/HOVER/CONTACT trajectory and
+  PC0 synthetic profile, plus stationary, reversal, crossed-order,
+  crossed-source, profile-hash, timestamp, and three independently limiting
+  dynamics profiles.
+- Commands: `python -m pytest -q
+  tests/unit/test_typing_joint_schedule_v1.py`; `python -m pytest -q
+  tests/unit/test_pre_camera_typing_qualification_basis_v1.py
+  tests/unit/test_typing_execution_plan_v1.py
+  tests/unit/test_typing_trajectory_plan_v1.py
+  tests/unit/test_typing_trajectory_ik_screen_v1.py
+  tests/unit/test_typing_joint_schedule_v1.py
+  tests/integration/test_model_motion_v2_shared_gate.py
+  tests/integration/test_zero_write_waveshare_contract_v1.py`;
+  `python scripts/ci/check_docs.py`; `python
+  scripts/ci/check_evidence_scope.py`; `python
+  scripts/ci/check_public_records.py`; `python
+  scripts/ci/check_repository_artifacts.py`; `python
+  scripts/ci/check_release_integrity.py`.
+- Result: PASS; 10 focused tests and 66 broader boundary tests passed. The
+  dynamic matrix selects velocity, acceleration, and jerk independently, passes
+  a just-inside maximum rescale, rejects a just-outside maximum rescale,
+  preserves stationary samples, and bounds a direction reversal. Crossed
+  profile hashes, timestamps, joint order, source lineage, non-finite limits,
+  invalid IK hashes, and excessive scaling reject. All five repository checks
+  passed; release integrity continues to report its one pre-existing recorded
+  candidate blocker.
+- Artifacts: `software/src/rocell/application/typing_joint_schedule_v1.py`;
+  `software/ai/schemas/typing_joint_schedule_v1.schema.json`;
+  `software/tests/unit/test_typing_joint_schedule_v1.py`;
+  `software/docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: PC1 proves only deterministic behavior against synthetic
+  offline limits and IK values. It does not qualify installed dynamics,
+  controller interpolation/tracking, settling, collision clearance, camera
+  localization, contact behavior, typing speed, or physical authority.
+- Supersedes: ARM-078's in-progress PC1 status only; ARM-078 remains retained
+  as the first checkpoint and naming-seam finding.
+- Next dependency: PC2 must compose the real zero-I/O V2 decode, typing plan,
+  Cartesian trajectory, IK, PC1 schedule, and collision-evidence blocker into
+  retained golden traces without granting authority.
+
+### E-20260928-ARM-080 — PC2 golden shadow composition checkpoint
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC2 in progress.
+- Lane: Arm/runtime.
+- Commit: `d6dad60ac732e5c08888344bcb1e11a961ca5535`.
+- Change: added one zero-I/O API that composes the real strict V2 decoder,
+  trusted-registry ingress and freshness gate, ordered typing compiler,
+  Cartesian trajectory, exact-sample IK, PC1 joint schedule, and collision-
+  evidence intake. It returns one content-addressed terminal receipt with nine
+  stage hashes and no writer or transport surface.
+- Inputs/fixtures: actual canonical V2 bytes for synthetic-local `robot`,
+  `H,H,1,PERIOD`, and `H,I` sequences; synthetic PC0 dynamics; pinned model,
+  build, calibration, registry, and IK seed identities.
+- Commands: `python -m pytest -q
+  tests/integration/test_typing_shadow_pipeline_v1.py`; and the 70-test shared
+  PC0/PC1/T1/T2/V2/zero-write command recorded in the PC2 plan checkpoint;
+  all five repository audit commands.
+- Result: PASS; 4 focused integration tests and 70 broader boundary tests
+  passed. Both retained golden receipts reproduce exactly, preserve repeated
+  targets and order, bind nine stage hashes, and stop at
+  `BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED` with the fresh observed-state
+  blocker also retained. A strict payload mutation rejects before a receipt.
+  All five repository audits passed; the existing release-integrity candidate
+  blocker is unchanged.
+- Artifacts: `software/src/rocell/application/typing_shadow_pipeline_v1.py`;
+  `software/tests/integration/test_typing_shadow_pipeline_v1.py`;
+  `software/tests/fixtures/typing_shadow_pipeline_v1_golden.json`;
+  `software/docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: fixtures use synthetic local perception, calibration, dynamics,
+  and start-state evidence. No measured collision profile, fresh controller
+  state, camera qualification, controller encoding, transport, movement, or
+  typing outcome is established. PC2 remains in progress pending its canonical
+  receipt parser/schema and full single-field stage-owner mutation matrix.
+- Supersedes: none.
+- Next dependency: finish PC2 mutation ownership and receipt validation before
+  PC3 rolling-horizon/restart work begins.
+
+### E-20260928-ARM-081 — PC2 golden shadow gate completed
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC2 complete, PC3 ready.
+- Lane: Arm/runtime.
+- Commit: `d24ec737196796d11dfadd3098f1dda1f88724bb`.
+- Change: added the canonical PC2 receipt schema and strict parser, then
+  completed stage-owner mutation coverage. The parser revalidates the receipt
+  hash, exact fields, canonical nine-stage hash order, target count/order,
+  terminal collision/fresh-state lineage, and zero-authority assertions.
+- Inputs/fixtures: ARM-080 golden `robot`, `H,H,1,PERIOD`, and `H,I` traces;
+  five independently rehashed receipt mutations and eight single-field stage
+  mutations covering duplicate JSON, batch hash, semantic intent, capture
+  expiry, preplanner expiry, calibration identity, seed/build identity, and
+  dynamics overflow.
+- Commands: `python -m pytest -q
+  tests/integration/test_typing_shadow_pipeline_v1.py`; the complete 83-test
+  affected PC0-PC2/T1/T2/V2/zero-write suite; and all five repository audits.
+- Result: PASS; 17 focused integration tests and 83 affected tests passed.
+  Every mutation rejected at its earliest responsible existing boundary; both
+  golden receipts remained byte-stable. All repository audits passed with the
+  existing unrelated release-integrity candidate blocker unchanged.
+- Artifacts: `software/src/rocell/application/typing_shadow_pipeline_v1.py`;
+  `software/ai/schemas/typing_shadow_pipeline_v1.schema.json`;
+  `software/tests/integration/test_typing_shadow_pipeline_v1.py`;
+  `software/tests/fixtures/typing_shadow_pipeline_v1_golden.json`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: all inputs remain synthetic offline. PC2 does not establish
+  measured collision geometry, fresh controller feedback, camera precision,
+  controller encoding/tracking, key contact, typing speed, or authority.
+- Supersedes: ARM-080's in-progress PC2 status only; ARM-080 remains retained
+  as the initial composition checkpoint.
+- Next dependency: PC3 one-action rolling horizon, observed-state rebinding,
+  invalidation, and ambiguous-restart behavior.
+
+### E-20260928-ARM-082 — PC3 rolling-horizon and restart gate completed
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC3 complete, PC4 ready.
+- Lane: Arm/runtime.
+- Commit: `3170757aff03353b49dbb800a765f9b9120b682b`.
+- Change: added a canonical one-action commit/one-action preview state machine.
+  The current action is bound to the exact observed-state, feedback receipt,
+  controller session, configuration epoch, calibration, tool, dynamics,
+  freshness, plan, and deadline identities. Preview slots explicitly contain
+  no permit, controller command, hardware access, or physical authority.
+- Inputs/fixtures: synthetic `H,H,1,PERIOD` typing plan, synthetic observed
+  execution bindings, every required drift/expiry family, pre-dispatch restart,
+  retained-dispatch restart, completion, and independently rehashed mutations.
+- Commands: `python -m pytest -q
+  tests/unit/test_typing_rolling_horizon_v1.py`; the 54-test affected typing,
+  shadow-pipeline, and reviewed-lifecycle suite; and all five repository audits.
+- Result: PASS; 24 focused tests and 54 affected tests passed. Revalidation
+  discarded both slots on state, session, configuration, calibration, tool,
+  dynamics, freshness, or deadline change. Pre-dispatch restart reconstructed
+  intent without replay. Restart after retained dispatch intent produced
+  `OUTCOME_UNCERTAIN` with automatic retry forbidden. Crossed indices, epochs,
+  roles, hashes, and authority mutations rejected.
+- Artifacts: `software/src/rocell/application/typing_rolling_horizon_v1.py`;
+  `software/ai/schemas/typing_rolling_horizon_v1.schema.json`;
+  `software/tests/unit/test_typing_rolling_horizon_v1.py`;
+  `software/docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is synthetic offline orchestration evidence. It does not
+  establish installed collision geometry, fresh live state, controller bytes,
+  tracking, contact, typing speed, or physical authority.
+- Supersedes: ARM-081's PC3-ready status only; ARM-081 remains retained as the
+  completed PC2 evidence.
+- Next dependency: PC4 must bind one qualified timed joint action to exact
+  deterministic Waveshare bytes behind the existing zero-write boundary.
+
+### E-20260928-ARM-083 — PC4 zero-write typing controller gate completed
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC4 complete, PC5 ready.
+- Lane: Arm/runtime.
+- Commits: `866f672f8a0d554e6e9bbf4c11b9d47caf5b0b7c` and
+  `31962c0f9d2860c5759ed5e5b4ea55035c6880af`.
+- Change: added a typing-specific zero-write controller bridge that selects
+  only the PC3 current action, verifies the exact timed schedule against its
+  source trajectory semantics, and encodes pinned Waveshare T=102 bytes using
+  arm-owned joint order, fixed gripper, speed, acceleration, and timing policy.
+- Inputs/fixtures: synthetic action-0 H schedule, repeated H at action index 1,
+  frozen three-waypoint golden bytes, crossed horizon/trajectory/schedule/
+  session/epoch identities, expired and insufficient feedback windows, invalid
+  firmware settings, and independently rehashed payload/authority/binding/order
+  mutations.
+- Commands: `python -m pytest -q
+  tests/unit/test_typing_controller_bridge_v1.py`; the 83-test affected PC1,
+  PC3, pinned-protocol, and zero-write adapter suite; and all five repository
+  audits.
+- Result: PASS; 15 focused tests and 83 affected tests passed. Exact bytes were
+  deterministic and reconstructed through the pinned protocol. Repeated target
+  actions retained distinct dispatch identities. Crossed semantics and every
+  tested authority or byte mutation rejected. All repository audits passed;
+  the existing recorded release-integrity candidate blocker is unchanged.
+- Artifacts: `software/src/rocell/application/typing_controller_bridge_v1.py`;
+  `software/ai/schemas/typing_controller_preview_v1.schema.json`;
+  `software/tests/unit/test_typing_controller_bridge_v1.py`;
+  `software/tests/fixtures/typing_controller_golden_bytes_v1.json`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: qualification, permit, collision, state, and timing identities
+  are synthetic offline fixtures. This does not establish installed controller
+  tracking, collision clearance, contact, typing speed, or physical authority.
+- Supersedes: ARM-082's PC4-ready status only; ARM-082 remains retained as the
+  completed PC3 evidence.
+- Next dependency: PC5 adversarial and property campaigns across malformed
+  input, stale/crossed identity, planner failure, controller uncertainty,
+  restart, cache, deadline, cancellation, and bounded-resource families.
+
+### E-20260928-ARM-084 — PC5 bounded fault-campaign checkpoint
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC5 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `72a6d53`.
+- Change: added a canonical, hash-bound, zero-I/O fault-campaign receipt with
+  35 required cases across six families and stable reason/outcome mappings.
+  Hardened the actual V2 model decoder with a 32-level JSON-depth ceiling and
+  stable recursion failure, capped rolling horizons at 64 actions, and bounded
+  controller-preview command count and individual payload size while
+  normalizing malformed protocol payloads.
+- Inputs/fixtures: malformed, duplicate, missing, oversized, NaN, infinity,
+  and deeply nested JSON; all 35 PC5 disposition records; eight independent
+  safety-invariant violations; missing, duplicate, crossed, reordered, and
+  independently rehashed campaign mutations; excessive horizon and controller
+  payload cases.
+- Commands: `python -m pytest -q
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_model_motion_ingress_v2.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py`.
+- Result: PASS; 23 focused PC5 tests and 86 affected ingress, horizon, and
+  controller tests passed. The canonical report contains zero uncaught
+  exceptions, authority leaks, automatic retries, reorders, silent fallbacks,
+  unbounded allocations, or inconsistent terminal outcomes.
+- Artifacts: `software/src/rocell/application/typing_fault_campaign_v1.py`;
+  `software/ai/schemas/typing_fault_campaign_v1.schema.json`;
+  `software/tests/unit/test_typing_fault_campaign_v1.py`; hardened ingress,
+  horizon, and controller-preview parsers.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this checkpoint proves the campaign contract and representative
+  real parser/resource boundaries only. Remaining planner, transport,
+  process-crash, and cache cases must still be driven through their owning
+  boundaries before PC5 can complete. It installs no measured workcell data,
+  deployment qualification, permit, or physical authority.
+- Next dependency: connect the planning and transport/feedback fault families
+  to existing IK, dynamics, collision, and lifecycle boundaries, then retain
+  the resulting observations in the canonical campaign report.
+
+### E-20260928-ARM-085 — PC5 owner-boundary fault qualification completed
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC5 complete, PC6 ready.
+- Lane: Arm/runtime shared boundary.
+- Commit: `51ee961`.
+- Change: completed the 35-case PC5 campaign by connecting each remaining
+  planning, identity/order, transport/feedback, process-restart, and runtime
+  case to its actual zero-hardware owner boundary. Added a canonical 64-entry
+  observation cache with exact fields, per-entry and outer hashes, strict
+  qualification identity, deterministic order, zero command authority, and
+  fail-closed corruption/resource handling.
+- Inputs/fixtures: actual V2 decoder failures; stale and crossed rolling-horizon
+  bindings; invalid V2 action order; canonical IK no-solution and joint-limit
+  rejection; weighted-Jacobian rank loss; bounded trajectory discontinuity;
+  dynamics overflow; missing collision evidence; clearance rejection; late and
+  missing feedback transactions; deterministic protocol-emulator malformed,
+  partial-write, disconnect, and reset faults; sequence mismatch and ambiguous
+  completion; all five restart timings; corrupt/crossed/oversized caches;
+  cancellation and deadline invalidation.
+- Commands: `python -m pytest tests/unit/test_typing_fault_owner_boundaries_v1.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_model_motion_ingress_v2.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_typing_trajectory_ik_screen_v1.py
+  tests/unit/test_typing_joint_schedule_v1.py
+  tests/unit/test_model_motion_sequence_coordinator.py
+  tests/unit/test_arm_protocol.py tests/unit/test_discrete_transaction.py -q`.
+- Result: PASS; 29 focused campaign tests and 145 affected owner-boundary tests
+  passed. All 35 cases retain stable machine-readable terminal dispositions;
+  no exception escaped, and no authority leak, automatic retry, reorder,
+  silent fallback, unbounded allocation, or inconsistent outcome was observed.
+- Artifacts: `software/src/rocell/application/typing_fault_campaign_v1.py`;
+  `software/ai/schemas/typing_fault_campaign_v1.schema.json`;
+  `software/ai/schemas/typing_fault_observation_cache_v1.schema.json`;
+  `software/tests/unit/test_typing_fault_campaign_v1.py`;
+  `software/tests/unit/test_typing_fault_owner_boundaries_v1.py`.
+- Hardware writes: 0 physical writes. Protocol-emulator writes were confined to
+  the incapable in-memory test transport.
+- Physical movements: 0.
+- Limitations: this is synthetic/offline fault qualification. It does not
+  establish installed controller tracking, measured collision clearance,
+  camera accuracy, contact behavior, typing speed, or physical authority.
+- Supersedes: ARM-084's in-progress PC5 status only; ARM-084 remains retained
+  as the campaign-contract checkpoint.
+- Next dependency: PC6 must journal the complete request-to-verification
+  correlation lineage and replay retained synthetic traces deterministically
+  without hardware, detecting mutation, deletion, truncation, and identity
+  crossing.
+
+### E-20260928-ARM-086 — PC6 deterministic trace-replay backbone
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC6 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `f65ff31`.
+- Change: added a canonical zero-authority trace journal with an exact 14-stage
+  order from request and AI batch through planning, controller/feedback
+  rehearsal, and effect-verification placeholder. Each entry binds ordinal,
+  bounded byte count, artifact digest, prior-stage digest, and stage digest.
+  Added a deterministic replay verifier that compares caller-supplied retained
+  artifacts but never interprets or executes them.
+- Inputs/fixtures: synthetic `robot` sequence; one bounded canonical artifact
+  for each required stage; missing IK artifact; changed joint schedule; empty
+  collision artifact; unreviewed extra artifact; reversed and truncated stage
+  chains; crossed request/correlation identities; oversized artifact.
+- Commands: `python -m pytest tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; 7 focused trace tests and 99 affected journal/planning tests
+  passed. Identical replay is explicit; missing, mutated, truncated, extra,
+  reordered, and identity-crossed inputs cannot be reported identical.
+- Artifacts: `software/src/rocell/application/typing_trace_journal_v1.py`;
+  `software/ai/schemas/typing_trace_journal_v1.schema.json`;
+  `software/tests/unit/test_typing_trace_journal_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the checkpoint uses bounded synthetic in-memory artifacts. It
+  does not yet adapt the actual retained PC2-PC5 outputs, provide the final
+  clean-checkout replay command, persist private evidence, qualify path
+  containment/redaction, or grant physical authority.
+- Next dependency: bind actual retained golden shadow, rolling-horizon,
+  controller-preview, sequence-journal, and fault-campaign artifacts into the
+  manifest, then add a contained clean-checkout replay command.
+
+### E-20260928-ARM-087 — actual PC2-PC5 typing trace adapter
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC6 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `b7666d9`.
+- Change: added an adapter that validates the actual strict V2 batch, PC2
+  shadow receipt, PC3 rolling horizon, PC4 zero-write controller preview, and
+  PC5 fault campaign; cross-checks request, action, horizon, and joint-schedule
+  lineage; and derives the exact 14 PC6 replay artifacts. Planning stages use
+  hash-only references to the existing PC2 receipt. The permit, encoding,
+  dispatch, and feedback stages preserve existing PC4 identities. Effect
+  verification is explicitly `NOT_OBSERVED_SYNTHETIC_PLACEHOLDER`.
+- Inputs/fixtures: actual one-key PC2 golden pipeline output; valid PC3 horizon;
+  reconstructed valid PC4 preview; complete PC5 campaign; crossed request,
+  schedule, and target-order mutations.
+- Commands: `python -m pytest tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; 4 focused adapter tests and 103 combined trace, shadow,
+  horizon, controller, journal, and campaign tests passed. Valid inputs replay
+  identically; crossed request, planning, and action lineage rejects before
+  the trace is sealed.
+- Artifacts: `software/src/rocell/application/typing_trace_adapter_v1.py`;
+  `software/tests/integration/test_typing_trace_adapter_v1.py`; ARM-086 trace
+  journal, schema, and replay verifier.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the integration fixture is synthetic and zero-I/O. The adapter
+  does not provide persistent evidence storage, CLI replay, path containment,
+  redaction, installed geometry, camera evidence, or physical authority.
+- Supersedes: ARM-086's missing-adapter limitation only; ARM-086 remains the
+  trace-contract checkpoint.
+- Next dependency: implement a contained clean-checkout replay package/command
+  that verifies every artifact before reporting an identical replay and never
+  interprets retained bytes as executable commands.
+
+### E-20260928-ARM-088 — contained PC6 replay package and CLI
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC6 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `00a4290`.
+- Change: added canonical contained trace packages and the
+  `replay-typing-trace` CLI. The writer validates trace identity, byte-identical
+  replay, canonical JSON, redaction, and bounded sizes before creating fixed
+  journal/artifact/manifest paths beneath an existing nonsymlink evidence root.
+  Replay validates every filename, file type, size, digest, stage, chain,
+  package identity, and authority field without interpreting artifact contents.
+- Inputs/fixtures: deterministic 14-stage `robot` trace; changed, deleted, and
+  extra files; invalid escape identifiers; sensitive credential/port keys;
+  Windows and POSIX absolute paths; noncanonical JSON; CLI identical and escape
+  cases under hardware-import sentinels.
+- Commands: `python -m pytest tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; 12 focused package tests, 2 CLI tests, and 117 affected PC2-PC6
+  tests passed. Identical packages return success; containment or integrity
+  failures return stable CLI configuration errors with zero hardware access.
+- Artifacts: `software/src/rocell/application/typing_trace_package_v1.py`;
+  `software/src/rocell/cli.py`;
+  `software/ai/schemas/typing_trace_package_v1.schema.json`;
+  `software/tests/unit/test_typing_trace_package_v1.py`;
+  `software/tests/integration/test_typing_trace_cli.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the CLI-qualified package is generated from deterministic test
+  artifacts during the test. No actual ARM-087 adapter-produced golden package
+  is retained in the repository yet. This adds no installed-workcell, camera,
+  controller-tracking, contact, or physical qualification.
+- Supersedes: ARM-087's missing CLI/containment/redaction limitations only;
+  ARM-087 remains the actual contract-adapter checkpoint.
+- Next dependency: retain one bounded ARM-087 adapter-produced synthetic golden
+  package and prove the checked-in package replays identically on a clean
+  checkout before PC6 is marked complete.
+
+### E-20260928-ARM-089 — retained adapter-generated PC6 golden trace
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC6 complete.
+- Lane: Arm/runtime shared boundary.
+- Commit: `18cde75`.
+- Change: retained one bounded synthetic trace package generated through the
+  actual ARM-087 PC2-PC5 adapter and added tests that regenerate all package
+  files byte-for-byte and replay the checked-in package through the CLI from an
+  isolated workspace.
+- Inputs/fixtures: deterministic single-target `H` V2 batch, golden shadow
+  receipt, rolling horizon, zero-write controller preview, completed fault
+  campaign, explicit effect-not-observed placeholder, and retained package
+  `typing-trace-58dba551903390ad42a42184`.
+- Commands: `python -m pytest tests/integration/test_typing_trace_golden_v1.py
+  tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; the retained 16-file package exactly matches a fresh adapter
+  regeneration, the isolated CLI replay returns `IDENTICAL`, and all 119
+  affected PC2-PC6 tests pass.
+- Artifacts: `software/tests/fixtures/typing_trace_packages/
+  typing-trace-58dba551903390ad42a42184/` and
+  `software/tests/integration/test_typing_trace_golden_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: synthetic-only inputs; effect remains explicitly not observed;
+  no installed-workcell, camera, contact, controller-tracking, or physical
+  qualification is claimed.
+- Supersedes: ARM-088's missing retained adapter-produced golden package.
+- Next dependency: begin PC7 safe transition-cache shadow qualification while
+  preserving full per-use revalidation and zero physical authority.
+
+### E-20260928-ARM-090 — PC7 zero-authority transition-cache checkpoint
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC7 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `196f161`.
+- Change: added a bounded FIFO transition cache keyed by directional targets,
+  calibration, catalog, tool, arm model, dynamics, planner policy, and
+  device-pose epoch. Entries contain only canonical joint seed positions,
+  timing estimates, and an earlier admitted schedule hash. Every hit requires
+  fresh start-state, IK, collision, dynamics, and permit-policy validation and
+  returns a hint that still requires fresh planning and full safety screening.
+- Inputs/fixtures: deterministic H-to-I PC2 shadow route; hit, miss, stale,
+  crossed-start, crossed-key, each-owner rejection, corruption, eviction, and
+  device-pose invalidation cases.
+- Commands: `python -m pytest
+  tests/unit/test_typing_transition_cache_v1.py
+  tests/integration/test_typing_transition_cache_equivalence_v1.py
+  tests/integration/test_typing_trace_golden_v1.py
+  tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; 14 focused tests and 133 affected PC2-PC7 tests pass. Cached
+  seed and uncached planning produce the identical PC2 receipt and joint
+  schedule hash. Rejection and corruption return no seed or authority.
+- Artifacts: `software/src/rocell/application/typing_transition_cache_v1.py`;
+  `software/tests/unit/test_typing_transition_cache_v1.py`;
+  `software/tests/integration/test_typing_transition_cache_equivalence_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: one deterministic H-to-I equivalence route is qualified so far;
+  timing savings are declared estimates, not measured typing performance; no
+  installed-workcell or physical qualification is claimed.
+- Next dependency: run broader directional-pair, repeated-key, identity-churn,
+  bounded-capacity, and randomized cached-versus-uncached equivalence campaigns
+  before PC7 completion.
+
+### E-20260928-ARM-091 — PC7 equivalence and stress completion
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC7 complete.
+- Lane: Arm/runtime shared boundary.
+- Commit: `d754e20`.
+- Change: expanded cached-versus-uncached planning equivalence to every
+  canonical PC0 typing fixture plus explicit reverse travel. Added exhaustive
+  invalidation coverage for all seven bound identity dimensions and a seeded
+  128-operation bounded-capacity campaign.
+- Inputs/fixtures: `robot`, `book`, `qaz`, `plm`, `hh1.`, space, enter, `aaa`,
+  and reverse I-to-H; calibration, catalog, tool, arm-model, dynamics,
+  planner-policy, and device-pose identity churn; deterministic capacity seed
+  `20260928`.
+- Commands: `python -m pytest
+  tests/unit/test_typing_transition_cache_v1.py
+  tests/integration/test_typing_transition_cache_equivalence_v1.py
+  tests/integration/test_typing_trace_golden_v1.py
+  tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; 31 focused PC7 tests and 150 affected PC2-PC7 tests pass. Every
+  cached route reproduces the uncached receipt and joint schedule hash. The
+  randomized campaign stays at eight entries and records deterministic FIFO
+  evictions while every immediate lookup is revalidated.
+- Artifacts: `software/tests/unit/test_typing_transition_cache_v1.py` and
+  `software/tests/integration/test_typing_transition_cache_equivalence_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: timing-saved values remain declared estimates rather than
+  measured physical performance; installed-workcell, camera, contact, and
+  controller-tracking qualification remain blocked.
+- Supersedes: ARM-090's limited single-route equivalence coverage.
+- Next dependency: begin PC8 reproducible cold/warm-cache performance and
+  readiness benchmarking without presenting simulated timing as typing speed.
+
+### E-20260928-ARM-092 — PC8 bounded performance-report contract
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC8 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `39af922`.
+- Change: added a strict synthetic-only benchmark sample and report contract
+  with deterministic percentile aggregation, scenario completeness, cache and
+  route comparison, resource accounting, and retained PC0 ceiling enforcement.
+- Inputs/fixtures: 50 deterministic samples for each of cold cache, warm cache,
+  long string, repeated key, punctuation, keyboard extreme, forced rejection,
+  direct hover, and park baseline; duplicate, incomplete, false-acceptance, and
+  resource-ceiling failure cases.
+- Commands: `python -m pytest
+  tests/unit/test_typing_performance_report_v1.py
+  tests/unit/test_typing_transition_cache_v1.py
+  tests/integration/test_typing_transition_cache_equivalence_v1.py
+  tests/integration/test_typing_trace_golden_v1.py
+  tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; eight focused PC8 tests and 158 affected PC2-PC8 tests pass.
+  Required p50/p95/p99 distributions, cache metrics, route comparison, resource
+  maxima, and all ceiling dispositions are deterministic.
+- Artifacts: `software/src/rocell/application/typing_performance_report_v1.py`
+  and `software/tests/unit/test_typing_performance_report_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: current samples are contract fixtures, not instrumented pipeline
+  measurements; no retained performance report or physical speed claim exists.
+- Next dependency: instrument the actual PC2-PC7 boundaries, run and retain the
+  bounded cold/warm benchmark, then publish bottlenecks and readiness without
+  converting predicted duration into a physical claim.
+
+### E-20260928-ARM-093 — actual PC2 performance instrumentation
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC8 in progress.
+- Lane: Arm/runtime shared boundary.
+- Commit: `4266602`.
+- Change: added a zero-I/O profiling runner over the actual PC2 decode, ingress
+  and freshness checks, execution/trajectory planning, IK, joint time scaling,
+  collision intake, and receipt creation boundaries. It also samples peak
+  process working set and bounded output/resource counts.
+- Inputs/fixtures: `robot` cold-cache route and `hh1.` warm-cache route using
+  the existing golden PC2 construction.
+- Commands: `python -m pytest
+  tests/integration/test_typing_performance_runner_v1.py
+  tests/unit/test_typing_performance_report_v1.py
+  tests/unit/test_typing_transition_cache_v1.py
+  tests/integration/test_typing_transition_cache_equivalence_v1.py
+  tests/integration/test_typing_trace_golden_v1.py
+  tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; profiled receipts equal ordinary receipts, ten focused
+  runner/report tests pass, and the 160-test affected PC2-PC8 suite passes.
+- Artifacts: `software/src/rocell/application/typing_performance_runner_v1.py`
+  and `software/tests/integration/test_typing_performance_runner_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: preview and encoding are correctly zero in this runner because
+  the honest installed-collision-evidence blocker stops the route first; the
+  retained 50-iteration scenario campaign has not yet run.
+- Next dependency: run the bounded scenario campaign in an isolated process,
+  retain its report, and publish the bottleneck/readiness interpretation.
+
+### E-20260928-ARM-094 — PC8 retained performance campaign and readiness
+
+- Stage: S1/S4/S7 pre-camera arm integration; PC8 complete.
+- Lane: Arm/runtime shared boundary.
+- Commit: `1407de5`.
+- Change: added the reproducible bounded campaign generator, canonical forced
+  decode-rejection measurement, correct matched direct-hover versus park-route
+  prediction, retained 450-observation report, and exact retained-evidence
+  regression binding.
+- Inputs/fixtures: 50 iterations each for cold cache, warm cache, long string,
+  repeated key, punctuation, keyboard extreme, forced rejection, direct hover,
+  and park baseline using the existing synthetic PC2 fixtures.
+- Commands: `python software/scripts/run_typing_performance_campaign_v1.py
+  --iterations 50`; `python -m pytest
+  tests/integration/test_retained_typing_performance_report_v1.py
+  tests/integration/test_typing_performance_runner_v1.py
+  tests/unit/test_typing_performance_report_v1.py
+  tests/unit/test_typing_transition_cache_v1.py
+  tests/integration/test_typing_transition_cache_equivalence_v1.py
+  tests/integration/test_typing_trace_golden_v1.py
+  tests/unit/test_typing_trace_package_v1.py
+  tests/integration/test_typing_trace_cli.py
+  tests/unit/test_typing_trace_journal_v1.py
+  tests/integration/test_typing_trace_adapter_v1.py
+  tests/integration/test_typing_shadow_pipeline_v1.py
+  tests/unit/test_typing_rolling_horizon_v1.py
+  tests/unit/test_typing_controller_bridge_v1.py
+  tests/unit/test_model_motion_sequence_journal.py
+  tests/unit/test_typing_fault_campaign_v1.py
+  tests/unit/test_typing_fault_owner_boundaries_v1.py -q`.
+- Result: PASS; report content SHA-256
+  `34273dcb73ba13295cd55a8b1dfafe7ac4aea06b06c7068c141868426ae084a8`;
+  retained file SHA-256
+  `8f8203e60d3e9a6a5f2e4380343c92284bf77498d47d5d04f362eec5ba460b1c`.
+  All 450 observations and all ceilings pass. IK p95 is 8.953 seconds CPU.
+  Direct-hover predicted p50 is 11.657399955 seconds versus 12.807750444
+  seconds for park baseline, an 8.98 percent predicted reduction. Twelve
+  focused tests and the 162-test affected PC2-PC8 suite pass.
+- Artifacts: `software/ai/eval/typing_performance_report_v1.json`,
+  `software/scripts/run_typing_performance_campaign_v1.py`,
+  `software/tests/integration/test_retained_typing_performance_report_v1.py`,
+  and `software/docs/TYPING_PERFORMANCE_READINESS_REPORT_V1.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: evidence is synthetic and offline. Preview and encoding remain
+  zero because the installed-collision-evidence boundary blocks those stages.
+  No physical typing speed, installed-workcell safety, tracking, contact, or
+  outcome-verification claim is made.
+- Supersedes: ARM-092/093 outstanding retained-campaign dependency; their
+  historical limitations remain accurate for their respective checkpoints.
+- Next dependency: PC9 camera-arrival evidence tooling and dry run, without
+  weakening installed geometry, calibration, observed-state, or contact gates.
+
+### E-20260928-ARM-095 — fail-closed camera-arrival kit
+
+- Stage: S1/S2/S3/S7 pre-camera integration; PC9 in progress.
+- Lane: Shared AI/arm evidence boundary.
+- Commit: `bef76c3`.
+- Change: added a canonical 15-slot physical-original map, strict sidecar JSON
+  schema, zero-I/O generator, retained synthetic dry run, exact-file regression,
+  synthetic-escalation mutation tests, and arrival-day checklist.
+- Inputs/fixtures: blank synthetic-only slots for camera receipt, identity,
+  mode/controls, support witnesses, five calibration originals, installed
+  geometry, cable envelope, keyboard/tool profiles, localization campaign, and
+  localization evaluation.
+- Commands: `python -m pytest
+  tests/unit/test_camera_arrival_kit_v1.py
+  tests/unit/test_camera_arrival_original_schema_v1.py
+  tests/integration/test_retained_camera_arrival_kit_v1.py
+  ai/tests/test_physical_camera_localization_campaign.py
+  ai/tests/test_physical_camera_localization_evaluator.py
+  tests/unit/test_camera_support_optics_epoch_intake_v1.py -q`.
+- Result: PASS; 33 tests. Retained kit SHA-256
+  `26a6604760cf129a61ac49660b46f90517d108aa745fc8b923359b909a694eeb`;
+  retained file SHA-256
+  `2a3c71f578626e6e4c8e0f1b56e7004f64c99643ce734325545b7a4d043b5808`.
+  All 15 measured evidence hashes remain null.
+- Artifacts: `software/src/rocell/application/camera_arrival_kit_v1.py`,
+  `software/ai/schemas/camera_arrival_original_v1.schema.json`,
+  `software/ai/eval/camera_arrival_kit_dry_run_v1.json`, and
+  `software/docs/CAMERA_ARRIVAL_DAY_CHECKLIST_V1.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is a synthetic coordination dry run, not received-camera,
+  calibration, installed-geometry, localization, or deployment evidence.
+- Next dependency: consolidate dry-run validation for the calibration and
+  installed-geometry consumers while preserving blank physical slots.
+
+### E-20260928-ARM-096 — camera-arrival consumer binding and PC9 completion
+
+- Stage: S1/S2/S3/S7 pre-camera integration; PC9 complete.
+- Lane: Shared AI/arm evidence boundary.
+- Commit: `665cc95`.
+- Change: added a repository-bound consumer map for all 15 arrival slots. Each
+  map row binds the current consumer source, aggregate schema, consumer field,
+  and exact source/schema hashes. The retained generator refuses overwrite.
+- Inputs/fixtures: the canonical ARM-095 arrival kit plus existing synthetic
+  capture, camera receipt/profile, calibration, installed-geometry,
+  camera-support, campaign-preflight, and localization-evaluation fixtures.
+- Commands: `python -m pytest
+  tests/unit/test_camera_arrival_kit_v1.py
+  tests/unit/test_camera_arrival_original_schema_v1.py
+  tests/integration/test_retained_camera_arrival_kit_v1.py
+  tests/integration/test_camera_arrival_consumer_map_v1.py
+  tests/unit/test_camera_capture_dataset.py
+  tests/unit/test_camera_capture_checksum.py
+  tests/unit/test_camera_receipt.py
+  tests/unit/test_camera_profile.py
+  tests/unit/test_planner_calibration_snapshot.py
+  tests/unit/test_installed_collision_geometry.py
+  tests/unit/test_camera_support_optics_epoch_intake_v1.py
+  ai/tests/test_physical_camera_localization_campaign.py
+  ai/tests/test_physical_camera_localization_evaluator.py -q`.
+- Result: PASS; 225 tests. Consumer-map content SHA-256
+  `9e42435dfbe5f64eb02eefa7a459e597d46fa72a3acf799c60e0b50a273c223b`;
+  retained file SHA-256
+  `d234aa3e54f33e840b90ea88922ea7a111728257b3bbff3a350a4db5a9e2ca6b`.
+  All 15 dependencies resolve and remain hash-bound to the tested checkout.
+- Artifacts: `software/src/rocell/application/camera_arrival_consumer_map_v1.py`,
+  `software/ai/eval/camera_arrival_consumer_map_dry_run_v1.json`, and
+  `software/tests/integration/test_camera_arrival_consumer_map_v1.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: no received camera, measured transform, installed geometry,
+  localization qualification, epoch advancement, deployment update, or
+  physical admission is established.
+- Supersedes: ARM-095's outstanding calibration/geometry consumer dry-run
+  dependency; ARM-095's physical-evidence limitations remain unchanged.
+- Next dependency: PC10 clean-checkout pre-camera integration closure.
 ### E-20260928-AI-423 — FREEZE-013 static simulation bundle reconciliation
 
 - Stage: S1/S2/S3 simulation and evidence governance.
@@ -4248,3 +5079,1329 @@ rewriting history. New entries must use a unique evidence ID.
   Git history; bundle 002 is a new identity rather than a silent rewrite.
 - Next dependency: merge the reviewed reconciliation, close issue #167, and
   retain issue #88 as the remaining source-preview blocker.
+
+### E-20260928-ARM-097 — PC10 clean-checkout pre-camera closure
+
+- Stage: PC10 pre-camera integration closure.
+- Lane: arm/runtime integration with shared AI boundary reconciliation.
+- Tested implementation commit:
+  `baa5745a966284bb94204307f1d37994e4e5bf3c`.
+- Change: merged the reviewed FREEZE-013 backbone, rebound the PC0
+  qualification basis to system-manifest SHA-256
+  `0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d`,
+  and regenerated deterministic shadow, trace-package, and retained
+  performance evidence. The new PC0 basis SHA-256 is
+  `ce26486caf16e2e4df8c5b313e6aa4e8e4ceb02923c706079dc6e4fb332aff28`;
+  the retained trace identity is
+  `typing-trace-0eaf0771e5baf2f53105b16e`.
+- Reconciliation: AI-423 established that FREEZE-013 changed only governed
+  manifest/build-package provenance identity. Robot numerics, target geometry,
+  optics, kinematics, semantic bindings, and physical-authority flags were
+  unchanged, so PC0 was advanced as a controlled lineage rebind rather than a
+  new physical qualification.
+- Commands: detached clean checkout; maintained portable selection from
+  `scripts/ci/offline_checks.py`; explicit PC0-PC9 unit/integration selection;
+  repository-policy unit discovery; documentation, public-record,
+  evidence-scope, repository-artifact, repository-health,
+  source-archive-footprint, and release-integrity policy checks.
+- Result: PASS. The detached Windows/Python 3.10.10 checkout passed 507
+  governed portable tests, 194 explicit PC0-PC9 tests, and 115 repository-policy
+  tests. All listed policy checks passed.
+- Boundary note: raw repository-wide `pytest` discovery also selects tests for
+  ignored retained/private evidence unavailable in a fresh clone and is not the
+  governed clean-checkout boundary. Cross-platform confirmation remains owned
+  by GitHub CI.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this establishes reproducible pre-camera software closure only.
+  It does not establish camera calibration, real localization accuracy,
+  installed collision/cable geometry, fresh observed arm state, controller
+  execution, contact behavior, key registration, physical typing speed, or
+  autonomous typing authority.
+- Supersedes: ARM-096's PC10 dependency. AI-423 remains the source-lineage
+  reconciliation record.
+- Next dependency: receive and commission the final camera, then execute the
+  camera-dependent continuation under separate physical authorization.
+
+### E-20260928-ARM-098 — Read-only camera-arrival evidence preflight
+
+- Stage: post-PC10 camera commissioning preparation.
+- Lane: arm/runtime evidence intake.
+- Implementation commit: `115ee6299ce23d0ff6f1711de9805977e3431d8e`.
+- Change: added one deterministic command and application service that inventory
+  the canonical 15-slot external camera-evidence root. It validates strict
+  sidecar fields, artifact identity/class/units, safe contained source paths,
+  source byte counts and SHA-256 hashes, accepted reviews, required uncertainty,
+  and one shared configuration epoch.
+- Command:
+  `python software/scripts/preflight_camera_arrival_evidence_v1.py --workspace . --evidence-root <external-root>`.
+- Result: PASS. Six focused preflight tests and 20 retained PC9 regressions
+  passed together; the governed offline matrix passed 514 tests. Repository
+  policy tests and documentation, public-record, evidence-scope,
+  repository-artifact, repository-health, and release-integrity checks passed.
+- Admission semantics: incomplete or invalid evidence returns
+  `BLOCKED_ARRIVAL_EVIDENCE_INCOMPLETE`; a complete structural set returns only
+  `READY_FOR_OFFLINE_QUALIFICATION_REVIEW`.
+- Camera opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: structural completeness is not calibration acceptance,
+  localization qualification, collision clearance, epoch commissioning,
+  deployment installation, or physical authority. The external evidence root
+  still requires actual camera-arrival originals and independent review.
+- Supersedes: ARM-097's informal first arrival-day inventory step only; PC10
+  remains complete and the physical-camera hold remains active.
+- Next dependency: run this preflight against the owner-selected external root
+  as physical originals are collected, then commission the measured epoch only
+  after all downstream reviews pass.
+
+### E-20260928-ARM-099 — Packaged camera-arrival preflight contract
+
+- Stage: post-PC10 camera commissioning preparation.
+- Lane: arm/runtime evidence intake and downstream contract packaging.
+- Implementation commit: `45fafe04a6394d4f23a1e32474fa6dc4fc93e587`.
+- Change: added a strict Draft 2020-12 output schema, a canonical-hash and
+  semantics-verifying parser, an installed-module entry point, and mutation
+  tests. The source wrapper and installed module share the same application
+  `main` function.
+- Installed invocation:
+  `python -m rocell.application.camera_arrival_evidence_preflight_v1 --workspace . --evidence-root <external-root>`.
+- Result: PASS. The installed package returned exit 2 with the expected
+  `BLOCKED_ARRIVAL_EVIDENCE_INCOMPLETE` report for an empty 15-slot root,
+  `valid_slot_count=0`, and `physical_authority=false`. Thirty focused and PC9
+  regression tests passed; the governed offline matrix passed 518 tests.
+  Repository-policy and maintained documentation/artifact audits passed.
+- Build-governance decision: no new `pyproject.toml` console alias was retained,
+  because changing package metadata invalidated the frozen software-build
+  evidence. Python's standard installed-module execution provides the same
+  capability without changing the governed package identity.
+- Camera opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the schema and parser make structural evidence portable and
+  tamper-evident; they do not accept measurement quality, commission an epoch,
+  install calibration, or authorize physical execution.
+- Supersedes: ARM-098's source-checkout-only invocation limitation.
+- Next dependency: bind a structurally complete preflight report to the existing
+  per-slot consumer map for offline qualification routing after real originals
+  exist.
+
+### E-20260929-ARM-100 — Hash-bound camera-arrival consumer handoff
+
+- Stage: post-PC10 camera commissioning preparation.
+- Lane: arm/runtime evidence routing.
+- Implementation commit: `6a921ba60be3ae61d693950cf6e3be24725a4530`.
+- Change: added a canonical, schema-validated handoff that joins the parsed
+  15-slot arrival preflight to the current repository-built consumer map. Every
+  route binds artifact identity, sidecar/source hashes, configuration epoch,
+  consumer source/schema hashes, and exact consumer field binding.
+- Installed invocation:
+  `python -m rocell.application.camera_arrival_consumer_handoff_v1 --workspace . --evidence-root <external-root>`.
+- Result: PASS. Empty and structurally complete synthetic roots, one corrupted
+  source, altered consumer-map content, rehashed authority, and route-admission
+  mutations were exercised. Twenty-three focused/PC9 regression tests passed;
+  the governed offline matrix passed 527 tests. All 115 repository-policy tests
+  and maintained documentation, public-record, evidence-scope,
+  repository-artifact, repository-health, and release-integrity checks passed.
+- Admission semantics: a complete consistent set becomes only
+  `READY_FOR_OFFLINE_CONSUMER_VALIDATION`. The handoff does not invoke any
+  consumer and records `consumer_validation_completed=false` globally and per
+  route, with `physical_admission_ready=false` for every route.
+- Camera opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: repository routing readiness is not downstream measurement
+  validation, calibration acceptance, localization qualification, installed
+  collision/cable clearance, epoch commissioning, or deployment authority.
+  Actual camera-arrival originals remain unavailable.
+- Supersedes: ARM-099's unbound downstream-routing dependency.
+- Next dependency: after actual originals arrive and preflight passes, run each
+  route's named offline consumer and retain its independent validation receipt
+  before considering any epoch or deployment transition.
+
+### E-20260929-ARM-101 — Camera consumer validation receipt gate
+
+- Stage: post-PC10 camera commissioning preparation.
+- Lane: arm/runtime downstream validation intake.
+- Implementation commit: `2228523aadd96c3e6b19731e445e31e6470331ce`.
+- Change: added strict consumer-validation receipt and aggregate-assessment
+  schemas plus hash- and semantics-verifying parsers. Every receipt binds the
+  exact ARM-100 handoff, preflight, consumer map, original sidecar/source,
+  consumer source/schema, field binding, validator version, and output.
+- Result: PASS. Tests cover blocked handoff, ready handoff with no receipts,
+  fifteen exact passes, one retained blocked result, wrong-route binding,
+  duplicate receipt, and rehashed physical-authority mutation. Sixteen focused
+  ARM-100/ARM-101 tests passed; the governed offline matrix passed 534 tests.
+  All 115 repository-policy tests and maintained documentation, public-record,
+  evidence-scope, repository-artifact, repository-health, and
+  release-integrity checks passed.
+- Completion semantics: missing receipts remain `PENDING`, consumer failures
+  remain `BLOCKED`, and only 15 exact passes produce
+  `CONSUMER_VALIDATION_COMPLETE_FOR_OFFLINE_REVIEW`.
+- Camera opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the generic gate verifies receipt identity and consistency, not
+  each consumer's domain-specific measurement algorithm. It invokes no
+  consumer, commissions no epoch, updates no registry, installs no
+  qualification, and grants no physical admission or authority. Actual
+  originals and real consumer outputs remain unavailable.
+- Supersedes: ARM-100's undefined downstream receipt format.
+- Next dependency: implement domain-specific receipt emitters beside each
+  existing offline consumer, then exercise them against actual arrival
+  originals after the camera-dependent hold can be satisfied.
+
+### E-20260929-ARM-102 — Explicit camera consumer receipt emitters
+
+- Stage: post-PC10 camera commissioning preparation.
+- Lane: arm/runtime domain-consumer integration.
+- Implementation commit: `8043971a763fe27788a626aaeb65e81cd2d5304f`.
+- Change: added adapters for the existing camera/support epoch assessment,
+  physical-camera campaign preflight, and held-out localization evaluator. The
+  adapters cover eight of the 15 arrival routes and bind validator version to
+  the exact mapped consumer-source hash.
+- Result: PASS. Tests exercise eight exact route-local pass receipts,
+  localization and support blockers with retained native-output hashes,
+  wrong-consumer route rejection, altered native output rejection, and blocked
+  handoff rejection. Thirteen focused ARM-101/ARM-102 tests passed; the governed
+  offline matrix passed 540 tests. All 115 repository-policy tests and
+  maintained documentation, public-record, evidence-scope,
+  repository-artifact, repository-health, and release-integrity checks passed.
+- Camera opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: no native consumer was run against actual arrival originals.
+  Planner calibration supplies five remaining routes and installed collision
+  geometry/cable supplies two; all seven remain pending. Eight receipts cannot
+  complete the 15-route aggregate, install qualification, or authorize
+  physical use.
+- Supersedes: ARM-101's absence of any domain-specific receipt producer.
+- Next dependency: add typed planner-snapshot and installed-collision/cable
+  receipt emitters while preserving their existing measured-evidence and
+  geometry-completeness semantics.
+
+### E-20260929-ARM-103 — Complete typed camera consumer emitter set
+
+- Stage: post-PC10 camera commissioning preparation.
+- Lane: arm/runtime domain-consumer integration.
+- Implementation commit: `20a9f9423e5e27a4534cac0140ffdaac1ec8ec77`.
+- Change: added five receipt emitters from the typed keyboard
+  `PlannerCalibrationSnapshot` and two from the typed
+  `InstalledCollisionGeometryProfile`. Planner receipts bind one decoded
+  snapshot; installed geometry uses diagnostic readiness, while the cable route
+  requires physical geometry completeness with no configuration-sampled body.
+- Result: PASS. The full domain-emitter fixture accounts for all 15 handoff
+  route identities. Thirteen pass, while incomplete installed geometry and the
+  sampled moving-camera cable retain two blocked receipts; pending count is
+  zero and aggregate completion remains false. Sixteen focused emitter/gate
+  tests passed; the governed offline matrix passed 543 tests. All 115
+  repository-policy tests and maintained documentation, public-record,
+  evidence-scope, repository-artifact, repository-health, and
+  release-integrity checks passed.
+- Camera opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: typed fixtures prove contract composition, not actual measured
+  calibration or installed geometry. The current synthetic collision profile
+  is intentionally incomplete and cannot produce 15 passing receipts. No
+  epoch, registry, qualification, physical admission, or authority changes.
+- Supersedes: ARM-102's seven pending domain-emitter implementations.
+- Next dependency: once physical originals exist, run the actual native
+  consumers and use their typed/hash-bound outputs to produce the 15 real
+  receipts. Installed geometry and the moving cable envelope must independently
+  satisfy their native completeness criteria before aggregate offline review.
+
+### E-20260929-ARM-104 — One-command zero-authority arrival commissioning
+
+- Stage: PC11 post-closure pre-camera continuation.
+- Lane: arm/runtime commissioning composition.
+- Implementation commit: `80502168aeac035e016d2872e462503ec1160619`.
+- Change: composed the existing structural preflight, hash-bound consumer
+  handoff, strict canonical receipt loading, and aggregate receipt assessment
+  into one deterministic library/CLI report. Added the strict outer parser,
+  JSON Schema, source wrapper, operator checklist instructions, and governed
+  test registration.
+- Command: `$env:PYTHONPATH='software/src;software'; $tests = @(python -c
+  "import importlib.util; s=importlib.util.spec_from_file_location('offline_checks','scripts/ci/offline_checks.py');
+  m=importlib.util.module_from_spec(s); s.loader.exec_module(m);
+  print(chr(10).join(m.TESTS))"); python -m pytest -q $tests`; repository policy
+  tests and maintained documentation/evidence/repository/release audits.
+- Result: PASS in detached clean checkout. The governed offline matrix passed
+  554 tests; repository-policy tests passed 115 tests; all maintained audits
+  passed. Focused commissioning tests cover empty evidence, complete evidence
+  without receipts, 15 exact receipts, one blocked receipt, unexpected files,
+  symlinks, duplicate JSON members, crossed filename identity, deterministic
+  reconstruction, CLI behavior, and rehashed authority mutation.
+- Artifacts: `software/src/rocell/application/camera_arrival_commissioning_orchestrator_v1.py`,
+  `software/ai/schemas/camera_arrival_commissioning_orchestrator_v1.schema.json`,
+  `software/scripts/run_camera_arrival_commissioning_v1.py`, and focused unit
+  and integration tests.
+- Camera opens: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the workflow composes evidence and receipts only. It does not
+  invoke physical consumers, commission an epoch, update a registry, install
+  qualification, validate a real camera, prove installed collision geometry,
+  or authorize physical action. Current tests use synthetic originals and
+  fixture receipts.
+- Supersedes: ARM-100 through ARM-103 only for operator-level composition;
+  their domain contracts and limitations remain authoritative.
+- Next dependency: PC12 must freeze and run the full synthetic arrival fault
+  matrix, including partial, mixed, stale, crossed, malformed, and
+  resource-bound sessions, before operator wrappers are added in PC13.
+
+### E-20260929-ARM-105 — Synthetic camera-arrival fault campaign
+
+- Stage: PC12 post-closure pre-camera continuation.
+- Lane: arm/runtime commissioning fault qualification.
+- Implementation commit: `f98ad366c19a960a07aea43e2612d21a304afe79`.
+- Change: added a frozen 18-case synthetic campaign and CLI that exercise the
+  actual PC11 orchestrator. Hardened external sidecar intake with strict
+  duplicate-member parsing and a 1 MiB ceiling, and corrected handoff parsing
+  so a global mixed-epoch blocker keeps every route blocked rather than making
+  the report reject itself.
+- Command: `python -m rocell.application.camera_arrival_fault_campaign_v1
+  --workspace .`; the governed offline matrix; repository-policy tests; and
+  maintained documentation/evidence/repository/release audits.
+- Result: PASS. 18/18 declared campaign cases matched the exact expected
+  outcome and owning detail; the retained report hash is
+  `98896d36a33807109f74143e56933386ef0a26f5761edb89ff9c8d6f6c74c2ca`.
+  The detached clean-checkout governed matrix passed 560 tests, policy tests
+  passed 115, and all maintained audits passed.
+- Artifacts: `software/src/rocell/application/camera_arrival_fault_campaign_v1.py`,
+  `software/ai/eval/camera_arrival_fault_campaign_v1.json`,
+  `software/ai/schemas/camera_arrival_fault_campaign_v1.schema.json`, and the
+  source wrapper plus focused unit/integration tests.
+- Camera opens: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is synthetic intake and orchestration evidence. It does not
+  validate a real camera, measured calibration, installed geometry, model
+  localization, epoch commissioning, or physical execution.
+- Supersedes: ARM-104 only for declared synthetic fault coverage; ARM-104's
+  orchestrator contract remains the operator boundary.
+- Next dependency: PC13 must provide uniform wrappers for the five native
+  consumer families while retaining their native schemas and blockers.
+
+### E-20260929-ARM-106 — Common camera-consumer operator boundary
+
+- Stage: PC13 post-closure pre-camera continuation.
+- Lane: arm/runtime consumer operations.
+- Implementation commit: `0543b421104ae479c7a1f3ce56bd6f098e84a927`.
+- Change: added one dispatch and exclusive receipt-write interface across the
+  support, campaign, localization, typed planner, and typed installed-collision
+  consumer families. Mapping outputs are available through a uniform CLI;
+  planner and collision outputs remain typed objects through the same Python
+  boundary rather than being reconstructed from generic JSON.
+- Result: PASS. All 15 route identities produced canonical receipt files with
+  exact native output hashes. Thirteen fixture routes passed and the incomplete
+  installed geometry and cable routes preserved their two native blockers.
+  Overwrite, wrong native type, typed-through-generic-CLI, and zero-authority
+  behavior were exercised. The detached clean-checkout governed matrix passed
+  564 tests, policy tests passed 115, and all maintained audits passed.
+- Artifacts: `software/src/rocell/application/camera_arrival_consumer_operator_v1.py`,
+  `software/scripts/emit_camera_arrival_consumer_receipt_v1.py`, focused
+  integration coverage, and expanded domain-emitter tests.
+- Camera opens: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the wrapper receives an already-produced native consumer output;
+  it does not perform camera capture, measurement, calibration, localization,
+  geometry collection, epoch commissioning, or physical admission. The current
+  full-route fixture still cannot complete offline review because installed
+  geometry and cable evidence are intentionally incomplete.
+- Supersedes: ARM-103 only for uniform operator invocation and receipt storage;
+  ARM-103's domain emitter semantics remain unchanged.
+- Next dependency: PC14 must bind originals, routes, receipt paths, epoch/profile
+  candidates, and derived session state into a restart-safe manifest.
+
+### E-20260929-ARM-107 — Restart-safe camera-arrival session manifest
+
+- Stage: PC14 post-closure pre-camera continuation.
+- Lane: arm/runtime commissioning session state.
+- Implementation commit: `0327035e2e77b37301f0fc9568146b37f14f55f9`.
+- Change: added a canonical manifest and JSON Schema binding the exact PC11
+  report, all 15 original/route/receipt summaries, candidate configuration
+  epoch, camera profile, and tool profile. Added exclusive-create and
+  bounded, duplicate-safe verify CLIs. Restart verification reruns PC11 and
+  requires complete manifest equality rather than inheriting a prior pass.
+- Command: `$env:PYTHONPATH='software/src;software'; $tests = @(python -c
+  "import importlib.util; s=importlib.util.spec_from_file_location('offline_checks','scripts/ci/offline_checks.py');
+  m=importlib.util.module_from_spec(s); s.loader.exec_module(m);
+  print(chr(10).join(m.TESTS))"); python -m pytest -q $tests`; repository-policy
+  tests and maintained documentation/evidence/repository/release audits.
+- Result: PASS in detached clean checkout. The governed matrix passed 575
+  tests; repository-policy tests passed 115; all maintained audits passed.
+  Focused coverage distinguishes collection incomplete, structurally complete,
+  validation pending, validation blocked, and offline-review complete/held;
+  checks exact reconstruction, changed-original refusal, distinct candidate
+  identities, exclusive output, duplicate JSON, size limits, JSON Schema, and
+  zero-authority semantics.
+- Artifacts: `software/src/rocell/application/camera_arrival_session_manifest_v1.py`,
+  `software/ai/schemas/camera_arrival_session_manifest_v1.schema.json`,
+  `software/scripts/build_camera_arrival_session_manifest_v1.py`,
+  `software/scripts/verify_camera_arrival_session_manifest_v1.py`, and focused
+  unit/integration tests.
+- Camera opens: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: candidate epoch/profile hashes are caller-selected metadata, not
+  measured or installed identities. A deliberate metadata change creates a new
+  manifest identity; authenticity still depends on retaining the intended
+  original manifest. No physical original, calibration, installed geometry,
+  cable envelope, camera validation, epoch commissioning, qualification, or
+  movement authority is established.
+- Supersedes: ARM-104 only for resumable session composition; PC11-PC13 native
+  contracts and blockers remain authoritative.
+- Next dependency: PC15 must exercise complete, incomplete, boundary, and
+  crossed synthetic installed-geometry and cable-envelope inputs through the
+  real typed collision consumer without promoting synthetic qualification.
+
+### E-20260929-ARM-108 — Typed synthetic cable-envelope intake
+
+- Stage: PC15 post-closure pre-camera continuation, increment 1.
+- Lane: arm/runtime installed collision evidence.
+- Implementation commit: `4f23b638b4dd126caea7397d633502acec21c1b9`.
+- Change: added a typed cable-envelope intake and JSON Schema that bind two to
+  64 ordered posture samples, every adjacent swept envelope, uncertainty, the
+  exact installed-collision profile, required sampled cable body, and one
+  profile source hash. Extended the typed collision emitter/operator so this
+  evidence can satisfy only the `cable_envelope` route.
+- Result: PASS in detached clean checkout. The governed matrix passed 579
+  tests; repository-policy tests passed 115; all maintained audits passed.
+  Focused cases cover the complete deterministic template, schema validation,
+  missing sweep, crossed adjacency, unknown source hash, and route misuse.
+- Artifacts: `software/src/rocell/application/installed_cable_envelope_intake_v1.py`,
+  `software/ai/schemas/installed_cable_envelope_intake_v1.schema.json`, the
+  collision receipt emitter/operator, and focused emitter tests.
+- Camera opens: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the included geometry is deliberately far-field synthetic test
+  data and is labeled `SYNTHETIC_OFFLINE_ONLY`. A route-local receipt pass is a
+  template/consumer compatibility result, not measured cable clearance,
+  physical collision qualification, installation, or movement authority.
+  Rigid/attachment templates, retained full campaign output, and measurement
+  diagnostics remain outstanding for PC15.
+- Supersedes: none; ARM-103/106 collision receipt behavior for a bare installed
+  profile remains unchanged and honestly blocked for sampled cable evidence.
+- Next dependency: complete PC15's rigid-body, attachment, uncertainty,
+  provenance, review, boundary, and crossed-lineage campaign around this cable
+  contract, retaining exact missing-measurement diagnostics.
+
+### E-20260929-ARM-109 — Installed-geometry and cable rehearsal campaign
+
+- Stage: PC15 post-closure pre-camera continuation, completion.
+- Lane: arm/runtime installed collision evidence.
+- Implementation commit: `e11f99394fea2c17aa28d37b6f659890e64edf98`.
+- Change: added a deterministic eight-case campaign, strict content-addressed
+  parser, JSON Schema, retained report, CLI, and governed tests around the real
+  installed-geometry and cable-envelope receipt emitter. The synthetic profile
+  covers every current rigid, attachment, and configuration-sampled body plus
+  uncertainty and source bindings without claiming measurement.
+- Command: `$env:PYTHONPATH='software/src;software'; $tests = @(python -c
+  "import importlib.util; s=importlib.util.spec_from_file_location('offline_checks','scripts/ci/offline_checks.py');
+  m=importlib.util.module_from_spec(s); s.loader.exec_module(m);
+  print(chr(10).join(m.TESTS))"); python -m pytest -q $tests`; followed by
+  `python scripts/maintain_repository.py verify`.
+- Result: PASS in detached clean checkout. The governed matrix passed 586
+  tests; repository-policy tests passed 115; all maintained documentation,
+  public-record, evidence-scope, repository-artifact, repository-health,
+  source-archive, release-integrity, and readiness-sync checks passed. All
+  eight declared cases matched: complete templates and the 64-posture boundary
+  passed; missing/unknown attachment geometry blocked with exact body-specific
+  codes; missing sweeps, crossed lineage, unknown source, and route misuse
+  rejected.
+- Artifacts: `software/src/rocell/application/installed_geometry_cable_rehearsal_v1.py`,
+  `software/ai/eval/installed_geometry_cable_rehearsal_v1.json`, its JSON
+  Schema, CLI, and focused unit/integration tests.
+- Camera opens: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: every campaign dimension and source is synthetic far-field test
+  data labeled `SYNTHETIC_OFFLINE_ONLY`. The pass establishes consumer and
+  diagnostic behavior only. It installs no measured geometry, cable clearance,
+  collision qualification, camera epoch, controller permit, or physical
+  authority.
+- Supersedes: ARM-108 only for PC15 stage completeness; its cable contract
+  remains the authoritative intake type.
+- Next dependency: PC16 must replay immutable captured bytes and metadata while
+  rejecting changed image, profile, model, calibration, or expected-output
+  identity and preserving zero live-camera and movement authority.
+
+### E-20260929-ARM-110 — Immutable camera replay runner
+
+- Stage: PC16 post-closure pre-camera continuation, completion.
+- Lane: arm/runtime immutable vision evidence replay.
+- Implementation commit: `22715d3ff6d4eebf9782175f93d73b3cc2dfa36b`.
+- Change: added a bounded replay manifest and runner binding one to 64 frozen
+  images and metadata records, camera/support profiles, model, calibration,
+  PC11 handoff, retained campaign/localization outputs, and the exact receipt
+  decisions produced by the existing camera consumers. Added strict parsers,
+  manifest/report JSON Schemas, CLI, and governed mutation coverage.
+- Command: `$env:PYTHONPATH='software/src;software'; $tests = @(python -c
+  "import importlib.util; s=importlib.util.spec_from_file_location('offline_checks','scripts/ci/offline_checks.py');
+  m=importlib.util.module_from_spec(s); s.loader.exec_module(m);
+  print(chr(10).join(m.TESTS))"); python -m pytest -q $tests`; followed by
+  `python scripts/maintain_repository.py verify`.
+- Result: PASS in detached clean checkout. The governed matrix passed 597
+  tests; repository-policy tests passed 115; all maintained audits passed.
+  Two identical runs produced the same report and consumer receipt identities.
+  Changed image, metadata, campaign output, localization output, model,
+  calibration, expected receipt, handoff, and authority paths reject.
+- Artifacts: `software/src/rocell/application/immutable_camera_replay_v1.py`,
+  `software/scripts/run_immutable_camera_replay_v1.py`, both replay JSON
+  Schemas, and focused governed tests.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: tests use synthetic frozen bytes. The runner verifies and
+  replays retained AI outputs through existing consumers; it does not execute
+  the vision model, prove the correctness of those outputs, establish source
+  authenticity merely from an origin label, install a measured epoch, or grant
+  movement authority. Physical originals remain required later.
+- Supersedes: none. PC11-PC14 handoff/session contracts and AI-owned inference
+  remain authoritative.
+- Next dependency: PC17 must add deterministic timing and observability without
+  making performance thresholds capable of overriding safety decisions.
+
+### E-20260929-ARM-111 — Decision-neutral pre-camera observability contract
+
+- Stage: PC17 post-closure pre-camera continuation, increment 1.
+- Lane: arm/runtime workflow timing and observability.
+- Implementation commit: `9930c4cd60c3dc6803538f17323834ebaedd70c9`.
+- Change: added the strict `rocell.pre_camera_observability_report.v1`
+  aggregator, parser, JSON Schema, CLI, and governed tests for PC11-PC16.
+  Samples carry bounded monotonic timing, item and artifact counts, cache
+  outcome, stable decision/blocker codes, cold/warm class, pass/block/pending
+  outcome, and safe AI-batch/target/plan/consumer/receipt/session correlation.
+  Each observation requires identical decision hashes before and after
+  instrumentation. Private absolute paths, duplicate JSON fields, non-finite
+  values, unsupported percentile claims, and authority mutation reject.
+- Command: `.\\.venv\\Scripts\\python.exe -c "import pytest; from
+  scripts.ci.offline_checks import TESTS; raise
+  SystemExit(pytest.main(['-q', *TESTS]))"`; followed by
+  `.\\.venv\\Scripts\\python.exe scripts/maintain_repository.py verify`.
+- Result: PASS in a detached clean checkout. The governed matrix passed 608 tests;
+  repository-policy tests passed 115; all maintained audits passed. Focused
+  observability coverage passed 11 tests. Per-stage p95 is emitted at 20
+  samples, per-stage p99 is withheld below 100, and overall p99 is emitted at
+  120 samples in the deterministic fixture.
+- Artifacts: `software/src/rocell/application/pre_camera_observability_v1.py`,
+  `software/scripts/build_pre_camera_observability_report_v1.py`, the report
+  JSON Schema, and focused governed tests.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: current timing evidence is a synthetic deterministic fixture;
+  it establishes contract and aggregation behavior, not host latency or
+  physical typing speed. No performance threshold influences admission.
+- Supersedes: none. PC11-PC16 decisions and artifacts remain authoritative.
+- Next dependency: collect retained host-measured cold/warm pass, blocked, and
+  pending observations through PC11-PC16 without changing their canonical
+  decisions, then publish the bounded report as PC17 increment 2.
+
+### E-20260929-ARM-112 — Retained PC11-PC16 host benchmark
+
+- Stage: PC17 post-closure pre-camera continuation, completion.
+- Lane: arm/runtime workflow timing and observability.
+- Implementation commit: `9583b51f03584bdd389ca8a7c9d69632a0417cbc`.
+- Change: added a hardware-incapable host benchmark that invokes the real PC11
+  commissioning orchestrator, PC12 18-case fault campaign, PC13 native
+  consumer operator, PC14 session-manifest builder, PC15 installed-geometry
+  and cable rehearsal, and PC16 immutable replay. Each stage runs 20 times:
+  ten against freshly materialized synthetic artifact trees (`COLD`/cache
+  miss) and ten against retained trees (`WARM`/cache hit). The timed result is
+  followed by an independent verification execution and exact decision-hash
+  comparison.
+- Command: `.\\.venv\\Scripts\\python.exe
+  software/scripts/run_pre_camera_host_benchmark_v1.py --workspace .
+  --samples-per-stage 20 --report-id pc17-host-windows-py310-20260929
+  --output software/ai/eval/pre_camera_host_benchmark_v1.json`; then the
+  governed matrix and `.\\.venv\\Scripts\\python.exe
+  scripts/maintain_repository.py verify`.
+- Result: PASS. The retained 120-sample report contains 60 cold and 60 warm
+  samples, 61 pass, 33 blocked, and 26 pending outcomes. Overall p95 was
+  1,309.2169 ms and p99 was 1,333.4719 ms. Per-stage p95 was 93.564 ms
+  (PC11), 1,333.4719 ms (PC12), 0.236 ms (PC13), 0.8717 ms (PC14),
+  256.4344 ms (PC15), and 2.1538 ms (PC16). All pre/post decision hashes
+  match. The governed matrix passed 610 tests; repository-policy tests passed
+  115; all maintained audits passed.
+- Retained report: `software/ai/eval/pre_camera_host_benchmark_v1.json`, SHA-256
+  identity `fb893be0f4c7915e6028a069b195145b77b92937023cc623f19737bae3f96a96`.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: one Windows/Python 3.10 host and synthetic artifact content;
+  timings are diagnostic samples, not cross-host claims, model inference
+  latency, controller response, typing throughput, or safety thresholds.
+- Supersedes: ARM-111 only for PC17 stage completeness; the ARM-111 contract
+  remains authoritative.
+- Next dependency: PC18 must run the actual AI producer's retained corpus
+  through the arm-owned compatibility gate with exact expected outcomes.
+
+### E-20260929-ARM-113 — Actual AI-output compatibility corpus and gate
+
+- Stage: PC18 post-closure pre-camera continuation, completion.
+- Lane: shared AI producer and arm/runtime consumer boundary.
+- Implementation commit: `b4343ba548f58164c6ff461cd5cd8debc2d324c2`.
+- Change: retained and content-addressed exact bytes from the actual shared AI
+  batch emitter for H,H,I, the actual frozen precision-adapter fixture for
+  H,H,1,PERIOD, and the current localization-abstention record. Added a strict
+  seven-case compatibility runner, corpus/report schemas, deterministic
+  regeneration, expected-owner/result checks, and mutation tests. The
+  supported H,H,I output passes strict decoding, trusted-registry admission,
+  monotonic preplanner revalidation, execution-plan compilation, and quintic
+  trajectory compilation with exact repeat/order preservation. The retained
+  precision output decodes with exact repeat/digit/punctuation order but is
+  blocked by the arm because its 14.400834977 mm model bound plus placement
+  error leaves measured key-safe regions. Unsupported phone input,
+  uncalibrated localization, exact expiry, crossed image identity, and low
+  confidence stop at their declared owner.
+- Command: `.\\.venv\\Scripts\\python.exe -c "import pytest; from
+  scripts.ci.offline_checks import TESTS; raise
+  SystemExit(pytest.main(['-q', *TESTS]))"`; followed by
+  `.\\.venv\\Scripts\\python.exe scripts/maintain_repository.py verify`.
+- Result: PASS. The governed matrix passed 616 tests; repository-policy tests
+  passed 115; all maintained audits passed. All seven corpus cases matched
+  their exact expected disposition. The retained report identity is
+  `9093213b064b08b2abfc6f300f04b5fda03725969fa0a32379f134c51471ff0f`.
+- Artifacts: `software/ai/rocell_ai/actual_output_compatibility_v1.py`,
+  `software/ai/eval/actual_ai_arm_compatibility_corpus_v1.json`,
+  `software/ai/eval/actual_ai_arm_compatibility_report_v1.json`, the retained
+  H,H,I batch, two JSON Schemas, deterministic generator, and governed tests.
+- Camera opens: 0.
+- Model runtime loads: 0. The retained precision result was not recomputed.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: all work remains `SYNTHETIC_OFFLINE_ONLY`. Trajectory
+  compilation proves structural consumer compatibility, not IK/collision
+  qualification, installed calibration, transport timing, controller response,
+  key contact, device effect, or physical typing speed. The actual precision
+  result remains unsafe for deployment and is deliberately blocked.
+- Supersedes: none. AI-owned localization evidence and arm-owned admission
+  policy remain authoritative.
+- Next dependency: after final-camera originals arrive, reduce or qualify the
+  localization uncertainty inside applicable key-safe regions, commission the
+  measured epoch, and rerun this boundary beginning with one non-contact target.
+
+### E-20260929-ARM-114 — PC18.1 broad actual-output and decoder refinement
+
+- Stage: PC18.1 post-closure robustness refinement, completion.
+- Lane: shared AI producer and arm/runtime consumer boundary.
+- Implementation commit: `9f8d975dcf825824c0c18101fa726b856567e752`.
+- Change: expanded the content-addressed PC18 corpus from seven to thirteen
+  exact outcomes. Added retained bytes generated by the actual shared emitter
+  for a 15-action mixed sequence (`robot book 10.` plus Enter) and one
+  46-action sequence covering every named keyboard target. Both preserve exact
+  proposal and contact order through strict decode, trusted admission,
+  preplanner revalidation, execution compilation, and offline trajectory
+  compilation. Added derived hostile payloads for authority injection,
+  duplicate JSON members, non-finite coordinates, and reordered actions, each
+  with a stable strict-decoder owner and blocker code. The report now records
+  the canonical 64-proposal and 1 MiB limits and the largest retained case.
+- Command: `.\\.venv\\Scripts\\python.exe -c "import pytest; from
+  scripts.ci.offline_checks import TESTS; raise
+  SystemExit(pytest.main(['-q', *TESTS]))"`; followed by
+  `.\\.venv\\Scripts\\python.exe scripts/maintain_repository.py verify`.
+- Result: PASS. The governed matrix passed 619 tests; repository-policy tests
+  passed 115; all maintained audits passed. All thirteen compatibility cases
+  matched their exact expected outcome. The largest retained batch is 15,022
+  bytes with 46 proposals, below the 1,048,576-byte and 64-proposal limits.
+  The retained report file identity is
+  `efea66b76991ebb9b1cdbbebdbb65cb809d8ed81091eb1f57a8c33d70058ec8c`.
+- Artifacts: expanded PC18 corpus/report, retained mixed and all-target batch
+  files, deterministic generator, report schema, runner, and governed tests.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: target coverage is structural. It does not prove IK reachability,
+  collision clearance, installed transforms, localization accuracy, key
+  contact, device effect, controller latency, or physical typing speed. The
+  accepted producer fixtures use coherent synthetic qualification data; the
+  actual precision fixture remains blocked at its unsafe 14.400834977 mm bound.
+- Supersedes: ARM-113 only for PC18 corpus breadth; ARM-113's original gate and
+  all AI/arm ownership boundaries remain authoritative.
+- Next dependency: final-camera physical originals and a qualified localization
+  bound that fits applicable key-safe regions, followed by one measured
+  non-contact target qualification.
+
+### E-20260929-ARM-115 — retained epoch-bound context-validation benchmark
+
+- Stage: operational efficiency E1, retained context-validation slice.
+- Lane: arm/runtime ingress and registry admission.
+- Implementation commit: `95d4385f6c68f07daa49dcb5d88c5221e5535a0c`.
+- Change: added a strict, clean-commit benchmark comparing complete locked
+  simulation-context source revalidation with an immutable epoch-bound lease.
+  Both paths pass through the same trusted registry ingress and must emit the
+  exact same accepted ingress hash. The lease binds the context object,
+  content-derived epoch, service instance, generation, and zero-authority
+  fields; mutation or lifecycle invalidation fails closed.
+- Command: `.\.venv\Scripts\python.exe
+  software\scripts\run_context_validation_lease_benchmark_v1.py`; focused
+  contract tests; governed offline test manifest; repository verification.
+- Result: PASS. Forty accepted samples (20 per path) produced one identical
+  ingress SHA-256. Full validation measured 37.185 ms p50 / 42.842 ms p95;
+  leased validation measured 0.115 ms p50 / 0.132 ms p95. All five invalidation
+  cases blocked. The retained file SHA-256 is
+  `9ecab492ee448327f16a7d234aedf041462377f5a7fca1f18deb5c278fc917de`;
+  its embedded report SHA-256 is
+  `859de0b38638c5f6e03dc3e78404c3776d713da6699862cb9597ebd86d915b1a`.
+- Artifact: `software/ai/eval/context_validation_lease_benchmark_v1.json`.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: host timing is an observation, never an admission threshold or
+  physical-speed claim. The caller must provide the authoritative active epoch,
+  service instance, and generation; filesystem watching and complete service
+  lifecycle integration remain future E1 work. This result does not exercise
+  IK, collision, permits, controller transport, feedback, contact, or outcome
+  verification.
+- Supersedes: the provisional local context-lease timings in the operational
+  efficiency plan only; no safety, model, camera, or physical gate.
+- Next dependency: implement and test the authoritative epoch lifecycle and
+  extend the retained cold/warm method to planner, geometry, camera, model, and
+  controller-service startup boundaries.
+
+### E-20260929-ARM-116 — runtime-owned simulation-context epoch lifecycle
+
+- Stage: operational efficiency E1, context lifecycle slice.
+- Lane: arm/runtime trusted registry admission.
+- Change: added `SimulationContextLifecycleV1` as the sole owner of the active
+  simulation context object, service identity, generation, and validation
+  lease. Trusted-registry admission can now consume the lifecycle directly;
+  it holds the lifecycle lock for the entire admission so reload,
+  invalidation, or restart cannot interleave after validation. Manually
+  supplied epoch/lease fields are rejected when lifecycle management is used.
+- Command: focused lifecycle, lease, benchmark, and v2 ingress tests; governed
+  offline test manifest; repository verification.
+- Result: PASS. Tests establish exact equality with full source validation,
+  atomic successful reload, preservation of the prior state after failed
+  reload, old-context rejection, explicit invalidation, distinct-service
+  restart, lock serialization, and rejection of mixed/manual lifecycle input.
+- Artifacts: `software/src/rocell/application/context_lifecycle_v1.py`, its
+  trusted-registry integration, and governed unit coverage.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this lifecycle is an in-process application service, not a
+  filesystem watcher or deployed daemon. Only consumers using its managed
+  scope receive its serialization guarantee. It does not qualify IK,
+  collision, controller timing, contact, or device outcomes.
+- Supersedes: ARM-115's stated next dependency for the simulation-context
+  lifecycle only; ARM-115 remains the retained timing evidence.
+- Next dependency: move the next dominant immutable startup products—planner
+  model/solver structures and installed collision acceleration data—behind
+  equivalent measured lifecycle boundaries without weakening dynamic checks.
+
+### E-20260929-ARM-117 — epoch-bound immutable typing planner preparation
+
+- Stage: operational efficiency E1, planner preparation slice.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: added `PreparedTypingPlannerV1`, which loads and parses the exact
+  pinned URDF once inside the active context lifecycle, verifies the root-frame
+  topology, and binds the immutable result to context object, epoch, service,
+  generation, model hash, byte count, and canonical preparation hash. Trusted
+  ingress, typing IK, and collision-evidence intake accept the preparation only
+  while the lifecycle lock holds. Reload, restart, mutation, crossed context,
+  and unmanaged reuse reject.
+- Command: focused prepared-planner, IK, collision-intake, shadow-pipeline, and
+  performance-runner tests; governed offline test manifest; repository
+  verification.
+- Result: PASS. Full-source and prepared paths produce the exact same IK
+  report, collision-intake report, and end-to-end shadow receipt. The optimized
+  path remains blocked at the same honest installed-geometry boundary.
+- Artifacts: typing planner preparation service, lifecycle-aware IK and
+  collision consumers, shadow/performance-runner integration, and governed
+  unit/integration tests.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the numerical IK solver is intentionally rebuilt from each
+  request's calibration, tool, limits, policy, and seed. No latency reduction
+  is claimed until a clean retained benchmark exists. No installed collision
+  acceleration structure has been introduced, and no physical capability is
+  qualified.
+- Supersedes: ARM-116's next dependency only for immutable pinned-model
+  preparation; ARM-116 remains authoritative for context lifecycle behavior.
+- Next dependency: retain a clean full-source versus prepared-pipeline
+  benchmark, then profile solver iteration behavior before considering bounded
+  warm-start or endpoint-atlas work under E2.
+
+### E-20260929-ARM-118 — retained full-source versus prepared typing benchmark
+
+- Stage: operational efficiency E1, planner preparation measurement.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: added a strict retained benchmark contract and clean-commit runner
+  for the complete deterministic shadow pipeline. Cold preparation is timed
+  separately; full-source and epoch-prepared request samples cover the same
+  real ingress, execution planning, trajectory planning, IK, schedule, and
+  collision-intake composition.
+- Command: `python
+  software/scripts/run_typing_planner_preparation_benchmark_v1.py` from clean
+  source commit `781cb1d34697d93476f7944b55b04c024003dbf4`.
+- Result: PASS. Twenty samples per path produced identical terminal receipt
+  SHA-256 `ff88c9404b29a8a3a24b01b0f4b7b54a87081dff3f39dae2a1bac461085c0057`
+  and identical aggregate stage-hash SHA-256
+  `b32894df93732db1452b3cb8305f2cfe447dccc5b76ca167ade7e3affc1ad27c`.
+  Full-source measured 1.667267 s p50 / 1.705646 s p95; epoch-prepared
+  measured 1.590753 s p50 / 1.604661 s p95. Reductions were 76.514 ms p50
+  and 100.985 ms p95. Separate cold preparation measured 1.190 ms.
+- Artifact: `typing_planner_preparation_benchmark_v1.json`; file SHA-256
+  `1dc24c0232422e1693f6165cc10e57e1422a4de599e189307e8e641f09039318`;
+  embedded report SHA-256
+  `b9650cc66a0171b2d8902e8568d17ae84df3d7276f9d9c853debd7bf0cf4fca2`.
+- Invalidation: context reload, service restart, forged preparation content,
+  and preparation use outside lifecycle management all blocked.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: host timing is descriptive, not an admission rule or physical
+  throughput claim. The modest reduction confirms numerical IK remains the
+  dominant cost. Installed collision acceleration and physical qualification
+  remain open.
+- Supersedes: ARM-117 only for its pending retained-measurement dependency;
+  ARM-117 remains authoritative for preparation semantics and lifecycle rules.
+- Next dependency: instrument solver iterations and evaluate bounded warm-start
+  or endpoint-atlas candidates under E2 without changing accepted or rejected
+  decisions.
+
+### E-20260929-ARM-119 — decision-neutral typing IK effort telemetry
+
+- Stage: operational efficiency E2, solver instrumentation slice.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: added opt-in bounded telemetry for per-waypoint attempt counts,
+  total and selected iterations, convergence counts, selected-attempt index,
+  and carried-forward-seed usage. Telemetry is emitted as a separate hashed
+  zero-authority report and is never consumed by planning or admission.
+- Result: PASS. The same full-source and lifecycle-prepared shadow requests
+  produce byte-identical canonical receipts with telemetry disabled or enabled.
+  Mutation, capacity, and append-order checks fail closed.
+- Initial diagnostic: one non-retained `ROBOT` run observed 57 waypoints, 228
+  attempts, 660 total iterations, and 274 selected-attempt iterations. Attempt
+  zero converged at every waypoint but was selected at only 4, which rules out
+  first-convergence early exit as an exact-equivalence optimization.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the initial diagnostic is not retained benchmark evidence and
+  covers one synthetic sequence. Telemetry does not measure controller timing,
+  physical throughput, or collision execution and grants no authority.
+- Supersedes: ARM-118 only for its next instrumentation dependency; ARM-118
+  remains authoritative for retained full-pipeline timing.
+- Next dependency: retain a representative multi-sequence solver-effort
+  campaign and quantify exact input-key reuse before designing a bounded cache
+  or endpoint atlas.
+
+### E-20260929-ARM-120 — retained multi-sequence IK effort campaign
+
+- Stage: operational efficiency E2, solver measurement and reuse analysis.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: retained five representative sequence cases with decision-neutral IK
+  effort telemetry. Each per-waypoint solver-input identity binds the active
+  solver source hash, build snapshot, model, calibration, target, incoming
+  seed, joint bounds, gripper state, options, implementation identity, and
+  algorithm version.
+- Command: `python software/scripts/run_typing_ik_effort_campaign_v1.py` from
+  clean source commit `99ea05af9377e082ff1d564ec210271ccc9caac1`.
+- Result: PASS. Five cases produced 186 waypoints, 744 attempts, 2,393 total
+  iterations, and 872 selected-attempt iterations. Attempt zero converged for
+  all 186 waypoints but was selected for only 15, independently confirming
+  first-convergence early exit is not exact-equivalent.
+- Exact reuse analysis: 186 observations reduced to 48 unique input identities;
+  138 observations repeated across 35 identities, and one identity appeared 11
+  times. Cache authorization remained false.
+- Artifact: `typing_ik_effort_campaign_v1.json`; file SHA-256
+  `876819e727cd40a78a6a368e886540053e30c2ab6e86b3522822b3c1a56096b0`;
+  embedded campaign SHA-256
+  `8d0d31a76ea1c1b264e1aeff4260c5fbd9ea4bd42a097d440c882d8f48ccdd0d`.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: cases use deterministic synthetic geometry and host software;
+  the campaign does not measure controller or physical timing. Reuse frequency
+  is evidence for an experiment, not permission to cache or skip validation.
+- Supersedes: ARM-119 only for its retained-campaign dependency; ARM-119 remains
+  authoritative for telemetry semantics and decision neutrality.
+- Next dependency: implement a bounded offline exact-result cache experiment
+  behind the full reference solver, prove hit/miss equivalence and invalidation,
+  and measure end-to-end benefit before considering runtime integration.
+
+### E-20260929-ARM-121 — lifecycle-bound exact IK result cache experiment
+
+- Stage: operational efficiency E2, bounded offline reuse experiment.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: added an optional in-memory cache keyed by the exact ARM-120 solver
+  input identity. Cache hits verify the retained `IkResult` hash; misses invoke
+  the complete deterministic solver and may store only while fixed capacity
+  remains. The cache never changes canonical report or receipt schemas.
+- Lifecycle: each cache is bound to one context object, context epoch, service
+  instance, and lifecycle generation. Invalidated, stale, restarted,
+  cross-context, unmanaged, or integrity-corrupt use rejects closed.
+- Result: governed integration coverage proves byte-identical terminal receipts
+  with the cache disabled, cold, warm, or capacity-limited. It also proves
+  bounded capacity behavior, explicit invalidation, corruption rejection, and
+  lifecycle reload rejection.
+- Cache authority: counters are diagnostic only; `decision_input=false`,
+  `timing_used_for_admission=false`, controller command list empty, hardware
+  commands zero, hardware access false, and physical authority false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this increment establishes cache mechanics and equivalence only.
+  It contains no retained timing campaign, does not authorize runtime rollout,
+  and says nothing about controller or physical speed.
+- Supersedes: ARM-120 only for its cache-experiment dependency; ARM-120 remains
+  authoritative for measured reuse frequency and solver effort.
+- Next dependency: retain a cold/warm/capacity benchmark and lifecycle
+  invalidation matrix before deciding whether exact-result caching provides
+  enough end-to-end value for further integration.
+
+### E-20260929-ARM-122 — retained exact IK cache benchmark and invalidation matrix
+
+- Stage: operational efficiency E2, retained host-measured reuse evidence.
+- Lane: arm/runtime typing shadow pipeline.
+- Source commit: `402e0d849cc41d694bebf8029644f0bfaa3fc3af`.
+- Change: retained 40 interleaved samples—10 each with cache disabled, cold,
+  fully warm, and capacity-limited to one entry—against the exact same prepared
+  `ROBOT` shadow pipeline. Each sample records timing, receipt identity, stage
+  identity, and cache-counter deltas.
+- Result: PASS. Disabled p50/p95 was 2,919,987,900 / 2,946,669,700 ns. Warm
+  p50/p95 was 301,629,900 / 306,845,800 ns, a reduction of 2,618,358,000 /
+  2,639,823,900 ns. Cold p50 was 2,312,926,300 ns; capacity-one p50 was
+  2,778,198,400 ns.
+- Reuse: cold execution recorded 110 hits and 460 misses across 570 lookups;
+  warm execution recorded 570 hits and zero misses. Capacity-one execution
+  recorded 10 hits, 560 misses, 10 stores, and 550 capacity skips.
+- Equivalence: all 40 terminal receipt hashes and complete stage-hash sets were
+  identical. Cache and timing evidence remained excluded from admission.
+- Invalidation matrix: explicit invalidation, context reload, service restart,
+  crossed context, integrity corruption, and unmanaged cache use all blocked.
+- Artifact: `typing_exact_ik_cache_benchmark_v1.json`; file SHA-256
+  `6ad55c649fc37a9215264e124b9d7f10edf2bc405de0d559b7290de7de1bd7cf`;
+  embedded report SHA-256
+  `ce869a13a01339fbf5a7fc5755740273d8fb8f6a4b9134d951bb5e26fc108e21`.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: timing is specific to this host, exact synthetic geometry, and
+  the measured `ROBOT` sequence. It does not measure controller, settling,
+  contact, verification, or physical typing speed and grants no deployment or
+  physical authority.
+- Supersedes: ARM-121 only for its retained timing and invalidation dependency;
+  ARM-121 remains authoritative for cache mechanics and integrity semantics.
+- Next dependency: design bounded cache ownership and observability for runtime
+  integration while retaining complete miss behavior and all dynamic gates.
+
+### E-20260929-ARM-123 — single-owner exact IK cache runtime integration
+
+- Stage: operational efficiency E2, bounded owner integration.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: added `TypingExactIkCacheOwnerV1` as the sole pairing point for one
+  simulation-context lifecycle, one prepared planner, and one exact-result
+  cache. Owner-managed pipeline arguments cannot be overridden by callers.
+- Lifecycle: the owner serializes a complete shadow run against resource
+  transitions. Successful reload and restart retire the previous cache and
+  create an empty replacement bound to the new epoch/service generation.
+  Explicit invalidation retires both cache and lifecycle. Replacement failure
+  leaves the owner unready and fail-closed.
+- Observability: a hashed diagnostic snapshot reports run/failure, reload,
+  restart, retirement, invalidation, refresh-failure, and nested cache counters.
+  Diagnostics are not decision inputs and report zero controller commands,
+  hardware access, and physical authority.
+- Result: PASS. Focused governed coverage preserves canonical cold/warm output,
+  proves old-cache retirement on reload and restart, rejects old-context input,
+  blocks owner-resource overrides and post-invalidation execution, and rejects
+  mutated owner diagnostics.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is an offline owner boundary around the shadow pipeline. It
+  is not wired to a physical executor, does not measure new timing, and grants
+  no deployment or physical authority.
+- Supersedes: ARM-122 only for its bounded-integration dependency; ARM-122
+  remains authoritative for retained performance and invalidation evidence.
+- Next dependency: retain an owner lifecycle/fault campaign including forced
+  replacement failure, then define service wiring without relaxing any dynamic
+  gate or sole-writer boundary.
+
+### E-20260929-ARM-124 — retained exact IK cache owner lifecycle/fault campaign
+
+- Stage: operational efficiency E2, retained owner fault evidence.
+- Lane: arm/runtime typing shadow pipeline.
+- Source commit: `a07ca2730f04dfccb5f072e210f8413e5c64e198`.
+- Change: retained six exact owner cases: normal cold/warm reuse, reload cache
+  retirement, restart cache retirement, explicit invalidation, forced reload
+  preparation failure, and forced restart preparation failure.
+- Result: PASS. All successful cases emitted the same terminal receipt. Reload
+  and restart retired the old cache and provisioned an empty replacement.
+  Explicit invalidation retired cache and lifecycle. Both forced replacement
+  failures retired the old cache, incremented the refresh-failure diagnostic,
+  left the owner unready, and blocked later execution.
+- Artifact: `typing_exact_ik_cache_owner_campaign_v1.json`; file SHA-256
+  `a644c5b46d6c15d70a3d9a207530620d3e89deb4058baa5937fc3672a016553a`;
+  embedded campaign SHA-256
+  `1f9b14fcd4fd76f068902efcf6ac3944435b051aed1b828f4ba3eec82e5200eb`.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: the campaign is host/offline fault evidence around the shadow
+  owner. It does not wire a physical executor, test controller concurrency, or
+  measure physical throughput.
+- Supersedes: ARM-123 only for its retained fault-campaign dependency; ARM-123
+  remains authoritative for owner mechanics and diagnostic semantics.
+- Next dependency: wire the owner into a bounded service boundary and retain
+  cancellation/generation-race tests without weakening sole-writer or dynamic
+  admission gates.
+
+### E-20260929-ARM-125 — bounded generation-bound typing shadow service
+
+- Stage: operational efficiency E2, bounded service integration.
+- Lane: arm/runtime typing shadow pipeline.
+- Change: added `TypingShadowServiceV1`, a bounded FIFO around the ARM-123
+  owner. Submission binds the canonical payload, intent-plan hash, context
+  epoch, service instance, and generation into one request hash. Request IDs
+  cannot be reused and the service has explicit queue and lifetime ceilings.
+- Cancellation: queued requests can be canceled exactly once before admission;
+  cancellation never invokes the owner. There is no automatic retry.
+- Lifecycle: reload and restart make older queued work stale and reject it
+  without an owner run. A threaded race test proves a transition waits for an
+  already admitted request, preventing mixed-generation execution. Explicit
+  invalidation accounts for every queued request it discards.
+- Evidence: 16 service tests and 31 focused owner/service tests pass. Strict
+  parsers reject altered hashes, counters, bounds, lifecycle claims, blockers,
+  and authority fields.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: this is an in-process offline shadow service. It has no executor,
+  transport, sole-writer attachment, deployment qualification, or physical
+  throughput claim.
+- Supersedes: ARM-124 only for its service-wiring dependency; ARM-124 remains
+  authoritative for retained owner lifecycle/fault evidence.
+- Next dependency: retain a clean-commit service-boundary fault campaign, then
+  evaluate endpoint-atlas and safe warm-start opportunities without changing
+  reference decisions.
+
+### E-20260929-ARM-126 — retained typing shadow service fault campaign
+
+- Stage: operational efficiency E2, retained service-boundary evidence.
+- Lane: arm/runtime typing shadow pipeline.
+- Source commit: `4c2ae9db9e27079c93b26e34330248f2f8537b47`.
+- Cases: normal FIFO completion, cancellation before admission, reload-stale
+  rejection, restart-stale rejection, queue-bound rejection, explicit
+  invalidation, unexpected shadow failure, and admitted-request/reload
+  serialization.
+- Result: PASS. All eight cases reached their exact expected outcomes. Both
+  completed cases preserved one identical shadow decision hash. Cancellation,
+  both stale-generation cases, queue saturation, invalidation, and forced
+  failure performed zero owner runs. The race transition waited until the
+  admitted request completed and then reloaded exactly once.
+- Artifact: `typing_shadow_service_campaign_v1.json`; file SHA-256
+  `c7ccec25ebd9c27e18c7a006b8a77da3477d317865e1d30a178abf300ea7c807`;
+  embedded campaign SHA-256
+  `75a2d03dc6b6c9c34e382062b24e1fdb5307a272b84e443d3b3887c31018620f`.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: this is host-measured offline service evidence. It does not
+  attach an executor or sole writer, measure physical throughput, or qualify a
+  deployed model/camera/controller configuration.
+- Supersedes: ARM-125 only for its retained campaign dependency; ARM-125 remains
+  authoritative for service mechanics and receipt semantics.
+- Next dependency: measure the repeated endpoint/state structure of the
+  representative typing corpus, then assess exact endpoint-atlas and safe
+  warm-start candidates without weakening reference selection.
+
+### E-20260929-ARM-127 — decision-neutral typing endpoint-atlas observer
+
+- Stage: operational efficiency E2, endpoint/state instrumentation.
+- Lane: arm/runtime typing IK screen.
+- Change: added a bounded observer for accepted semantic phase endpoints. Each
+  observation binds phase, target, exact board point, canonical solver input,
+  incoming joint state, and solved joint state by content hash. Per-route
+  reports aggregate repeated endpoint and transition identities and count
+  observed solution variants.
+- Result: PASS. Governed tests prove the complete canonical shadow receipt is
+  byte-identical with observation disabled or enabled. Repeated target phases
+  and the start/end PARK endpoint are counted without authorizing reuse.
+  Capacity, endpoint identity, atlas aggregate, transition, hash, and authority
+  mutations reject closed.
+- Atlas use authorized: false.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: current evidence is governed unit/integration coverage, not a
+  retained representative-corpus atlas. A repeated Cartesian endpoint may
+  still have multiple joint-state solutions depending on its incoming state.
+- Supersedes: ARM-126 only for its endpoint-atlas instrumentation dependency;
+  ARM-126 remains authoritative for retained service faults.
+- Next dependency: retain a multi-sequence endpoint/transition atlas and
+  quantify stable versus variable solved joint states before evaluating any
+  warm-start proposal.
+
+### E-20260929-ARM-128 — retained representative typing endpoint atlas
+
+- Stage: operational efficiency E2, retained endpoint/state evidence.
+- Lane: arm/runtime typing IK screen.
+- Source commit: `9b9bd0a71f72d2a61fc2e607843383c8657cf944`.
+- Cases: home transition, `ROBOT`, repeated letter/number/punctuation,
+  alphabetic extremes, and number/space/enter.
+- Result: PASS. All five observed runs produced byte-identical canonical
+  shadow receipts to their unobserved references. The campaign records 186
+  screened samples, 58 semantic endpoints, 40 unique endpoint identities, 18
+  repeated endpoint observations across seven recurring identities, 53
+  transitions, 46 unique transitions, and five recurring transition
+  identities. All 40 endpoints have one observed solved joint-state variant;
+  the seven recurring endpoints are stable reuse candidates in this corpus,
+  with zero observed variable reuse candidates.
+- Artifact: `typing_endpoint_atlas_campaign_v1.json`; file SHA-256
+  `af8702f0e4b8470fb4957a567baba596028f3ea6c9f084d75ca56b65ef5cce77`;
+  embedded campaign SHA-256
+  `ac623147c7bf7e257f7c6892919ec21d632ab18b9455caa32cd039d86f9450a4`.
+- Atlas use authorized: false.
+- Warm start authorized: false.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: stability is observed only for the exact incoming states and
+  fixed synthetic geometry in this bounded corpus. It does not prove that an
+  endpoint is path-independent under arbitrary incoming state, context,
+  calibration, build, solver, or lifecycle changes.
+- Supersedes: ARM-127 only for its retained representative-corpus dependency;
+  ARM-127 remains authoritative for observer mechanics and report semantics.
+- Next dependency: implement a bounded exact endpoint-result reuse experiment
+  with full context identity, integrity verification, invalidation, and
+  reference-decision equivalence before proposing any runtime optimization.
+
+### E-20260929-ARM-129 — decision-neutral endpoint-result reuse verifier
+
+- Stage: operational efficiency E2, endpoint-result equivalence experiment.
+- Lane: arm/runtime typing IK screen.
+- Change: added a lifecycle-bound verifier beside the canonical solver. It
+  retains bounded endpoint candidates and compares recurrences with newly
+  computed canonical solutions; candidates cannot replace solver output or
+  affect admission.
+- Context binding: active context object, context epoch, service instance,
+  generation, build, model, calibration, joint bounds, fixed gripper, IK
+  options, algorithm, solver implementation, and solver-source digest.
+- Result: PASS. Two complete `ROBOT` runs preserve the uninstrumented canonical
+  receipt. Across 114 screened samples and 34 semantic endpoint observations,
+  the verifier records 13 bounded stores and 21 candidate hits; all 21 match
+  the canonical solved joint state and zero conflict.
+- Fault coverage: capacity exhaustion, lifetime sample bound, invalidation,
+  corrupted entry, deliberate alternate solved state, altered decision
+  context, lifecycle reload, lifecycle restart, crossed context, snapshot
+  mutation, and unmanaged use reject or remain bounded as specified.
+- Candidate used for decision: false.
+- Warm start authorized: false.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: this is governed offline comparison coverage, not retained
+  clean-commit campaign evidence. It intentionally recomputes every canonical
+  solve and therefore provides no runtime speed benefit or substitution proof.
+- Supersedes: ARM-128 only for its verifier-mechanics dependency; ARM-128
+  remains authoritative for the retained endpoint atlas.
+- Next dependency: retain a clean-commit five-sequence equivalence and fault
+  campaign before considering a separately gated candidate-substitution
+  experiment.
+
+### E-20260929-ARM-130 — retained endpoint-reuse equivalence and fault campaign
+
+- Stage: operational efficiency E2, retained endpoint-result qualification.
+- Lane: arm/runtime typing IK screen.
+- Source commit: `9833ed964fb889bb0e8bd5ef00e2e85fd475e89d`.
+- Result: PASS. The clean-commit campaign replayed home transition, `ROBOT`,
+  repeated letter/number/punctuation, alphabetic extremes, and
+  number/space/enter through one lifecycle-bound verifier. Every observed
+  shadow receipt is byte-identical to its uninstrumented canonical reference.
+- Totals: 186 screened samples, 58 semantic endpoint observations, 40 bounded
+  stores, 18 candidate hits, 18 canonical matches, and zero canonical
+  conflicts. These totals independently agree with the ARM-128 atlas.
+- Fault coverage: capacity remains bounded while preserving the canonical
+  receipt. Lifetime sample exhaustion, explicit invalidation, entry
+  corruption, deliberate solution conflict, decision-context change, reload,
+  restart, crossed context, and unmanaged use all reject as required.
+- Artifact: `typing_endpoint_reuse_campaign_v1.json`; file SHA-256
+  `34bbc8fc3882c0057f43332b5f365241aa12ed58bc6dab4453c13edffc05d913`;
+  embedded campaign SHA-256
+  `4f662d46cd09bcf69552f23cf63c7b1ecfc54ca65447076d9dbf8b8e756bb2fc`.
+- Candidate used for decision: false.
+- Warm start authorized: false.
+- Diagnostics used for admission: false.
+- Camera opens: 0.
+- Model runtime loads: 0.
+- Transport opens: 0.
+- Controller starts: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Physical authority: false.
+- Limitations: the verifier deliberately recomputes every canonical solve, so
+  this qualifies equivalence and failure containment but provides no speed
+  gain. The corpus is bounded and synthetic; it does not prove arbitrary-state
+  path independence or physical typing performance.
+- Supersedes: ARM-129 only for its retained-campaign dependency; ARM-129 remains
+  authoritative for verifier mechanics.
+- Next dependency: design a separately gated candidate-substitution experiment
+  that preserves canonical decisions and fails back to a complete solve; do
+  not enable substitution in the operational path from this evidence alone.
+
+### E-20260929-ARM-131 — retained multi-sequence exact-input substitution campaign
+
+- Stage: operational efficiency E2, exact-result substitution qualification.
+- Lane: arm/runtime typing IK screen.
+- Source commit: `0e3982335717974fe3dafe58faf8805ebd83022c`.
+- Design decision: endpoint-only substitution remains unauthorized because the
+  endpoint key omits incoming joint state. The selected experiment uses the
+  existing exact solver-input cache, binding target, incoming seed, build,
+  model, calibration, bounds, gripper, IK options, algorithm, implementation,
+  and solver-source identity. Every miss performs the complete solve.
+- Result: PASS. Home transition, `ROBOT`, repeated letter/number/punctuation,
+  alphabetic extremes, and number/space/enter produced identical canonical
+  receipts and stage hashes with reuse disabled, cold, and warm.
+- Coverage: 186 total samples. Independent cold caches recorded 26 hits and 160
+  complete-solve misses. Warm caches recorded 186 hits and zero misses.
+- Timing: aggregate reference 10,644,660,500 ns; cold 8,834,502,900 ns; warm
+  1,039,984,300 ns. Timing is descriptive host evidence and is not used for
+  admission or claimed as physical typing throughput.
+- Artifact: `typing_exact_reuse_multisequence_campaign_v1.json`; file SHA-256
+  `692b621a6910928507cb5a5f5b3dcfae92d7279a66c7537d3fe0a10752746f22`;
+  embedded campaign SHA-256
+  `b9caa7e7c2f75ef43de26b19d848ad71ceb6bd96d7d1666d42bce1904883bd14`.
+- Complete-solve fallback required: true.
+- Endpoint-only substitution authorized: false.
+- Exact-input substitution mode: `EXPERIMENTAL_SHADOW_ONLY`.
+- Controller opens: 0; transport opens: 0; hardware writes: 0; physical
+  movements: 0; physical authority: false.
+- Limitations: this is one clean host run over bounded synthetic geometry.
+  Warm performance depends on an unchanged lifecycle generation and exact input
+  recurrence. It does not measure controller, settling, verification, camera,
+  or physical typing latency.
+- Supersedes: ARM-130 only for its candidate-substitution dependency; ARM-130
+  remains authoritative for endpoint-verifier equivalence and hostile faults.
+- Next dependency: qualify the exact cache inside the bounded shadow-service
+  request lifecycle with mixed requests, cancellation, reload, restart, and
+  latency accounting before considering any production runtime profile.
+
+### E-20260929-ARM-132 — retained shadow-service exact-reuse lifecycle campaign
+
+- Stage: operational efficiency E2/E3 boundary, request-lifecycle reuse.
+- Lane: arm/runtime bounded typing shadow service.
+- Source commit: `ba9930ea248cec85f043a182a9b047d443aa377a`.
+- Result: PASS. Five mixed representative requests completed in FIFO order
+  through one generation-bound owner. Their 186 solver lookups produced 48
+  complete-solve misses/stores and 138 exact-input hits, matching the ARM-120
+  unique/repeated input counts.
+- Cancellation: one pre-admission cancellation produced zero owner runs and
+  zero cache operations.
+- Lifecycle: reload and restart each rejected one queued stale request without
+  executing it, retired the old cache, and completed a new current-generation
+  H/I request from a cold cache (24 lookups, 23 misses/stores, one hit).
+- Automatic retry allowed: false.
+- Artifact: `typing_shadow_service_reuse_campaign_v1.json`; file SHA-256
+  `da0277885671a24de19a94b6b627759c3ce80726cf4eb530a5718ce16597c4a0`;
+  embedded campaign SHA-256
+  `62aa3c107cdf2c432001bc7566a9643bf5050255e3b7310432d00d69f3c32cfe`.
+- Endpoint-only substitution authorized: false; complete-solve fallback
+  required: true; timing used for admission: false.
+- Controller opens: 0; transport opens: 0; hardware writes: 0; physical
+  movements: 0; physical authority: false.
+- Limitations: request durations are one-host observations and include no
+  controller, settling, camera, effect-verification, or physical timing. The
+  service has no executor or sole-writer attachment.
+- Supersedes: ARM-131 only for its service-lifecycle integration dependency;
+  ARM-131 remains authoritative for multi-sequence direct-cache equivalence.
+- Next dependency: define the frozen production-profile selection gate that
+  can choose exact-input reuse only for qualified lifecycle/build/calibration
+  identities while preserving complete-solve fallback and zero automatic
+  retry. Do not attach physical authority at that gate.

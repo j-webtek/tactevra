@@ -9,18 +9,30 @@ import pytest
 from scripts import deploy_r90_pose_hover as deploy
 
 
+def _installer_fixture(tmp_path):
+    """Build non-authority inputs for installer sequencing tests.
+
+    The retained app bytes still exercise the installer's readback hash check;
+    historical release preflight remains a separate fail-closed test boundary.
+    """
+    root = deploy.Path(__file__).resolve().parents[2]
+    image_path = (root / ".firmware-tools"
+                  / "build-configured-diagnostic-candidate-r90--default-4mb-no-psram"
+                  / "RoArm-M3_example.ino.bin")
+    prior_path = (root / ".firmware-tools"
+                  / "build-configured-diagnostic-candidate-r89--default-4mb-no-psram"
+                  / "RoArm-M3_example.ino.bin")
+    return dict(image=image_path.read_bytes(), image_path=image_path,
+                prior=prior_path.read_bytes(), partition_md5="1" * 32,
+                filesystem_md5="2" * 32, journal=tmp_path / "attempt.jsonl",
+                release_sha256="3" * 64)
+
+
 @pytest.mark.parametrize("predecessor_matches", [True, False])
 def test_r90_installer_never_writes_before_predecessor_check(monkeypatch, tmp_path,
                                                                predecessor_matches):
     root = deploy.Path(__file__).resolve().parents[2]
-    # The real one-use installation is complete. Hide only that reservation
-    # while constructing a separate fake-journal test input.
-    original_exists = deploy.Path.exists
-    monkeypatch.setattr(deploy.Path, "exists", lambda path:
-                        False if path.name == "app-r90-deployment-events.jsonl"
-                        else original_exists(path))
-    prepared = deploy.prepare(root)
-    prepared["journal"] = tmp_path / "attempt.jsonl"
+    prepared = _installer_fixture(tmp_path)
     calls = dict(write=0, reset=0, port_open=0, port_close=0)
 
     class Stub:

@@ -8,18 +8,30 @@ import pytest
 from scripts import deploy_reviewed_hover_r89 as deploy
 
 
+def _installer_fixture(tmp_path):
+    """Build non-authority inputs for installer sequencing tests.
+
+    Historical release attestation is covered separately.  These tests retain
+    the real app bytes so the installer's readback hash checks remain real,
+    while isolating write ordering from later source-tree changes.
+    """
+    root = deploy.Path(__file__).resolve().parents[2]
+    image_path = (root / ".firmware-tools"
+                  / "build-configured-diagnostic-candidate-r89--default-4mb-no-psram"
+                  / "RoArm-M3_example.ino.bin")
+    prior_path = (root / ".firmware-tools"
+                  / "build-configured-diagnostic-candidate-r84--default-4mb-no-psram"
+                  / "RoArm-M3_example.ino.bin")
+    return dict(image=image_path.read_bytes(), image_path=image_path,
+                prior=prior_path.read_bytes(), partition_md5="1" * 32,
+                filesystem_md5="2" * 32, journal=tmp_path / "attempt.jsonl",
+                release_sha256="3" * 64)
+
+
 @pytest.mark.parametrize("predecessor_matches", [True, False])
 def test_r89_installer_writes_once_only_after_matching_prewrite(monkeypatch, tmp_path,
                                                                  predecessor_matches):
-    # The real second attempt is now consumed; exercise the installer with a
-    # separate fake journal while retaining the pinned local preflight assets.
-    original_exists = deploy.Path.exists
-    monkeypatch.setattr(deploy.Path, "exists", lambda path: False if
-                        path.name == "app-r89-attempt2-deployment-events.jsonl"
-                        else original_exists(path))
-    prepared = deploy.preflight(deploy.Path(__file__).resolve().parents[2],
-                                second_attempt=True)
-    prepared["journal"] = tmp_path / "attempt.jsonl"
+    prepared = _installer_fixture(tmp_path)
     calls = dict(write=0, reset=0, port_open=0, port_close=0)
 
     class Stub:

@@ -58,6 +58,8 @@ still being developed.
 | [Runtime implementation plan](../software/ai/docs/MODEL_COMMAND_RUNTIME_IMPLEMENTATION_PLAN.md) | Arm developers: planning, command handling and execution infrastructure |
 | [Optimized typing execution plan](../software/docs/OPTIMIZED_TYPING_EXECUTION_PLAN.md) | Arm and integration contributors: rolling-horizon planning, smooth transitions, one-action authority, verification, and speed qualification |
 | [T102 security migration](T102_SECURITY_MIGRATION.md) | Runtime owners and deployment reviewers: breaking authority changes, physical prerequisites, and rollback gate |
+| [AI-to-arm operational efficiency plan](../software/docs/AI_TO_ARM_OPERATIONAL_EFFICIENCY_PLAN.md) | All workstreams: shared latency vocabulary, cross-stack critical-path optimization, invariants, benchmark gates, and staged performance qualification |
+| [Pre-camera arm integration completion plan](../software/docs/PRE_CAMERA_ARM_INTEGRATION_COMPLETION_PLAN.md) | Arm and integration contributors: ordered PC0-PC18 delivery plan covering the completed motion-runtime foundation plus zero-authority arrival orchestration, fault rehearsal, operator wrappers, session state, immutable replay, observability, and actual AI-output compatibility |
 | [Isaac Sim integration plan](../software/docs/ISAAC_SIM_INTEGRATION_PLAN.md) | Simulation and runtime contributors: pinned NVIDIA adapter, asset, evidence, and GPU-runner work packages |
 | [AI system baseline](../software/ai/docs/AI_SYSTEM_BASELINE_AND_IMPLEMENTATION_PLAN.md) | Research context and dated model-evaluation results |
 

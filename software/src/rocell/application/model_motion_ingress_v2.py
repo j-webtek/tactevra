@@ -11,7 +11,11 @@ from typing import Any, Mapping
 
 from rocell.models import (ActionPlan, Interaction, ModelMotionBatchV2, PressKey,
                            TapPhoneTarget, UncertaintyBoundType, VerifyPhoneState)
-from .context import SimulationContext, revalidate_simulation_context
+from .context import (
+    SimulationContext,
+    SimulationContextValidationLeaseV1,
+    revalidate_simulation_context,
+)
 
 SCHEMA = "rocell.model_motion_ingress.v2"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -184,12 +188,21 @@ def ingest_model_motion_batch_v2(
     measured_target_regions: Mapping[str, MeasuredTargetRegionV2],
     minimum_observation_confidence: float = 0.9,
     maximum_surface_normal_error_mm: float = 0.5,
+    context_validation_lease: SimulationContextValidationLeaseV1 | None = None,
+    active_context_epoch_sha256: str | None = None,
+    active_service_instance_id: str | None = None,
+    active_context_generation: int | None = None,
 ) -> dict[str, Any]:
     """Admit a v2 batch without generating commands or touching hardware."""
     if not isinstance(batch, ModelMotionBatchV2) or not isinstance(plan, ActionPlan) \
             or not isinstance(context, SimulationContext):
         raise TypeError("batch, plan, or context has the wrong type")
-    revalidate_simulation_context(context)
+    revalidate_simulation_context(
+        context, lease=context_validation_lease,
+        active_context_epoch_sha256=active_context_epoch_sha256,
+        active_service_instance_id=active_service_instance_id,
+        active_generation=active_context_generation,
+    )
     if batch.capability.profile_id != _profile_identifier(
             expected_capability_profile_id, "profile") \
             or batch.capability.profile_sha256 != _digest(

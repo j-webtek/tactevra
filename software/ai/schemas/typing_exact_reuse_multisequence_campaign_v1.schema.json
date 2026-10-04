@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/typing_exact_reuse_multisequence_campaign_v1.schema.json",
+  "title": "TypingExactReuseMultisequenceCampaignV1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "campaign_id", "evidence_class", "environment", "case_count", "cases", "all_receipts_identical", "all_stage_hashes_identical", "total_samples", "total_cold_hits", "total_warm_hits", "endpoint_only_substitution_authorized", "exact_input_substitution_mode", "complete_solve_fallback_required", "timing_used_for_admission", "performance_authority", "controller_opened", "transport_opened", "controller_commands", "hardware_writes", "physical_movements", "physical_authority", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.typing_exact_reuse_multisequence_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1},
+    "evidence_class": {"const": "HOST_MEASURED_OFFLINE"},
+    "environment": {"type": "object"}, "case_count": {"const": 5},
+    "cases": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/case"}},
+    "all_receipts_identical": {"const": true}, "all_stage_hashes_identical": {"const": true},
+    "total_samples": {"type": "integer", "minimum": 1},
+    "total_cold_hits": {"type": "integer", "minimum": 0},
+    "total_warm_hits": {"type": "integer", "minimum": 1},
+    "endpoint_only_substitution_authorized": {"const": false},
+    "exact_input_substitution_mode": {"const": "EXPERIMENTAL_SHADOW_ONLY"},
+    "complete_solve_fallback_required": {"const": true},
+    "timing_used_for_admission": {"const": false}, "performance_authority": {"const": false},
+    "controller_opened": {"const": false}, "transport_opened": {"const": false},
+    "controller_commands": {"const": []}, "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "campaign_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "counters": {"type": "object", "additionalProperties": false,
+      "required": ["lookups", "hits", "misses", "stores", "capacity_skips"],
+      "properties": {"lookups": {"type": "integer", "minimum": 0}, "hits": {"type": "integer", "minimum": 0}, "misses": {"type": "integer", "minimum": 0}, "stores": {"type": "integer", "minimum": 0}, "capacity_skips": {"type": "integer", "minimum": 0}}},
+    "case": {"type": "object", "additionalProperties": false,
+      "required": ["case", "target_ids", "status", "sample_count", "reference_duration_ns", "cold_duration_ns", "warm_duration_ns", "reference_receipt_sha256", "cold_receipt_sha256", "warm_receipt_sha256", "reference_stage_sha256", "cold_stage_sha256", "warm_stage_sha256", "cold_counters", "warm_counters"],
+      "properties": {
+        "case": {"enum": ["HOME_TRANSITION", "WORD_ROBOT", "REPEAT_NUMBER_PUNCTUATION", "ALPHABETIC_EXTREMES", "NUMBER_SPACE_ENTER"]},
+        "target_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "status": {"const": "PASS"},
+        "sample_count": {"type": "integer", "minimum": 1},
+        "reference_duration_ns": {"type": "integer", "minimum": 0}, "cold_duration_ns": {"type": "integer", "minimum": 0}, "warm_duration_ns": {"type": "integer", "minimum": 0},
+        "reference_receipt_sha256": {"$ref": "#/$defs/sha"}, "cold_receipt_sha256": {"$ref": "#/$defs/sha"}, "warm_receipt_sha256": {"$ref": "#/$defs/sha"},
+        "reference_stage_sha256": {"$ref": "#/$defs/sha"}, "cold_stage_sha256": {"$ref": "#/$defs/sha"}, "warm_stage_sha256": {"$ref": "#/$defs/sha"},
+        "cold_counters": {"$ref": "#/$defs/counters"}, "warm_counters": {"$ref": "#/$defs/counters"}
+      }}
+  }
+}

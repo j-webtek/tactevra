@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_evidence_preflight_v1.schema.json",
+  "title": "Camera arrival evidence preflight v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "evidence_root", "arrival_kit_sha256",
+    "sidecar_schema_sha256", "required_slot_count", "valid_slot_count",
+    "configuration_epoch_ids", "global_blockers", "slots",
+    "ready_for_offline_qualification_review", "configuration_epoch_advanced",
+    "deployment_registry_updated", "qualification_installed", "camera_opened",
+    "controller_started", "hardware_writes", "physical_movements",
+    "physical_authority", "preflight_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_evidence_preflight.v1"},
+    "status": {
+      "enum": [
+        "READY_FOR_OFFLINE_QUALIFICATION_REVIEW",
+        "BLOCKED_ARRIVAL_EVIDENCE_INCOMPLETE"
+      ]
+    },
+    "evidence_root": {"type": "string", "minLength": 1},
+    "arrival_kit_sha256": {"$ref": "#/$defs/sha256"},
+    "sidecar_schema_sha256": {"$ref": "#/$defs/sha256"},
+    "required_slot_count": {"const": 15},
+    "valid_slot_count": {"type": "integer", "minimum": 0, "maximum": 15},
+    "configuration_epoch_ids": {
+      "type": "array", "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 128}
+    },
+    "global_blockers": {
+      "type": "array", "uniqueItems": true,
+      "items": {
+        "enum": [
+          "REQUIRED_ORIGINALS_INCOMPLETE", "CONFIGURATION_EPOCH_MISMATCH"
+        ]
+      }
+    },
+    "slots": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/slot"}
+    },
+    "ready_for_offline_qualification_review": {"type": "boolean"},
+    "configuration_epoch_advanced": {"const": false},
+    "deployment_registry_updated": {"const": false},
+    "qualification_installed": {"const": false},
+    "camera_opened": {"const": false},
+    "controller_started": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "preflight_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {
+      "anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id", "sidecar_relative_path", "status", "blockers",
+        "sidecar_sha256", "source_relative_path", "source_sha256",
+        "configuration_epoch_id", "review_disposition"
+      ],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "sidecar_relative_path": {"type": "string", "minLength": 1},
+        "status": {"enum": ["MISSING", "INVALID", "VALID"]},
+        "blockers": {
+          "type": "array", "uniqueItems": true,
+          "items": {
+            "enum": [
+              "SIDECAR_MISSING", "SIDECAR_UNSAFE", "SIDECAR_INVALID_JSON",
+              "SIDECAR_SCHEMA_INVALID", "ARTIFACT_ID_MISMATCH",
+              "ARTIFACT_CLASS_MISMATCH", "UNITS_MISMATCH",
+              "SOURCE_PATH_UNSAFE", "SOURCE_MISSING_OR_UNSAFE",
+              "SOURCE_READ_FAILED", "SOURCE_SIZE_MISMATCH",
+              "SOURCE_HASH_MISMATCH", "SOURCE_PATH_INVALID",
+              "REVIEW_NOT_ACCEPTED"
+            ]
+          }
+        },
+        "sidecar_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "source_relative_path": {"type": ["string", "null"]},
+        "source_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "configuration_epoch_id": {"type": ["string", "null"]},
+        "review_disposition": {
+          "enum": ["ACCEPTED", "REJECTED", null]
+        }
+      }
+    }
+  }
+}

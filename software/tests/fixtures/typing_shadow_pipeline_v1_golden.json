@@ -1,0 +1,71 @@
+{
+  "type_robot": {
+    "schema": "rocell.typing_shadow_pipeline.v1",
+    "status": "BLOCKED_AT_HONEST_COLLISION_EVIDENCE_BOUNDARY",
+    "request_id": "request-001",
+    "ordered_target_ids": [
+      "R",
+      "O",
+      "B",
+      "O",
+      "T"
+    ],
+    "action_count": 5,
+    "stage_hashes": {
+      "payload_sha256": "cb2c716e3103b9432d54494b07c230d4f64b5c702c19155ef9e3586cd5fe27e2",
+      "batch_sha256": "cbe265ac49bb7481ca50f28b895e27634d311728d6c880cd623a6521c40b2c13",
+      "ingress_sha256": "347b0e8895caad20acfad25854666f155d36941f679f19417e5571b54b014824",
+      "freshness_sha256": "d048e773c4435c1671de4ba3f3a93c1282f2a4bb38148ff49fe05c8b3ef8f268",
+      "typing_execution_plan_sha256": "fe1f1209e7ef5188a296b4b44be593e6f8d83a1085a5fe080ae0d95cfb550509",
+      "typing_trajectory_plan_sha256": "e491d9f756302b3aa76ec988c87b4665bd02dda83478b6c825a6ae9eebd80c66",
+      "typing_trajectory_ik_screen_sha256": "cb2a6612fa6103cbe20463eae06c54b467d178738286d5fc109c86e6758a3a2b",
+      "typing_joint_schedule_sha256": "82a99fb9f12ff00f1d662e71c0a4b03461a74f4f99a84808cced1fcca73250b4",
+      "typing_collision_intake_sha256": "03e51d8b9996d4dbbfdaafd0ccde889c97487b7b1d2ebafcba7fb094983cba62"
+    },
+    "terminal_stage": "COLLISION_EVIDENCE_INTAKE",
+    "terminal_stage_status": "BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED",
+    "terminal_blockers": [
+      "INSTALLED_COLLISION_PROFILE_REQUIRED",
+      "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION"
+    ],
+    "controller_commands": [],
+    "hardware_commands_generated": 0,
+    "hardware_access": false,
+    "physical_authority": false,
+    "typing_shadow_pipeline_sha256": "0ace491b206b59eedd4b082219d0b174b9a4ce6deddb4e8f37763b48c06b66b7"
+  },
+  "repeat_punctuation": {
+    "schema": "rocell.typing_shadow_pipeline.v1",
+    "status": "BLOCKED_AT_HONEST_COLLISION_EVIDENCE_BOUNDARY",
+    "request_id": "request-001",
+    "ordered_target_ids": [
+      "H",
+      "H",
+      "1",
+      "PERIOD"
+    ],
+    "action_count": 4,
+    "stage_hashes": {
+      "payload_sha256": "3a1234f90b4d2579ee3dedf904c6e6ac1461fac17952aa3d54b571981a31ff3e",
+      "batch_sha256": "2da163162bb164414e43c4685595fc9f714c57386fbd806819f482c3567aa65b",
+      "ingress_sha256": "87bb494a27f45e8bcd7406ee9033e7abda524dc0998dfc8be2312312c255e713",
+      "freshness_sha256": "bfcc1fb987c0343ebee642345909e77c652084937e89a554f5798a41a0dadef5",
+      "typing_execution_plan_sha256": "799bcd3fe90229bf5c040cf8caf79be36f08cd37c79b2f4313bd130a714d1e8b",
+      "typing_trajectory_plan_sha256": "8906678e9761a1ad9e80613fb2403ea9bc34cd06f65ffb26b8015a22db858780",
+      "typing_trajectory_ik_screen_sha256": "26100564dced4fb2b23e93cdb226c2a909d7e861cc2d3407ab96c24c6badb694",
+      "typing_joint_schedule_sha256": "b0e2665ccdf37a37d6262a73f5b61f647dd0d5172efd9edae5d4c5646080534a",
+      "typing_collision_intake_sha256": "8f4d7c9743a9ff32f3741ab9fdc315e31096839618a5de3cf009a7f4c3eee696"
+    },
+    "terminal_stage": "COLLISION_EVIDENCE_INTAKE",
+    "terminal_stage_status": "BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED",
+    "terminal_blockers": [
+      "INSTALLED_COLLISION_PROFILE_REQUIRED",
+      "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION"
+    ],
+    "controller_commands": [],
+    "hardware_commands_generated": 0,
+    "hardware_access": false,
+    "physical_authority": false,
+    "typing_shadow_pipeline_sha256": "b0c566fe35b8e1f96b2cb983606ba082ad2dcbb135e903a6d134bfd262485bf6"
+  }
+}

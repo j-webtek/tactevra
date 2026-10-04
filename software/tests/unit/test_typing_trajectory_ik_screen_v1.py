@@ -31,9 +31,11 @@ from rocell.application.typing_execution_plan_v1 import (
     compile_typing_execution_plan_v1,
 )
 from rocell.application.typing_trajectory_ik_screen_v1 import (
+    EVIDENCE_FLOAT_DECIMAL_PLACES,
     READY_STATUS,
     TypingTrajectoryIkScreenV1Error,
     TypingTrajectoryIkSeedV1,
+    canonicalize_typing_ik_evidence_v1,
     screen_typing_trajectory_ik_v1,
 )
 from rocell.application.typing_trajectory_plan_v1 import (
@@ -80,6 +82,31 @@ from rocell.simulation.collision import (
 
 WORKSPACE = Path(__file__).resolve().parents[3]
 MANIFEST = WORKSPACE / "software/config/system_manifest.json"
+
+
+def test_typing_ik_evidence_has_one_cross_platform_float_representation():
+    raw = {
+        "positive": 1.2345674999999,
+        "negative_zero": -0.0000001,
+        "nested": [0.123456789, True, 7, "unchanged"],
+    }
+
+    canonical = canonicalize_typing_ik_evidence_v1(raw)
+
+    assert EVIDENCE_FLOAT_DECIMAL_PLACES == 6
+    assert canonical == {
+        "positive": 1.234567,
+        "negative_zero": 0.0,
+        "nested": [0.123457, True, 7, "unchanged"],
+    }
+    assert math.copysign(1.0, canonical["negative_zero"]) == 1.0
+
+
+def test_typing_ik_evidence_rejects_nonfinite_or_unknown_values():
+    with pytest.raises(TypingTrajectoryIkScreenV1Error, match="finite"):
+        canonicalize_typing_ik_evidence_v1(float("inf"))
+    with pytest.raises(TypingTrajectoryIkScreenV1Error, match="unsupported"):
+        canonicalize_typing_ik_evidence_v1(object())
 
 
 def _canonical(value: object) -> bytes:

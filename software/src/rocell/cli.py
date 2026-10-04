@@ -3116,6 +3116,65 @@ def _command_replay_prehardware_qualification(args: argparse.Namespace) -> int:
     return int(ExitCode.OK)
 
 
+def _command_replay_typing_trace(args: argparse.Namespace) -> int:
+    """Verify one contained PC6 trace package without interpreting artifacts."""
+
+    from rocell.application.typing_trace_package_v1 import (
+        TypingTracePackageV1Error,
+        replay_typing_trace_package_v1,
+    )
+
+    try:
+        report = replay_typing_trace_package_v1(
+            args.evidence_root,
+            args.package_id,
+            expected_correlation_id=args.expected_correlation_id,
+            expected_request_id=args.expected_request_id,
+        )
+    except (OSError, TypeError, ValueError, TypingTracePackageV1Error) as exc:
+        raise ConfigurationError(
+            "TYPING_TRACE_REPLAY_FAILED",
+            f"Could not verify the contained typing trace package: {exc}",
+            details={
+                "package_id": args.package_id,
+                "hardware_accessed": False,
+                "hardware_commands_generated": 0,
+            },
+        ) from exc
+    document: dict[str, Any] = {
+        "schema": "rocell.replay_typing_trace_cli.v1",
+        "status": report["status"],
+        "identical": report["replay"]["identical"],
+        "package_id": report["package_id"],
+        "package_sha256": report["package_sha256"],
+        "typing_trace_replay_sha256": report["replay"][
+            "typing_trace_replay_sha256"],
+        "authority": {
+            "simulation_only": True,
+            "hardware_accessed": False,
+            "hardware_commands_generated": 0,
+            "execution_authorized": False,
+            "live_motion_authorized": False,
+            "physical_contact_authorized": False,
+            "physical_release_effect": "NONE",
+        },
+    }
+    document["report_hash"] = _canonical_report_hash(document)
+    _emit(
+        document,
+        args.json,
+        (
+            f"typing trace replay: {report['status']}",
+            f"package: {report['package_id']}",
+            f"identical: {str(report['replay']['identical']).lower()}",
+            "hardware access: not attempted; hardware commands generated: 0",
+        ),
+    )
+    if args.require_identical and report["replay"]["identical"] is not True:
+        return int(ExitCode.CONFIGURATION_ERROR)
+    return int(ExitCode.OK)
+
+
 def _command_replay_session(args: argparse.Namespace) -> int:
     """Strictly verify and fully recompute an immutable virtual session."""
 
@@ -5254,6 +5313,32 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_json_argument(replay_qualification)
     replay_qualification.set_defaults(handler=_command_replay_prehardware_qualification)
+
+    replay_typing_trace = commands.add_parser(
+        "replay-typing-trace",
+        help="Verify one contained PC6 typing trace package without hardware",
+        description=(
+            "Read one exact package beneath an explicit evidence root, verify "
+            "canonical manifests, stage hashes, containment, and redaction, then "
+            "compare retained bytes without decoding them into executable commands."
+        ),
+    )
+    replay_typing_trace.add_argument(
+        "--evidence-root", type=Path, required=True,
+        help="Existing nonsymlink directory containing the trace package",
+    )
+    replay_typing_trace.add_argument(
+        "--package-id", required=True,
+        help="Exact typing-trace-<24 lowercase hex> package identifier",
+    )
+    replay_typing_trace.add_argument("--expected-correlation-id", required=True)
+    replay_typing_trace.add_argument("--expected-request-id", required=True)
+    replay_typing_trace.add_argument(
+        "--require-identical", action="store_true",
+        help="Return nonzero unless every retained stage is byte-identical",
+    )
+    _add_json_argument(replay_typing_trace)
+    replay_typing_trace.set_defaults(handler=_command_replay_typing_trace)
 
     status = commands.add_parser(
         "status", help="Inspect verified build state and capabilities"

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/camera_arrival_consumer_validation_assessment_v1.schema.json",
+  "title": "Camera arrival consumer validation assessment v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "handoff_sha256", "slot_count", "pass_count",
+    "blocked_count", "pending_count", "route_results",
+    "complete_for_offline_review", "configuration_epoch_advanced",
+    "deployment_registry_updated", "qualification_installed", "camera_opened",
+    "controller_started", "hardware_writes", "physical_movements",
+    "physical_authority", "assessment_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.camera_arrival_consumer_validation_assessment.v1"},
+    "status": {
+      "enum": [
+        "BLOCKED_HANDOFF_NOT_READY", "AWAITING_CONSUMER_VALIDATION",
+        "CONSUMER_VALIDATION_COMPLETE_FOR_OFFLINE_REVIEW"
+      ]
+    },
+    "handoff_sha256": {"$ref": "#/$defs/sha256"},
+    "slot_count": {"const": 15},
+    "pass_count": {"type": "integer", "minimum": 0, "maximum": 15},
+    "blocked_count": {"type": "integer", "minimum": 0, "maximum": 15},
+    "pending_count": {"type": "integer", "minimum": 0, "maximum": 15},
+    "route_results": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {"$ref": "#/$defs/result"}
+    },
+    "complete_for_offline_review": {"type": "boolean"},
+    "configuration_epoch_advanced": {"const": false},
+    "deployment_registry_updated": {"const": false},
+    "qualification_installed": {"const": false},
+    "camera_opened": {"const": false},
+    "controller_started": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "assessment_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {
+      "anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+    },
+    "result": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "artifact_id", "status", "receipt_sha256", "output_sha256",
+        "blockers", "physical_admission_ready"
+      ],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["PENDING", "PASS", "BLOCKED", "BLOCKED_HANDOFF"]},
+        "receipt_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "output_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "blockers": {
+          "type": "array", "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "physical_admission_ready": {"const": false}
+      }
+    }
+  }
+}
