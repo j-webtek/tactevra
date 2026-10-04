@@ -1,0 +1,159 @@
+{
+  "bindings": {
+    "emulator_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
+      "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
+    },
+    "park_screen": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\joint_park_camera_screen_v1.json",
+      "sha256": "9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed"
+    },
+    "phase8_receipt": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\phase8\\candidate_collision_attribution_v1.json",
+      "sha256": "f8603f979cce8775658fa371ec768adcff9377a1879f2364b8bc7d75a38879c5"
+    },
+    "pose_bundle": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2u\\nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+    },
+    "program_fixture": {
+      "path": "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json",
+      "sha256": "36301d4288164aaa54e4d549cc9944aec8d52a137cc47035835fb051dd76bafd"
+    },
+    "readiness_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_readiness_v1.json",
+      "sha256": "6bcfa546d39c5fb11b6231ee3fe79078fe5eaf34ff78e74bf7105d0005faf780"
+    }
+  },
+  "cable_design": {
+    "anchor_board_x_mm_range": [
+      225.0,
+      325.0
+    ],
+    "anchor_height_board_z_mm_range": [
+      90.0,
+      110.0
+    ],
+    "cable_radius_mm_range": [
+      2.0,
+      6.0
+    ],
+    "candidate_management": [
+      "OVERHEAD_BOOM",
+      "ARTICULATED_CABLE_CARRIER",
+      "ARM_MOUNTED_CLIPS"
+    ],
+    "decision": "Every Cartesian endpoint combination must be screened; any collision blocks robustness. Commissioning must verify the selected design lies inside the passing envelope.",
+    "maximum_sag_fraction_range": [
+      0.0,
+      0.75
+    ],
+    "section_sha256": "5fe0b6ce23a6d4fe249b5852b8de9b07a16a5420cc6332d759af024acf15f8d5"
+  },
+  "claim_commit": "5a952e2233721718715629addf4f21b3ac639667",
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "A-C pass only if every sampled segment pose is free of potentially consequential collision for every cable/tool design endpoint.",
+    "D passes only if every admitted pad variant has IK and every hover/approach/contact/retract sample is clear except the exact tool-pad contact at contact.",
+    "Cable design is robust only if every endpoint combination clears A-F sampled poses.",
+    "Structural evidence may propose exclusions but never installs them.",
+    "Any missing IK, stage geometry, unclassified pair, or nonfinite result stops the applicable claim."
+  ],
+  "fixture_sha256": "8bcbef58278ce13e1c4c443759cac23d7e8eab1db772c17777815081b074df68",
+  "limitations": [
+    "All dimensions and routes are unmeasured candidate ranges.",
+    "Park pose is a prior exploratory candidate, not a commissioned pose.",
+    "Collision sampling is discrete and does not prove continuous swept-volume clearance.",
+    "The temporary touch pad is a design family, not selected hardware."
+  ],
+  "schema": "tactevra.first_motion_collision_design_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "stage_trajectories": {
+    "A": {
+      "base_delta_rad": [
+        0.005,
+        0.02
+      ],
+      "source": "controller-intersection midpoint"
+    },
+    "B": {
+      "park_pose_id": "halton-0299",
+      "source": "bound exploratory joint park camera screen rank 1"
+    },
+    "C": {
+      "hover_height_above_contact_mm_range": [
+        5.0,
+        30.0
+      ],
+      "source": "canonical numerical IK against bound layout overlay",
+      "target_id": "G"
+    },
+    "E_F": {
+      "source": "all 46 bound keyboard target poses"
+    },
+    "samples_per_segment": 33,
+    "section_sha256": "665e4767f876f69025b45d07dbf2112fa0c3fd784970e285be55497c707832ca"
+  },
+  "structural_review": {
+    "candidate_rule": "Only ALWAYS_TOUCHING pairs with an adjacent-link, rigid-attachment, cable-anchor, or base-installation rationale may be proposed for human exclusion review. No pair is installed automatically.",
+    "classifications": [
+      "ALWAYS_TOUCHING",
+      "SOMETIMES_TOUCHING",
+      "NEVER_TOUCHING"
+    ],
+    "pair_universe": [
+      "ROBOT_LINK_X_ROBOT_LINK",
+      "TOOL_X_ROBOT_LINK",
+      "CABLE_X_ROBOT_LINK",
+      "BASE_CLAMP_X_ROBOT_LINK"
+    ],
+    "pose_corpus": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E_F"
+    ],
+    "section_sha256": "330bcb489713930da555e0d06fc9628a5412e810c95dabbf89a74c8a7890e127"
+  },
+  "test_pad_design": {
+    "approach_mm": 3.0,
+    "center_board_x_mm_range": [
+      300.0,
+      340.0
+    ],
+    "center_board_y_mm_range": [
+      70.0,
+      100.0
+    ],
+    "contact_overtravel_mm": 1.0,
+    "depth_mm_range": [
+      50.0,
+      100.0
+    ],
+    "expected_contact_pair": "attachment:contact_tool|workcell:test_pad",
+    "hover_mm": 10.0,
+    "landing_sensor_role": "TEMPORARY_TOUCH_SURFACE_AT_KEYBOARD",
+    "section_sha256": "1f47a23ac15705a63bb15013fd771969e2da66bb94165fc2789db9fa3e748d79",
+    "thickness_mm_range": [
+      3.0,
+      15.0
+    ],
+    "top_board_z_mm_range": [
+      10.0,
+      25.0
+    ],
+    "variant_sampling": "ONE_FACTOR_AT_A_TIME_BASELINE_PLUS_EVERY_ENDPOINT",
+    "width_mm_range": [
+      80.0,
+      160.0
+    ]
+  }
+}
