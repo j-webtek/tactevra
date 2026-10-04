@@ -15,9 +15,11 @@ sys.path.insert(0, str(AI_ROOT / "train"))
 from train.paired_height_corpus_contract import (  # noqa: E402
     SHARD_SCHEMA,
     admit_shard_manifest,
+    apply_camera_model_native,
     apply_feature_standardization,
     canonical,
     construct_paired_height_features,
+    construct_paired_height_features_from_delivered,
     decide_resolution,
     derive_model_input,
     expected_counts,
@@ -162,6 +164,21 @@ def test_twelve_channel_features_are_deterministic_and_preserve_thin_line() -> N
         assert float(first[9].max()) > 0.0
         assert float(first[10].max()) > 0.0
         assert set(np.unique(first[11])) == {0.0, 1.0}
+        delivered_reference = apply_camera_model_native(
+            reference, seed=101, camera_profile=camera, qualifying=False
+        )
+        delivered_observation = apply_camera_model_native(
+            observation, seed=202, camera_profile=camera, qualifying=False
+        )
+        shared_native = construct_paired_height_features_from_delivered(
+            delivered_reference,
+            delivered_observation,
+            reference_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+            observation_aligned_crop_box_px=[0.0, 0.0, 400.0, 400.0],
+            output_size_px=size,
+            safe_half_extent_mm=[7.0, 7.0],
+        )
+        assert np.array_equal(first, shared_native)
         outputs[size] = first
     assert outputs[192][11].sum() > outputs[96][11].sum() * 3.5
 

@@ -460,26 +460,17 @@ def _measured_tone_encode(value: Any, profile: dict[str, Any], np: Any) -> Any:
     )
 
 
-def derive_model_input(
+def apply_camera_model_native(
     native_rgb: Any,
     *,
-    aligned_crop_box_px: list[float],
-    output_size_px: int,
     seed: int,
     camera_profile: dict[str, Any] | None,
     qualifying: bool,
     exposure_gain: float = 1.0,
 ) -> Any:
-    """Apply the camera model at native pixels, then align and resize.
-
-    Stored RGB8 is decoded to linear light first.  Brightness-dependent noise
-    is then sampled before sensor quantization, tone encoding, YUY2, and resize.
-    """
+    """Apply the frozen camera model once at native sensor-aligned pixels."""
     import numpy as np
-    from PIL import Image
 
-    if output_size_px not in {96, 192}:
-        raise ValueError("output_size_px must be 96 or 192")
     value = np.asarray(native_rgb)
     if value.ndim != 3 or value.shape[2] != 3 or value.dtype != np.uint8:
         raise ValueError("native_rgb must be uint8 HxWx3")
@@ -517,8 +508,7 @@ def derive_model_input(
         correlated_noise = spatially_correlate_noise(
             white_noise, profile["spatial_noise_kernel"]
         )
-        noise = correlated_noise * channel_std
-        noisy = np.clip(exposed + noise, 0.0, 1.0)
+        noisy = np.clip(exposed + correlated_noise * channel_std, 0.0, 1.0)
     levels = float((1 << int(profile["sensor_quantization_bits"])) - 1)
     quantized = np.rint(noisy * levels) / levels
     balanced = np.clip(
@@ -531,12 +521,25 @@ def derive_model_input(
         if camera_profile is None
         else _measured_tone_encode(balanced, profile, np)
     )
-    delivered_rgb8 = np.rint(tone_encoded * 255.0).astype(np.uint8)
-    delivered = _yuy2_roundtrip(delivered_rgb8, np)
+    return _yuy2_roundtrip(np.rint(tone_encoded * 255.0).astype(np.uint8), np)
+
+
+def resize_delivered_model_input(
+    delivered_rgb: Any, *, aligned_crop_box_px: list[float], output_size_px: int
+) -> Any:
+    """Align and resize already delivered RGB pixels without camera reprocessing."""
+    import numpy as np
+    from PIL import Image
+
+    if output_size_px not in {96, 192}:
+        raise ValueError("output_size_px must be 96 or 192")
+    value = np.asarray(delivered_rgb)
+    if value.ndim != 3 or value.shape[2] != 3 or value.dtype != np.uint8:
+        raise ValueError("delivered_rgb must be uint8 HxWx3")
     left, top, right, bottom = (float(item) for item in aligned_crop_box_px)
     if not (0 <= left < right <= value.shape[1] and 0 <= top < bottom <= value.shape[0]):
         raise ValueError("aligned crop box is outside the stored native crop")
-    image = Image.fromarray(delivered, mode="RGB")
+    image = Image.fromarray(value, mode="RGB")
     return np.asarray(
         image.transform(
             (output_size_px, output_size_px),
@@ -545,6 +548,31 @@ def derive_model_input(
             resample=Image.Resampling.BICUBIC,
         ),
         dtype=np.uint8,
+    )
+
+
+def derive_model_input(
+    native_rgb: Any,
+    *,
+    aligned_crop_box_px: list[float],
+    output_size_px: int,
+    seed: int,
+    camera_profile: dict[str, Any] | None,
+    qualifying: bool,
+    exposure_gain: float = 1.0,
+) -> Any:
+    """Apply the camera model at native pixels, then align and resize."""
+    delivered = apply_camera_model_native(
+        native_rgb,
+        seed=seed,
+        camera_profile=camera_profile,
+        qualifying=qualifying,
+        exposure_gain=exposure_gain,
+    )
+    return resize_delivered_model_input(
+        delivered,
+        aligned_crop_box_px=aligned_crop_box_px,
+        output_size_px=output_size_px,
     )
 
 
@@ -594,20 +622,14 @@ def _local_texture(value: Any, np: Any, window: int = 5) -> Any:
     return np.sqrt(np.maximum(squared / count - mean * mean, 0.0), dtype=np.float32)
 
 
-def construct_paired_height_features(
-    reference_native_rgb: Any,
-    observation_native_rgb: Any,
+def _construct_features_from_model_inputs(
+    reference: Any,
+    observation: Any,
     *,
-    reference_aligned_crop_box_px: list[float],
-    observation_aligned_crop_box_px: list[float],
     output_size_px: int,
-    reference_seed: int,
-    observation_seed: int,
-    camera_profile: dict[str, Any],
     safe_half_extent_mm: list[float],
-    physical_footprint_mm: float = 48.0,
+    physical_footprint_mm: float,
 ) -> Any:
-    """Construct the frozen twelve-channel paired-height model input."""
     import numpy as np
 
     if len(safe_half_extent_mm) != 2 or any(
@@ -615,22 +637,6 @@ def construct_paired_height_features(
         for item in safe_half_extent_mm
     ):
         raise ValueError("safe half extents must fit inside the physical crop")
-    reference = derive_model_input(
-        reference_native_rgb,
-        aligned_crop_box_px=reference_aligned_crop_box_px,
-        output_size_px=output_size_px,
-        seed=reference_seed,
-        camera_profile=camera_profile,
-        qualifying=False,
-    )
-    observation = derive_model_input(
-        observation_native_rgb,
-        aligned_crop_box_px=observation_aligned_crop_box_px,
-        output_size_px=output_size_px,
-        seed=observation_seed,
-        camera_profile=camera_profile,
-        qualifying=False,
-    )
     reference_normalized = _self_crop_p05_p95(reference, np)
     observation_normalized = _self_crop_p05_p95(observation, np)
     difference = np.abs(reference_normalized - observation_normalized)
@@ -653,18 +659,73 @@ def construct_paired_height_features(
     ).astype(np.float32)[..., None]
     features = np.concatenate(
         (
-            observation_normalized,
-            reference_normalized,
-            difference,
-            sobel_difference,
-            texture_difference,
-            safe_mask,
+            observation_normalized, reference_normalized, difference,
+            sobel_difference, texture_difference, safe_mask,
         ),
         axis=2,
     )
     if features.shape != (output_size_px, output_size_px, 12):
         raise ValueError("paired-height feature expansion produced the wrong shape")
     return np.ascontiguousarray(features.transpose(2, 0, 1), dtype=np.float32)
+
+
+def construct_paired_height_features_from_delivered(
+    reference_delivered_rgb: Any,
+    observation_delivered_rgb: Any,
+    *,
+    reference_aligned_crop_box_px: list[float],
+    observation_aligned_crop_box_px: list[float],
+    output_size_px: int,
+    safe_half_extent_mm: list[float],
+    physical_footprint_mm: float = 48.0,
+) -> Any:
+    """Construct features from camera-processed pixels shared by both resolutions."""
+    reference = resize_delivered_model_input(
+        reference_delivered_rgb,
+        aligned_crop_box_px=reference_aligned_crop_box_px,
+        output_size_px=output_size_px,
+    )
+    observation = resize_delivered_model_input(
+        observation_delivered_rgb,
+        aligned_crop_box_px=observation_aligned_crop_box_px,
+        output_size_px=output_size_px,
+    )
+    return _construct_features_from_model_inputs(
+        reference, observation, output_size_px=output_size_px,
+        safe_half_extent_mm=safe_half_extent_mm,
+        physical_footprint_mm=physical_footprint_mm,
+    )
+
+
+def construct_paired_height_features(
+    reference_native_rgb: Any,
+    observation_native_rgb: Any,
+    *,
+    reference_aligned_crop_box_px: list[float],
+    observation_aligned_crop_box_px: list[float],
+    output_size_px: int,
+    reference_seed: int,
+    observation_seed: int,
+    camera_profile: dict[str, Any],
+    safe_half_extent_mm: list[float],
+    physical_footprint_mm: float = 48.0,
+) -> Any:
+    """Construct the frozen twelve-channel paired-height model input."""
+    reference_delivered = apply_camera_model_native(
+        reference_native_rgb, seed=reference_seed, camera_profile=camera_profile,
+        qualifying=False,
+    )
+    observation_delivered = apply_camera_model_native(
+        observation_native_rgb, seed=observation_seed, camera_profile=camera_profile,
+        qualifying=False,
+    )
+    return construct_paired_height_features_from_delivered(
+        reference_delivered, observation_delivered,
+        reference_aligned_crop_box_px=reference_aligned_crop_box_px,
+        observation_aligned_crop_box_px=observation_aligned_crop_box_px,
+        output_size_px=output_size_px, safe_half_extent_mm=safe_half_extent_mm,
+        physical_footprint_mm=physical_footprint_mm,
+    )
 
 
 def new_feature_statistics_accumulator() -> dict[str, Any]:
