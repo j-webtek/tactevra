@@ -405,3 +405,7 @@ The one-file increase from 6,346 to 6,347 retains one consolidated, section-hash
 CPU fixture for simulation-program Workstreams 1 through 6. It freezes each
 workstream independently while avoiding separate evidence files for every
 parameter grid. Generated receipts remain external and are referenced by hash.
+
+The two-file increase from 6,347 to 6,349 retains the consolidated CPU
+simulation harness and its focused tests. One implementation serves all frozen
+sections; workstream receipts and parameter-grid rows remain external.
