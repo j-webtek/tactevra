@@ -1,0 +1,356 @@
+{
+  "schema": "tactevra.simulation_program_cpu_fixtures.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "bindings": {
+    "semantic_fixture": {
+      "path": "software/ai/sim/evidence/end_to_end_typing_twin_v1.json",
+      "sha256": "bef5bd761805bfaf7beb67bd3070af740cb0b528deb637a8b3ab6d07ca7f8e00"
+    },
+    "boundary_fixture": {
+      "path": "software/ai/sim/evidence/end_to_end_typing_twin_boundary_v1.json",
+      "sha256": "e456c61768a84c419ad8d8b2f8dbe563705a5c462f165b5d404444c12129393e"
+    },
+    "installed_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "candidate_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8",
+      "mode": "EXPLORATORY_UNINSTALLED_CANDIDATE80"
+    },
+    "virtual_profile": {
+      "path": "software/config/virtual_commissioning_profile.json",
+      "sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+    },
+    "pose_bundle": {
+      "path": "C:/MuJoCoWarp/evidence/mw2u/nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+    },
+    "mjcf": {
+      "path": "C:/MuJoCoWarp/evidence/mw1/roarm_m3_kinematic.mjcf",
+      "sha256": "448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0"
+    }
+  },
+  "sections": {
+    "workstream_1_cpu": {
+      "catalog_modes": [
+        "INSTALLED_STRICT",
+        "EXPLORATORY_UNINSTALLED_CANDIDATE80"
+      ],
+      "installed_expected_rejection": {
+        "text": "Hello 2026!",
+        "missing_target": "SHIFT"
+      },
+      "candidate_cases": [
+        "Hello 2026!",
+        "AA",
+        "!!",
+        "aA",
+        "A A",
+        "Z!z",
+        "A! A"
+      ],
+      "tool_length_mm": [
+        0,
+        80,
+        100,
+        120
+      ],
+      "board_translation_mm": [
+        -5,
+        0,
+        5
+      ],
+      "board_rotation_deg": [
+        -2,
+        0,
+        2
+      ],
+      "ik_required": true,
+      "collision_intake_required": true,
+      "mujoco_backend": "STANDARD_MUJOCO_CPU",
+      "endpoint_tolerance_mm": [
+        0.1,
+        0.5,
+        1,
+        2
+      ],
+      "decision": "Every candidate case must reproduce exact text and order; installed rejection must remain; IK and collision intake report exact readiness/blocker; CPU replay must be finite and deterministic.",
+      "section_sha256": "53d03ad1864f44e093e1f9b473e3cf7aeb803df774089b186da151a15f24e183"
+    },
+    "workstream_2": {
+      "keycap_width_height_mm": [
+        11,
+        15
+      ],
+      "travel_mm": [
+        1,
+        5
+      ],
+      "actuation_fraction": [
+        0.3,
+        0.9
+      ],
+      "bottom_out_fraction": [
+        0.9,
+        1.1
+      ],
+      "spring_n_per_mm": [
+        0.1,
+        2.5
+      ],
+      "damping_n_s_per_mm": [
+        0.001,
+        0.2
+      ],
+      "force_n": [
+        0.2,
+        3.0
+      ],
+      "fingertip_radius_mm": [
+        1,
+        6
+      ],
+      "press_depth_mm": [
+        0.5,
+        7
+      ],
+      "dwell_ms": [
+        10,
+        750
+      ],
+      "approach_mm_s": [
+        2,
+        120
+      ],
+      "release_mm_s": [
+        2,
+        160
+      ],
+      "repeat_delay_ms": [
+        200,
+        1200
+      ],
+      "repeat_period_ms": [
+        20,
+        250
+      ],
+      "phone_contact_radius_mm": [
+        1,
+        7
+      ],
+      "phone_duration_ms": [
+        20,
+        500
+      ],
+      "phone_long_press_ms": [
+        250,
+        1200
+      ],
+      "landing_random_rad": [
+        0.001,
+        0.002
+      ],
+      "fixed_source_rad": [
+        0.002,
+        0.008
+      ],
+      "residual_fraction": [
+        0,
+        0.25,
+        0.5,
+        1
+      ],
+      "highlight_targets": [
+        "GRAVE",
+        "EQUAL",
+        "Z",
+        "SHIFT"
+      ],
+      "decision": "Admit a recipe cell only for exactly one actuation, zero neighbor contact, zero repeat, completed release, finite state, and no bottom-out overflow.",
+      "section_sha256": "f3cef7975a5187c429a6aca931ef6369ef456af7bd992ffecb1f6a7865cfb2fe"
+    },
+    "workstream_3": {
+      "hover_mm": [
+        2,
+        30
+      ],
+      "transition_mm_s": [
+        10,
+        400
+      ],
+      "random_rad": [
+        0,
+        0.002
+      ],
+      "backlash_rad": [
+        0,
+        0.008
+      ],
+      "residual_fraction": [
+        0,
+        0.25
+      ],
+      "pair_scope": "EVERY_ORDERED_KEYBOARD_PAIR_IN_SELECTED_CATALOG_INCLUDING_SELF",
+      "decision": "Recommend only a policy with zero sampled collision or neighbor contact and per-pair miss bound no worse than parked; otherwise recommend park.",
+      "section_sha256": "e2c18482a97f84071bba9f914e05351cc9610a4a83af7d019bd2dc7532fcfa7b"
+    },
+    "workstream_4": {
+      "translation_xy_mm": [
+        -10,
+        -5,
+        -1,
+        0,
+        1,
+        5,
+        10
+      ],
+      "rotation_deg": [
+        -5,
+        -1,
+        -0.25,
+        0,
+        0.25,
+        1,
+        5
+      ],
+      "readback_delay_ms": [
+        0,
+        100,
+        500,
+        1000,
+        2000
+      ],
+      "faults": [
+        "MISSED_PRESS",
+        "WRONG_KEY",
+        "DOUBLE_PRESS",
+        "STALE_FRAME",
+        "TARGET_DISPLACEMENT",
+        "AMBIGUOUS_READBACK"
+      ],
+      "states": [
+        "OBSERVE",
+        "PLAN",
+        "SIMULATE_PRESS",
+        "VERIFY",
+        "STOP",
+        "REOBSERVE",
+        "RELOCALIZE",
+        "BACKSPACE_CORRECT",
+        "ABORT",
+        "COMPLETE"
+      ],
+      "decision": "Detect every deterministic fault; ambiguous state aborts; no more than one wrong character before per-character verification; recoverable cases require >=0.99 success.",
+      "section_sha256": "0c1849f464e9eb68239b03fb6be189a947a9fda41853b40afb7518ae8946ded4"
+    },
+    "workstream_5": {
+      "probe_counts": [
+        1,
+        2,
+        3,
+        5,
+        8,
+        13,
+        21,
+        34
+      ],
+      "noise_mm": [
+        0.1,
+        0.5,
+        1,
+        2
+      ],
+      "outlier_probability": [
+        0,
+        0.01,
+        0.05
+      ],
+      "outlier_mm": [
+        1,
+        3,
+        5
+      ],
+      "initial_bias_mm": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "residual_fraction": [
+        0.1,
+        0.15,
+        0.2,
+        0.25
+      ],
+      "translational_drift_mm_per_hour": [
+        0.01,
+        0.05,
+        0.1,
+        0.25,
+        0.5
+      ],
+      "rotational_drift_deg_per_hour": [
+        0.01,
+        0.05,
+        0.1,
+        0.25
+      ],
+      "session_hours": [
+        0.25,
+        1,
+        2,
+        4,
+        8
+      ],
+      "probe_seconds": [
+        2,
+        10
+      ],
+      "seed": 1905001,
+      "trials": 2000,
+      "confidence_quantile": 0.95,
+      "decision": "Select the first frozen probe count whose 95th-percentile residual ratio meets the target; otherwise report insufficient through 34. Recalibrate at earliest conservative margin exhaustion.",
+      "section_sha256": "87447d5fd279e40afdde4e6ade688888ba697f72014d5314584465a5975e87f3"
+    },
+    "workstream_6": {
+      "camera_height_mm": [
+        700,
+        850,
+        1000
+      ],
+      "fps": [
+        9
+      ],
+      "exposure_seconds": [
+        0.008333333333333333,
+        0.016666666666666666,
+        0.03333333333333333,
+        0.06666666666666667,
+        0.1111111111111111
+      ],
+      "timestamp_offset_ms": [
+        0,
+        111
+      ],
+      "requires_positive_arm_mask_overlap": true,
+      "held_out_by": [
+        "trajectory",
+        "lighting",
+        "camera_identity"
+      ],
+      "decision": "Covered targets abstain; uncovered checks require conservative projected-mask coverage of held-out arm masks. Physical mid-motion use remains blocked.",
+      "section_sha256": "8e108a5da8ae9bdf9768656c7bbcfb2295f65ca67269f0542ffad6d9b057dd9d"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "physical_movements": 0,
+    "commands": 0,
+    "permits": 0,
+    "transport": 0
+  },
+  "gpu_execution_authorized": false,
+  "fixture_sha256": "d1bcb90ff5fba828ead7d4834c5f59d52e8c65d03710faa955b26bf7c0e6e408"
+}

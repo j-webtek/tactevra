@@ -400,3 +400,8 @@ The one-file increase from 6,342 to 6,343 retains the hash-bound Workstream 1 en
 The two-file increase from 6,343 to 6,345 retains the Workstream 1 semantic/device-state implementation and its focused tests. Generated run receipts remain external and are represented in Git by one ledger entry.
 
 The one-file increase from 6,345 to 6,346 retains the frozen Workstream 1 strict-boundary sweep. Its 81 range combinations are generated from one manifest.
+
+The one-file increase from 6,346 to 6,347 retains one consolidated, section-hashed
+CPU fixture for simulation-program Workstreams 1 through 6. It freezes each
+workstream independently while avoiding separate evidence files for every
+parameter grid. Generated receipts remain external and are referenced by hash.
