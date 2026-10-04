@@ -11075,3 +11075,10 @@ rewriting history. New entries must use a unique evidence ID.
 - Structural review: 343 representative A-F poses classify 45 robot/tool/cable/base pairs: 10 always touching, 11 sometimes touching, and 24 never touching. The 10 proposed only for human review are the five adjacent robot-link pairs, gripper-link5, tool-gripper/tool-link5, and cable-gripper/cable-link5 anchor pairs. The 11 sometimes-touching nonadjacent pairs remain active collision checks and are never proposed for exclusion. Installed exclusions created: zero.
 - Decision: `STOP_DESIGN_RANGE_OR_IK_REQUIRES_REFINEMENT`. This is a productive failed design screen. It preserves the cable-management requirement but shows it is insufficient without collision-aware park selection, clearance-first paths, a nonoverlapping pad station, and target-aware expected-contact semantics.
 - Custody and authority: receipt copied to `C:\Users\WebTek\Desktop\issue190-evidence-backup\first_motion_readiness\phase9`; same-drive limitation remains. GPU launches 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. PID 50020 remained uninterrupted.
+
+### E-20261004-INT-638 — evidence-ledger truncation correction
+
+- Stage/lane: shared evidence custody correction. The Phase 9 documentation commit `feb1efa7` opened `EVIDENCE_LEDGER.md` for writing before reading its existing contents, so the documentation check correctly failed and the commit retained only E-637. Simulation code, fixtures, external receipts, metrics, and authority counters were unaffected.
+- Correction: commit `a9f4a8aa` restored the complete ledger bytes from `feb1efa7^`, then appended the unchanged E-637 entry. `python scripts/ci/check_docs.py` and `git diff --check` pass after restoration.
+- Preservation: the failed commit remains in branch history; it was not amended or hidden. No prior evidence row was intentionally rewritten or discarded.
+- Authority: hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
