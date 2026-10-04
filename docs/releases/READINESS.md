@@ -4,9 +4,9 @@
 **Authority:** Status and routing only; this page does not approve publication or authorize hardware operation
 **Status source:** `.github/release-readiness.json`; generated status below is checked on every PR
 
-Tactevra has not published a GitHub release. Candidate `ed29e82f` is selected and
-technically qualified, but no tag, release notes, or downloadable asset set is
-approved for publication. This dashboard is the concise
+Tactevra has not yet published a GitHub release. Candidate `ed29e82f` is selected,
+technically qualified, and explicitly approved with its exact tag, release notes,
+and GitHub-generated source archive boundary. This dashboard is the concise
 public summary of the first source-only experimental preview. Use
 [issue #57](https://github.com/j-webtek/tactevra/issues/57) for the actionable
 checklist and the [release procedure](../RELEASING.md) for the required process.
@@ -20,7 +20,7 @@ evidence. Any candidate change requires a new exact-SHA record and qualification
 <!-- BEGIN GENERATED READINESS STATUS -->
 **Registry status:** 0 open blockers.
 
-**Candidate:** [`ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3`](CANDIDATE_ED29E82F.md) is technically qualified; publication is not approved.
+**Candidate:** [`ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3`](CANDIDATE_ED29E82F.md) is technically qualified and approved; publication is pending.
 
 | Blocker | Owner | State |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ evidence. Any candidate change requires a new exact-SHA record and qualification
 | AI and arm compatibility dispositions | **Complete with offline limitations** | Candidate `ed29e82f` retains the strict shared contract; 162 focused tests pass. Physical readiness remains blocked as recorded in the [candidate](CANDIDATE_ED29E82F.md). |
 | Exact candidate commit | **Selected and technically qualified** | `ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3` on protected `main`; later preparation records do not alter it. |
 | Candidate audit and fresh-checkout review | **Pass** | The [hosted exact-SHA audit](https://github.com/j-webtek/tactevra/actions/runs/37175363712) and detached Windows candidate receipt passed. |
-| Tag and pre-release | **Not approved or published** | Requires explicit maintainer approval of the exact tag, SHA, notes, and source-only asset scope. |
+| Tag and pre-release | **Approved; publication pending** | Publish only the exact approved tag, SHA, title, notes, and GitHub-generated source archives, then verify before closure. |
 
 ## What is already established
 
@@ -80,12 +80,10 @@ Issue [#88](https://github.com/j-webtek/tactevra/issues/88) is completed by
 The disposition preserves the explicit upstream package-level MIT declaration,
 the absent-notice caveat, and the independent-replacement contingency together.
 
-1. The maintainer reviews the [candidate record](CANDIDATE_ED29E82F.md),
-   [proposed release notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md), third-party notices,
-   limitations, and GitHub-generated source-only boundary.
-2. Publication occurs only after explicit approval of the exact tag, SHA, notes,
-   and asset scope. A candidate passing every technical check is still not
-   self-authorizing.
+1. The maintainer review and exact publication approval are recorded in the
+   [candidate record](CANDIDATE_ED29E82F.md) and issue #57.
+2. Publish only the approved values and verify the public tag, target SHA, notes,
+   prerelease state, and source-only assets before closing the tracker.
 
 ## Ownership and routing
 

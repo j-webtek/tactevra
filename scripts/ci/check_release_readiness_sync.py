@@ -47,6 +47,12 @@ def load_registry(path: Path = REGISTRY) -> dict:
             raise ValueError("qualified release candidate needs a passing audit")
         if any(item["status"] == "open" for item in data["blockers"]):
             raise ValueError("release candidate cannot be qualified while blockers are open")
+        if candidate["maintainer_review_status"] not in {"pending", "complete"}:
+            raise ValueError("qualified release candidate has unsupported maintainer review status")
+        if candidate["publication_status"] not in {"not-approved", "approved", "published"}:
+            raise ValueError("qualified release candidate has unsupported publication status")
+        if candidate["publication_status"] in {"approved", "published"} and candidate["maintainer_review_status"] != "complete":
+            raise ValueError("approved or published release candidate needs completed maintainer review")
     return data
 
 
@@ -60,9 +66,16 @@ def render_dashboard_status(registry: dict) -> str:
     candidate = registry["candidate"]
     lines = [BEGIN, f"**Registry status:** {len(opened)} open blocker{suffix}."]
     if candidate["status"] == "qualified":
+        publication = candidate["publication_status"]
+        if publication == "published":
+            disposition = "is published."
+        elif publication == "approved":
+            disposition = "is technically qualified and approved; publication is pending."
+        else:
+            disposition = "is technically qualified; publication is not approved."
         lines.extend([
             "",
-            f"**Candidate:** [`{candidate['sha']}`]({Path(candidate['record']).name}) is technically qualified; publication is not approved.",
+            f"**Candidate:** [`{candidate['sha']}`]({Path(candidate['record']).name}) {disposition}",
         ])
     else:
         lines.extend(["", "**Candidate:** Not selected."])
@@ -104,18 +117,34 @@ def render_tracker_body(registry: dict) -> str:
     else:
         sha = candidate["sha"]
         record_url = f"https://github.com/j-webtek/tactevra/blob/main/{candidate['record']}"
-        lines.extend([
-            "", "**Phase:** Candidate qualification complete; maintainer review and explicit publication approval remain pending.",
-            "", f"**Candidate:** [`{sha}`]({record_url}) on protected `main`.",
-            "", "**Publication:** Not approved. No tag or GitHub release has been created.",
-            "", "**Decision owner:** @j-webtek, as repository maintainer.",
-            "", "## Next accountable decision", "",
-            "The maintainer must review the exact release notes and source-only asset boundary, then choose one bounded path:", "",
-            "1. explicitly approve the exact tag, SHA, title, notes, and GitHub-generated source archives;",
-            "2. defer publication and leave this tracker open; or",
-            "3. abandon the preview milestone, record the reason, and close the tracker as not planned.", "",
-            "Technical qualification does not authorize publication.",
-        ])
+        publication = candidate["publication_status"]
+        if publication == "published":
+            lines.extend([
+                "", "**Phase:** Experimental source preview published and verified.",
+                "", f"**Candidate:** [`{sha}`]({record_url}) on protected `main`.",
+                "", "**Publication:** Published from the explicitly approved source-only set.",
+            ])
+        elif publication == "approved":
+            lines.extend([
+                "", "**Phase:** Candidate qualification and maintainer approval complete; publication and verification remain pending.",
+                "", f"**Candidate:** [`{sha}`]({record_url}) on protected `main`.",
+                "", "**Publication:** Explicitly approved; no tag or GitHub release has yet been verified.",
+                "", "## Next accountable action", "",
+                "Publish only the approved tag, SHA, title, notes, and GitHub-generated source archives, then verify the public result before closure.",
+            ])
+        else:
+            lines.extend([
+                "", "**Phase:** Candidate qualification complete; maintainer review and explicit publication approval remain pending.",
+                "", f"**Candidate:** [`{sha}`]({record_url}) on protected `main`.",
+                "", "**Publication:** Not approved. No tag or GitHub release has been created.",
+                "", "**Decision owner:** @j-webtek, as repository maintainer.",
+                "", "## Next accountable decision", "",
+                "The maintainer must review the exact release notes and source-only asset boundary, then choose one bounded path:", "",
+                "1. explicitly approve the exact tag, SHA, title, notes, and GitHub-generated source archives;",
+                "2. defer publication and leave this tracker open; or",
+                "3. abandon the preview milestone, record the reason, and close the tracker as not planned.", "",
+                "Technical qualification does not authorize publication.",
+            ])
     lines.extend([
         "", "## Registry-controlled blockers", "",
     ])
@@ -154,13 +183,19 @@ def render_milestone_description(registry: dict) -> str:
     if opened:
         phase = "blocker resolution"
     elif registry["candidate"]["status"] == "qualified":
-        phase = "candidate technically qualified; publication unapproved"
+        publication = registry["candidate"]["publication_status"]
+        if publication == "published":
+            phase = "source preview published and verified"
+        elif publication == "approved":
+            phase = "candidate approved; publication pending"
+        else:
+            phase = "candidate technically qualified; publication unapproved"
     else:
         phase = "candidate qualification ready; candidate unselected"
     return ("Source-only experimental preview readiness. "
             f"Registry-controlled open blockers: {blockers}. "
             f"Phase: {phase}. "
-            "Status: docs/releases/READINESS.md. Publication still requires exact-SHA review and explicit maintainer approval.")
+            "Status: docs/releases/READINESS.md. Publication follows the exact approved candidate boundary.")
 
 
 def replace_generated_status(text: str, generated: str) -> str:
