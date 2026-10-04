@@ -15,8 +15,8 @@
     "ai_disposition": "compatible-offline-with-limitations",
     "arm_disposition": "compatible-offline-with-limitations",
     "audit_status": "pass",
-    "maintainer_review_status": "pending",
-    "publication_status": "not-approved"
+    "maintainer_review_status": "complete",
+    "publication_status": "approved"
   },
   "blockers": [
     {

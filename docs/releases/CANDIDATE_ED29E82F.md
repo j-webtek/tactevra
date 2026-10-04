@@ -2,9 +2,13 @@
 
 Prepared October 4, 2026 for
 [issue #57](https://github.com/j-webtek/tactevra/issues/57).
-**Disposition: TECHNICALLY QUALIFIED; PUBLICATION NOT APPROVED.** This record
-selects and qualifies one immutable source snapshot. It creates no tag, release,
-hardware authority, model promotion, or approval to publish.
+**Disposition: TECHNICALLY QUALIFIED; PUBLICATION APPROVED.** This record
+selects and qualifies one immutable source snapshot. On October 4, 2026, the
+repository maintainer explicitly approved the exact tag, SHA, title, notes, and
+GitHub-generated source archives together in
+[issue #57](https://github.com/j-webtek/tactevra/issues/57#issuecomment-5976515197).
+That approval does not create a tag or release and grants no hardware authority
+or model promotion.
 
 ## Proposed identity
 
@@ -126,12 +130,12 @@ untracked and link-only. No new legal conclusion is claimed here.
 - The snapshot scanner is heuristic and does not certify Git history, security,
   or redistribution rights.
 
-## Remaining publication decision
+## Publication approval
 
 Technical candidate selection, both bounded compatibility dispositions, the
 exact-SHA hosted audit, and detached-checkout verification are complete. The
-maintainer must still review the exact notes and notice/source-only boundary,
-then explicitly approve or reject all five publication inputs together:
+maintainer reviewed the notes and notice/source-only boundary and explicitly
+approved all five publication inputs together:
 
 1. tag `tactevra-v0.1.0-alpha.1`;
 2. SHA `ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3`;
@@ -139,5 +143,6 @@ then explicitly approve or reject all five publication inputs together:
 4. [the exact notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md); and
 5. GitHub-generated source archives only.
 
-Until that approval is recorded, do not create the tag or release and do not
-close issue #57 as completed.
+Publication must still use these values without substitution. Issue #57 remains
+open until the public tag, target SHA, prerelease title, notes, and source-only
+assets are verified.

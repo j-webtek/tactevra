@@ -143,7 +143,7 @@ REQUIRED_PHRASES = {
         '**Document status:** Current release-readiness dashboard',
         '**Authority:** Status and routing only; this page does not approve publication or authorize hardware operation',
         '**Selected and technically qualified**',
-        '**Not approved or published**',
+        '**Approved; publication pending**',
         'https://github.com/j-webtek/tactevra/issues/56',
         'https://github.com/j-webtek/tactevra/issues/61',
         'https://github.com/j-webtek/tactevra/issues/88',
@@ -197,7 +197,7 @@ REQUIRED_PHRASES = {
         '**Disposition: SUPERSEDED WITHOUT PUBLICATION.**',
     ),
     'docs/releases/CANDIDATE_ED29E82F.md': (
-        '**Disposition: TECHNICALLY QUALIFIED; PUBLICATION NOT APPROVED.**',
+        '**Disposition: TECHNICALLY QUALIFIED; PUBLICATION APPROVED.**',
         'ed29e82fcebbd3fe4194fa141d0eaadc3c3c8fc3',
         'https://github.com/j-webtek/tactevra/actions/runs/37175363712',
     ),
