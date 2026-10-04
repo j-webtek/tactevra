@@ -1,0 +1,262 @@
+{
+  "schema": "tactevra.end_to_end_typing_twin_isaac_subset_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "status": "FROZEN_PREEXECUTION_GPU_BLOCKED_BY_PAIRED_COMPARISON",
+  "source_claim_commit": "86509b763a7d554377c14dd8ab9cb92a716f58ad",
+  "bindings": {
+    "semantic_fixture": {
+      "path": "software/ai/sim/evidence/end_to_end_typing_twin_v1.json",
+      "sha256": "bef5bd761805bfaf7beb67bd3070af740cb0b528deb637a8b3ab6d07ca7f8e00"
+    },
+    "cpu_fixture": {
+      "path": "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json",
+      "sha256": "36301d4288164aaa54e4d549cc9944aec8d52a137cc47035835fb051dd76bafd"
+    },
+    "candidate_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "camera_profile": {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    "urdf": {
+      "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    "mesh_inventory": {
+      "path": "software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_meshes_20260929.json",
+      "sha256": "ab8749f813a20cc93e804eddfaccca8d1997a9d6ef86eb6cebf7368e6e368640"
+    },
+    "typing_twin": {
+      "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
+      "sha256": "50f83bc49765fcce32aa41b67e7a972680e33f15af622f10d053f0cc542e7442"
+    },
+    "sticky_compiler": {
+      "path": "software/ai/rocell_ai/adapter.py",
+      "sha256": "a1d65ea48aee263b1af9e4856d2e8e4cfa90af248ac78feb730941d60b096b6c"
+    }
+  },
+  "simulator_contract": {
+    "required_isaac_version": "6.1.0",
+    "headless": true,
+    "multi_gpu_per_process": false,
+    "gpu_ids": [
+      0,
+      1
+    ],
+    "same_identity_each_gpu": true,
+    "manifest_must_record": [
+      "isaac_version",
+      "warp_version",
+      "driver_version",
+      "gpu_name",
+      "gpu_uuid",
+      "git_commit"
+    ]
+  },
+  "camera_family": {
+    "orientation": "EXACT_NADIR_FIXED",
+    "camera_height_board_mm": 850.0,
+    "camera_center_board_xy_mm": [
+      333.5044034818228,
+      228.5
+    ],
+    "resolution_px": [
+      960,
+      640
+    ],
+    "focal_length_mm": 16.0,
+    "horizontal_aperture_mm": 13.1328,
+    "frame_rate_fps": 9,
+    "settle_frames": 3,
+    "source": "EXPLORATORY_SYNTHETIC_MATCH_TO_DECLARED_B0477_MODE_NOT_CALIBRATION"
+  },
+  "unmeasured_render_ranges": {
+    "target_visual_extrusion_mm": [
+      1.0,
+      5.0
+    ],
+    "dome_light_intensity_sim_units": [
+      500.0,
+      3000.0
+    ],
+    "dome_light_color_temperature_k": [
+      3000.0,
+      6500.0
+    ],
+    "fixture_translation_xy_mm": [
+      -5.0,
+      5.0
+    ],
+    "fixture_yaw_deg": [
+      -2.0,
+      2.0
+    ],
+    "occlusion_fraction": [
+      0.3,
+      0.6
+    ]
+  },
+  "sampled_render_values": {
+    "target_visual_extrusion_mm": [
+      1.0,
+      3.0,
+      5.0
+    ],
+    "dome_light_intensity_sim_units": [
+      500.0,
+      1500.0,
+      3000.0
+    ],
+    "dome_light_color_temperature_k": [
+      3000.0,
+      4750.0,
+      6500.0
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "WS1-ISAAC-HELLO",
+      "device": "keyboard",
+      "text": "Hello 2026!",
+      "target_ids": [
+        "SHIFT",
+        "H",
+        "E",
+        "L",
+        "L",
+        "O",
+        "SPACE",
+        "2",
+        "0",
+        "2",
+        "6",
+        "SHIFT",
+        "1"
+      ],
+      "render_mode": "CLEAR",
+      "expected_outcome": "PROCEED_EXACT_TEXT"
+    },
+    {
+      "scenario_id": "WS1-ISAAC-REPEATED",
+      "device": "keyboard",
+      "text": "AAAA",
+      "target_ids": [
+        "SHIFT",
+        "A",
+        "SHIFT",
+        "A",
+        "SHIFT",
+        "A",
+        "SHIFT",
+        "A"
+      ],
+      "render_mode": "CLEAR",
+      "expected_outcome": "PROCEED_EXACT_TEXT"
+    },
+    {
+      "scenario_id": "WS1-ISAAC-SHIFT-TRANSITIONS",
+      "device": "keyboard",
+      "text": "aA A!",
+      "target_ids": [
+        "A",
+        "SHIFT",
+        "A",
+        "SPACE",
+        "SHIFT",
+        "A",
+        "SHIFT",
+        "1"
+      ],
+      "render_mode": "CLEAR",
+      "expected_outcome": "PROCEED_EXACT_TEXT"
+    },
+    {
+      "scenario_id": "WS1-ISAAC-STALE-FRAME",
+      "device": "keyboard",
+      "text": "h",
+      "target_ids": [
+        "H"
+      ],
+      "render_mode": "CLEAR",
+      "expected_outcome": "ABSTAIN_STALE_FRAME",
+      "frame_age_ms": 2000
+    },
+    {
+      "scenario_id": "WS1-ISAAC-TARGET-DISPLACEMENT",
+      "device": "keyboard",
+      "text": "Z",
+      "target_ids": [
+        "SHIFT",
+        "Z"
+      ],
+      "render_mode": "DISPLACED_FIXTURE",
+      "expected_outcome": "STOP_TARGET_DISPLACEMENT",
+      "board_translation_xy_mm": [
+        5.0,
+        -5.0
+      ],
+      "board_yaw_deg": 2.0
+    },
+    {
+      "scenario_id": "WS1-ISAAC-PERCEPTION-ABSTENTION",
+      "device": "keyboard",
+      "text": "=",
+      "target_ids": [
+        "EQUAL"
+      ],
+      "render_mode": "TARGET_OCCLUDER",
+      "expected_outcome": "ABSTAIN_PERCEPTION",
+      "target_occlusion_fraction": 0.6
+    }
+  ],
+  "metrics": [
+    "EXACT_SCENARIO_AND_TARGET_ORDER",
+    "TARGET_CENTER_PIXEL_ERROR",
+    "SAFE_REGION_VISIBLE_FRACTION",
+    "EXPECTED_FAULT_DECISION",
+    "CROSS_GPU_TARGET_CENTER_MAX_ABS_PX",
+    "CROSS_GPU_MASK_IOU",
+    "CROSS_GPU_RGB_MEAN_ABS_UINT8",
+    "CROSS_GPU_RGB_MAX_ABS_UINT8",
+    "PER_SCENARIO_RENDER_SECONDS"
+  ],
+  "decision_rules": {
+    "all_scenarios_present": true,
+    "target_order_difference_count_maximum": 0,
+    "clear_target_center_error_px_maximum": 0.5,
+    "clear_safe_region_visible_fraction_minimum": 0.99,
+    "fault_expected_outcome_match_rate_minimum": 1.0,
+    "cross_gpu_target_center_max_abs_px_maximum": 0.25,
+    "cross_gpu_mask_iou_minimum": 0.999,
+    "cross_gpu_rgb_mean_abs_uint8_maximum": 0.05,
+    "cross_gpu_rgb_max_abs_uint8_maximum": 2,
+    "any_missing_identity_or_nonfinite_metric": "STOP",
+    "any_source_hash_or_fixture_hash_mismatch": "STOP",
+    "any_authority_counter_nonzero": "STOP"
+  },
+  "output_contract": {
+    "external_root": "C:/IsaacSim/evidence/issue190/simulation_program/workstream_1/isaac_subset_v1",
+    "per_gpu_subdirectory": "gpu_{gpu_id}",
+    "compact_manifest_name": "manifest.json",
+    "cross_gpu_receipt_name": "cross_gpu_result.json",
+    "backup_required": true
+  },
+  "limitations": [
+    "The external 80-target catalog is uninstalled and exploratory.",
+    "The render uses declared ranges rather than measured materials, lighting, or camera calibration.",
+    "Isaac agreement tests deterministic pipeline behavior, not physical perception transfer.",
+    "Fault decisions are simulated metadata gates and do not qualify a physical detector.",
+    "A passing result creates no command, permit, transport, collision clearance, or physical authority."
+  ],
+  "counters": {
+    "hardware_writes": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "permits": 0,
+    "transport_operations": 0
+  },
+  "physical_authority": false,
+  "fixture_sha256": "128d584d1167f1529ec0b2167b3d96d240e4717a8bab853357d1c6ae0a4241de"
+}
