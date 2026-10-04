@@ -151,6 +151,16 @@ def test_torch_feature_expansion_matches_frozen_numpy_contract() -> None:
         torch.ones(11),
     )[0].numpy()
     np.testing.assert_allclose(actual, expected, rtol=2.0e-5, atol=2.0e-5)
+    cached_derived = paired_height_features_from_normalized_torch(
+        torch.from_numpy(expected[0:3][None]),
+        torch.from_numpy(expected[3:6][None]),
+        torch.from_numpy(expected[11:12][None]),
+        torch.zeros(11),
+        torch.ones(11),
+        torch.from_numpy(expected[9:10][None]),
+        torch.from_numpy(expected[10:11][None]),
+    )[0].numpy()
+    np.testing.assert_allclose(cached_derived, expected, rtol=2.0e-6, atol=2.0e-6)
 
 
 def test_twelve_channel_features_are_deterministic_and_preserve_thin_line() -> None:

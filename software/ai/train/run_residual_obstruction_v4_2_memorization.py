@@ -162,6 +162,8 @@ def paired_height_features_from_normalized_torch(
     safe_mask: Any,
     feature_mean: Any,
     feature_scale: Any,
+    sobel_difference: Any | None = None,
+    texture_difference: Any | None = None,
 ) -> Any:
     """Expand cached normalized RGB pairs into the frozen twelve channels.
 
@@ -184,10 +186,12 @@ def paired_height_features_from_normalized_torch(
     if bool(torch.any(feature_scale < 1.0e-6)):
         raise ValueError("feature scales must be at least 1e-6")
 
-    weights = observation.new_tensor((0.2126, 0.7152, 0.0722)).view(1, 3, 1, 1)
-
     def luminance(value: Any) -> Any:
-        return torch.sum(value * weights, dim=1, keepdim=True)
+        return (
+            0.2126 * value[:, 0:1]
+            + 0.7152 * value[:, 1:2]
+            + 0.0722 * value[:, 2:3]
+        )
 
     sobel_x = observation.new_tensor(
         ((-1.0, 0.0, 1.0), (-2.0, 0.0, 2.0), (-1.0, 0.0, 1.0))
@@ -204,17 +208,40 @@ def paired_height_features_from_normalized_torch(
 
     def texture(value: Any) -> Any:
         padded = functional.pad(luminance(value), (2, 2, 2, 2), mode="reflect")
-        mean = functional.avg_pool2d(padded, kernel_size=5, stride=1)
-        squared_mean = functional.avg_pool2d(padded * padded, kernel_size=5, stride=1)
+        height, width = value.shape[2:]
+        total = torch.zeros_like(value[:, :1])
+        squared = torch.zeros_like(value[:, :1])
+        # Preserve the frozen NumPy accumulator order.  Average pooling uses a
+        # different reduction tree whose cancellation error is material after
+        # the small texture channel is divided by its training standard deviation.
+        for row in range(5):
+            for column in range(5):
+                sample = padded[:, :, row:row + height, column:column + width]
+                total = total + sample
+                squared = squared + sample * sample
+        mean = total / 25.0
+        squared_mean = squared / 25.0
         return torch.sqrt(torch.clamp(squared_mean - mean * mean, min=0.0))
 
+    if sobel_difference is None:
+        derived_sobel = torch.abs(sobel(reference) - sobel(observation))
+    else:
+        if sobel_difference.shape != safe_mask.shape:
+            raise ValueError("sobel_difference must match safe_mask shape")
+        derived_sobel = sobel_difference
+    if texture_difference is None:
+        derived_texture = torch.abs(texture(reference) - texture(observation))
+    else:
+        if texture_difference.shape != safe_mask.shape:
+            raise ValueError("texture_difference must match safe_mask shape")
+        derived_texture = texture_difference
     features = torch.cat(
         (
             observation,
             reference,
             torch.abs(reference - observation),
-            torch.abs(sobel(reference) - sobel(observation)),
-            torch.abs(texture(reference) - texture(observation)),
+            derived_sobel,
+            derived_texture,
         ),
         dim=1,
     )
