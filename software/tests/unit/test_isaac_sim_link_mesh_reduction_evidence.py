@@ -12,7 +12,7 @@ from rocell.simulation.collision import OrientedBoxMm
 WORKSPACE = Path(__file__).resolve().parents[3]
 RECEIPT = (
     WORKSPACE / "software/integrations/isaac_sim/evidence"
-    / "roarm_m3_link_mesh_reduction_20260929.json"
+    / "roarm_m3_link_mesh_reduction_20261004.json"
 )
 
 
@@ -38,11 +38,11 @@ def test_reduction_binds_the_retained_mesh_receipt() -> None:
     receipt = _load()
     source = (
         WORKSPACE / "software/integrations/isaac_sim/evidence"
-        / "roarm_m3_upstream_link_meshes_20260929.json"
+        / "roarm_m3_upstream_link_mesh_binding_20261004.json"
     )
     assert receipt["source_bindings"]["mesh_receipt_file_sha256"] == _digest(source)
     assert receipt["source_bindings"]["mesh_receipt_sha256"] == (
-        "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954"
+        "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e"
     )
 
 

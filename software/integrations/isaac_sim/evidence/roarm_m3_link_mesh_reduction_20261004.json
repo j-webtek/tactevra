@@ -773,12 +773,12 @@
   "physical_authority": false,
   "physical_movements": 0,
   "raw_mesh_collision_admissible": false,
-  "receipt_sha256": "e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab",
+  "receipt_sha256": "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178",
   "reduced_collision_geometry_admissible": false,
   "schema": "tactevra.isaac_sim_link_mesh_reduction.v1",
   "source_bindings": {
-    "mesh_receipt_file_sha256": "ab8749f813a20cc93e804eddfaccca8d1997a9d6ef86eb6cebf7368e6e368640",
-    "mesh_receipt_sha256": "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954",
+    "mesh_receipt_file_sha256": "8408214ddc9bec69ffb65a4928e22bbdd83f99c6590576ff6a4ef61599c3703d",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
     "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d",
     "upstream_repository": "https://github.com/waveshareteam/roarm_ws"
   },

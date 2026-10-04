@@ -20,7 +20,7 @@ import subprocess
 UPSTREAM_COMMIT = "40dbd84b553695212fab713e8465f817ba95454d"
 MESH_DIRECTORY = "src/roarm_main/roarm_description/meshes/roarm_m3"
 EXPECTED_MESH_RECEIPT_SHA256 = (
-    "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954"
+    "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e"
 )
 IDENTITY_ROTATION = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
 CONTAINMENT_TOLERANCE_MM = 1e-9
@@ -227,17 +227,21 @@ def main() -> int:
             ],
         }
         receipt["receipt_sha256"] = canonical_sha256(receipt)
-        args.output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        args.output.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         args.status_output.write_text(json.dumps({
             "status": "PASS_WITH_BLOCKERS",
             "receipt_sha256": receipt["receipt_sha256"],
             **receipt["summary"],
             "blockers": blockers,
-        }, sort_keys=True) + "\n", encoding="utf-8")
+        }, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     except BaseException as exc:
         args.status_output.write_text(json.dumps({
             "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
-        }, sort_keys=True) + "\n", encoding="utf-8")
+        }, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
         raise
     return 0
 
