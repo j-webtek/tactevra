@@ -1181,6 +1181,16 @@ synthetic observations, unmeasured layout/tool geometry, zero physics steps,
 and unsafe 14.400834977 mm localization bound remain explicit blockers; the
 derived proof cannot authorize deployment or physical motion.
 
+`E-20261004-INT-454` begins the next WP2 collision-foundation increment by
+binding the official Waveshare `roarm_ws` Xacro and seven per-link STL blobs to
+one immutable upstream commit and tree. The Xacro uses identical visual and
+collision references with zero local origins and a declared `0.001` scale. The
+source meshes contain 38,344 triangles across 19 connected bodies; `link1` and
+`link5` are not watertight, and one left-gripper mesh is unreferenced. This is
+source provenance only. It deliberately does not prove robot-frame alignment,
+install reduced collision geometry, choose self-collision pairs, run clearance
+replay, or grant simulator, controller, hardware, or physical authority.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

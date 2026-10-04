@@ -210,6 +210,31 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\model_m
   --status-output C:\IsaacSim\evidence\model_motion_overlay_001.status.json
 ```
 
+## Official per-link mesh binding
+
+[`upstream_link_mesh_binding_probe.py`](upstream_link_mesh_binding_probe.py)
+reads immutable blobs from the pinned Waveshare `roarm_ws` commit. The retained
+[`binding receipt`](evidence/roarm_m3_upstream_link_mesh_binding_20261004.json)
+proves that seven named Xacro links use seven exact STL blobs, with identical
+visual and collision references, zero local origin offsets, and the declared
+`0.001` scale. It records 38,344 triangles across 19 connected bodies; `link1`
+and `link5` are not watertight, and one left-gripper mesh is not referenced by
+the Xacro.
+
+This is source-provenance evidence, not collision qualification. It does not
+prove mesh-to-robot-frame alignment, install collision shapes, select a
+self-collision pair policy, run Isaac, or admit a clearance result. Raw mesh,
+reduced geometry, and clearance replay remain explicitly inadmissible.
+
+Reproduce the inspection from a local checkout containing the pinned commit:
+
+```powershell
+python software\integrations\isaac_sim\upstream_link_mesh_binding_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --output C:\IsaacSim\evidence\upstream_link_mesh_binding_001.json `
+  --status-output C:\IsaacSim\evidence\upstream_link_mesh_binding_001.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
