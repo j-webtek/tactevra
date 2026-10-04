@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 POLICY_CHECKS = [
+    ["scripts/ci/check_evidence_ledger_append_only.py"],
     ["scripts/ci/check_docs.py"],
     ["scripts/ci/check_public_records.py"],
     ["scripts/ci/check_evidence_scope.py"],

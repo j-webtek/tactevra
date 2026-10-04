@@ -13,6 +13,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 CHECKS = (
+    ("evidence_ledger_append_only", ("scripts/ci/check_evidence_ledger_append_only.py",)),
     ("maintained_docs", ("scripts/ci/check_docs.py",)),
     ("public_records", ("scripts/ci/check_public_records.py",)),
     ("evidence_scope", ("scripts/ci/check_evidence_scope.py",)),

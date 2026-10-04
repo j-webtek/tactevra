@@ -66,6 +66,8 @@ jobs:
           snapshot_status=$?
           python scripts/ci/check_docs.py
           docs_status=$?
+          python scripts/ci/check_evidence_ledger_append_only.py
+          ledger_status=$?
           python scripts/ci/check_source_archive_footprint.py
           footprint_status=$?
           set -e
@@ -74,6 +76,7 @@ jobs:
             echo "integrity_status=${integrity_status}"
             echo "snapshot_status=${snapshot_status}"
             echo "docs_status=${docs_status}"
+            echo "ledger_status=${ledger_status}"
             echo "footprint_status=${footprint_status}"
           } >> "$GITHUB_OUTPUT"
 
@@ -83,6 +86,7 @@ jobs:
           INTEGRITY_STATUS: ${{ steps.audits.outputs.integrity_status }}
           SNAPSHOT_STATUS: ${{ steps.audits.outputs.snapshot_status }}
           DOCS_STATUS: ${{ steps.audits.outputs.docs_status }}
+          LEDGER_STATUS: ${{ steps.audits.outputs.ledger_status }}
           FOOTPRINT_STATUS: ${{ steps.audits.outputs.footprint_status }}
         shell: bash
         run: |
@@ -92,6 +96,7 @@ jobs:
             --check "release_integrity=${INTEGRITY_STATUS}" \
             --check "snapshot_audit=${SNAPSHOT_STATUS}" \
             --check "maintained_docs=${DOCS_STATUS}" \
+            --check "evidence_ledger_append_only=${LEDGER_STATUS}" \
             --check "source_footprint=${FOOTPRINT_STATUS}" \
             | tee release-review-summary.md
           cat release-review-summary.md >> "$GITHUB_STEP_SUMMARY"
@@ -109,10 +114,11 @@ jobs:
           INTEGRITY_STATUS: ${{ steps.audits.outputs.integrity_status }}
           SNAPSHOT_STATUS: ${{ steps.audits.outputs.snapshot_status }}
           DOCS_STATUS: ${{ steps.audits.outputs.docs_status }}
+          LEDGER_STATUS: ${{ steps.audits.outputs.ledger_status }}
           FOOTPRINT_STATUS: ${{ steps.audits.outputs.footprint_status }}
         shell: bash
         run: |
-          if (( INTEGRITY_STATUS != 0 || SNAPSHOT_STATUS != 0 || DOCS_STATUS != 0 || FOOTPRINT_STATUS != 0 )); then
+          if (( INTEGRITY_STATUS != 0 || SNAPSHOT_STATUS != 0 || DOCS_STATUS != 0 || LEDGER_STATUS != 0 || FOOTPRINT_STATUS != 0 )); then
             echo 'Candidate remains blocked; inspect the uploaded review packet.'
             exit 1
           fi

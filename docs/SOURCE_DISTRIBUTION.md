@@ -489,3 +489,6 @@ The tracked-file ceiling is 6,365 after freezing the compact Workstream 7 collis
 
 The tracked-file ceiling is 6,366 after adding the zero-authority Workstream 7 collision-design runner; complete generated screens remain external.
 
+The tracked-file ceiling is 6,368 after adding the evidence-ledger append-only
+policy check and its regression tests. The check compares the current ledger
+with its Git-history prefix and rejects deletion, rewriting, or reordering.
