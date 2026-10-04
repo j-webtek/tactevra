@@ -305,11 +305,13 @@ def _timing(
     }
     limiting, duration_s = max(candidates.items(), key=lambda item: item[1])
     return QuinticTimingSegmentV1(
-        sequence, source_sequence, destination_sequence, distance_mm,
-        duration_s * 1000.0, dwell_after_ms, limiting,
-        _QUINTIC_PEAK_VELOCITY * distance_mm / duration_s,
-        _QUINTIC_PEAK_ACCELERATION * distance_mm / duration_s**2,
-        _QUINTIC_PEAK_JERK * distance_mm / duration_s**3,
+        sequence, source_sequence, destination_sequence,
+        _evidence_float(distance_mm),
+        _evidence_float(duration_s * 1000.0), dwell_after_ms, limiting,
+        _evidence_float(_QUINTIC_PEAK_VELOCITY * distance_mm / duration_s),
+        _evidence_float(
+            _QUINTIC_PEAK_ACCELERATION * distance_mm / duration_s**2),
+        _evidence_float(_QUINTIC_PEAK_JERK * distance_mm / duration_s**3),
     )
 
 
@@ -350,9 +352,15 @@ def _screening_samples(
             ratio = step / steps
             point = Point3Mm(
                 source.point.frame,
-                source.point.x + (destination.point.x - source.point.x) * ratio,
-                source.point.y + (destination.point.y - source.point.y) * ratio,
-                source.point.z + (destination.point.z - source.point.z) * ratio,
+                _evidence_float(
+                    source.point.x
+                    + (destination.point.x - source.point.x) * ratio),
+                _evidence_float(
+                    source.point.y
+                    + (destination.point.y - source.point.y) * ratio),
+                _evidence_float(
+                    source.point.z
+                    + (destination.point.z - source.point.z) * ratio),
             )
             phase = destination.phase if step == steps else (
                 MotionPhase.APPROACH
