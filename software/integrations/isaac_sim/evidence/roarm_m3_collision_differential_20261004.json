@@ -1,0 +1,872 @@
+{
+  "blockers": [
+    "CANDIDATE_FALSE_POSITIVE_COLLISIONS_OBSERVED",
+    "THREE_POSE_CORPUS_IS_NOT_WORKSPACE_COVERAGE",
+    "SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED",
+    "NON_WATERTIGHT_RAW_MESHES",
+    "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "candidate_profile_installable": false,
+  "clearance_replay_admissible": false,
+  "collision_query_admissible": false,
+  "evidence_class": "OFFLINE_THREE_POSE_COLLISION_DIFFERENTIAL_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "three_static_poses_do_not_cover_continuous_joint_space",
+    "adjacent_contacts_are_reported_without_policy_exclusion",
+    "raw_non_watertight_meshes_are_supported_by_fcl_but_not_repaired",
+    "no_tool_camera_support_environment_clearance_or_contact_dynamics",
+    "no_installed_profile_controller_hardware_or_physical_qualification"
+  ],
+  "method": {
+    "adjacent_pairs_are_measured_not_excluded": true,
+    "collision_backend": "python-fcl via trimesh CollisionManager",
+    "distance_semantics": "FCL_SIGNED_DISTANCE_NONPOSITIVE_ON_COLLISION",
+    "distance_unit": "mm",
+    "pair_scope": "ALL_21_UNORDERED_LINK_PAIRS",
+    "pose_scope": [
+      "zero",
+      "home",
+      "ready"
+    ]
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "poses": [
+    {
+      "counts": {
+        "agreement_collision": 1,
+        "agreement_free": 16,
+        "candidate_false_negative": 0,
+        "candidate_false_positive": 4
+      },
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pairs": [
+        {
+          "body_pair": [
+            "base_link",
+            "link1"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -4e-06,
+          "kinematically_adjacent": true,
+          "outcome": "AGREEMENT_COLLISION",
+          "raw_mesh_collision": true,
+          "raw_mesh_minimum_signed_distance_mm": 0.0
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link2"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 40.459209,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 43.850883
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link3"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 277.164509,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 277.164514
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 422.35968,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 422.359684
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 484.763529,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 484.763539
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 526.7806,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 526.780631
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link2"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -20.187473,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 1.69996
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link3"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 216.517827,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 216.567575
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 361.712998,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 361.912048
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 424.116847,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 424.41474
+        },
+        {
+          "body_pair": [
+            "link1",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 466.133918,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 466.297567
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link3"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -4.596888,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.610001
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 125.085134,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 125.085156
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 187.489029,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 187.735156
+        },
+        {
+          "body_pair": [
+            "link2",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 229.506108,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 230.062939
+        },
+        {
+          "body_pair": [
+            "link3",
+            "link4"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -19.611009,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 1.2202
+        },
+        {
+          "body_pair": [
+            "link3",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 42.79284,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 42.79285
+        },
+        {
+          "body_pair": [
+            "link3",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 84.809911,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 84.809942
+        },
+        {
+          "body_pair": [
+            "link4",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 0.603843,
+          "kinematically_adjacent": true,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.603853
+        },
+        {
+          "body_pair": [
+            "link4",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 42.620914,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 42.854298
+        },
+        {
+          "body_pair": [
+            "link5",
+            "gripper_link"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -25.497951,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.358807
+        }
+      ],
+      "pose_name": "zero"
+    },
+    {
+      "counts": {
+        "agreement_collision": 1,
+        "agreement_free": 16,
+        "candidate_false_negative": 0,
+        "candidate_false_positive": 4
+      },
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        1.5707963267948966,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pairs": [
+        {
+          "body_pair": [
+            "base_link",
+            "link1"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -4e-06,
+          "kinematically_adjacent": true,
+          "outcome": "AGREEMENT_COLLISION",
+          "raw_mesh_collision": true,
+          "raw_mesh_minimum_signed_distance_mm": 0.0
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link2"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 40.459209,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 43.850883
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link3"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 274.913706,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 274.913711
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 300.876214,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 300.876221
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 314.498312,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 317.543889
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 339.569141,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 339.569187
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link2"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -20.187473,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 1.69996
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link3"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 214.267024,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 214.377825
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 256.686451,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 268.379519
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 278.501415,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 292.755382
+        },
+        {
+          "body_pair": [
+            "link1",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 308.951031,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 320.352069
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link3"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -2.950839,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.610001
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 125.085133,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 125.085156
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 187.489028,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 187.735156
+        },
+        {
+          "body_pair": [
+            "link2",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 229.506107,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 230.062939
+        },
+        {
+          "body_pair": [
+            "link3",
+            "link4"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -19.611009,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 1.2202
+        },
+        {
+          "body_pair": [
+            "link3",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 42.79284,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 42.79285
+        },
+        {
+          "body_pair": [
+            "link3",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 84.809911,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 84.809942
+        },
+        {
+          "body_pair": [
+            "link4",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 0.603843,
+          "kinematically_adjacent": true,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.603853
+        },
+        {
+          "body_pair": [
+            "link4",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 42.620914,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 42.854298
+        },
+        {
+          "body_pair": [
+            "link5",
+            "gripper_link"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -25.497951,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.358807
+        }
+      ],
+      "pose_name": "home"
+    },
+    {
+      "counts": {
+        "agreement_collision": 1,
+        "agreement_free": 16,
+        "candidate_false_negative": 0,
+        "candidate_false_positive": 4
+      },
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        2.618,
+        -1.0472,
+        0.0,
+        0.0
+      ],
+      "pairs": [
+        {
+          "body_pair": [
+            "base_link",
+            "link1"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -4e-06,
+          "kinematically_adjacent": true,
+          "outcome": "AGREEMENT_COLLISION",
+          "raw_mesh_collision": true,
+          "raw_mesh_minimum_signed_distance_mm": 0.0
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link2"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 40.459209,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 43.850883
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link3"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 156.761638,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 156.761651
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 156.302513,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 156.30252
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 171.383222,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 174.79157
+        },
+        {
+          "body_pair": [
+            "base_link",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 200.362567,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 200.362608
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link2"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -20.187473,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 1.69996
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link3"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 110.789525,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 120.309479
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 112.399871,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 125.148192
+        },
+        {
+          "body_pair": [
+            "link1",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 145.002993,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 160.630127
+        },
+        {
+          "body_pair": [
+            "link1",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 182.451468,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 195.915222
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link3"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -1.193538,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.610001
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link4"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 78.79327,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 82.790911
+        },
+        {
+          "body_pair": [
+            "link2",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 141.197081,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 145.194741
+        },
+        {
+          "body_pair": [
+            "link2",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 183.214153,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 187.313984
+        },
+        {
+          "body_pair": [
+            "link3",
+            "link4"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -25.259442,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.073488
+        },
+        {
+          "body_pair": [
+            "link3",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 37.144426,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 37.144432
+        },
+        {
+          "body_pair": [
+            "link3",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 79.161505,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 79.368316
+        },
+        {
+          "body_pair": [
+            "link4",
+            "link5"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 0.603843,
+          "kinematically_adjacent": true,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.603853
+        },
+        {
+          "body_pair": [
+            "link4",
+            "gripper_link"
+          ],
+          "candidate_box_collision": false,
+          "candidate_box_minimum_signed_distance_mm": 42.620914,
+          "kinematically_adjacent": false,
+          "outcome": "AGREEMENT_FREE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 42.854298
+        },
+        {
+          "body_pair": [
+            "link5",
+            "gripper_link"
+          ],
+          "candidate_box_collision": true,
+          "candidate_box_minimum_signed_distance_mm": -25.497951,
+          "kinematically_adjacent": true,
+          "outcome": "CANDIDATE_FALSE_POSITIVE",
+          "raw_mesh_collision": false,
+          "raw_mesh_minimum_signed_distance_mm": 0.358807
+        }
+      ],
+      "pose_name": "ready"
+    }
+  ],
+  "receipt_sha256": "e955990d357694705bfc078643782622491425dd33a7cecb23314b58e5833e61",
+  "schema": "tactevra.isaac_sim_collision_differential.v1",
+  "source_bindings": {
+    "mesh_receipt_file_sha256": "8408214ddc9bec69ffb65a4928e22bbdd83f99c6590576ff6a4ef61599c3703d",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
+    "python_fcl_version": "0.7.0.11",
+    "python_fcl_wheel_sha256": "63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f",
+    "reduction_receipt_file_sha256": "d9d49bbb97a207a56db2a15cb55b12dc63f6ce89e35998a139ccd112f2061714",
+    "reduction_receipt_sha256": "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178",
+    "trimesh_version": "4.11.1",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
+  },
+  "summary": {
+    "agreement_collision": 3,
+    "agreement_free": 48,
+    "candidate_false_negative": 0,
+    "candidate_false_positive": 12,
+    "pair_cases": 63
+  },
+  "wire_commands": []
+}

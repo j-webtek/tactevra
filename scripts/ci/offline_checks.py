@@ -119,6 +119,7 @@ TESTS = (
     "software/ai/tests/test_confidence_metrics.py",
     "software/tests/unit/test_isaac_sim_upstream_link_mesh_binding_evidence.py",
     "software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py",
+    "software/tests/unit/test_isaac_sim_collision_differential_evidence.py",
 )
 
 

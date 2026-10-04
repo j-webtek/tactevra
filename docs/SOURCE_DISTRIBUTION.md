@@ -86,6 +86,14 @@ observed 6,269 files. The measured tree is 649,495,261 logical bytes with
 mesh hashes rather than copying mesh blobs, so all byte and reduction limits
 remain unchanged.
 
+The three-pose collision-differential increment adds three governed paths: one
+offline comparison probe, one compact retained receipt, and one evidence test.
+The reviewed tracked-file ceiling therefore moves from 6,269 to the exact
+observed 6,272 files. The measured tree is 649,538,065 logical bytes with
+4,890,152 governed duplicate bytes. The comparison binds external source meshes
+and the exact collision-backend wheel by hash without copying either artifact
+into the repository, so all byte and reduction limits remain unchanged.
+
 The preferred order is:
 
 1. replace repeated instructional STL copies with one canonical tracked object
