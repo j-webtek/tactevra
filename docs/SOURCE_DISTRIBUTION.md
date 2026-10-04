@@ -302,3 +302,10 @@ totaling 9,833,904 bytes. Against the preceding `main` snapshot, the governed
 large-blob duplicate metric falls from 56,671,848 to 46,837,944 bytes. Source
 CAD, grounded-saddle revision evidence, the active 3MF queue, profiles, and HOLD
 or superseded records remain tracked; Git history is not rewritten.
+
+The governed joint-space collision differential adds three tracked source
+paths: one offline probe, one compact retained receipt, and one receipt test.
+At this change the repository contains 6,275 tracked files, 649,591,121 logical
+bytes, and 4,890,152 governed duplicate bytes. The file-count ceiling advances
+from 6,272 to 6,275 for those reviewed paths only; the logical-byte and
+duplicate-byte ceilings do not change.

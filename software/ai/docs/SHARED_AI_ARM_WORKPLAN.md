@@ -1211,6 +1211,18 @@ Three poses are not continuous workspace coverage, so self-collision policy,
 candidate installation, collision admission, clearance replay, tool/camera
 support geometry, controller access, and physical authority remain blocked.
 
+`E-20261004-INT-457` expands that differential to 49 deterministic governed
+joint-space poses: the three existing anchors, lower/upper/midpoint limit
+anchors, 12 single-joint limit poses, and 32 Halton interior samples. Across
+1,029 pair-pose cases it retains 780 free-space agreements, 57 collision
+agreements, 192 conservative-candidate false positives, and zero observed
+candidate false negatives. Of the false positives, 191 are adjacent-link cases
+and one is the nonadjacent `link2/gripper_link` pair. The corpus therefore
+identifies a concrete refinement target without selecting exclusions or
+installing a profile. Finite samples are not continuous coverage; collision
+admission, clearance replay, tool/camera/support/environment geometry,
+controller access, and physical authority remain blocked.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

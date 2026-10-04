@@ -1291,16 +1291,16 @@
       "pose_name": "halton_032"
     }
   ],
-  "receipt_sha256": "6161d29a6ce36a3ca9ac54755a7b3f69393af2e3afe49f9f26ee4496da861844",
+  "receipt_sha256": "b91df9df0728e7c88bbcca331c8846f9fdbf2f2e6cb643a07489fc50c9841302",
   "schema": "tactevra.isaac_sim_collision_joint_space_summary.v1",
   "source_bindings": {
-    "detailed_receipt_file_sha256": "f1226994510a3489820494021445ba50f4b17bbafaacb5605114b77ef8988f50",
-    "detailed_receipt_sha256": "0e5908b601b7184312343c9c610ecb9bf0754ad716ff1a59e35b4e8411c4c734",
+    "detailed_receipt_file_sha256": "8d73c80426c2e066f9472d89b3373ea6f4990a5fac5717dcb5b0e1b8df389adb",
+    "detailed_receipt_sha256": "6332d6af74c75d3a738414efedf2e75ec9729f30297af2b320ddfe4deb9e1d71",
     "governed_urdf_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
-    "mesh_receipt_sha256": "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
     "python_fcl_version": "0.7.0.11",
     "python_fcl_wheel_sha256": "63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f",
-    "reduction_receipt_sha256": "e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab",
+    "reduction_receipt_sha256": "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178",
     "trimesh_version": "4.11.1",
     "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
   },

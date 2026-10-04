@@ -9,7 +9,7 @@ from rocell.integrations.isaac_sim import canonical_sha256
 WORKSPACE = Path(__file__).resolve().parents[3]
 RECEIPT = (
     WORKSPACE / "software/integrations/isaac_sim/evidence"
-    / "roarm_m3_collision_joint_space_20260929.json"
+    / "roarm_m3_collision_joint_space_20261004.json"
 )
 
 
@@ -37,7 +37,7 @@ def test_joint_space_corpus_is_deterministic_and_governed() -> None:
         "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
     )
     assert receipt["source_bindings"]["detailed_receipt_file_sha256"] == (
-        "f1226994510a3489820494021445ba50f4b17bbafaacb5605114b77ef8988f50"
+        "8d73c80426c2e066f9472d89b3373ea6f4990a5fac5717dcb5b0e1b8df389adb"
     )
 
 
