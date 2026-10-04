@@ -10,6 +10,8 @@ from rocell_ai.simulation_program_cpu import (
     candidate_catalog_semantic_check,
     continuous_policy_smoke,
     collision_candidate,
+    phase0_collision_intake,
+    landing_sensor_comparison,
     gpu_readiness,
     load_program_fixture,
     mid_motion_mask_smoke,
@@ -30,7 +32,8 @@ def test_fixture_is_section_hashed_and_zero_authority():
     assert set(fixture["sections"]) == {"workstream_1_cpu", "workstream_2",
                                          "workstream_3", "workstream_4",
                                          "workstream_5", "workstream_6",
-                                         "workstream_5_attribution", "collision_candidate"}
+                                         "workstream_5_attribution", "collision_candidate",
+                                         "phase0_collision_mode", "phase0_landing_sensors"}
 
 
 def test_candidate_mode_is_separate_and_installed_rejection_remains():
@@ -84,3 +87,24 @@ def test_combined_receipt_is_deterministic_and_gpu_blocked():
     assert gpu_readiness(load_program_fixture(FIXTURE))["gpu_execution_authorized"] is False
     assert not any(first["counters"].values())
     json.dumps(first, allow_nan=False)
+
+
+def test_phase0_sensor_comparison_is_deterministic_and_selects_nothing():
+    fixture = load_program_fixture(FIXTURE)
+    first = landing_sensor_comparison(fixture)
+    assert first == landing_sensor_comparison(fixture)
+    assert first["selected_option"] is None
+    assert first["target_count"] == 51
+    assert len(first["options"]) == 3
+    assert first["overhead_camera_contact_visibility"].startswith("OCCLUDED")
+    assert first["hardware_write_count"] == first["physical_movement_count"] == 0
+
+
+def test_phase0_collision_candidate_runs_but_cannot_release_gates():
+    result = phase0_collision_intake(load_program_fixture(FIXTURE), workspace=ROOT)
+    assert result["mode"] == "EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE"
+    assert result["installed_profile_eligible"] is False
+    assert result["variant_count"] > 10
+    assert result["pose_count_per_variant"] == 46
+    assert result["decision"] == "STOP"
+    assert result["hardware_write_count"] == result["physical_movement_count"] == 0

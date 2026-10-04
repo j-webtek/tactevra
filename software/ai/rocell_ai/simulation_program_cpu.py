@@ -18,6 +18,7 @@ from .adapter import compile_virtual_us_sticky_keys, replay_virtual_us_sticky_ke
 
 SCOPE = "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
 CANDIDATE_MODE = "EXPLORATORY_UNINSTALLED_CANDIDATE80"
+COLLISION_CANDIDATE_MODE = "EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE"
 
 
 def _canonical(value: object) -> bytes:
@@ -285,6 +286,264 @@ def collision_candidate(fixture: dict[str, Any], *, workspace: Path) -> dict[str
             "commands": [], "physical_authority": False}
     core["candidate_sha256"] = _sha(core)
     return core
+
+
+def _collision_primitive(document: dict[str, Any]):
+    from rocell.geometry import Rotation3, Vec3
+    from rocell.simulation.collision import OrientedBoxMm
+
+    if document["kind"] != "oriented_box":
+        raise ValueError("phase-zero reduction supports only oriented boxes")
+    return OrientedBoxMm(
+        Vec3(*document["center_mm"]), Vec3(*document["half_extents_mm"]),
+        Rotation3(tuple(document["rotation_row_major"])),
+    )
+
+
+def _phase0_collision_variants(section: dict[str, Any]) -> list[dict[str, Any]]:
+    """Expand the frozen one-factor-at-a-time family without a hidden cross product."""
+
+    clamp = section["installed_base_clamp"]
+    camera = section["static_camera"]
+    cable = section["moving_cable"]
+    baseline = {
+        "tool_length_mm": section["tool"]["provisional_nominal_length_mm"],
+        "tool_radius_mm": section["tool"]["provisional_nominal_radius_mm"],
+        "clamp_x_mm": sum(clamp["arm_axis_board_x_mm_range"]) / 2,
+        "clamp_half_x_mm": sum(clamp["half_extents_mm_ranges"]["x"]) / 2,
+        "clamp_half_y_mm": sum(clamp["half_extents_mm_ranges"]["y"]) / 2,
+        "clamp_half_z_mm": sum(clamp["half_extents_mm_ranges"]["z"]) / 2,
+        "camera_height_mm": camera["height_mm_samples"][1],
+        "camera_depth_mm": sum(camera["module_depth_mm_range"]) / 2,
+        "cable_radius_mm": sum(cable["radius_mm_range"]) / 2,
+        "cable_offset_fraction": 0.5,
+        "cable_anchor_x_mm": sum(cable["route_family"]["fixed_anchor_board_x_mm_range"]) / 2,
+        "cable_anchor_z_mm": sum(cable["route_family"]["fixed_anchor_board_z_mm_range"]) / 2,
+        "clearance_margin_mm": sum(section["clearance_margin_mm_range"]) / 2,
+    }
+    axes = {
+        "tool_length_mm": section["tool"]["length_mm_range"],
+        "tool_radius_mm": section["tool"]["radius_mm_range"],
+        "clamp_x_mm": clamp["arm_axis_board_x_mm_range"],
+        "clamp_half_x_mm": clamp["half_extents_mm_ranges"]["x"],
+        "clamp_half_y_mm": clamp["half_extents_mm_ranges"]["y"],
+        "clamp_half_z_mm": clamp["half_extents_mm_ranges"]["z"],
+        "camera_height_mm": camera["height_mm_samples"],
+        "camera_depth_mm": camera["module_depth_mm_range"],
+        "cable_radius_mm": cable["radius_mm_range"],
+        "cable_offset_fraction": cable["configuration_samples"],
+        "cable_anchor_x_mm": cable["route_family"]["fixed_anchor_board_x_mm_range"],
+        "cable_anchor_z_mm": cable["route_family"]["fixed_anchor_board_z_mm_range"],
+        "clearance_margin_mm": section["clearance_margin_mm_range"],
+    }
+    variants = [{"variant_id": "baseline", **baseline}]
+    seen = {_sha(baseline)}
+    for axis, values in axes.items():
+        for value in values:
+            row = dict(baseline)
+            row[axis] = value
+            digest = _sha(row)
+            if digest in seen:
+                continue
+            seen.add(digest)
+            variants.append({"variant_id": f"{axis}={value}", **row})
+    return variants
+
+
+def phase0_collision_intake(fixture: dict[str, Any], *, workspace: Path) -> dict[str, Any]:
+    """Run a zero-authority candidate screen through the production collision kernel."""
+
+    from rocell.application.context import load_simulation_context
+    from rocell.geometry import JointPosition, RigidTransform, Rotation3, UrdfModel, Vec3
+    from rocell.simulation.collision import (
+        CapsuleMm, CollisionBindingMode, CollisionBody, CollisionBodyRequirement,
+        CollisionBodyRole, CollisionClearanceEvidenceState, CollisionClearancePolicy,
+        CollisionEvaluationPolicy, CollisionEvidenceState, CollisionGeometryContract,
+        CollisionPose, OrientedBoxMm, SampledCollisionGeometry,
+        audit_collision_geometry, build_roarm_m3_prehardware_collision_contract,
+        evaluate_collision_pose,
+    )
+
+    section = fixture["sections"]["phase0_collision_mode"]
+    if section["mode"] != COLLISION_CANDIDATE_MODE or section["installed_profile_eligible"]:
+        raise ValueError("phase-zero candidate mode changed authority")
+    context = load_simulation_context(workspace, workspace / "software/config/system_manifest.json")
+    model = UrdfModel.from_file(context.scenario.model_path)
+    base_contract = build_roarm_m3_prehardware_collision_contract(model, context.scene)
+    workcell = [body for body in base_contract.bodies if body.body_id.startswith("workcell:")]
+    reduction = json.loads(Path(fixture["bindings"]["link_box_reduction"]["path"]).read_text())
+    pose_bundle = json.loads(Path(fixture["bindings"]["pose_bundle"]["path"]).read_text())
+    overlay = pose_bundle["layout_overlay"]["board_T_vendor_world_matrix_row_major"]
+    board_t_world = RigidTransform(
+        "board", "world", Rotation3(tuple(overlay[index] for index in (0, 1, 2, 4, 5, 6, 8, 9, 10))),
+        Vec3(overlay[3], overlay[7], overlay[11]),
+    )
+    robot = []
+    body_name = lambda link: f"robot:{'gripper' if link == 'gripper_link' else link}"
+    for link in reduction["links"]:
+        robot.append(CollisionBody(
+            body_name(link["link_name"]), link["link_name"], CollisionBodyRole.ROBOT_LINK,
+            CollisionEvidenceState.PINNED_DIGITAL,
+            tuple(_collision_primitive(item["candidate_primitive"]) for item in link["components"]),
+            CollisionBindingMode.RIGID_FRAME, f"mesh_sha256:{link['mesh_sha256']}",
+        ))
+    cage = _binary_stl_bounds(Path(fixture["bindings"]["camera_cage_mesh"]["path"]))
+    carriage = _binary_stl_bounds(Path(fixture["bindings"]["camera_carriage_mesh"]["path"]))
+    variants = _phase0_collision_variants(section)
+    status_counts: dict[str, int] = {}
+    collision_pairs: dict[str, int] = {}
+    variant_rows = []
+    first_audit = None
+    for variant in variants:
+        clamp_half = Vec3(variant["clamp_half_x_mm"], variant["clamp_half_y_mm"], variant["clamp_half_z_mm"])
+        clamp = CollisionBody(
+            "installation:base_and_factory_clamp", "board", CollisionBodyRole.BASE_CLAMP,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY,
+            (OrientedBoxMm(Vec3(variant["clamp_x_mm"], section["installed_base_clamp"]["rear_edge_board_y_mm"], -clamp_half.z), clamp_half),),
+            CollisionBindingMode.STATIC_ROOT, "frozen phase-zero unmeasured range",
+        )
+        camera_xy = section["static_camera"]["optical_center_board_xy_mm"]
+        camera_bodies = []
+        for name, bounds, binding in (("cage", cage, "camera_cage_mesh"), ("carriage", carriage, "camera_carriage_mesh")):
+            local_center = bounds["center_mm"]
+            camera_bodies.append(CollisionBody(
+                f"static_camera:{name}", "board", CollisionBodyRole.STATIC_ENVIRONMENT,
+                CollisionEvidenceState.PINNED_DIGITAL,
+                (OrientedBoxMm(Vec3(camera_xy[0] + local_center[0], camera_xy[1] + local_center[1], variant["camera_height_mm"] + local_center[2]), Vec3(*bounds["half_extents_mm"])),),
+                CollisionBindingMode.STATIC_ROOT, f"sha256:{fixture['bindings'][binding]['sha256']}",
+            ))
+        camera_bodies.append(CollisionBody(
+            "static_camera:module_range", "board", CollisionBodyRole.STATIC_ENVIRONMENT,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY,
+            (OrientedBoxMm(Vec3(camera_xy[0], camera_xy[1], variant["camera_height_mm"] - variant["camera_depth_mm"] / 2), Vec3(20, 20, variant["camera_depth_mm"] / 2)),),
+            CollisionBindingMode.STATIC_ROOT, "frozen phase-zero depth range",
+        ))
+        tool = CollisionBody(
+            "attachment:contact_tool", "hand_tcp", CollisionBodyRole.TOOL,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY,
+            (CapsuleMm(Vec3.zero(), Vec3(0, 0, -variant["tool_length_mm"]), variant["tool_radius_mm"]),),
+            CollisionBindingMode.RIGID_FRAME, "frozen phase-zero range; replaced by WS2",
+        )
+        cable = CollisionBody(
+            "attachment:moving_cable", "board", CollisionBodyRole.CABLE,
+            CollisionEvidenceState.SYNTHETIC_TEST_ONLY, (),
+            CollisionBindingMode.CONFIGURATION_SAMPLED, "frozen phase-zero route family",
+        )
+        bodies = tuple(robot + [clamp, tool, cable] + workcell + camera_bodies)
+        requirements = tuple(CollisionBodyRequirement(
+            body.body_id, body.parent_frame, body.role, body.binding_mode,
+            "phase-zero exploratory candidate requires complete sampled coverage",
+        ) for body in bodies)
+        contract = CollisionGeometryContract(
+            f"TACTEVRA-PHASE0-{variant['variant_id']}", "board", requirements, bodies, (),
+        )
+        audit = audit_collision_geometry(contract)
+        if first_audit is None:
+            first_audit = audit.to_dict()
+        margin = variant["clearance_margin_mm"]
+        if margin == 0:
+            variant_rows.append({"variant_id": variant["variant_id"], "pose_count": len(pose_bundle["poses"]),
+                                 "status": "BLOCKED_ZERO_CLEARANCE_POLICY", "clear_count": 0,
+                                 "collision_count": 0, "blocked_count": len(pose_bundle["poses"])})
+            status_counts["BLOCKED_ZERO_CLEARANCE_POLICY"] = status_counts.get("BLOCKED_ZERO_CLEARANCE_POLICY", 0) + len(pose_bundle["poses"])
+            continue
+        policy = CollisionEvaluationPolicy(clearance_policy=CollisionClearancePolicy(
+            margin, 0, 0, CollisionClearanceEvidenceState.SYNTHETIC_TEST_ONLY,
+            "frozen phase-zero clearance range",
+        ))
+        local_counts = {"clear": 0, "collision": 0, "blocked": 0}
+        for source_pose in pose_bundle["poses"]:
+            positions = {name: JointPosition.radians(value) for name, value in zip(pose_bundle["joint_order"], source_pose["joint_positions_rad"], strict=True)}
+            # The gripper joint is fixed at the frozen virtual scenario value.
+            positions["link5_to_gripper_link"] = context.scenario.fixed_gripper_position
+            fk = model.forward_kinematics(positions)
+            transforms = {name: board_t_world.compose(transform) for name, transform in fk.items()}
+            gripper = transforms["gripper_link"].translation_mm
+            anchor = Vec3(variant["cable_anchor_x_mm"], section["moving_cable"]["route_family"]["fixed_anchor_board_y_mm"], variant["cable_anchor_z_mm"])
+            midpoint = (gripper + anchor).scaled(0.5) + Vec3(0, 0, -variant["cable_offset_fraction"] * section["moving_cable"]["swept_offset_mm_range"][1])
+            sampled = SampledCollisionGeometry(
+                (CapsuleMm(gripper, midpoint, variant["cable_radius_mm"]), CapsuleMm(midpoint, anchor, variant["cable_radius_mm"])),
+                CollisionEvidenceState.SYNTHETIC_TEST_ONLY, "frozen phase-zero sampled cable",
+            )
+            pose = CollisionPose(
+                f"{variant['variant_id']}:{source_pose['target_id']}", "board", transforms,
+                {"attachment:moving_cable": sampled},
+            )
+            evaluation = evaluate_collision_pose(contract, pose, policy)
+            status_counts[evaluation.status.value] = status_counts.get(evaluation.status.value, 0) + 1
+            if evaluation.collision_free_diagnostic:
+                local_counts["clear"] += 1
+            elif evaluation.evaluation_complete:
+                local_counts["collision"] += 1
+                for pair in evaluation.collisions:
+                    key = "|".join(sorted((pair.first_body_id, pair.second_body_id)))
+                    collision_pairs[key] = collision_pairs.get(key, 0) + 1
+            else:
+                local_counts["blocked"] += 1
+        variant_rows.append({"variant_id": variant["variant_id"], "pose_count": len(pose_bundle["poses"]),
+                             "status": "SCREENED", **{f"{key}_count": value for key, value in local_counts.items()}})
+    result = {
+        "schema": "tactevra.phase0_collision_intake.v1", "scope": SCOPE,
+        "mode": COLLISION_CANDIDATE_MODE, "installed": False,
+        "installed_profile_eligible": False, "fixture_sha256": fixture["fixture_sha256"],
+        "variant_count": len(variants), "pose_count_per_variant": len(pose_bundle["poses"]),
+        "status_counts": status_counts, "collision_pairs": dict(sorted(collision_pairs.items())),
+        "variants": variant_rows, "geometry_audit": first_audit,
+        "decision": "STOP" if any(row.get("collision_count", 0) or row.get("blocked_count", 0) for row in variant_rows) else "CLEAR_EXPLORATORY_ONLY",
+        "limitations": ["unmeasured candidate ranges", "no self-collision exclusions", "cannot release physical or installed collision gates"],
+        "hardware_write_count": 0, "physical_movement_count": 0, "physical_authority": False,
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
+def landing_sensor_comparison(fixture: dict[str, Any]) -> dict[str, Any]:
+    """Compare frozen landing-sensor ranges without selecting physical hardware."""
+
+    section = fixture["sections"]["phase0_landing_sensors"]
+    candidate = json.loads(Path(fixture["bindings"]["candidate_catalog"]["path"]).read_text())
+    target_count = len(_catalog_ids(candidate))
+    option_rows = []
+    for option_index, (name, option) in enumerate(sorted(section["options"].items())):
+        noise_values = [option["noise_mm_range"][0] + index * (option["noise_mm_range"][1] - option["noise_mm_range"][0]) / (section["noise_samples_per_range"] - 1) for index in range(section["noise_samples_per_range"])]
+        cells = []
+        for bias in section["bias_mm"]:
+            for target in section["residual_fraction"]:
+                selected = None
+                worst_q95 = None
+                for count in section["probe_counts"]:
+                    quantiles = []
+                    for noise_index, noise in enumerate(noise_values):
+                        rng = random.Random(section["seed"] + option_index * 1_000_000 + int(bias * 10_000) + int(target * 100_000) + count * 100 + noise_index)
+                        ratios = []
+                        for _ in range(section["trial_count"]):
+                            estimate = sum(bias + rng.gauss(0, noise) for _ in range(count)) / count
+                            ratios.append(abs(estimate - bias) / bias)
+                        quantiles.append(sorted(ratios)[math.ceil(0.95 * len(ratios)) - 1])
+                    worst_q95 = max(quantiles)
+                    if worst_q95 <= target:
+                        selected = count
+                        break
+                cells.append({"bias_mm": bias, "target_fraction": target,
+                              "selected_probes": selected, "worst_noise_q95_residual_fraction": worst_q95,
+                              "status": "FEASIBLE" if selected else "INSUFFICIENT_THROUGH_34"})
+        selected_counts = [row["selected_probes"] for row in cells if row["selected_probes"]]
+        commissioning = None if not selected_counts else [
+            target_count * min(selected_counts) * section["probe_seconds_range"][0],
+            target_count * max(selected_counts) * section["probe_seconds_range"][1],
+        ]
+        option_rows.append({"option": name, "noise_mm_samples": noise_values,
+                            "contact_visibility": option["contact_visibility"], "cells": cells,
+                            "feasible_cells": len(selected_counts), "failed_cells": len(cells) - len(selected_counts),
+                            "commissioning_seconds_range": commissioning})
+    result = {"schema": "tactevra.phase0_landing_sensor_comparison.v1", "scope": SCOPE,
+              "fixture_sha256": fixture["fixture_sha256"], "target_count": target_count,
+              "options": option_rows, "selected_option": None,
+              "overhead_camera_contact_visibility": section["overhead_camera_contact_visibility"],
+              "decision": "NO_PHYSICAL_SENSOR_SELECTED_EXPLORATORY_RANGES_ONLY",
+              "hardware_write_count": 0, "physical_movement_count": 0, "physical_authority": False}
+    result["receipt_sha256"] = _sha(result)
+    return result
 
 
 def gpu_readiness(fixture: dict[str, Any]) -> dict[str, Any]:
