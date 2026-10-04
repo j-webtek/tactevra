@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+import json
 from pathlib import Path
 
 import pytest
@@ -17,12 +18,15 @@ from rocell_ai.first_motion_controller_emulator import (
     _runtime_frame,
     _runtime_manifest,
     load_emulator_fixture,
+    load_first_motion_fixture,
     run_controller_emulator,
+    run_staged_bringup_rehearsal,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_controller_emulator_v1.json"
 SOURCE = ROOT / "software/ai/rocell_ai/first_motion_controller_emulator.py"
+READINESS_FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_readiness_v1.json"
 
 
 def _sample() -> ServoRangeSample:
@@ -124,3 +128,33 @@ def test_strict_runtime_rejects_wire_mutation_before_plant() -> None:
         runtime.admit_t102(mutated, now_monotonic_ns=150)
     assert runtime.report()["status"] == "TERMINAL_NO_RETRY"
     assert runtime.report()["hardware_write_count"] == 0
+
+
+def test_stage_rehearsal_prepares_envelope_then_stops_at_collision_no_go() -> None:
+    readiness = load_first_motion_fixture(READINESS_FIXTURE)
+    report = run_staged_bringup_rehearsal(
+        readiness, load_emulator_fixture(FIXTURE))
+    assert report["decision"] == "STOP_AT_STAGE_A_COLLISION_DIAGNOSTIC_NOT_CLEAR"
+    assert report["first_no_go_stage"] == "A"
+    assert report["predictive_runtime_rehearsals"] == 28
+    assert report["staged_motion_executions"] == 0
+    assert report["envelopes"][0]["prediction_count"] == 28
+    assert len(report["envelopes"][0]["samples"]) == 33
+    assert report["stage_results"][0]["status"] == "NO_GO"
+    assert [row["status"] for row in report["stage_results"][1:]] == [
+        "NOT_RUN_UPSTREAM_BLOCKED"] * 5
+    assert report["hardware_write_count"] == report["physical_movement_count"] == 0
+    assert report["real_command_count"] == report["permit_count"] == 0
+    assert report["transport_count"] == 0
+
+
+def test_first_motion_fixture_rejects_changed_external_collision_receipt(
+        tmp_path: Path) -> None:
+    fixture = json.loads(READINESS_FIXTURE.read_text(encoding="utf-8"))
+    fixture["bindings"]["phase0_collision_receipt"]["sha256"] = "0" * 64
+    claimed = fixture.pop("fixture_sha256")
+    fixture["fixture_sha256"] = claimed
+    path = tmp_path / "changed.json"
+    path.write_text(json.dumps(fixture), encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_first_motion_fixture(path)

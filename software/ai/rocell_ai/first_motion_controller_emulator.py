@@ -24,6 +24,10 @@ from rocell.application.production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeManifestV1,
     RuntimeCommandFrameV1,
 )
+from rocell.simulation.controller import (
+    ControllerJointState,
+    controller_forward_kinematics,
+)
 
 SCOPE = "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
 FIELD_TO_KEY = dict(zip(JOINT_FIELDS, ("b", "s", "e", "t", "r", "g"), strict=True))
@@ -56,6 +60,30 @@ def load_emulator_fixture(path: Path) -> dict[str, Any]:
         source = root / binding["path"]
         if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
             raise ValueError(f"bound emulator source changed: {binding['path']}")
+    return value
+
+
+def load_first_motion_fixture(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    claimed = value.pop("fixture_sha256")
+    if _sha(value) != claimed:
+        raise ValueError("first-motion fixture hash mismatch")
+    value["fixture_sha256"] = claimed
+    for name in ("phase3", "phase4", "phase5"):
+        section = value[name]
+        section_claimed = section.pop("section_sha256")
+        if _sha(section) != section_claimed:
+            raise ValueError(f"{name} section hash mismatch")
+        section["section_sha256"] = section_claimed
+    if value["scope"] != SCOPE or any(value["counters"].values()):
+        raise ValueError("first-motion fixture changed zero-authority scope")
+    root = path.resolve().parents[4]
+    for binding in value["bindings"].values():
+        source = Path(binding["path"])
+        if not source.is_absolute():
+            source = root / source
+        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError(f"bound first-motion source changed: {binding['path']}")
     return value
 
 
@@ -403,5 +431,162 @@ def run_controller_emulator(fixture: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-__all__ = ["InMemoryT102Controller", "ServoRangeSample", "load_emulator_fixture",
-           "run_controller_emulator"]
+def _baseline_joints(emulator_fixture: dict[str, Any]) -> tuple[float, ...]:
+    profile = json.loads(Path(
+        emulator_fixture["bindings"]["simulation_profile"]["path"]
+    ).read_text())
+    limits = profile["robot"]["controller_model_bridge"][
+        "provisional_simulation_joint_intersection_rad"]
+    return (
+        sum(limits["base"]) / 2,
+        sum(limits["shoulder"]) / 2,
+        sum(limits["elbow"]) / 2,
+        sum(limits["wrist"]) / 2,
+        sum(limits["roll"]) / 2,
+        math.pi - sum(limits["gripper_model"]) / 2,
+    )
+
+
+def _pose(values: list[float]) -> dict[str, Any]:
+    state = ControllerJointState(*values)
+    return controller_forward_kinematics(state).to_dict()
+
+
+def _stage_a_envelope(
+    readiness_fixture: dict[str, Any], emulator_fixture: dict[str, Any],
+) -> dict[str, Any]:
+    stage = readiness_fixture["phase3"]["stages"][0]
+    baseline = _baseline_joints(emulator_fixture)
+    traces: list[list[dict[str, Any]]] = []
+    wire_hashes: set[str] = set()
+    for sample_index, sample in enumerate(_range_samples(
+            emulator_fixture["controller_emulator"])):
+        for delta_index, delta in enumerate(stage["delta_rad_range"]):
+            target = list(baseline)
+            target[0] += delta
+            command = all_joint_command(
+                target, speed=sample.speed_setting,
+                acceleration=sample.acceleration_setting)
+            controller = InMemoryT102Controller(
+                baseline, sample,
+                seed=readiness_fixture["phase3"]["seed"]
+                + sample_index * 10 + delta_index,
+            )
+            plant, runtime, frame = _execute_strict_runtime_path(
+                emulator_fixture, controller, command,
+                case_id=f"stage-a-envelope:{sample.sample_id}:{delta}")
+            if runtime["runtime_status"] != "TERMINAL_NO_RETRY":
+                raise ValueError("stage A prediction did not close terminally")
+            wire_hashes.add(frame.wire_bytes_sha256)
+            traces.append(plant["telemetry"])
+    samples = []
+    for index in range(readiness_fixture["phase3"]["telemetry_envelope"][
+            "samples_per_trace"]):
+        rows = [trace[index] for trace in traces]
+        joints = [row["measured_joints_rad"] for row in rows]
+        poses = [_pose(row) for row in joints]
+        samples.append({
+            "sample_index": index,
+            "time_ms_range": [
+                min(row["time_ms"] for row in rows),
+                max(row["time_ms"] for row in rows),
+            ],
+            "joint_position_rad_min": [min(row[j] for row in joints) for j in range(6)],
+            "joint_position_rad_max": [max(row[j] for row in joints) for j in range(6)],
+            "tool_tip_r_ctrl_mm_min": [
+                min(row[key] for row in poses) for key in ("x_mm", "y_mm", "z_mm")
+            ],
+            "tool_tip_r_ctrl_mm_max": [
+                max(row[key] for row in poses) for key in ("x_mm", "y_mm", "z_mm")
+            ],
+        })
+    envelope = {
+        "stage": "A",
+        "status": "PREDICTED_EXPLORATORY_NOT_EXECUTED",
+        "frame": "R_ctrl",
+        "prediction_count": len(traces),
+        "wire_bytes_sha256": sorted(wire_hashes),
+        "samples": samples,
+        "physical_accuracy_claim": False,
+    }
+    envelope["envelope_sha256"] = _sha(envelope)
+    return envelope
+
+
+def run_staged_bringup_rehearsal(
+    readiness_fixture: dict[str, Any], emulator_fixture: dict[str, Any],
+) -> dict[str, Any]:
+    """Prepare A-F envelopes and obey the frozen first-no-go progression."""
+
+    collision_path = Path(readiness_fixture["bindings"][
+        "phase0_collision_receipt"]["path"])
+    collision = json.loads(collision_path.read_text(encoding="utf-8"))
+    phase2_path = Path(readiness_fixture["bindings"]["phase2_receipt"]["path"])
+    phase2 = json.loads(phase2_path.read_text(encoding="utf-8"))
+    if phase2["decision"] != "PASS_STRICT_RUNTIME_CONTRACT_SIMULATED_PLANT_ONLY":
+        raise ValueError("Phase 2 strict-runtime result is not passing")
+    envelope_a = _stage_a_envelope(readiness_fixture, emulator_fixture)
+    envelopes = [envelope_a]
+    for stage in readiness_fixture["phase3"]["stages"][1:]:
+        envelope = {
+            "stage": stage["id"],
+            "status": "BLOCKED_NO_NUMERIC_ENVELOPE",
+            "reason": (
+                "COMMISSIONED_INPUTS_AND_UPSTREAM_COLLISION_CLEARANCE_REQUIRED"),
+            "frozen_stage_contract": stage,
+            "physical_accuracy_claim": False,
+        }
+        envelope["envelope_sha256"] = _sha(envelope)
+        envelopes.append(envelope)
+    collision_clear = (
+        collision["decision"] == "PASS"
+        and collision["installed_profile_eligible"] is True
+        and collision["status_counts"].get("COLLISION_DETECTED", 0) == 0
+    )
+    results = [{
+        "stage": "A",
+        "status": "NO_GO",
+        "first_failed_preflight": "COLLISION_DIAGNOSTIC_CLEAR",
+        "reasons": [
+            "UNREVIEWED_COLLISION_EXCLUSIONS",
+            "CANDIDATE_COLLISION_RESULT_NOT_CLEAR",
+        ] if not collision_clear else [],
+        "simulated_stage_motion_executed": False,
+        "envelope_sha256": envelope_a["envelope_sha256"],
+    }]
+    results.extend({
+        "stage": stage["id"],
+        "status": "NOT_RUN_UPSTREAM_BLOCKED",
+        "blocked_by_stage": "A",
+        "simulated_stage_motion_executed": False,
+        "envelope_sha256": envelopes[index]["envelope_sha256"],
+    } for index, stage in enumerate(
+        readiness_fixture["phase3"]["stages"][1:], start=1))
+    report = {
+        "schema": "tactevra.first_motion_staged_rehearsal.v1",
+        "scope": SCOPE,
+        "fixture_sha256": readiness_fixture["fixture_sha256"],
+        "phase2_receipt_sha256": phase2["receipt_sha256"],
+        "collision_receipt_sha256": collision["receipt_sha256"],
+        "envelopes": envelopes,
+        "stage_results": results,
+        "first_no_go_stage": "A",
+        "decision": "STOP_AT_STAGE_A_COLLISION_DIAGNOSTIC_NOT_CLEAR",
+        "predictive_runtime_rehearsals": envelope_a["prediction_count"],
+        "staged_motion_executions": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+    }
+    report["receipt_sha256"] = _sha(report)
+    return report
+
+
+__all__ = [
+    "InMemoryT102Controller", "ServoRangeSample", "load_emulator_fixture",
+    "load_first_motion_fixture", "run_controller_emulator",
+    "run_staged_bringup_rehearsal",
+]
