@@ -63,6 +63,13 @@
     "reason": "Synthetic USB export tests redaction while preserving original evidence hash."
   },
   {
+    "path": "software/tests/unit/test_typing_trace_package_v1.py",
+    "kind": "credential-literal-review",
+    "line_sha256": "33d9946973187bab857d6caace45a4f1c3bb8673421426b1588d4d48f076143a",
+    "expected_count": 1,
+    "reason": "Synthetic typing-trace artifact tests that password-shaped fields are rejected by the package redaction policy."
+  },
+  {
     "path": "software/tests/unit/test_usb_absence_export.py",
     "kind": "credential-literal-review",
     "line_sha256": "fd4e96e8362b50d7728f5acbd4eb7401a0f334f42aba06180d3a5bc86b033b78",
