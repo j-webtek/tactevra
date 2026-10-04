@@ -1,12 +1,13 @@
 # Snapshot audit: reviewed synthetic fixtures
 
-Reviewed September 26, 2026, from baseline `317406a`.
+Reviewed September 26 and October 4, 2026, from baselines `317406a` and
+`1ce97b1`.
 
-The 14 previously reported credential-literal findings across 12 unit-test files
+The 15 reported credential-literal findings across 13 unit-test files
 are deliberate synthetic inputs for redaction and malformed-feedback tests.
 Review included the surrounding assertions: they verify removal, rejection,
 redacted restoration, or withholding of an original-byte preservation claim.
-No real credential was identified among these 14 findings. That statement is not
+No real credential was identified among these 15 findings. That statement is not
 a claim that the entire repository or its history contains no secrets.
 
 The tests remain unchanged. Their exact exceptions are recorded with individual
