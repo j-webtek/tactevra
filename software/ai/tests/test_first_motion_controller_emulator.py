@@ -270,3 +270,17 @@ def test_collision_design_fixture_is_bounded_and_zero_authority() -> None:
     assert len(_pad_variants(fixture["test_pad_design"])) == 13
     assert fixture["structural_review"]["candidate_rule"].endswith(
         "No pair is installed automatically.")
+
+
+def test_clearance_waypoint_fixture_is_bounded_and_arm_runtime_owned() -> None:
+    from rocell_ai.first_motion_clearance_waypoints import load_waypoint_fixture
+
+    fixture = load_waypoint_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_clearance_waypoint_v1.json")
+    assert fixture["scope"] == "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+    assert not any(fixture["counters"].values())
+    assert fixture["ownership"]["production_planning_owner"] == "deterministic arm runtime"
+    assert fixture["ownership"]["ai_boundary_changed"] is False
+    assert fixture["swappable_pad"]["keyboard_present_in_pad_mode"] is False
+    assert fixture["swappable_pad"]["expected_contact_phase"] == "PRESS"
+    assert fixture["waypoint_study"]["stage_b_route"] == ["ASCEND", "TRANSIT", "DESCEND"]

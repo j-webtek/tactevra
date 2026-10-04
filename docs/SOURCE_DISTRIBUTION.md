@@ -496,3 +496,7 @@ with its Git-history prefix and rejects deletion, rewriting, or reordering.
 The tracked-file ceiling is 6,369 after freezing the compact Workstream 7
 clearance-waypoint and swappable-pad fixture. Generated routes, collision rows,
 and receipts remain external and hash-bound.
+
+The tracked-file ceiling is 6,370 after adding the simulation-only clearance
+waypoint and swappable-pad runner. It reuses the existing focused test module;
+generated route and collision evidence stays external.
