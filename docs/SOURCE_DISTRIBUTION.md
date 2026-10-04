@@ -120,6 +120,14 @@ external and hash-bound. The governed tracked-file ceiling is therefore 6,334;
 no simulator cache, image, model, or physical artifact is tracked, and all byte,
 blob, duplicate, and reduction limits remain unchanged.
 
+The prioritized simulation program adds one reviewed Markdown plan covering six
+ordered, zero-authority workstreams and their frozen range, evidence, backup,
+dependency, and stop-rule contracts. Raw simulator output remains external and
+hash-bound. Concurrent reviewed AI increments brought the exact observed count
+to 6,341 before this plan; the governed tracked-file ceiling is therefore 6,342.
+No simulator cache, image, checkpoint, model, or physical artifact is added, and
+all byte, blob, duplicate, and reduction limits remain unchanged.
+
 The issue 190 v14 synthetic evaluation adds three small, reviewed source files:
 the deterministic static-pose fixture builder, its retained JSON fixture, and
 its focused test. The tracked-file ceiling is therefore 6,103. This adjustment

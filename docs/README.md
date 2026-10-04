@@ -57,6 +57,7 @@ still being developed.
 | [External artifact contract](EXTERNAL_ARTIFACTS.md) | AI and repository contributors: deterministic identity and availability checks for external checkpoints and datasets |
 | [Runtime implementation plan](../software/ai/docs/MODEL_COMMAND_RUNTIME_IMPLEMENTATION_PLAN.md) | Arm developers: planning, command handling and execution infrastructure |
 | [Optimized typing execution plan](../software/docs/OPTIMIZED_TYPING_EXECUTION_PLAN.md) | Arm and integration contributors: rolling-horizon planning, smooth transitions, one-action authority, verification, and speed qualification |
+| [Prioritized simulation program](../software/docs/SIMULATION_PROGRAM_PLAN.md) | Simulation contributors: ordered digital-twin, contact, continuous motion, recovery, calibration-budget, and mid-motion observation workstreams with zero physical authority |
 | [Isaac Sim integration plan](../software/docs/ISAAC_SIM_INTEGRATION_PLAN.md) | Simulation and runtime contributors: pinned NVIDIA adapter, asset, evidence, and GPU-runner work packages |
 | [AI system baseline](../software/ai/docs/AI_SYSTEM_BASELINE_AND_IMPLEMENTATION_PLAN.md) | Research context and dated model-evaluation results |
 
