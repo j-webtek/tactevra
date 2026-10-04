@@ -10963,7 +10963,7 @@ rewriting history. New entries must use a unique evidence ID.
 
 ### E-20261004-INT-629 — Workstream 1 bounded Isaac subset preexecution freeze
 
-- Stage/lane: S3 AI/model plus simulation. Claim commit `86509b763a7d554377c14dd8ab9cb92a716f58ad`; bound claim `7c205f1e70016c949336634f4b3ed42114331cbf`; fixture commit `PENDING_BINDING`. No arm-lane status or integration gate changed.
+- Stage/lane: S3 AI/model plus simulation. Claim commit `86509b763a7d554377c14dd8ab9cb92a716f58ad`; bound claim `7c205f1e70016c949336634f4b3ed42114331cbf`; fixture commit `66516a0233ee66f498ef18d98a749ea92c134923`. No arm-lane status or integration gate changed.
 - Frozen fixture: `software/ai/sim/evidence/end_to_end_typing_twin_isaac_subset_v1.json`, file SHA-256 `9d27ad29277cb3155907bdca6aec5d261d6fe2117ce13847fbda635d7ead9e89`, canonical fixture SHA-256 `128d584d1167f1529ec0b2167b3d96d240e4717a8bab853357d1c6ae0a4241de`.
 - Exact scenarios: `WS1-ISAAC-HELLO` preserves `SHIFT,H,E,L,L,O,SPACE,2,0,2,6,SHIFT,1`; `WS1-ISAAC-REPEATED` preserves four one-shot Shift/A pairs; `WS1-ISAAC-SHIFT-TRANSITIONS` exercises lower/upper, space/upper, and shifted-symbol transitions; three deterministic fault identities require stale-frame abstention, target-displacement stop, and perception abstention.
 - Frozen render envelope: the candidate remains `EXPLORATORY_UNINSTALLED_CANDIDATE80`; the exact-nadir camera is fixed at 850 mm and 960 by 640 pixels. Unmeasured visual extrusion, simulated illumination intensity/color, fixture displacement, and target occlusion remain declared ranges with frozen endpoint/midpoint samples rather than physical values. The manifest must record Isaac, Warp, driver, GPU name/UUID, and Git commit.
