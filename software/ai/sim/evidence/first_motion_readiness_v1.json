@@ -25,7 +25,7 @@
     },
     "controller_emulator": {
       "path": "software/ai/rocell_ai/first_motion_controller_emulator.py",
-      "sha256": "1c76a2a46132f0f69b11dbfa4f846904fd8f6512d968ed5931b0ee35106471b1"
+      "sha256": "f9fb81442e1e23c0748fbcab6008d72afc79d7145f23f0a1576ab7c9a089624d"
     },
     "typing_twin": {
       "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
@@ -344,5 +344,11 @@
     "No stage result can authorize hardware",
     "Physical parked pose and installed collision exclusions are absent"
   ],
-  "fixture_sha256": "fe94c7a6ded2b047f5621924ec3147e99a4fd6a879f1545ddd3ac2298fffc6e8"
+  "amendments": [
+    {
+      "timing": "PRE_RESULT_SMOKE",
+      "reason": "The initial fixture bound the preimplementation controller-emulator source. The first focused smoke failed source admission before a staged result existed. Only the implementation source hash changed; phase ranges, identities, metrics, and rules are unchanged."
+    }
+  ],
+  "fixture_sha256": "50c7b0e6623f9a85168428aafe130982749ad30d85ef56a36257cfef35f3b167"
 }
