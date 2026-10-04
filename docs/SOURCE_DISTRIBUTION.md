@@ -469,3 +469,11 @@ cross-GPU stop rules. It binds external landing inputs by exact hashes and keeps
 all generated simulator output outside Git. The exact tracked-file count and
 governed ceiling are therefore 6,361; every byte, blob, duplicate, and reduction
 limit remains unchanged.
+
+The Workstream 2 staged-search amendment adds one compact fixture that retains
+the complete 285,769,728-world population as a reference, freezes a measured-
+throughput decision, covers every factor on a 4,465,152-world coarse stage,
+refines only by fixed nearest-neighbor boundary rules, and requires exhaustive
+sampled-range confirmation for up to eight candidate recipes. Generated rows
+remain external. The exact tracked-file count and governed ceiling are therefore
+6,362; every byte, blob, duplicate, and reduction limit remains unchanged.
