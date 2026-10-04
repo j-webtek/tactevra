@@ -443,7 +443,8 @@
         ],
         "provisional_nominal_length_mm": 100,
         "provisional_nominal_radius_mm": 3.5,
-        "replacement_rule": "WS2 selected nominal replaces provisional values"
+        "replacement_rule": "WS2 selected nominal replaces provisional values",
+        "axis_in_hand_tcp": "NEGATIVE_Z"
       },
       "moving_cable": {
         "radius_mm_range": [
@@ -526,7 +527,9 @@
         "placement_rule": "nadir static environment; cage and carriage local mesh bounds translated to each height sample"
       },
       "pre_results_amendment": "2026-10-04: placement ranges added before any phase-zero collision evaluation because the original freeze named bodies but did not bind their placement.",
-      "section_sha256": "7595f465a7d4c821d28f6c4725dd8b3c441f424ff1454604032e2209c2998a91"
+      "variant_sampling": "ONE_FACTOR_AT_A_TIME_BASELINE_PLUS_EVERY_DECLARED_ENDPOINT_AND_DISCRETE_SAMPLE; not a Cartesian product",
+      "pre_results_amendment_2": "2026-10-04: bound the already-pinned runtime tool axis and one-factor-at-a-time range sampling before evaluation.",
+      "section_sha256": "3caedf41589669b5efc09c068312cd64efc062f845647901a319a7491b33f54a"
     },
     "phase0_landing_sensors": {
       "trial_count": 2000,
@@ -607,5 +610,5 @@
     "isaac_kit": "6.1.0",
     "isaac_version_source": "C:/IsaacSim/evidence/first_launch_receipt_6_1_0.json"
   },
-  "fixture_sha256": "edc742ce3f3391b0315661f4a9123406d3f47e64e2c1d910ead2e8a84c744ec7"
+  "fixture_sha256": "4329398677685e4ceab56b5f36a18fc50dcc968852a58328088a85894182e9cf"
 }
