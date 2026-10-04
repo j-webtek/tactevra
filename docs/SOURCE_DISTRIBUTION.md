@@ -142,6 +142,12 @@ generated envelopes and receipts remain external. The exact tracked-file count
 and governed ceiling are therefore 6,353. Every byte, blob, duplicate, and
 reduction limit remains unchanged.
 
+The Workstream 7 wrong-model drills add one reviewed CPU-only analyzer; its
+tests extend the existing focused suite and raw receipts remain external. The
+exact tracked-file count and governed ceiling are therefore 6,354. No binary or
+generated simulation output is tracked, and every other containment limit is
+unchanged.
+
 The issue 190 v14 synthetic evaluation adds three small, reviewed source files:
 the deterministic static-pose fixture builder, its retained JSON fixture, and
 its focused test. The tracked-file ceiling is therefore 6,103. This adjustment
