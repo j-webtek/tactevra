@@ -4,9 +4,9 @@
   "authority": "This registry records readiness and the selected candidate identity; it does not authorize publication.",
   "tracker": {
     "issue": 57,
-    "expected_state": "open",
+    "expected_state": "closed",
     "milestone": "Tactevra v0.1 experimental preview",
-    "milestone_state": "open"
+    "milestone_state": "closed"
   },
   "candidate": {
     "status": "qualified",
@@ -16,7 +16,7 @@
     "arm_disposition": "compatible-offline-with-limitations",
     "audit_status": "pass",
     "maintainer_review_status": "complete",
-    "publication_status": "approved"
+    "publication_status": "published"
   },
   "blockers": [
     {

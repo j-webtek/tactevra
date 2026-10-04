@@ -2,13 +2,16 @@
 
 Prepared October 4, 2026 for
 [issue #57](https://github.com/j-webtek/tactevra/issues/57).
-**Disposition: TECHNICALLY QUALIFIED; PUBLICATION APPROVED.** This record
+**Disposition: PUBLISHED AND VERIFIED.** This record
 selects and qualifies one immutable source snapshot. On October 4, 2026, the
 repository maintainer explicitly approved the exact tag, SHA, title, notes, and
 GitHub-generated source archives together in
 [issue #57](https://github.com/j-webtek/tactevra/issues/57#issuecomment-5976515197).
-That approval does not create a tag or release and grants no hardware authority
-or model promotion.
+The approved prerelease was published and independently verified on October 4,
+2026. Publication grants no hardware authority or model promotion.
+
+Public release:
+[Tactevra v0.1.0-alpha.1 — experimental source preview](https://github.com/j-webtek/tactevra/releases/tag/tactevra-v0.1.0-alpha.1).
 
 ## Proposed identity
 
@@ -130,7 +133,7 @@ untracked and link-only. No new legal conclusion is claimed here.
 - The snapshot scanner is heuristic and does not certify Git history, security,
   or redistribution rights.
 
-## Publication approval
+## Publication result
 
 Technical candidate selection, both bounded compatibility dispositions, the
 exact-SHA hosted audit, and detached-checkout verification are complete. The
@@ -143,6 +146,7 @@ approved all five publication inputs together:
 4. [the exact notes](TACTEVRA_V0.1.0_ALPHA.1_NOTES.md); and
 5. GitHub-generated source archives only.
 
-Publication must still use these values without substitution. Issue #57 remains
-open until the public tag, target SHA, prerelease title, notes, and source-only
-assets are verified.
+The published release uses these values without substitution. Post-publication
+verification confirmed an annotated tag that peels to the candidate commit, the
+exact approved title and notes, prerelease state, and zero uploaded assets. The
+only downloadable assets are GitHub-generated source archives.
