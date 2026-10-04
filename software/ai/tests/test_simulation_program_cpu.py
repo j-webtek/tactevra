@@ -6,8 +6,10 @@ from pathlib import Path
 from rocell_ai.simulation_program_cpu import (
     CANDIDATE_MODE,
     calibration_budget,
+    calibration_attribution,
     candidate_catalog_semantic_check,
     continuous_policy_smoke,
+    collision_candidate,
     gpu_readiness,
     load_program_fixture,
     mid_motion_mask_smoke,
@@ -27,7 +29,8 @@ def test_fixture_is_section_hashed_and_zero_authority():
     assert set(fixture["counters"].values()) == {0}
     assert set(fixture["sections"]) == {"workstream_1_cpu", "workstream_2",
                                          "workstream_3", "workstream_4",
-                                         "workstream_5", "workstream_6"}
+                                         "workstream_5", "workstream_6",
+                                         "workstream_5_attribution", "collision_candidate"}
 
 
 def test_candidate_mode_is_separate_and_installed_rejection_remains():
@@ -59,6 +62,19 @@ def test_continuous_pair_enumeration_and_mid_motion_mask_sentinels():
     assert masks["positive_arm_mask_overlap"] is True
     assert masks["decisions"]["covered"] == "ABSTAIN_ARM_COVERED"
     assert masks["physical_mid_motion_use"] == "BLOCKED"
+
+
+def test_ws5_attribution_and_collision_candidate_remain_exploratory():
+    fixture = load_program_fixture(FIXTURE)
+    attribution = calibration_attribution(fixture)
+    assert attribution["insufficient_cell_count"] == 15
+    assert attribution["factor_ranking"][0] in {"noise_mm", "initial_bias_mm", "target_fraction"}
+    candidate = collision_candidate(fixture, workspace=ROOT)
+    assert len(candidate["robot_bodies"]) == 7
+    assert len(candidate["workcell_bodies"]) == 6
+    assert candidate["installed_profile_eligible"] is False
+    assert candidate["simulation_diagnostic_ready"] is False
+    assert candidate["commands"] == []
 
 
 def test_combined_receipt_is_deterministic_and_gpu_blocked():

@@ -11,6 +11,7 @@ import json
 import math
 from pathlib import Path
 import random
+import struct
 from typing import Any
 
 from .adapter import compile_virtual_us_sticky_keys, replay_virtual_us_sticky_keys
@@ -198,6 +199,94 @@ def calibration_budget(fixture: dict[str, Any]) -> dict[str, Any]:
             "recalibration_hours_range": [min(intervals), max(intervals)]}
 
 
+def calibration_attribution(fixture: dict[str, Any]) -> dict[str, Any]:
+    receipt = json.loads(Path(fixture["bindings"]["ws5_cpu_receipt"]["path"]).read_text())
+    rows = receipt["workstream_5"]["rows"]
+    sentinel = fixture["sections"]["workstream_5_attribution"]["outcome_for_insufficient_cells"]
+    outcomes = [row["selected_probes"] or sentinel for row in rows]
+    grand = sum(outcomes) / len(outcomes)
+    total_ss = sum((value - grand) ** 2 for value in outcomes)
+    factors = {}
+    for factor in fixture["sections"]["workstream_5_attribution"]["factors"]:
+        levels = {}
+        for row, outcome in zip(rows, outcomes, strict=True):
+            levels.setdefault(str(row[factor]), []).append((outcome, row["selected_probes"] is None))
+        between = sum(len(values) * ((sum(v for v, _ in values) / len(values)) - grand) ** 2
+                      for values in levels.values())
+        factors[factor] = {
+            "one_way_eta_squared": 0.0 if total_ss == 0 else between / total_ss,
+            "levels": {level: {"mean_outcome": sum(v for v, _ in values) / len(values),
+                               "insufficient_count": sum(failed for _, failed in values),
+                               "cell_count": len(values)}
+                       for level, values in sorted(levels.items(), key=lambda item: float(item[0]))},
+        }
+    ranked = sorted(factors, key=lambda name: (-factors[name]["one_way_eta_squared"], name))
+    insufficient = [row for row in rows if row["selected_probes"] is None]
+    return {"status": "EXPLORATORY_CPU_ATTRIBUTION_COMPLETE", "factor_ranking": ranked,
+            "factors": factors, "insufficient_cell_count": len(insufficient),
+            "insufficient_cells": insufficient,
+            "insufficient_noise_levels_mm": sorted({row["noise_mm"] for row in insufficient}),
+            "insufficient_bias_levels_mm": sorted({row["initial_bias_mm"] for row in insufficient}),
+            "visual_correction_region": "CANDIDATE_WHEN_PROBING_INSUFFICIENT_NOT_SELECTED_POLICY"}
+
+
+def _binary_stl_bounds(path: Path) -> dict[str, Any]:
+    raw = path.read_bytes()
+    triangles = struct.unpack_from("<I", raw, 80)[0]
+    if len(raw) != 84 + triangles * 50:
+        raise ValueError(f"unsupported or malformed binary STL: {path}")
+    points = []
+    for index in range(triangles):
+        offset = 84 + index * 50 + 12
+        points.extend(struct.unpack_from("<9f", raw, offset))
+    axes = [points[index::3] for index in range(3)]
+    minimum = [min(axis) for axis in axes]
+    maximum = [max(axis) for axis in axes]
+    return {"minimum_mm": minimum, "maximum_mm": maximum,
+            "center_mm": [(a + b) / 2 for a, b in zip(minimum, maximum, strict=True)],
+            "half_extents_mm": [(b - a) / 2 for a, b in zip(minimum, maximum, strict=True)],
+            "triangle_count": triangles}
+
+
+def collision_candidate(fixture: dict[str, Any], *, workspace: Path) -> dict[str, Any]:
+    from rocell.application.collision_readiness import assess_current_collision_readiness
+    from rocell.application.context import load_simulation_context
+
+    context = load_simulation_context(workspace, workspace / "software/config/system_manifest.json")
+    readiness = assess_current_collision_readiness(context).to_dict()
+    reduction = json.loads(Path(fixture["bindings"]["link_box_reduction"]["path"]).read_text())
+    robot = []
+    for link in reduction["links"]:
+        robot.append({"body_id": f"robot:{'gripper' if link['link_name'] == 'gripper_link' else link['link_name']}",
+                      "parent_frame": link["link_name"], "evidence_state": "PINNED_DIGITAL_CANDIDATE",
+                      "mesh_sha256": link["mesh_sha256"],
+                      "primitives": [component["candidate_primitive"] for component in link["components"]]})
+    workcell = [body for body in readiness["contract"]["bodies"]
+                if body["body_id"].startswith("workcell:")]
+    cage_path = Path(fixture["bindings"]["camera_cage_mesh"]["path"])
+    carriage_path = Path(fixture["bindings"]["camera_carriage_mesh"]["path"])
+    blockers = ["INSTALLED_CLAMP_GEOMETRY_UNMEASURED", "MOVING_CABLE_GEOMETRY_UNMEASURED",
+                "CONTACT_TOOL_IS_RANGE_FAMILY", "ARM_ATTACHED_CAMERA_FRAMES_NOT_BOUND",
+                "SELF_COLLISION_EXCLUSIONS_UNREVIEWED", "INSTALLED_PROFILE_REQUIRES_ACCEPTED_MEASURED"]
+    core = {"schema": "tactevra.simulation_collision_candidate.v1", "scope": SCOPE,
+            "status": "EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_FAMILY",
+            "fixture_sha256": fixture["fixture_sha256"], "installed": False,
+            "installed_profile_eligible": False, "robot_bodies": robot,
+            "workcell_bodies": workcell,
+            "static_camera_environment": {
+                "cage": {"sha256": fixture["bindings"]["camera_cage_mesh"]["sha256"],
+                         "local_bounds": _binary_stl_bounds(cage_path)},
+                "carriage": {"sha256": fixture["bindings"]["camera_carriage_mesh"]["sha256"],
+                             "local_bounds": _binary_stl_bounds(carriage_path)},
+                "placement_state": "UNBOUND_RANGE_REQUIRED"},
+            "range_family": fixture["sections"]["collision_candidate"]["unmeasured_ranges"],
+            "blockers": blockers, "simulation_diagnostic_ready": False,
+            "hardware_write_count": 0, "physical_movement_count": 0,
+            "commands": [], "physical_authority": False}
+    core["candidate_sha256"] = _sha(core)
+    return core
+
+
 def gpu_readiness(fixture: dict[str, Any]) -> dict[str, Any]:
     return {"workstream_1_isaac_subset": "WAITING_FOR_ACTIVE_96_192_JOB",
             "workstream_2_warp": "FIXTURE_AND_CPU_SMOKE_READY",
@@ -217,6 +306,7 @@ def run_all(fixture_path: Path) -> dict[str, Any]:
             "workstream_3_smoke": continuous_policy_smoke(fixture),
             "workstream_4": recovery_sweep(fixture),
             "workstream_5": calibration_budget(fixture),
+            "workstream_5_attribution": calibration_attribution(fixture),
             "workstream_6_smoke": mid_motion_mask_smoke(fixture),
             "gpu_readiness": gpu_readiness(fixture), "counters": fixture["counters"]}
     core["receipt_sha256"] = _sha(core)
