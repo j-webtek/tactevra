@@ -14,6 +14,7 @@ import math
 from pathlib import Path
 import platform
 import subprocess
+import time
 from typing import Any
 
 
@@ -25,6 +26,7 @@ COUNT_METRICS = (
     "neighbor_contact",
     "bottom_out_overflow",
     "release_complete",
+    "force_within_available",
 )
 CONTINUOUS_METRICS = (
     "peak_penetration_mm",
@@ -86,6 +88,38 @@ def load_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
         "section_sha256"
     ]:
         raise ValueError("governing WS2 section changed")
+    return fixture
+
+
+def load_execution_fixture(
+    path: Path, *, workspace: Path, parent: dict[str, Any]
+) -> dict[str, Any]:
+    fixture = json.loads(path.read_text(encoding="utf-8"))
+    claimed = fixture.pop("fixture_sha256")
+    if _sha_value(fixture) != claimed:
+        raise ValueError("WS2 execution fixture self-hash mismatch")
+    fixture["fixture_sha256"] = claimed
+    if fixture.get("scope") != SCOPE or fixture.get("physical_authority") is not False:
+        raise ValueError("WS2 execution fixture is not zero-authority simulation")
+    if fixture.get("gpu_execution_authorized") is not False:
+        raise ValueError("WS2 execution fixture unexpectedly authorizes execution")
+    if any(fixture.get("counters", {}).values()):
+        raise ValueError("WS2 execution fixture contains nonzero authority counters")
+    for name, binding in fixture["bindings"].items():
+        source = _resolve(workspace, binding["path"])
+        if _sha_file(source) != binding["sha256"]:
+            raise ValueError(f"execution binding changed: {name}")
+    parent_binding = fixture["bindings"]["parent_fixture"]
+    if parent_binding["fixture_sha256"] != parent["fixture_sha256"]:
+        raise ValueError("execution fixture parent identity mismatch")
+    landing = json.loads(
+        _resolve(workspace, fixture["bindings"]["landing_prepass"]["path"])
+        .read_text(encoding="utf-8")
+    )
+    if landing.get("receipt_sha256") != fixture["bindings"]["landing_prepass"][
+        "receipt_sha256"
+    ]:
+        raise ValueError("execution landing receipt identity mismatch")
     return fixture
 
 
@@ -500,6 +534,255 @@ def landing_prepass(fixture: dict[str, Any], *, workspace: Path) -> dict[str, An
     }
 
 
+def _mocap_positions(np: Any, x_m: Any, y_m: Any, z_m: Any) -> Any:
+    return np.stack((x_m, y_m, z_m), axis=1).reshape(len(x_m), 1, 3).astype(
+        np.float32
+    )
+
+
+def run_smoke_worker(
+    fixture: dict[str, Any],
+    execution: dict[str, Any],
+    *,
+    workspace: Path,
+    device_name: str,
+) -> dict[str, Any]:
+    """Run only the exact bounded smoke frozen by the execution fixture."""
+    if device_name not in execution["smoke"]["devices"]:
+        raise ValueError("device outside frozen WS2 smoke")
+    import mujoco
+    import mujoco_warp as mjw
+    import numpy as np
+    import warp as wp
+
+    smoke = execution["smoke"]
+    catalog = json.loads(
+        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
+        .read_text(encoding="utf-8")
+    )
+    targets = _target_records(catalog)
+    target = next(row for row in targets if row["target_id"] == smoke["target_id"])
+    profile = next(
+        row for row in physical_profiles(fixture) if row["profile_id"] == smoke["profile_id"]
+    )
+    tip = next(row for row in tip_geometries(fixture) if row["tip_id"] == smoke["tip_id"])
+    recipes = {row["recipe_index"]: row for row in recipe_rows(fixture)}
+    if len(smoke["recipe_indices"]) != 1 or len(smoke["scenario_ids"]) != 1:
+        raise ValueError("bounded smoke must contain one recipe and scenario")
+    recipe = recipes[smoke["recipe_indices"][0]]
+    scenario_id = smoke["scenario_ids"][0]
+    landing = json.loads(
+        _resolve(workspace, execution["bindings"]["landing_prepass"]["path"])
+        .read_text(encoding="utf-8")
+    )
+    landing_row = next(
+        row
+        for row in landing["rows"]
+        if row["target_id"] == target["target_id"]
+        and row["scenario_id"] == scenario_id
+    )
+    offsets = np.asarray(
+        [landing_row["offset_xy_mm"][index] for index in smoke["landing_sample_indices"]],
+        dtype=np.float64,
+    )
+    nworld = len(offsets)
+    if nworld != smoke["expected_world_count"]:
+        raise ValueError("bounded smoke world count changed")
+
+    xml = build_contact_mjcf(
+        fixture,
+        profile,
+        tip,
+        target["half_extent_mm"],
+        float(catalog["keyboard"]["pitch_mm"]),
+    )
+    model = mujoco.MjModel.from_xml_string(xml)
+    seed_data = mujoco.MjData(model)
+    wp.init()
+    wp.set_device(device_name)
+    device = wp.get_device()
+    warp_model = mjw.put_model(model)
+    data = mjw.put_data(model, seed_data, nworld=nworld)
+    zeros = np.zeros((nworld, model.nq), dtype=np.float32)
+    data.qpos.assign(zeros)
+    data.qvel.assign(zeros)
+    far_z = np.full(nworld, 0.05, dtype=np.float32)
+    data.mocap_pos.assign(
+        _mocap_positions(np, offsets[:, 0] / 1000.0, offsets[:, 1] / 1000.0, far_z)
+    )
+    mjw.forward(warp_model, data)
+
+    dt = fixture["contact_model"]["timestep_seconds"]
+    settle = execution["numerical_protocol"]["settle"]
+    settled_count = 0
+    previous = zeros.copy()
+    settle_steps = 0
+    for settle_steps in range(1, math.ceil(settle["maximum_seconds"] / dt) + 1):
+        mjw.step(warp_model, data)
+        qpos = np.asarray(data.qpos.numpy(), dtype=np.float64)
+        qvel = np.asarray(data.qvel.numpy(), dtype=np.float64)
+        stable = (
+            float(np.max(np.abs(qvel))) <= settle["velocity_limit_m_s"]
+            and float(np.max(np.abs(qpos - previous)))
+            <= settle["position_delta_limit_m"]
+        )
+        settled_count = settled_count + 1 if stable else 0
+        previous = qpos
+        if settled_count >= settle["consecutive_steps"]:
+            break
+    settle_pass = settled_count >= settle["consecutive_steps"]
+    rest_qpos = np.asarray(data.qpos.numpy(), dtype=np.float64)
+    center_joint = 4
+    values = profile["values"]
+    actuation_mm = values["travel_mm"] * values["actuation_fraction"]
+    bottom_mm = values["travel_mm"] * values["bottom_out_fraction"]
+    tip_extent_mm = tip["radius_mm"] + tip["half_length_mm"]
+    approach_s = recipe["press_depth_mm"] / recipe["approach_mm_s"]
+    dwell_s = recipe["dwell_ms"] / 1000.0
+    release_s = recipe["press_depth_mm"] / recipe["release_mm_s"]
+    motion_s = approach_s + dwell_s + release_s
+    extra_s = execution["numerical_protocol"]["release"]["additional_settle_seconds"]
+    total_steps = math.ceil((motion_s + extra_s) / dt)
+
+    actuation_count = np.zeros(nworld, dtype=np.int64)
+    neighbor_contact = np.zeros(nworld, dtype=bool)
+    active = np.zeros(nworld, dtype=bool)
+    active_run = np.zeros(nworld, dtype=np.int64)
+    maximum_active_run = np.zeros(nworld, dtype=np.int64)
+    peak_mm = np.zeros(nworld, dtype=np.float64)
+    peak_force = np.zeros(nworld, dtype=np.float64)
+    bottom_overflow = np.zeros(nworld, dtype=bool)
+    started = time.perf_counter()
+    if settle_pass:
+        for step in range(total_steps):
+            elapsed = step * dt
+            if elapsed < approach_s:
+                displacement = recipe["press_depth_mm"] * elapsed / approach_s
+            elif elapsed < approach_s + dwell_s:
+                displacement = recipe["press_depth_mm"]
+            elif elapsed < motion_s:
+                displacement = recipe["press_depth_mm"] * (
+                    1.0 - (elapsed - approach_s - dwell_s) / release_s
+                )
+            else:
+                displacement = 0.0
+            z_m = (
+                tip_extent_mm - rest_qpos[:, center_joint] * 1000.0 - displacement
+            ) / 1000.0
+            data.mocap_pos.assign(
+                _mocap_positions(
+                    np, offsets[:, 0] / 1000.0, offsets[:, 1] / 1000.0, z_m
+                )
+            )
+            mjw.step(warp_model, data)
+            qpos = np.asarray(data.qpos.numpy(), dtype=np.float64)
+            qvel = np.asarray(data.qvel.numpy(), dtype=np.float64)
+            relative_mm = (qpos - rest_qpos) * 1000.0
+            center_mm = relative_mm[:, center_joint]
+            now_active = center_mm >= actuation_mm
+            actuation_count += np.logical_and(now_active, ~active)
+            active_run = np.where(now_active, active_run + 1, 0)
+            maximum_active_run = np.maximum(maximum_active_run, active_run)
+            active = now_active
+            neighbor_contact |= np.max(np.delete(relative_mm, center_joint, axis=1), axis=1) > execution[
+                "numerical_protocol"
+            ]["neighbor_contact_displacement_mm"]
+            peak_mm = np.maximum(peak_mm, center_mm)
+            required = (
+                values["spring_n_per_mm"] * np.maximum(center_mm, 0.0)
+                + values["damping_n_s_per_mm"]
+                * np.maximum(qvel[:, center_joint] * 1000.0, 0.0)
+            )
+            peak_force = np.maximum(peak_force, required)
+            bottom_overflow |= qpos[:, center_joint] * 1000.0 > (
+                bottom_mm
+                + execution["numerical_protocol"]["bottom_out_numerical_tolerance_mm"]
+            )
+    wp.synchronize_device(device)
+    elapsed_seconds = time.perf_counter() - started
+    final_qpos = np.asarray(data.qpos.numpy(), dtype=np.float64)
+    final_qvel = np.asarray(data.qvel.numpy(), dtype=np.float64)
+    overflow = np.asarray(data.overflow.numpy(), dtype=np.int64)
+    finite = bool(np.isfinite(final_qpos).all() and np.isfinite(final_qvel).all())
+    release = execution["numerical_protocol"]["release"]
+    release_complete = (
+        np.abs((final_qpos[:, center_joint] - rest_qpos[:, center_joint]) * 1000.0)
+        <= release["position_error_limit_mm"]
+    ) & (np.abs(final_qvel[:, center_joint] * 1000.0) <= release["velocity_limit_mm_s"])
+    minimum_delay = min(fixture["recipe_design"]["os_repeat_delay_ms_samples"])
+    minimum_period = min(fixture["recipe_design"]["os_repeat_period_ms_samples"])
+    active_ms = maximum_active_run * dt * 1000.0
+    repeats = np.where(
+        active_ms >= minimum_delay,
+        np.floor((active_ms - minimum_delay) / minimum_period).astype(np.int64) + 1,
+        0,
+    )
+    rows = []
+    for index in range(nworld):
+        row = {
+            "row_id": (
+                f"{target['target_id']}__{scenario_id}__r{recipe['recipe_index']:03d}"
+                f"__l{smoke['landing_sample_indices'][index]:03d}"
+            ),
+            "target_id": target["target_id"],
+            "scenario_id": scenario_id,
+            "recipe_index": recipe["recipe_index"],
+            "landing_sample_index": smoke["landing_sample_indices"][index],
+            "actuation_count": int(actuation_count[index]),
+            "auto_repeat_count": int(repeats[index]),
+            "neighbor_contact": bool(neighbor_contact[index]),
+            "bottom_out_overflow": bool(bottom_overflow[index]),
+            "release_complete": bool(release_complete[index]),
+            "force_within_available": bool(
+                peak_force[index] <= recipe["available_press_force_n"]
+            ),
+            "partial_press": bool(actuation_count[index] == 0),
+            "double_actuation": bool(actuation_count[index] > 1),
+            "peak_penetration_mm": float(peak_mm[index]),
+            "peak_required_force_n": float(peak_force[index]),
+            "dwell_above_actuation_ms": float(active_ms[index]),
+        }
+        row["admitted"] = bool(
+            row["actuation_count"] == 1
+            and row["auto_repeat_count"] == 0
+            and not row["neighbor_contact"]
+            and not row["bottom_out_overflow"]
+            and row["release_complete"]
+            and row["force_within_available"]
+        )
+        rows.append(row)
+    stack = _stack()
+    receipt = {
+        "schema": "tactevra.ws2_warp_smoke_receipt.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "execution_fixture_sha256": execution["fixture_sha256"],
+        "device": device_name,
+        "device_name": device.name,
+        "stack": stack,
+        "world_count": nworld,
+        "settle_pass": settle_pass,
+        "settle_steps": settle_steps,
+        "motion_steps": total_steps if settle_pass else 0,
+        "elapsed_seconds": elapsed_seconds,
+        "finite": finite,
+        "overflow_zero": bool((overflow == 0).all()),
+        "rows": rows,
+        "status": (
+            "PASS_EXPLORATORY_SMOKE"
+            if settle_pass and finite and (overflow == 0).all() and len(rows) == nworld
+            else "STOP_EXPLORATORY_SMOKE"
+        ),
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_commands": [],
+        "permits": [],
+        "transport_operations": [],
+        "physical_authority": False,
+    }
+    return receipt
+
+
 def compare_receipts(
     fixture: dict[str, Any], left: dict[str, Any], right: dict[str, Any]
 ) -> dict[str, Any]:
@@ -564,13 +847,22 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "mode",
-        choices=("manifest", "cpu-smoke", "landing-prepass", "phone", "compare"),
+        choices=(
+            "manifest",
+            "cpu-smoke",
+            "landing-prepass",
+            "phone",
+            "smoke-worker",
+            "compare",
+        ),
     )
     parser.add_argument("--fixture", type=Path, required=True)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--left", type=Path)
     parser.add_argument("--right", type=Path)
+    parser.add_argument("--execution", type=Path)
+    parser.add_argument("--device", choices=DEVICES)
     args = parser.parse_args()
     workspace = args.workspace.resolve(strict=True)
     fixture = load_fixture(args.fixture.resolve(strict=True), workspace=workspace)
@@ -580,6 +872,15 @@ def main() -> int:
         result = cpu_contact_smoke(fixture, workspace=workspace)
     elif args.mode == "landing-prepass":
         result = landing_prepass(fixture, workspace=workspace)
+    elif args.mode == "smoke-worker":
+        if args.execution is None or args.device is None:
+            parser.error("smoke-worker requires --execution and --device")
+        execution = load_execution_fixture(
+            args.execution.resolve(strict=True), workspace=workspace, parent=fixture
+        )
+        result = run_smoke_worker(
+            fixture, execution, workspace=workspace, device_name=args.device
+        )
     elif args.mode == "phone":
         rows = phone_cells(fixture)
         result = {

@@ -24,6 +24,7 @@ from rocell_ai.simulation_program_cpu import (
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json"
 WS2_FIXTURE = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v1.json"
+WS2_EXECUTION = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v1.json"
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
     ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
@@ -124,6 +125,9 @@ def test_phase0_collision_candidate_runs_but_cannot_release_gates():
 
 def test_ws2_executable_manifest_is_exact_and_zero_authority():
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION, workspace=ROOT, parent=fixture
+    )
     first = WS2_PROBE.build_manifest(fixture, workspace=ROOT)
     second = WS2_PROBE.build_manifest(fixture, workspace=ROOT)
     assert first == second
@@ -135,6 +139,8 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
     assert first["physics_world_count"] == 285_769_728
     assert first["physical_authority"] is False
     assert not first["real_commands"]
+    assert execution["smoke"]["expected_world_count"] == 64
+    assert execution["smoke"]["devices"] == ["cuda:0", "cuda:1"]
 
 
 def test_ws2_tampering_and_cross_gpu_drift_stop():
@@ -150,6 +156,7 @@ def test_ws2_tampering_and_cross_gpu_drift_stop():
                 "neighbor_contact": False,
                 "bottom_out_overflow": False,
                 "release_complete": True,
+                "force_within_available": True,
                 "peak_penetration_mm": 2.0,
                 "peak_required_force_n": 0.5,
                 "dwell_above_actuation_ms": 100.0,
