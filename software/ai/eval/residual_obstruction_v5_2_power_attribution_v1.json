@@ -1,0 +1,200 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v5_2_power_attribution.v1",
+  "scope": "SYNTHETIC_POWER_ATTRIBUTION_AND_RENDER_EFFICIENCY_NO_FIXTURE_CHANGE",
+  "status": "BLOCKED_GATE_MODEL_AND_FIXTURE_REVISION_REQUIRED",
+  "source_commit": "d8c3103169663a6dcc3e611261834afbea64df56",
+  "v5_file_sha256": "1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001",
+  "v5_bundle_sha256": "69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e",
+  "v5_1_file_sha256": "0c4a6e558c76152c5b03d836a66c0bcf633d3ae7fe4816891c7936f55007e8e0",
+  "v5_1_report_sha256": "9d57ce6bf1de079c45fcc32e0902dfcd1d8348839fbb44ff9243a50f21b11b64",
+  "joint_power_semantics": "MINIMUM_IS_LIMITING_MARGINAL_POWER_NOT_JOINT_POWER_BONFERRONI_IS_DEPENDENCE_FREE_LOWER_BOUND",
+  "assumed_true_performance": {
+    "pooled_all_obstruction_miss_rate": 0.005,
+    "visible_false_stop_rate": 0.03,
+    "homogeneous_target_auc": 0.98,
+    "target_auc_slack_above_every_target_gate": 0.03,
+    "target_auc_slack_above_q05_gate": 0.0,
+    "target_quantile_margin": null
+  },
+  "gate_inventory": [
+    {
+      "gate": "pooled_all_obstruction_miss_rate_le_0_02",
+      "power_status": "MODELED"
+    },
+    {
+      "gate": "visible_false_stop_rate_le_0_06",
+      "power_status": "MODELED"
+    },
+    {
+      "gate": "scene_cluster_miss_upper_95_le_0_02",
+      "power_status": "PARTIAL_ICC_APPROXIMATION_ONLY"
+    },
+    {
+      "gate": "scene_cluster_false_stop_upper_95_le_0_06",
+      "power_status": "PARTIAL_ICC_APPROXIMATION_ONLY"
+    },
+    {
+      "gate": "cable_family_miss_rate_le_0_02",
+      "power_status": "UNMODELED_MISSING_FAMILY_EFFECT"
+    },
+    {
+      "gate": "dark_cable_30_60_miss_rate_le_0_02",
+      "power_status": "UNMODELED_MISSING_FAMILY_EFFECT"
+    },
+    {
+      "gate": "every_target_auc_ge_0_95",
+      "power_status": "MODELED"
+    },
+    {
+      "gate": "linear_q05_target_auc_ge_0_98",
+      "power_status": "UNMODELED_ZERO_DECLARED_EFFECT_SLACK"
+    },
+    {
+      "gate": "linear_q05_target_quantile_margin_ge_0_05",
+      "power_status": "UNMODELED_MISSING_MARGIN_EFFECT_AND_VARIANCE"
+    }
+  ],
+  "original_eight_scene_attribution": {
+    "MODERATE_ICC_0_05": {
+      "individual_gate_power": {
+        "pooled_all_obstruction_miss": 0.3384,
+        "visible_false_stop": 0.524,
+        "every_target_auc": 3.3e-05
+      },
+      "limiting_gates": [
+        "every_target_auc"
+      ],
+      "limiting_modeled_marginal_power": 3.3e-05,
+      "bonferroni_joint_lower_bound": 0.0
+    },
+    "PESSIMISTIC_ICC_0_30": {
+      "individual_gate_power": {
+        "pooled_all_obstruction_miss": 0.0,
+        "visible_false_stop": 0.0,
+        "every_target_auc": 0.0
+      },
+      "limiting_gates": [
+        "every_target_auc",
+        "pooled_all_obstruction_miss",
+        "visible_false_stop"
+      ],
+      "limiting_modeled_marginal_power": 0.0,
+      "bonferroni_joint_lower_bound": 0.0
+    }
+  },
+  "balanced_rotation_analysis": {
+    "trials": 5000,
+    "seed": 55201,
+    "rows_per_target_scene": 36,
+    "designs_by_scenario": [
+      {
+        "scenario_id": "MODERATE_ICC_0_05",
+        "intracluster_correlation": 0.05,
+        "designs": [
+          {
+            "design_id": "FULL_GRID_256_SCENES_75_TARGETS",
+            "scene_count": 256,
+            "targets_per_scene": 75,
+            "development_observations": 691200,
+            "minimum_target_scene_exposures": 256,
+            "maximum_target_scene_exposures": 256,
+            "modeled_gate_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "visible_false_stop": 1.0,
+              "every_target_auc": 1.0,
+              "limiting_modeled_marginal_power": 1.0,
+              "bonferroni_joint_lower_bound": 1.0
+            }
+          },
+          {
+            "design_id": "BALANCED_ROTATION_256_SCENES_24_TARGETS",
+            "scene_count": 256,
+            "targets_per_scene": 24,
+            "development_observations": 221184,
+            "minimum_target_scene_exposures": 81,
+            "maximum_target_scene_exposures": 82,
+            "modeled_gate_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "visible_false_stop": 1.0,
+              "every_target_auc": 1.0,
+              "limiting_modeled_marginal_power": 1.0,
+              "bonferroni_joint_lower_bound": 1.0
+            }
+          }
+        ]
+      },
+      {
+        "scenario_id": "PESSIMISTIC_ICC_0_30",
+        "intracluster_correlation": 0.3,
+        "designs": [
+          {
+            "design_id": "FULL_GRID_256_SCENES_75_TARGETS",
+            "scene_count": 256,
+            "targets_per_scene": 75,
+            "development_observations": 691200,
+            "minimum_target_scene_exposures": 256,
+            "maximum_target_scene_exposures": 256,
+            "modeled_gate_power": {
+              "pooled_all_obstruction_miss": 0.9934,
+              "visible_false_stop": 0.994,
+              "every_target_auc": 1.0,
+              "limiting_modeled_marginal_power": 0.9934,
+              "bonferroni_joint_lower_bound": 0.9874
+            }
+          },
+          {
+            "design_id": "BALANCED_ROTATION_256_SCENES_24_TARGETS",
+            "scene_count": 256,
+            "targets_per_scene": 24,
+            "development_observations": 221184,
+            "minimum_target_scene_exposures": 81,
+            "maximum_target_scene_exposures": 82,
+            "modeled_gate_power": {
+              "pooled_all_obstruction_miss": 0.9934,
+              "visible_false_stop": 0.9932,
+              "every_target_auc": 0.910544,
+              "limiting_modeled_marginal_power": 0.910544,
+              "bonferroni_joint_lower_bound": 0.897144
+            }
+          }
+        ]
+      }
+    ],
+    "observation_reduction_fraction": 0.68,
+    "interpretation": "Rotation spends independent scene diversity across balanced target subsets. It powers only the three modeled gates and does not authorize rendering."
+  },
+  "split_role_options": [
+    {
+      "option": "POWERED_DEVELOPMENT_AND_POWERED_EVALUATION",
+      "cost": "DUPLICATES_STATISTICAL_BURDEN",
+      "selection_risk": "LOWER",
+      "status": "NOT_SELECTED"
+    },
+    {
+      "option": "DEVELOPMENT_POINT_ESTIMATES_AND_DIAGNOSTICS_THEN_POWERED_EVALUATION",
+      "cost": "LOWER_RENDER_COST",
+      "selection_risk": "HIGHER_REQUIRES_FROZEN_SELECTION_AND_SINGLE_EVALUATION_OPEN",
+      "status": "PREFERRED_FOR_FIXTURE_REVISION_NOT_ENACTED"
+    }
+  ],
+  "findings": [
+    "At moderate correlation, the every-target AUC floor is the limiting modeled gate for the original eight-scene plan.",
+    "At pessimistic correlation, eight scenes are insufficient for both pooled error endpoints as well as every-target AUC.",
+    "V5.1 did not power cable-family misses, dark-cable misses, q05 target AUC, or q05 target margin.",
+    "The assumed homogeneous target AUC equals the q05 gate, leaving zero design effect and preventing a defensible high-power claim for that gate.",
+    "A 256-scene balanced 24-target rotation reduces observations by 68 percent and retains at least 81 scene exposures per target, but remains only a partial-gate planning candidate."
+  ],
+  "next_requirements": [
+    "Declare realistic alternative effect sizes for q05 target AUC, q05 target margin, cable misses, and dark-cable misses.",
+    "Choose development-selection versus evaluation-proof responsibilities before revising the fixture.",
+    "Freeze an exact balanced target rotation and re-run complete gate power before any render.",
+    "Use the physical pilot to replace provisional lighting and real-obstruction assumptions before hardware remedy selection."
+  ],
+  "images_generated": false,
+  "training_started": false,
+  "evaluation_opened": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "report_sha256": "ac77da122ae5d4ef9dad38f7aa8f36a2064d53c9c5f0c2226f5f5d53dd49a85c"
+}

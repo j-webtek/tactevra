@@ -1,0 +1,54 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v5_4_fixture_audit.v1",
+  "scope": "INDEPENDENT_FIXTURE_IDENTITY_AND_COUNT_AUDIT_NO_RENDER",
+  "status": "PASS_FIXTURE_READY_FOR_TRAINING_DEVELOPMENT_RENDERER_IMPLEMENTATION",
+  "source_commit": "1d717b246932ce4b3230ecc8f20df886f26caf00",
+  "fixture_file_sha256": "85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3",
+  "fixture_bundle_sha256": "44c83dbee7fef8520bfdf825c94c2c34f61cf4b9d6d0db909e914c53ef6fa085",
+  "source_file_sha256": {
+    "v5_file_sha256": "1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001",
+    "v5_3_file_sha256": "2c61d39c28cb4b56dc4dbcaa474de055285a5ea4f976583645f7f3814917fdeb",
+    "pretraining_file_sha256": "c6588a42e9e2e48c28773e09290a04eb7fc940eb5a83349185d17e3243c59602"
+  },
+  "rotation_metrics": {
+    "scene_count": 224,
+    "unique_seed_count": 224,
+    "targets_per_scene": 12,
+    "target_count": 75,
+    "targets_at_35_scenes": 12,
+    "targets_at_36_scenes": 63,
+    "mixed_device_scene_count": 224,
+    "evaluation_observation_identities": 96768
+  },
+  "development_support": {
+    "per_target": {
+      "scene_identities": 8,
+      "appearance_identities": 3,
+      "visible_rows": 96,
+      "all_obstruction_rows": 192,
+      "cable_abstain_rows": 96,
+      "dark_cable_30_60_abstain_rows": 48,
+      "dark_cable_10_boundary_visible_rows": 24
+    },
+    "aggregate_cable_abstain_rows": 7200,
+    "aggregate_dark_cable_abstain_rows": 3600,
+    "aggregate_dark_boundary_visible_rows": 1800,
+    "candidate_count": 2,
+    "same_rows_for_every_candidate": true,
+    "adequacy": "ADEQUATE_FOR_PAIRED_CANDIDATE_SELECTION_AND_HARD_CASE_DIAGNOSTICS_NOT_POWERED_SAFETY"
+  },
+  "power_interpretation_present": "POWER_IS_PROBABILITY_OF_PROVING_THE_SAFETY_BOUNDS_IF_TRUE_RATES_EQUAL_THE_ASSUMED_RATES_NOT_A_PREDICTION_THE_MODEL_WILL_PASS",
+  "training_development_renderer_implementation_may_begin": true,
+  "evaluation_render_authorized": false,
+  "images_generated": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "Audit validates identities, balance, counts, hashes, and gate roles only.",
+    "No renderer, image, model, threshold, or evaluation result exists.",
+    "Development counts support diagnostics and paired selection, not powered safety claims.",
+    "Physical pilot remains required for lighting, obstruction contrast, and sim-to-real transfer."
+  ],
+  "report_sha256": "693ccaf4e4c69bd643a880470ce9c3ae3f99e61c9166287929645a7672c012bc"
+}

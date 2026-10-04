@@ -125,7 +125,12 @@ from .pixel_detector import (
     RELEASED_TAG_IDS,
     detect_apriltag36h11_pixels,
 )
-from .usb_opencv import UsbOpenCvCamera
+from .usb_opencv import (
+    OPENCV_ORIENTATION_PATTERN_VERSION,
+    OPENCV_TOP_LEFT_BGR_ORIENTATION,
+    UsbOpenCvCamera,
+    verify_opencv_top_left_bgr_orientation,
+)
 from .uvc_inventory import (
     DETERMINISTIC_FAKE_PROVIDER_ID,
     MAX_CONTROLS_PER_SNAPSHOT,
@@ -247,6 +252,8 @@ __all__ = [
     "TagReference",
     "TimestampQuality",
     "UsbOpenCvCamera",
+    "OPENCV_ORIENTATION_PATTERN_VERSION",
+    "OPENCV_TOP_LEFT_BGR_ORIENTATION",
     "UVC_INVENTORY_ASSESSMENT_SCHEMA",
     "UVC_INVENTORY_SCHEMA",
     "DeterministicFakeUvcInventoryProvider",
@@ -286,4 +293,5 @@ __all__ = [
     "tag_reference_from_dict",
     "synthetic_b0477_camera_receipt_document",
     "parse_uvc_inventory_json",
+    "verify_opencv_top_left_bgr_orientation",
 ]

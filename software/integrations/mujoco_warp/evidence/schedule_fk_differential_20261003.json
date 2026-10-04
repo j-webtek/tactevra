@@ -1,0 +1,121 @@
+{
+  "cross_device_maximum_tool_tip_delta_mm": 0.0,
+  "external_receipt_canonical_sha256": {
+    "cuda0_run1": "2a586dee9cafc54895361d8a9e6b50184fad4ab4afd7d41d56203ed2da6337d0",
+    "cuda0_run2": "2a586dee9cafc54895361d8a9e6b50184fad4ab4afd7d41d56203ed2da6337d0",
+    "cuda1_run1": "7b7d286a92e993c71c4daa471f3ca8ee69ef6c11c5ff8a7c7c980f7d28931b72"
+  },
+  "external_receipt_file_sha256": {
+    "cuda0_run1": "036581d32fddcfeaa0c0c32be9b9b6aa17cf1f644913816540ec8f0822e6bbc6",
+    "cuda0_run2": "036581d32fddcfeaa0c0c32be9b9b6aa17cf1f644913816540ec8f0822e6bbc6",
+    "cuda1_run1": "21d8afd81c1501165e71be5263deb3535ff5d97700a48596335db41fa9d37d80"
+  },
+  "gates": {
+    "all_samples_present_ordered_finite": true,
+    "mujoco_vs_rocell": true,
+    "mujoco_warp_vs_mujoco": true,
+    "retained_isaac_vs_reference": true
+  },
+  "hardware_write_count": 0,
+  "limitations": [
+    "governed meshless URDF with placeholder MJCF inertia supports kinematics only",
+    "schedule geometry and tool length are an unmeasured simulation-only overlay",
+    "retained Isaac receipt reports an all-sample maximum but omits non-contact per-sample tips",
+    "no uncertainty qualification, silhouette dilation, collision, dynamics, contact, or rendering claim",
+    "same-stack bitwise reproducibility applies only to canonical receipt bytes from this exact stack",
+    "different stacks must be compared using frozen numerical tolerances"
+  ],
+  "metrics": {
+    "maximum_mujoco_vs_rocell_mm": 3.1776437161565096e-13,
+    "maximum_mujoco_warp_vs_mujoco_mm": 0.000151675112855002,
+    "maximum_schedule_reference_vs_rocell_mm": 0.0769109833265308,
+    "retained_isaac_maximum_vs_schedule_reference_mm": 0.07684842940066568
+  },
+  "physical_authority": false,
+  "physical_movement_count": 0,
+  "same_stack_cuda0_byte_identical": true,
+  "sample_count": 133,
+  "schema": "rocell.mujoco_warp_schedule_fk_differential_summary.v1",
+  "scope": "SYNTHETIC_OFFLINE_SCHEDULE_FK_DIFFERENTIAL_ONLY",
+  "stack_by_device": {
+    "cuda0": {
+      "all_gpus": [
+        {
+          "compute_capability": "8.6",
+          "driver_version": "595.97",
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3090",
+          "uuid": "GPU-e428f4d7-ea02-2a73-2aeb-88b30949dae1"
+        },
+        {
+          "compute_capability": "8.6",
+          "driver_version": "595.97",
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 3090",
+          "uuid": "GPU-2e3457e2-aa15-ef1d-e417-b29c8cf1ba77"
+        }
+      ],
+      "different_stack_reproducibility": "FROZEN_NUMERICAL_TOLERANCES",
+      "packages": {
+        "mujoco": "3.14.0",
+        "mujoco-warp": "3.13.0",
+        "numpy": "2.5.3",
+        "warp-lang": "1.17.0"
+      },
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python_version": "3.12.0",
+      "same_stack_reproducibility": "BITWISE_CANONICAL_RECEIPT",
+      "selected_device": {
+        "compute_capability": "8.6",
+        "driver_version": "595.97",
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3090",
+        "requested": "cuda:0",
+        "uuid": "GPU-e428f4d7-ea02-2a73-2aeb-88b30949dae1"
+      }
+    },
+    "cuda1": {
+      "all_gpus": [
+        {
+          "compute_capability": "8.6",
+          "driver_version": "595.97",
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3090",
+          "uuid": "GPU-e428f4d7-ea02-2a73-2aeb-88b30949dae1"
+        },
+        {
+          "compute_capability": "8.6",
+          "driver_version": "595.97",
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 3090",
+          "uuid": "GPU-2e3457e2-aa15-ef1d-e417-b29c8cf1ba77"
+        }
+      ],
+      "different_stack_reproducibility": "FROZEN_NUMERICAL_TOLERANCES",
+      "packages": {
+        "mujoco": "3.14.0",
+        "mujoco-warp": "3.13.0",
+        "numpy": "2.5.3",
+        "warp-lang": "1.17.0"
+      },
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python_version": "3.12.0",
+      "same_stack_reproducibility": "BITWISE_CANONICAL_RECEIPT",
+      "selected_device": {
+        "compute_capability": "8.6",
+        "driver_version": "595.97",
+        "index": 1,
+        "name": "NVIDIA GeForce RTX 3090",
+        "requested": "cuda:1",
+        "uuid": "GPU-2e3457e2-aa15-ef1d-e417-b29c8cf1ba77"
+      }
+    }
+  },
+  "status": "PASS_KINEMATIC_ONLY",
+  "summary_sha256": "190d95d35fb4f551dc6f9c85106efcfa66b9ba6de185f719003d1897af5d21f0",
+  "thresholds": {
+    "mujoco_vs_rocell_mm": 0.1,
+    "mujoco_warp_vs_mujoco_mm": 0.01,
+    "retained_isaac_vs_schedule_reference_mm": 0.25
+  }
+}

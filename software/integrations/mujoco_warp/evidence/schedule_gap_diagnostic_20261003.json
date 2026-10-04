@@ -1,0 +1,43 @@
+{
+  "decision": "CONFIRMED_ACCEPTED_IK_RESIDUAL",
+  "external_receipt_file_sha256": "3a3895bbed815167a6f0ce61efd359ac6a16f2bd5c02b95580eb334a642b2ed2",
+  "external_receipt_sha256": "2199f9d43af577216ee6d822619e56114138e5043ce2a78d60874031c84ed384",
+  "gates": {
+    "all_133_rows_exact_order_and_semantics": true,
+    "computed_residual_equals_reported_ik_residual": true,
+    "desired_waypoints_equal_schedule_reference": true,
+    "serialized_joints_reproduce_reported_achieved_fk": true
+  },
+  "hardware_write_count": 0,
+  "interpretation": {
+    "backend_geometry_mismatch_supported": false,
+    "four_backend_parity_claim": "IMPLEMENTATION_CONSISTENCY_ONLY",
+    "physical_arm_accuracy_claim": "NOT_TESTED_REQUIRES_PHYSICAL_CALIBRATION",
+    "schedule_gap_source": "ACCEPTED_NUMERICAL_INVERSE_KINEMATICS_RESIDUAL",
+    "serialization_rounding_supported": false
+  },
+  "metrics": {
+    "contact_maximum_ik_residual_mm": 0.00036367129920562754,
+    "ik_residual_maximum_mm": 0.0769109833264784,
+    "ik_residual_median_mm": 0.00035391630666627605,
+    "ik_residual_p95_mm": 0.028744975253913875,
+    "maximum_achieved_vs_rocell_fk_mm": 1.1718571004216928e-13,
+    "maximum_computed_vs_reported_residual_delta_mm": 1.3877787807814457e-17,
+    "maximum_desired_vs_schedule_reference_mm": 0.0,
+    "maximum_residual_phase": "TRANSIT",
+    "maximum_residual_sequence": 129,
+    "residual_vs_board_origin_xy_radius_pearson": 0.2625933016035675,
+    "residual_vs_sequence_pearson": -0.059340684494376364,
+    "residual_vs_solver_weighted_jacobian_condition_number_pearson": 0.3367899708131944
+  },
+  "physical_authority": false,
+  "physical_movement_count": 0,
+  "sample_count": 133,
+  "schema": "rocell.mujoco_warp_schedule_gap_summary.v1",
+  "scope": "SYNTHETIC_OFFLINE_KINEMATIC_ATTRIBUTION_ONLY",
+  "source_file_sha256": {
+    "mw2f_cuda0_receipt": "036581d32fddcfeaa0c0c32be9b9b6aa17cf1f644913816540ec8f0822e6bbc6",
+    "promoted_arm_report": "681455f0b734e924f0074ccfb7228ecb94c04ba62f5657f9d66b27af438c618b"
+  },
+  "status": "PASS"
+}

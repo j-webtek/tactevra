@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_successor_fixture_v4_1.schema.json",
+  "type": "object",
+  "required": ["schema", "source", "scope", "base_scenes", "appearances", "variants", "reference_contract", "split_policy", "render_admission", "training_plan", "pretraining_gates", "development_gate", "images_generated", "training_started", "development_opened", "evaluation_opened", "hardware_writes", "physical_movements", "physical_authority", "limitations", "bundle_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_successor_fixture.v4_1"},
+    "source": {"type": "object"},
+    "scope": {"const": "SYNTHETIC_ISAAC_REFERENCE_COMPARISON_PREDECLARATION_NO_QUALIFICATION"},
+    "base_scenes": {"type": "array", "minItems": 28, "maxItems": 28},
+    "appearances": {"type": "array", "minItems": 12, "maxItems": 12},
+    "variants": {"type": "array", "minItems": 12, "maxItems": 12},
+    "reference_contract": {"type": "object"},
+    "split_policy": {"type": "object"},
+    "render_admission": {"type": "object"},
+    "training_plan": {"type": "object"},
+    "pretraining_gates": {"type": "object"},
+    "development_gate": {"type": "object"},
+    "images_generated": {"const": false},
+    "training_started": {"const": false},
+    "development_opened": {"const": false},
+    "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1},
+    "bundle_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

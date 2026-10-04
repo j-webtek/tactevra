@@ -1,0 +1,66 @@
+{
+  "campaign_sha256": null,
+  "collection_effects": {
+    "authorization_evidence_sha256": null,
+    "hardware_write_count": 0,
+    "physical_movement_count": 0
+  },
+  "controller_authority": false,
+  "criteria": {},
+  "hardware_writes": 0,
+  "incomplete_reasons": [
+    "campaign_not_collected"
+  ],
+  "limitations": [
+    "No parked-pose campaign has been collected or evaluated.",
+    "Evidence completion supports owner review of a supervised parked observation workflow only."
+  ],
+  "physical": {
+    "accepted_known_self_occlusion_count": 0,
+    "accepted_known_self_occlusion_ids": [],
+    "accepted_residual_obstruction_count": 0,
+    "accepted_residual_obstruction_ids": [],
+    "completed_cycle_count": 0,
+    "false_stops": {
+      "events": 0,
+      "lower_95": 0.0,
+      "rate": 0.0,
+      "trials": 0,
+      "upper_95": 1.0
+    },
+    "geometric_path_missed_known_self_occlusion_count": 0,
+    "known_self_occlusion_count": 0,
+    "maximum_charuco_drift_mm": null,
+    "maximum_park_repeatability_mm": null,
+    "observation_count": 0,
+    "residual_obstruction_count": 0,
+    "residual_path_missed_obstruction_count": 0,
+    "session_count": 0,
+    "visible_count": 0
+  },
+  "physical_deployment_qualified": false,
+  "physical_movements": 0,
+  "result_sha256": "afbdf74bcf4d0887a496fb6f1320e55360491c337df3f6aaf53eca63b229b9c4",
+  "schema": "rocell.ai_parked_pose_qualification_result.v1",
+  "scope": "SUPERVISED_PARKED_OBSERVATION_EVIDENCE_ONLY",
+  "status": "INCOMPLETE",
+  "synthetic": {
+    "accepted_known_self_occlusion_count": 0,
+    "accepted_known_self_occlusion_ids": [],
+    "accepted_residual_obstruction_count": 0,
+    "accepted_residual_obstruction_ids": [],
+    "false_stops": {
+      "events": 0,
+      "lower_95": 0.0,
+      "rate": 0.0,
+      "trials": 0,
+      "upper_95": 1.0
+    },
+    "geometric_path_missed_known_self_occlusion_count": 0,
+    "known_self_occlusion_count": 0,
+    "observation_count": 0,
+    "residual_obstruction_count": 0,
+    "residual_path_missed_obstruction_count": 0,
+    "visible_count": 0
+  }
+}

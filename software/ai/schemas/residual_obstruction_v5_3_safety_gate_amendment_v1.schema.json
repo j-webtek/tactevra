@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v5_3_safety_gate_amendment_v1.schema.json",
+  "title": "Residual obstruction v5.3 safety gate amendment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "scope", "status", "source_commit", "v5_file_sha256",
+    "v5_bundle_sha256", "v5_2_file_sha256", "v5_2_report_sha256",
+    "gate_roles", "power_assumptions", "evaluation_rotation",
+    "development_role", "evaluation_role", "limitations", "images_generated",
+    "training_started", "development_opened", "evaluation_opened",
+    "hardware_writes", "physical_movements", "physical_authority", "report_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v5_3_safety_gate_amendment.v1"},
+    "scope": {"const": "SYNTHETIC_GATE_ROLE_AND_COMPLETE_SAFETY_POWER_NO_RENDER"},
+    "status": {"const": "READY_FOR_FIXTURE_REVISION_RENDER_STILL_BLOCKED"},
+    "source_commit": {"$ref": "#/$defs/commit"},
+    "v5_file_sha256": {"$ref": "#/$defs/sha"},
+    "v5_bundle_sha256": {"$ref": "#/$defs/sha"},
+    "v5_2_file_sha256": {"$ref": "#/$defs/sha"},
+    "v5_2_report_sha256": {"$ref": "#/$defs/sha"},
+    "gate_roles": {
+      "type": "object", "additionalProperties": false,
+      "required": ["development_candidate_selection", "single_use_evaluation_safety_gates"],
+      "properties": {
+        "development_candidate_selection": {"type": "object"},
+        "single_use_evaluation_safety_gates": {"type": "object"}
+      }
+    },
+    "power_assumptions": {
+      "type": "object", "additionalProperties": false,
+      "required": ["trials", "seed", "power_target", "planning_selection_joint_lower_bound_target", "pooled_all_obstruction_miss_design_rate", "cable_family_miss_design_rate", "dark_cable_30_60_miss_design_rate", "visible_false_stop_design_rate", "rationale", "joint_lower_bound"],
+      "properties": {
+        "trials": {"type": "integer", "minimum": 5000},
+        "seed": {"type": "integer"},
+        "power_target": {"const": 0.9},
+        "planning_selection_joint_lower_bound_target": {"const": 0.93},
+        "pooled_all_obstruction_miss_design_rate": {"const": 0.005},
+        "cable_family_miss_design_rate": {"const": 0.005},
+        "dark_cable_30_60_miss_design_rate": {"const": 0.005},
+        "visible_false_stop_design_rate": {"const": 0.03},
+        "rationale": {"type": "string", "minLength": 1},
+        "joint_lower_bound": {"const": "BONFERRONI_WITHOUT_GATE_INDEPENDENCE_ASSUMPTION"}
+      }
+    },
+    "evaluation_rotation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["targets_per_scene", "target_count", "rows_per_target_scene", "family_rows_per_target_scene", "scenarios", "recommended_scene_count", "recommended_evaluation_observations", "minimum_target_scene_exposures", "maximum_target_scene_exposures", "exact_rotation_frozen", "render_authorized"],
+      "properties": {
+        "targets_per_scene": {"const": 12},
+        "target_count": {"const": 75},
+        "rows_per_target_scene": {"const": 36},
+        "family_rows_per_target_scene": {"type": "object"},
+        "scenarios": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/scenario"}},
+        "recommended_scene_count": {"type": "integer", "minimum": 1},
+        "recommended_evaluation_observations": {"type": "integer", "minimum": 1},
+        "minimum_target_scene_exposures": {"type": "integer", "minimum": 1},
+        "maximum_target_scene_exposures": {"type": "integer", "minimum": 1},
+        "exact_rotation_frozen": {"const": false},
+        "render_authorized": {"const": false}
+      }
+    },
+    "development_role": {"type": "object"},
+    "evaluation_role": {"type": "object"},
+    "limitations": {"type": "array", "minItems": 5, "items": {"type": "string", "minLength": 1}},
+    "images_generated": {"const": false},
+    "training_started": {"const": false},
+    "development_opened": {"const": false},
+    "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "probability": {"type": "number", "minimum": 0, "maximum": 1},
+    "scenario": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scenario_id", "intracluster_correlation", "candidates"],
+      "properties": {
+        "scenario_id": {"type": "string"},
+        "intracluster_correlation": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+        "candidates": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"$ref": "#/$defs/candidate"}}
+      }
+    },
+    "candidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scene_count", "evaluation_observations", "minimum_target_scene_exposures", "maximum_target_scene_exposures", "marginal_power", "limiting_marginal_power", "bonferroni_joint_lower_bound"],
+      "properties": {
+        "scene_count": {"type": "integer", "minimum": 1},
+        "evaluation_observations": {"type": "integer", "minimum": 1},
+        "minimum_target_scene_exposures": {"type": "integer", "minimum": 1},
+        "maximum_target_scene_exposures": {"type": "integer", "minimum": 1},
+        "marginal_power": {
+          "type": "object", "additionalProperties": false,
+          "required": ["pooled_all_obstruction_miss", "cable_family_miss", "dark_cable_30_60_miss", "visible_false_stop"],
+          "properties": {
+            "pooled_all_obstruction_miss": {"$ref": "#/$defs/probability"},
+            "cable_family_miss": {"$ref": "#/$defs/probability"},
+            "dark_cable_30_60_miss": {"$ref": "#/$defs/probability"},
+            "visible_false_stop": {"$ref": "#/$defs/probability"}
+          }
+        },
+        "limiting_marginal_power": {"$ref": "#/$defs/probability"},
+        "bonferroni_joint_lower_bound": {"$ref": "#/$defs/probability"}
+      }
+    }
+  }
+}

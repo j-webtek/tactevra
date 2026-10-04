@@ -62,6 +62,121 @@ policy baseline now points to this merged commit so future checks have a stable,
 post-reduction reference. Containment ceilings remain deliberately above the
 baseline to detect material growth without making normal small changes brittle.
 
+The issue 190 v5.4 power sensitivity and bounded Isaac renderer smoke add nine
+small reviewed source, schema, test, and retained-evidence files. The governed
+tracked-file ceiling is therefore 6,299. Pixel output remains in the external
+Isaac artifact directory and is not included in Git source archives.
+
+The issue 190 v4.2 scene-correlation estimate adds four small reviewed text
+files: the exact-probability reconstruction tool, strict schema, retained
+aggregate report, and focused test. The governed tracked-file ceiling is
+therefore 6,303. No image, checkpoint, simulator output, or physical artifact
+is added to the source archive.
+
+The issue 190 multi-axis error-dependence increment adds four reviewed text
+files: the exact-probability analyzer, strict schema, retained aggregate report,
+and focused test. The governed tracked-file ceiling is therefore 6,307. It adds
+no pixel, checkpoint, simulator output, or physical artifact.
+
+The issue 190 v5.4 admission and codec analysis adds four reviewed source and
+test files: the exact-shard allowlist admitter, frozen codec evaluator, retained
+failure diagnostic, and their focused test. These are independent executable
+evidence tools rather than generated outputs, so they remain separate instead
+of being hidden inside unrelated modules. The governed tracked-file ceiling is
+therefore 6,311. No image, checkpoint, simulator output, or physical artifact is
+added, and every byte and duplicate ceiling remains unchanged.
+
+The MuJoCo Warp secondary-oracle architecture adds one reviewed Markdown plan.
+It installs no dependency, cache, converted asset, simulation output, image, or
+model. The governed tracked-file ceiling is therefore 6,312; all byte, blob,
+duplicate, and reduction limits remain unchanged.
+
+The reviewed MuJoCo Warp host, parity, batch, campaign, queue, and scenario
+increments add twelve small source, configuration, fixture, schema, and test
+files through the frozen provenanced-profile stage. No installed environment,
+cache, converted asset, rendered image, or model is tracked. The governed
+tracked-file ceiling is therefore 6,324; all byte, blob, duplicate, and
+reduction limits remain unchanged.
+
+The schedule-scale differential, full-sample four-backend admission, and
+schedule-gap attribution increments each add one reviewed probe and one compact
+JSON evidence record. These six files are retained separately because each
+records a distinct frozen computation and result. The governed tracked-file
+ceiling is therefore 6,330; all byte, blob, duplicate, and reduction limits
+remain unchanged.
+
+The nominal-target uncertainty increment adds three reviewed files: a
+catalog-bound target-pose bundle builder, a deterministic uncertainty probe,
+and its compact retained result. The existing focused MuJoCo Warp test file and
+shared coordination documents were extended in place. The governed tracked-file
+ceiling is therefore 6,333; no simulator cache, image, model, or physical
+artifact is tracked, and all byte, blob, duplicate, and reduction limits remain
+unchanged.
+
+The measured-catalog MW2UC extension adds one reviewed zero-authority source
+file. It consolidates five-target pose generation and the unchanged frozen
+calibrated-residual application in one tool; all full simulation results remain
+external and hash-bound. The governed tracked-file ceiling is therefore 6,334;
+no simulator cache, image, model, or physical artifact is tracked, and all byte,
+blob, duplicate, and reduction limits remain unchanged.
+
+The issue 190 v14 synthetic evaluation adds three small, reviewed source files:
+the deterministic static-pose fixture builder, its retained JSON fixture, and
+its focused test. The tracked-file ceiling is therefore 6,103. This adjustment
+does not relax the byte, single-blob, or duplicate-byte ceilings and does not
+change either reduction target.
+
+The issue 190 v15 pose-cluster diagnostic adds four reviewed, small text files:
+the read-only analyzer, strict schema, retained aggregate report, and focused
+test. The current tracked-file ceiling is therefore 6,131. This adjustment does
+not relax any byte or duplicate-byte ceiling and adds no model or image blob.
+
+The issue 190 v16 grouped-neighborhood campaign adds three reviewed source
+files: the deterministic grouped fixture builder, its retained JSON fixture,
+and its focused test. The current tracked-file ceiling is therefore 6,134.
+This adjustment does not relax any byte, single-blob, or duplicate-byte ceiling
+and adds no model or image blob.
+
+The issue 190 v16 grouped-neighborhood diagnostic adds four reviewed text
+files: the read-only analyzer, strict schema, retained aggregate report, and
+focused test. The current tracked-file ceiling is therefore 6,138. This
+adjustment does not relax any byte, single-blob, or duplicate-byte ceiling.
+
+The issue 190 v16 geometry-first fusion replay adds four reviewed text files:
+the mask replay analyzer, strict schema, retained aggregate report, and focused
+test. The current tracked-file ceiling is therefore 6,142. This adjustment does
+not relax any byte, single-blob, or duplicate-byte ceiling and adds no image,
+model, or simulator blob.
+
+The issue 190 residual-obstruction pretraining freeze adds four reviewed text
+files: the deterministic campaign builder, strict schema, retained fixture, and
+focused test. The current tracked-file ceiling is therefore 6,146. This
+adjustment does not relax any byte, single-blob, or duplicate-byte ceiling and
+adds no image, model, or simulator blob.
+
+The issue 190 residual-obstruction development run adds four reviewed text
+files: the deterministic materializer/trainer, strict result schema, retained
+scorecard, and focused test. Generated crops and model weights remain external
+hashed artifacts. The current tracked-file ceiling is therefore 6,150. This
+adjustment does not relax any byte, single-blob, or duplicate-byte ceiling.
+
+The issue 190 rejected residual-candidate diagnostic adds four reviewed text
+files: the read-only analyzer, strict schema, retained aggregate report, and
+focused test. The current tracked-file ceiling is therefore 6,154. This
+adjustment does not relax any byte, single-blob, or duplicate-byte ceiling.
+
+The issue 190 residual successor v2 freeze adds four reviewed text files: the
+deterministic successor builder, strict schema, retained fixture, and focused
+test. The current tracked-file ceiling is therefore 6,158. This adjustment does
+not relax any byte, single-blob, or duplicate-byte ceiling and adds no image,
+model, or simulator blob.
+
+The issue 190 residual v2 renderer binding adds four reviewed text files: the
+deterministic contract builder, strict schema, retained contract, and focused
+test. The current tracked-file ceiling is therefore 6,162. This adjustment does
+not relax any byte, single-blob, or duplicate-byte ceiling and adds no generated
+image or model blob.
+
 The preferred order is:
 
 1. replace repeated instructional STL copies with one canonical tracked object

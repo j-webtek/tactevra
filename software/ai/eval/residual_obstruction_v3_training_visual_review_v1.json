@@ -1,0 +1,28 @@
+{
+  "contact_sheet_sha256": "5741046ed35bcdb215f9c8f302605733c4e1ea96304a94a956f2a2b52fab7c86",
+  "development_pixels_opened": false,
+  "evaluation_opened": false,
+  "findings": [
+    "All 24 crops retain a consistent local keyboard neighborhood and no crop-to-label permutation is visible.",
+    "Cable, foreign-object, and tool variants visibly affect the target neighborhood in the declared direction.",
+    "Compression, defocus, glare, and motion-blur rows are intentionally ABSTAIN quality failures even when geometric safe-overlap is zero.",
+    "Keyboard G is not globally inverted on training: its local AUC is 0.9625651041666666; its negative strict margin comes from a high-scoring clear cool-sensor outlier and a low-scoring low-key cable-rubber outlier."
+  ],
+  "hardware_writes": 0,
+  "limitations": [
+    "The review covers 24 neutral-appearance rows from two training scenes for keyboard G, not the full corpus.",
+    "This simulated human review assesses visible crop and label coherence only; it does not qualify rendering realism, physical deployment, or a successor model."
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "prior_report_file_sha256": "51dc971e6370b929a1bfa0b32243f7fb3fac7de38807716865c6f80a24f84e26",
+  "review_sha256": "d02bdd445bee1053f89195809b3c051c8f4f7962c4991cc232522596d9138297",
+  "reviewed_rows": 24,
+  "reviewed_target": "keyboard:G",
+  "schema": "tactevra.ai_residual_obstruction_v3_training_visual_review.v1",
+  "scope": "TRAINING_ONLY_HUMAN_SIMULATED_REVIEW_NO_QUALIFICATION",
+  "source_commit": "ad1b9bed6ba46560ac51e4628dcbdb9b496e108a",
+  "source_report_file_sha256": "766b287b2c9d127390db41f6eed7016298bc0086dd8f45d2337ca2b2366c74a9",
+  "source_report_sha256": "8952e1146676b97efeabc9120fd2725e73ad5f5e76b52fd44dd44b6fada0b549",
+  "status": "PASS_WITH_LIMITATIONS"
+}

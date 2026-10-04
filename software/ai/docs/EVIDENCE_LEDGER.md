@@ -4248,3 +4248,6312 @@ rewriting history. New entries must use a unique evidence ID.
   Git history; bundle 002 is a new identity rather than a silent rewrite.
 - Next dependency: merge the reviewed reconciliation, close issue #167, and
   retain issue #88 as the remaining source-preview blocker.
+
+### E-20260929-INT-424 — Isaac WP0 test checkout was incomplete
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `2973bf912445ce70be26c8e88c6eb6ae256b4611`.
+- Change: ran the merged Isaac request/receipt contract suite beside the new
+  runner-probe tests in the issue #190 worktree before the sparse checkout had
+  materialized every tracked WP0 input.
+- Inputs/fixtures: tracked paths
+  `software/tests/fixtures/isaac_sim/` and `software/schemas/`; contract-test
+  source SHA-256
+  `01bc2497819d266ee7081646a3e7d4a2ea6557130eac30a222a422ee21805e2b`.
+- Command: `python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`; then
+  `git sparse-checkout add software/tests/fixtures software/integrations; python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`.
+- Result: BLOCKED. The first attempt reported 8 failed and 6 passed because all
+  tracked Isaac fixtures were absent. The second reported 2 failed and 12
+  passed because both tracked JSON schemas were still absent. Both failures
+  were checkout-materialization errors; no validator behavior was changed.
+- Artifacts: console results only; tracked fixtures and schemas remain the
+  unchanged test inputs.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is worktree setup evidence. It evaluates no Isaac physics,
+  USD asset, collision, contact, camera, arm command, or physical outcome.
+- Supersedes: none; both failed attempts remain recorded here.
+- Next dependency: materialize `software/schemas/` and rerun the identical
+  focused suite before relying on WP0 results.
+
+### E-20260929-INT-425 — Isaac Sim 6.1.0 runner candidate installed and bound
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `2973bf912445ce70be26c8e88c6eb6ae256b4611`.
+- Change: installed the exact Isaac Sim 6.1.0 Python distribution and CUDA 13
+  Torch in a dedicated external environment; added a standard-library-only
+  host probe that hashes installed distribution metadata without importing or
+  launching Isaac; retained a compact zero-authority candidate report; and
+  added deterministic, fail-closed hardware-free tests and runner guidance.
+- Inputs/fixtures: host-probe artifact SHA-256
+  `063a4fe5afae0f786043b9eae36cad28b69ca224eddb8e47c84252dc757eb017`;
+  probe source SHA-256
+  `d911c6d30fc365e78b943712db2abeedb72326ef3dd2ce7b8b6315ffbc750914`;
+  probe-test SHA-256
+  `2b72270544a3919256a4b52dad0d96bbdef5473a3ccdcd40d55ae97281186b1f`;
+  unchanged fail-closed toolchain-lock SHA-256
+  `171da8d802226145f382041e1ca321cc1665ecb1f356933e48b4a5989928d42e`.
+  The report binds 26 distributions, installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`,
+  extension digest
+  `3a510e375fc27c0ac2b540e14976ef6ae4255286d43753b45fc999ce2188e8bc`,
+  driver 591.86, and two RTX 3090 GPUs with 24576 MiB each.
+- Command: `py -3.12 -m venv C:\IsaacSim\env_6_1_0`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install --upgrade pip`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install "isaacsim[all,extscache]==6.1.0.0" --extra-index-url https://pypi.nvidia.com`;
+  `$env:PYTHONPATH = (Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_probe --output software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json`;
+  `git sparse-checkout add software/schemas; python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_repository_artifacts.py`.
+- Result: PASS for installation, non-launching evidence capture, and repository
+  checks. Exact installed versions are Isaac Sim 6.1.0.0 and Torch
+  2.11.0+cu130; Torch reports CUDA available with two RTX 3090 devices. The
+  focused suite passed 14 tests in 0.53 seconds. Documentation, evidence-scope,
+  and repository-artifact audits passed. The candidate correctly reports
+  `CANDIDATE_BLOCKED` with four named blockers.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json`;
+  `software/src/rocell/integrations/isaac_sim/host_probe.py`;
+  `software/tests/unit/test_isaac_sim_host_probe.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: Isaac Sim was not launched and no NVIDIA license/EULA was
+  accepted by automation. The host driver 591.86 is below NVIDIA's documented
+  tested Windows driver 595.97, and RTX 3090 is outside the documented 6.1.0
+  minimum GPU set. No settings profile, live extension export, USD import,
+  kinematic parity, simulation data, collision/contact evidence, controller
+  access, or physical qualification exists. The repository lock remains
+  `UNSELECTED`; this result changes no AI lane, arm lane, or integration gate.
+- Supersedes: none. INT-424 remains visible failed setup evidence.
+- Next dependency: obtain explicit acceptance for NVIDIA's applicable terms
+  and a reviewed driver update, then run a first standalone/headless
+  compatibility launch and retain the live version, extension, and settings
+  identities before proposing a selected toolchain lock.
+
+### E-20260929-INT-426 — NVIDIA outer installer failed before driver update
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: downloaded the official NVIDIA 595.97 Windows package after owner
+  authorization, verified its Windows signature, and attempted its outer
+  self-extracting silent installer.
+- Inputs/fixtures: official 957,358,592-byte installer SHA-256
+  `979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`;
+  valid Authenticode signer `NVIDIA Corporation`, certificate thumbprint
+  `B66776FC8E70C58ED98199E8391264C827AAC534`.
+- Command: `Start-Process -FilePath C:\IsaacSim\installers\595.97-desktop-win10-win11-64bit-international-dch-whql.exe -ArgumentList '-s','-noreboot' -Verb RunAs -PassThru -Wait`.
+- Result: FAIL. The signed outer installer exited `-2147024891`
+  (`0x80070005`, access denied), and both GPUs continued to report driver
+  591.86. No retry result was substituted for this failed attempt.
+- Artifacts: installer retained externally at the hash above; console result
+  only. No installer binary or extracted driver payload is committed.
+- Hardware writes: 0 robot/controller writes. The unsuccessful driver
+  installer may have updated NVIDIA application support files but did not
+  change the active display driver.
+- Physical movements: 0.
+- Limitations: operating-system driver installation evidence only. It tests no
+  Isaac process, scene, robot model, physics, rendering, or physical system.
+- Supersedes: none; INT-425 remains the prelaunch candidate boundary.
+- Next dependency: extract the same verified package and run its signed inner
+  display-driver installer with NVIDIA's documented silent switches.
+
+### E-20260929-INT-427 — initial headless receipt extraction failed closed
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: attempted to retain structured evidence from the newly installed
+  Isaac environment after driver correction.
+- Inputs/fixtures: Isaac Sim 6.1.0.0 installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`;
+  NVIDIA driver 595.97; external smoke scripts and logs.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\smoke_6_1_0.py *> C:\IsaacSim\evidence\first_launch_6_1_0.log` and two corrected reruns of the same command.
+- Result: FAIL in retained stages. The first command could not create its log
+  because the evidence directory was absent. After creating the directory,
+  Isaac started and shut down but the script called nonexistent
+  `IApp.get_version`, initially without a durable error receipt and then with a
+  retained `AttributeError` status. Isaac's shutdown forced process exit zero,
+  demonstrating that exit code alone is insufficient evidence.
+- Artifacts: external logs SHA-256
+  `53bf754512d4bd640b576a8ecf1037221347a10c281141f640e4fda08f1789c3`
+  and failed status JSON; neither is promoted as a passing receipt.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the Isaac application did initialize, but these attempts do not
+  provide a valid version/extension/settings receipt and cannot select the
+  repository lock. No USD scene or robot asset was loaded.
+- Supersedes: none; these failures remain visible alongside the later corrected
+  probe.
+- Next dependency: use Kit 6.1's `get_app_version` API, write an explicit PASS
+  or ERROR sidecar before shutdown, and validate the resulting canonical
+  receipt in hardware-free CI.
+
+### E-20260929-INT-428 — driver-qualified Isaac headless launch verified
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: extracted the verified 595.97 package, verified the inner NVIDIA
+  `setup.exe` signature, installed the display driver directly, confirmed CUDA
+  health, implemented a current-API headless launch probe with an explicit
+  status sidecar, retained its canonical receipt, and added hardware-free
+  receipt validation.
+- Inputs/fixtures: first-launch receipt file SHA-256
+  `bc41e5070109de62a1a78388e9b46ebd8a0882cecc567141ad43ea9ba90b20ee`;
+  receipt content SHA-256
+  `fa28e3a5878f77cc928a93861b35cdf9fac53b857840fbdacef9907aefc1d0ee`;
+  probe source SHA-256
+  `db9df17670a32d134f54030883288359803852031a6caab37efccf57ff103b0e`;
+  test source SHA-256
+  `e23fe207f0a03ef69b018af6158bb3f27d0763873134af69503a89ec880e9280`;
+  installer and installation identities from INT-426 and INT-425.
+- Command: `C:\IsaacSim\tools\7zr.exe x C:\IsaacSim\installers\595.97-desktop-win10-win11-64bit-international-dch-whql.exe -oC:\IsaacSim\installers\595.97-extracted -y`;
+  `Start-Process -FilePath C:\IsaacSim\installers\595.97-extracted\setup.exe -WorkingDirectory C:\IsaacSim\installers\595.97-extracted -ArgumentList '-s','-n','Display.Driver' -Verb RunAs -PassThru -Wait`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_launch_probe.py --output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.json --status-output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.status.json --installation-sha256 ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258 --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`;
+  `python -m py_compile software/integrations/isaac_sim/first_launch_probe.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS for the bounded compatibility launch and repository checks.
+  Both RTX 3090s report driver 595.97 and Torch 2.11.0+cu130 retained CUDA 13.0
+  access. Isaac Sim 6.1.0.0 / Kit 6.1.0 started headlessly and shut down; the
+  receipt binds 303 unique enabled extensions at digest
+  `6e0d70db81fe16273341e65bd3cf0bc70dffe4a88a5cc0a7bacf51110dd27c70`
+  and the launch settings at digest
+  `0cbc21c4dbeeb7b2a0ce6c4c4875681834da8c12c83aa49cd36f09654b3ea473`.
+  The focused suite passed 17 tests in 0.82 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/windows_dual_rtx3090_first_launch_20260929.json`;
+  `software/integrations/isaac_sim/first_launch_probe.py`;
+  `software/tests/unit/test_isaac_sim_first_launch_evidence.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0 robot/controller writes. One authorized operating-system
+  display-driver update occurred and is outside the robot authority boundary.
+- Physical movements: 0.
+- Limitations: this is compatibility-startup evidence only. No USD scene,
+  RoArm asset, physics step, rendered frame, collision/contact check, trajectory,
+  robot transport, or physical qualification exists. RTX 3090 remains outside
+  NVIDIA's documented 6.1.0 minimum GPU set. The log reports device 0 at PCIe
+  x4 versus x16 maximum, no CUDA peer access, a stale localhost Omniverse proxy,
+  and an OpenUSD asset-converter build warning. The toolchain lock remains
+  `UNSELECTED`, and no AI, arm, or integration gate status changed.
+- Supersedes: none. INT-426 and INT-427 remain visible failed evidence.
+- Next dependency: isolate or resolve the OpenUSD asset-converter warning,
+  define the governed RoArm import inputs, and begin WP1 joint/link/axis/unit
+  mapping plus deterministic FK parity before reviewing a selected lock.
+
+### E-20260929-INT-429 — initial Isaac URDF joint mapping assumption failed closed
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `8594c10b6a757e743388c7440aab2f31014ac463`.
+- Change: ran the first governed import probe against the pinned meshless
+  RoArm-M3 URDF and required every source joint to appear as a USD Physics
+  joint.
+- Inputs/fixtures: governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  Isaac Sim 6.1.0.0 installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`;
+  NVIDIA driver 595.97.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-001a --receipt C:\IsaacSim\evidence\urdf_import_001.json --status-output C:\IsaacSim\evidence\urdf_import_001.status.json`.
+- Result: FAIL. Isaac emitted all nine source links and six movable joints but
+  did not emit `world_to_base_link` or `link5_to_hand_tcp` as Physics joint
+  prims. The explicit status was `RuntimeError: imported joint mismatch:
+  missing=['link5_to_hand_tcp', 'world_to_base_link'], extra=[]`.
+- Artifacts: failed status and 11,450-byte generated USD retained externally
+  under `C:\IsaacSim\evidence` and
+  `C:\IsaacSim\artifacts\issue190\wp1-import-001a`; neither is promoted as
+  passing evidence.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: importer representation discovery only. No physics step, FK
+  parity, collision/contact result, rendering, robot transport, or physical
+  qualification was attempted.
+- Supersedes: none; this failed assumption remains visible beside INT-430.
+- Next dependency: classify the two fixed source joints from their imported
+  nested transforms while continuing to require exact movable-joint and link
+  sets.
+
+### E-20260929-INT-430 — governed RoArm URDF import and mapping retained
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `8594c10b6a757e743388c7440aab2f31014ac463`.
+- Change: implemented the bounded Isaac URDF import probe, retained a compact
+  canonical mapping receipt, explicitly represented the two collapsed fixed
+  joints, bound the external generated USD manifest, added hardware-free
+  receipt tests, and documented reproduction and scope.
+- Inputs/fixtures: governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  probe SHA-256
+  `ff3b6575376b1d7e037d3b45dbdcc06e9c3da9e6d0b0c99c121812f669f27fff`;
+  committed receipt file SHA-256
+  `d537aa8aa0c4dc30eff62fd918b45c6afb103a8a81fd2180cdb7add757139ae1`;
+  receipt content SHA-256
+  `24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343`;
+  test SHA-256
+  `6007d4ec370bc1fcbde9423543ceaadf97b1a216126f9764b99e4d85a323b596`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-002 --receipt C:\IsaacSim\evidence\urdf_import_002.json --status-output C:\IsaacSim\evidence\urdf_import_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/urdf_import_probe.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS. The receipt binds nine unique links, six unique movable Physics
+  joints, and both source fixed joints as collapsed nested transforms. The one
+  external 11,450-byte USD has SHA-256
+  `492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6`;
+  its canonical manifest digest is
+  `b84b6b6542c76dbffa4f43446db53d724a9c6e44333a43654eb351ca40e7d378`.
+  The focused suite passed 22 tests in 1.06 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json`;
+  `software/integrations/isaac_sim/urdf_import_probe.py`;
+  `software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: meshless kinematic-import evidence only. The source retains zero
+  effort and velocity placeholders and lacks inertial, visual, and collision
+  geometry. No dynamics, FK parity, trajectory, clearance, contact, render,
+  hardware, or physical qualification claim is made. RTX 3090 remains outside
+  NVIDIA's documented Isaac 6.1.0 minimum GPU set, and the toolchain lock
+  remains `UNSELECTED`.
+- Supersedes: none. INT-429 remains retained failed evidence.
+- Next dependency: set actual Isaac articulation states for the fixed zero,
+  home, and ready corpus and compare the imported `hand_tcp` world pose against
+  governed FK values before reviewing runner selection.
+
+### E-20260929-INT-431 — unnormalized Isaac articulation omitted base rotation DOF
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `21cd36177f37e788bca8951d664a804398826155`.
+- Change: opened the retained unnormalized USD in a live Isaac physics
+  articulation, enumerated its DOFs, teleported the exposed joints through the
+  fixed corpus, and retained the topology blocker separately from its otherwise
+  passing base-zero pose measurements.
+- Inputs/fixtures: unnormalized import receipt content SHA-256
+  `24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343`;
+  preserved unnormalized receipt file SHA-256
+  `5113c2ba391cfd8720358ce0386dcdb34c01a8afcb0bd27296eb322a395fccca`;
+  unnormalized external USD SHA-256
+  `492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\fk_parity_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-002\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --output C:\IsaacSim\evidence\fk_parity_001.json --status-output C:\IsaacSim\evidence\fk_parity_001.status.json`.
+- Result: BLOCKED. The three base-zero corpus poses passed the provisional
+  0.1 mm / 0.05 degree thresholds, but the live articulation exposed only five
+  DOFs and omitted `base_link_to_link1`. The status receipt recorded
+  `parity_pass=true`, `status=BLOCKED`, content SHA-256
+  `0e5f00a8ea1ec378f35823026efa41a467503e65652604d63eaffe5dfece2017`.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_unnormalized_20260929.json`;
+  blocked parity receipt and logs retained externally in `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: base-zero kinematic diagnostic only. It could not test nonzero
+  base rotation, performed no dynamics step, and provides no collision,
+  contact, render, hardware, or physical qualification.
+- Supersedes: none. INT-429 and INT-430 remain visible import evidence.
+- Next dependency: deterministically promote the collapsed `base_link` to the
+  articulation root and rerun the identical corpus with all six DOFs visible.
+
+### E-20260929-INT-432 — complete six-DOF Isaac FK corpus passes
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `21cd36177f37e788bca8951d664a804398826155`.
+- Change: normalized the generated USD articulation root to `base_link`,
+  preserved all six source movable joints in live Isaac order, implemented the
+  live articulation FK probe, retained canonical import and parity receipts,
+  added hardware-free evidence tests, and documented the bounded result.
+- Inputs/fixtures: normalized import receipt file SHA-256
+  `f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde`;
+  import receipt content SHA-256
+  `ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85`;
+  parity receipt file SHA-256
+  `73568d4d8387426345d8df47eb23509866d307e39c55061a18a847e4698bba0e`;
+  parity receipt content SHA-256
+  `baa6fd635e3004f75426234cc3ff72da240dae8c0b69074e7882dfbdbea2287e`;
+  normalized external USD SHA-256
+  `a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2`;
+  import probe SHA-256
+  `c12cddef1b972b96bc53303aaa92341f6f54c3b78d0dac0cc08f9f5bc4923d55`;
+  FK probe SHA-256
+  `0426a628b51420998486fb5c58f97cd393f915a3edbe791dd81518bbc3e7fcbf`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-003 --receipt C:\IsaacSim\evidence\urdf_import_003.json --status-output C:\IsaacSim\evidence\urdf_import_003.status.json`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\fk_parity_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt C:\IsaacSim\evidence\urdf_import_003.json --output C:\IsaacSim\evidence\fk_parity_002.json --status-output C:\IsaacSim\evidence\fk_parity_002.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS for the bounded kinematic parity corpus. The live articulation
+  exposes the exact six-DOF source order. Zero, home, and ready all pass at
+  thresholds 0.1 mm translation and 0.05 degrees rotation; worst translation
+  error is 0.00012833903159220256 mm and reported rotation error is 0 degrees.
+  The focused suite passed 27 tests in 1.29 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_fk_parity_20260929.json`;
+  `software/integrations/isaac_sim/urdf_import_probe.py`;
+  `software/integrations/isaac_sim/fk_parity_probe.py`;
+  `software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `software/tests/unit/test_isaac_sim_fk_parity_evidence.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: parity uses instantaneous articulation teleport and the imported
+  fixed `hand_tcp` transform without a dynamics step. The meshless source has
+  invalid mass and inertia placeholders and no visual or collision geometry.
+  This result makes no dynamics, trajectory, clearance, contact, rendering,
+  controller, hardware, or physical qualification claim. RTX 3090 remains
+  outside NVIDIA's documented Isaac 6.1.0 minimum GPU set, and the repository
+  toolchain lock remains `UNSELECTED`. No AI, arm, or integration gate status
+  changed.
+- Supersedes: INT-431's missing-base-DOF topology for the normalized artifact
+  only; INT-431 remains retained failed evidence.
+- Next dependency: define and import governed reduced collision geometry and
+  valid inertial properties before any dynamics, clearance, or contact oracle
+  work; runner lock selection remains a separate review decision.
+
+### E-20260929-INT-433 — nominal RC03 rigid scene retained with collision blockers
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `0ffb24b5860cea90ad3338429a4adf19134f0727`.
+- Change: projected the strict RC03 nominal scene into a metre-based external
+  Isaac USD, referenced the normalized six-DOF robot at the frozen nominal
+  board transform, retained six static rigid obstacle envelopes, six nominal
+  fiducials and the nominal `H` target marker, and added a compact canonical
+  receipt plus hardware-free validation. Collision queries and hover replay
+  are explicitly inadmissible.
+- Inputs/fixtures: scene-probe SHA-256
+  `69fb0caa5045e8fb3938f2ad71859f0da35963ddd85dfe847a593a5dd4a4f945`;
+  test SHA-256
+  `af86a721b2b3a584a1d0894f5c3b67e5f7082353f197d040235d6b4674752a0f`;
+  committed receipt file SHA-256
+  `df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b`;
+  receipt content SHA-256
+  `0d080880e6c7915cae43d04771c9a17748060c4d682a1de86003d54021067bcd`;
+  target-profile SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  simulation-hardware-profile SHA-256
+  `6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190`;
+  RC03 layout SHA-256
+  `e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1`;
+  AprilTag-map SHA-256
+  `81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700`;
+  normalized robot-import receipt file SHA-256
+  `f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_scene_probe.py --workspace . --rc03-root active-project\RoCell_v0_3 --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --robot-import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --output-dir C:\IsaacSim\artifacts\issue190\wp2-scene-002 --receipt C:\IsaacSim\evidence\rc03_scene_002.json --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/rc03_scene_probe.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_fk_evidence.py software/tests/unit/test_isaac_sim_import_evidence.py software/tests/unit/test_isaac_sim_host_evidence.py -q`;
+  `python -m pytest software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for bounded rigid scene composition. The external
+  6,847-byte stage SHA-256 is
+  `77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35`,
+  with canonical external-manifest digest
+  `fcd219cab737e48ccffd464360705a9de931ab46a23640f4336bc4223b662664`.
+  Reopening the stage found exactly six collision prims and all six composed
+  robot joints. The corrected focused suite passed 32 tests in 1.49 seconds,
+  and all four repository audits passed. The earlier focused-test command
+  failed before collection because it named three nonexistent test files;
+  that failed attempt is retained here and was corrected without rewriting it.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/rc03_nominal_rigid_scene_20260929.json`;
+  `software/integrations/isaac_sim/rc03_scene_probe.py`;
+  `software/tests/unit/test_isaac_sim_rc03_scene_evidence.py`;
+  external USD and status evidence under
+  `C:\IsaacSim\artifacts\issue190\wp2-scene-002` and
+  `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the board, keyboard, phone and three station bodies are static
+  nominal envelopes. The station heights are 35 mm conservative proxies. Arm
+  links, the tool and camera support have no collision geometry; source
+  inertial properties are invalid; robot placement is nominal and unmeasured;
+  and the Isaac toolchain lock remains `UNSELECTED`. This evidence provides no
+  dynamics, trajectory, clearance, contact, rendering, controller, hardware or
+  physical qualification, and changes no AI, arm or integration gate status.
+- Supersedes: none. INT-431 and INT-432 remain the governing topology and FK
+  evidence.
+- Next dependency: define reviewed reduced collision geometry for the arm,
+  tool and camera support, replace fixture proxies with governed solid heights,
+  and obtain measured robot placement before any clearance or hover oracle is
+  admissible.
+
+### E-20260929-INT-434 — STEP probe import-order attempt failed closed
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `204fe02906d1e914bed0a20a753a2fb6e61dbfe0`.
+- Change: attempted the first repository-owned inspection of the pinned
+  official RoArm STEP assembly with the installed Isaac HOOPS converter.
+- Inputs/fixtures: official archive SHA-256
+  `1e2111145276aac14e521f47990fc41de87e2e735623d115a39cc176c9762da2`;
+  extracted STEP SHA-256
+  `728eb52f0bdd32dc0b907c9bb983d3d0b8adf7a5ea945949785a6e496f5089ff`;
+  failed status-file SHA-256
+  `96ad33a2d241d21cb26e6adbb44fb62f31b9f78dc0dd00e492fae346511c6f36`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\step_inspection_probe.py --archive C:\IsaacSim\sources\roarm-m3-step-260310\RoArm-M3_STEP_260310.zip --step C:\IsaacSim\sources\roarm-m3-step-260310\extracted\RoArm-M3_STEP\RoArm-M3.step --output-dir C:\IsaacSim\artifacts\issue190\wp2-cad-002 --receipt C:\IsaacSim\evidence\step_inspection_002.json --status-output C:\IsaacSim\evidence\step_inspection_002.status.json`.
+- Result: FAIL. The probe imported `omni.converter.hoops` before enabling
+  `omni.kit.converter.hoops_core`; the explicit status recorded
+  `ModuleNotFoundError: No module named 'omni.converter'`. Isaac shutdown again
+  forced process exit zero, so the status sidecar rather than the process code
+  preserved the failure.
+- Artifacts: failed status and log retained externally under
+  `C:\IsaacSim\evidence`; the empty output directory contains no promoted USD.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: initialization-order evidence only. No CAD conversion, geometry
+  inventory, collision shape, physics step, trajectory, hardware, or physical
+  qualification resulted.
+- Supersedes: none; this failure remains visible beside INT-435.
+- Next dependency: enable the HOOPS core extension, advance Kit startup, then
+  import the backend and rerun the same pinned inputs with explicit status
+  validation.
+
+### E-20260929-INT-435 — pinned official STEP inspection retained
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `204fe02906d1e914bed0a20a753a2fb6e61dbfe0`.
+- Change: downloaded and hash-verified the pinned official Waveshare archive,
+  verified its sole STEP member byte for byte, converted it twice with the
+  installed HOOPS backend, inventoried the resulting USD, retained four named
+  upstream structural components as unassigned collision seeds, and added a
+  compact canonical receipt plus hardware-free tests. No generated vendor CAD
+  asset is committed.
+- Inputs/fixtures: probe SHA-256
+  `417d37f34e9bd05f985e7fedf5d0571920b88e108e7e516fcde28fd3ce1b2e66`;
+  test SHA-256
+  `65822a8d2784eeae22afb6fc5d9f1d9ab758c028393d740bb646cd5b4618f528`;
+  committed receipt file SHA-256
+  `255a3612d1c932646f3ba4c09357f5337b679d46a1aeb210ffe9976a5c93ddbb`;
+  receipt content SHA-256
+  `b51c20e34c3b3edfa4ba40b88d04299aa346803b43b12909dade7c41c44cf967`;
+  archive SHA-256
+  `1e2111145276aac14e521f47990fc41de87e2e735623d115a39cc176c9762da2`;
+  extracted STEP SHA-256
+  `728eb52f0bdd32dc0b907c9bb983d3d0b8adf7a5ea945949785a6e496f5089ff`.
+- Command: `Invoke-WebRequest -Uri https://files.waveshare.com/wiki/RoArm-M3/RoArm-M3_STEP_260310.zip -OutFile C:\IsaacSim\sources\roarm-m3-step-260310\RoArm-M3_STEP_260310.zip`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\step_inspection_probe.py --archive C:\IsaacSim\sources\roarm-m3-step-260310\RoArm-M3_STEP_260310.zip --step C:\IsaacSim\sources\roarm-m3-step-260310\extracted\RoArm-M3_STEP\RoArm-M3.step --output-dir C:\IsaacSim\artifacts\issue190\wp2-cad-003 --receipt C:\IsaacSim\evidence\step_inspection_003.json --status-output C:\IsaacSim\evidence\step_inspection_003.status.json`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\step_inspection_probe.py --archive C:\IsaacSim\sources\roarm-m3-step-260310\RoArm-M3_STEP_260310.zip --step C:\IsaacSim\sources\roarm-m3-step-260310\extracted\RoArm-M3_STEP\RoArm-M3.step --output-dir C:\IsaacSim\artifacts\issue190\wp2-cad-004 --receipt C:\IsaacSim\evidence\step_inspection_004.json --status-output C:\IsaacSim\evidence\step_inspection_004.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/step_inspection_probe.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for pinned CAD inspection. Isaac identified the
+  source as millimetre/Z-up and produced 2,893 prims and 770 meshes over an
+  assembly bound from `[-48.994985,-42.71,0]` to
+  `[356.851785,42.51,389.380716]` mm. Separate corrected conversions produced
+  the identical 26,872,057-byte USD SHA-256
+  `cfcd4e6170350d948de1976164665ddde99cfad457b72730f7ffcbdd119496d3`;
+  its canonical external manifest digest is
+  `9e7fbf1d2a81cdc039603613aabdf91b63a301c46e0230da78b733e7934485b9`.
+  The two passing status-file SHA-256 values are
+  `2a145f2793d66d0d3a2c27ccea412f5c7f31ef39b382ddb1015252c5328c5ef4`
+  and `a4ed5791b6f7950871dfc42cc97b53e24a118000f7f97d14f9e46d21cb31e1ad`.
+  The focused suite passed 38 tests in 1.71 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_step_inspection_20260929.json`;
+  `software/integrations/isaac_sim/step_inspection_probe.py`;
+  `software/tests/unit/test_isaac_sim_step_inspection_evidence.py`;
+  generated CAD USD, status, and logs retained externally under
+  `C:\IsaacSim\artifacts\issue190\wp2-cad-004` and
+  `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the STEP assembly pose is not bound to a governed URDF joint
+  state. `AL-BASE`, `AL-SHOULDER`, `AL-ELBOW-A`, and `AL-ELBOW-B` retain null
+  dynamic-link assignments and are incomplete inspection seeds. No reduced
+  shapes, arm collision geometry, valid inertia, tool, camera support, measured
+  placement, clearance, trajectory, contact, rendering, controller, hardware,
+  or physical qualification exists. Upstream redistribution scope remains
+  unconfirmed, and the toolchain lock remains `UNSELECTED`. No AI, arm, or
+  integration gate status changed.
+- Supersedes: none. INT-434 remains retained failed evidence; INT-433 remains
+  the governing nominal rigid-scene composition evidence.
+- Next dependency: derive and review the assembly-pose-to-URDF-state binding,
+  assign complete CAD groups to dynamic links, and generate conservative
+  reduced link-local shapes before collision differential or hover replay can
+  become admissible.
+
+### E-20260929-INT-436 — official CAD assembly pose classified against governed states
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `9775ab3b875eede9a941a55a10af573ffc507e42`.
+- Change: derived a CAD-to-URDF world translation from the pinned assembly's
+  paired shoulder-servo envelopes and assembly floor, compared six governed
+  URDF link origins in fixed zero, home, and ready states against six named CAD
+  product envelopes, selected the strongly separated home-pose hypothesis, and
+  retained dynamic-link assignment, collision geometry, and clearance replay
+  as explicitly inadmissible.
+- Inputs/fixtures: probe SHA-256
+  `930b9d8d5ecfba3c8decc1af4f0f496ba841341bf1492ef704b9984a108a4abf`;
+  test SHA-256
+  `64c30e83ebbdca02c2945ff94a906d96449ef0807e77e2ab54253a9cac9858c6`;
+  committed receipt file SHA-256
+  `e4271e62147c8e421e4d303365563514da24fbe33b1ae46328dddffad3827f50`;
+  receipt content SHA-256
+  `3817f28d9171ee3cb33d024f3f31e57495b02fb383ba60277953f6148ba00f3`;
+  external receipt file SHA-256
+  `c62be383dba83a440635ae2c2283cd09beb56ab18de0257c2ff275106c214acc`
+  (same canonical JSON content; Windows external output uses CRLF);
+  external status-file SHA-256
+  `4e8962bc08c3e74583ec91d4cf483a812a45485737638e2f15b5425d54732424`;
+  CAD USD SHA-256
+  `cfcd4e6170350d948de1976164665ddde99cfad457b72730f7ffcbdd119496d3`;
+  STEP inspection receipt content SHA-256
+  `b51c20e34c3b3edfa4ba40b88d04299aa346803b43b12909dade7c41c44cf967`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`.
+- Command: `C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\step_pose_binding_probe.py --workspace . --cad-usd C:\IsaacSim\artifacts\issue190\wp2-cad-004\roarm_m3_official.usda --step-receipt software\integrations\isaac_sim\evidence\roarm_m3_step_inspection_20260929.json --output C:\IsaacSim\evidence\step_pose_binding_001.json --status-output C:\IsaacSim\evidence\step_pose_binding_001.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/step_pose_binding_probe.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for the bounded pose hypothesis. The derived
+  `CAD_T_URDF_WORLD` has identity rotation and translation
+  `[7.005001, 0, 0]` mm. Home supported all six witnesses with maximum residual
+  2.215515 mm and RMS residual 0.904480 mm. Ready was the runner-up at
+  133.237718 mm maximum residual, producing a 131.022203 mm classification
+  margin; zero reached 305.130844 mm. The focused suite passed 43 tests in
+  1.93 seconds and all four repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_step_pose_binding_20260929.json`;
+  `software/integrations/isaac_sim/step_pose_binding_probe.py`;
+  `software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py`;
+  external generated receipt and status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: AABB witnesses classify the fixed assembly pose but do not prove
+  exact joint-axis correspondence or define complete CAD-product membership per
+  dynamic link. No reduced collision shapes, self-collision validation, valid
+  inertia, tool geometry, camera-support geometry, measured robot placement,
+  dynamics, trajectory, clearance, contact, rendering, controller, hardware,
+  or physical qualification resulted. The Isaac toolchain lock remains
+  `UNSELECTED`. No AI, arm, or integration gate status changed.
+- Supersedes: the assembly-pose uncertainty stated by INT-435 only; INT-435 and
+  all earlier failed evidence remain retained.
+- Next dependency: review complete CAD-product membership for each dynamic link
+  and generate conservative reduced link-local shapes before any collision
+  differential or hover replay can become admissible.
+
+### E-20260929-INT-437 — fixed-pose CAD link-membership candidates retained
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `5ac4ae5079814d21ccc4572848459a64f936c62d`.
+- Change: partitioned every mesh in the pinned converted STEP assembly by its
+  direct component instance, ranked two governed-link candidates for each
+  component from its AABB centroid distance to the classified home-pose link
+  skeleton, identified component groups crossing governed joint origins, and
+  retained every reviewed dynamic-link assignment as null.
+- Inputs/fixtures: probe SHA-256
+  `cb6245e1894d80e083a5e1358895c8aae4c8c40829e0d54414cf46f0b2f74057`;
+  test SHA-256
+  `0768f5d461b3922fa5ac6a90aa763e7d60f2e694a2ddc1b9ab64a111b1c155f8`;
+  committed receipt file SHA-256
+  `711437e98d148e16bfaa03cd2f69ee459efa276c15a95775535946991e2a9386`;
+  receipt content SHA-256
+  `c1ecd6b636368e38ae815aca436699d9fa44ca7e70e1456048794d0f5769fd78`;
+  external receipt file SHA-256
+  `e5c303d5b0f609d9f1cc63abb63d89d20d5fe88f80e9a65c0bdcc29ed7498f42`
+  (same canonical JSON content; Windows external output uses CRLF);
+  external status-file SHA-256
+  `d8f1c151775095228c162c7eaa11c95c65d046b6cc4d3b2b03f1da7e6222dd04`;
+  CAD USD SHA-256
+  `cfcd4e6170350d948de1976164665ddde99cfad457b72730f7ffcbdd119496d3`;
+  pose receipt content SHA-256
+  `3817f28d9171ee3cb33d024f3f31e57495b02fb383ba60277953f6148ba00f3f`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\step_link_membership_probe.py --workspace . --cad-usd C:\IsaacSim\artifacts\issue190\wp2-cad-004\roarm_m3_official.usda --pose-receipt software\integrations\isaac_sim\evidence\roarm_m3_step_pose_binding_20260929.json --output C:\IsaacSim\evidence\step_link_membership_001.json --status-output C:\IsaacSim\evidence\step_link_membership_001.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/step_link_membership_probe.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for the complete candidate inventory. The 162
+  direct component instances partition all 770 stage meshes. Forty-eight
+  instances have a nearest-link margin above 10 mm; 114 remain ambiguous and
+  19 component envelopes cross at least one governed joint origin. The nearest
+  candidate distribution is base_link 33, link1 35, link2 27, link3 26, link4
+  11, link5 23, and gripper_link 7. Reviewed assignment count remains zero.
+  The focused suite passed 48 tests in 2.17 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_step_link_membership_candidates_20260929.json`;
+  `software/integrations/isaac_sim/step_link_membership_probe.py`;
+  `software/tests/unit/test_isaac_sim_step_link_membership_evidence.py`;
+  external generated receipt and status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: nearest support-segment ranking is a review aid, not proof of
+  rigid membership. The fixed-pose STEP contains no reviewed joint or mate
+  graph; one pose cannot separate components that move together in that pose;
+  and direct component subtrees can contain parts on both sides of a joint.
+  No link-local collision shapes, inertia, dynamics, trajectory, clearance,
+  contact, rendering, controller, hardware, or physical qualification
+  resulted. The tool, camera support, measured placement, and Isaac toolchain
+  lock remain unresolved. No AI, arm, or integration gate status changed.
+- Supersedes: none. INT-436 remains the governing pose-classification evidence;
+  this row quantifies its unresolved membership dependency.
+- Next dependency: obtain a reviewed STEP joint/mate graph or at least one
+  independently identified articulated CAD state, then establish leaf-level
+  rigid motion groups before reducing any component to collision geometry.
+
+### E-20260929-INT-438 — official per-link mesh grouping bound to STEP envelope
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `0b222ebdca6c29364f12cdb138ce436a3774d328`.
+- Change: read the official RoArm-M3 Xacro and STL assets as immutable Git blobs
+  at the already governed upstream commit, verified identical visual/collision
+  bindings for seven governed links, transformed the link meshes through the
+  governed home pose and CAD frame, compared their union envelope with the
+  independently converted official STEP assembly, and retained raw and reduced
+  collision admission as false.
+- Inputs/fixtures: probe SHA-256
+  `12427f4ec0d49257e4aac0601c4100ff9ee43fe170bf2018afbf9e23ab404199`;
+  test SHA-256
+  `cd589b2f071e97c31e65c97499f163fcdce650c6e541e68528dbd9e50808555d`;
+  committed receipt file SHA-256
+  `ab8749f813a20cc93e804eddfaccca8d1997a9d6ef86eb6cebf7368e6e368640`;
+  receipt content SHA-256
+  `77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954`;
+  external receipt file SHA-256
+  `976d176d20ccb6e4fac287106aa5eb755bac07b8e579db0b260b102b590401a3`
+  (same canonical JSON content; Windows external output uses CRLF);
+  external status-file SHA-256
+  `b083e36e7d52e713588e57f7f0352251c0aafd71179a2ebde87d2dfdbcc35066`;
+  upstream commit `40dbd84b553695212fab713e8465f817ba95454d`, tree
+  `3a1d24388e15b318ba0c5305a94b5140b5b239bd`, and Xacro SHA-256
+  `b6333849d0e377008eee0a87a5b8cdcf44f7a73edf3d7600e95506a023a234b6`;
+  STEP receipt content SHA-256
+  `b51c20e34c3b3edfa4ba40b88d04299aa346803b43b12909dade7c41c44cf967`;
+  pose receipt content SHA-256
+  `3817f28d9171ee3cb33d024f3f31e57495b02fb383ba60277953f6148ba00f3f`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`.
+- Command: `git clone --filter=blob:none --no-checkout https://github.com/waveshareteam/roarm_ws.git C:\IsaacSim\sources\roarm_ws-40dbd84`;
+  `git -C C:\IsaacSim\sources\roarm_ws-40dbd84 fetch origin 40dbd84b553695212fab713e8465f817ba95454d`;
+  `git -C C:\IsaacSim\sources\roarm_ws-40dbd84 checkout --detach 40dbd84b553695212fab713e8465f817ba95454d`;
+  `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\upstream_link_mesh_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --step-receipt software\integrations\isaac_sim\evidence\roarm_m3_step_inspection_20260929.json --pose-receipt software\integrations\isaac_sim\evidence\roarm_m3_step_pose_binding_20260929.json --output C:\IsaacSim\evidence\upstream_link_meshes_001.json --status-output C:\IsaacSim\evidence\upstream_link_meshes_001.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/upstream_link_mesh_probe.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for authoritative upstream link grouping. Seven
+  referenced meshes contain 19,030 processed vertices, 38,344 triangles, and
+  19 connected bodies. Five meshes are watertight; `link1` and `link5` are not.
+  The governed home-pose mesh union spans
+  `[-48.994999,-40.799999,-0.999998]` to
+  `[355.130799,40.799999,387.543710]` mm in the CAD frame and differs from the
+  STEP assembly envelope by at most 1.910001 mm, below the declared 2 mm
+  diagnostic threshold. `gripper_left_link.stl` exists upstream but is not
+  referenced by the Xacro. The focused suite passed 53 tests in 2.45 seconds
+  and all four repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_meshes_20260929.json`;
+  `software/integrations/isaac_sim/upstream_link_mesh_probe.py`;
+  `software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py`;
+  pinned external upstream checkout under `C:\IsaacSim\sources` and generated
+  receipt/status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: global envelope agreement supports the official per-link
+  grouping but does not prove surface-level or link-local equivalence with the
+  STEP assembly. The Xacro reuses high-detail visual triangle meshes directly
+  as collision meshes; two referenced meshes are non-watertight, the extra
+  left-gripper asset is unreferenced, and no convex reduction or self-collision
+  pair policy has been reviewed. Tool geometry, camera-support geometry,
+  measured placement, dynamics, trajectory, clearance, contact, controller,
+  hardware, and physical qualification remain absent. The Isaac toolchain lock
+  remains `UNSELECTED`. No AI, arm, or integration gate status changed.
+- Supersedes: none. INT-437 remains the fixed-STEP product-candidate evidence;
+  this row establishes a stronger independent per-link geometry source.
+- Next dependency: derive deterministic conservative reduced shapes from the
+  seven pinned link meshes, quantify enclosure error against each source mesh,
+  and review the self-collision pair policy before any collision query can be
+  admissible.
+
+### E-20260929-INT-439 — conservative link-local box candidates retained
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `5abd805bf5958d3b2c38a55398d426f6ad103306`.
+- Change: reduced each pinned official link mesh to deterministic link-local
+  identity-oriented box candidates. Connected components receive separate
+  boxes unless their count exceeds the runtime contract's 64-primitives-per-
+  body limit; `link5` therefore uses one declared whole-link envelope. The
+  change emits evidence only and installs no collision geometry profile.
+- Inputs/fixtures: probe SHA-256
+  `f0f056ff8beb4c7e9552c9b37969a81ddeaea1339afc745ed1959aba8be6065c`;
+  test SHA-256
+  `90cf7bb0346fd1e9f6dec1dc0e63951266e2a0b706e645f062de4be07e51a0a0`;
+  committed receipt file SHA-256
+  `e7007e4c4b0e5924cbaf77ab3257eaf7338711150f5d28f1b1f372740a93b70e`;
+  receipt content SHA-256
+  `91708da2a349ae3f5e6469d8f6809c2e94543f93a401f98cfd6325303a9e79e1`;
+  external final receipt SHA-256
+  `e7007e4c4b0e5924cbaf77ab3257eaf7338711150f5d28f1b1f372740a93b70e`;
+  external final status SHA-256
+  `a92fb5c252ba523fbba0683879c64c80c1dd40985593acb9be32049deff8a0ed`;
+  source mesh receipt file SHA-256
+  `ab8749f813a20cc93e804eddfaccca8d1997a9d6ef86eb6cebf7368e6e368640`
+  and content SHA-256
+  `77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954`.
+- Failed/corrected evidence retained: run 001 rejected a zero-thickness
+  `link5` component rather than emit an invalid runtime box; status SHA-256
+  `d875833cd48cec5f15ee91b998f80d0ad8e61b49ccbce6839cbe2e5050c46a75`.
+  Run 002 added a declared 0.000001 mm half-extent floor and contained every
+  vertex, but its 114 `link5` component boxes exceeded the runtime limit;
+  receipt SHA-256
+  `5c349123667f2a652c5aae8ce27cc83f121e3ba05e70a14f4bdd5f51783fb1b8`
+  and status SHA-256
+  `c85e3aa012a4a67036c00120f4f1554ea6b5a7caae8f1a7ca7dd688ad5a3212d`.
+  Neither intermediate was promoted or overwritten.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\link_mesh_reduction_probe.py --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --output C:\IsaacSim\evidence\link_mesh_reduction_003.json --status-output C:\IsaacSim\evidence\link_mesh_reduction_003.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/link_mesh_reduction_probe.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. Fourteen candidate boxes across seven links cover
+  all 19,030 processed source vertices with 0.0 mm maximum vertex overflow.
+  Twelve candidate sources are watertight and two are not. For watertight
+  sources, the median box/source volume ratio is 1.822853 and the maximum is
+  21.140792. `link5` has 114 processed face-connected fragments and uses one
+  whole-link envelope to remain within the primitive-count contract. The
+  focused suite passed 58 tests in 2.72 seconds and all four repository audits
+  passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json`;
+  `software/integrations/isaac_sim/link_mesh_reduction_probe.py`;
+  `software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py`;
+  external run 001, 002, and 003 receipts/status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: vertex containment proves only that each box encloses its source
+  vertices. It does not qualify collision false positives, clearance, contact,
+  or self-collision exclusions. Volume ratios are omitted for non-watertight
+  sources, and the 21.140792 maximum plus `link5` whole-link fallback may be too
+  conservative for useful planning. Tool, camera-support, static-environment,
+  measured-placement, dynamics, trajectory, controller, hardware, and physical
+  qualification remain absent. The Isaac toolchain lock remains `UNSELECTED`.
+  No AI, arm, or integration gate status changed.
+- Supersedes: none. INT-438 remains the source-link grouping evidence; this row
+  supplies bounded candidate geometry without installing it.
+- Next dependency: run a collision differential corpus against the raw meshes,
+  refine high-inflation and `link5` candidates within the 64-primitive limit,
+  then review the self-collision pair policy before proposing any installed
+  collision geometry profile.
+
+### E-20260929-INT-440 — serialized containment correction retained
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `d0f66c753adfee8be280d1df20f56ab4f442eab0`.
+- Change: checked the exact six-decimal candidate primitives emitted by
+  INT-439 against their source vertices, found that serialization rounding
+  could shrink a box, and added a declared 0.000002 mm half-extent containment
+  pad before serialization. The corrected receipt replaces the tracked
+  candidate artifact while the earlier receipt remains preserved in Git and
+  INT-439.
+- Inputs/fixtures: corrected probe SHA-256
+  `84db7f1931be14eb08ddb63493c04373ededae126d7b4dc31154be8717f36bd1`;
+  corrected test SHA-256
+  `cd4378e37031f65d4ee8e1febf6e1caac52dee8a58d6605f16eb96bf14933879`;
+  corrected committed receipt file SHA-256
+  `7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431`;
+  corrected receipt content SHA-256
+  `e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab`;
+  external receipt SHA-256
+  `73e59e8e14785db2f5907d0924e5fa3246bb5b4f9f74387755e5b07e9f853610`;
+  external status SHA-256
+  `87e27d0d35cfa90ba0707989c9ec087154d851dd78471d3767dadd36d2ff0f89`.
+- Command: exact serialized-candidate replay against each sorted source
+  component with `C:\IsaacSim\env_6_1_0\Scripts\python.exe` found a maximum
+  overflow of `0.000000881713866363043 mm` at `gripper_link` component zero;
+  `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\link_mesh_reduction_probe.py --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --output C:\IsaacSim\evidence\link_mesh_reduction_004.json --status-output C:\IsaacSim\evidence\link_mesh_reduction_004.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py -q`;
+  `git diff --check`.
+- Result: CORRECTED_PASS_WITH_BLOCKERS. Exact serialized boxes now retain 0.0
+  mm maximum vertex overflow. Candidate count remains 14; median watertight
+  volume ratio remains 1.822853 and the padded maximum becomes 21.140797.
+  Five focused tests passed.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this correction establishes serialized vertex containment only.
+  All collision, clearance, self-collision-policy, tool, camera-support,
+  placement, controller, hardware, and physical blockers from INT-439 remain.
+  No AI, arm, or integration gate status changed.
+- Supersedes: INT-439 only for the tracked candidate receipt identity and exact
+  serialized-containment claim. INT-439 remains the retained original result.
+- Next dependency: run the corrected boxes through the raw-mesh collision
+  differential corpus before considering any installation proposal.
+
+### E-20260929-INT-441 — three-pose raw-mesh collision differential
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `7fea403cd4d81408cb1487ba5cfc17148e95eded`.
+- Change: compared the corrected 14-box candidates with the immutable official
+  raw link meshes for every unordered link pair at the governed zero, home,
+  and ready poses using an identity-bound python-fcl wheel through trimesh.
+  Adjacent pairs were measured rather than silently excluded.
+- Inputs/fixtures: probe SHA-256
+  `8496df7cf5efaa7febbfacaff2f077a2c04649e7e878fea311a0681236646bd6`;
+  test SHA-256
+  `509c5b83336c41b40cdf99974b8a779fc3f6938b28d0ee15498f6ed134c523ed`;
+  committed receipt file SHA-256
+  `33a4377ab12f33719bd7d001300e4b37dc7ecbd1aee9437ee7b9407eb0adfbab`;
+  receipt content SHA-256
+  `46e9133e7e8bc0529f03f3e1fb97e0927a5e3eff77a3d1d0282498c2d397f58f`;
+  external status SHA-256
+  `2d7223583a89d5b48a9a78fc4e71695344cfc7f6b2d0b6ebbac173d002dc648d`;
+  python-fcl 0.7.0.11 Windows CPython 3.12 wheel SHA-256
+  `63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f`;
+  corrected reduction receipt content SHA-256
+  `e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab`.
+- Command: `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip download --no-deps --only-binary=:all: --dest C:\IsaacSim\sources\python-fcl-0.7.0.11 python-fcl==0.7.0.11`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl`;
+  `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\collision_differential_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20260929.json --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl --output C:\IsaacSim\evidence\collision_differential_002.json --status-output C:\IsaacSim\evidence\collision_differential_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/collision_differential_probe.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS across 63 pair-pose cases: 48 free-space
+  agreements, three collision agreements, 12 candidate false positives, and
+  zero candidate false negatives. Each pose has the same four false-positive
+  adjacent pairs: `link1/link2`, `link2/link3`, `link3/link4`, and
+  `link5/gripper_link`. All 45 nonadjacent pair-pose cases agree. The focused
+  suite passed 63 tests in 3.05 seconds and all four repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_differential_20260929.json`;
+  `software/integrations/isaac_sim/collision_differential_probe.py`;
+  `software/tests/unit/test_isaac_sim_collision_differential_evidence.py`;
+  exact external wheel under `C:\IsaacSim\sources` and generated receipt/status
+  under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: three static poses do not cover continuous joint space. The
+  diagnostic reports adjacent contacts without selecting exclusions. Two raw
+  meshes remain non-watertight. Tool, camera-support, environment, measured
+  placement, clearance, contact dynamics, controller, hardware, and physical
+  qualification remain absent. The Isaac toolchain lock remains `UNSELECTED`.
+  Collision query, clearance replay, and candidate installation remain false.
+  No AI, arm, or integration gate status changed.
+- Supersedes: none. INT-440 governs the candidate receipt identity; this row
+  measures its bounded differential without promoting it.
+- Next dependency: review the four adjacent-pair relationships against the
+  kinematic design, expand the corpus beyond three poses, and refine the high-
+  inflation shapes before proposing any pair exclusions or installed profile.
+
+### E-20260929-INT-442 — governed-limit joint-space collision expansion
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `95d8f812e458aa47a739b8e596f482f4348601a8`.
+- Change: expanded INT-441 from three poses to 49 deterministic joint-space
+  poses derived only from the governed URDF limits. The corpus contains the
+  three governed anchors, all-limit and midpoint anchors, every single-joint
+  lower and upper limit, and 32 six-dimensional Halton samples. It compares
+  all 21 unordered link pairs and separates adjacent from nonadjacent results.
+- Inputs/fixtures: probe SHA-256
+  `b0f2f399bc1f944e8a74f50d8e0dc0e5726edca4c594da34a2d7748576e2b33b`;
+  test SHA-256
+  `f62ee829695515dd6fdd0656fcdfd9fb516531cfbdca98184f2e1c2e1dc6a3b4`;
+  committed compact receipt file SHA-256
+  `6da0540ce8e668ec28d35f1f949932dacbcbb1419fa07c4445ab65df33def636`;
+  compact receipt content SHA-256
+  `6161d29a6ce36a3ca9ac54755a7b3f69393af2e3afe49f9f26ee4496da861844`;
+  external detailed receipt file SHA-256
+  `f1226994510a3489820494021445ba50f4b17bbafaacb5605114b77ef8988f50`
+  and content SHA-256
+  `0e5908b601b7184312343c9c610ecb9bf0754ad716ff1a59e35b4e8411c4c734`;
+  external status SHA-256
+  `6c552b622574581b65b8f27ac73d7bffac1eb67686e1b9ff09126326b4388112`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  corrected reduction receipt content SHA-256
+  `e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab`;
+  python-fcl wheel SHA-256
+  `63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f`.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\collision_joint_space_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20260929.json --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl --output C:\IsaacSim\evidence\collision_joint_space_003.detailed.json --summary-output C:\IsaacSim\evidence\collision_joint_space_003.summary.json --status-output C:\IsaacSim\evidence\collision_joint_space_003.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/collision_joint_space_probe.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS across 1,029 pair-pose cases: 780 free-space
+  agreements, 57 collision agreements, 192 candidate false positives, and
+  zero candidate false negatives. Adjacent pairs account for 191 false
+  positives. One nonadjacent false positive occurs between `link2` and
+  `gripper_link` at `halton_019`, where the raw meshes remain 13.607432 mm
+  apart while candidate boxes report -13.915923 mm signed separation. The
+  focused suite passed 68 tests in 3.23 seconds and all four audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_joint_space_20260929.json`;
+  `software/integrations/isaac_sim/collision_joint_space_probe.py`;
+  `software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py`;
+  external detailed receipt and status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: 49 deterministic poses are substantially broader than three
+  anchors but do not cover continuous joint space. The one nonadjacent false
+  positive shows that adjacent-pair policy alone cannot make these candidates
+  suitable. Two raw meshes remain non-watertight. Tool, camera-support,
+  environment, measured placement, clearance, contact dynamics, controller,
+  hardware, and physical qualification remain absent. No pair exclusion was
+  selected; profile installation and collision-query admission remain false.
+  No AI, arm, or integration gate status changed.
+- Supersedes: INT-441 only for corpus breadth. INT-441 remains the retained
+  exact three-pose differential.
+- Next dependency: refine the `link2` and gripper candidate shapes against the
+  `halton_019` witness, then rerun this exact corpus. Separately review adjacent
+  joint pairs against mechanical design evidence before any exclusion proposal.
+
+### E-20260929-INT-443 — targeted OBB variants and exact corpus replay
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `6fba9a80826415336a89d27f7a3c8704f223a284`.
+- Change: derived deterministic oriented-box alternatives for the two `link2`
+  components and the gripper component implicated by INT-442, then replayed
+  the exact 49-pose, 1,029-case corpus for combined, `link2`-only, and gripper-
+  only variants. The `link2`-only result is retained as the preferred
+  diagnostic candidate; it is not installed or admitted.
+- Inputs/fixtures: refinement probe SHA-256
+  `6a26872df78ce6969417f90fcb9fa9cf47d36fccc2d15fc275cfd8dd9f09fe82`;
+  replay probe SHA-256
+  `2fc3bacc136377441c9bcf5e34891fdfa08b64c0217b9882b22bd060aec66abf`;
+  test SHA-256
+  `b738bef3011dede889a4cb344b00ae92430cba7de10172cf0b6aa0e833c39feb`;
+  committed `link2` candidate file/content SHA-256
+  `0eb782c71b1ab72c4bbbc7a22abea16f4aead33ce32e435288c9c8a2413b3b41` /
+  `68f0aa41c4f46e12b563285f5a48b65f3d0457a7939a1bf537dec93b11740bcb`;
+  committed `link2` replay file/content SHA-256
+  `c22c6f4db52c9c97634097fab7647b81421148adad3afcae6c24a78ec9ef6e29` /
+  `c256eed4869005fa312eaa3371a7b5483f4a4e5e3bcd0fa5128a6ccc053d1fa1`;
+  external detailed replay file/content SHA-256
+  `7fa6cabff51f8166efc227b013dc6fa54f825c3a3f978405981acf38017fe107` /
+  `c7af3fc8caea53bf8440326c5a26622b71c68ced2ceceb42509d0d9a8038a1d0`;
+  selected replay status SHA-256
+  `85bf4c26994d0533dcc62f3ca9acc8f328f40b51acf9fd6347cd28a7fb8e5c2b`.
+- Rejected evidence retained: combined candidate content SHA-256
+  `0e412308371d801f6d185617e9e73258cc7f13d35a9d2c6e954795ab150ca605`
+  and replay content SHA-256
+  `99054875ee0dc0e95f5b58311ec630922aed0166f02dc4895421666ab219862d`;
+  gripper-only candidate content SHA-256
+  `40458bb4bb82fbe75642ce793b7d561c17928d9e49649c6a1bc5c6da3690905f`
+  and replay content SHA-256
+  `483e58dbc5954c92931c2c0f8becae555731f17db53e0552075684831fc9c0ad`.
+  Combined replay had 144 false positives including two nonadjacent cases;
+  gripper-only had 193 false positives including two nonadjacent cases.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\targeted_obb_refinement_probe.py --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --base-reduction software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20260929.json --target-links link2 --output C:\IsaacSim\evidence\targeted_obb_refinement_002_link2.json --status-output C:\IsaacSim\evidence\targeted_obb_refinement_002_link2.status.json`;
+  `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\collision_joint_space_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --reduction-receipt C:\IsaacSim\evidence\targeted_obb_refinement_002_link2.json --expected-reduction-sha256 68f0aa41c4f46e12b563285f5a48b65f3d0457a7939a1bf537dec93b11740bcb --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl --output C:\IsaacSim\evidence\collision_joint_space_link2_001.detailed.json --summary-output C:\IsaacSim\evidence\collision_joint_space_link2_001.summary.json --status-output C:\IsaacSim\evidence\collision_joint_space_link2_001.status.json`;
+  the same two commands were run with target sets `link2,gripper_link` and
+  `gripper_link`, each bound to its exact receipt SHA-256 above;
+  `python -m pytest software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  four repository audits; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for the `link2`-only diagnostic candidate. Its
+  second component volume falls to 94.1967% of the original axis-aligned box;
+  serialized vertex overflow remains 0.0 mm. Exact replay reduces false
+  positives from 192 to 143: 142 adjacent and one nonadjacent. It preserves
+  zero false negatives and all 57 collision agreements. The original
+  `halton_019` witness clears, but one `link2`/gripper false positive remains at
+  `all_upper`: 21.640035 mm raw separation and -6.752044 mm box signed
+  separation. The focused suite passed 73 tests in 3.51 seconds and all
+  four audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_targeted_obb_link2_20260929.json`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_joint_space_link2_20260929.json`;
+  `software/integrations/isaac_sim/targeted_obb_refinement_probe.py`;
+  `software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py`;
+  all variant and detailed replay receipts under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: oriented boxes materially reduce adjacent false positives but
+  do not remove the nonadjacent witness. Gripper orientation introduces a new
+  base/gripper false positive and is rejected. The finite corpus, nonwatertight
+  source meshes, missing tool/camera/environment geometry, placement, dynamics,
+  controller, hardware, and physical blockers remain. No exclusion was
+  selected; profile installation and collision-query admission remain false.
+  No AI, arm, or integration gate status changed.
+- Supersedes: none. INT-442 remains the baseline corpus. This row retains a
+  preferred diagnostic variant plus the rejected alternatives.
+- Next dependency: partition or otherwise tighten the gripper and remaining
+  `link2` geometry without increasing nonadjacent false positives, then replay
+  the same corpus. Review adjacent exclusions only after mechanical evidence.
+
+### E-20260929-INT-444 — OBB replay rotation correction
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `14f26c1b0ed8e85f5000e83c851cb174b23b7f79`.
+- Change: primitive-level witness inspection found that the joint-space replay
+  applied box centers but omitted each candidate's `rotation_row_major`.
+  Added the serialized rotation to the local box transform and reran baseline,
+  `link2`-only, gripper-only, and combined candidates across all 1,029 cases.
+- Inputs/fixtures: corrected replay probe SHA-256
+  `9c49195eb41c812e1efe7af9fcc981fc80d197423344051410fad3aff61dd180`;
+  corrected test SHA-256
+  `6e917043f237e0b84617dc74d680a037807a14d2ae61382cd732838a49a4cdb5`;
+  corrected committed `link2` replay file/content SHA-256
+  `76582476094243a66374e098b8197d97a8048029d3c9dac936cef8ea64ff655f` /
+  `72635bbb2712676cf33973d50efc4394d642b81077822f1188140f9503a957fd`;
+  corrected external detailed replay file/content SHA-256
+  `9a33d753335f4156cd25fcee21eeecd71fd8c684ec8585bb7ab066f21be7bc05` /
+  `04aaee95e298cca7b09d9873197dddc669f07beec92bcf5f6f093019fb10e746`;
+  corrected status SHA-256
+  `6308f530d4395f5ea100c17eae16922672dad4849b3c125a02e89cf90a0fc616`;
+  gripper-only corrected summary file SHA-256
+  `4eb9d384d62b56e951f9f5e2d05da097f577af5e8371b8db728819d246c43f3f`;
+  combined corrected summary file SHA-256
+  `863be7f1f0a4f8882838de1f27bafafc00a6ff4086f6a371c886a053eb3b48c0`.
+- Command: reran the exact INT-443 replay command for each variant after adding
+  `local[:3, :3] = rotation_row_major`; baseline replay was also rerun as a
+  control with receipt SHA-256
+  `e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab`;
+  `python -m pytest software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `git diff --check`.
+- Result: CORRECTED_PASS_WITH_BLOCKERS. Baseline control remains byte-identical
+  at 192 false positives, zero false negatives, 57 collision agreements, and
+  780 free agreements. Correctly rotated `link2`-only, gripper-only, and
+  combined OBB candidates each produce the same classification counts. No OBB
+  variant demonstrates the improvement claimed by INT-443. Seventy-three
+  focused tests passed in 3.49 seconds.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this correction invalidates INT-443's comparative collision
+  conclusion, while its candidate containment and volume measurements remain
+  valid. The original 192 false positives and nonadjacent `halton_019` witness
+  remain. All finite-corpus, geometry, policy, installation, controller,
+  hardware, and physical limitations remain. No gate status changed.
+- Supersedes: INT-443 for every replay classification and preferred-variant
+  conclusion. INT-443 remains preserved as the original erroneous evidence.
+- Next dependency: identify the exact baseline primitive pair at `halton_019`
+  and evaluate a triangle-preserving partition rather than a whole-component
+  orientation change.
+
+### E-20260929-INT-445 — bounded triangle-preserving link2 partition replay
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `da55752a55460698463dc86c28121eb421bfada3`.
+- Change: identified the exact baseline `halton_019` witness as `link2`
+  component 0 against gripper component 0, then evaluated deterministic
+  triangle-centroid partitions of the implicated `link2` component. Every
+  source triangle is assigned exactly once and every candidate box encloses
+  every vertex of its assigned triangles. Retained the first bounded variant
+  that removes the nonadjacent witness without a false negative: 16 recursive
+  groups. The candidate remains uninstalled and has no collision authority.
+- Inputs/fixtures: partition probe SHA-256
+  `fe678dcef544a3dc17ee719ed00c0f2aa6602fad85fd545da167c2bd7e86af8a`;
+  corrected replay probe SHA-256
+  `9c49195eb41c812e1efe7af9fcc981fc80d197423344051410fad3aff61dd180`;
+  test SHA-256
+  `ee464b8fbb59a64ce92c1331dfda69f22b8b96ba090ea542d668def8dc814922`;
+  selected candidate file/content SHA-256
+  `5628fac4ac9d27caf138002831e0eb1ebf2d90dfc0c96a34817c0495fb874a4b` /
+  `0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6`;
+  selected replay file/content SHA-256
+  `986cf17c52e4394ab19999a41625ac94cb73840397314f0877c2578739ef9b66` /
+  `1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87`;
+  external selected detailed file/content SHA-256
+  `e2beac0e5a054b8a992adb46b5debe6d1f3285d0409d8e442a79fe2da43bf954` /
+  `6543cb63293897458d06dba6f3420699de67c9f1549f7cc12302c9f75b0e4550`;
+  selected candidate/replay status SHA-256
+  `5ac3e455b62f786321af785ab82abb1a05b5e88feaadf681108d2b2e3ca585e7` /
+  `93a60d70a8c939274de41e666318c825752b7a350e0a87fb961446afa0842f63`;
+  upstream commit `40dbd84b553695212fab713e8465f817ba95454d`;
+  base-reduction content SHA-256
+  `e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab`;
+  python-fcl wheel SHA-256
+  `63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f`.
+- Rejected and failed evidence retained: 2, 4, and 8 recursive groups each
+  preserve the baseline 192 false positives and one nonadjacent false
+  positive. Their candidate content SHA-256 values are respectively
+  `ed7aaf21a1a87306d07fe17a1c7e6705b36d86761bd1739210d4cf2231d75fa3`,
+  `18e9834a66908130cdcdc9df8695b0895fa7fc5be89449a01a68daba4a9adfe9`,
+  and `ef16d2f1477ed7351c1f8798c7c9f18b77d6eead6114bc8e1fea413a93df7292`;
+  replay content SHA-256 values are
+  `26eb856865c3a9be1f72adcd501d19d2c466aa34e7c834436f1d24fd37269059`,
+  `b762c53cb8d39b624e9410ef5d60888ef802749589332a0b92152f223d3519ab`,
+  and `1a6f4fcf8f07d757c46d1e730183e06e96013811d8613dec3fe9aabe86f384c6`.
+  The 32-group candidate content SHA-256 is
+  `c31e24862bc14deb86c939a3b7c61572bbb53c9e429223a49ee828302e0a0804`;
+  its replay content SHA-256 is
+  `4b1c4ab823c3a2961c2197f076025af00dcdd3efe521ee902c0ce828a7156124`;
+  it matches the 16-group classification and provides no further benefit.
+  An exploratory 63-group request was rejected by the declared 2-to-32 input
+  bound; its retained error status SHA-256 is
+  `cfabcd9f977334cd19160274c620770ef61bbca4a50cfb7574a342a7db23ce6a`.
+- Command: `$env:PYTHONUTF8='1'; $py='C:\IsaacSim\env_6_1_0\Scripts\python.exe'; foreach ($bands in 2,4,8,16,32) { $stem="C:\IsaacSim\evidence\triangle_partition_final_${bands}"; & $py software\integrations\isaac_sim\triangle_partition_refinement_probe.py --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --base-reduction software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20260929.json --band-count $bands --strategy recursive-longest-centroid-axis --output "$stem.candidate.json" --status-output "$stem.candidate.status.json"; $receipt=(Get-Content -Raw "$stem.candidate.json" | ConvertFrom-Json).receipt_sha256; & $py software\integrations\isaac_sim\collision_joint_space_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --reduction-receipt "$stem.candidate.json" --expected-reduction-sha256 $receipt --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl --output "$stem.detailed.json" --summary-output "$stem.summary.json" --status-output "$stem.replay.status.json" }`;
+  `python -m pytest software/tests/unit/test_isaac_sim_triangle_partition_refinement_evidence.py software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  four repository audits; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. The selected candidate partitions all 9,216
+  source triangles exactly once, records 0.0 mm serialized vertex overflow,
+  uses 17 primitives for `link2` and 29 across all links, and stays below the
+  64-primitives-per-body bound. Exact replay across 49 poses and 1,029 cases
+  records 807 free agreements, 57 collision agreements, 165 adjacent false
+  positives, zero nonadjacent false positives, and zero false negatives. The
+  `link2`/gripper minimum candidate separation becomes 13.421512 mm versus
+  13.607432 mm for the raw meshes. Seventy-eight focused tests passed in
+  3.70 seconds and all four repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/triangle_partition_refinement_probe.py`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_triangle_partition_link2_20260929.json`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_joint_space_triangle_partition_20260929.json`;
+  `software/tests/unit/test_isaac_sim_triangle_partition_refinement_evidence.py`;
+  all variant and detailed receipts under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the retained result covers a finite deterministic corpus, not
+  continuous joint space. The 165 remaining false positives are adjacent-link
+  cases whose policy has not been reviewed. Partition groups are open surface
+  subsets, so no per-group volume ratio is asserted. Existing nonwatertight
+  source meshes, whole-link `link5` fallback, missing tool, camera-support and
+  environment geometry, nominal placement, dynamics, controller, hardware,
+  and physical qualification blockers remain. No profile, pair exclusion,
+  collision query, clearance replay, lane gate, or integration gate is
+  admitted or completed.
+- Supersedes: INT-444 only for the next dependency. INT-444 remains the
+  correction record, and INT-442 remains the governed baseline.
+- Next dependency: review the 165 adjacent witnesses against mechanical design
+  evidence before proposing any exclusion policy, and broaden deterministic
+  replay only after tool, camera-support, and measured environment geometry
+  are bound.
+
+### E-20260929-INT-446 — pinned RoArm-M3 self-collision policy review
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `36414de12edbc7e46d2d0fbf87dc1d9496ef5be6`.
+- Change: bound the retained triangle-partition replay to the exact upstream
+  RoArm-M3 SRDF at the pinned source commit and to direct parent-child pairs in
+  the governed URDF. Classified every remaining false-positive pair against
+  both sources and computed adjacent-only and full-SRDF counterfactual summary
+  counts. No exclusion profile is installed or admitted.
+- Inputs/fixtures: review probe SHA-256
+  `429f7473c9ca5c46054f9dfee7d53299c1f2393f47ea75b611f6820e629473bf`;
+  test SHA-256
+  `84191f336a0acf3af82fb5a63f3d2a5028963831882b0b4f5402d3b45a124b2d`;
+  committed review file/content SHA-256
+  `91365b63c7e1fc032d4d94fcd098dfb233079f7777326c89d2c5b7ddeec7e04d` /
+  `c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423`;
+  external status SHA-256
+  `b226629109f45ab60137c4cf84620eea19031bf806d5615e356e87c5a7aae380`;
+  upstream commit `40dbd84b553695212fab713e8465f817ba95454d`;
+  upstream SRDF path
+  `src/roarm_main/roarm_moveit/config/roarm_m3/roarm_m3.srdf` and SHA-256
+  `29f1daaeea91a490b85581a9a62dd07be9ab959d7817fad89836c466e8288499`;
+  selected replay content SHA-256
+  `1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87`.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\self_collision_policy_review_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --replay-summary software\integrations\isaac_sim\evidence\roarm_m3_collision_joint_space_triangle_partition_20260929.json --output C:\IsaacSim\evidence\self_collision_policy_review_001.json --status-output C:\IsaacSim\evidence\self_collision_policy_review_001.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_self_collision_policy_review_evidence.py software/tests/unit/test_isaac_sim_triangle_partition_refinement_evidence.py software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  four repository audits; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. The SRDF contains 12 exclusions: six `Adjacent`
+  and six `Never`. Its six `Adjacent` pairs exactly equal the six direct-joint
+  pairs in the governed URDF. All 165 remaining false-positive cases belong to
+  four of those direct-joint pairs, leaving zero unsupported false-positive
+  pairs. The adjacent-only counterfactual excludes 294 pair-pose cases,
+  including 54 raw/candidate collision agreements and 165 candidate false
+  positives. Its retained 735 nonadjacent cases contain three collision
+  agreements, 732 free agreements, zero false positives, and zero false
+  negatives. The full-SRDF counterfactual would exclude 588 cases and is
+  recorded without selection. Eighty-three focused tests passed in 3.97
+  seconds and all four repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/self_collision_policy_review_probe.py`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_self_collision_policy_review_20260929.json`;
+  `software/tests/unit/test_isaac_sim_self_collision_policy_review_evidence.py`;
+  external status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is a pair-summary counterfactual, not a geometry requery or
+  an installed runtime policy. Excluding direct-joint pairs also removes 54
+  raw-mesh collision agreements at their mechanical interfaces. The upstream
+  SRDF's six `Never` exclusions have not been independently justified and are
+  not selected. Finite-corpus, nonwatertight source, whole-link `link5`, tool,
+  camera-support, environment, placement, dynamics, controller, hardware, and
+  physical blockers remain. No pair exclusion, collision query, clearance
+  replay, lane gate, or integration gate is admitted or completed.
+- Supersedes: INT-445 only for its adjacent-policy next dependency. INT-445
+  remains the selected finite replay and geometry evidence.
+- Next dependency: review the six SRDF `Never` pairs against the selected
+  replay and source geometry, then define a shared runtime exclusion-policy
+  contract before any candidate can be installed.
+
+### E-20260929-INT-447 — finite replay review of SRDF `Never` pairs
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `0ad69c7d05cec46ea56ea0c5a160394e1ff8dd66`.
+- Change: reviewed all six pinned upstream SRDF pairs labeled `Never` against
+  the committed 49-pose selected-candidate replay. Retained positive minimum
+  raw and candidate separation for each pair and separately retained every
+  nonexcluded nonadjacent collision witness. No exclusion is installed.
+- Inputs/fixtures: probe SHA-256
+  `e6636880f10728b9445fa2814bf7997cfff7ebf9ae695d450e7f26c421dce23b`;
+  test SHA-256
+  `211add37d11e9646a12ca1ece96a6a5b3dd1934b9f303f90838922bb42080459`;
+  committed review file/content SHA-256
+  `75ae1fe48c2b9e287f076d1465ebfdb59913a9ca0b253b12c20ad6e6f44e7490` /
+  `a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8`;
+  external status SHA-256
+  `82fe018131df2a2a635ed6bc08f8d2d1b9b2a8b6b404785a46c0d4825c8e7963`;
+  policy-review content SHA-256
+  `c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423`;
+  replay content SHA-256
+  `1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87`.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\srdf_never_pair_review_probe.py --policy-review software\integrations\isaac_sim\evidence\roarm_m3_self_collision_policy_review_20260929.json --replay-summary software\integrations\isaac_sim\evidence\roarm_m3_collision_joint_space_triangle_partition_20260929.json --output C:\IsaacSim\evidence\srdf_never_pair_review_001.json --status-output C:\IsaacSim\evidence\srdf_never_pair_review_001.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_srdf_never_pair_review_evidence.py software/tests/unit/test_isaac_sim_self_collision_policy_review_evidence.py software/tests/unit/test_isaac_sim_triangle_partition_refinement_evidence.py software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  four repository audits; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. All 294 cases across the six `Never` pairs are
+  raw/candidate free-space agreements, with zero collisions, false positives,
+  or false negatives. Every pair retains positive recorded raw and candidate
+  minima; the lowest raw minimum is 34.870661 mm and the lowest candidate
+  minimum is 26.995907 mm. Three nonexcluded nonadjacent pairs remain visible:
+  `link1`/gripper, `link2`/`link4`, and `link2`/`link5` each record one
+  raw/candidate collision agreement. Eighty-eight focused tests passed in
+  4.22 seconds and all four repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/srdf_never_pair_review_probe.py`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_srdf_never_pair_review_20260929.json`;
+  `software/tests/unit/test_isaac_sim_srdf_never_pair_review_evidence.py`;
+  external status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: agreement across 49 poses supports but cannot prove the SRDF's
+  continuous-workspace `Never` semantics. Pair-summary minima are not a
+  continuous clearance certificate. The three retained collision witnesses
+  require trajectory and policy handling rather than exclusion. Existing
+  geometry, tool, camera-support, environment, placement, dynamics,
+  controller, hardware, and physical blockers remain. No exclusion profile,
+  collision query, clearance replay, lane gate, or integration gate is
+  admitted or completed.
+- Supersedes: INT-446 only for its `Never`-pair next dependency. INT-446
+  remains the upstream SRDF and adjacent-policy binding evidence.
+- Next dependency: jointly define a strict, hash-bound runtime exclusion-policy
+  contract that defaults to no exclusions and cannot grant controller or
+  physical authority; keep installation blocked until reviewed separately.
+
+### E-20260929-INT-448 — inert hash-bound exclusion-policy candidate
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `3cdd25c75d2272310423733aa84b3056ba969c56`.
+- Change: added a strict shared schema, immutable loader, and deterministic
+  probe for a collision-exclusion policy candidate. The retained candidate
+  binds the exact base collision contract, governed robot model, selected
+  geometry and replay, pinned upstream SRDF, adjacent review, and `Never`
+  review. It proposes all twelve upstream pairs while requiring an empty
+  effective-exclusion set, collision checking by default, an explicitly
+  uninstalled state, and false values for every authority flag. The loader has
+  no installation or application method.
+- Inputs/fixtures: loader SHA-256
+  `38770b54b3a1d5c0e0e2df9d2b0ce6c60618643e140fac2b75add8359577a08b`;
+  schema SHA-256
+  `136d5d804271fdee42f43495fcd5a7bcbc6a832f952c188b546520ef55a70b2d`;
+  probe SHA-256
+  `5f1bcc14e0ebf494974e4c8d55e8aca16b73f32f56ba16eb0b014903d9ef49ef`;
+  loader-test SHA-256
+  `77fca91ec847c81506718040f42df207ecd34e462a1c8e07bdd381a58cebb6ec`;
+  evidence-test SHA-256
+  `bfe6c6956d911ca8161d8e88712275711d2facb9796d61c0153f73a66fe66dad`;
+  committed candidate file/content SHA-256
+  `88e31c4b525ded8ca48d4bae7cf70faff396e2d9f92249296f2b2f3a9c1d3c3f` /
+  `651adee0ee18c4d11233e3ed37389a4811236e08b54c0f91a32fd6dfa436e75a`;
+  external status SHA-256
+  `412d38041194682b54285d9e4423517f68ea7f64c2a4168f5f7290557d7541b9`;
+  base collision contract SHA-256
+  `d3238c0c95a1d2e7ff74fcb8dccc3eb0aadb0f897b2ea041319bbcd6442af5c3`;
+  governed robot model SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  selected geometry/replay content SHA-256
+  `0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6` /
+  `1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87`;
+  adjacent/`Never` review content SHA-256
+  `c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423` /
+  `a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8`;
+  upstream SRDF SHA-256
+  `29f1daaeea91a490b85581a9a62dd07be9ab959d7817fad89836c466e8288499`.
+- Command: `python software\integrations\isaac_sim\exclusion_policy_candidate_probe.py --workspace . --geometry-candidate software\integrations\isaac_sim\evidence\roarm_m3_triangle_partition_link2_20260929.json --replay-summary software\integrations\isaac_sim\evidence\roarm_m3_collision_joint_space_triangle_partition_20260929.json --policy-review software\integrations\isaac_sim\evidence\roarm_m3_self_collision_policy_review_20260929.json --never-review software\integrations\isaac_sim\evidence\roarm_m3_srdf_never_pair_review_20260929.json --output C:\IsaacSim\evidence\collision_exclusion_policy_candidate_001.json --status-output C:\IsaacSim\evidence\collision_exclusion_policy_candidate_001.status.json`;
+  `python -m pytest software/tests/unit/test_collision_exclusion_policy_candidate.py software/tests/unit/test_isaac_sim_exclusion_policy_candidate_evidence.py software/tests/unit/test_isaac_sim_srdf_never_pair_review_evidence.py software/tests/unit/test_isaac_sim_self_collision_policy_review_evidence.py software/tests/unit/test_isaac_sim_triangle_partition_refinement_evidence.py software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  four repository audits; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. The candidate contains twelve proposed
+  exclusions, zero effective exclusions, `CHECK_COLLISION` as the default pair
+  disposition, and false collision-query, clearance-replay, controller,
+  execution-permit, transport, and physical authority. Strict parsing rejects
+  duplicate fields, content tampering, wrong file or source hashes, unknown,
+  duplicate, or noncanonical pairs, a nonempty effective set, and any true
+  authority flag. One hundred two focused tests passed in 4.68 seconds and all
+  four repository audits passed.
+- Artifacts:
+  `software/src/rocell/simulation/exclusion_policy.py`;
+  `software/ai/schemas/collision_exclusion_policy_candidate_v1.schema.json`;
+  `software/integrations/isaac_sim/exclusion_policy_candidate_probe.py`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_exclusion_policy_candidate_20260929.json`;
+  `software/tests/unit/test_collision_exclusion_policy_candidate.py`;
+  `software/tests/unit/test_isaac_sim_exclusion_policy_candidate_evidence.py`;
+  external status under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the document is a review candidate only. Installed measured
+  geometry and engineering acceptance are absent. Finite-corpus, geometry,
+  tool, camera-support, environment, placement, dynamics, controller,
+  hardware, and physical qualification blockers remain. There is no runtime
+  installation path and no collision-query, clearance, controller, permit,
+  transport, or physical authority. No lane or integration gate changed.
+- Supersedes: INT-447 only for its shared candidate-contract next dependency.
+  INT-445 through INT-447 remain the retained geometry and policy evidence.
+- Next dependency: arm/runtime lane review of the shared candidate schema and
+  a separate promotion/install contract that requires accepted measured
+  geometry and explicit engineering acceptance before any effective exclusion
+  can exist.
+
+### E-20260929-INT-449 — held-out collision-policy stress campaign
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commits: `5f839803605139487998531d9603f1ad52c4dbec` and
+  `d6a5e48fccb420e9a565d9c9fb5e55e3d7c1efb7`.
+- Change: extended the existing joint-space differential probe with bounded,
+  configurable Halton ranges while preserving its default 49-pose reproduction
+  behavior. Added a strict assessment that binds the inert exclusion candidate
+  to a 256-pose held-out replay, separates proposed from retained pairs, and
+  preserves pair-level contradictions. The held-out indices 1001 through 1256
+  are disjoint from the original indices 1 through 32. No proposal is applied.
+- Inputs/fixtures: joint-space probe SHA-256
+  `c9bc0fb6d61bdd9ab248a55591dd8043d20396e576202c99d30d7f41249094b1`;
+  stress-assessment probe SHA-256
+  `5addf69009f92aa1e5e819bde9b6dbb123b4a917aafb766ab494df303e38d68a`;
+  unit-test SHA-256
+  `9823aa0ad6e8fb095e027df2b9a887a319b2dac5c56aa1c1fb2b84b4c4e3eb5e`;
+  evidence-test SHA-256
+  `eb2b3cc22feddbf21cdb998e6fd6fcd5d6cf634d1cc792baebf44a8f823a3cf5`;
+  committed replay file/receipt SHA-256
+  `8b598c5b582f063a5989cd434ef2f4d2a842445c69aa8706becd7948681dc31b` /
+  `199a8f77e6cdbc00154ae0f01aca490b4a074c56b6b28dcf0ace641390b8ffe8`;
+  committed assessment file/receipt SHA-256
+  `d4872389634bbb712de08507088b0bdbe2902d89780f449cf8f709d77d26365f` /
+  `8b2662fb183022d93600d4dd72be815e2b0f3a0b0d77722bcd52f478e411bc9a`;
+  external detailed replay SHA-256
+  `ba6038334744845264987fbf020846eda490c2065a2ecca407c5245d8805273b`;
+  replay-status SHA-256
+  `79f15e7bdd5a3672246a68dbbff79cf5d11c9fbbe13324953ab5619434ff2648`;
+  selected geometry/candidate content SHA-256
+  `0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6` /
+  `651adee0ee18c4d11233e3ed37389a4811236e08b54c0f91a32fd6dfa436e75a`;
+  python-fcl wheel SHA-256
+  `63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f`.
+- Preserved intermediate evidence: the first aggregate-only assessment remains
+  under `C:\IsaacSim\evidence` with file/status SHA-256
+  `65c0253a9c4ff36a956e3ccc7fec666e5c29bcc2419b229b2680d527d9138863` /
+  `763f9166287a67254d66a41ae1745681e6258caa4b8031e1d9c21b18d9a7187d`.
+  It was not rewritten after the pair-level assessment was added.
+- Command: `$env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\collision_joint_space_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_triangle_partition_link2_20260929.json --expected-reduction-sha256 0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6 --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl --halton-start 1001 --halton-count 256 --halton-only --output C:\IsaacSim\evidence\collision_policy_stress_001.detailed.json --summary-output C:\IsaacSim\evidence\collision_policy_stress_001.summary.json --status-output C:\IsaacSim\evidence\collision_policy_stress_001.replay.status.json`;
+  `python software\integrations\isaac_sim\collision_policy_stress_probe.py --workspace . --candidate software\integrations\isaac_sim\evidence\roarm_m3_collision_exclusion_policy_candidate_20260929.json --stress-replay C:\IsaacSim\evidence\collision_policy_stress_001.summary.json --output C:\IsaacSim\evidence\collision_policy_stress_002.assessment.json --status-output C:\IsaacSim\evidence\collision_policy_stress_002.assessment.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_collision_policy_stress.py software/tests/unit/test_isaac_sim_collision_policy_stress_evidence.py software/tests/unit/test_collision_exclusion_policy_candidate.py software/tests/unit/test_isaac_sim_exclusion_policy_candidate_evidence.py software/tests/unit/test_isaac_sim_srdf_never_pair_review_evidence.py software/tests/unit/test_isaac_sim_self_collision_policy_review_evidence.py software/tests/unit/test_isaac_sim_triangle_partition_refinement_evidence.py software/tests/unit/test_isaac_sim_targeted_obb_refinement_evidence.py software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py software/tests/unit/test_isaac_sim_collision_differential_evidence.py software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py software/tests/unit/test_isaac_sim_upstream_link_mesh_evidence.py software/tests/unit/test_isaac_sim_step_link_membership_evidence.py software/tests/unit/test_isaac_sim_step_pose_binding_evidence.py software/tests/unit/test_isaac_sim_step_inspection_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  four repository audits; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS across 256 held-out poses and 5,376 pair
+  cases: 334 collision agreements, 4,147 free agreements, 895 candidate false
+  positives, and zero false negatives. All six proposed `Never` pairs remain
+  free in all 1,536 cases with positive recorded minima. The nine nonproposed
+  pairs retain 36 collision agreements, 2,255 free agreements, 13 false
+  positives across six pairs, and zero false negatives. Those false-positive
+  pairs are base/`link4` (1), base/`link5` (2), base/gripper (1),
+  `link1`/`link5` (3), `link1`/gripper (5), and `link2`/gripper (1).
+  One hundred fourteen focused tests passed in 5.16 seconds and all four
+  repository audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/collision_joint_space_probe.py`;
+  `software/integrations/isaac_sim/collision_policy_stress_probe.py`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_policy_stress_replay_20260929.json`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_collision_policy_stress_assessment_20260929.json`;
+  `software/tests/unit/test_isaac_sim_collision_policy_stress.py`;
+  `software/tests/unit/test_isaac_sim_collision_policy_stress_evidence.py`;
+  detailed replay and both assessment versions under `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the held-out corpus is finite and does not prove continuous
+  workspace behavior. Reappearing nonproposed false positives show that the
+  49-pose zero-nonadjacent-false-positive result does not generalize to this
+  corpus. Source meshes remain nonwatertight, `link5` remains a whole-link
+  fallback, and tool, camera-support, environment, measured placement,
+  dynamics, controller, hardware, and physical qualification are absent. The
+  candidate remains uninstalled with zero effective exclusions and grants no
+  collision-query, clearance, controller, permit, transport, or physical
+  authority. No lane or integration gate changed.
+- Supersedes: INT-448 only for the next geometry dependency. INT-445 through
+  INT-448 remain the retained candidate derivation and finite review evidence.
+- Next dependency: inspect exact primitive witnesses for the 13 retained-pair
+  false positives, prioritizing the whole-link `link5` fallback and gripper
+  envelope, then refine geometry without introducing any false negative.
+
+### E-20260929-INT-450 — AI batch to governed Isaac scene alignment
+
+- Stage: S2/S3 simulation process alignment, WP2.
+- Lane: INTEGRATION.
+- Commit: `296de99bd6ad9232d856fb5c8eb0aca365a3da0e`.
+- Change: added a zero-write Isaac overlay for an actual AI-produced
+  `ModelMotionBatchV2`. The probe strict-decodes the canonical batch, verifies
+  its exact target-catalog and RC03-scene bindings, preserves action order and
+  repeated targets, infers one synthetic rigid keyboard placement from unique
+  target correspondences, checks each uncertainty disk against its placed key
+  safe region, and authors proposal centers, safe regions, and uncertainty
+  disks into an external USD. It never accepts a trajectory, changes the
+  articulation, steps physics, encodes a controller command, or accesses
+  hardware.
+- Inputs/fixtures: RC03 workcell layout SHA-256
+  `e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1`;
+  retained scene USD/receipt SHA-256
+  `77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35` /
+  `df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b`;
+  AI batch/metadata file SHA-256
+  `26fa25a5824c2bd3e1b8312f91b801afa02c240487771533b8faed5c4bd531c5` /
+  `930cab4459878911069043e99b6718113971fc6c7fee78c6a4d29501462b7afd`;
+  probe SHA-256
+  `9da9c8b4ea14763c19a9a0cc6017efce9662203fe38f86298c108c6e5d85ecd4`;
+  integration/evidence test SHA-256
+  `a105bbf2f682771ce82a6fa69685bfb5d849e1970f11ffb7d63bba9957f7cfbf` /
+  `9459193a0df8edfca1a83c18557dae18966ea8e32e304169f9f6f705c3b6f18a`;
+  committed receipt/status file SHA-256
+  `1e88fa086b37d882b4527a6138ad764b9590add883efef6de7257e19e89d682c` /
+  `8f72143ae1feb4ca0931f26e3d29d6c14ca78169fa2e686da86fdbb5f62dbcc5`;
+  external overlay USD SHA-256
+  `a7dcc53a5ed5d83d47aa524818978e5b7d363008c452a81c5d30e59e6703532b`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\model_motion_scene_overlay_probe.py --workspace . --scene-usd C:\IsaacSim\artifacts\issue190\wp2-scene-002\rc03_nominal_rigid_scene.usda --scene-receipt software\integrations\isaac_sim\evidence\rc03_nominal_rigid_scene_20260929.json --batch software\ai\eval\precision_adapter_batch_v2_contract_fixture.json --batch-metadata software\ai\eval\precision_adapter_batch_v2_contract_fixture_metadata.json --output-dir C:\IsaacSim\artifacts\issue190\wp2-command-overlay-001 --receipt C:\IsaacSim\evidence\model_motion_overlay_001.json --status-output C:\IsaacSim\evidence\model_motion_overlay_001.status.json`;
+  `$env:PYTHONPATH=(Resolve-Path software/src).Path; python -m pytest software/tests/integration/test_model_motion_scene_overlay_probe.py software/tests/unit/test_isaac_sim_model_motion_scene_overlay_evidence.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/integration/test_model_motion_v2_shared_gate.py software/ai/tests/test_precision_adapter_v2.py software/ai/tests/test_batch_emitter_v2.py -q`;
+  `python scripts/maintain_repository.py verify`;
+  `git diff --check`.
+- Preserved failed attempt: the first wrapper containing
+  `if(Test-Path $out){Remove-Item -LiteralPath $out -Recurse -Force}` was
+  rejected by the command safety boundary before a process started. The
+  absolute output path was separately confirmed absent, then the exact probe
+  command above ran without a deletion step. No artifact or evidence file was
+  rewritten by that failed attempt. The repository verifier then failed once
+  for missing `mistune` package metadata and again for missing `weasyprint`
+  package metadata after `mistune>=3` was installed. The declared local test
+  dependencies were installed with `python -m pip install "mistune>=3"` and
+  `python -m pip install "beautifulsoup4>=4.12" "weasyprint>=70"`; the third
+  exact verifier run passed. Both dependency failures occurred before any
+  repository mutation by the verifier and are retained here.
+- Result: `BLOCKED_UNCERTAINTY_CROSSES_INFERRED_SAFE_REGIONS`. Four actions and
+  twelve overlay prims preserved `H, H, 1, PERIOD`, including the repeated H at
+  action index 1. Three unique target correspondences fit one rigid synthetic
+  placement with maximum residual `7.105427357601002e-14` mm. Every proposal
+  center sits at its inferred placed key center, leaving 7 mm to each edge,
+  while the qualified synthetic planar disk is `14.400834977163141` mm. Thus
+  zero of four uncertainty disks fit. Forty-five focused boundary, producer,
+  precision-adapter, scene, and retained-evidence tests passed in 3.15 seconds.
+  The repository verifier then passed 123 CI unit tests plus documentation,
+  public-record, evidence-scope, artifact, repository-health, source-footprint,
+  release-integrity, and readiness-synchronization checks.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the RC03 board, keyboard, phone, station, locator, and tag values
+  are governed design/simulation geometry. They are not installed measurements;
+  the source itself still requires physical board, keyboard underside,
+  phone/case, hardware, and tag-stack observations. The batch is a synthetic
+  contract fixture whose metadata explicitly denies deployment qualification.
+  The inferred placement is visualization-only and cannot replace camera or
+  robot calibration. No joint schedule, articulation replay, physics contact,
+  collision clearance, controller encoding, or task-effect observation ran.
+  No lane or integration-gate status changed.
+- Next dependency: consume the arm typing pipeline's exact source-bound
+  zero-write joint schedule for a representative batch that uses these same
+  target coordinates and satisfies the safe-region uncertainty gate. Replay
+  the schedule only in Isaac, compare simulated TCP contact to ordered targets,
+  and retain misses, collisions, and ordering failures without hardware or
+  physical authority.
+
+### E-20260929-INT-451 — source-bound arm schedule replay in Isaac
+
+- Stage: S2/S3 simulation process alignment, WP2.
+- Lane: INTEGRATION.
+- Implementation commit: `ff395ff5900f99be3958857c659feccbde31092d`.
+  Arm source commit: `5072c163152848bd8d78fa3fbc024e32177ac98d`.
+- Change: added a strict extractor for a complete arm-lane shadow-pipeline
+  report and a zero-authority in-memory Isaac replay. The extractor requires
+  accepted IK at every sample, exact Cartesian/joint semantic agreement,
+  canonical joint order, preserved requested order and repetitions, accepted
+  synthetic joint dynamics, and no controller commands. The Isaac probe binds
+  the bundle, robot USD/import receipt, and simulation-only virtual profile,
+  then teleports all scheduled joint states and independently reconstructs the
+  120 mm tool-tip pose from the live articulation. It takes zero physics steps.
+- Inputs/fixtures: implementation SHA-256
+  `f32ea136c8661f9ac93287e766f4911b42c22e534a887efb1c2deadff20d49a2` /
+  `fed7abe930bc3bf8e373de7fa017caa012dd89d13326b94e27c0b99eb4152ead`;
+  integration/evidence test SHA-256
+  `c872ce832a3482fb3cb89ca23bde0cf2b9f370d709a9c4600fb9e6f7f20ab86a` /
+  `7c22343eaad6cdc6915ac5c6076b806b82429d49c7c43d183801d0590e20728a`;
+  arm export helper SHA-256
+  `7314ad8f409c7a3fea32b6dfe06201fa7754881da2fc0881ab0588dd0762f92a`;
+  successful full arm report SHA-256
+  `681455f0b734e924f0074ccfb7228ecb94c04ba62f5657f9d66b27af438c618b`;
+  committed replay bundle file/content SHA-256
+  `4aece6ef7c7194aea59af2263caff6d4a3be65273a5df92348bf796b7103bb8c` /
+  `b890df278560724de964b374b4d4cc46e0e9c51b430051319034a1d259fdfdc0`;
+  committed replay receipt file/content SHA-256
+  `3780fd590f912835c85b69d3265291572eca767ab63ab3b859b9dcbbe18b6078` /
+  `ea6cc125388ac4b71c2a73374604a2ca672c21889d016cb17af1faebf6fe01cc`;
+  status SHA-256
+  `7539b48bcc4439d98695050024fd4e90c35d6cce8737fca535fd17199727b431`;
+  virtual-profile SHA-256
+  `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`;
+  robot USD SHA-256
+  `a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2`.
+- Commands: `$env:PYTHONPATH='software/src;software/tests/unit;software/tests/integration'; python C:\IsaacSim\tools\export_representative_schedule_5072.py`;
+  `$env:PYTHONPATH='software/src;software/tests/unit;software/tests/integration'; python C:\IsaacSim\tools\export_representative_schedule_promoted_5072.py`;
+  `python software/integrations/isaac_sim/joint_schedule_replay_bundle.py --arm-report C:\IsaacSim\evidence\representative_schedule_promoted_5072.json --arm-commit 5072c163152848bd8d78fa3fbc024e32177ac98d --output C:\IsaacSim\evidence\representative_joint_schedule_bundle_5072.json`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\joint_schedule_isaac_replay_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --bundle C:\IsaacSim\evidence\representative_joint_schedule_bundle_5072.json --virtual-profile software\config\virtual_commissioning_profile.json --output C:\IsaacSim\evidence\joint_schedule_isaac_replay_5072.json --status-output C:\IsaacSim\evidence\joint_schedule_isaac_replay_5072.status.json`;
+  `python -m pytest software/tests/integration/test_joint_schedule_replay_bundle.py software/tests/unit/test_isaac_sim_joint_schedule_replay_evidence.py -q`;
+  repository verification and `git diff --check`.
+- Preserved failed evidence: the nominal RC03 transform and 100 mm tool report
+  is retained externally at SHA-256
+  `5f4c4b9c68cafc591f4d8040ea7630b58e008be4133422cfb16c7b62c9a8aec2`.
+  It stops after 16 of 121 samples with
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`; the first rejected sample has
+  `0.0029863366428572314` normalized margin and `0.001590271049715872` mm
+  position error. The simulation overlay with the nominal ready seed is
+  retained externally at SHA-256
+  `3061f8363858a7019ce11b9a0a4392dfe196397e5eac465f045b15fde0457775`.
+  Its first park sample converges but exceeds adjacent-joint continuity with a
+  `1.9655926496107192` rad maximum delta. These failures were not relaxed;
+  the successful report uses a separately identified synthetic seed at the
+  overlay's declared park pose. The first Isaac launch stopped before startup
+  because `OMNI_KIT_ACCEPT_EULA` was absent from that shell; the existing
+  accepted installation was then exposed with the exact successful command.
+- Result: PASS_WITH_BLOCKERS. All 133 IK samples pass with maximum arm-solver
+  position error `0.07691098332647842` mm, minimum normalized arm-joint margin
+  `0.154335044383209`, and maximum adjacent joint delta
+  `0.09243468166349966` rad. Synthetic joint dynamics accepts every sample.
+  Isaac preserves four ordered contacts `H, H, 1, PERIOD`, reports maximum
+  full-route tool-tip disagreement `0.07684842940066568` mm and maximum joint
+  readback disagreement `5.923525581152944e-08` rad. Contact disagreements are
+  `0.00007682018682808492`, `0.00007682018682808492`,
+  `0.0001850485047460475`, and `0.00014589261019436637` mm. Fifty-eight focused
+  boundary, producer, scene, replay, and retained-evidence tests passed in 3.50
+  seconds. Repository verification passed 123 CI unit tests plus documentation,
+  public-record, evidence-scope, artifact, repository-health, source-footprint,
+  release-integrity, and readiness-synchronization checks.
+- Artifacts:
+  `software/integrations/isaac_sim/joint_schedule_replay_bundle.py`;
+  `software/integrations/isaac_sim/joint_schedule_isaac_replay_probe.py`;
+  `software/integrations/isaac_sim/evidence/representative_joint_schedule_bundle_5072_20260929.json`;
+  `software/integrations/isaac_sim/evidence/joint_schedule_isaac_replay_5072_20260929.json`;
+  `software/integrations/isaac_sim/evidence/joint_schedule_isaac_replay_5072_20260929.status.json`;
+  `software/tests/integration/test_joint_schedule_replay_bundle.py`;
+  `software/tests/unit/test_isaac_sim_joint_schedule_replay_evidence.py`;
+  full and failed reports under `C:\IsaacSim\evidence`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the source batch, localization qualification, layout, 120 mm
+  tool, and park seed are synthetic or unmeasured simulation inputs. The
+  earlier AI batch's `14.400834977163141` mm uncertainty still does not fit the
+  7 mm key-edge margin and was not promoted. Replay uses joint teleportation
+  with zero physics steps. Installed collision geometry, collision clearance,
+  valid inertial properties, dynamics, controller tracking, measured start
+  state, key travel, contact force, camera localization, hardware, and physical
+  qualification remain absent. After this replay completed, the arm branch
+  advanced to `7f22378613bc9866b14912e667882af9201fd52c`, adding shared-emitter
+  routing through the profiled shadow service. That later source was reviewed
+  but is not retroactively claimed by this commit-bound replay. No lane or
+  integration-gate status changed.
+- Supersedes: INT-450 only for its joint-schedule replay dependency. INT-450's
+  uncertainty blocker remains active and retained.
+- Next dependency: feed an actual precision-adapter batch whose qualified
+  uncertainty fits the observed key safe regions through this same schedule
+  path, starting from the current profiled-service arm source, then run
+  installed-geometry collision screening before any dynamics or contact
+  simulation. Separately replace the virtual layout, tool length, and synthetic
+  park seed with measured calibration and fresh observed state.
+
+### E-20260929-INT-452 — actual-emitter schedule lineage and Isaac replay
+
+- Stage: S2/S3 simulation process alignment, WP2.
+- Lane: INTEGRATION.
+- Implementation commit: `c764259a94cd0c1d9726257f2ce4f8d1ed1ddc49`.
+  Arm source commit: `9e5c878852da6a6e8509598bce9ce43f218efc70`.
+- Change: extended the simulation-local replay bundle to v2 so it can require
+  and bind actual shared-emitter lineage. The extractor verifies that the
+  producer payload SHA-256 equals the canonical retained batch SHA-256, marks
+  the supplied observations synthetic, denies deployment qualification, and
+  preserves the existing strict schedule, order, zero-authority, and digest
+  checks. The latest arm source's actual emitter produced nominal RC03 centers
+  for `H, H, 1, PERIOD`; the same production ingress, trajectory, IK, and
+  synthetic joint-dynamics boundaries emitted 133 samples, which were replayed
+  through the independent Isaac articulation.
+- Inputs/fixtures: bundle builder/probe SHA-256
+  `e4daf07db09a0c003e35ce913e1bde17ce2c22c12fdbb77822880000d42381f5` /
+  `67a3d628c85f9bdbe5a1bdc88a3756916df9fda1f336a13c1631061357490540`;
+  integration/evidence test SHA-256
+  `ded1c39d84c01c52fd301309d65a14f6d257aac1512d83b51da94d8652eafc99` /
+  `4e4b78a0180edd9079c399e591d21f7ba8e2a69b0d40d633e499c0ad9161386a`;
+  external export helper/full-report SHA-256
+  `0fc75ad67990721a57ea4a48c43111f24267c070632a4e6e26b026e7ce3aa8dd` /
+  `8e997fe024e465f29cc583ccb23bceda7f236844ceaabca4b1609db2fca58d41`;
+  actual-emitter input/payload SHA-256
+  `b5dc580825819a27a5aba3e58275453aa4c7c0a6b365d24a80a9b2c095f06c6d` /
+  `d4bad540537d48bee7227aab089f247216a3a88343cb16bd728d41e9ac623f7a`;
+  committed bundle file/content SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42` /
+  `52e8e1977cc88bc4d80b1664ccaaec5b4a2d4286c744bf74655f3d683577d71a`;
+  committed replay receipt file/content SHA-256
+  `b66993bab6aba1a5ab592f2fabb85bf4bca98658fe1bec4e997ea8b5a31b3fc6` /
+  `5ac28fd35d62f0cf27d1c9c86c092ecfb74fa9cd36e93eb99dcc0f47dcf90e8c`;
+  status SHA-256
+  `d3a573a4c60455c554366775f9d32592a618f4dfcdb9b9ecfce55fe901b38ee8`.
+- Commands: `$env:PYTHONPATH='software/src;software/ai;software/tests/unit;software/tests/integration'; python C:\IsaacSim\tools\export_actual_emitter_representative_schedule_9e5c878.py`;
+  `python software/integrations/isaac_sim/joint_schedule_replay_bundle.py --arm-report C:\IsaacSim\evidence\actual_emitter_representative_schedule_9e5c878.json --arm-commit 9e5c878852da6a6e8509598bce9ce43f218efc70 --require-actual-emitter --output C:\IsaacSim\evidence\actual_emitter_joint_schedule_bundle_9e5c878.json`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\joint_schedule_isaac_replay_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --bundle C:\IsaacSim\evidence\actual_emitter_joint_schedule_bundle_9e5c878.json --virtual-profile software\config\virtual_commissioning_profile.json --output C:\IsaacSim\evidence\actual_emitter_joint_schedule_isaac_replay_9e5c878.json --status-output C:\IsaacSim\evidence\actual_emitter_joint_schedule_isaac_replay_9e5c878.status.json`;
+  `python -m pytest software/tests/integration/test_joint_schedule_replay_bundle.py software/tests/unit/test_isaac_sim_joint_schedule_replay_evidence.py -q`;
+  shared focused suite, repository verification, and `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. The actual emitter preserves `H, H, 1, PERIOD`,
+  including the repeated key, and its canonical output is byte-bound to the
+  retained batch. All 133 arm samples pass exactly as in INT-451. Isaac reports
+  the identical maximum full-route tool-tip disagreement
+  `0.07684842940066568` mm and maximum joint readback disagreement
+  `5.923525581152944e-08` rad. This equality isolates producer substitution:
+  replacing fixture-origin batch construction with the actual shared emitter
+  changes no downstream motion for the same observations. Sixty-two focused
+  boundary, producer, scene, replay, and retained-evidence tests passed in 3.57
+  seconds. Repository verification passed 123 CI unit tests plus documentation,
+  public-record, evidence-scope, artifact, repository-health, source-footprint,
+  release-integrity, and readiness-synchronization checks.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json`;
+  `software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json`;
+  `software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.status.json`;
+  updated bundle builder, replay probe, integration tests, and evidence tests;
+  full source report under `C:\IsaacSim\evidence`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the observations supplied to the actual emitter are synthetic
+  nominal target centers with fixture qualification evidence. The v2 bundle
+  explicitly sets `synthetic_observations=true` and
+  `deployment_qualification_claimed=false`. The simulation-only layout, 120 mm
+  tool, and synthetic park seed remain unmeasured. Isaac uses joint teleport
+  with zero physics steps. The `14.400834977163141` mm localization uncertainty
+  from the actual precision-adapter fixture still exceeds the 7 mm key-edge
+  margin. Installed collision geometry, collision clearance, valid inertia,
+  dynamics, controller tracking, fresh observed state, contact force, key
+  travel, hardware, and physical qualification remain absent. No lane or
+  integration-gate status changed.
+- Supersedes: INT-451 only for the synthetic producer-substitution dependency.
+  INT-451's failed geometry/seed evidence and all physical blockers remain.
+- Next dependency: obtain safe-region-fitting output from a deployment-scoped
+  physical-camera qualification, then feed those actual observations through
+  this now-verified emitter-to-schedule boundary. In parallel, the arm lane must
+  install accepted collision geometry before any dynamic or contact replay.
+
+### E-20260929-INT-453 — fixed-fixture synthetic camera practice corpus
+
+- Stage: S2/S3 synthetic perception and data-pipeline rehearsal.
+- Lane: INTEGRATION supporting the AI/model lane; no lane status changed.
+- Implementation commit: `3fa068b8b4630105f0743843afdc59ef1bbeee73`.
+- Change: added a deterministic corpus generator around the existing plan-blind
+  virtual arm-camera JPEG path. It captures two achieved arm/camera poses,
+  projects the frozen nominal target map, renders simplified keyboard and phone
+  target surfaces, and emits eight declared pixel cases per pose: nominal,
+  55-percent dim, 145-percent bright, warm cast, elliptical glare, foreground
+  arm/tool proxy, the same proxy under dim light, and defocus blur. Each sample
+  includes its image digest, achieved joint state, base capture identities,
+  target board coordinates, pixel centers and safe polygons, in-frame state,
+  exact pixel transform, and synthetic occlusion labels. The generator and
+  manifest explicitly deny physical-camera and deployment qualification.
+- Inputs/fixtures: generator SHA-256
+  `b364906e0798c4f032bf2e329041a775a008e5ee7aa7a23ee0b1c83e0cb90163`;
+  focused test SHA-256
+  `06899eecfdc5d2e3e652782d94e13dd7c4b0013827b5a9d36ca9865a77a1225f`;
+  retained manifest file SHA-256
+  `a529ffbdc39aff5450d0378f2e3020c83b398a3e7f853b0ef4e957748e34c7fd`;
+  canonical corpus SHA-256
+  `03e2d3d7ac2d3a0026b2c24cb0a9d709190794e1adb5b69e038374fa46f152e4`;
+  frozen target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  virtual camera service-definition SHA-256
+  `8c6f6df05a8f4e88e933cddb2237bbc9a17b9a8b96602b60638756c3c3119831`.
+  The manifest carries the exact SHA-256 of every retained JPEG.
+- Commands: `New-Item -ItemType Directory -Force software/runs | Out-Null; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; python software/integrations/isaac_sim/fixed_fixture_practice_corpus.py --output-dir C:\IsaacSim\artifacts\issue190\fixed-fixture-practice-v1`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest software/tests/unit/test_fixed_fixture_practice_corpus.py software/tests/unit/test_virtual_arm_camera.py -q`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -c "from scripts.ci.offline_checks import TESTS; import pytest; raise SystemExit(pytest.main(['-q', *TESTS]))"`;
+  repository policy scripts and `git diff --check`.
+- Preserved failed evidence: the first generator invocation stopped before any
+  capture because the ignored `software/runs` bootstrap directory was absent.
+  The exact error was `BootstrapConfigurationError: evidence_root directory is
+  missing: software/runs`. The directory was created and the identical command
+  then completed. A later `python scripts/ci/offline_checks.py test` invocation
+  stopped because this worktree has no `.venv-ci`; the equivalent declared
+  `TESTS` tuple was then run with the active Python environment. Neither failed
+  invocation accessed hardware, wrote a controller command, or moved the arm.
+- Result: PASS_WITH_BLOCKERS. Sixteen JPEGs totaling 1,265,525 bytes plus a
+  532,000-byte manifest were retained. Every sample contains 75 targets and all
+  75 projected centers are in frame. The obstruction proxy covers 26 targets
+  at `hover_t` and 29 at `hover_e`; both poses also have a combined dim and
+  obstructed case. Deterministic regeneration produced identical corpus and
+  per-image hashes. Eleven focused corpus and virtual-camera tests passed in
+  5.28 seconds. The declared repository offline suite passed 503 tests with 4
+  platform skips in 44.49 seconds, and all documentation, evidence-scope,
+  artifact, repository-health, source-footprint, release-integrity, and
+  readiness-synchronization policy checks passed.
+- Artifacts:
+  `software/integrations/isaac_sim/fixed_fixture_practice_corpus.py`;
+  `software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json`;
+  the 16 JPEGs in that directory;
+  `software/tests/unit/test_fixed_fixture_practice_corpus.py`;
+  reproduction documentation in `software/integrations/isaac_sim/README.md`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the virtual camera intrinsics and mount are unmeasured. The
+  rendered key and phone surfaces use nominal safe rectangles rather than
+  photoreal device assets. Lighting is a deterministic pixel transformation,
+  and obstruction is an image-space proxy rather than rendered robot CAD or a
+  depth-aware mask. The fixed-fixture assumption has not been physically
+  verified or bound to a measured configuration epoch. These images may train
+  invariance and validate data plumbing, but they cannot measure sim-to-real
+  error, establish localization coverage, fit an uncertainty bound, release a
+  safe-region gate, prove installed collision clearance, or authorize motion.
+- Supersedes: none.
+- Next dependency: register the real fixed camera, keyboard, phone, board, and
+  lighting as one measured configuration epoch; capture a small, disjoint
+  physical validation set from that exact installation; then measure the
+  synthetic-to-physical gap and qualify or reject synthetic augmentation per
+  perturbation. In parallel, replace the image-space obstruction proxy with a
+  rendered, pose-bound robot geometry mask and retain depth/segmentation labels.
+
+### E-20260930-INT-454 — fixed-overview FK obstruction masks and depth
+
+- Stage: S2/S3 synthetic perception and obstruction-abstention rehearsal.
+- Lane: INTEGRATION supporting the AI/model lane; no lane status changed.
+- Implementation commits: `e786bade481fd8d7723e8e4daf94edddf30664dd`
+  and corrective packaging commit
+  `53ca5ce4ccd44b15b81a1537aa3db3f7affc9fb5`.
+- Change: added a fixed-overview corpus generator that holds the synthetic
+  camera and board registration constant while deriving three robot poses from
+  the pinned URDF and exact joint states. Each URDF parent/child span becomes a
+  declared projected capsule with a stable link label and conservative
+  per-link depth. The output includes one semantic label PNG and uint16
+  millimetre-depth PNG per pose, 15 RGB lighting samples packed into three
+  deterministic atlases with exact crop rectangles, and board/pixel target
+  labels carrying robot-center occlusion and safe-region overlap fraction.
+- Inputs/fixtures: final generator SHA-256
+  `87b0d43dbf78122785db9163d2bae928b3db14ed2bc65f681f4b965026bc4b35`;
+  focused test SHA-256
+  `fa04ec5109e67bcacf5a50f6c806130add37f820433084c570d6389a125ab12d`;
+  retained manifest file SHA-256
+  `fcd43eae86aeefaa5d4309dfc874f6d56adb673f539e39fb33c59df18cebff46`;
+  canonical corpus SHA-256
+  `7b0f6be41f75464fae4a6fc75facfd0f7a62d90bc2eee62c64b5c5c7ef5353f6`;
+  frozen target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  pinned kinematic-model SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  base synthetic frame SHA-256
+  `854ba1e893be26dc849a15ac6665710efcab19340c807dd6707ce2743b9b3487`.
+- Commands: `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python software/integrations/isaac_sim/fixed_overview_segmentation_corpus.py --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-segmentation-v1-atlas`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest software/tests/unit/test_fixed_overview_segmentation_corpus.py software/tests/unit/test_fixed_fixture_practice_corpus.py software/tests/unit/test_virtual_pixel_vision.py software/tests/unit/test_virtual_arm_camera.py -q`;
+  the declared offline `TESTS` tuple through the active Python environment;
+  all repository policy scripts and `git diff --check`.
+- Preserved failed evidence: the initial implementation retained 15 separate
+  RGB JPEGs, producing 6,105 tracked files against the governed 6,100-file
+  ceiling. `check_source_archive_footprint.py` failed with that exact count.
+  The individual images were then replaced by three pose atlases whose manifest
+  records exact crop rectangles and independently hashed crop JPEG encodings.
+  The corrected archive contains 6,093 tracked files. No ceiling was raised and
+  no test or image case was removed.
+- Result: PASS_WITH_BLOCKERS. Three poses and five lighting cases produce 15
+  addressable RGB samples, three semantic masks, and three depth maps. The RGB
+  atlases total 2,025,452 bytes, masks/depth total 37,595 bytes, and the manifest
+  is 125,241 bytes. The ready pose obscures 4 target centers and overlaps 6
+  target safe regions; `hover_t` obscures 14 centers and overlaps 19 regions;
+  `hover_e` obscures 14 centers and overlaps 21 regions. Nineteen focused
+  corpus, fixed-camera, and arm-camera tests passed in 11.86 seconds. The
+  declared repository suite passed 503 tests with 4 Windows platform skips in
+  42.67 seconds. Documentation, public-record, evidence-scope, artifact,
+  repository-health, corrected source-footprint, release-integrity, and
+  readiness-synchronization checks passed.
+- Artifacts:
+  `software/integrations/isaac_sim/fixed_overview_segmentation_corpus.py`;
+  `software/integrations/isaac_sim/evidence/fixed_overview_segmentation_v1/manifest.json`;
+  three RGB atlases, three link-label masks, and three robot-depth maps in that
+  directory; `software/tests/unit/test_fixed_overview_segmentation_corpus.py`;
+  reproduction documentation in `software/integrations/isaac_sim/README.md`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: robot bodies are radius-declared capsules around URDF link
+  origins, not CAD meshes. Depth is one conservative value per rendered link,
+  not a per-triangle z-buffer. The fixed overview camera, board registration,
+  device surfaces, lighting response, fixture state, and link radii are
+  synthetic or unmeasured. The overlap labels support abstention rehearsal but
+  cannot establish visibility performance, localization coverage, an error
+  bound, installed collision clearance, physical qualification, or authority.
+- Supersedes: INT-453 only for the fixed-camera obstruction approximation;
+  INT-453 remains the arm-camera perturbation corpus and retained evidence.
+- Next dependency: replace capsule proxies with the pinned robot CAD in the
+  governed Isaac scene and export triangle-level RGB, semantic segmentation,
+  and depth from the identical fixed camera. Compare CAD and capsule masks per
+  pose before deciding whether the lighter-weight generator is conservative.
+
+### E-20260930-INT-455 — official visual-mesh fixed-overview comparison
+
+- Stage: S2/S3 synthetic perception and obstruction-abstention rehearsal.
+- Lane: INTEGRATION supporting the AI/model lane; no lane status changed.
+- Implementation commit: `8562cab663e4e389ce7815be4db1172f1c519abf`.
+- Change: added an Isaac probe that pins the upstream Waveshare commit and
+  seven per-link visual-mesh hashes, applies the governed URDF forward
+  kinematics for `ready`, `hover_t`, and `hover_e`, and renders each pose from
+  the same fixed overview. The retained package contains crop-addressed RGB,
+  binary robot-mask, and uint16 millimetre-depth atlases plus a hash-bound
+  receipt and zero-authority status. Each mesh mask is compared pixel for pixel
+  with the corresponding INT-454 capsule proxy.
+- Inputs/fixtures: upstream commit
+  `40dbd84b553695212fab713e8465f817ba95454d`; governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  upstream mesh receipt SHA-256
+  `77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954`;
+  capsule corpus SHA-256
+  `7b0f6be41f75464fae4a6fc75facfd0f7a62d90bc2eee62c64b5c5c7ef5353f6`;
+  final probe SHA-256
+  `91b610c6834b4306da8dad2605f5ca882161c1a629836722f3f0b5ad06bdc934`;
+  focused test SHA-256
+  `01a9d6b8442a17da65778f425617fa78f772fbac0ea4705fae1134d63c005ad3`;
+  retained manifest file SHA-256
+  `729554a4716e571e0db0735a9896af700c1eb9767923c32f7c53cff6a404d79c`;
+  canonical receipt SHA-256
+  `0abf73eaf3e58f9d7df5f1f2ac2a39dcc666f729f8c7bd34631eb535e9302055`.
+- Commands: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v6 --receipt C:\IsaacSim\evidence\fixed_overview_official_mesh_v6.json --status-output C:\IsaacSim\evidence\fixed_overview_official_mesh_v6.status.json`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py software/tests/unit/test_fixed_overview_segmentation_corpus.py software/tests/unit/test_fixed_fixture_practice_corpus.py software/tests/unit/test_virtual_pixel_vision.py software/tests/unit/test_virtual_arm_camera.py -q`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -c "from scripts.ci.offline_checks import TESTS; import pytest; raise SystemExit(pytest.main(['-q', *TESTS]))"`;
+  documentation, public-record, evidence-scope, artifact, repository-health,
+  source-footprint, release-integrity, readiness-synchronization, Ruff, and
+  `git diff --check` checks.
+- Preserved failed evidence: the first render exited zero but used every
+  nonbackground semantic ID, thereby including `UNLABELLED` board/device
+  geometry; its receipt/status file SHA-256 values are
+  `4b531c2b140913e56bfc09e99286e2ce4617c10755e3056e87d6c01d20dcc1b1`
+  and `06c7e4ec73f57e54a4bfde34e36edf349186a0f4a6180b9153c7555c5c72bbb9`.
+  The first correction failed closed because all three inherited-visibility
+  masks remained identical; status SHA-256
+  `7e09cfc4626774afd78ae160eed61ea30be1c91fe58ac7fcdcde09579231a3ec`.
+  Explicit per-mesh visibility then correctly exposed that the ready view has
+  only six visible link IDs; the overly strict seven-ID assertion failed with
+  status SHA-256
+  `54c596fec1ff6ba5becb7475bde134c0f6b6cf6ec7def2ca18d24780d3e9df71`.
+  The first evidence test also exposed uint16-versus-Pillow-int32 depth hash
+  normalization, while Ruff rejected one unused import; both were corrected
+  before the retained run. None of these failures was relabeled as passing.
+- Result: PASS_WITH_BLOCKERS. At `ready`, the official mesh has 88,567 pixels,
+  capsule IoU is `0.5968193509715699`, 9,908 mesh pixels lie outside the
+  capsule, and 43,230 capsule pixels lie outside the mesh. At `hover_t`, those
+  values are 173,242, `0.7098557113660929`, 22,847, and 38,625. At `hover_e`,
+  they are 190,210, `0.6980977455407738`, 30,058, and 39,202. Robot-only depth
+  spans 180 to 501 mm across the poses. Therefore the capsule proxy is not a
+  conservative official-mesh silhouette. Twenty focused tests passed in 12.52
+  seconds. The declared shared suite passed 503 tests with 4 Windows platform
+  skips in 45.22 seconds. All applicable repository policy checks passed. The
+  committed tree is exactly at the 6,100-file ceiling without raising it.
+- Artifacts:
+  `software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py`;
+  `software/integrations/isaac_sim/evidence/fixed_overview_official_mesh_v1/`;
+  `software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py`;
+  reproduction documentation in `software/integrations/isaac_sim/README.md`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the official upstream meshes are high-detail visual/perception
+  geometry, not reviewed reduced collision geometry. Link1 and link5 are not
+  watertight. The renderer uses synthetic materials and lighting, nominal and
+  unmeasured camera/robot placement, no tool geometry, and no camera-support
+  geometry. The run performs zero physics steps and establishes no collision
+  clearance, safe-region localization, physical-camera qualification,
+  controller behavior, permit, transport, or physical authority.
+- Supersedes: INT-454 only for assessing whether its capsules conservatively
+  approximate official visual-mesh silhouettes; INT-454 remains a valid cheap
+  synthetic obstruction and perturbation corpus.
+- Next dependency: replace the capsule labels in future synthetic training
+  renders with the retained official visual-mesh mask/depth path, then add the
+  missing tool and camera-support visual geometry. Separately collect a small
+  measured physical fixed-camera validation set before assigning any
+  synthetic-to-physical qualification or safe-region error bound.
+
+### E-20260930-INT-456 — target-bound official-mesh occlusion labels
+
+- Stage: S2/S3 synthetic perception and obstruction-abstention rehearsal.
+- Lane: INTEGRATION supporting the AI/model lane; no lane status changed.
+- Implementation commit: `822bb2c99833476ac953c6e916527b467ea53384`.
+- Change: extended the retained official-mesh probe and receipt to project the
+  frozen 75-target catalog through the exact fixed-overview camera. Every pose
+  now carries ordered board-millimetre and pixel geometry, target depth,
+  in-frame state, center occlusion, and official-mesh safe-region overlap.
+  Receipt serialization is canonical and compact; no tracked artifact was
+  added and the repository remains at its 6,100-file ceiling.
+- Inputs/fixtures: target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  upstream commit `40dbd84b553695212fab713e8465f817ba95454d`;
+  implementation SHA-256
+  `1ee458a4e1565bddd14e40b25934934f8ee73444e4da1e86ce8eef51e12e3e1e`;
+  test SHA-256
+  `6af1e17858fb434bcd887e0bfc0585e172efc4268e4318acfdc5889230503a77`;
+  retained manifest file SHA-256
+  `97c8a211e8e0ab9ca5d0e16ae97127d794a0b42aeae74a74bd258ad3888c0b88`;
+  canonical receipt SHA-256
+  `3b8229d210f8353062009c4f6650ce9bd0a1575a0af09aa85fee20d56db89967`.
+- Commands: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v7 --receipt C:\IsaacSim\evidence\fixed_overview_official_mesh_v7.json --status-output C:\IsaacSim\evidence\fixed_overview_official_mesh_v7.status.json`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py software/tests/unit/test_fixed_overview_segmentation_corpus.py software/tests/unit/test_fixed_fixture_practice_corpus.py software/tests/unit/test_virtual_pixel_vision.py software/tests/unit/test_virtual_arm_camera.py -q`;
+  Ruff, source-footprint, and `git diff --check` checks.
+- Result: PASS_WITH_BLOCKERS. All three poses retain the same ordered 46-key
+  and 29-phone catalog. `ready` obscures 1 target center and overlaps 5 safe
+  regions; `hover_t` obscures 14 centers and overlaps 17 regions; `hover_e`
+  obscures 14 centers and overlaps 18 regions. The largest safe-region overlap
+  is 0.91 at ready and 1.00 at each hover. Twenty focused tests passed in 12.30
+  seconds. The source archive remains within policy at exactly 6,100 files.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: labels inherit INT-455's synthetic lighting, nominal unmeasured
+  camera and placement, missing tool/camera-support geometry, and visual-only
+  mesh scope. They support offline training and abstention evaluation only;
+  they do not establish localization accuracy, physical visibility coverage,
+  collision clearance, execution permission, or physical authority.
+- Supersedes: none; augments INT-455 with target-level labels.
+- Next dependency: expose this retained receipt through the AI data-building
+  path as a synthetic-only occlusion dataset, then train/evaluate abstention on
+  disjoint pose/lighting splits without treating those scores as deployment
+  qualification. Add measured tool and camera-support geometry when available.
+
+### E-20260930-AI-457 — official-mesh occlusion data builder
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `35495d0d79c231490149bd22ad1cdbd51a4d815f`.
+- Change: added a hash-verifying builder that consumes the retained INT-456
+  receipt and official-mesh RGB atlas, materializes nine deterministic images,
+  and emits target-specific `target_visible`/`abstain` JSONL. Training uses
+  `ready` and `hover_t` crossed with nominal, dim, and bright lighting.
+  Evaluation holds out `hover_e` and warm, glare, and blur transformations.
+  Both pose and lighting groups are therefore disjoint. The 0.20 maximum
+  safe-region overlap is declared before label generation; center occlusion
+  always abstains.
+- Inputs/fixtures: implementation SHA-256
+  `275857499ca39ff0398cadc6f0ddda5e3883606fbcd668de69fbf14dc1f77d60`;
+  test SHA-256
+  `de552ce13c6935b65a8307a7a06fafd355517118af50ab7b976d4aa12caef480`;
+  source manifest file SHA-256
+  `9ae31bfc21a6ec522fa8fd0d91ab0d37f789ea1717a371ec4750855308839d5c`;
+  source receipt SHA-256
+  `b09559c54a5bd65715f5a34003b15c4dd20abd05e860e3cc6d1d4089ffe7e99b`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Commands: `python software/ai/train/build_official_mesh_occlusion_data.py --source-manifest software/integrations/isaac_sim/evidence/fixed_overview_official_mesh_v1/manifest.json --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-data-v1`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py software/tests/unit/test_fixed_overview_segmentation_corpus.py software/tests/unit/test_fixed_fixture_practice_corpus.py software/tests/unit/test_virtual_pixel_vision.py software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py -q`;
+  Ruff, documentation, evidence-scope, artifact, source-footprint,
+  release-integrity, and `git diff --check` checks.
+- Result: PASS_WITH_BLOCKERS. The deterministic dataset SHA-256 is
+  `d18f398e2aa7cf9e4297780158e91946d0c03f44afec97830311daf1a614a546`.
+  Training contains 450 rows: 51 abstentions and 399 visible labels, JSONL
+  SHA-256 `140636df91e1884ca28d5f8cb9fb3662946a0ab8633f452098de4e87c3f8f107`.
+  Evaluation contains 225 rows: 45 abstentions and 180 visible labels, JSONL
+  SHA-256 `c00b3c3ded761af0c57e4211441d253bfa9848623b658be02dd114a2b40d70ca`.
+  Nine images total 910,461 bytes. The external generated manifest SHA-256 is
+  `ff6c9f5523d4334309d685e975a58bb33f57af678b7d8b4792d0b78a4dcf85ea`.
+  Forty-nine focused AI, evidence, corpus, and virtual-camera tests passed in
+  13.48 seconds. Tampered receipt identity, nondeterministic output, and group
+  leakage are rejected.
+- Evidence consolidation: the redundant retained `status.json` was removed
+  and its `PASS_WITH_BLOCKERS`, minimum-IoU, and maximum-missed-pixel content
+  moved inside the canonical receipt before its new hash was calculated. The
+  prior file and hashes remain preserved in INT-455 and INT-456. This one-path
+  consolidation freed the path used by the builder and kept the repository at
+  the unchanged 6,100-file ceiling.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: all images, pose geometry, transformations, and labels are
+  synthetic. The evaluation split is a development fixture rather than a
+  physical or deployment qualification set. Tool and camera-support geometry
+  remain absent. No localization error, physical visibility coverage,
+  collision clearance, model promotion, controller behavior, execution
+  permission, or physical authority is established.
+- Supersedes: none; consumes and preserves INT-456 source evidence.
+- Next dependency: train a small offline occlusion/abstention baseline on the
+  generated training split and score the untouched synthetic evaluation split,
+  reporting class balance, confusion matrix, calibration, and failure cases.
+  Keep any resulting model blocked from deployment until measured physical
+  camera data is collected under a registered configuration epoch.
+
+### E-20260930-AI-458 — held-out synthetic occlusion baseline
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `0134496ab25e28fbf1085d1565174535993bc8b9`.
+- Change: trained a deterministic class-weighted logistic baseline on
+  standardized 16-by-16 RGB crops around each requested target. Training uses
+  only the INT-457 training split. The 0.5 threshold, 800 iterations, 0.08
+  learning rate, and 0.001 L2 term are fixed in source. The scorecard retains
+  the training and held-out confusion matrices, Brier scores, ten-bin
+  calibration errors, calibration bins, and every misclassified case.
+- Inputs/fixtures: implementation SHA-256
+  `7223eda0881632c2bd8f402c9ada78be1f60b83d92a7107f027b2e5d637fc3d0`;
+  test SHA-256
+  `a767b7efa189e2b5514ef2c5757b3d6c267fd937c2ccd7e5ca3c66015d0f5ad1`;
+  dataset SHA-256
+  `d18f398e2aa7cf9e4297780158e91946d0c03f44afec97830311daf1a614a546`.
+- Commands: `python software/ai/train/build_official_mesh_occlusion_data.py --source-manifest software/integrations/isaac_sim/evidence/fixed_overview_official_mesh_v1/manifest.json --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-data-v3 --baseline-output C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-baseline-v2`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py software/tests/unit/test_fixed_overview_segmentation_corpus.py software/tests/unit/test_fixed_fixture_practice_corpus.py software/tests/unit/test_virtual_pixel_vision.py software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py -q`;
+  Ruff, documentation, source-footprint, and `git diff --check` checks.
+- Result: BLOCKED_SYNTHETIC_ONLY. Training confusion is 49 true abstentions,
+  398 true-visible labels, 1 false abstention, and 2 missed abstentions:
+  accuracy `0.9933333333333333`, balanced accuracy `0.9791390240306649`,
+  Brier score `0.008785044955760532`, and calibration error
+  `0.03074390236995543`. Held-out evaluation confusion is 32 true
+  abstentions, 118 true-visible labels, 62 false abstentions, and 13 missed
+  abstentions: accuracy `0.6666666666666666`, balanced accuracy
+  `0.6833333333333333`, Brier score `0.3273629285787362`, and calibration
+  error `0.3328667785273153`. The large train/evaluation gap rejects promotion.
+  Model SHA-256 is
+  `79504ae753d6e0baf82575cd14aae89a9b98eac8e77d9a99ab2398e07204dee1`;
+  canonical scorecard SHA-256 is
+  `37ce4ecc808c0c906cb81e7a84fd830daa031cb42e00df1ef742fb0c676a541d`;
+  scorecard file SHA-256 is
+  `c88dc43181e705eb31b83deaa14da626f1519111da05b09e45cf99d41bcc178d`.
+  Forty-nine focused tests passed in 21.97 seconds, including deterministic
+  retraining and exact retained confusion checks.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: the baseline sees only synthetic target crops from three robot
+  poses and six deterministic lighting families. It has no temporal context,
+  no physical frames, no tool or support geometry, and no deployment-calibrated
+  uncertainty. Its evaluation split is now consumed and cannot be used as fresh
+  selection or tuning evidence. It produces an offline visibility decision,
+  not coordinates, motion, controller commands, permits, or authority.
+- Supersedes: none; first measured baseline on INT-457.
+- Next dependency: predeclare and render additional official-mesh robot pose
+  groups. Reserve separate development and untouched evaluation pose/lighting
+  families before testing a lighting-normalized or convolutional model. The
+  consumed `hover_e` results may diagnose failure modes but may not select the
+  next candidate. Physical promotion remains dependent on measured fixed-camera
+  data under a registered configuration epoch.
+
+### E-20260930-AI-459 — predeclared official-mesh pose expansion
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model with an inert Isaac rendering fixture; no arm or integration
+  status changed.
+- Implementation commit: `33dca133ff53d6d27cff4b746d6b56d40c9e5acc`.
+- Change: expanded the fixed-overview official visual-mesh renderer from three
+  to nine poses and declared all split roles before rendering. Previously seen
+  `ready`, `hover_t`, and consumed `hover_e` form the training geometry;
+  schedule sequences 34/35 (`hover_h`/`contact_h`) form development geometry;
+  and sequences 63/64/103/104 (`hover_1`/`contact_1`/`hover_period`/
+  `contact_period`) are reserved for untouched evaluation. The six new states
+  are read from the retained actual-emitter schedule by exact sequence and the
+  schedule must retain zero authority. Only the original three poses carry a
+  capsule comparison because the capsule corpus has no labels for new poses.
+- Inputs/fixtures: renderer SHA-256
+  `2070df6e087f54ac924a2d5a81ecf4cf5c49f90dbf98c15472dfa3bc892e300f`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  schedule bundle SHA-256
+  `52e8e1977cc88bc4d80b1664ccaaec5b4a2d4286c744bf74655f3d683577d71a`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  source upstream commit `40dbd84b553695212fab713e8465f817ba95454d`.
+- Commands: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software/integrations/isaac_sim/evidence/fixed_overview_segmentation_v1/manifest.json
+  --schedule-bundle software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v2-run2
+  --receipt C:\IsaacSim\evidence\fixed_overview_official_mesh_v2_run2.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_official_mesh_v2_run2.status.json`;
+  `python -m ruff check software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py`;
+  `python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -q`.
+- Failed evidence preserved: the same render command first named the nonempty
+  pre-existing external directory `fixed-overview-official-mesh-v2` and stopped
+  before Isaac initialization with `ValueError: output directory must be
+  empty`. Its status SHA-256 is
+  `4db7c8a1d90df84431d85b444cb740002859148e3aff03cdaa1b6659792fb931`.
+  Hardware writes and physical movements were zero.
+- Result: PASS_WITH_BLOCKERS. All nine semantic masks are distinct. Center-
+  occluded target counts for `ready`, `hover_t`, `hover_e`, `hover_h`,
+  `contact_h`, `hover_1`, `contact_1`, `hover_period`, and `contact_period`
+  are respectively `1,14,14,12,12,9,9,7,7`; counts exceeding the predeclared
+  0.20 safe-region-overlap threshold are `2,15,15,17,15,13,12,9,9`.
+  Canonical receipt SHA-256 is
+  `47fb8d389d956b877e444f4c9221c08a9b2d73fa6b4f6898eaf3d401a7e79ca0`;
+  receipt file SHA-256 is
+  `f5072ea7884c080837d1bd5945b00a82ddd14b8c08bda0a4a058e6f5c4dbe375`.
+  RGB/mask/depth atlas SHA-256 values are respectively
+  `e26789c36a7cfc121b943ad2874912e7971e22a48161cae75fc27443383ca942`,
+  `513e66280b51f7da76bf5ec7b1d4a799b0f0723de0713c58651109f45b729641`,
+  and `7e77446b1ce5eb3adb0cc2b21e47e43e6bb78c1e8d55c16b1c29d469b4e49012`.
+  Three focused retained-evidence tests passed in 9.82 seconds and Ruff passed.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v2-run2` and
+  `C:\IsaacSim\evidence\fixed_overview_official_mesh_v2_run2.json`; repository
+  retention would exceed the governed 6,100-file ceiling. The hashes above
+  identify the exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: official visual meshes, camera, board placement, lighting, and
+  occlusion labels remain synthetic. Tool and camera-support geometry are
+  absent. The reserved evaluation poses have not been used for model selection
+  or scoring. This evidence establishes no physical visibility coverage,
+  localization accuracy, collision clearance, controller behavior, execution
+  permission, or physical authority.
+- Supersedes: none; expands INT-455/INT-456 while preserving AI-458 as the
+  consumed first baseline.
+- Next dependency: materialize training/development/evaluation datasets with
+  disjoint predeclared lighting families, select a compact candidate using only
+  training and development, then score the reserved evaluation group once.
+
+### E-20260930-AI-460 — three-way official-mesh occlusion dataset
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `280878de88f38672e3c04145d211a7d0146d35fa`.
+- Change: extended the hash-verifying synthetic dataset builder without
+  changing its v1 results. A v2 source must declare training, development, and
+  evaluation pose groups that exactly partition every rendered pose and agree
+  with each pose row. Training uses nominal/dim/bright lighting, development
+  uses warm/glare/blur, and evaluation uses newly implemented cool/side-shadow/
+  defocus transformations. These pose and lighting families are pairwise
+  disjoint. The reserved evaluation JSONL and images are materialized for
+  immutable identity and leakage checking but have not been scored or used to
+  select a model.
+- Inputs/fixtures: builder SHA-256
+  `0f4bd03e7bc32bd6016f20204e849fc18604c9f7ff2dece5fc84079ec901ee37`;
+  focused evidence-test SHA-256
+  `d46ff3e3d2bc1a01dd33164c59a091f05915e603e1bcecc5e099b45d977fa900`;
+  source receipt file SHA-256
+  `f5072ea7884c080837d1bd5945b00a82ddd14b8c08bda0a4a058e6f5c4dbe375`;
+  source receipt SHA-256
+  `47fb8d389d956b877e444f4c9221c08a9b2d73fa6b4f6898eaf3d401a7e79ca0`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Commands: `Copy-Item C:\IsaacSim\evidence\fixed_overview_official_mesh_v2_run2.json
+  C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v2-run2\manifest.json`;
+  `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v2-run2\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-expanded-v1`;
+  repeated with output `official-mesh-occlusion-expanded-v2` for deterministic
+  byte comparison; `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python
+  -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py
+  software/tests/unit/test_fixed_overview_segmentation_corpus.py
+  software/tests/unit/test_fixed_fixture_practice_corpus.py
+  software/tests/unit/test_virtual_pixel_vision.py
+  software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py
+  -q`; Ruff and `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. Two independent builds are byte-identical.
+  Dataset SHA-256 is
+  `e672b3a1fe9d23376b91c07ce56f85005443cf521645373110de24791712607d`;
+  manifest file SHA-256 is
+  `0ace2d7e018cdd53fee659375a3c325f6b33093d54f8e70824cf8e63b77dbd50`.
+  Training contains 675 rows with 96 abstentions and 579 visible labels,
+  JSONL SHA-256
+  `a2fd3e3e52dd42757fbda35882eeecc8f9dae4a80ccd59eb21f12bad5983c97f`.
+  Development contains 450 rows with 96 abstentions and 354 visible labels,
+  JSONL SHA-256
+  `2b6b695fbf8f7f8df9a8515c44e2731d60ca9fb717af4bc0f5a087c7ac301146`.
+  Reserved evaluation contains 900 rows with 129 abstentions and 771 visible
+  labels, JSONL SHA-256
+  `c7eba79268e436cb9dda75cdded8910807f97bee40ac2dd4bb530651cddfd954`.
+  All 27 generated images have distinct SHA-256 values and total 2,844,007
+  bytes. Fifty-one focused tests passed in 22.16 seconds and Ruff passed. The
+  tracked repository remains at exactly 6,100 files.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-expanded-v1` and
+  deterministic repeat `...expanded-v2`; hashes identify exact local bytes but
+  do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: all source renders, transformations, geometry, and labels are
+  synthetic. The dataset omits measured tool and camera-support geometry,
+  physical frames, temporal evidence, and deployment-calibrated uncertainty.
+  Merely materializing the reserved evaluation group is not model evaluation.
+  The dataset cannot qualify localization, collision clearance, controller
+  behavior, execution permission, or physical authority.
+- Supersedes: none; preserves the v1 AI-457/AI-458 dataset and baseline exactly.
+- Next dependency: train compact candidates on training only, select one using
+  development only, freeze its checkpoint and decision threshold, then score
+  the reserved evaluation group once. Keep every result synthetic-only and
+  blocked from deployment pending measured fixed-camera evidence.
+
+### E-20260930-AI-461 — compact occlusion candidate selection and reserved evaluation
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `c16893093045bfe93756b4ad0966783223775404`.
+- Change: fit two deterministic class-weighted logistic candidates using only
+  AI-460 training rows: raw RGB crops and brightness-normalized chromatic,
+  grayscale, and first-difference edge features. Each threshold was selected
+  on development only from explicit 0.05 increments. Ranking first preferred a
+  development missed-abstention rate at or below 0.05, then balanced accuracy,
+  false abstentions, and missed abstentions. Neither candidate met the 0.05
+  bound, so the deterministic ranking fallback selected the higher-balanced-accuracy
+  chromatic/edge candidate. Its feature family, threshold, weights, and
+  standardization were frozen before the reserved evaluation JSONL was loaded.
+  That evaluation was then scored exactly once.
+- Inputs/fixtures: implementation SHA-256
+  `673709ec4aaba36dcf6eb79235533669a99bd900155ff03d7769e8c14542c401`;
+  focused evidence-test SHA-256
+  `fb0a2825dfaa9b34700734c162a09bb82eb954970bb79ad5a0bea79891790ae8`;
+  dataset SHA-256
+  `e672b3a1fe9d23376b91c07ce56f85005443cf521645373110de24791712607d`;
+  training/development/evaluation JSONL identities remain exactly those in
+  AI-460.
+- Command: `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v2-run2\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-expanded-v3
+  --candidate-output C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-candidate-v1`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest
+  software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py
+  software/tests/unit/test_fixed_overview_segmentation_corpus.py
+  software/tests/unit/test_fixed_fixture_practice_corpus.py
+  software/tests/unit/test_virtual_pixel_vision.py
+  software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py
+  -q`; Ruff, documentation, and `git diff --check` checks.
+- Failed evidence preserved: two focused pre-run test attempts returned one
+  failure because the threshold unit fixture expected `0.20` while its negative
+  examples gave `0.10` the same false-positive count and better recall. Rounding
+  the threshold grid did not change that correct `0.10` selection. The fixture
+  was corrected to distinguish the thresholds; the selection implementation
+  retained explicit two-decimal thresholds. Both failures involved no model
+  evaluation, hardware write, or physical movement.
+- Development results: raw RGB selected threshold `0.90` and produced 73 true
+  abstentions, 234 true-visible labels, 120 false abstentions, and 23 missed
+  abstentions; balanced accuracy `0.7107168079096045`, Brier score
+  `0.32920465840558444`, and calibration error `0.3401623490847901`.
+  Chromatic/edge features selected threshold `0.25` and produced 86 true
+  abstentions, 236 true-visible labels, 118 false abstentions, and 10 missed
+  abstentions; balanced accuracy `0.78125`, Brier score
+  `0.28322995445080373`, calibration error `0.2813957820375068`, and missed-
+  abstention rate `0.10416666666666667`. Neither met the declared 0.05 bound.
+- Reserved evaluation result: BLOCKED_SYNTHETIC_ONLY. The frozen chromatic/edge
+  checkpoint at threshold `0.25` produced 77 true abstentions, 769 true-visible
+  labels, 2 false abstentions, and 52 missed abstentions: accuracy `0.94`,
+  balanced accuracy `0.7971525955418816`, Brier score
+  `0.05842087208017514`, and calibration error `0.05288915202213142`. The
+  missed-abstention rate is `52/129 = 0.40310077519379844`; the high overall
+  accuracy therefore does not support admission. Model SHA-256 is
+  `c016363ef67aaac110c4c1743f6bd5a3f47f24f1f83f342842d7d5984d7e3d3d`;
+  canonical scorecard SHA-256 is
+  `209b9ff2801f2f05783c7f42d47dcee43aedad399d9c976468d20b37ec6cd1c3`;
+  scorecard file SHA-256 is
+  `176041bf12154d5f040dc1392819c5419ebdcf9b23fb17878d4db8579f7eba14`.
+  Fifty-three focused tests passed in 21.91 seconds and Ruff passed. The tracked
+  repository remains at exactly 6,100 files.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\official-mesh-occlusion-candidate-v1`;
+  hashes identify the local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: all data and labels are synthetic and omit measured tool and
+  camera-support geometry, physical frames, temporal evidence, and deployment-
+  calibrated uncertainty. The evaluation group is now consumed and cannot be
+  used to tune another candidate. The checkpoint emits only an offline
+  occlusion probability and has no coordinate, motion, controller, permit,
+  transport, or physical authority.
+- Supersedes: none; rejects promotion of the AI-460 compact candidate.
+- Next dependency: add predeclared geometry diversity that covers the observed
+  evaluation failure modes, including tool/camera-support meshes when measured,
+  and reserve another untouched pose group before evaluating a spatial model.
+  Physical promotion still requires measured fixed-camera evidence under a
+  registered configuration epoch.
+
+### E-20260930-AI-462 — fresh transit-geometry official-mesh expansion
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model with an inert Isaac rendering fixture; no arm or integration
+  status changed.
+- Implementation commit: `b3c095ab327a827a77ca2a0fc71255f5abe09927`.
+- Change: expanded the fixed-camera official-mesh source from nine endpoint
+  poses to 21 predeclared poses. All nine geometries consumed through AI-461
+  now form training. Previously unused actual-emitter schedule sequences
+  8/17/26 and 112/120/128 form outbound/return development geometry. Unused
+  sequences 44/52/60 and 72/84/96 form untouched H-to-1 and 1-to-PERIOD
+  evaluation geometry. Split roles and exact sequence bindings were committed
+  before rendering. The evaluation group has not been supplied to a model.
+- Diagnostic input: the consumed AI-461 evaluation scorecard was read only to
+  group its 54 failures. It contained 52 missed occlusions and two false
+  abstentions; 36 failures used the cool transformation and failures occurred
+  across all four endpoint poses. This diagnosis did not select, label, score,
+  or inspect the new transit evaluation group.
+- Inputs/fixtures: renderer SHA-256
+  `89bcc878f11b7cf675a9b986479363afcd1048ddd2f8994e6c75a08731b1d815`;
+  focused evidence-test SHA-256
+  `128e3b2da941f46ce53a165c0b7691c06070848c3fddab9323b42f48ac49f435`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  schedule bundle SHA-256
+  `52e8e1977cc88bc4d80b1664ccaaec5b4a2d4286c744bf74655f3d683577d71a`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software/integrations/isaac_sim/evidence/fixed_overview_segmentation_v1/manifest.json
+  --schedule-bundle software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v3-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_official_mesh_v3_run1.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_official_mesh_v3_run1.status.json`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest
+  software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py
+  software/tests/unit/test_fixed_overview_segmentation_corpus.py
+  software/tests/unit/test_fixed_fixture_practice_corpus.py
+  software/tests/unit/test_virtual_pixel_vision.py
+  software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py
+  -q`; Ruff, documentation, and `git diff --check` checks.
+- Result: PASS_WITH_BLOCKERS. All 21 semantic masks are distinct. Across the
+  nine training poses there are 85 center occlusions and 107 target regions
+  above the predeclared 0.20 safe-overlap threshold. Across six development
+  poses there are 34 center occlusions and 43 threshold crossings. Across six
+  untouched evaluation poses there are 77 center occlusions and 92 crossings.
+  Per-evaluation-pose center/crossing counts are respectively `13/17`, `14/16`,
+  `12/13`, `14/15`, `13/17`, and `11/14`, demonstrating materially varied and
+  harder inter-key obstruction geometry.
+- Artifact identities: canonical receipt SHA-256
+  `ce72cbdd921f3cbcdf81ffe15a1b90eaf8b5749e6df4c8764783fa07a0c89766`;
+  receipt file SHA-256
+  `1bc26ad7cabf59587f5606e7c834526e76bbaa1b3e2a0a2321af0bbaff167ecc`;
+  RGB/mask/depth atlas SHA-256 values respectively
+  `07c91a0bb2332801042e10ed290fa794ca3aea64caca3fb33507ee3c03b57d3a`,
+  `2e752cfce9c36c4ed659bdf193c9b9eb6f5bada9016e987cfdcb471b86899052`,
+  and `75df29523ea008572f69b8cff284e5b140fba2cb4bf6785e99224d49d474a032`.
+  Fifty-four focused tests passed in 21.72 seconds; Ruff and documentation
+  checks passed.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v3-run1` and
+  `C:\IsaacSim\evidence\fixed_overview_official_mesh_v3_run1.json`; hashes
+  identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: visual meshes, camera, board placement, lighting, and labels are
+  synthetic. Measured tool and camera-support geometry, physical frames,
+  temporal evidence, and deployment-calibrated uncertainty remain absent.
+  This evidence qualifies no localization, collision clearance, controller,
+  execution, transport, permit, or physical authority.
+- Supersedes: none; preserves AI-459 through AI-461 and provides fresh geometry
+  for a subsequent three-way dataset.
+- Next dependency: predeclare new disjoint lighting families, materialize the
+  21-pose training/development/evaluation dataset, select a spatial candidate
+  using training/development only, and score the new evaluation once. Physical
+  promotion still requires measured fixed-camera evidence.
+
+### E-20260930-AI-463 — deterministic transit-occlusion dataset
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `0deb40d7ff208cf2f00086518479df7487b90db6`.
+- Change: added a v3 dataset policy for the hash-bound AI-462 source. Training
+  uses all nine consumed endpoint poses crossed with all nine consumed lighting
+  families. Development uses six fresh outbound/return poses crossed with
+  desaturation, dark gamma, and vignette. Evaluation uses six untouched
+  inter-key poses crossed with low contrast, right-side shadow, and horizontal
+  motion blur. Pose and lighting groups are pairwise disjoint and were committed
+  before generation. The evaluation bytes were materialized only for immutable
+  identity and leakage checks; no model loaded or scored them.
+- Inputs/fixtures: builder SHA-256
+  `69e7f2803af2de26ad1f22725f76ecf7643e599b555c2c38c3e4a12c5f804e0c`;
+  focused evidence-test SHA-256
+  `5cda332b3891814e3c34fc677912890f8ce1958b6e61453c2692084f040ea492`;
+  source receipt file SHA-256
+  `1bc26ad7cabf59587f5606e7c834526e76bbaa1b3e2a0a2321af0bbaff167ecc`;
+  source receipt SHA-256
+  `ce72cbdd921f3cbcdf81ffe15a1b90eaf8b5749e6df4c8764783fa07a0c89766`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Commands: `Copy-Item C:\IsaacSim\evidence\fixed_overview_official_mesh_v3_run1.json
+  C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v3-run1\manifest.json`;
+  `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v3-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-transit-occlusion-data-v1`;
+  repeated with output `official-mesh-transit-occlusion-data-v2` for byte
+  comparison; `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m
+  pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py
+  software/tests/unit/test_fixed_overview_segmentation_corpus.py
+  software/tests/unit/test_fixed_fixture_practice_corpus.py
+  software/tests/unit/test_virtual_pixel_vision.py
+  software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py
+  -q`; Ruff and `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. Two independent builds are byte-identical.
+  Dataset SHA-256 is
+  `21dfc1a685d2abd322c63bc9eecff6361f9aa39b5c339bde0f3b99bfe7a7e27c`;
+  manifest file SHA-256 is
+  `bf713aeb6d5bc17afa953024828b6b2da42ba0de8a8cbca154d19e7306a79222`.
+  Training contains 6,075 rows with 963 abstentions and 5,112 visible labels,
+  JSONL SHA-256
+  `384da017be3933682e7f56892a997849c28a9e595a0f3a8d96a42fd4982ab7a3`.
+  Development contains 1,350 rows with 129 abstentions and 1,221 visible labels,
+  JSONL SHA-256
+  `458d94706dbf85b865d019d2f5a6bc4807b807fde512c9443bbc7207d94dd1a9`.
+  Reserved evaluation contains 1,350 rows with 276 abstentions and 1,074
+  visible labels, JSONL SHA-256
+  `22e5392399a082fe7200ce9cb00870afef07b6e8a481c1626ae946ce193561f7`.
+  All 117 images have distinct SHA-256 values and total 12,554,138 bytes.
+  Fifty-six focused tests passed in 22.32 seconds and Ruff passed. The tracked
+  repository remains at exactly 6,100 files.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\official-mesh-transit-occlusion-data-v1`
+  with deterministic repeat `...data-v2`; hashes identify exact local bytes
+  but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: every render, transformation, geometry value, and label remains
+  synthetic. The dataset lacks measured tool/camera-support geometry, physical
+  frames, temporal evidence, and deployment-calibrated uncertainty. Merely
+  materializing the evaluation bytes is not model evaluation. This artifact
+  establishes no localization, collision clearance, controller, execution,
+  transport, permit, or physical authority.
+- Supersedes: none; preserves all AI-457 through AI-462 evidence.
+- Next dependency: fit spatial candidates on training, select architecture and
+  threshold on development only, freeze the checkpoint, and score the reserved
+  evaluation once. Physical promotion remains dependent on measured fixed-
+  camera evidence under a registered configuration epoch.
+
+### E-20260930-AI-464 — tiny spatial occlusion candidate
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `fe1d1f28029870f7c264b6313ecbd80b7bb5d51e`.
+- Change: added a deterministic CPU-only 1,649-parameter convolutional model
+  over 32-by-32 RGB crops with 24-pixel source padding. Its fixed architecture
+  is 3→8 convolution/ReLU/max-pool, 8→16 convolution/ReLU, adaptive 4-by-4
+  pooling, and a 256→1 linear head. Training uses eight epochs, 128-row batches,
+  Adam at 0.002, seed 190, deterministic Torch algorithms, and positive-class
+  weighting. The threshold was selected only on AI-463 development with the
+  existing preference for at most 0.05 missed abstentions. Architecture,
+  weights, and threshold were serialized canonically before evaluation bytes
+  were loaded. The reserved evaluation was scored exactly once.
+- Inputs/fixtures: implementation SHA-256
+  `2ef61da6fe22e03d4b87637a0e421d9e8c0928b42bb149db3f2c0f41fa360cc7`;
+  focused evidence-test SHA-256
+  `a95cd6e1fead66bea4e16636be2fe645c91e24a26e2af9f608acba5c01df5ea4`;
+  dataset SHA-256
+  `21dfc1a685d2abd322c63bc9eecff6361f9aa39b5c339bde0f3b99bfe7a7e27c`;
+  training/development/evaluation JSONL identities remain exactly those in
+  AI-463.
+- Command: `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v3-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-transit-occlusion-data-v3
+  --spatial-output C:\IsaacSim\artifacts\issue190\official-mesh-spatial-candidate-v1`;
+  `$env:PYTHONPATH=(Resolve-Path 'software/src').Path; python -m pytest
+  software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py
+  software/tests/unit/test_fixed_overview_segmentation_corpus.py
+  software/tests/unit/test_fixed_fixture_practice_corpus.py
+  software/tests/unit/test_virtual_pixel_vision.py
+  software/tests/unit/test_virtual_arm_camera.py software/ai/tests/test_offline.py
+  -q`; Ruff, documentation, source-footprint, and `git diff --check` checks.
+- Training result: weighted loss decreased monotonically over eight epochs from
+  `1.1415249223277402` to `0.4837107294969598`. Development selected threshold
+  `0.35` and produced 124 true abstentions, 1,096 true-visible labels, 125 false
+  abstentions, and 5 missed abstentions: missed-abstention rate
+  `0.03875968992248062`, accuracy `0.9037037037037037`, balanced accuracy
+  `0.9294326038512085`, Brier score `0.08806267391690031`, and calibration
+  error `0.2052697585799076`. The declared development safety preference passed.
+- Reserved evaluation result: BLOCKED_SYNTHETIC_ONLY. The frozen model produced
+  274 true abstentions, 641 true-visible labels, 433 false abstentions, and 2
+  missed abstentions: missed-abstention rate `2/276 = 0.007246376811594203`,
+  visible-target false-abstention rate `433/1074 = 0.4031657355679702`, accuracy
+  `0.6777777777777778`, balanced accuracy `0.7947939438102178`, Brier score
+  `0.14953791361640184`, and calibration error `0.24486421483534357`. The low
+  miss rate is meaningful safety progress, while the high false-abstention rate
+  blocks useful cadence and any promotion.
+- Artifact identities: model SHA-256
+  `42adeaf6e89f53c868512e51e2d4e288d79ebe9f2a28f52895f4f122dbff8af6`;
+  canonical scorecard SHA-256
+  `fb1cb5e49334d39976d7154fc55c7007330b350bdbb3a1124f9cf09c1bff6d60`;
+  scorecard file SHA-256
+  `41195473b27846e9cdfc5d6798662fc679efb2f273dd081cf1e6b79b53e01cdc`.
+  Fifty-seven focused tests passed in 21.80 seconds; Ruff, documentation, and
+  source-footprint checks passed. The repository remains at 6,100 files.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\official-mesh-spatial-candidate-v1`; hashes
+  identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: all data and labels remain synthetic and omit measured tool and
+  camera-support geometry, physical frames, temporal evidence, and deployment-
+  calibrated uncertainty. Evaluation is consumed and cannot tune the model or
+  threshold. The checkpoint emits an offline occlusion probability only and
+  has no coordinate, motion, controller, permit, transport, or physical
+  authority.
+- Supersedes: none; rejects promotion while improving the dangerous error class
+  relative to the prior synthetic candidate on a fresh, harder split.
+- Next dependency: reserve another unused schedule-pose evaluation group before
+  tuning specificity on new development data. Add representative visible
+  transit negatives and measured tool/camera-support geometry when available.
+  Physical promotion remains dependent on measured fixed-camera evidence under
+  a registered configuration epoch.
+
+### E-20260930-AI-465 — fresh visible-transit specificity candidate
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model with inert Isaac rendering; no arm or integration status
+  changed.
+- Implementation commit: `f0dbbeec1490a1373bf29b70489f356c3163326f`.
+- Change: before rendering or model selection, reserved twelve previously
+  unused states from the exact 133-sample actual-emitter schedule. All 21
+  previously consumed poses and fifteen previously consumed lighting families
+  became training input. Schedule samples 2/4/6 and 124/126/130, crossed with
+  soft-neutral, mid-gamma, and left-shadow lighting, formed visible-heavy
+  development. Samples 10/13/20 and 114/118/122, crossed with cool-flat,
+  top-shadow, and vertical-motion-blur lighting, remained untouched evaluation.
+  Pose and lighting groups are pairwise disjoint. The 1,649-parameter spatial
+  architecture, eight-epoch training policy, and development-only threshold
+  selection remained fixed. Evaluation bytes loaded once after checkpoint and
+  threshold freeze.
+- Inputs/fixtures: renderer SHA-256
+  `35883bccc1814d5ecde06f43602af7a4ec01fd10f6513e6956067d4305a9366d`;
+  dataset/model implementation SHA-256
+  `f738b0290fac7d7cecef76ecbfc8c6624fd378cbd223a35a157c4848ff15eb24`;
+  focused test SHA-256
+  `a3249d1ebb6817a8046b7164b4ed2aaf211cfddfc07c64e03099e9a4aa5d48a3`;
+  actual-emitter schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Commands: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v4-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_official_mesh_v4_run1.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_official_mesh_v4_run1.status.json`;
+  `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v4-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-specificity-data-v1
+  --spatial-output C:\IsaacSim\artifacts\issue190\official-mesh-specificity-candidate-v1`;
+  the same builder command with `v2` output directories for deterministic byte
+  comparison; focused pytest, shared boundary pytest, Ruff, documentation,
+  repository audit, source-footprint, and `git diff --check` checks.
+- Render result: PASS_WITH_BLOCKERS. All 33 official-mesh masks are distinct.
+  The 21 training poses contain 196 center occlusions and 242 safe-overlap
+  crossings. The visible-heavy six-pose development group contains 13 center
+  occlusions and 15 crossings. The six-pose evaluation group contains 32
+  center occlusions and 37 crossings. Canonical render receipt SHA-256 is
+  `def37772c86853319b27be21f6133fa7750619cb3d8d80d8a3578227d772af35`;
+  receipt file SHA-256 is
+  `1c734f4cdff14c7cdf07528c80a10e415f43dbcb8fcbbb86bc67400553839c2c`;
+  status file SHA-256 is
+  `4ea62dcee8013e6fc0d3e4ef56ea5a223887db4ef7254970ec2ee3e3b39e65da`.
+  RGB/mask/depth atlas SHA-256 values are respectively
+  `c7a2215e42739ba80f0592067e15eb6152eccca4bc5d85f4cf7100fbf9955953`,
+  `a5018b9f5edefb4125a1b4a00c126487c0e9f39f23de52b8005da2d851b8f8e6`,
+  and `2955540537bf1f447c7b894eca166f511f8f271871d539cde0503dbac6323508`.
+- Dataset result: two independent 355-file builds are byte-identical. Each is
+  54,200,927 bytes. Dataset SHA-256 is
+  `e913da3a300019e1e5b21817e99b5c4319fc13479ef33eaf3df7b9c022e1f444`;
+  manifest file SHA-256 is
+  `01b35301729bd9718284e638787feed84709daecbf702dbbb71fccdd3061ae6c`.
+  Training has 23,625 rows with 3,630 abstentions; development has 1,350
+  rows with 45 abstentions; evaluation has 1,350 rows with 111 abstentions.
+  Their JSONL SHA-256 values are respectively
+  `5b021e2a58e709074dcafa85f9414fd39c1799f076f5d5c15805219e0f5cfc10`,
+  `e4acd5f6afec07ac45d1213429de00b5f212a8be699691fdd9eb7defa29a777e`,
+  and `0468943b5ee38ebd5ee521e07e9f15828f77cb1811d7bab5530697024e18ec77`.
+- Candidate result: BLOCKED_SYNTHETIC_ONLY. Both independent checkpoint and
+  scorecard builds are byte-identical. Selected threshold is `0.30`.
+  Development records 45 true abstentions, 1,277 true-visible labels, 28 false
+  abstentions, and zero missed abstentions: accuracy `0.9792592592592593`,
+  balanced accuracy `0.989272030651341`, Brier score
+  `0.011989938053770022`, and calibration error `0.02784303200189714`.
+  Untouched evaluation records 96 true abstentions, 1,211 true-visible labels,
+  28 false abstentions, and 15 missed abstentions: missed-abstention rate
+  `15/111 = 0.13513513513513514`, visible-target false-abstention rate
+  `28/1239 = 0.022598870056497176`, accuracy `0.9681481481481482`, balanced
+  accuracy `0.9211329974041839`, Brier score `0.027426143289465753`, and
+  calibration error `0.028454788347913162`. Model SHA-256 is
+  `aee2e2136768ea3fb80bf7978902d9013e73c32b7fed31b8285a002f5ea1afdd`;
+  canonical scorecard SHA-256 is
+  `40887e2162e06cd28cdd1a7fdd7973630ca56be2abdfe84ae6be42311ded038c`;
+  scorecard file SHA-256 is
+  `e4db3849a5641b6a76b9e5f690ec7e9f9095a6ec49e474d22b03c52e4ce884d1`.
+- Validation: 59 focused simulator/perception tests passed in 22.43 seconds;
+  70 shared v2 precision, producer, strict-ingress, and conformance tests passed
+  in 5.51 seconds. Ruff and maintained-document checks passed. The repository
+  audit inspected 6,100 paths and 622.5 MiB with zero unresolved findings and
+  14 exact reviewed synthetic fixtures. `git diff --check` passed.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v4-run1`,
+  `official-mesh-specificity-data-v1`, `...data-v2`,
+  `official-mesh-specificity-candidate-v1`, and `...candidate-v2`; hashes bind
+  exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: all geometry, camera, lighting, pixels, and labels remain
+  synthetic. Tool and camera-support geometry, physical frames, temporal
+  evidence, and deployment-calibrated uncertainty remain absent. The safer
+  AI-464 result and more usable AI-465 result are from different consumed
+  evaluation domains and do not form an authorized ensemble or threshold.
+  This evidence qualifies no localization, collision clearance, controller,
+  execution, transport, permit, or physical authority.
+- Supersedes: none. AI-464 remains the retained low-miss candidate; AI-465
+  demonstrates a reproducible specificity improvement and a safety-recall
+  regression on a fresh domain.
+- Next dependency: reserve another unused schedule-pose evaluation group before
+  any tuning. Use new development only to investigate calibrated two-stage or
+  overlap-aware abstention that preserves AI-464-level miss behavior while
+  approaching AI-465 specificity. Add measured tool/camera-support geometry
+  when available; physical promotion remains dependent on final fixed-camera
+  evidence under a registered configuration epoch.
+
+### E-20260930-AI-466 — deterministic simulator progression videos
+
+- Stage: S2/S3 synthetic perception review evidence.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `89b8a9cf588bd18d2a5318b25d9d5258c651e4c5`.
+- Change: added a deterministic PyAV/libx264 exporter for retained simulator
+  evidence. The first H.264 video presents all 33 exact official-mesh source
+  poses at two frames per second with green visible and red blocked safe-region
+  polygons. The second reconstructs the exact frozen 1,649-parameter AI-465
+  checkpoint and presents all 18 held-out pose/lighting images with per-target
+  true-visible, true-abstain, false-abstain, and missed-abstain overlays. The
+  exporter verifies source, atlas, dataset, image, model, scorecard, and scope
+  hashes before encoding and writes a canonical bundle manifest.
+- Inputs/fixtures: source manifest file SHA-256
+  `1c734f4cdff14c7cdf07528c80a10e415f43dbcb8fcbbb86bc67400553839c2c`;
+  canonical source receipt SHA-256
+  `def37772c86853319b27be21f6133fa7750619cb3d8d80d8a3578227d772af35`;
+  dataset manifest file SHA-256
+  `01b35301729bd9718284e638787feed84709daecbf702dbbb71fccdd3061ae6c`;
+  canonical dataset SHA-256
+  `e913da3a300019e1e5b21817e99b5c4319fc13479ef33eaf3df7b9c022e1f444`;
+  model SHA-256
+  `aee2e2136768ea3fb80bf7978902d9013e73c32b7fed31b8285a002f5ea1afdd`;
+  canonical scorecard SHA-256
+  `40887e2162e06cd28cdd1a7fdd7973630ca56be2abdfe84ae6be42311ded038c`;
+  exporter source SHA-256
+  `ce29399a237313b677cb513c59cd30bae48794594bd6b7cfaa8f467ab8d6fb31`;
+  focused test SHA-256
+  `bfa8843db7b6a1b63948340de428035c657f77d6d51b7296e3ef0eccae541daa`.
+- Exact command: `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v4-run1\manifest.json
+  --record-existing C:\IsaacSim\artifacts\issue190\official-mesh-specificity-data-v1
+  C:\IsaacSim\artifacts\issue190\official-mesh-specificity-candidate-v1
+  C:\IsaacSim\artifacts\issue190\sim-progression-videos-v1`; repeated with
+  final output `sim-progression-videos-v2`, followed by SHA-256 comparison,
+  PyAV decode inspection, focused pytest, shared boundary pytest, Ruff,
+  maintained-document checks, repository audit, source-footprint check, and
+  `git diff --check`.
+- Result: PASS_WITH_BLOCKERS. Both final exports are byte-identical. Canonical
+  bundle SHA-256 is
+  `9463f52c80f32bbdcdc2ca6a00a48392fe0d5e3b5c1cb78977efa9bbc6088d7a`;
+  manifest file SHA-256 is
+  `faa1640e69d60add772d2bb05533d43b7945a26d55e135f6dc132581fce36adb`.
+  `official_mesh_pose_progression.mp4` is H.264, 960-by-540, 33 frames,
+  2 fps, 16.5 seconds, 263,269 bytes, SHA-256
+  `3bb24d91f4145f9eb8fea18062207e9a254d55f694faefa664701f226f1830fe`.
+  `occlusion_candidate_evaluation.mp4` is H.264, 960-by-540, 18 frames,
+  2 fps, 9.0 seconds, 167,067 bytes, SHA-256
+  `0d0ab2f8413f8633fd85342d71dda979a0a2ad66c92e82ea8c825d6a39eacfab`.
+  Its outcomes exactly reproduce AI-465: 1,211 true visible, 96 true abstain,
+  28 false abstain, and 15 missed abstain at threshold `0.30`.
+- Validation: 60 focused simulator/perception tests passed in 22.26 seconds;
+  96 shared v2 precision, producer, strict-ingress, shadow-runner, trajectory,
+  and conformance tests passed in 6.91 seconds. Ruff, maintained-document,
+  AI work-registry, repository-audit, source-footprint, and `git diff --check`
+  gates passed. The repository audit inspected 6,100 paths and 622.5 MiB with
+  zero unresolved findings and 14 exact reviewed synthetic fixtures.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\sim-progression-videos-v1`, with byte-
+  identical repeat `...videos-v2`. Hashes identify exact local bytes but do not
+  make the MP4 files clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; encoding reuses exact retained static frames.
+- Limitations: these are presentation videos derived from static synthetic
+  renders, not continuous simulator trajectories or screen recordings. H.264
+  is lossy; the hash-bound source images, dataset rows, and scorecard remain the
+  authoritative numeric evidence. No new evaluation examples were created and
+  the recordings should not be admitted to training merely because they are
+  videos. Measured camera, tool, support, and physical-domain evidence remain
+  absent. The bundle grants no localization, collision, controller, execution,
+  transport, permit, or physical authority, and AI-465 remains blocked.
+- Supersedes: none; adds a review medium for the retained AI-465 evidence.
+- Next dependency: produce the same bundle type for future frozen simulator
+  milestones. Add a continuous trajectory recording only after its simulation
+  timestep, camera cadence, state binding, and frame-retention rules are
+  declared. Physical promotion still requires final fixed-camera evidence
+  under a registered configuration epoch.
+
+### E-20260930-AI-467 — interrupted target-aware crop materialization
+
+- Stage: S2/S3 synthetic perception development.
+- Lane: AI/model; no arm or integration status changed.
+- Implementation commit: `bd59785f06c0714e363dafa7568d68b9ec1b5efb`.
+- Change attempted: predeclared twelve unused actual-emitter schedule poses and
+  six new lighting families, rendered a 45-pose v5 source, materialized the
+  three-way dataset, and began deterministic training of a four-channel RGB
+  plus known-safe-region candidate.
+- Exact command: `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v5-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-data-v1
+  --target-aware-output C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-candidate-v1`.
+- Result: FAILED_INTERRUPTED. Dataset materialization completed with 733 files,
+  112,366,840 bytes, and manifest file SHA-256
+  `a1010e1a7c7599f60241ffd83610e7c19f52cd67fca102d6f39165d605a6debe`.
+  Candidate construction repeatedly reopened one image for every target while
+  building the safe-region channel. The run was manually stopped before model
+  fitting completed; the candidate directory contains zero files. No metric or
+  promotion claim is made from this attempt.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0 during dataset/model work; the separately completed
+  retained source render also declares zero physics steps.
+- Limitations: this is retained failed process evidence. The completed dataset
+  bytes are not treated as a completed model result. No controller, permit,
+  transport, collision, localization, or physical authority was created.
+- Corrective dependency: cache image dimensions per materialized image rather
+  than reopening the image for each of its 75 target rows. The correction is
+  commit `a40c8b4bcc0502360594910dd2e641ae119656aa` and the failed output remains
+  retained rather than overwritten.
+
+### E-20260930-AI-468 — fresh target-aware occlusion candidate
+
+- Stage: S2/S3 synthetic perception and abstention development.
+- Lane: AI/model with inert Isaac rendering; no arm or integration status
+  changed.
+- Implementation commits: predeclared split and model
+  `bd59785f06c0714e363dafa7568d68b9ec1b5efb`; image-dimension cache correction
+  `a40c8b4bcc0502360594910dd2e641ae119656aa`.
+- Change: all 33 previously consumed official-mesh poses and all 21 previously
+  consumed lighting families became training-only. Schedule samples
+  11/15/19 and 113/117/121 with neutral-low, bottom-shadow, and diagonal-blur
+  lighting formed development. Samples 23/27/31 and 115/119/123 with green-
+  cast, corner-glare, and horizontal-blur lighting remained untouched
+  evaluation. The 1,721-parameter candidate consumes 32-by-32 RGB crops plus a
+  fourth binary channel derived from the catalog target safe region. The
+  simulator robot mask supplies labels only and is explicitly absent from
+  inference input. Eight deterministic CPU epochs and development-only
+  threshold selection remain fixed; evaluation loaded once after checkpoint
+  serialization.
+- Inputs/fixtures: renderer SHA-256
+  `e50b6978c2aa2c88169375458a82315c8a6c5698d99c5cc7947c03103bec435b`;
+  dataset/model builder SHA-256
+  `2e06b8d9d82e2aff8fb55347d6d13523093f958976e8f528ae995475d52d3b3b`;
+  focused test SHA-256
+  `e27d0782a02e9c3afafbb1f20b4c07823b4d0d6635fda7889cd428e5fc2fe508`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target-catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v5-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_official_mesh_v5_run1.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_official_mesh_v5_run1.status.json`.
+- Dataset/model command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v5-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-data-v1-retry1
+  --target-aware-output C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-candidate-v1-retry1`;
+  repeated with final `...data-v2` and `...candidate-v2` directories for exact
+  byte comparison.
+- Render result: PASS_WITH_BLOCKERS. All 45 official-mesh masks are distinct.
+  Training contains 241 center occlusions and 294 abstention labels across 33
+  poses; development contains 33 center occlusions and 40 abstention labels;
+  evaluation contains 44 center occlusions and 55 abstention labels. Canonical
+  render receipt SHA-256 is
+  `dece049dd226781a7a7d53f5c29056bfc47e83134e6f05da1b5e9d4c59d67c5a`;
+  receipt file SHA-256 is
+  `a3583b4c9582efa2e4285845892b16dfa4e18cec97231a9d1b7d57de0647d576`;
+  status file SHA-256 is
+  `48f49d1e410042402969af379433c974970f21bec5e0953c2ede00fc8de0e213`.
+  RGB/mask/depth atlas SHA-256 values are respectively
+  `40d1db4d30fdb513fa1aa0fa94a5515e874e22d3e689f48ed7831cb361f3ea47`,
+  `b041300f649edeaaaf0beff7b5ebfaa3cf71e90b1828c03773549dcfbaf8a911`,
+  and `4e3ab545b58d400000041fd7963ff2b0b06bb4a1c4d127bd34a6dbc76d143891`.
+- Dataset result: two independent 733-file builds are byte-identical. Each is
+  112,366,840 bytes. Dataset SHA-256 is
+  `393a6cfdad649efe99d27e62f952d81dbf2d34428ff0c80eeba6f51ab0980767`;
+  manifest file SHA-256 is
+  `a1010e1a7c7599f60241ffd83610e7c19f52cd67fca102d6f39165d605a6debe`.
+  Training has 51,975 rows with 6,174 abstentions; development has 1,350 rows
+  with 120 abstentions; evaluation has 1,350 rows with 165 abstentions. Their
+  JSONL SHA-256 values are respectively
+  `0238f0c36ae66a84bcc79121a04a5297f73c50af55ab5baeaf49b9aab05053fa`,
+  `737363083324b6ca5e246153df6a7b7d08cf86ac519c9715c4eedc847bd626e0`,
+  and `a44da607ed72ed1dcebdf162b851d15b80775840a3e1f2c4cd0609ad023a6676`.
+- Candidate result: BLOCKED_SYNTHETIC_ONLY. Both independent checkpoints and
+  scorecards are byte-identical. Weighted loss falls monotonically from
+  `0.8524029298348172` to `0.1863514108285702`; development selects threshold
+  `0.10`, with 120 true abstentions, 1,196 true-visible labels, 34 false
+  abstentions, and zero missed abstentions. Fresh evaluation records 160 true
+  abstentions, 1,158 true-visible labels, 27 false abstentions, and 5 missed
+  abstentions. Missed-abstention rate is `5/165 = 0.030303030303030304`;
+  visible-target false-abstention rate is `27/1185 = 0.02278481012658228`;
+  accuracy is `0.9762962962962963`, balanced accuracy
+  `0.9734560797851937`, Brier score `0.01932606178893815`, and calibration
+  error `0.02123716483410034`. The remaining misses are `APOSTROPHE` and
+  `SEMICOLON` at return sample 115 and `SLASH` at return sample 119. Model
+  SHA-256 is
+  `a986eb4cdd654905893029c54e11d2175910810f3f87dfe029580b97dc385bcb`;
+  canonical scorecard SHA-256 is
+  `c6edaf88eaef98dfab60470b3b4d97c6c80b429f117a7f39aa927361c1cbd66a`;
+  scorecard file SHA-256 is
+  `1bfbe3959e89e5825d7eceb028d76ea29e78362e5f6dccb67f0032fa07b53e6d`.
+- Validation: 64 focused simulator/perception tests passed in 25.14 seconds;
+  96 shared v2 boundary tests passed in 6.84 seconds. The final audit commands
+  also include Ruff, maintained-document, AI work-registry, repository-audit,
+  source-footprint, and `git diff --check` gates.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v5-run1`,
+  `official-mesh-target-aware-data-v1-retry1`,
+  `official-mesh-target-aware-candidate-v1-retry1`, and byte-identical
+  `...data-v2`/`...candidate-v2`; hashes identify local bytes but do not make
+  them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: all geometry, pixels, target masks, transformations, and labels
+  remain synthetic. The known safe-region channel assumes exact target-map
+  alignment; this experiment does not measure behavior under localization or
+  placement error. The evaluation is consumed and cannot tune another model.
+  Results from different held-out domains provide directional evidence but are
+  not a paired proof that every AI-465 failure is corrected. Measured tool,
+  camera-support, and physical-camera evidence remain absent. The checkpoint
+  emits only an offline occlusion probability and grants no localization,
+  collision, controller, execution, transport, permit, or physical authority.
+- Supersedes: none. It improves the combined synthetic safety/cadence result on
+  a fresh domain while preserving AI-464, AI-465, and failed AI-467 evidence.
+- Next dependency: bind a progression-video bundle to this exact four-channel
+  checkpoint, then test target-mask perturbation from predeclared localization
+  offsets on new development data before reserving another untouched evaluation
+  group. Physical promotion still requires final fixed-camera qualification and
+  measured installed support/tool geometry.
+
+### E-20260930-AI-469 — target-aware progression video bundle
+
+- Stage: S2/S3 synthetic perception review evidence.
+- Lane: AI/model with offline presentation encoding; no arm or integration
+  status changed.
+- Implementation commit:
+  `2eda502f65b2fd38e4d3f8ac8ef34c94e5a02ba4`.
+- Change: the deterministic video exporter now loads either the existing
+  three-channel spatial checkpoint or the four-channel target-aware checkpoint.
+  For the latter it reconstructs the exact RGB plus known-target-safe-region
+  input, replays the already consumed evaluation without model selection, and
+  emits a v2 bundle manifest that names all four channels and explicitly records
+  `simulator_robot_mask_input: false`. The previous v1 path remains supported.
+- Inputs/fixtures: source manifest file SHA-256
+  `a3583b4c9582efa2e4285845892b16dfa4e18cec97231a9d1b7d57de0647d576`;
+  canonical source receipt SHA-256
+  `dece049dd226781a7a7d53f5c29056bfc47e83134e6f05da1b5e9d4c59d67c5a`;
+  dataset manifest file SHA-256
+  `a1010e1a7c7599f60241ffd83610e7c19f52cd67fca102d6f39165d605a6debe`;
+  canonical dataset SHA-256
+  `393a6cfdad649efe99d27e62f952d81dbf2d34428ff0c80eeba6f51ab0980767`;
+  model SHA-256
+  `a986eb4cdd654905893029c54e11d2175910810f3f87dfe029580b97dc385bcb`;
+  canonical scorecard SHA-256
+  `c6edaf88eaef98dfab60470b3b4d97c6c80b429f117a7f39aa927361c1cbd66a`;
+  exporter source SHA-256
+  `e81d42f7bf6b83c3501750ff488b3a123a04ecc338395f4e31e95ac7165cfc5a`;
+  focused test SHA-256
+  `303816eece6d9f17ba67be21c0bacf36540a7f4eec8af92bbb5acd6c38d930a9`.
+- Exact command: `python software/ai/train/build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-official-mesh-v5-run1\manifest.json
+  --record-existing C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-data-v1-retry1
+  C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-candidate-v1-retry1
+  C:\IsaacSim\artifacts\issue190\target-aware-progression-videos-v1`;
+  repeated with final output `target-aware-progression-videos-v2`, followed by
+  byte comparison, PyAV decode, representative-frame inspection, focused and
+  shared pytest, Ruff, maintained-document, AI work-registry,
+  repository-health, source-footprint, and `git diff --check` gates.
+- Result: PASS_WITH_BLOCKERS. Both exports are byte-identical. Canonical bundle
+  SHA-256 is
+  `b1b7847072792eaf519d47ee34a22bd3eeb8ee3430d859e03b7761732c885979`;
+  manifest file SHA-256 is
+  `d7df9ec26f6ab96f1041c9ddac605f5e92ff6d3aa4bf905f70d6f1bfc84b6f07`.
+  `official_mesh_pose_progression.mp4` is H.264, 960-by-540, 45 frames,
+  2 fps, 22.5 seconds, 341,457 bytes, SHA-256
+  `50bff986386c86436bf047ea009bd2a0f289d3aa4836e2eca74e391e24524d02`.
+  `occlusion_candidate_evaluation.mp4` is H.264, 960-by-540, 18 frames,
+  2 fps, 9.0 seconds, 167,922 bytes, SHA-256
+  `ae52e2b560a7681c2f672edc92d0e093cc82d64b1c6ccbb53436c70aced5535f`.
+  Its overlays exactly reproduce AI-468 at threshold `0.10`: 160 true
+  abstentions, 1,158 true-visible decisions, 27 false abstentions, and 5 missed
+  abstentions.
+- Validation: 64 focused simulator/perception tests passed in 24.84 seconds;
+  101 shared v2 precision, adapter, producer, strict-ingress, shadow-runner,
+  trajectory, and conformance tests passed in 11.47 seconds. Ruff,
+  maintained-document, AI work-registry, repository-health, source-footprint,
+  and `git diff --check` gates passed. Repository health matched policy and the
+  source archive remained at 6,100 files and 652,778,946 logical bytes.
+- Artifact location: external only at
+  `C:\IsaacSim\artifacts\issue190\target-aware-progression-videos-v1`, with
+  byte-identical repeat `...videos-v2`. Hashes identify exact local bytes but
+  do not make the MP4 files clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; encoding uses retained static images.
+- Limitations: these are lossy presentation videos from static synthetic
+  frames, not continuous trajectories, new examples, or physical-camera
+  evidence. The evaluation was already consumed by AI-468 and cannot be used
+  for tuning. The fourth channel assumes exact catalog target alignment and
+  has not been perturbed by localization error. Measured camera, support, and
+  tool geometry remain absent. The bundle grants no localization, collision,
+  controller, execution, transport, permit, or physical authority; AI-468
+  remains blocked.
+- Supersedes: none; adds a deterministic review medium for AI-468.
+- Next dependency: predeclare target-mask offset families on new development
+  poses, measure degradation without consuming a new evaluation group, and
+  reserve fresh evaluation only after the perturbation policy is frozen.
+
+### E-20260930-AI-470 — development-only target-mask perturbation study
+
+- Stage: S2/S3 synthetic localization-sensitivity evidence.
+- Lane: AI/model with inert Isaac rendering and frozen offline inference; no
+  arm or integration status changed.
+- Implementation commit:
+  `c5098efd68dd9a20a83ec9b263b60c370f415960`.
+- Change: a v6 renderer campaign predeclares schedule samples 12, 16, 21, 116,
+  125, and 129 as fresh development-only arm states. Training and evaluation
+  groups are empty. The frozen AI-468 checkpoint is measured at nominal
+  alignment and 1, 2, 4, and 8 mm offsets in eight directions. Each offset
+  translates the RGB crop and catalog safe-region mask together while keeping
+  ground-truth occlusion labels fixed. The nominal 2 px/mm conversion is
+  derived from the synthetic 1,000 px focal length and 500 mm target depth.
+- Inputs/fixtures: renderer SHA-256
+  `ec1ee85d9adbde21324993981fdbacc37b9adb14e99fc9457c50d0b6b01d676f`;
+  dataset/study builder SHA-256
+  `cbe6d97e3bb6b384fd5e865f63153e7ae95a0304ba2fde552f2887646c7defc5`;
+  focused test SHA-256
+  `2ffd99d35576c18921d6f2ed1dfa95cd8fd6208ae9be4ad9d97fd45d11312b58`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  frozen model SHA-256
+  `a986eb4cdd654905893029c54e11d2175910810f3f87dfe029580b97dc385bcb`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign mask-perturbation-v6
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-mask-perturbation-v6-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_mask_perturbation_v6_run1.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_mask_perturbation_v6_run1.status.json`.
+- Dataset command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-mask-perturbation-v6-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\mask-perturbation-development-data-v1`;
+  repeated with final `...data-v2` for byte comparison.
+- Study command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-mask-perturbation-v6-run1\manifest.json
+  --perturb-existing C:\IsaacSim\artifacts\issue190\mask-perturbation-development-data-v1
+  C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-candidate-v1-retry1
+  C:\IsaacSim\artifacts\issue190\target-mask-perturbation-study-v1`;
+  repeated into `...study-v2` and `...study-v2-retry1`. All three report files
+  are byte-identical.
+- Render result: PASS_WITH_BLOCKERS. Six pose-distinct official-mesh masks
+  contain 32 center occlusions and 36 safe-region overlap crossings. Canonical
+  receipt SHA-256 is
+  `52d3958341f1d8f8ca610598d10717fcd1188ce0295bbe0a0a5697a8c3505005`;
+  manifest file SHA-256 is
+  `b9943488381ded4395a01f78980de86f1b7cee1e8a3421902398d198514c78bc`;
+  status file SHA-256 is
+  `7eacc56b9e4882c8cae1c8f62b650efbbe516f7c671a4b5ad951564975fa566a`.
+  RGB/mask/depth atlas SHA-256 values are respectively
+  `936da8acdf3da0dbec609cda338d98aae4d3dd235bf1c732c573aa4b628acf2f`,
+  `c397f55f75d2c835b831012db337e917e1f84155bc18a14bcaaf0c5771606fc1`,
+  and `f6eaf59c33ef3eb6b64457de3d7427d5af7178034b60a8ea5f4d61aca93a8e04`.
+- Dataset result: two independent 22-file, 2,711,888-byte builds are
+  byte-identical. Dataset SHA-256 is
+  `35011f05e5ecbc39d2768dcccfdee052ff90674f5f378c7e18ba3cf0715138b0`;
+  manifest file SHA-256 is
+  `15d26c3f9ee6b992f00d470985b86d158e19c7eddc0d242e9e9adcd6e939d276`.
+  Development has 1,350 rows with 108 abstentions and 1,242 visible labels.
+  Train and evaluation each contain zero rows and the canonical empty-file
+  SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`.
+- Study result: BLOCKED_SYNTHETIC_ONLY. All three 2,486,710-byte reports are
+  byte-identical. Canonical report SHA-256 is
+  `58c72ac60e6f8d26f980ad6e9b41ac2ad24c5f9236fd6a534271a77980ff8956`;
+  report file SHA-256 is
+  `bf6044c26841ba1818545aed15ed858ccedd4d89745501a28d5ef507f0430fee`.
+  Nominal alignment records 99 true abstentions, 1,207 true-visible labels,
+  35 false abstentions, and 9 missed abstentions: missed rate `9/108 =
+  0.08333333333333333` and visible false-stop rate `35/1242 =
+  0.02818035426731079`. Across the eight 1 mm directions, missed abstentions
+  range from 4 to 9 and false stops from 35 to 62. At 2 mm the ranges are 4–9
+  and 32–272; at 4 mm, 0–8 and 44–950; at 8 mm, 0–13 and 56–1,230. The worst
+  missed-abstention direction is -8 mm x with 13 misses. The worst false-stop
+  direction is +8 mm y with 1,230 false stops and only 12 true-visible
+  decisions. Some offsets reducing misses do so by stopping broadly and do not
+  establish robustness.
+- Validation: 67 focused simulator/perception tests passed in 25.34 seconds;
+  101 shared v2 precision, adapter, producer, strict-ingress, shadow-runner,
+  trajectory, and conformance tests passed in 11.43 seconds. Final validation
+  also includes Ruff, maintained-document, AI work-registry,
+  repository-health, source-footprint, and `git diff --check` gates.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-mask-perturbation-v6-run1`,
+  `mask-perturbation-development-data-v1`, byte-identical `...data-v2`, and
+  the three byte-identical `target-mask-perturbation-study-*` directories.
+  Hashes identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: all camera geometry, images, labels, and offsets are synthetic.
+  The px/mm mapping uses nominal geometry and is not a measured physical error
+  bound. Development-only rows diagnose sensitivity but cannot qualify or
+  compare a tuned successor. There is no evaluation group. Tool and camera-
+  support geometry remain absent. The checkpoint and study grant no
+  localization, collision, controller, execution, transport, permit, or
+  physical authority.
+- Supersedes: none; converts AI-468's exact-alignment limitation into measured
+  directional synthetic evidence.
+- Next dependency: add localization-offset augmentation and an explicit
+  uncertainty-to-abstention rule using development data only. Freeze that
+  policy before rendering and opening a new untouched evaluation group.
+
+### E-20260930-AI-471 — offset-augmented candidate and uncertainty policy
+
+- Stage: S2/S3 synthetic localization-robustness development.
+- Lane: AI/model offline training and development-only policy selection; no
+  arm or integration status changed.
+- Implementation commit:
+  `038f64c1f6d7178c958f42ebfed91a466b457302`.
+- Change: each of the 51,975 v5 training rows receives one deterministic
+  hash-selected offset from nominal plus every 1 mm and 2 mm direction. The
+  same 1,721-parameter four-channel CNN is trained for eight deterministic CPU
+  epochs. The frozen model is then scored on all 33 v6 development offsets.
+  Policy selection accepts the largest 0, 1, 2, or 4 mm bound only when every
+  direction inside it keeps both missed-abstention and visible false-stop rates
+  at or below 5%. Uncertainty above the selected bound produces
+  `abstain_localization_uncertain`. No evaluation group exists or is opened.
+- Inputs/fixtures: implementation SHA-256
+  `64ddf1af83a4c259747841a7131c6d7de60ea539b7e518a180c74e3660c853a7`;
+  focused test SHA-256
+  `8cb4742124008320fc55d86ebd2f1dab13c8708d772bf75749edabc301df3b10`;
+  training dataset SHA-256
+  `393a6cfdad649efe99d27e62f952d81dbf2d34428ff0c80eeba6f51ab0980767`;
+  training manifest file SHA-256
+  `a1010e1a7c7599f60241ffd83610e7c19f52cd67fca102d6f39165d605a6debe`;
+  development dataset SHA-256
+  `35011f05e5ecbc39d2768dcccfdee052ff90674f5f378c7e18ba3cf0715138b0`;
+  development manifest file SHA-256
+  `15d26c3f9ee6b992f00d470985b86d158e19c7eddc0d242e9e9adcd6e939d276`.
+- Exact command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-mask-perturbation-v6-run1\manifest.json
+  --train-localization-robust
+  C:\IsaacSim\artifacts\issue190\official-mesh-target-aware-data-v1-retry1
+  C:\IsaacSim\artifacts\issue190\mask-perturbation-development-data-v1
+  C:\IsaacSim\artifacts\issue190\localization-robust-candidate-v1`;
+  repeated with final `...candidate-v2`, with stdout redirected to separate
+  external receipts.
+- Training result: weighted loss falls monotonically from
+  `0.8715942066010516` to `0.2215171820912985`. All 17 augmentation offsets
+  receive 2,955–3,137 rows. Two independent checkpoints and scorecards are
+  byte-identical. Model file SHA-256 is
+  `16f1810ee5ad51b8414ea524ad54399a85fcce56a45aa76512c2b81ed56d22e6`;
+  canonical scorecard SHA-256 is
+  `c61cb0d9bcc59b93337aa1f83a7465814842dfec25e74f824a6231435da766ea`;
+  scorecard file SHA-256 is
+  `69e9ba90dbc82771add2ee4ba9579b4b32adc1b953d9ffd1bf60858683e11f4d`.
+- Development result: BLOCKED_AWAITING_FRESH_EVALUATION, with evaluation still
+  unopened. Threshold `0.10` is selected. At nominal alignment the candidate
+  records 105 true abstentions, 1,198 true-visible labels, 44 false
+  abstentions, and 3 missed abstentions. Missed rate is `3/108 =
+  0.027777777777777776`; visible false-stop rate is `44/1242 =
+  0.03542673107890499`. Across 1 mm directions, misses range 1–6 and false
+  stops 44–61. The +1 mm x/+1 mm y direction has 6 misses, or
+  `0.05555555555555555`, so 1 mm fails the safety limit by one case. At 2 mm
+  the ranges are 0–6 and 43–187; at 4 mm, 0–5 and 44–720; at 8 mm, 0–9 and
+  42–1,053. The largest supported synthetic bound is therefore 0 mm. Any
+  nonzero localization uncertainty must abstain.
+- Comparison with AI-470: nominal misses improve from 9 to 3 while false stops
+  increase from 35 to 44. Offset augmentation creates a valid nominal policy
+  and materially improves safety, but does not yet establish useful nonzero
+  tolerance.
+- Validation: 68 focused simulator/perception tests passed in 24.97 seconds;
+  101 shared v2 precision, adapter, producer, strict-ingress, shadow-runner,
+  trajectory, and conformance tests passed in 11.47 seconds. Final validation
+  also includes Ruff, maintained-document, AI work-registry,
+  repository-health, source-footprint, and `git diff --check` gates.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\localization-robust-candidate-v1`, with
+  byte-identical repeat `...candidate-v2`. Hashes identify exact local bytes
+  but do not make the checkpoint clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: training, target geometry, offsets, and development evidence are
+  synthetic. The selected 0 mm bound is not a physical calibration and cannot
+  support deployment. No fresh evaluation has been rendered or scored. Tool
+  and camera-support geometry remain absent. The checkpoint and uncertainty
+  policy grant no localization, collision, controller, execution, transport,
+  permit, or physical authority.
+- Supersedes: none; improves nominal safety relative to AI-470 and adds an
+  explicit fail-closed uncertainty policy while preserving all prior evidence.
+- Next dependency: improve the worst 1 mm development direction without
+  exceeding the 5% false-stop limit, then freeze a nonzero uncertainty bound
+  before allocating a fresh untouched evaluation campaign.
+
+### E-20260930-AI-472 — frozen-weight millithreshold policy refreeze
+
+- Stage: S2/S3 synthetic localization-uncertainty policy selection.
+- Lane: AI/model offline development-only policy selection; no arm or
+  integration status changed.
+- Claim commit:
+  `d8e6fad5debb16c8dde71ea5d8665f326b28213e`.
+- Implementation commit:
+  `34aea6d53f980bbf1049f3a22564bf78a89d0241`.
+- Change: the frozen E-471 model is rescored on the existing 33 predeclared v6
+  offsets using a fixed threshold grid from `0.050` through `0.950` in `0.001`
+  increments. The refreeze path verifies the source model and scorecard,
+  development-manifest identity, synthetic-only scope, empty training and
+  evaluation splits, unopened evaluation state, and zero hardware authority.
+  It changes only the decision threshold and uncertainty policy; model state
+  values remain identical to E-471. Detailed metrics are materialized only for
+  the selected threshold to keep the finer search bounded.
+- Inputs/fixtures: implementation SHA-256
+  `66d5079f8ed442097f16a44d5113a5319d82c5b448eba8d42b5a71bfc77b2357`;
+  focused test SHA-256
+  `f40655963f9d424502ae1d3df76503813a955595bdeca733e0b83dcd9e854181`;
+  source render manifest file SHA-256
+  `b9943488381ded4395a01f78980de86f1b7cee1e8a3421902398d198514c78bc`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  development dataset SHA-256
+  `35011f05e5ecbc39d2768dcccfdee052ff90674f5f378c7e18ba3cf0715138b0`;
+  development manifest file SHA-256
+  `15d26c3f9ee6b992f00d470985b86d158e19c7eddc0d242e9e9adcd6e939d276`;
+  source model file SHA-256
+  `16f1810ee5ad51b8414ea524ad54399a85fcce56a45aa76512c2b81ed56d22e6`;
+  source canonical scorecard SHA-256
+  `c61cb0d9bcc59b93337aa1f83a7465814842dfec25e74f824a6231435da766ea`.
+- Exact command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-mask-perturbation-v6-run1\manifest.json
+  --refreeze-localization-policy
+  C:\IsaacSim\artifacts\issue190\mask-perturbation-development-data-v1
+  C:\IsaacSim\artifacts\issue190\localization-robust-candidate-v1
+  C:\IsaacSim\artifacts\issue190\localization-policy-refreeze-v1`;
+  repeated with final output `...refreeze-v2` and stdout redirected to
+  `C:\IsaacSim\artifacts\issue190\localization-policy-refreeze-v2.stdout.json`.
+- Result: PASS_WITH_BLOCKERS. The selected threshold is `0.093` and the largest
+  supported synthetic planar-error bound is 1 mm. Nominal alignment records
+  105 true abstentions, 1,194 true-visible decisions, 48 false abstentions,
+  and 3 missed abstentions. Across all eight 1 mm directions, missed
+  abstentions range from 1 to 4 and false stops range from 47 to 62. The worst
+  missed rate is `4/108 = 0.037037037037037035`; the worst visible false-stop
+  rate is `62/1242 = 0.0499194847020934`. The +1 mm x/+1 mm y direction reaches
+  the 62-false-stop edge. The 2 mm ring fails with 0–6 misses and 45–207 false
+  stops, so uncertainty above 1 mm must produce
+  `abstain_localization_uncertain`.
+- Reproducibility: both 37,660-byte model files are byte-identical at SHA-256
+  `e7b57b6e06edfb2b26972565c02149762c6e9a25ec67718f9d28b1c62dc6af3d`;
+  both 2,081,052-byte scorecard files are byte-identical at SHA-256
+  `de381870fd0e7d541aa32fd154069c897bb2fc99f9d5c7c8d7b1dd04646d3ae3`;
+  canonical scorecard SHA-256 is
+  `224f7677f395192f80f9ecbeea816bed232cafb8d5e05cc2855123be044b7b20`.
+  The refrozen and source `state_dict` objects compare equal. Evaluation is
+  absent and unopened.
+- Validation: 69 focused simulator/perception tests passed in 25.30 seconds;
+  101 shared v2 precision, adapter, producer, strict-ingress, shadow-runner,
+  trajectory, and conformance tests passed in 11.41 seconds. Ruff,
+  maintained-document, AI work-registry, repository-health, source-footprint,
+  and `git diff --check` gates passed. At arm commit
+  `a842e71863dc4c0c8bcf8198567ea25bfc1fb5cf`, the precision-observation v2,
+  motion-batch v2, conformance-profile schema, and installed conformance
+  profile blobs remain identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\localization-policy-refreeze-v1`, with
+  byte-identical repeat `...refreeze-v2`. Hashes identify exact local bytes but
+  do not make the checkpoint clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; this increment replays retained synthetic images.
+- Limitations: the camera, target geometry, labels, and offsets are synthetic.
+  The 1 mm bound is a development result under nominal 2 px/mm geometry, not a
+  measured physical-camera calibration or deployment qualification. The
+  threshold is selected on the existing v6 development corpus, so that corpus
+  cannot evaluate this policy. The 2 mm ring fails. Tool and camera-support
+  geometry remain absent. The artifact grants no localization, collision,
+  controller, execution, transport, permit, or physical authority.
+- Supersedes: none; preserves E-471's coarse-grid failure while correcting the
+  policy resolution with unchanged weights.
+- Next dependency: predeclare and render a fresh untouched synthetic evaluation
+  campaign with new arm poses and lighting, freeze its identity before opening
+  it, then score this exact checkpoint once. Physical deployment remains
+  separately blocked on final-camera calibration and installed geometry.
+
+### E-20260930-AI-473 — one-time fresh 1 mm policy evaluation
+
+- Stage: S2/S3 synthetic localization-policy evaluation.
+- Lane: AI/model with inert Isaac rendering and frozen offline inference; no
+  arm or integration status changed.
+- Claim commit:
+  `fa39a666e752557604057eba6302a8d538f2056a`.
+- Implementation commit:
+  `657974574191a53583db13cfea1dea79dd6a1a5a`.
+- Change: a v7 campaign predeclares actual-emitter schedule samples 40, 48,
+  56, 76, 88, and 100 as evaluation-only poses. They are disjoint from all
+  prior training, development, and evaluation samples and interleave the
+  previously observed H-to-1 and 1-to-period transit poses. Three new
+  deterministic lighting families—amber cast, center glare, and anti-diagonal
+  motion blur—are evaluation-only. The evaluator accepts only an evaluation-
+  only v7 dataset and the exact frozen E-472 1 mm checkpoint, then scores
+  nominal plus every 1 mm direction once. It emits a synthetic blocked report
+  with no execution authority regardless of the metric result.
+- Inputs/fixtures: renderer SHA-256
+  `0dff477d8f091926512d52130c6503e92d98bd29c2e0db09190f44ca3fa702c5`;
+  dataset/evaluator SHA-256
+  `036e076be8979ee9b9d58f84a41234af518de5fb461f5342cb681afb9dcbd802`;
+  focused test SHA-256
+  `fd777f8b94bd27506f4e4b0bb17a29833257a0deca04959c892025a60392500e`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  frozen model file SHA-256
+  `e7b57b6e06edfb2b26972565c02149762c6e9a25ec67718f9d28b1c62dc6af3d`;
+  frozen canonical scorecard SHA-256
+  `224f7677f395192f80f9ecbeea816bed232cafb8d5e05cc2855123be044b7b20`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign policy-evaluation-v7
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-policy-evaluation-v7-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_policy_evaluation_v7_run1.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_policy_evaluation_v7_run1.status.json`.
+- Dataset command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-policy-evaluation-v7-run1\manifest.json
+  --output-dir
+  C:\IsaacSim\artifacts\issue190\localization-policy-evaluation-data-v1`;
+  repeated with final `...data-v2` before inference.
+- Evaluation command, run once: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-policy-evaluation-v7-run1\manifest.json
+  --evaluate-localization-policy
+  C:\IsaacSim\artifacts\issue190\localization-policy-evaluation-data-v1
+  C:\IsaacSim\artifacts\issue190\localization-policy-refreeze-v1
+  C:\IsaacSim\artifacts\issue190\localization-policy-evaluation-report-v1`.
+- Render result: PASS_WITH_BLOCKERS. Six pose-distinct official-mesh renders
+  provide 90 safe-region-overlap abstention labels before lighting expansion.
+  Canonical receipt SHA-256 is
+  `c8e8a7e152b0c763867ac488838c918a7e073c75c225c3503b92a8f9fc1dd3bf`;
+  manifest file SHA-256 is
+  `d3cf5f5928d84d3226b7872322716e78590218e7f52ae617c6d66a135ee86095`;
+  status file SHA-256 is
+  `b90f34b85a8a02304a7fd62aace847e886352f50611019f8059b7573bb0093f1`.
+  RGB, mask, and depth atlas SHA-256 values are respectively
+  `6fb715b004f96ef3cfe02297edd3e9ff74f662d8e8efb89d0e3c9a5b150ff88b`,
+  `bac8ace8bc39ae910732eab386a851a8769774bc4b23cb1d67386a048fc8fc1b`,
+  and `72eba5ebf287ecdf7365299f147a67e34734417d30cc582c606367b0c7861433`.
+- Dataset result: both independent 22-file, 2,898,387-byte builds are
+  byte-identical. Dataset SHA-256 is
+  `cc9665f58629ad311cf5d9913bf7ca3f993caf708302182905c78108d300556a`;
+  manifest file SHA-256 is
+  `b1cc90d3aa415faf822f98860fbc310af0a987b823fb86c04fed4474b166c68f`.
+  Training and development each contain zero rows. Evaluation contains 1,350
+  rows: 270 abstentions and 1,080 visible labels across 18 distinct images.
+- Evaluation result: BLOCKED_SYNTHETIC_ONLY. At frozen threshold `0.093`,
+  nominal alignment records 267 true abstentions, 997 true-visible decisions,
+  83 false abstentions, and 3 missed abstentions. Across all 1 mm directions,
+  misses range from 0 to 3 and false stops range from 82 to 96. The worst
+  missed rate is `3/270 = 0.011111111111111112`, within the 5% safety limit;
+  the worst visible false-stop rate is `96/1080 = 0.08888888888888889`, above
+  the 5% cadence limit. The synthetic gate fails. Nominal false stops are
+  already `83/1080 = 0.07685185185185185`. The -1 mm x/-1 mm y direction is
+  worst at 96 false stops and one miss.
+- Failure concentration: nominal false stops contain 36 center-glare, 29
+  amber-cast, and 18 anti-diagonal-blur rows. `ENTER`, `EQUAL`, `MINUS`, and
+  `0` account for 57 of 83 nominal false stops. These are observations from a
+  consumed split and may define a separate future development campaign but
+  may not tune this checkpoint or be reused as evaluation.
+- Report identity: canonical report SHA-256 is
+  `05a4ccb746ee97f5b55b1aba4d53a83924ec98477bdeb34759ae5589ac8a03c2`;
+  the 145,274-byte report file SHA-256 is
+  `bd436b5b2554eebfa1b56d8e4f4106b6663501fc796bd520ebad44d35f55c222`.
+- Validation: 72 focused simulator/perception tests passed in 25.82 seconds;
+  101 shared v2 precision, adapter, producer, strict-ingress, shadow-runner,
+  trajectory, and conformance tests passed in 11.49 seconds. Ruff,
+  maintained-document, AI work-registry, repository-health, source-footprint,
+  and `git diff --check` gates passed. At arm commit
+  `a842e71863dc4c0c8bcf8198567ea25bfc1fb5cf`, the precision-observation v2,
+  motion-batch v2, conformance-profile schema, and installed conformance
+  profile blobs remain identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-policy-evaluation-v7-run1`,
+  `localization-policy-evaluation-data-v1`, byte-identical `...data-v2`, and
+  `localization-policy-evaluation-report-v1`. Hashes identify exact local
+  bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; retained schedule states are rendered statically.
+- Limitations: all camera geometry, images, labels, and offsets are synthetic.
+  The evaluated 1 mm ring uses nominal 2 px/mm geometry and is not physical
+  calibration. The v7 evaluation group is consumed and cannot tune a
+  successor. Tool and camera-support geometry remain absent. The failed report
+  grants no localization, collision, controller, execution, transport, permit,
+  or physical authority.
+- Supersedes: none; preserves E-472's development pass and records that its
+  visible-target specificity does not generalize to the fresh v7 campaign.
+- Next dependency: predeclare a new development-only hard-negative corpus that
+  represents the persistent keyboard targets and new lighting families, then
+  improve specificity without exceeding the 5% missed-abstention limit. A
+  later successor requires another untouched evaluation group; physical
+  deployment remains separately blocked on final-camera calibration and
+  installed geometry.
+
+### E-20260930-AI-474 — development-only hard-negative diagnostic
+
+- Stage: S2/S3 synthetic target-specificity diagnosis.
+- Lane: AI/model with inert Isaac rendering and frozen offline inference; no
+  arm or integration status changed.
+- Claim commit:
+  `39274887d71b3aeb18f62dcb9e50b826cc097366`.
+- Implementation commit:
+  `9a6f364824ad9cecf1c50a716299f3b85f4acb23`.
+- Change: a v8 campaign predeclares unused actual-emitter schedule samples 42,
+  50, 58, 78, 90, and 98 as development-only poses. They interleave but do not
+  reuse the consumed v7 evaluation samples. Amber low contrast, right-center
+  glare, and offset anti-diagonal blur are new deterministic development-only
+  transforms related to the consumed failure categories but byte-distinct from
+  v7. The diagnostic holds the E-472 model and threshold fixed, scores nominal
+  plus every 1 mm direction, and records `selection_performed: false`,
+  `training_performed: false`, and `evaluation_group_present: false`.
+- Inputs/fixtures: renderer SHA-256
+  `2eb9083e4621a373ecbc7129c8af63242304520ef881a3e1f43eb0682b9db918`;
+  dataset/diagnostic SHA-256
+  `a14260988411d9a82b95175062a390313508792951b88e4b7f27f115cc49b3ac`;
+  focused test SHA-256
+  `a03d34a65ec58561eff7763c0cea3b7726d767221f24d88ce7cc5d7242c890c5`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  frozen model file SHA-256
+  `e7b57b6e06edfb2b26972565c02149762c6e9a25ec67718f9d28b1c62dc6af3d`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign hard-negative-v8
+  --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-hard-negative-v8-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_hard_negative_v8_run1.json
+  --status-output C:\IsaacSim\evidence\fixed_overview_hard_negative_v8_run1.status.json`.
+- Dataset command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-hard-negative-v8-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\hard-negative-development-data-v1`;
+  repeated with final `...data-v2` before diagnosis.
+- Diagnostic command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-hard-negative-v8-run1\manifest.json
+  --diagnose-localization-hard-negatives
+  C:\IsaacSim\artifacts\issue190\hard-negative-development-data-v1
+  C:\IsaacSim\artifacts\issue190\localization-policy-refreeze-v1
+  C:\IsaacSim\artifacts\issue190\hard-negative-diagnostic-v1`;
+  repeated with final output `...diagnostic-v2`.
+- Render result: PASS_WITH_BLOCKERS. Six official-mesh renders provide 87
+  safe-region-overlap abstention labels before lighting expansion. Canonical
+  receipt SHA-256 is
+  `358979bb9ee62d1a56b4a5bad4f0a5d420ff4e22c1da8667f6c67c49674ef0a2`;
+  manifest file SHA-256 is
+  `c9a846c31dce4bd5a55281e9e069558eae314906c2bdbda6607d1f94decf89e8`;
+  status file SHA-256 is
+  `fce7d2382dfb11670b958f1ac15d0b4aad9738d4716bbcb69704f3f9f7ff3798`.
+  RGB, mask, and depth atlas SHA-256 values are respectively
+  `c1d31ec860d9e358a850b2494e7223dd58f768667245a09246ff115311220fe7`,
+  `0270659110006ad77c83fc960326a53a7d2f2b0cb020071083febd20cee55a6f`,
+  and `683346da184dd266e44cb4a37b7b4940115c51993d76c0beb55342cf1bdb4bef`.
+- Dataset result: both independent 22-file, 2,920,254-byte builds are
+  byte-identical. Dataset SHA-256 is
+  `21f5643fa556214f34a1ddc20e3f768c74ee68c9af42db9dbcd62ec182597b2d`;
+  manifest file SHA-256 is
+  `f07dee0da2a755e5db497da69a76b365cc52543d1b5913ed858023ff829389e8`.
+  Development contains 1,350 rows: 261 abstentions and 1,089 visible labels.
+  Training and evaluation each contain zero rows.
+- Diagnostic result: BLOCKED_DEVELOPMENT_ONLY. At frozen threshold `0.093`,
+  nominal alignment records 257 true abstentions, 990 true-visible decisions,
+  99 false abstentions, and 4 missed abstentions. Across all 1 mm directions,
+  misses range from 1 to 5 and false stops range from 93 to 110. The worst
+  missed rate is `5/261 = 0.019157088122605363`; the worst false-stop rate is
+  `110/1089 = 0.10101010101010101`. The -1 mm x/-1 mm y direction is worst for
+  false stops. Low missed-occlusion error reproduces, but specificity remains
+  substantially outside the 5% limit.
+- Failure concentration: at nominal alignment, amber low contrast contributes
+  41 false stops, right-center glare 34, and offset anti-diagonal blur 24.
+  `ENTER`, `EQUAL`, and `MINUS` each fail in all 18 development images and
+  contribute 48 of 99 false stops. The repeated target pattern supports adding
+  explicit target identity or target-geometry features rather than selecting a
+  new threshold on these rows.
+- Reproducibility: both 172,451-byte diagnostic reports are byte-identical.
+  Canonical report SHA-256 is
+  `af07d0b289d008b13611cea4eb2d737a77085474546367ad2afe64ec01a1f6da`;
+  report file SHA-256 is
+  `43db5d20493d0cadff91befaa24bfeebcaed6c74659b6dea30d4be6175c05c57`.
+- Validation: 75 focused simulator/perception tests passed in 25.57 seconds;
+  101 shared v2 precision, adapter, producer, strict-ingress, shadow-runner,
+  trajectory, and conformance tests passed in 11.46 seconds. Ruff,
+  maintained-document, AI work-registry, repository-health, source-footprint,
+  and `git diff --check` gates passed. At arm commit
+  `e34547d76b3ec5fab3b5ca5004bb29c36ef195ab`, the precision-observation v2,
+  motion-batch v2, conformance-profile schema, and installed conformance
+  profile blobs remain identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-hard-negative-v8-run1`,
+  `hard-negative-development-data-v1`, byte-identical `...data-v2`, and the
+  byte-identical `hard-negative-diagnostic-v1` and `...v2` reports. Hashes
+  identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; retained schedule states are rendered statically.
+- Limitations: the consumed v7 evaluation informed the class of new
+  development transforms, so v8 is selection data and cannot evaluate a
+  successor. All camera geometry, images, labels, and offsets are synthetic.
+  The 1 mm ring uses nominal 2 px/mm geometry and is not physical calibration.
+  Tool and camera-support geometry remain absent. This diagnostic grants no
+  localization, collision, controller, execution, transport, permit, or
+  physical authority.
+- Supersedes: none; preserves the failed v7 evaluation and reproduces its
+  specificity problem on new development-only bytes without model changes.
+- Next dependency: predeclare separate target-aware training data, add a small
+  explicit target identity or geometry representation to the offline model,
+  and select the successor against v8 while keeping missed abstentions at or
+  below 5%. A later successor requires another untouched evaluation group.
+
+### E-20260930-AI-475 — explicit target-identity candidate fails specificity gate
+
+- Stage: S2/S3 synthetic target-specificity training and development selection.
+- Lane: AI/model with inert Isaac rendering and offline inference; no arm or
+  integration status changed.
+- Claim commit:
+  `81b114e5d8cd21b39b9591657e70896c9d487d45`.
+- Implementation commit:
+  `becab5594cdea1ba8c2f3c88656436f11b297d53`.
+- Change: a v9 campaign predeclares actual-emitter schedule samples 41, 43,
+  45, 47, 49, 51, 77, 79, 81, 83, 85, and 87 as training-only poses. They are
+  disjoint from every prior declared pose. Amber edge boost, right glare dim,
+  and anti-diagonal blur contrast are new deterministic training-only lighting
+  transforms. The 1,800-parameter candidate retains RGB plus the known target
+  safe-region mask and concatenates 75 device-qualified one-hot target values
+  plus normalized catalog center x/y and safe-region width/height immediately
+  before its classifier. Training uses only v9; threshold and uncertainty
+  selection use only the retained v8 development corpus. No evaluation group
+  was created or opened.
+- Inputs/fixtures: renderer SHA-256
+  `6f22fc9e5e5b8fa34481064d9cf7057242be90a9a9487d67d6887813d49c2771`;
+  dataset/training implementation SHA-256
+  `4113baf38d5aa2eda4ff0a485c901a6f2ea68f8664c0665fdf0d04b383378fc8`;
+  focused test SHA-256
+  `845cfe6296b78ed66072bdca2e379131a35758c10a75b675709b60e5edf475f0`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  v8 selection dataset SHA-256
+  `21f5643fa556214f34a1ddc20e3f768c74ee68c9af42db9dbcd62ec182597b2d`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path
+  'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign target-identity-training-v9 --output-dir
+  C:\IsaacSim\artifacts\issue190\fixed-overview-target-identity-training-v9-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_target_identity_training_v9_run1.json
+  --status-output
+  C:\IsaacSim\evidence\fixed_overview_target_identity_training_v9_run1.status.json`.
+- Dataset command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-target-identity-training-v9-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\target-identity-training-data-v1`;
+  repeated with final `...data-v2`.
+- Training command: `python
+  software/ai/train/build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-target-identity-training-v9-run1\manifest.json
+  --train-target-identity
+  C:\IsaacSim\artifacts\issue190\target-identity-training-data-v1
+  C:\IsaacSim\artifacts\issue190\hard-negative-development-data-v1
+  C:\IsaacSim\artifacts\issue190\target-identity-candidate-v1`;
+  repeated with final output `...candidate-v2`.
+- Render result: PASS_WITH_BLOCKERS. Twelve pose-distinct official-mesh renders
+  provide 191 safe-region-overlap abstention labels before lighting expansion.
+  Canonical receipt SHA-256 is
+  `bb034c897fc4e2042d89d99ff33787c713d6430b29f858d852fe36b796ca68b4`;
+  manifest file SHA-256 is
+  `448c5012d469b22ce7a051995d73adba48a560b3441cb30803db20d8113fcaaa`;
+  status file SHA-256 is
+  `2da9fc001126c747b0be1d8e0da67a2a7d973c5968c9a56b35ec4151bf516a70`.
+  RGB, mask, and depth atlas SHA-256 values are respectively
+  `0527b3f6c24e81c64f4210e439b6c2628477f0eb2c7f5d2db4449ce4786f4cc6`,
+  `0f1096e3d7446dcbb689ffc34e235560e0be306ba75374774b287e93278de4c3`,
+  and `74d22c36838a00ae61869cdc9e33e2845cb0fa8e3970f4b86e73bc4108da4b04`.
+- Dataset result: both independent 40-file, 5,774,498-byte builds are
+  byte-identical. Dataset SHA-256 is
+  `ac424019f83fe6f46fa3e95e93e5c435dc7fd6fb8e794127bf435eb3c1b2d29d`;
+  manifest file SHA-256 is
+  `b4872968fdb7f33ee0c610175818d94a5d6a924a8cb1543b39bf39956b0a1023`;
+  deterministic directory-content SHA-256 is
+  `e8e3fab6320ef22a0e6211906a0f37dcb72f2a811e01e9354bec3b905e34b221`.
+  Training contains 2,700 rows: 573 abstentions and 2,127 visible labels.
+  Development and evaluation each contain zero rows.
+- Candidate result: FAILED_DEVELOPMENT_GATE. Both independent checkpoints and
+  scorecards are byte-identical. The 42,507-byte model SHA-256 is
+  `276a2caf5c7b678cc484f51eda58587579ece1c264c481b4a2e2c57073a6d26e`.
+  Canonical scorecard SHA-256 is
+  `01e1a2ff6586f92a25d27ad27cb4c4765570342eea76b8eed14c14f119e6f202`;
+  the 2,604,591-byte scorecard file SHA-256 is
+  `34dfa8ebb8bc39ea3f53728bd9db84b450ec31e8270b0dcc8ea660f22a7f6e93`.
+  At selected threshold `0.25`, nominal alignment records 252 true
+  abstentions, 682 true-visible decisions, 407 false abstentions, and 9 missed
+  abstentions. Across the 1 mm ring, misses range from 7 to 10 and false stops
+  range from 405 to 425. Worst missed rate is `10/261 = 3.83%`; worst false-
+  stop rate is `425/1089 = 39.03%`. The selector returns a 0 mm bound and
+  `development_gate_met: false`. Nominal false stops concentrate in amber low
+  contrast (195), offset anti-diagonal blur (113), and right-center glare (99).
+  `ENTER` and `TAB` each false-stop in all 18 nominal images. This is worse
+  than the retained E-474 architecture and is not a model improvement.
+- Interpretation: the exact target identity is now present, but late
+  concatenation after global adaptive pooling acts mainly as a classifier
+  bias and loses the local spatial relationship needed to distinguish target
+  overlap from visually similar key regions. This rejects this architecture;
+  it does not reject target conditioning generally.
+- Validation: 34 focused simulator/perception tests passed in 14.37 seconds;
+  83 shared v2 precision, adapter, producer, strict-ingress, shadow,
+  coordinator, journal, and trajectory-envelope tests passed in 7.44 seconds.
+  Ruff, maintained-document, AI work-registry, repository-health,
+  source-footprint, and `git diff --check` gates passed. Source footprint is
+  6,100 files and 652,914,544 logical bytes. At arm commit
+  `9fa8fabf7076623ca17cb855050201739efc9596`, the precision-observation v2,
+  motion-batch v2, conformance-profile schema, and installed conformance
+  profile blobs remain identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-target-identity-training-v9-run1`,
+  byte-identical `target-identity-training-data-v1` and `...data-v2`, and
+  byte-identical `target-identity-candidate-v1` and `...candidate-v2`. Hashes
+  identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; retained schedule states are rendered statically.
+- Limitations: all camera geometry, images, labels, target descriptors, and
+  offsets are synthetic. The fixed identity vocabulary assumes the exact
+  frozen catalog. The 1 mm ring uses nominal 2 px/mm geometry and is not
+  physical calibration. V8 remains development/selection data and cannot
+  evaluate this or a successor. Tool and camera-support geometry, physical
+  frames, temporal evidence, and deployment calibration remain absent. The
+  failed candidate grants no localization, collision, controller, execution,
+  transport, permit, or physical authority.
+- Supersedes: none; preserves E-474 and adds failed evidence for one explicit
+  target-identity architecture without consuming a new evaluation group.
+- Next dependency: retain v9 for training and v8 for development, then test a
+  bounded target-conditioned spatial fusion that applies the target descriptor
+  before spatial pooling while preserving the 5% missed-abstention ceiling.
+  Only after a candidate passes development may a new untouched evaluation
+  campaign be predeclared.
+
+### E-20260930-AI-476 — target-conditioned spatial fusion passes development
+
+- Stage: S2/S3 synthetic target-specificity training and development selection.
+- Lane: AI/model with offline inference over retained synthetic images; no arm
+  or integration status changed.
+- Claim commit:
+  `6df5bbc5d6bf560b6c8469f87f8fcca93bf1394f`.
+- Implementation commit:
+  `e3b06692ec342e8209a1e28b845ac680772909c8`.
+- Change: the exact E-472 four-channel visual backbone and classifier are
+  frozen. A 79-value descriptor containing 75 device-qualified target entries
+  and normalized catalog center x/y and safe-region width/height drives a
+  2,560-parameter FiLM conditioner after the second convolution and before
+  adaptive spatial pooling. Modulation scale is `0.25`. Only the conditioner
+  trains for 20 epochs with Adam, learning rate `0.001`, weight decay `0.0001`,
+  and unweighted binary cross entropy. Training uses only v9; threshold and
+  uncertainty selection use only v8. No evaluation group was created or opened.
+- Inputs/fixtures: implementation SHA-256
+  `2d102186278d01dd88720128f7e5fbdb5d67b7e12ace9d8fc86443d89834231a`;
+  focused test SHA-256
+  `553a95b29ee18ed4697715d1082c66f13ad2ebaa3315cb6e805666f76bed4953`;
+  frozen E-472 seed model SHA-256
+  `e7b57b6e06edfb2b26972565c02149762c6e9a25ec67718f9d28b1c62dc6af3d`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  v9 training dataset SHA-256
+  `ac424019f83fe6f46fa3e95e93e5c435dc7fd6fb8e794127bf435eb3c1b2d29d`;
+  v9 manifest SHA-256
+  `b4872968fdb7f33ee0c610175818d94a5d6a924a8cb1543b39bf39956b0a1023`;
+  v8 development dataset SHA-256
+  `21f5643fa556214f34a1ddc20e3f768c74ee68c9af42db9dbcd62ec182597b2d`;
+  v8 manifest SHA-256
+  `f07dee0da2a755e5db497da69a76b365cc52543d1b5913ed858023ff829389e8`.
+- Exact command: `$train='C:\IsaacSim\artifacts\issue190\target-identity-training-data-v1';
+  $dev='C:\IsaacSim\artifacts\issue190\hard-negative-development-data-v1';
+  $seed='C:\IsaacSim\artifacts\issue190\localization-policy-refreeze-v1';
+  $run1='C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v1';
+  $run2='C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v2';
+  Write-Output "run1_exists=$(Test-Path -LiteralPath $run1) run2_exists=$(Test-Path -LiteralPath $run2)";
+  python software\ai\train\build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-target-identity-training-v9-run1\manifest.json
+  --train-target-conditioned-fusion $train $dev $seed $run1 >
+  C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v1.stdout.json;
+  python software\ai\train\build_official_mesh_occlusion_data.py
+  --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-target-identity-training-v9-run1\manifest.json
+  --train-target-conditioned-fusion $train $dev $seed $run2 >
+  C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v2.stdout.json`.
+- Result: `BLOCKED_AWAITING_FRESH_EVALUATION` after passing the preregistered
+  development gate. Both runs produce byte-identical 95,659-byte models and
+  1,416,993-byte scorecards. Model/file SHA-256 is
+  `55da91e5a2c14e2c6fb6ebab7c1302e9c1fd5a8cc41644e8f6467ffdcb3c5c74`;
+  canonical scorecard SHA-256 is
+  `c7cd205140f014673a367591ab18d2b342a2af4ad7f633eec234cae5c0277537`;
+  scorecard file SHA-256 is
+  `704d5dcd82951867c887a0d0295decf2ca8bdd5da1751bbdcca8ad0fd0ad7ac1`;
+  byte-identical stdout SHA-256 is
+  `3216b246638eb2ee8655bc56c01f84234cfe1d31c5d3c62c703c92f30fdaa13a`.
+  All frozen seed convolution and classifier values match exactly.
+- Metrics: selected threshold is `0.107`. Nominal alignment records 258 true
+  abstentions, 1,045 true-visible decisions, 44 false abstentions, and 3 missed
+  abstentions: false-stop rate `44/1089 = 4.04%`; missed-abstention rate
+  `3/261 = 1.15%`. Across all eight 1 mm directions, false stops range from 39
+  to 52 and misses range from 3 to 6. Worst rates are
+  `52/1089 = 4.78%` at +1 mm x/-1 mm y and `6/261 = 2.30%`. The selector
+  returns a 1 mm synthetic planar bound with `development_gate_met: true`.
+  At nominal alignment, false stops concentrate in amber low contrast (23),
+  right-center glare (11), and offset anti-diagonal blur (10); target `8`
+  contributes 8, and `S`, `U`, and `X` contribute 6 each. All three nominal
+  misses are target `Q`, one per lighting family.
+- Validation: 35 focused simulator/perception tests passed in 15.33 seconds.
+  The shared boundary suite passed 83 tests in 7.24 seconds. Ruff passed.
+  Maintained-document validation passed across 48 docs, 28 public titles, and
+  two SVG assets. The AI work-registry audit passed with 35 tracked and
+  documented AI tests, 110 referenced paths, and zero unowned or multiply
+  owned tests. Repository-health policy, source-footprint, and
+  `git diff --check` gates passed. Source footprint is 6,100 tracked files, 652,946,878
+  logical bytes, 4,890,152 duplicate bytes, and a 55,939,877-byte largest blob.
+  At arm commit `f8a2c1980a19d890f3d368f5fb9e88978823d9cd`, the
+  precision-observation v2, motion-batch v2, conformance-profile schema, and
+  installed conformance-profile blobs remain identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v1` and
+  byte-identical `...fusion-v2`, plus their byte-identical stdout captures.
+  Hashes identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; this increment trains over retained static renders.
+- Limitations: all camera geometry, images, labels, target descriptors, and
+  offsets are synthetic. The frozen identity vocabulary assumes the exact
+  catalog. The 1 mm ring uses nominal 2 px/mm simulator geometry and is not
+  physical calibration. V8 is consumed development/selection data and cannot
+  evaluate this candidate. Tool and camera-support geometry, physical frames,
+  temporal evidence, and deployment calibration remain absent. Passing this
+  development gate grants no localization, collision, controller, execution,
+  transport, permit, or physical authority.
+- Supersedes: none; preserves the failed E-475 result and demonstrates that
+  pre-pool target conditioning succeeds on retained development where late
+  descriptor concatenation failed.
+- Next dependency: predeclare a new pose- and lighting-disjoint synthetic
+  evaluation campaign, freeze its identities before rendering, evaluate this
+  exact checkpoint once, and preserve the result whether it passes or fails.
+  Physical deployment qualification remains a later, separate requirement.
+
+### E-20260930-AI-477 — frozen fusion checkpoint fails fresh recall gate
+
+- Stage: S2/S3 one-time synthetic evaluation of the frozen E-476 checkpoint.
+- Lane: AI/model with inert Isaac rendering and offline inference; no arm or
+  integration status changed.
+- Claim commit:
+  `1b3d5629d3d7461b067c225595ba69c916f30bc1`.
+- Implementation and predeclaration commit:
+  `4b7fd0ca9198a57671305e7ba34b44f5400f614f`.
+- Change: v10 freezes six evaluation-only actual-emitter schedule poses at
+  sequences 46, 54, 62, 80, 92, and 102 before rendering. All are absent from
+  v1-v9. `blue_edge_shadow`, `lower_left_glare`, and `vertical_blur_dim` are
+  deterministic evaluation-only transforms absent from every earlier lighting
+  group. The evaluator verifies the dataset, checkpoint, scorecard, target
+  catalog, 1 mm policy, and zero-authority fields, then applies the frozen
+  threshold to nominal alignment and all eight 1 mm directions. It performs no
+  training, threshold selection, relabeling, or model mutation.
+- Inputs/fixtures: renderer SHA-256
+  `1b15f0633b014fad69cbe29d3e2f8aa67a6e1c57e6388f11f69dce8d573cb6aa`;
+  builder/evaluator SHA-256
+  `d983f4d9927141a19e165f3916c40d73596eb0b7eb64ae406bb910a6b968a0fd`;
+  focused test SHA-256
+  `fcaeb360b6df2ac48b7036eec87f6494e36a6832e8f7591c0a8eaeb1e2fe451e`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  frozen E-476 model SHA-256
+  `55da91e5a2c14e2c6fb6ebab7c1302e9c1fd5a8cc41644e8f6467ffdcb3c5c74`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES';
+  $env:PYTHONPATH=(Resolve-Path 'software/src').Path;
+  C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign fusion-evaluation-v10 --output-dir
+  C:\IsaacSim\artifacts\issue190\fixed-overview-fusion-evaluation-v10-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_fusion_evaluation_v10_run1.json
+  --status-output
+  C:\IsaacSim\evidence\fixed_overview_fusion_evaluation_v10_run1.status.json`.
+- Dataset command: `Copy-Item -LiteralPath
+  C:\IsaacSim\evidence\fixed_overview_fusion_evaluation_v10_run1.json
+  -Destination
+  C:\IsaacSim\artifacts\issue190\fixed-overview-fusion-evaluation-v10-run1\manifest.json;
+  python software\ai\train\build_official_mesh_occlusion_data.py
+  --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-fusion-evaluation-v10-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\fusion-evaluation-data-v1`;
+  repeated with final output `...data-v2`.
+- Evaluation command: `$data='C:\IsaacSim\artifacts\issue190\fusion-evaluation-data-v1';
+  $candidate='C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v1';
+  python software\ai\train\build_official_mesh_occlusion_data.py
+  --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-fusion-evaluation-v10-run1\manifest.json
+  --evaluate-target-conditioned-fusion $data $candidate
+  C:\IsaacSim\artifacts\issue190\fusion-evaluation-report-v1 >
+  C:\IsaacSim\artifacts\issue190\fusion-evaluation-report-v1.stdout.json`;
+  repeated with final report and stdout suffix `v2`.
+- Render result: `PASS_WITH_BLOCKERS`. Canonical receipt SHA-256 is
+  `3320501484816252b49ae15dbf645cebd611f160846737a4100b781a01a10f06`;
+  225,162-byte manifest file SHA-256 is
+  `f581416316d5f98fafa328f3052a519ee408c536ba4b9700a7eb7b1c08e7cc5e`;
+  status file SHA-256 is
+  `0d3f62d8f28b7cefc45a39bbc6bf7edf81a3c153047b892e455169b93e69b1a1`.
+  RGB, mask, and depth atlas SHA-256 values are respectively
+  `8b8e9019f49c11214b70fe98d107e8727636ca651183d3d70734e3309dd57e9b`,
+  `953a52138c06bc0f792a7c6fc844e328fe05f0b7894c21b3f609272a664548d3`,
+  and `27df1c65ce2332c6e4eb910be05650443f1a503d076ae11a6204e3a467acd341`.
+- Dataset result: both independent 22-file, 2,948,327-byte builds are
+  byte-identical. Dataset SHA-256 is
+  `a60568c213fc64c62e1ee831bffc1a4f46475113c1c6f913adf994e325a9fca3`;
+  manifest file SHA-256 is
+  `7c1ea9d10a53118d0e93d86505be3e6fcb4c6c4cc3b5573ba809996274b18ee6`;
+  deterministic directory-content SHA-256 is
+  `5c6bbd05ab5ba781b35a11aaad8bb35b09e796d4b5748d0116d1ca1a40635058`.
+  Evaluation contains 1,350 rows: 249 abstentions and 1,101 visible labels.
+  Training and development each contain zero rows.
+- Evaluation result: `FAILED_SYNTHETIC_GATE`. Both independent 83,540-byte
+  reports are byte-identical. Canonical report SHA-256 is
+  `5a6d5e4074447b33811c1a868ad7f5da55ea88690eca3f380ef35b70e4d7f21c`;
+  report file SHA-256 is
+  `3a2f53ebc6e6b65b65810f7ee4860ff79f5f0213f143e92dbc233329b97e45c2`;
+  byte-identical stdout SHA-256 is
+  `1c7c8f618a6eb9379c2a136cc867fea7b8e111249656fffdf91aefdbc5d3d7be`.
+  At frozen threshold `0.107`, nominal alignment records 237 true abstentions,
+  1,073 true-visible decisions, 28 false abstentions, and 12 missed abstentions.
+  Nominal rates are `28/1101 = 2.54%` false stops and `12/249 = 4.82%` misses.
+  Across the 1 mm ring, false stops range from 24 to 50 and misses range from 5
+  to 15. Worst false-stop rate is `50/1101 = 4.54%` at +1 mm x/-1 mm y. Worst
+  missed-abstention rate is `15/249 = 6.02%` at -1 mm x/0 mm y, so the fixed
+  5% gate fails.
+- Failure concentration: the 15 worst-direction misses contain `D` four times,
+  `PERIOD` and `L` three times each, `Q` and `X` twice each, and `TAB` once.
+  Eight occur at pose `fusion_eval_h_to_1_62`; the lighting split is six each
+  for blue-edge shadow and lower-left glare, plus three for vertical blur dim.
+  Nominal misses are 12, led by `D` four times and `L` three times. Specificity
+  is retained: even the worst false-stop direction remains below 5%.
+- Validation: 37 focused simulator/perception tests passed in 15.89 seconds.
+  The shared boundary suite passed 83 tests in 7.21 seconds. Ruff passed.
+  Maintained-document validation passed across 48 docs, 28 public titles, and
+  two SVG assets. The AI work-registry audit passed with 35 tracked and
+  documented AI tests, 110 referenced paths, and zero unowned or multiply
+  owned tests. Repository-health policy, source-footprint, and
+  `git diff --check` gates passed. Source footprint is 6,100 tracked files,
+  652,974,944 logical bytes, 4,890,152 duplicate bytes, and a 55,939,877-byte
+  largest blob. At arm commit
+  `943dd06ee2e732e02f68decbb27abe704b23ce00`, the precision-observation v2,
+  motion-batch v2, conformance-profile schema, and installed profile blobs are
+  byte-identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-fusion-evaluation-v10-run1`,
+  byte-identical `fusion-evaluation-data-v1` and `...data-v2`, and byte-identical
+  `fusion-evaluation-report-v1` and `...report-v2`. Hashes identify exact local
+  bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; schedule states are rendered statically.
+- Limitations: all camera geometry, images, labels, target descriptors, and
+  offsets are synthetic. The 1 mm ring uses nominal 2 px/mm simulator geometry
+  and is not physical calibration. V10 is now consumed evaluation evidence and
+  cannot tune a successor. Tool and camera-support geometry, physical frames,
+  temporal evidence, and deployment calibration remain absent. This failed
+  evaluation grants no localization, collision, controller, execution,
+  transport, permit, or physical authority.
+- Supersedes: none; preserves E-476's passing development result and adds the
+  required fresh failed evaluation without rewriting or tuning either result.
+- Next dependency: declare new training and development poses and lighting for
+  an occlusion-recall candidate, retaining the target-conditioned pre-pool
+  specificity mechanism. Do not reuse v10 images, labels, probabilities, or
+  failures for selection. A successor requires another untouched evaluation.
+
+### E-20261001-AI-478 — occlusion-recall successor passes nominal development
+
+- Stage: S2/S3 synthetic recall training and development selection.
+- Lane: AI/model with inert Isaac rendering and offline training; no arm or
+  integration status changed.
+- Claim commit:
+  `f25ca76bf31eb2effdf951e821e05dbe39a40d7a`.
+- Implementation and predeclaration commit:
+  `1545b0b9af65b06ee0c2b77c66ccbf1305d3a9a8`.
+- Corrected pose declaration commit:
+  `b5ec2d687d3e626d63e56ff313229609b6d64fcd`.
+- Change: v11 reserves twelve training and six development schedule states
+  absent from v1-v10, and contains no evaluation group. Three train-only and
+  three development-only deterministic lighting transforms are absent from all
+  previous campaigns. The exact E-476 checkpoint seeds the successor. Both
+  visual convolutions and the classifier remain frozen; only the pre-pool FiLM
+  conditioner trains for 12 epochs with Adam, learning rate `0.0005`, weight
+  decay `0.0001`, and a fixed positive abstention weight of `1.5`. Threshold
+  and uncertainty selection use v11 development only. Consumed v10 evaluation
+  bytes are excluded and `consumed_evaluation_dataset_sha256` remains null.
+- Preserved failed evidence: the first frozen render used schedule samples 36,
+  37, and 39, whose joint states are identical. It failed closed with
+  `official mesh semantic masks are not pose-distinct`, wrote no receipt or
+  admissible dataset, and recorded status-file SHA-256
+  `7e09cfc4626774afd78ae160eed61ea30be1c91fe58ac7fcdcde09579231a3ec`.
+  The correction replaced only duplicate development samples 37 and 39 with
+  previously unused H-transit samples 30 and 32 and rendered to a new output
+  directory. The failed output remains preserved.
+- Inputs/fixtures: renderer SHA-256
+  `c468e323dd2b230d7728c4479ef8edd4b79d0620eeb728a5b13e9afdc838e3cd`;
+  builder/trainer SHA-256
+  `53fef0738be57c08726db02f5765336248de5a2ea07869d12d786f6198a80f8d`;
+  focused test SHA-256
+  `b8d858f56187e883fda89344b42ff9f6c1d766294a738b4e0b9fb8b36b319aac`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  E-476 seed model SHA-256
+  `55da91e5a2c14e2c6fb6ebab7c1302e9c1fd5a8cc41644e8f6467ffdcb3c5c74`.
+- Corrected render command: `$env:OMNI_KIT_ACCEPT_EULA='YES';
+  $env:PYTHONPATH=(Resolve-Path 'software/src').Path;
+  C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign occlusion-recall-v11 --output-dir
+  C:\IsaacSim\artifacts\issue190\fixed-overview-occlusion-recall-v11-run2
+  --receipt C:\IsaacSim\evidence\fixed_overview_occlusion_recall_v11_run2.json
+  --status-output
+  C:\IsaacSim\evidence\fixed_overview_occlusion_recall_v11_run2.status.json`.
+- Dataset command: `Copy-Item -LiteralPath
+  C:\IsaacSim\evidence\fixed_overview_occlusion_recall_v11_run2.json
+  -Destination
+  C:\IsaacSim\artifacts\issue190\fixed-overview-occlusion-recall-v11-run2\manifest.json;
+  python software\ai\train\build_official_mesh_occlusion_data.py
+  --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-occlusion-recall-v11-run2\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\occlusion-recall-data-v1`;
+  repeated with final output `...data-v2`.
+- Training command: `python
+  software\ai\train\build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-occlusion-recall-v11-run2\manifest.json
+  --train-occlusion-recall
+  C:\IsaacSim\artifacts\issue190\occlusion-recall-data-v1
+  C:\IsaacSim\artifacts\issue190\target-conditioned-fusion-v1
+  C:\IsaacSim\artifacts\issue190\occlusion-recall-candidate-v1`;
+  repeated with dataset and candidate suffix `v2`.
+- Render result: `PASS_WITH_BLOCKERS`. The 18 distinct states comprise 12
+  training and six development poses; evaluation has zero. Canonical receipt
+  SHA-256 is
+  `4ebac2b69bdb03121359ff9cf592ca86be15adb57c14a0041a75c3ce61bc4fdf`;
+  receipt file SHA-256 is
+  `7716c76895ec9d9a0719beabf1fa1565af0cc372339d4847e8ca2883dfea4aaf`;
+  status file SHA-256 is
+  `42e067ea3050b10a24f01424ef61e83fa6aa3dc93ce945d909f575cafaea15a8`.
+  RGB, mask, and depth atlas SHA-256 values are respectively
+  `e73ebbad9158222e43c2f7ab523c67cae4ddc674770ef02a530c8054de5290b2`,
+  `886e2b658e310ef14166402b2e8ad4a00e29a12cd2b941f92f14a6ce84c651c4`,
+  and `e12b4c7594870b7fb3f948294bbeabf9f0a14538f36c5a41be8c1638baaad819`.
+- Dataset result: both independent 58-file builds are byte-identical. Dataset
+  SHA-256 is
+  `5c99f7638b87eadc359e267de7a5d2e5a37dd43598b39fe415c46a4219eb817f`;
+  manifest file SHA-256 is
+  `1aaee7460e968eb72baa08f5ef9b7f5b5b9d6b2014bb0b779ac6befc573dc0fd`;
+  directory-content SHA-256 is
+  `0612376e48636ba605b07944a69c3e3b6a0eb923cf6f02b68348c35e763c64bd`.
+  Training contains 2,700 rows: 501 abstentions and 2,199 visible targets.
+  Development contains 1,350 rows: 246 abstentions and 1,104 visible targets.
+  Evaluation contains zero rows.
+- Training result: `BLOCKED_AWAITING_FRESH_EVALUATION` after passing nominal
+  development. Both runs produce byte-identical 95,658-byte models and
+  1,524,008-byte scorecards. Model/file SHA-256 is
+  `27c7be58e11f8bf3341cb4eb56abdf7786d984e2664b6eb07d6349243730e09c`;
+  canonical scorecard SHA-256 is
+  `807928f2559d14fa8b0b9da1781d379650deeadb40ec8690e41484be16eaa0d4`;
+  scorecard file SHA-256 is
+  `5aa9aa4f7bf826b54d1337bdcb1d00601ea76c3333469354062740ce238cbbc2`.
+  All frozen convolution and classifier values match E-476 exactly.
+- Metrics: selected threshold is `0.162`. Nominal alignment records 235 true
+  abstentions, 1,073 true-visible decisions, 31 false abstentions, and 11
+  missed abstentions: false-stop rate `31/1104 = 2.81%` and missed-abstention
+  rate `11/246 = 4.47%`. Seven of eight 1 mm directions keep both rates below
+  5%; +1 mm x/0 mm y records `13/246 = 5.28%` misses. Worst 1 mm false-stop
+  rate is `48/1104 = 4.35%` at +1 mm x/-1 mm y. The selector therefore returns
+  a 0 mm synthetic planar bound with `development_gate_met: true`.
+- Validation: 39 focused simulator/perception tests passed in 16.02 seconds.
+  The shared AI-to-arm boundary selection passed 59 tests in 3.82 seconds.
+  Ruff passed. Maintained-document validation passed across 48 docs, 28 public
+  titles, and two SVG assets. Public-record, evidence-scope, repository-artifact,
+  repository-health, release-integrity, and release-readiness checks passed.
+  Source footprint is 6,100 tracked files, 653,007,891 logical bytes, 4,890,152
+  duplicate bytes, and remains within policy. The AI work-registry audit passed
+  with 35 tracked and documented tests, 110 referenced paths, and zero unowned
+  or multiply owned tests. `git diff --check` passed. At `origin/main`
+  `0c6bea062bcf2baebe232efcf1063a392192fb9d`, precision-observation v2,
+  motion-batch v2, conformance-profile schema, and installed profile blobs are
+  byte-identical to this AI branch.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-occlusion-recall-v11-run2`,
+  byte-identical `occlusion-recall-data-v1` and `...data-v2`, and byte-identical
+  `occlusion-recall-candidate-v1` and `...candidate-v2`. Hashes identify exact
+  local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; schedule states are rendered statically and training
+  uses retained images offline.
+- Limitations: all camera geometry, images, labels, target descriptors, and
+  offsets are synthetic. The 0 mm bound is synthetic development evidence and
+  is not physical calibration. V11 has selected this checkpoint and cannot
+  evaluate it. V10 remains consumed and was not reused. Tool and camera-support
+  geometry, physical frames, temporal evidence, and deployment calibration
+  remain absent. Passing nominal development grants no localization,
+  collision, controller, execution, transport, permit, or physical authority.
+- Supersedes: none; preserves E-476 and the failed E-477 evaluation, and adds a
+  separately trained recall successor without rewriting either result.
+- Next dependency: predeclare a new pose- and lighting-disjoint evaluation-only
+  campaign, freeze its identities before rendering, and evaluate this exact
+  checkpoint once. Preserve the outcome whether it passes or fails. Physical
+  deployment qualification remains a separate later requirement.
+
+### E-20261001-AI-479 — frozen recall checkpoint narrowly fails specificity
+
+- Stage: S2/S3 one-time synthetic evaluation of the frozen E-478 checkpoint.
+- Lane: AI/model with inert Isaac rendering and offline inference; no arm or
+  integration status changed.
+- Claim commit:
+  `8f82376cc9176db99c0f8cd8a1dba3757ee7df0e`.
+- Implementation and predeclaration commit:
+  `838b165eea0ebf36d3681f0b875e134d3b448d51`.
+- Change: v12 freezes six evaluation-only actual-emitter schedule poses at
+  sequences 73, 82, 91, 99, 105, and 110, all absent from v1-v11.
+  `upper_left_soft_vignette`, `warm_center_bloom`, and `diagonal_smear_cool`
+  are deterministic evaluation-only transforms absent from every earlier
+  lighting group. The evaluator admits only the exact E-478 model and
+  scorecard hashes, preserves threshold `0.162`, gates nominal alignment at
+  the checkpoint's declared 0 mm bound, and reports the eight 1 mm directions
+  only as non-selecting stress evidence. It performs no training, threshold
+  selection, relabeling, policy expansion, or model mutation.
+- Inputs/fixtures: renderer SHA-256
+  `f8fa72b4a8a13c64e0b5589753e615870f9a5e80c0e1b8f21db08165e4cf3325`;
+  builder/evaluator SHA-256
+  `e8dcc1c5c3256974a4ddfdb65704a61b9bc6d83da8cdf1191b135e3e90a1d861`;
+  focused test SHA-256
+  `7c4776169c00bffbba6fbc3ef9d8c62336435428a1f97fe3a7c75c9fe6ab719a`;
+  schedule file SHA-256
+  `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`;
+  target catalog SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  frozen E-478 model SHA-256
+  `27c7be58e11f8bf3341cb4eb56abdf7786d984e2664b6eb07d6349243730e09c`;
+  frozen E-478 canonical scorecard SHA-256
+  `807928f2559d14fa8b0b9da1781d379650deeadb40ec8690e41484be16eaa0d4`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES';
+  $env:PYTHONPATH=(Resolve-Path 'software/src').Path;
+  C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json
+  --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json
+  --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json
+  --campaign recall-evaluation-v12 --output-dir
+  C:\IsaacSim\artifacts\issue190\fixed-overview-recall-evaluation-v12-run1
+  --receipt C:\IsaacSim\evidence\fixed_overview_recall_evaluation_v12_run1.json
+  --status-output
+  C:\IsaacSim\evidence\fixed_overview_recall_evaluation_v12_run1.status.json`.
+- Dataset command: `Copy-Item -LiteralPath
+  C:\IsaacSim\evidence\fixed_overview_recall_evaluation_v12_run1.json
+  -Destination
+  C:\IsaacSim\artifacts\issue190\fixed-overview-recall-evaluation-v12-run1\manifest.json;
+  python software\ai\train\build_official_mesh_occlusion_data.py
+  --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-recall-evaluation-v12-run1\manifest.json
+  --output-dir C:\IsaacSim\artifacts\issue190\recall-evaluation-data-v1`;
+  repeated with final output `...data-v2`.
+- Evaluation command: `python
+  software\ai\train\build_official_mesh_occlusion_data.py --source-manifest
+  C:\IsaacSim\artifacts\issue190\fixed-overview-recall-evaluation-v12-run1\manifest.json
+  --evaluate-occlusion-recall
+  C:\IsaacSim\artifacts\issue190\recall-evaluation-data-v1
+  C:\IsaacSim\artifacts\issue190\occlusion-recall-candidate-v1
+  C:\IsaacSim\artifacts\issue190\recall-evaluation-report-v1 >
+  C:\IsaacSim\artifacts\issue190\recall-evaluation-report-v1.stdout.json`;
+  repeated with dataset, report, and stdout suffix `v2`.
+- Render result: `PASS_WITH_BLOCKERS`. Canonical receipt SHA-256 is
+  `df4d320b58efaea287b88ef5af563b4181dfd37c4589eece5a93b4f6b468144e`;
+  receipt file SHA-256 is
+  `5ee827b556603d512aab3830e702b61461ae452d6b435e6dd6d693a2d40ac79b`;
+  status file SHA-256 is
+  `40cf85b4e2931e01c2855e8f03742e5ceb188d36dba6b420218e05dbb08245a2`.
+  RGB, mask, and depth atlas SHA-256 values are respectively
+  `fc6403c546fe2ca154e7fe2c6cc19dcdeea8ca27e17596f565169c548e614328`,
+  `1d3575abc92b12c2a3f48b7419dde99a7477120d53465e136babcb318dfeb6c9`,
+  and `fe01bac42cc958e937ee75925846fad447dc9fa5799c22a3206c5056f33f7780`.
+- Dataset result: both independent 22-file builds are byte-identical. Dataset
+  SHA-256 is
+  `9fc5c0947005bc8a2443072370df8b0df16ca1201acb8b3adbf9fd24ae6fd825`;
+  manifest file SHA-256 is
+  `ff8ff6bbf4d00c341976d773ef28f02dc132acd43d989658b13877cb5dc4439d`;
+  directory-content SHA-256 is
+  `b88f25029836d26d903f445a7e7182239053fa1474fbb1d25f222955ec173d07`.
+  Evaluation contains 1,350 rows: 219 abstentions and 1,131 visible targets.
+  Training and development each contain zero rows.
+- Evaluation result: `FAILED_SYNTHETIC_GATE`. Both independent 122,483-byte
+  reports are byte-identical. Canonical report SHA-256 is
+  `49612bbce8bb7e293a39acb857f85bf6e15a237b625c241fa0011bdea7189b15`;
+  report file SHA-256 is
+  `e2ddcc64ddacb88c86cdd877b589d3004df78e68fa02b808c2efa75b4a0cd453`;
+  byte-identical stdout SHA-256 is
+  `86db2ce8a41b32258698c8987440f09e18848328c9d1c26968e057b026bfd229`.
+  Nominal alignment records 219 true abstentions, 1,074 true-visible
+  decisions, 57 false abstentions, and zero missed abstentions. Recall is
+  perfect at `0/219 = 0%`, but false stops are `57/1131 = 5.04%`, one case
+  above the fixed 5% ceiling. The nominal synthetic gate therefore fails.
+  Across the 1 mm stress ring, misses range from 0 to 5
+  (`0%` to `5/219 = 2.28%`) while false stops range from 58 to 74
+  (`5.13%` to `74/1131 = 6.54%`). The stress gate also fails specificity.
+- Failure concentration: the 57 nominal false stops span 13 targets. Target
+  `7` contributes 9; `SPACE` and `5` contribute 7 each; `E` and `W` contribute
+  5 each. By lighting, upper-left soft vignette contributes 29, warm center
+  bloom 19, and diagonal cool smear 9. Pose counts range from 7 to 12, led by
+  period-transit sample 82 with 12. This is consumed evaluation diagnosis and
+  cannot select successor weights, thresholds, architecture, or data.
+- Validation: 41 focused simulator/perception tests passed in 16.46 seconds.
+  The shared AI-to-arm boundary selection passed 59 tests in 3.76 seconds.
+  Ruff passed. Maintained-document validation passed across 48 docs, 28 public
+  titles, and two SVG assets. Public-record, evidence-scope, repository-artifact,
+  repository-health, release-integrity, and release-readiness checks passed.
+  Source footprint is 6,100 tracked files, 653,038,199 logical bytes, 4,890,152
+  duplicate bytes, and remains within policy. The AI work-registry audit passed
+  with 35 tracked and documented tests, 110 referenced paths, and zero unowned
+  or multiply owned tests. `git diff --check` passed.
+- Artifact location: external only under
+  `C:\IsaacSim\artifacts\issue190\fixed-overview-recall-evaluation-v12-run1`,
+  byte-identical `recall-evaluation-data-v1` and `...data-v2`, and byte-identical
+  `recall-evaluation-report-v1` and `...report-v2`. Hashes identify exact local
+  bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; schedule states are rendered statically and inference
+  uses retained images offline.
+- Limitations: all camera geometry, images, labels, target descriptors, and
+  offsets are synthetic. The 1 mm ring uses nominal 2 px/mm simulator geometry
+  and is not physical calibration. V12 is now consumed evaluation evidence and
+  cannot tune a successor. Tool and camera-support geometry, physical frames,
+  temporal evidence, and deployment calibration remain absent. This failed
+  evaluation grants no localization, collision, controller, execution,
+  transport, permit, or physical authority.
+- Supersedes: none; preserves E-478's passing development result and adds the
+  required fresh failed evaluation without rewriting or tuning either result.
+- Next dependency: diagnose the 57 nominal false stops by target, pose, and
+  lighting using the frozen report only. Any successor training and development
+  data must be separately declared and cannot reuse v12 images, labels,
+  probabilities, or failure identities for selection.
+
+
+### E-20261001-AI-480 — specificity-balanced successor passes fresh development
+
+- Stage: S2/S3 synthetic training and development of a zero-authority target-conditioned occlusion successor.
+- Lane: AI/model with inert Isaac rendering and offline inference; no arm or integration status changed.
+- Claim commit: `978b4ea184023c987b74db4f94c72172aad406a7`.
+- Implementation and predeclaration commit: `03cde98cb84cefb599d24168c865a60a6a68c383`.
+- Change: v13 reserves all thirteen remaining unused, pose-distinct actual-emitter schedule states before rendering. Training uses sequences 33, 65, 74, 86, 94, 97, 109, and 111; development uses 75, 89, 93, 95, and 101. Six deterministic lighting transforms are absent from v1-v12. The trainer admits only the exact E-478 model and scorecard, freezes both convolutions and the classifier, updates only the 224-parameter FiLM conditioner for 12 epochs with Adam, learning rate `0.00025`, weight decay `0.0001`, and ordinary binary cross entropy, and selects threshold and uncertainty only on v13 development. V12 bytes and identities are excluded. No evaluation group is created or opened.
+- Inputs/fixtures: renderer SHA-256 `01396da0f7bd7b569eb3ac17a01b5ef8e3da54bac33ca89d6766d45673c9b3f1`; builder/trainer SHA-256 `23cdd1cefa59ba2a7ebc9fc3786242331a54707555cbe6500fa5f9004feb9608`; focused test SHA-256 `a9927da55d24293286aa5cbe0227d46fe41b67dfd6be68d8ee81b45c8dbf940f`; schedule file SHA-256 `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`; target catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; exact seed model SHA-256 `27c7be58e11f8bf3341cb4eb56abdf7786d984e2664b6eb07d6349243730e09c`; exact seed canonical scorecard SHA-256 `807928f2559d14fa8b0b9da1781d379650deeadb40ec8690e41484be16eaa0d4`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json --schedule-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json --campaign specificity-rebalance-v13 --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-specificity-rebalance-v13-run1 --receipt C:\IsaacSim\evidence\fixed_overview_specificity_rebalance_v13_run1.json --status-output C:\IsaacSim\evidence\fixed_overview_specificity_rebalance_v13_run1.status.json`.
+- Dataset command: `Copy-Item -LiteralPath C:\IsaacSim\evidence\fixed_overview_specificity_rebalance_v13_run1.json -Destination C:\IsaacSim\artifacts\issue190\fixed-overview-specificity-rebalance-v13-run1\manifest.json; python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-specificity-rebalance-v13-run1\manifest.json --output-dir C:\IsaacSim\artifacts\issue190\specificity-rebalance-data-v1`; repeated with final output `...data-v2`.
+- Training command: `python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-specificity-rebalance-v13-run1\manifest.json --train-specificity-rebalance C:\IsaacSim\artifacts\issue190\specificity-rebalance-data-v1 C:\IsaacSim\artifacts\issue190\occlusion-recall-candidate-v1 C:\IsaacSim\artifacts\issue190\specificity-rebalance-candidate-v1`; repeated with dataset and candidate suffix `v2`.
+- Render result: `PASS_WITH_BLOCKERS`. Canonical receipt SHA-256 is `5bf8456427e2c2dd4ac9c1b06c4425e0de10bcc22586c1411eb745595ba525c6`; receipt and copied-manifest file SHA-256 is `7644684f2f77050cc2cd179748b29b47b5d41820fb9065b1572b33f38513891a`; status file SHA-256 is `2991dbee2d2616310739ff92081bcf458b0089f0f919545b977a3f064e33c842`.
+- Dataset result: both independent builds are byte-identical. Dataset SHA-256 is `db73af8b171eec859131673e7ddacbc2fa02728c1848eb1287b5afe277dba6ed`; manifest file SHA-256 is `7cac23de40eff04aede8f0b04bb8144f97b87ff3a179aea2cf5e1c91a61b894a`; directory-content SHA-256 is `29a866348d7219277e8ddab580abfd9afe852d0bff19919558b7d029b5674319`. Training contains 1,800 rows with 297 abstentions; development contains 1,125 rows with 204 abstentions; evaluation contains zero rows.
+- Training result: both independent model, scorecard, stdout, and complete candidate directory bytes are identical. Model SHA-256 is `b20a02990d47ee87d97383d130052c4517391442d517ea94b5b5e78749a7525d`; canonical scorecard SHA-256 is `d11a71c67e2f7072e52a4a28d9c2bdbf5f6da308c5704bfe47a379c79cad9f00`; scorecard file SHA-256 is `4ceb8284f56e3f8b294a5f877bbdc2c8976a55cd5228b91336ff4fa8de90d554`; stdout SHA-256 is `1fddde75cb995ad254c59bb68cf3c285b5f848b53cc7c635c607ea9c732d6a69`; candidate directory-content SHA-256 is `693e3e471f60d6bebfb85157380ca24ee69ce5662802c2c0ce9a51f929ff6699`. Threshold `0.406` passes nominal development with 195 true abstentions, 910 true-visible decisions, 9 misses (`4.41%`), and 11 false stops (`1.19%`). Every 1 mm and 2 mm direction passes both 5% ceilings. At 2 mm, the worst miss rate is `9/204 = 4.41%` and the worst false-stop rate is `36/921 = 3.91%`. The 4 mm ring fails, reaching `13/204 = 6.37%` misses and `326/921 = 35.40%` false stops in different directions. The selected bound is therefore 2 mm and status remains `BLOCKED_AWAITING_FRESH_EVALUATION`.
+- Validation: 43 focused simulator/perception tests passed in 20.97 seconds;
+  107 shared AI-to-arm boundary and trajectory tests passed in 12.41 seconds.
+  Ruff, maintained-document, public-record, evidence-scope,
+  repository-artifact, repository-health, release-integrity, and
+  release-readiness checks passed. The source footprint remains contained at
+  6,100 files and 653,073,429 logical bytes. The AI work-registry audit passed
+  with 35 tracked and documented tests, 110 referenced paths, and zero
+  unowned or multiply owned tests. `git diff --check` passed.
+- Artifact location: external only under `C:\IsaacSim\artifacts\issue190\fixed-overview-specificity-rebalance-v13-run1`, byte-identical `specificity-rebalance-data-v1` and `...data-v2`, and byte-identical `specificity-rebalance-candidate-v1` and `...candidate-v2`. Hashes identify exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; schedule states are rendered statically and training uses retained images offline.
+- Limitations: all camera geometry, images, masks, labels, target descriptors, and offsets are synthetic. The selected 2 mm bound assumes nominal 2 px/mm simulator geometry and is not physical calibration or deployment evidence. No untouched evaluation group exists for this checkpoint. Tool and camera-support geometry, physical frames, temporal evidence, and deployment calibration remain absent. This candidate grants no localization, collision, controller, execution, transport, permit, or physical authority.
+- Supersedes: none; preserves E-479's failed consumed evaluation and creates a new independently predeclared train/development successor without rewriting or reusing that evidence.
+- Next dependency: predeclare and run a new untouched synthetic evaluation campaign for the exact v13 model and scorecard. No schedule states remain in the current actual-emitter bundle, so fresh evaluation requires a separately generated and frozen inert schedule with pose-distinct states.
+
+
+### E-20261001-AI-481 — specificity-balanced successor fails untouched v14 evaluation
+
+- Stage: S2/S3 untouched synthetic evaluation of the exact E-480 checkpoint.
+- Lane: AI/model with static inert Isaac rendering and offline inference; no arm or integration status changed.
+- Claim commit: `1c8e31c334dac2983d039301fe1703bb658c1077`.
+- Implementation and predeclaration commit: `123557c28e356b03dd3d58aed84c290a24d3bb0e`.
+- Change: v14 creates a separately frozen, evaluation-only static visual pose fixture from six predeclared rational fractions of the exact zero-authority source schedule. It adds three lighting transforms absent from v1-v13 and an evaluator bound to the exact E-480 model, scorecard, threshold `0.406`, and 2 mm synthetic uncertainty policy. The 4 mm ring is stress evidence only. No training, selection, threshold change, model mutation, policy expansion, controller field, motion authority, or physical write is permitted.
+- Inputs/fixtures: static fixture file SHA-256 `638e17a18feb79aa15864078ff80df37e69ebe6889710de08d98ed709013fb69`; canonical fixture bundle SHA-256 `93b77619af1bb90a3261b36cdbd7a209c3ac5bddf3b8a26b05fa2ae2b4625985`; source schedule file SHA-256 `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`; target catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; exact model SHA-256 `b20a02990d47ee87d97383d130052c4517391442d517ea94b5b5e78749a7525d`; exact canonical scorecard SHA-256 `d11a71c67e2f7072e52a4a28d9c2bdbf5f6da308c5704bfe47a379c79cad9f00`. Renderer SHA-256 is `668bc00e632685ac698c569e3625d86dae6bdfe089ddee116bb363ab1088efe8`; builder/evaluator SHA-256 is `90b306fadfcd7824cf83ac2feec20d5de7d336852c160bfb133f6854983a4a6b`; fixture builder SHA-256 is `9e99cfedafc1725cfd4f76d338754331e4d18e5a396262ff5daa5b1a225b44c8`.
+- Render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json --schedule-bundle software\ai\sim\evidence\static_interpolated_evaluation_poses_v1.json --campaign rebalance-evaluation-v14 --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-rebalance-evaluation-v14-run1 --receipt C:\IsaacSim\evidence\fixed_overview_rebalance_evaluation_v14_run1.json --status-output C:\IsaacSim\evidence\fixed_overview_rebalance_evaluation_v14_run1.status.json`.
+- Dataset command: `Copy-Item -LiteralPath C:\IsaacSim\evidence\fixed_overview_rebalance_evaluation_v14_run1.json -Destination C:\IsaacSim\artifacts\issue190\fixed-overview-rebalance-evaluation-v14-run1\manifest.json; python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-rebalance-evaluation-v14-run1\manifest.json --output-dir C:\IsaacSim\artifacts\issue190\specificity-rebalance-evaluation-data-v1`; repeated with output suffix `v2`.
+- Evaluation command: `python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-rebalance-evaluation-v14-run1\manifest.json --evaluate-specificity-rebalance C:\IsaacSim\artifacts\issue190\specificity-rebalance-evaluation-data-v1 C:\IsaacSim\artifacts\issue190\specificity-rebalance-candidate-v1 C:\IsaacSim\artifacts\issue190\specificity-rebalance-evaluation-report-v1`; repeated with dataset and report suffix `v2` against the same exact checkpoint.
+- Render result: `PASS_WITH_BLOCKERS` for six static poses. Canonical receipt SHA-256 is `bfe243bb88e1eaf8544eec9bad58d84daa77ec4540473f8e49a768b94676a3c3`; receipt and copied-manifest file SHA-256 is `8ca817ca4abffe9f218feb45079221349b395e47e89039365cc756a4ee2dd54f`; status file SHA-256 is `9b8659b6b4ebf54d5577044f69617f69c0294330d8ff3de2fa144e1503d0557c`.
+- Dataset result: both independent 22-file trees are byte identical. Canonical dataset SHA-256 is `98d30863887793a76e29dbcfeee48e4f6fe14e1d4a58f41cc232007d603b3379`; manifest file SHA-256 is `306abc668e90a39ef24ab08dda03d5cb4e2e1873dde650ca4863e1afb6b99fc5`. Evaluation contains 1,350 rows: 219 expected abstentions and 1,131 visible targets; train and development are empty.
+- Evaluation result: both reports are byte identical. Canonical report SHA-256 is `97e26c28be37544d00b074ace9fb53b5b674f90ad5948208e72a5cdbbbc82521`; report file SHA-256 is `697882506d5ed294bf43727fac96da0751b0db689409b2a069df7e3ba8956585`. Nominal confusion is 195 true abstentions, 1,110 true-visible decisions, 24 misses, and 21 false stops: `24/219 = 10.96%` missed abstentions and `21/1131 = 1.86%` false abstentions. Inside the declared 2 mm envelope, the worst miss rate is `31/219 = 14.16%` at `(x=1 mm, y=-1 mm)` and the worst false-stop rate is `62/1131 = 5.48%` at `(x=2 mm, y=-2 mm)`. Both exceed the fixed 5% ceilings. At 4 mm, maxima reach `15.07%` misses and `36.87%` false stops. Status is `FAILED_SYNTHETIC_GATE`. The report retains each offset measurement plus per-target failure counts.
+- Validation command: `python -m pytest software/tests/unit/test_static_evaluation_pose_fixture.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -q`; `python -m ruff check software/ai/train/build_official_mesh_occlusion_data.py software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py software/ai/sim/build_static_evaluation_pose_fixture.py software/tests/unit/test_static_evaluation_pose_fixture.py`; `git diff --check`.
+- Validation result: 47 focused simulator/perception tests passed in 17.67 seconds; 174 AI tests passed in 33.38 seconds; 80 available shared boundary, coordinator, journal, and trajectory tests passed in 13.21 seconds; and 55 public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, and readiness unit checks passed in 0.33 seconds. A broader combined command, `python -m pytest software/ai/tests software/tests/unit -q`, failed during collection because this branch lacks the arm-lane modules `scripts.preflight_r89_live_campaign`, `scripts.deploy_r90_pose_hover`, and `scripts.deploy_reviewed_hover_r89`; the failure is preserved and was not treated as model evidence. The first GitHub policy run also failed because the three reviewed v14 source files increased the observed tracked count from the former 6,100 ceiling to 6,103. The policy correction raises only the tracked-file ceiling to the exact measured 6,103 and leaves all byte and duplicate limits unchanged. The direct maintained-doc, public-record, evidence-scope, artifact, policy, source-footprint, release-integrity, and readiness commands then passed; the measured footprint is 6,103 files, 653,129,268 logical bytes, and 4,890,152 duplicate bytes. Ruff and `git diff --check` passed. Fixture test SHA-256 is `51994cb44a3ecdb0d0cbba72238768c0bfe438ab51fa9f1fcd7c132c8bc00ab6`; focused simulator/evaluator test SHA-256 is `196df5f36a696ff5647f7a4c95157bc5e627d0ff142b01f00e67202b9147edf8`.
+- Artifact location: retained externally under `C:\IsaacSim\artifacts\issue190\fixed-overview-rebalance-evaluation-v14-run1`, byte-identical `specificity-rebalance-evaluation-data-v1` and `...data-v2`, and byte-identical `specificity-rebalance-evaluation-report-v1` and `...report-v2`. Hashes bind the exact local bytes but do not make them clean-clone available.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; the generated states are rendered statically and inference uses retained images offline.
+- Limitations: all camera geometry, poses, images, masks, labels, target descriptors, and offsets are synthetic. Interpolated states are visual fixtures rather than trajectories and provide no dynamics, reachability, clearance, or collision evidence. The 2 mm envelope assumes nominal 2 px/mm simulator geometry and is not physical calibration. Tool and camera-support geometry, physical frames, temporal evidence, and deployment calibration remain absent. V14 is consumed and cannot tune a successor. This failure grants no localization, collision, controller, execution, transport, permit, deployment, or physical authority.
+- Supersedes: none; preserves E-480's passing development result and adds the required untouched failed evaluation without rewriting or tuning either result.
+- Next dependency: predeclare new train/development data and a mechanism aimed at pose generalization. Exclude every v14 image, mask, label, probability, failure identity, pose identity, lighting identity, and threshold outcome from training and selection. A future candidate requires another newly frozen untouched evaluation source.
+
+
+### E-20261001-AI-482 — geometry-first self-occlusion and clustered qualification design
+
+- Stage: S2/S3 architecture and evaluation-policy revision after the E-481 failure.
+- Lane: AI/model documentation and shared perception-boundary design only; no arm or integration status changed.
+- Claim commit: `f55f3a4b9947fb61e89ce02a1b374bc969804518`.
+- Implementation commit: `b84420c493bdf91498e01686873fc22ba4096d85`.
+- Change: known robot self-occlusion becomes a deterministic perception input projected from fresh measured joint state, commissioned camera/board calibration, and pinned official visual meshes. The learned model is restricted to residual obstructions and image failures such as cables, hands, glare, foreign objects, and degradation. Conservative fusion abstains if either route abstains, if they disagree, or if either route is stale or unqualified. Projected visibility evidence provides no collision, trajectory, permit, transport, or physical authority.
+- Leakage control: simulator ground-truth robot masks are labels and scoring references only. Runtime-like silhouette features must come from the telemetry/calibration projection route and include predeclared perturbations of joint state, intrinsics, distortion, and extrinsics. Perfect renderer masks are forbidden as learned inputs.
+- Label definition: historical E-457 through E-481 `target_visible` labels require both an uncovered target center and safe-region robot-mask overlap at or below `0.20`; center coverage or overlap above `0.20` is an abstention. A successor must freeze an ambiguity margin or continuous overlap-fraction target before generation and report failures by overlap fraction.
+- Statistical gate: future point estimates cannot pass by themselves. A deterministic seeded pose-level cluster bootstrap resamples whole pose clusters and records the maximum error across all offsets inside the declared localization envelope on every replicate. The predeclared one-sided 95% upper-confidence limits are at most `0.02` missed abstentions and at most `0.10` visible false abstentions. This simultaneously addresses pose dependence, asymmetric consequence, and worst-offset multiplicity.
+- Evaluation budget: before generation, the untouched set requires at least 64 independent pose clusters, 800 abstention-labeled observations, and 3,200 visible observations, with pose and lighting identities disjoint from training and development. Power and cluster-bootstrap simulations must show the design can pass. One primary evaluation set opens once for one frozen candidate; one separately identified escrow family remains unrendered. A failed set is consumed and cannot tune any successor.
+- First physical protocol: begin ChArUco intrinsics, distortion, and camera-to-board captures plus measured lighting and parked-arm images in parallel. For the first interaction milestone, retract to a commissioned parked pose, wait for settling, capture fresh evidence for one action, then retract and recapture. Keyboard host events and development-mode phone ADB state are independent outcome observations when available and create no movement authority.
+- Interpretation correction: byte-identical builds and reports demonstrate deterministic pipeline behavior. They do not establish statistical robustness of the observed rate; clustered uncertainty is required for that claim.
+- Validation command: `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: maintained-doc, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. At implementation commit `b84420c493bdf91498e01686873fc22ba4096d85`, the measured footprint is 6,103 files, 653,138,378 logical bytes, and 4,890,152 governed duplicate bytes.
+- Fixtures/data/metrics: no model, dataset, image, calibration, mask, threshold, or runtime artifact was generated or changed. This increment freezes design and future acceptance policy only.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: no projection service, uncertainty propagation, cluster-bootstrap evaluator, ChArUco capture, parked-pose controller behavior, keyboard event collector, or ADB outcome adapter is implemented by this increment. The limits are synthetic research gates and do not qualify deployment. The arm lane retains exclusive ownership of calibration installation, planning, admission, encoding, transport, and execution.
+- Supersedes: the next-campaign recommendation following E-481. It does not rewrite E-481, retroactively change the v14 5% gate, or promote the failed checkpoint.
+- Next dependency: separately claim and implement the read-only deterministic self-occlusion projection contract and its uncertainty-envelope tests, then independently claim the ChArUco capture and lighting-survey data protocol. Any model campaign begins only after those inputs and the clustered power simulation are frozen.
+
+
+### E-20261001-AI-483 — corrected occlusion qualification semantics
+
+- Stage: S2/S3 qualification-policy correction before projection or render implementation.
+- Lane: AI/model documentation and shared perception-boundary policy only; no arm-lane or integration-gate status changed.
+- Claim commit: `d219820b3d77ce835059727d2addcc38ec546895`.
+- Implementation commit: `6635291eed20c3c2ca660ed42b40301ab1c7b2ca`.
+- Change: the fused OR decision now owns the authoritative one-sided 95% pose-cluster-bootstrap gates of at most 2% missed abstentions and 10% false abstentions. On the same clustered set, the geometric and residual paths receive false-stop upper-bound shares of 4% and 6%. Overlap between path stops is retained, so the shares do not arithmetically prove the fused gate. The redundant disagreement condition was removed.
+- Temporal contract: projection binds the image exposure timestamp and clock identity to measured-position samples bracketing exposure and to a qualified interpolation rule. Latest feedback, commanded position, unsynchronized clocks, missing brackets, or excessive sample gaps require abstention.
+- Dilation contract: image-space dilation must be derived by propagating ChArUco reprojection residuals, measured feedback resolution and noise, observed directional backlash, and parked-pose repeatability through the mesh projection. Guessed pixel margins are nonqualifying.
+- Ambiguity policy: the uncovered-center overlap band is frozen at `[0.18, 0.22]`. Either decision is accepted for binary scoring inside the band, but every row remains in dataset totals and cluster resampling and is listed with pose, target, lighting, overlap, label, and decision. Center coverage always requires abstention, and the band cannot hide outside-band errors or be widened after observation.
+- Power policy: 64 independent poses is a floor. The pre-render power tool estimates intra-pose correlation from grouped v13/v14 diagnostics and also uses a pessimistic value equal to the larger of its one-sided 95% upper bound and `0.30`. It increases pose count until the frozen design has at least 90% simulated probability of passing both fused gates at design rates of 1% misses and 6% false stops, while retaining minimum totals of 800 abstention and 3,200 visible labels.
+- Operating scope: the initial parked-pose set is separate from the later broad-pose gate. It combines synthetic calibration/lighting variation with at least 30 independent physical park cycles across three sessions, records repeatability, ChArUco drift, tool/cable obstructions, fused decisions, exact binomial bounds, and false stops, and requires zero accepted known self-occlusions plus abstention for every labeled residual obstruction. It supports a supervised parked-observation milestone only and does not qualify mid-motion observation, unattended deployment, or physical authority.
+- Document SHA-256 values at the implementation commit: shared workplan `a49f88dbd7b841cafc9b7f651d9b0f0da47d25ae104c38429aa1ced54e0fa1dd`; translation assurance `423d9e0910770ef7e36c5de3e4944c8f0fbc1de413f54cf14be41a7fbd94fb49`; training README `097286d04b55ffade4c5c3e32a51c8dcd0a14a726a1607ebe4a0ecc9f8f4e697`.
+- Validation command: `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: maintained-doc, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. At implementation commit `6635291eed20c3c2ca660ed42b40301ab1c7b2ca`, the measured footprint is 6,103 files, 653,143,687 logical bytes, and 4,890,152 governed duplicate bytes.
+- Fixtures/data/metrics: no model, dataset, image, calibration, mask, threshold, evaluation fixture, runtime artifact, or render was generated or changed. The numeric values above are predeclared future acceptance and power-design policy, not measured performance.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: no projection service, time-synchronization adapter, measured-feedback source, uncertainty propagation, ICC estimator, power simulator, parked-pose dataset, or physical calibration evidence is implemented here. Thirty physical park cycles cannot by themselves demonstrate a 2% population error ceiling; their exact interval must remain visible, and the evidence is limited to supervised parked operation. The arm lane retains exclusive ownership of calibration installation, planning, admission, encoding, transport, and execution.
+- Supersedes: E-482 only where its fusion wording, fixed 64-pose interpretation, unspecified dilation, and unspecified ambiguity scoring conflict with this correction. E-481 and all earlier measured evidence remain unchanged.
+- Next dependency: separately claim and implement the read-only projection evidence contract and exposure-time measured-feedback validation first. Then claim the correlation-aware power and cluster-bootstrap tool before spending render compute. ChArUco capture, mechanical uncertainty measurement, and the parked-pose evidence protocol proceed as separately reviewed physical-data increments.
+
+
+### E-20261001-AI-484 — read-only synthetic self-occlusion projection contract
+
+- Stage: S2/S3 strict projection-evidence boundary before projection rendering or a new campaign.
+- Lane: AI/model schema, validation, and offline tests only; no arm-lane or integration-gate status changed.
+- Claim commit: `91d4ea6c20c42683fda5aacaf5141e6e5d0fe302`.
+- Implementation commit: `d88364022d48d58ee7d1b61b1ddcf9fc40338447`.
+- Change: added strict `rocell.ai_self_occlusion_projection_qualification.v1` and `rocell.ai_self_occlusion_projection_evidence.v1` synthetic-only schemas plus a read-only validator. Evidence binds exact image bytes and exposure interval to a single clock, measured-position receipt hashes before and after exposure, clock-correlation identity, qualified interpolation identity, the interpolated-state digest, camera/board/mesh/catalog/uncertainty/projector identities, measured dilation derivation, and deterministic named-target overlap decisions. It contains no joint values, command fields, transport fields, permits, collision claims, or physical authority.
+- Timing behavior: commanded and latest-only position sources are structurally rejected. Exposure must be enclosed by the measured-feedback bracket on the same qualified clock. The trusted synthetic policy bounds bracket width and evidence age. Missing qualification, wrong domain, mismatched source or clock-correlation hashes, identity drift, stale evidence, excessive bracket width, and altered dilation all abstain.
+- Visibility behavior: an uncovered target with dilated overlap below `0.18` is `VISIBLE`; overlap from `0.18` through `0.22` is `ABSTAIN_AMBIGUOUS`; center coverage or overlap above `0.22` is `ABSTAIN_SELF_OCCLUDED`. Dilation cannot reduce raw overlap. These are projection-path decisions only and do not establish localization, collision clearance, reachability, or execution safety.
+- Trust behavior: evidence cannot self-install its qualification. Only a caller-authenticated `TrustedSyntheticProjectionQualificationV1` registry entry can admit the exact qualification hash, and the only accepted status is `ACCEPTED_SYNTHETIC_OFFLINE_ONLY`. Synthetic qualification is forced to `physical_deployment_qualified=false` with zero writes and zero movements.
+- Artifact SHA-256 values: validator `cc5bf2c86e3376662c62229ebe00598ebcff3cd203dc202a647a3876b1cb6582`; evidence schema `a49ff6d66461bea6cbc051f808ad5353621ef8702a8b77deca9e8db8e5b1ec68`; qualification schema `cf32b5ef22bc7927f209ec3b7a5d3d9178470a80a44d5ff16e1a26e4c9ca0cf1`; focused test `00d9e4f0ff09fe1d68fc7d8cd8b6ac65806fda3d9b142cd259f0fd325929fc82`; registry audit receipt `444532eee10272c73ec2688ac7b64c83e32c68d9c4a75f9488976cd212e3fca0`.
+- Focused and suite commands: `python -m pytest software/ai/tests/test_self_occlusion_projection.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/rocell_ai/self_occlusion_projection.py software/ai/tests/test_self_occlusion_projection.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`.
+- Policy command: `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: 24 focused projection/registry tests passed; 192 AI tests passed; 34 shared model-to-arm ingress and conformance tests passed; Ruff, registry audit, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. The registry covers 36 tracked AI tests and 112 referenced paths with no unowned or multiply owned test. The committed source footprint is 6,107 files, 653,195,583 logical bytes, and 4,890,152 governed duplicate bytes; only the tracked-file ceiling changed from 6,103 to the exact 6,107 required by the four reviewed source/schema/test files.
+- Preserved failed development evidence: the first focused run failed all 18 cases because fixture placeholders `g` through `o` were not hexadecimal SHA-256 strings; production digest rejection worked as designed. After correcting fixture hashes, the first full AI run produced 191 passes and one failure because the governance test still expected 35 tracked AI tests. The expectation and generated registry audit were updated to the actual governed count of 36. Neither failure changed acceptance policy or erased prior output.
+- Fixtures/data/metrics: fixtures are deterministic in-memory synthetic records. No model, image, render, mask, physical capture, calibration, threshold, training dataset, or evaluation campaign was generated or changed. Test pass counts establish contract behavior only.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: the increment does not project meshes, inspect or authenticate joint values, validate the contents behind feedback receipt hashes, derive a measured dilation, install calibration, qualify a camera/clock, or supply fused residual-obstacle decisions. Caller authentication and upstream byte custody remain required. The contract is synthetic-only and cannot be used as deployment qualification or physical authority.
+- Supersedes: none. It implements the first dependency declared by E-483 and leaves E-481 through E-483 unchanged.
+- Next dependency: separately claim and implement the correlation-aware power and pose-cluster-bootstrap tool using grouped v13/v14 diagnostics and the frozen pessimistic-correlation scenario. Do not spend new render compute until that tool and its sample-size result are committed.
+
+
+### E-20261001-AI-485 — correlation-aware synthetic occlusion power plan
+
+- Stage: S2/S3 pre-render statistical planning for the later broad-pose occlusion evaluation.
+- Lane: AI/model offline evaluation tooling only; no arm-lane or integration-gate status changed.
+- Claim commit: `7ec9880a2f93d28295f0cc41af70a10f2fc0226d`.
+- Implementation commit: `3fe8e57eca77dcd369be79e188d6ae2b0724d39a`.
+- Change: added a strict aggregate-only planner that reconciles the retained v13 development and frozen v14 evaluation dataset, manifest, report, target-catalog, confusion, and failure identities; estimates endpoint-specific intra-pose correlation with a seeded whole-pose bootstrap; and runs empirical-upper and pessimistic-correlation beta-binomial power scenarios. The receipt emits source hashes and aggregate statistics only. It contains zero pose, target, row, image-path, or failure identities and cannot select a model or threshold.
+- Exact retained inputs: v13 dataset file SHA-256 `3aa029d64b247601841e951f2645679391be55d138e7464b0769c6fe3eb25c60`, manifest file SHA-256 `7cac23de40eff04aede8f0b04bb8144f97b87ff3a179aea2cf5e1c91a61b894a`, report file SHA-256 `4ceb8284f56e3f8b294a5f877bbdc2c8976a55cd5228b91336ff4fa8de90d554`; v14 dataset file SHA-256 `e1c92152eac5486b0d8eb4cb41976637353cb12e81b62ddb7a08e34a46a3bd54`, manifest file SHA-256 `306abc668e90a39ef24ab08dda03d5cb4e2e1873dde650ca4863e1afb6b99fc5`, and report file SHA-256 `697882506d5ed294bf43727fac96da0751b0db689409b2a069df7e3ba8956585`. Both bind target catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Planning method: 5,000 seeded whole-pose bootstrap samples form a one-sided empirical ICC upper input by taking the maximum 95th percentile across both sources and all 17 offsets within the component-wise 2 mm envelope. Power uses 2,000 deterministic beta-binomial trials, whole-pose effects, worst-of-17 offsets, and a design-effect one-sided Wilson planning bound. Design rates remain frozen at 1% missed abstentions and 6% visible false stops; fused limits remain 2% and 10%; required joint planning power is 90%. The calculation is a planning approximation. Actual qualification remains a seeded pose-cluster-bootstrap upper bound, worst across declared offsets.
+- Measured result: empirical upper correlations are `0.767574770` for missed abstentions and `0.024507274` for visible false stops. The pessimistic correlations are `0.767574770` and `0.30`. Median retained cluster sizes are 45 abstention-labeled and 180 visible rows per pose. The 64-pose floor has `0.000` joint planning power in both scenarios. The first tested size meeting the 90% joint target in both is 2,048 poses, with `0.936` empirical and `0.927` pessimistic joint power. No new render or model inference was performed.
+- Exact generation command: `python software/ai/eval/plan_clustered_occlusion_power.py --v13-dataset C:\IsaacSim\artifacts\issue190\specificity-rebalance-data-v1\development.jsonl --v13-manifest C:\IsaacSim\artifacts\issue190\specificity-rebalance-data-v1\manifest.json --v13-report C:\IsaacSim\artifacts\issue190\specificity-rebalance-candidate-v1\scorecard.json --v14-dataset C:\IsaacSim\artifacts\issue190\specificity-rebalance-evaluation-data-v1\evaluation.jsonl --v14-manifest C:\IsaacSim\artifacts\issue190\specificity-rebalance-evaluation-data-v1\manifest.json --v14-report C:\IsaacSim\artifacts\issue190\specificity-rebalance-evaluation-report-v1\report.json --output software/ai/eval/clustered_occlusion_power_plan_v1.json`; the identical command writing `%TEMP%\clustered_occlusion_power_plan_v1_second.json` reproduced the exact output bytes.
+- Artifact SHA-256 values: planner `894cb19043256346d48de4d9d84bd7b367f4f3c61cd4999ff822d3ddf97ff0fa`; retained plan file `986e438d99282e198fbf926c3c5e139e2a2a8ab145f0a2bedfecf6d01b8026c0`; canonical embedded plan SHA-256 `754f06c26b6a7b7ade29ca3ca136d0d3ff5f7d5e994e7135ddf39ee3ceced288`; schema `862e02e4dbe1af2b39772bcbd6334feda59a4be596b999708485d1fc7747ff49`; test `8764c6510b65e2f556f6b00c6b3731f63e8950220e7dfa8b5e3b8a0e56a2554c`; registry audit receipt `6f0c4a455b211029724f1ed699547c6d3a25cc1d5b8e8d7fc3f4deba9bb38497`.
+- Validation commands: `python -m pytest software/ai/tests/test_clustered_occlusion_power.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/plan_clustered_occlusion_power.py software/ai/tests/test_clustered_occlusion_power.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: 9 focused planner/registry tests passed; 196 AI tests passed; 34 shared model-to-arm ingress and conformance tests passed; Ruff, schema validation, registry audit, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, release-integrity, release-readiness, and diff checks passed. Two independent generation runs were byte identical. The registry covers 37 AI tests and 116 referenced paths. The committed footprint is 6,111 files, 653,240,743 logical bytes, and 4,890,152 governed duplicate bytes; only the tracked-file ceiling changed from 6,107 to the exact 6,111 required by the four reviewed planner/schema/test/result files.
+- Preserved failed development evidence: the first focused run had one failure because the zero-ICC case divided by zero in the beta-binomial concentration conversion. The simulator now evaluates zero ICC through the ordinary binomial limit, and the focused suite passed. The first Ruff run then rejected two unused imports; they were removed without changing the method or result. The first policy sequence reached `git diff --check`, which rejected CRLF introduced while rewriting the registry on Windows; the registry was rewritten with LF and the check passed. None of these failures changed gates, rates, correlation estimates, or sample-size selection.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; the planner reads retained JSON/JSONL only.
+- Limitations: all inputs and outputs are synthetic. Six v14 and five v13 poses make the empirical ICC upper estimate itself uncertain, so the pessimistic scenario remains mandatory. The beta-binomial/design-effect Wilson calculation sizes a campaign but is not the future qualification estimator. The 2,048-pose recommendation applies to the later broad mid-motion synthetic gate, not the separate parked-pose milestone. It does not qualify projection geometry, measured feedback, dilation, camera calibration, localization, collision safety, contact, deployment, or physical authority.
+- Supersedes: the fixed 64-pose interpretation only. E-481 remains a failed consumed evaluation; E-482 through E-484 otherwise remain unchanged.
+- Next dependency: define and implement the separate parked-pose synthetic/physical qualification protocol and collect commissioned ChArUco, measured-feedback, backlash, repeatability, cable/tool-obstruction, and lighting evidence. A future broad campaign must freeze a new candidate, preserve v14 exclusion from selection, and predeclare the 2,048-pose design plus an unopened escrow family before rendering.
+
+
+### E-20261001-AI-486 — strict parked-pose evidence protocol remains incomplete
+
+- Stage: S2/S3 supervised parked-observation evidence protocol before physical collection.
+- Lane: AI/model schemas and offline evaluator only; no arm-lane or integration-gate status changed.
+- Claim commit: `801c7d4d19745db11f02757a96746332782b78cc`.
+- Implementation commit: `9dc1f7fa6642b6468bb5df85d0a6bed33e0fa592`.
+- Change: added strict parked-pose campaign and result schemas plus an offline evaluator. The campaign binds the commissioned park identity, camera calibration, camera-to-board transform, official robot visual meshes, target catalog, projection qualification, residual model, conservative fusion policy, repeatability qualification, ChArUco drift qualification, exact images, exposure bindings, measured-feedback bracket receipts, projection/residual-observer evidence, and authorized collection effects. It carries no joint values, servo commands, controller JSON, motion policy, permit, or transport fields.
+- Synthetic policy: runtime-like projected silhouettes and simulator truth-mask labels are separate hashes, and `truth_mask_used_as_model_input` is fixed false. Required calibration perturbations, lighting variants, visible cases, known self-occlusions, and cable/tool residual obstructions must all be present. Both source paths and conservative OR fusion are independently checked.
+- Physical policy: at least 30 unique completed and settled park cycles across at least three sessions are required. Every row binds image/exposure, measured-feedback bracket, projection, residual observation, ChArUco capture, park repeatability, drift evidence, and measured lighting identity. Visible, known self-occlusion, cable, and tool cases are mandatory. Every known self-occlusion must be detected by the geometric path and every residual obstruction by the residual path; the fused decision is recomputed as OR. Repeatability and drift must remain within independently bound campaign limits.
+- Collection/evaluator separation: a physical campaign must retain actual collection hardware-write and physical-movement counts plus its authorization-evidence hash. The evaluator's own `hardware_writes` and `physical_movements` remain zero. The result always fixes `physical_deployment_qualified=false` and `controller_authority=false`; even structurally complete evidence advances only to owner review of the supervised parked workflow.
+- Statistical output: false stops are reported separately for synthetic and physical visible cases with exact two-sided 95% Clopper-Pearson bounds. With zero events in only 30 trials, the upper bound is `0.11570330822202779`, demonstrating that 30 cycles cannot establish a 2% population failure ceiling.
+- Retained result: `parked_pose_qualification_pending_v1.json` is `INCOMPLETE`, has no campaign SHA-256, and records the sole blocker `campaign_not_collected`. Synthetic observations, physical cycles, collection writes, collection movements, evaluator writes, and evaluator movements are all zero. This is the current factual readiness state rather than a fabricated campaign.
+- Exact receipt command: `python software/ai/eval/evaluate_parked_pose_qualification.py --output software/ai/eval/parked_pose_qualification_pending_v1.json`; the same command writing `%TEMP%\parked_pose_qualification_pending_v1_second.json` reproduced byte-identical output.
+- Artifact SHA-256 values: evaluator `2579f4f52db19df7afbd51d7c18aab7c2a4ddfb889e22d61b51d707f425ee8e8`; pending result file `db494161c53e8164d79034749417cb4c807ce134ef87eea9425cb5c060d8ce92`; canonical embedded result SHA-256 `afbdf74bcf4d0887a496fb6f1320e55360491c337df3f6aaf53eca63b229b9c4`; campaign schema `eb8e656af4ab4d2280d9a860b7c766769a76f41234b6bfd8eb5b9746df882964`; result schema `8ac5cc862bd53c414c9eb48f85a79db4e7113a947ac1f1137fed1fb97f90b2ab`; focused test `cf89490b6cefe2b60837f55a0ea65b0306fadb2feeb59e95ce4c49e626d64906`; registry audit receipt `680b793ef75020f7ae0131437a6873dfeaf9ae4c0bdb2197f52df8b1fe38e3a6`.
+- Validation commands: `python -m pytest software/ai/tests/test_parked_pose_qualification.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/evaluate_parked_pose_qualification.py software/ai/tests/test_parked_pose_qualification.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: 13 focused protocol/registry tests passed; 203 AI tests passed; 34 shared model-to-arm ingress and conformance tests passed; both schemas validated under JSON Schema 2020-12; Ruff, registry audit, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Two pending-receipt generations were byte identical. The registry covers 38 AI tests and 121 referenced paths. The committed footprint is 6,116 files, 653,289,398 logical bytes, and 4,890,152 governed duplicate bytes; only the tracked-file ceiling changed from 6,111 to the exact 6,116 required by the five reviewed evaluator/schema/test/result files.
+- Preserved failed development evidence: the first focused test run passed all seven cases, but the following Ruff run rejected one unused `deepcopy` import in the test. The import was removed without changing protocol behavior. No physical data, acceptance gate, or result was changed in response.
+- Hardware-write count: 0 for this implementation and evaluator run.
+- Physical-movement count: 0 for this implementation and evaluator run.
+- Physics-step count: 0; no simulator or renderer was opened.
+- Limitations: no ChArUco, lighting, repeatability, backlash, measured-feedback, cable, tool, image, synthetic perturbation, or park-cycle evidence was collected. Hash bindings do not establish custody or truth of future source artifacts; upstream collectors and owner review must authenticate them. Structural test fixtures demonstrate evaluator behavior only and are not retained physical evidence. The protocol is limited to supervised observation after a commissioned park and settle cycle and cannot qualify mid-motion observation, unattended deployment, collision safety, contact, localization, or physical execution.
+- Supersedes: none. It implements the parked-pose protocol dependency declared by E-483 and E-485 while preserving the broad 2,048-pose gate and all consumed v14 evidence.
+- Next dependency: collect the commissioned camera/support originals and ChArUco/lighting/repeatability evidence through the ARM-071 onboarding path, then collect the separately authorized physical park cycles. Until those originals exist, the AI lane can implement a file-backed preflight that authenticates retained campaign artifacts without generating or moving the arm.
+
+
+### E-20261001-AI-487 — file-backed parked-pose preflight remains blocked
+
+- Stage: S2/S3 retained-artifact authentication before parked-pose evaluation.
+- Lane: AI/model read-only preflight only; no arm-lane or integration-gate status changed.
+- Claim commit: `e869e154223affb89f8b7f9754e01396c646b417`.
+- Implementation commit: `ad2c8ce9aeee11e0b6fcfddcda1e0c5a6afa72ed`.
+- Change: added strict evidence-index and preflight-receipt schemas plus a read-only file preflight. It derives the exact required artifact set from the campaign rather than trusting index coverage. Required types include commissioned park identity, camera and board calibration, robot visual meshes, target catalog, projection qualification, residual model, fusion policy, repeatability and drift qualifications, collection authorization, custody review, every synthetic image/runtime-like projection/truth label, and every physical image/exposure binding/measured-feedback bracket/projection/residual observation/ChArUco capture/repeatability/drift record.
+- Integrity behavior: every required SHA-256 must have exactly one index entry and one unique contained relative path. The preflight verifies artifact type, expected declared-custody class, byte count, stable bytes during hashing, and SHA-256. Missing, extra, duplicate-digest, duplicate-path, altered, size-mismatched, traversal, final-symlink, nested-symlink, symlink-root, index-self-hash, campaign-self-hash, and campaign/index binding failures stop the run. Physical rows also require a retained collection-authorization artifact.
+- Custody boundary: `PHYSICAL_RETAINED_ORIGINAL` and other index custody values are declarations. A passing preflight authenticates retained bytes and bindings only. It cannot prove who captured them, physical originality, measurement truth, model behavior, calibration quality, safety, or deployment readiness. The custody-review bytes require independent owner authentication.
+- Structural fixture result: a temporary full protocol fixture reconciled exactly 270 retained artifacts: 240 physical-declared bindings, 18 synthetic bindings, ten reviewed configuration/software bindings, one collection authorization, and one custody review. This fixture exists only in the test temporary directory and is not physical evidence.
+- Retained result: `parked_pose_preflight_pending_v1.json` is `BLOCKED` by `campaign_package_not_retained`. Campaign, index, and custody-review identities are null; verified artifacts and bytes are zero; physical deployment qualification and controller authority are false; evaluator writes and movements are zero.
+- Exact receipt command: `python software/ai/eval/preflight_parked_pose_campaign.py --output software/ai/eval/parked_pose_preflight_pending_v1.json`; the same command writing `%TEMP%\parked_pose_preflight_pending_v1_second.json` reproduced byte-identical output.
+- Artifact SHA-256 values: preflight `ad1ca6338220a11df2be1fef8eb0908c59a1ebf20b8153aebe8fbe7288f26db8`; pending receipt file `9d5528846a038b154f914a938c7e3b3bba0d90b773cdf953cb9f3ff9273fd0d2`; canonical embedded receipt SHA-256 `a94e4b5c44f574eff6f03c35c4a8b3ae3ed677058f1d815d2fde5cee5b4dd960`; evidence-index schema `027b8a7119e3bafc67989da48dd0540e44a2f23b7825642fff98ea274b508a06`; receipt schema `3c9128bbe6a506dfd9e2c87c5f07c8e557cea4967b849ccb39b41544f18fe15d`; focused test `8a853383a4c142784431d754c59ba6439204192fb95305286981ec3a273087d6`; registry audit receipt `f0fb92ffd86a490999f161541ced101086f8fac944b9874a3363e27cf5eb51b9`.
+- Validation commands: `python -m pytest software/ai/tests/test_parked_pose_preflight.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/preflight_parked_pose_campaign.py software/ai/tests/test_parked_pose_preflight.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: on the Windows development host, 11 focused preflight/registry tests passed and one symlink test skipped because unprivileged symlink creation was unavailable; 208 AI tests passed and the same single test skipped; 34 shared model-to-arm ingress and conformance tests passed. Both schemas validated under JSON Schema 2020-12. Ruff, registry audit, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Two pending-receipt generations were byte identical. The registry covers 39 AI tests and 126 referenced paths. The committed footprint is 6,121 files, 653,323,561 logical bytes, and 4,890,152 governed duplicate bytes; only the tracked-file ceiling changed from 6,116 to the exact 6,121 required by the five reviewed preflight/schema/test/result files.
+- Preserved non-pass evidence: Windows could not create the symlink needed by the symlink-rejection test, so pytest recorded an explicit skip rather than treating the case as passed. The test remains enabled for Linux CI. No protocol behavior, artifact, gate, or result was changed because of the host limitation.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; no simulator or renderer was opened.
+- Limitations: no actual campaign package, physical original, custody review, ChArUco capture, measured-feedback receipt, calibration, lighting survey, park cycle, cable/tool observation, or synthetic campaign asset exists. Regular-file hash validation does not prevent a dishonest producer from supplying false but internally consistent bytes. It also does not establish model performance or qualify the supervised workflow. Owner review, authorized collection, semantic evaluation, and arm-owned safety gates remain separate.
+- Supersedes: none. It implements E-486's file-backed preflight dependency and leaves both parked-pose receipts blocked/incomplete.
+- Next dependency: ARM-071 must onboard the four camera/support physical originals. After that, freeze an authorized collection package layout and capture the calibration/lighting/repeatability inputs. The AI lane can next implement a deterministic package builder that inventories already retained files but must not generate evidence content, move the arm, or self-assign physical custody.
+
+
+### E-20261001-AI-488 — deterministic retained-package index builder
+
+- Stage: S2/S3 retained parked-pose package assembly before file preflight.
+- Lane: AI/model offline metadata assembly only; no arm-lane or integration-gate status changed.
+- Claim commit: `e6546925ab4009f6887113b75ef9c8f6020637b9`.
+- Implementation commit: `e7b16c2de470a1c01040fab0be17e22b44cdfcdc`.
+- Change: added an externally authored custody-declaration schema and a deterministic index builder over one frozen parked-pose campaign and one exact retained evidence directory. Artifact types come from the campaign contract. Custody values come only from the separately supplied declarations. The builder verifies both self-hashes, their shared campaign identity, exact declaration coverage, protocol-required custody classes, one nonempty contained regular file per required digest, stable bytes during hashing, and no unmatched retained file.
+- Rejection behavior: malformed schemas, duplicate JSON fields, campaign or declaration self-hash mismatch, wrong campaign binding, missing physical collection authorization, missing/extra/duplicate custody declarations, wrong declared custody class, missing/extra/empty files, duplicate content at multiple paths, root/nested/file symlinks, non-regular files, and file-set changes during inventory fail closed. CLI output is required to remain outside the evidence root so repeated indexing cannot silently inventory its own metadata.
+- Structural fixture result: the builder inventoried the temporary 270-artifact protocol fixture twice and produced the exact same evidence index both times. The independently invoked preflight accepted that index as `PASS_FILE_INTEGRITY_ONLY`, with 270 verified artifacts, 240 physical-declared bindings, and 18 synthetic bindings. All files and declarations were test-generated inside pytest temporary storage and are not retained physical evidence.
+- Custody boundary: `PHYSICAL_RETAINED_ORIGINAL` and every other custody value remain externally supplied declarations. The builder checks consistency with the protocol but cannot authenticate the author, capture event, physical originality, or measurement truth. The custody-review artifact still requires independent owner authentication.
+- Exact validation commands: `python -m ruff check software/ai/eval/build_parked_pose_evidence_index.py software/ai/tests/test_parked_pose_package_builder.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest software/ai/tests/test_parked_pose_package_builder.py software/ai/tests/test_parked_pose_preflight.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: on the Windows development host, 16 focused builder/preflight/registry tests passed and two symlink tests skipped because unprivileged symlink creation was unavailable; 213 AI tests passed and the same two tests skipped; 34 shared model-to-arm ingress and conformance tests passed. JSON Schema 2020-12 validation, Ruff, registry audit, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. The registry covers 40 AI tests and 129 referenced paths.
+- Artifact SHA-256 values: builder `d4383efe920df4422371dbabe7ede84c88488233406f50d09905df6fc7adc023`; custody-declaration schema `e50b9be66605194c2ff1492010c5198f0dce0215d5e4d40dd67e56eef0d61229`; focused test `77b4f6533740055b2ba26c99f1a13b7dc245455f91bff687e29c165b67c8fa7f`; registry audit receipt `b6eeb0966e1c1f1fea1a28fdd5e82e9ff05ebca0a2483ae03fec1fba1a20fd51`.
+- Preserved non-pass evidence: Windows could not create symlinks for the builder and preflight rejection cases, so pytest recorded two explicit skips. Both tests remain enabled for Linux CI. No contract, artifact, gate, or result was altered because of this host limitation.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; no simulator or renderer was opened.
+- Implementation-commit footprint: 6,124 tracked files, 653,347,836 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob. The tracked-file ceiling changed from 6,121 to exactly 6,124 for the reviewed builder, schema, and test files.
+- Limitations: no real campaign, image, calibration, measured-feedback bracket, ChArUco capture, authorization, or authenticated custody declaration was supplied. The fixture proves deterministic assembly and rejection behavior only. A malicious producer can still supply false but internally consistent evidence and declarations. This increment does not evaluate model accuracy, qualify the parked workflow, authorize collection, or grant physical authority.
+- Supersedes: none. It implements E-487's deterministic package-builder dependency while leaving both retained parked-pose receipts blocked/incomplete.
+- Next dependency: ARM-071 must retain and authenticate the four camera/support originals. After the measured configuration epoch exists, an authorized collector must freeze the campaign and separately authenticated custody declarations; the builder can then assemble their index for unchanged preflight and evaluation.
+
+
+### E-20261001-AI-489 — pose-diverse visibility successor fails clustered development gate
+
+- Stage: S2/S3 synthetic target-visibility training and development-only selection after the consumed v14 evaluation.
+- Lane: AI/model, static inert Isaac rendering, offline dataset assembly, and offline model training only; no arm-lane or integration-gate status changed.
+- Claim commit: `bcc8dd970fa97fa711647b66b815944a24feb951`.
+- Frozen implementation/predeclaration commit: `3ecb30eca9a4b4aee8cccfa4eef6a3144cc5f1fc`.
+- Packaging repair commits: `0c5401ca5cd42aa49e44c46a0b1969ce4d7d2c7b` bounds atlas dimensions after run 1 exposed Pillow's 65,500-pixel limit; `ba1ea9bf43098eb37e6d17c4785d428023cc1aab` writes deterministic 16-pose atlas chunks after run 2 exhausted RTX resource descriptors. Neither repair changed pose identities, split, lighting, labels, training parameters, thresholds, gates, seed, or source checkpoint.
+- Change: v15 freezes 96 fresh static schedule-interpolated visual poses, with 72 training poses and every fourth accepted pose in a 24-pose development split. It uses three new training and three new development lighting transforms, contains no evaluation group, seeds the exact E-480 checkpoint, freezes both convolutions and the classifier, and trains only the FiLM conditioner for 16 epochs at learning rate `0.00035`, positive-abstention weight `1.5`, seed `190`, and deterministic CPU execution. Selection limits were frozen at at most 2% missed abstentions and 10% false abstentions for both point metrics and seeded one-sided 95% whole-pose bootstrap UCBs.
+- Fixtures and source identities: source schedule file SHA-256 `6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42`; v15 fixture file SHA-256 `38e169e1b8b59d77785470b44e5feca8dad78fce18bc6dab8459ffa3f867ae0e`; canonical fixture bundle SHA-256 `df7ccb80e12121497a48f886f6d9c1aa29f82a91f5be9f73990914e682109061`; target catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; seed model SHA-256 `b20a02990d47ee87d97383d130052c4517391442d517ea94b5b5e78749a7525d`; seed canonical scorecard SHA-256 `d11a71c67e2f7072e52a4a28d9c2bdbf5f6da308c5704bfe47a379c79cad9f00`.
+- Source artifact identities after packaging repair: fixture builder `13a9a08417d2c1b6f5cba1119e55db8fd1db6473abaa77a7cbb6e0675a282be8`; renderer `c395a39bfb62fc8b67c64a6e670fba39d4d685b0f3f331c60a15e585fd4b7159`; dataset/training builder `7f1ee2952b68f60c9394e9787ad71d3bb48b24a3b6a736f62554b9b1cc95182a`; fixture test `9539437cc80cd0b3068b4915bdd0eddb3927ced08d7b80dce7d60fe2e92a9801`; focused renderer/training test `33490b9b678b9d080c23e0981ad1c9d51a67e80be2e6ab4976da7164c8add1b0`.
+- Exact successful render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json --schedule-bundle software\ai\sim\evidence\pose_diverse_training_development_v1.json --campaign pose-diverse-training-v15 --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-pose-diverse-v15-run3 --receipt C:\IsaacSim\evidence\fixed_overview_pose_diverse_v15_run3.json --status-output C:\IsaacSim\evidence\fixed_overview_pose_diverse_v15_run3.status.json`.
+- Exact dataset command: `Copy-Item -LiteralPath C:\IsaacSim\evidence\fixed_overview_pose_diverse_v15_run3.json -Destination C:\IsaacSim\artifacts\issue190\fixed-overview-pose-diverse-v15-run3\manifest.json; python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-pose-diverse-v15-run3\manifest.json --output-dir C:\IsaacSim\artifacts\issue190\pose-diverse-data-v1`; repeated unchanged with output suffix `v2`.
+- Exact training command: `python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-pose-diverse-v15-run3\manifest.json --train-pose-diverse-successor C:\IsaacSim\artifacts\issue190\pose-diverse-data-v1 C:\IsaacSim\artifacts\issue190\specificity-rebalance-candidate-v1 C:\IsaacSim\artifacts\issue190\pose-diverse-candidate-v1`; repeated unchanged with candidate output suffix `v2`.
+- Render result: run 3 is `PASS_WITH_BLOCKERS` for 96 poses and 18 chunked atlas artifacts. Canonical receipt SHA-256 is `8677602fcd57d60bee7cbb0855336af74c37a0de1b436bc8ca373efccd324912`; receipt/copied-manifest file SHA-256 is `acdc2cebb1b4b5ff6fa3090f1197932c84ff3b5b5a47ad7b1b90321fc22f0eb1`; status file SHA-256 is `72fb4fe825c44eb99bc7cb5b198b2ec8ff32bf350ff2d84b34f3dcd9fa56330c`.
+- Dataset result: both independent 292-file trees are byte identical, contain 46,719,682 bytes, and have inventory digest `e16995eadf146eaaf62f15bfd8cc04c70d8d0d14ca0ec3740eeafb1ed21a427f`. Canonical dataset SHA-256 is `a478dcf510ee0936bf029a8e6f27b00f7cd41a5847ba9f6caec15174a9f6da09`; manifest file SHA-256 is `b20e34deb5a89cabcb333ec4d7627f8c6918871d225bc6da03f0fa9e7ba9c081`. Training has 16,200 rows with 2,463 abstentions and 13,737 visible labels; development has 5,400 rows with 786 abstentions and 4,614 visible labels; evaluation has zero rows.
+- Model result: both model files are byte identical with SHA-256 `9e09a13fae22cbbc75d2b15d9fe2e9cfbf76638d61220d635dd31272e298cfbb`. Both scorecard files are byte identical with file SHA-256 `e61907d5111b3f1328d976156362c14f54522a16df62c6db941b22e73bc19616` and canonical embedded scorecard SHA-256 `0079e0d7f3b7b4f77d191b7258cafbbe8a53e88441767059f6d4a63858edf490`.
+- Metrics: selected threshold is `0.141`. Nominal development has 781 true abstentions, 4,468 true-visible decisions, five missed abstentions, and 146 false abstentions: `5/786 = 0.64%` misses and `146/4614 = 3.16%` false stops. Point metrics pass through the component-wise 1 mm ring; the worst point miss rate there is `15/786 = 1.91%` at `(-1,+1) mm`, and the worst false-stop rate is `283/4614 = 6.13%` at `(+1,-1) mm`. The seeded 2,000-resample 24-pose bootstrap reports worst missed-abstention UCB `3.249097%` and worst false-abstention UCB `7.134968%`. The miss UCB exceeds the frozen 2% ceiling, so `pose_cluster_upper_bound_gate_met=false`, `development_gate_met=false`, and promotion status is `FAILED_DEVELOPMENT_GATE`. The internal point selector's 1 mm value is not an installable qualification because the authoritative clustered gate failed.
+- Preserved failed evidence: the first fixture algorithm used uniform fractions and failed with `RuntimeError: generated render poses are not fresh and distinct`; its focused run recorded one failed and two passed tests before the prime-modulus fixture was frozen. Isaac run 1 rendered 288 valid per-pose files but failed while writing an over-limit vertical atlas with `OSError: broken data stream when writing image file`; its retained status SHA-256 is `18c1792be8706b68e66d29561f36f4780` and reports zero writes and movements. Run 2 then emitted `Fatal [omni.rtx] Out of resource descriptors!` during the monolithic tiled-atlas path and was interrupted after remaining CPU-active without producing a receipt or status; its empty/incomplete output was not admitted. Both failures remain separate from successful run 3 and did not alter the frozen experiment.
+- Validation commands: `python -m ruff check software/ai/sim/build_pose_diverse_training_fixture.py software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/ai/train/build_official_mesh_occlusion_data.py software/tests/unit/test_pose_diverse_training_fixture.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py`; `python -m pytest software/tests/unit/test_pose_diverse_training_fixture.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python software/ai/eval/audit_ai_work_registry.py`; `python scripts/ci/check_docs.py; python scripts/ci/check_public_records.py; python scripts/ci/check_evidence_scope.py; python scripts/ci/check_repository_artifacts.py; python scripts/ci/check_repository_health.py --policy-only; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_release_integrity.py --mode policy; python scripts/ci/check_release_readiness_sync.py; git diff --check`.
+- Validation result: the final combined focused suite passed 51 tests in 18.53 seconds; the earlier pre-chunk suite passed 50 tests and the first post-chunk renderer suite passed 48 tests. The full AI suite passed 213 tests with two Windows symlink skips; 34 shared ModelMotionBatch ingress/conformance tests passed. Ruff, registry audit, maintained-doc, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, readiness, and diff checks passed. Registry audit receipt file SHA-256 is `8b64ab98fc98f69918f48d48a6b431f528b50fe5cb98595488ffecf0cdb3f0ff`. The source footprint is 6,127 tracked files, 653,478,428 logical bytes, and 4,890,152 governed duplicate bytes; hardware writes and physical movements remained zero.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; every arm state is rendered statically and all model work is offline.
+- Limitations: all camera geometry, robot placement, images, masks, labels, lighting, target coordinates, and offset perturbations are synthetic. The 96 states densely sample one governed path and are correlated; they do not cover arbitrary arm configurations. The tool and camera-support meshes, commissioned camera calibration, synchronized measured joint feedback, physical lighting, cables, hands, and unexpected objects remain absent. This campaign trains target visibility/occlusion only and does not improve the retained KeyboardPoseNet localization bound of `14.400834977 mm`. Passing point metrics do not override the failed clustered gate. The artifacts grant no localization, collision, reachability, controller, transport, permit, deployment, or physical authority.
+- Supersedes: none. It preserves the failed v14 evaluation and implements its fresh pose-generalization training dependency without opening another evaluation set. It also leaves E-482 through E-488 and the geometry-first architecture intact.
+- Next dependency: keep this checkpoint rejected. Use the pose-level failures as development diagnostics only under a separately predeclared successor design. Implement and physically commission the synchronized geometry-projection path and measured dilation inputs in parallel. Any later learned residual candidate needs a new frozen train/development design and, only after passing its clustered gate, a newly predeclared untouched evaluation source. Do not reuse v14 or claim the 1 mm point result as runtime calibration.
+
+
+### E-20261001-AI-490 — v15 development misses are concentrated by pose and target
+
+- Stage: S2/S3 synthetic development-only diagnosis after the failed v15 clustered gate.
+- Lane: AI/model analysis only; no arm-lane or integration-gate status changed.
+- Claim commit: `4d0bfd7b63bba52433224db98e09ebbb254eef1f`.
+- Implementation commit: `048bb41acd2cbe6350672e82f402bc54d096cc12`.
+- Change: added a strict read-only diagnostic, report schema, retained report, and tests. The tool verifies the v15 dataset, scorecard, and pose-fixture canonical hashes; refuses any evaluation group or physical authority; binds every failure to an exact development row; limits analysis to the selected 1 mm ring; and attributes misses and false stops by whole pose, target, lighting identity, source interval, and offset. It does not load images, run inference, alter the threshold, train a model, render a pose, or open an evaluation source.
+- Exact command: `python software/ai/eval/diagnose_pose_cluster_development.py --dataset-manifest C:\IsaacSim\artifacts\issue190\pose-diverse-data-v1\manifest.json --development-rows C:\IsaacSim\artifacts\issue190\pose-diverse-data-v1\development.jsonl --scorecard C:\IsaacSim\artifacts\issue190\pose-diverse-candidate-v1\scorecard.json --pose-fixture software\ai\sim\evidence\pose_diverse_training_development_v1.json --output software\ai\eval\pose_cluster_development_diagnostic_v1.json`.
+- Inputs and fixtures: dataset manifest file SHA-256 `b20e34deb5a89cabcb333ec4d7627f8c6918871d225bc6da03f0fa9e7ba9c081`; canonical dataset SHA-256 `a478dcf510ee0936bf029a8e6f27b00f7cd41a5847ba9f6caec15174a9f6da09`; development JSONL SHA-256 `dae77167465e727a83961374d6013fb98124241124b292e3107b4114e2296e72`; scorecard file SHA-256 `e61907d5111b3f1328d976156362c14f54522a16df62c6db941b22e73bc19616`; canonical scorecard SHA-256 `0079e0d7f3b7b4f77d191b7258cafbbe8a53e88441767059f6d4a63858edf490`; model SHA-256 `9e09a13fae22cbbc75d2b15d9fe2e9cfbf76638d61220d635dd31272e298cfbb`; target catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; pose fixture file SHA-256 `38e169e1b8b59d77785470b44e5feca8dad78fce18bc6dab8459ffa3f867ae0e`; canonical fixture SHA-256 `df7ccb80e12121497a48f886f6d9c1aa29f82a91f5be9f73990914e682109061`.
+- Artifact hashes: diagnostic source SHA-256 `29799dd47eae71dcf0cef844ff8f96a0a49adb487744680644dc0d5109204032`; retained report file SHA-256 `a13a999c8c8ca279e72bdd11bca79d6803b291600f0e1bdce152542e250a482a`; embedded canonical report SHA-256 `f88e2b40b980465857a64c9c7d1fe09cfb878db2012852ffad1965728f5de447`.
+- Metrics: 24 development pose clusters, 5,400 rows, and nine offsets inside the selected 1 mm ring. Across those offsets there are 58 missed abstentions and 1,693 false abstentions. Seven poses and eight pose-target pairs contain any miss. `pose_diverse_development_016` with target `MINUS` contributes 27/58 misses (`46.5517%`) and repeats equally across all three lighting variants. The two highest-miss poses contribute 41/58 (`70.6897%`). The worst clustered offset is `(-1,+1) mm`, where the retained one-sided 95% missed-abstention UCB is `3.249097%`.
+- Interpretation: the failure is correlated with specific pose-target geometry rather than a broad lighting-only breakdown. This explains the gap between passing row-level point metrics and the failed whole-pose bound. It does not establish that repairing the dominant clusters will generalize and does not justify changing the frozen threshold.
+- Validation commands: `python -m ruff check software/ai/eval/diagnose_pose_cluster_development.py software/ai/tests/test_pose_cluster_development_diagnostic.py`; `python -m pytest -q software/ai/tests/test_pose_cluster_development_diagnostic.py`; plus the full AI, shared boundary, registry, maintained-document, evidence-scope, artifact, repository-health, source-footprint, release-integrity, readiness, and diff checks recorded with the completing commit.
+- Validation result: four focused diagnostic tests passed; the final full AI suite passed 217 tests with two expected Windows symlink skips; 34 shared ModelMotionBatch ingress and conformance tests passed; the registry audit passed with 41 tracked/documented AI tests and 134 referenced paths. Ruff, maintained-doc, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, readiness, and diff checks passed. Registry audit receipt file SHA-256 is `1dfa54ae24e180296eac6c49f586a2d1802d0afe07d0f8b2fa12e5a693eb202f`.
+- Preserved failed validation: the first combined registry run failed one assertion because the maintained registry-count test still expected 40 tests after this increment added the 41st. The contemporaneous full AI run recorded `1 failed, 216 passed, 2 skipped`. The count assertion was updated to the audited inventory of 41, after which the full suite passed. No model, threshold, metric, report, or gate changed in response.
+- Source footprint: 6,131 tracked files, 653,525,143 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob. The exact four-file ceiling increase covers only the analyzer, schema, aggregate report, and focused test.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened.
+- Limitations: this is one consumed synthetic development split drawn from correlated static states on one governed path. Failure identities are design evidence and are no longer eligible to select or evaluate v16. The diagnostic contains no physical camera, commissioned calibration, synchronized measured feedback, measured dilation, cable/hand obstruction capture, localization qualification, collision evidence, controller command, transport field, execution permit, or physical authority.
+- Supersedes: none. V15 remains rejected, v14 remains consumed, and every untouched evaluation source remains closed.
+- Next dependency: predeclare v16 with fresh train/development identities, source-interval group isolation, fresh pose neighborhoods around the diagnosed intervals, balanced failed-target coverage, and frozen architecture/training/bootstrap rules before rendering. Commission synchronized deterministic geometry projection and measured dilation in parallel. Open an untouched evaluation source only after the fresh clustered development gate passes.
+
+
+### E-20261001-AI-491 — v16 grouped-neighborhood campaign is frozen before rendering
+
+- Stage: S2/S3 synthetic target-visibility successor predeclaration.
+- Lane: AI/model fixture, inert Isaac render contract, offline dataset policy, and tests only; no arm-lane or integration-gate status changed.
+- Claim commit: `83a2fbaed74900cdc0dc2bce6993e2b3b024806a`.
+- Implementation/predeclaration commit: `20be6d127db5d2d90cc3f31a4b889208992845df`.
+- Change: froze a deterministic 320-pose fixture with 256 training and 64 development poses, balanced three-interval source blocks, a one-block buffer between splits, training-only coverage of all seven blocks implicated by E-490, exact exclusion of all 96 consumed v15 fractions, six fresh deterministic lighting identities, an empty evaluation split, and a v16 Isaac receipt/dataset contract. No rendering or model training occurred in this increment.
+- Exact fixture command: `python software/ai/sim/build_grouped_neighborhood_training_fixture.py --source software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json --v15-fixture software/ai/sim/evidence/pose_diverse_training_development_v1.json --v15-diagnostic software/ai/eval/pose_cluster_development_diagnostic_v1.json --output software/ai/sim/evidence/grouped_neighborhood_training_development_v1.json`.
+- Frozen training plan: exact v15 model SHA-256 `9e09a13fae22cbbc75d2b15d9fe2e9cfbf76638d61220d635dd31272e298cfbb`; train `conv2`, `conditioner`, and `classifier` while keeping `conv1` frozen; 12 deterministic CPU epochs; learning rate `0.00015`; positive abstention weight `1.75`; weight decay `0.0001`; fixed `2.0` row emphasis for `MINUS`, `U`, `7`, `1`, `0`, `PERIOD`, and `6`. Development retains the 2% miss and 10% false-stop point and whole-pose UCB ceilings, 2,000 resamples, and bootstrap seed `19016`.
+- Fixture metrics: canonical bundle SHA-256 `21af4a14ed154d2cecd07cc995ea6c497fd356ef85d9181cf012885f924b2fa5`; file SHA-256 `0e0f30a801a38720f0dc6ddc5b769c8447dda09a67a8577ddf37fd7fffb5abae`; 18 training blocks with 14 or 15 poses each; ten development blocks with six or seven poses each; all train/development block distances are at least two.
+- Artifact SHA-256 values: fixture builder `e54073297e11805b863ffc8d5fb8eec8fa80d13c3e13cdc773633d20ebd64c07`; renderer `81c3ab21376fb119f0203b92a8cb3f7f936b670e9440145779e51f6d66291c6a`; dataset/training builder `511da032529bacbea3171b90a26d8079e5498bde6fd1beaee0e61b321d6cf31c`; fixture test `5df35d9c8005c6edd20d0f04f97195d48d7df4ed2068927299d57076f664e353`; renderer/dataset test `f96ec9ad8f7c7a8dda4fd9eccc192d1a3cd5e965ed8484b7f9086fb015bd1bbc`.
+- Validation commands: `python -m pytest software/tests/unit/test_grouped_neighborhood_training_fixture.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py software/ai/tests/test_ai_work_registry.py -q`; `python software/ai/eval/audit_ai_work_registry.py`; `git diff --check`.
+- Validation result: 59 focused tests passed. Registry audit passed with 41 tracked/documented AI tests and 135 referenced paths; audit receipt SHA-256 is `44aa66be7e3b5a5fd4ab6651b1002767bb9b7ab3c2c1994a1f8b46c1c993ccda`.
+- Preserved failed pre-artifact validation: the first generator invocation rejected an incorrect draft assumption of 121 source samples; the actual pinned source contains 133. After binding that exact count, the first allocation policy rejected development block 37 because it received only three rows against the frozen floor of four. The final deterministic balanced-block quota gives every development block six or seven rows. Neither failure produced a retained fixture, render, dataset, or model and no observed model metric changed the design.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened.
+- Limitations: all poses, geometry, labels, and planned lighting remain synthetic. Block isolation reduces adjacent-path leakage but does not create physical independence. V15 failure identities informed training neighborhoods and target emphasis, so v15 is consumed and cannot evaluate v16. This work does not qualify localization, camera calibration, synchronized feedback, dilation, collision, contact, deployment, controller transport, permits, or physical authority.
+- Next dependency: implement the exact frozen v16 training entry point and its rejection tests, then run the committed Isaac campaign without changing identities or gates. Preserve any simulator failure as a separate result.
+
+
+### E-20261001-AI-492 — v16 lowers the clustered miss bound but remains rejected
+
+- Stage: S2/S3 synthetic target-visibility training and development-only selection.
+- Lane: AI/model, inert Isaac rendering, offline dataset assembly, and offline training only; no arm-lane or integration-gate status changed.
+- Claim commit: `83a2fbaed74900cdc0dc2bce6993e2b3b024806a`.
+- Frozen fixture/render predeclaration commit: `20be6d127db5d2d90cc3f31a4b889208992845df`.
+- Training implementation and repairs: `b68a6cb2a2596768f2c4941970efedbd942e74f8` added the entry point; `a77ee493ebb9b2f50e9177bca87653cb025ce986` restored the module's original LF representation after Windows rewrote its line endings; `ce6172b8b43a22613d3eaf128cc80873423e076a` corrected the copied seed assertion to the exact failed v15 1 mm policy. The combined functional diff remains the frozen v16 implementation; no observed metric changed its poses, lighting, architecture, weights, epochs, gates, or bootstrap seed.
+- Exact render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONPATH=(Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\isaac_fixed_overview_mesh_render_probe.py --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_meshes_20260929.json --capsule-manifest software\integrations\isaac_sim\evidence\fixed_overview_segmentation_v1\manifest.json --schedule-bundle software\ai\sim\evidence\grouped_neighborhood_training_development_v1.json --campaign grouped-neighborhood-training-v16 --output-dir C:\IsaacSim\artifacts\issue190\fixed-overview-grouped-v16-run1 --receipt C:\IsaacSim\evidence\fixed_overview_grouped_v16_run1.json --status-output C:\IsaacSim\evidence\fixed_overview_grouped_v16_run1.status.json`.
+- Exact dataset command: `Copy-Item -LiteralPath C:\IsaacSim\evidence\fixed_overview_grouped_v16_run1.json -Destination C:\IsaacSim\artifacts\issue190\fixed-overview-grouped-v16-run1\manifest.json; python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-grouped-v16-run1\manifest.json --output-dir C:\IsaacSim\artifacts\issue190\grouped-neighborhood-data-v1`; repeated unchanged with output suffix `v2`.
+- Exact training command: `python software\ai\train\build_official_mesh_occlusion_data.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-grouped-v16-run1\manifest.json --train-grouped-neighborhood-successor C:\IsaacSim\artifacts\issue190\grouped-neighborhood-data-v1 C:\IsaacSim\artifacts\issue190\pose-diverse-candidate-v1 C:\IsaacSim\artifacts\issue190\grouped-neighborhood-candidate-v1`.
+- Render result: `PASS_WITH_BLOCKERS`; 320 static poses; 256 training, 64 development, zero evaluation; 60 chunked atlas artifacts; canonical receipt SHA-256 `576e6512a2c27d33773957592805499975895edb162537b457ed198caa514bab`; receipt file SHA-256 `8e54e4f8b9e58b4a11c986678e410724c1b0d929904d4229bb31b1c8f63a4043`; status file SHA-256 `d758476ede52f3602aa6fffce93760cc73798075fa0d87c8d8d63e4ebaf5758b`.
+- Dataset result: both independent 964-file trees are byte identical, contain 159,025,407 bytes, and have inventory SHA-256 `d0debf41b369f851e2691a516790675ade74589266b54ddc33d224608f2a2562`. Canonical dataset SHA-256 is `7a7521d7fdad19b33f86261c3f30560b101d720538e8d994fd9852e7901d32a8`; manifest file SHA-256 is `17c18d1d2189b5f79bfdbdcda84a1ec47b1174ea349db27b05d9e98309614204`. Training has 57,600 rows with 8,994 abstentions and 48,606 visible labels; development has 14,400 rows with 2,118 abstentions and 12,282 visible labels; evaluation is empty.
+- Model result: model file SHA-256 `af917bb4ecc0aa07de904b44e0c78f1afda4ebf64d5629dddb09f064d0cd7969`; scorecard file SHA-256 `ef03701d5841dafb15537cfbd34e5b0e6b4046583e8689dc30e185e5e7a7bbab`; canonical scorecard SHA-256 `ec11ca7302901c7051ef5aadae2d0df7833f58f30cf4d8c0f0e8b92f74c3ec38`. Twelve epoch losses decreased monotonically from `0.0780796` to `0.0550298`.
+- Metrics: selected threshold `0.138`; selected synthetic offset ring 2 mm. Nominal development confusion is 2,106 true abstentions, 12 missed abstentions, 12,049 true-visible decisions, and 233 false abstentions: `12/2118 = 0.5666%` misses and `233/12282 = 1.8971%` false stops. Point metrics pass. The authoritative 2,000-resample 64-pose bootstrap with seed `19016` evaluated all 17 declared offsets through 2 mm and reports worst missed-abstention UCB `2.821616%` and worst false-abstention UCB `7.802481%`. The miss UCB exceeds the 2% ceiling; `pose_cluster_upper_bound_gate_met=false`, `development_gate_met=false`, and promotion status is `FAILED_DEVELOPMENT_GATE`.
+- Interpretation: v16's clustered miss bound is directionally lower than v15's `3.249097%`, but the development corpora differ, so this is not a controlled head-to-head improvement claim. The 2 mm point result is not installable calibration or runtime qualification.
+- Validation commands: `python -m ruff check software/ai/sim/build_grouped_neighborhood_training_fixture.py software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/ai/train/build_official_mesh_occlusion_data.py software/tests/unit/test_grouped_neighborhood_training_fixture.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py`; `python -m pytest software/tests/unit/test_grouped_neighborhood_training_fixture.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `git diff --check`.
+- Validation result: 53 focused fixture/render/training tests passed; 217 AI tests passed with two expected Windows symlink skips; 34 shared ModelMotionBatch ingress/conformance tests passed; Ruff and diff checks passed.
+- Preserved failed evidence: the first training invocation produced no model or scorecard and failed seed admission because the new entry point asserted 2 mm while the exact rejected v15 seed records 1 mm. The assertion was corrected to the retained seed identity before rerunning. The initial training-entry commit also rewrote the large module's line endings on Windows; `git diff --check` reported the full-file trailing-whitespace churn, and the next commit restored LF bytes. The predeclaration prose said "nine declared offsets" too broadly; the committed selector has always evaluated every offset in the selected ring, so v16 conservatively scored 17 offsets at 2 mm. These failures and discrepancy did not change the experiment after model evidence was observed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; all arm states were placed as static perception renders.
+- Limitations: all camera geometry, placement, images, masks, labels, target coordinates, and lighting are synthetic. Source-block separation reduces adjacent-path leakage but does not make poses independent. The model addresses residual target visibility only; deterministic synchronized geometry projection remains primary for known self-occlusion. Tool/support meshes, commissioned calibration, measured feedback, measured dilation, physical lighting, cables, hands, localization qualification, collision, contact, and deployment evidence remain absent. No controller command, joint output, transport field, permit, or physical authority was created.
+- Supersedes: none. V14 evaluation, v15 development, and v16 development are consumed and cannot select or evaluate another successor.
+- Next dependency: keep v16 rejected. Diagnose its development failures by pose, target, lighting, and offset without altering the checkpoint. In parallel, commission the deterministic synchronized geometry path and physical parked-pose evidence. Any learned successor requires a new frozen train/development design and a later untouched evaluation source only after its clustered development gate passes.
+
+
+### E-20261001-AI-493 — v16 failures are distributed across pose geometry
+
+- Stage: S2/S3 synthetic development-only diagnostic.
+- Lane: AI/model read-only attribution only; no arm-lane or integration-gate status changed.
+- Claim commit: `07b941ed1f98a425a514b1dd7bfca8b48b9a9fe7`.
+- Implementation commit: `bc880ad9087d18b99becf7c4db765d8b77edb026`.
+- Change: added a strict, deterministic diagnostic that reconciles the rejected v16 dataset manifest, development rows, scorecard, and frozen pose fixture, then attributes every in-bound missed and false abstention by exact offset, pose, target, lighting identity, and source block. It rejects non-v16 schemas, a nonfailed candidate, evaluation rows, identity/hash mismatches, and any nonzero effect or authority claim. It does not load images, run inference, train, render, select a threshold, open evaluation, or promote the candidate.
+- Exact command: `python software/ai/eval/diagnose_grouped_neighborhood_development.py --dataset-manifest C:\IsaacSim\artifacts\issue190\grouped-neighborhood-data-v1\manifest.json --development-rows C:\IsaacSim\artifacts\issue190\grouped-neighborhood-data-v1\development.jsonl --scorecard C:\IsaacSim\artifacts\issue190\grouped-neighborhood-candidate-v1\scorecard.json --pose-fixture software/ai/sim/evidence/grouped_neighborhood_training_development_v1.json --output software/ai/eval/grouped_neighborhood_development_diagnostic_v1.json`; repeated unchanged with `%TEMP%\grouped_neighborhood_development_diagnostic_v1_second.json`.
+- Bound input SHA-256 values: dataset manifest file `17c18d1d2189b5f79bfdbdcda84a1ec47b1174ea349db27b05d9e98309614204`; canonical dataset `7a7521d7fdad19b33f86261c3f30560b101d720538e8d994fd9852e7901d32a8`; development rows file `13beb5470db53da2a2e517945a0e519d77a5375ec010c3da10a485567708de9c`; scorecard file `ef03701d5841dafb15537cfbd34e5b0e6b4046583e8689dc30e185e5e7a7bbab`; canonical scorecard `ec11ca7302901c7051ef5aadae2d0df7833f58f30cf4d8c0f0e8b92f74c3ec38`; model `af917bb4ecc0aa07de904b44e0c78f1afda4ebf64d5629dddb09f064d0cd7969`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; fixture file `0e0f30a801a38720f0dc6ddc5b769c8447dda09a67a8577ddf37fd7fffb5abae`; canonical fixture `21af4a14ed154d2cecd07cc995ea6c497fd356ef85d9181cf012885f924b2fa5`.
+- Artifact SHA-256 values: analyzer `a26c72f37b0150ccb35c236b01634e7ff1f7c3f0976b98ec7e963802b8b58df9`; report file `67a8a19915fa60fa35bbcb96794c007e69c013d19958d7d9e3401829da860374`; canonical report `4846c8ce7d281e647d6d68f75f44a8cde8fff6d40558ec22a8336658d56ccecc`; schema `035b535b0a0837755fb7909dc658f56855f6df3f402c115316a31700a5fa62ee`; tests `a0aa75e7a8c41a1ca4c92b44e073bea94224ba6d8f969258d100adc22105418a`; registry `a24de29ee1165d3eccb0c05d7db877096a46696c152f0b1a2a899f1511d83941`; registry audit file `e28bbd6adfd0a231c7fc531839d633524cd9690f9ec4f04195e752082bc3c276`; registry audit receipt `d24707447286b8d070964688ae050ac5a6712b9a735fc0691e157e731d077ae5`.
+- Metrics: 64 development poses; 14,400 rows; 17 in-bound offsets; 348 missed abstentions across offsets; 6,243 false abstentions across offsets; 28 poses, 46 pose-target pairs, and eight source blocks with a miss. The dominant pose-target is `grouped_development_064` / `P` with 41 misses (`11.781609%`). Source block 37 has 93 misses (`26.724138%`); the top three source blocks have 264 of 348 (`75.862069%`). Target miss totals are `EQUAL=63`, `MINUS=63`, `P=63`, `I=53`, `R=28`, `4=15`, `5=15`, `APOSTROPHE=13`, `9=10`, `COMMA=7`, `M=7`, `T=7`, and `SPACE=4`. Lighting totals are `grouped_overhead_low=131`, `grouped_side_glare=95`, and `grouped_soft_focus=122`. The worst clustered miss offset is `(-2 mm, 0 mm)`, with miss UCB `0.028216164514586323` and false-stop UCB `0.019722425127830533`.
+- Interpretation: the failures are more distributed than v15 and indicate a broad pose-geometry/generalization problem rather than one dominant key pair. This is diagnostic evidence, not a controlled model-improvement claim, and it does not justify changing the frozen threshold.
+- Validation commands: two exact diagnostic commands above followed by byte comparison; `python -m pytest software/ai/tests/test_grouped_neighborhood_development_diagnostic.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/diagnose_grouped_neighborhood_development.py software/ai/tests/test_grouped_neighborhood_development_diagnostic.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `git diff --check`.
+- Validation result: repeated reports were byte identical; 10 focused diagnostic/registry tests passed; all 221 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and diff checks passed; registry audit passed with 42 tracked/documented AI tests and 139 referenced paths.
+- Preserved failed evidence: before the retained report existed, the first focused test run produced `1 failed, 3 passed`; the report-loading test failed closed with `FileNotFoundError`. The report was then generated through the intended command, after which the focused suite passed. No model, threshold, split, policy, or authority changed in response.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened.
+- Limitations: this analyzes one consumed synthetic development split and correlated static visual states. Failure concentration is not an unbiased generalization estimate. It contains no physical camera, commissioned calibration, synchronized measured feedback, measured dilation, physical lighting, tool/cable/hand evidence, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority.
+- Supersedes: none. V16 remains rejected; v14 evaluation and v15/v16 development remain consumed.
+- Next dependency: keep v16 rejected and preserve its threshold. Prioritize the synchronized deterministic geometry path for known self-occlusion. If another learned successor is attempted, freeze fresh group-isolated train/development identities, architecture, training, bootstrap, and asymmetric gates before rendering, and do not open an untouched evaluation source until its clustered development gate passes.
+
+
+### E-20261001-AI-494 — geometry-first fusion closes synthetic v16 misses by construction
+
+- Stage: S2/S3 synthetic development-only architecture replay.
+- Lane: AI/model read-only mask reconciliation and fusion replay; no arm-lane or integration-gate status changed.
+- Claim commit: `e2cb582a0f0400ac2d2d9f6446da399d5735836b`.
+- Implementation commit: `a576f6658acf7ccab6da067fcce4f6ee152ac962`.
+- Change: added a deterministic replay that verifies the retained v16 Isaac source receipt, dataset, development rows, rejected scorecard, target catalog, and four development robot-mask atlases; independently rerasterizes every target safe polygon against the atlas crop; reconciles 4,800 pose-target overlaps and 14,400 lighting rows; reconstructs learned decisions from every scorecard failure identity; and applies conservative geometry OR learned abstention at every frozen offset inside 2 mm. It opens no evaluation source and performs no render, training, threshold selection, or promotion.
+- Exact command: `python software/ai/eval/replay_geometry_first_fusion_development.py --source-manifest C:\IsaacSim\artifacts\issue190\fixed-overview-grouped-v16-run1\manifest.json --dataset-manifest C:\IsaacSim\artifacts\issue190\grouped-neighborhood-data-v1\manifest.json --development-rows C:\IsaacSim\artifacts\issue190\grouped-neighborhood-data-v1\development.jsonl --scorecard C:\IsaacSim\artifacts\issue190\grouped-neighborhood-candidate-v1\scorecard.json --output software/ai/eval/geometry_first_fusion_replay_v1.json`; repeated unchanged with `%TEMP%\geometry_first_fusion_replay_v1_second.json`.
+- Bound source SHA-256 values: Isaac manifest file `8e54e4f8b9e58b4a11c986678e410724c1b0d929904d4229bb31b1c8f63a4043`; canonical Isaac receipt `576e6512a2c27d33773957592805499975895edb162537b457ed198caa514bab`; dataset manifest file `17c18d1d2189b5f79bfdbdcda84a1ec47b1174ea349db27b05d9e98309614204`; canonical dataset `7a7521d7fdad19b33f86261c3f30560b101d720538e8d994fd9852e7901d32a8`; development rows `13beb5470db53da2a2e517945a0e519d77a5375ec010c3da10a485567708de9c`; scorecard file `ef03701d5841dafb15537cfbd34e5b0e6b4046583e8689dc30e185e5e7a7bbab`; canonical scorecard `ec11ca7302901c7051ef5aadae2d0df7833f58f30cf4d8c0f0e8b92f74c3ec38`; model `af917bb4ecc0aa07de904b44e0c78f1afda4ebf64d5629dddb09f064d0cd7969`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; mask atlases `c4e33e0b4b686aaed688abe39a81d0f54638351de2d2b9ba7beb7cc58a4235ab`, `215622ca38eb246d487057a800180f5e76f7ed5ad3232952798b3c756ddd09a4`, `81d1b96a34e2eea4480cc396cc3cf7212003ec34a1d2297d6116e9bdf24565fc`, and `587e3ed2ddbe9380ac67e5276822b7c98af8d6eae332f12f70a4dbd075cde513`.
+- Artifact SHA-256 values: replay tool `b165034b89d390ba1d211ce9b8676bd9b547fbd502d14ccbe7d7e08461ad0f9d`; report file `e25faa568fe6600bc0ab866cf14bd9074e9e0b946c00cc968af1c7c84366d8fc`; canonical report `737f923ae835b6a3b07ca573014f030c5f47707414ef2f55eb575783fc5816c9`; schema `7b4bf3d66240274711c3cba2cccf0ee119be874ca9928fd96f9d18717eb3b9fd`; tests `600a5473acf3fbcb1540af6d7c5df074cb2131c2853bb1c6069517a85d9f4dcc`; registry file `73c012023c136f7d605219d7a36ea62180579eb4b6b50d7f86516e7e25c8ecbb`; canonical registry `98b372fa10e1b00114ba093426cbf83dcbc6fd46d615251623d843e2c2a16718`; registry audit file `0b4cc2adcac2f8df280bda1e39939d79a519e19d2a6d4ed649a0a82e17a69a25`; registry audit receipt `59ce2627525fab7117a7f11fc95c003351d026e46c06590d5f4b407d7a86df3b`.
+- Nominal result: learned confusion is 2,106 true abstentions, 12 misses, 12,049 true visible decisions, and 233 false stops. Conservative fusion is 2,118 true abstentions, zero misses, 12,049 true visible decisions, and 233 strict false stops. Fifteen strict geometry false stops are inside the frozen ambiguity band and are already a subset of learned false stops. Accepting either answer for those rows gives 218 nominal false stops (`1.7750%`).
+- Ring result: all 17 offsets through the selected 2 mm ring have zero fused misses. Worst strict fused false stops are 881 of 12,282 visible rows (`7.1731%`); worst ambiguity-accepted fused false stops are 866 (`7.0510%`). The report retains all 54 ambiguity-band row identities rather than excluding them. These are point replay counts, not a new clustered qualification or gate pass.
+- Interpretation: the result verifies the architecture seam and conservative OR behavior. It does not demonstrate independent accuracy because the retained Isaac semantic mask is also the source of the synthetic truth label. The zero misses therefore occur by construction when the exact source geometry is available. V16 remains rejected as a learned checkpoint and is not a residual-obstruction model.
+- Validation commands: two exact replay commands above followed by byte comparison; `python -m pytest software/ai/tests/test_geometry_first_fusion_replay.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/replay_geometry_first_fusion_development.py software/ai/tests/test_geometry_first_fusion_replay.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `git diff --check`.
+- Validation result: repeated retained reports are byte identical; 11 focused replay/registry tests passed; all 226 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and diff checks passed; registry audit passed with 43 tracked/documented AI tests and 143 referenced paths.
+- Preserved failed evidence: the first real-artifact invocation failed closed because the draft source-schema constant did not match the exact retained v16 schema; the constant was corrected to `tactevra.isaac_fixed_overview_mesh_render.v16` before producing the report. The first combined focused run produced `1 failed, 10 passed` because the registry paths were updated before its canonical hash; regenerating the canonical registry hash resolved that expected integrity failure. A subsequent `git diff --check` exposed a Windows text-mode CRLF rewrite of the registry; the file was restored to LF bytes without changing its JSON content.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened and only retained atlas bytes were read.
+- Limitations: no measured dilation, commissioned camera calibration, camera-to-board transform, exposure-time measured-feedback bracket, qualified interpolation, tool/support mesh, cable, hand, glare truth, physical image, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority is present. The existing learned checkpoint detects synthetic self-occlusion and cannot be treated as the future residual-obstruction model.
+- Supersedes: none. V16 remains rejected and every consumed dataset remains consumed.
+- Next dependency: commission the geometry producer against exposure-synchronized measured servo feedback and independently measured dilation, then collect parked-pose physical originals and synthetic residual-obstruction cases for cable, tool, hand, glare, and degradation. Train or select the residual path only on a separately frozen design; retain conservative OR fusion and open no untouched evaluation until its clustered development gate passes.
+
+
+### E-20261001-AI-495 — residual-obstruction pretraining is frozen before crop generation
+
+- Stage: S2/S3 synthetic parked residual-obstruction pretraining predeclaration.
+- Lane: AI/model fixture and offline model plan only; no arm-lane or integration-gate status changed.
+- Claim commit: `5efc901ae7271218c562f45cd995f1710e9f62e9`.
+- Implementation/predeclaration commit: `7e0509d0828a557c04a38aef47fc51c49dea70c8`.
+- Change: added a strict deterministic fixture builder, schema, retained fixture, and tests. The builder binds the exact fixed-camera practice manifest, corpus, target catalog, and `hover_t__nominal` / `hover_e__nominal` image hashes; preserves the same ordered 75-target catalog across splits; assigns eight cases per target; freezes crop geometry, procedural obstruction parameters, the small offline model plan, and asymmetric target-cluster development gates; and rejects source mutation, mixed target catalogs, authority, or physical effects. It emits specifications only and does not generate crop images, train, open evaluation, or create motion authority.
+- Exact command: `python software/ai/sim/build_residual_obstruction_campaign_fixture.py --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --output software/ai/sim/evidence/residual_obstruction_pretraining_v1.json`; repeated unchanged with `%TEMP%\residual_obstruction_pretraining_v1_second.json`.
+- Bound source SHA-256 values: source manifest file `a529ffbdc39aff5450d0378f2e3020c83b398a3e7f853b0ef4e957748e34c7fd`; canonical source corpus `03e2d3d7ac2d3a0026b2c24cb0a9d709190794e1adb5b69e038374fa46f152e4`; source generator `b364906e0798c4f032bf2e329041a775a008e5ee7aa7a23ee0b1c83e0cb90163`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; training source image `2b6f4d49da7e28e78e9ca900d1f4133432b88d44ec7c9b8bc70f9fe98eed1e92`; development source image `d0f3802c9035a4e3f8141dad87bcfa6a89930f3d009d926927b3378de923418b`.
+- Artifact SHA-256 values: fixture builder `e677f04193ebcfc764fbc0a06a9ff5bb638e1292c4c2161bb0ad252fdc37aa34`; retained fixture file `c6588a42e9e2e48c28773e09290a04eb7fc940eb5a83349185d17e3243c59602`; canonical fixture `06f3972c71fa4132083cd963285824d49577eaf933cab4e411da84224a2ebfef`; schema `37673f358a670953d1c326148c60d8121f50486e3af9c832823aff8c63e7786b`; tests `1497eba96fec207f84fabaa515ec459b011b9d0b5846cac5e7542d37d32ee207`; registry file `dea5db40e4bb0262088acd79814462a18642d27ca78cce40e6e76bdebf7bd822`; canonical registry `5197d76e8e66f3f19c347953574b334989adf48475802ffa12f4850788966c72`; registry audit file `c1c99b0f7a4a1c35121d29cffbab79f143dfb5e8988fd2b4280e1a6a5f6f437f`; registry audit receipt `5e6fcbe98c9d38c0c12ad48c747f733c66791ae391f4e1b1076e74ae2a200d9e`.
+- Frozen inventory: 1,200 specifications total; training has 600 rows with 150 visible and 450 abstention labels; development has 600 rows with 150 visible and 450 abstention labels; evaluation has zero rows. Each split contains all 75 targets and exactly one clear, adjacent-distractor, cable, tool, hand, foreign-object, glare, and degradation case per target. Training uses only `hover_t`; development uses only `hover_e`.
+- Frozen model and gate: `target_crop_residual_cnn_v1`, channels `[16,32,64]`, 12 epochs, batch 64, learning rate `0.0005`, weight decay `0.0001`, seed `19017`, thresholds `0.05` through `0.95` by `0.05`; point and 2,000-resample target-cluster upper bounds must both pass 2% missed abstentions and 10% visible false stops. Evaluation remains unopened.
+- Validation commands: two exact fixture commands above followed by SHA-256 comparison; `python -m pytest software/ai/tests/test_residual_obstruction_campaign_fixture.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/sim/build_residual_obstruction_campaign_fixture.py software/ai/tests/test_residual_obstruction_campaign_fixture.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: repeated fixtures were byte identical; 11 focused fixture/registry tests passed; all 231 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and all repository governance checks passed. The registry audit covers 44 tracked/documented AI tests and 147 referenced paths. Source footprint is 6,146 tracked files, 655,127,539 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened.
+- Limitations: this is a synthetic procedural design over only two correlated retained views with simplified surfaces and an unmeasured camera. It contains no generated crop dataset, trained model, measured metric, untouched evaluation, physical camera, commissioned calibration, synchronized feedback, measured dilation, real cable/tool/hand/glare evidence, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority. Pose separation between two views does not establish physical or statistical independence.
+- Supersedes: none. V16 remains rejected; the geometry-first seam remains primary for known self-occlusion; every evaluation source remains closed.
+- Next dependency: generate the exact frozen crops outside this fixture, inventory and hash them independently, train only the declared model, and apply the target-cluster development gate without opening evaluation. Commission exposure-synchronized measured-feedback projection, measured dilation, and physical parked-pose originals in parallel.
+
+
+### E-20261001-AI-496 — first residual-obstruction candidate fails development
+
+- Stage: S2/S3 synthetic parked residual-obstruction crop generation, offline training, and development-only selection.
+- Lane: AI/model external dataset and model artifacts plus retained development scorecard; no arm-lane or integration-gate status changed.
+- Claim commit: `b1279e50471ad18f16dc36a4265f17b10314c470`.
+- Implementation commit: `cf7aa8613876ae1b4c70f73b8322cf8007b4367e`.
+- Change: added one deterministic materialize/verify/train entry point, a strict retained-result schema, a retained failed scorecard, and focused tests. It materializes only the 1,200 specifications frozen by E-495, independently verifies exact regular-file hashes and inventory, trains only `target_crop_residual_cnn_v1` with the frozen 12-epoch plan, scores every declared threshold with the frozen 2,000-resample target-cluster bootstrap, rejects missing/extra/changed files, and opens no evaluation source. Generated images and model bytes remain external hashed artifacts.
+- Exact materialization commands: `python software/ai/train/build_residual_obstruction_pretraining.py materialize --fixture software/ai/sim/evidence/residual_obstruction_pretraining_v1.json --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --output-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-data-v1`; repeated unchanged with output suffix `v2`.
+- Exact verification commands: `python software/ai/train/build_residual_obstruction_pretraining.py verify --fixture software/ai/sim/evidence/residual_obstruction_pretraining_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-data-v1`; repeated unchanged with dataset suffix `v2`.
+- Exact training commands: `python software/ai/train/build_residual_obstruction_pretraining.py train --fixture software/ai/sim/evidence/residual_obstruction_pretraining_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-data-v1 --output-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-candidate-v1 --retained-report software/ai/eval/residual_obstruction_development_v1.json`; repeated unchanged with dataset and candidate suffix `v2` and without rewriting the retained report.
+- Dataset result: both 1,201-file trees are byte identical, contain 7,747,442 bytes, and have manifest file SHA-256 `32f2264cabb7833f3d2cee13d9ab7fcdcca91d7b75ba1e9dc1221dfc29800aa7`. Canonical dataset SHA-256 is `a6188e5ae191e2bfc71dae37ee26f174d5a056d3d4958ae7c2f472ef9bff2830`; inventory SHA-256 is `9dbbe3bb397f85fff576b68b80610901b5f3ab5d6a07cea501a3780dcd273a7d`. Each tree contains 600 training and 600 development PNG crops; evaluation has zero rows.
+- Model result: both 95,797-byte model files are byte identical with SHA-256 `90d32245902a20653e829627772d78604bd8c11880bc5be1c54bf14343831946`. Both scorecards are byte identical with file SHA-256 `d2197eb2292c4ed603132dc3aa1ee06d40ce910382b9c9e74bfafac06c457a29` and canonical result SHA-256 `c04f8dc67ba09fa4fc582b85d1b186c13d9c0dafa7855d41545c193a568a6573`. Training loss decreases from `0.6869502171` to `0.5415630054` across 12 epochs.
+- Development result: `FAILED_DEVELOPMENT_GATE`; no threshold was selected. Thresholds `0.05` through `0.65` detect every obstruction but falsely stop every visible row. At `0.75`, 126/450 obstructions are missed (`28.0%`, target-cluster upper bound `32.6667%`) and 40/150 visible rows falsely stop (`26.6667%`, upper bound `36.0%`). At `0.80`, misses are 363/450 (`80.6667%`, upper bound `85.5556%`) while false stops are 2/150 (`1.3333%`, upper bound `4.0%`). No declared threshold meets both 2% and 10% point and clustered limits. Threshold adjustment cannot repair this candidate.
+- Artifact SHA-256 values: pipeline `7b61d7b5e0615089fcff0cec6dca379e55cb41e556c29388f55361bb7ef17532`; retained scorecard `d2197eb2292c4ed603132dc3aa1ee06d40ce910382b9c9e74bfafac06c457a29`; schema `80f66959bc82dba51a49e34deb7e3d8a4409b53b63d2c1d3f0a60437931662da`; tests `16b4c6b1d43d89569c9ced209b28c02db588403d359761fc49cb0e3d86d63211`; registry file `ba87dc6c6291a725fa497f3b1fbd5c78a97efdce93847628bcdcf9372b64ba55`; canonical registry `3a09abbdee0259f4451a041f967586751036427cfcb50ae547f1620d814f748b`; registry audit file `e48affd50cc33dd1214f6b0e3fea945b50b2c4ee7579533ac9d4e66acb6d1a27`; registry audit receipt `f6b09fbba2a3f082658c1540a2c8c180c45f3f0fa321f1e1d98e1d38e3bc034b`.
+- Validation commands: the exact generation, verification, and training commands above; `python -m pytest software/ai/tests/test_residual_obstruction_pretraining.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/train/build_residual_obstruction_pretraining.py software/ai/tests/test_residual_obstruction_pretraining.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: the two datasets, models, and scorecards are byte identical; 11 focused pipeline/registry tests passed; all 236 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. Registry audit covers 45 tracked/documented AI tests and 151 referenced paths. Source footprint is 6,150 tracked files, 655,176,760 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened and all work was offline image processing and CPU training.
+- Limitations: this is a failed synthetic development result over two correlated practice views, simplified surfaces, deterministic image-space proxies, and an unmeasured camera. It contains no untouched evaluation, physical obstruction image, commissioned calibration, measured feedback, measured dilation, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority. The development split is consumed and cannot select a repaired successor.
+- Supersedes: none. The candidate is rejected, V16 remains rejected, the geometry-first seam remains primary for known self-occlusion, and every evaluation source remains closed.
+- Next dependency: diagnose the consumed development probabilities by obstruction variant and target without changing the checkpoint or threshold. Use that diagnosis only to predeclare a fresh pose- and appearance-diverse residual campaign. Continue exposure-synchronized measured-feedback projection, measured dilation, and physical parked-pose originals in parallel.
+
+
+### E-20261002-AI-497 — residual failure spans every target and includes duplicate distractor crops
+
+- Stage: S2/S3 consumed synthetic development-only diagnosis after the failed residual gate.
+- Lane: AI/model read-only model reconstruction and failure attribution; no arm-lane or integration-gate status changed.
+- Claim commit: `126db9ede1d6f7a057abd53e58493505257cae4a`.
+- Implementation commits: `343b4b548bb9b92745af71bd6d7cf4cd50c607cd` adds the exact model decoder, diagnostic, schema, retained report, registry, and tests; `60fcebe9513f449f6c93c8e3dd44b96e12506312` retains the independently discovered clear/distractor byte-identity count in that report and schema. Neither commit changes the checkpoint, threshold grid, dataset, or evaluation state.
+- Change: the diagnostic verifies the frozen fixture, exact 1,200-file dataset inventory, rejected scorecard, and model hash; decodes the deterministic model artifact; reconstructs all 600 development probabilities; requires their byte hash and ordered observation hash to match E-496; attributes distributions at thresholds `0.75` and `0.80` by all eight variants and all 75 targets; measures per-target visible/obstruction separation; and checks clear/distractor image hashes. It rejects model, source, scorecard, identity, probability, evaluation-state, or authority mismatches.
+- Exact command: `python software/ai/eval/diagnose_residual_obstruction_development.py --fixture software/ai/sim/evidence/residual_obstruction_pretraining_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-data-v1 --model C:\IsaacSim\artifacts\issue190\residual-obstruction-candidate-v1\model.bin --scorecard C:\IsaacSim\artifacts\issue190\residual-obstruction-candidate-v1\scorecard.json --output software/ai/eval/residual_obstruction_development_diagnostic_v1.json`; repeated unchanged with dataset/candidate suffix `v2` and `%TEMP%\residual_obstruction_development_diagnostic_v1_second.json`.
+- Bound input SHA-256 values: fixture file `c6588a42e9e2e48c28773e09290a04eb7fc940eb5a83349185d17e3243c59602`; canonical fixture `06f3972c71fa4132083cd963285824d49577eaf933cab4e411da84224a2ebfef`; dataset manifest file `32f2264cabb7833f3d2cee13d9ab7fcdcca91d7b75ba1e9dc1221dfc29800aa7`; canonical dataset `a6188e5ae191e2bfc71dae37ee26f174d5a056d3d4958ae7c2f472ef9bff2830`; dataset inventory `9dbbe3bb397f85fff576b68b80610901b5f3ab5d6a07cea501a3780dcd273a7d`; model file `90d32245902a20653e829627772d78604bd8c11880bc5be1c54bf14343831946`; scorecard file `d2197eb2292c4ed603132dc3aa1ee06d40ce910382b9c9e74bfafac06c457a29`; canonical scorecard `c04f8dc67ba09fa4fc582b85d1b186c13d9c0dafa7855d41545c193a568a6573`.
+- Global result: pairwise AUC is `0.7585185185`. Visible probabilities have minimum `0.714412451`, maximum `0.802202523`, mean `0.738759756`, and median `0.737469614`. Obstruction probabilities have minimum `0.678780198`, maximum `0.907149673`, mean `0.770756662`, and median `0.770943880`.
+- Target result: zero of 75 targets are locally separable. For every target, the minimum obstruction probability is below the maximum visible probability. The worst separation margin is `-0.038004994` on target `2`; the best is still negative at `-0.000876069`. The problem therefore spans the full target catalog rather than one target or keyboard region.
+- Variant result: all 75 development `none_adjacent_distractor` PNG files are byte identical to the corresponding `none_clear` files, so the planned adjacent distractor did not enter the crop. `image_degraded` is the lowest-scoring obstruction variant with mean `0.734067500`; 17/75 rows abstain at `0.75` and 0/75 at `0.80`. Cable abstains on 46/75 at `0.75` and 21/75 at `0.80`; tool abstains on 46/75 and 35/75. Localized glare is the only obstruction family with 75/75 abstentions at `0.75`. Clear and adjacent-distractor each produce 20/75 false stops at `0.75` and 1/75 at `0.80`.
+- Interpretation: the failed gate reflects dataset construction, source-pose transfer, and broad variant overlap. Threshold adjustment cannot correct it. A successor must prove that every adjacent distractor changes retained pixels while preserving zero target overlap, introduce multiple source-pose and appearance groups with split isolation, and broaden degradation/cable/tool severity before generation. These consumed identities cannot evaluate that successor.
+- Artifact SHA-256 values: final diagnostic tool `1816b9f7147e26954780749ecbe88c3368902b62065c09ba4c4ab385603d0a4b`; retained report file `91a3185c431067a5533ea3d6cc21342605a93b04f55935c914a4ea1f0779bb84`; canonical report `b4e9e51ad92962894330500e18ce062ef059759b851716552b7a6b6b7b23235d`; schema `da42c754dcfbda98495064f2ebbc4ee0ff164f3eb1534a9617d1ed7cdac50da5`; tests `7153f406f7a1bc128c23f0ac3ea0034e4845e76a77f729947eb8b371a808c5ac`; registry file `0382f51934997d676e0a2221d58a1e66b42262b3caa0c5b3b1c88d7af8381681`; canonical registry `139b4078727b849861ab28593cc5dc066156e368f0812620c6e13ef630153f88`; registry audit file `e18cd4b3b5d75f2f6118645c8e3368fb51cd4b3c64a3e7deec870f45f8270314`; registry audit receipt `d71dd8806e27fc222a316754f2e048e33fc70f4d10441f95ae6217baed93d581`.
+- Validation commands: two exact diagnostic commands above followed by file SHA-256 comparison; `python -m pytest software/ai/tests/test_residual_obstruction_development_diagnostic.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/diagnose_residual_obstruction_development.py software/ai/tests/test_residual_obstruction_development_diagnostic.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: repeated reports are byte identical; 10 focused diagnostic/registry tests passed; all 240 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. Registry audit covers 46 tracked/documented AI tests and 155 referenced paths. Source footprint is 6,154 tracked files, 655,243,424 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened and only retained crop/model bytes were read.
+- Limitations: this reuses a consumed synthetic development split from two correlated practice views with simplified surfaces and an unmeasured camera. Per-variant and per-target identities are design evidence only. There is no untouched evaluation, physical obstruction image, commissioned calibration, synchronized feedback, measured dilation, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority.
+- Supersedes: none. The residual candidate remains rejected, its development split is consumed, V16 remains rejected, the geometry-first seam remains primary for known self-occlusion, and every evaluation source remains closed.
+- Next dependency: predeclare a fresh pose- and appearance-diverse residual campaign before generating data. Require nonduplicate adjacent distractors, multiple source-pose and appearance groups isolated across train/development, and severity diversity for degradation, cable, and tool cases. Continue exposure-synchronized measured-feedback projection, measured dilation, and physical parked-pose originals in parallel.
+
+
+### E-20261002-AI-498 — residual successor v2 is frozen before rendering
+
+- Stage: S2/S3 synthetic parked residual-obstruction successor predeclaration.
+- Lane: AI/model render fixture, model plan, and development-gate policy only; no arm-lane or integration-gate status changed.
+- Claim commit: `2c4dbec42f3447b8b4c512b21dcd4dbced0f2f96`.
+- Implementation/predeclaration commit: `d754434045bac59b177be107925ac2a27aba7bda`.
+- Change: added a deterministic v2 fixture builder, strict schema, retained fixture, and focused tests. The fixture binds the exact retained fixed-camera source and E-497 diagnostic, freezes six training and three development parked-camera perturbation identities, four training and three development appearance identities, 15 target-balanced variants, exact observation counts, renderer admission, a small RGB-only offline model, threshold candidates, whole-view clustered development gates, and an empty evaluation split. It emits no images or model and performs no training.
+- Exact command: `python software/ai/sim/build_residual_obstruction_successor_fixture.py --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --diagnostic software/ai/eval/residual_obstruction_development_diagnostic_v1.json --output software/ai/sim/evidence/residual_obstruction_successor_v2.json`; repeated unchanged with `%TEMP%\residual_obstruction_successor_v2_second.json`.
+- Bound source SHA-256 values: source manifest file `a529ffbdc39aff5450d0378f2e3020c83b398a3e7f853b0ef4e957748e34c7fd`; canonical source corpus `03e2d3d7ac2d3a0026b2c24cb0a9d709190794e1adb5b69e038374fa46f152e4`; source generator `b364906e0798c4f032bf2e329041a775a008e5ee7aa7a23ee0b1c83e0cb90163`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; diagnostic file `91a3185c431067a5533ea3d6cc21342605a93b04f55935c914a4ea1f0779bb84`; canonical diagnostic `b4e9e51ad92962894330500e18ce062ef059759b851716552b7a6b6b7b23235d`.
+- Frozen campaign: six training and three development view groups with camera translation/rotation perturbations around a synthetic parked-observation reference; four training appearances (`neutral`, `dim`, `bright`, `warm`) and three disjoint development appearances (`cool`, `directional shadow`, `sensor noise`); 75 targets; 15 variants per target; 27,000 training rows; 10,125 development rows; zero evaluation rows.
+- Variant policy: three visible families (`clear`, `adjacent left`, `adjacent right`) and 12 abstention families spanning three cable widths, tool edge/center, hand, foreign object, localized glare, light/heavy defocus, compression, and motion blur. Adjacent distractors require at least 64 changed crop pixels and exactly zero safe-region overlap. Obstruction masks must satisfy the declared overlap bands. Duplicate observation bytes fail the campaign. Truth and runtime geometry masks are prohibited as model inputs.
+- Frozen model and gate: `target_crop_residual_cnn_v2`; RGB only; convolution channels `[16,32,64]`; 18 epochs; batch 128; learning rate `0.0003`; weight decay `0.0001`; deterministic label/variant-balanced sampling; seed `19018`; threshold grid `0.05` through `0.95` by `0.05`. Development requires point and 2,000-resample whole-view cluster upper bounds at most 2% missed obstructions and 6% residual false stops, including the maximum across development appearances.
+- Artifact SHA-256 values: builder `f2a04f5898813d95490a80a5fea417d5752835922f35e3eb09c6be61196c4070`; retained fixture file `54d6b3eeceda18f5bdeeb628abacb45715cbbeac7cc518de9c51e01ee309cc0d`; canonical fixture `0833469f9d7244ba5c2f2ded3819c2c8c3ab438c68ad84fdfca8f475fedb5bfd`; schema `a284aeeb7b6e52241286745a2eddc3f6bbbc84d6a1b1ed7f1bfc5816a14916ce`; tests `3476a3db3fb5250debda38dbb618a00d1cb2d815d221d8675bca90f4b3eb8f18`; registry file `be4e665bc060cfbac97213bf235df13e066add663fbb86d3a3fe31d32d31ddea`; canonical registry `7c62decf67e99e4be0d60c2d5a9b9f03e62b7ec2a53c8cf5f99545b40b2e0022`; registry audit file `1a4a2a833b4ec3a42256521d1fad81d3722f02d2ebdc6e6d7ffff6d7a93ce7a9`; registry audit receipt `263c9155b209c9abde1233d574da4f8287af7a2e5aee3772028dd6c05fde32e7`.
+- Validation commands: two exact fixture commands above followed by file SHA-256 comparison; `python -m pytest software/ai/tests/test_residual_obstruction_successor_fixture.py software/ai/tests/test_ai_work_registry.py -q`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/sim/build_residual_obstruction_successor_fixture.py software/ai/tests/test_residual_obstruction_successor_fixture.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: repeated fixtures are byte identical; 11 focused fixture/registry tests passed; all 245 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. Registry audit covers 47 tracked/documented AI tests and 159 referenced paths. Source footprint is 6,158 tracked files, 655,285,216 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened.
+- Limitations: every view, camera perturbation, appearance, obstruction, label, and acceptance condition remains synthetic. The source scene has simplified target surfaces and an unmeasured camera. The consumed v1 diagnostic informed this design and cannot evaluate v2. This fixture has no rendered image, measured performance, physical obstruction evidence, commissioned calibration, synchronized feedback, measured dilation, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority.
+- Supersedes: none. Residual v1 and V16 remain rejected; the geometry-first seam remains primary for known self-occlusion; every evaluation source remains closed.
+- Next dependency: implement the exact v2 parked-view renderer and fail closed on any split, identity, changed-pixel, safe-overlap, obstruction-overlap, or duplicate-byte mismatch. Independently inventory the generated campaign before training. Continue exposure-synchronized measured-feedback projection, measured dilation, and physical parked-pose originals in parallel.
+
+
+### E-20261002-AI-499 — residual v2 renderer produces an admitted reproducible crop corpus
+
+- Stage: S2/S3 synthetic residual-obstruction renderer binding and crop materialization.
+- Lane: AI/model offline synthetic rendering and evidence only; no arm-lane or integration-gate status changed.
+- Claim commit: `8b108fb88065f90d2c40425b24732cdb16c276d0`.
+- Renderer-contract commit: `4dcadad59c64195d09986782dbee2793b89c3c2e`.
+- Renderer implementation/evidence commit: `0a307a2f51f3ce82db240312542e5cb02cd8ca0c`.
+- Change: first froze a separate renderer contract binding the exact retained `hover_t__nominal` image, ordered 75-target catalog, deterministic planar affine camera approximation, target geometry transform, raster rules, PNG policy, crop size, changed-pixel rule, overlap definition, and fail-closed no-duplicate policy. Only after that commit, added the renderer, independent verifier, compact retained receipt, strict receipt schema, and focused tests. The renderer produces RGB crops only; truth masks are used for labels/admission and are prohibited as model inputs. No model was trained or scored and no evaluation source was opened.
+- Exact contract command: `python software/ai/sim/build_residual_obstruction_renderer_contract.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v2.json --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --output software/ai/sim/evidence/residual_obstruction_renderer_contract_v1.json`.
+- Exact render commands: `python software/ai/sim/render_residual_obstruction_v2.py render --fixture software/ai/sim/evidence/residual_obstruction_successor_v2.json --contract software/ai/sim/evidence/residual_obstruction_renderer_contract_v1.json --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --output-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-render-v1`; repeated unchanged with output suffix `v2`.
+- Exact verification commands: `python software/ai/sim/render_residual_obstruction_v2.py verify --fixture software/ai/sim/evidence/residual_obstruction_successor_v2.json --contract software/ai/sim/evidence/residual_obstruction_renderer_contract_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-render-v1`; repeated unchanged with dataset suffix `v2`.
+- Exact retained-receipt command: `python software/ai/sim/render_residual_obstruction_v2.py receipt --fixture software/ai/sim/evidence/residual_obstruction_successor_v2.json --contract software/ai/sim/evidence/residual_obstruction_renderer_contract_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-render-v1 --output software/ai/sim/evidence/residual_obstruction_v2_render_receipt.json`.
+- Bound input SHA-256 values: v2 fixture file `54d6b3eeceda18f5bdeeb628abacb45715cbbeac7cc518de9c51e01ee309cc0d`; canonical fixture `0833469f9d7244ba5c2f2ded3819c2c8c3ab438c68ad84fdfca8f475fedb5bfd`; source manifest file `a529ffbdc39aff5450d0378f2e3020c83b398a3e7f853b0ef4e957748e34c7fd`; canonical source corpus `03e2d3d7ac2d3a0026b2c24cb0a9d709190794e1adb5b69e038374fa46f152e4`; base image `2b6f4d49da7e28e78e9ca900d1f4133432b88d44ec7c9b8bc70f9fe98eed1e92`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; renderer-contract file `3d9e661050dd92640f01d5122f747f7efec42e3728bd17d3b926401282d9d965`; canonical renderer contract `e5bef5305086d962400bdbd98efe39cf4f4dc02471243d9966375d42888f7c90`.
+- Dataset result: each independent external tree contains 37,125 PNG crops plus one manifest and occupies 329,046,332 bytes. The manifests are byte identical with file SHA-256 `8ab18548adb510943bcb39e8d16653334f17710ae6d4780ae2bc4ca6fbec9f84`; canonical dataset SHA-256 is `0328262ed2eaffb56895f39a9b975044c84f9be4d7a5b8006981601ebce43d0a`; inventory SHA-256 is `6bb68cc216ea6271d2567f7aad94a1a7ebd5feeced4c31f79b0fe6623b612ef5`. Training contains 27,000 crops, development contains 10,125, and evaluation contains zero. All 37,125 PNG byte hashes are unique. Retained PNG bytes total 304,206,952 per tree.
+- Admission metrics: the 7,425 visible labels comprise clear, adjacent-left, and adjacent-right cases; 29,700 labels are abstentions. Each of 15 variants contains 2,475 observations. Adjacent-left changes 793–799 pixels and adjacent-right changes 795–799 pixels, both with exactly zero safe-region overlap. Every cable, tool, hand, and foreign-object overlap stays within its predeclared band. Every crop is 96 by 96 RGB, all file hashes and sizes verify, no extra file exists, and neither truth nor runtime geometry masks are exposed as model inputs.
+- Artifact SHA-256 values: contract builder `2d9be04787a35633045a59e5b4c29640d39222a6535338e62bd0c4a9a05b3aa8`; contract schema `340f771de9a0392539077f473beca29f86e519cfa15b13d08ca9a7ef24969aa8`; retained contract `3d9e661050dd92640f01d5122f747f7efec42e3728bd17d3b926401282d9d965`; contract tests `c05a9f02a4c7c92249ae1363e32e9b2e171263b8d2cd1d019810c2a5600de2cb`; renderer `c7d6aa4b8865d6d61f8239534c5861682971d70f911671b06dc5d665a9d50db5`; receipt schema `a42581c27eb64da462f641d75d83411c131a98b4e6a4a7367c34775e7a796195`; retained receipt file `572d5b93f1cfe375c0ef5340d083bd730f27200928239e80040d0eb5df44e78c`; canonical receipt `2b917f6f1f6da6dc2c6de9d947c37846435a8f626737f08f678e5553720ca9d4`; renderer tests `99f56dbbc4e2a8c513deb2b8da373246a337ebee2f5a47e95f669c2ca761dcdc`; registry file `e9d9090bb5ac1a3563a0a7595f2b9db9c24ad8250d115e6eb47f46be0cf47f50`; canonical registry `e16418e5ef86f7f7adc9141999c37f1012190fa033bfe11cb3f20451ce49d0e1`; registry audit file `82b560d98845361f871ea1655799e5d9f0a83eeb0178ab6ef932cfa78eb15a38`; registry audit receipt `f102e3da2470ff435c300f89ae0a83964ef8d81008f47e5b7509ad24cc4ccccb`.
+- Validation commands: the exact render, verify, and receipt commands above; manifest SHA-256 comparison with `Get-FileHash`; `python -m pytest -q software/ai/tests/test_residual_obstruction_v2_renderer.py software/ai/tests/test_residual_obstruction_renderer_contract.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/sim/render_residual_obstruction_v2.py software/ai/tests/test_residual_obstruction_v2_renderer.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: ten focused renderer/contract tests passed; all 255 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. Registry audit covers 49 tracked/documented AI tests and 167 referenced paths. Source footprint is 6,166 tracked files, 655,350,506 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the first focused renderer/contract run produced `1 failed, 8 passed` because the test used a uniform image and incorrectly required blur and motion blur to alter it. The test fixture alone was changed to a deterministic textured image; renderer behavior, the frozen contract, and every admission threshold stayed unchanged. No dataset existed at that point. A later read-only PowerShell size-summary command had an empty-pipe parser error; the corrected command reported the identical tree sizes above and did not modify either dataset.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened in this increment. The renderer used the exact retained Isaac-derived practice image as its base and performed offline deterministic pixel-domain transformations.
+- Limitations: every crop derives from one simplified synthetic base image through deterministic pixel-domain transformations. The planar affine camera approximation is not a calibrated 3D render. Procedural obstruction shapes and lighting do not establish physical realism. Dataset admission proves bindings, identities, split counts, byte uniqueness, and declared pixel/overlap constraints; it does not prove useful features, model accuracy, camera calibration, localization, collision safety, contact success, deployment readiness, or physical authority. The development split is unopened but will become consumed when used for threshold selection; evaluation remains absent.
+- Supersedes: none. Residual v1 and v16 remain rejected; the geometry-first seam remains primary for known self-occlusion; every evaluation source remains closed.
+- Next dependency: materialize the frozen RGB-only v2 loader from this admitted manifest, verify exact identity/split isolation, train `target_crop_residual_cnn_v2` once under the frozen seed and hyperparameters, and score only development against the precommitted point and whole-view cluster gates. Preserve failure without threshold changes and do not create an evaluation source unless a later separately frozen design requires it.
+
+
+### E-20261002-AI-500 — residual v2 training is reproducible and fails development
+
+- Stage: S2/S3 synthetic residual-obstruction training and development-only selection.
+- Lane: AI/model offline loading, GPU training, and synthetic development scoring only; no arm-lane or integration-gate status changed.
+- Claim commit: `454d5e76b816c271561d8a77d1b89f6692e295c0`.
+- Implementation/evidence commit: `e6de99167656734f86d60abfd76593a1f156f4bc`.
+- Change: added a strict manifest-verified RGB crop loader, deterministic label-and-variant-balanced sampler, the frozen three-layer CNN v2, deterministic CUDA training, exact model serialization, whole-view clustered bootstrap scoring, worst-development-appearance scoring, strict result schema, retained failed scorecard, and focused tests. The implementation accepts only the frozen fixture, renderer contract, and admitted dataset, refuses evaluation data and existing output directories, and creates candidate files only after training and scoring complete.
+- Exact training command: `python software/ai/train/train_residual_obstruction_v2.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v2.json --contract software/ai/sim/evidence/residual_obstruction_renderer_contract_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-render-v1 --output-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-candidate-v2`; repeated unchanged with output suffix `v3`.
+- Bound inputs: fixture file SHA-256 `54d6b3eeceda18f5bdeeb628abacb45715cbbeac7cc518de9c51e01ee309cc0d`; canonical fixture `0833469f9d7244ba5c2f2ded3819c2c8c3ab438c68ad84fdfca8f475fedb5bfd`; renderer-contract file `3d9e661050dd92640f01d5122f747f7efec42e3728bd17d3b926401282d9d965`; canonical contract `e5bef5305086d962400bdbd98efe39cf4f4dc02471243d9966375d42888f7c90`; dataset-manifest file `8ab18548adb510943bcb39e8d16653334f17710ae6d4780ae2bc4ca6fbec9f84`; canonical dataset `0328262ed2eaffb56895f39a9b975044c84f9be4d7a5b8006981601ebce43d0a`; inventory `6bb68cc216ea6271d2567f7aad94a1a7ebd5feeced4c31f79b0fe6623b612ef5`.
+- Reproducibility: both completed GPU runs produced byte-identical 95,120-byte models with SHA-256 `0f5982b6af2761ce367837c35094647cfa5711f1fd042ede36650ba9306a1367` and byte-identical scorecards with file SHA-256 `a82755040aec805a68aea263c86d24c07ce03657c6756999041c4977beac548a`. Canonical result SHA-256 is `8b748d1b21f38beb1580cb7217bddbd643dde81e6b1b277341a531465a7618fb`; development-probability SHA-256 is `d9931a32be2b6d3fd29c53b77dd012392ef003c0d27a389bbea10caf1529b7b6`.
+- Training result: all 27,000 training crops were sampled for each of 18 deterministic epochs with equal visible/abstain allocation and uniform allocation across variants inside each label. Loss decreased from `0.6909732927` to `0.4133035734`. Development contains 10,125 rows: 8,100 obstruction and 2,025 visible. Evaluation contains zero rows.
+- Development result: `FAILED_DEVELOPMENT_GATE`; no threshold was selected. At threshold `0.10`, missed obstructions are 80/8,100 (`0.9877%`) with whole-view upper `1.1235%`, but visible false stops are 1,230/2,025 (`60.7407%`) with whole-view upper `62.1235%`. At threshold `0.20`, misses are 566/8,100 (`6.9877%`) with whole-view upper `7.2099%`, while false stops are 758/2,025 (`37.4321%`) with whole-view upper `38.6173%`. Its worst-appearance miss and false-stop rates are `18.7037%` and `54.2222%`. Every one of the 19 frozen thresholds fails at least one 2% miss or 6% false-stop point, whole-view, or worst-appearance limit.
+- Artifact SHA-256 values: training tool `f080741f0be075785dd6aadba12436e154a2dad235a05fe65e72540f893b09da`; result schema `72f23070be500ce4803373ead84d77d3a83cc73b022010b7ece76e6d983b6785`; retained scorecard `a82755040aec805a68aea263c86d24c07ce03657c6756999041c4977beac548a`; focused tests `159c9dd88158b9267a5ffbed40c84e205e9975e5cba7652270379a4893b1cfa5`; registry file `77db21123855d2bca77eb60172bce899ed601fbc1187548e25514aa29ac7d666`; canonical registry `78b90029ce33e2cea4e297531a55a467eb2bf715cfb5c563ffeb59e2bd6256c4`; registry audit file `ebfa88d8d335ee5d663834e4377dc5e868985e17d1d338f38a0415ff5bd2b711`; registry audit receipt `81e16b997742ea3384e747c8ce33ee2fe6abf8dbf3eed9501dda5c3c955e9222`.
+- Validation commands: the two exact training commands above followed by `Get-FileHash` model/scorecard comparison; `python -m pytest -q software/ai/tests/test_residual_obstruction_v2_training.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/train/train_residual_obstruction_v2.py software/ai/tests/test_residual_obstruction_v2_training.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: four focused training tests passed; all 259 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. Registry audit covers 50 tracked/documented AI tests and 171 referenced paths. Source footprint is 6,170 tracked files, 655,403,428 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the first attempted run used output suffix `v1` and failed before completing epoch one because deterministic CUDA mode requires `CUBLAS_WORKSPACE_CONFIG` before CuBLAS initialization. It emitted no model or scorecard and left only an empty output directory. The implementation now sets `:4096:8` before importing Torch and defers output-directory creation until after training/scoring. The frozen architecture, data, seed, sampler, epochs, thresholds, and gates did not change. The two subsequent runs reproduced exactly.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened and training used offline retained crop bytes.
+- Limitations: training and development derive from one simplified synthetic base scene with pixel-domain camera, appearance, and obstruction transforms. The strong appearance-specific failure shows that deterministic rendering diversity did not create sufficient invariant separation. This result contains no untouched evaluation, physical obstruction image, commissioned calibration, synchronized measured feedback, measured dilation, localization qualification, collision evidence, controller command, transport field, permit, deployment qualification, or physical authority.
+- Supersedes: none. Residual v1, residual v2, and v16 remain rejected; geometry-first handling remains primary for known self-occlusion; evaluation remains absent.
+- Next dependency: diagnose the consumed v2 development probabilities by variant, appearance, view, and target without changing the checkpoint or threshold. Use the diagnosis only to predeclare a fresh successor that addresses appearance transfer and physically shaped residual obstructions. Continue measured-feedback geometry projection, measured dilation, and physical parked-pose collection in parallel.
+
+
+### E-20261002-AI-501 — residual v2 diagnosis proves catalog-wide score overlap
+
+- Stage: S2/S3 consumed synthetic development-only diagnosis after the rejected residual v2 gate.
+- Lane: AI/model read-only probability reconstruction and failure attribution; no arm-lane or integration-gate status changed.
+- Claim commit: `6419340feaf3abb0050a93bffa54482aff5dc608`.
+- Implementation/evidence commit: `cc2d6b0ddea32359e8fc6c3cd957b14e336450c5`.
+- Change: added a fail-closed diagnostic that binds the exact v2 fixture, renderer contract, admitted dataset manifest, rejected checkpoint, and scorecard; reconstructs all 10,125 ordered development probabilities with the exact training-time CUDA preprocessing path; verifies the frozen probability digest; attributes score distributions and threshold errors by 15 variants, three appearance identities, three views, and all 75 targets; computes global pairwise AUC and target-local separation margins; retains a strict aggregate report, schema, registry update, and focused tests. It cannot retrain, change a threshold, read evaluation data, promote the model, or create physical authority.
+- Exact command: `python software/ai/eval/diagnose_residual_obstruction_v2.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v2.json --contract software/ai/sim/evidence/residual_obstruction_renderer_contract_v1.json --dataset-dir C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-render-v1 --model C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-candidate-v2\model.bin --scorecard C:\IsaacSim\artifacts\issue190\residual-obstruction-v2-candidate-v2\scorecard.json --output software/ai/eval/residual_obstruction_v2_diagnostic_v1.json`; repeated unchanged with output `%TEMP%\residual_obstruction_v2_diagnostic_v1_second.json` and compared byte for byte.
+- Bound input SHA-256 values: fixture file `54d6b3eeceda18f5bdeeb628abacb45715cbbeac7cc518de9c51e01ee309cc0d`; canonical fixture `0833469f9d7244ba5c2f2ded3819c2c8c3ab438c68ad84fdfca8f475fedb5bfd`; renderer-contract file `3d9e661050dd92640f01d5122f747f7efec42e3728bd17d3b926401282d9d965`; canonical contract `e5bef5305086d962400bdbd98efe39cf4f4dc02471243d9966375d42888f7c90`; dataset-manifest file `8ab18548adb510943bcb39e8d16653334f17710ae6d4780ae2bc4ca6fbec9f84`; canonical dataset `0328262ed2eaffb56895f39a9b975044c84f9be4d7a5b8006981601ebce43d0a`; model file `0f5982b6af2761ce367837c35094647cfa5711f1fd042ede36650ba9306a1367`; scorecard file `a82755040aec805a68aea263c86d24c07ce03657c6756999041c4977beac548a`; canonical scorecard `8b748d1b21f38beb1580cb7217bddbd643dde81e6b1b277341a531465a7618fb`; development probabilities `d9931a32be2b6d3fd29c53b77dd012392ef003c0d27a389bbea10caf1529b7b6`.
+- Global result: pairwise AUC is `0.8975297058` across 8,100 obstruction and 2,025 visible development rows. All 75 targets are locally nonseparable because each target's minimum obstruction probability is no greater than its maximum visible probability. The best target margin is `-0.202038795`; the worst is `-0.785702050` for `key_space`.
+- Appearance result at threshold `0.20`: cool produces 505/2,700 obstruction misses and 110/675 visible false stops; sensor noise produces 7 misses and 282 false stops; shadow produces 54 misses and 366 false stops. Mean obstruction/visible probabilities are `0.463768`/`0.105928` for cool, `0.671587`/`0.232419` for sensor noise, and `0.636035`/`0.261453` for shadow. View errors are similar enough that appearance transfer is the stronger observed factor.
+- Variant result at threshold `0.20`: clear creates 537/675 visible false stops; adjacent-left and adjacent-right create 119/675 and 102/675. Compression creates 174/675 obstruction misses; cable thin, medium, and thick create 84, 79, and 63; tool edge and center create 97 and 57. Most other obstruction variants have near-zero misses. This pattern and the negative target-local margins do not support a threshold-only correction.
+- Successor dependency: predeclare a fresh campaign with independent base scenes and group isolation, explicit appearance-invariance training, physically shaped/material/depth/transparency obstruction variation, and a positive held-out target-local margin requirement before any evaluation source can be opened.
+- Artifact SHA-256 values: diagnostic tool `e611f535736426c35727382c510b568c68f2afe205251b60b0f94ff311df391a`; diagnostic schema `1412d5270718a2edca122718e700e28f3ccd8f00f75ea5cc003d9d7cb4517661`; retained report file `9560c6bd6c2d0463741e2f0e8221d16d520f062b7fdfd525f79272a7374cbfb6`; canonical report `48496f1015b31c859bdf4ca2e53a8b4b50ef59ad524f35ea74e5caf864fe8517`; focused tests `efdc6ab3afecd9ff8dd85c927fbc3055702f58e9a8570e8a9750e3abfb022937`; registry file `ba02a041cc840605c5cf4b67ab1e6b302ec33255864be9c5ab40edb56358511c`; canonical registry `bf98ae8c9d91e353d5103b60711a3eb465a8dca30f51f48619e9c4475a1ca324`; registry-audit file `aa1fe38c0c581322c973b89ac1efe88fe4b12da9fc762356ab1f7764f3346daf`; registry-audit receipt `9c3364e156c1ec6bd8e8850e8ab9585c9279f639676fc60e633f8ed4a737a485`.
+- Validation commands: the two exact diagnostic commands above followed by byte comparison; `python -m pytest -q software/ai/tests/test_residual_obstruction_v2_diagnostic.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/diagnose_residual_obstruction_v2.py software/ai/tests/test_residual_obstruction_v2_diagnostic.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: repeated diagnostic reports are byte identical; two focused diagnostic tests passed; all 261 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. The registry covers 51 tracked/documented AI tests and 175 referenced paths. The committed footprint is 6,174 tracked files, 655,490,464 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the first diagnostic reconstruction used CPU inference and failed closed with `development probability reconstruction mismatch`. Deterministic CUDA then also failed because preprocessing divided by 255 in NumPy/CPU rather than reproducing the training path. The final implementation batches original `uint8` pixels and performs the exact CUDA `.to(dtype=float32).div_(255.0)` conversion, after which the frozen probability hash reproduced. No checkpoint, data, threshold, gate, or evaluation state changed during either correction.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened and the diagnostic read retained offline crop/model bytes.
+- Limitations: this is reuse of consumed synthetic development evidence from one simplified base scene and pixel-domain transformations. It can explain rejection and guide a fresh design, but cannot estimate untouched generalization, physical realism, camera performance, projection error, measured dilation, localization, collision safety, contact success, deployment readiness, or physical qualification. It contains no controller command, joint/PWM/serial/Waveshare field, motion policy, execution permit, transport field, or physical authority.
+- Supersedes: none. Residual v1, residual v2, and v16 remain rejected; geometry-first handling remains primary for known self-occlusion; every evaluation source remains closed.
+- Next dependency: freeze the fresh residual successor design before generation, then use independent base scenes and physically grounded obstruction geometry. Continue synchronized measured-feedback projection, measured dilation, and physical parked-pose original collection as parallel prerequisites.
+
+
+### E-20261002-AI-502 — residual v3 freezes independent Isaac scenes and 3D obstruction semantics
+
+- Stage: S2/S3 fresh synthetic residual-obstruction successor predeclaration before rendering or training.
+- Lane: AI/model Isaac campaign and small offline-model contract only; no arm-lane or integration-gate status changed.
+- Claim commit: `a0aec0a58ccc1f939f4ca48945397d8b550d5d1b`.
+- Implementation/evidence commit: `29025a142f6d2eca0e67d95d85663e029dc3dc0d`.
+- Change: added a deterministic v3 fixture builder, strict JSON schema, retained fixture, registry ownership, and focused tests. The fixture binds the exact practice-corpus identity and consumed v2 diagnostic, requires all three frozen v2 findings, freezes eight training and four development base-scene identities with disjoint seeds, and requires every base scene to be a fresh Isaac 3D render. It prohibits source-image warping and model access to truth masks or depth. It freezes four paired physically based appearances and 12 variants covering clear/adjacent-visible cases, rubber/translucent mesh cables, matte/gloss mesh tools, foreign objects, rendered glare, defocus, motion blur, and compression. Mesh variants declare material, depth, opacity where applicable, and target-safe-region overlap ranges.
+- Exact command: `python software/ai/sim/build_residual_obstruction_successor_v3.py --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --diagnostic software/ai/eval/residual_obstruction_v2_diagnostic_v1.json --output software/ai/sim/evidence/residual_obstruction_successor_v3.json`; repeated unchanged with output `%TEMP%\residual_obstruction_successor_v3_second.json` and compared byte for byte.
+- Bound input SHA-256 values: practice manifest file `a529ffbdc39aff5450d0378f2e3020c83b398a3e7f853b0ef4e957748e34c7fd`; canonical practice corpus `03e2d3d7ac2d3a0026b2c24cb0a9d709190794e1adb5b69e038374fa46f152e4`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; v2 diagnostic file `9560c6bd6c2d0463741e2f0e8221d16d520f062b7fdfd525f79272a7374cbfb6`; canonical v2 diagnostic `48496f1015b31c859bdf4ca2e53a8b4b50ef59ad524f35ea74e5caf864fe8517`; rejected model `0f5982b6af2761ce367837c35094647cfa5711f1fd042ede36650ba9306a1367`.
+- Frozen campaign: 8 training and 4 development base scenes are identity-disjoint; four paired appearances and 12 variants over 75 targets predeclare 28,800 training and 14,400 development observations. Evaluation count is zero. Each scene must use a fresh full-frame 3D render and independently seeded bounded camera and fixture-surface randomization.
+- Frozen training/gate design: `target_crop_residual_cnn_v3` remains a small RGB-only CNN with channels 24/48/64, GroupNorm, deterministic balanced sampling, binary classification loss, and a `0.2` weighted paired-logit Huber appearance-consistency loss. Development retains 2% missed-obstruction and 6% visible-false-stop ceilings, 95% 4,000-resample base-scene cluster bounds, worst-appearance and worst-variant-family gates, and a strictly positive local separation margin for every target. No threshold is selected and evaluation must remain unopened.
+- Artifact SHA-256 values: fixture builder `c0d643e9d7d4ddfcd5d18e6784695cdbd323270108ca549b9779a29f10217653`; schema `a3fff358d89e06e3ad7f64d2fd24faece970a80d46483bf448b007bbbdf9c096`; retained fixture file `56b04e0bcc35c26eea2848a0244827d7285e5056667f17deae628c0986921cbd`; canonical fixture `7e861cb17b5f4717d732989d1ddaaeb4ab3e3e4e0ae1d92dd19de35afa397fed`; focused tests `2feed456ddf636153e3fb06014b8dd8acb66ddd52099725431e948674e771da9`; registry file `8ce660b5d6ec939ff0a0f42c5860f59535c8f3921d217d761064ac9e65d11609`; canonical registry `acf2259447c5093b1987309025428727f447a3ae97686cc5919fcd3257972591`; registry-audit file `d20e3795fdcacfba463c7d6786fcea2be602c79ec178bcd8c177211818c19300`; registry-audit receipt `c0cd9d4fe702002405ae4e01f84969b3f6efa23f3d556873e2211fc4c82ada29`.
+- Validation commands: the two exact fixture commands above followed by SHA-256 comparison; `python -m pytest -q software/ai/tests/test_residual_obstruction_successor_v3.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/sim/build_residual_obstruction_successor_v3.py software/ai/tests/test_residual_obstruction_successor_v3.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: repeated fixtures are byte identical; 11 focused fixture/registry tests passed; all 266 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, schema validation, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 52 tracked/documented AI tests and 179 referenced paths. The committed footprint is 6,178 tracked files, 655,531,306 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the first registry/policy rewrite used the Windows default newline conversion, and `git diff --check` rejected the affected lines as trailing whitespace. The same semantic JSON updates were rewritten with explicit LF line endings and then passed. The fixture, hashes, counts, model plan, and gates did not change.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac Sim was not opened and no v3 observation was rendered in this increment.
+- Limitations: this is a synthetic campaign design, not measured evidence. The declared independent scenes, camera jitter, materials, geometry, depth, opacity, and lighting ranges are unrendered. The camera and physical obstacle appearances remain unmeasured. The v2 development diagnosis motivated v3 but cannot evaluate or select it. No model, threshold, evaluation result, camera calibration, localization qualification, collision evidence, contact success, deployment qualification, controller command, joint/PWM/serial/Waveshare field, motion policy, permit, transport, or physical authority exists here.
+- Supersedes: none. Residual v1, residual v2, and v16 remain rejected; geometry-first handling remains primary for known self-occlusion; every evaluation source remains closed.
+- Next dependency: implement the exact v3 Isaac renderer and fail-closed admission receipt, then generate all fresh base scenes and 3D variants. Reject any source-image reuse, split leakage, duplicate bytes, geometry/material/depth/overlap mismatch, or missing paired appearance before training.
+
+
+### E-20261002-AI-503 — residual v3 Isaac renderer passes a bounded four-target smoke
+
+- Stage: S2/S3 fresh synthetic residual-obstruction renderer and admission, partial smoke only.
+- Lane: AI/model Isaac rendering and synthetic evidence admission only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `04d333b7db120d10e6e5b818128fcbfd04cdd90c`.
+- Change: added an Isaac Sim 6.1 target-local renderer that reads the frozen v3 fixture, creates fresh USD board/target geometry, assigns distinct target semantics, builds actual 3D cable/tool/foreign-object obstruction primitives, samples RGB/semantic/depth annotators, applies paired appearance and deterministic sensor variants, and fails closed when measured target overlap falls outside the frozen contract. Target-range arguments bound GPU resource use. Only RGB crops are retained as model inputs; semantic and depth data are admission evidence and are not model inputs.
+- Exact successful command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v3-smoke-009 --scene-limit 1 --target-start 0 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-smoke-009.status.json`.
+- Bound fixture SHA-256 values: retained fixture file `56b04e0bcc35c26eea2848a0244827d7285e5056667f17deae628c0986921cbd`; canonical fixture `7e861cb17b5f4717d732989d1ddaaeb4ab3e3e4e0ae1d92dd19de35afa397fed`.
+- Successful smoke: one of 12 frozen scenes, four of 75 targets, four paired appearances, and all 12 variants produced 192 observations. All 192 RGB hashes are unique. The retained external directory contains 193 files totaling 629,212 bytes. Manifest file SHA-256 is `b9de04520d2618f76c8df2ea16a374430d2645f66945c42fedd327a5fedd8469`; canonical dataset SHA-256 is `f640d67ff700c567a7908d8e71857e7ffcc56f00067e12af77beb98f03379778`.
+- Measured overlap: adjacent-left and adjacent-right `0.0`; rubber and translucent cables `0.6`; matte tool edge `0.45` to `0.5`; gloss tool center `0.75`; foreign object `0.56` to `0.5875`. Every value is inside its predeclared variant band.
+- Artifact SHA-256 values: renderer `b22e2fb3ebf5743bfb0ca51bfeefa2de66b23249d98dacdc7dfba9d8f473a9b8`; smoke schema `21ecba598143240072dd5096aa6a12592281ecb42282d0d80ec49ca3360d40fe`; smoke report file `2210af5f352ca49615ff96aa18ed8b6fa51c0d4e78b8351fdf1cac81f4364dc2`; canonical smoke report `3632fc4bd3ed169b70b5ab36690cc11c690cec3fc6c0eee5aef05ec46b14f439`; focused tests `47fa731de3b0eb939488305a44cb6a41eae8b4e0c5b18544ab12ee61b3466b07`; registry file `6a3ee39f9b8b61cac370bb2357a48cf30428733d1d5e9ed2b82d002db22f5c23`; canonical registry `f00c7c3e9cb1391b2c083e726a5906d2b32c18bc2ac23f5dd7acd2e2515fd0de`; registry-audit file `9290a0adbd59ba9a4f2ca7ddb83bef9642b627dfef50efe82a416d0e26d3ab5a`; registry-audit receipt `087c1740f3cb19b0b1ac802637beb46c88f0e2ebe3db98523bbbab0d59bedc9b`.
+- Validation commands: the exact Isaac command above; `python -m pytest -q software/ai/tests/test_residual_obstruction_v3_renderer_smoke.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v3_isaac_probe.py software/ai/tests/test_residual_obstruction_v3_renderer_smoke.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: three focused smoke tests and six registry tests passed; all 269 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 53 tracked/documented AI tests and 182 referenced paths. The committed footprint is 6,182 tracked files, 655,570,435 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: `smoke-001` created 75 simultaneous RGB/semantic/depth render products and Isaac terminated after exhausting the RTX descriptor pool; no manifest was admitted. `smoke-002` produced 192 observations before measured-overlap admission existed and is not admitted. `smoke-003/004` failed closed because the first cable-overlap denominator included neighboring target semantics. `smoke-005/006` failed closed because all target distractors were visible together. `smoke-007` failed closed because tool-center overlap was `0.90`, above the frozen `0.80` maximum. `smoke-008` failed closed because foreign-object overlap was `0.9875`, above the frozen `0.70` maximum. The first registry update also failed because its strict schema permits only `software/ai/...` source paths; the integration script was removed from that registry list instead of broadening the schema.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; the successful smoke used 192 zero-delta Replicator render captures and did not advance a robot simulation or emit an arm command.
+- Limitations: this is synthetic partial renderer evidence, not a complete corpus, trained model, untouched evaluation, camera qualification, localization qualification, measured projection/dilation evidence, collision proof, contact success, deployment qualification, or physical qualification. Eleven scenes and 71 targets remain unrendered. Isaac closes before the optional status file is flushed, so the external manifest and repository smoke report are the authoritative retained records for this increment. No controller command, joint/PWM/serial/Waveshare field, motion policy, permit, transport field, or physical authority exists here.
+- Supersedes: none. Residual v1, residual v2, and v16 remain rejected; v3 training and evaluation remain unopened; geometry-first handling remains primary for known self-occlusion.
+- Next dependency: add an independent shard merger/admission verifier, render all frozen train/development scene-target shards, and verify exact coverage, uniqueness, split isolation, fixture binding, overlap, material, and depth before any v3 training.
+
+
+### E-20261002-AI-504 — independent v3 admission keeps the partial smoke out of training
+
+- Stage: S2/S3 fresh synthetic residual-obstruction shard admission, incomplete campaign.
+- Lane: AI/model offline evidence verification only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `8300b4a639ca9542c74a6e8d0baf04322bd4f4c9`.
+- Change: added an Isaac-independent shard verifier, strict receipt schema, retained partial receipt, registry ownership, and tests. The verifier binds the exact v3 fixture file and canonical bundle plus the bootstrapped target-catalog hash; recomputes each shard manifest and RGB hash; enforces contained regular files and exact portable paths; validates scene, split, appearance, variant, device, target, decision, depth, and overlap semantics; rejects duplicate identities, combinations, and RGB bytes; rejects extra files and authority/evaluation claims; and enumerates the frozen 43,200-combination campaign. The normal gate raises on any missing combination. `--allow-partial` exists only to retain bounded progress evidence and can never set `campaign_admitted=true`.
+- Exact partial command: `python software/ai/eval/admit_residual_obstruction_v3_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v3.json --shard C:\IsaacSim\artifacts\issue190\residual-v3-smoke-009 --output C:\IsaacSim\evidence\residual-v3-smoke-009.admission.json --allow-partial`.
+- Exact fail-closed command: `python software/ai/eval/admit_residual_obstruction_v3_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v3.json --shard C:\IsaacSim\artifacts\issue190\residual-v3-smoke-009 --output $env:TEMP\should-not-exist.json`.
+- Result: the partial mode verified 192 observations and 192 unique RGB hashes, retained `PARTIAL`, set `campaign_admitted=false`, and reported 43,008 missing combinations. The normal mode raised `ValueError: campaign incomplete: 43008 observation combinations missing` and wrote no output. Training remains prohibited.
+- Bound inputs: fixture file SHA-256 `56b04e0bcc35c26eea2848a0244827d7285e5056667f17deae628c0986921cbd`; canonical fixture `7e861cb17b5f4717d732989d1ddaaeb4ab3e3e4e0ae1d92dd19de35afa397fed`; smoke manifest file `b9de04520d2618f76c8df2ea16a374430d2645f66945c42fedd327a5fedd8469`; canonical smoke dataset `f640d67ff700c567a7908d8e71857e7ffcc56f00067e12af77beb98f03379778`.
+- Artifact SHA-256 values: verifier `9b6457a90be78037d58554cee0eb63b39077367900443c13e1b7e81f2d0ba698`; admission schema `9f86ab0ea474f0c2d35f3e04dfc236af36311cf5cf191ac4309b2bb81472dca3`; retained partial receipt file `649d6fb64fa29b1d4bb02c6293a9989bf4d229da12d4deb0d3635d4c32a6013d`; canonical receipt `bc4b7f831b41565c27e3b0026b51bb22a4ddfd95bd69bfd356bfc8c64ab20e84`; focused tests `a2ad37fe0a1a19f3e6e95ea6e85ae64ba9d84ae7b92c03884f1947d72d7009a0`; registry file `d1dfeff508e5bde50c0c03383340734bd3df4e77a62e097e5f8bffe8bf2b4366`; canonical registry `7ae3601dd4161d65234146827aa891e11e85c5e98ab7499ec18158ef66ca7925`; registry-audit file `6a66ddae04eb7127f851a170b454973b4764f18cb8603036eff01d47d3c0cd1c`; registry-audit receipt `318efafcf3c7fcfea51a653790da6142f5911a0741ecd69d458a9ec3b03cbc32`.
+- Validation commands: the partial and fail-closed commands above; `python -m pytest -q software/ai/tests/test_residual_obstruction_v3_admission.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/admit_residual_obstruction_v3_shards.py software/ai/tests/test_residual_obstruction_v3_admission.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: eight verifier tests and six registry tests passed; all 277 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, schema validation, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 54 tracked/documented AI tests and 186 referenced paths. The committed footprint is 6,186 tracked files, 655,602,765 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the normal admission command rejected the real smoke because 43,008 combinations are missing. A focused duplicate-byte test initially altered the wrong sorted image relative to its manifest row and therefore failed earlier on image-hash mismatch; the test now addresses images through their manifest paths and confirms the intended global duplicate-byte rejection. No acceptance rule was weakened.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; verification only read retained files and did not open Isaac Sim.
+- Limitations: the receipt proves integrity and frozen-contract conformance for the 192 retained synthetic smoke observations only. It does not create the missing 43,008 observations or establish model quality, physical realism, camera qualification, localization qualification, measured projection/dilation evidence, collision safety, contact success, deployment qualification, or physical qualification. It contains no controller command, joint/PWM/serial/Waveshare field, motion policy, permit, transport field, or physical authority.
+- Supersedes: none. E-503 remains the renderer smoke; this increment independently verifies and limits it. V3 training and evaluation remain unopened.
+- Next dependency: render all frozen training and development scene-target shards, pass this verifier without `--allow-partial`, and retain a `PASS` receipt with `campaign_admitted=true` before creating any v3 training loader or checkpoint.
+
+
+### E-20261002-AI-505 — scene-scoped Isaac prims complete the first full v3 target shard
+
+- Stage: S2/S3 fresh synthetic residual-obstruction rendering and admission, first complete target shard.
+- Lane: AI/model Isaac rendering and offline synthetic evidence verification only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `20616baf8bc258ceb0247f6938009c66d0727375`.
+- Change: corrected the multi-scene renderer so every scene receives its own dynamic USD namespace and the dynamic subtree is removed after capture. PASS/FAIL status now flushes before `SimulationApp.close()`. Added a focused namespace regression test and retained the independently verified first full target-shard receipt.
+- Exact successful render command: `$out='C:\IsaacSim\artifacts\issue190\residual-v3-shard-000-003-retry01'; $env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir $out --target-start 0 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-000-003-retry01.status.json`.
+- Exact admission command: `python software/ai/eval/admit_residual_obstruction_v3_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v3.json --shard C:\IsaacSim\artifacts\issue190\residual-v3-shard-000-003-retry01 --output C:\IsaacSim\evidence\residual-v3-shard-000-003-retry01.admission.json --allow-partial`.
+- Result: the repaired shard spans all eight training and four development scenes for target indices 0–3, four appearances, and 12 variants. It contains 2,304 unique RGB observations plus one manifest, totaling 7,381,955 bytes. The manifest canonical dataset SHA-256 is `92fac974f3b5bb879017d0b210e9b7bd6cddff4de5baec21ac363e9acb933261`. Independent admission verified all 2,304 observations, retained `PARTIAL`, set `campaign_admitted=false`, and reported 40,896 missing combinations.
+- External artifact SHA-256 values: failed first-attempt `failure.json` `130e217b1e3f1f6b9b55c8b1b1474933b6917a7eef64ca94c829b5135b572826`; successful manifest file `31974808bd0fa7162d018f4862998755d3e7104accac83c6d75d68a95f867588`; pre-shutdown PASS status `8923de9e2db98b679bcd6e683e797d1f49f652362a1ac8bf6abbaaf0938975c5`; external admission receipt file `f2e108e45cf8783fec34e0f80f4847ade7b3e3f55d760fd34a57916207f16c86`; canonical admission receipt `42fc4c245001b1ed861cdc986d876baa0bf74baf3d7306c823b9c813b59bf1bc`.
+- Repository artifact SHA-256 values: corrected renderer `83aa42fdc85e99e378d14034de7d62831cd153e6a7434ef645e7c77c5ffbc62b`; retained first-shard receipt `f2e108e45cf8783fec34e0f80f4847ade7b3e3f55d760fd34a57916207f16c86`; renderer tests `f4bdaebb342a0c201869345e5676809c6345047437e31bd5478cd23317ae1c33`; admission tests `b819ed449930db390fe262d045a2f333e6e765e0409aa97a4d04639bb3586b63`; registry file `e7332e3e63c007044f448b4a18cbe4fe12affd58d27a80e822ac1d21f2bb2159`; canonical registry `7234c79cc77439e62ee16719fed479aebee59585b2aaff0915876beaa59a24b7`; registry-audit file `dfd1268abddc10c8c5d6a2690982b9623b71bbb10e7b35f9f29f08a08b20f093`; registry-audit receipt `d40c5414da5dac0721d03f99c1a73e293ead7fefc61a3290f9474ed17a8a872f`.
+- Validation commands: the render and admission commands above; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v3_isaac_probe.py software/ai/tests/test_residual_obstruction_v3_renderer_smoke.py software/ai/tests/test_residual_obstruction_v3_admission.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: all 279 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 54 tracked/documented AI tests and 187 referenced paths. The committed footprint is 6,187 tracked files, 655,613,276 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the first all-scene attempt wrote 192 images for scene one, then failed before a manifest because scene two reused the same USD prim paths and `UsdGeomXformable::AddXformOp` rejected an existing `xformOp:translate`. That directory and its `failure.json` remain external. The correction namespaces prims by scene and removes the previous subtree; it does not change the frozen scenes, appearances, variants, target geometry, overlap gates, or model plan.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; the renderer issued zero-delta Replicator captures and no robot simulation, controller command, or physical action.
+- Limitations: this is one of 19 planned target shards and only 5.333% of the frozen synthetic corpus. It is synthetic render/admission evidence, not trained-model, camera, localization, measured projection/dilation, collision, contact, deployment, or physical qualification. It contains no joint/PWM/serial/Waveshare field, motion policy, permit, transport field, or physical authority.
+- Supersedes: the corrected renderer supersedes the implementation mechanics of E-503 while preserving E-503's smoke evidence and all failures. E-504 admission policy is unchanged. Training and evaluation remain unopened.
+- Next dependency: render the remaining target indices 4–74 in bounded shards, independently admit the complete shard set without `--allow-partial`, and require `campaign_admitted=true` before any v3 training.
+
+
+### E-20261002-AI-506 — target-scaled rounded obstacles remove aspect-ratio bias
+
+- Stage: S2/S3 fresh synthetic residual-obstruction rendering, geometry correction before corpus admission.
+- Lane: AI/model Isaac renderer only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `6ba49ffaaf99d7782f3f1527482a63eb9094fdc7`.
+- Change: replaced the aspect-biased constant-radius foreign-object sphere with a rounded ellipsoid whose two planar radii are each 42% of the target safe-region dimension. The predeclared `ROUNDED_SOLID_MESH` kind and 0.35–0.70 overlap gate are unchanged. Added a pure geometry regression test.
+- Exact failed command: the dual-GPU queue launched target indices 16–19 with `C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v3-shard-016-019 --target-start 16 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-016-019.status.json` and `CUDA_VISIBLE_DEVICES=1`.
+- Exact corrected smoke command: `$out='C:\IsaacSim\artifacts\issue190\residual-v3-shard-016-019-shape-smoke'; $env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir $out --scene-limit 1 --target-start 16 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-016-019-shape-smoke.status.json`.
+- Result: the failed shard stopped during scene one because `ENTER` foreign-object overlap was `0.3092105263`, below the frozen `0.35` minimum, and no manifest was admitted. The corrected smoke produced all 192 observations; foreign-object overlap is `0.545` for `E`, `0.5425` for `EQUAL`, `0.545` for `F`, and `0.5342105263` for `ENTER`. All are within the original band.
+- Artifact SHA-256 values: corrected renderer `cb51ee1821b234ac47db1cd19e98de3fdfcf5a22211e40af25e4af4c912cd443`; focused tests `28fb9c97e11ac99963a30424d70116fe7e1b428c84ccfdf3c1fd9a097c7fe72d`; failed shard `failure.json` `ee6b0e80db7fd36f6c60684d367e423818ea219ef88f7d820ad7c8659dc55aef`; corrected smoke manifest file `561df764fd42ad3cae85d3ed9364ec75df41e90bf5a85433b8564eba134c9b2e`; corrected smoke canonical dataset `0c1b0838a548ece05a3ff8de8882e09e5157e96d9a64516397e636184c99b242`.
+- Validation commands: the corrected smoke command above; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v3_isaac_probe.py software/ai/tests/test_residual_obstruction_v3_renderer_smoke.py`; repository governance commands listed in E-505; `git diff --check`.
+- Validation result: all 280 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. The committed footprint remains 6,187 tracked files, 655,620,286 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the target 16–19 failed directory and FAIL status remain external. The queue was stopped when the status exposed the overlap failure; its concurrently running target 12–15 and subsequently started target 24–27 directories are incomplete, have no manifests, and are excluded from admission. This also proves orchestration must inspect the status receipt because Isaac fast shutdown returned process code zero after writing FAIL.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic render captures ran.
+- Limitations: this smoke validates one scene and four key shapes, not every target or all scenes. It is synthetic geometry evidence and provides no model, camera, localization, projection/dilation, collision, contact, deployment, or physical qualification. It contains no controller command, joint/PWM/serial/Waveshare field, motion policy, permit, transport field, or physical authority.
+- Supersedes: only the foreign-object geometry implementation in E-503/E-505. Frozen campaign semantics, overlap ranges, model plan, and prior evidence remain unchanged.
+- Next dependency: resume bounded shards in new output directories with an orchestrator that treats the JSON status as authoritative, then require complete independent admission before training.
+
+
+### E-20261002-AI-507 — dimension-aware framing keeps wide targets inside the crop
+
+- Stage: S2/S3 fresh synthetic residual-obstruction rendering, camera-framing correction before corpus admission.
+- Lane: AI/model Isaac renderer only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `7361d84e45e9e4fb8af66ba0cdf87ff2761c111d`.
+- Change: target-local camera height is now `max(82 mm, 1.5 * max(safe width, safe height))`. Standard 14 mm keys retain the original 82 mm view; the 96 mm `SPACE` safe region uses 144 mm so the full region and margin fit the crop. The frozen focal length, aperture, target geometry, variants, and overlap bands are unchanged.
+- Exact corrected smoke command: `$out='C:\IsaacSim\artifacts\issue190\residual-v3-shard-036-039-camera-smoke'; $env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir $out --scene-limit 1 --target-start 36 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-036-039-camera-smoke.status.json`.
+- Result: the preceding target 36–39 shard failed closed because `SPACE` centered-tool overlap was `1.0`, above the frozen `0.80` maximum. The camera smoke then produced all 192 observations with `SPACE` centered-tool overlap `0.7179487179` and foreign-object overlap `0.5192307692`. Standard targets remained at `0.75` tool overlap and `0.5425`–`0.5535714286` foreign-object overlap.
+- Artifact SHA-256 values: corrected renderer `89955c7da267a0bbe79c6ad3bebb4a760a4ced42443deff740314b094ced7220`; focused tests `1113cd9edf7a7c17b1bcb9b6f49d8ff328ed5791313581719f8df37d8d24cca1`; failed shard `failure.json` `36e50f4e30333e82bae1374253d62551019f9c0012459be320338a1e6f1a46bd`; corrected smoke manifest file `c57dccb1aa9927b776cc47426672afd2196504c58ad98a8005ebb3dfb8a72b48`; corrected smoke canonical dataset `8dc0ab8542b1f6de392d7b63952d967f6db8c8e38a3227fdece9df51e826b3ea`.
+- Validation result: all 281 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. The implementation commit footprint remains 6,187 tracked files, 655,626,193 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the target 36–39 failed directory and FAIL status remain external and are excluded. The queue was stopped after target 32–35 completed PASS; its just-started target 40–43 directory is incomplete, has no manifest, and is excluded. The failure was corrected through framing geometry, without widening a threshold or overlap range.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic render captures ran.
+- Limitations: the corrected smoke covers one scene and four targets. It does not complete or admit the campaign and provides no trained model, camera qualification, localization qualification, measured projection/dilation, collision, contact, deployment, or physical qualification. It contains no controller command, joint/PWM/serial/Waveshare field, motion policy, permit, transport field, or physical authority.
+- Supersedes: only fixed-height target framing in prior renderer increments. Frozen model and admission policy remain unchanged.
+- Next dependency: resume the remaining target shards in fresh directories, independently verify the complete 43,200 observations, and require `campaign_admitted=true` before training.
+
+
+### E-20261002-AI-508 — normalized phone crops and tool geometry pass mixed-device smoke
+
+- Stage: S2/S3 fresh synthetic residual-obstruction rendering, small-target geometry correction before corpus admission.
+- Lane: AI/model Isaac renderer only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `e0be81c8186682172e55005e3fbdc9bd028d4da6`.
+- Change: for targets no larger than 14 mm, camera height now scales from the standard 82 mm reference with a 45 mm floor. The centered tool uses 65% target width and 100% height. The edge tool is placed 15% of target width from the left with 45% target width and 100% height, yielding a nominal 37.5% safe-region intersection. Frozen tool families and overlap bands remain unchanged.
+- Exact successful smoke command: `$out='C:\IsaacSim\artifacts\issue190\residual-v3-shard-044-047-phone-smoke02'; $env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir $out --scene-limit 1 --target-start 44 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-044-047-phone-smoke02.status.json`.
+- Result: the prior target 44–47 shard failed closed because `key_a` matte-edge overlap was `0.5454545455`, above the frozen `0.50` maximum. A first correction smoke preserved that failure and exposed the same edge case. The final 192-observation smoke passed: matte-edge overlap is `0.4` for `Y`/`Z`, `0.4545454545` for `key_a`, and `0.3818181818` for `key_b`; centered-tool overlap is `0.7` for `Y`/`Z` and `0.7272727273` for both phone keys; foreign-object overlap is `0.54`–`0.5681818182`.
+- Artifact SHA-256 values: corrected renderer `c5782cf80f42364432e1df7dfe91e895972d74570e166cca58e618e1e663e36f`; focused tests `ba84d866bd8630aac1d3e1488da25b71c0340bd69badce4dd0ff19c924915dc8`; failed shard `failure.json` `39a383b821171eb3f43b937baa8c587335eba41214820cb98d897e2fc3ec2a46`; successful mixed-device smoke manifest file `ed3290fc08043296d43debd0fcd862d2f790b038911a3461a5d83ec39737ee47`; successful smoke canonical dataset `22d495f547be8f62a1b2edc28155e7f26d5d0e5228e4c5028b3c959199cf30b4`.
+- Validation result: all 283 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. The implementation commit footprint remains 6,187 tracked files, 655,631,067 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Preserved failed evidence: the target 44–47 failed full-shard directory, its FAIL status, and the first failed phone smoke remain external and excluded. The queue was stopped after targets 36–43 completed PASS; the just-started target 48–51 directory is incomplete, has no manifest, and is excluded. Neither correction widened a frozen acceptance band.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic render captures ran.
+- Limitations: the successful correction is a one-scene mixed-device smoke. It does not complete the corpus and provides no model, camera qualification, localization qualification, measured projection/dilation, collision, contact, deployment, or physical qualification. It contains no controller command, joint/PWM/serial/Waveshare field, motion policy, permit, transport field, or physical authority.
+- Supersedes: small-target framing and tool geometry implementation only. Frozen scenes, variants, model plan, and admission gates remain unchanged.
+- Next dependency: render targets 44–74 in fresh full-scene shards, independently admit all 43,200 observations, and require `campaign_admitted=true` before training.
+
+
+### E-20261002-AI-509 — centered-tool margin passes the smallest punctuation key
+
+- Stage: S2/S3 fresh synthetic residual-obstruction rendering, final small-target quantization correction before corpus admission.
+- Lane: AI/model Isaac renderer only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `a2de66b02eec84eccf305893716b367975b6aac3`.
+- Change: reduced centered-tool width from 65% to 55% of target width while retaining 100% target height. This leaves nominal and measured overlap inside the unchanged frozen 0.50–0.80 centered-tool band with pixel margin for 6×10 mm phone punctuation targets.
+- Exact successful smoke command: `$out='C:\IsaacSim\artifacts\issue190\residual-v3-shard-060-063-phone-smoke'; $env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir $out --scene-limit 1 --target-start 60 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-060-063-phone-smoke.status.json`.
+- Result: the preceding full shard failed closed because `key_period` centered-tool overlap was `0.8333333333`. The corrected 192-observation smoke passed. Centered overlap is `0.5833333333`–`0.6363636364`, matte-edge overlap `0.3333333333`–`0.4545454545`, and foreign-object overlap `0.55`–`0.5727272727` for `key_n`, `key_o`, `key_p`, and `key_period`.
+- Artifact SHA-256 values: corrected renderer `6566f851402932b787a35e7758781b57fec3f3bd7b3c5491da7b332ba86bc2a8`; focused tests `a439c6eda6206afe06e14a8b78968e811f60e4cc4cd52b92c181749c6d3a95bc`; failed shard `failure.json` `297d0317ff8ce9abcef7ed9921045e90fa96d7c1ac54477cb62c081bd9ff8459`; successful smoke manifest file `c3615308d89f01bba8bbf3933061e084799bbd2574329ccb2e1f169bb2093b7b`; successful smoke canonical dataset `6e4059c76791db1e8daf3a0a40ad062a53e5a9140d21c66b72af7eda936a5af7`.
+- Validation result: all 283 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff and repository governance checks passed. The implementation commit footprint remains 6,187 tracked files with no hardware artifact added.
+- Preserved failed evidence: the target 60–63 failed full-shard directory and FAIL status remain external and excluded. The queue stopped after targets 52–59 completed PASS; the just-started target 64–67 directory is incomplete, has no manifest, and is excluded. The correction changed generator geometry and did not widen a gate.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic render captures ran.
+- Limitations: this is a one-scene four-target smoke. It provides no trained model, physical camera or localization qualification, measured projection/dilation, collision, contact, deployment, or physical qualification, and contains no controller command or physical authority.
+- Supersedes: centered-tool width implementation only; frozen campaign semantics and admission policy remain unchanged.
+- Next dependency: render targets 60–74 in fresh full-scene shards and require complete independent admission before training.
+
+
+### E-20261002-AI-510 — complete residual v3 Isaac corpus passes exact admission
+
+- Stage: S2/S3 fresh synthetic residual-obstruction rendering and complete corpus admission.
+- Lane: AI/model Isaac rendering, evidence admission, and provenance only; no arm-lane or integration-gate status changed.
+- Claim commit: `14c3d2ff0cffd6bad1a7bb96194f6efa98c9348c`.
+- Implementation/evidence commit: `57a9ce498ba24850a666ea2d0fe0e09ff743cd88`.
+- Change: completed the remaining target shards, independently verified the exact frozen 43,200-observation set, retained the complete admission receipt, and added an explicit 19-shard lineage artifact binding every admitted manifest and canonical dataset hash to the committed renderer source that produced it. The admission test now requires complete coverage, byte uniqueness, exact train/development counts, no evaluation records, no training, and zero authority.
+- Exact final render commands: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v3_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v3.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v3-shard-060-063-phone04 --target-start 60 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-060-063-phone04.status.json`; the same exact executable, workspace, and fixture were run on GPU 1 with `--output-dir C:\IsaacSim\artifacts\issue190\residual-v3-shard-064-067-phone04 --target-start 64 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-064-067-phone04.status.json`; after PASS, GPU 0 ran `--output-dir C:\IsaacSim\artifacts\issue190\residual-v3-shard-068-071-phone04 --target-start 68 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v3-shard-068-071-phone04.status.json`, and GPU 1 ran `--output-dir C:\IsaacSim\artifacts\issue190\residual-v3-shard-072-074-phone04 --target-start 72 --target-count 3 --status-output C:\IsaacSim\evidence\residual-v3-shard-072-074-phone04.status.json`. All four JSON status receipts reported `PASS`.
+- Exact admission command: PowerShell constructed `$argsList = @('software/ai/eval/admit_residual_obstruction_v3_shards.py','--workspace','.', '--fixture','software/ai/sim/evidence/residual_obstruction_successor_v3.json','--output','C:\IsaacSim\evidence\residual-v3-complete-admission.json')`, appended `--shard` plus these exact `C:\\IsaacSim\\artifacts\\issue190` child directories in target order: `residual-v3-shard-000-003-retry01`, `residual-v3-shard-004-007`, `residual-v3-shard-008-011`, `residual-v3-shard-012-015-geometry01`, `residual-v3-shard-016-019-geometry01`, `residual-v3-shard-020-023-geometry01`, `residual-v3-shard-024-027-geometry01`, `residual-v3-shard-028-031-geometry01`, `residual-v3-shard-032-035-geometry01`, `residual-v3-shard-036-039-camera02`, `residual-v3-shard-040-043-camera02`, `residual-v3-shard-044-047-phone03`, `residual-v3-shard-048-051-phone03`, `residual-v3-shard-052-055-phone03`, `residual-v3-shard-056-059-phone03`, `residual-v3-shard-060-063-phone04`, `residual-v3-shard-064-067-phone04`, `residual-v3-shard-068-071-phone04`, `residual-v3-shard-072-074-phone04`, then ran `python @argsList` without `--allow-partial`.
+- Result: `PASS`, `campaign_admitted=true`; 19 manifests; 43,200 expected, verified, and unique RGB observations; zero missing; 133,155,943 RGB bytes; 28,800 training, 14,400 development, and zero evaluation observations. Training remained false. The admitted corpus spans all 75 target IDs and all frozen scene, appearance, and variant combinations.
+- Artifact SHA-256 values: admission receipt file `5f5b3cf6f778ad0a3aee58e48ff248469699d2aaa8884efdad48277ec7175872`; canonical admission receipt `8a3868f1daa98326186541c368a14bf28b86e4df85180e3198dfd4fa6b456efe`; renderer lineage file `42b90b96ad200d5ac4077973cb3d4ce5523c061cda3cbd15e9f6c227d6f2694d`; canonical lineage `8e6e04ba441a8229baa1f51c3b5ddac1887fa7a64e60c8bb234f29b761c9ea3a`; lineage schema `e48afeb738ba82396f7400da7fda1cc6f36457bef8f2d34eda02d39298b8e370`; frozen fixture file `56b04e0bcc35c26eea2848a0244827d7285e5056667f17deae628c0986921cbd`; canonical fixture `7e861cb17b5f4717d732989d1ddaaeb4ab3e3e4e0ae1d92dd19de35afa397fed`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; final renderer `6566f851402932b787a35e7758781b57fec3f3bd7b3c5491da7b332ba86bc2a8`; admission tests `a64e1d26fe0aceacbd72d7aaf755152a60aef73a30bfa5926573df58d81910ad`; registry file `9577e2d0d2519893de47d07a33c69efdabf235d5686fc6a6652e74f690a5bc4c`; canonical registry `d588f759716d4cdd7edb5f1f305b539bc002642e3792f726741e282405d09919`; registry-audit file `0716e1e92234a046315f650af56fdb96831d7edd5d54eebd461d3658c6bfb031`; registry-audit receipt `84dbe8bcf2157e3710e9dbaabbf3145b703926ddc803b27eab9af7f6c66b3748`. The lineage artifact contains the exact manifest, dataset, renderer-commit, and renderer-source hashes for every shard.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v3_admission.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/admit_residual_obstruction_v3_shards.py software/ai/tests/test_residual_obstruction_v3_admission.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --registry software/ai/docs/AI_WORK_REGISTRY.json --output software/ai/eval/ai_work_registry_audit_v1.json`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_public_records.py`; `python scripts/ci/check_evidence_scope.py`; `python scripts/ci/check_repository_artifacts.py`; `python scripts/ci/check_repository_health.py --policy-only`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_release_integrity.py --mode policy`; `python scripts/ci/check_release_readiness_sync.py`; `git diff --check`.
+- Validation result: 11 focused admission tests passed; all 285 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, schema, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 54 tracked/documented AI tests and 190 referenced paths. The pre-commit tracked footprint was 6,187 files, 655,640,659 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob. After adding the three reviewed admission, lineage, and schema files, the policy ceiling was raised only from 6,187 to 6,190; the final footprint is 6,190 tracked files and 655,659,935 logical bytes.
+- Preserved failed evidence: earlier renderer failures and incomplete directories remain externally retained and excluded as recorded in E-503 through E-509. During this increment, the first lineage-schema test failed because a 40-character Git commit ID incorrectly reused the 64-character SHA-256 rule; the schema now distinguishes the two. The first registry-audit invocation failed because `--workspace` is unsupported; the exact supported command then passed. The first policy run reached release-readiness PASS but `git diff --check` rejected CRLF-converted registry lines; the same semantic JSON was rewritten with explicit LF and then passed. A transient attempted workplan rewrite used the Windows locale codec; the file was restored from `HEAD` before any commit and the intended UTF-8-only edit was reapplied.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; all 43,200 observations used zero-delta Replicator captures, with no robot simulation, controller command, or physical action.
+- Limitations: this is synthetic Isaac corpus admission, not trained-model evidence and not physical or deployment qualification. Camera, materials, obstruction appearance, projection error, dilation, localization, collision, contact, and device outcome remain unmeasured. The shards were produced across documented contract-conforming renderer corrections; lineage makes that explicit, but the external image bytes must remain retained beside their manifests. No joint, PWM, serial, Waveshare/controller JSON, motion policy, execution permit, transport field, or physical authority was created.
+- Supersedes: E-503 through E-509 remain the preserved renderer and failure history. This entry changes the campaign admission state from partial to complete; it does not alter any arm-lane status or integration gate.
+- Next dependency: implement a loader that consumes only this exact complete admission receipt and lineage, then execute only the frozen v3 training plan on the 28,800 training observations. Select a threshold only from the 14,400 development observations using the predeclared point, scene-cluster, worst-appearance, worst-family, and target-local separation gates. Evaluation remains absent and closed.
+
+
+### E-20261002-AI-511 — frozen residual v3 model deterministically fails development
+
+- Stage: S2/S3 admitted residual v3 training and development-only selection.
+- Lane: AI/model offline training and synthetic development scoring only; no arm-lane or integration-gate status changed.
+- Claim commit: `7080f9ef1c65714d1fa45d67b3052376f3cfb765`.
+- Implementation commit: `164f4c35e11dd831995975cc9767b453dabb3f1a`.
+- Evidence commit: `c670f2c90319a3b9ae396e7c37ad518e92f39ad4`.
+- Change: added a strict loader that re-verifies the complete admission and all 19 renderer-lineage bindings before training; preserved each four-appearance semantic group in deterministic epoch order; implemented the frozen three-convolution GroupNorm model, AdamW plan, BCE plus 0.2-weight paired-logit Huber loss, and all predeclared development gates. The scorer measures point rates, four-base-scene cluster upper bounds, worst appearance, worst variant family, and strict local probability separation for every target. No evaluation source exists.
+- Exact commands: with `CUDA_VISIBLE_DEVICES=0`, PowerShell populated `$shards` with the exact 19 directories listed in E-510, then populated `$argsList=@('software/ai/train/train_residual_obstruction_v3.py','--workspace','.','--fixture','software/ai/sim/evidence/residual_obstruction_successor_v3.json','--admission','software/ai/eval/residual_obstruction_v3_complete_admission_v1.json','--lineage','software/ai/eval/residual_obstruction_v3_renderer_lineage_v1.json','--output-dir','C:\IsaacSim\artifacts\issue190\residual-v3-training-run01')`; it appended `@('--shard',$shard)` for each item and ran `python @argsList`. The unchanged command was repeated with only `--output-dir C:\IsaacSim\artifacts\issue190\residual-v3-training-run02` changed.
+- Result: both runs are byte identical. The model SHA-256 is `f84dc5e4c675dfac2533bf51e3101f0b4eab1c2dd36850c80cfdd6b4f59c7a26` and size is 157,225 bytes. The scorecard file SHA-256 is `e640fabd7023742bb6ce13a4bd1aabd245b0ad94a9ec9d0f339086e94c4f9c52`; canonical result SHA-256 is `a9cad85e3ac389c81af5117125d61cc9ca1ae94ff9d382a64f34f1987fd35b05`; development-probability SHA-256 is retained in that scorecard. Combined loss decreased from `0.5639576312` to `0.3169545239`, but all 19 thresholds failed. At threshold 0.60, the point missed-obstruction rate is 10.0185%, its scene-cluster upper bound is 10.5463%, the visible false-stop rate is 16.3611%, and its scene-cluster upper bound is 19.1667%, against frozen 2% and 6% limits. Zero of 75 targets are locally separable; the minimum target margin is `-0.8240186572`. No threshold was selected and the model is rejected.
+- Artifact SHA-256 values: training implementation `b65f48687762b89210e0c068ed769b9ac16a599a4fe473e82a220b7a5a6af5fe`; retained scorecard `e640fabd7023742bb6ce13a4bd1aabd245b0ad94a9ec9d0f339086e94c4f9c52`; scorecard schema `fbd790ca05a5011a607f0b1866a7115ccd6b433d6071f5ceb85e5af869fb7f80`; training tests `a826c61b33a8a0c7a51ef32aa0f45134af50dbf5876582fbed3814f88e93fd9d`; registry file `13ce8c01397ec28fb0be393a96929574178b6f275c3a583316f53d0f8771e76c`; canonical registry `ec0a1eef49f594919a8c17321421bd3f8a532771c0d38aef0674afb8c1fe2820`; registry-audit file `ee032f1bb5c4c68bb0eced90ac209319d1712ccb6ae298ab41ac2f0fa917cc14`; registry-audit receipt `f5f0e46fb92b0e9a74601bbb8ab29f86b9ab63df0eaf1c3973ef53acd37d3f98`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v3_training.py software/ai/tests/test_residual_obstruction_v3_admission.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/train/train_residual_obstruction_v3.py software/ai/tests/test_residual_obstruction_v3_training.py software/ai/tests/test_ai_work_registry.py`; `python software/ai/eval/audit_ai_work_registry.py --registry software/ai/docs/AI_WORK_REGISTRY.json --output software/ai/eval/ai_work_registry_audit_v1.json`; all repository governance commands listed in E-510; `git diff --check`.
+- Validation result: five focused v3 training tests passed; all 290 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, strict scorecard schema, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 55 tracked/documented AI tests and 194 referenced paths. The reviewed source ceiling increased only for the trainer, its test, the scorecard, and its schema, from 6,190 to 6,194 tracked files; final logical bytes are 655,781,102, governed duplicate bytes remain 4,890,152, and the largest blob remains 55,939,877 bytes.
+- Preserved failed evidence: the first implementation-focused registry test expected the prior fixed count of 54 tracked tests and failed at 55; after correcting it, the next assertion exposed the matching stale documented count of 54 and also failed. Both fixed expectations now read 55 and the registry audit passes. The development failure itself is retained unchanged; no threshold, loss, fixture, model plan, or gate was altered after observing it.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; training read static RGB files and did not open Isaac Sim.
+- Limitations: this is synthetic development evidence from simplified, unmeasured rendering. Determinism proves execution stability, while the measured failure remains limited to this frozen corpus. It is not physical camera, localization, projection/dilation, collision, contact, device-outcome, deployment, or execution qualification. The rejected model contains no controller command, joint/PWM/serial/Waveshare field, motion policy, execution permit, transport field, or physical authority.
+- Supersedes: none. The complete v3 corpus remains admitted, but its first frozen model is rejected. Residual v1, v2, and v3 candidates remain rejected; evaluation remains absent and closed.
+- Next dependency: perform a read-only diagnostic on the consumed v3 development probabilities by scene, target, appearance, and variant family. Preserve the rejected checkpoint and all gates. Use the diagnostic only to predeclare a fresh successor; do not tune against or manufacture an evaluation split.
+
+
+### E-20261002-AI-512 — residual v3 diagnostic reproduces probabilities and attributes overlap
+
+- Stage: S2/S3 read-only diagnostic of the consumed residual v3 development split.
+- Lane: AI/model diagnostic only; no arm-lane or integration-gate status changed.
+- Claim commit: `9598c58a1d11224f0d46a4cc32347241852faba3`.
+- Implementation commit: `b535cf7297acba80845f7b7b98ef086a31b95555`; deterministic inference correction `ba63176d3e84084149629914d6a1b9245f825280`; evidence commit `7147e51bf5a37c1eb89e4fa16dfd6ca181e9116e`.
+- Change: added a strict reader for the exact custom v3 model bytes, reverified the complete external corpus and renderer lineage, reconstructed the unchanged 14,400 development probabilities, required their SHA-256 to match the frozen scorecard, and attributed probability overlap by base scene, appearance, target, variant, and family. The diagnostic cannot select a threshold or modify the checkpoint.
+- Exact command: with `CUDA_VISIBLE_DEVICES=0`, PowerShell populated `$shards` with the exact 19 directories listed in E-510 and `$argsList=@('software/ai/eval/diagnose_residual_obstruction_v3.py','--workspace','.','--fixture','software/ai/sim/evidence/residual_obstruction_successor_v3.json','--admission','software/ai/eval/residual_obstruction_v3_complete_admission_v1.json','--lineage','software/ai/eval/residual_obstruction_v3_renderer_lineage_v1.json','--scorecard','software/ai/eval/residual_obstruction_development_v3.json','--model','C:\IsaacSim\artifacts\issue190\residual-v3-training-run01\model.bin','--output','C:\IsaacSim\evidence\residual-obstruction-v3-diagnostic-v1.json')`; it appended `@('--shard',$shard)` for each shard and ran `python @argsList`.
+- Result: exact development probability bytes reproduce. Pairwise AUC is `0.9459893261`, yet zero of four development scenes, four appearances, and 75 targets are locally separable. Scene margins range from `-0.859168` to `-0.666278`; appearance margins range from `-0.800999` to `-0.777553`. Keyboard `G` is worst at `-0.824019`; even the best target, phone `key_e`, remains negative at `-0.192954`. The clear visible variant averages `0.552767` obstruction probability and reaches `0.920447`, while rubber-cable obstruction cases fall to `0.061279`. Image-quality cases are easiest at mean `0.921828`; cable cases are hardest at mean `0.673073`. The failure is broad overlap rather than one lighting condition or target.
+- Artifact SHA-256 values: diagnostic implementation `e8d2394eb64f3f6dff4f01f4272f1b2b4b660e26015ff2db881d3b43ec8c80ac`; retained report file `d06ce82747677f18ffa0152301108bba54e22733f07728e29e008dc96d4d2dda`; canonical report `75043c46e7d49c7861f4c0c32acd5b471a10df35acf17c7cc924f6b5ab608804`; schema `799e5923d4c52ee199f191abc49bcc50d20be78a2863191248dcc7d2772a8a19`; tests `ece888e5e4e429dd975d38c2e5abf7e799f8cb5d37130b18aa45b645660d398b`; unchanged model `f84dc5e4c675dfac2533bf51e3101f0b4eab1c2dd36850c80cfdd6b4f59c7a26`; registry file `eeec8465fb07b0fb47638271f534d237a3e9d6c8c98b893de6b7673bd01a4c3c`; canonical registry `f30baf2e0d3a5ba26e9000e0a55c1480301df3d690c9d6dfbb5e701c6cefeaa2`; registry-audit file `5f31cd029274aea9be02020a4d159263a301ff0856272876f951696dc4f73070`; registry-audit receipt `5d6b7972e7a399828243a76e0f68fb3970d7ca47ef345a353be20620835c2962`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v3_diagnostic.py`; `python -m pytest software/ai/tests -q`; `python -m pytest software/tests/unit/test_model_motion_ingress_v2.py software/tests/integration/test_model_arm_conformance_profile_v1.py -q`; `python -m ruff check software/ai/eval/diagnose_residual_obstruction_v3.py software/ai/tests/test_residual_obstruction_v3_diagnostic.py software/ai/tests/test_ai_work_registry.py`; registry audit and repository governance commands listed in E-511; `git diff --check`.
+- Validation result: five focused diagnostic tests passed; all 295 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, strict schema, registry, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks passed. Registry audit covers 56 tracked/documented AI tests and 198 referenced paths. The reviewed source ceiling rose only for the diagnostic, its test, its report, and its schema, from 6,194 to 6,198 files; final logical bytes are 655,849,824, governed duplicate bytes remain 4,890,152, and the largest blob remains 55,939,877 bytes.
+- Preserved failed evidence: the first diagnostic invocation verified the exact model and corpus but rejected a development-probability hash mismatch. The cause was that the fresh inference process had not mirrored the training process's deterministic-algorithm and TF32 settings. The correction sets the same CUBLAS workspace, deterministic algorithm, cuDNN benchmark, and TF32 controls before model construction. The rerun reproduced the frozen hash exactly. The first failure did not emit or retain a report and did not alter the model, threshold, scorecard, fixture, admission, or gates.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; the diagnostic read static RGB and model bytes and did not open Isaac Sim.
+- Limitations: this reuses consumed synthetic development evidence and cannot evaluate a successor. It diagnoses probability overlap in an unmeasured synthetic camera/material domain and is not physical or deployment qualification. AUC does not override the frozen safety gates or absence of per-target separation. No controller command, joint/PWM/serial/Waveshare field, motion policy, execution permit, transport field, or physical authority exists.
+- Supersedes: none. The v3 checkpoint remains rejected and unchanged; every evaluation source remains absent and closed.
+- Next dependency: predeclare a fresh successor before new rendering or training. It should address the clear-versus-obstruction overlap and target-specific extremes with new scene identities, stronger target-normalized geometry cues, and unchanged asymmetric gates. The consumed v3 development split may motivate that design but cannot evaluate or select it.
+
+### E-20261002-AI-513 — training-only causal audit rejects target-identity leakage and the current representation
+
+- Stage: S2/S3 rejected residual-v3 training-only causal diagnosis.
+- Lane: AI/model evaluation only; no arm-lane or integration-gate status changed.
+- Claim commit: `81f7d7a17fb5816a7bf4642eaa9176f636334a21`.
+- Implementation commits: `3c3681e95c5bee2bc7eab9666e61b54093179723` and outlier-attribution revision `ad1b9bed6ba46560ac51e4628dcbdb9b496e108a`.
+- Exact command: with `CUDA_VISIBLE_DEVICES=0`, PowerShell populated `$shards` with the exact 19 retained shard directories listed in E-510, then populated `$argsList=@('software/ai/eval/audit_residual_obstruction_v3_training.py','--workspace','.', '--fixture','software/ai/sim/evidence/residual_obstruction_successor_v3.json','--admission','software/ai/eval/residual_obstruction_v3_complete_admission_v1.json','--lineage','software/ai/eval/residual_obstruction_v3_renderer_lineage_v1.json','--scorecard','software/ai/eval/residual_obstruction_development_v3.json','--model','C:\IsaacSim\artifacts\issue190\residual-v3-training-run01\model.bin','--visual-audit','C:\IsaacSim\evidence\residual-v3-training-audit-G-contact-sheet.jpg','--output','C:\IsaacSim\evidence\residual-obstruction-v3-training-audit-v1.json')`; it appended `@('--shard',(Join-Path 'C:\IsaacSim\artifacts\issue190' $name))` for every shard and ran `python @argsList`.
+- Fixtures and bindings: fixture file `56b04e0bcc35c26eea2848a0244827d7285e5056667f17deae628c0986921cbd`, canonical fixture `7e861cb17b5f4717d732989d1ddaaeb4ab3e3e4e0ae1d92dd19de35afa397fed`, admission file `5f5b3cf6f778ad0a3aee58e48ff248469699d2aaa8884efdad48277ec7175872`, canonical admission `8a3868f1daa98326186541c368a14bf28b86e4df85180e3198dfd4fa6b456efe`, lineage file `42b90b96ad200d5ac4077973cb3d4ce5523c061cda3cbd15e9f6c227d6f2694d`, rejected scorecard file `e640fabd7023742bb6ce13a4bd1aabd245b0ad94a9ec9d0f339086e94c4f9c52`, canonical scorecard `a9cad85e3ac389c81af5117125d61cc9ca1ae94ff9d382a64f34f1987fd35b05`, and unchanged model `f84dc5e4c675dfac2533bf51e3101f0b4eab1c2dd36850c80cfdd6b4f59c7a26`.
+- Result: the target-ID plus nominal-geometry ridge logistic baseline is exactly chance, pooled training AUC `0.5`; all 75 targets have the same `0.75` obstruction base rate. The rejected CNN's pooled training AUC is `0.9443582176`; every target has useful local ranking with AUC `0.8407479745`–`0.9906684028` and median `0.9602864583`, but no target has a strict positive separation margin. The best margin is `-0.2542256117` and keyboard `G` is worst at `-0.8223519325` despite local AUC `0.9625651042`.
+- Exact G outliers: maximum visible probability `0.9102718234` is `residual_training_scene_02:cool_sensor:clear:keyboard:G`; minimum obstruction probability `0.0879198611` is `residual_training_scene_03:low_key:cable_rubber:keyboard:G`. This is a scene/appearance extreme, not global inversion of `G`.
+- Memorization control: the unchanged architecture trained on a deterministic balanced 500-row subset for all 300 allowed epochs and reached loss `0.4416929841` and accuracy `0.834`, failing both the `<=0.01` near-zero-loss and `>=0.995` accuracy checks. This identifies a representation/capacity limitation or unresolved pipeline interaction before successor selection.
+- Split audit: eight training and four development base-scene identities are disjoint and observation identity overlap is zero; all four appearance identities (`neutral`, `high_key`, `low_key`, and `cool_sensor`) occur in both splits. Development metadata was read for this identity audit, but development image bytes were not opened. Evaluation is absent and unopened.
+- Simulated human visual review: 24 neutral keyboard-`G` crops from training scenes 01 and 08 retain a consistent local keyboard neighborhood; cable, foreign-object, and tool variants visibly affect it in the declared direction. Quality variants are intentionally `ABSTAIN` even when safe-overlap is zero. Review status is `PASS_WITH_LIMITATIONS`; it checks crop/label coherence only.
+- Retained artifacts: canonical training audit `8952e1146676b97efeabc9120fd2725e73ad5f5e76b52fd44dd44b6fada0b549`, training-audit file `766b287b2c9d127390db41f6eed7016298bc0086dd8f45d2337ca2b2366c74a9`, contact sheet `5741046ed35bcdb215f9c8f302605733c4e1ea96304a94a956f2a2b52fab7c86`, and canonical visual-review receipt `d02bdd445bee1053f89195809b3c051c8f4f7962c4991cc232522596d9138297`.
+- Preserved superseded evidence: the first complete audit file is retained externally with SHA-256 `51dc971e6370b929a1bfa0b32243f7fb3fac7de38807716865c6f80a24f84e26`; it lacks exact outlier observation IDs and variant aggregates. A first retained-schema test failed because the review schema incorrectly required a 64-character Git commit; the schema was corrected to the actual 40-character full Git SHA before evidence retention.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v3_training_audit.py`; `python -m ruff check software/ai/eval/audit_residual_obstruction_v3_training.py software/ai/tests/test_residual_obstruction_v3_training_audit.py`; full AI, shared boundary, registry, and repository governance commands run with this evidence commit.
+- Validation result: 298 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, the 57-test/204-path registry audit, documentation, public-record, evidence-scope, artifact, repository-health, source-archive, release-integrity, release-readiness, and diff checks passed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: this is synthetic training evidence. It does not evaluate a successor, qualify a physical camera, establish deployment behavior, or prove which architectural component causes the failed memorization control. The visual review covers one target, one appearance, and two training scenes. No checkpoint, threshold, or consumed development result changed.
+- Next dependency: predeclare a reference-comparison successor with spatial difference features, fresh development and evaluation base-scene plus appearance identities, and explicit per-target AUC and strict-margin gates; use the commissioned parked-pose clear reference at runtime and keep evaluation unopened until the frozen successor passes development.
+
+### E-20261002-AI-514 — reference-comparison v4 is frozen before rendering
+
+- Stage: S2/S3 residual-obstruction successor predeclaration.
+- Lane: AI/model simulation design only; no arm-lane or integration-gate status changed.
+- Claim commit: `a787628496fb4d798506427b84510d3f52450f81`.
+- Implementation/evidence commit: `b61cc1dbfee7cc939dc29274d3ecb105f634f938`.
+- Exact command: `python software/ai/sim/build_residual_obstruction_successor_v4.py --source-manifest software/integrations/isaac_sim/evidence/fixed_fixture_practice_v1/manifest.json --training-audit software/ai/eval/residual_obstruction_v3_training_audit_v1.json --visual-review software/ai/eval/residual_obstruction_v3_training_visual_review_v1.json --output software/ai/sim/evidence/residual_obstruction_successor_v4.json`.
+- Source bindings: practice corpus `03e2d3d7ac2d3a0026b2c24cb0a9d709190794e1adb5b69e038374fa46f152e4`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; v3 training audit file `766b287b2c9d127390db41f6eed7016298bc0086dd8f45d2337ca2b2366c74a9` and canonical report `8952e1146676b97efeabc9120fd2725e73ad5f5e76b52fd44dd44b6fada0b549`; visual-review file `34bab816e740a95b31e22eb094535ff61baf2865051f759069460b2d6040e367` and canonical review `d02bdd445bee1053f89195809b3c051c8f4f7962c4991cc232522596d9138297`; rejected model `f84dc5e4c675dfac2533bf51e3101f0b4eab1c2dd36850c80cfdd6b4f59c7a26`.
+- Frozen campaign: 12 training, eight development, and eight evaluation scene identities; four unique lighting/appearance identities per split; all scene IDs, appearance IDs, lighting seeds, and reference IDs must be disjoint. Training and development plan 43,200 and 28,800 reference-observation pairs. Evaluation freezes 28,800 planned pair identities now but renders zero pixels until a development pass; it is single use.
+- Reference contract: one clear target crop per scene and named target at the commissioned parked observation pose; observations must share its exact camera transform. Reference reuse within that scene-target group is intentional and declared, while observation RGB must remain unique. Runtime references come from retained commissioning capture and never from model generation; missing or stale reference means `ABSTAIN`.
+- Model contract: 96×96 `REFERENCE_RGB`, `OBSERVATION_RGB`, and `ABSOLUTE_RGB_DIFFERENCE` form nine input channels. The small CNN keeps a 6×6 spatial feature grid; global average pooling is prohibited. Per-target normalization is fit only from training clear-reference statistics; development or evaluation statistics are prohibited.
+- Frozen pretraining gate: the architecture must memorize the deterministic balanced 500-row control to loss `<=0.01` and accuracy `>=0.995` before full training. The identity-plus-geometry baseline must remain `<=0.55` AUC.
+- Frozen development gate: missed obstruction `<=2%`, visible false stop `<=6%`, 95% base-scene-cluster upper bounds, minimum per-target AUC `0.95`, minimum strict per-target margin `0.05`, every target passing both, and worst appearance plus worst family passing. Evaluation remains unopened.
+- Artifact SHA-256 values: builder `f5fd3da107114f5d1192195e523545689e4647ae779fbb3b13363212be2aeff7`; schema `cd3c21e6a98b25768445f90bdcd7f03be13df77132c9547ea5603465bc8a87d8`; fixture file `90a648a5643a9c4a8bfe7b328c561acaf7620d1f1a0d3b7010b611050764dd63`; canonical fixture `85faa5ce4339796a386d99d66cc2681bfa5846fb536ee0d25d764d084ad4791a`; focused tests `e96eb655822f5aa90dbb7a7c4997050c5b5faa277923de2e94c2ff8d36f2910b`.
+- Validation commands: the exact fixture command above; `python -m pytest -q software/ai/tests/test_residual_obstruction_successor_v4.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/sim/build_residual_obstruction_successor_v4.py software/ai/tests/test_residual_obstruction_successor_v4.py software/ai/tests/test_ai_work_registry.py`; full AI, shared boundary, registry, and repository governance commands run with this evidence update.
+- Validation result: 302 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, the 58-test/208-path registry audit, documentation, public-record, evidence-scope, artifact, repository-health, source-archive, release-integrity, release-readiness, and diff checks passed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: this is a synthetic design freeze. It creates no pixels, trained model, development result, evaluation result, camera qualification, localization qualification, deployment claim, controller command, or physical authority. Synthetic clear references only approximate later physical commissioning captures.
+- Next dependency: implement a bounded Isaac smoke renderer and independent pair admission for the frozen reference contract, then render only training and development identities; the 500-row memorization gate must pass before the full v4 training campaign.
+
+### E-20261002-AI-515 — spatial control explains memorization failure and v4.1 corrects lighting and gates
+
+- Stage/lane: S2/S3 AI/model training-only diagnosis and synthetic predeclaration; no arm-lane or integration-gate status changed.
+- Commits: claim `e329e22c19b86071e9e1a8ae0fd84485ad472b0f`; diagnostic `9ecb306ba95c1d68af811307d871a1732872a2eb`; deterministic-pooling fix `62248aceb79ce5a58904f1f587d3724b7667660b`; v4.1 implementation/evidence `13ced61a755d36cd4c7cdfd40d2b1d323626d36a`.
+- Exact diagnostic command: `python software/ai/eval/diagnose_residual_v3_memorization.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v3.json --admission software/ai/eval/residual_obstruction_v3_complete_admission_v1.json --lineage software/ai/eval/residual_obstruction_v3_renderer_lineage_v1.json` plus the exact 19 E-510 `--shard` paths and `--output C:\IsaacSim\evidence\residual-v3-memorization-diagnostic-v1.json`, with `CUDA_VISIBLE_DEVICES=0`.
+- Memorization result: the balanced 500-row subset has zero opposite-label RGB duplicates. Closest opposite-label raw downsampled MAE is `0.00831518` and photometrically normalized MAE is `0.0427884`. The legacy global-pool model has no augmentation, no dropout, weight decay `0`, learning rate `0.003`, 39,137 parameters, and still ends at loss `0.441693`/accuracy `0.834`. The 41,377-parameter fixed-pool 6x6 spatial control on identical rows/seed reaches loss `0.00963265` and accuracy `1.0` in 229 epochs. The failure is representational, not contradictory labels or the suspected training switches.
+- Preserved failed evidence: the first spatial-control run failed before producing a report because CUDA lacks deterministic adaptive-average-pool backward. Fixed 4x4 average pooling preserves the 6x6 shape and deterministic contract; no nondeterministic fallback was accepted.
+- Power result: each target has 288 obstruction and 96 visible development pairs. A 95% per-target upper-bound gate allows at most one miss and one false stop; requiring all 75 point gates to pass at their true limits has probability approximately `2.20e-24` and `1.46e-24`. At AUC 0.95, analytic SE is `0.01023`. V4.1 therefore uses pooled scene-cluster 2%/6% binary gates, minimum target AUC 0.90, fifth-percentile target AUC at least 0.95, and fifth-percentile target 5%/95% quantile margin at least 0.05. Strict extreme margin is diagnostic only.
+- Lighting correction: reference lighting seed is independent of observation lighting and must vary across scene-target groups; training requires lighting mismatch. Reference and observation crops receive independent P05/P95 luminance and channel-mean normalization before absolute differencing; raw difference is prohibited.
+- Exact power/v4.1 commands: `python software/ai/eval/plan_residual_v4_gate_power.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v4.json --output software/ai/eval/residual_v4_gate_power_v1.json`; `python software/ai/sim/build_residual_obstruction_successor_v4_1.py --v4 software/ai/sim/evidence/residual_obstruction_successor_v4.json --memorization-diagnostic software/ai/eval/residual_v3_memorization_diagnostic_v1.json --gate-power software/ai/eval/residual_v4_gate_power_v1.json --output software/ai/sim/evidence/residual_obstruction_successor_v4_1.json`.
+- Artifact hashes: diagnostic source `bf6b5fcc1421c4687cf5e8a77e5c5e1af25bfb3beb9ac39c76d98686de2495df`, diagnostic file `beaa09e04f0a9e80c8afdfd4d418d303a7bf6018a42592864ec34d907631764f`, canonical diagnostic `d9302773baa95e4b9b738e91080078491f5e87f3e2f9d26eaa0736cb77a3316f`; power source `6d305305cdd7cb8dd9152a16521a0f7082cf5a435e263f96937a58218ba700c1`, power file `8fe9dc8651aa8352a71272f08c4a530edd2bcc1a3fbb05b4a485d9038e94682f`, canonical power `f900f655e55e2f9b7ef07316fd31fcc445ebeb2c19476937fb5ba27478db8983`; v4.1 builder `8731683638e152a3e7f5a6ffdb5b681b6021d87811d23fb36f6b2d6507b802c5`, fixture file `921e9aceba206f81106b6641971d6b7d49b2745117060dcb5a563d7873e44888`, canonical fixture `72e2837ae82d78018c09e2a2c1a535071873ecb95dbfb3717946cb05e679ddb6`.
+- Hardware writes: 0. Physical movements: 0. Evaluation pixels rendered/opened: 0.
+- Validation result: 307 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff, the 60-test/217-path registry audit, and all repository governance checks passed.
+- Limitations: synthetic training diagnosis and analytic power planning do not establish generalization, physical lighting robustness, camera qualification, or deployment readiness. V4 is preserved as superseded, unrendered evidence.
+- Next dependency: implement and admit a bounded v4.1 reference-pair Isaac smoke; do not render evaluation or start full training before pair admission and the spatial memorization gate pass.
+
+
+### E-20261002-AI-516 — bounded v4.1 reference smoke passes with normalization unresolved
+
+- Stage/lane: S2/S3 AI/model synthetic reference-pair rendering, independent smoke admission, and commissioned-reference freshness; no arm-lane or integration-gate status changed.
+- Commits: active claim `59b1977e`; renderer and validity implementation `693153ef3a0ada0ca6c7efe0d61a1177d2b0b9f7`; registry correction `02544ca0`. The current evidence commit retains the independent admission receipt, commissioning handoff, and this ledger entry.
+- Exact smoke command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v4_1_smoke_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v4_1.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v4-1-reference-smoke-fghi --scene-limit 1 --target-start 19 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v4-1-reference-smoke-fghi.status.json`.
+- Exact admission command: `python software/ai/eval/admit_residual_obstruction_v4_1_smoke.py --manifest C:\IsaacSim\artifacts\issue190\residual-v4-1-reference-smoke-fghi\manifest.json --output software/ai/eval/residual_obstruction_v4_1_smoke_admission_v1.json`.
+- Fixtures and inventory: frozen v4.1 fixture file SHA-256 `921e9aceba206f81106b6641971d6b7d49b2745117060dcb5a563d7873e44888`, canonical fixture `72e2837ae82d78018c09e2a2c1a535071873ecb95dbfb3717946cb05e679ddb6`; one training scene; targets `F`, `G`, `H`, and `I`; four independently lit clear references; 192 observation rows and 192 unique observation RGB hashes; 144 `ABSTAIN` and 48 `VISIBLE` labels; zero development and evaluation observations.
+- Result: independent admission returned `PASS_WITH_LIMITATIONS`. Pooled raw-difference AUC is `0.7662037037`, independent self-crop-normalized AUC `0.8038194444`, and reference-context-normalized AUC `0.7743055556`. Per-target self/context AUC is F `0.8032407407/0.7569444444`, G `0.8703703704/0.7893518519`, H `0.8773148148/0.8101851852`, and I `0.7199074074/0.7615740741`. The user's washout concern is not demonstrated on this shard: self-crop normalization ranks labels better in aggregate, while context normalization is better only for I. The smoke is therefore insufficient to select either path; both are retained for a fresh development comparison.
+- Reference validity: `evaluate_reference_validity` returns `ABSTAIN` for expired/future references, camera-calibration change, fixture-pose change, target-map change, or excessive measured luminance/color-ratio drift. Maximum age and lighting drift remain owner-approved commissioning-profile inputs; the smoke does not invent deployment values. The physical handoff requires synchronized parked-pose/ChArUco captures, original clear references, clear repeats, and dark-cable/translucent-cable/hand pairs, starting with a keyboard cluster containing G and one phone cluster.
+- Artifact SHA-256 values: renderer `3a822da5f12f4d18aa27f40077aee3b11f65b1980244c1e9e0d1e33c4d26a5a4`; reference-validity source `19ae75cd9e96eeaeb6686d4e930075724e5bc43cbd9cb2b84579e52881a3a9d8`; validity schema `d3f00c3088d3755e0148f3e46df3390bcff0b99a7ad0875f2a22b6b5477c838d`; external manifest `c5a8cc84529c9bb016adc47360c97525a3638df2ef212f876c2fe1ae954012b2`; canonical dataset `ea4c01d60658182169248850d99f4825abd9aa0b3c2c235622cf861bdf42ca94`; external status `bfd4de68e7625bfb3cd6b351cd01b8d9ddab84c35f749cf841078a3f0de39975`; admission source `06ac5eb2215fca30355b3de75eb0e95f01c4b530323eaf92620a66aeea0abbf3`; admission schema `2c33400569833d03ebb3d823abdcfaada721d0ce2116178a5df1b2b2927866bb`; retained admission file `f08784b1a7c375e6b1808cedf2ed5367e29cb7ca75f144ad8d91b19be1b9e970`; canonical admission `0c203a5edc72b90e026ba38cbf2169529cb245cbdd044f3e9deb442514490d3b`; commissioning handoff `cc95983b59122c8dda4b5f0235a8d7de5f68e6fc7307ce9b31335850ad618169`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_reference_validity.py software/ai/tests/test_residual_obstruction_v4_1_smoke.py software/ai/tests/test_residual_obstruction_v4_1_smoke_admission.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/rocell_ai/reference_validity.py software/ai/eval/admit_residual_obstruction_v4_1_smoke.py software/ai/tests/test_reference_validity.py software/ai/tests/test_residual_obstruction_v4_1_smoke.py software/ai/tests/test_residual_obstruction_v4_1_smoke_admission.py software/integrations/isaac_sim/residual_obstruction_v4_1_smoke_probe.py`; full AI, shared-boundary, registry, and repository governance checks were run for the retained evidence commit.
+- Validation result: 13 focused tests passed; all 314 AI tests passed with two expected Windows symlink skips; all 34 shared ingress/conformance tests passed; Ruff passed. The registry audit covers 63 tracked/documented AI tests and 226 referenced paths.
+- Preserved failed evidence: the first heavy-dark unit probe showed that independent per-crop P05/P95 normalization can erase a constructed obstruction; the implementation added a reference-context comparator rather than suppressing the result. Commit `693153ef` was then pushed with an invalid registry source path outside `software/ai`; the registry audit and four registry tests failed, and `02544ca0` removed only that invalid registry entry, after which 10 focused tests and Ruff passed. The first independent admission invocation rejected the valid manifest because it incorrectly required an explicit zero-valued evaluation split key; the smoke manifest represents absence by omitting that key while separately declaring zero evaluation observations. The verifier now treats a missing split count as zero and still rejects any nonzero evaluation count.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; Isaac used zero-delta Replicator captures and did not simulate robot motion.
+- Limitations: this is a one-scene, four-target synthetic training smoke. It is not model training, development selection, held-out evaluation, camera qualification, physical qualification, deployment qualification, or evidence of all 75 targets. The reference-context method currently uses the reference crop's surrounding pixels and has not been tested with a true full-frame context region. No controller command, joint/PWM/serial/Waveshare JSON, motion policy, execution permit, transport field, or physical authority was created.
+- Supersedes: none. V4.1 remains the frozen successor; this completes only the smoke and reference-validity increment.
+- Next dependency: independently render and admit fresh v4.1 training/development reference pairs with both normalization channels, rerun the 500-row spatial memorization gate, and compare frozen development gates without opening evaluation. In parallel, collect the documented physical-original reference pairs when final-camera ChArUco commissioning is available.
+
+
+### E-20261002-AI-517 — v4.2 freezes dual-normalization selection and baseline uplift
+
+- Stage/lane: S2/S3 AI/model synthetic campaign predeclaration; no rendering, training, arm-lane, or integration-gate status changed.
+- Claim commit: `2577ce8d`. The current implementation/evidence commit contains the builder, schema, retained fixture, tests, registry, workplan, and this append-only entry.
+- Exact command: `python software/ai/sim/build_residual_obstruction_successor_v4_2.py --v4-1 software/ai/sim/evidence/residual_obstruction_successor_v4_1.json --smoke-admission software/ai/eval/residual_obstruction_v4_1_smoke_admission_v1.json --output software/ai/sim/evidence/residual_obstruction_successor_v4_2.json`.
+- Source bindings: v4.1 file SHA-256 `921e9aceba206f81106b6641971d6b7d49b2745117060dcb5a563d7873e44888`, canonical v4.1 `72e2837ae82d78018c09e2a2c1a535071873ecb95dbfb3717946cb05e679ddb6`; smoke-admission file `f08784b1a7c375e6b1808cedf2ed5367e29cb7ca75f144ad8d91b19be1b9e970`, canonical admission `0c203a5edc72b90e026ba38cbf2169529cb245cbdd044f3e9deb442514490d3b`.
+- Frozen training-free baselines: each normalization uses zero-parameter mean absolute normalized RGB difference on the same rows and labels. The candidates are independent per-crop P05/P95 luminance/channel normalization and a reference-context P95 channel white point applied to both images, using the outer 24-pixel border of the 96-pixel target neighborhood.
+- Frozen selector: compute AUC for every target on development; compare linear-interpolated fifth-percentile target AUC; higher wins. An absolute difference at or below `0.005` uses the predeclared `SELF_CROP_P05_P95` tie break. Selection occurs once and evaluation statistics are prohibited.
+- Frozen CNN value gate: train one identical spatial CNN per normalization; both must pass the existing 500-row loss `<=0.01` and accuracy `>=0.995` memorization gate before development. The selected CNN must improve pooled AUC and q05 target AUC by at least `0.02` over its corresponding training-free baseline on identical development rows, while also passing all existing pooled, cluster, appearance, family, target-AUC, and target-margin gates. Failure rejects the candidate.
+- Frozen render admission: exact 43,200 training and 28,800 development observations, zero evaluation observations, one reference per scene/target, unique observation bytes, zero semantic obstruction overlap for clear/distractor/image-quality variants, and unchanged geometry bounds of 0.20–0.75 cables, 0.25–0.50 matte edge tool, 0.50–0.80 centered gloss tool, and 0.35–0.70 foreign object.
+- Artifact hashes: builder `58f88a6fa6847e471fda3a201bdd8b39d2c655f04e1086811d022eee65086c11`; schema `bbdbb8df85edcbfd02f4ed7656c4348f8cbd1b376127e66d87208581ef40bd99`; tests `12df406cd85049ec49c65034c2eb4bb11a1e172da4358b2cd90c659520c53494`; retained fixture file `26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5`; canonical fixture `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`.
+- Validation commands: the exact builder command above; `python -m pytest -q software/ai/tests/test_residual_obstruction_successor_v4_2.py`; `python -m ruff check software/ai/sim/build_residual_obstruction_successor_v4_2.py software/ai/tests/test_residual_obstruction_successor_v4_2.py`; registry and repository governance checks run with this evidence commit.
+- Focused result: two tests passed and Ruff passed; registry audit covers 64 tracked/documented AI tests and 230 referenced paths.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: this is a synthetic decision freeze. The 0.02 uplift is a predeclared practical model-value requirement, not a physical safety guarantee. It creates no images, model, development result, camera qualification, deployment claim, command, or authority.
+- Supersedes: v4.1 remains preserved as the smoke contract; v4.2 governs the unstarted campaign because normalization selection and CNN uplift are new semantics.
+- Next dependency: implement a v4.2 split/scene/target-sharded Isaac renderer and exact independent campaign admission, then render training and development only. Evaluation remains absent.
+
+
+### E-20261002-AI-518 — v4.2 renderer and independent admission pass bounded smoke
+
+- Stage/lane: S2/S3 AI/model synthetic rendering and admission infrastructure; no training, arm-lane, or integration-gate status changed.
+- Claim commit: `2577ce8d`; governing v4.2 predeclaration commit `80fe45c64b8d5c5e46be886a5541efb6f0139719`. The current implementation/evidence commit contains the renderer, verifier, tests, retained partial receipt, workplan, registry, and this entry.
+- Exact render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v4_2_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v4_2.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v4-2-training-s00-t019-022-smoke --split training --scene-start 0 --scene-count 1 --target-start 19 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v4-2-training-s00-t019-022-smoke.status.json`.
+- Exact admission command: `python software/ai/eval/admit_residual_obstruction_v4_2_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --shard C:\IsaacSim\artifacts\issue190\residual-v4-2-training-s00-t019-022-smoke --allow-partial --output software/ai/eval/residual_obstruction_v4_2_renderer_smoke_v1.json`.
+- Result: Isaac returned PASS for training scene 0 and target indices 19–22 (`F`, `G`, `H`, and `I`): 192 observations, four references, and zero evaluation observations. Independent admission reread every image, verified hash/size/path containment, exact scene/appearance/variant/target identity, reference consistency, unique observation identity and bytes, labels, and frozen semantic overlap. It returned `PARTIAL`, `campaign_admitted=false`, with 43,008 training and 28,800 development observations missing.
+- Artifact hashes: renderer `7237820044fb843666afe42efb47fa7f616cdfcf406574a4ea45fed5937eefa0`; admission source `ad14831a3932c3444ae690a0e52c1109959888157a30833bc5543f7e714436e1`; admission schema `6b710853b0fe26718ea9f96063f77b27d0451519e26b0413a77c6316714cb53a`; renderer tests `29b5c9930ec47e6fe2af56e090577101beefd320ee9258e78d7f1515425b0c09`; admission tests `67e8d0c078cf4c5835beb51f93ffc24d5ff75517525140ed848a615a7fb28bba`; external manifest file `654ec940163d18a5224fff979baeb9295a41d5ae7e450b83560fb6940faaef03`; canonical shard dataset `aecf7efab58ecc0f05e1216482e2a2c51b04a272b4cb8b52524425958b4143f2`; external status `12ec0d9a1077510c8b9f9f9b06515b039bc986a7bfe9589330b0e05541463bda`; retained partial receipt file `c8b66239c85cf5210161fe4750157de0a3cc77ef95080cc13141ce0f1584cdd4`; canonical partial receipt `48248559c94e691187ee6ace86d2d6a2ebd3fa77af33f22bf5859e9c10f7b31e`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_renderer.py software/ai/tests/test_residual_obstruction_v4_2_admission.py`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v4_2_isaac_probe.py software/ai/eval/admit_residual_obstruction_v4_2_shards.py software/ai/tests/test_residual_obstruction_v4_2_renderer.py software/ai/tests/test_residual_obstruction_v4_2_admission.py`; registry and repository governance checks run with this evidence commit.
+- Focused result: four tests passed and Ruff passed; registry audit covers 66 tracked/documented AI tests and 235 referenced paths.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta Replicator captures ran.
+- Limitations: this smoke covers one of 20 train/development scenes and four of 75 targets. It is not complete campaign admission, model training, development selection, evaluation, camera qualification, or physical qualification. No command, joint, PWM, serial, controller JSON, motion policy, permit, transport field, or authority was created.
+- Supersedes: none; E-517 remains the governing predeclaration.
+- Next dependency: run committed renderer shards for every frozen training and development scene/target combination, require exact complete admission, then run both 500-row memorization gates before any development scoring.
+
+
+### E-20261002-AI-519 — early shard audit stops camera-contract drift and validates correction
+
+- Stage/lane: S2/S3 AI/model early synthetic campaign audit and renderer correction; no training, arm-lane, or integration-gate status changed.
+- Governing predeclaration: `80fe45c64b8d5c5e46be886a5541efb6f0139719`; initial renderer/admission commit `c6a17ccdc224da023c9c4c3e2c71302c4e4c41f6`. The current implementation/evidence commit contains the correction, tests, corrected partial receipt, workplan, registry, and this append-only entry.
+- Preserved failed campaign evidence: two initial queue launches failed before Isaac started because a PowerShell integer-array argument was passed as one comma-delimited string and then because the first script correction wrote a literal newline escape. The third launch began correctly on two GPUs. Early source/visual inspection then found that the committed renderer sampled X/Y camera position at ±6 mm although every v4.2 scene freezes ±3 mm, did not sample the declared ±1.5 mm Z component, and did not explicitly sample the frozen ±0.8/±0.8/±1.0 degree rotation components. Both queues and the finalizer were stopped. Completed `residual-v4-2-training-t000-003` (2,304 observations), partial development target 0–3, and partial training target 4–7 remain external and excluded from campaign admission.
+- Early visual review: the completed invalid shard contains 48 reference identities and 2,304 observations; all 2,304 reference/observation pairs use different lighting. Safe-region overlap is 0.55–0.60 for both cable materials, 0.35–0.40 for the matte edge tool, 0.55–0.60 for the centered gloss tool, 0.54–0.56 for the foreign object, and exactly zero for clear, adjacent, glare, defocus, motion blur, and compression variants. Reference/observation/difference and same-light contact sheets visually confirm the declared distractor, cable, tool, foreign-object, glare, defocus, motion-blur, and compression effects.
+- Correction: the renderer now draws deterministic X/Y/Z position jitter from each scene's exact frozen bounds, draws all three rotation components from their exact frozen bounds, rotates both view and up vectors, records position, look-at, up-axis, position-jitter, and rotation-jitter triples on every bound row, and reuses that exact camera contract for reference and observation. Independent admission validates finite triples, normalized up-axis, frozen per-axis bounds, and exact per-reference transform consistency.
+- Exact corrected smoke command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v4_2_isaac_probe.py --workspace . --fixture software\ai\sim\evidence\residual_obstruction_successor_v4_2.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v4-2-training-s00-t019-022-camera02-smoke --split training --scene-start 0 --scene-count 1 --target-start 19 --target-count 4 --status-output C:\IsaacSim\evidence\residual-v4-2-training-s00-t019-022-camera02-smoke.status.json`.
+- Corrected result: PASS and independent `PARTIAL` admission for 192 unique observations/four references. Across the four camera bindings, maximum absolute position jitter is `[2.9520211835, 1.8436982000, 1.3807749754]` mm within `[3,3,1.5]`; maximum absolute rotation jitter is `[0.4748799951, 0.7797173760, 0.9949197949]` degrees within `[0.8,0.8,1.0]`. Canonical corrected shard dataset is `368b5e4016ffd5d38563d108931b80b06618d256ab0dbd38596e6e6f46f13d79`; canonical partial admission is `abd1389fd50a40068f75145ae4395f68313eeda1d9a6332c033b0708737b1b8d`.
+- Artifact hashes: corrected renderer `fdc871119f460c19cb26869be745c6791fea95f7722059b225e7e963bc074593`; corrected admission source `6ac1c74f8ecf0f4e272f360688ec564d96fceec452426185a10a2563f48ec995`; renderer tests `c19a5c35ac5fabd1a29f4524d3a17948cde65a8f49aa3e5512f3f72bb743be5d`; admission tests `7a727771179efc7f8719c698acf0cbc6e3cd70bba6f30145fa95a19d7fb899f2`; retained corrected receipt `3db854829abdc777b8b1ae46e06d159b1d56b1b60ebe6400f1f711c4cef1b36e`; corrected external manifest `cf377967c047fb615a2948491c5e6a5f1aa8719edfc5d607f4e7915a2366b716`; early audit JSON `f225ead16db920944fe001d19252ebda7baaf70d6d870c2905da88cc351bca30`; reference-pair sheet `6a63b5312772a63a23a3d816684cfbdbf23440b8f6ae8f9e224c0ecdd171150b`; same-light sheet `71b6173aad36b9e2d57c0c992edf45d66c726cf5b491e98198607b3142c95b41`; stop receipt `ee7a9d26baaab43cebc08e0854d7810e1aab4afed9a7b7655e98b2410408f90d`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_renderer.py software/ai/tests/test_residual_obstruction_v4_2_admission.py`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v4_2_isaac_probe.py software/ai/eval/admit_residual_obstruction_v4_2_shards.py software/ai/tests/test_residual_obstruction_v4_2_renderer.py software/ai/tests/test_residual_obstruction_v4_2_admission.py`; corrected smoke and independent admission commands above; registry and repository governance checks run with this evidence commit.
+- Focused result: seven renderer/admission tests pass and Ruff passes; registry audit covers 66 tracked/documented AI tests and 236 referenced paths.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic captures ran.
+- Limitations: visual review covers one invalidated training target shard and a corrected four-target smoke. It does not establish full campaign integrity, model quality, physical rendering fidelity, or deployment qualification.
+- Supersedes: renderer implementation in E-518 only. The original evidence remains preserved as a valid smoke of image/overlap plumbing but invalid campaign camera sampling.
+- Next dependency: commit the corrected renderer, restart all training/development shards only in fresh directories, spot-check the first corrected complete shard, then allow automatic complete admission. Evaluation remains absent.
+
+
+### E-20261002-AI-520 — corrected training and development shards pass early admission and visual review
+
+- Stage/lane: S2/S3 AI/model early v4.2 campaign audit; no arm-lane or integration-gate status changed.
+- Exact implementation commit: `3eff71ec2162edd56f9d3998fc043f60f6b75c5a`.
+- Preserved failures: the first corrected external queue requested 20 scene rows for both splits and every request failed closed because the fixture has 12 training and 8 development scenes. The next queue correctly used those counts but treated development `scene_start` as a global fixture index; both valid training shards completed, while both development requests failed closed with `scene start is outside the selected split`. These `camera02` and failed `camera03` directories and logs remain external and are excluded from final admission.
+- Repaired queue: `camera04` uses split-relative ranges `training=0:12` and `development=0:8`, checks each renderer receipt instead of relying only on process exit, reuses only the independently admitted `camera03` training target shards 0–3 and 4–7, and writes all other outputs to fresh `camera04` paths. Launch receipt SHA-256 is `4333b8f255ca6891eb4b0758f90df35d2c9d5d165394ec8dfe6bd848d3f7e9b4`.
+- Exact training admission command: `python software/ai/eval/admit_residual_obstruction_v4_2_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --shard C:\IsaacSim\artifacts\issue190\residual-v4-2-training-t000-003-camera03 --allow-partial --output C:\IsaacSim\evidence\v4-2-campaign\early-shard-camera03-admission.json`.
+- Training audit result: `PARTIAL`, never campaign-admitted; 2,304 observations, 48 references, 2,304 unique observation RGB hashes, dataset SHA-256 `2e23c5f4337ce87afc1837b1f6dea75f8fe9f5a8c2e267beb7540731b0a4fdef`, canonical report SHA-256 `fce647a96744d1174f8eedfa4ad2d4a88cb1cd142f02f666f17a890c481b00dc`. Maximum absolute position jitter is `[2.9520211835, 2.9350613381, 1.4196729667]` mm and rotation jitter is `[0.7673540248, 0.7805785909, 0.9961893572]` degrees, inside the frozen `[3,3,1.5]` mm and `[0.8,0.8,1.0]` degree limits. Every reference identity has one camera binding.
+- Exact development admission command: `python software/ai/eval/admit_residual_obstruction_v4_2_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --shard C:\IsaacSim\artifacts\issue190\residual-v4-2-development-t000-003-camera04 --allow-partial --output C:\IsaacSim\evidence\v4-2-campaign\early-development-camera04-admission.json`.
+- Development audit result: `PARTIAL`, never campaign-admitted; 1,536 observations, 32 references, 1,536 unique observation RGB hashes, dataset SHA-256 `d80d9adb5a7430cf1c3183f41b5605cf14ab7825e73eb5bf98b741388092ccbd`, canonical report SHA-256 `4a73252b3718dbe36bcf2c6ba8274e4be764e1afc2123eea942bf51fe97ff932`. Maximum absolute position jitter is `[2.6361014127, 2.9578068298, 1.2340984336]` mm and rotation jitter is `[0.7785023492, 0.7847713524, 0.8897554729]` degrees. Every reference identity has one camera binding.
+- Visual review: commissioned-reference and same-light sheets were inspected for both shards. Adjacent targets visibly alter neighboring keys while retaining zero safe-region overlap. Rubber/translucent cables, edge/center tools, and the foreign object visibly affect the target region with measured overlaps inside their frozen ranges. Glare, defocus, motion blur, and compression visibly alter the intended crop. Same-light clear comparisons confirm these effects independently of reference-light change.
+- External artifact hashes: training admission file `be13e5d8d98b983ee4a90eff0b92137b30b508671ff72eab695300ce83b9ab4d`; training audit JSON `047e480a5e1804870f4a55aacc940468a5197e1f2fc3ca006f0a508fde729b35`; training reference-pair sheet `4d10d034ce4b444571c854ac511fe3af079548c407e2dd9c99b0212ad772237b`; training same-light sheet `6d0e3c17cde64a78bc74c99402bf1444bc7467e77f55a8f23b2168b27bde431e`; development admission file `daf9a1093abd365802a17ec15aabb2e35cfc90602e16a2270ecfa970114b59eb`; development audit JSON `95260877a3272f1b8a9e4f073a8966a316f187529c9998a6803af346f559e5c0`; development reference-pair sheet `b647e563f4af18361df3ff9b45716d9373d7b5ec27e1bcc8b87b8ac54a3dbbb7`; development same-light sheet `5fa5b934e975dba3892f260fdc4e2fbbc5da14fdf8579c6a9a7c3a76c242cef5`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic captures ran.
+- Limitations: two early target shards from each split do not establish full-campaign integrity, model quality, sim-to-real transfer, physical calibration, or deployment qualification. The automatic finalizer still must admit all 38 intended shard manifests exactly before training can start. Evaluation images remain absent and unopened.
+- Next dependency: allow the repaired queues to finish, require complete exact admission, then run both 500-row memorization gates before any development normalization selection or CNN uplift comparison.
+
+
+### E-20261002-AI-521 — dated pre-result camera-conformance amendment and exact shard allowlist
+
+- Amendment date: 2026-10-02, before complete campaign admission, training, development metrics, normalization selection, or model results.
+- Stage/lane: S2/S3 AI/model synthetic render governance; no arm-lane or integration-gate status changed.
+- Governing frozen fixture: `software/ai/sim/evidence/residual_obstruction_successor_v4_2.json`, file SHA-256 `26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5`, canonical bundle SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`.
+- Amendment scope: the frozen fixture and camera bounds did **not** change. Commit `3eff71ec2162edd56f9d3998fc043f60f6b75c5a` corrected the renderer implementation to conform to the already-frozen per-axis position `[3,3,1.5]` mm and rotation `[0.8,0.8,1.0]` degree bounds. This correction occurred before any development score or model result was observed. E-519 preserves the invalid pre-correction output and the corrected smoke; E-520 preserves the early complete-shard review.
+- Exact final-admission identity contract: the hardened finalizer constructs exactly 38 paths from the frozen 75-target grid. Only training target shards 0–3 and 4–7 use their independently admitted `camera03` paths; all remaining training shards and all development shards use fresh `camera04` paths. No directory scan or glob is used. `camera02` and failed development `camera03` paths cannot enter the list.
+- Hash binding: before invoking admission, every exact path must have a `PASS` renderer receipt whose `dataset_sha256` equals the manifest's canonical `dataset_sha256`; the manifest split, scene start/count, and target start/count must equal its expected identity. The finalizer records the manifest-file SHA-256 and renderer-receipt SHA-256 for all 38 identities in `exact-shard-allowlist-camera04.json`. Ordinary admission then independently validates the fixture binding, canonical manifest hash, observation IDs, duplicate exclusion, reference/camera consistency, every observation/reference image byte count and SHA-256, frozen overlap bounds, and frozen camera bounds.
+- Running finalizer launch: external PID `58804`, bound to queue PIDs `37696` and `62640`; launch receipt `C:\IsaacSim\evidence\v4-2-campaign\finalizer-camera04-hardened-launch.json`. The finalizer cannot emit `PASS` unless both queue receipts pass, all exact bindings pass, and complete admission succeeds.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0; only zero-delta synthetic captures run.
+- Limitations: the allowlist hashes are generated only after all shards finish, so this entry documents the enforced procedure rather than claiming campaign admission. Synthetic admission cannot establish sim-to-real transfer, physical calibration, or deployment qualification. Evaluation remains absent and unopened.
+- Next dependency: wait for both render queues, preserve the exact allowlist and complete-admission receipts, and require campaign-admitted `PASS` before either memorization gate starts.
+
+
+### E-20261002-AI-522 — v4.2 post-admission gate sequence is scripted before results
+
+- Stage/lane: S2/S3 AI/model synthetic pretraining preparation; no arm-lane or integration-gate status changed.
+- Governing fixture: `software/ai/sim/evidence/residual_obstruction_successor_v4_2.json`, canonical bundle SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`.
+- Implemented order: complete admission; deterministic 500-row training-only preparation; one identical 6x6 spatial CNN memorization run for each frozen normalization; one development opening for the training-free baseline selector; full CNN training and the frozen 0.02 uplift comparison. The baseline scorer refuses development access unless both memorization runs report `gate_met=true` and bind to the same complete-admission preparation receipt.
+- Deterministic subset: `LABEL_BALANCED_TARGET_ROUND_ROBIN_SHA256_RANK_V1`, seed 19201, exactly 250 `VISIBLE` and 250 `ABSTAIN` rows. Rows are round-robin across sorted `device:target_id` groups and SHA-256 ranked within each group. The preparation report binds every observation identity, observation/reference path, byte count, and SHA-256.
+- Memorization contract: nine channels comprising normalized reference RGB, normalized observation RGB, and their absolute difference; convolution channels 24/48/64; two 2x2 max pools followed by deterministic 4x4 average pooling to a retained 6x6 map; no global adaptive pool, augmentation, or dropout; AdamW, learning rate 0.003, weight decay 0, batch size 100, at most 300 epochs; pass requires loss at most 0.01 and accuracy at least 0.995 independently for both normalizations.
+- Baseline contract: zero fitted parameters; uses manifest-bound mean absolute normalized RGB difference; reports pooled and every-target AUC; selects by linear fifth-percentile target AUC with the frozen absolute 0.005 tie band and `SELF_CROP_P05_P95` tie break. It does not train or select from evaluation.
+- Early admitted-shard smoke: exact manifest `C:\IsaacSim\artifacts\issue190\residual-v4-2-training-t000-003-camera03\manifest.json`; 500 rows prepared as 250/250 across the four available targets, subset identity SHA-256 `07b383fca08bb12604a8a4c378be6387fcc1a180e96b7a25f033fe5bf6ce4a86`. Both loaders verified all bound image bytes and produced `(500,9,96,96)` float32 tensors. Mean absolute difference-channel values were 0.0832754597 for self-crop and 0.0433583446 for reference-context normalization. This partial smoke cannot unlock memorization or development.
+- Exact smoke command: an inline Python invocation imported `load_manifest_rows`, `build_preparation`, and `load_subset`, loaded only the independently admitted training manifest above, built the deterministic subset with the frozen fixture, and loaded both normalization tensors. Retained external smoke summary SHA-256: `b393d79a9a066abbaab6cbfc43e8c19a3c5c6bc6a13e335312df9716c46e313a`.
+- Fail-closed production check: invoking `prepare_residual_obstruction_v4_2_gates.py` with the same `PARTIAL` admission exited 1 with `gate preparation requires complete campaign admission` and created no output file.
+- Source hashes: preparation `93c7adfa254c6a864e7e958c3f91275672ed8ed34848de8a44e99af8e3a4b37c`; memorization runner `e05a6ea80aee1ee24e7a708942b04e75c2f249c708dd91e7800e5f82674ac007`; baseline scorer `5987369129e66f6d9284a9106dde4d028dbe37617f2e8f7b8be98a1682752980`; focused tests `58db3b1cec79a17fc9a0a5cf44ba123140d21b41d847c45c5178fd582f3f8e91`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_gates.py`; `python -m ruff check software/ai/train/prepare_residual_obstruction_v4_2_gates.py software/ai/train/run_residual_obstruction_v4_2_memorization.py software/ai/eval/score_residual_obstruction_v4_2_baseline.py software/ai/tests/test_residual_obstruction_v4_2_gates.py`; registry and repository governance checks run with this evidence commit.
+- Focused result: six gate tests pass, covering deterministic/balanced selection, frozen gate order, exact normalization parity with the renderer, retained 6x6 architecture, AUC/tie selection, and tamper rejection.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Physics-step count: 0.
+- Limitations: no memorization model was trained and no development score was computed because full admission remains pending. The early smoke covers four targets from one valid training shard and is only an implementation check. Synthetic success cannot establish sim-to-real transfer, physical calibration, or deployment qualification. Evaluation remains absent and unopened.
+- Next dependency: require complete exact admission, generate the full 75-target preparation receipt, run both memorization gates, and only then execute the development baseline selector.
+
+
+### E-20261002-AI-523 — complete v4.2 admission, memorization, and baseline selection pass
+
+- Stage/lane: S2/S3 AI/model synthetic development campaign; no arm-lane or integration-gate status changed.
+- Exact source commits: camera-conformant renderer `3eff71ec2162edd56f9d3998fc043f60f6b75c5a`; admission/pretraining/memorization/baseline tooling `4ee2e0a68f70aa2f86138706c5771c741bb43e6c`.
+- Governing fixture: `software/ai/sim/evidence/residual_obstruction_successor_v4_2.json`, file SHA-256 `26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5`, canonical bundle SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`.
+- Exact admission result: PASS and campaign-admitted across the exact 38-manifest allowlist. Admission independently verified 72,000 of 72,000 observations, 72,000 unique RGB hashes, 1,500 of 1,500 clear references, 43,200 training rows, 28,800 development rows, zero missing rows, and zero evaluation rows. Allowlist file SHA-256 is `94c903d158700e5e2796c1129380146c95c819cd5661c49625b5b1e375eaf28f`; admission file SHA-256 is `d1c4873a34df6ccc37a9191e27eac47bf86cc2a18cd3c7211f54ad3568c34311`; canonical admission report SHA-256 is `d0a7107016703045f98e3b7d40e9222012e0b9fe7a433c429486b35a11e0066b`.
+- Exact preparation command: PowerShell loaded the 38 admitted manifest paths from `complete-admission-camera04.json`, passed each manifest's parent directory as a repeated `--shard` argument, and invoked `python software/ai/train/prepare_residual_obstruction_v4_2_gates.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json [38 exact --shard directories] --output C:\IsaacSim\evidence\v4-2-campaign\v4-2-gate-preparation.json`.
+- Preparation result: the deterministic training-only selector produced exactly 500 rows, 250 `VISIBLE` and 250 `ABSTAIN`, with subset identity SHA-256 `681f022f41d46361a64bdee3add4db9988de340cf7c4b7fb8773104e6f273574`. Preparation file SHA-256 is `0fda00878ec91b020dc2b50219f414737d2148c5f71c770fe4a3d994ea68acd4`; canonical report SHA-256 is `7abb714366eac9ec9de6d4ba501fb8514ed7fed445f22bce35e60bcd08f4e409`.
+- Preserved failed evidence: the first production preparation invocation supplied the 38 exact manifest *files* to `--shard`; the CLI requires shard directories and therefore failed closed with `shard paths differ from exact admitted manifest inventory`, exit 1, and no output. The corrected invocation supplied each exact manifest parent. No admission bytes, fixture, selector, or result rule changed.
+- Exact memorization command: `python software/ai/train/run_residual_obstruction_v4_2_memorization.py --preparation C:\IsaacSim\evidence\v4-2-campaign\v4-2-gate-preparation.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json --output C:\IsaacSim\evidence\v4-2-campaign\v4-2-memorization.json`.
+- Memorization result: both 42,673-parameter spatial 6x6 CNN controls pass on CUDA. `SELF_CROP_P05_P95` reached 1.0 accuracy and 0.0095028142 loss in 76 epochs; `REFERENCE_CONTEXT_WHITEPOINT` reached 1.0 accuracy and 0.0093137743 loss in 157 epochs. Memorization file SHA-256 is `8cc509e8bc478239dd1c7d184ecb4aaf6ce00328441acb881276a8acc69e5aa9`; canonical report SHA-256 is `9a2a0376361a9b27764adbc8c2a43439a085ba37f6e6bbcd91c31b391c5dba2c`.
+- Exact baseline command: PowerShell passed the same 38 exact admitted shard directories to `python software/ai/eval/score_residual_obstruction_v4_2_baseline.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json --preparation C:\IsaacSim\evidence\v4-2-campaign\v4-2-gate-preparation.json --memorization C:\IsaacSim\evidence\v4-2-campaign\v4-2-memorization.json [38 exact --shard directories] --output C:\IsaacSim\evidence\v4-2-campaign\v4-2-baseline.json`.
+- Baseline result: the predeclared fifth-percentile rule selected `SELF_CROP_P05_P95` once. Its training-free difference score measured pooled AUC `0.6853627958`, fifth-percentile target AUC `0.6948350694`, and minimum target AUC `0.6405888310`; context-whitepoint measured `0.6255507202`, `0.5801432292`, and `0.5474537037`. Baseline file SHA-256 is `dceec31965df1ecc4a64cff2a17dc97ab0e5d87646e69291930686e7b1a36803`; canonical report SHA-256 is `7b6efa9c711a6466de1276a4bf332c3abcfdf6d4014c266466d5bea0b4465339`.
+- Pre-result full-training clarification: full CNN training consumes only the once-selected `SELF_CROP_P05_P95` normalization. `REFERENCE_CONTEXT_WHITEPOINT` remains an untested full-CNN alternative and is not rejected. This clarification was recorded before any full CNN development result was observed; the fixture, baseline selector, 0.02 pooled uplift, and 0.02 fifth-percentile target-AUC uplift were not changed.
+- Validation command for the new bound runner: `python -m pytest -q software/ai/tests/test_ai_work_registry.py software/ai/tests/test_residual_obstruction_v4_2_gates.py`; `python -m ruff check software/ai/train/train_residual_obstruction_v4_2_cnn.py software/ai/tests/test_residual_obstruction_v4_2_gates.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`. Result: 13 focused tests, registry audit, Ruff, source-archive check, and diff check pass. The governed source footprint remains within the exact 6,242-path ceiling.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Physical authority: false.
+- Limitations: all results are synthetic simulation evidence. They do not establish real-camera transfer, physical calibration, obstruction qualification, deployment qualification, or safe arm operation. Evaluation remains absent and unopened. First physical confidence requires commissioned real clear references and bounded real cable/hand captures from the fixed parked pose; ChArUco and parked-pose capture work can proceed independently while training runs.
+- Next dependency: commit the full-training runner before observing its result, train on all 43,200 admitted training rows with the selected normalization, compare on the identical 28,800 development rows, and require both frozen 0.02 uplift gates. Preserve a failed result without changing the thresholds.
+
+
+### E-20261002-AI-524 — selected-normalization CNN exceeds both frozen simulation uplift gates
+
+- Stage/lane: S2/S3 AI/model synthetic CNN development; no arm-lane or integration-gate status changed.
+- Exact implementation commit: `f9b5ebdc60f9b18b0aeeebc5f0a6d295e03c4bd5`. This commit containing the runner, gate test, registry update, workplan claim, E-523, and selected-normalization clarification was pushed before the full CNN result was observed.
+- Governing artifacts: fixture canonical SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`; admission canonical SHA-256 `d0a7107016703045f98e3b7d40e9222012e0b9fe7a433c429486b35a11e0066b`; preparation canonical SHA-256 `7abb714366eac9ec9de6d4ba501fb8514ed7fed445f22bce35e60bcd08f4e409`; memorization canonical SHA-256 `9a2a0376361a9b27764adbc8c2a43439a085ba37f6e6bbcd91c31b391c5dba2c`; baseline canonical SHA-256 `7b6efa9c711a6466de1276a4bf332c3abcfdf6d4014c266466d5bea0b4465339`.
+- Exact command: PowerShell loaded the 38 exact manifest identities from `C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json`, supplied each exact parent directory as repeated `--shard`, and invoked `python software/ai/train/train_residual_obstruction_v4_2_cnn.py --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json --preparation C:\IsaacSim\evidence\v4-2-campaign\v4-2-gate-preparation.json --memorization C:\IsaacSim\evidence\v4-2-campaign\v4-2-memorization.json --baseline C:\IsaacSim\evidence\v4-2-campaign\v4-2-baseline.json [38 exact --shard directories] --checkpoint C:\IsaacSim\evidence\v4-2-campaign\v4-2-selected-cnn.pt --output C:\IsaacSim\evidence\v4-2-campaign\v4-2-cnn-development.json`.
+- Training: exact selected normalization `SELF_CROP_P05_P95`; exact 43,200 admitted training observations; spatial reference/observation/difference CNN with 42,673 parameters and retained 6x6 map; CUDA; seed 19200; batch size 128; AdamW at learning rate 0.0003 and weight decay 0.0001; 30 frozen epochs; no augmentation or dropout. Loss fell from `0.3683590598` after epoch 1 to `0.0261779779` after epoch 30.
+- Synthetic development result on the exact 28,800 admitted development observations: pooled AUC `0.9970838027`, fifth-percentile target AUC `0.9838107639`, and minimum target AUC `0.9525101273`. The selected training-free baseline was `0.6853627958`, `0.6948350694`, and `0.6405888310`, respectively.
+- Frozen uplift result: pooled improvement `0.3117210069` against required `0.02`; fifth-percentile target-AUC improvement `0.2889756944` against required `0.02`. Both uplift gates pass. Canonical result report SHA-256 is `80ce5b72b65b84e6dfa0e3d5d174c6a87d72c929487d53eee53f0dd5b8342b82`.
+- Retained artifacts: committed scorecard `software/ai/eval/residual_obstruction_v4_2_cnn_development_v1.json`, file SHA-256 `a6f9947e24809fa9d0149fd9f87773296a28823ef0280d09c264dcabbaee72dd`; external checkpoint, 176,032 bytes, SHA-256 `68c993b679d81715eca9327f5df001117c0156bcf0034a79580951e1e91c4aad`; external complete log, 5,234 bytes, SHA-256 `c0dc1367f9830920b98f88197678386cbeea21a8aef167e1c9aea51aa62bc6c4`.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Physical authority: false. Evaluation observations opened: 0.
+- Limitations: this result proves only that the selected compact CNN strongly exceeds the frozen simple baseline on synthetic development data. It does not yet pass a selected operating threshold, missed-obstruction or false-stop cluster bounds, worst-appearance/family gates, real-camera transfer, physical calibration, or deployment qualification. The other normalization remains an untested full-CNN alternative rather than a rejected alternative.
+- Real-camera dependency: simulation cannot answer transfer. Commissioned parked-pose clear references and bounded real cable/hand captures remain required, with camera intrinsics, ChArUco board pose, fixed-device identity, and reference validity evidence. That work may proceed in parallel but is not claimed here.
+- Next dependency: implement the already frozen threshold and robustness scoring on this consumed development set. Do not render or open evaluation unless every required development gate passes; preserve any failure without moving a threshold or changing the fixture.
+
+
+### E-20261002-AI-525 — pre-evaluation shortcut and hard-case audit narrows the simulation claim
+
+- Stage/lane: S2/S3 AI/model consumed synthetic-development diagnostic; no training, threshold change, evaluation access, arm-lane status, or integration-gate status change.
+- Source checkpoint and scorecard: runner commit `f9b5ebdc60f9b18b0aeeebc5f0a6d295e03c4bd5`; uplift evidence commit `d5719adc1cee473ecea1b73ba3b3fe663bed5dda`; checkpoint SHA-256 `68c993b679d81715eca9327f5df001117c0156bcf0034a79580951e1e91c4aad`; canonical CNN report SHA-256 `80ce5b72b65b84e6dfa0e3d5d174c6a87d72c929487d53eee53f0dd5b8342b82`.
+- Obstruction-identity finding: training, development, and frozen evaluation have disjoint scene IDs, lighting seeds, and reference IDs, but reuse the same 12 variant IDs, procedural target-relative obstruction geometry formulas, primitive shapes, and material/color definitions. The frozen evaluation family contains no unseen obstruction asset identity. V4.2 also contains no articulated hand variant. A future evaluation pass can measure new synthetic scenes and lighting, but cannot establish generalization to a different physical cable, the owner's hand, or an unexpected object.
+- Exact diagnostic execution: an inline Python invocation loaded the fixture and complete admission through `load_complete_campaign`, derived the exact 38 admitted shard directories, loaded all 28,800 development pairs with `SELF_CROP_P05_P95`, loaded the exact external checkpoint with `weights_only=True`, reproduced development probabilities through `spatial_model` and `predict`, and retained the 50 lowest-scoring `ABSTAIN` plus 50 highest-scoring `VISIBLE` identities with image hashes and group summaries. Evaluation remained absent.
+- Hard obstruction cases: the lowest score is `0.0000175847` for `cable_rubber` over keyboard `EQUAL` in development scene 01 / cool-sensor lighting despite safe overlap `0.6`. The next cable/EQUAL case scores `0.0000499380`; phone `key_period` with the same cable scores `0.0004255922`. Eight of the ten lowest obstruction scores are rubber-cable cases, concentrated on `EQUAL`, `key_period`, `key_y`, and `key_p`; the other two are tool cases on keyboard `9`. Rubber cable has minimum `0.0000175847` and fifth percentile `0.4643739134`, materially harder than translucent cable fifth percentile `0.9967684597`.
+- Hard visible cases: the highest false-stop score is `0.9999518394` for `adjacent_right` on keyboard `E` under dim ambient lighting. The next is `0.9999420643` for `adjacent_right` on phone `key_a`; clear phone `key_c` reaches `0.9996683598`. The ten highest visible scores contain six `adjacent_right` and four `clear` cases, mainly phone targets across dim, warm, neutral, and cool appearances.
+- Visual review: the exact top-ten obstruction and visible reference/observation/difference triples were inspected. The misses contain subtle dark or reflective target-local changes whose presentation varies strongly with lighting and small-key context. The false stops show large reference-to-observation photometric differences and bright target-local highlights despite zero semantic obstruction overlap. This supports lighting/reference mismatch and simplified repeated asset appearance as concrete remaining risks; it does not prove the cause of every error.
+- Retained artifacts: committed audit `software/ai/eval/residual_obstruction_v4_2_hard_case_audit_v1.json`, LF-normalized file SHA-256 `820b625a7fa10ea1558b27ba2cb5271c954b95cacb27cadd25b7aa71a9dd5c26`, canonical report SHA-256 `57e562a87c8f4d8619865b86eac1eee7c20914259f43c911e23fbca2c6d369b7`; external reviewed contact sheet, 1,300,301 bytes, SHA-256 `90ac5b5aa81431efc328586206acd2d9e3d20887ed3050e360c7cf10809542d3`.
+- Preserved formatting correction: evidence commit `26da0a908b933f1c721d5461ea3f275b7963f846` retained the correct JSON values and canonical report but copied the external file with CRLF endings, causing `git diff --check` trailing-whitespace warnings. The immediate successor changed line endings only, updated the file hash above, and left the canonical report SHA-256 and all findings unchanged.
+- Source-archive governance: after the retained audit entered the index, the exact repository footprint was 6,245 tracked paths. The reviewed ceiling was raised only from 6,244 to 6,245; logical bytes and duplicate/blob ceilings did not change.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Physical authority: false. Evaluation observations opened: 0.
+- Limitations: this is a diagnostic on already consumed development data and cannot select a new model design or justify changing gates. The strong AUC does not guarantee a usable threshold because extreme misses and false stops coexist. It remains simulation-only and does not establish real-camera transfer.
+- Next dependency: run the unchanged frozen threshold, base-scene cluster, worst-appearance, worst-family, target-AUC, and quantile-margin gates. Preserve any failure. Do not render evaluation if no frozen threshold passes. Independently plan a later asset-disjoint synthetic family and collect commissioned real clear/cable/hand pairs; neither may be used to rewrite this v4.2 result.
+
+
+### E-20261002-AI-526 — v4.2 robustness scorer is fixed before threshold results
+
+- Stage/lane: S2/S3 AI/model synthetic consumed-development gate implementation; no threshold result, evaluation access, arm-lane status, or integration-gate status changed.
+- Implementation: `software/ai/eval/score_residual_obstruction_v4_2_robustness.py` binds the exact fixture, complete admission, retained CNN report, external checkpoint hash, and 38 admitted shard identities. It loads only the already consumed 28,800 development observations and refuses a changed checkpoint or failed CNN uplift report.
+- Frozen scoring: all declared thresholds `0.05` through `0.95`; point missed-obstruction and visible-false-stop rates; seeded 5,000-resample eight-scene cluster upper bounds at 95% confidence; worst development appearance and worst variant-family point rates; every-target AUC; linear fifth-percentile target AUC; and linear fifth-percentile target 5% obstruction minus 95% visible probability margin. A threshold passes only if every frozen condition passes. The first ascending passing threshold is selected; otherwise the candidate is rejected and evaluation remains closed.
+- Interpretation contract: model output is recorded as `UNCALIBRATED_RANKING_SCORE_NOT_CONFIDENCE`. The extremely low rubber-cable scores cannot be represented downstream as calibrated certainty that a target is clear.
+- Candidate physical mitigation: independently of model outcome, prohibit cable routing across keyboard and phone interaction surfaces during commissioning and require that fixed workcell rule to remain satisfied. This candidate mitigation does not alter, excuse, or override any frozen model gate.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_gates.py`; `python -m ruff check software/ai/eval/score_residual_obstruction_v4_2_robustness.py software/ai/tests/test_residual_obstruction_v4_2_gates.py`. Result: eight focused tests and Ruff pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Evaluation observations opened: 0.
+- Limitations: this implementation measures only synthetic consumed development. Worst-appearance failures may reflect deliberately harsher reference/observation lighting than the eventual commissioned freshness envelope, but that is not grounds to relax or reinterpret the frozen gate.
+- Next dependency: commit and push this scorer before running it, then preserve the exact pass or failure, dominant threshold tradeoff, and driving appearance/family without changing the fixture or checkpoint.
+
+
+### E-20261002-AI-527 — residual v4.2 fails unchanged development robustness gates
+
+- Stage/lane: S2/S3 AI/model consumed synthetic development decision; no arm-lane or integration-gate status changed.
+- Producing implementation commit: `a57896506f9997858e047fbc77707f1100e88e4e`. The current bounded evidence commit retains the unchanged failed report, shared workplan state, registry state, and this ledger entry.
+- Exact command: `$admission = Get-Content 'C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json' -Raw | ConvertFrom-Json; $shards = @($admission.manifests | ForEach-Object { Split-Path -Parent $_.path } | Sort-Object -Unique); $args = @('software/ai/eval/score_residual_obstruction_v4_2_robustness.py','--fixture','software/ai/sim/evidence/residual_obstruction_successor_v4_2.json','--admission','C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json','--cnn-report','software/ai/eval/residual_obstruction_v4_2_cnn_development_v1.json','--checkpoint','C:\IsaacSim\evidence\v4-2-campaign\v4-2-selected-cnn.pt'); foreach ($shard in $shards) { $args += @('--shard', $shard) }; $args += @('--output','C:\IsaacSim\evidence\v4-2-campaign\v4-2-robustness.json'); python @args`. The expected process exit was 1 because no frozen threshold passed.
+- Exact bindings: fixture bundle SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`; complete-admission report SHA-256 `d0a7107016703045f98e3b7d40e9222012e0b9fe7a433c429486b35a11e0066b`; CNN report SHA-256 `80ce5b72b65b84e6dfa0e3d5d174c6a87d72c929487d53eee53f0dd5b8342b82`; checkpoint SHA-256 `68c993b679d81715eca9327f5df001117c0156bcf0034a79580951e1e91c4aad`; development-probability SHA-256 `2ad7d47922c8e37573e34028346d6bfd3ab240c7c6179b3b88ca7098a0f87f6b`; 38 exact admitted shards; 28,800 already consumed development observations.
+- Decision: `FAILED_DEVELOPMENT_GATES`. All 19 frozen thresholds from 0.05 through 0.95 fail, `selected_threshold` is null, and evaluation remains unopened. The model output is `UNCALIBRATED_RANKING_SCORE_NOT_CONFIDENCE`; an extreme low score cannot be treated as calibrated certainty that a target is clear.
+- Threshold-independent metrics: minimum target AUC `0.9525101273148148` passes the `0.90` floor; fifth-percentile target AUC `0.9838107638888889` passes the `0.85` floor; fifth-percentile target quantile margin `-0.06176602363586421` fails the required `0.05`; minimum strict extreme margin is diagnostic at `-0.9928022623062134`.
+- Least-bad frozen tradeoff: threshold `0.55` minimizes the maximum normalized gate violation but still fails. Pooled misses are `206/21600 = 0.009537037037037037`, with scene-cluster upper `0.010972222222222222`; pooled false stops are `467/7200 = 0.0648611111111111`, with scene-cluster upper `0.07069444444444445`. Worst appearance misses are `0.012037037037037037`; worst appearance false stops are `0.08722222222222223` under `v4_development_warm_side_02`. Worst family misses are `144/4800 = 0.03` for `CABLE`, exceeding the `0.02` family limit. Worst family false stops are `205/2400 = 0.08541666666666667` for `NONE`, exceeding the `0.06` family limit.
+- Target-local failure: `phone:key_a` has the minimum AUC `0.9525101273148148`, visible Q95 `0.9933381080627441`, obstructed Q05 `0.6802757501602174`, and quantile margin `-0.3130623579025268`. Six more phone targets have negative margins: `key_y`, `key_b`, `key_period`, `key_c`, `key_v`, and `key_w`.
+- Preserved result: `software/ai/eval/residual_obstruction_v4_2_robustness_v1.json`, LF-normalized file SHA-256 `ee60b28369ea8dc56a5598bda8134b825af75666b5ff0b0121bab323842e0541`, canonical report SHA-256 `776e4936c1733ea831847fa5142bfe605f8cc603cd23c601109a2cb66fa60ea5`.
+- Failure attribution to carry forward: model-input candidates include higher-resolution target context and edge/texture change channels for dark-on-dark obstruction; data candidates include asset-disjoint dark obstructors plus commissioned real clear/cable/hand pairs; the workcell-rule candidate is `PROHIBIT_CABLE_ROUTING_ACROSS_KEYBOARD_OR_PHONE_INTERACTION_SURFACES`. These are categories for the next decision, not a selected successor and not grounds to rewrite this failure.
+- Validation commands: `python -m pytest -q software/ai/tests/test_ai_work_registry.py software/ai/tests/test_residual_obstruction_v4_2_gates.py`; `python -m ruff check software/ai/eval/score_residual_obstruction_v4_2_robustness.py software/ai/tests/test_residual_obstruction_v4_2_gates.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Physical authority: false. Evaluation observations opened: 0.
+- Limitations: this is synthetic consumed-development evidence. The development and unopened evaluation identities reuse procedural obstruction families, formulas, and materials and contain no articulated hand asset. No real camera, measured calibration drift, physical cable/hand capture, deployment qualification, or sim-to-real claim exists. The deliberately broad lighting pairs may be harsher than the commissioned freshness envelope, but that does not change the frozen failure.
+- Next dependency: keep the candidate and evaluation closed; review the preserved failures by model-input, data, and workcell-rule category; collect real commissioned reference/cable/hand evidence; then freeze any successor and asset-disjoint evaluation design before producing new development results.
+
+
+### E-20261002-AI-528 — v4.2 remedy decision requires real-camera pilot before v5
+
+- Stage/lane: S2/S3 AI/model failure classification and physical-evidence handoff; no arm-lane or integration-gate status changed.
+- Claim commit: `80d4804c250f4a822c717e6c4bc2b87048d0079e`. This evidence commit contains the classifier, strict schema, tests, generated classification, commissioning handoff, shared workplan update, registry update, and this entry.
+- Exact command: `python software/ai/eval/classify_residual_obstruction_v4_2_remedies.py --robustness software/ai/eval/residual_obstruction_v4_2_robustness_v1.json --hard-case-audit software/ai/eval/residual_obstruction_v4_2_hard_case_audit_v1.json --source-commit 80d4804c250f4a822c717e6c4bc2b87048d0079e --output software/ai/eval/residual_obstruction_v4_2_remedy_classification_v1.json`.
+- Exact source bindings: failed robustness file SHA-256 `ee60b28369ea8dc56a5598bda8134b825af75666b5ff0b0121bab323842e0541`, report SHA-256 `776e4936c1733ea831847fa5142bfe605f8cc603cd23c601109a2cb66fa60ea5`; hard-case audit file SHA-256 `820b625a7fa10ea1558b27ba2cb5271c954b95cacb27cadd25b7aa71a9dd5c26`, report SHA-256 `57e562a87c8f4d8619865b86eac1eee7c20914259f43c911e23fbca2c6d369b7`.
+- Preserved invariants: v4.2 remains rejected; no gate changed; cable cases remain required; the workcell cable-routing rule reduces occurrence frequency only; the detector remains the backstop; evaluation is unopened; v5 is unselected; and no lighting limit is guessed.
+- Remedy order: (1) edge or texture difference channels, which directly target low-contrast dark-cable boundaries; (2) higher target-context resolution, which tests whether thin cables occupy too few 96-by-96 pixels; (3) dark-obstructor hard-example weighting, deferred until its miss/false-stop tradeoff can be measured. Every candidate remains compared with the unchanged RGB-difference baseline.
+- Physical pilot: at least three sessions; keyboard `EQUAL/F/G/H/I`; phone `key_a/key_b/key_c/key_period`; clear reference, clear repeat, dark cable, translucent cable, and hand; dark-cable safe-region coverage at 0.2/0.4/0.6; measured low/nominal/high lighting; original bytes and reference/observation hashes retained; settled parked pose plus ChArUco and fixture bindings required.
+- Lighting rule: the maximum relative drift remains null. Real-camera luminance, red/green, and blue/green samples must define the envelope accepted by `reference_validity`; successor training and tests must use that same admitted envelope. Outside-envelope lighting remains an upstream abstention and cannot excuse or rewrite v4.2.
+- Retained result: `software/ai/eval/residual_obstruction_v4_2_remedy_classification_v1.json`, file SHA-256 `be596e603040d8f1a759ff27ffedb8c82ea408c51165a8fc566377ca342fbee1`, canonical report SHA-256 `0aa55061d7002ef8b741f854b1d35d8bf079ba72a768ffe2e288748669e9cedf`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_ai_work_registry.py software/ai/tests/test_residual_obstruction_v4_2_remedy_classification.py`; `python -m ruff check software/ai/eval/classify_residual_obstruction_v4_2_remedies.py software/ai/tests/test_residual_obstruction_v4_2_remedy_classification.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Validation result: the final combined focused run, which also includes the unchanged v4.2 robustness tests, passes 17 tests; Ruff and diff checks pass. The staged tree contains exactly 6,251 paths, so the reviewed source-archive path ceiling moves from 6,246 to 6,251 for the classifier, schema, retained result, and test plus the previously observed one-path policy lag; byte and duplicate ceilings do not change.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Evaluation observations opened: 0.
+- Limitations: no physical image, real cable, hand, ChArUco capture, or measured lighting range was produced. This is a strict pilot and decision plan, not model improvement, v5 selection, physical qualification, or sim-to-real evidence. Physical collection may require separately authorized park movements whose effects must be recorded in the physical campaign.
+- Next dependency: collect the bounded real-camera pilot and retain exact original bytes and measurement bindings; use it to choose which predeclared representation experiment is warranted before any new synthetic development campaign.
+
+
+### E-20261002-AI-529 — physical pilot freezes boundary labels, escrow, and de-energized capture
+
+- Stage/lane: S2/S3 AI/model physical pilot predeclaration; no physical capture, arm-lane status, or integration-gate status changed.
+- Claim commit: `579ca70f1fe95bcafd4cd94e447fbbf0c95fecef`. This evidence commit contains the builder, strict top-level schema, tests, retained predeclaration, commissioning amendment, shared workplan, registry, and this entry.
+- Exact command: `python software/ai/eval/build_residual_obstruction_physical_pilot_predeclaration.py --remedy-classification software/ai/eval/residual_obstruction_v4_2_remedy_classification_v1.json --source-commit 579ca70f1fe95bcafd4cd94e447fbbf0c95fecef --output software/ai/eval/residual_obstruction_physical_pilot_v1.json`.
+- Source binding: E-528 remedy file SHA-256 `be596e603040d8f1a759ff27ffedb8c82ea408c51165a8fc566377ca342fbee1`, canonical report SHA-256 `0aa55061d7002ef8b741f854b1d35d8bf079ba72a768ffe2e288748669e9cedf`.
+- Preserved evidence: E-528 and its 0.2/0.4/0.6 proposed coverage list remain unchanged. This pre-capture amendment supersedes only those pending pilot fields because no physical image or result existed when it was frozen. V4.2 remains rejected; no frozen v4.2 gate changes.
+- Coverage labels: nominal 0.10 safe-region coverage is `VISIBLE`; 0.20 is `BOUNDARY_PROBE`; 0.30 and 0.60 are `ABSTAIN`. Boundary rows accept either runtime decision in the primary pilot metric, remain retained, are reported separately, and also receive strict-visible and strict-abstain counterfactual reports. Silent exclusion is prohibited.
+- Real-label measurement: every cable row requires both a measured physical placement template and an independently hand-annotated mask against the hash-bound safe region. The annotator is blind to the model score. Absolute method disagreement above 0.05 yields `LABEL_UNRESOLVED_RETAIN_AND_REPORT_NO_MODEL_METRIC`; target-center coverage forces abstention.
+- Data-use split fixed before capture: `physical_pilot_measurement_01` and `physical_pilot_measurement_02` may select a remedy but cannot train a model. `physical_pilot_escrow_01` cannot select or train; its pixels remain unopened until a candidate representation, checkpoint, and threshold are frozen. Real training requires a separate future collection.
+- Capture safety: every row requires the arm de-energized, servo power isolated and verified, controller command channel disconnected, and the park pose established before the capture phase. Capture-phase robot movements and hardware writes are both zero. Hand rows require verified energy isolation. Any energized row is retained as invalid and cannot be used.
+- Lighting: maximum admitted relative drift remains null pending real measurement. No tolerance is guessed.
+- Retained result: `software/ai/eval/residual_obstruction_physical_pilot_v1.json`, file SHA-256 `48b551a1a4ae36d34367f20c1345314eedfdf3e166b91d8fcd0aa57935118c9d`, canonical report SHA-256 `3bf5efb4638a9957f7b46ac999298c4ddc1191eb2ddbd0f5f98e22f9c9f2f4b8`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_ai_work_registry.py software/ai/tests/test_residual_obstruction_physical_pilot.py software/ai/tests/test_residual_obstruction_v4_2_remedy_classification.py`; `python -m ruff check software/ai/eval/build_residual_obstruction_physical_pilot_predeclaration.py software/ai/tests/test_residual_obstruction_physical_pilot.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Evaluation observations opened: 0. Escrow pixels opened: 0.
+- Limitations: this is a plan with no physical pixels, coverage labels, lighting measurement, ChArUco evidence, energy-isolation receipt, or model result. The 0.05 labeling disagreement limit is an operational pilot-quality rule rather than a learned-model performance gate. Evidence completion cannot qualify deployment or execution.
+- Next dependency: perform the first de-energized measurement session, retaining original bytes, placement-template evidence, score-blind masks, energy-isolation proof, camera/fixture/ChArUco bindings, and lighting descriptors; preserve any invalid or unresolved row.
+
+
+### E-20261002-AI-530 — pilot binds post-isolation sag evidence and limits escrow claims
+
+- Stage/lane: S2/S3 AI/model pre-capture amendment; no physical capture, arm-lane status, or integration-gate status changed.
+- Claim commit: `09303487afcf6abe840d727efdcb245971e2010a`. This evidence commit adds the v1.1 builder, schema, tests, retained amendment, commissioning update, shared workplan, registry, and this entry while preserving E-529 and its v1 artifact unchanged.
+- Exact command: `python software/ai/eval/build_residual_obstruction_physical_pilot_v1_1.py --pilot-v1 software/ai/eval/residual_obstruction_physical_pilot_v1.json --source-commit 09303487afcf6abe840d727efdcb245971e2010a --output software/ai/eval/residual_obstruction_physical_pilot_v1_1.json`.
+- Source binding: physical pilot v1 file SHA-256 `48b551a1a4ae36d34367f20c1345314eedfdf3e166b91d8fcd0aa57935118c9d`, canonical report SHA-256 `3bf5efb4638a9957f7b46ac999298c4ddc1191eb2ddbd0f5f98e22f9c9f2f4b8`.
+- Sag contract: pre-isolation pose is insufficient. After power isolation, at least two stable frames must match the commissioned park silhouette before each capture group and again at session end. Passive measured joint feedback may supplement the silhouette; commanded joint state is prohibited. Every image binds the applicable pose-evidence SHA-256. The silhouette tolerance comes from the commissioned park profile and remains null here rather than guessed.
+- Failure handling: a failed post-isolation pose check or manual reposition during the capture phase produces `INVALID_RETAIN_AND_REPORT_DO_NOT_USE`. Capture-phase movements and writes remain zero. This detects the actual unpowered capture pose instead of assuming the powered park pose was held.
+- Escrow scope: `physical_pilot_escrow_01` spans nine targets but is `REAL_WORLD_SANITY_CHECK_ONLY`. It is not a statistical gate, cannot support a 2% miss-rate or deployment claim, and remains unopened until a representation, checkpoint, and threshold are frozen. A powered real evaluation requires a separate authorized, statistically planned, newly captured campaign; reuse of pilot escrow as that evaluation is prohibited.
+- Preserved contracts: all E-529 label, mask/template, energy-isolation, measurement-session, escrow-open, cable-backstop, no-training, no-lighting-guess, v4.2 rejection, and no-v5-selection rules remain in force.
+- Retained result: `software/ai/eval/residual_obstruction_physical_pilot_v1_1.json`, file SHA-256 `b6c28b87f05f5b15e8560abd91898d79c781f77b0501b738b059521da36a65ce`, canonical report SHA-256 `6cd43b4ebb316f76432c39932b08fdb4ada96ec087f5342573eb5ff28551e0f1`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_ai_work_registry.py software/ai/tests/test_residual_obstruction_physical_pilot_v1_1.py software/ai/tests/test_residual_obstruction_physical_pilot.py`; `python -m ruff check software/ai/eval/build_residual_obstruction_physical_pilot_v1_1.py software/ai/tests/test_residual_obstruction_physical_pilot_v1_1.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Physical pixels captured: 0. Escrow pixels opened: 0. Evaluation observations opened: 0.
+- Limitations: no post-isolation silhouette, passive joint measurement, commissioned silhouette tolerance, physical image, or statistical real evaluation exists. The plan cannot show whether the unpowered arm will hold pose or whether the model transfers to the real camera.
+- Next dependency: commission the park silhouette tolerance without using commanded state as truth, then collect the first de-energized measurement session with before-group and end-session post-isolation pose bindings.
+
+
+### E-20261002-AI-531 — physical ChArUco readiness probe is blocked before capture
+
+- Stage/lane: S2/S3 AI/model physical-camera calibration readiness; no camera capture, calibration installation, arm-lane status, or integration-gate status changed.
+- Claim commit: `b13e492636178e54ad502dfb7bfa9c8df1084c79`. This bounded result retains the probe, strict schema, blocked receipt, test, commissioning handoff, registry update, shared workplan update, and this evidence entry.
+- Environment preparation: `py -3.12 -m venv C:\IsaacSim\tools\charuco-venv`; `C:\IsaacSim\tools\charuco-venv\Scripts\python.exe -m pip install --upgrade pip`; `C:\IsaacSim\tools\charuco-venv\Scripts\python.exe -m pip install opencv-contrib-python`. The isolated external environment reports OpenCV `5.0.0`, NumPy `2.5.3`, ArUco available, and 24 detected ChArUco corners in the retained generated 5x7 image. These external packages and bytes are not committed.
+- Exact device commands: `pnputil /enum-devices /connected /class Camera`; `pnputil /enum-devices /connected /class Image`. Both report zero devices. The retained external outputs are `C:\IsaacSim\evidence\physical-charuco-probe\pnputil-camera.txt` and `pnputil-image.txt`, each SHA-256 `f610a8f80674f3c310eaff4196fd1d4c34379f4a6da13808da16b70973b809e2`.
+- Exact probe command: `python software/ai/eval/probe_physical_charuco_readiness.py --source-commit b13e492636178e54ad502dfb7bfa9c8df1084c79 --board-definition active-project/RoCell_v0_3/fiducials/charuco_board_definition.json --board-pdf active-project/RoCell_v0_3/fiducials/charuco_5x7_square25_marker17_5_1to1.pdf --vision-python C:/IsaacSim/tools/charuco-venv/Scripts/python.exe --raw-dir C:/IsaacSim/evidence/physical-charuco-probe --output software/ai/eval/physical_charuco_probe_blocked_v1.json`. Exit code 2 is the expected blocked outcome.
+- Tooling-smoke bindings: retained 5x7 board definition SHA-256 `ed7aa4bd9d82c9d48d6fe86928f7a13836dde8320a489f8c3f851f074103a672`; retained PDF SHA-256 `dd2192e679f764608996957e5708d4e020acca65d0e3fb60f1802897bd866b01`. They prove only that the isolated OpenCV tool can detect the generated asset.
+- Production mismatch: the authoritative static-camera contract requires Arducam B0477, 5472x3648, YUY2, 4 fps, and a rigid 12x9 ChArUco target with 30 mm squares, 22 mm markers, and `DICT_5X5_1000`. The retained 5x7, 25/17.5 mm `DICT_5X5_100` asset cannot create production intrinsics. No production-board asset, print-scale measurement, or rigid-backing verification exists.
+- Retained result: `software/ai/eval/physical_charuco_probe_blocked_v1.json`; LF file SHA-256 `5b593eb1b416c33fbbad0e092f4a454d865121c02817b601a3fe3f3e2b000eef`; canonical report SHA-256 `b91b440cfbf1be6c9db559694a77f89db21332615f5694b10c4eb502892027a2`; status `BLOCKED`; Camera-class count 0; Image-class count 0; capture count 0; calibration solved false; reprojection error null.
+- Preserved failed invocation: running the repository probe with the isolated vision interpreter failed before device probing because that minimal environment intentionally lacked `jsonschema`. The corrected command runs orchestration/schema validation with the repository Python and delegates only the OpenCV smoke to `--vision-python`; no evidence was overwritten or promoted by the failed attempt.
+- Planned physical metric: 24 training plus 8 held-out calibration views across angles, positions, corners, and edges, with train and held-out reprojection reported separately. Approximately 0.5 pixel is a diagnostic target, not an automatic qualification threshold.
+- Validation commands: `python -m pytest -q software/ai/tests/test_physical_charuco_probe.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/eval/probe_physical_charuco_readiness.py software/ai/tests/test_physical_charuco_probe.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Camera-open count: 0. Physical-image count: 0. Calibration count: 0. Physical authority: false.
+- Limitations: this is a readiness failure and tooling smoke, not physical camera evidence, intrinsics, reprojection evidence, deployment qualification, sim-to-real validation, or model improvement. The B0477 identity and mode, production target, print scale, rigid backing, lens state, and real lighting remain unmeasured.
+- Next dependency: connect the intended B0477, verify its persistent identity and exact 5472x3648 YUY2 4 fps mode, retain and physically verify the required rigid 12x9 target, then collect the predeclared 24 training and 8 held-out views before any reference-pair pilot capture.
+
+
+### E-20261002-AI-532 — B0477 mode correction and physical commissioning controls are frozen
+
+- Stage/lane: S2/S3 AI/model pre-capture commissioning correction; no camera capture, calibration installation, arm-lane status, or integration-gate status changed.
+- Claim commit: `d5e26be9ca2a3e03cd10d49460d32db367da73be`. This evidence commit adds the strict corrective amendment, builder, test, current commissioning documents, registry update, shared workplan update, and this ledger row.
+- Preserved failure: E-531 and `software/ai/eval/physical_charuco_probe_blocked_v1.json` remain byte-for-byte unchanged with the erroneous 4 fps production field. Their file SHA-256 remains `5b593eb1b416c33fbbad0e092f4a454d865121c02817b601a3fe3f3e2b000eef` and canonical report SHA-256 remains `b91b440cfbf1be6c9db559694a77f89db21332615f5694b10c4eb502892027a2`. Current documents and this amendment supersede only that mode assertion; they do not rewrite the blocked device result.
+- Authoritative mode bindings: purchase profile `software/config/camera_profiles/arducam_b0477_imx283_16mm.json`, SHA-256 `c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024`; nominal UVC inventory fixture SHA-256 `a0b53d709c45e7f77c0860ae757292746a47570ceeffc140ea548f5dfa29bcd7`; sealed intrinsics rehearsal fixture SHA-256 `d00f71b9a6f2d721a97e6d3b03435261581630ee7b0c08738aae98be9d0b7a74`. All three bind the full-native 5472x3648 YUY2 mode at 9 fps. Received-unit verification remains absent.
+- Exact command: `python software/ai/eval/build_b0477_commissioning_amendment.py --source-commit d5e26be9ca2a3e03cd10d49460d32db367da73be --probe software/ai/eval/physical_charuco_probe_blocked_v1.json --output software/ai/eval/b0477_commissioning_amendment_v1.json`.
+- Mode gate: calibration and runtime use the exact full-native mode. A lower-resolution, MJPG, cropped, binned, or scaled mode requires separate calibration unless its crop/bin/scale transform is physically measured and reviewed.
+- Optics/control gate: manual focus and aperture are fixed and witnessed; autofocus, auto exposure, and auto white balance are disabled; exposure, gain, and white balance are locked; a controls snapshot and settings hash are retained before calibration and lighting measurement.
+- Print-scale gate: use calibrated calipers for at least eight raw measurements: at least four distributed horizontal and four distributed vertical measurements including opposite board extents. Retain instrument identity and every measurement. Maximum axis-scale error remains null pending physical measurement and review rather than being guessed.
+- Capture plan retained: 24 training and 8 held-out views across positions, angles, distances, corners, and edges; report train and held-out reprojection separately. The approximate 0.5 pixel target remains diagnostic rather than an automatic qualification threshold.
+- Retained result: `software/ai/eval/b0477_commissioning_amendment_v1.json`; file SHA-256 `8914f2c461d7d2036ed9e832b708c172149288e28421426bc3dafa78fcbf8f9d`; canonical report SHA-256 `2a996b4a83f95cfae373a238430b41b44b1cd78ff64a33db33cd846eb87d00a7`; `ready_for_capture=false`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_b0477_commissioning_amendment.py software/ai/tests/test_physical_charuco_probe.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/eval/build_b0477_commissioning_amendment.py software/ai/tests/test_b0477_commissioning_amendment.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Camera-frame count: 0. Calibration count: 0. Physical authority: false.
+- Limitations: no B0477 is connected; its persistent identity, actual modes, sensor crop/bin behavior, focus, aperture, exposure, gain, white balance, printed-board scale, rigid backing, and reprojection remain unmeasured. Repository fixtures are rehearsal and purchase-profile evidence, not received-unit proof.
+- Next dependency: connect the intended B0477, enumerate and verify the full-native mode, lock and hash-bind optics/controls, produce and measure the rigid production board, review the measured X/Y scale before selecting a tolerance, and only then collect calibration frames.
+
+
+### E-20261002-AI-533 — residual v5 synthetic robustness campaign is frozen before rendering
+
+- Stage/lane: S2/S3 AI/model synthetic successor predeclaration; no render, training, development access, evaluation access, arm-lane status, or integration-gate status changed.
+- Claim commit: `8944f6a02534b414858777b050113c8b8ced1e86`. The bounded evidence commit contains the deterministic builder, strict schema, retained fixture, tests, registry, source-archive ceiling, shared workplan update, and this ledger row.
+- Sequence amendment: E-528's `PHYSICAL_PILOT_REQUIRED_BEFORE_SUCCESSOR_SELECTION` remains preserved. The owner's later explicit direction to continue model robustness work in simulation while physical inputs are unavailable permits selecting synthetic research candidates only. The physical pilot remains mandatory for the runtime lighting envelope, sim-to-real transfer, and any physical qualification. V4.2 remains rejected and unchanged.
+- Exact source bindings: remedy classification file SHA-256 `be596e603040d8f1a759ff27ffedb8c82ea408c51165a8fc566377ca342fbee1`, report SHA-256 `0aa55061d7002ef8b741f854b1d35d8bf079ba72a768ffe2e288748669e9cedf`; v4.2 robustness file SHA-256 `ee60b28369ea8dc56a5598bda8134b825af75666b5ff0b0121bab323842e0541`, report SHA-256 `776e4936c1733ea831847fa5142bfe605f8cc603cd23c601109a2cb66fa60ea5`; v4.2 fixture file SHA-256 `26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5`, bundle SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`; target catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Exact command: `python software/ai/sim/build_residual_obstruction_successor_v5.py --source-commit 8944f6a02534b414858777b050113c8b8ced1e86 --remedy software/ai/eval/residual_obstruction_v4_2_remedy_classification_v1.json --robustness software/ai/eval/residual_obstruction_v4_2_robustness_v1.json --v4-2-fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --output software/ai/sim/evidence/residual_obstruction_successor_v5.json`.
+- Model candidates: `V5_EDGE_TEXTURE_96` combines current/reference RGB, absolute RGB difference, Sobel-magnitude difference, local-texture difference, and the safe-region mask at 96 px with a 6x6 spatial map and 2M-parameter ceiling. `V5_EDGE_TEXTURE_MULTISCALE_96_192` adds a 192 px wide-context difference branch with a 3M-parameter ceiling. Both are offline-capable and produce uncalibrated ranking scores rather than confidence.
+- Split isolation: 16/8/8 training/development/evaluation scene identities, three distinct lighting identities per split, 14/10/10 distinct obstruction assets, and nonoverlapping procedural seed ranges. Reusing obstruction mesh, material, or texture identity across splits is prohibited. Evaluation has 21,600 frozen identities and zero rendered pixels.
+- Dataset plan: 75 targets, 12 variants, three appearances per scene, 43,200 planned training observations and 21,600 planned development observations. Dark and translucent cables, articulated-hand identities, tools, foreign objects, clear and adjacent cases are included. Ten-percent cable coverage is visible; 30% and 60% are abstain cases.
+- Geometry realism: learned residual inputs may not receive simulator ground-truth arm masks. The geometry channel must use projection from perturbed measured-state surrogates with camera translation/rotation error, joint noise/backlash, and capture-time offsets from -150 to +150 ms.
+- Frozen gates: unchanged training-free and v4.2 comparisons; deterministic balanced 500-row memorization at at least 99.5%; pooled and scene-cluster miss/false-stop limits; cable and dark-cable miss rates no greater than 2%; every-target AUC at least 0.95; linear fifth-percentile target AUC at least 0.98; fifth-percentile quantile margin at least 0.05; mandatory dark-on-dark, thin, reflective, adjacent-object, lighting-plus-jitter, and perturbed-mask hard-case reports. The lowest-parameter candidate passing every gate is selected; if none pass, both are rejected and evaluation stays closed.
+- End-to-end follow-on: a development pass must feed actual ModelMotionBatchV2 producer output into simulated `TYPE_HELLO`, repeated-key, number/punctuation, obstruction, stale-evidence, and uncertainty missions with zero wrong-target contacts. This remains simulation-only and carries no hardware authority.
+- Retained result: `software/ai/sim/evidence/residual_obstruction_successor_v5.json`; LF file SHA-256 `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`; canonical bundle SHA-256 `69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e`.
+- Preserved failed validation: the first combined v5/registry pytest run passed the three new v5 tests but failed registry coverage because `test_residual_obstruction_successor_v5.py` had not yet been assigned to a workstream. The fixture and results were unchanged; the test, sources, and evidence were then registered before the final run.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_successor_v5.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/sim/build_residual_obstruction_successor_v5.py software/ai/tests/test_residual_obstruction_successor_v5.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Rendered-image count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: this is a synthetic plan, not a better model result. Asset-disjoint procedural objects remain simulator approximations. No real camera, measured lighting envelope, physical cable/hand evidence, checkpoint, usable threshold, calibrated confidence, deployment qualification, or execution authority exists.
+- Next dependency: implement exact v5 rendering and independent admission, then run a small training-only smoke plus visual review before scheduling the full training/development campaign. Keep evaluation identities unrendered.
+
+
+### E-20261002-AI-534 — v5.1 restores safety gates and blocks the underpowered render
+
+- Stage/lane: S2/S3 AI/model pre-render correction and power planning; no render, training, development access, evaluation access, arm-lane status, or integration-gate status changed.
+- Claim/source commit: `aacbda9aeeb2e808d167b9fbba0aeeb98c424cd3`. The v5 fixture remains byte-identical and is not rewritten by this amendment.
+- Process amendment: simulation work is proceeding only because the physical camera pilot is blocked. All v5 lighting ranges are `PROVISIONAL_SYNTHETIC_ONLY_UNMEASURED`. A simulation pass cannot select a hardware remedy, set the runtime reference-validity lighting envelope, establish sim-to-real transfer, or replace the physical pilot.
+- Exact v5 bindings: `software/ai/sim/evidence/residual_obstruction_successor_v5.json`, file SHA-256 `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`, canonical bundle SHA-256 `69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e`.
+- Gate correction: v5 already retained the pooled all-obstruction miss ceiling at 2%. Its visible false-stop ceiling was silently loosened to 10%; v5.1 restores the frozen 6% ceiling because v4.2 failed at 8.72% against 6%. V5 is preserved as superseded planning evidence rather than rewritten.
+- Exact command: `python software/ai/eval/amend_residual_v5_pre_render.py --source-commit aacbda9aeeb2e808d167b9fbba0aeeb98c424cd3 --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --trials 5000 --seed 55101 --output software/ai/eval/residual_obstruction_v5_1_pre_render_v1.json`.
+- Power method: 5,000 seeded beta-binomial scene-effect trials plus Wilson upper bounds and a Hanley-McNeil AUC approximation; base scene is the cluster; design miss rate 0.5% against the 2% gate, design false-stop rate 3% against the 6% gate, and every-target AUC 0.98 against 0.95 across 75 targets. Both moderate ICC 0.05 and pessimistic ICC 0.30 scenarios are reported.
+- Result: `BLOCKED_RENDER_PENDING_POWERED_FIXTURE_REVISION`. The original 8-scene/21,600-row plan has conservative joint power `0.000033` at ICC 0.05 and `0` at ICC 0.30. At pessimistic ICC 0.30, 128 scenes/345,600 rows reaches only `0.868`; the minimum tested size reaching at least 0.90 in both scenarios is 256 scenes/691,200 rows, with conservative joint power `0.9924`. This larger result is not render authorization; the fixture must first be revised to control compute and scene diversity.
+- Retained artifact: `software/ai/eval/residual_obstruction_v5_1_pre_render_v1.json`, file SHA-256 `0c4a6e558c76152c5b03d836a66c0bcf633d3ae7fe4816891c7936f55007e8e0`, canonical report SHA-256 `9d57ce6bf1de079c45fcc32e0902dfcd1d8348839fbb44ff9243a50f21b11b64`.
+- Source hashes: amendment builder `2f9d78677bb05001ca3434015ab50b09815f9f9355bc422b68e33b23e7d33705`; schema `c36640d03aec6f62d85736067a8178be185049c710d4468e6479a4babf17af73`; focused test `7f26be2e8fbbcd6fffc7789ea547c969fff75ed72aeb358d8ace86406bbffe6`.
+- Preserved failed validation: the first focused run passed the six v5/v5.1 behavior tests but the registry test failed because the new v5.1 test was not yet assigned to a workstream. No fixture, gate, power result, or retained artifact changed; ownership was then added before the final run.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_1_pre_render.py software/ai/tests/test_residual_obstruction_successor_v5.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/eval/amend_residual_v5_pre_render.py software/ai/tests/test_residual_obstruction_v5_1_pre_render.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Fixtures: preserved v5 fixture above; candidate scene counts 8, 16, 32, 64, 128, and 256; moderate and pessimistic ICC scenarios; 75 targets; 12 visible and 24 obstructed rows per target per scene.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Rendered-image count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: this is a planning approximation, not observed v5 performance. The every-target AUC power term is analytic and does not replace clustered development scoring. No real camera, measured lighting envelope, real obstruction contrast, model checkpoint, threshold, physical qualification, or hardware remedy selection exists.
+- Supersedes: v5's 10% visible false-stop planning value and its immediate renderer next step only. E-533 and its frozen v5 bytes remain preserved.
+- Next dependency: revise the v5 fixture with a predeclared, compute-bounded scene-diversity and power design before any render. Keep evaluation unrendered and require the physical pilot before hardware remedy selection.
+
+
+### E-20261002-AI-535 — v5.2 attributes power loss and tests balanced target rotation
+
+- Stage/lane: S2/S3 AI/model synthetic power attribution and render-efficiency planning; no fixture, gate, render, training, development access, evaluation access, arm-lane status, or integration-gate status changed.
+- Claim/source commit: `d8c3103169663a6dcc3e611261834afbea64df56`.
+- Exact inputs: v5 fixture file SHA-256 `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`, bundle SHA-256 `69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e`; v5.1 file SHA-256 `0c4a6e558c76152c5b03d836a66c0bcf633d3ae7fe4816891c7936f55007e8e0`, report SHA-256 `9d57ce6bf1de079c45fcc32e0902dfcd1d8348839fbb44ff9243a50f21b11b64`.
+- Exact command: `python software/ai/eval/analyze_residual_v5_power_attribution.py --source-commit d8c3103169663a6dcc3e611261834afbea64df56 --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --v5-1 software/ai/eval/residual_obstruction_v5_1_pre_render_v1.json --trials 5000 --seed 55201 --output software/ai/eval/residual_obstruction_v5_2_power_attribution_v1.json`.
+- Joint-power clarification: v5.1 reported the minimum of its modeled marginal gate powers and called it a conservative joint result. The minimum is not joint power; it is an upper ceiling on the probability that all gates pass. V5.2 reports both the limiting marginal power and a dependence-free Bonferroni joint lower bound.
+- Eight-scene attribution: at ICC 0.05, pooled miss power is `0.3384`, visible false-stop power is `0.524`, and every-target AUC power is `0.000033`; every-target AUC is the limiting modeled gate. At ICC 0.30 all three round to zero, so the every-target requirement is not the sole problem under pessimistic clustering.
+- Gate-coverage audit: v5.1 modeled pooled all-obstruction misses, visible false stops, and every-target AUC. It represented scene clustering only through an ICC approximation. It did not separately power cable-family misses, dark-cable misses, q05 target AUC, or q05 target quantile margin. The assumed homogeneous target AUC is `0.98`: 0.03 above the every-target 0.95 gate but exactly equal to the q05 0.98 gate, leaving zero declared alternative effect for that requirement. No true margin effect or variance was declared.
+- Balanced-rotation result: 256 scenes with 24 targets per scene require 221,184 observations, 68% fewer than the 691,200-row full grid. Exact balanced allocation gives each target 81 or 82 independent scene exposures. Across the three modeled gates, the sparse design's limiting marginal power is `1.0` at ICC 0.05 and `0.910544` at ICC 0.30; its Bonferroni joint lower bounds are `1.0` and `0.897144`, respectively, so it remains below the 0.90 joint target even for the three modeled gates. The pessimistic every-target AUC term is limiting. This is not complete power because the four family/q05 gates remain unmodeled.
+- Split-role analysis: retaining powered development and powered evaluation duplicates the statistical burden but reduces selection risk. Using development point estimates plus diagnostics and reserving powered bounds for one frozen evaluation is the preferred fixture-revision candidate because it reduces render cost, but it raises selection risk and is not enacted here.
+- Preserved failed invocation: the first exact command failed schema validation because the draft schema incorrectly applied a 64-hex artifact-hash pattern to the 40-hex Git source commit. The schema was corrected to distinguish commit and SHA-256 identities; no input, calculation, metric, or result changed.
+- Retained artifact: `software/ai/eval/residual_obstruction_v5_2_power_attribution_v1.json`, file SHA-256 `1df76cb8aa84e3ac4239ad6f506c3f56e39d19adf26146502ed07ab7a7ccf7af`, canonical report SHA-256 `ac77da122ae5d4ef9dad38f7aa8f36a2064d53c9c5f0c2226f5f5d53dd49a85c`.
+- Source hashes: analyzer `1e7a904158706ce475157a7ca414aad4aa02ab11c128285db5493158459a2c49`; schema `2a372842cb3a496f28b54ec80fee261ea1e0c01d8eb11f341297239e282b5ff6`; focused test `0d0b9bc60b46470ff636bda0075bb123f7b77510e9f304df48a34d72adbc1eae`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_2_power_attribution.py software/ai/tests/test_residual_obstruction_v5_1_pre_render.py software/ai/tests/test_residual_obstruction_successor_v5.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/eval/analyze_residual_v5_power_attribution.py software/ai/tests/test_residual_obstruction_v5_2_power_attribution.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Fixtures: preserved v5 and v5.1 inputs; 5,000 trials; seed 55201; ICC 0.05 and 0.30; full 75-target and balanced 24-target designs; 256 scenes; 36 observations per target-scene.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Rendered-image count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: this is a synthetic planning analysis. It assumes miss 0.5%, false-stop 3%, and homogeneous target AUC 0.98. It does not establish plausible q05 or margin alternatives, real family rates, real target heterogeneity, real lighting, sim-to-real transfer, model quality, qualification, or authority.
+- Supersedes: the interpretation of v5.1's 256-scene result as a complete powered recommendation. V5, v5.1, their blockers, and their retained bytes remain preserved.
+- Next dependency: declare defensible alternative effects for q05 AUC, q05 margin, cable misses, and dark-cable misses; decide split responsibilities; then freeze and power an exact balanced rotation before any render. The physical pilot remains required before hardware remedy selection.
+
+
+### E-20261003-AI-536 — v5.3 powers safety gates and assigns AUC to development diagnostics
+
+- Stage/lane: S2/S3 AI/model gate-role and evaluation-power amendment; no fixture bytes, render, training, development access, evaluation access, arm-lane status, or integration-gate status changed.
+- Claim/source commit: `c8a9e4d0ffd89e035087afe783deb6cfdc8dfcd6`.
+- Exact inputs: v5 file SHA-256 `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`, bundle SHA-256 `69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e`; v5.2 file SHA-256 `1df76cb8aa84e3ac4239ad6f506c3f56e39d19adf26146502ed07ab7a7ccf7af`, report SHA-256 `ac77da122ae5d4ef9dad38f7aa8f36a2064d53c9c5f0c2226f5f5d53dd49a85c`.
+- Exact command: `python software/ai/eval/build_residual_v5_safety_gate_amendment.py --source-commit c8a9e4d0ffd89e035087afe783deb6cfdc8dfcd6 --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --v5-2 software/ai/eval/residual_obstruction_v5_2_power_attribution_v1.json --trials 20000 --seed 55301 --output software/ai/eval/residual_obstruction_v5_3_safety_gate_amendment_v1.json`.
+- Gate roles: development candidate selection uses point estimates no greater than 2% for pooled, cable-family, and dark-cable misses and 6% for visible false stops. It retains the legacy loose diagnostic floors of minimum target AUC 0.90 and linear q05 target AUC 0.95. Q05 target margin, per-target errors, hard-case tables, and baseline uplift are reported diagnostics rather than powered safety claims.
+- Evaluation contract: after the candidate and threshold are frozen, one single-use evaluation requires one-sided 95% upper confidence bounds no greater than 2% for pooled all-obstruction misses, cable-family misses, and dark-cable 30/60 misses, and no greater than 6% for visible false stops. Every gate must pass. Failure rejects the frozen candidate without evaluation-driven retuning.
+- Planning alternatives: pooled/cable/dark-cable miss rates 0.5%, one quarter of their 2% safety ceilings; visible false-stop rate 3%, half of its 6% usability ceiling. These are required model-performance alternatives for sample-size planning, not observed v5 results. Power is simulated with ICC 0.05 and pessimistic ICC 0.30, 20,000 trials, seed 55301, and a dependence-free Bonferroni joint lower bound.
+- Balanced evaluation result: the first tested design meeting the 0.93 planning cushion in both scenarios is 224 scenes with 12 targets per scene. It contains 96,768 observations and balances each target across 35 or 36 independent scenes. In the pessimistic scenario, marginal powers are 0.9817 pooled miss, 0.9809 cable miss, 0.97985 dark-cable miss, and 0.9881 visible false stop; the Bonferroni joint lower bound is 0.93055. The 208-scene candidate reaches only 0.9014, so the 224-scene design retains deliberate planning margin above the 0.90 requirement.
+- Split responsibility: the retained eight-scene/21,600-row development family selects the lowest-parameter candidate using point safety checks, diagnostic floors, and threshold freeze without a powered confidence claim. Only one frozen candidate may open the expanded powered evaluation; retuning after evaluation is prohibited.
+- Retained artifact: `software/ai/eval/residual_obstruction_v5_3_safety_gate_amendment_v1.json`, file SHA-256 `2c61d39c28cb4b56dc4dbcaa474de055285a5ea4f976583645f7f3814917fdeb`, canonical report SHA-256 `1a3bea5b88566b55c8a621b7b0a94d0a6e0dfc4130dafd46ef0cc1354bf680e6`.
+- Source hashes: builder `79037c228d033e978258d106d1bfc2a78e28951f3e8a07e6070ba460e4e53ee8`; schema `1cb1bae251cfd1f0e8460bfc54034ed7977163e8de648d617eef5db83e5f7210`; focused test `6f83f05a0fd3c0916eda0c130a98208b75a3857da25dc4fce5d9f4663fa94875`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_3_safety_gate_amendment.py software/ai/tests/test_residual_obstruction_v5_2_power_attribution.py software/ai/tests/test_residual_obstruction_v5_1_pre_render.py software/ai/tests/test_residual_obstruction_successor_v5.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/eval/build_residual_v5_safety_gate_amendment.py software/ai/tests/test_residual_obstruction_v5_3_safety_gate_amendment.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Fixtures: preserved v5 and v5.2 inputs; candidate scene counts 128, 160, 192, 208, 216, 224, 240, and 256; 12 targets per scene; 36 rows per target-scene; pooled/cable/dark/visible family counts 24/12/6/12.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Rendered-image count: 0. Training-run count: 0. Development-image count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: the exact 12-target rotation, 224 split-disjoint evaluation scene identities, assets, and hashes remain unfrozen. Synthetic lighting and obstruction behavior remain provisional. This is sample-size planning, not model evidence, sim-to-real transfer, qualification, or authority.
+- Supersedes: v5's powered per-target AUC/q05/margin interpretation and v5.2's partial three-gate render candidate. V5, v5.1, v5.2, and all prior failed evidence remain preserved.
+- Next dependency: create a fixture revision that deterministically freezes 224 evaluation scenes, exact 12-target balanced assignments, split-disjoint assets and seeds, unchanged safety ceilings, and unopened evaluation identities; independently audit it before any rendering.
+
+
+### E-20261003-AI-537 — v5.4 freezes and independently audits exact evaluation rotation
+
+- Stage/lane: S2/S3 AI/model synthetic fixture revision and independent pre-render audit; no image, training, development result, threshold, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `1d717b246932ce4b3230ecc8f20df886f26caf00`.
+- Exact inputs: v5 file SHA-256 `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`, bundle SHA-256 `69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e`; v5.3 file SHA-256 `2c61d39c28cb4b56dc4dbcaa474de055285a5ea4f976583645f7f3814917fdeb`, report SHA-256 `1a3bea5b88566b55c8a621b7b0a94d0a6e0dfc4130dafd46ef0cc1354bf680e6`; source target/pretraining file SHA-256 `c6588a42e9e2e48c28773e09290a04eb7fc940eb5a83349185d17e3243c59602`, target-catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Exact fixture command: `python software/ai/sim/build_residual_obstruction_successor_v5_4.py --source-commit 1d717b246932ce4b3230ecc8f20df886f26caf00 --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --v5-3 software/ai/eval/residual_obstruction_v5_3_safety_gate_amendment_v1.json --pretraining software/ai/sim/evidence/residual_obstruction_pretraining_v1.json --output software/ai/sim/evidence/residual_obstruction_successor_v5_4.json`.
+- Exact audit command: `python software/ai/eval/audit_residual_obstruction_v5_4_fixture.py --source-commit 1d717b246932ce4b3230ecc8f20df886f26caf00 --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --v5-3 software/ai/eval/residual_obstruction_v5_3_safety_gate_amendment_v1.json --pretraining software/ai/sim/evidence/residual_obstruction_pretraining_v1.json --output software/ai/eval/residual_obstruction_v5_4_fixture_audit_v1.json`.
+- Exact rotation: the 75 catalog targets are ordered by SHA-256 of a frozen salt plus device and target ID, then assigned as cyclic contiguous blocks of 12. All 224 scene IDs and procedural seeds 53000–53223 are unique and split-isolated. Every scene has 12 unique targets and includes both keyboard and phone. Sixty-three targets occur in 36 scenes and twelve occur in 35 scenes. The unopened evaluation inventory is exactly 96,768 identities: 224 scenes × 12 targets × 3 appearances × 12 variants.
+- Power interpretation recorded beside the design: miss-rate power assumes the model's true pooled, cable-family, and dark-cable miss rates are each 0.5%; false-stop power assumes 3%. Those alternatives are the performance v5 must deliver to obtain the reported approximately 0.98 marginal powers and 0.93055 joint lower bound. They are not predictions that v5 will pass; v4.2's measured cable miss remained 3.0%.
+- Development adequacy: both candidates use the exact same 21,600 development rows. Each target has eight scene identities, three appearances, 96 visible rows, 192 obstruction rows, 96 cable-abstain rows, 48 dark-cable 30/60 abstain rows, and 24 dark-cable 10% boundary-visible rows. Aggregate cable, dark-cable abstain, and dark boundary-visible counts are 7,200, 3,600, and 1,800. This supports paired candidate selection and hard-case diagnostics; it does not support powered safety bounds or a physical claim.
+- Independent audit result: `PASS_FIXTURE_READY_FOR_TRAINING_DEVELOPMENT_RENDERER_IMPLEMENTATION`. The auditor independently recomputes source hashes, canonical bundle hash, target inventory/order, every scene assignment, seed and split isolation, occurrence distribution, observation count, development family counts, and safety-gate binding. Training/development renderer implementation may begin; evaluation rendering remains unauthorized until development freezes one candidate and threshold.
+- Retained fixture: `software/ai/sim/evidence/residual_obstruction_successor_v5_4.json`, file SHA-256 `85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3`, bundle SHA-256 `44c83dbee7fef8520bfdf825c94c2c34f61cf4b9d6d0db909e914c53ef6fa085`.
+- Retained audit: `software/ai/eval/residual_obstruction_v5_4_fixture_audit_v1.json`, file SHA-256 `cebef0b75b9d60c3c40467a8a0a4e4561b4248d35fe6d61eee07fe00dd386cd2`, report SHA-256 `693ccaf4e4c69bd643a880470ce9c3ae3f99e61c9166287929645a7672c012bc`.
+- Source hashes: fixture builder `9acf7ca522f5942bf31a8b7a2333225d1be0df3d231efe67f5f6e7c973e4689a`; fixture schema `f3dceca5e783477e219d82e79340c444583f0870a1c5c9b85d25fb0e121ff9a4`; audit tool `fd50325da9ef011ecbaca3b8d76327ad50df6b7235b14c3bb22f095d04b8a413`; audit schema `b29f99809f8dfcad861682f31d7a1dc8bffc2ef133e5a9d338b1f9c9b5bd7b7c`; focused test `62bd4c7732fed695182d9919762945523eedc10ee76f8a4a983d446435357c97`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_successor_v5_4.py software/ai/tests/test_residual_obstruction_v5_3_safety_gate_amendment.py software/ai/tests/test_residual_obstruction_v5_2_power_attribution.py software/ai/tests/test_ai_work_registry.py`; `python -m ruff check software/ai/sim/build_residual_obstruction_successor_v5_4.py software/ai/eval/audit_residual_obstruction_v5_4_fixture.py software/ai/tests/test_residual_obstruction_successor_v5_4.py`; `python scripts/ci/check_source_archive_footprint.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Rendered-image count: 0. Training-run count: 0. Development-image count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: this audit establishes deterministic fixture integrity, not renderer correctness, image realism, model performance, physical transfer, qualification, or authority. Evaluation assets are split-disjoint but reused within their split with fresh procedural seeds; the physical pilot remains required.
+- Supersedes: the v5.3 statement that the exact rotation and scene identities were unfrozen. All v5 through v5.3 artifacts and limitations remain preserved.
+- Next dependency: implement the v5.4 training/development renderer against the exact fixture, run a small training-only smoke plus visual audit, and keep all 96,768 evaluation identities unrendered.
+
+### E-20261003-AI-538 — v5.4 power sensitivity exposes a pessimistic all-or-nothing evaluation
+
+- Stage/lane: S2/S3 AI/model synthetic evaluation planning; no renderer pixel, candidate, threshold, arm-lane status, or integration-gate status changed.
+- Claim commit: `d5119e64b62e8afb891644fc3b0e8f97916c372b`. This bounded increment adds the sensitivity runner, strict schema, test, retained report, registry binding, and this append-only entry while preserving the v5.4 fixture, v5.3 gates, exact rotation, and audit unchanged.
+- Exact command: `python software/ai/eval/analyze_residual_v5_4_power_sensitivity.py --source-commit d5119e64b62e8afb891644fc3b0e8f97916c372b --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --audit software/ai/eval/residual_obstruction_v5_4_fixture_audit_v1.json --v5-3 software/ai/eval/residual_obstruction_v5_3_safety_gate_amendment_v1.json --trials 20000 --seed 55401 --output software/ai/eval/residual_obstruction_v5_4_power_sensitivity_v1.json`.
+- Frozen design: 224 scenes, 12 targets per scene, 96,768 evaluation identities; 2% pooled/cable/dark-cable miss upper-bound gates and 6% visible false-stop upper-bound gate. The sensitivity assumes true miss rates of 1% and true false stops of 3%; these are hypothetical effect sizes, not model predictions.
+- Moderate ICC 0.05 result: marginal powers pooled `1.0`, cable `0.99985`, dark cable `0.9994`, visible false stop `1.0`; dependence-free Bonferroni joint lower bound `0.99925`.
+- Pessimistic ICC 0.30 result: marginal powers pooled `0.687`, cable `0.6899`, dark cable `0.6767`, visible false stop `0.98895`; dependence-free joint lower bound `0.04255`.
+- Interpretation fixed before rendering: a moderate improvement can prove the gates when scene clustering is moderate, but under pessimistic clustering the frozen evaluation effectively requires a large miss-rate improvement. No evaluation size, gate, identity, or threshold was changed in response.
+- Retained result: `software/ai/eval/residual_obstruction_v5_4_power_sensitivity_v1.json`, file SHA-256 `10134514a01d40129da5eecf07c3743bbc4f45f4d27ae6e2253b9c15dbeed4c1`, canonical report SHA-256 `0b423322cd54c622702fc0b9cd7a347c55eb4b3a81406f76f4e06ae52a4abe54`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_4_power_sensitivity.py software/ai/tests/test_residual_obstruction_successor_v5_4.py`; `python -m ruff check software/ai/eval/analyze_residual_v5_4_power_sensitivity.py software/ai/tests/test_residual_obstruction_v5_4_power_sensitivity.py`; `git diff --check`. Result: 6 focused tests pass and Ruff/diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Images generated: 0. Evaluation pixels opened: 0.
+- Limitations: this is simulated power under assumed beta-binomial correlation, not observed model performance or a transfer claim. It does not predict v5's miss rate and cannot qualify physical deployment.
+- Next dependency: implement and validate a training/development-only Isaac renderer against the audited v5.4 fixture, then run a bounded training smoke while refusing every evaluation identity.
+
+### E-20261003-AI-539 — v5.4 Isaac training smoke validates plumbing and blocks simplistic assets
+
+- Stage/lane: S2/S3 AI/model synthetic renderer implementation and bounded training-only smoke; no model training, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `fbb0de9d65d83a7327dde437f1af5f54436a35ea`. The new renderer binds the audited v5.4 amendment and inherited v5 render contract, rejects evaluation before Isaac initialization, admits only training/development scenes, emits 96 px local and 192 px context RGB plus safe-region masks, uses lighting-matched references, records split-specific asset identities, and labels the arm projection input as a perturbed measured-state surrogate rather than simulator truth.
+- Exact Isaac command: `='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v5_4_isaac_probe.py --workspace C:\Users\WebTek\Desktop\tactevra-issue-190 --fixture C:\Users\WebTek\Desktop\tactevra-issue-190\software\ai\sim\evidence\residual_obstruction_successor_v5_4.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-a --split training --scene-start 0 --scene-count 1 --target-start 0 --target-count 4 --status-output C:\IsaacSim\evidence\issue190\residual-v5-4-training-smoke-a-status.json`.
+- Exact audit command: `python software/ai/eval/audit_residual_v5_4_renderer_smoke.py --source-commit fbb0de9d65d83a7327dde437f1af5f54436a35ea --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --manifest C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-a\manifest.json --status C:\IsaacSim\evidence\issue190\residual-v5-4-training-smoke-a-status.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --output software/ai/eval/residual_obstruction_v5_4_renderer_smoke_v1.json`.
+- Smoke result: one frozen training scene, four targets, three appearance identities, all 12 variants, 144 observations, 12 lighting-matched references, 457 files, 12 selected obstruction identities, and zero evaluation observations. Semantic overlap ranges progress as intended: dark cable 10% `0.1020–0.1149`, 30% `0.3150–0.3232`, 60% `0.6344–0.6438`; 40% tool/foreign `0.4155–0.4301`. Clear and adjacent safe overlap is exactly zero.
+- Visual audit: clear, adjacent-right, dark-cable 10/60, hand 60, and foreign 40 context images were inspected. Pair alignment and coverage progression pass. The simple procedural primitives are visibly adequate for orchestration checks but insufficiently realistic as cable, hand, and tool assets, so a full campaign render is not authorized.
+- External bindings: manifest file SHA-256 `413db98a9ce1c707ce49a6adab1c41dc93d6987b03e55e76a37a053cb945a49c`, canonical dataset SHA-256 `15635967678197e375321419a665cdc03b70611655d7e78e42b5508183c580fa`, status file SHA-256 `bc9d4619a8d37728a5629e94bef0e042c4bbe5235de2deaaa1c0accc0cfbc1e6`. External pixels remain outside Git.
+- Retained report: `software/ai/eval/residual_obstruction_v5_4_renderer_smoke_v1.json`, file SHA-256 `9c175e354f7f032896e8d479ed9eb4fd75e444039f4b9f9bce7916f14b1e8a6a`, canonical report SHA-256 `8ca9c28e0064929c1377eb64ad36fbeeedcb14b8f1959ad06f2fbbbf9a459878`. Renderer file SHA-256 `8d8427b8cc0de912fd895f64355e8ad8c091655be57ed244d1af0531d73b981d`.
+- Preserved failed check: after E-538 was committed, the broader registry suite reported a stale expected count of 77/78 after adding the 78th test. Follow-up commit `fbb0de9d65d83a7327dde437f1af5f54436a35ea` corrected both governed counts and the same 12-test command passed. The earlier focused six tests for E-538 had passed and its retained evidence was unchanged.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_4_renderer.py`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py software/ai/tests/test_residual_obstruction_v5_4_renderer.py`; `python -m py_compile software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py`; `git diff --check`. Initial result: 4 contract tests pass; the retained-report test is added in this evidence commit.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Physics-step count: renderer-only frames. Model-training count: 0. Evaluation-image count: 0.
+- Limitations: the smoke is too small for model metrics; the rendered workcell and obstruction shapes remain synthetic approximations; the arm projection record is a surrogate and does not yet prove mesh projection accuracy; no physical transfer or deployment claim follows.
+- Next dependency: replace simplistic obstruction primitives with family-specific, split-disjoint geometry/material/texture variations, rerun a fresh training-only smoke and visual audit, then authorize training/development campaign shards only if that audit passes.
+
+### E-20261003-AI-540 — v5.4 asset-family smoke improves silhouettes and keeps campaign blocked
+
+- Stage/lane: S2/S3 AI/model renderer asset revision and bounded training-only smoke; no model training, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `2e491a5eeb4889e17f6461f3096ec06c5c1173db`. E-539 and smoke A remain unchanged as the failed visual-realism evidence that motivated this revision.
+- Change: obstruction identities are now selected from the matching split and family. Dark/translucent cables render as rounded cylinders with asset-dependent dimensions; hand and foreign families render as distinct ellipsoids; tool geometry remains rigid. Split-specific asset IDs deterministically vary geometry. The renderer continues to refuse evaluation before Isaac initialization and emits no hardware authority.
+- Exact command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v5_4_isaac_probe.py --workspace C:\Users\WebTek\Desktop\tactevra-issue-190 --fixture C:\Users\WebTek\Desktop\tactevra-issue-190\software\ai\sim\evidence\residual_obstruction_successor_v5_4.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-b --split training --scene-start 0 --scene-count 1 --target-start 0 --target-count 4 --status-output C:\IsaacSim\evidence\issue190\residual-v5-4-training-smoke-b-status.json`.
+- Result: one training scene, four targets, three appearance identities, all 12 variants, 144 observations, 12 lighting-matched references, 457 files, 14 selected family-matched obstruction identities, and zero evaluation observations. Canonical dataset SHA-256 is `3f4376f218c2e2119f07839f187cfc5cf5a77c3ed5c84322505cd04ecddcfb10`.
+- Coverage audit: dark cable 10% `0.09964–0.10042`, dark cable 30% `0.29765–0.30038`, dark cable 60% `0.59295–0.60075`, hand 30% `0.27962–0.29313`, hand 60% `0.56313–0.58573`, tool 40% `0.42333–0.43179`, and foreign 40% `0.39174–0.40168`; all remain inside the frozen admission bands.
+- Visual audit: dark-cable 10/60, translucent-cable 60, hand 60, tool 40, and foreign 40 context images were inspected. Rounded cable thickness and family silhouettes are visibly distinct and correctly aligned with the target. The tool remains intentionally low contrast, which is a hard case rather than a reason to recolor after inspection.
+- External bindings: manifest file SHA-256 `2e96f6429fd0d98bcc9d3989291d3c74b1deb460ca89fec17fb430c6706564e2`; status file SHA-256 `245baf3b755f637bc3f0eb65c461f12317d236b48fd499abe4130d560dd94850`. External pixels remain outside Git. Renderer file SHA-256 after this revision is `652819d67eceaad9c95db469f6da778ab8d79a16c5534c514c6daa313435e56c`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_4_renderer.py`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py`; `python -m py_compile software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py`; `git diff --check`. Result: five tests, Ruff, compile, and diff checks pass before the Isaac run.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Model-training count: 0. Evaluation-image count: 0.
+- Limitations: this still uses procedural shapes and display colors rather than measured real obstruction assets. Geometry/material/texture signatures are not yet computed from the actual render descriptors, and the arm-projection record remains metadata rather than a derived mask artifact. The smoke cannot authorize the full campaign, establish model performance, or support physical transfer.
+- Next dependency: hash-bind exact procedural geometry/material/texture descriptors, emit the perturbed-state derived arm projection mask without simulator truth leakage, and rerun a fresh training smoke plus visual/manifest audit before scheduling campaign shards.
+
+
+### E-20261003-AI-541 — v4.2 scene ICC transfer prior and v5 smoke geometry amendment
+
+- Stage/lane: S2/S3 AI/model synthetic planning and pre-results renderer record; no safety gate, fixture rotation, candidate, threshold, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `4f6897b7aa676612c661d0ee7f5e99336e8089de`. This increment reconstructs consumed v4.2 development predictions from exact external custody, estimates binary-error scene ICC, and records the smoke A-to-B geometry correction before any v5 training or development result.
+- Exact command: `python software/ai/eval/estimate_residual_v4_2_scene_icc.py --source-commit 4f6897b7aa676612c661d0ee7f5e99336e8089de --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json --cnn-report software/ai/eval/residual_obstruction_v4_2_cnn_development_v1.json --robustness software/ai/eval/residual_obstruction_v4_2_robustness_v1.json --checkpoint C:\IsaacSim\evidence\v4-2-campaign\v4-2-selected-cnn.pt --allowlist C:\IsaacSim\evidence\v4-2-campaign\exact-shard-allowlist-camera04.json --v5-4 software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --smoke-a-manifest C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-a\manifest.json --smoke-b-manifest C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-b\manifest.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --threshold 0.55 --output software/ai/eval/residual_obstruction_v4_2_scene_icc_v1.json`.
+- Exact fixtures and custody: 38-shard exact allowlist file SHA-256 `94c903d158700e5e2796c1129380146c95c819cd5661c49625b5b1e375eaf28f`; checkpoint SHA-256 `68c993b679d81715eca9327f5df001117c0156bcf0034a79580951e1e91c4aad`; v4.2 fixture file SHA-256 `26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5`, bundle SHA-256 `e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2`; admission file SHA-256 `d1c4873a34df6ccc37a9191e27eac47bf86cc2a18cd3c7211f54ad3568c34311`, canonical report SHA-256 `d0a7107016703045f98e3b7d40e9222012e0b9fe7a433c429486b35a11e0066b`.
+- Reconstruction result: all 28,800 consumed v4.2 development predictions reproduce byte-for-byte at probability SHA-256 `2ad7d47922c8e37573e34028346d6bfd3ab240c7c6179b3b88ca7098a0f87f6b`. The threshold remains the rejected least-bad v4.2 value `0.55`; it was not changed or selected again.
+- Scene ICC metrics: pooled obstruction miss `0.0003381490` with delete-one range `0.0001082636–0.0004399706` and error rate `0.9537%`; cable-family miss `0.0013617856` with range `0.0001899973–0.0018756098` and error rate `3.0%`; dark-rubber-cable proxy miss `0.0017509856` with range `0.0004800658–0.0025850115` and error rate `5.75%`; visible false stop `0.0008953620` with range `0.0002646988–0.0012282041` and error rate `6.4861%`. Each estimate uses eight equal-size scenes.
+- Planning decision: the v4.2 ICC values are transfer priors only. V5 development must re-estimate correlation and reconfirm evaluation size before any evaluation render. Evaluation resizing remains permitted while evaluation pixels are unopened; the four frozen safety gates may not change.
+- Dated pre-results amendment: on `2026-10-03`, smoke A file SHA-256 `413db98a9ce1c707ce49a6adab1c41dc93d6987b03e55e76a37a053cb945a49c` and dataset SHA-256 `15635967678197e375321419a665cdc03b70611655d7e78e42b5508183c580fa` remain preserved as failed visual-realism evidence. Smoke B file SHA-256 `2e96f6429fd0d98bcc9d3989291d3c74b1deb460ca89fec17fb430c6706564e2` and dataset SHA-256 `3f4376f218c2e2119f07839f187cfc5cf5a77c3ed5c84322505cd04ecddcfb10` implement family-matched rounded cables, hand/foreign ellipsoids, rigid tool geometry, and split-specific procedural dimensions. The fixture, gates, rotation, and identities did not change.
+- Retained artifact: `software/ai/eval/residual_obstruction_v4_2_scene_icc_v1.json`, file SHA-256 `165d3dd52c8b5d75fb5b7297570a4c887629a52981fde844bb2ca5c8a1f7e08f`, canonical report SHA-256 `fa88dcdc97a7e52ca0df350030a3352032a184f35027b088475480a9cdfd0692`. Tool SHA-256 `e9252aab893f3288306d201d2f5850a544fd5b3609f16a29083e6dce639eacb5`; schema SHA-256 `5446cbaf5a80969e0946e81c0bfa213bd2e7c633a7b9646e0496360996b1370e`; focused test SHA-256 `64db3aa814377b4514bcace6404f44fea559ceec706013b1a35e8e88a7d09b11`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_scene_icc.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/ai/eval/estimate_residual_v4_2_scene_icc.py software/ai/tests/test_residual_obstruction_v4_2_scene_icc.py software/ai/tests/test_ai_work_registry.py`; `python -m py_compile software/ai/eval/estimate_residual_v4_2_scene_icc.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Result: nine focused/registry tests and 372 full AI/archive tests pass, two symlink-dependent tests skip, and Ruff, compile, archive, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. New rendered-image count: 0. Training-run count: 0. Evaluation-image count: 0.
+- Limitations: only eight consumed synthetic scenes inform the estimates; v5 changes assets and scene structure; binary-error ICC depends on the rejected v4.2 threshold and endpoint definitions. This is not a prediction that v5 will pass, physical transfer evidence, qualification, or authority.
+- Next dependency: hash-bind exact procedural geometry/material/texture descriptors and emit an audited perturbed-state-derived arm projection mask, then rerun a training-only smoke. After v5 development, measure its correlation structure and reconfirm the unopened evaluation size before rendering evaluation.
+
+
+### E-20261003-AI-542 — v5.4 smoke C closes renderer descriptor and arm-mask blockers
+
+- Stage/lane: S2/S3 AI/model synthetic renderer contract and bounded training-only smoke; no model training, threshold, evaluation access, arm-lane status, integration-gate status, or physical authority changed.
+- Source commit: `cc4b7ed92640f9d6f8c8f9a45d360ab942689dfc`. Smoke A and B remain preserved; this revision closes their two declared renderer blockers without changing the frozen fixture, safety gates, rotation, target identities, or obstruction asset identities.
+- Exact Isaac command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\residual_obstruction_v5_4_isaac_probe.py --workspace C:\Users\WebTek\Desktop\tactevra-issue-190 --fixture C:\Users\WebTek\Desktop\tactevra-issue-190\software\ai\sim\evidence\residual_obstruction_successor_v5_4.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-c --split training --scene-start 0 --scene-count 1 --target-start 0 --target-count 4 --status-output C:\IsaacSim\evidence\issue190\residual-v5-4-training-smoke-c-status.json`.
+- Exact audit command: `python software/ai/eval/audit_residual_v5_4_renderer_smoke.py --source-commit cc4b7ed92640f9d6f8c8f9a45d360ab942689dfc --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --manifest C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-c\manifest.json --status C:\IsaacSim\evidence\issue190\residual-v5-4-training-smoke-c-status.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --output software/ai/eval/residual_obstruction_v5_4_renderer_smoke_v1.json`.
+- Render-descriptor result: every obstruction row retains the exact primitive type and dimensions, display color, opacity, and explicit `NONE_PROCEDURAL_SOLID_DISPLAY_COLOR` texture contract used to author its prim. The canonical descriptor, rather than the asset name alone, supplies `obstruction_asset_signature_sha256`. Smoke C contains 14 asset IDs and 32 distinct descriptor hashes.
+- Arm-mask result: all 144 rows contain a hash-verified PNG derived from the synthetic ready-state telemetry after bounded joint-measurement noise, backlash, and capture-offset drift are applied to URDF forward kinematics and analytically projected through the row's camera contract as capsule proxies. No simulator semantic arm mask is read, and no joint value is emitted to the model. Two segments project mathematically in each smoke view, but the parked arm is outside all four target-local frames, so all masks are empty and byte-identical; this is retained as a limitation rather than claimed as positive-overlap validation.
+- Smoke metrics: one frozen training scene, four targets, three appearances, 12 variants, 144 observations, 12 references, 601 files, 32 descriptor hashes, one empty-mask hash, and zero evaluation observations. Coverage remains inside the frozen bands: dark cable 10% `0.09964–0.10042`, 30% `0.29765–0.30038`, 60% `0.59295–0.60075`; hand 30% `0.27962–0.29313`, hand 60% `0.56313–0.58573`; tool 40% `0.42333–0.43179`; foreign 40% `0.39174–0.40168`.
+- External bindings: manifest file SHA-256 `af3b73bffb1c30fd5ba60788db191c20161b9f7e02ef2df769d32e3e225ff43d`; canonical dataset SHA-256 `81ccdb1ab0882afa1c0d0535befd074c42ae995308ded248c9546805bde8693d`; status file SHA-256 `d0a80f65d421873e000bf743684d8e236bd5b13ce5b83c91ef58c925710a21f0`. External pixels and masks remain outside Git.
+- Retained audit: `software/ai/eval/residual_obstruction_v5_4_renderer_smoke_v1.json`, file SHA-256 `209ce8a647a85e90e754ddb4f3591c5e4befbc50721d90d69a2a3cdca153fc42`, canonical report SHA-256 `000a3707b95b5219bb8418305404cd117648b5ec15f6b59b717d5c97557bade9`. Renderer SHA-256 `74154eee63b6606e4891f39d5ef3f6ed2462f21335bbf25b482f5872eacddb0f`; auditor SHA-256 `2e6d436e7004faaaf203f680e5b7d57d811b99cc626a51bbd5638e9edf90961d`; schema SHA-256 `de15c6b70289e7dcfb495d6e46492d0f4512e4dd2fd5db82bc6299e953da3777`; focused test SHA-256 `1fcc5b8521df811e87df5f4159b7f70eac7a67f791f096fc5eaaa63818afeaee`.
+- Decision: exact training/development campaign rendering is authorized. Evaluation rendering remains prohibited. Campaign shards must still undergo exact allowlist admission before any training or development consumption.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_4_renderer.py software/ai/tests/test_residual_obstruction_v4_2_scene_icc.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest -q software/ai/tests`; `python -m ruff check software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py software/ai/eval/audit_residual_v5_4_renderer_smoke.py software/ai/tests/test_residual_obstruction_v5_4_renderer.py`; `python -m py_compile software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py software/ai/eval/audit_residual_v5_4_renderer_smoke.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Result: 16 focused/registry and 369 full AI tests pass, two symlink-dependent tests skip, and Ruff, compile, archive, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Model-training count: 0. Evaluation-image count: 0.
+- Limitations: synthetic family-matched shapes and colors are not measured real obstructions; empty parked-pose masks do not validate positive robot overlap; the arm proxy uses capsule geometry and synthetic ready-state telemetry; no physical transfer or qualification follows.
+- Next dependency: render the exact frozen training/development shards, admit only exact shard identities and hashes, run the predeclared baseline/memorization/development sequence, then estimate v5 scene ICC and reconfirm evaluation size before any evaluation render.
+
+
+### E-20261003-AI-543 — v5.4 dual-GPU training/development campaign launch
+
+- Stage/lane: S2/S3 AI/model synthetic rendering orchestration; campaign is running, no shard is admitted yet, and no training, threshold selection, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `1c355d598fcd929d97a262368e86f11095ae2b06`. The exact pushed renderer and authorized smoke-C contract are used unchanged.
+- Campaign design: 38 fresh target shards cover training and development separately in target blocks of four, with a final three-target block. Queue 0 carries 32,832 observations and queue 1 carries 31,968, totaling the frozen 64,800 training/development observations. Every renderer call uses split-relative scene start zero and exact scene counts of 16 training or eight development. Evaluation is absent from both job lists.
+- Preserved failed launch 01: the wrapper promoted Isaac's Visual C++ stderr warning into a terminating PowerShell error before rendering. Queue receipt SHA-256 values are `640ee24181832579304263b792a15fae8a5447e7ef894170639cf163f99cc4bf` and `edf50571856f72ccda5d987ef8edfdd99d86b18ed819335f066ba7e7e94a8238`; script SHA-256 is `9e3cc0c2b97c9391b2aed75716d51c88b39c7c2c0137a4ff385c1561ac74aeef`. Empty output directories remain excluded.
+- Preserved failed launch 02: PowerShell rejected two `$nativeExit:` interpolations during script parsing. Both stderr logs have SHA-256 `c8c87826ffed87bed1e0abd830d6647835c5db9f30b0029dbf8059f35e34b77c`; script SHA-256 is `8bbb3a6ce7f15f85ce872ce5f4f1017655b9479ef8514a7a8bb2bfa66bc33e52`. Isaac did not start and no output directory or shard manifest was created.
+- Active launch 03: syntax validation command was `powershell.exe -NoProfile -Command "[void][scriptblock]::Create((Get-Content -LiteralPath 'C:\IsaacSim\evidence\issue190\v5-4-campaign03\run-queue.ps1' -Raw)); 'PARSE_PASS'"`. Each hidden queue was then started with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\IsaacSim\evidence\issue190\v5-4-campaign03\run-queue.ps1 -GpuId <0|1> -QueueId <queue-0|queue-1> -JobsPath <exact hashed job file>`. Script SHA-256 is `2f6b5d7f85c284bcdf389215bb52b6aa4bc7288a68e4af320c27888abd47cf43`; queue job-file hashes are `adce01be402eec93a93289662e9c41dad76ecbb316422fe3eeb59f296b91e343` and `f8c5246dfe3eebc3f9e99ee1a3c013af84c5aababffaa1f82d4bbd9d85e22672`; launch receipt SHA-256 is `b6c182525f625f2134dc8a78712242e55e5d3a00e7eff9b860ab67160001e30b`.
+- Runtime state at launch check: queue wrapper PIDs `27292` and `64928` and two Isaac Python workers were active; fresh first-shard directories were created for training targets 0–3 and 4–7. No completed status or manifest was claimed at this checkpoint.
+- Admission rule: the wrapper ignores native process exit alone and requires each status JSON to exist and contain `PASS`, requires `manifest.json`, and records its file SHA-256 and canonical dataset SHA-256 before advancing. A later independent complete admission must consume an exact 38-shard allowlist; directory discovery alone is prohibited.
+- Disk check: 148.16 GiB free before launch. Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Evaluation-image count: 0.
+- Limitations: launch evidence is not campaign completion, admission, training, model performance, or transfer evidence. The running queues may still fail, and any partial output must remain excluded unless its exact status and manifest independently pass.
+- Next dependency: wait for both queues, inspect early completed shards, preserve every failed or partial output, then freeze an exact allowlist and run complete independent admission before baseline or training.
+
+
+### E-20261003-AI-544 — v4.2 multi-axis error dependence and v5 pre-evaluation rule
+
+- Stage/lane: S2/S3 AI/model uncertainty planning and mid-motion scope control; no fixture, safety gate, candidate, threshold, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `5ef009bdf2efb5a91df3e301fa827ec47d1714c7`. The consumed v4.2 checkpoint, exact 38-shard allowlist, complete admission, frozen fixture, CNN report, robustness report, v5.4 fixture, smoke-C manifest, smoke-C audit, and pushed renderer are hash-bound in the retained report.
+- Exact command: `python software/ai/eval/estimate_residual_v4_2_error_dependence.py --source-commit 5ef009bdf2efb5a91df3e301fa827ec47d1714c7 --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json --cnn-report software/ai/eval/residual_obstruction_v4_2_cnn_development_v1.json --robustness software/ai/eval/residual_obstruction_v4_2_robustness_v1.json --checkpoint C:\IsaacSim\evidence\v4-2-campaign\v4-2-selected-cnn.pt --allowlist C:\IsaacSim\evidence\v4-2-campaign\exact-shard-allowlist-camera04.json --v5-4 software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --smoke-c-manifest C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-c\manifest.json --smoke-c-audit software/ai/eval/residual_obstruction_v5_4_renderer_smoke_v1.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --threshold 0.55 --output software/ai/eval/residual_obstruction_v4_2_error_dependence_v1.json`.
+- Reconstruction: all 28,800 rejected v4.2 development predictions again reproduce exact probability SHA-256 `2ad7d47922c8e37573e34028346d6bfd3ab240c7c6179b3b88ca7098a0f87f6b`; threshold `0.55` remains the retained rejected threshold and was not selected again.
+- Pooled obstruction miss: error rate `0.953704%`; ICC is `0.0003381490` by scene, `0.0065907083` by device/target, `0.0013743457` by lighting appearance, and `0.0350008588` by obstruction-variant proxy.
+- Cable-family miss: error rate `3.0%`; ICC is `0.0013617856` by scene, `0.0264322602` by device/target, and `0.0050963218` by lighting appearance. Obstruction identity is not estimable because v4.2 retained only two cable variant groups.
+- Dark-rubber-cable miss: error rate `5.75%`; ICC is `0.0017509856` by scene, `0.0481157982` by device/target, and `0.0087599847` by lighting appearance. Obstruction identity is not estimable because this endpoint has one proxy group.
+- Visible false stop: error rate `6.486111%`; ICC is `0.0008953620` by scene, `0.0558426567` by device/target, and `0.0060092949` by lighting appearance. Asset clustering is not applicable to visible rows.
+- Pre-evaluation rule: v5 development must compute a one-way cluster-bootstrap upper bound for each frozen safety gate by scene ID, device plus target ID, actual `obstruction_asset_signature_sha256`, and appearance ID. Evaluation sizing and the final reported bound use the maximum applicable axis result. An applicable but unestimable axis receives planning ICC `0.30`. Evaluation may be resized before pixels exist; safety gates may not change.
+- Arm-mask scope: smoke C's empty masks remain valid for the retracted parked-pose workflow only. `positive_arm_mask_overlap_tested=false` and `mid_motion_observation_authorized=false`. Mid-motion requires held-out positive-overlap poses comparing the perturbed-FK analytic mask against simulator truth used only as an audit label, with thresholds frozen before authorization.
+- Retained artifacts: analyzer `software/ai/eval/estimate_residual_v4_2_error_dependence.py`, SHA-256 `a917d40d51005881ad75d50bef3cf7bf1e68f215453a29d0f7a1181a65455777`; schema `software/ai/schemas/residual_obstruction_v4_2_error_dependence_v1.schema.json`, SHA-256 `78b3146ad17fdf6d8cc2047cbb48a066f98f3aa9a1aa6e5a395fc5546c867c37`; report `software/ai/eval/residual_obstruction_v4_2_error_dependence_v1.json`, file SHA-256 `d8f5aecc8c32db5eb7ced08fae8570c85370937ed3c764c7cea6c59672d6b094` and canonical report SHA-256 `fad3e7948009fbfb797e6c2006243b23d6a3ce81eaa7c267be821cc545f3e90f`; focused test `software/ai/tests/test_residual_obstruction_v4_2_error_dependence.py`, SHA-256 `38531f9ff0e66b3214cc9675d62c175960c213bf5be2f0c0d0f231d1b07d9043`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_error_dependence.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/ai/eval/estimate_residual_v4_2_error_dependence.py software/ai/tests/test_residual_obstruction_v4_2_error_dependence.py software/ai/tests/test_ai_work_registry.py`; `python -m py_compile software/ai/eval/estimate_residual_v4_2_error_dependence.py`; `python software/ai/eval/audit_ai_work_registry.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Result: nine focused/registry tests and 377 full AI/archive tests pass, two symlink-dependent tests skip; Ruff, compile, registry, archive, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. New rendered-image count: 0. Training-run count: 0. Evaluation-image count: 0.
+- Limitations: v4.2 retained variants rather than actual per-asset signatures; it has only eight scenes; its target, lighting, scene, and asset structures differ from v5; all values are transfer priors tied to a rejected threshold. This is neither a v5 performance result nor physical transfer evidence.
+- Next dependency: finish exact v5 training/development admission, run the frozen development sequence, repeat the analysis with actual v5 asset signatures, and reconfirm evaluation size from the strongest applicable dependence axis before any evaluation render.
+
+
+### E-20261003-AI-545 — campaign03 wrapper failure preserved and campaign04 safely resumed
+
+- Stage/lane: S2/S3 AI/model synthetic rendering orchestration; training/development rendering is active, complete admission has not run, and evaluation remains unopened.
+- Source commit: `5ef009bdf2efb5a91df3e301fa827ec47d1714c7`; renderer source is unchanged from the pushed smoke-C authorization.
+- Campaign03 result: both Isaac workers completed one valid training shard before the wrappers failed while hashing because `Get-FileHash` was unavailable in the child PowerShell environment. Queue receipt SHA-256 values are `0cd8fc7ace06dc6cbc8a6e588c8936e0e91dfd3aa49c4fd5696e2e4892d28c1f` and `3cba17584b7e2bbc00254561dd25bf4057faf9ae5909a637ed647cb5642dada2`; both explicitly retain `status=FAIL`, an empty completed list, and `evaluation_opened=false`.
+- Preserved PASS shard 1: training targets 0–3, 2,304 observations and 192 references; external status SHA-256 `1827cbe10dab77a0fce1b9533f912e97caab3c65e7a316168733e533e5259625`; manifest file SHA-256 `365eb80f4d412c04479e7bfb3cd57df6c7548145b90ba06a4c34570f9e722871`; canonical dataset SHA-256 `165e3b0e93fa699fb398c399b54590a71957b46d2d1beec4facbd569a2b0dd75`.
+- Preserved PASS shard 2: training targets 4–7, 2,304 observations and 192 references; external status SHA-256 `ae69a950797be45b901de2b483884e01c8e76bb4e20bb77a06bb2c8a49b2bf43`; manifest file SHA-256 `75147a3c4d4bb342f407486fa8d22b70258342fece5aaf9a2fdf08160ce99402`; canonical dataset SHA-256 `727819e9167bb3a34d3736a1a4d9b113e80e0cfd0f04948472f3ba4cfa1fc676`.
+- Campaign04 launch: the replacement wrapper uses .NET SHA-256, exact status/manifest/dataset validation, and revalidates the two PASS campaign03 shards before recording them as reused. Syntax validation command was `powershell.exe -NoProfile -Command "[void][scriptblock]::Create((Get-Content -LiteralPath 'C:\IsaacSim\evidence\issue190\v5-4-campaign04\run-queue.ps1' -Raw)); 'PARSE_PASS'"`; hidden queues were launched with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\IsaacSim\evidence\issue190\v5-4-campaign04\run-queue.ps1 -GpuId <0|1> -QueueId <queue-0|queue-1> -JobsPath <exact hashed job file>`.
+- Campaign04 bindings: wrapper SHA-256 `db751a2f54db4fec6186e8726ca4f2b300c89b9d51e739a486d1ba082a42cf59`; queue job SHA-256 values `e18b3b99319e30c20328ba95d02b67518d38b62b17f8be9a5b6d31c4b7ac8e0d` and `976ff19fe228fdd985dc073eae7039ce588bfbdd8b0b1805a223d9f90e07e111`; launch receipt SHA-256 `8212d6cddbd3d293b7772c8d2aadf11d8d8cb2b512f49fda8e3ba728583da0a7`.
+- Runtime checkpoint: wrapper PIDs `37248` and `32860` remain active. Fresh training targets 8–11 report PASS with status SHA-256 `f5fa5e75259d6798f93ac0d2333a56d81a8c900fb97f8715c245ea7614e8d535`, manifest SHA-256 `78f959af9837ceb9ac04b67be491c9915ef730cf537d8ba5aad0cd8bee4bf629`, dataset SHA-256 `6fda328d599adf4aadcf60ef5c4ceb573ab85da44d33e20ad3103fddff683bea`, 2,304 observations, and 192 references. Targets 12–15 report PASS with status SHA-256 `b27b349857d28315941b76bbd8c05162a2e54ae42e4a9dd760dedde216f77f6d`, manifest SHA-256 `b73ec56a0659b6538156e52966043ad9e53d26b1521671da5db7cf1a2fa1b8bd`, dataset SHA-256 `65c1bfc7c827e8cc035f91b7e5e09f46dfa304bfb9532e67b577e84c24c2c322`, 2,304 observations, and 192 references. Fresh targets 16–19 and 20–23 are now rendering. About 148.06 GiB remained free at launch. This is bounded progress evidence, not campaign completion or admission.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Model-training count: 0. Evaluation-image count: 0.
+- Limitations: two PASS shards do not establish campaign completeness; campaign04 can still fail; no output is consumable until exact independent complete admission passes. External pixels and receipts remain outside Git.
+- Next dependency: let both queues finish, preserve any further failures, generate an exact shard allowlist from only revalidated PASS identities, then run complete admission before baseline scoring or training.
+
+
+### E-20261003-AI-546 — pre-results target-by-asset multiway dependence amendment
+
+- Stage/lane: S2/S3 AI/model uncertainty planning amendment made while v5 training/development rendering continues and before any v5 development score or evaluation pixel exists.
+- Source commit: `32b647d62e16405432695c5d703a2d959a33b9ba`. E-544 remains preserved as the original one-way rule and transfer analysis; this amendment strengthens it without changing a fixture, safety gate, candidate, threshold, or evaluation identity.
+- Rationale: a maximum across one-way target and asset bounds can miss simultaneous dependence on both axes. V5 therefore must compute a two-way multiway cluster-bootstrap upper bound for every safety endpoint where target and actual asset axes both apply and are estimable, resampling target and asset separately rather than treating target × asset cells as independent.
+- Frozen rule: required one-way axes remain scene ID, device plus target ID, actual `obstruction_asset_signature_sha256`, and appearance ID. Required interaction is `device_and_target_id_x_obstruction_asset_signature_sha256`. The final conservative comparison includes every applicable one-way bound and the two-way target-by-asset bound. The prior ICC `0.30` fail-closed fallback, frozen safety gates, and pre-pixel-only evaluation resizing remain unchanged.
+- Exact command: `python software/ai/eval/estimate_residual_v4_2_error_dependence.py --source-commit 32b647d62e16405432695c5d703a2d959a33b9ba --fixture software/ai/sim/evidence/residual_obstruction_successor_v4_2.json --admission C:\IsaacSim\evidence\v4-2-campaign\complete-admission-camera04.json --cnn-report software/ai/eval/residual_obstruction_v4_2_cnn_development_v1.json --robustness software/ai/eval/residual_obstruction_v4_2_robustness_v1.json --checkpoint C:\IsaacSim\evidence\v4-2-campaign\v4-2-selected-cnn.pt --allowlist C:\IsaacSim\evidence\v4-2-campaign\exact-shard-allowlist-camera04.json --v5-4 software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --smoke-c-manifest C:\IsaacSim\artifacts\issue190\residual-v5-4-training-smoke-c\manifest.json --smoke-c-audit software/ai/eval/residual_obstruction_v5_4_renderer_smoke_v1.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --threshold 0.55 --output software/ai/eval/residual_obstruction_v4_2_error_dependence_v1.json`.
+- Reproduction: all 28,800 v4.2 development probabilities remain byte-identical at SHA-256 `2ad7d47922c8e37573e34028346d6bfd3ab240c7c6179b3b88ca7098a0f87f6b`; every retained error rate and one-way ICC from E-544 is unchanged. V4.2 cannot estimate the new interaction because it lacks actual per-asset identities, so no retrospective two-way result is claimed.
+- Updated artifacts: analyzer SHA-256 `28fa387eea96907f341c5bf84ede68259fb68e3bb2d5b7083f3d4a48ba7ce4df`; schema SHA-256 `45e91f3fb82747d891337e8e4bc0140b32d7e547e78a46f9c2103297f25623d8`; report file SHA-256 `368a791852d08fbcfddff27666dca578bf48c9bd803eb8d9358b58b8cf11b946`, canonical report SHA-256 `87cb27af5ace3bc9054b68870acf741bead31e60e7bac009a957666eaaf24d51`; focused test SHA-256 `9218cdbc6f0c53b2887a176f169eb940f0711a626bd62f3bc41b58ee3c0a24db`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_error_dependence.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/ai/eval/estimate_residual_v4_2_error_dependence.py software/ai/tests/test_residual_obstruction_v4_2_error_dependence.py software/ai/tests/test_ai_work_registry.py`; `python -m py_compile software/ai/eval/estimate_residual_v4_2_error_dependence.py`; `python software/ai/eval/audit_ai_work_registry.py`; `git diff --check`. Result: nine focused/registry tests and 377 full AI/archive tests pass, two symlink-dependent tests skip; Ruff, compilation, registry audit, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. New rendered-image count caused by this amendment: 0. Model-training count: 0. Evaluation-image count: 0.
+- Limitations: this freezes the required statistical comparison but does not yet implement or report a v5 two-way bound; that requires admitted v5 development predictions and actual asset signatures. Synthetic evidence remains non-physical.
+- Next dependency: finish and admit v5 training/development, run the frozen model sequence, compute all one-way and required two-way bounds, then reconfirm unopened evaluation size from their maximum.
+
+
+### E-20261003-AI-547 — v5.4 JPEG contract gap and dark-cable sample audit
+
+- Stage/lane: S2/S3 AI/model pre-training input-fidelity audit performed while the unchanged training/development render queues continue; no running renderer, frozen fixture, shard, candidate, threshold, evaluation identity, arm-lane status, or integration-gate status changed.
+- Source commit: `426fe00a56ccbd9c3d88db549bf5f8b61967d18e`. Frozen v5.4 fixture SHA-256 is `85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3`; v5 source SHA-256 is `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`; unchanged campaign renderer SHA-256 is `74154eee63b6606e4891f39d5ef3f6ed2462f21335bbf25b482f5872eacddb0f`.
+- Exact command: `python software/ai/eval/audit_residual_v5_4_jpeg_contract.py --source-commit 426fe00a56ccbd9c3d88db549bf5f8b61967d18e --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --shard C:\IsaacSim\artifacts\issue190\residual-v5-4-training-t052-055-campaign04 --output software/ai/eval/residual_obstruction_v5_4_jpeg_contract_audit_v1.json`.
+- Fixture/renderer finding: codec semantics are not declared in the frozen v5 or v5.4 fixture. The renderer hardcodes JPEG quality 92, `optimize=False`, `progressive=False`, and 4:4:4 (`subsampling=0`) for current training/development references and observations. Current split consistency therefore comes from the unchanged renderer implementation, not the fixture contract. Evaluation must bind this renderer identity or receive an explicit pre-render codec amendment while its pixels remain unopened.
+- Sample fixture: completed PASS training shard targets 52–55, manifest SHA-256 `378c9c01b4236046069f0961c7d952a26b640de6f50b4767f16bd1811cf99c97`, canonical dataset SHA-256 `ea5a92aaa0a915b5973fdc9461c2d9bb37e62a6e05e7278897e7604773be4b6c`, 2,304 observations and 192 references. The audit covers all 384 `dark_cable_30`/`dark_cable_60` rows in that shard and all 192 aligned local/context reference pairs.
+- Result: `PASS_AUDIT_WITH_KNOWN_LIMITATION`. The additional local quality-92 encode has median finite PSNR `69.4193 dB`, minimum `64.7732 dB`, maximum mean absolute error `0.01530` intensity levels, and maximum absolute channel error 4. Median dark-cable reference-to-observation mean absolute signal is `14.6149` levels. The added-encode/signal ratio is median `0.0004151` and maximum `0.0024947`. All 192 aligned independently encoded reference crops decode identically. A four-row visual montage retains clearly visible 60% dark-cable changes; montage SHA-256 is `b8d0e1b08b4eaa305fdaae4e58c27037894dad986c1af5eb05a86de47a71bcee` and remains external with the campaign evidence.
+- Retained artifacts: audit tool `software/ai/eval/audit_residual_v5_4_jpeg_contract.py`, SHA-256 `1868f927157bd1a686ef66a467e69d9b305475d6d8106a21f630ffeb52539572`; report `software/ai/eval/residual_obstruction_v5_4_jpeg_contract_audit_v1.json`, file SHA-256 `2d198f525537f05dae473d4a4d1e1723844b1b9c59b3763e291130c7182758a9`, canonical report SHA-256 `8e8871d7792cfabca7b2c2185ea0a754d94d35b839dd90b02ec9e1a581214592`.
+- Validation commands: `python -m ruff check software/ai/eval/audit_residual_v5_4_jpeg_contract.py`; `python -m py_compile software/ai/eval/audit_residual_v5_4_jpeg_contract.py`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. New rendered-image count: 0. Model-training count: 0. Evaluation-image count: 0.
+- Limitations: the raw Isaac RGB preceding the first JPEG was not retained, so this audit cannot measure raw-to-first-JPEG loss or honestly provide a same-scene lossless comparison. JPEG 4:4:4 also does not reproduce the commissioned B0477 YUY2 4:2:2 signal path. The current sample does not establish that subtle real dark-on-dark detail survives either transformation, and it is not simulation, physical, or deployment qualification.
+- Next dependency: let the unchanged campaign finish; before training, reproduce a deterministic admitted dark-cable scene in a separate non-campaign probe that retains raw/lossless RGB, compare it against quality-92 JPEG and a simulated YUY2 4:2:2 round trip, then freeze the input-codec decision before consuming the admitted dataset. Evaluation stays unopened.
+
+
+### E-20261003-AI-548 — raw/JPEG/YUY2 fidelity decision frozen before comparison
+
+- Stage/lane: S2/S3 AI/model pre-training input-fidelity predeclaration; no comparison render, model training, threshold selection, evaluation access, running campaign process, arm-lane status, or integration-gate status changed.
+- Source commit: `d7abf76ce6e1678db29cf9e8b5aaec57232461ff`. Inputs are v5.4 fixture SHA-256 `85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3`, v5 SHA-256 `1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001`, unchanged renderer SHA-256 `74154eee63b6606e4891f39d5ef3f6ed2462f21335bbf25b482f5872eacddb0f`, JPEG gap-audit SHA-256 `2d198f525537f05dae473d4a4d1e1723844b1b9c59b3763e291130c7182758a9`, and target-catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Exact command: `python C:\IsaacSim\evidence\issue190\v5-4-campaign04\audit_residual_v5_4_jpeg_contract.py --source-commit 426fe00a56ccbd9c3d88db549bf5f8b61967d18e --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --renderer software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --shard C:\IsaacSim\artifacts\issue190\residual-v5-4-training-t052-055-campaign04 --output C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_jpeg_contract_audit_v1.json --predeclaration-source-commit d7abf76ce6e1678db29cf9e8b5aaec57232461ff --predeclaration-output C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_codec_fidelity_predeclaration_v1.json`.
+- Frozen comparison population: training scenes `v5_training_scene_01` and `v5_training_scene_16`; target indices/IDs `1/keyboard:1`, `18/keyboard:EQUAL`, `20/keyboard:G`, `37/keyboard:SPACE`, `45/keyboard:Z`, `46/phone:key_a`, `59/phone:key_m`, and `63/phone:key_period`; all three frozen training appearances; and `dark_cable_10`, `dark_cable_30`, and `dark_cable_60`. This yields 144 paired obstruction rows and 48 clear references. Development and evaluation identities are prohibited.
+- Frozen encodings: lossless RGB8 PNG directly from the Isaac RGB annotator; the campaign's quality-92, non-progressive, non-optimized JPEG 4:4:4; and the runtime evidence contract's packed `Y0 U0 Y1 V0` BT.601 full-range cosited-left 4:2:2 round trip with sRGB transfer and BT.709 primaries.
+- Frozen measurements: mean absolute RGB reference/observation contrast and Sobel-luma edge contrast inside the admission-only safe-region mask; encoded/raw signal retention; mean reference-plus-observation codec distortion divided by raw RGB signal; linear quantiles; zero raw signal fails.
+- Frozen gate, applied independently to JPEG and YUY2: median RGB retention at least `0.95`; q05 RGB retention at least `0.85`; every-row RGB retention at least `0.60`; median distortion/signal no greater than `0.05`; q95 no greater than `0.15`; every-row no greater than `0.30`; q05 edge retention at least `0.80`; every-row edge retention at least `0.50`; and every row with raw RGB signal at least two intensity levels must retain at least `1.5` levels. Every limit must pass and post-result threshold changes are prohibited.
+- Decision: JPEG pass makes the current corpus usable for its predeclared synthetic candidate training; JPEG failure makes it exploratory and blocks candidate training. YUY2 pass establishes only plausible synthetic camera-format transfer; YUY2 failure blocks sim-to-real interpretation and requires YUY2 augmentation or a replacement corpus. Neither outcome is physical or deployment qualification.
+- Retained artifacts: consolidated external audit/predeclaration tool `C:\IsaacSim\evidence\issue190\v5-4-campaign04\audit_residual_v5_4_jpeg_contract.py`, SHA-256 `5077a9593b85e9e4d99940cfb3d76af6b71f210a79440d9d1ae15ce72d0a76c2`; external JPEG report at the sibling path, SHA-256 `2d198f525537f05dae473d4a4d1e1723844b1b9c59b3763e291130c7182758a9`; external predeclaration at the sibling path, file SHA-256 `b03770895c63a71de335292f954be67ac22e893a5e29bc72f9300e3c7dd8ec81`, canonical bundle SHA-256 `5648b7d7078a43053c523a26784660c4012ff818af315ad4ae44edabe46a7f66`. The original E-547 tool/report remain recoverable from source commit `d7abf76ce6e1678db29cf9e8b5aaec57232461ff`; their HEAD deletion restores the unchanged source-archive file-count ceiling rather than erasing evidence.
+- Validation commands: the exact command was run twice and produced identical predeclaration bytes; `python -m ruff check C:\IsaacSim\evidence\issue190\v5-4-campaign04\audit_residual_v5_4_jpeg_contract.py`; `python -m py_compile C:\IsaacSim\evidence\issue190\v5-4-campaign04\audit_residual_v5_4_jpeg_contract.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Comparison-render count: 0. Training-run count: 0. Evaluation-image count: 0.
+- Limitations: thresholds are engineering input-fidelity requirements rather than measured physical detectability limits. A passing synthetic YUY2 round trip omits delivered-camera optics, ISP, noise, exposure, white balance, and real cable/keycap materials. This does not change the requirement for the physical pilot.
+- Next dependency: finish the unchanged training/development queues, then run the separate training-only comparison probe before complete dataset consumption or model training. Preserve a failure without changing these limits. Evaluation stays unopened.
+
+
+### E-20261003-AI-549 — external campaign evidence checkpoint copied to a second physical disk
+
+- Stage/lane: S2/S3 AI/model evidence durability checkpoint while rendering continues; no fixture, render output, model, threshold, evaluation access, arm-lane status, or integration-gate status changed.
+- Source commit: `503866fce1fc2c95ecc1093e25b4d5944c863af8`. Source volume is the Samsung 990 PRO system disk at `C:\IsaacSim`; destination is the separate USB SanDisk physical disk mounted at `D:`.
+- Selection command: PowerShell enumerated only `*.status.json` files whose parsed `status` was `PASS`, required a sibling artifact `manifest.json`, added the two explicitly revalidated campaign03 shards, sorted unique directory identities, and wrote `selection.json` plus `artifact-directories.txt` before archiving. Selection SHA-256 is `4798673af752966c764b0675ab20df4e64da86a3e0cab814ebbf3e840f4d6c0c`; directory-list SHA-256 is `b8fc52b0d4bce51f0bdfe2bb7dd71695c385bd5bf62ad7f257e95db8e6c73e6d`.
+- Archive commands: `tar.exe -cf D:\TactevraEvidenceBackups\issue190\v5-4-campaign04\snapshot-20261003T100924-0400\campaign-evidence.tar -C C:\IsaacSim\evidence\issue190 v5-4-campaign04`; `tar.exe -cf D:\TactevraEvidenceBackups\issue190\v5-4-campaign04\snapshot-20261003T100924-0400\completed-artifacts.tar -C C:\IsaacSim\artifacts\issue190 -T D:\TactevraEvidenceBackups\issue190\v5-4-campaign04\snapshot-20261003T100924-0400\artifact-directories.txt`.
+- Result: `PASS`. The checkpoint freezes 23 fresh PASS shards plus two reused/revalidated PASS shards. `campaign-evidence.tar` is 1,755,136 bytes, contains 61 entries under the single expected top-level directory, and has SHA-256 `6ae419b4aa457accf3a3579b55375573f2007778553073f99edb6cbda9aebe80`. `completed-artifacts.tar` is 951,839,744 bytes, contains 224,388 entries, exactly 25 expected artifact directories and 25 manifests, no unexpected top-level directory, and has SHA-256 `3db5991a1cbe18833ddcbeabeaf8099b326b55d5a7294783916ac5a45e1d6176`.
+- Restore check: Python `tarfile` restored the consolidated codec generator SHA-256 `5077a9593b85e9e4d99940cfb3d76af6b71f210a79440d9d1ae15ce72d0a76c2`, frozen predeclaration SHA-256 `b03770895c63a71de335292f954be67ac22e893a5e29bc72f9300e3c7dd8ec81`, training targets 52–55 manifest SHA-256 `378c9c01b4236046069f0961c7d952a26b640de6f50b4767f16bd1811cf99c97`, and development targets 12–15 manifest SHA-256 `af90b4a453125fcac63fb72049cfef99254eca37013cdb46bc41bef51817b182`; every restored byte sequence matches its source.
+- Backup receipt: `D:\TactevraEvidenceBackups\issue190\v5-4-campaign04\snapshot-20261003T100924-0400\backup-receipt.json`, SHA-256 `b1da117e5fb389a561f6f506cc04d3ee56865b512d566e7bea549ad91df97d0e`; `SHA256SUMS.txt` is colocated. Destination remained healthy with 17.66 GiB free after the copy.
+- Hardware-write count: 0 robot/controller writes. Physical-movement count: 0. Physical authority: false. Evaluation-image count: 0. The USB storage write is evidence backup activity only.
+- Limitations: this is a mid-campaign checkpoint, not the final complete campaign archive. Shards completed after selection are intentionally absent. Hash and sample-restore checks do not replace periodic full restore exercises or an offsite copy.
+- Next dependency: after both queues and exact admission finish, create and verify a final second-disk snapshot containing every accepted shard, queue completion receipts, complete allowlist/admission, codec comparison, and training result artifacts. Keep the append-only checkpoint rather than overwriting it.
+
+### E-20261003-AI-550 — complete v5.4 admission passes; frozen codec gate rejects training
+
+- Stage/lane: S2/S3 AI/model synthetic corpus admission and pre-training input-fidelity gate. No arm-lane or integration-gate status changed.
+- Source commit: `1f514cf883d4977f4d6bc32ce9e519031f3d53a2`. Implementation and evidence commit: `e8c14d987223c36e5e51af389ed305f24fb78ef7`. Frozen fixture: `software/ai/sim/evidence/residual_obstruction_successor_v5_4.json`, file SHA-256 `85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3`; frozen codec predeclaration file SHA-256 `b03770895c63a71de335292f954be67ac22e893a5e29bc72f9300e3c7dd8ec81`, canonical bundle SHA-256 `5648b7d7078a43053c523a26784660c4012ff818af315ad4ae44edabe46a7f66`.
+- Render completion: both external queue receipts report `PASS`; 36 fresh campaign04 shards plus the two explicitly revalidated campaign03 shards produce the exact 38-shard inventory. Evaluation remained unopened.
+- Exact allowlist construction command: Python read only `C:\IsaacSim\evidence\issue190\v5-4-campaign04\queue-0-receipt.json` and `queue-1-receipt.json` with UTF-8 BOM support, required `status=PASS`, `evaluation_opened=false`, and 19 completed items per receipt; reread every named manifest; required receipt/manifest file and canonical dataset hashes to match; sorted by split and target start; and wrote `residual_obstruction_v5_4_exact_allowlist_v1.json`. Allowlist file SHA-256 is `b8acf81fdaed70287a491136c155107e1e5202c500bd22479cb05dc9c48ee8f3`; canonical allowlist SHA-256 is `e834ac8becb34e7512fd9735b66c05f168922f345753203100a79630fdee8476`.
+- Exact admission command: PowerShell constructed `python software/ai/eval/admit_residual_obstruction_v5_4_shards.py --workspace . --fixture software/ai/sim/evidence/residual_obstruction_successor_v5_4.json --allowlist C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_exact_allowlist_v1.json --output C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_complete_admission_v1.json`, appended `--shard <path>` for every allowlisted item in exact order, and ran it concurrently with the codec probe.
+- Admission result: `PASS`, `campaign_admitted=true`; 38 manifests; 64,800 verified and byte-unique RGB observations; 5,400 verified references; 43,200 training and 21,600 development observations; zero evaluation observations; no missing split rows. The admission report file SHA-256 is `94f9613173c85808905de2d57b8c545bb6a737d25a09190b33bc82e3a348ff12`; canonical report SHA-256 is `3ebb5494888d8db5864dfbb2c1fe92a8d64bebc4bd92dbaec1884a2174f669cb`.
+- Exact codec render command: with `OMNI_KIT_ACCEPT_EULA=YES` and `CUDA_VISIBLE_DEVICES=0`, `C:\IsaacSim\env_6_1_0\Scripts\python.exe software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py --workspace C:\Users\WebTek\Desktop\tactevra-issue-190 --fixture C:\Users\WebTek\Desktop\tactevra-issue-190\software\ai\sim\evidence\residual_obstruction_successor_v5_4.json --output-dir C:\IsaacSim\artifacts\issue190\residual-v5-4-codec-fidelity-probe01 --split training --status-output C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual-v5-4-codec-fidelity-probe01.status.json --scene-index 0 --scene-index 15 --target-index 1 --target-index 18 --target-index 20 --target-index 37 --target-index 45 --target-index 46 --target-index 59 --target-index 63 --variant-id dark_cable_10 --variant-id dark_cable_30 --variant-id dark_cable_60 --retain-raw-rgb`.
+- Codec fixture/population: only training scenes `v5_training_scene_01` and `v5_training_scene_16`; targets keyboard `1/EQUAL/G/SPACE/Z` and phone `key_a/key_m/key_period`; all three training appearances; variants `dark_cable_10/30/60`; exactly 144 obstruction pairs plus 48 clear references. Probe manifest file SHA-256 is `82967e99d16aeed8ff1a5244f8481e1dd64ccb7476d20f09a74e4cf2ac5e3e6c`; canonical dataset SHA-256 is `fdc50066d4239341bd0fe8ae948464a6b39d9c1706b9bf4b24268609e57c857e`.
+- Exact codec evaluation command: `python software/ai/eval/evaluate_residual_v5_4_codec_fidelity.py --predeclaration C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_codec_fidelity_predeclaration_v1.json --probe-dir C:\IsaacSim\artifacts\issue190\residual-v5-4-codec-fidelity-probe01 --output C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_codec_fidelity_result_v1.json`. Two runs produced byte-identical output SHA-256 `1af060644769f429baa9b633634e90aa2ad436d0053692003c904e2c0b9b58c6`; canonical report SHA-256 is `798543b042f7fee3c0a75047ba641388e66a821e036596bd98f48914ca4bc05c`.
+- JPEG result: contrast and edge gates pass (median/q05/minimum RGB retention `1.00404/0.99438/0.98572`; q05/minimum edge retention `0.99924/0.99263`; minimum encoded signal above the raw floor `2.16167`). All distortion-to-signal limits fail: median `0.08564 > 0.05`, q95 `0.35495 > 0.15`, maximum `1.09636 > 0.30`.
+- YUY2 result: contrast and edge gates pass (median/q05/minimum RGB retention `1.00126/0.99615/0.97865`; q05/minimum edge retention `0.99636/0.97305`; minimum encoded signal above the raw floor `2.08938`). Median distortion passes at `0.04275`; q95 `0.17322 > 0.15` and maximum `0.47359 > 0.30` fail.
+- Decision: preserve `FAIL` without changing any frozen limit. JPEG failure classifies the admitted JPEG corpus as exploratory and blocks v5.4 candidate training. YUY2 failure blocks synthetic sim-to-real interpretation and requires a predeclared YUY2-augmented or replacement corpus. Evaluation remains unopened.
+- Implementation/artifact SHA-256 values before this ledger edit: exact admission tool `18cac2a5b8a7d31ba509f8da9fc52b703004d84961fa5af224a2e238111f84b6`; codec evaluator `03ef5b3d7aa885d0fa307586e04815d843d576e8d71be587ae409231b42c00e2`; bounded raw-capture renderer `b84bf017db8ff95aa2562955f647ddb1ee41f0be72f4863251d173ecd41b694b`; codec tests `9dc414ea9f1bae506d62937603002e994a45417a6a6750d60df6232e535026f7`.
+- Validation: `python -m py_compile software/ai/eval/admit_residual_obstruction_v5_4_shards.py software/ai/eval/evaluate_residual_v5_4_codec_fidelity.py software/integrations/isaac_sim/residual_obstruction_v5_4_isaac_probe.py`; `python -m pytest -q software/ai/tests/test_residual_obstruction_v5_4_codec_fidelity.py software/ai/tests/test_residual_obstruction_v5_4_renderer.py software/ai/tests/test_residual_obstruction_successor_v5_4.py` reports 13 passed; Ruff reports clean for the two tools, renderer, and test. The full AI suite reports 374 passed and two expected Windows symlink skips; the shared ingress/conformance suite reports 34 passed; the registry audit passes with 82 tracked/documented tests and 307 referenced paths; Ruff, compile, maintained-document, public-record, evidence-scope, repository-artifact, repository-health, source-footprint, release-integrity, release-readiness, and diff checks pass. The pre-staging footprint is 6,307 tracked files, 657,329,002 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob.
+- Durable backup: `D:\TactevraEvidenceBackups\issue190\v5-4-campaign04\final-20261003T105319-0400`. The 2,682,368-byte evidence archive SHA-256 is `5d6988e9ecdd7a7e44729b3ead80cc36949246e46c0483e69017253f6ddabb23`; the 1,245,321,216-byte 38-shard-plus-codec archive SHA-256 is `4497edff4675090b6a9480a8a47d1ec1fed20d0d2036a8dcef2014b9fdfb5098`; backup receipt SHA-256 is `acf2fc4c6c8d048ced825d3fd905093fae421a5cd1411505beaa343dcdb5887f`. Six sample restores spanning allowlist, admission, codec result, training, development, and codec manifests match their source hashes; restore receipt SHA-256 is `f3a9453142c5ef73e88a2bec9ef500ca9b617b112e07ad71ebb91c1b99d8e0d8`.
+- Preserved failed evidence: the first allowlist builder read BOM-prefixed queue receipts as plain UTF-8 and failed before writing an allowlist; the corrected UTF-8-sig read produced the frozen allowlist. The first new-test collection used the wrong relative root and failed before execution; the path correction then produced 13 passing focused tests. The first restore-check shell command was rejected before execution; the Python tarfile restore then passed. The codec gate failure itself is retained unchanged.
+- Hardware-write count: 0. Physical-movement count: 0. Physics steps: zero-delta synthetic capture only. Physical authority: false. Training-run count: 0. Evaluation-image count: 0.
+- Limitations: admission proves exact synthetic corpus integrity, not model accuracy or physical transfer. The codec limits are predeclared engineering fidelity limits, not measured physical detectability limits. The probe omits real optics, ISP, sensor noise, exposure, white balance, focus, calibration drift, and real cable/keycap materials. Empty parked-pose arm masks do not authorize mid-motion observation. No joint, PWM, serial, Waveshare/controller JSON, motion policy, execution permit, transport field, or physical authority was created.
+- Next dependency: predeclare a replacement input pipeline that stores lossless raw synthetic crops and explicitly trains or augments for the commissioned camera format, then run a fresh training-only fidelity probe before rendering another full corpus. The physical B0477/ChArUco and dark-cable pilot remains required before any hardware remedy, transfer, deployment, or execution claim.
+
+### E-20261003-AI-551 — YUY2 failure attribution separates ratio instability from detectability
+
+- Stage/lane: S2/S3 AI/model post-failure diagnostic over the consumed training-only codec probe. E-550 remains the governing failed decision; no gate, threshold, label, corpus status, or evaluation state changed.
+- Source commit: `84dc77fd793e45ad743aae30000c375725ece134`. Inputs: frozen codec-result file SHA-256 `1af060644769f429baa9b633634e90aa2ad436d0053692003c904e2c0b9b58c6`, canonical report SHA-256 `798543b042f7fee3c0a75047ba641388e66a821e036596bd98f48914ca4bc05c`, probe manifest file SHA-256 `82967e99d16aeed8ff1a5244f8481e1dd64ccb7476d20f09a74e4cf2ac5e3e6c`, and probe dataset SHA-256 `fdc50066d4239341bd0fe8ae948464a6b39d9c1706b9bf4b24268609e57c857e`.
+- Exact command: `python software/ai/eval/diagnose_residual_v5_4_codec_failure.py --probe-dir C:\IsaacSim\artifacts\issue190\residual-v5-4-codec-fidelity-probe01 --frozen-result C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_codec_fidelity_result_v1.json --output C:\IsaacSim\evidence\issue190\v5-4-campaign04\residual_obstruction_v5_4_codec_failure_diagnostic_v1.json`.
+- Population: the unchanged 144 training-only dark-cable rows: 48 `VISIBLE` 10%-coverage boundary probes and 96 safety-relevant `ABSTAIN` 30%/60%-coverage rows. Evaluation-image count remains zero.
+- Visible-boundary finding: raw RGB signal minimum/q05/median is `0.53068/1.24879/5.24703` levels; YUY2 is `0.58561/1.28163/5.28206`. Seven raw and six YUY2 rows are below two levels; twelve each are below three. The worst overall distortion ratio (`0.47359`) is phone `key_m`, scene 01, neutral light, 10% coverage: YUY2 retains `1.10350` of its RGB signal and `1.01686` of its edge signal. Its ratio is dominated by the `0.53068` raw denominator rather than loss of delivered contrast.
+- Safety-row finding: raw RGB minimum/q05/median is `1.45114/2.92351/20.19531`; YUY2 is `1.45379/3.03395/20.15797`. Three raw and three YUY2 rows are below two levels; seven raw and five YUY2 rows are below three. YUY2 edge minimum/q05/median is `4.01799/6.33617/23.05609`. The weakest safety row is 60% coverage over phone `key_m`, where raw/YUY2 RGB signals are `1.45114/1.45379`; this remains an unresolved synthetic detectability risk despite preservation through YUY2.
+- Decision: the E-550 YUY2 failure remains valid and training stays blocked. The replacement pipeline must render losslessly and convert model inputs to simulated delivered YUY2. Its safety question must be detectability in the YUY2 domain, with near-zero signals reported separately by decision, target, coverage, light, and scene. No absolute physical detectability floor is selected before the B0477 dark-cable pilot.
+- Retained artifact: external diagnostic file SHA-256 `ec2809f97f388fddd31cfebd51ad4b7bf2979bb289a18339a678675c70e1906b`, canonical report SHA-256 `52ff82e034eacc14adbe50c5598340660e7b7e44fd18d5741e3839b4f0fd0024`; generator SHA-256 `f5cbb65c5e75fbe939fff8c332391d05c9e7615968822cb899a9fb233c1d799f`; expanded focused-test SHA-256 `addb735457360ec4b55f363ccca42abc6535bccefdb251fa3497abda2c51615e`.
+- Backup note: the E-550 final archive already contains the exact probe and frozen result required to reproduce this diagnostic. The removable `D:` volume was unavailable when a convenience copy of this derived report was attempted, so no new backup-copy claim is made; E-550's completed archive and restore receipts remain unchanged.
+- Hardware-write count: 0. Physical-movement count: 0. Physical authority: false. Training-run count: 0. Evaluation-image count: 0.
+- Limitations: this diagnostic uses two synthetic scenes and cannot establish a physical detection floor, model performance, camera transfer, deployment qualification, or execution authority. Signal preservation alone does not prove a model can separate the weakest safety rows.
+- Next dependency: freeze the replacement's YUY2-domain detectability endpoints and data flow without guessing a physical signal floor, then run a small training-only smoke before authorizing another full render. Keep the cable-routing rule as occurrence reduction while detection remains the backstop.
+
+### E-20261003-AI-552 — B0477 delivered-YUY2 sensor-noise pilot amendment
+
+- Stage/lane: S2/S3 AI/model physical-measurement predeclaration and synthetic-camera dependency. The existing v1/v1.1 pilot receipts, rejected v4.2 result, failed v5.4 codec gate, unopened evaluation, arm-lane status, and integration-gate status are unchanged.
+- Source commit: `6d0f43061edec0e0b8141b2f7e05176de20e8c93`; implementation and evidence commit: `21f7742d5fbcf1551200b986d47a48f2dda07076`. Source pilot v1.1 file SHA-256 is `b6c28b87f05f5b15e8560abd91898d79c781f77b0501b738b059521da36a65ce`; its canonical report SHA-256 is `6cd43b4ebb316f76432c39932b08fdb4ada96ec087f5342573eb5ff28551e0f1`.
+- Exact command: `python software/ai/eval/build_residual_obstruction_physical_pilot_v1_1.py --pilot-v1-1 software/ai/eval/residual_obstruction_physical_pilot_v1_1.json --source-commit 6d0f43061edec0e0b8141b2f7e05176de20e8c93 --output C:\IsaacSim\evidence\issue190\physical-pilot\residual_obstruction_physical_pilot_v1_2.json`.
+- Frozen capture procedure: use the B0477's commissioned full-native 5472x3648 YUY2 9 fps mode on the direct runtime port/cable with fixed focus, exposure, gain, and white balance and all automatic controls disabled. At each measured low, nominal, and high lighting level, hold the clear scene, camera, fixture, device, settled parked pose, and controls fixed; discard eight settling frames; then retain one continuous 32-frame burst with original bytes/hashes, monotonic timestamps, available driver sequence/timestamps, dropped/duplicate-frame counts, lighting descriptor, controls hash, and pose-evidence hash.
+- Frozen analysis: report per-pixel temporal mean, sample standard deviation, median, and `1.4826 × MAD` robust sigma separately for delivered Y, U, and V; retain spatial maps, empirical residual samples, adjacent-frame-difference summaries, median/q95/q99/maximum aggregates, clipped/saturated counts, and raw/derived hashes. No Gaussian, independence, or spatial-uniformity assumption is allowed before measurement.
+- Synthetic dependency: the next camera-domain corpus starts with lossless renders, prohibits a JPEG intermediate, and must reproduce the measured delivered-YUY2 noise profile. Empirical residual resampling is preferred so spatial and chroma dependence can be retained; any fitted distribution requires held-out goodness-of-fit evidence. The profile expires when the camera mode, controls, lighting binding, port, or cable changes.
+- Decision: the signal floor, intensity-level minimum, noise multiplier, and sub-floor decision remain explicitly unset. A future pre-results amendment must compare obstruction signal with matching-lighting noise before choosing them. Measurement profiles may parameterize future simulation, but this amendment does not make raw physical pixels training data and does not alter escrow.
+- Artifact hashes: consolidated builder SHA-256 `8932d495ad66793d87124a4fd59595f3a1485bdc1bcaa4a322c9ddac6eac6693`; consolidated test SHA-256 `b9255a05ac5c27801991be9b9a9b93822174d42d44b91e554a13593985fbd004`; external v1.2 receipt file SHA-256 `1e63f3d47aefff3592cdab8b774cc4fa4f07f0685d0eee823fd3def012b92659`; canonical receipt SHA-256 `85076301976433fe45221075bd70b5ba4525aa3083df45f9e597024ea4ce0cce`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_residual_obstruction_physical_pilot_v1_1.py software/ai/tests/test_ai_work_registry.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m pytest -q software/tests/unit/test_model_motion_ingress.py software/tests/unit/test_model_motion_ingress_v2.py software/tests/unit/test_model_motion_sequence_coordinator.py`; `python -m ruff check software/ai/eval/build_residual_obstruction_physical_pilot_v1_1.py software/ai/tests/test_residual_obstruction_physical_pilot_v1_1.py`; `python -m py_compile software/ai/eval/build_residual_obstruction_physical_pilot_v1_1.py`; `python software/ai/eval/audit_ai_work_registry.py`; `git diff --check`. Results: 12 focused/registry tests pass, 383 full AI/archive tests pass with two expected Windows symlink skips, 34 shared boundary tests pass, Ruff and compilation pass, and the registry audit passes with 82 tracked/documented tests. The direct source-footprint command remains failed at the inherited HEAD count of 6,311 tracked files against the reviewed 6,307 ceiling; this increment adds zero repository files and does not weaken or rewrite that limit.
+- Hardware-write count: 0. Physical-movement count: 0. Camera-capture count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: no physical B0477 noise sample exists yet, so this amendment measures no numerical noise floor and proves no detectability, camera transfer, model performance, deployment qualification, or execution safety. Thirty-two frames per level define a bounded first measurement, not a statistical deployment gate.
+- Next dependency: connect and commission the B0477 in its exact runtime mode, complete ChArUco and parked-pose evidence, capture the three static clear bursts, audit frame delivery, and review measured Y/U/V residuals before freezing a signal floor or rendering a replacement corpus.
+
+### E-20261003-AI-553 — one-arm modifier and phone-layer planner capability decision
+
+- Stage/lane: S1 AI/model intent-to-semantic-plan capability contract. This increment audits and blocks unsupported semantic compilation; it does not change arm-lane status, target geometry, motion planning, controller encoding, or any integration gate.
+- Source commit: `85c28c61688c13fe04ca9ad38776a1202e4368f7`; implementation and evidence commit: `78421d7a6f0c77aec7f4017ab0e61958b47a4922`. Exact audited target catalog SHA-256 is `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Decision: select commissioned Sticky Keys as the first desktop shifted-character strategy. A single arm presses `SHIFT` and the base key sequentially; simultaneous chords are unsupported, and Caps Lock optimization is disabled because it cannot cover symbols and creates additional state. Readiness requires a commissioned `SHIFT` target plus hash-bound host Sticky Keys evidence.
+- Phone decision: use a verified layer state machine with `KEYBOARD_LOWER`, `KEYBOARD_UPPER`, and `SYMBOLS_1`. Future layered input requires commissioned `key_shift`, `key_symbols`, and `key_letters` transition targets and ADB verification of the current layer before every press.
+- Current audit: all 46 keyboard targets lack `SHIFT`; all 29 phone targets lack the three layer-transition targets. Sticky Keys and ADB layer-verification evidence are absent. Keyboard uppercase and shifted-symbol requests therefore block as `keyboard_modifier_uncommissioned`; phone uppercase, number, and layered-symbol requests block as `phone_layer_uncommissioned`. Current supported lowercase requests remain accepted. Generic unsupported characters continue to fail closed rather than being guessed.
+- Model boundary: the capability contract explicitly prohibits language-model target IDs, contains no coordinates, generates zero commands, and grants no physical authority. The language model remains responsible only for intent and exact text; deterministic commissioning inputs and the compiler own capability and target selection.
+- Exact successful audit command: `$env:PYTHONPATH='software/ai;software/src'; python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --source-commit 85c28c61688c13fe04ca9ad38776a1202e4368f7 --output C:\IsaacSim\evidence\issue190\planner\planner_capability_audit_v1.json; Remove-Item Env:PYTHONPATH`.
+- Artifact hashes: adapter SHA-256 `bf2f9d1b054bbce25f0ab7b2f28e26aecf9cc56d39bd3c63dded20d6586c7984`; focused-test SHA-256 `fd7150bb7199d50dd9f89e6574f73858380686667a7578eb58db68234dd5b1ee`; external audit file SHA-256 `b591b85cad7056aec74d2153738859f5f0913be21492cf8078f52b5a44de25e3`; canonical audit SHA-256 `43375e3afe648239d164f7a988d73d8b9f2febd268e835ca63ee817d12a566e2`; canonical capability-contract SHA-256 `35d5b2c52443888bde28bb67f98265d520c626a99d0ee009767a3fd139076e10`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_offline.py`; `python -m pytest -q software/ai/tests software/tests/unit/test_models_and_typing.py scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py`; documentation, public-record, evidence-scope, repository-artifact, repository-health, release-integrity, release-readiness, and `git diff --check`. Results: 28 focused tests pass; 394 combined AI/compiler/archive tests pass with two expected Windows symlink skips; all listed static and policy checks pass.
+- Preserved failed evidence: direct execution as `python software/ai/rocell_ai/adapter.py ...` failed before output because package-relative imports require module execution. The corrected `python -m rocell_ai.adapter ...` command generated bytes identical to the earlier independently constructed audit.
+- Hardware-write count: 0. Physical-movement count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: this settles the semantic strategy and current fail-closed behavior; it does not add or calibrate a Shift key, enable Sticky Keys, install ADB observation, define phone-layer geometry, or prove typed output. The current catalogs and profiles remain lowercase-only.
+- Next dependency: add a proposed `SHIFT` target and Sticky Keys commissioning receipt to the shared catalog process; separately define phone layer-transition targets and ADB observation evidence. Then extend the deterministic compiler and exhaustively replay printable characters before training any intent parser on the expanded capability.
+
+### E-20261003-AI-554 — Sticky Keys state machine and exhaustive virtual replay
+
+- Stage/lane: S1 AI/model deterministic compiler research and commissioning precondition. This extends E-553 without adding a physical Shift target, changing a target catalog, enabling a host setting, or advancing an arm/integration gate.
+- Source commit: `5b2eef46c47616f57af601428224131d72bd522b`; implementation and evidence commit: `4f0e4e58054908de7ca83f016940ca63ee83abf5`. Exact target catalog SHA-256 remains `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- State-machine contract: `OFF -> LATCHED` on one Shift press; the immediately following base key consumes the latch and returns to `OFF`. A second consecutive Shift is rejected because it would enter locked state, and a sequence ending in `LATCHED` is rejected. The compiler never uses modifier lock and never emits a simultaneous chord.
+- Commissioning checklist: Sticky Keys enabled; one-shot Shift latch verified; the five-Shift shortcut and dialog disabled; “turn off Sticky Keys when two keys are pressed at once” disabled; host keystroke/modifier-state logging available. The expected log reports `LATCHED` after every Shift and `OFF` after its base key. Any mismatch blocks progression.
+- Exhaustive replay result: all 95 printable ASCII characters, including repeated case transitions and every US shifted symbol, compile to 142 named virtual key presses and replay exactly to the original text. There are 47 one-shot Shift presses, no consecutive Shift pair, no trailing latch, no dialog, and no simulated Sticky Keys disable event.
+- Exact capability-audit command: `$env:PYTHONPATH='software/ai;software/src'; python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --source-commit 5b2eef46c47616f57af601428224131d72bd522b --output C:\IsaacSim\evidence\issue190\planner\planner_capability_audit_v1_1.json; Remove-Item Env:PYTHONPATH`.
+- Artifact hashes: adapter SHA-256 `0e2269190296534dbe929d0324d759eeab83a121f6600c734eedb0ada2701441`; focused-test SHA-256 `4dee9bf14ad9845a61ae912cdcb2033e81056dafc3b79fdf23c5753b9611f008`; external audit file SHA-256 `10f3db94275a3f227f86d605bf6edd9f4146bb230b72e402a987a598f4dc24b8`; canonical audit SHA-256 `aa24f3540168ba75a394c34e40f48184294056adf29b61e3912fd661c676b422`; canonical capability contract SHA-256 `99771c57a945c60996fb7d219b1b55721a0ffcbb1427bfa21cb2e82dcdffad18`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_offline.py`; `python -m pytest -q software/ai/tests software/tests/unit/test_models_and_typing.py scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py`; documentation, public-record, evidence-scope, repository-artifact, repository-health, release-integrity, release-readiness, and `git diff --check`. Results: 30 focused tests pass; 396 combined AI/compiler/archive tests pass with two expected Windows symlink skips; all listed static and policy checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Host-setting-change count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: the replay proves the deterministic ASCII mapping and modeled latch invariants, not Windows behavior on the eventual host. The current catalog still lacks `SHIFT`, and no Sticky Keys setting or keystroke log has been observed. Non-US layouts and non-ASCII text are outside this replay.
+- Next dependency: commission the US keyboard identity, add and measure the Shift target, record the four host settings, and compare a real host keystroke/modifier-state log with these expectations before enabling shifted characters in the production semantic profile.
+
+### E-20261003-AI-555 — commissioned-key admission and seeded Sticky Keys replay
+
+- Stage/lane: S1 AI/model deterministic compiler admission and virtual replay. This follows E-554 and changes no target catalog, calibration, arm-lane status, integration gate, or physical capability.
+- Source commit: `c6a198b3a24513563816cd7d94205b89d5bc5e4f`; implementation and evidence commit: `253419cae37785578df71b17b2e28ec74ffd9b1c`. Exact audited target catalog SHA-256 is `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Catalog comparison: printable US ASCII requires 48 distinct base keys plus the separate `SHIFT` modifier. The current 46-target keyboard catalog supplies 44 required base keys and two non-printable controls (`TAB`, `ENTER`). Missing printable base targets are exactly `BACKSLASH`, `GRAVE`, `LEFT_BRACKET`, and `RIGHT_BRACKET`; `SHIFT` is separately missing.
+- Compiler change: printable compilation now requires an explicit commissioned target-ID set. It rejects a character before emitting a semantic sequence if any required base or modifier target is absent. Against the current catalog, lowercase `a` compiles to `A`; backtick rejects on missing `GRAVE`; uppercase `A` rejects on missing `SHIFT`. A complete virtual catalog is accepted only by replay tooling and does not establish commissioning.
+- Seeded replay: seed `190055`; fixed cases `AA`, `!!`, `aA`, `A`, and ` A`; 5,000 additional random printable-ASCII strings, each 1–64 characters; 5,005 total strings; 160,925 characters; 240,468 virtual actions; 79,543 one-shot Shift presses; zero mismatches or state-machine failures. Case-population SHA-256 is `47bdada7b846a3fe23bdbb28a9d93272078f75d41e6ffed27db9f1de65f479e1`.
+- Exact audit command: `$env:PYTHONPATH='software/ai;software/src'; python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --source-commit c6a198b3a24513563816cd7d94205b89d5bc5e4f --output C:\IsaacSim\evidence\issue190\planner\planner_capability_audit_v1_2.json; Remove-Item Env:PYTHONPATH`.
+- Artifact hashes: adapter SHA-256 `869d41b0720d5f365ad83d755b0edc4480ec239f9a69e598017f77706e8246ef`; focused-test SHA-256 `7aeaeecd362560694cc149fea25fa07d575d83af97ac3522842ad662d5257e43`; external audit file SHA-256 `c9dd43b1cc7f13de48dc63f2d52a48808a289db8bbe5e12389e00500735c8c28`; canonical audit SHA-256 `ba76bbbd646c7f91661f33c2a718956538ab1f83fd620f652f2abbb4c819cf67`; canonical capability-contract SHA-256 `f6448966021981dab5fa3f4cf2b33c120aa01be85c7532ccae389082df76eca8`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_offline.py`; `python -m pytest -q software/ai/tests software/tests/unit/test_models_and_typing.py scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py`; documentation, public-record, evidence-scope, repository-artifact, repository-health, release-integrity, release-readiness, and `git diff --check`. Results: 32 focused tests pass; 398 combined AI/compiler/archive tests pass with two expected Windows symlink skips; all listed static and policy checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Host-setting-change count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: random replay validates the deterministic virtual US mapping and inter-character state transitions, not the eventual Windows host, physical target geometry, target reachability, or keystroke delivery. Non-ASCII and non-US layouts remain unsupported. Current uppercase and the four missing punctuation-base families remain blocked.
+- Next dependency: propose the five absent physical targets through the shared catalog and calibration process, then bind host Sticky Keys and keystroke-log evidence before enabling the expanded compiler profile.
+
+### E-20261003-AI-556 — five-key shared-catalog proposal and v5.5 render blocker
+
+- Stage/lane: S1 AI/model shared-catalog proposal and synthetic-corpus admission. This increment changes no active target coordinate, semantic profile, compiler capability, arm-lane status, integration gate, or physical authority.
+- Claim commit: `c092f82b50a8b1bb79c985ab0cc99f0c2a251171`; implementation commit: `6463c90f4d1b62e29f97a230cc7c443732fa37c4`. The unchanged active catalog is SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`, with 46 keyboard plus 29 phone targets.
+- Geometry audit: the repository's presentation model, SHA-256 `269b9bdc60cb1239273c2eae5dd395efab731a95f2f7016aaa87b2e9c848f89c`, explicitly labels its outer modifiers presentation-only. It supplies provisional centers and widths for left `SHIFT`, `LEFT_BRACKET`, `RIGHT_BRACKET`, and `BACKSLASH`. Each receives a conservative 14 by 14 mm proposed safe patch for shared synthetic review. Shift's press point is explicitly selected at `[20.0, 48.0]` for maximum modeled edge clearance; its full 37 mm width is not made a safe region.
+- Preserved blocker: no repository geometry source defines `GRAVE`. Extrapolating the frozen 19.05 mm pitch one position left of key `1` gives x=`2.95` mm, which cannot contain the ordinary 7 mm half-width inside the device boundary. The proposal therefore stores no Grave coordinate or safe region and marks it `BLOCKED_GEOMETRY_SOURCE_INSUFFICIENT` rather than inventing geometry.
+- Usability decisions: all four provisional targets remain pending the commissioned parked-camera visibility check, commissioned parked-arm projection check, and arm-lane read-only IK reachability check. Grave cannot enter those checks before geometry exists. The proposal grants no catalog-install or compiler-expansion authority.
+- v5.5 decision: render authorization is false. Rendering remains blocked until all five targets are admitted into a re-frozen 80-target catalog, visibility/non-occlusion/IK checks pass, v5.5 train/development/evaluation identities are amended before pixels exist, and the 80-target power check is rerun. Evaluation remains unrendered.
+- Exact artifact command: `$env:PYTHONPATH='software/ai;software/src'; python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --source-commit c092f82b50a8b1bb79c985ab0cc99f0c2a251171 --target-extension-geometry-source presentations/blender/build_workcell_explainer.py --output C:\IsaacSim\evidence\issue190\planner\keyboard_target_extension_proposal_v1.json; Remove-Item Env:PYTHONPATH`.
+- Artifact hashes: external proposal file SHA-256 `f04559c12828e535ac90b91a505af6df6d07f30f4d66ac5e2430130f56cdcb13`; canonical proposal SHA-256 `b5b7e103208594e6e0e33255f7d5b1e4d06c023509b1a983d2d2c79d53c14149`; adapter SHA-256 `e5e8abe389c80775cec2d6bade53340f973db2eec02dd40d687ae5ae6a67d998`; focused-test file SHA-256 `dd09eb46eabc650db42f2214ed0821db37b77de123774411c6b022b4813abdbc`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_offline.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m pytest -q software/tests/unit/test_model_motion_ingress.py software/tests/unit/test_model_motion_ingress_v2.py software/tests/unit/test_model_motion_sequence_coordinator.py`; `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py`; `python software/ai/eval/audit_ai_work_registry.py`; documentation, public-record, evidence-scope, repository-artifact, repository-health, release-integrity, release-readiness-sync, and `git diff --check`. Results: 34 focused tests pass; 390 full AI/archive tests pass with two expected Windows symlink skips; 34 shared boundary tests pass; Ruff and compilation pass; registry audit passes with 82 tracked/documented tests and 308 referenced paths; all listed static checks pass.
+- Preserved failed evidence: the initially invoked nonexistent `scripts/ci/check_release_readiness.py` failed with file-not-found. The correct `python scripts/ci/check_release_readiness_sync.py` reports no readiness drift. Direct `python scripts/ci/check_source_archive_footprint.py` still fails at the inherited 6,311 tracked paths against the reviewed 6,307 ceiling; this increment adds zero repository files and does not weaken that policy.
+- Hardware-write count: 0. Physical-movement count: 0. Camera-capture count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: presentation geometry is not product-drawing, physical-measurement, calibration, reachability, visibility, obstruction-model, deployment, or execution evidence. The external proposal is retained on the current Isaac evidence drive and does not itself change the shared catalog.
+- Next dependency: obtain a measured or shared-authoritative Grave position, run the arm-owned read-only IK check and commissioned parked-camera visibility/non-occlusion checks for all five targets, then review and re-freeze the catalog. Only after that may the compiler expand and the v5.5 80-target power/identity amendment precede any lossless render.
+
+### E-20261003-AI-557 — v5.5 render/commissioning separation, Grave measurement method, and archive correction
+
+- Stage/lane: S1 AI/model synthetic-render admission and shared-catalog measurement preparation. This corrects E-556's gate coupling without deleting or restating its original evidence. Claim commit: `cb4292356fadde26f97d6d05e3860d99584e35ef`; implementation commit: `374c918bb97e221cede9d91a17070f3fc75cd92d`.
+- Gate correction: `v5_5_render_gate` now requires only an 80-target re-frozen catalog, simulated parked-camera visibility, simulated parked-arm non-occlusion, offline arm-runtime IK reachability, amended unopened identities, and rerun power. Physical-camera evidence is explicitly false as a render prerequisite. A separate `physical_commissioning_gate` requires real-camera visibility, real parked-arm non-occlusion, and measured geometry before hardware use, and explicitly does not block synthetic rendering.
+- Grave method: direct caliper measurement is required rather than extrapolation. The keyboard remains fixed, power isolated, and arm clear. A digital caliper with at most 0.1 mm resolution records three signed repeats for Grave-to-`1` left-edge X and front-edge Y offsets plus Grave and reference cap width/height; zero is checked before and after and each repeat range must be at most 0.3 mm. Center derives relative to the existing `1` center `[22.0, 111.0]`; the safe region uses a 1 mm measured-edge inset capped at the existing 7 mm half extents. Operator, UTC time, keyboard identity, instrument identity/resolution, raw readings, and source catalog hash are mandatory. Method SHA-256 is `903410987876538088ce99a03a074a611bad7cd8c98647e88e166424c9b02e07`; readings and derived geometry remain unset.
+- Offline arm finding: a first inline attempt failed before import because `software/src` was absent from `PYTHONPATH`; that failed evidence is retained. The corrected read-only attempt constructed a temporary 79-target in-memory catalog from the four proposal seeds and performed zero hardware operations, but the unchanged runtime rejected it as `Simulation context coherence check failed: targets differ from their locked source`. Static inspection also finds `reach_optimizer.py` requires exactly 46 keyboard plus 29 phone targets and raises `optimizer requires the locked 46-key + 29-phone = 75 target catalog`. The arm lane therefore must update its catalog cardinality contract after the shared 80-target catalog is frozen; no IK result is claimed.
+- Archive correction: the exact four paths above the 6,307 ceiling are `software/ai/eval/admit_residual_obstruction_v5_4_shards.py`, `software/ai/eval/evaluate_residual_v5_4_codec_fidelity.py`, `software/ai/eval/diagnose_residual_v5_4_codec_failure.py`, and `software/ai/tests/test_residual_obstruction_v5_4_codec_fidelity.py`. They are reviewed independent executable evidence and test tools, so policy deliberately raises only the tracked-file ceiling to 6,311 and names them in `docs/SOURCE_DISTRIBUTION.md`; byte, blob, duplicate, and reduction limits are unchanged. The direct archive check now passes at 6,311 files, 657,460,619 logical bytes, and 4,890,152 governed duplicate bytes.
+- Exact proposal command: `$env:PYTHONPATH='software/ai;software/src'; python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --source-commit cb4292356fadde26f97d6d05e3860d99584e35ef --target-extension-geometry-source presentations/blender/build_workcell_explainer.py --output C:\IsaacSim\evidence\issue190\planner\keyboard_target_extension_proposal_v1_1.json; Remove-Item Env:PYTHONPATH`.
+- Artifact hashes: external proposal file SHA-256 `3d9d03f4513420f71dcd9710bb87a0783616fe87474fcf4007904eac0f5f9a82`; canonical proposal SHA-256 `0ffce08d60451b8caca08a0e592c6794b1d8726a1c7fbf1128d024bf2813a25d`; adapter SHA-256 `bcfcb157d768d93ab1a48f22cd61e3b3d3e87905e3736365c9426a885918b0ce`; focused-test SHA-256 `7eef5c328b0834d989b60d72a6434f7ac2a63dc9fb28af7ad080d2b6dd955bb2`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_offline.py scripts/ci/test_check_source_archive_footprint.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m pytest -q software/tests/unit/test_model_motion_ingress.py software/tests/unit/test_model_motion_ingress_v2.py software/tests/unit/test_model_motion_sequence_coordinator.py`; `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py`; registry, documentation, public-record, evidence-scope, repository-artifact, repository-health, source-archive, release-integrity, release-readiness-sync, and `git diff --check`. Results: 39 focused/policy tests pass; 390 full AI/policy tests pass with two expected Windows symlink skips; 34 shared boundary tests pass; all static and policy checks pass; registry covers 82 tracked/documented tests and 308 paths.
+- Hardware-write count: 0. Physical-movement count: 0. Camera-capture count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: no Grave reading, expanded catalog, simulated visibility image, arm-mask result, or IK result exists yet. The proposal remains simulation-only and does not qualify hardware. The external receipt remains on the current Isaac evidence drive.
+- Next dependency: collect and bind the Grave caliper readings; review and re-freeze the 80-target catalog; have the arm lane accept that cardinality and run its read-only IK screen; then run the simulated parked-camera visibility/non-occlusion check, amend unopened v5.5 identities, and rerun power before rendering. Physical camera confirmation remains required only before hardware use.
+
+### E-20261003-AI-558 — MuJoCo Warp secondary-oracle integration architecture
+
+- Stage/lane: S1/S2 AI/model and simulation planning. Claim commit: `d06705e7c1929e88e90587552e6510cd083768d2`; implementation commit: `7f0d1b7d2243162a0eee06508418d0cf17cca6b0`. Planning/documentation only; no dependency installation, converted asset, simulation, model training, target/catalog change, arm-lane status, or integration-gate change occurred.
+- Decision: MuJoCo Warp is a candidate high-throughput secondary oracle downstream of the exact admitted runtime schedule. RoCell retains deterministic planning/admission, Isaac remains the higher-fidelity visual reference, and physical evidence remains the only hardware qualification path. The unchanged `ModelMotionBatch` boundary does not feed MuJoCo Warp directly.
+- Architecture: a future simulator-neutral request/receipt binds system, schedule, catalog, camera, robot, scene, asset, toolchain, seed, world, buffer, and authority identities. Backend adapters may observe only requested FK, projection, mask, collision, tracking, render, or contact evidence and must return zero hardware access, transport, permit, gate-promotion, and physical authority.
+- Work packages: MW0 isolated toolchain/license/host lock; MW1 URDF/MJCF asset and four-way FK parity; MW2 1/32/256/1,024/4,096-world throughput, overflow, repeatability, and dual-GPU sharding; MW3 paired Isaac/MuJoCo Warp RGB/depth/segmentation/occlusion comparison; MW4 collision/contact differential only after measured property prerequisites; MW5 backend-labeled synthetic-data admission; MW6 deferred policy-learning research behind a separate shared contract.
+- Adoption constraints: every work package records `ADOPT_FOR_DECLARED_SCOPE`, `RESEARCH_ONLY`, `REJECT_BACKEND`, or `BLOCKED`. FK parity does not admit RGB, geometry parity does not admit contact, and synthetic model performance does not qualify physical transfer. The pilot must not delay Grave/catalog completion, v5.5 lossless Isaac rendering, B0477 calibration/noise, compiler work, or arm-runtime integration.
+- Host observation command: `nvidia-smi --query-gpu=name,driver_version,memory.total,compute_cap --format=csv,noheader; python --version`. Observed two NVIDIA GeForce RTX 3090 devices, driver `595.97`, 24,576 MiB each, compute capability 8.6, and Python 3.12.0. These are candidate-host facts, not a MuJoCo Warp compatibility result.
+- Upstream sources reviewed: `https://github.com/google-deepmind/mujoco_warp`; `https://mujoco.readthedocs.io/en/latest/mjwarp/`; `https://mujoco.readthedocs.io/en/3.13.0/mjwarp/api.html`. The candidate plan records Apache-2.0 upstream licensing, Python 3.10–3.14 packaging, NVIDIA/CPU modes, batch rendering, float32/nondeterminism, explicit overflow checking, low-latency limitations, absent Warp differentiation, and unsupported/experimental feature limits as items to verify under MW0 rather than silently trust.
+- Artifact hashes: MuJoCo Warp plan SHA-256 `f47538dac47e9bc1d6f7dec93187e57530bf7b5bac0dfce6aae19237b999b92b`; architecture SHA-256 `6bccdd573c9fda37be254d44ac543a407162eaee79ba229de4c7dde41683f92d`; Isaac-plan SHA-256 `efabf40f7da59ca9b89afb5946b0efc0673626eb36883ffe74d2f9c85336b013`; source-archive policy SHA-256 `2a9e72f768372c0636a4b386ecab1257fc5c6a59ef05f38db6bfca91f75c1e22`; source-distribution documentation SHA-256 `d5d0485c90ba7bb96ce8a98f3e536c8bb6c69e92140221fc5f61c1cfb6fa5740`.
+- Validation commands: `git diff --check`; documentation, public-record, evidence-scope, repository-artifact, repository-health, source-archive, release-integrity, and release-readiness-sync checks. Results: every check passes. The deliberate one-file plan addition raises only the tracked-file ceiling from 6,311 to 6,312; the committed evidence tree is 6,312 tracked files, 657,506,582 logical bytes, 4,890,152 governed duplicate bytes, and a 55,939,877-byte largest blob. All byte, duplicate, and reduction limits remain unchanged and pass.
+- Hardware-write count: 0. Physical-movement count: 0. Simulator-run count: 0. Render count: 0. Training-run count: 0. Physical authority: false.
+- Limitations: this is an architecture decision and staged feasibility plan, not evidence that MuJoCo Warp installs on Windows, imports the governed RoArm, matches FK, accelerates the target workload, preserves low-contrast vision signals, models contact accurately, or improves a model. The current URDF remains a kinematic seed rather than a validated dynamic twin.
+- Next dependency: execute MW0 in an isolated external environment, retain exact version/license/GPU/driver receipts, and stop before asset or render work unless CPU and both single-GPU smokes pass. MW1 then compares the already governed frozen pose corpus without changing v5.5 or physical-camera priorities.
+
+### E-20261003-AI-558 — Grave top-surface contract and catalog-driven reachability handoff
+
+- Stage/lane: S1 AI/model target-measurement contract and arm-lane interface handoff. Claim commit: `319e875f619d87af34d32b96d142a8312cef3b37`; implementation commit: `46a189bf4b462c2412e578412a814c6a910f4ffc`. No arm implementation, arm status, catalog, coordinate, v5.5 identity, integration gate, or authority changed.
+- Measurement correction: all Grave and reference-key edge, width, and height readings now explicitly use `KEYCAP_TOP_PRESS_SURFACE`, defined as the visible top-surface edge at the press plane. The tapered sidewall, keycap base, and switch housing are excluded. This makes the measured geometry correspond to both the camera-visible region and physical contact surface. The six measurement families and three-repeat/zero/repeatability rules from E-557 remain otherwise unchanged. Revised method SHA-256 is `8619ed87bec8924b437633cb62e6b01153fae965467f9491f3e1d77cf9f8054f`; readings and derived geometry remain unset.
+- Arm-lane handoff: reachability must validate the loaded catalog against the active frozen catalog SHA-256, validate every enumerated target's device, ID, center, safe region, and source state, screen every ordered target exactly once, and bind the catalog hash plus ordered identities into its report. Catalog mutation, duplicate IDs, hash mismatch, or missing results fail closed. Hard-coded total or per-device target counts are prohibited, so later catalog additions remain governed data changes rather than source edits.
+- Exact proposal command: `$env:PYTHONPATH='software/ai;software/src'; python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --source-commit 319e875f619d87af34d32b96d142a8312cef3b37 --target-extension-geometry-source presentations/blender/build_workcell_explainer.py --output C:\IsaacSim\evidence\issue190\planner\keyboard_target_extension_proposal_v1_2.json; Remove-Item Env:PYTHONPATH`.
+- Artifact hashes: external proposal file SHA-256 `30ab43ede8a70abab40fff9d17474f77c140de7e44e9f1c6afd49ecdc135b5a0`; canonical proposal SHA-256 `6984ab561883dc294acbe4ed85b2d534d4614661ad780348d05d1a6b263c13b3`; adapter SHA-256 `ea09099498ed79859d495a663bca26fb14b0acb5e030c31734764dd472061aa1`; focused-test SHA-256 `b4f5e18b3ca0e284271ec2ef87b84e022746caae03e1cb9bfe6c6493cae4e67f`.
+- Validation commands: `python -m pytest -q software/ai/tests/test_offline.py scripts/ci/test_check_source_archive_footprint.py`; `python -m pytest -q software/ai/tests scripts/ci/test_check_source_archive_footprint.py`; `python -m pytest -q software/tests/unit/test_model_motion_ingress.py software/tests/unit/test_model_motion_ingress_v2.py software/tests/unit/test_model_motion_sequence_coordinator.py`; `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py`; registry, documentation, public-record, evidence-scope, repository-artifact, repository-health, source-archive, release-integrity, release-readiness-sync, and `git diff --check`. Results: 39 focused/policy tests pass; 390 full AI/policy tests pass with two expected Windows symlink skips; 34 shared boundary tests pass; all static and policy checks pass; registry covers 82 tracked/documented tests and 308 paths; source containment passes at 6,311 files.
+- Hardware-write count: 0. Physical-movement count: 0. Camera-capture count: 0. Measurement-reading count: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: this clarifies method and software ownership only. It does not supply Grave measurements, change the active catalog, run IK, prove simulated or physical visibility, or qualify hardware.
+- Next dependency: collect the repeated Grave/reference top-surface readings, derive and review the Grave safe region, freeze the 80-target catalog, then let the arm lane implement this catalog-driven validation and run the offline reach screen before v5.5 rendering.
+
+### E-20261003-AI-559 — guided Grave measurement session opened
+
+- Stage/lane: S1 AI/model operator-guided physical measurement intake. Source commit and active-work claim base: `15cf1846402347df47181bc1d4cc7f07d2689e04`. This entry records session initialization only; it does not record or infer a measurement.
+- Frozen sequence: confirm arm power isolation and mechanical stability; retain the keyboard in its fixed joints; capture keyboard identity and overhead layout; capture caliper identity/resolution and pre-measurement zero; collect three top-press-surface repeats for Grave/reference widths, heights, X edge offset, and Y edge offset; capture post-measurement zero; validate repeat ranges; then derive geometry and review it before any catalog change.
+- Current state: `AWAITING_OPERATOR_SETUP_CONFIRMATION`. Measurement surface remains `KEYCAP_TOP_PRESS_SURFACE`; tapered sidewall, base, and switch housing remain excluded. Measurement-reading count: 0. Photograph count: 0. Derived-coordinate count: 0.
+- Hardware-write count: 0. Physical arm-movement count: 0. Camera-capture count by this repository: 0. Training-run count: 0. Evaluation-image count: 0. Physical authority: false.
+- Limitations: no operator response, device identity, caliper identity, image, reading, hash, or derived geometry has been received. This session-open entry cannot change the target catalog or authorize rendering or hardware use.
+- Next dependency: operator confirms the arm is electrically isolated and mechanically supported away from the measurement area, with the keyboard still fixed in its workcell joints.
+
+### E-20261003-AI-560 — operator setup confirmation for Grave measurement
+
+- Stage/lane: S1 AI/model operator-guided physical measurement intake. Session-opening evidence is E-559 at commit `4e2562fad1d3a413abe3d46163a6dd42ef0c39f1`.
+- Operator response: the user answered `Yes to all` after being asked to confirm five explicit statements. Recorded confirmations are: arm power disconnected; arm mechanically stable; tool clear of keyboard; keyboard still fixed; and digital caliper available.
+- Admission decision: `SETUP_CONFIRMATION_ACCEPTED_AWAITING_KEYBOARD_IDENTITY`. This is operator-reported evidence. No independent electrical, mechanical, photographic, or sensor verification is claimed.
+- Measurement-reading count: 0. Photograph count received in this session: 0. Derived-coordinate count: 0. Repository hardware-write count: 0. Repository-commanded physical-movement count: 0. Any manual setup manipulation by the operator is not quantified and is not represented as a repository action. Physical authority: false.
+- Limitations: keyboard model/SKU/layout and caliper identity/resolution remain unverified. No measurement may be admitted until those identities and the required zero checks are recorded.
+- Next dependency: capture a readable underside keyboard label and a current directly overhead full-keyboard image while keeping the keyboard fixed.
+
+### E-20261003-AI-561 — keyboard identity photographs admitted for Grave measurement
+
+- Stage/lane: S1 AI/model operator-guided physical measurement intake. Parent session evidence: E-559 and E-560. Two original user-provided JPEGs were inspected and hash-bound; they are not copied into the repository.
+- Identity result: label image reads brand `perixx`, product `Mini USB Keyboard`, model `PERIBOARD-409`, power `5V 30mA`, and serial suffix `0103`. The overview shows a US QWERTY legend arrangement, horizontal Enter, bracket/backslash keys, and a visible Grave/tilde key immediately left of `1`. Decision: `KEYBOARD_IDENTITY_ACCEPTED_FOR_LOCAL_KEYCAP_MEASUREMENT`.
+- Artifact bindings: `1-Photo-1.jpg`, 960x1280 RGB JPEG, 273,598 bytes, SHA-256 `3ba4fca9e5751b260aaa0f68fadf3e86dfd0be39f95f6e18893d3474c158c85b`; `2-Photo-2.jpg`, 960x1280 RGB JPEG, 232,952 bytes, SHA-256 `1de3414e81cac2f47e27b73168e29e7830bc765657a2e910897614f865cba6b1`.
+- Scope: the overview is angled and supplies identity/layout evidence only. It is prohibited as dimensional evidence. The keyboard is not visibly in the workcell fixture in this overview, so current board placement is `UNVERIFIED`; this does not prevent local Grave-to-`1` top-surface measurement, but placement must be restored and reverified before camera/arm qualification.
+- Preserved failed evidence: the first PowerShell hash command failed with `An empty pipe element is not allowed`; it produced no hash result. The corrected collection command produced the bindings above.
+- Privacy: the repository records only serial suffix `0103`; it does not transcribe the full serial. The external original label photograph itself contains the full label and remains outside Git.
+- Measurement-reading count: 0. Derived-coordinate count: 0. Repository hardware-write count: 0. Repository-commanded physical-movement count: 0. Physical authority: false.
+- Limitations: identity photographs do not measure key size, center, safe region, placement, visibility, reachability, or occlusion. USB electrical operation was not tested.
+- Next dependency: record caliper make/model, resolution, stable identity if present, and initial closed-jaw zero before any keycap reading.
+
+### E-20261003-AI-562 — concurrent source-archive ceiling reconciliation
+
+- Stage/lane: shared repository governance observed during the active S1 AI/model measurement session. This changes no arm result, AI result, target, measurement, integration gate, or authority.
+- Finding: after E-560, concurrent MuJoCo Warp work advanced the shared branch and the direct source-archive check reported 6,330 tracked files against a 6,324 ceiling. The six unaccounted reviewed files are the schedule-scale differential probe/evidence, full-sample four-backend admission probe/evidence, and schedule-gap diagnostic probe/evidence.
+- Decision: retain the six independent frozen tools/records and deliberately raise only the tracked-file ceiling from 6,324 to 6,330. `docs/SOURCE_DISTRIBUTION.md` now also records the preceding twelve-file path from 6,312 to 6,324 and this six-file path to 6,330. Logical-byte, single-blob, duplicate-byte, and reduction limits remain unchanged.
+- Grave-session effect: none. E-561 remains the current identity evidence; measurement-reading count remains 0 and derived-coordinate count remains 0.
+- Hardware-write count: 0. Repository-commanded physical-movement count: 0. Physical authority: false.
+- Next dependency: pass the direct archive check, then continue E-561 with caliper identity and initial closed-jaw zero.
+
+### E-20261003-AI-561 — MuJoCo Warp MW0 isolated toolchain and three-device smoke
+
+- Stage/lane: S1/S2 AI/model and simulation. Active-claim commit: `f8ba211f8c9231bc4886f4ec887730f19596405c`; implementation commit: `e8acf8eda331a3ceaaa03db44d577098f1f8d2fa`. Scope is the isolated MW0 toolchain, pre-import lock, and one minimal synthetic world only. No RoArm asset, target catalog, current model, Isaac campaign, arm lane, or integration gate changed.
+- Exact candidate: Python `3.12.0`; `mujoco-warp==3.13.0`; `mujoco==3.14.0`; `warp-lang==1.17.0`; `numpy==2.5.3`; CUDA Toolkit reported by Warp `12.9`; driver API reported by Warp `13.2`; NVIDIA driver `595.97`. MuJoCo Warp declares `mujoco>=3.12.0`, so pip resolved MuJoCo 3.14.0. That exact pair is locked; its release-number difference remains a later parity risk rather than being hidden.
+- Host: Windows `Windows-11-10.0.26200-SP0`; GPU 0 UUID `GPU-e428f4d7-ea02-2a73-2aeb-88b30949dae1`; GPU 1 UUID `GPU-2e3457e2-aa15-ef1d-e417-b29c8cf1ba77`; both are NVIDIA GeForce RTX 3090, 24,576 MiB, compute capability 8.6. CUDA peer access was reported unsupported.
+- Installation commands: `py -3.12 -m venv C:\MuJoCoWarp\env_3_13_0`; `C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe -m pip download --dest C:\MuJoCoWarp\wheels\3.13.0 mujoco-warp==3.13.0`; `C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe -m pip install --no-index --find-links C:\MuJoCoWarp\wheels\3.13.0 mujoco-warp==3.13.0`. All 12 resolved dependency wheels are named and SHA-256 bound by the lock and external receipt. The MuJoCo Warp wheel SHA-256 is `cb1f74c36684ef5d2b610926d8979db8aa39fd78613a7130cf6a7ef802ee5e3c`; the complete wheel-manifest SHA-256 is bound inside the retained receipt.
+- License: installed upstream `LICENSE` SHA-256 `58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd`, recorded as Apache-2.0. Redistribution retains installed `LICENSE` and `AUTHORS`; no upstream package source or binary is vendored into this repository.
+- Smoke fixture: external `C:\MuJoCoWarp\evidence\mw0\mw0_smoke.py`, SHA-256 `76e1e6371a86830b27161a3292ca5bc6edd7f3a33f69f51cc0999796f5e3a43f`; one hinge pendulum, one world, 16 steps, 0.002-second timestep, initial qpos 0.35 radians. Exact command per device: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe C:\MuJoCoWarp\evidence\mw0\mw0_smoke.py --device <cpu|cuda:0|cuda:1> --steps 16 --output <device-receipt>`.
+- Metrics: CPU `PASS`, 9.3964972 seconds including compilation; `cuda:0` `PASS`, 16.5542638 seconds including compilation; `cuda:1` `PASS`, 0.8277852 seconds with the shared external kernel cache warm. Every device resolved to the requested identity, advanced time to 0.0320000015 seconds, changed qpos from 0.3499999940 to 0.3419105411 radians, produced finite qpos/qvel/time, and returned `overflow=[0]`. These are smoke timings, not throughput claims. GPU 1 reused compiled kernels but executed as `cuda:1` in an independent process.
+- External artifact hashes: consolidated receipt `C:\MuJoCoWarp\evidence\mw0\mw0_receipt.json` SHA-256 `375f1a50cda13310a5b607ace7d24fc50ecc34fe2e773aad5a242b556748cada`; live host-probe receipt `8d835325e5ad4835984c855065ab4f1a0099b4019a762590e5a2e3a99e87ca28`; CPU smoke `8642afa812a20e8f92ddaa7ab563a79d3a10e99f93419d09e9b33ef00d6b9d18`; GPU 0 smoke `fced38d44a2d0fdfcc1b2d0255b6a97a960f3912dc442a331c9a8349267ea608`; GPU 1 smoke `424382d4ca9335c30a41b5a92a96ec5b1910a832a7f98cb397ac2aa3359973c`.
+- Repository artifacts: exact lock SHA-256 `ed5150e46850b4bffe2486ce6c162209319414daf2cbceb7eed04c7dce9bf650`; pre-import probe `a5d9612ec557babd18b11bdff3bdc9ab35c9616377c66ff71534c9c500353177`; rebuild/removal instructions `a205ef39e6a7654045e67ec5b7de3597572a29542ff5a9431f078cc1fad6d2f5`; hardware-free fixture `524777e2e95ba992bafa5e298c3d130b9d2c056e84492b19791f7756a7b4928e`; unit test `0ad3a486d9afb8e554ce8d87a304505ffb521807d8445f55606afaf9c1a9fef1`.
+- Failed increment retained: the first read-only `pip inspect` redirection failed under Windows CP1252 with `UnicodeEncodeError` before a valid JSON inventory was admitted. The unchanged command succeeded with `PYTHONUTF8=1`. External failure record SHA-256 is `343e183b27971ce1d0466ef04c1fb5a968524197bcf2205c92fa27090da8337f`; limits and smoke criteria were not changed after the failure.
+- Validation commands: live external host probe against the committed lock; `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/integrations/mujoco_warp/host_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/host_probe.py`; source-archive footprint; and `git diff --check`. Results before the final documentation audit: live lock `PASS`; 8 focused/policy tests pass; static checks pass; source archive passes at 6,317 files and 657,518,211 logical bytes. The deliberate five-file MW0 source addition raises only the file ceiling from 6,312 to 6,317.
+- Hardware-write count: 0. Physical-movement count: 0. Robot-asset import count: 0. Render count: 0. Training-run count: 0. Physical authority: false.
+- Limitations: this proves installability and minimal stepping on this exact host. It does not prove RoArm import, FK parity, collision/contact correctness, renderer fidelity, scaling throughput, determinism, model improvement, synthetic-to-real transfer, or physical qualification. The external evidence currently has no writable second physical drive on this host: `E:` is the read-only WD Unlocker virtual CD and `F:` is an unavailable network drive, so Git retains hashes but the external bytes remain on `C:` pending durable backup.
+- Decision: `MW0_TOOLCHAIN_SMOKE_PASS`. This authorizes only MW1 offline asset/FK parity under the frozen architecture; it grants no command, permit, transport, execution, or physical authority.
+- Next dependency: import the governed robot asset into a separately retained MuJoCo/MuJoCo Warp representation, bind conversion hashes, and compare standard MuJoCo, MuJoCo Warp, Isaac, and deterministic RoCell FK over the already governed frozen pose corpus before any render, contact, or training claim.
+
+### E-20261003-AI-562 — MuJoCo Warp MW1 governed-asset and fixed-pose FK parity
+
+- Stage/lane: S1/S2 AI/model and simulation. Active-claim commit: `e1188bdc8f8159c451d0256e2d4ab198a5875fa9`; frozen probe/threshold commit: `02b5afd66a668946c6ba58f580bc4e759c986dab`. The exact MW0 lock remained mandatory. Scope is meshless kinematic parity only; rendering, dynamics, collision, contact, batching, training, arm-lane status, and integration-gate state were excluded.
+- Source: governed `software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf`, SHA-256 `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`; retained Isaac parity receipt file SHA-256 `73568d4d8387426345d8df47eb23509866d307e39c55061a18a847e4698bba0e`. The source explicitly omits visual geometry, collision geometry, inertia, damping, actuators, and contact parameters.
+- Failed evidence retained: direct `mujoco.MjModel.from_xml_path(<governed URDF>)` failed before simulation with `mass and inertia of moving bodies must be larger than mjMINVAL` at `link1`. External failure record SHA-256 `e9343a90f3a66ccd5f8dfd3f35e4962c41f6eded72571e4979dc55c231b0c0f4`. No importer default or inferred physical property was silently accepted.
+- Governed conversion: the frozen probe parses the URDF graph and emits MJCF with the exact origins, RPY-derived quaternions, local axes, limits, and joint order. It sets `fusestatic=false`, zero gravity, and explicit per-moving-link placeholder mass `0.001 kg` and diagonal inertia `0.000001 kg m^2` solely so MuJoCo can compile FK. Property provenance marks source inertia, collision, geometry, damping, actuator, and contact as absent; `dynamics_claim=BLOCKED` and `contact_claim=BLOCKED`. Generated external MJCF SHA-256 `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`.
+- Exact mapping: six movable joints in order `base_link_to_link1`, `link1_to_link2`, `link2_to_link3`, `link3_to_link4`, `link4_to_link5`, `link5_to_gripper_link`; compiled body order `world`, `base_link`, `link1`, `link2`, `link3`, `link4`, `link5`, `gripper_link`, `hand_tcp`. Every expected joint and non-world link maps exactly once.
+- Frozen gates preceding results: RoCell-to-standard-MuJoCo hand-point error at most `0.1 mm` translation and `0.05 degrees` rotation; MuJoCo-Warp-to-standard-MuJoCo float32 error at most `0.01 mm` and `0.005 degrees`. Corpus: retained `zero`, `home`, and `ready` joint vectors from the already consumed Isaac FK campaign.
+- Result: `PASS_KINEMATIC_ONLY`. Maximum Isaac-to-RoCell translation error remains `0.0001283390 mm` with reported rotation error `0`. Maximum standard-MuJoCo-to-RoCell translation error is `1.1637690e-13 mm`; maximum rotation error is `2.9575587e-6 degrees`. Maximum MuJoCo-Warp-to-standard-MuJoCo translation error is `4.2379077e-5 mm`; maximum rotation error is `2.4148365e-6 degrees`. All three cases pass both frozen limits.
+- Exact command: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\asset_parity_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --isaac-receipt software\integrations\isaac_sim\evidence\roarm_m3_fk_parity_20260929.json --mjcf-output C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --output C:\MuJoCoWarp\evidence\mw1\asset_parity.json`.
+- Artifact hashes: probe SHA-256 `235b53a8cbc36c7e440da59543ffc104029035dfaff3dba6d5e8a9b40cd4aaa0`; external receipt file SHA-256 `a9fe852d8c0977da7a10accb342b8e414ed30a7628ddfaacdc8ec704d8a91d6b`; receipt canonical SHA-256 `546a8aa01f6af4642023e55f9caa43c9808914f14306720bb7b0b722b9ac9460`.
+- Validation commands: `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/integrations/mujoco_warp/asset_parity_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/asset_parity_probe.py`; source-archive footprint; and `git diff --check`. Results before final documentation audit: 9 focused/policy tests pass; static checks pass; archive passes at 6,318 files and 657,539,219 logical bytes.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Physical authority: false.
+- Limitations: this validates three fixed hand-point transforms using a meshless model and kinematic-only placeholder inertia. It does not validate every retained 5,072 schedule step, link-mesh transforms, dynamics, self-collision, environment collision, contact force, actuator behavior, rendering, throughput, model training, synthetic transfer, or hardware behavior.
+- Decision: `MW1_PASS_KINEMATIC_ONLY`. MW2 batch/overflow benchmarking may proceed with this kinematic model, but any dynamics/contact or visual claim remains blocked on measured/provenanced properties and geometry.
+- Next dependency: freeze an MW2 benchmark matrix for 1, 32, 256, 1,024, and 4,096 worlds, repeat runs per GPU, overflow/finite-state inspection, compilation-versus-steady-state timing, and predeclared numerical-repeatability limits before observing performance results.
+
+### E-20261003-AI-563 — MuJoCo Warp MW2 batch throughput, overflow, and repeatability
+
+- Stage/lane: S2 AI/model and simulation. Active-claim commit: `d085610481aa512f395fe633411a399665cb38b1`; frozen benchmark/gate commit: `082c69ad3ae0fd96e22b919f7cf1e356b4c43590`. Performance results were not observed until after the fixture, matrix, limits, and admission logic were committed.
+- Frozen fixture: governed MW1 MJCF SHA-256 `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`; world counts `[1,32,256,1024,4096]`; three independent repeats per size and backend; 16 warmup steps plus 128 timed steps; initial qpos `[0,0,2.618,-1.0472,0,0]`; initial qvel `[0,0,-0.05,0,0,0]`; standard MuJoCo CPU comparison; independent `cuda:0` and `cuda:1` shards; no dual-GPU aggregation.
+- Frozen gates: every run finite; every requested world retained; every overflow value zero; maximum repeated qpos/qvel delta at most `1e-6`; timing coefficient of variation at most `0.25`; each GPU at least `3.0x` the same-size standard-MuJoCo median at both 1,024 and 4,096 worlds. Failure at either target size yields `RESEARCH_ONLY`; the gate was not relaxed after results.
+- Safety/repeatability result: all 45 GPU repeat/size executions pass finite-state, world-count, zero-overflow, numerical-repeatability, and timing-CV requirements. Maximum qpos and qvel delta between repeats is `0`; maximum observed timing CV is `0.10`. Device shards remain separate. Resident memory deltas observed by the probe reach 67,108,864 bytes at 4,096 worlds; this is retained allocation evidence, not a peak-memory guarantee.
+- Standard-MuJoCo medians in world-steps/s for 1/32/256/1,024/4,096 worlds: `592318.01`, `584641.73`, `547363.99`, `513177.10`, `325123.39`.
+- `cuda:0` medians: `326.46`, `10343.07`, `82929.48`, `328829.34`, `1322545.21` world-steps/s. Speedups: `0.00055x`, `0.01769x`, `0.15151x`, `0.64077x`, `4.06783x`. At 4,096 worlds this equals approximately 4.761 billion modeled observations/hour.
+- `cuda:1` medians: `300.99`, `8186.65`, `66817.78`, `305398.29`, `1239597.47` world-steps/s. Speedups: `0.00051x`, `0.01400x`, `0.12207x`, `0.59511x`, `3.81270x`. At 4,096 worlds this equals approximately 4.463 billion modeled observations/hour.
+- Admission: `RESEARCH_ONLY`. Both devices pass the 4,096-world speed gate but fail the frozen 1,024-world gate. The result demonstrates a large-batch crossover for this tiny kinematic workload; it does not satisfy the declared maintainability/adoption scope.
+- Exact commands: `C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\batch_probe.py run --backend standard-mujoco --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --output C:\MuJoCoWarp\evidence\mw2\standard_mujoco.json`; the same probe with `run --backend mujoco-warp --device cuda:0` and `cuda:1`; then `admit --standard <standard> --gpu0 <cuda0> --gpu1 <cuda1> --output C:\MuJoCoWarp\evidence\mw2\admission.json`. GPU commands used external `WARP_CACHE_PATH=C:\MuJoCoWarp\cache\warp-1.17.0`.
+- Artifact hashes: benchmark probe `4ce2ad4bacdaa53f10428475b632895e400a17dfeb01f449a3fc8510ba4910b8`; standard receipt file `9e76a0ba62eedc61c321b55d58bf3110c398fc474d7770fd64d2308a77264130`; CUDA 0 receipt file `47c4269da28859df7cdc28132065202011fb036be9021a30252466054dbf888d`; CUDA 1 receipt file `b174193f2c989c2f9b2f264afaa9595c06faac914a61b16d235ffcff772a271a`; admission file `f64c0d2d77fd2402e0f0e62e80344ab30d487e91c902e5f3d09e85de8a7a7d39`; admission canonical SHA-256 `468c52c6b59a1a1dbf161bc7da6a3a3f6f26a039afb46270cb739264162ef5ae`.
+- Validation commands: `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python -m ruff check software/integrations/mujoco_warp/batch_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/batch_probe.py`; source-archive footprint; and `git diff --check`. Results before final documentation audit: 11 focused/policy tests pass; static checks pass; archive passes at 6,319 files.
+- Hardware-write count: 0. Physical-movement count: 0. Render count: 0. Training-run count: 0. Physical authority: false.
+- Limitations: benchmark uses the tiny meshless kinematic MW1 model with placeholder inertia, zero gravity, no collision geometry, no contacts, no actuators, no rendering, and a warm external kernel cache. World-step throughput is not camera observations, labeled training examples, or a prediction of performance for a complete robot scene. Free-memory snapshots do not prove true peak memory. Standard MuJoCo is a sequential CPU loop and no Isaac comparison was timed in this increment.
+- Decision: `RESEARCH_ONLY`. Under the frozen architecture, failure closes the declared MW2 acceleration-adoption path without affecting Isaac, RoCell, v5.5, the current model, or physical priorities. Any future 4,096-only research scope must be separately predeclared and cannot rewrite this result.
+- Next dependency: return priority to the lossless camera-model/physical-measurement and planner/catalog paths. MuJoCo Warp may remain available for explicitly labeled large-batch research, but MW3 promotion requires a new reviewed claim and cannot treat MW2 as adopted.
+
+### E-20261003-AI-564 — MuJoCo Warp MW2R diverse-world large-batch specialization
+
+- Stage/lane: S2 AI/model and simulation. Active-claim commit: `54098f4dca76630054005d717512a960133b4277`; frozen implementation/gates commit: `0ce44c9cc665509b2ad070ba70cd386c1398df20`. This is a new large-batch-only research scope and does not rewrite E-563 or its failed general-purpose adoption gate.
+- Frozen fixture: independently seeded (`190201 + nworld`) six-joint poses and velocities for 4,096, 8,192, and 16,384 worlds; every initial pose is unique; three repeats; 16 warmup and 128 timed steps; exact MW1 MJCF SHA-256 `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`; each GPU tested independently, followed by two concurrent 4,096-world child processes with no peer access or shared state.
+- Frozen gates: finite state, exact world count, zero overflow, repeated qpos/qvel maximum delta at most `1e-6`, timing CV at most `0.25`, every single-device size at least `975370.17` world-steps/s (three times the retained standard-MuJoCo 4,096-world median), larger-size throughput at least 85% of the device's 4,096-world rate, and concurrent aggregate throughput at least `1.70x` the faster independent 4,096-world shard.
+- Single-device safety: every run passes finite-state, world-count, overflow, repeatability, and timing gates. Maximum repeated qpos/qvel delta is `0`. Maximum timing CV is `0.07`. Retained memory delta reaches 167,772,160 bytes at 16,384 worlds; this remains an allocation snapshot rather than peak-memory proof.
+- GPU 0 medians for 4,096/8,192/16,384 worlds: `1,314,525.22`, `2,600,122.25`, and `5,225,192.72` world-steps/s, corresponding to about 4.732B, 9.360B, and 18.811B modeled observations/hour. All 4,096, 8,192, and 16,384 initial poses are distinct.
+- GPU 1 medians: `1,056,623.88`, `2,045,255.28`, and `4,772,515.22` world-steps/s, corresponding to about 3.804B, 7.363B, and 17.181B modeled observations/hour. Every single-GPU gate passes.
+- Concurrent result: two independent 4,096-world shards pass all safety checks and produce child medians `1,065,832.47` and `1,123,280.68`, aggregate `2,189,113.15` world-steps/s. Scaling is `1.665326x` relative to the faster independent 4,096-world shard, below the frozen `1.70x` gate. Admission is therefore `RESEARCH_ONLY`; the limit was not changed after results.
+- Exact commands: the frozen probe `run --device cuda:0|cuda:1 --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --counts 4096 8192 16384 --output <device receipt>`; `concurrent --mjcf <same> --output-dir C:\MuJoCoWarp\evidence\mw2r\concurrent_children --output C:\MuJoCoWarp\evidence\mw2r\concurrent.json`; and `admit --gpu0 <receipt> --gpu1 <receipt> --concurrent <receipt> --output C:\MuJoCoWarp\evidence\mw2r\admission.json`. All GPU processes used external `WARP_CACHE_PATH=C:\MuJoCoWarp\cache\warp-1.17.0`.
+- Artifact hashes: probe `ac03d0e3026ace00faec1aeebfdefb1d0c7bc602ead422c3747612b106369561`; CUDA 0 receipt file `d56207dc1d9705d0f46b4c6a50d699498ede385407be7bc551e1efdcad753669`; CUDA 1 `a6ced53fe441d30a0855b7189939857aa20b16a858b770f20d82e36e50ebfd21`; concurrent receipt `712b1dda12de41324b73d6a19b39366e0ddfc715246dc703adafff5aed53534a`; admission file `0cb427e0d7f84d8ae7564a06e333cd823d977d129783915de856f5bf92015754`; admission canonical SHA-256 `cc6e9d4c5ef5daef311571dd353056759102b4582f1864eae351ff78a35076fe`.
+- Validation commands: `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; Ruff and `py_compile` for `large_batch_probe.py`; source-archive footprint; and `git diff --check`. Results before final documentation audit: 13 focused/policy tests pass; static checks pass; archive passes at 6,320 files.
+- Hardware-write count: 0. Physical-movement count: 0. Render count: 0. Training-run count: 0. Physical authority: false.
+- Limitations: the high rates describe a meshless, contact-free, kinematic placeholder model. They do not predict performance after collision geometry, contacts, rendering, observations, or policy inference are introduced. Concurrent children were independent processes without synchronized timing barriers; aggregate medians are retained research evidence, not a unified 8,192-world state.
+- Decision: `RESEARCH_ONLY_WITH_LARGE_BATCH_CAPACITY_CONFIRMED`. The useful direction is deterministic high-cardinality offline campaigns and independent GPU sharding. A successor may predeclare 16,384-world concurrent saturation and reduce process-launch/host contention, but cannot relabel this 4,096-world concurrency result as passing.
+- Next dependency: freeze a saturation-oriented dual-GPU successor at the demonstrated 16,384-world operating point, then build reusable deterministic shard manifests for future calibration uncertainty, pose coverage, dynamics randomization, and rare-event searches as measured robot properties become available.
+
+### E-20261003-AI-565 — MuJoCo Warp MW2S persistent deterministic campaign sharding
+
+- Stage/lane: S2 AI/model and simulation. Active-claim commit: `1b539984cc2e80521a7464ec576ed77bc14796d4`; frozen implementation/gates commit: `67c8d55f1f698dbf25d20f41c40e6a69fc43f027`. Performance results were not observed until the manifest, persistent worker, orchestration comparison, admission logic, and tests were committed and pushed.
+- Frozen campaign: sixteen compact, hash-bound `joint_state_uncertainty` shards, eight assigned to each GPU, 16,384 worlds per shard, two exact replays, 16 warmup and 128 timed steps, seeds `190300` through `190307` and `190400` through `190407`, MW1 MJCF SHA-256 `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`. Each worker must load the model once and reuse one world allocation. The same manifest is executed first sequentially and then concurrently.
+- Frozen gates: exact manifest and MJCF identity; unique shard IDs and seeds; complete receipt coverage; distinct initial-state hashes; 16,384 unique initial poses per shard; finite qpos/qvel; exact world count; zero overflow; replay qpos/qvel delta at most `1e-6`; canonical receipt hashes; sequential/concurrent final-state identity; and full campaign wall-time scaling at least `1.70x`. Wall time includes child startup and receipt writes.
+- Integrity and safety result: all sixteen shards are present in both modes; every initial-state pair is distinct; every shard contains 16,384 unique initial poses; all 64 shard/replay/mode executions are finite, preserve world count, report zero overflow, and reproduce qpos/qvel exactly with maximum delta `0`. Sequential and concurrent initial/final state hashes match. Each of the four worker executions reports exactly one model load and one allocation.
+- Performance result: sequential complete wall time `19.2830674001` seconds and concurrent complete wall time `12.5496561001` seconds yield `1.5365414993x`, below the frozen `1.70x` gate. Sequential worker elapsed times are `7.9499075999` seconds on CUDA 0 and `7.7586646001` seconds on CUDA 1; concurrent times increase to `10.5406756999` and `10.2624420002` seconds. Admission is `RESEARCH_ONLY`; the gate was not changed. This identifies shared host, transfer, or orchestration contention and does not invalidate single-GPU capacity or deterministic sharding.
+- Exact commands: `C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\persistent_campaign_probe.py manifest --output C:\MuJoCoWarp\evidence\mw2s\manifest.json`; then the same probe with `orchestrate --manifest <manifest> --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --mode sequential|concurrent --output-dir <mode children> --output <mode receipt>`; then `admit --manifest <manifest> --sequential <receipt> --concurrent <receipt> --output C:\MuJoCoWarp\evidence\mw2s\admission.json`. GPU processes used external `WARP_CACHE_PATH=C:\MuJoCoWarp\cache\warp-1.17.0`.
+- Artifact hashes: probe `67499d122afdfe514be9de0d0b1f6a4eff6c82e8a3e70de1e3d673711e30e94c`; manifest file `e47e1909514be3fb038ae92bfe1aa21afd8b951908268ec50f6d4b98318971c5`, canonical manifest `b94a303e6a4089680134100abc34f4bb4fb7f9037b6581335cf6e38256005d76`; sequential receipt file `f1d9799fc5ab49125dd041bd92f90ebb65bd8846e29730d4277a8dc676a5431e`, canonical sequential receipt `1a870c6fc2e3f43d6d6c1e5963f0dffdc6d70314488ba1cff9c1cda3f9656eb3`; concurrent file `3175b8ee0c3bf976c246137b9a1481b2db30babffd9cf1a524e33d4cc95093c8`, canonical concurrent receipt `42667364e33a69e5a427933bbbc95f0487053afbe26777ced689a1cc6bcbe3e2`; admission file `ac4d41e52b8ed5fbe1deb213340f2efd0a9dccd7a9e23c3eb7f2bab1efa04b7e`, canonical admission `8f41455bc59552782337ce1978c7e3c2303c316825492052f28379f155282150`. Sequential child file hashes are `8da2ea9551d6e8dcccc5514889776b51fdedc23744a7765cbfd12a3742b0e71b` and `088f72bef9472411a9696c92d1b744a82397c29ef95106e6cca03b95346ea2ac`; concurrent children are `9cf69684ecbedd898b153b7ff92195463410127b898854a4d9f9246b96fd3576` and `e75fabdb85ce7f1d08e86cf58fc41131075f099e1da314c1ffed6953c194553e`.
+- Failed launch retained: the first concurrent wrapper was rejected by PowerShell with `ParserError: An empty pipe element is not allowed` while parsing its final display pipeline. The probe did not start and no campaign output was produced by that attempt. The frozen probe and arguments were unchanged; only the post-run display wrapper was corrected.
+- Validation before results: `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py` (`17 passed`); Ruff and `py_compile` for the persistent probe; all maintained policy checks; source archive at 6,320 tracked files before the new probe was committed; and `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Physical authority: false.
+- Limitations: the model is meshless, contact-free, and uses placeholder inertia. The result does not qualify dynamics, contact, collision, camera output, policy inference, training data, synthetic transfer, or hardware behavior. External campaign bytes remain on `C:` pending durable second-media backup. Timing is one frozen sequential/concurrent campaign and is not a general host benchmark.
+- Decision: `RESEARCH_ONLY_WITH_DETERMINISTIC_SHARDING`. Compact deterministic manifests and exact state-bound receipts are accepted as research infrastructure. Persistent dual-GPU saturation is not accepted because the unchanged 1.70x gate failed. MW2 and MW2R decisions remain unchanged.
+- Next dependency: inspect GPU topology and host contention without changing this result. A successor may predeclare CPU-affinity and transfer-overlap controls, or use each GPU for separate independent research queues where single-GPU capacity is already proven. Future scenario families must bind measured properties when available rather than inventing physical parameters.
+
+### E-20261003-AI-566 — MuJoCo Warp MW2Q resumable independent GPU queues
+
+- Stage/lane: S2 AI/model and simulation. Active-claim commit: `a7f14a938d9b8b7dc5b4f925ad6fb7b7c0693400`; frozen implementation/gates commit: `47536d809f6ec579c4f3f0387b81d5da0e92edaa`. Live queue and corruption-recovery results were not observed until atomic-write, validation, quarantine, allowlist, assembly, recovery rules, and tests were committed and pushed.
+- Fixture: exact retained MW2S manifest file SHA-256 `e47e1909514be3fb038ae92bfe1aa21afd8b951908268ec50f6d4b98318971c5`, canonical identity `b94a303e6a4089680134100abc34f4bb4fb7f9037b6581335cf6e38256005d76`; exact MW1 MJCF SHA-256 `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`; sixteen shards, eight per GPU, 16,384 distinct poses each, two replays per shard. No scenario identity, seed, world count, or physics property changed.
+- Frozen rules: same-directory temporary write, flush and `fsync`, then atomic replacement; exact receipt fields and canonical hash; manifest, MJCF, device, shard, seed, world count, unique-pose, finite-state, overflow, repeatability, state-hash, and zero-authority validation before reuse; invalid bytes moved under their SHA-256 quarantine identity; root JSON allowlist must equal the eight expected device receipts; complete assembly requires sixteen receipts with disjoint initial-state identities. A clean resume must skip sixteen with zero loads/allocations and zero temporary files. A copied one-corruption rehearsal must quarantine exactly that file, execute exactly one shard, and preserve the other seven bytes.
+- First-run result: `ADMIT_RESUMABLE_RESEARCH_QUEUE`; all sixteen atomic receipts pass and assemble. Dual-queue wall time is `14.8808371001` seconds. CUDA 0 executes eight shards in `14.3358681002` seconds and CUDA 1 executes eight in `14.0697419001` seconds. Both use one model load and one allocation; no root temporary files remain. The sixteen-file inventory canonical SHA-256 is `d8fc7333a0ee79f3dcf24caf90f3e02b0df614e9c455b0ad4aff9ef95bfd5917`.
+- Clean-resume result: complete wall time `0.1059741999` seconds. Both device queues validate and skip all eight receipts, execute zero shards, load zero models, allocate zero world batches, quarantine zero files, and leave zero temporary files.
+- Recovery rehearsal: copied CUDA 0 receipt `mw2s-d0-s03.json` originally hashes to `47679b6972c60bb36a89a0ea01a42f923b9c61a4c698418990e46bf46aadf2d5`. Its result seed was deliberately incremented without updating the canonical receipt hash; altered bytes hash to `34aaa8cc694e59aeb880a0febb4a60a4e9dfdbc7ed4759fa4cc2831c365d1009`. Validation reports `canonical receipt hash mismatch` and `result seed mismatch`, preserves those exact bytes in quarantine, executes only `mw2s-d0-s03`, and produces replacement file SHA-256 `99bca6ca8244ca9f0ce845b6e032b9a64973b7847971d5f289de69706262f772`. The seven other copied receipts remain byte identical. Recovery uses one model load, one allocation, and leaves zero temporary files.
+- Exact commands: `C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\resumable_queue_probe.py run-both --manifest C:\MuJoCoWarp\evidence\mw2s\manifest.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --receipt-root C:\MuJoCoWarp\evidence\mw2q_20261003\receipts --output-root C:\MuJoCoWarp\evidence\mw2q_20261003\first_queue --output C:\MuJoCoWarp\evidence\mw2q_20261003\first_run.json`; `assemble --manifest <same> --cuda0-dir <receipts\cuda0> --cuda1-dir <receipts\cuda1> --output <first_assembly.json>`; the unchanged `run-both` command with `resume_queue` and `resume_run.json`; then `queue --manifest <same> --mjcf <same> --device cuda:0 --receipt-dir <copied recovery_cuda0> --output <recovery_queue.json>`. All GPU work used external `WARP_CACHE_PATH=C:\MuJoCoWarp\cache\warp-1.17.0`.
+- Artifact hashes: probe `570b01246096a188adad0cf68d4fee41381d4828931c8190b7a74292893192a4`; first dual-queue receipt `728f5c19188674b260f9c30083c55707c8c2dc08caa9973da03e1481c75be5b1`; first assembly `1d29dc131af519d5bb7b86e0026d6b0811883484114fad4a34a8d67d420b0212`; clean resume `5ec320f2e8c95ed04765bec54549a53f84c61de9bf83157cff4eab5abf0da86d`; recovery queue `f7747164d92cf2163cca899cf2edb1f4c3d4420b75133101487ebcf81d37819f`; recovery audit `5baa4eef0061a4afe482e8be469791ecfcbafb2fa318d2263ff63a8d3b9fd657`; receipt inventory file `167365a24c8f82494ae9453f493d4985b8d779541a560f142eb47d3648728f`.
+- Validation before results: `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py` (`22 passed`); Ruff and `py_compile` for the queue probe; all maintained policy checks; source archive at 6,321 tracked files before the new probe was committed; and `git diff --check`.
+- Hardware-write count: 0. Physical-movement count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: this validates restart and corruption recovery for the fixed meshless, contact-free MW2S kinematic campaign. It does not qualify dynamics, collision, contacts, camera observations, planner outputs, policy inference, training data, synthetic transfer, GPU saturation, or hardware behavior. External evidence remains on `C:` pending second-media backup. Atomic replacement relies on the receipt temporary file and destination residing on the same filesystem.
+- Decision: `ADMIT_RESUMABLE_RESEARCH_QUEUE`. Independent GPU research jobs may use these strict atomic receipts and exact manifest assembly. Partial, invalid, extra, or altered output remains inadmissible. All prior simulation decisions remain unchanged.
+- Next dependency: define a versioned scenario-profile input that binds future measured uncertainty ranges and provenance to deterministic shard seeds. Do not add guessed physical dynamics or overlap with the separate camera, catalog, and planner work; initial integration should remain kinematic uncertainty and offline candidate screening.
+
+### E-20261003-AI-567 — MuJoCo Warp MW2P provenanced kinematic scenario profiles
+
+- Stage/lane: S2 AI/model and simulation. Active-claim commit: `1a32d4ecb84c2a61e77e61975c2333ed55061534`; frozen schema/compiler/queue-gates commit: `4918d91a8d2d5f75b1208a9e4cfd37718baeb0c7`; validation-CLI correction commit: `a03bf71581b082f6e45b79e12d0c5f8361fb3a54`. The correction only declares the already-used validation output argument and adds its regression test; no profile rule, seed, scenario, threshold, GPU result, or admission decision changed.
+- Contract: exact six-joint order from the governed MW1 asset; finite ordered position and velocity ranges; positions confined to governed joint limits; exact MJCF; exact two-GPU/eight-shard/16,384-world/two-replay worker contract; zero authority fields. The source artifact must be strict JSON carrying the identical source type, domain, time, assumptions, ranges, method, and sample count. Its file hash is embedded in the profile; the canonical profile hash binds every deterministic shard seed. Physical sources require zero assumptions and a positive sample count. Synthetic sources cannot compile in qualifying mode.
+- Rehearsal fixture: synthetic source file SHA-256 `113f41155f2700ec459c6286bbec1d25e8284a6e9b3cf6c8bd7b5eaffe9f48a4`; profile file SHA-256 `f51e8bfa21ca65a4539fd2ca6fa48b8992dc37a41089c4c235e1842a6e1b2139`; canonical embedded profile `b20dab31c1fdfa096f81319c993977ac06b74981e818034646aa6097ba4d4272`. The fixture explicitly states that its governed-limit interior ranges are deterministic contract-rehearsal values, not physical measurements. It is not a qualification source.
+- Compilation result: two independent compilations are byte identical; compiled manifest file SHA-256 `c4968a90b0af7c36d28fb8c550a2bd0464de9801417a95f3a9261b697dc94656`, canonical manifest `dfa734abb59c91879c38756f27ebf4f4fd90eb9e840b453c832782ab5adc3611`, admission scope `EXPLORATORY_ONLY`, sixteen unique derived seeds. Unit evidence also confirms deterministic state arrays and every generated qpos/qvel value remains inside its declared source range.
+- Expected qualification rejection: changing only the synthetic profile's requested mode to `qualifying` exits nonzero, creates no manifest, and reports `qualifying mode requires physical measurement provenance` plus `qualifying mode forbids assumed ranges`. Retained stderr SHA-256 is `35276219f544ed347e48c5d3c06e28f5609175eb25f18f553fcaac775cbec00`.
+- GPU/queue result: the unchanged `EXPLORATORY_ONLY` manifest executes and atomically assembles all sixteen profile-bound receipts as `ADMIT_RESUMABLE_RESEARCH_QUEUE`. Complete wall time is `11.7276821001` seconds; CUDA 0 executes eight shards in `11.2407118999` seconds and CUDA 1 in `11.1104920001` seconds, each with one load, one allocation, and zero temporary files. First-run receipt file SHA-256 is `f8fbe78e63efe27fe07c911f340da431311e6ff10023caa8798fe50a006cac5c`; assembly `98dfc25844063611c5577611555481f38a58b7eaa9f2f471e8b4d7b91ba9c061`; sixteen-file inventory canonical SHA-256 `cb2b2bb42f84ae7b8bddf46959bef9e1061049007f68988795fbc5c240ab33f9`, inventory file SHA-256 `2608c214c7a34803dd701169a06ee562d9e096121495c1e5fecf47e7d5e21433`.
+- Clean resume: wall time `0.1023712000` seconds; each device skips eight, executes zero, loads zero models, creates zero allocations, and leaves zero temporary files. Resume receipt file SHA-256 is `5f684b9a26483f901049be00a70645fa48a43731ceaca61b138279ab044ab2b7`.
+- Tamper result: a copied manifest with one derived seed incremented has file SHA-256 `69c9d33c93398d7eb8e1a2e370bbf90b11a04840b97eeeb37e59ee18c9298f4c`. The queue rejects it before simulator import with `shard derivation mismatch; manifest hash mismatch`, creates no receipt, and retains stderr SHA-256 `74fd90903cb3467d263c8af602fd6cd09d9082207e7a751abb18c0008c71cee3`. After the CLI correction, the standalone profile validator rejects the exact same bytes for the same two reasons, creates no output, and retains stderr SHA-256 `d2a4f9010e6a493f6c7aa88b274712a95fc688ceb01ed45698050b8b8d646b2a`.
+- Preserved failed validation attempt: before correction, the first standalone tamper command exited during argument parsing because `validate` had not declared its internally required `--output`; no validation ran and no output was created. Its unchanged stderr SHA-256 is `d1eae2aeebebe1cd5c4c39dc67691381e274614d0aa66404240063c99ee2b465`. This failure was not presented as tamper evidence and remains separately retained.
+- Exact commands: `C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\scenario_profile_probe.py compile --profile C:\MuJoCoWarp\evidence\mw2p_20261003\profile.json --source-artifact <synthetic_source.json> --output <manifest_a.json|manifest_b.json>`; the same compiler with `invalid_qualifying_profile.json` for the expected rejection; `software\integrations\mujoco_warp\resumable_queue_probe.py run-both --manifest <manifest_a.json> --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --receipt-root <receipts> --output-root <first_queue> --output <first_run.json>`; `assemble --manifest <same> --cuda0-dir <receipts\cuda0> --cuda1-dir <receipts\cuda1> --output <assembly.json>`; then unchanged `run-both` to `resume_run.json`. Tamper checks use `scenario_profile_probe.py validate` and `resumable_queue_probe.py queue` against the copied altered manifest. GPU work used external `WARP_CACHE_PATH=C:\MuJoCoWarp\cache\warp-1.17.0`.
+- Repository artifact hashes after the CLI correction: compiler `c64b67d3903474467b65116908cdb203b09dd2746d6aa3825970dcbfc9385357`; JSON schema `4154ccb5a9b8b7437525967fce9e198699aade299dbff43a59f5285f634a78cc`; resumable queue `2f43052c505b2db75b001417e740ea71c16dae3e49052eb6d9b6d63be89a27bb`.
+- Validation: before rehearsal results, `28` focused/policy tests passed with Ruff, `py_compile`, all maintained policy checks, source-archive audit, and `git diff --check`. After the CLI correction, `29` focused/policy tests pass, including direct successful CLI validation/output creation. Final maintained audits are rerun with the evidence update.
+- Hardware-write count: 0. Physical-movement count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Physical-profile count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: the admitted result proves deterministic compilation, provenance plumbing, strict rejection, GPU queue compatibility, and resumability for an explicitly synthetic kinematic rehearsal. It does not estimate real uncertainty, qualify the arm, validate dynamics/collision/contact, render observations, train a model, test sim-to-real transfer, consume planner output, or authorize hardware. A future `QUALIFYING_CANDIDATE` still requires an independently reviewed physical source and downstream validation; that label alone is not deployment qualification.
+- Decision: `ADMIT_EXPLORATORY_PROFILE_PIPELINE`. The profile/compiler/queue path is ready to consume future measured joint-state envelopes without code changes. This rehearsal remains exploratory and cannot support physical or deployment claims.
+- Next dependency: when authoritative joint telemetry and repeatability measurements exist, create a separately reviewed physical source artifact with exact domain, method, sample count, and ranges. Until then, use the pipeline only for synthetic sensitivity research and do not add guessed inertia, friction, backlash, contact, camera, catalog, or planner semantics.
+
+### E-20261003-AI-568 — MuJoCo Warp MW2F 133-state forward-kinematics differential
+
+- Stage/lane: S2 AI/model and simulation. Active-claim and frozen-contract commit: `1e0ca222bfc80b865573ec102107fb4797151969`; implementation/evidence commit: `b89da2ae562d8233484bb8c53e04bc239b8456fb`. The job boundary is explicit: Isaac remains the perception simulator; MuJoCo Warp supplies batched kinematic and provisional physics research only.
+- Exact inputs: schedule bundle `software/integrations/isaac_sim/evidence/representative_joint_schedule_bundle_5072_20260929.json`, file SHA-256 `4aece6ef7c7194aea59af2263caff6d4a3be65273a5df92348bf796b7103bb8c`, canonical bundle `b890df278560724de964b374b4d4cc46e0e9c51b430051319034a1d259fdfdc0`, 133 ordered states; retained Isaac receipt file SHA-256 `3780fd590f912835c85b69d3265291572eca767ab63ab3b859b9dcbbe18b6078`; governed URDF `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`; generated kinematic MJCF `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`; synthetic virtual profile `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`; toolchain lock `ed5150e46850b4bffe2486ce6c162209319414daf2cbceb7eed04c7dce9bf650`.
+- Frozen gates: all 133 samples exact, ordered, and finite; standard MuJoCo versus current RoCell forward kinematics at most `0.1 mm`; MuJoCo Warp versus standard MuJoCo at most `0.01 mm`; retained Isaac versus the same frozen schedule reference at most `0.25 mm`; zero authority and physical activity. Same-stack canonical receipts must be byte identical. Different stack results use the frozen numerical limits.
+- Exact command per run: `$env:PYTHONPATH=(Resolve-Path software/src); C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\schedule_fk_differential_probe.py --bundle software\integrations\isaac_sim\evidence\representative_joint_schedule_bundle_5072_20260929.json --isaac software\integrations\isaac_sim\evidence\joint_schedule_isaac_replay_5072_20260929.json --profile software\config\virtual_commissioning_profile.json --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --toolchain-lock software\config\mujoco_warp_toolchain_lock.json --device <cuda:0|cuda:1> --output <receipt.json>`. CUDA 0 was run twice; CUDA 1 once.
+- Result: `PASS_KINEMATIC_ONLY`. Maximum schedule-reference versus current RoCell FK error is `0.0769109833265308 mm`; maximum standard-MuJoCo versus RoCell error is `3.1776437161565096e-13 mm`; maximum Warp versus standard-MuJoCo error is `0.000151675112855002 mm`; retained Isaac maximum versus the schedule reference is `0.07684842940066568 mm`. Both CUDA 0 receipt files SHA-256 to `036581d32fddcfeaa0c0c32be9b9b6aa17cf1f644913816540ec8f0822e6bbc6`, proving same-stack byte identity. CUDA 1 receipt file SHA-256 is `21d8afd81c1501165e71be5263deb3535ff5d97700a48596335db41fa9d37d80`; its different stack identity changes the receipt, while maximum CUDA 0/CUDA 1 tool-tip delta is `0 mm`. The originally recorded CUDA 0 text omitted its final hexadecimal `6`; E-569 preserves the rejection this transcription defect caused and binds the complete digest.
+- Stack: Windows `Windows-11-10.0.26200-SP0`, Python `3.12.0`, MuJoCo `3.14.0`, MuJoCo Warp `3.13.0`, Warp `1.17.0`, NumPy `2.5.3`, NVIDIA driver `595.97`; GPU UUIDs `GPU-e428f4d7-ea02-2a73-2aeb-88b30949dae1` and `GPU-2e3457e2-aa15-ef1d-e417-b29c8cf1ba77`, both RTX 3090.
+- Artifacts: probe SHA-256 `d0e04865f8fd151304594ecc8432f1dfcee3bf373ef1af12474bea0747697b99`; repository summary file SHA-256 `a71154f0ac5deec9cf8e74b7e45e553166dd87e97571bd3e6d0c58825cc8a12b`, canonical summary `190d95d35fb4f551dc6f9c85106efcfa66b9ba6de185f719003d1897af5d21f0`; focused test file SHA-256 `31d1980df94eba804dbef220dcd58890a489c57df274c3a6b1f8b4ef1c2688bc`.
+- Validation: `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py` (`32 passed`); Ruff; `py_compile`; `git diff --check`; source archive `PASS` at 6,324 files and 657,698,909 logical bytes. Tests cover exact input acceptance and fail-closed authority, order, and nonfinite tampering.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: the URDF is meshless and the MJCF uses placeholder inertia. The placement and tool length are unmeasured synthetic overlays. This result does not qualify joint uncertainty, tool-tip error bounds, silhouette dilation, collision, dynamics, servo behavior, contact, camera evidence, training data, or hardware. The retained Isaac v1 receipt proves all 133 vectors were replayed and reports their maximum error, but retains per-sample tool tips only for contact endpoints; direct all-sample Isaac-to-other-backend rows are unavailable.
+- Decision: `PASS_KINEMATIC_ONLY`. The kinematic model is consistent enough to begin explicitly exploratory joint-uncertainty propagation once a separately frozen scenario is selected. No synthetic result may become a physical bound. Dynamic work remains blocked on measured servo and mechanics data.
+- Next dependency: produce a new full-sample Isaac replay receipt for direct four-backend rows, or freeze an exploratory sensitivity sweep that uses the admitted synthetic profile and labels every resulting tool-tip distribution nonqualifying. A future powered repeatability campaign requires its own cleared-workcell, reduced-speed/torque, e-stop, interior-pose, deterministic-script safety plan.
+
+### E-20261003-AI-569 — MW2FI direct 133-row four-backend FK closure
+
+- Stage/lane: S2 AI/model and simulation. Active claim `d61bd9c1471204890c1fe9f43ade6d703c8362fd`; frozen implementation `209157effd07609bcf3497f8fc4bf6d510724c0f`; hash-literal correction `7d3a49a6c1e62f220f331e01c5bdd61530bf3c6f`; result `498b1cfa6cd5b9a836fc5b1866696fbb83ec5f62`.
+- Contract: the existing Isaac replay defaults to its byte-compatible v1 shape. Opt-in `--retain-all-samples` emits v2 with every ordered tool-tip row. Admission binds the exact 133-state bundle, virtual profile, imported USD, v2 canonical receipt, and MW2F CUDA 0 receipt. Existing `0.25 mm` Isaac/reference, `0.1 mm` MuJoCo/RoCell, and `0.01 mm` Warp/MuJoCo gates remain unchanged. New direct Isaac pairwise metrics are diagnostics with no post-result threshold.
+- Exact Isaac command, run twice: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:PYTHONUTF8='1'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\joint_schedule_isaac_replay_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --bundle software\integrations\isaac_sim\evidence\representative_joint_schedule_bundle_5072_20260929.json --virtual-profile software\config\virtual_commissioning_profile.json --retain-all-samples --output <isaac_full_run1.json|isaac_full_run2.json> --status-output <matching status>`.
+- Exact admission command: `python software\integrations\mujoco_warp\four_backend_fk_admission.py --isaac-full C:\IsaacSim\evidence\mw2fi\isaac_full_run1.json --mw2f C:\MuJoCoWarp\evidence\mw2f\cuda0_run1.json --output C:\IsaacSim\evidence\mw2fi\four_backend_admission.json`.
+- Result: `PASS_KINEMATIC_ONLY`, 133 of 133 rows exact and ordered. Maximum Isaac versus schedule reference `0.07684842940066568 mm`; Isaac versus RoCell `0.0002710608315793465 mm`; Isaac versus standard MuJoCo `0.00027106083166082413 mm`; Isaac versus MuJoCo Warp `0.0002801399314244456 mm`. All preexisting gates pass.
+- Reproducibility: both independent full-sample Isaac files SHA-256 to `bf71b9e7e839b42c6447d052ceb6cd5f072dd57c35d3ad3404369fb03f2143b1` and carry canonical receipt `78eb6abeb05abc89eb702c142e56d4cd4d30fa5d8b3719addfc31be3667e6a59`. Their status files are also byte identical at `50308fe1653c5a114341b67cdcc33ec72d6bfd4b3ab77f479259acdd9cecb1f8`. Four-backend admission file SHA-256 `78e6ea66b17db10b522200da45a35d31657a761947160ac55bb013ed131cd71d`, canonical receipt `39fa5e2f3680490c9d6b378e4501fac808b7bf820f7c7893813904b36a2690f2`.
+- Preserved failed attempt: the first admission exited before comparison and created no output because the frozen MW2F hash literal contained 63 characters, omitting the already recorded final `6`. The unchanged external MW2F file hashes to `036581d32fddcfeaa0c0c32be9b9b6aa17cf1f644913816540ec8f0822e6bbc6`. Correction commit `7d3a49a6c1e62f220f331e01c5bdd61530bf3c6f` adds only that digit and a 64-character regression assertion; no threshold, source byte, or simulation result changed. External failure record file SHA-256 `38e13becbe9b90566830d6845c90b1827d2b89143b5b544df5d60224b2380549`.
+- Repository artifacts: Isaac probe SHA-256 `c19c4c50f0eab294cbc3f3f2a670c83b5569c6700ee5602982c64994659034e1`; admission probe `a037da0d31b9253de8a9a2868addc3dfdf8ebadd44f24685ddec02932ee68c9b`; tests `c9dbfefe066b46f191d65bc459e98ff3fc1f4e1de262cb68f6b2a07bb8dd3e95`; compact summary file SHA-256 `b136fc652f857fb786a9c47fd0b09e5c238ad09419f53f68930d66eebb37ea04`, canonical summary `23a1321ec62fb9eb81b5bdaa1c42e4d541323a41fc73415e0a03a7ff125fce20`.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: this is an unmeasured synthetic placement/tool overlay and a meshless kinematic model with placeholder MJCF inertia. Teleport parity does not qualify uncertainty, silhouette dilation, collision, dynamics, controller tracking, backlash, contact, camera perception, training data, or hardware.
+- Decision: `PASS_KINEMATIC_ONLY`. The same 133 joint states now have direct per-row evidence across RoCell, standard MuJoCo, MuJoCo Warp, and Isaac. This closes the remaining MW2F comparison gap without promoting any physical parameter.
+- Next dependency: use the proven batched FK path for a separately frozen exploratory sensitivity sweep of tool-tip landing error under the synthetic profile, while clearly excluding physical error budgets and silhouette margins until measured joint repeatability exists.
+
+### E-20261003-AI-570 — MW2G schedule-gap attribution
+
+- Stage/lane: S2 AI/model and simulation. Active claim: `9d707d3dd3574994894efbb34007d2798e2cf655`; implementation/result commit: `aaf7a38e5db3410d596fb837eecea27352f6bef4`. The implementation, compact evidence, tests, shared workplan, and ledger entry were committed together.
+- Question and contract: attribute the approximately `0.077 mm` schedule-reference gap without changing any prior threshold. Exact desired waypoints, accepted IK results, and the MW2F forward-kinematics rows must remain ordered and semantically identical across all 133 samples. Desired waypoint versus schedule reference, serialized-joint FK versus original achieved tip, and recomputed versus reported IK residual each have a reconciliation tolerance of `1e-9 mm`. Authority-bearing, reordered, altered-semantic, nonconverged, nonfinite, or controller-output inputs reject.
+- Exact command: `python software/integrations/mujoco_warp/schedule_gap_diagnostic.py --arm-report C:\IsaacSim\evidence\representative_schedule_promoted_5072.json --mw2f C:\MuJoCoWarp\evidence\mw2f\cuda0_run1.json --output C:\MuJoCoWarp\evidence\mw2g\schedule_gap_diagnostic.json`.
+- Fixtures and identities: promoted arm report file SHA-256 `681455f0b734e924f0074ccfb7228ecb94c04ba62f5657f9d66b27af438c618b`, source commit `5072c163152848bd8d78fa3fbc024e32177ac98d`; MW2F CUDA 0 receipt file SHA-256 `036581d32fddcfeaa0c0c32be9b9b6aa17cf1f644913816540ec8f0822e6bbc6`; diagnostic script SHA-256 `1912825204356e09e0d2cbf4c3cf300482b73b46895a239be38f2609dda0dd6f`; focused test file SHA-256 `8dca4118cefa5b96833724b5f68e95688bcd91c5dba73e6db604bdf34c9b4b46`.
+- Result: `CONFIRMED_ACCEPTED_IK_RESIDUAL`. Maximum desired-waypoint versus schedule-reference difference is `0 mm`. Maximum original achieved-tip versus RoCell FK from the serialized joints is `1.1718571004216928e-13 mm`. Maximum recomputed-versus-reported residual difference is `1.3877787807814457e-17 mm`. IK residual minimum/median/p95/maximum are `0.0000706325`/`0.0003539163`/`0.0287449753`/`0.0769109833 mm`. The maximum is transit sequence 129, selected attempt 3 of 4; contact residuals max at `0.0003636713 mm`.
+- Descriptive diagnostics: residual Pearson correlation is `0.2626` with XY radius from board origin, `0.3368` with the solver-weighted Jacobian condition number, and `-0.0593` with sequence. These weak descriptive relationships do not support rounding or a backend geometry mismatch; every achieved point is reproduced from the stored joints. They are not causal or physical bounds.
+- External and repository artifacts: full external diagnostic file SHA-256 `3a3895bbed815167a6f0ce61efd359ac6a16f2bd5c02b95580eb334a642b2ed2`, canonical receipt `2199f9d43af577216ee6d822619e56114138e5043ce2a78d60874031c84ed384`; repository compact summary is `software/integrations/mujoco_warp/evidence/schedule_gap_diagnostic_20261003.json`.
+- Validation commands: `python -m ruff check software/integrations/mujoco_warp/schedule_gap_diagnostic.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/schedule_gap_diagnostic.py`; `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `git diff --check`. Result: `36 passed`; Ruff, compilation, archive policy, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: four-backend parity proves that four implementations evaluate the same governed kinematic model. Because they share the same URDF, this does not prove the URDF link dimensions, joint zero offsets, board transform, or tool length match the physical arm. The retained placement and tool overlay remain unmeasured. No uncertainty, safe-region, silhouette, collision, dynamics, contact, servo, camera, or hardware qualification follows.
+- Decision: the schedule gap is the accepted numerical IK residual between each exact Cartesian waypoint and the joint solution, within the existing `0.20 mm` solver tolerance. Serialization rounding and backend geometry mismatch are unsupported explanations for this gap.
+- Next dependency: freeze a separate exploratory sensitivity contract that scores each current catalog target against its nominal keycap rectangle, separates random joint noise, approach-direction backlash, and systematic offsets, compares small-noise Monte Carlo spread with a local Jacobian estimate, and labels any derived repeatability threshold provisional until physical safe regions, tool footprint, and joint repeatability are measured.
+
+### E-20261003-AI-571 — MW2U nominal-target joint-uncertainty sensitivity
+
+- Stage/lane: S2 AI/model and simulation. Active claim: `7f744191d59a11540493ae6de5f202ab950b18a0`; implementation/result commit: `0c7436e1bf5490c9d89a823a083725409ecf9032`. The implementation, tests, compact evidence, shared workplan, and ledger entry were committed together. The claim froze the separated-source, safe-region, Jacobian, zero-authority, and nonphysical scope. Exact grid constants lived in the implementation before execution but were not separately committed first, so this is explicitly exploratory development evidence and cannot be reclassified as preregistered qualification.
+- Pose-source correction and preserved failed evidence: the first command used the locked default placement and default 100 mm tool: `$env:PYTHONPATH=(Resolve-Path software/src); python -m rocell --workspace . sweep-targets --device keyboard --phase contact --require-all --json > C:\MuJoCoWarp\evidence\mw2u\keyboard_contact_sweep.json`. It reported only `6/46` contacts admitted and is preserved at file SHA-256 `07e6ff43c6b1d2b7a17994180eb181d7c67880ba8d7073afb241cae8ea6bf167`. It was not silently used. The intended retained route study uses the unmeasured rank-1 placement and 120 mm keyboard tool and had already passed 46/46 independent routes.
+- Exact pose command: `python software/integrations/mujoco_warp/nominal_target_pose_bundle.py --workspace . --output C:\MuJoCoWarp\evidence\mw2u\nominal_target_pose_bundle.json`. The generator binds catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`, virtual profile `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`, and prior 46/46 route coverage `a4528e510eb5e8af515905733c5433a859e6e17731e18664c6c63ae62741dabf`. Output file SHA-256 is `388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385`, canonical receipt `a06d605ed28fe39fb73fc91e0ca5b5f2e1758dcb4c2d330a1a0d0218fb1fbbde`; all 46 targets retain one accepted contact pose and maximum IK residual `0.004116 mm`.
+- Exact sensitivity command per GPU: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\nominal_target_uncertainty_probe.py --pose-bundle C:\MuJoCoWarp\evidence\mw2u\nominal_target_pose_bundle.json --target-catalog software\config\nominal_target_profiles.json --virtual-profile software\config\virtual_commissioning_profile.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --device <cuda:0|cuda:1> --output <uncertainty_cuda0.json|uncertainty_cuda1.json>`.
+- Frozen implementation constants: deterministic seed `2026100301`; 46 targets; 4,096 worlds per target, source, and level; levels `[0.00025, 0.0005, 0.001, 0.002, 0.004, 0.008] rad`; random source is per-joint zero-mean Gaussian sigma; backlash source is fixed per-joint magnitude with sampled approach-direction signs; systematic source is a uniform per-joint half-width held constant across all 46 targets within a campaign. A miss means point-tool XY leaves the current nominal keycap rectangle. A tested level passes only when every target's one-sided 95% Wilson miss upper bound is at most `0.001` and every target's first-percentile margin is nonnegative.
+- Result: both RTX 3090s produce identical numerical content across `3,391,488` forward-kinematic worlds, canonical numerical-content SHA-256 `f2de32761971946a155e8f347918309f43def4b175b639df5d16dcffea0fcc10`. Random noise passes through `0.002 rad`; at `0.004 rad`, target `D` records one miss and Wilson upper `0.0010936`, so the transition is bracketed. Backlash and systematic cases still pass at the top `0.008 rad`; their thresholds are not identified and are reported as right-censored lower bounds, not exact requirements.
+- Linear sanity and conditioning: at random sigma `0.00025 rad`, empirical radial RMS divided by the local finite-difference Jacobian prediction ranges `0.9833707`–`1.0162212`, inside the frozen `[0.8,1.2]` range for every target. Local XY Jacobian condition numbers range `1.1129`–`1.6884`; no sampled target is near an XY singularity under this narrow metric.
+- Preserved interpretation correction: the first CUDA 0 output used the ambiguous field name `provisional_candidate_repeatability_levels_rad` even when the maximum grid level passed. It remains preserved at SHA-256 `c668bccdafcd5944b68807cb0f2bfb7817132fa69bcdf958f01500302998d7b3`. No sample, gate, or result was changed. The corrected report distinguishes an identified in-grid bracket from an upper-search-bound pass before final admission.
+- Final artifacts: CUDA 0 file SHA-256 `24f3c5f1b5a4d6560811ae31abe26837840c94b400c8d028a718636f1e25f768`, canonical receipt `03a96aed40f441da4cd911b25a74013a4e772012b0e5cd46c18a7e0a058e2667`; CUDA 1 file SHA-256 `b33f01e85ce2dee4deb9ac2dd94d32e27da0e86d8acd55b68d2ae91bc4198132`, canonical receipt `63895410ce65bb3cd488b8d6a1ac92145d707d878e6cec666739835af9f86075`. Generator source SHA-256 `7e709da1bb17e454ef397c575037997cf703adfa62e1d16e5968535b9ccef840`; sensitivity source `4a59a5268a39211ae60746bf0a373d45326460ee311f1ebec43bcdd26e419f2b`; focused tests `47dd50293d6113871a60a5f9276c40907f7172aef3ca1525d876e74fbcc0d52a`; compact repository summary `software/integrations/mujoco_warp/evidence/nominal_target_uncertainty_20261003.json`.
+- Validation commands: `python -m ruff check software/integrations/mujoco_warp/nominal_target_pose_bundle.py software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/nominal_target_pose_bundle.py software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py`; `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; maintained repository policy checks; `git diff --check`. Focused/policy result: `38 passed`.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: the rectangles are nominal keycap extents rather than commissioned safe regions; the tool is a zero-radius point; placement and 120 mm tool length are unmeasured; backlash directions are sampled surrogates; systematic offsets are synthetic; no combined-source result is claimed. No collision, servo tracking, dynamics, force, key travel, camera, physical model accuracy, or hardware qualification follows.
+- Decision: `PASS_EXPLORATORY_SENSITIVITY`. This proves the batch path can turn separated uncertainty hypotheses into per-key miss rates, confidence bounds, margins, conditioning diagnostics, and a bounded threshold search. It does not establish the arm's required or achieved repeatability.
+- Next dependency: replace nominal rectangles with measured safe regions eroded by the measured tool footprint, replace synthetic source magnitudes with measured repeatability/backlash/joint-zero artifacts, derive approach signs from the commissioned route, then rerun the exact pipeline as a separately preregistered physical-candidate analysis. Positive arm-mask overlap remains required before any mid-motion perception claim.
+
+### E-20261003-AI-572 — photo-derived keyboard geometry admitted for simulation review
+
+- Stage/lane: S1 AI/model. Scope claim commit: `45709ae8c1e3b60ceb203f5cefebbcf42e987f35`; adapter implementation commit: `15d6c5b306aab4c66b96333b4a9cae0496932235`. The operator elected to continue without caliper readings. This entry therefore admits only a photo-derived simulation proposal and does not replace E-559 through E-561.
+- Source evidence: original overview JPEG SHA-256 `3ba4fca9e5751b260aaa0f68fadf3e86dfd0be39f95f6e18893d3474c158c85b`, 273,598 bytes, 960x1280 RGB. E-561 already binds the keyboard as a Perixx PERIBOARD-409, USB, US QWERTY layout, serial suffix `0103`. The keyboard is outside the workcell fixture in the overview, so workcell placement is unverified.
+- Method and metrics: 31 manually reviewed integer-pixel key centers from the Q, A, and Z rows fit an eight-parameter projective homography with NumPy least squares. Median/mean/maximum anchor reprojection errors are `0.677914`/`0.782114`/`2.317615 px`. The inferred number-row pitch median is `19.244232 mm` (range `18.831794` to `19.780262 mm`). Relative to the active synthetic catalog, the 12 existing number-row centers differ by mean `+17.670719 mm` X and `-6.707665 mm` Y; X differences range `+17.041060` to `+18.217495 mm`, and Y differences range `-7.032869` to `-6.419508 mm`.
+- Five-target proposal: photo-derived nominal centers are SHIFT `[15.470567, 47.930646]`, BACKSLASH `[260.336694, 88.734261]`, GRAVE `[19.260798, 104.638065]`, LEFT_BRACKET `[221.930160, 88.606678]`, and RIGHT_BRACKET `[240.933038, 88.444852]` mm in the existing keyboard-nominal frame. Their `7 x 7 mm` half extents are inherited synthetic assumptions, not measured keycap dimensions. All five carry `PHOTO_DERIVED_SIMULATION_ONLY_PENDING_SHARED_REVIEW`.
+- Exact analysis command: `python C:\IsaacSim\evidence\issue190\planner\estimate_keyboard_photo_geometry.py`. Analysis script SHA-256 `669c962c1874de53ee65c6499122651c753b71c8b7bf80900da39cbc5510cad8`; study file SHA-256 `291afd44efcfaf6b43ff79263805e96d0bcbaa1b25397b457fb14e96a385e3c2`; 25-pixel review overlay SHA-256 `4a0ef0fda973a32c59ccb9dae5d0287ae378bf0953d3915591b9b7a619527dfc`.
+- Exact proposal command: `$env:PYTHONPATH=((Resolve-Path software/src).Path + ';' + (Resolve-Path software/ai).Path); python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --target-extension-geometry-source presentations/blender/build_workcell_explainer.py --photo-geometry-study C:\IsaacSim\evidence\issue190\planner\keyboard_photo_geometry_v1.json --photo-source <E-561 overview JPEG> --source-commit 45709ae8c1e3b60ceb203f5cefebbcf42e987f35 --output C:\IsaacSim\evidence\issue190\planner\keyboard_photo_catalog_proposal_v1.json`. Proposal file SHA-256 `1ac3741f4631467434b7cdbc5e469c530f782a9fa16cd53e9ec2136263a366d5`; canonical proposal SHA-256 `ac62a951de85bfc2eb92705ba335ed797e7050190322ab05b9b35ca7ee9276ad`.
+- Bound repository inputs: active catalog SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; presentation source SHA-256 `269b9bdc60cb1239273c2eae5dd395efab731a95f2f7016aaa87b2e9c848f89c`; adapter SHA-256 `e13f45c25e901e306a81f195e5bfa3430d4a620559b713a6f63df429fc96fe04`; focused test SHA-256 `3a52e4864e4c1609fefd68cd90399ecdd513d363ee5ac3c99ef5b22ba32d5b34`.
+- Preserved failures: the first OpenCV study attempt failed with `ModuleNotFoundError: No module named 'cv2'`; failure record SHA-256 `0b370467e3cb6e4e1b9120e3534d66a89442a80e79c088009658c804897720a5`. Three proposal CLI attempts then failed without output due to missing `PYTHONPATH`, direct-file relative imports, and an incorrect `software/presentations` path; combined failure record SHA-256 `de36f80e055bbe90b54ec80553f2b3024bd3c2a876b0ca8db323410b7f01394c`. No failed attempt was rescored or removed.
+- Validation: `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m py_compile software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py`; `python -m pytest -q software/ai/tests` (`386 passed`, `2 skipped` because Windows symlink creation is unavailable); `git diff --check`. The strict tests cover accepted study binding, altered source hash rejection, simulation-only labeling, 12-row correction retention, unchanged catalog authority, and continued physical blocking.
+- Concurrent archive reconciliation: during validation, the separately owned MW2U nominal-target uncertainty increment added three reviewed tracked files, increasing the observed total from 6,330 to 6,333. The policy and source-distribution record now name that increment and set the exact reviewed ceiling to 6,333; no pixel, model, simulator cache, or physical artifact was added.
+- Hardware-write count: 0. Physical-movement count: 0. Measurement-reading count: 0. Render count: 0. Training-run count: 0. Catalog-install count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Decision: `ADMIT_PHOTO_DERIVED_SIMULATION_PROPOSAL_FOR_SHARED_REVIEW`. The result blocks the earlier plan to add only Grave at the old nominal number-row coordinates. It does not install or refreeze a catalog, authorize rendering, expand compiler capability, qualify physical geometry, or satisfy any placement, camera, parked-arm, IK, commissioning, or hardware-use gate.
+- Next dependency: review the 17 proposed changes as one simulation-only catalog revision; then, if accepted, refreeze the catalog and run simulated parked-camera visibility, simulated parked-arm non-occlusion, catalog-driven offline IK, v5.5 identity amendment, and the power check. Physical use still requires direct measurement and real-camera commissioning.
+
+### E-20261003-AI-573 — external 80-target simulation candidate and analytic visibility
+
+- Stage/lane: S1 AI/model continuation of E-572. No repository catalog or arm-lane status changed. The candidate is external, simulation-only, and carries no installation or physical authority.
+- Materialization: the hash-bound E-572 proposal is applied as one revision. The original number row is removed from the regular 19.05 mm row representation and its 12 targets become explicit photo-derived centers, preventing the other three keyboard rows from inheriting an incompatible pitch change. The five missing targets are also explicit. The unchanged phone contributes 29 targets, producing 51 keyboard plus 29 phone targets.
+- Exact materialization command: `python C:\IsaacSim\evidence\issue190\planner\materialize_photo_catalog_candidate.py`. Script SHA-256 `da1f115d42a7397876bb0dc2120c81627956f6e05734a6f6ef9cda25fda9ff04`; candidate file SHA-256 and strict loader content SHA-256 `e6629396e799562d94e1dc28e106a300094fc43d505e3d43a077d16b1593a66d`.
+- Preserved failure: the first external candidate used device source state `PHOTO_DERIVED_SIMULATION_ONLY_NOMINAL_UNMEASURED`. The strict loader rejected it because a nominal source must retain the `SYNTHETIC_` prefix. No catalog was installed. The corrected candidate uses `SYNTHETIC_PHOTO_DERIVED_NOMINAL_UNMEASURED`; failure record SHA-256 `a235244787d70bf487f51e365fd37b33bde47d03c33107329903a9a0a6e46165`.
+- Strict-load result: `load_nominal_target_catalog` accepts exactly 51 keyboard and 29 phone targets, including SHIFT, BACKSLASH, GRAVE, LEFT_BRACKET, and RIGHT_BRACKET. The active repository catalog remains SHA-256 `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2` with 75 targets.
+- Visibility command: `$env:PYTHONPATH=((Resolve-Path software/src).Path + ';' + (Resolve-Path software/integrations/isaac_sim).Path); python C:\IsaacSim\evidence\issue190\planner\project_photo_catalog_candidate.py`. Script SHA-256 `1570a5d6c09bc5b2045f4740929810605b8f290b166e74c18a55eb4f1b9ad591`; receipt SHA-256 `2edbed60f4f711ddca6eeb539480f8e82d1c649394cfae3321d0155627f22ea5`.
+- Analytic visibility result: under the current nominal 1920x1080 overview-camera contract, all five added target centers and every vertex of their safe polygons are in frame at positive 479 mm depth. Centers in pixels are BACKSLASH `[1044.210, 654.333]`, GRAVE `[540.920, 621.131]`, LEFT_BRACKET `[964.030, 654.600]`, RIGHT_BRACKET `[1003.702, 654.938]`, and SHIFT `[533.007, 739.518]`.
+- Hardware-write count: 0. Physical-movement count: 0. Measurement-reading count: 0. Render count: 0. Catalog-install count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: this is an analytic projection through the nominal, unmeasured simulation camera and board transform. It does not evaluate a parked-arm mask, prove physical visibility, measure keycap dimensions, verify workcell placement, establish IK reachability, or authorize rendering or hardware use.
+- Decision: `PASS_ANALYTIC_SIMULATED_CAMERA_FRAME_COVERAGE`. Only the simulated visibility blocker for the five added target regions is resolved. Parked-arm non-occlusion, shared catalog installation/refreeze, arm-owned catalog-driven offline IK, v5.5 identity amendment, and power remain blocked.
+- Next dependency: evaluate the five added regions against the retained synthetic parked-arm mask or rerender an exact parked mask bound to this candidate; then submit the candidate catalog for shared installation/refreeze and arm-owned offline IK.
+
+### E-20261003-AI-574 — MW2UR absolute-scoring audit and threshold refinement
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `867677aa324145857388e17c66ad0fab25a8f1e9`; implementation/result commit `b5ea96ff95c396e4fe3c3552468e5f1c2c1048fe`. The original MW2U artifacts and E-571 remain unchanged and visible.
+- Scoring audit: pass/fail uses absolute board-frame `tool_tip_xy - target_center_xy`; displacement from the unperturbed nominal landing is diagnostic only. A regression sentinel with three identical landings translated `2 mm` from a target with `1 mm` half extent has zero spread, `-1 mm` margin, and three misses. This proves a constant offset cannot disappear through recentering.
+- Exact command, once per GPU: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\nominal_target_uncertainty_probe.py --pose-bundle C:\MuJoCoWarp\evidence\mw2u\nominal_target_pose_bundle.json --target-catalog software\config\nominal_target_profiles.json --virtual-profile software\config\virtual_commissioning_profile.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --device <cuda:0|cuda:1> --mode refinement --output C:\MuJoCoWarp\evidence\mw2ur\refinement_cuda<0|1>.json`.
+- Bound fixtures: pose bundle SHA-256 `388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; virtual profile `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`; MJCF `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`.
+- Sample design: deterministic seed `2026100302`; 46 targets; 4,096 worlds per target and level. Random levels are `0.00025, 0.002, 0.00225, 0.0025, 0.00275, 0.003, 0.00325, 0.0035, 0.00375, 0.004 rad`; backlash and systematic levels are `0.008, 0.01, 0.012, 0.014, 0.016, 0.02, 0.024, 0.032 rad`. Each GPU evaluated 4,898,816 forward-kinematic worlds.
+- Result: both RTX 3090s have identical numerical content, SHA-256 `6860ff1cc949389790dfad6061380e6f8cca0ef050a2e3fb5b6d195bed101c86`. Random noise passes at `0.0035 rad` and first fails at `0.00375 rad`; sampled-sign backlash passes at `0.008 rad` and first fails at `0.01 rad`; campaign-constant systematic offsets pass at `0.008 rad` and first fail at `0.01 rad`. The Jacobian empirical/linear RMS ratio remains `0.98384`–`1.01969` for all 46 targets.
+- Absolute landing diagnostics explain the earlier result. At the `0.008 rad` passing level, backlash reaches `6.09446 mm` from target center with `0.94880 mm` minimum margin; systematic offsets reach `5.42515 mm` with `1.58898 mm` minimum margin. At random `0.0035 rad`, the maximum sampled center distance is `6.89253 mm` with `0.59542 mm` minimum margin. These large displacements pass only because the current nominal rectangles use `7 mm` half extents and the tool has zero modeled radius.
+- External artifacts: CUDA 0 file SHA-256 `e3ea81844cb2690897635ad2c87f09c11f90b5641061a1ac5777f780e0f1ceb1`, canonical receipt `a201e322f51d1a7ce62cd2a0121ae95af16a24e00ca4a6785ca8fbd280f5b8b5`; CUDA 1 file SHA-256 `cb920649414606e3516a50bdb1fa6b00d81f7f6f31e6255d2c5f8d1eb3384d36`, canonical receipt `fe2b22d16156195c43ed8dee5842890091b5eac3d16560424725a7945e426816`.
+- Repository artifacts: probe SHA-256 `3af0388be014e833e854b31c18e36d30da0c96115b467d64aee6cc5b8d9f243d`; focused test SHA-256 `4bb61d242cf7c8364646d77ef7f74779195cef382456f78ceec0c52b873730fa`; compact summary SHA-256 `7ba990355969518d1d0c4c8d8a65f9ef3dd07f103f8571d388a02f4263909662`.
+- Validation commands: `python -m ruff check software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py`; `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: `39 passed`; Ruff, compilation, archive policy, documentation, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: these are separated synthetic sources, not a combined error budget. The `7 mm` half extents are nominal keycap rectangles rather than commissioned safe regions; the tool is a zero-radius point; the rank-1 placement and `120 mm` tool length are unmeasured; sampled backlash signs are not commissioned approach directions; no physical encoder resolution, repeatability, backlash, calibration, fingertip footprint, collision, dynamics, contact, or servo tracking is qualified.
+- Decision: `PASS_EXPLORATORY_REFINEMENT`. The scoring bug hypothesis is rejected, and all three synthetic transition brackets are now identified. None is a hardware requirement or claim of achieved servo performance.
+- Next dependency: measure the fingertip footprint and commissioned safe regions, derive per-target approach signs from the admitted route, and collect powered joint repeatability/backlash evidence under a separate safety plan. Then propagate measured source profiles, evaluate consistent-direction and per-key calibration mitigations, and compare shorter tool lengths before setting a physical repeatability requirement.
+
+### E-20261003-AI-575 — MW2UF effective-safe-region and combined-source feasibility map
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `9a4b959ab498d4470cea07a83fd3745e5018a899`; implementation/result commit `27b3b1341f4ea81325b2d6b6ccb9b511cc133a30`. Concurrent work claimed E-573 before the MW2UR documentation landed, so MW2UR is administratively renumbered E-574 without changing its evidence; this entry follows as E-575. Both workers' evidence is retained.
+- Exact command, once per GPU: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\nominal_target_uncertainty_probe.py --pose-bundle C:\MuJoCoWarp\evidence\mw2u\nominal_target_pose_bundle.json --target-catalog software\config\nominal_target_profiles.json --virtual-profile software\config\virtual_commissioning_profile.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --device <cuda:0|cuda:1> --mode feasibility --output C:\MuJoCoWarp\evidence\mw2uf\feasibility_cuda<0|1>.json`.
+- Bound fixtures: pose bundle SHA-256 `388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; virtual profile `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`; MJCF `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`.
+- Design: seed `2026100303`; 46 targets; 4,096 worlds per target and uncertainty scenario; symmetric effective safe half-widths `1–7 mm`. Random sigma spans `0, 0.00025, 0.0005, 0.001, 0.0015, 0.002, 0.00225, 0.0025, 0.00275, 0.003, 0.00325, 0.0035, 0.00375, 0.004 rad`; sampled-sign backlash and campaign-constant uniform systematic half-width independently span `0, 0.002, 0.004, 0.006, 0.008 rad`. Unit random draws, backlash signs, and systematic draws are reused across magnitudes for paired comparisons. Each GPU evaluates 350 scenarios, 65,945,600 FK worlds, and 2,450 width/scenario cells.
+- Preserved failed design: the first completed map inherited a refinement-only noise axis and omitted `0`, `0.0005`, `0.001`, and `0.0015 rad`, so it could not isolate constant sources or cover the encoder-count neighborhood. It was not interpreted or overwritten silently. Preserved CUDA 0 SHA-256 is `436a56901d2a9ff71bedfd91a275f7d1700996f0bc9e8b187a9233e62b6e1f39`; CUDA 1 is `608fb6eb0fe7e1dcef780e79bb7aa36e0577e9447ab37c63793c1d898985a4a2`.
+- Result: both RTX 3090s produce identical numerical content, SHA-256 `f527ef9714b70a919e586b81f679ff8e9d02cdb98f72d08626c8546af7a0cfe5`. Random-only largest feasible sigma rises with half-width: `1→0.0005`, `2→0.001`, `3→0.0015`, `4→0.002`, `5→0.0025`, `6→0.003`, `7→0.0035 rad`. This uses the existing conservative rule that every target's one-sided 95% miss UCB is at most `0.001` and every target's p01 margin is nonnegative.
+- Combined-source findings: random `0.0015 rad` alone first becomes feasible at `3 mm`; with backlash and systematic both `0.002 rad`, it needs `5 mm`; with both `0.004 rad`, it needs `7 mm`. Random `0.002 rad` plus backlash/systematic `0.002 rad` needs `6 mm`; random `0.002` plus backlash/systematic `0.004 rad` has three misses and fails even at `7 mm`. Backlash/systematic `0.004 rad` with zero random noise needs `6 mm`; both at `0.008 rad` fail throughout `1–7 mm`. Feasible grid-cell counts are `3, 9, 17, 28, 48, 80, 118` of 350 scenarios at half-widths `1–7 mm`; these are grid coverage counts, not probability estimates.
+- External artifacts: final CUDA 0 file SHA-256 `6cbc26104095b1cb6ec7f344bed3439c8d45487ba0ffd996605914d4ac72c423`, canonical receipt `6ddf790000afcc146659d196256a9adae2c08e6a5edfa11924eff7e8ce1fa427`; final CUDA 1 file SHA-256 `9a9bc77908e2626aa1f2bd32c3e239325882f3d79c57b02867be798304974f56`, canonical receipt `70f73da3e12eb3206d3fc48c7572d85659f25b0d5e7942ef82fe9961ce205a49`.
+- Repository artifacts: probe SHA-256 `f4b9d363f201cfb05f17152bae745cebb4107f7b1010d8494c81c34739097a77`; focused test SHA-256 `1b90af7f8e7c5c6b5bcbac02ea1a2aaa5bc7657bc5b816cfe3aa248e7ccb42ff`; compact summary SHA-256 `9f2e8d09bfda291f765cf5715d7cb97912954d6dab2ad5ec9784662ac5367b41`.
+- Validation commands: `python -m ruff check software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py`; `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: `40 passed`; Ruff, compilation, archive policy, documentation, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: safe width is a sensitivity axis, not measured keycap-top geometry eroded by a fingertip footprint. The tool remains a zero-radius point; placement and `120 mm` length are unmeasured; backlash directions are sampled surrogates; source distributions and additive joint-space composition are synthetic. No visual correction, collision, dynamics, force, key travel, servo tracking, or physical accuracy is modeled.
+- Decision: `PASS_EXPLORATORY_FEASIBILITY_MAP`. Combined sources materially reduce the open-loop feasible region. At realistic effective widths, measured error magnitudes will determine whether shorter tooling, consistent approach, per-key calibration, or visual correction are required rather than optional.
+- Next dependency: measure keycap tops and fingertip footprint to select an effective region from the frozen map; collect powered repeatability/backlash and joint-zero evidence under a separate safety plan; derive approach signs from the admitted route. Then rerun with measured profiles, compare shorter tool lengths and per-key correction, and evaluate a fresh-observation visual correction loop if open-loop cells remain infeasible.
+
+### E-20261003-AI-576 — MW2UC fixed-approach calibrated-residual study
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `d5582108808d8cdd87df3fab4e716baa49e53bbe`; implementation/result commit `d561103a52c6787b85eaeabb84f48086347ccbb4`. This is the final planned synthetic uncertainty sensitivity increment before physical measurements.
+- Exact command, once per GPU: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\nominal_target_uncertainty_probe.py --pose-bundle C:\MuJoCoWarp\evidence\mw2u\nominal_target_pose_bundle.json --target-catalog software\config\nominal_target_profiles.json --virtual-profile software\config\virtual_commissioning_profile.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --device <cuda:0|cuda:1> --mode calibrated --output C:\MuJoCoWarp\evidence\mw2uc\calibrated_cuda<0|1>.json`.
+- Bound fixtures: pose bundle SHA-256 `388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385`; target catalog `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`; virtual profile `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`; MJCF `448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0`.
+- Model and grid: one deterministic five-joint approach sign is held fixed per target; one systematic joint-offset vector is shared across targets; both fixed-source magnitudes are set together to `0.002, 0.004, 0.008 rad`. Per-key calibration subtracts the fixed Cartesian displacement from the absolute target center, leaving residual fractions `0, 0.1, 0.25, 0.5, 1.0`. Random press noise is `0.001, 0.0015, 0.002 rad`; effective half-widths are `3` and `4 mm`. Seed `2026100304`; 46 targets; 4,096 worlds per target; 12 FK scenarios, 45 scored correction scenarios, 90 safe-width cells, and 2,260,992 FK worlds per GPU.
+- Preserved failed design: the first run subtracted fixed displacement relative to the unperturbed nominal landing rather than the absolute target center. A rare nominal IK-offset tail then let 10% residual appear better than zero residual under the zero-miss gate. It was rejected before interpretation. Preserved CUDA 0 SHA-256 is `bfb6a20d06b4eb0684a82f2416e6e08aca1db9432619ada091ea7f5e53b86f92`; CUDA 1 is `78f3cfab60ee2fb7c5d8d221b0e64cf3009ecce7f99257073a33460abd87326c`. The corrected implementation targets the absolute center. A subsequent mistyped external-copy path failed without changing either source or result artifact; the correct copy then preserved both files.
+- Result: both RTX 3090s produce identical numerical content, SHA-256 `ce13808a089a453ab7eb30c21d2c94889fd1096b40260b64751c65890222627c`. At `0.0015 rad` random noise and `4 mm` half-width, the largest passing tested residual is `0.5` for `0.002 rad` fixed sources, `0.25` for `0.004 rad`, and `0.1` for `0.008 rad`. At `3 mm`, the corresponding observed passing grid values are `0.25`, `0.1`, and none. At `0.002 rad` random noise and `4 mm`, the largest observed passing residuals are `0.25`, `0.1`, and `0.1`; no `3 mm` cell passes.
+- Interpretation: a fixed approach plus per-key correction can make a `4 mm` effective half-width feasible across the focused synthetic grid when the harder fixed biases are calibrated down to a 10–25% residual. The `3 mm` region is marginal: isolated tail misses occur even at zero declared residual for some biased-pose sensitivities. Directional residual can occasionally offset the tail direction, so the listed values are observed passing grid points, not monotonic calibration thresholds or physical requirements.
+- External artifacts: final CUDA 0 file SHA-256 `78574e805961769d69579f63d3b7e9027173a219680dda12327134596363437f`, canonical receipt `41f9bf28111115f64e1998181405b23de7fe09d70cd1470a239bdfc063d326ed`; final CUDA 1 file SHA-256 `aa90e5ace60b01faf51d4f6f270f4a4f3fae8fd0a22898e2efb4b0e7a5d98afc`, canonical receipt `c48ed345841846149a5d7c6570782b92c4fe06147a1c8852c9c1f409a925dae4`.
+- Repository artifacts: probe SHA-256 `5570a43c39c15e2c7edac2c4526430228f6a8921de5f9944cf475fb9eeaa3c63`; focused test SHA-256 `42ae5b28093eb45f12fc124f1a1b378b856d4502e8a030fb865c793aaca1ab42`; compact summary SHA-256 `7bf20e5f5bb333a24a87545ff925273c41c99fdc3e066ed6331b44526aa47d5f`.
+- Validation commands: `python -m ruff check software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/nominal_target_uncertainty_probe.py`; `python -m pytest -q software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: `41 passed`; Ruff, compilation, archive policy, documentation, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: approach signs, source magnitudes, and residual fractions are synthetic. Cartesian subtraction is a local equivalent rather than inverse-kinematic replanning to a corrected aim point. Safe regions, fingertip footprint, placement, tool length, servo repeatability, backlash, and calibration accuracy remain unmeasured. No visual correction, collision, dynamics, contact, servo, or physical qualification follows.
+- Decision: `PASS_EXPLORATORY_CALIBRATED_RESIDUAL`. The consistent-approach plus per-key-calibration path is plausible at a `4 mm` effective half-width. A `3 mm` claim is unsupported. Visual correction remains a fallback until physical measurements show whether the 4 mm open-loop cell is achievable.
+- Next dependency: stop synthetic sensitivity expansion. Measure fingertip footprint and keycap top, then run the separately safety-planned powered repeatability/backlash procedure with consistent approach directions and per-key landing calibration. Read those measurements against MW2UF/MW2UC; if the 4 mm cell is not met, evaluate shorter tooling or the fresh-observation visual correction loop.
+
+### E-20261003-AI-577 — measured PERIBOARD-409 geometry reconciliation
+
+- Stage/lane: S1 AI/model and simulation. Active claim commit `9722040b567872772785b0526832bac2d47a789f`; implementation commit `c29a61455d30b10454df6f8b775ee39a59ff49c1`. E-572 and E-573 remain unchanged as the preserved photo-derived evidence that led to the rejected candidate.
+- Measurement evidence: the operator-guided PERIBOARD-409 suffix `0103` session contains 24 records on the keycap top press surface, SHA-256 `e500d2a2e629a8bd6c04d15a358528267c6a2b2c5f2cd0454a7b5434d551f847`. Standard key tops are `14 x 14 mm`; Left Shift is `37.76 x 14.80 mm`; the weighted number-row pitch is `19.133636 mm`; the measured `1`-to-`Q` row separation is `19.40 mm`; and housing anchors locate `GRAVE`, `1`, `Q`, and Left Shift. Photo paths, byte lengths, and SHA-256 values are bound in the session. Hardware writes and physical movements are zero.
+- Failed-photo correction: housing-left-to-`Q` is `37.60 mm` and housing-left-to-`1` is `29.21 mm`, placing `Q` `8.39 mm` to the right of `1`. This contradicts the earlier manual photo fit, which was off by one number-row key. The external rejection receipt SHA-256 is `d16f9d9f4289d6bc17bae2a88ea8b37abfb4ba0f1c7ca8c5eb5a7c3b66c7717b`; the rejected candidate remains uninstalled.
+- Strict adapter: the measured-session path validates schema, fit status, coordinate surface, zero write/movement counts, false physical authority, unique finite readings, required measurement coverage, every referenced photo's bytes and SHA-256, consistent operator-confirmed key dimensions, and a mandatory rejected-photo receipt. Altered or incomplete sessions fail closed. Adapter SHA-256 is `12d0a9a69e693fc3e1b2549e82ef02f0342b36bc26cff767a45bf62064918c58`; focused-test SHA-256 is `3bfb55b529c117e554a8716b82e03ef3e453e0d9e6e6a023b2c1ebfc06c47e3a`.
+- Derived five-target proposal: `SHIFT [29.30, 51.97]`, `GRAVE [17.12, 108.87]`, `LEFT_BRACKET [235.936364, 89.47]`, `RIGHT_BRACKET [255.07, 89.47]`, and `BACKSLASH [274.203636, 89.47]` mm in housing-local coordinates. Standard safe half extents use a 1 mm top-edge inset and are `[6, 6] mm`; Shift is capped at `[7, 6.4] mm`. Number and Q rows are emitted as explicit measurement-derived simulation corrections. Proposal SHA-256 is `eba12c7dc9548a5ebb74ddbaa4f33cf0344c17d3196a3b6105731fc67b7d35b6`.
+- Preserved materialization failures: first candidate SHA-256 `7b1dd8625835874ac63f0d5915b12a7ace92433495c6130bdbc2ffe0dd4f69c8` was rejected because its device source marker was not synthetically prefixed; receipt SHA-256 `38ea79e88bb3cf27a1d31528cf547d5aec7551b42f4ae82e933ae43262f6e55c`. Second candidate SHA-256 `bcf298e456a3e588add578a2133aa671a2087e40492cf0f0f7f9b8eefbd00d92` was rejected because changing the single global pitch conflicted with unmeasured rows retaining the legacy pitch; receipt SHA-256 `cae6180be21cfc41e240422156fd0b48c158c71098cc66b17a0f28847be48337`. Neither failure was rewritten or interpreted as admission.
+- Corrected external candidate: the measured number and Q rows are explicit targets; the legacy global pitch remains for unmeasured home and bottom rows, and both values are recorded in provenance. The strict loader accepts exactly 51 keyboard and 29 phone targets. Candidate SHA-256 is `e7e54efd94999a099be99f6396fb374e3fbb5a49301e734275963fc539e68804`; materializer SHA-256 is `32cb565a8add8d51164ef4fce921a3b2581748c7d3c1177df8ea75161df38635`.
+- Simulated visibility: all five added centers and every safe-polygon vertex lie inside the current nominal 1920x1080 overview-camera frame. Receipt SHA-256 is `59f032efcd61cbdf6fbf7fb85d39fb2a5b3222a7a51d5c54f817bcec32067b09`; projector SHA-256 is `53340df5a31f4bcbf5e9012d171fb47e23111bfffc3b099b660ea5d5250c21c1`. This is analytic projection with zero renders.
+- Planner result: the external candidate contains all 48 printable-US base targets and `SHIFT`, so missing base and modifier target lists are empty. The unchanged seeded replay covers 5,005 strings, 160,925 characters, 240,468 actions, and 79,543 Shift presses with zero failures. Keyboard readiness remains false because Sticky Keys commissioning evidence is absent. Audit SHA-256 is `f6e31a2388cd877427df9bee8eca816a6af8eca13288ab3e0e47afbea39dd72a`.
+- Exact proposal command: `$env:PYTHONPATH=((Resolve-Path software/ai).Path + ';' + (Resolve-Path software/src).Path); python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --target-extension-geometry-source presentations/blender/build_workcell_explainer.py --measurement-session C:\IsaacSim\evidence\issue190\planner\keyboard_physical_measurement_session_v1.json --rejected-photo-candidate C:\IsaacSim\evidence\issue190\planner\photo_catalog_candidate_rejection_v1.json --source-commit 9722040b567872772785b0526832bac2d47a789f --output C:\IsaacSim\evidence\issue190\planner\keyboard_measured_catalog_proposal_v2.json`.
+- Exact materialization/load/visibility commands: `python C:\IsaacSim\evidence\issue190\planner\materialize_measured_catalog_candidate.py`; `$env:PYTHONPATH=((Resolve-Path software/src).Path + ';' + (Resolve-Path software/integrations/isaac_sim).Path); python -c "from pathlib import Path; from rocell.targets.nominal import load_nominal_target_catalog; c=load_nominal_target_catalog(Path('.').resolve(),Path(r'C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json')); print(len(c.keyboard_targets),len(c.phone_targets),c.content_sha256)"; python C:\IsaacSim\evidence\issue190\planner\project_measured_catalog_candidate.py`.
+- Validation commands: `$env:PYTHONPATH=((Resolve-Path software/ai).Path + ';' + (Resolve-Path software/src).Path); python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py; python -m py_compile software/ai/rocell_ai/adapter.py; python -m pytest -q software/ai/tests/test_offline.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: `41 passed`; Ruff, compilation, archive policy at 6,333 tracked files, documentation, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Measurement-reading records: 24. Render count: 0. Catalog-install count: 0. Training-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: most dimensions are single readings; several dimension matches are operator text confirmations; bracket and backslash centers are inferred from measured pitch and topology; the number and Q rows are measured/inferred while home and bottom rows retain synthetic nominal geometry; the keyboard was outside its final fixture; camera pose, board placement, parked-arm mask, arm reachability, key travel, fingertip footprint, and Sticky Keys behavior are uncommissioned. This is a simulation candidate, not physical or deployment qualification.
+- Decision: `PASS_MEASUREMENT_DERIVED_SIMULATION_CANDIDATE`. The earlier photo candidate is rejected. The corrected external candidate may proceed to shared catalog review and arm-owned read-only IK, but the active 75-target repository catalog and all physical gates remain unchanged.
+- Next dependency: arm lane performs catalog-hash-bound read-only IK over the external candidate and simulation evaluates parked-arm non-occlusion. If both pass, shared review may install and re-freeze the 80-target catalog, rerun the v5.5 target rotation and power check, and then authorize lossless rendering. Physical use still requires the camera, fixed workcell placement, and Sticky Keys commissioning evidence.
+
+### E-20261003-AI-578 — five-key measured-catalog MW2UC extension
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `a531d94a01a0197066eea459bccca95df6dc16c2`; implementation commit `f4b7584de755f42717aa3422cd1ad5dfa82c4cbf`. The active 75-target catalog, arm-lane status, and integration gates are unchanged.
+- Provenance correction: the proposal now records a coordinate class and field-level coordinate provenance for every added key. `SHIFT` is measured from direct housing anchors and measured top dimensions. `GRAVE` is measured from the housing-left anchor, measured 1-row anchor with the operator-confirmed zero row offset, and measured keycap top. `LEFT_BRACKET`, `RIGHT_BRACKET`, and `BACKSLASH` are `MIXED_MEASURED_ANCHOR_TOPOLOGY_INFERRED`: Y and standard top size are measurement-bound, while X is inferred from the measured Q anchor plus ten, eleven, or twelve measured pitches. Proposal file SHA-256 is `98fa8f6b9749fa666c0edff2d127152eebe96b0a3c43f49032469c605485dbd9`; internal proposal receipt is `44f7cbc6e41c2ad2b8e352667182c097130d78bd606b80b3056012a51ea6701e`.
+- External candidate: the materializer includes the per-target coordinate provenance under simulation-candidate provenance. Materializer SHA-256 is `b47c3110d9a9409d272491fbeb0f9380897e7e8cdf253079696d429041dfdc46`; corrected external 51-keyboard plus 29-phone candidate SHA-256 is `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`. The prior candidate and prior successful pose bundle remain preserved as pre-provenance evidence at SHA-256 `e7e54efd94999a099be99f6396fb374e3fbb5a49301e734275963fc539e68804` and `ab80bb9370de38cc3d50fe481d530b7c3fb0c1e50bf115a1ffb0361ff5e4fa60`.
+- Exact proposal and materialization commands: `$env:PYTHONPATH=((Resolve-Path software/ai).Path + ';' + (Resolve-Path software/src).Path); python -m rocell_ai.adapter --target-catalog software/config/nominal_target_profiles.json --target-extension-geometry-source presentations/blender/build_workcell_explainer.py --measurement-session C:\IsaacSim\evidence\issue190\planner\keyboard_physical_measurement_session_v1.json --rejected-photo-candidate C:\IsaacSim\evidence\issue190\planner\photo_catalog_candidate_rejection_v1.json --source-commit a531d94a01a0197066eea459bccca95df6dc16c2 --output C:\IsaacSim\evidence\issue190\planner\keyboard_measured_catalog_proposal_v2.json`; `python C:\IsaacSim\evidence\issue190\planner\materialize_measured_catalog_candidate.py`.
+- Exact pose command: `python software\integrations\mujoco_warp\measured_target_calibrated_residual_probe.py --mode pose --workspace . --target-catalog C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --output C:\MuJoCoWarp\evidence\mw2uce\measured_target_pose_bundle.json`. The exact five-target order is `BACKSLASH`, `GRAVE`, `LEFT_BRACKET`, `RIGHT_BRACKET`, `SHIFT`. All five zero-authority rank-1 routes pass. Maximum IK position residual is `0.0017166918462846342 mm`; minimum modeled arm-joint margin is `0.1888461764510514 rad` at `BACKSLASH`; condition numbers range `21.816322497769676`–`23.94086133889658`. Pose bundle SHA-256 is `0b4d3da8a8299387558b1373f8d5433d3d1063c2e1bff68ff32ec678c85f1665`.
+- Preserved failed pose attempts: the first attempt requested a hardware profile after replacing the static context and is preserved at SHA-256 `5732fb5ca2d51511774530e246c325e9e3e7883e8588c5b53d3006dbea068799`; the second used the static semantic profile rather than the candidate's development profile and is preserved at `58bf70dc63f895fad590b604d44c92d8d9f66709613da0b7d296c1e18da4f3d0`. Neither was overwritten or scored.
+- Exact GPU command, once per device: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\measured_target_calibrated_residual_probe.py --mode residual --pose-bundle C:\MuJoCoWarp\evidence\mw2uce\measured_target_pose_bundle.json --target-catalog C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --virtual-profile software\config\virtual_commissioning_profile.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --device <cuda:0|cuda:1> --output C:\MuJoCoWarp\evidence\mw2uce\calibrated_extension_cuda<0|1>.json`.
+- Frozen design: the extension imports the unchanged MW2UC seed `2026100304`, 4,096 worlds per target, fixed-source magnitudes `0.002, 0.004, 0.008 rad`, random noise `0.001, 0.0015, 0.002 rad`, residual fractions `0, 0.1, 0.25, 0.5, 1.0`, absolute-center correction, Wilson upper-bound limit `0.001`, nonnegative p01 margin, and the requested 4 mm half-width. Each GPU evaluates 12 FK scenarios, 45 scored correction scenarios, and `245,760` forward-kinematic worlds. No threshold or original 46-target result changed.
+- Result: both RTX 3090s produce identical numerical content, SHA-256 `d291223a57897d3860d777897189bdbe121063c185c9c70c8593ca072aac2bb0`. At random noise `0.0015 rad`, all five targets have zero misses in each original 46-target passing comparison cell: residual `0.5` at fixed sources `0.002 rad`, residual `0.25` at `0.004 rad`, and residual `0.1` at `0.008 rad`. Their minimum target p01 margins are respectively `1.6881539240728927`, `1.678706789990804`, and `1.8454407287673775 mm`. CUDA 0 file SHA-256 is `902e6b01845f7e3b9a30b0e1c0c0b6aa150442a62b81d427510a4ac8b9ffc7f4`; CUDA 1 is `fd08a74426ac8da10e4d1a1daece69783d7967539a6bfe600c61d3d291b86a6d`.
+- Original-46 comparison clarification: the `1.678706789990804 mm` value is the minimum among the five additions, not all 51 keyboard targets. In the same three frozen 4 mm comparison cells, the original 46-target result is tighter at `Z`: `1.4544377634650687`, `1.4533174636423738`, and `1.6592605390854573 mm`, respectively. Across every feasible 4 mm grid cell, the lowest original-46 p01 margin is `0.9098355953485793 mm` at `Z`, while the lowest new-five value is `1.1376406668998271 mm` at `SHIFT`. The original pose bundle also has a smaller modeled joint-limit margin at `EQUAL` (`0.0947880248489168 rad`) than the new-five minimum at `BACKSLASH` (`0.1888461764510514 rad`). Physical per-key calibration should therefore prioritize `Z`, `EQUAL`, `MINUS`, and `0` alongside the inferred-position edge keys. This is a comparison of retained synthetic outputs; because the external measured candidate also repositions existing number and Q-row targets, it is not an exact full-51 candidate rerun.
+- Repository artifacts: adapter SHA-256 `a1d65ea48aee263b1af9e4856d2e8e4cfa90af248ac78feb730941d60b096b6c`; consolidated pose/residual extension `8b3a80ecf985a3b97087ab2ecc5d5f4741f722bb9071653cd61b089a740893af`; AI focused tests `c49b27820bd9baf03a9cec392b2efaa52a8c598f46d5544f91164a3e9dddf37`; MuJoCo focused tests `5420213b1c68facaf5f0e9189eb9359a670f0c2e4290af42ce186ad625e29744`. Full outputs remain external and hash-bound.
+- Validation commands: `python -m ruff check software/ai/rocell_ai/adapter.py software/ai/tests/test_offline.py software/integrations/mujoco_warp/measured_target_calibrated_residual_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/ai/rocell_ai/adapter.py software/integrations/mujoco_warp/measured_target_calibrated_residual_probe.py`; `$env:PYTHONPATH=((Resolve-Path software/ai).Path + ';' + (Resolve-Path software/src).Path); python -m pytest -q software/ai/tests/test_offline.py software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Focused result: `80 passed`; Ruff, compilation, archive policy at 6,334 tracked files, documentation, and diff checks pass. The one-file ceiling increase is recorded in `docs/SOURCE_DISTRIBUTION.md`; all byte and duplicate limits remain unchanged.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: the external 80-target candidate remains uninstalled. `GRAVE` and `SHIFT` are measured, while bracket/backslash X coordinates remain topology inferences. The 4 mm region is a synthetic sensitivity width rather than a commissioned safe region. Rank-1 placement, the 120 mm tool, uncertainty sources, correction residuals, and point-tool footprint remain synthetic or unmeasured. This does not qualify collision, dynamics, contact, servo tracking, camera visibility, physical reachability, or hardware use.
+- Decision: `PASS_EXPLORATORY_FROZEN_MW2UC_EXTENSION`. The five proposed keys match the original 46-target passing comparison cells under the unchanged synthetic configuration. This closes the requested simulation feasibility check without installing the catalog or changing any physical gate.
+- Next dependency: shared review may use this result with simulated parked-camera and arm-mask evidence when deciding whether to install and re-freeze the 80-target catalog. Physical use still requires fixed-workcell placement, real-camera visibility/non-occlusion, measured safe regions and fingertip footprint, repeatability/backlash evidence, and Sticky Keys commissioning.
+
+### E-20261003-AI-579 — exact 51-key measured-candidate MW2UC rerun
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `d9c43b60f866dbf70294bb69407f1e915d80a4a0`; implementation commit `2684a4c9146db14f9b73443727e61d39a92ad4c8`. E-576 and E-578 remain unchanged as the original 46-target and five-key extension evidence. This increment produces one candidate-matched result and changes no threshold, active catalog, arm-lane status, or integration gate.
+- Bound candidate: exact external catalog SHA-256 `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`, containing 51 keyboard and 29 phone targets. The ordered keyboard identities are read from this exact candidate, retained in the pose bundle, checked for uniqueness and exact result order, and never hand-spliced with the old 46-target result.
+- Exact pose command: `python software\integrations\mujoco_warp\measured_target_calibrated_residual_probe.py --mode pose --target-scope candidate51 --workspace . --target-catalog C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --output C:\MuJoCoWarp\evidence\mw2uc51\candidate51_pose_bundle.json`. All 51 rank-1 routes pass. Pose bundle file SHA-256 is `267534d7247b43732be15d54e4036738e179829ba0f4bf1ba8b3807b71f7861f`; canonical receipt is `e9f66ae2dcbb28219bfb3673072626b26176605ce00195471b9114e625a28d6d`.
+- Pose findings: `EQUAL` is the tightest modeled joint-limit target at `0.09105251805574088 rad`, followed by `MINUS` at `0.1128980167352398`, `0` at `0.14047561544742893`, `9` at `0.17321775496004044`, and `BACKSLASH` at `0.1888461764510514 rad`. Maximum IK position residual across the exact candidate is `0.0047329702725540795 mm` at `4`. `EQUAL` moved to candidate board center `[331.68, 193.87, 21.0] mm`; its refreshed IK residual is `0.0003633640376210338 mm`.
+- Exact GPU command, once per device: `$env:WARP_CACHE_PATH='C:\MuJoCoWarp\cache\warp-1.17.0'; C:\MuJoCoWarp\env_3_13_0\Scripts\python.exe software\integrations\mujoco_warp\measured_target_calibrated_residual_probe.py --mode residual --target-scope candidate51 --pose-bundle C:\MuJoCoWarp\evidence\mw2uc51\candidate51_pose_bundle.json --target-catalog C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --virtual-profile software\config\virtual_commissioning_profile.json --mjcf C:\MuJoCoWarp\evidence\mw1\roarm_m3_kinematic.mjcf --device <cuda:0|cuda:1> --output C:\MuJoCoWarp\evidence\mw2uc51\candidate51_cuda<0|1>.json`.
+- Frozen design: seed `2026100304`; 51 targets; 4,096 worlds per target and FK scenario; fixed-source magnitudes `0.002, 0.004, 0.008 rad`; random noise `0.001, 0.0015, 0.002 rad`; residual fractions `0, 0.1, 0.25, 0.5, 1.0`; absolute-center correction; 4 mm half-width; every-target one-sided 95% Wilson miss UCB at most `0.001`; every-target p01 margin nonnegative. Each GPU evaluates 12 FK scenarios, 45 scored correction scenarios, and `2,506,752` forward-kinematic worlds.
+- Dual-GPU result: both RTX 3090s produce identical numerical content, SHA-256 `5c836079dd2fc686f850934f1db3a0a4c3ed2f9b3e469f98340d2e1db1d257de`. CUDA 0 file SHA-256 is `ca67978a2a635d5b625865bf1009071015aac6da9f8205a3598f8774bb44c061`, canonical receipt `a7ead3bc07a30d5f492d0638ebdb9ee02b604fc29ccefb15891a15a5637bbd57`; CUDA 1 file SHA-256 is `d2cfbf9f5264932c297bd561d978bd3ec89f4bd3ef6ee62dcd282150e46ac11a`, canonical receipt `47e3455806757617854f82114326de6e264ee41f0af8ba891fd9dc098f4b0415`.
+- Comparison cells: at random noise `0.0015 rad`, the exact 51-key candidate has zero misses and passes residual `0.5` with fixed sources `0.002 rad`, residual `0.25` with `0.004 rad`, and residual `0.1` with `0.008 rad`. `GRAVE` is the p01 limiting target at `1.6949739324902566`, `1.691625297847733`, and `1.8629848567725333 mm`, respectively. `EQUAL` records `2.436183306929621`, `2.435498270633751`, and `2.4793969713811577 mm`; `Z` records `1.8416941448161126`, `1.8419479029778332`, and `1.9577687412879627 mm`.
+- Whole-grid diagnostic: among all feasible 4 mm cells, the minimum p01 margin is `0.8035961627175653 mm` at `GRAVE` for fixed sources `0.004 rad`, random noise `0.0015 rad`, and residual `0.5`; its minimum sampled margin is `0.009258835140514066 mm`. This cell passes the frozen rule but is tail-close and therefore a physical-calibration priority. This diagnostic does not redefine a threshold.
+- Repository artifacts: consolidated probe SHA-256 `7a53cdcd8dd6467adb8faeb5beb84941f7662b557f6287ec80638ea1850bcaa4`; focused MuJoCo test SHA-256 `133ab742d23706033a8fa3b32568df12984aae68355d31b7a1a106e1fc442738`.
+- Validation commands: `python -m ruff check software/integrations/mujoco_warp/measured_target_calibrated_residual_probe.py software/tests/unit/test_mujoco_warp_host_probe.py`; `python -m py_compile software/integrations/mujoco_warp/measured_target_calibrated_residual_probe.py`; `$env:PYTHONPATH=((Resolve-Path software/ai).Path + ';' + (Resolve-Path software/src).Path); python -m pytest -q software/ai/tests/test_offline.py software/tests/unit/test_mujoco_warp_host_probe.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: `81 passed`; Ruff, compilation, archive policy at 6,334 tracked files, documentation, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Contact-run count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: this remains an uninstalled external simulation candidate. The 4 mm region, rank-1 placement, 120 mm tool, uncertainty sources, correction residuals, and point-tool footprint remain synthetic or unmeasured. Target count changes the deterministic draw layout, so this exact-candidate result supersedes stitched interpretation but does not retroactively alter E-576/E-578. It does not qualify collision, dynamics, contact, servo tracking, camera visibility, physical calibration, or hardware use.
+- Decision: `PASS_EXPLORATORY_EXACT_CANDIDATE51_MW2UC`. One hash-bound pose and residual result now covers the exact 51-key measured candidate. This closes the stitched-result limitation before catalog review without installing the catalog or granting authority.
+- Next dependency: run simulated parked-arm non-occlusion against all 51 candidate regions, then submit the external candidate plus visibility, route, and residual evidence for shared catalog installation/refreeze review. Physical use still requires real-camera visibility/non-occlusion, fixed placement, measured safe regions and fingertip footprint, repeatability/backlash evidence, and Sticky Keys commissioning.
+
+### E-20261003-AI-580 — exact 51-key parked-arm non-occlusion failure
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `d9a959f9284ea31ddbd9e150f02ca203977e085a`; implementation commit `84ecedf396141e4cde776c5215b405506a28f4ef`. E-579 remains the matching route/residual result. This increment reuses retained official-mesh pixels and performs no new render, catalog installation, arm-lane change, or integration-gate change.
+- Bound inputs: external exact 51-keyboard plus 29-phone candidate SHA-256 `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`; retained official-mesh v4 manifest SHA-256 `1c734f4cdff14c7cdf07528c80a10e415f43dbcb8fcbbb86bc67400553839c2c`; ready mask file SHA-256 `02f129b7fb740a22fb60ea198b3ead3aaeb54a5ab4107f9250ddea42cc394cee`; ready mask pixel SHA-256 `aef7c72f4acfada886e7c8270a58fd5aa0711ae94b8f9c123573c167c5866a09`; governed URDF SHA-256 `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`; upstream commit `40dbd84b553695212fab713e8465f817ba95454d`.
+- Camera and pose: nominal fixed overview resolution `1920 x 1080`, position `[0.305, 0.2285, 0.5] m`, look-at `[0.305, 0.2285, 0.0] m`, 24 mm focal length, 46.08 mm horizontal aperture, nominal `fx=1000 px`; ready joints are `[0, 0, 2.618, -1.0472, 0, 0] rad` in the manifest's named order. Camera, board transform, and ready pose remain synthetic and unmeasured.
+- Exact command: `python C:\IsaacSim\evidence\issue190\planner\assess_measured_candidate_parked_arm.py`. External evaluator SHA-256 `2f4064a7e69288f86e6de0732d2bc28d166aff313c2fcc8359a79c397ba4dc8a`; output SHA-256 `2d662d722143ed8c43d1084f50d2dae5337b86ede9e4ccc4f3c0c35c4f39ec6f`.
+- Result: `FAIL_PARKED_ARM_OCCLUSION`. All 51 centers are in frame, but eight safe regions overlap the official visual-mesh ready mask: `0` 423/676 pixels (`0.6257`, center covered), `APOSTROPHE` 161/900 (`0.1789`), `ENTER` 154/1650 (`0.0933`), `EQUAL` 676/676 (`1.0`, center covered), `LEFT_BRACKET` 390/676 (`0.5769`), `MINUS` 520/676 (`0.7692`, center covered), `P` 28/676 (`0.0414`), and `RIGHT_BRACKET` 66/676 (`0.0976`). Among zero-overlap targets, `9` has the smallest nominal mask clearance at `8.4853 px`. This clearance is diagnostic only and is not a physical dilation allowance.
+- Positive control: filling `GRAVE`'s projected safe polygon produces 676/676 overlap and center coverage, and the evaluator rejects it. The shared renderer helper retains its former Isaac path without a SciPy dependency; distance-transform work runs only when the offline diagnostic explicitly requests clearance.
+- Repository artifacts: official-mesh projection implementation SHA-256 `e32a3f599695f35bbfd71d43c19f96ceb85ee71d8fc7e42ba11f1e3f7057e3bf`; focused test SHA-256 `c6af9cec789f9204748fe5c8d2faf427de1efc0a3936a272e3772a54611a63ee`.
+- Validation commands: `python -m ruff check software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py`; `python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -k "target_occlusion_diagnostic or official_mesh_render_receipt"`; `python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Result: focused `2 passed, 49 deselected`; full/policy `56 passed`; Ruff, documentation, archive policy at 6,334 tracked files, and diff checks pass.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. New-render count: 0. Training-run count: 0. Contact-run count: 0. Catalog-install count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: official visual meshes are perception geometry, not collision geometry. Tool, camera support, cables, measured camera uncertainty, measured joint feedback, backlash-derived dilation, and physical parked-pose repeatability are absent. The mask is a retained nominal synthetic render. This failure does not establish physical occlusion, but it prevents a simulation claim that the current ready pose clears the exact candidate.
+- Decision: `FAIL_PARKED_ARM_RENDER_GATE_PRESERVED`. The result is not rescored and no overlap tolerance is introduced after observation. The external candidate remains uninstalled and v5.5 rendering cannot claim a clear parked reference under this ready pose.
+- Next dependency: select and freeze a revised observation/park pose using the existing zero-write simulation stack, require zero center and safe-region overlap for all 51 candidate keyboard targets against an official-mesh rerender, retain joint-limit/route feasibility, and then repeat this exact check. Physical commissioning must independently verify the selected pose with the real camera and measured dilation.
+
+### E-20261003-AI-581 — joint park/camera capsule screen and predecessor-corpus audit
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `0221f0b229abbaa96ab0450821822e1f2f3e7204`; implementation commit `729dfd670b1746221e83e80ceac2e9787741807d`. E-580 remains the failed exact-ready official-mesh gate. This increment is a broad analytic screen and source audit; it does not accept a replacement pose or camera.
+- Predecessor audit command: `python C:\IsaacSim\evidence\issue190\planner\audit_parked_reference_predecessors.py`. Script SHA-256 `ad08105de56d9d24dfc4ed2a71e2f8eba6d44fc6b29ed801431983ed063e9c94`; output SHA-256 `1bf009ff54314732711026afbeb9f9a1b7883f79fb3ab6bf2c653eacda14b610`.
+- v4.2 finding: renderer SHA-256 `fdc871119f460c19cb26869be745c6791fea95f7722059b225e7e963bc074593` contains no robot model or arm-mask path. Its clear references therefore do not contain arm pixels, but omit an obstruction that the nominal ready pose would create at the six old-catalog targets `0`, `APOSTROPHE`, `ENTER`, `EQUAL`, `MINUS`, and `P`. Those targets have development AUC `0.994936`–`0.999819` (mean `0.998390`) versus unaffected minimum/mean `0.952510`/`0.996404`; they contribute 8 of the 100 retained hard-case rows. The broad ranking result does not mostly rest on those targets, although `EQUAL` contributes four of the 50 lowest-scoring obstructed rows, so the dark-cable lesson partially includes that target. v4.2 stays rejected and cannot qualify runtime clear references.
+- v5.4 finding: renderer SHA-256 `b84bf017db8ff95aa2562955f647ddb1ee41f0be72f4863251d173ecd41b694b` generates analytic FK capsule masks separately from RGB. Its only smoke covers F, G, H, and I; all 144 observations share one empty mask identity, zero masks are nonempty, arm masks are not composited into model input, the full campaign was never rendered, and no ready-mask-affected target was tested. Its custody result remains valid only for that bounded smoke.
+- Search command: `python C:\IsaacSim\evidence\issue190\planner\search_joint_park_camera_candidates.py`. Script SHA-256 `d304b4e161026753691e312122d9ad88c5337f20bfb3fabb207ce1224575cbc`; result SHA-256 `9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed`.
+- Search design: exact external candidate SHA-256 `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`; governed URDF SHA-256 `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`; 768 requested deterministic Halton poses across five arm joints; 596 poses admitted with at least `0.10 rad` joint-limit margin including ready; 45 camera positions spanning three heights and a 5-by-3 planar grid; every camera keeps all 51 keyboard and 29 phone safe polygons in frame; 24,633 valid pose/camera pairs scored. The primary objective is maximum minimum signed projected capsule-to-safe-region clearance in pixels. No post-result physical threshold is introduced.
+- Search result: moving only the camera to board position `[155, 108.5, 500] mm` while looking at `[305, 228.5, 0] mm` makes the existing ready pose screen clear across all 80 targets, with `BACKSLASH` limiting at `96.23325 px` and `0.332 rad` minimum joint margin. The maximum screen clearance is `466.05191 px`, limited by keyboard `MINUS`, at camera `[305, 348.5, 500] mm`; 145 pairs lie within one pixel of that maximum. The lowest unit-mass torque proxy within that band is Halton pose 299, but its joint margin is only `0.11376 rad`. Halton pose 453 retains the same clearance with a larger `0.650729 rad` joint margin and a modestly higher unit-mass torque proxy (`5.92987` versus `5.37043`). These are candidates for official-mesh comparison, not accepted parks.
+- Gravity/rest scope: the governed URDF and MW1 MJCF have no measured link masses, centers of mass, friction, servo backdrive, de-energized sag, or rest-contact properties. The reported score assigns one kilogram to each link midpoint and numerically differentiates potential energy. It is an ordering proxy only. Every candidate remains marked as requiring either measured de-energized stability or a qualified physical cradle/rest.
+- Preserved failure and amendment: the first search attempt used a nonexistent `JointPosition.as_radians()` accessor and created no output. Failure record SHA-256 is `3d95a5cf307dadbac647c1524a7945977828bff98d01f29826e87c83ba7d96a3`. The first successful exploratory output selected gravity proxy only among the first 25 clearance rows; its reported file hash was `a6a86e08ae6735d9a58dc87e7bd040a35097e2f223cc9577a8ce42d2072434e7`, but those intermediate bytes were overwritten before final custody. The ranking was corrected to score all 145 pairs within one pixel of the maximum. This makes the result development evidence and prevents any preregistered or qualifying interpretation.
+- Repository artifacts: projection and signed-clearance helpers SHA-256 `f9cf270c8e9e0ec3d2d120dd12f678ec6a616835821f5bd5042cd371569f793f`; focused tests SHA-256 `eaa4188e884d6cd9c522441bb6d862b0fb0cb53c8032a735832e3121e01015cd`.
+- Validation commands: `python -m ruff check software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py`; `python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -k "candidate_search_projection or target_occlusion_diagnostic"`; `python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_docs.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Result: focused `2 passed, 50 deselected`; full `57 passed`; Ruff, documentation, archive, and diff checks pass. Archive policy reports 6,334 tracked files, 657,975,076 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. New-render count: 0. Training-run count: 0. Contact-run count: 0. Catalog-install count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Limitations: broad screening uses conservative projected capsules, not official visual meshes; it does not evaluate robot/environment self-collision, board collision, cable routing, tool geometry, or a cradle. Camera and target placement are nominal. Pixel clearance is not a measured dilation bound. Gravity torque is unavailable and the proxy cannot predict unpowered holding behavior.
+- Decision: `PASS_EXPLORATORY_SCREEN_WITH_OFFICIAL_MESH_AND_STABILITY_BLOCKERS`. Camera placement is a viable design variable, and a camera-only adjustment may preserve the current ready pose. No pose or camera is accepted yet.
+- Next dependency: freeze three comparison cases—the camera-only ready pose, maximum-clearance/lowest-proxy pose 299, and larger-joint-margin pose 453—then rerender their official visual meshes from their declared cameras. Reject any official-mesh overlap, run environment/collision checks on survivors, and require either a designed rest or physical de-energized stability evidence before commissioning.
+
+### E-20261003-AI-582 — fixed-nadir height-family analytic screen
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `c05ef8ff2a483342361cd124c1ecaa72456a1ff0`; first axis amendment commit `0e0a49633d2a37071977bf97787aae968c6bbe09`; corrected fixed-trunk amendment commit `99aeb524e18cc1f9a83f3876d9a4f614f50505d1`; implementation commit `0c5525a91969423cf0ecf5d00ad86427a6676a35`.
+- Frozen family: external fixture `C:\IsaacSim\evidence\issue190\camera_family\nadir_camera_family_v1.json`, SHA-256 `151b9fb0352660089823fa8b821f0d7a73072689a3ad0b0217d70886dd1219ee`; builder SHA-256 `612e25712c4b592562908713d9d6bfd04b3791a05a29e7f8d1c1c744d4fb7cb5`. It binds the repository-authoritative 500–1000 mm support range, exact nadir, board center `[305.0, 228.5] mm`, the purchased nominal 16 mm lens only, published/unmeasured 2.4 micrometre IMX283 pixel pitch, full-native 5472 by 3648 YUY2 at 9 fps, 30 mm board-edge screening margin, the exact external 80-target candidate, zero plus two existing-stress-derived exploratory Brown-Conrady profiles, unchanged 2% miss/6% false-stop gates, fixed physical-area crop intent, and height as the only future camera-pose variation.
+- Implementation: the existing Isaac overview probe now provides tested native physical intrinsics, exact-nadir Brown-Conrady projection, paraxial ground-sample distance, and exploratory thin-lens blur helpers. Source SHA-256 `72ce439a15b4c2769f57031c6a10852d18d31b69d6869d7bb6b7849ea06b4b0b`; test SHA-256 `a888f055b2d5382f52cc041fa6c8f2c764eb5673d89f4efb7e1deb5eee4e55bd`.
+- Analytic command: `python C:\IsaacSim\evidence\issue190\camera_family\screen_nadir_height_family.py`. Corrected script SHA-256 `6ba29a08117ec8c357ec0f416bf6d24d223398cff12828e9d7be2955637007cf`; corrected report SHA-256 `b4f7a3e83ba1ad1fbfc9da70cd3da92fe0c5846950d52a1bac63a997bcf3f4b9`. Derived nominal FOV is 44.6265 by 30.6033 degrees. Every target safe polygon remains in frame for every frozen stress profile at 700, 750, 800, 850, 900, 950, and 1000 mm. The complete 30 mm board envelope passes every stress profile only at 1000 mm. The existing ready-arm capsule is not wholly in frame at any tested height.
+- Height-resolution result: keyboard GSD increases from `0.10185 mm/px` at 700 mm to `0.14685 mm/px` at 1000 mm; phone GSD increases from `0.103215` to `0.148215 mm/px`. The smallest safe region is phone `key_w`, nominally 58.13 by 106.57 px at 700 mm and 40.48 by 74.22 px at 1000 mm. `GRAVE` and `EQUAL` are 117.82 px square at 700 mm and 81.72 px square at 1000 mm. A 1 mm cable spans 9.82 to 6.81 nominal keyboard pixels and 9.69 to 6.75 phone pixels across the same range. With keyboard-plane focus, exploratory phone-plane blur falls from 1.520 to 0.729 px at f/1.4 and 0.532 to 0.255 px at f/4. These are sampling curves, not detectability or focus gates.
+- Preserved analytic failure: the first report used signed front/rear subtraction when reporting safe-region height, making those diagnostic heights negative and selecting the wrong smallest target. Its bytes remain as `nadir_height_analytic_screen_failure_001.json`, SHA-256 `5b2d711c5463a2df5b94c077d4871a89c88423ad332b90291960b65d2cebddd1`. Coverage decisions were unaffected, but no resolution statistic from that failed report is adopted.
+- Centered pose screen: external script SHA-256 `690034a21fb314bfd023bc0133f9511a84bd5775ce5f512c2661c583a5550ee1`; preserved result `nadir_park_pose_capsule_screen_failure_002.json`, SHA-256 `272a5f92ea2689af2ac422e4eb734ae28145802a0dceb5bb6bca1d0ed654ecdb`. The exact-centered 1000 mm nadir screen admitted the same 596 ready/Halton poses but found zero with the entire capsule silhouette in frame because the fixed rear arm structure cannot move with joint pose.
+- First axis amendment: external fixture SHA-256 `70a7a0ea098daab95f4ff496854413922bf84e24925219ea5442a4519fbebc96`, builder SHA-256 `61e0b891019503860f5a5e742009cfdc4da5617c776a5e32e114dac2e0653f2d`. Its ±15 mm axis search incorrectly constrained only the base circle, selected `[310.0, 238.5] mm`, and reported 196 passing axis candidates. That incomplete result is preserved as `nadir_axis_selection_failure_003.json`, SHA-256 `75c7f7aeb1758b1a4838ed5647cbf69e66206b0b828a71a8a33bf16fabd44a35`. The resulting 596-pose search again found zero contained poses; preserved result SHA-256 `463610878e0c844fc7f917297650ef404e6a8e44d0dbb605a6f5a47ade05a312`. Neither result is adopted.
+- Corrected axis amendment and result: fixture SHA-256 `a6185df0e8c986019d8f867a693c951b02dae6a1a7c6435495f986a2355c3113`; builder SHA-256 `2cc2a6ff0e82379f0d5848371d70251967ee6227e019484f81eddfdcd0d6676f`; corrected selector SHA-256 `b571db86383502f0c5f2bf4b870c709c3414d66d6ea1a7f3b1ecef2eebff7b82`; result SHA-256 `2de39cec6bcb2bda8a771c5865edcfb0d0c18a07483f21f23404d095205b47d1`. Every fixed segment from world through `link2` is included. Zero of 961 axes passes all constraints. The best axis `[310.0, 242.5] mm` has positive nominal (`5.35 px`) and existing-stress (`10.26 px`) combined border, but the unmeasured mirrored-stress board border is `-6.52 px`. One pre-result selector attempt used the old `axis_search` key after v1.1 renamed it and failed without output; failure receipt SHA-256 `2e34f3178df93180b88195561564b503b19e07b2a91b8e1a351c9def4b0c3a88`.
+- Validation commands: `python -m ruff check software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py`; `python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -k "native_nadir or candidate_search_projection"`; `python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Results: Ruff passes; focused `4 passed, 52 deselected`; full `61 passed`; archive policy passes at 6,334 tracked files, 657,991,403 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes.
+- Hardware-write count: 0. Physical-movement count: 0. Physics-step count: 0. Render count: 0. Training-run count: 0. Catalog-install count: 0. Permit count: 0. Transport count: 0. Physical authority: false.
+- Decision: `HEIGHT_DIVERSITY_SUPPORTED_FOR_TARGET_LOCAL_RESEARCH_FULL_NADIR_OVERVIEW_BLOCKED`. Height-diverse target crops from 700–1000 mm have adequate nominal pixel support for exploratory model work, and future inputs must crop a fixed physical region before resampling while retaining native pixel support. The complete operating workflow cannot declare a synthetic camera envelope because no configuration in the frozen current-architecture screen contains the board margin and fixed arm trunk under all exploratory stress profiles.
+- Limitations: the focal length, pixel pitch, lens distortion, native crop, focus, aperture, and mount are published/unmeasured or synthetic. The mirrored distortion stress failure is not evidence that the physical B0477 fails. Capsules are not official meshes. No model performance, physical transfer, detectability, calibration, collision, gravity stability, or deployment claim is made.
+- Next dependency: measure the received B0477 intrinsics/FOV/distortion at the exact runtime mode, or predeclare an architecture change such as additional height or an exact wider lens. In parallel, implement and smoke-test fixed-physical-area crop/resample metadata over target-local lossless renders at disjoint 700–1000 mm heights; label that work exploratory and keep full-corpus rendering, model selection, and physical qualification blocked until a full overview configuration survives the camera and official-mesh gates.
+
+### E-20261003-AI-583 — exact-nadir fixed-physical-crop height smoke
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `bb7d2e2661684af93871aba08fc886a365338b13`; implementation commit `0e5994fd5b958461e60178b63903b0454d61ae49`. The AI-to-arm boundary, arm-lane state, integration gates, active 75-target catalog, and physical authority remain unchanged.
+- Frozen v1 fixture: `C:\IsaacSim\evidence\issue190\camera_family\nadir_height_robustness_smoke_v1.json`, SHA-256 `e1f30691d189a6050c54d55cb372ce9a26de63e75060295c18b9389ce192e25a`; builder SHA-256 `20d9928f46df5e2521a9705e1363726477b3b294f78f8091e4ddbbb358077491`. It binds exact-nadir fixed-center heights 700/850/1000 mm, the exact external 80-target candidate, representative targets `GRAVE`, `EQUAL`, keyboard `F`, and phone `key_w`, clear plus 30%/60% dark-cable variants, a 48 by 48 mm local crop resampled to 96 by 96, a 72 by 72 mm context crop resampled to 192 by 192, lossless PNG storage, exploratory zero-noise BT.601 full-range YUY2 4:2:2 cosited-left delivery, 36 expected observations, and a strict per-height ordinal check. The 850 mm height is held out as an interpolation smoke. Evaluation identities, model training, model selection, physical height selection, and qualification are prohibited.
+- Implementation: the existing overview probe now projects fixed board-plane crop rectangles, reports floating native pixel support, rejects clipped inputs, and deterministically resamples a fixed physical extent with Pillow bicubic. The analytic projection retains its former default image convention while accepting an explicit `board_y_to_image_v_sign` for renderer-bound work. This avoids silently changing E-582. Repository source SHA-256 is `010352fb487f9c8cc124cf1a9ae7683cf9061157fdd87f6a9912d44d6ebe1b78`; focused-test SHA-256 is `7a12abb94116bb2fc499a771f9148658a81d47d9c2d9fb394ed0722ac215511b`. Fifty-nine focused tests pass after correction.
+- Preserved implementation failure: the first test run attempted Pillow Lanczos with a floating `EXTENT` transform, which Pillow rejects. Exact command `python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -q`; result `1 failed, 57 passed`. The implementation was corrected to the supported frozen bicubic resampler before any smoke render. The subsequent exact command `python -m pytest software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py -q; python -m ruff check software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py` passes with `59 passed` and Ruff clean.
+- Preserved launch failure: exact command `& C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\camera_family\run_nadir_height_robustness_smoke.py` stopped before Isaac initialization because that shell lacked the already-established `OMNI_KIT_ACCEPT_EULA=YES`. Log SHA-256 is `58867e991d997e3c8c6af45e7e90feb4ed796353c453eb2813a1e4bafc71d13a`; render count is zero for this attempt. Retained earlier campaign launchers independently show the same EULA setting.
+- Preserved v1 render failure: exact command `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\camera_family\run_nadir_height_robustness_smoke.py`. Renderer SHA-256 `866810b27bcdf219dac9766dab84040d1a4bfb1473995f97f128cc8866e7b242`; log SHA-256 `d72d9dffc893e02d858b399ab0c2ecc97dd3504b960e1f8a2f3dd5df5efb8c48`; result SHA-256 `48361ad10ac496f3d1f3ea6d3a7b500cbe29ba2bdd939c3a7f69a25ac44e8995`. It reports `FAIL_EXPLORATORY_SMOKE`: three ordinal failures and background-only target crops. Visual audit proved the analytic helper's board `+Y` to image `+v` convention was inconsistent with the instantiated Isaac camera, so these scores are not model evidence and are not rescored.
+- Frozen v2 successor: fixture SHA-256 `3b9473c226074ec0ce7b659caeecdf9f0c35658bbc21b973ffe24f677f848d18`; builder SHA-256 `82a71a9b213d5e25ad59f327ba6d2f2ed842273666e7821506b747b919ad2e46`. It preserves every v1 identity and check, binds v1's failed result, and adds the explicit Isaac convention board `+X` to image `+u`, board `+Y` to image `-v`. This successor was frozen before v2 pixels were rendered.
+- Successful v2 command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\camera_family\run_nadir_height_robustness_smoke_v2.py`. Renderer SHA-256 `02c7af03dfd7ba1ab333c2856ea44b3b64a698434e4b4d4494c82c5568e0c018`; log SHA-256 `88442dfd002b6ae74913a7af4e0b379db7ed327950922a232931581fbf646816`; result SHA-256 `14bffa8cebb2f1e1c21d9e8e806f86473ace02d596efddecfb7163e415f5e325`. Result is `PASS_EXPLORATORY_SMOKE`: all 36 observations and their contexts are lossless PNG, all crops are in frame, native physical-crop support decreases monotonically with height, and all 12 target/height comparisons satisfy `dark_cable_60 > dark_cable_30 > clear`.
+- Height diagnostics: the 48 mm native crop spans `471.28 px` at the near keyboard plane and no less than `323.85 px` at the far phone plane; the same-FOV proxy spans `88.19` down to `60.60 px`. Cross-height score ranges remain material: 30%/60% ranges are `0.00392/0.00111` for `GRAVE`, `0.00806/0.01364` for `EQUAL`, `0.00925/0.00827` for `F`, and `0.00253/0.00519` for phone `key_w`. Thus fixed physical cropping preserves geometry and ordinal obstruction signal, but does not by itself prove score invariance across height.
+- Backup: 173 files from the two immutable smoke outputs plus fixtures, builders, renderers, and logs were copied to `C:\IsaacSim\artifacts\issue190\nadir-height-robustness-smoke-20261003`. Backup manifest SHA-256 is `7a29f5380481bbb94180777bc0bb2c5590edb1572ef4f5a6443778419ea62daf`.
+- Final validation command: `python -m ruff check software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py; python -m pytest -q software/tests/unit/test_isaac_fixed_overview_mesh_render_evidence.py scripts/ci/test_check_source_archive_footprint.py; python scripts/ci/check_source_archive_footprint.py --json; python scripts/ci/check_docs.py; git diff --check`. Result: Ruff passes; `64 passed`; archive policy passes at 6,334 tracked files, 658,006,140 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes; documentation and diff checks pass.
+- Counts: overview render count 18 across v1 and v2; retained observation rows 72; evaluation identities rendered 0; physics steps 0; model training runs 0; model selection runs 0; hardware writes 0; physical movements 0; catalog installs 0; permits 0; transports 0; physical authority false.
+- Decision: `PASS_EXPLORATORY_FIXED_PHYSICAL_CROP_PIPELINE_WITH_HEIGHT_SENSITIVITY_REMAINING`. The current architecture can present a constant physical neighborhood to the model while the same nadir camera moves within 700–1000 mm. The test demonstrates retained obstruction ordering on four representative targets, not robust model performance or a physical height envelope.
+- Limitations and next dependency: the render uses a 1024 by 683 same-FOV proxy, one neutral lighting appearance, synthetic procedural targets/cables, an external uninstalled catalog, nominal focal/sensor data, and no measured B0477 noise, intrinsics, distortion, focus, or exposure. No arm mesh is composited and the full overview remains blocked by E-582. Next, use these crops as a training augmentation axis only after freezing a broader lossless height-development fixture with multiple lighting appearances and obstruction assets; keep evaluation unopened and require measured B0477 camera data before any qualifying or sim-to-real claim.
+
+### E-20261003-AI-584 — nadir height admission, OpenCV orientation sentinel, and native 96/192 pair
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `2c5007ce5bb8d6afbdfc08ed1266741efee4373c`; result and repository implementation commit `7fdbd4d5509ab991840d60e8206278bea67a9c9a`. The AI-to-arm boundary, arm-lane state, integration gates, installed catalog, physical authority, and evaluation identities remain unchanged.
+- Frozen capsule admission: fixture `C:\IsaacSim\evidence\issue190\camera_family\nadir_height_admission_v1.json`, SHA-256 `249b4064139bd8cc2f356653334d410b69ddd9ff38753acd97114d652d29f111`; builder SHA-256 `1316d7d9fbdc5af29f6a7161c4fb6eb19c16c25000162d3ec2f3df77d8534bbc`; screen SHA-256 `b3d030540f719aa9b8a2bdb87a518e0a8a1fa2ceb16297cd69220e06b02484d6`; result SHA-256 `82f04415dace8e22fd8a46078fed01a0d2e9288752e66ee5255c2e0b53aa5fad`. Exact command: `python C:\IsaacSim\evidence\issue190\camera_family\screen_nadir_height_admission.py`. The ready pose fails at every height, with minimum capsule clearance `-138.459469 px`. Of 596 screened poses, 516 pass the capsule and target-coverage checks. Frozen selection `halton-0157` has `1.422123 rad` minimum joint margin and `1486.056234 px` minimum capsule clearance across all heights, distortion profiles, and targets. This was provisional until the official-mesh gate.
+- Frozen official-mesh gate: fixture SHA-256 `fe9a9f9da9bdc212ea40524adaa58997b3a142bd94ddd3257dda53039526a6dd`; final external renderer SHA-256 `198b726aebca95eecce981922857cefdbe5b42e554edaa7bd6d6f7644dee2b2a`; exact successful command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\camera_family\run_nadir_height_official_mesh_gate.py`; log SHA-256 `52fb8e86e95ce0a4466a1fd1cef4b7ea8650f17b77eff28f74a2e21366185d2e`; result SHA-256 `9664f973e145224309615b8e60e868a83cc1033547386ed5833aa55113f3c61a`; status SHA-256 `9dc7234fe7a0622525a481ba2191ef9d2dc96148ac273395107546fb5f779e5f`. Result is `PASS_SIMULATION_ONLY`: all 80 safe regions are in frame and have zero official-mesh overlap at 700, 850, and 1000 mm. The mesh is outside the 700 mm frame, giving a conservative target-to-frame-edge lower bound of `29.07 px`; it has 12,478/18,504 visible pixels at 850/1000 mm with minimum target clearance `436/371 px`. No measured dilation is inferred.
+- Preserved official-mesh failures: the first two launches failed before Isaac initialization because PowerShell generation corrupted Windows paths and newline literals; log SHA-256 values are `4c3f80b4cc13da2a9d0d0d8e3002b34a0c4a77f4565c46fef19448a2f329acc5` and `4932efed6866733ca73b58343d146e426c1d5e383fa68d9ec557af23267a1e1e`. A third launch returned no result before instrumentation, log SHA-256 `1462081fc94f5ee473ccbc87482326966c8ad1a6df99e90a8b25ae3bb660af0f` is not adopted. The instrumented launch rendered 700 mm but the inherited helper rejected a valid no-visible-robot mask, log SHA-256 `fad85870de0c6c444795f2b35c5f2e404c8028a2dce8b469957d177f16848f08`. The next launch saved the 700 mm images then failed because Isaac 6.1 lacks `rep.destroy.render_product`; log SHA-256 `f8046620719a18ed7036633fdb64a373bcbd0f7093e5e2d38afd0b6221fe0bb2`, with partial pixels preserved. None is rescored or rewritten.
+- OpenCV convention boundary: `verify_opencv_top_left_bgr_orientation` uses an asymmetric blue/green/red/yellow marker pattern at declared image quadrants. It returns only `TOP_LEFT_BGR_NO_MIRROR` and fails closed on vertical flips, horizontal mirrors, 180-degree rotation, RGB/BGR swaps, malformed frames, dark markers, or unclassified colors. Exact command: `python -m ruff check software/src/rocell/vision/usb_opencv.py software/src/rocell/vision/__init__.py software/tests/unit/test_camera_sources.py; python -m pytest -q software/tests/unit/test_camera_sources.py`. The first test run was preserved at `1 failed, 30 passed` because swapped yellow becomes cyan and the classifier did not yet identify that specific channel-order failure. After adding cyan only as a failure signature, Ruff passes and `31 passed`. The test is a software sentinel; a real B0477 frame with the physical/displayed pattern remains required at commissioning.
+- Frozen full-native paired diagnostic: fixture `C:\IsaacSim\evidence\issue190\camera_family\nadir_height_resolution_pair_v1.json`, SHA-256 `316411c15b66c4a7b251d1217c335d5c6b0a3bea48a7924285e0de6e39b633c2`; external renderer SHA-256 `93b12a41c1ba7a780416537662794007ee7fd8a9718649d46469771c9960dd01`; exact command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\camera_family\run_nadir_height_resolution_pair_v1.py`; log SHA-256 `94888f4a7b923600d23fd99165ad745ae0a3a507a7a70a3bb4e0cea39b1f030c`; result SHA-256 `4d54aad0e78d39d1242e13aee967e16619d5c1c2cec13c943e961878420cbae1`. Nine 5472 by 3648 lossless overviews yield the same 36 target/height/obstruction identities at both 96 and 192 px, for 72 rows. All 24 resolution/target/height checks preserve `dark_cable_60 > dark_cable_30 > clear`.
+- Paired metrics: at 96 px, minimum 30%/60% cable-minus-clear separation is `0.005843987/0.010920222`; maximum and mean cross-height score range are `0.002513716/0.001171422`. At 192 px, the corresponding values are `0.005649303/0.010904224` and `0.002452470/0.001072302`. Thus 192 is modestly steadier across height but does not uniformly strengthen the weakest cable signal. The smoke makes no selection; both resolutions advance to the broader paired development comparison.
+- Custody: 179 external evidence files totaling 13,587,456 bytes were copied to `C:\IsaacSim\artifacts\issue190\nadir-height-admission-resolution-20261003-backup`; manifest SHA-256 `f0e50da58c8736cc79ccefb9008170697afd512d1c63a099f425e1145ee8dce5`. This is a second directory on the same host, not independent media.
+- Counts: official-mesh render attempts 5, successful official-mesh result renders 3, native paired renders 9, paired observation rows 72, evaluation identities rendered 0, physics steps 0, model training runs 0, model selection runs 0, hardware writes 0, physical movements 0, catalog installs 0, permits 0, transports 0, physical authority false.
+- Decision: `PASS_EXPLORATORY_HEIGHT_ADMISSION_AND_RETAIN_BOTH_RESOLUTIONS`. Heights 700/850/1000 may be used as synthetic training augmentation with the frozen parked candidate and target-local crops. This is not a physical camera envelope, de-energized stable park, collision clearance, or deployment qualification.
+- Limitations and next dependency: official visual meshes omit the tool, camera support, cables, collision geometry, measured pose error, gravity, sag, and cradle. The synthetic camera lacks measured B0477 intrinsics, distortion, noise, focus, and exposure. Next freeze a broader train/development-only paired fixture with identical identities and seeds at 96 and 192, multiple lighting and unseen obstruction assets, then compare the same spatial reference-difference model without opening evaluation. Physical commissioning must separately run the asymmetric orientation sentinel and measure the camera/noise envelope.
+
+### E-20261003-AI-585 — parameter-matched 96/192 spatial model preparation
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `59522d96737da35841ee6d4d7d4fcd23d66d9c1c`; result and implementation commit `6dbd71332bda6c7dd24f874deb399ce5a6689bcd`. The released v4.2 model function, AI-to-arm boundary, arm-lane state, integration gates, evaluation identities, and physical authority remain unchanged.
+- Implementation: a separate `paired_resolution_spatial_model` accepts only square 96 or 192 inputs, keeps the three convolution blocks and 6 by 6 spatial head, and uses adaptive average pooling solely to hold the head shape constant. Both variants have exactly 42,673 trainable parameters and map a two-row, nine-channel batch to shape `(2, 1)`. `REFERENCE_CONTEXT_WHITEPOINT` now derives the excluded center half from the image dimensions; at 96 pixels it remains exactly rows/columns 24 through 71, preserving released behavior. Source SHA-256 is `3160aea968fcd1c11d6e832e94a50a3978a26c35f8123f9102e18db272f0d36c`; focused-test SHA-256 is `bf70ef47bd6be198f058db448b6c84f8ef060860dc61154208defe935d01c177`.
+- Exact validation command: `python -m ruff check software/ai/train/run_residual_obstruction_v4_2_memorization.py software/ai/tests/test_residual_obstruction_v4_2_gates.py; python -m pytest -q software/ai/tests/test_residual_obstruction_v4_2_gates.py`. Ruff passes and the corrected run reports `11 passed`.
+- Preserved failure: the first 192-normalization test used a uniform gray reference, causing reference-whitepoint clipping to make the changed center identical after normalization. Exact command was the validation command above; result `1 failed, 10 passed`. The test fixture was corrected to a white context with darker center before any model training or comparison; production normalization code was not changed in response to that test failure.
+- Counts: render count 0, opened development/evaluation pixels 0, training runs 0, model selection runs 0, hardware writes 0, physical movements 0, catalog installs 0, permits 0, transports 0, physical authority false.
+- Decision: `PASS_PAIRED_MODEL_IMPLEMENTATION_PREPARATION`. Model capacity is controlled for the coming 96/192 comparison. No performance or efficiency winner is claimed.
+- Next dependency: freeze and render the broader train/development-only lossless paired corpus with identical row identities and seeds at the admitted 700/850/1000 mm heights; train both variants with identical optimization and compare safety diagnostics, height stability, latency, and memory without opening evaluation.
+
+### E-20261003-AI-586 — frozen paired-height corpus schedule and exact shard admission
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `70acc510a5b3b53c1b51905d05317344756fea39`; fixture, schedule, admission, and test commit `a7b2bbdaa29ef9948f6a3de197022d0a559eb909`. The released v5.4 fixture and results, AI-to-arm boundary, installed target catalog, arm-lane state, integration gates, evaluation identities, and physical authority remain unchanged.
+- Frozen fixture: `software/ai/sim/evidence/residual_obstruction_paired_height_v1.json`, file SHA-256 `c90f8cdbc6835e01a099265da6c238d01d982b343d667f0e57484d2c5a49fbe9`, canonical bundle SHA-256 `d0cc220b9fddabfc2221362dff0dcf8af0d5ea2524400426eda9e258adccbc41`. It binds the external uninstalled 80-target candidate SHA-256 `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`, height-admission result `82f04415dace8e22fd8a46078fed01a0d2e9288752e66ee5255c2e0b53aa5fad`, official-mesh result `9664f973e145224309615b8e60e868a83cc1033547386ed5833aa55113f3c61a`, and paired smoke result `4d54aad0e78d39d1242e13aee967e16619d5c1c2cec13c943e961878420cbae1`.
+- Exact fixture command: `python software/ai/train/build_paired_height_fixture.py --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --candidate C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --output software/ai/sim/evidence/residual_obstruction_paired_height_v1.json --source-commit 70acc510a5b3b53c1b51905d05317344756fea39`. Builder SHA-256 is `a5725d39a812c96e589e6b9d9ac77d21256503c9362d59de39d24ad16a689545`.
+- Schedule: 16 training scenes receive one deterministically assigned height each, balanced as six at 700 mm, five at 850 mm, and five at 1000 mm. This produces 46,080 training source rows. Eight development scenes repeat every appearance, target, and obstruction identity at all three heights, producing 69,120 development source rows. The total is 115,200 source rows and exactly 230,400 paired model-input PNGs. A SHA-256-derived 64-bit seed binds every row identity. Development and training obstruction assets remain split-disjoint. Evaluation identities and pixels are absent.
+- Output/admission contract: every source row must yield exactly one 96 by 96 and one 192 by 192 lossless PNG, both naming the same source-pixel SHA-256 and frozen seed. Admission reconstructs the exact scene/height/appearance/target/variant Cartesian allowlist, rejects missing, duplicate, stale, evaluation, wrong-source, wrong-size, non-PNG, hash-altered, or extra paths, and optionally opens every file to verify its PNG signature and dimensions. Contract SHA-256 is `4f5645e6d9de81e39ef1218f7edc0901462acbbb580fafc468d578f7f6f2e38d`; test SHA-256 is `a3115732d3ec3f58eee990bc734fc355db5fa0a44d4769a0ed5179a4175ed663`.
+- Validation commands: `python -m ruff check software/ai/train/paired_height_corpus_contract.py software/ai/train/build_paired_height_fixture.py software/ai/tests/test_paired_height_corpus_contract.py`; `python -m pytest -q software/ai/tests/test_paired_height_corpus_contract.py software/ai/tests/test_residual_obstruction_v4_2_gates.py software/ai/tests/test_residual_obstruction_successor_v5_4.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result before commit: Ruff passes, `24 passed`, documentation passes, and the existing tracked tree remains within byte and duplicate targets. After the four intentional source/test/evidence files are committed, archive inventory is 6,338 tracked files, 658,067,372 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes. The tracked-file ceiling is deliberately raised from 6,334 to 6,338 in the same implementation commit; byte and duplicate ceilings are unchanged.
+- Preserved validation failure: the first lint run followed a passing `4 passed` focused test and reported two source-style errors: one late test import required `# noqa: E402`, and one unused `hashlib` import was removed. No fixture identity, count, seed, threshold, image, model, or result changed in response.
+- Counts: rendered source rows 0, rendered model-input PNGs 0, development pixels opened 0, evaluation identities present 0, evaluation pixels opened 0, training runs 0, model-selection runs 0, hardware writes 0, physical movements 0, catalog installs 0, permits 0, transports 0, physical authority false.
+- Decision: `PASS_FROZEN_PAIRED_HEIGHT_SCHEDULE_AND_EXACT_ADMISSION`. This bounded increment makes the next render auditable and prevents stale shard pickup. It does not demonstrate image quality, model performance, camera transfer, or physical readiness.
+- Limitations and next dependency: the corpus is explicitly synthetic and the loader remains exploratory with zero measured B0477 noise. The external 80-target candidate is not installed. Implement the Isaac renderer against this exact schedule, render and admit a small training-only shard, visually inspect lossless source and paired 96/192 crops, then launch broader train/development rendering only if that smoke passes. Evaluation remains unopened.
+
+### E-20261003-AI-587 — pre-render correction to native sensor-crop storage
+
+- Stage/lane: S2 AI/model and simulation. Amendment claim commit `1c44e376304e0ef364d09c3b8e56912ac9e72a8c`; corrected fixture, loader, admission, and test commit `c99b52dc5b22e7a92dfe149aada132b0950d4f57`; final explicit exposure-before-noise implementation commit `82103e333c8ee47357562afd4d7fbe4b3d87c91a`. No corpus pixels or model results existed when the storage error was identified. E-586 remains preserved as the rejected pre-render design rather than being rewritten.
+- Correction: pre-resampled 96/192 PNG storage is rejected because measured sensor noise and YUY2 4:2:2 occur at native sensor pixels before crop alignment and downsampling. The v1.1 fixture stores exactly one lossless sensor-aligned native RGB8 PNG per source identity. Its full-frame left/right bounds must be even so cosited-left chroma pairs retain the real sensor phase. The loader then applies exposure/gain role, native-scale noise, uint8 quantization, BT.601 full-range YUY2 4:2:2, floating crop alignment, and finally 96 or 192 bicubic resampling. Both candidates therefore consume identical source pixels and deterministic noise seeds while downsampling averages noise at the correct stage.
+- Frozen successor fixture: `software/ai/sim/evidence/residual_obstruction_paired_height_v1_1.json`, file SHA-256 `2376dd8f1e38c5f479311f1054837ca3d1f76e133d80329d9242424a968b6476`, canonical bundle SHA-256 `4b8178e7068ce0a76b1e885c12d8b58e05fadb33bc0a17427f3dd7dfdf10fd71`. It explicitly binds superseded v1 file SHA-256 `c90f8cdbc6835e01a099265da6c238d01d982b343d667f0e57484d2c5a49fbe9`. Exact build command: `python software/ai/train/build_paired_height_fixture.py --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --candidate C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --output software/ai/sim/evidence/residual_obstruction_paired_height_v1_1.json --source-commit 1c44e376304e0ef364d09c3b8e56912ac9e72a8c`.
+- Inventory correction: the source-row counts remain 46,080 training, 69,120 development, and 115,200 total. Storage is now 115,200 native crop PNGs. A loader epoch derives 230,400 model tensors in memory; those tensors are not corpus artifacts. Admission validates exact identities and paths, PNG signatures and hashes, native dimensions in the frozen 320–480 px range, full-frame YUY2 pair alignment, and the floating model-crop box. Qualifying mode fails closed without a measured B0477 noise profile; exploratory zero-noise mode remains explicitly nonqualifying.
+- Statistical correction: three repeated development heights are one matched identity family, not three independent observations. The frozen cluster key is scene, appearance, target, and variant with height repeated. Future evaluation identities remain absent, but the contract reserves intermediate 775 and 925 mm probes before any claim about performance between the three trained heights. A pass at 700, 850, and 1000 mm supports only those discrete heights.
+- Source SHA-256 values: camera loader/admission `8a0c1c424903963f6e8c050d63e07b6c9112759858a6aac64c89b8b4bfaba999`; builder `473392e0a78905cc34b0f00a31bd25e15a7b838bbe1a144f72c0090177bb2a10`; focused tests `fe3877cea16d6188793600bfec15200a0cbb48aaa4c290a4ae688cdb57c236a5`.
+- Exact validation commands: `python -m ruff check software/ai/train/paired_height_corpus_contract.py software/ai/train/build_paired_height_fixture.py software/ai/tests/test_paired_height_corpus_contract.py`; `python -m pytest -q software/ai/tests/test_paired_height_corpus_contract.py software/ai/tests/test_residual_obstruction_v4_2_gates.py software/ai/tests/test_residual_obstruction_successor_v5_4.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: Ruff passes and `25 passed`. The deterministic loader test shows a native dark line survives both resolutions, qualification rejects a missing measured noise profile, and the 96 output averages more seeded native noise than the 192 output. Archive inventory after commit is 6,339 tracked files, 658,090,472 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes. The tracked-file ceiling rises by one in the same commit solely to retain both the rejected v1 and corrected v1.1 fixtures.
+- Counts: stored native crop PNGs rendered 0, derived tensors materialized for tests 2, development pixels opened 0, evaluation identities present 0, evaluation pixels opened 0, training runs 0, model-selection runs 0, hardware writes 0, physical movements 0, catalog installs 0, permits 0, transports 0, physical authority false.
+- Decision: `PASS_PRE_RENDER_NATIVE_STORAGE_CORRECTION`. The renderer may now target the native-crop boundary. This establishes ordering and integrity, not camera realism, model performance, or hardware qualification.
+- Limitations and next dependency: the stored synthetic source is RGB8 rather than linear high-bit-depth sensor data, and the B0477 noise, exposure, gain, focus, intrinsics, and distortion remain unmeasured. The next increment is a small training-only Isaac shard that stores even-bound native crops, passes strict admission, and is visually audited after exploratory load-time YUY2 conversion at both resolutions. Broader rendering remains blocked until that smoke passes.
+
+### E-20261003-AI-588 — linear-light tone pipeline and brightness-dependent noise contract
+
+- Stage/lane: S2 AI/model and simulation. Amendment claim commit `2e4dc25dae6d875ad5dc20edb134a832a2b68634`; implementation and frozen v1.2 fixture commit `80931d89733d33b22a61a5a625526167a660dc2a`; malformed-curve validation commit `36931cbcb783d21bed00f134a7aef37b4fb67799`. No corpus pixels, development results, evaluation identities, or model results existed when the missing tone step was identified. The v1 and v1.1 fixtures remain in history as rejected pre-render contracts.
+- Corrected camera order: stored native crops are explicitly `UINT8_SRGB_GAMMA_ENCODED_RGB`. The loader decodes sRGB to linear light, applies linear exposure/gain, samples deterministic zero-mean noise from a piecewise-linear standard-deviation curve indexed by per-pixel linear luminance, quantizes at the declared sensor bit depth, applies per-channel white balance, applies the sRGB tone curve, encodes BT.601 full-range cosited-left YUY2 4:2:2, applies the recorded floating crop alignment, and only then resamples to 96 or 192. This fixes the dark-versus-bright noise-strength error and preserves downsampling's noise averaging.
+- Frozen successor fixture: `software/ai/sim/evidence/residual_obstruction_paired_height_v1_2.json`, file SHA-256 `2ab9382feb524c9787653f06eedb38684caae37ef57ef541e6582bf9a6241b3a`, canonical bundle SHA-256 `adbef005ab1dca282f5307ebbdc29d9a123fcbf01796df6486536f56c4747989`. It binds rejected v1 SHA-256 `c90f8cdbc6835e01a099265da6c238d01d982b343d667f0e57484d2c5a49fbe9` and rejected v1.1 SHA-256 `2376dd8f1e38c5f479311f1054837ca3d1f76e133d80329d9242424a968b6476`. Exact build command: `python software/ai/train/build_paired_height_fixture.py --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --candidate C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --output software/ai/sim/evidence/residual_obstruction_paired_height_v1_2.json --source-commit 2e4dc25dae6d875ad5dc20edb134a832a2b68634`.
+- Measured-profile contract: qualifying loads require measurement scope `MEASURED_B0477_LOCKED_SETTINGS`, a hash-bound source-burst manifest, strictly increasing linear-brightness knots spanning 0 through 1, corresponding nonnegative noise standard deviations, RGB channel noise scales, 8–16 bit sensor quantization, white-balance multipliers, and the declared sRGB tone curve. The planned measurement uses locked runtime exposure, gain, white balance, and focus; decodes repeated static YUY2 frames, linearizes sRGB, computes each pixel's temporal mean and variance, and fits the noise curve by mean-brightness bin. An exploratory assumed profile cannot enter qualifying mode.
+- Source SHA-256 values: loader/admission `01610a168f0c83920262e127ad18696d500075e904ee6214eca144d46dba147d`; fixture builder `ae1aad89100890cbb25870443462f34f5d5aba6fe2f5ff838b279de5aaae76cd`; focused tests `97c24b46f2597ebc4121bf96593fcf04e36888d26854c51ed66796c40cf6e530`.
+- Exact validation commands: `python -m ruff check software/ai/train/paired_height_corpus_contract.py software/ai/train/build_paired_height_fixture.py software/ai/tests/test_paired_height_corpus_contract.py`; `python -m pytest -q software/ai/tests/test_paired_height_corpus_contract.py software/ai/tests/test_residual_obstruction_v4_2_gates.py software/ai/tests/test_residual_obstruction_successor_v5_4.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Result: Ruff passes and `26 passed`. Tests cover absent-profile rejection, assumed-profile rejection in qualifying mode, measured-profile admission, malformed curve validation through the frozen schema, brighter-linear-pixel noise interpolation exceeding darker-pixel noise, YUY2-before-resize behavior, and stronger noise averaging at 96 than 192.
+- Archive inventory after commit: 6,340 tracked files, 658,115,785 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes. The tracked-file ceiling rises by one in the same commit solely to retain rejected v1.1 and corrected v1.2 side by side; byte and duplicate ceilings are unchanged.
+- Counts: native corpus PNGs rendered 0, test tensors derived 3, development pixels opened 0, evaluation identities present 0, evaluation pixels opened 0, training runs 0, model-selection runs 0, hardware writes 0, physical movements 0, catalog installs 0, permits 0, transports 0, physical authority false.
+- Decision: `PASS_PRE_RENDER_LINEAR_LIGHT_CAMERA_ORDER`. The storage and loader boundary now matches the required causal order at an explicitly approximate RGB8 source boundary. It does not supply a measured camera profile or prove real-camera fidelity.
+- Limitations and next dependency: Isaac RGB8 sRGB cannot recover high-bit-depth linear radiance lost before storage, and the B0477 exposes processed YUY2 rather than raw sensor samples. The measured curve will therefore be an effective linearized output-noise model under exact locked settings. Next implement the training-only Isaac native-crop smoke against v1.2, verify strict admission, and visually inspect dark-cable crops after zero-noise and assumed-curve exploratory loads at both resolutions. Broader rendering remains blocked until that smoke passes.
+
+### E-20261003-AI-589 — measured tone response and spatially correlated camera-noise contract
+
+- Stage/lane: S2 AI/model and simulation. Amendment claim commit `c81ff955f9feafca727b645380d7a0ee08b7482d`; implementation, frozen v1.3 fixture, and tests commit `a1f25cca35c0e5adaaeab1cf46065cebda6864f7`. No corpus pixels, development results, evaluation identities, or model results existed before this correction. Fixtures v1 through v1.2 remain preserved as rejected pre-render designs.
+- Tone response: the loader continues to decode the stored Isaac `UINT8_SRGB_GAMMA_ENCODED_RGB` source with the renderer's declared sRGB transfer, but no longer assumes the physical B0477 uses sRGB for output. The camera profile carries strictly increasing measured linear-input and output-code knots from a locked-exposure sweep. After linear exposure, noise, quantization, and white balance, the loader interpolates this measured B0477 curve before YUY2. The same curve is inverted when linearizing physical static-burst measurements.
+- Spatial processing: the measured profile carries an odd square kernel up to 7 by 7. The loader L2-normalizes it, filters seeded white noise, and then applies the brightness- and channel-dependent standard deviation, preserving nominal RMS while reproducing neighboring-pixel correlation. The profile also records whether denoising and sharpening were disabled, whether disabling was attempted, and the exact settings-receipt SHA-256. If onboard processing cannot be disabled, the measured kernel remains required rather than pretending the noise is independent.
+- Frozen successor fixture: `software/ai/sim/evidence/residual_obstruction_paired_height_v1_3.json`, file SHA-256 `cf51c934646fbb928e2ccc17f82169561fb8aafee07757126b32a97247bb4654`, canonical bundle SHA-256 `fe6e8ed88634c7a323ca1b4c1861677df78736abce9b4824218091d296771e7b`. It binds rejected v1.2 SHA-256 `2ab9382feb524c9787653f06eedb38684caae37ef57ef541e6582bf9a6241b3a` in addition to the earlier rejected fixtures. Exact build command: `python software/ai/train/build_paired_height_fixture.py --v5 software/ai/sim/evidence/residual_obstruction_successor_v5.json --candidate C:\IsaacSim\evidence\issue190\planner\nominal_target_profiles_80_measured_candidate.json --output software/ai/sim/evidence/residual_obstruction_paired_height_v1_3.json --source-commit c81ff955f9feafca727b645380d7a0ee08b7482d`.
+- Source SHA-256 values: loader/admission `fe8ae01190a430b3a135f3131c97c30a41373d1052ab466e83c6586ecbca5ef5`; fixture builder `54ee9ac4ca7edcf1680973ac12ac7e1a02a395337932ebe50dd497d84b8aabe8`; focused tests `1b9af6842b8d35ba67d794ac1b895faaed492e1da6f9c705dac2cdadd0b6a664`.
+- Exact validation commands: `python -m ruff check software/ai/train/paired_height_corpus_contract.py software/ai/train/build_paired_height_fixture.py software/ai/tests/test_paired_height_corpus_contract.py`; `python -m pytest -q software/ai/tests/test_paired_height_corpus_contract.py software/ai/tests/test_residual_obstruction_v4_2_gates.py software/ai/tests/test_residual_obstruction_successor_v5_4.py scripts/ci/test_check_source_archive_footprint.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `git diff --check`. Result: Ruff passes and `27 passed`. Tests cover measured-versus-assumed profile admission, malformed response/noise curves, measured-tone output effect, brightness-dependent variance interpolation, neighboring-pixel kernel spread and RMS preservation, native YUY2 ordering, and 96-versus-192 noise averaging.
+- Archive inventory after commit: 6,341 tracked files, 658,139,294 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes. The tracked-file ceiling rises by one solely to retain rejected v1.2 and corrected v1.3; byte and duplicate ceilings are unchanged.
+- Counts: native corpus PNGs rendered 0, test tensors derived 5, development pixels opened 0, evaluation identities present 0, evaluation pixels opened 0, training runs 0, model-selection runs 0, hardware writes 0, physical movements 0, catalog installs 0, permits 0, transports 0, physical authority false.
+- Decision: `PASS_PRE_RENDER_MEASURED_TONE_AND_CORRELATED_NOISE_CONTRACT`. The camera-model design is complete to the extent possible without the B0477. It remains synthetic and nonqualifying.
+- Limitations and next dependency: the actual response curve, spatial kernel, brightness/noise curve, white balance, quantization behavior, denoise state, and sharpening state remain unmeasured. Run the training-only Isaac native-crop smoke against v1.3 with exploratory zero-noise and assumed-profile loader views, enforce exact admission, and visually inspect thin dark cables at 96 and 192 before broader rendering.
+
+### E-20261003-AI-590 — exact v1.3 training-only native-crop smoke
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `14c428d802cd059bf4ff8dc3a299a8d05c35749f`. The AI-to-arm boundary, arm-lane state, integration gates, installed catalog, physical authority, development identities, and evaluation identities remain unchanged.
+- Bounded scope: one exact training shard uses `v5_training_scene_01`, its frozen 700 mm nadir height, keyboard `GRAVE`, all three frozen training appearances, and all twelve frozen obstruction variants. `GRAVE` was selected because the exact-candidate MW2UC evidence gives it the smallest simulated landing margin and its dark surface exercises the known low-contrast cable weakness. This is 36 source identities. No development or evaluation identity was rendered or opened.
+- Exact render command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\paired_height_v1_3_smoke\run_training_grave_smoke_v1.py`. External renderer SHA-256 is `19a4ffe3326aa7828a511c440fee97dcff9c4373d9984262e393e63373efc396`. The v1.3 fixture SHA-256 is `cf51c934646fbb928e2ccc17f82169561fb8aafee07757126b32a97247bb4654`, with canonical bundle SHA-256 `fe6e8ed88634c7a323ca1b4c1861677df78736abce9b4824218091d296771e7b`.
+- Native output and exact admission: every identity stores one RGB8 lossless PNG at 472 by 472 pixels. Full-frame bounds are even on both horizontal edges, and each manifest row retains its floating model-crop alignment. Manifest `C:\IsaacSim\evidence\issue190\paired_height_v1_3_smoke\training_scene_01_grave\manifest.json` has SHA-256 `95e3c4715e3b279336c5b8cac7cb482a3b1d48a8ffcf4f94ab7dba65f4c69462`. Exact admission command: `python -c "import sys,json; from pathlib import Path; sys.path.insert(0,r'software/ai/train'); from paired_height_corpus_contract import admit_shard_manifest; f=Path(r'software/ai/sim/evidence/residual_obstruction_paired_height_v1_3.json'); root=Path(r'C:\IsaacSim\evidence\issue190\paired_height_v1_3_smoke\training_scene_01_grave'); print(json.dumps(admit_shard_manifest(f,root/'manifest.json',artifact_root=root),indent=2))"`. Result is `PASS_EXACT_PAIRED_SHARD_ADMISSION`, split training, 36 source rows, and 36 stored native PNGs.
+- Exploratory loader audit: v1.3 derives 36 images at 96 and 36 at 192 from the exact native files using an explicitly `ASSUMED_EXPLORATORY_ONLY` identity-tone, zero-noise profile. These images are outside the corpus file allowlist and cannot enter qualifying selection. Audit manifest SHA-256 is `f3b06612c8e9a3cb76e3a0a4d776454686bc5e6f5f3d2b04b481419f57850af7`; 192-pixel contact sheet SHA-256 is `52c14fafdbfb9ad55a44095aafa29d58f2c6b440b37a4aca6415e6b87d69775c`. Visual review confirms correct target-relative placement for adjacent, cable, hand, tool, and foreign-object variants.
+- Diagnostic result: result `C:\IsaacSim\evidence\issue190\paired_height_v1_3_smoke\training_scene_01_grave\smoke_result.json` has SHA-256 `42cc81ee78a10ab1ed85df8ef871b0cf9047ff2bc6e119cde593429369b92a84` and status `PASS_TRAINING_ONLY_PIPELINE_SMOKE`. At 192 pixels, mean absolute RGB8 change for dark cables increases from 10% to 30% to 60% in every appearance: `1.271991/2.244376/3.876383`, `1.674479/2.248906/3.561189`, and `1.555709/2.202402/3.312428`. Every non-clear variant has positive mean and maximum change from its same-appearance clear reference. These are pipeline diagnostics, not thresholds or model metrics.
+- Custody: the result directory is copied to `C:\Users\WebTek\Desktop\issue190-evidence-backup\paired_height_v1_3_smoke\training_scene_01_grave`. Backup receipt SHA-256 is `6abc3a357788605f22cd998e6d39b8e0a328653241d8d55e0669eda62bb6a60a`. Only the `C:` fixed disk is available, so this second directory protects against accidental directory loss but not physical drive failure.
+- Counts: native PNGs 36; exploratory derived audit PNGs 72; Isaac renders 36; development rows rendered/opened 0; evaluation rows rendered/opened 0; physics steps 0; model training runs 0; model-selection runs 0; hardware writes 0; physical movements 0; catalog installs 0; permits 0; transports 0; physical authority false.
+- Decision: `PASS_TRAINING_ONLY_PIPELINE_SMOKE`. The exact v1.3 schedule, native lossless storage, YUY2-pair alignment, load-time 96/192 derivation, and exact shard admission operate together on Isaac output. This does not prove model performance, height robustness, camera transfer, photorealism, or deployment qualification.
+- Limitations and next dependency: the smoke uses procedural solid-color geometry without Periboard legends, one target, one scene, and one trained height. It uses no measured B0477 tone/noise profile, and the derived audits are intentionally nonqualifying. Before broad rendering, turn this bounded script into a restartable exact-shard runner, estimate native-corpus storage and throughput, retain external evidence with durable off-host backup when available, then render training shards first. Development remains unopened until training admission and the frozen memorization gate are ready.
+
+### E-20261003-AI-591 — cross-height keyboard/phone native-crop smoke
+
+- Stage/lane: S2 AI/model and simulation. Active claim commit `11dcc4f4b30b55f1637a0d66dbed6988e15aed34`. Arm-lane status, integration gates, the external uninstalled catalog, AI-to-arm authority, development identities, and evaluation identities remain unchanged.
+- Scope: exact training rows for scenes `v5_training_scene_01`, `02`, and `03`, which the frozen schedule assigns to 700, 850, and 1000 mm; keyboard `GRAVE` at board-Z 21.0 mm; phone `key_w` at board-Z 11.9 mm; all three training appearances; and all twelve variants. This yields 216 exact source rows. The paired visual audit derives only clear and dark-cable 10/30/60 views at 96 and 192, for 144 nonqualifying audit PNGs outside the model-input allowlist.
+- Exact successful command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\evidence\issue190\paired_height_v1_3_cross_plane_smoke\run_cross_plane_height_smoke_v1.py`. Final renderer SHA-256 is `d4f256801c622cb1674a02ecf6fd1af2609561385db5030b251d1fa2d7aba729`; successful log SHA-256 is `1a97a3f8f856550758d02997fdeca9a0faf6b77f01b6f54d5795b3e1d4213124`.
+- Preserved failures: attempt 1 reused a semantic-array helper whose fixed 192 by 192 shape contract was invalid for 5472 by 3648 native segmentation. Renderer SHA-256 `a4dc4feda24d60100db8a2c0ca85ab353ea1485e2eedc1ed9f769e47cbfad726`; log SHA-256 `940ac194bac472e694c51ea1c76013429c7e2eaad7c73ac4ec1dff33322c2ad2`; no crop was retained. Attempt 2 replaced the helper shape check but Isaac's three-camera full-native semantic path shut down after one partial crop while returning process code zero; log SHA-256 `119b8d5e8d2983ebd734284c21e438b100bee1f2136732e55a9095946aa9e16d`. The final run removes semantic rendering, keeps geometric alignment diagnostics, and requires visual confirmation. Neither failed attempt is rescored or relabeled as a pass.
+- Exact admission command: `python -c "import sys,json; from pathlib import Path; sys.path.insert(0,r'software/ai/train'); from paired_height_corpus_contract import admit_shard_manifest; f=Path(r'software/ai/sim/evidence/residual_obstruction_paired_height_v1_3.json'); root=Path(r'C:\IsaacSim\evidence\issue190\paired_height_v1_3_cross_plane_smoke\training_scenes_01_03_grave_key_w'); print(json.dumps(admit_shard_manifest(f,root/'manifest.json',artifact_root=root),indent=2))"`. Manifest SHA-256 `baf305e3063bffe4d5ffb901daf81d5b912326becb7ff7cde01f9fc38e07989b`; result `PASS_EXACT_PAIRED_SHARD_ADMISSION`, training, 216/216 rows and native PNGs.
+- Height and plane result: keyboard native sizes are 472 by 472, 388 by 387, and 328 by 328 at 700/850/1000 mm. Phone sizes are 468 by 466, 384 by 383, and 326 by 325. Width strictly decreases with height on both physical planes. Every stored left and right edge is even and every floating crop lies inside its stored crop, as enforced by exact admission. Maximum analytic center-to-stored-center offset caused by integer pair expansion is `0.850673 px`.
+- Visual/focus result: 192-pixel contact sheet SHA-256 `00630c3fbb5eb81b65e0f65b2d36d88663b6068eeac9c45848f71f72f2da14ea` shows both targets centered and visually sharp at all three heights and appearances. Minimum clear-crop native Laplacian variance is `28.387110`. This is a synthetic renderer sharpness diagnostic and does not qualify B0477 optics or focus.
+- Dark-cable result: all 18 combinations of three heights, three appearances, and two targets preserve mean absolute RGB8 difference ordering `dark_cable_10 < dark_cable_30 < dark_cable_60` at 192 pixels. No threshold or model selection is inferred.
+- Final result: `C:\IsaacSim\evidence\issue190\paired_height_v1_3_cross_plane_smoke\training_scenes_01_03_grave_key_w\result.json`, SHA-256 `47142a721a4ce6b875fd6629b8b8b8d33804a0a6329f90ac12e48785493a5675`, status `PASS_EXACT_CROSS_HEIGHT_CROSS_PLANE_TRAINING_SMOKE`.
+- Storage estimate: 216 native crops occupy 10,681,971 bytes, averaging 49,453.57 bytes. Mean size is 66,781.04/45,957.44/35,622.22 bytes at 700/850/1000 mm. A simple sample-mean projection estimates 115,200 native crops at 5,697,051,200 bytes before manifests, logs, or backups. This is a planning estimate rather than a quota.
+- Custody: evidence is copied to `C:\Users\WebTek\Desktop\issue190-evidence-backup\paired_height_v1_3_cross_plane_smoke`; backup-receipt SHA-256 `4624a445c30bfe5f5363708f460ee880f4a86b06d13e0366a17816e9713f2192`. Both copies are on the same physical `C:` disk.
+- Counts: Isaac RGB renders 108; native PNGs 216; exploratory audit PNGs 144; development rows rendered/opened 0; evaluation rows rendered/opened 0; model training runs 0; model-selection runs 0; physics steps 0; hardware writes 0; physical movements 0; permits 0; transports 0; physical authority false.
+- Decision: `PASS_EXACT_CROSS_HEIGHT_CROSS_PLANE_TRAINING_SMOKE`. The native crop geometry, discrete-height scaling, keyboard/phone plane handling, exact admission, and dark-cable ordering are ready for the full training render. This is not a height-continuity, physical focus, camera-transfer, or model-performance claim.
+- Next dependency: launch restartable exact training shards over all 16 frozen scenes and 80 targets while preventing neighboring target obstructions from contaminating each target's independent row. Admit and back up every training shard before opening any development identity.
+
+### E-20261003-AI-592 — full-render early visual audit and gated development preparation
+
+- Stage/lane: S2 AI/model and simulation. Full-render claim commit `40d12f41a36d946a0080f24f2b6fe65c7483d2aa`; development-queue claim commit `3da63d572190f625023aa008f96363388d60dfa0`. Arm-lane status, integration gates, installed catalogs, model-to-arm authority, evaluation identities, hardware writes, and physical movement remain unchanged.
+- Early audit scope and command: after the first complete training scene became available, run `python C:\IsaacSim\evidence\issue190\paired_height_v1_3_full\audit_first_groups_v1.py`. The audit generator SHA-256 is `ebd434dc343f24a5cff045a10da5626483bad0686e30335dc6178d8aef7db7db`. It reads only `v5_training_scene_01` / `v5_training_light_01`, selecting keyboard `GRAVE`, `EQUAL`, and `F` plus phone `key_w`, `key_period`, and `key_enter`, crossed with clear, adjacent-left, dark-cable 10/30/60, translucent-cable 60, hand 60, and tool 40. This yields 48 inspected training crops and opens zero development or evaluation rows.
+- Audit artifacts and result: contact sheet `C:\IsaacSim\evidence\issue190\paired_height_v1_3_full\early_visual_audit\training_scene_01_light_01_contact_sheet.png` has SHA-256 `9a9fbf92d42890463787a01cb52233c3629d2a568efaaa6c61d6289fa59158a3`; machine-readable audit `C:\IsaacSim\evidence\issue190\paired_height_v1_3_full\early_visual_audit\audit.json` has SHA-256 `f856c061e292b54dbee18ea15e9952da2a99d1c2a4d3cfdba5d45e2ec36e29d4`. Visual review finds target-centered obstructions on both planes, correct adjacent placement, visibly distinct cable/hand/tool shapes, and no neighboring-target obstruction inside the selected crop. For all six targets, mean absolute RGB8 change obeys `dark_cable_10 < dark_cable_30 < dark_cable_60`; every selected non-clear crop differs from its clear reference. This is a synthetic pipeline audit, not a model metric or camera-transfer claim.
+- Live-render status at `2026-10-03T21:54:40-04:00`: worker 0 is at 950/3,192 frame groups and 7,037 PNGs; worker 1 is at 800/3,192 and 5,957 PNGs. Both progress receipts were updated within ten seconds of the check. The workers were not restarted or modified after inspection.
+- Development preparation: external renderer `C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\run_development_worker_v1.py` has SHA-256 `5f22c9ec7ee6e06efe2ab07713a6c409efebebe24bb6b417ded282b7d33b6add`. Exact plan commands are `python C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\run_development_worker_v1.py --worker-index 0 --plan-only` and the corresponding `--worker-index 1 --plan-only`. Plan SHA-256 values are `04214bd8b0598d0c7ad65ab3bb42543be9e395c29ed79bec9a3ec81694149272` and `a94996016512ef451d6e544c82d4d4beca6a6a9d09f88dce7bf9a3f56b88edcd`. Each worker owns four whole scenes, all three repeated heights, 34,560 rows, and 4,788 full-native frame groups. The plans bind fixture SHA-256 `cf51c934646fbb928e2ccc17f82169561fb8aafee07757126b32a97247bb4654`, candidate SHA-256 `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`, the development-only asset IDs, and three pre-render lighting settings.
+- Fail-closed queue: `C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\queue_development_after_training_v1.py` has SHA-256 `ee2cb45bc456889e07f7be2351b341795f23477b4143aaad78fbaaa27e912c33`. It waits for both training result manifests, reruns `admit_shard_manifest` over every referenced PNG, requires exactly two 23,040-row `PASS_EXACT_PAIRED_SHARD_ADMISSION` receipts, requires at least 20 GiB free, and only then starts the two disjoint development workers. Any exception writes a preserved `BLOCKED_NO_DEVELOPMENT_LAUNCH` artifact. At this evidence point the queue is prepared but not launched, development rows rendered/opened are 0, evaluation rows rendered/opened are 0, model training runs are 0, and model-selection runs are 0.
+- Validation commands: `python -m py_compile C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\run_development_worker_v1.py C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\queue_development_after_training_v1.py`; `python scripts/ci/check_source_archive_footprint.py --json`; `python scripts/ci/check_docs.py`; `git diff --check`. Archive status before the evidence commit is 6,341 tracked files, 658,159,921 logical bytes, 4,890,152 duplicate bytes, and 55,939,877 largest-blob bytes, within all governed limits.
+- Counts and limits: audited training crops 48; training rows fully admitted 0 while render remains active; development rows rendered/opened 0; evaluation rows rendered/opened 0; model training runs 0; model-selection runs 0; hardware-write count 0; physical-movement count 0; permits 0; transports 0; physical authority false. The procedural renderer still lacks real legends, measured B0477 tone/noise, physical focus, and physical camera qualification.
+- Decision and next dependency: `PASS_EARLY_TRAINING_VISUAL_AUDIT_AND_PREPARE_GATED_DEVELOPMENT_QUEUE`. Start the fail-closed queue, allow the training workers to finish unchanged, and preserve the exact training admission outcome before any development pixel is created. Evaluation remains absent and unopened.
+
+### E-20261003-AI-593 — fail-closed development queue launch
+
+- Stage/lane: S2 AI/model and simulation. Queue claim commit `3da63d572190f625023aa008f96363388d60dfa0`; audit and queue-preparation evidence commit `6a8d67a468fee735ab249e41b8c53ab8ddb39cbe`. No arm-lane or integration status is changed.
+- Exact launch command: `$script='C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\queue_development_after_training_v1.py'; Start-Process -FilePath (Get-Command python).Source -ArgumentList @($script) -WorkingDirectory 'C:\Users\WebTek\Desktop\tactevra-issue-190' -WindowStyle Hidden -PassThru`. The launched queue PID is 12916. Queue script SHA-256 remains `ee2cb45bc456889e07f7be2351b341795f23477b4143aaad78fbaaa27e912c33`.
+- Immediate receipt: `C:\IsaacSim\evidence\issue190\paired_height_v1_3_development\queue_status.json` has SHA-256 `f168f2eb2525d355e8999991d23a5f586fdb56791bc092c26d849c3244f5732a` and status `WAITING_FOR_EXACT_TRAINING_ADMISSION`, with a 30-second poll interval and 48-hour fail-closed timeout. At launch, both training workers remained active; shortly afterward their receipts reported 1,075/3,192 and 925/3,192 frame groups.
+- Gate semantics: the queue does not treat renderer exit as admission. It opens development only after both complete manifests pass repository `admit_shard_manifest` against every exact identity, PNG signature, content hash, pixel size, YUY2-pair alignment, floating alignment, and file allowlist, totaling exactly 46,080 admitted training rows. It then requires at least 20 GiB free. A timeout, hash change, manifest error, row-count difference, or disk failure produces `BLOCKED_NO_DEVELOPMENT_LAUNCH` and launches no development worker.
+- Counts at launch: training render active; training rows finally admitted 0; development rows rendered/opened 0; evaluation rows rendered/opened 0; model training runs 0; model-selection runs 0; hardware-write count 0; physical-movement count 0; permits 0; transports 0; physical authority false.
+- Decision and next dependency: `PASS_FAIL_CLOSED_QUEUE_LAUNCH`. Await exact training completion and admission. If admitted, the queue launches the frozen 69,120-row development render on two GPUs; if rejected, preserve the failure and keep development unopened.

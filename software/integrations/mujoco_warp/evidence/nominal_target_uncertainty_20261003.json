@@ -1,0 +1,343 @@
+{
+  "calibrated_residual_study": {
+    "claim_commit": "d5582108808d8cdd87df3fab4e716baa49e53bbe",
+    "cross_device_numerical_content_equal": true,
+    "cross_device_numerical_content_sha256": "ce13808a089a453ab7eb30c21d2c94889fd1096b40260b64751c65890222627c",
+    "design": {
+      "cartesian_correction_model": "local equivalent subtraction",
+      "correction_reference": "absolute target center",
+      "effective_safe_half_widths_mm": [
+        3.0,
+        4.0
+      ],
+      "fixed_approach_sign_per_target": true,
+      "fixed_backlash_and_systematic_magnitude_rad_each": [
+        0.002,
+        0.004,
+        0.008
+      ],
+      "per_key_calibration_residual_fraction": [
+        0.0,
+        0.1,
+        0.25,
+        0.5,
+        1.0
+      ],
+      "random_joint_noise_sigma_rad": [
+        0.001,
+        0.0015,
+        0.002
+      ]
+    },
+    "external_artifact_sha256": {
+      "cuda0": "78574e805961769d69579f63d3b7e9027173a219680dda12327134596363437f",
+      "cuda1": "aa90e5ace60b01faf51d4f6f270f4a4f3fae8fd0a22898e2efb4b0e7a5d98afc"
+    },
+    "hardware_write_count": 0,
+    "interpretation": {
+      "residual_grid_not_a_monotonic_threshold": "directional residual can sometimes offset tail direction, so entries are observed passing grid values rather than qualification limits",
+      "synthetic_design_path": "consistent approach plus per-key correction can reduce the problem primarily to random noise; physical measurements must set all values",
+      "width_3_mm": "marginal; single tail misses occur even at zero residual for some fixed-pose sensitivities",
+      "width_4_mm": "feasible across the focused grid when fixed-source residual is reduced to 10\u201325% in the harder cases"
+    },
+    "largest_passing_residual_grid_value": {
+      "fixed_0.002_noise_0.0015_width_3": 0.25,
+      "fixed_0.002_noise_0.0015_width_4": 0.5,
+      "fixed_0.002_noise_0.001_width_3": 0.5,
+      "fixed_0.002_noise_0.001_width_4": 1.0,
+      "fixed_0.002_noise_0.002_width_3": null,
+      "fixed_0.002_noise_0.002_width_4": 0.25,
+      "fixed_0.004_noise_0.0015_width_3": 0.1,
+      "fixed_0.004_noise_0.0015_width_4": 0.25,
+      "fixed_0.004_noise_0.001_width_3": 0.25,
+      "fixed_0.004_noise_0.001_width_4": 0.5,
+      "fixed_0.004_noise_0.002_width_3": null,
+      "fixed_0.004_noise_0.002_width_4": 0.1,
+      "fixed_0.008_noise_0.0015_width_3": null,
+      "fixed_0.008_noise_0.0015_width_4": 0.1,
+      "fixed_0.008_noise_0.001_width_3": 0.1,
+      "fixed_0.008_noise_0.001_width_4": 0.25,
+      "fixed_0.008_noise_0.002_width_3": null,
+      "fixed_0.008_noise_0.002_width_4": 0.1
+    },
+    "limitations": [
+      "approach signs and residual fractions are synthetic",
+      "Cartesian subtraction approximates replanning to a corrected aim point",
+      "3 mm results are tail-sensitive under the zero-miss rule",
+      "safe regions, fingertip, source magnitudes, placement, and tool length are unmeasured",
+      "no more synthetic sensitivity expansion is authorized by this result",
+      "no visual correction, collision, dynamics, contact, servo, or physical qualification claim"
+    ],
+    "physical_authority": false,
+    "physical_movement_count": 0,
+    "preserved_failed_design": {
+      "cuda0_sha256": "bfb6a20d06b4eb0684a82f2416e6e08aca1db9432619ada091ea7f5e53b86f92",
+      "cuda1_sha256": "78f3cfab60ee2fb7c5d8d221b0e64cf3009ecce7f99257073a33460abd87326c",
+      "reason": "first correction referenced the unperturbed nominal landing instead of the absolute target center"
+    },
+    "sample_design": {
+      "fk_scenario_count": 12,
+      "safe_width_cells": 90,
+      "scored_scenario_count": 45,
+      "target_count": 46,
+      "total_forward_kinematic_worlds_per_gpu": 2260992,
+      "worlds_per_target_per_fk_scenario": 4096
+    },
+    "status": "PASS_EXPLORATORY_CALIBRATED_RESIDUAL"
+  },
+  "cross_device_numerical_content_equal": true,
+  "cross_device_numerical_content_sha256": "f2de32761971946a155e8f347918309f43def4b175b639df5d16dcffea0fcc10",
+  "decision": "PASS_EXPLORATORY_SENSITIVITY",
+  "external_artifact_sha256": {
+    "cuda0": "24f3c5f1b5a4d6560811ae31abe26837840c94b400c8d028a718636f1e25f768",
+    "cuda1": "b33f01e85ce2dee4deb9ac2dd94d32e27da0e86d8acd55b68d2ae91bc4198132",
+    "default_placement_100mm_tool_blocked_6_of_46": "07e6ff43c6b1d2b7a17994180eb181d7c67880ba8d7073afb241cae8ea6bf167",
+    "initial_cuda0_censored_semantics": "c668bccdafcd5944b68807cb0f2bfb7817132fa69bcdf958f01500302998d7b3",
+    "rank1_target_pose_bundle": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+  },
+  "feasibility_map": {
+    "absolute_target_center_scoring": true,
+    "claim_commit": "9a4b959ab498d4470cea07a83fd3745e5018a899",
+    "cross_device_numerical_content_equal": true,
+    "cross_device_numerical_content_sha256": "f527ef9714b70a919e586b81f679ff8e9d02cdb98f72d08626c8546af7a0cfe5",
+    "effective_safe_half_widths_mm": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0
+    ],
+    "external_artifact_sha256": {
+      "cuda0": "6cbc26104095b1cb6ec7f344bed3439c8d45487ba0ffd996605914d4ac72c423",
+      "cuda1": "9a9bc77908e2626aa1f2bd32c3e239325882f3d79c57b02867be798304974f56"
+    },
+    "feasible_scenario_counts_by_half_width_out_of_350": {
+      "1": 3,
+      "2": 9,
+      "3": 17,
+      "4": 28,
+      "5": 48,
+      "6": 80,
+      "7": 118
+    },
+    "grids": {
+      "campaign_systematic_uniform_half_width_rad": [
+        0.0,
+        0.002,
+        0.004,
+        0.006,
+        0.008
+      ],
+      "random_joint_noise_sigma_rad": [
+        0.0,
+        0.00025,
+        0.0005,
+        0.001,
+        0.0015,
+        0.002,
+        0.00225,
+        0.0025,
+        0.00275,
+        0.003,
+        0.00325,
+        0.0035,
+        0.00375,
+        0.004
+      ],
+      "sampled_sign_backlash_magnitude_rad": [
+        0.0,
+        0.002,
+        0.004,
+        0.006,
+        0.008
+      ]
+    },
+    "hardware_write_count": 0,
+    "limitations": [
+      "safe width is a sensitivity axis, not a measured keycap/fingertip region",
+      "point tool remains optimistic",
+      "rank-1 placement and 120 mm tool are unmeasured",
+      "backlash signs are sampled surrogates",
+      "synthetic additive joint-space sources are not measured probabilities",
+      "scenario counts are grid coverage and must not be read as success probabilities",
+      "no visual correction, collision, dynamics, contact, servo, or physical qualification claim"
+    ],
+    "per_scenario_recentering": false,
+    "physical_authority": false,
+    "physical_movement_count": 0,
+    "preserved_failed_design": {
+      "cuda0_sha256": "436a56901d2a9ff71bedfd91a275f7d1700996f0bc9e8b187a9233e62b6e1f39",
+      "cuda1_sha256": "608fb6eb0fe7e1dcef780e79bb7aa36e0577e9447ab37c63793c1d898985a4a2",
+      "reason": "initial feasibility noise axis omitted zero, 0.0005, 0.001, and 0.0015 rad, preventing isolated constant-source and encoder-neighborhood interpretation"
+    },
+    "random_only_largest_feasible_sigma_by_half_width_rad": {
+      "1": 0.0005,
+      "2": 0.001,
+      "3": 0.0015,
+      "4": 0.002,
+      "5": 0.0025,
+      "6": 0.003,
+      "7": 0.0035
+    },
+    "representative_minimum_feasible_half_width_mm": {
+      "noise_0.0015_backlash_0.002_systematic_0.002": 5.0,
+      "noise_0.0015_backlash_0.004_systematic_0.004": 7.0,
+      "noise_0.0015_backlash_0_systematic_0": 3.0,
+      "noise_0.002_backlash_0.002_systematic_0.002": 6.0,
+      "noise_0.002_backlash_0.004_systematic_0.004": null,
+      "noise_0_backlash_0.004_systematic_0.004": 6.0,
+      "noise_0_backlash_0.008_systematic_0.008": null
+    },
+    "sample_design": {
+      "safe_width_cells": 2450,
+      "scenario_count": 350,
+      "target_count": 46,
+      "total_forward_kinematic_worlds_per_gpu": 65945600,
+      "worlds_per_target_per_scenario": 4096
+    },
+    "status": "PASS_EXPLORATORY_FEASIBILITY_MAP"
+  },
+  "hardware_write_count": 0,
+  "jacobian_sanity": {
+    "empirical_to_linear_rms_ratio_maximum": 1.0162211860317691,
+    "empirical_to_linear_rms_ratio_minimum": 0.9833707400406609,
+    "frozen_acceptance_range": [
+      0.8,
+      1.2
+    ],
+    "passed_all_46_targets": true,
+    "xy_jacobian_condition_number_maximum": 1.6884256767747878,
+    "xy_jacobian_condition_number_minimum": 1.1128608088722547
+  },
+  "physical_authority": false,
+  "physical_movement_count": 0,
+  "provisional_synthetic_threshold_search": {
+    "approach_direction_backlash": {
+      "largest_tested_passing_level_rad": 0.008,
+      "threshold_identified_within_grid": false
+    },
+    "random_joint_noise": {
+      "first_tested_failing_level_rad": 0.004,
+      "largest_tested_passing_level_rad": 0.002,
+      "threshold_identified_within_grid": true
+    },
+    "systematic_calibration_offset": {
+      "largest_tested_passing_level_rad": 0.008,
+      "threshold_identified_within_grid": false
+    }
+  },
+  "refinement": {
+    "absolute_landing_diagnostics": {
+      "backlash_0_008_maximum_radial_distance_from_target_center_mm": 6.0944641939618345,
+      "backlash_0_008_minimum_margin_mm": 0.9488007815612036,
+      "random_0_0035_maximum_radial_distance_from_target_center_mm": 6.8925278395346625,
+      "random_0_0035_minimum_margin_mm": 0.5954193701699353,
+      "systematic_0_008_maximum_radial_distance_from_target_center_mm": 5.425154715576139,
+      "systematic_0_008_minimum_margin_mm": 1.5889847464977436
+    },
+    "absolute_target_center_scoring": true,
+    "claim_commit": "867677aa324145857388e17c66ad0fab25a8f1e9",
+    "constant_translation_regression": {
+      "all_miss": true,
+      "minimum_margin_mm": -1.0,
+      "spread_mm": 0.0,
+      "target_half_extent_mm": 1.0,
+      "translation_mm": 2.0
+    },
+    "cross_device_numerical_content_equal": true,
+    "cross_device_numerical_content_sha256": "6860ff1cc949389790dfad6061380e6f8cca0ef050a2e3fb5b6d195bed101c86",
+    "external_artifact_sha256": {
+      "cuda0": "e3ea81844cb2690897635ad2c87f09c11f90b5641061a1ac5777f780e0f1ceb1",
+      "cuda1": "cb920649414606e3516a50bdb1fa6b00d81f7f6f31e6255d2c5f8d1eb3384d36"
+    },
+    "hardware_write_count": 0,
+    "jacobian_sanity": {
+      "empirical_to_linear_rms_ratio_maximum": 1.0196852174543531,
+      "empirical_to_linear_rms_ratio_minimum": 0.9838375585152853,
+      "passed_all_46_targets": true
+    },
+    "limitations": [
+      "nominal 7 mm half extents are not commissioned safe regions",
+      "zero-radius point tool is optimistic",
+      "rank-1 placement and 120 mm tool are unmeasured",
+      "backlash signs are sampled surrogates rather than commissioned approach directions",
+      "no combined-source, dynamics, collision, contact, servo, or physical qualification claim"
+    ],
+    "per_source_recentering": false,
+    "physical_authority": false,
+    "physical_movement_count": 0,
+    "provisional_synthetic_threshold_search": {
+      "approach_direction_backlash": {
+        "first_tested_failing_level_rad": 0.01,
+        "largest_tested_passing_level_rad": 0.008
+      },
+      "random_joint_noise": {
+        "first_tested_failing_level_rad": 0.00375,
+        "largest_tested_passing_level_rad": 0.0035
+      },
+      "systematic_calibration_offset": {
+        "first_tested_failing_level_rad": 0.01,
+        "largest_tested_passing_level_rad": 0.008
+      }
+    },
+    "sample_design": {
+      "levels_rad": {
+        "approach_direction_backlash": [
+          0.008,
+          0.01,
+          0.012,
+          0.014,
+          0.016,
+          0.02,
+          0.024,
+          0.032
+        ],
+        "random_joint_noise": [
+          0.00025,
+          0.002,
+          0.00225,
+          0.0025,
+          0.00275,
+          0.003,
+          0.00325,
+          0.0035,
+          0.00375,
+          0.004
+        ],
+        "systematic_calibration_offset": [
+          0.008,
+          0.01,
+          0.012,
+          0.014,
+          0.016,
+          0.02,
+          0.024,
+          0.032
+        ]
+      },
+      "target_count": 46,
+      "total_forward_kinematic_worlds_per_gpu": 4898816,
+      "worlds_per_target_per_level": 4096
+    },
+    "status": "PASS_EXPLORATORY_REFINEMENT"
+  },
+  "sample_design": {
+    "error_sources": 3,
+    "levels_rad": [
+      0.00025,
+      0.0005,
+      0.001,
+      0.002,
+      0.004,
+      0.008
+    ],
+    "target_count": 46,
+    "total_forward_kinematic_worlds": 3391488,
+    "worlds_per_target_per_level": 4096
+  },
+  "schema": "rocell.mujoco_warp_nominal_target_uncertainty_summary.v4",
+  "scope": "SYNTHETIC_UNMEASURED_NOMINAL_KEYCAP_POINT_TOOL_ONLY",
+  "status": "PASS"
+}

@@ -3,3 +3,7 @@
 
 # CAD/print packages use ordinary Git in this initial baseline because the
 # account's Git LFS budget is unavailable. Review size before adding binaries.
+
+# Retained Isaac outputs are generated evidence. Keep their exact bytes and
+# hashes in Git while collapsing them by default in GitHub pull-request diffs.
+software/integrations/isaac_sim/evidence/** linguist-generated=true

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v4_2_error_dependence_v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "scope",
+    "status",
+    "source_commit",
+    "source",
+    "threshold",
+    "threshold_role",
+    "endpoint_icc",
+    "v5_pre_evaluation_dependence_rule",
+    "mid_motion_arm_mask_gate",
+    "evaluation_opened",
+    "hardware_writes",
+    "physical_movements",
+    "physical_authority",
+    "limitations",
+    "report_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "tactevra.ai_residual_obstruction_v4_2_error_dependence.v1"
+    },
+    "scope": {
+      "const": "CONSUMED_V4_2_MULTI_AXIS_DEPENDENCE_AND_V5_PRE_EVALUATION_RULE"
+    },
+    "status": {
+      "const": "COMPLETE_TRANSFER_PRIOR_V5_MULTI_AXIS_REESTIMATE_REQUIRED"
+    },
+    "source_commit": {
+      "$ref": "#/$defs/commit"
+    },
+    "source": {
+      "type": "object"
+    },
+    "threshold": {
+      "type": "number"
+    },
+    "threshold_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "endpoint_icc": {
+      "type": "object",
+      "required": [
+        "pooled_obstruction_miss",
+        "cable_family_miss",
+        "dark_cable_proxy_rubber_miss",
+        "visible_false_stop"
+      ]
+    },
+    "v5_pre_evaluation_dependence_rule": {
+      "type": "object",
+      "required": [
+        "required_axes",
+        "required_multiway_interactions",
+        "per_gate_rule",
+        "multiway_rule",
+        "evaluation_sizing_rule",
+        "unestimable_axis_fallback_icc",
+        "safety_gates_may_change",
+        "evaluation_resize_permitted_before_pixels",
+        "evaluation_pixels_opened",
+        "asset_axis_uses_actual_v5_descriptor_signature"
+      ]
+    },
+    "mid_motion_arm_mask_gate": {
+      "type": "object",
+      "required": [
+        "positive_arm_mask_overlap_tested",
+        "mid_motion_observation_authorized",
+        "required_evidence",
+        "thresholds_frozen",
+        "parked_pose_scope_affected"
+      ]
+    },
+    "evaluation_opened": {
+      "const": false
+    },
+    "hardware_writes": {
+      "const": 0
+    },
+    "physical_movements": {
+      "const": 0
+    },
+    "physical_authority": {
+      "const": false
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "report_sha256": {
+      "$ref": "#/$defs/sha"
+    }
+  },
+  "$defs": {
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v4_1_smoke_admission.v1",
+  "status": "PASS_WITH_LIMITATIONS",
+  "scope": "SYNTHETIC_ISAAC_REFERENCE_PAIR_SMOKE_NO_QUALIFICATION",
+  "manifest_file_sha256": "c5a8cc84529c9bb016adc47360c97525a3638df2ef212f876c2fe1ae954012b2",
+  "dataset_sha256": "ea4c01d60658182169248850d99f4825abd9aa0b3c2c235622cf861bdf42ca94",
+  "fixture_bundle_sha256": "72e2837ae82d78018c09e2a2c1a535071873ecb95dbfb3717946cb05e679ddb6",
+  "observation_count": 192,
+  "reference_count": 4,
+  "unique_observation_rgb_count": 192,
+  "target_ids": [
+    "F",
+    "G",
+    "H",
+    "I"
+  ],
+  "evaluation_observation_count": 0,
+  "pooled_auc": {
+    "raw_mean_absolute_difference": 0.7662037037037037,
+    "self_crop_normalized_mean_absolute_difference": 0.8038194444444444,
+    "context_normalized_mean_absolute_difference": 0.7743055555555556
+  },
+  "per_target_auc": {
+    "F": {
+      "raw_mean_absolute_difference": 0.7523148148148148,
+      "self_crop_normalized_mean_absolute_difference": 0.8032407407407407,
+      "context_normalized_mean_absolute_difference": 0.7569444444444444
+    },
+    "G": {
+      "raw_mean_absolute_difference": 0.7777777777777778,
+      "self_crop_normalized_mean_absolute_difference": 0.8703703703703703,
+      "context_normalized_mean_absolute_difference": 0.7893518518518519
+    },
+    "H": {
+      "raw_mean_absolute_difference": 0.8078703703703703,
+      "self_crop_normalized_mean_absolute_difference": 0.8773148148148148,
+      "context_normalized_mean_absolute_difference": 0.8101851851851852
+    },
+    "I": {
+      "raw_mean_absolute_difference": 0.7569444444444444,
+      "self_crop_normalized_mean_absolute_difference": 0.7199074074074074,
+      "context_normalized_mean_absolute_difference": 0.7615740740740741
+    }
+  },
+  "normalization_decision": "RETAIN_SELF_AND_REFERENCE_CONTEXT_FOR_DEVELOPMENT_COMPARISON",
+  "normalization_finding": "On this bounded shard, independent self-crop normalization ranks labels better than the current reference-context transform; neither method is selected from smoke evidence.",
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "This is a four-target, one-scene synthetic training smoke, not a model or qualification result.",
+    "The smoke is too small to select normalization, thresholds, architecture, or deployment policy.",
+    "Evaluation pixels remain absent and unopened."
+  ],
+  "report_sha256": "0c203a5edc72b90e026ba38cbf2169529cb245cbdd044f3e9deb442514490d3b"
+}

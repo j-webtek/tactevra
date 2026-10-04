@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/collision_exclusion_policy_candidate_v1.schema.json",
+  "title": "RoCell collision exclusion policy candidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "policy_id", "installation_state", "default_pair_disposition",
+    "base_contract_sha256", "robot_model_sha256", "geometry_candidate_sha256",
+    "source_bindings", "proposed_exclusions", "effective_exclusions", "authority",
+    "content_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.collision_exclusion_policy_candidate.v1"},
+    "policy_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "installation_state": {"const": "CANDIDATE_UNINSTALLED"},
+    "default_pair_disposition": {"const": "CHECK_COLLISION"},
+    "base_contract_sha256": {"$ref": "#/$defs/hash"},
+    "robot_model_sha256": {"$ref": "#/$defs/hash"},
+    "geometry_candidate_sha256": {"$ref": "#/$defs/hash"},
+    "source_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["upstream_srdf", "selected_geometry_candidate", "selected_replay", "adjacent_policy_review", "never_pair_review"],
+      "properties": {
+        "upstream_srdf": {"$ref": "#/$defs/hash"},
+        "selected_geometry_candidate": {"$ref": "#/$defs/hash"},
+        "selected_replay": {"$ref": "#/$defs/hash"},
+        "adjacent_policy_review": {"$ref": "#/$defs/hash"},
+        "never_pair_review": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "proposed_exclusions": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/proposal"}},
+    "effective_exclusions": {"type": "array", "maxItems": 0},
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": ["collision_query", "clearance_replay", "controller", "execution_permit", "transport", "physical"],
+      "properties": {
+        "collision_query": {"const": false}, "clearance_replay": {"const": false},
+        "controller": {"const": false}, "execution_permit": {"const": false},
+        "transport": {"const": false}, "physical": {"const": false}
+      }
+    },
+    "content_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "proposal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["body_pair", "upstream_reason", "supporting_evidence_sha256"],
+      "properties": {
+        "body_pair": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string", "minLength": 1}},
+        "upstream_reason": {"enum": ["UPSTREAM_SRDF_ADJACENT", "UPSTREAM_SRDF_NEVER"]},
+        "supporting_evidence_sha256": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

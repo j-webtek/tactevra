@@ -1,0 +1,3383 @@
+{
+  "enabled_extension_count": 303,
+  "enabled_extensions": [
+    {
+      "id": "carb.audio-0.1.0",
+      "name": "carb.audio",
+      "version": [
+        0,
+        1,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "carb.windowing.plugins-1.0.1",
+      "name": "carb.windowing.plugins",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "isaacsim.anim.robot.schema-0.1.1",
+      "name": "isaacsim.anim.robot.schema",
+      "version": [
+        0,
+        1,
+        1,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.app.about-2.3.2",
+      "name": "isaacsim.app.about",
+      "version": [
+        2,
+        3,
+        2,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.asset.exporter.urdf-2.2.6",
+      "name": "isaacsim.asset.exporter.urdf",
+      "version": [
+        2,
+        2,
+        6,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.asset.importer.mjcf-3.12.1",
+      "name": "isaacsim.asset.importer.mjcf",
+      "version": [
+        3,
+        12,
+        1,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.asset.importer.urdf-3.11.10",
+      "name": "isaacsim.asset.importer.urdf",
+      "version": [
+        3,
+        11,
+        10,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.asset.importer.utils-1.9.1",
+      "name": "isaacsim.asset.importer.utils",
+      "version": [
+        1,
+        9,
+        1,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.asset.transformer-6.1.0",
+      "name": "isaacsim.asset.transformer",
+      "version": [
+        6,
+        1,
+        0,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.asset.transformer.rules-1.7.18",
+      "name": "isaacsim.asset.transformer.rules",
+      "version": [
+        1,
+        7,
+        18,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.common-6.2.0",
+      "name": "isaacsim.common",
+      "version": [
+        6,
+        2,
+        0,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.core.api-5.3.2",
+      "name": "isaacsim.core.api",
+      "version": [
+        5,
+        3,
+        2,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.cloner-1.7.5",
+      "name": "isaacsim.core.cloner",
+      "version": [
+        1,
+        7,
+        5,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.core.deprecation_manager-0.4.4",
+      "name": "isaacsim.core.deprecation_manager",
+      "version": [
+        0,
+        4,
+        4,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.experimental.actuators-0.1.6",
+      "name": "isaacsim.core.experimental.actuators",
+      "version": [
+        0,
+        1,
+        6,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.experimental.materials-0.10.0",
+      "name": "isaacsim.core.experimental.materials",
+      "version": [
+        0,
+        10,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.experimental.objects-0.9.0",
+      "name": "isaacsim.core.experimental.objects",
+      "version": [
+        0,
+        9,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.experimental.primdata-0.3.6",
+      "name": "isaacsim.core.experimental.primdata",
+      "version": [
+        0,
+        3,
+        6,
+        "",
+        "110.3.0.wx64.r"
+      ]
+    },
+    {
+      "id": "isaacsim.core.experimental.prims-1.10.8",
+      "name": "isaacsim.core.experimental.prims",
+      "version": [
+        1,
+        10,
+        8,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.core.experimental.utils-0.23.0",
+      "name": "isaacsim.core.experimental.utils",
+      "version": [
+        0,
+        23,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.nodes-5.10.13",
+      "name": "isaacsim.core.nodes",
+      "version": [
+        5,
+        10,
+        13,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.core.prims-0.11.7",
+      "name": "isaacsim.core.prims",
+      "version": [
+        0,
+        11,
+        7,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.rendering_manager-0.5.1",
+      "name": "isaacsim.core.rendering_manager",
+      "version": [
+        0,
+        5,
+        1,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.simulation_manager-1.17.1",
+      "name": "isaacsim.core.simulation_manager",
+      "version": [
+        1,
+        17,
+        1,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.core.throttling-2.3.7",
+      "name": "isaacsim.core.throttling",
+      "version": [
+        2,
+        3,
+        7,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.core.utils-4.1.9",
+      "name": "isaacsim.core.utils",
+      "version": [
+        4,
+        1,
+        9,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.core.version-2.2.1",
+      "name": "isaacsim.core.version",
+      "version": [
+        2,
+        2,
+        1,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.cortex.behaviors-2.0.18",
+      "name": "isaacsim.cortex.behaviors",
+      "version": [
+        2,
+        0,
+        18,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.cortex.framework-1.0.20",
+      "name": "isaacsim.cortex.framework",
+      "version": [
+        1,
+        0,
+        20,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.examples.base-1.3.4",
+      "name": "isaacsim.examples.base",
+      "version": [
+        1,
+        3,
+        4,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.examples.browser-0.3.4",
+      "name": "isaacsim.examples.browser",
+      "version": [
+        0,
+        3,
+        4,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.exp.base-6.1.0",
+      "name": "isaacsim.exp.base",
+      "version": [
+        6,
+        1,
+        0,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.exp.base.python-6.1.0",
+      "name": "isaacsim.exp.base.python",
+      "version": [
+        6,
+        1,
+        0,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.gui.components-1.8.9",
+      "name": "isaacsim.gui.components",
+      "version": [
+        1,
+        8,
+        9,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.gui.content_browser-0.5.1",
+      "name": "isaacsim.gui.content_browser",
+      "version": [
+        0,
+        5,
+        1,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.gui.menu-2.10.12",
+      "name": "isaacsim.gui.menu",
+      "version": [
+        2,
+        10,
+        12,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.gui.property-1.6.4",
+      "name": "isaacsim.gui.property",
+      "version": [
+        1,
+        6,
+        4,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.gui.sensors.icon-2.2.4",
+      "name": "isaacsim.gui.sensors.icon",
+      "version": [
+        2,
+        2,
+        4,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.replicator.agent.schema-0.1.1",
+      "name": "isaacsim.replicator.agent.schema",
+      "version": [
+        0,
+        1,
+        1,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.replicator.behavior-1.6.2",
+      "name": "isaacsim.replicator.behavior",
+      "version": [
+        1,
+        6,
+        2,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.replicator.domain_randomization-1.2.3",
+      "name": "isaacsim.replicator.domain_randomization",
+      "version": [
+        1,
+        2,
+        3,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.replicator.experimental.domain_randomization-1.2.10",
+      "name": "isaacsim.replicator.experimental.domain_randomization",
+      "version": [
+        1,
+        2,
+        10,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.replicator.writers-1.5.6",
+      "name": "isaacsim.replicator.writers",
+      "version": [
+        1,
+        5,
+        6,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.experimental.wheeled_robots-0.2.14",
+      "name": "isaacsim.robot.experimental.wheeled_robots",
+      "version": [
+        0,
+        2,
+        14,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.manipulators-3.4.5",
+      "name": "isaacsim.robot.manipulators",
+      "version": [
+        3,
+        4,
+        5,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.policy.examples-7.2.0",
+      "name": "isaacsim.robot.policy.examples",
+      "version": [
+        7,
+        2,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.schema-7.0.2",
+      "name": "isaacsim.robot.schema",
+      "version": [
+        7,
+        0,
+        2,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.surface_gripper-3.6.3",
+      "name": "isaacsim.robot.surface_gripper",
+      "version": [
+        3,
+        6,
+        3,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.wheeled_robots-5.2.5",
+      "name": "isaacsim.robot.wheeled_robots",
+      "version": [
+        5,
+        2,
+        5,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.robot.wheeled_robots.nodes-0.1.12",
+      "name": "isaacsim.robot.wheeled_robots.nodes",
+      "version": [
+        0,
+        1,
+        12,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.robot_motion.controllers-0.3.2",
+      "name": "isaacsim.robot_motion.controllers",
+      "version": [
+        0,
+        3,
+        2,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.robot_motion.cumotion-1.4.0",
+      "name": "isaacsim.robot_motion.cumotion",
+      "version": [
+        1,
+        4,
+        0,
+        "",
+        "110.3.0.wx64.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.robot_motion.experimental.motion_generation-7.1.2",
+      "name": "isaacsim.robot_motion.experimental.motion_generation",
+      "version": [
+        7,
+        1,
+        2,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "isaacsim.robot_motion.lula-4.1.4",
+      "name": "isaacsim.robot_motion.lula",
+      "version": [
+        4,
+        1,
+        4,
+        "",
+        "110.3.0.wx64.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.robot_motion.motion_generation-8.2.9",
+      "name": "isaacsim.robot_motion.motion_generation",
+      "version": [
+        8,
+        2,
+        9,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.robot_motion.schema-0.2.2",
+      "name": "isaacsim.robot_motion.schema",
+      "version": [
+        0,
+        2,
+        2,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.sensors.camera-1.7.13",
+      "name": "isaacsim.sensors.camera",
+      "version": [
+        1,
+        7,
+        13,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.sensors.experimental.physics-3.3.0",
+      "name": "isaacsim.sensors.experimental.physics",
+      "version": [
+        3,
+        3,
+        0,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.sensors.experimental.rtx-1.9.0",
+      "name": "isaacsim.sensors.experimental.rtx",
+      "version": [
+        1,
+        9,
+        0,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "isaacsim.sensors.physics.nodes-1.6.2",
+      "name": "isaacsim.sensors.physics.nodes",
+      "version": [
+        1,
+        6,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.sensors.physx-2.5.7",
+      "name": "isaacsim.sensors.physx",
+      "version": [
+        2,
+        5,
+        7,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.sensors.rtx-15.17.5",
+      "name": "isaacsim.sensors.rtx",
+      "version": [
+        15,
+        17,
+        5,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "isaacsim.simulation_app-2.19.0",
+      "name": "isaacsim.simulation_app",
+      "version": [
+        2,
+        19,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.storage.native-1.11.0",
+      "name": "isaacsim.storage.native",
+      "version": [
+        1,
+        11,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.test.docstring-1.3.2",
+      "name": "isaacsim.test.docstring",
+      "version": [
+        1,
+        3,
+        2,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "isaacsim.util.debug_draw-3.2.6",
+      "name": "isaacsim.util.debug_draw",
+      "version": [
+        3,
+        2,
+        6,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.activity.core-1.0.4",
+      "name": "omni.activity.core",
+      "version": [
+        1,
+        0,
+        4,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.anim.behavior.schema-110.3.0",
+      "name": "omni.anim.behavior.schema",
+      "version": [
+        110,
+        3,
+        0,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.anim.curve.core-1.6.1",
+      "name": "omni.anim.curve.core",
+      "version": [
+        1,
+        6,
+        1,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.anim.graph.schema-110.3.0",
+      "name": "omni.anim.graph.schema",
+      "version": [
+        110,
+        3,
+        0,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.anim.navigation.schema-110.3.0",
+      "name": "omni.anim.navigation.schema",
+      "version": [
+        110,
+        3,
+        0,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.appwindow-1.2.2",
+      "name": "omni.appwindow",
+      "version": [
+        1,
+        2,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.assets.plugins-0.0.0",
+      "name": "omni.assets.plugins",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.behavior.scripting.core-110.3.0",
+      "name": "omni.behavior.scripting.core",
+      "version": [
+        110,
+        3,
+        0,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "omni.behavior.tree.schema-110.3.0",
+      "name": "omni.behavior.tree.schema",
+      "version": [
+        110,
+        3,
+        0,
+        "",
+        "110.3.0.u7f4"
+      ]
+    },
+    {
+      "id": "omni.blobkey-1.1.2",
+      "name": "omni.blobkey",
+      "version": [
+        1,
+        1,
+        2,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.client-1.3.0",
+      "name": "omni.client",
+      "version": [
+        1,
+        3,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.client.lib-1.1.1",
+      "name": "omni.client.lib",
+      "version": [
+        1,
+        1,
+        1,
+        "",
+        "wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.convexdecomposition-110.3.2",
+      "name": "omni.convexdecomposition",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.cubric-0.1.0",
+      "name": "omni.cubric",
+      "version": [
+        0,
+        1,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.datastore-0.0.0",
+      "name": "omni.datastore",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.gpu_foundation-0.0.0",
+      "name": "omni.gpu_foundation",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.gpu_foundation.shadercache.vulkan-1.0.0",
+      "name": "omni.gpu_foundation.shadercache.vulkan",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.d"
+      ]
+    },
+    {
+      "id": "omni.gpucompute.plugins-0.0.0",
+      "name": "omni.gpucompute.plugins",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.graph-1.142.5",
+      "name": "omni.graph",
+      "version": [
+        1,
+        142,
+        5,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.graph.action-2.10.2",
+      "name": "omni.graph.action",
+      "version": [
+        2,
+        10,
+        2,
+        "",
+        "110.0.0"
+      ]
+    },
+    {
+      "id": "omni.graph.action_core-1.1.9",
+      "name": "omni.graph.action_core",
+      "version": [
+        1,
+        1,
+        9,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.graph.action_nodes-2.11.0",
+      "name": "omni.graph.action_nodes",
+      "version": [
+        2,
+        11,
+        0,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.graph.action_nodes_core-2.11.0",
+      "name": "omni.graph.action_nodes_core",
+      "version": [
+        2,
+        11,
+        0,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.graph.core-3.1.5",
+      "name": "omni.graph.core",
+      "version": [
+        3,
+        1,
+        5,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.graph.exec-0.9.6",
+      "name": "omni.graph.exec",
+      "version": [
+        0,
+        9,
+        6,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.graph.image.core-0.6.1",
+      "name": "omni.graph.image.core",
+      "version": [
+        0,
+        6,
+        1,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.graph.image.nodes-1.3.2",
+      "name": "omni.graph.image.nodes",
+      "version": [
+        1,
+        3,
+        2,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.graph.nodes-2.12.0",
+      "name": "omni.graph.nodes",
+      "version": [
+        2,
+        12,
+        0,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.graph.nodes_core-2.11.0",
+      "name": "omni.graph.nodes_core",
+      "version": [
+        2,
+        11,
+        0,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.graph.scriptnode-2.10.2",
+      "name": "omni.graph.scriptnode",
+      "version": [
+        2,
+        10,
+        2,
+        "",
+        "110.0.0"
+      ]
+    },
+    {
+      "id": "omni.graph.tools-1.81.0",
+      "name": "omni.graph.tools",
+      "version": [
+        1,
+        81,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.graph.ui_nodes-2.11.1",
+      "name": "omni.graph.ui_nodes",
+      "version": [
+        2,
+        11,
+        1,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.graph.visualization.nodes-2.1.4",
+      "name": "omni.graph.visualization.nodes",
+      "version": [
+        2,
+        1,
+        4,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.grpc.lib-1.0.0",
+      "name": "omni.grpc.lib",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.hsscclient-1.1.4",
+      "name": "omni.hsscclient",
+      "version": [
+        1,
+        1,
+        4,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.hydra.engine.stats-1.0.5",
+      "name": "omni.hydra.engine.stats",
+      "version": [
+        1,
+        0,
+        5,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.hydra.rtx-1.0.4",
+      "name": "omni.hydra.rtx",
+      "version": [
+        1,
+        0,
+        4,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.hydra.rtx.shadercache.vulkan-1.0.0",
+      "name": "omni.hydra.rtx.shadercache.vulkan",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.d"
+      ]
+    },
+    {
+      "id": "omni.hydra.scene_delegate-0.3.5",
+      "name": "omni.hydra.scene_delegate",
+      "version": [
+        0,
+        3,
+        5,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.hydra.usdrt_delegate-7.5.2",
+      "name": "omni.hydra.usdrt_delegate",
+      "version": [
+        7,
+        5,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.index-1.0.1",
+      "name": "omni.index",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.index.libs-392300.961.0",
+      "name": "omni.index.libs",
+      "version": [
+        392300,
+        961,
+        0,
+        "",
+        "00c488ae.wx64.r.d"
+      ]
+    },
+    {
+      "id": "omni.inspect-1.0.2",
+      "name": "omni.inspect",
+      "version": [
+        1,
+        0,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.iray.libs-0.0.1",
+      "name": "omni.iray.libs",
+      "version": [
+        0,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.d"
+      ]
+    },
+    {
+      "id": "omni.kit.actions.core-1.2.0",
+      "name": "omni.kit.actions.core",
+      "version": [
+        1,
+        2,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.asset_converter-6.0.5",
+      "name": "omni.kit.asset_converter",
+      "version": [
+        6,
+        0,
+        5,
+        "",
+        "110.1.1.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.kit.async_engine-0.0.3",
+      "name": "omni.kit.async_engine",
+      "version": [
+        0,
+        0,
+        3,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.audiodeviceenum-1.0.2",
+      "name": "omni.kit.audiodeviceenum",
+      "version": [
+        1,
+        0,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.browser.core-2.3.18",
+      "name": "omni.kit.browser.core",
+      "version": [
+        2,
+        3,
+        18,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.browser.folder.core-2.0.3",
+      "name": "omni.kit.browser.folder.core",
+      "version": [
+        2,
+        0,
+        3,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.clipboard-1.1.1",
+      "name": "omni.kit.clipboard",
+      "version": [
+        1,
+        1,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.commands-1.5.0",
+      "name": "omni.kit.commands",
+      "version": [
+        1,
+        5,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.context_menu-1.10.0",
+      "name": "omni.kit.context_menu",
+      "version": [
+        1,
+        10,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.exec.core-0.13.6",
+      "name": "omni.kit.exec.core",
+      "version": [
+        0,
+        13,
+        6,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.helper.file_utils-0.1.10",
+      "name": "omni.kit.helper.file_utils",
+      "version": [
+        0,
+        1,
+        10,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.hotkeys.core-1.4.0",
+      "name": "omni.kit.hotkeys.core",
+      "version": [
+        1,
+        4,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.hydra_texture-1.6.2",
+      "name": "omni.kit.hydra_texture",
+      "version": [
+        1,
+        6,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.loop-isaac-1.6.2",
+      "name": "omni.kit.loop-isaac",
+      "version": [
+        1,
+        6,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.mainwindow-1.0.4",
+      "name": "omni.kit.mainwindow",
+      "version": [
+        1,
+        0,
+        4,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.camera-110.1.0",
+      "name": "omni.kit.manipulator.camera",
+      "version": [
+        110,
+        1,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.prim-108.0.0",
+      "name": "omni.kit.manipulator.prim",
+      "version": [
+        108,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.prim.core-108.0.2",
+      "name": "omni.kit.manipulator.prim.core",
+      "version": [
+        108,
+        0,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.prim.usd-107.0.3",
+      "name": "omni.kit.manipulator.prim.usd",
+      "version": [
+        107,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.selection-110.0.0",
+      "name": "omni.kit.manipulator.selection",
+      "version": [
+        110,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.selector-1.1.4",
+      "name": "omni.kit.manipulator.selector",
+      "version": [
+        1,
+        1,
+        4,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.tool.snap-1.5.15",
+      "name": "omni.kit.manipulator.tool.snap",
+      "version": [
+        1,
+        5,
+        15,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.transform-107.0.1",
+      "name": "omni.kit.manipulator.transform",
+      "version": [
+        107,
+        0,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.manipulator.viewport-107.0.1",
+      "name": "omni.kit.manipulator.viewport",
+      "version": [
+        107,
+        0,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.material.library-3.1.7",
+      "name": "omni.kit.material.library",
+      "version": [
+        3,
+        1,
+        7,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.menu.common-2.0.2",
+      "name": "omni.kit.menu.common",
+      "version": [
+        2,
+        0,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.menu.core-1.3.0",
+      "name": "omni.kit.menu.core",
+      "version": [
+        1,
+        3,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.menu.create-2.0.2",
+      "name": "omni.kit.menu.create",
+      "version": [
+        2,
+        0,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.menu.stage-1.2.7",
+      "name": "omni.kit.menu.stage",
+      "version": [
+        1,
+        2,
+        7,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.menu.utils-2.2.8",
+      "name": "omni.kit.menu.utils",
+      "version": [
+        2,
+        2,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.notification_manager-1.0.16",
+      "name": "omni.kit.notification_manager",
+      "version": [
+        1,
+        0,
+        16,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.numpy.common-0.1.3",
+      "name": "omni.kit.numpy.common",
+      "version": [
+        0,
+        1,
+        3,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.pipapi-0.0.0",
+      "name": "omni.kit.pipapi",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.primitive.mesh-1.1.1",
+      "name": "omni.kit.primitive.mesh",
+      "version": [
+        1,
+        1,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.adapter.core-1.1.1",
+      "name": "omni.kit.property.adapter.core",
+      "version": [
+        1,
+        1,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.adapter.usd-1.0.6",
+      "name": "omni.kit.property.adapter.usd",
+      "version": [
+        1,
+        0,
+        6,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.audio-1.0.18",
+      "name": "omni.kit.property.audio",
+      "version": [
+        1,
+        0,
+        18,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.bundle-1.5.2",
+      "name": "omni.kit.property.bundle",
+      "version": [
+        1,
+        5,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.camera-1.0.14",
+      "name": "omni.kit.property.camera",
+      "version": [
+        1,
+        0,
+        14,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.geometry-2.1.2",
+      "name": "omni.kit.property.geometry",
+      "version": [
+        2,
+        1,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.light-1.0.16",
+      "name": "omni.kit.property.light",
+      "version": [
+        1,
+        0,
+        16,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.material-1.14.10",
+      "name": "omni.kit.property.material",
+      "version": [
+        1,
+        14,
+        10,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.render-1.2.2",
+      "name": "omni.kit.property.render",
+      "version": [
+        1,
+        2,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.transform-1.6.12",
+      "name": "omni.kit.property.transform",
+      "version": [
+        1,
+        6,
+        12,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.property.usd-4.9.14",
+      "name": "omni.kit.property.usd",
+      "version": [
+        4,
+        9,
+        14,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.raycast.query-1.2.0",
+      "name": "omni.kit.raycast.query",
+      "version": [
+        1,
+        2,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.renderer.capture-2.0.1",
+      "name": "omni.kit.renderer.capture",
+      "version": [
+        2,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.renderer.core-1.3.1",
+      "name": "omni.kit.renderer.core",
+      "version": [
+        1,
+        3,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.renderer.imgui-2.1.0",
+      "name": "omni.kit.renderer.imgui",
+      "version": [
+        2,
+        1,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.renderer.init-1.0.1",
+      "name": "omni.kit.renderer.init",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.kit.search.files-1.0.4",
+      "name": "omni.kit.search.files",
+      "version": [
+        1,
+        0,
+        4,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.search_core-1.0.8",
+      "name": "omni.kit.search_core",
+      "version": [
+        1,
+        0,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.selection-0.1.6",
+      "name": "omni.kit.selection",
+      "version": [
+        0,
+        1,
+        6,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.stage_template.core-1.1.23",
+      "name": "omni.kit.stage_template.core",
+      "version": [
+        1,
+        1,
+        23,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.stage_templates-2.0.3",
+      "name": "omni.kit.stage_templates",
+      "version": [
+        2,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.telemetry-0.5.2",
+      "name": "omni.kit.telemetry",
+      "version": [
+        0,
+        5,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.test-2.1.1",
+      "name": "omni.kit.test",
+      "version": [
+        2,
+        1,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.tool.asset_importer-6.0.2",
+      "name": "omni.kit.tool.asset_importer",
+      "version": [
+        6,
+        0,
+        2,
+        "",
+        "110.1.1"
+      ]
+    },
+    {
+      "id": "omni.kit.tool.collect-2.2.19",
+      "name": "omni.kit.tool.collect",
+      "version": [
+        2,
+        2,
+        19,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.ui.actions-1.0.5",
+      "name": "omni.kit.ui.actions",
+      "version": [
+        1,
+        0,
+        5,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.uiapp-0.0.0",
+      "name": "omni.kit.uiapp",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "9be7cf1b.00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.usd.collect-3.0.6",
+      "name": "omni.kit.usd.collect",
+      "version": [
+        3,
+        0,
+        6,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.usd.layers-2.7.2",
+      "name": "omni.kit.usd.layers",
+      "version": [
+        2,
+        7,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.usd.mdl-1.1.11",
+      "name": "omni.kit.usd.mdl",
+      "version": [
+        1,
+        1,
+        11,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.usd_undo-0.1.8",
+      "name": "omni.kit.usd_undo",
+      "version": [
+        0,
+        1,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.usdz_export-1.1.1",
+      "name": "omni.kit.usdz_export",
+      "version": [
+        1,
+        1,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.actions-110.1.0",
+      "name": "omni.kit.viewport.actions",
+      "version": [
+        110,
+        1,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.legacy_gizmos-1.0.24",
+      "name": "omni.kit.viewport.legacy_gizmos",
+      "version": [
+        1,
+        0,
+        24,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.manipulator.transform-107.0.4",
+      "name": "omni.kit.viewport.manipulator.transform",
+      "version": [
+        107,
+        0,
+        4,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.menubar.camera-107.0.14",
+      "name": "omni.kit.viewport.menubar.camera",
+      "version": [
+        107,
+        0,
+        14,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.menubar.core-110.0.3",
+      "name": "omni.kit.viewport.menubar.core",
+      "version": [
+        110,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.menubar.display-110.0.0",
+      "name": "omni.kit.viewport.menubar.display",
+      "version": [
+        110,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.menubar.lighting-107.3.2",
+      "name": "omni.kit.viewport.menubar.lighting",
+      "version": [
+        107,
+        3,
+        2,
+        "",
+        "107.3.0"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.menubar.render-110.1.1",
+      "name": "omni.kit.viewport.menubar.render",
+      "version": [
+        110,
+        1,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.menubar.settings-110.0.1",
+      "name": "omni.kit.viewport.menubar.settings",
+      "version": [
+        110,
+        0,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.registry-104.0.6",
+      "name": "omni.kit.viewport.registry",
+      "version": [
+        104,
+        0,
+        6,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.scene_camera_model-1.0.7",
+      "name": "omni.kit.viewport.scene_camera_model",
+      "version": [
+        1,
+        0,
+        7,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.utility-2.1.0",
+      "name": "omni.kit.viewport.utility",
+      "version": [
+        2,
+        1,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.viewport.window-110.0.1",
+      "name": "omni.kit.viewport.window",
+      "version": [
+        110,
+        0,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.browser_bar-2.0.11",
+      "name": "omni.kit.widget.browser_bar",
+      "version": [
+        2,
+        0,
+        11,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.calendar-1.0.9",
+      "name": "omni.kit.widget.calendar",
+      "version": [
+        1,
+        0,
+        9,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.widget.connection_manager-1.0.3",
+      "name": "omni.kit.widget.connection_manager",
+      "version": [
+        1,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.context_menu-1.5.0",
+      "name": "omni.kit.widget.context_menu",
+      "version": [
+        1,
+        5,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.extended_searchfield-1.0.31",
+      "name": "omni.kit.widget.extended_searchfield",
+      "version": [
+        1,
+        0,
+        31,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.widget.filebrowser-2.14.0",
+      "name": "omni.kit.widget.filebrowser",
+      "version": [
+        2,
+        14,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.filter-1.1.8",
+      "name": "omni.kit.widget.filter",
+      "version": [
+        1,
+        1,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.highlight_label-1.0.3",
+      "name": "omni.kit.widget.highlight_label",
+      "version": [
+        1,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.nucleus_connector-2.4.0",
+      "name": "omni.kit.widget.nucleus_connector",
+      "version": [
+        2,
+        4,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.nucleus_info-2.0.2",
+      "name": "omni.kit.widget.nucleus_info",
+      "version": [
+        2,
+        0,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.options_button-1.0.3",
+      "name": "omni.kit.widget.options_button",
+      "version": [
+        1,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.options_menu-1.1.7",
+      "name": "omni.kit.widget.options_menu",
+      "version": [
+        1,
+        1,
+        7,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.path_field-2.0.13",
+      "name": "omni.kit.widget.path_field",
+      "version": [
+        2,
+        0,
+        13,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.prompt-1.0.7",
+      "name": "omni.kit.widget.prompt",
+      "version": [
+        1,
+        0,
+        7,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.search_delegate-1.0.10",
+      "name": "omni.kit.widget.search_delegate",
+      "version": [
+        1,
+        0,
+        10,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.searchable_combobox-1.0.7",
+      "name": "omni.kit.widget.searchable_combobox",
+      "version": [
+        1,
+        0,
+        7,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.searchfield-1.1.8",
+      "name": "omni.kit.widget.searchfield",
+      "version": [
+        1,
+        1,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.settings-2.0.1",
+      "name": "omni.kit.widget.settings",
+      "version": [
+        2,
+        0,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.stage-4.6.5",
+      "name": "omni.kit.widget.stage",
+      "version": [
+        4,
+        6,
+        5,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.stage_icons-1.0.8",
+      "name": "omni.kit.widget.stage_icons",
+      "version": [
+        1,
+        0,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.toolbar-2.1.0",
+      "name": "omni.kit.widget.toolbar",
+      "version": [
+        2,
+        1,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.viewport-110.0.0",
+      "name": "omni.kit.widget.viewport",
+      "version": [
+        110,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.widget.zoombar-1.0.7",
+      "name": "omni.kit.widget.zoombar",
+      "version": [
+        1,
+        0,
+        7,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "omni.kit.window.console-1.1.10",
+      "name": "omni.kit.window.console",
+      "version": [
+        1,
+        1,
+        10,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.window.content_browser-3.1.12",
+      "name": "omni.kit.window.content_browser",
+      "version": [
+        3,
+        1,
+        12,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.content_browser_registry-0.0.6",
+      "name": "omni.kit.window.content_browser_registry",
+      "version": [
+        0,
+        0,
+        6,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.drop_support-1.0.8",
+      "name": "omni.kit.window.drop_support",
+      "version": [
+        1,
+        0,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.extensions-1.5.16",
+      "name": "omni.kit.window.extensions",
+      "version": [
+        1,
+        5,
+        16,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.file-2.0.15",
+      "name": "omni.kit.window.file",
+      "version": [
+        2,
+        0,
+        15,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.file_exporter-1.0.38",
+      "name": "omni.kit.window.file_exporter",
+      "version": [
+        1,
+        0,
+        38,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.file_importer-1.1.22",
+      "name": "omni.kit.window.file_importer",
+      "version": [
+        1,
+        1,
+        22,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.filepicker-3.0.14",
+      "name": "omni.kit.window.filepicker",
+      "version": [
+        3,
+        0,
+        14,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.popup_dialog-2.0.26",
+      "name": "omni.kit.window.popup_dialog",
+      "version": [
+        2,
+        0,
+        26,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.preferences-1.8.5",
+      "name": "omni.kit.window.preferences",
+      "version": [
+        1,
+        8,
+        5,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.property-1.15.2",
+      "name": "omni.kit.window.property",
+      "version": [
+        1,
+        15,
+        2,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.stage-2.6.1",
+      "name": "omni.kit.window.stage",
+      "version": [
+        2,
+        6,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.kit.window.status_bar-0.1.11",
+      "name": "omni.kit.window.status_bar",
+      "version": [
+        0,
+        1,
+        11,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.kit.window.toolbar-3.0.3",
+      "name": "omni.kit.window.toolbar",
+      "version": [
+        3,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.materialx.libs-1.0.9",
+      "name": "omni.materialx.libs",
+      "version": [
+        1,
+        0,
+        9,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.mdl-57.0.6",
+      "name": "omni.mdl",
+      "version": [
+        57,
+        0,
+        6,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.mdl.neuraylib-0.2.22",
+      "name": "omni.mdl.neuraylib",
+      "version": [
+        0,
+        2,
+        22,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.metrics.core-0.0.3",
+      "name": "omni.metrics.core",
+      "version": [
+        0,
+        0,
+        3,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.metropolis.schema-0.0.3",
+      "name": "omni.metropolis.schema",
+      "version": [
+        0,
+        0,
+        3,
+        "",
+        "110.3.0"
+      ]
+    },
+    {
+      "id": "omni.ocio-0.1.1",
+      "name": "omni.ocio",
+      "version": [
+        0,
+        1,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.physics-110.3.2",
+      "name": "omni.physics",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physics.physx-110.3.2",
+      "name": "omni.physics.physx",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physics.stageupdate-110.3.2",
+      "name": "omni.physics.stageupdate",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physics.tensors-110.3.2",
+      "name": "omni.physics.tensors",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physx-110.3.2",
+      "name": "omni.physx",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physx.commands-110.3.2",
+      "name": "omni.physx.commands",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physx.cooking-110.3.2",
+      "name": "omni.physx.cooking",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physx.foundation-110.3.2",
+      "name": "omni.physx.foundation",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physx.gpu-110.3.2",
+      "name": "omni.physx.gpu",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.physx.tensors-110.3.2",
+      "name": "omni.physx.tensors",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.protobuf.lib-1.0.1",
+      "name": "omni.protobuf.lib",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.replicator.core-1.13.36",
+      "name": "omni.replicator.core",
+      "version": [
+        1,
+        13,
+        36,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.replicator.nv-1.1.6",
+      "name": "omni.replicator.nv",
+      "version": [
+        1,
+        1,
+        6,
+        "",
+        "110.3.0.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.replicator.replicator_yaml-2.0.12",
+      "name": "omni.replicator.replicator_yaml",
+      "version": [
+        2,
+        0,
+        12,
+        "",
+        "110.3.0.wx64"
+      ]
+    },
+    {
+      "id": "omni.rtx.settings.core-0.7.1",
+      "name": "omni.rtx.settings.core",
+      "version": [
+        0,
+        7,
+        1,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.rtx.spg-0.4.0",
+      "name": "omni.rtx.spg",
+      "version": [
+        0,
+        4,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.rtx.window.settings-0.8.2",
+      "name": "omni.rtx.window.settings",
+      "version": [
+        0,
+        8,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.scene.optimizer.core-110.2.1",
+      "name": "omni.scene.optimizer.core",
+      "version": [
+        110,
+        2,
+        1,
+        "",
+        "110.2.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.sensors.net-1.0.1",
+      "name": "omni.sensors.net",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.acoustic-3.0.0",
+      "name": "omni.sensors.nv.acoustic",
+      "version": [
+        3,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.camera-1.0.0",
+      "name": "omni.sensors.nv.camera",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.common-3.0.0",
+      "name": "omni.sensors.nv.common",
+      "version": [
+        3,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.ids-2.0.1",
+      "name": "omni.sensors.nv.ids",
+      "version": [
+        2,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.lidar-3.0.0",
+      "name": "omni.sensors.nv.lidar",
+      "version": [
+        3,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.materials-2.0.0",
+      "name": "omni.sensors.nv.materials",
+      "version": [
+        2,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.sensors.nv.radar-3.0.0",
+      "name": "omni.sensors.nv.radar",
+      "version": [
+        3,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.simready.content.browser-0.3.8",
+      "name": "omni.simready.content.browser",
+      "version": [
+        0,
+        3,
+        8,
+        "",
+        "110.1.2"
+      ]
+    },
+    {
+      "id": "omni.stats-1.0.1",
+      "name": "omni.stats",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.syntheticdata-0.6.17",
+      "name": "omni.syntheticdata",
+      "version": [
+        0,
+        6,
+        17,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.timeline-1.1.0",
+      "name": "omni.timeline",
+      "version": [
+        1,
+        1,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.ui-3.3.1",
+      "name": "omni.ui",
+      "version": [
+        3,
+        3,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.ui.scene-2.0.4",
+      "name": "omni.ui.scene",
+      "version": [
+        2,
+        0,
+        4,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.uiaudio-1.0.0",
+      "name": "omni.uiaudio",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.ujitso.client-0.0.0",
+      "name": "omni.ujitso.client",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.ujitso.default-1.0.0",
+      "name": "omni.ujitso.default",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd-1.18.0",
+      "name": "omni.usd",
+      "version": [
+        1,
+        18,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.config-1.0.8",
+      "name": "omni.usd.config",
+      "version": [
+        1,
+        0,
+        8,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd.core-1.10.10",
+      "name": "omni.usd.core",
+      "version": [
+        1,
+        10,
+        10,
+        "",
+        "00c488ae.wx64.r"
+      ]
+    },
+    {
+      "id": "omni.usd.libs-1.0.3",
+      "name": "omni.usd.libs",
+      "version": [
+        1,
+        0,
+        3,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.metrics.assembler-110.1.2",
+      "name": "omni.usd.metrics.assembler",
+      "version": [
+        110,
+        1,
+        2,
+        "",
+        "110.1.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.metrics.assembler.physics-110.3.2",
+      "name": "omni.usd.metrics.assembler.physics",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.metrics.assembler.ui-110.1.1",
+      "name": "omni.usd.metrics.assembler.ui",
+      "version": [
+        110,
+        1,
+        1,
+        "",
+        "110.1.0.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.anim-0.0.1",
+      "name": "omni.usd.schema.anim",
+      "version": [
+        0,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.audio-0.0.1",
+      "name": "omni.usd.schema.audio",
+      "version": [
+        0,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.flow-110.0.0",
+      "name": "omni.usd.schema.flow",
+      "version": [
+        110,
+        0,
+        0,
+        "",
+        "110.0.0.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.geospatial-0.0.1",
+      "name": "omni.usd.schema.geospatial",
+      "version": [
+        0,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.metrics.assembler-110.1.0",
+      "name": "omni.usd.schema.metrics.assembler",
+      "version": [
+        110,
+        1,
+        0,
+        "",
+        "110.1.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.mujoco-1.1.4",
+      "name": "omni.usd.schema.mujoco",
+      "version": [
+        1,
+        1,
+        4,
+        "",
+        "110.3.0.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.newton-1.4.0",
+      "name": "omni.usd.schema.newton",
+      "version": [
+        1,
+        4,
+        0,
+        "",
+        "110.3.0.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.omni_dome_light-1.0.0",
+      "name": "omni.usd.schema.omni_dome_light",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.omni_lens_distortion-1.0.0",
+      "name": "omni.usd.schema.omni_lens_distortion",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.omni_projectors-1.0.0",
+      "name": "omni.usd.schema.omni_projectors",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.omni_sensors-0.0.0",
+      "name": "omni.usd.schema.omni_sensors",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.omnigraph-1.0.1",
+      "name": "omni.usd.schema.omnigraph",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.omniscripting-1.0.1",
+      "name": "omni.usd.schema.omniscripting",
+      "version": [
+        1,
+        0,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.physical_lighting-0.1.0",
+      "name": "omni.usd.schema.physical_lighting",
+      "version": [
+        0,
+        1,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.physx-110.3.2",
+      "name": "omni.usd.schema.physx",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.playback-1.1.0",
+      "name": "omni.usd.schema.playback",
+      "version": [
+        1,
+        1,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.render_settings.rtx-1.0.3",
+      "name": "omni.usd.schema.render_settings.rtx",
+      "version": [
+        1,
+        0,
+        3,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.semantics-0.0.0",
+      "name": "omni.usd.schema.semantics",
+      "version": [
+        0,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usd.schema.usd_particle_field-1.0.0",
+      "name": "omni.usd.schema.usd_particle_field",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae"
+      ]
+    },
+    {
+      "id": "omni.usd_resolver-1.0.0",
+      "name": "omni.usd_resolver",
+      "version": [
+        1,
+        0,
+        0,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.usdex.libs-2.3.0",
+      "name": "omni.usdex.libs",
+      "version": [
+        2,
+        3,
+        0,
+        "",
+        "110.0.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.usdphysics-110.3.2",
+      "name": "omni.usdphysics",
+      "version": [
+        110,
+        3,
+        2,
+        "",
+        "110.3.0.wx64.r.cp312.u7f4"
+      ]
+    },
+    {
+      "id": "omni.videoencoding-0.2.1",
+      "name": "omni.videoencoding",
+      "version": [
+        0,
+        2,
+        1,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.volume-0.5.2",
+      "name": "omni.volume",
+      "version": [
+        0,
+        5,
+        2,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    },
+    {
+      "id": "omni.warp.core-1.16.0",
+      "name": "omni.warp.core",
+      "version": [
+        1,
+        16,
+        0,
+        "",
+        "wx64"
+      ]
+    },
+    {
+      "id": "semantics.schema.editor-2.0.2",
+      "name": "semantics.schema.editor",
+      "version": [
+        2,
+        0,
+        2,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "semantics.schema.property-2.0.2",
+      "name": "semantics.schema.property",
+      "version": [
+        2,
+        0,
+        2,
+        "",
+        ""
+      ]
+    },
+    {
+      "id": "usdrt.scenegraph-7.6.3",
+      "name": "usdrt.scenegraph",
+      "version": [
+        7,
+        6,
+        3,
+        "",
+        "00c488ae.wx64.r.cp312"
+      ]
+    }
+  ],
+  "evidence_class": "COMPATIBILITY_LAUNCH_ONLY",
+  "extension_lock_sha256": "6e0d70db81fe16273341e65bd3cf0bc70dffe4a88a5cc0a7bacf51110dd27c70",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "installation_sha256": "ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258",
+  "installer_sha256": "979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122",
+  "isaacsim_distribution": "6.1.0.0",
+  "kit_version": "6.1.0",
+  "launch_profile": {
+    "headless": true,
+    "multi_gpu": false,
+    "no_window": true,
+    "physics_cuda_device": 0,
+    "portable": true
+  },
+  "license_acceptance_status": "OWNER_AUTHORIZED_INTERNAL_USE",
+  "limitations": [
+    "compatibility_startup_only",
+    "no_usd_scene_loaded",
+    "no_physics_or_render_acceptance",
+    "no_physical_qualification"
+  ],
+  "nvidia": {
+    "driver_version": "595.97",
+    "gpus": [
+      {
+        "compute_capability": "8.6",
+        "index": 0,
+        "memory_total_mb": 24576,
+        "name": "NVIDIA GeForce RTX 3090"
+      },
+      {
+        "compute_capability": "8.6",
+        "index": 1,
+        "memory_total_mb": 24576,
+        "name": "NVIDIA GeForce RTX 3090"
+      }
+    ]
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "fa28e3a5878f77cc928a93861b35cdf9fac53b857840fbdacef9907aefc1d0ee",
+  "schema": "tactevra.isaac_sim_first_launch.v1",
+  "settings_profile_sha256": "0cbc21c4dbeeb7b2a0ce6c4c4875681834da8c12c83aa49cd36f09654b3ea473",
+  "wire_commands": []
+}

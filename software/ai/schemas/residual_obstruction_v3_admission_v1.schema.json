@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v3_admission_v1.schema.json",
+  "title": "Residual obstruction v3 synthetic shard admission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "status", "campaign_admitted", "fixture_file_sha256", "fixture_bundle_sha256", "target_catalog_sha256", "manifest_count", "manifests", "expected_observation_count", "verified_observation_count", "missing_observation_count", "unique_rgb_sha256_count", "rgb_bytes", "split_counts", "evaluation_observation_count", "training_started", "hardware_writes", "physical_movements", "physical_authority", "limitations", "receipt_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v3_admission.v1"},
+    "scope": {"const": "SYNTHETIC_ISAAC_ADMISSION_NO_QUALIFICATION"},
+    "status": {"enum": ["PASS", "PARTIAL"]},
+    "campaign_admitted": {"type": "boolean"},
+    "fixture_file_sha256": {"$ref": "#/$defs/hash"},
+    "fixture_bundle_sha256": {"$ref": "#/$defs/hash"},
+    "target_catalog_sha256": {"$ref": "#/$defs/hash"},
+    "manifest_count": {"type": "integer", "minimum": 1},
+    "manifests": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["manifest_file_sha256", "dataset_sha256", "target_start", "target_count", "observation_count"], "properties": {"manifest_file_sha256": {"$ref": "#/$defs/hash"}, "dataset_sha256": {"$ref": "#/$defs/hash"}, "target_start": {"type": "integer", "minimum": 0}, "target_count": {"type": "integer", "minimum": 1}, "observation_count": {"type": "integer", "minimum": 1}}}},
+    "expected_observation_count": {"const": 43200},
+    "verified_observation_count": {"type": "integer", "minimum": 1, "maximum": 43200},
+    "missing_observation_count": {"type": "integer", "minimum": 0, "maximum": 43199},
+    "unique_rgb_sha256_count": {"type": "integer", "minimum": 1, "maximum": 43200},
+    "rgb_bytes": {"type": "integer", "minimum": 1},
+    "split_counts": {"type": "object", "additionalProperties": false, "required": ["training", "development"], "properties": {"training": {"type": "integer", "minimum": 0}, "development": {"type": "integer", "minimum": 0}}},
+    "evaluation_observation_count": {"const": 0},
+    "training_started": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}},
+    "receipt_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

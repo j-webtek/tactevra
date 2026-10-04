@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/mujoco-warp-scenario-profile-v1.json",
+  "title": "MuJoCo Warp Provenanced Kinematic Scenario Profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "profile_id",
+    "admission_mode",
+    "mjcf_sha256",
+    "provenance",
+    "assumptions",
+    "joint_ranges",
+    "campaign",
+    "hardware_write_count",
+    "physical_movement_count",
+    "physical_authority"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.mujoco_warp_scenario_profile.v1"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "admission_mode": {"enum": ["exploratory", "qualifying"]},
+    "mjcf_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "artifact_sha256", "domain_id", "collected_at"],
+      "properties": {
+        "source_type": {"enum": ["synthetic_rehearsal", "physical_measurement"]},
+        "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "domain_id": {"type": "string", "minLength": 1},
+        "collected_at": {"type": "string", "minLength": 1}
+      }
+    },
+    "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "joint_ranges": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["joint_id", "qpos_min", "qpos_max", "qvel_min", "qvel_max", "units", "source_field"],
+        "properties": {
+          "joint_id": {"type": "string"},
+          "qpos_min": {"type": "number"},
+          "qpos_max": {"type": "number"},
+          "qvel_min": {"type": "number"},
+          "qvel_max": {"type": "number"},
+          "units": {"const": "radians"},
+          "source_field": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["devices", "shards_per_device", "world_count", "replays", "warmup_steps", "timed_steps"],
+      "properties": {
+        "devices": {"const": ["cuda:0", "cuda:1"]},
+        "shards_per_device": {"const": 8},
+        "world_count": {"const": 16384},
+        "replays": {"const": 2},
+        "warmup_steps": {"const": 16},
+        "timed_steps": {"const": 128}
+      }
+    },
+    "hardware_write_count": {"const": 0},
+    "physical_movement_count": {"const": 0},
+    "physical_authority": {"const": false}
+  }
+}

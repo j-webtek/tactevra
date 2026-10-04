@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_physical_pilot_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "remedy_file_sha256", "remedy_report_sha256", "supersedes_pilot_fields_only", "coverage_contract", "boundary_scoring", "coverage_measurement", "data_use", "capture_safety", "capture_matrix", "preserved_invariants", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_physical_pilot.v1"},
+    "scope": {"const": "DEENERGIZED_REAL_CAMERA_MEASUREMENT_AND_ESCROW_PLAN_NO_QUALIFICATION"},
+    "status": {"const": "READY_FOR_DEENERGIZED_CAPTURE"},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "remedy_file_sha256": {"$ref": "#/$defs/sha256"}, "remedy_report_sha256": {"$ref": "#/$defs/sha256"},
+    "supersedes_pilot_fields_only": {"type": "object"},
+    "coverage_contract": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "object", "required": ["nominal_fraction", "role", "expected_decision", "primary_metric_included"]}},
+    "boundary_scoring": {"type": "object", "required": ["boundary_fraction", "either_visible_or_abstain_accepted", "rows_retained", "rows_reported_separately", "strict_visible_and_strict_abstain_counterfactuals_reported", "silent_exclusion_prohibited"]},
+    "coverage_measurement": {"type": "object", "required": ["methods_required", "safe_region_source", "mask_and_template_artifacts_retained", "annotator_blind_to_model_score", "maximum_absolute_method_disagreement", "disagreement_decision", "target_center_coverage_forces_abstain_label"]},
+    "data_use": {"type": "object", "required": ["measurement_session_ids", "escrow_session_ids", "measurement_rows_may_select_remedy", "measurement_rows_may_train_model", "escrow_rows_may_select_remedy", "escrow_rows_may_train_model", "escrow_pixels_opened", "escrow_open_rule", "future_real_training_requires_separate_capture"]},
+    "capture_safety": {"type": "object", "required": ["arm_deenergized_during_every_capture", "servo_power_isolated_and_verified", "controller_command_channel_disconnected", "park_pose_established_before_capture_phase", "capture_phase_robot_movement_count", "capture_phase_hardware_write_count", "hand_case_requires_verified_energy_isolation", "energized_capture_decision"]},
+    "capture_matrix": {"type": "object", "required": ["target_ids", "observation_types", "lighting_samples", "lighting_descriptor_fields", "maximum_relative_lighting_drift", "minimum_sessions", "original_bytes_and_hashes_required", "charuco_fixture_and_reference_bindings_required"]},
+    "preserved_invariants": {"type": "object", "required": ["v4_2_rejected", "v4_2_gates_changed", "cable_detection_required", "lighting_limit_guessed", "v5_selected", "evaluation_opened"]},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

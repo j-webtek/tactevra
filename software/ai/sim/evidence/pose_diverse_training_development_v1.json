@@ -1,0 +1,3018 @@
+{
+  "bundle_sha256": "df7ccb80e12121497a48f886f6d9c1aa29f82a91f5be9f73990914e682109061",
+  "consumed_evaluation_sources_excluded": [
+    {
+      "campaign": "rebalance-evaluation-v14",
+      "excluded_fraction_count": 6,
+      "fixture_file_sha256": "638e17a18feb79aa15864078ff80df37e69ebe6889710de08d98ed709013fb69"
+    }
+  ],
+  "controller_commands": [],
+  "development_interval": 4,
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "interpolated states are static perception fixtures, not a motion trajectory",
+    "dense samples cover one governed path and do not span arbitrary robot configurations",
+    "no dynamics, collision, clearance, or reachability claim is made",
+    "all coordinates are synthetic and unmeasured",
+    "consumed v14 bytes and pose fractions are excluded from training and selection",
+    "the fixture cannot qualify deployment or physical execution"
+  ],
+  "method": "prime_modulus_permuted_path_interpolation_with_distinct_state_filter",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "pose_denominator": 389,
+  "pose_permutation_step": 149,
+  "sample_count": 96,
+  "samples": [
+    {
+      "action_index": null,
+      "candidate_rank": 1,
+      "expected_tool_tip_board_mm": [
+        163.78153920308483,
+        174.23071979434448,
+        26.0
+      ],
+      "interpolation_alpha": 0.5604113110539846,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2919773449210129,
+        "link1_to_link2": 0.6990794472321735,
+        "link2_to_link3": 1.8873676262679115,
+        "link3_to_link4": -1.015647073441028,
+        "link4_to_link5": 3.9795681397921494e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_001",
+      "sequence": 2001,
+      "source_interval": [
+        50,
+        51
+      ],
+      "source_path_fraction": [
+        149,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 2,
+      "expected_tool_tip_board_mm": [
+        274.48655121093225,
+        136.11547828439996,
+        26.0
+      ],
+      "interpolation_alpha": 0.12082262210796915,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.010423745114546398,
+        "link1_to_link2": 0.678159531495108,
+        "link2_to_link3": 1.9579643558882762,
+        "link3_to_link4": -1.0653238858499894,
+        "link4_to_link5": -1.1622404803129155e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_002",
+      "sequence": 2002,
+      "source_interval": [
+        101,
+        102
+      ],
+      "source_path_fraction": [
+        298,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 3,
+      "expected_tool_tip_board_mm": [
+        247.48274610615454,
+        93.3558143051565,
+        44.53016785120218
+      ],
+      "interpolation_alpha": 0.6812339331619537,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.04200856693448264,
+        "link1_to_link2": 0.7449939092946307,
+        "link2_to_link3": 1.5530225932799926,
+        "link3_to_link4": -0.7272166398469899,
+        "link4_to_link5": 7.761613512421907e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_003",
+      "sequence": 2003,
+      "source_interval": [
+        19,
+        20
+      ],
+      "source_path_fraction": [
+        58,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 4,
+      "expected_tool_tip_board_mm": [
+        131.30468136923287,
+        187.30990393722095,
+        26.0
+      ],
+      "interpolation_alpha": 0.2416452442159383,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3726775035550605,
+        "link1_to_link2": 0.7160222647881256,
+        "link2_to_link3": 1.83230068602757,
+        "link3_to_link4": -0.9775229511123527,
+        "link4_to_link5": 1.040958773007116e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_004",
+      "sequence": 2004,
+      "source_interval": [
+        70,
+        71
+      ],
+      "source_path_fraction": [
+        207,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 5,
+      "expected_tool_tip_board_mm": [
+        287.1797772065124,
+        61.01285347043702,
+        51.75149957155098
+      ],
+      "interpolation_alpha": 0.8020565552699229,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.05701891902639281,
+        "link1_to_link2": 0.7994529719742625,
+        "link2_to_link3": 1.3472360615135641,
+        "link3_to_link4": -0.5758891093257992,
+        "link4_to_link5": -1.3291987558395247e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_005",
+      "sequence": 2005,
+      "source_interval": [
+        120,
+        121
+      ],
+      "source_path_fraction": [
+        356,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 6,
+      "expected_tool_tip_board_mm": [
+        214.895485218509,
+        154.63431876606683,
+        26.0
+      ],
+      "interpolation_alpha": 0.36246786632390743,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.16168780832052987,
+        "link1_to_link2": 0.6843480399203655,
+        "link2_to_link3": 1.9367370365883856,
+        "link3_to_link4": -1.0502850752325965,
+        "link4_to_link5": 1.9034178534385828e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_006",
+      "sequence": 2006,
+      "source_interval": [
+        39,
+        40
+      ],
+      "source_path_fraction": [
+        116,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 7,
+      "expected_tool_tip_board_mm": [
+        222.56345555405224,
+        154.6804897848735,
+        26.0
+      ],
+      "interpolation_alpha": 0.922879177377892,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.14471734664798722,
+        "link1_to_link2": 0.6776923704077683,
+        "link2_to_link3": 1.959579363266083,
+        "link3_to_link4": -1.0664717323389663,
+        "link4_to_link5": 1.1775982791866627e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_007",
+      "sequence": 2007,
+      "source_interval": [
+        89,
+        90
+      ],
+      "source_path_fraction": [
+        265,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 8,
+      "expected_tool_tip_board_mm": [
+        271.67359745954934,
+        45.92923030394677,
+        59.021624073794044
+      ],
+      "interpolation_alpha": 0.4832904884318766,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.03273574729837676,
+        "link1_to_link2": 0.8568400636626119,
+        "link2_to_link3": 1.1441039598356766,
+        "link3_to_link4": -0.430144159609809,
+        "link4_to_link5": 2.463173285303786e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_008",
+      "sequence": 2008,
+      "source_interval": [
+        8,
+        9
+      ],
+      "source_path_fraction": [
+        25,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 9,
+      "expected_tool_tip_board_mm": [
+        125.05885282776349,
+        189.07647814910024,
+        26.0
+      ],
+      "interpolation_alpha": 0.043701799485861184,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.38680650066217903,
+        "link1_to_link2": 0.7215436764318256,
+        "link2_to_link3": 1.8146899379200034,
+        "link3_to_link4": -0.9654336147800724,
+        "link4_to_link5": 1.212532984027441e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_009",
+      "sequence": 2009,
+      "source_interval": [
+        59,
+        60
+      ],
+      "source_path_fraction": [
+        174,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 10,
+      "expected_tool_tip_board_mm": [
+        284.35955441302485,
+        112.02570694087403,
+        33.502999143101974
+      ],
+      "interpolation_alpha": 0.6041131105398457,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.026596103360607495,
+        "link1_to_link2": 0.6998555237960749,
+        "link2_to_link3": 1.7935282475169196,
+        "link3_to_link4": -0.9225838312973064,
+        "link4_to_link5": -1.282719622818486e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_010",
+      "sequence": 2010,
+      "source_interval": [
+        109,
+        110
+      ],
+      "source_path_fraction": [
+        323,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 11,
+      "expected_tool_tip_board_mm": [
+        229.15634356570393,
+        129.28504460910327,
+        33.55179192499622
+      ],
+      "interpolation_alpha": 0.16452442159383032,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.10743954906016376,
+        "link1_to_link2": 0.6995320208635465,
+        "link2_to_link3": 1.7938472888508104,
+        "link3_to_link4": -0.9225793698508867,
+        "link4_to_link5": -1.2841888971763646e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_011",
+      "sequence": 2011,
+      "source_interval": [
+        28,
+        29
+      ],
+      "source_path_fraction": [
+        83,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 12,
+      "expected_tool_tip_board_mm": [
+        170.64035989717223,
+        173.24550128534705,
+        26.0
+      ],
+      "interpolation_alpha": 0.7249357326478149,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2767787291044201,
+        "link1_to_link2": 0.6930157144437121,
+        "link2_to_link3": 1.9075055628536708,
+        "link3_to_link4": -1.029721277474379,
+        "link4_to_link5": -1.348709790564864e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_012",
+      "sequence": 2012,
+      "source_interval": [
+        78,
+        79
+      ],
+      "source_path_fraction": [
+        232,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 13,
+      "expected_tool_tip_board_mm": [
+        289.3163096258212,
+        22.366752356469583,
+        65.57612110825478
+      ],
+      "interpolation_alpha": 0.2853470437017995,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.0762093601682583,
+        "link1_to_link2": 0.9440323999508542,
+        "link2_to_link3": 0.8779360647679577,
+        "link3_to_link4": -0.2511690965338183,
+        "link4_to_link5": 3.935996391060721e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_013",
+      "sequence": 2013,
+      "source_interval": [
+        129,
+        130
+      ],
+      "source_path_fraction": [
+        381,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 14,
+      "expected_tool_tip_board_mm": [
+        176.17279884318768,
+        169.48007712082264,
+        26.0
+      ],
+      "interpolation_alpha": 0.8457583547557841,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2608122924721185,
+        "link1_to_link2": 0.6940005812209775,
+        "link2_to_link3": 1.9042156824531387,
+        "link3_to_link4": -1.0274162639130224,
+        "link4_to_link5": -1.3486300529413228e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_014",
+      "sequence": 2014,
+      "source_interval": [
+        47,
+        48
+      ],
+      "source_path_fraction": [
+        141,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 15,
+      "expected_tool_tip_board_mm": [
+        261.89913408199163,
+        140.61608713299958,
+        26.0
+      ],
+      "interpolation_alpha": 0.40616966580976865,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.04292891115516783,
+        "link1_to_link2": 0.6766314809054416,
+        "link2_to_link3": 1.96325481222221,
+        "link3_to_link4": -1.0690862915549892,
+        "link4_to_link5": -2.438189089587273e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_015",
+      "sequence": 2015,
+      "source_interval": [
+        98,
+        99
+      ],
+      "source_path_fraction": [
+        290,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 16,
+      "expected_tool_tip_board_mm": [
+        253.34719491909874,
+        81.85846060789353,
+        48.04324814758809
+      ],
+      "interpolation_alpha": 0.9665809768637532,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.022732600459387003,
+        "link1_to_link2": 0.7658851923021979,
+        "link2_to_link3": 1.4658799017756161,
+        "link3_to_link4": -0.6609652014044165,
+        "link4_to_link5": -7.711467955149395e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_016",
+      "sequence": 2016,
+      "source_interval": [
+        16,
+        17
+      ],
+      "source_path_fraction": [
+        50,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 17,
+      "expected_tool_tip_board_mm": [
+        118.71726424029225,
+        191.81051278582058,
+        26.0
+      ],
+      "interpolation_alpha": 0.5269922879177378,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.40232003117093934,
+        "link1_to_link2": 0.7256744646714799,
+        "link2_to_link3": 1.8016234585029371,
+        "link3_to_link4": -0.9564979238089015,
+        "link4_to_link5": 1.277461589691403e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_017",
+      "sequence": 2017,
+      "source_interval": [
+        67,
+        68
+      ],
+      "source_path_fraction": [
+        199,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 18,
+      "expected_tool_tip_board_mm": [
+        286.4960868323336,
+        73.37960582690658,
+        47.32762067980577
+      ],
+      "interpolation_alpha": 0.08740359897172237,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.05023206336976393,
+        "link1_to_link2": 0.7680679578064731,
+        "link2_to_link3": 1.4664297389106384,
+        "link3_to_link4": -0.6636978249698144,
+        "link4_to_link5": -2.375468116874737e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_018",
+      "sequence": 2018,
+      "source_interval": [
+        118,
+        119
+      ],
+      "source_path_fraction": [
+        348,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 20,
+      "expected_tool_tip_board_mm": [
+        209.97603842511165,
+        159.18109863347317,
+        26.0
+      ],
+      "interpolation_alpha": 0.20822622107969152,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.17711415548056691,
+        "link1_to_link2": 0.6799281741874424,
+        "link2_to_link3": 1.951865743879107,
+        "link3_to_link4": -1.060993916884356,
+        "link4_to_link5": 1.9428742228908606e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_019",
+      "sequence": 2019,
+      "source_interval": [
+        87,
+        88
+      ],
+      "source_path_fraction": [
+        257,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 21,
+      "expected_tool_tip_board_mm": [
+        277.5380462724936,
+        34.43187660668381,
+        62.534704370179945
+      ],
+      "interpolation_alpha": 0.7686375321336761,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.04908820707167355,
+        "link1_to_link2": 0.8972693953670134,
+        "link2_to_link3": 1.016628827039442,
+        "link3_to_link4": -0.343096843082488,
+        "link4_to_link5": 6.778582587601563e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_020",
+      "sequence": 2020,
+      "source_interval": [
+        5,
+        6
+      ],
+      "source_path_fraction": [
+        17,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 22,
+      "expected_tool_tip_board_mm": [
+        137.45011246786635,
+        184.3258354755784,
+        26.0
+      ],
+      "interpolation_alpha": 0.32904884318766064,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.35693551885557545,
+        "link1_to_link2": 0.713230689081944,
+        "link2_to_link3": 1.8412622164210593,
+        "link3_to_link4": -0.983692905599615,
+        "link4_to_link5": 1.0279346731634039e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_021",
+      "sequence": 2021,
+      "source_interval": [
+        56,
+        57
+      ],
+      "source_path_fraction": [
+        166,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 23,
+      "expected_tool_tip_board_mm": [
+        283.67586403884604,
+        124.3924592973436,
+        29.079120251356755
+      ],
+      "interpolation_alpha": 0.8894601542416453,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.018155590984294853,
+        "link1_to_link2": 0.686545392169323,
+        "link2_to_link3": 1.8883450353442073,
+        "link3_to_link4": -1.0040904271085065,
+        "link4_to_link5": -1.4786138860514875e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_022",
+      "sequence": 2022,
+      "source_interval": [
+        106,
+        107
+      ],
+      "source_path_fraction": [
+        315,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 24,
+      "expected_tool_tip_board_mm": [
+        235.0207923786481,
+        117.78769091184031,
+        37.06487222138213
+      ],
+      "interpolation_alpha": 0.4498714652956298,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.08560963748768237,
+        "link1_to_link2": 0.7110271524452886,
+        "link2_to_link3": 1.7212256004137405,
+        "link3_to_link4": -0.8614527866428048,
+        "link4_to_link5": -1.3220757049211154e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_023",
+      "sequence": 2023,
+      "source_interval": [
+        25,
+        26
+      ],
+      "source_path_fraction": [
+        75,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 25,
+      "expected_tool_tip_board_mm": [
+        158.05294276823162,
+        177.7461101339467,
+        26.0
+      ],
+      "interpolation_alpha": 0.010282776349614395,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.30795945516688605,
+        "link1_to_link2": 0.6992353856329644,
+        "link2_to_link3": 1.8868505684827395,
+        "link3_to_link4": -1.015285953809854,
+        "link4_to_link5": 6.610722328411994e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_024",
+      "sequence": 2024,
+      "source_interval": [
+        76,
+        77
+      ],
+      "source_path_fraction": [
+        224,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 26,
+      "expected_tool_tip_board_mm": [
+        288.6326192516424,
+        34.733504712939165,
+        61.15224221650956
+      ],
+      "interpolation_alpha": 0.570694087403599,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.07037692779026293,
+        "link1_to_link2": 0.8873693891362433,
+        "link2_to_link3": 1.0516081580507306,
+        "link3_to_link4": -0.36817799608482354,
+        "link4_to_link5": -1.2649041341983076e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_025",
+      "sequence": 2025,
+      "source_interval": [
+        126,
+        127
+      ],
+      "source_path_fraction": [
+        373,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 27,
+      "expected_tool_tip_board_mm": [
+        188.56405848329052,
+        164.72943444730078,
+        26.000000000000004
+      ],
+      "interpolation_alpha": 0.13110539845758354,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.22933507683958404,
+        "link1_to_link2": 0.6899043721779655,
+        "link2_to_link3": 1.9179341179357476,
+        "link3_to_link4": -1.0370384891645497,
+        "link4_to_link5": 4.265982955996094e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_026",
+      "sequence": 2026,
+      "source_interval": [
+        45,
+        46
+      ],
+      "source_path_fraction": [
+        133,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 28,
+      "expected_tool_tip_board_mm": [
+        249.31171695305102,
+        145.11669598159926,
+        26.0
+      ],
+      "interpolation_alpha": 0.6915167095115681,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.07551450394691048,
+        "link1_to_link2": 0.6760061731609989,
+        "link2_to_link3": 1.9654254348643976,
+        "link3_to_link4": -1.0706316064804424,
+        "link4_to_link5": 1.758553957491666e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_027",
+      "sequence": 2027,
+      "source_interval": [
+        95,
+        96
+      ],
+      "source_path_fraction": [
+        282,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 29,
+      "expected_tool_tip_board_mm": [
+        259.21164373204294,
+        70.36110691063055,
+        51.55632844397399
+      ],
+      "interpolation_alpha": 0.2519280205655527,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.004230103882337478,
+        "link1_to_link2": 0.7904060180526402,
+        "link2_to_link3": 1.3721455230943547,
+        "link3_to_link4": -0.5917516567460237,
+        "link4_to_link5": -1.3153011212738657e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_028",
+      "sequence": 2028,
+      "source_interval": [
+        14,
+        15
+      ],
+      "source_path_fraction": [
+        42,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 30,
+      "expected_tool_tip_board_mm": [
+        107.0,
+        196.0,
+        25.061696658097684
+      ],
+      "interpolation_alpha": 0.8123393316195373,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.42941208116844787,
+        "link1_to_link2": 0.7389001506949029,
+        "link2_to_link3": 1.7712025653097185,
+        "link3_to_link4": -0.9393027178537467,
+        "link4_to_link5": 1.3939214108293844e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_029",
+      "sequence": 2029,
+      "source_interval": [
+        64,
+        65
+      ],
+      "source_path_fraction": [
+        191,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 31,
+      "expected_tool_tip_board_mm": [
+        285.8123964581548,
+        85.74635818337619,
+        42.90374178806055
+      ],
+      "interpolation_alpha": 0.37275064267352187,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.043084581643366426,
+        "link1_to_link2": 0.7416461091732621,
+        "link2_to_link3": 1.5772920575575484,
+        "link3_to_link4": -0.7481383202095828,
+        "link4_to_link5": -2.014701442721705e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_030",
+      "sequence": 2030,
+      "source_interval": [
+        115,
+        116
+      ],
+      "source_path_fraction": [
+        340,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 32,
+      "expected_tool_tip_board_mm": [
+        216.69438983819748,
+        153.71692121578707,
+        26.08649629517617
+      ],
+      "interpolation_alpha": 0.9331619537275064,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.1568221319228007,
+        "link1_to_link2": 0.6842404725001902,
+        "link2_to_link3": 1.9359263134175846,
+        "link3_to_link4": -1.0493667846528758,
+        "link4_to_link5": 1.7396475108500997e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_031",
+      "sequence": 2031,
+      "source_interval": [
+        33,
+        34
+      ],
+      "source_path_fraction": [
+        100,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 33,
+      "expected_tool_tip_board_mm": [
+        197.388621296171,
+        163.6817074820728,
+        26.0
+      ],
+      "interpolation_alpha": 0.493573264781491,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.20931031579872156,
+        "link1_to_link2": 0.6830976566201783,
+        "link2_to_link3": 1.9410022993550256,
+        "link3_to_link4": -1.0532999549707185,
+        "link4_to_link5": 2.871850817157733e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_032",
+      "sequence": 2032,
+      "source_interval": [
+        84,
+        85
+      ],
+      "source_path_fraction": [
+        249,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 34,
+      "expected_tool_tip_board_mm": [
+        283.40249508543775,
+        22.934522909420842,
+        66.04778466656586
+      ],
+      "interpolation_alpha": 0.05398457583547558,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.06481265422222247,
+        "link1_to_link2": 0.9464269409599226,
+        "link2_to_link3": 0.8686368947510411,
+        "link3_to_link4": -0.24427347729340573,
+        "link4_to_link5": 1.404022364969439e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_033",
+      "sequence": 2033,
+      "source_interval": [
+        3,
+        4
+      ],
+      "source_path_fraction": [
+        9,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 35,
+      "expected_tool_tip_board_mm": [
+        149.84137210796916,
+        179.57519280205656,
+        26.0
+      ],
+      "interpolation_alpha": 0.6143958868894601,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3266028013786,
+        "link1_to_link2": 0.7059861464041213,
+        "link2_to_link3": 1.8647185942697653,
+        "link3_to_link4": -0.9999047404716664,
+        "link4_to_link5": 8.649413581756852e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_034",
+      "sequence": 2034,
+      "source_interval": [
+        53,
+        54
+      ],
+      "source_path_fraction": [
+        158,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 36,
+      "expected_tool_tip_board_mm": [
+        283.2,
+        133.0,
+        21.874035989717225
+      ],
+      "interpolation_alpha": 0.17480719794344474,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.01199465625450932,
+        "link1_to_link2": 0.6954703382539537,
+        "link2_to_link3": 1.9569810588725471,
+        "link3_to_link4": -1.0816513974695157,
+        "link4_to_link5": -1.4008680594121502e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_035",
+      "sequence": 2035,
+      "source_interval": [
+        104,
+        105
+      ],
+      "source_path_fraction": [
+        307,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 37,
+      "expected_tool_tip_board_mm": [
+        240.8852411915923,
+        106.29033721457736,
+        40.57795251776803
+      ],
+      "interpolation_alpha": 0.7352185089974294,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.06462649817186077,
+        "link1_to_link2": 0.7253461627431087,
+        "link2_to_link3": 1.6446413289074486,
+        "link3_to_link4": -0.7991875034525777,
+        "link4_to_link5": -1.3430279291692546e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_036",
+      "sequence": 2036,
+      "source_interval": [
+        22,
+        23
+      ],
+      "source_path_fraction": [
+        67,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 38,
+      "expected_tool_tip_board_mm": [
+        145.465525639291,
+        182.24671898254635,
+        26.000000000000004
+      ],
+      "interpolation_alpha": 0.29562982005141386,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.33868731835309934,
+        "link1_to_link2": 0.70653047357977,
+        "link2_to_link3": 1.8629464434244167,
+        "link3_to_link4": -0.9986769169604502,
+        "link4_to_link5": 8.26216182228203e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_037",
+      "sequence": 2037,
+      "source_interval": [
+        73,
+        74
+      ],
+      "source_path_fraction": [
+        216,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 39,
+      "expected_tool_tip_board_mm": [
+        287.9489288774636,
+        47.10025706940874,
+        56.72836332476435
+      ],
+      "interpolation_alpha": 0.8560411311053985,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.06426386590976584,
+        "link1_to_link2": 0.8416394278891272,
+        "link2_to_link3": 1.1999992215312112,
+        "link3_to_link4": -0.470838760487155,
+        "link4_to_link5": 4.068019208148488e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_038",
+      "sequence": 2038,
+      "source_interval": [
+        123,
+        124
+      ],
+      "source_path_fraction": [
+        365,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 40,
+      "expected_tool_tip_board_mm": [
+        200.95531812339334,
+        159.97879177377894,
+        26.0
+      ],
+      "interpolation_alpha": 0.41645244215938304,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.19760495143423862,
+        "link1_to_link2": 0.6867695653931782,
+        "link2_to_link3": 1.9285142754677747,
+        "link3_to_link4": -1.0444838397357212,
+        "link4_to_link5": 3.065843557167773e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_039",
+      "sequence": 2039,
+      "source_interval": [
+        42,
+        43
+      ],
+      "source_path_fraction": [
+        125,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 41,
+      "expected_tool_tip_board_mm": [
+        236.72429982411037,
+        149.6173048301989,
+        26.0
+      ],
+      "interpolation_alpha": 0.9768637532133676,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.10811396978433381,
+        "link1_to_link2": 0.676279653923243,
+        "link2_to_link3": 1.9644755365680384,
+        "link3_to_link4": -1.0699551890224055,
+        "link4_to_link5": 5.389410319813168e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_040",
+      "sequence": 2040,
+      "source_interval": [
+        92,
+        93
+      ],
+      "source_path_fraction": [
+        274,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 42,
+      "expected_tool_tip_board_mm": [
+        265.07609254498715,
+        58.863753213367616,
+        55.0694087403599
+      ],
+      "interpolation_alpha": 0.5372750642673522,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.013553345527067221,
+        "link1_to_link2": 0.818929978164508,
+        "link2_to_link3": 1.2705703236352468,
+        "link3_to_link4": -0.5187003771451684,
+        "link4_to_link5": -7.59208625321552e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_041",
+      "sequence": 2041,
+      "source_interval": [
+        11,
+        12
+      ],
+      "source_path_fraction": [
+        34,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 43,
+      "expected_tool_tip_board_mm": [
+        111.1186857326478,
+        194.42095115681235,
+        26.0
+      ],
+      "interpolation_alpha": 0.09768637532133675,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.41979313984942074,
+        "link1_to_link2": 0.7322611874369636,
+        "link2_to_link3": 1.7809357527170424,
+        "link3_to_link4": -0.9423969409979798,
+        "link4_to_link5": 1.4607197275763297e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_042",
+      "sequence": 2042,
+      "source_interval": [
+        62,
+        63
+      ],
+      "source_path_fraction": [
+        183,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 44,
+      "expected_tool_tip_board_mm": [
+        285.128706083976,
+        98.11311053984576,
+        38.47986289631534
+      ],
+      "interpolation_alpha": 0.6580976863753213,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.0355591291700965,
+        "link1_to_link2": 0.7196681666627196,
+        "link2_to_link3": 1.6817916525268677,
+        "link3_to_link4": -0.8306598406281294,
+        "link4_to_link5": -1.3350287184026484e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_043",
+      "sequence": 2043,
+      "source_interval": [
+        112,
+        113
+      ],
+      "source_path_fraction": [
+        332,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 45,
+      "expected_tool_tip_board_mm": [
+        222.55883865114168,
+        142.21956751852412,
+        29.599576591562073
+      ],
+      "interpolation_alpha": 0.2185089974293059,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.1330701507455665,
+        "link1_to_link2": 0.6899174086124644,
+        "link2_to_link3": 1.870875379453715,
+        "link3_to_link4": -0.9899927909412585,
+        "link4_to_link5": 2.116537699357135e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_044",
+      "sequence": 2044,
+      "source_interval": [
+        31,
+        32
+      ],
+      "source_path_fraction": [
+        92,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 46,
+      "expected_tool_tip_board_mm": [
+        184.8012041672304,
+        168.18231633067245,
+        26.0
+      ],
+      "interpolation_alpha": 0.7789203084832905,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2412453733421706,
+        "link1_to_link2": 0.6872103022023708,
+        "link2_to_link3": 1.9270232778877252,
+        "link3_to_link4": -1.04343357928437,
+        "link4_to_link5": 3.941025199009306e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_045",
+      "sequence": 2045,
+      "source_interval": [
+        81,
+        82
+      ],
+      "source_path_fraction": [
+        241,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 47,
+      "expected_tool_tip_board_mm": [
+        289.26694389838195,
+        11.437169212157869,
+        69.56086496295177
+      ],
+      "interpolation_alpha": 0.3393316195372751,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.0799234711260213,
+        "link1_to_link2": 1.0122835554420098,
+        "link2_to_link3": 0.6791540082008264,
+        "link3_to_link4": -0.12063812381305992,
+        "link4_to_link5": -1.2633455529761019e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_046",
+      "sequence": 2046,
+      "source_interval": [
+        0,
+        1
+      ],
+      "source_path_fraction": [
+        1,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 48,
+      "expected_tool_tip_board_mm": [
+        162.23263174807198,
+        174.8245501285347,
+        26.0
+      ],
+      "interpolation_alpha": 0.8997429305912596,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2958527077941027,
+        "link1_to_link2": 0.6997726747234038,
+        "link2_to_link3": 1.885079289927253,
+        "link3_to_link4": -1.014051964280499,
+        "link4_to_link5": 6.470909964098626e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_047",
+      "sequence": 2047,
+      "source_interval": [
+        50,
+        51
+      ],
+      "source_path_fraction": [
+        150,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 49,
+      "expected_tool_tip_board_mm": [
+        276.05997835204977,
+        135.55290217832498,
+        26.0
+      ],
+      "interpolation_alpha": 0.4601542416452442,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.0063713452261162,
+        "link1_to_link2": 0.6784251021040508,
+        "link2_to_link3": 1.9570472653094022,
+        "link3_to_link4": -1.0646723658944315,
+        "link4_to_link5": -1.2349118174505094e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_048",
+      "sequence": 2048,
+      "source_interval": [
+        101,
+        102
+      ],
+      "source_path_fraction": [
+        299,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 50,
+      "expected_tool_tip_board_mm": [
+        246.74969000453652,
+        94.79298351731438,
+        44.091032814153934
+      ],
+      "interpolation_alpha": 0.02056555269922879,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.044461073319493616,
+        "link1_to_link2": 0.7425665881432081,
+        "link2_to_link3": 1.5635976612706,
+        "link3_to_link4": -0.7353643880695118,
+        "link4_to_link5": 1.1675564998612875e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_049",
+      "sequence": 2049,
+      "source_interval": [
+        20,
+        21
+      ],
+      "source_path_fraction": [
+        59,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 51,
+      "expected_tool_tip_board_mm": [
+        132.87810851035042,
+        186.74732783114598,
+        26.0
+      ],
+      "interpolation_alpha": 0.5809768637532133,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3689311589832688,
+        "link1_to_link2": 0.7149021578528985,
+        "link2_to_link3": 1.8358933635538448,
+        "link3_to_link4": -0.9799955216636469,
+        "link4_to_link5": 1.0148908612669323e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_050",
+      "sequence": 2050,
+      "source_interval": [
+        70,
+        71
+      ],
+      "source_path_fraction": [
+        208,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 52,
+      "expected_tool_tip_board_mm": [
+        287.26523850328476,
+        59.467009425878324,
+        52.30448443301914
+      ],
+      "interpolation_alpha": 0.14138817480719795,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.05784467736750324,
+        "link1_to_link2": 0.8037377165245583,
+        "link2_to_link3": 1.331670864797006,
+        "link3_to_link4": -0.5646086449050343,
+        "link4_to_link5": -8.178512817229728e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_051",
+      "sequence": 2051,
+      "source_interval": [
+        121,
+        122
+      ],
+      "source_path_fraction": [
+        357,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 53,
+      "expected_tool_tip_board_mm": [
+        213.34657776349616,
+        155.22814910025707,
+        26.0
+      ],
+      "interpolation_alpha": 0.7017994858611826,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.16568791828214952,
+        "link1_to_link2": 0.6845579319509635,
+        "link2_to_link3": 1.9360224341457024,
+        "link3_to_link4": -1.0497803648343496,
+        "link4_to_link5": 2.0204528192103128e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_052",
+      "sequence": 2052,
+      "source_interval": [
+        39,
+        40
+      ],
+      "source_path_fraction": [
+        117,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 54,
+      "expected_tool_tip_board_mm": [
+        224.13688269516985,
+        154.11791367879854,
+        26.0
+      ],
+      "interpolation_alpha": 0.2622107969151671,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.1406558925678227,
+        "link1_to_link2": 0.6774861359458808,
+        "link2_to_link3": 1.9602931978111795,
+        "link3_to_link4": -1.0669793324054357,
+        "link4_to_link5": 1.0963488058999196e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_053",
+      "sequence": 2053,
+      "source_interval": [
+        90,
+        91
+      ],
+      "source_path_fraction": [
+        266,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 55,
+      "expected_tool_tip_board_mm": [
+        270.94054135793135,
+        47.366399516104636,
+        58.582489036745805
+      ],
+      "interpolation_alpha": 0.8226221079691517,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.030651039817154953,
+        "link1_to_link2": 0.8522337283134851,
+        "link2_to_link3": 1.1590160026541958,
+        "link3_to_link4": -0.440449857599681,
+        "link4_to_link5": 1.856263380748974e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_054",
+      "sequence": 2054,
+      "source_interval": [
+        8,
+        9
+      ],
+      "source_path_fraction": [
+        26,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 56,
+      "expected_tool_tip_board_mm": [
+        123.50994537275064,
+        189.6703084832905,
+        26.0
+      ],
+      "interpolation_alpha": 0.38303341902313626,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3904978874460835,
+        "link1_to_link2": 0.7226774951516798,
+        "link2_to_link3": 1.8110985327575833,
+        "link3_to_link4": -0.9629760283819608,
+        "link4_to_link5": 1.2381843648424435e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_055",
+      "sequence": 2055,
+      "source_interval": [
+        59,
+        60
+      ],
+      "source_path_fraction": [
+        175,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 57,
+      "expected_tool_tip_board_mm": [
+        284.44501570979713,
+        110.47986289631534,
+        34.05598400457012
+      ],
+      "interpolation_alpha": 0.9434447300771208,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.027624885189647525,
+        "link1_to_link2": 0.7017479758721651,
+        "link2_to_link3": 1.7814227041869912,
+        "link3_to_link4": -0.9123707354738356,
+        "link4_to_link5": -1.2912728433536192e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_056",
+      "sequence": 2056,
+      "source_interval": [
+        109,
+        110
+      ],
+      "source_path_fraction": [
+        324,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 58,
+      "expected_tool_tip_board_mm": [
+        228.42328746408592,
+        130.72221382126114,
+        33.11265688794798
+      ],
+      "interpolation_alpha": 0.5038560411311054,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.11023765542516668,
+        "link1_to_link2": 0.6983160386193384,
+        "link2_to_link3": 1.8026360273806368,
+        "link3_to_link4": -0.9301521294318279,
+        "link4_to_link5": -1.2776213384772112e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_057",
+      "sequence": 2057,
+      "source_interval": [
+        28,
+        29
+      ],
+      "source_path_fraction": [
+        84,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 59,
+      "expected_tool_tip_board_mm": [
+        172.2137870382898,
+        172.6829251792721,
+        26.0
+      ],
+      "interpolation_alpha": 0.06426735218508997,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2728570703703404,
+        "link1_to_link2": 0.6922988861957015,
+        "link2_to_link3": 1.9099005425229094,
+        "link3_to_link4": -1.0313994288073796,
+        "link4_to_link5": 1.766261008176436e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_058",
+      "sequence": 2058,
+      "source_interval": [
+        79,
+        80
+      ],
+      "source_path_fraction": [
+        233,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 60,
+      "expected_tool_tip_board_mm": [
+        289.4017709225935,
+        20.820908311910884,
+        66.12910596972293
+      ],
+      "interpolation_alpha": 0.6246786632390745,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.07691909313990569,
+        "link1_to_link2": 0.9524799007726488,
+        "link2_to_link3": 0.8529199997758319,
+        "link3_to_link4": -0.23460068921473615,
+        "link4_to_link5": 5.323402883597288e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_059",
+      "sequence": 2059,
+      "source_interval": [
+        129,
+        130
+      ],
+      "source_path_fraction": [
+        382,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 61,
+      "expected_tool_tip_board_mm": [
+        174.6238913881748,
+        170.07390745501283,
+        25.999999999999996
+      ],
+      "interpolation_alpha": 0.18508997429305912,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.26472584896393947,
+        "link1_to_link2": 0.6945819293419917,
+        "link2_to_link3": 1.9022784225210525,
+        "link3_to_link4": -1.0260603521364118,
+        "link4_to_link5": -1.3487015846526208e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_060",
+      "sequence": 2060,
+      "source_interval": [
+        48,
+        49
+      ],
+      "source_path_fraction": [
+        142,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 62,
+      "expected_tool_tip_board_mm": [
+        263.4725612231092,
+        140.05351102692464,
+        26.0
+      ],
+      "interpolation_alpha": 0.7455012853470437,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.03885965436232286,
+        "link1_to_link2": 0.6767702729134792,
+        "link2_to_link3": 1.9627734074471803,
+        "link3_to_link4": -1.068743678788157,
+        "link4_to_link5": -4.054569789041294e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_061",
+      "sequence": 2061,
+      "source_interval": [
+        98,
+        99
+      ],
+      "source_path_fraction": [
+        291,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 63,
+      "expected_tool_tip_board_mm": [
+        252.61413881748075,
+        83.29562982005142,
+        47.60411311053984
+      ],
+      "interpolation_alpha": 0.3059125964010283,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.025108183503043217,
+        "link1_to_link2": 0.7631256182709043,
+        "link2_to_link3": 1.4770329711263637,
+        "link3_to_link4": -0.6693587000520415,
+        "link4_to_link5": -7.774838677471893e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_062",
+      "sequence": 2062,
+      "source_interval": [
+        17,
+        18
+      ],
+      "source_path_fraction": [
+        51,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 64,
+      "expected_tool_tip_board_mm": [
+        120.29069138140981,
+        191.24793667974564,
+        26.0
+      ],
+      "interpolation_alpha": 0.8663239074550129,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3986501455965177,
+        "link1_to_link2": 0.7243939223404492,
+        "link2_to_link3": 1.8056631078012706,
+        "link3_to_link4": -0.9592570307319574,
+        "link4_to_link5": 1.2447002166193116e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_063",
+      "sequence": 2063,
+      "source_interval": [
+        67,
+        68
+      ],
+      "source_path_fraction": [
+        200,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 65,
+      "expected_tool_tip_board_mm": [
+        286.58154812910595,
+        71.8337617823479,
+        47.88060554127392
+      ],
+      "interpolation_alpha": 0.4267352185089974,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.05109563533638974,
+        "link1_to_link2": 0.7717642185164366,
+        "link2_to_link3": 1.451944476702642,
+        "link3_to_link4": -0.6529088615897922,
+        "link4_to_link5": -1.962593066175629e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_064",
+      "sequence": 2064,
+      "source_interval": [
+        118,
+        119
+      ],
+      "source_path_fraction": [
+        349,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 67,
+      "expected_tool_tip_board_mm": [
+        211.54946556622917,
+        158.6185225273982,
+        26.0
+      ],
+      "interpolation_alpha": 0.5475578406169666,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.17307289749170834,
+        "link1_to_link2": 0.6796039478484022,
+        "link2_to_link3": 1.9529821148079876,
+        "link3_to_link4": -1.0617860614537986,
+        "link4_to_link5": 1.8388204428358523e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_065",
+      "sequence": 2065,
+      "source_interval": [
+        87,
+        88
+      ],
+      "source_path_fraction": [
+        258,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 68,
+      "expected_tool_tip_board_mm": [
+        276.80499017087556,
+        35.86904581884168,
+        62.095569333131714
+      ],
+      "interpolation_alpha": 0.10796915167095116,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.047083060887902095,
+        "link1_to_link2": 0.8917726567259544,
+        "link2_to_link3": 1.0335975673903326,
+        "link3_to_link4": -0.35457051868164857,
+        "link4_to_link5": -1.2995411034210065e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_066",
+      "sequence": 2066,
+      "source_interval": [
+        6,
+        7
+      ],
+      "source_path_fraction": [
+        18,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 69,
+      "expected_tool_tip_board_mm": [
+        135.90120501285347,
+        184.91966580976862,
+        26.0
+      ],
+      "interpolation_alpha": 0.6683804627249358,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.36069510265663873,
+        "link1_to_link2": 0.7142115662489321,
+        "link2_to_link3": 1.8381085683806062,
+        "link3_to_link4": -0.9815201347657819,
+        "link4_to_link5": 1.0496328911889442e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_067",
+      "sequence": 2067,
+      "source_interval": [
+        56,
+        57
+      ],
+      "source_path_fraction": [
+        167,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 70,
+      "expected_tool_tip_board_mm": [
+        283.7613253356184,
+        122.84661525278491,
+        29.632105112824906
+      ],
+      "interpolation_alpha": 0.22879177377892032,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.01923464653156012,
+        "link1_to_link2": 0.6879902926091044,
+        "link2_to_link3": 1.8767071464401135,
+        "link3_to_link4": -0.9938974174854451,
+        "link4_to_link5": -1.3318894537753218e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_068",
+      "sequence": 2068,
+      "source_interval": [
+        107,
+        108
+      ],
+      "source_path_fraction": [
+        316,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 71,
+      "expected_tool_tip_board_mm": [
+        234.28773627703012,
+        119.22486012399818,
+        36.62573718433389
+      ],
+      "interpolation_alpha": 0.7892030848329049,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.08828695115666933,
+        "link1_to_link2": 0.7094230316291993,
+        "link2_to_link3": 1.7305299650019315,
+        "link3_to_link4": -0.8691530335833213,
+        "link4_to_link5": -1.3183377341020705e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_069",
+      "sequence": 2069,
+      "source_interval": [
+        25,
+        26
+      ],
+      "source_path_fraction": [
+        76,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 72,
+      "expected_tool_tip_board_mm": [
+        159.6263699093492,
+        177.18353402787173,
+        26.0
+      ],
+      "interpolation_alpha": 0.3496143958868895,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.30407919855092597,
+        "link1_to_link2": 0.6984150888934612,
+        "link2_to_link3": 1.889563354229893,
+        "link3_to_link4": -1.0171784430592714,
+        "link4_to_link5": 4.297942477622582e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_070",
+      "sequence": 2070,
+      "source_interval": [
+        76,
+        77
+      ],
+      "source_path_fraction": [
+        225,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 73,
+      "expected_tool_tip_board_mm": [
+        288.7180805484148,
+        33.18766066838047,
+        61.70522707797772
+      ],
+      "interpolation_alpha": 0.910025706940874,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.0711241438883517,
+        "link1_to_link2": 0.893640521211708,
+        "link2_to_link3": 1.0318115591034867,
+        "link3_to_link4": -0.35465236521484206,
+        "link4_to_link5": -1.3013560504573407e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_071",
+      "sequence": 2071,
+      "source_interval": [
+        126,
+        127
+      ],
+      "source_path_fraction": [
+        374,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 74,
+      "expected_tool_tip_board_mm": [
+        187.01515102827764,
+        165.323264781491,
+        26.0
+      ],
+      "interpolation_alpha": 0.4704370179948586,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.23328238421076344,
+        "link1_to_link2": 0.6903724987154991,
+        "link2_to_link3": 1.9163612774285872,
+        "link3_to_link4": -1.0359337752196596,
+        "link4_to_link5": 4.4257590138803685e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_072",
+      "sequence": 2072,
+      "source_interval": [
+        45,
+        46
+      ],
+      "source_path_fraction": [
+        134,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 75,
+      "expected_tool_tip_board_mm": [
+        250.8851440941686,
+        144.5541198755243,
+        26.0
+      ],
+      "interpolation_alpha": 0.030848329048843187,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.0714389467664068,
+        "link1_to_link2": 0.6760230874605911,
+        "link2_to_link3": 1.9653666780292143,
+        "link3_to_link4": -1.0705897639379143,
+        "link4_to_link5": 1.4054915197202674e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_073",
+      "sequence": 2073,
+      "source_interval": [
+        96,
+        97
+      ],
+      "source_path_fraction": [
+        283,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 76,
+      "expected_tool_tip_board_mm": [
+        258.47858763042495,
+        71.79827612278845,
+        51.11719340692576
+      ],
+      "interpolation_alpha": 0.5912596401028277,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.006506267535364568,
+        "link1_to_link2": 0.7871527542051615,
+        "link2_to_link3": 1.3842237603074659,
+        "link3_to_link4": -0.6005766529929999,
+        "link4_to_link5": -1.3062880642367173e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_074",
+      "sequence": 2074,
+      "source_interval": [
+        14,
+        15
+      ],
+      "source_path_fraction": [
+        43,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 77,
+      "expected_tool_tip_board_mm": [
+        107.70327425246921,
+        195.74854552834526,
+        26.0
+      ],
+      "interpolation_alpha": 0.15167095115681234,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.42779587166696126,
+        "link1_to_link2": 0.7350798960830547,
+        "link2_to_link3": 1.7721457921893269,
+        "link3_to_link4": -0.9364256892263205,
+        "link4_to_link5": 1.5270591103730467e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_075",
+      "sequence": 2075,
+      "source_interval": [
+        65,
+        66
+      ],
+      "source_path_fraction": [
+        192,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 78,
+      "expected_tool_tip_board_mm": [
+        285.89785775492714,
+        84.20051413881748,
+        43.456726649528704
+      ],
+      "interpolation_alpha": 0.712082262210797,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.04399858743215672,
+        "link1_to_link2": 0.7446989649762061,
+        "link2_to_link3": 1.5638167872605075,
+        "link3_to_link4": -0.7377159007970047,
+        "link4_to_link5": -1.777636152172442e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_076",
+      "sequence": 2076,
+      "source_interval": [
+        115,
+        116
+      ],
+      "source_path_fraction": [
+        341,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 79,
+      "expected_tool_tip_board_mm": [
+        216.55,
+        154.0,
+        24.637532133676093
+      ],
+      "interpolation_alpha": 0.27249357326478146,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.15741495625027238,
+        "link1_to_link2": 0.6892628377309418,
+        "link2_to_link3": 1.9389882621825774,
+        "link3_to_link4": -1.0574510993690671,
+        "link4_to_link5": 1.255790119477684e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_077",
+      "sequence": 2077,
+      "source_interval": [
+        34,
+        35
+      ],
+      "source_path_fraction": [
+        101,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 80,
+      "expected_tool_tip_board_mm": [
+        198.9620484372886,
+        163.11913137599782,
+        26.0
+      ],
+      "interpolation_alpha": 0.8329048843187661,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2053006704729762,
+        "link1_to_link2": 0.682643319492555,
+        "link2_to_link3": 1.942553938666628,
+        "link3_to_link4": -1.0543972571311262,
+        "link4_to_link5": 2.7466099540293834e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_078",
+      "sequence": 2078,
+      "source_interval": [
+        84,
+        85
+      ],
+      "source_path_fraction": [
+        250,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 81,
+      "expected_tool_tip_board_mm": [
+        282.66943898381976,
+        24.37169212157871,
+        65.60864962951761
+      ],
+      "interpolation_alpha": 0.39331619537275064,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.06287353997468342,
+        "link1_to_link2": 0.9398121216790991,
+        "link2_to_link3": 0.8882802840591362,
+        "link3_to_link4": -0.2573010076782531,
+        "link4_to_link5": 5.7896321152089554e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_079",
+      "sequence": 2079,
+      "source_interval": [
+        3,
+        4
+      ],
+      "source_path_fraction": [
+        10,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 82,
+      "expected_tool_tip_board_mm": [
+        148.2924646529563,
+        180.1690231362468,
+        26.0
+      ],
+      "interpolation_alpha": 0.9537275064267352,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.330423965467048,
+        "link1_to_link2": 0.7068204283658329,
+        "link2_to_link3": 1.8619985893068935,
+        "link3_to_link4": -0.9980190175057679,
+        "link4_to_link5": 8.842560897314711e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_080",
+      "sequence": 2080,
+      "source_interval": [
+        53,
+        54
+      ],
+      "source_path_fraction": [
+        159,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 83,
+      "expected_tool_tip_board_mm": [
+        283.2,
+        133.0,
+        23.5706940874036
+      ],
+      "interpolation_alpha": 0.5141388174807198,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.011994656821260071,
+        "link1_to_link2": 0.6890083616331975,
+        "link2_to_link3": 1.95512104246062,
+        "link3_to_link4": -1.0733294036996321,
+        "link4_to_link5": -1.4650364533764617e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_081",
+      "sequence": 2081,
+      "source_interval": [
+        104,
+        105
+      ],
+      "source_path_fraction": [
+        308,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 84,
+      "expected_tool_tip_board_mm": [
+        240.1521850899743,
+        107.72750642673523,
+        40.138817480719794
+      ],
+      "interpolation_alpha": 0.07455012853470437,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.06719623630001222,
+        "link1_to_link2": 0.7233698836360557,
+        "link2_to_link3": 1.6544920882391592,
+        "link3_to_link4": -0.8070619858601132,
+        "link4_to_link5": -1.3415070142174186e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_082",
+      "sequence": 2082,
+      "source_interval": [
+        23,
+        24
+      ],
+      "source_path_fraction": [
+        68,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 85,
+      "expected_tool_tip_board_mm": [
+        147.03895278040858,
+        181.68414287647138,
+        26.0
+      ],
+      "interpolation_alpha": 0.6349614395886889,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.33487056490437866,
+        "link1_to_link2": 0.7055634985632422,
+        "link2_to_link3": 1.8660976836249592,
+        "link3_to_link4": -1.0008611821091817,
+        "link4_to_link5": 8.050456561480014e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_083",
+      "sequence": 2083,
+      "source_interval": [
+        73,
+        74
+      ],
+      "source_path_fraction": [
+        217,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 86,
+      "expected_tool_tip_board_mm": [
+        288.0343901742359,
+        45.55441302485005,
+        57.281348186232506
+      ],
+      "interpolation_alpha": 0.1953727506426735,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.06504379562735019,
+        "link1_to_link2": 0.846889262171348,
+        "link2_to_link3": 1.1824767140524184,
+        "link3_to_link4": -0.45856609672547927,
+        "link4_to_link5": 4.74693843760006e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_084",
+      "sequence": 2084,
+      "source_interval": [
+        124,
+        125
+      ],
+      "source_path_fraction": [
+        366,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 87,
+      "expected_tool_tip_board_mm": [
+        199.4064106683805,
+        160.57262210796915,
+        26.0
+      ],
+      "interpolation_alpha": 0.7557840616966581,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.20158344443287934,
+        "link1_to_link2": 0.6871073416483996,
+        "link2_to_link3": 1.9273705454775494,
+        "link3_to_link4": -1.0436778860206295,
+        "link4_to_link5": 3.207879653914363e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_085",
+      "sequence": 2085,
+      "source_interval": [
+        42,
+        43
+      ],
+      "source_path_fraction": [
+        126,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 88,
+      "expected_tool_tip_board_mm": [
+        238.29772696522798,
+        149.05472872412392,
+        26.0
+      ],
+      "interpolation_alpha": 0.3161953727506427,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.10404011452178788,
+        "link1_to_link2": 0.6762062406539658,
+        "link2_to_link3": 1.9647304878618423,
+        "link3_to_link4": -1.0701367270355244,
+        "link4_to_link5": 4.856034199699783e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_086",
+      "sequence": 2086,
+      "source_interval": [
+        93,
+        94
+      ],
+      "source_path_fraction": [
+        275,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 89,
+      "expected_tool_tip_board_mm": [
+        264.3430364433691,
+        60.300922425525485,
+        54.63027370331166
+      ],
+      "interpolation_alpha": 0.8766066838046273,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.011375253532834778,
+        "link1_to_link2": 0.8150777737756183,
+        "link2_to_link3": 1.2838515395674712,
+        "link3_to_link4": -0.5281293842179963,
+        "link4_to_link5": -9.178565711011527e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_087",
+      "sequence": 2087,
+      "source_interval": [
+        11,
+        12
+      ],
+      "source_path_fraction": [
+        35,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 90,
+      "expected_tool_tip_board_mm": [
+        109.56977827763495,
+        195.01478149100257,
+        26.0
+      ],
+      "interpolation_alpha": 0.4370179948586118,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.4234105301008816,
+        "link1_to_link2": 0.7335552051007035,
+        "link2_to_link3": 1.7769002628790036,
+        "link3_to_link4": -0.9396554688728695,
+        "link4_to_link5": 1.4920361499093929e-09
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_088",
+      "sequence": 2088,
+      "source_interval": [
+        62,
+        63
+      ],
+      "source_path_fraction": [
+        184,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 91,
+      "expected_tool_tip_board_mm": [
+        285.21416738074834,
+        96.56726649528706,
+        39.03284775778349
+      ],
+      "interpolation_alpha": 0.9974293059125964,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.03652803297834958,
+        "link1_to_link2": 0.7221296777404029,
+        "link2_to_link3": 1.6690942024671767,
+        "link3_to_link4": -0.8204238978836477,
+        "link4_to_link5": -1.338554622164827e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_089",
+      "sequence": 2089,
+      "source_interval": [
+        112,
+        113
+      ],
+      "source_path_fraction": [
+        333,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 92,
+      "expected_tool_tip_board_mm": [
+        221.8257825495237,
+        143.65673673068198,
+        29.160441554513838
+      ],
+      "interpolation_alpha": 0.5578406169665809,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.13599374745378626,
+        "link1_to_link2": 0.6890763350255369,
+        "link2_to_link3": 1.8791647734845665,
+        "link3_to_link4": -0.9974411099231082,
+        "link4_to_link5": 2.6947579931920176e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_090",
+      "sequence": 2090,
+      "source_interval": [
+        31,
+        32
+      ],
+      "source_path_fraction": [
+        93,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 93,
+      "expected_tool_tip_board_mm": [
+        186.37463130834797,
+        167.61974022459748,
+        25.999999999999996
+      ],
+      "interpolation_alpha": 0.11825192802056556,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2372717668920317,
+        "link1_to_link2": 0.6866381063349721,
+        "link2_to_link3": 1.9289595327998201,
+        "link3_to_link4": -1.0447976383030204,
+        "link4_to_link5": 3.7994588262755045e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_091",
+      "sequence": 2091,
+      "source_interval": [
+        82,
+        83
+      ],
+      "source_path_fraction": [
+        242,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 94,
+      "expected_tool_tip_board_mm": [
+        288.5338877967639,
+        12.874338424315741,
+        69.12172992590352
+      ],
+      "interpolation_alpha": 0.6786632390745502,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.0780659582486538,
+        "link1_to_link2": 1.002840932695901,
+        "link2_to_link3": 0.7059006660123721,
+        "link3_to_link4": -0.13794270500544223,
+        "link4_to_link5": -1.178485732505748e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_092",
+      "sequence": 2092,
+      "source_interval": [
+        0,
+        1
+      ],
+      "source_path_fraction": [
+        2,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 95,
+      "expected_tool_tip_board_mm": [
+        160.68372429305913,
+        175.41838046272494,
+        26.0
+      ],
+      "interpolation_alpha": 0.2390745501285347,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.2997159467498398,
+        "link1_to_link2": 0.7004986194912566,
+        "link2_to_link3": 1.8826894748933232,
+        "link3_to_link4": -1.0123880939454761,
+        "link4_to_link5": 7.336004624785936e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_093",
+      "sequence": 2093,
+      "source_interval": [
+        51,
+        52
+      ],
+      "source_path_fraction": [
+        151,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 96,
+      "expected_tool_tip_board_mm": [
+        277.63340549316734,
+        134.99032607225004,
+        26.0
+      ],
+      "interpolation_alpha": 0.7994858611825193,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.002318945337686002,
+        "link1_to_link2": 0.6786906727129935,
+        "link2_to_link3": 1.9561301747305286,
+        "link3_to_link4": -1.0640208459388736,
+        "link4_to_link5": -1.3075831545881036e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_094",
+      "sequence": 2094,
+      "source_interval": [
+        101,
+        102
+      ],
+      "source_path_fraction": [
+        300,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 97,
+      "expected_tool_tip_board_mm": [
+        246.0166339029185,
+        96.23015272947225,
+        43.6518977771057
+      ],
+      "interpolation_alpha": 0.35989717223650386,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.046948050451048544,
+        "link1_to_link2": 0.7402966869795644,
+        "link2_to_link3": 1.5739206866188737,
+        "link3_to_link4": -0.7434174685359861,
+        "link4_to_link5": -3.751314941987548e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_training_095",
+      "sequence": 2095,
+      "source_interval": [
+        20,
+        21
+      ],
+      "source_path_fraction": [
+        60,
+        389
+      ],
+      "split": "training",
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "candidate_rank": 98,
+      "expected_tool_tip_board_mm": [
+        134.451535651468,
+        186.18475172507104,
+        26.0
+      ],
+      "interpolation_alpha": 0.9203084832904884,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3651848144114771,
+        "link1_to_link2": 0.7137820509176713,
+        "link2_to_link3": 1.8394860410801193,
+        "link3_to_link4": -0.9824680922149411,
+        "link4_to_link5": 9.888229495267489e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "pose_id": "pose_diverse_development_096",
+      "sequence": 2096,
+      "source_interval": [
+        70,
+        71
+      ],
+      "source_path_fraction": [
+        209,
+        389
+      ],
+      "split": "development",
+      "target_id": null
+    }
+  ],
+  "schema": "tactevra.ai_pose_diverse_training_fixture.v1",
+  "scope": "SYNTHETIC_STATIC_PERCEPTION_TRAIN_DEVELOPMENT_ONLY",
+  "source": {
+    "sample_count": 133,
+    "schedule_bundle_sha256": "52e8e1977cc88bc4d80b1664ccaaec5b4a2d4286c744bf74655f3d683577d71a",
+    "schedule_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42"
+  },
+  "split_counts": {
+    "development": 24,
+    "training": 72
+  },
+  "target_pose_count": 96
+}

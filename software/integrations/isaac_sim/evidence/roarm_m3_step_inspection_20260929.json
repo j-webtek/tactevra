@@ -1,0 +1,164 @@
+{
+  "blockers": [
+    "CAD_ASSEMBLY_POSE_NOT_BOUND_TO_URDF_JOINT_STATE",
+    "CAD_COMPONENTS_NOT_ASSIGNED_TO_DYNAMIC_LINKS",
+    "COLLISION_REDUCTION_NOT_REVIEWED",
+    "TOOL_GEOMETRY_MISSING",
+    "CAMERA_SUPPORT_GEOMETRY_MISSING",
+    "ROBOT_PLACEMENT_NOMINAL_UNMEASURED",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "candidate_collision_seed_components": [
+    {
+      "bounds_mm_in_cad_assembly_pose": {
+        "maximum": [
+          34.393894,
+          36.210006,
+          119.246683
+        ],
+        "minimum": [
+          -20.383892,
+          -36.209993,
+          83.6
+        ]
+      },
+      "dynamic_link_assignment": null,
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALBASE1_qAV3",
+      "product_id": "AL-BASE",
+      "provenance": "upstream_step_assembly_component",
+      "status": "INSPECTION_ONLY_UNASSIGNED_TO_DYNAMIC_LINK"
+    },
+    {
+      "bounds_mm_in_cad_assembly_pose": {
+        "maximum": [
+          21.004997,
+          39.409972,
+          167.374403
+        ],
+        "minimum": [
+          -8.504998,
+          -39.609987,
+          113.059271
+        ]
+      },
+      "dynamic_link_assignment": null,
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALSHOULDER1_kGu4",
+      "product_id": "AL-SHOULDER",
+      "provenance": "upstream_step_assembly_component",
+      "status": "INSPECTION_ONLY_UNASSIGNED_TO_DYNAMIC_LINK"
+    },
+    {
+      "bounds_mm_in_cad_assembly_pose": {
+        "maximum": [
+          47.007393,
+          20.109996,
+          369.874405
+        ],
+        "minimum": [
+          -7.111824,
+          -20.309987,
+          333.45927
+        ]
+      },
+      "dynamic_link_assignment": null,
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALELBOWA1_nD8g4",
+      "product_id": "AL-ELBOW-A",
+      "provenance": "upstream_step_assembly_component",
+      "status": "INSPECTION_ONLY_UNASSIGNED_TO_DYNAMIC_LINK"
+    },
+    {
+      "bounds_mm_in_cad_assembly_pose": {
+        "maximum": [
+          87.800487,
+          16.909999,
+          375.38197
+        ],
+        "minimum": [
+          42.410487,
+          -18.609998,
+          366.924404
+        ]
+      },
+      "dynamic_link_assignment": null,
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALELBOWB1_nD8g4",
+      "product_id": "AL-ELBOW-B",
+      "provenance": "upstream_step_assembly_component",
+      "status": "INSPECTION_ONLY_UNASSIGNED_TO_DYNAMIC_LINK"
+    }
+  ],
+  "clearance_replay_admissible": false,
+  "collision_geometry_admissible": false,
+  "converter": {
+    "extension_name": "omni.kit.converter.hoops_core",
+    "extension_version": "512.0.0",
+    "identity": "omni.kit.converter.hoops_core 512.0.0 hoops_cad_converter 11.3.6+v11-3-6.4666.4a1c16a1.gl",
+    "options": {
+      "accurate_surface_curvatures": true,
+      "accurate_tessellation": false,
+      "composition_style": "NONE",
+      "convert_metadata": true,
+      "convert_physics_data": false,
+      "filter_style": "OMIT",
+      "instancing_style": "NONE",
+      "tessellation_lod": 1,
+      "use_materials": false,
+      "use_normals": true
+    }
+  },
+  "dynamic_link_assignment_admissible": false,
+  "evidence_class": "PINNED_CAD_INSPECTION_ONLY",
+  "external_files": [
+    {
+      "path": "roarm_m3_official.usda",
+      "sha256": "cfcd4e6170350d948de1976164665ddde99cfad457b72730f7ffcbdd119496d3",
+      "size_bytes": 26872057
+    }
+  ],
+  "external_files_manifest_sha256": "9e7fbf1d2a81cdc039603613aabdf91b63a301c46e0230da78b733e7934485b9",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "cad_assembly_pose_is_not_a_governed_robot_joint_state",
+    "selected_structural_components_are_incomplete_collision_seeds",
+    "no_dynamic_link_local_transforms_or_reduced_shapes",
+    "no_inertia_dynamics_trajectory_clearance_contact_or_render_claim",
+    "generated_cad_asset_remains_external_due_to_unconfirmed_license_scope"
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "b51c20e34c3b3edfa4ba40b88d04299aa346803b43b12909dade7c41c44cf967",
+  "schema": "tactevra.isaac_sim_step_inspection.v1",
+  "source": {
+    "archive_name": "RoArm-M3_STEP_260310.zip",
+    "archive_sha256": "1e2111145276aac14e521f47990fc41de87e2e735623d115a39cc176c9762da2",
+    "archive_size_bytes": 5117961,
+    "archive_url": "https://files.waveshare.com/wiki/RoArm-M3/RoArm-M3_STEP_260310.zip",
+    "redistribution": "external_only_license_scope_unconfirmed",
+    "step_member": "RoArm-M3_STEP/RoArm-M3.step",
+    "step_sha256": "728eb52f0bdd32dc0b907c9bb983d3d0b8adf7a5ea945949785a6e496f5089ff",
+    "step_size_bytes": 26671289
+  },
+  "stage": {
+    "assembly_bounds_mm": {
+      "maximum": [
+        356.851785,
+        42.51,
+        389.380716
+      ],
+      "minimum": [
+        -48.994985,
+        -42.71,
+        0.0
+      ]
+    },
+    "collision_prim_count": 0,
+    "default_prim": "/roarm_m3_official",
+    "mesh_count": 770,
+    "meters_per_unit": 0.001,
+    "named_product_count": 1297,
+    "prim_count": 2893,
+    "unique_product_id_count": 745,
+    "up_axis": "Z"
+  },
+  "wire_commands": []
+}

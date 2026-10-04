@@ -1,0 +1,53 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v4_2_admission.v1",
+  "status": "PARTIAL",
+  "campaign_admitted": false,
+  "fixture_file_sha256": "26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5",
+  "fixture_bundle_sha256": "e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2",
+  "manifest_count": 1,
+  "manifests": [
+    {
+      "path": "C:\\IsaacSim\\artifacts\\issue190\\residual-v4-2-training-s00-t019-022-camera02-smoke\\manifest.json",
+      "manifest_file_sha256": "cf377967c047fb615a2948491c5e6a5f1aa8719edfc5d607f4e7915a2366b716",
+      "dataset_sha256": "368b5e4016ffd5d38563d108931b80b06618d256ab0dbd38596e6e6f46f13d79",
+      "split": "training",
+      "scene_shard": {
+        "count": 1,
+        "start": 0
+      },
+      "target_shard": {
+        "count": 4,
+        "start": 19
+      },
+      "observation_count": 192,
+      "reference_count": 4
+    }
+  ],
+  "verified_observation_count": 192,
+  "unique_observation_rgb_count": 192,
+  "verified_reference_count": 4,
+  "expected_reference_count": 1500,
+  "verified_by_split": {
+    "training": 192,
+    "development": 0
+  },
+  "expected_by_split": {
+    "training": 43200,
+    "development": 28800
+  },
+  "missing_by_split": {
+    "training": 43008,
+    "development": 28800
+  },
+  "evaluation_observation_count": 0,
+  "training_started": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "Synthetic campaign admission does not establish physical or deployment qualification",
+    "PARTIAL status cannot unlock training or development scoring",
+    "Evaluation images remain absent and unopened"
+  ],
+  "report_sha256": "abd1389fd50a40068f75145ae4395f68313eeda1d9a6332c033b0708737b1b8d"
+}

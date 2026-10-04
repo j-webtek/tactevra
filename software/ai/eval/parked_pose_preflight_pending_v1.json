@@ -1,0 +1,24 @@
+{
+  "blockers": [
+    "campaign_package_not_retained"
+  ],
+  "campaign_sha256": null,
+  "controller_authority": false,
+  "custody_review_sha256": null,
+  "evidence_index_sha256": null,
+  "hardware_writes": 0,
+  "limitations": [
+    "No parked-pose campaign package was supplied.",
+    "File integrity and declared custody never prove physical originality or measurement truth."
+  ],
+  "physical_deployment_qualified": false,
+  "physical_movements": 0,
+  "receipt_sha256": "a94e4b5c44f574eff6f03c35c4a8b3ae3ed677058f1d815d2fde5cee5b4dd960",
+  "schema": "rocell.ai_parked_pose_preflight_receipt.v1",
+  "scope": "READ_ONLY_FILE_INTEGRITY_ONLY",
+  "status": "BLOCKED",
+  "verified_artifact_count": 0,
+  "verified_byte_count": 0,
+  "verified_physical_original_count": 0,
+  "verified_synthetic_count": 0
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "rocell.mujoco_warp_fake_host_fixture.v1",
+  "scope": "HARDWARE_FREE_CI_ONLY",
+  "observed": {
+    "python_version": "3.12.0",
+    "platform": "Windows-fixture",
+    "packages": {
+      "mujoco": "3.14.0",
+      "mujoco-warp": "3.13.0",
+      "numpy": "2.5.3",
+      "warp-lang": "1.17.0"
+    },
+    "gpus": [
+      {
+        "uuid": "fixture-gpu-0",
+        "name": "Fixture GPU",
+        "driver_version": "fixture-driver",
+        "compute_capability": "8.6"
+      },
+      {
+        "uuid": "fixture-gpu-1",
+        "name": "Fixture GPU",
+        "driver_version": "fixture-driver",
+        "compute_capability": "8.6"
+      }
+    ]
+  }
+}

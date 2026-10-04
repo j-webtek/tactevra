@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/b0477_commissioning_amendment_v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "source_commit", "superseded_probe_binding", "authoritative_bindings", "mode_correction", "calibration_runtime_mode", "alternate_mode_rule", "optics_and_controls_gate", "print_scale_measurement_gate", "capture_plan", "ready_for_capture", "camera_frames_requested", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_b0477_commissioning_amendment.v1"},
+    "scope": {"const": "PRECAPTURE_CONTRACT_CORRECTION_NO_PHYSICAL_EVIDENCE"},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "superseded_probe_binding": {"type": "object", "additionalProperties": false, "required": ["path", "file_sha256", "report_sha256", "preserved_as_failed_evidence"], "properties": {"path": {"const": "software/ai/eval/physical_charuco_probe_blocked_v1.json"}, "file_sha256": {"$ref": "#/$defs/sha256"}, "report_sha256": {"$ref": "#/$defs/sha256"}, "preserved_as_failed_evidence": {"const": true}}},
+    "authoritative_bindings": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": {"path": {"type": "string"}, "sha256": {"$ref": "#/$defs/sha256"}}}},
+    "mode_correction": {"type": "object", "additionalProperties": false, "required": ["incorrect_fps_in_preserved_probe", "authoritative_maximum_fps", "reason"], "properties": {"incorrect_fps_in_preserved_probe": {"const": 4}, "authoritative_maximum_fps": {"const": 9.0}, "reason": {"type": "string", "minLength": 1}}},
+    "calibration_runtime_mode": {"type": "object", "additionalProperties": false, "required": ["width_px", "height_px", "fps", "pixel_format", "sensor_transform"], "properties": {"width_px": {"const": 5472}, "height_px": {"const": 3648}, "fps": {"const": 9.0}, "pixel_format": {"const": "YUY2"}, "sensor_transform": {"const": "FULL_NATIVE_MODE"}}},
+    "alternate_mode_rule": {"const": "SEPARATE_CALIBRATION_REQUIRED_UNLESS_CROP_BIN_SCALE_TRANSFORM_IS_MEASURED_AND_REVIEWED"},
+    "optics_and_controls_gate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["manual_focus_locked", "manual_aperture_locked", "autofocus_disabled", "auto_exposure_disabled", "auto_white_balance_disabled", "exposure_locked", "gain_locked", "white_balance_locked", "focus_and_aperture_witness_required", "controls_snapshot_required", "settings_hash_binding_required"],
+      "properties": {
+        "manual_focus_locked": {"const": true}, "manual_aperture_locked": {"const": true}, "autofocus_disabled": {"const": true},
+        "auto_exposure_disabled": {"const": true}, "auto_white_balance_disabled": {"const": true}, "exposure_locked": {"const": true},
+        "gain_locked": {"const": true}, "white_balance_locked": {"const": true}, "focus_and_aperture_witness_required": {"const": true},
+        "controls_snapshot_required": {"const": true}, "settings_hash_binding_required": {"const": true}
+      }
+    },
+    "print_scale_measurement_gate": {"type": "object", "additionalProperties": false, "required": ["instrument", "minimum_total_measurements", "minimum_horizontal_measurements", "minimum_vertical_measurements", "distributed_across_board", "opposite_extents_required", "raw_measurements_and_instrument_identity_retained", "maximum_axis_scale_error_fraction", "tolerance_status"], "properties": {"instrument": {"const": "CALIBRATED_CALIPERS"}, "minimum_total_measurements": {"const": 8}, "minimum_horizontal_measurements": {"const": 4}, "minimum_vertical_measurements": {"const": 4}, "distributed_across_board": {"const": true}, "opposite_extents_required": {"const": true}, "raw_measurements_and_instrument_identity_retained": {"const": true}, "maximum_axis_scale_error_fraction": {"type": "null"}, "tolerance_status": {"const": "UNSET_PENDING_PHYSICAL_MEASUREMENT_AND_REVIEW"}}},
+    "capture_plan": {"type": "object", "additionalProperties": false, "required": ["training_views", "held_out_views", "corners_and_edges_required", "varied_positions_angles_and_distances_required", "training_and_held_out_reprojection_reported_separately", "diagnostic_reprojection_target_px", "diagnostic_target_is_qualification_threshold"], "properties": {"training_views": {"const": 24}, "held_out_views": {"const": 8}, "corners_and_edges_required": {"const": true}, "varied_positions_angles_and_distances_required": {"const": true}, "training_and_held_out_reprojection_reported_separately": {"const": true}, "diagnostic_reprojection_target_px": {"const": 0.5}, "diagnostic_target_is_qualification_threshold": {"const": false}}},
+    "ready_for_capture": {"const": false}, "camera_frames_requested": {"const": 0}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

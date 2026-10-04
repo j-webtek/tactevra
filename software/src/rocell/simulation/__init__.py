@@ -92,6 +92,12 @@ from .collision import (
     evaluate_collision_pose,
     evaluate_collision_sweep,
 )
+from .exclusion_policy import (
+    CollisionExclusionPolicyCandidate,
+    CollisionExclusionPolicyCandidateError,
+    ProposedCollisionPairExclusion,
+    load_collision_exclusion_policy_candidate,
+)
 from .static_route_collision import (
     MAX_STATIC_ROUTE_BODIES,
     MAX_STATIC_ROUTE_PHASE_POSES,
@@ -225,10 +231,13 @@ __all__ = [
     "CollisionEvidenceState",
     "CollisionExclusionEvidenceState",
     "CollisionExclusionScope",
+    "CollisionExclusionPolicyCandidate",
+    "CollisionExclusionPolicyCandidateError",
     "CollisionGeometryAudit",
     "CollisionGeometryContract",
     "CollisionPair",
     "CollisionPairExclusion",
+    "ProposedCollisionPairExclusion",
     "CollisionPose",
     "CollisionPoseEvaluation",
     "CollisionPoseInputBindings",
@@ -371,6 +380,7 @@ __all__ = [
     "build_roarm_m3_prehardware_collision_contract",
     "evaluate_collision_pose",
     "evaluate_collision_sweep",
+    "load_collision_exclusion_policy_candidate",
     "evaluate_static_b0477_target_route",
     "load_rc03_nominal_scene",
     "load_simulation_bundle_lock",

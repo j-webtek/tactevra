@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v5_2_power_attribution_v1.schema.json",
+  "title": "Residual obstruction v5.2 power attribution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "scope", "status", "source_commit", "v5_file_sha256",
+    "v5_bundle_sha256", "v5_1_file_sha256", "v5_1_report_sha256",
+    "joint_power_semantics", "assumed_true_performance", "gate_inventory",
+    "original_eight_scene_attribution", "balanced_rotation_analysis",
+    "split_role_options", "findings", "next_requirements", "images_generated",
+    "training_started", "evaluation_opened", "hardware_writes",
+    "physical_movements", "physical_authority", "report_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v5_2_power_attribution.v1"},
+    "scope": {"const": "SYNTHETIC_POWER_ATTRIBUTION_AND_RENDER_EFFICIENCY_NO_FIXTURE_CHANGE"},
+    "status": {"const": "BLOCKED_GATE_MODEL_AND_FIXTURE_REVISION_REQUIRED"},
+    "source_commit": {"$ref": "#/$defs/commit"},
+    "v5_file_sha256": {"$ref": "#/$defs/sha"},
+    "v5_bundle_sha256": {"$ref": "#/$defs/sha"},
+    "v5_1_file_sha256": {"$ref": "#/$defs/sha"},
+    "v5_1_report_sha256": {"$ref": "#/$defs/sha"},
+    "joint_power_semantics": {"const": "MINIMUM_IS_LIMITING_MARGINAL_POWER_NOT_JOINT_POWER_BONFERRONI_IS_DEPENDENCE_FREE_LOWER_BOUND"},
+    "assumed_true_performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pooled_all_obstruction_miss_rate", "visible_false_stop_rate", "homogeneous_target_auc", "target_auc_slack_above_every_target_gate", "target_auc_slack_above_q05_gate", "target_quantile_margin"],
+      "properties": {
+        "pooled_all_obstruction_miss_rate": {"const": 0.005},
+        "visible_false_stop_rate": {"const": 0.03},
+        "homogeneous_target_auc": {"const": 0.98},
+        "target_auc_slack_above_every_target_gate": {"const": 0.03},
+        "target_auc_slack_above_q05_gate": {"const": 0.0},
+        "target_quantile_margin": {"type": "null"}
+      }
+    },
+    "gate_inventory": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"$ref": "#/$defs/gate"}},
+    "original_eight_scene_attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["MODERATE_ICC_0_05", "PESSIMISTIC_ICC_0_30"],
+      "properties": {
+        "MODERATE_ICC_0_05": {"$ref": "#/$defs/attribution"},
+        "PESSIMISTIC_ICC_0_30": {"$ref": "#/$defs/attribution"}
+      }
+    },
+    "balanced_rotation_analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trials", "seed", "rows_per_target_scene", "designs_by_scenario", "observation_reduction_fraction", "interpretation"],
+      "properties": {
+        "trials": {"type": "integer", "minimum": 1000},
+        "seed": {"type": "integer"},
+        "rows_per_target_scene": {"const": 36},
+        "designs_by_scenario": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/scenario"}},
+        "observation_reduction_fraction": {"const": 0.68},
+        "interpretation": {"type": "string", "minLength": 1}
+      }
+    },
+    "split_role_options": {"type": "array", "minItems": 2, "items": {"type": "object"}},
+    "findings": {"type": "array", "minItems": 5, "items": {"type": "string", "minLength": 1}},
+    "next_requirements": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+    "images_generated": {"const": false},
+    "training_started": {"const": false},
+    "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "report_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "probability": {"type": "number", "minimum": 0, "maximum": 1},
+    "gate": {
+      "type": "object", "additionalProperties": false, "required": ["gate", "power_status"],
+      "properties": {"gate": {"type": "string", "minLength": 1}, "power_status": {"type": "string", "minLength": 1}}
+    },
+    "attribution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["individual_gate_power", "limiting_gates", "limiting_modeled_marginal_power", "bonferroni_joint_lower_bound"],
+      "properties": {
+        "individual_gate_power": {
+          "type": "object", "additionalProperties": false,
+          "required": ["pooled_all_obstruction_miss", "visible_false_stop", "every_target_auc"],
+          "properties": {
+            "pooled_all_obstruction_miss": {"$ref": "#/$defs/probability"},
+            "visible_false_stop": {"$ref": "#/$defs/probability"},
+            "every_target_auc": {"$ref": "#/$defs/probability"}
+          }
+        },
+        "limiting_gates": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "limiting_modeled_marginal_power": {"$ref": "#/$defs/probability"},
+        "bonferroni_joint_lower_bound": {"$ref": "#/$defs/probability"}
+      }
+    },
+    "scenario": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scenario_id", "intracluster_correlation", "designs"],
+      "properties": {
+        "scenario_id": {"type": "string"},
+        "intracluster_correlation": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+        "designs": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/design"}}
+      }
+    },
+    "design": {
+      "type": "object", "additionalProperties": false,
+      "required": ["design_id", "scene_count", "targets_per_scene", "development_observations", "minimum_target_scene_exposures", "maximum_target_scene_exposures", "modeled_gate_power"],
+      "properties": {
+        "design_id": {"type": "string"},
+        "scene_count": {"const": 256},
+        "targets_per_scene": {"enum": [24, 75]},
+        "development_observations": {"type": "integer", "minimum": 1},
+        "minimum_target_scene_exposures": {"type": "integer", "minimum": 1},
+        "maximum_target_scene_exposures": {"type": "integer", "minimum": 1},
+        "modeled_gate_power": {
+          "type": "object", "additionalProperties": false,
+          "required": ["pooled_all_obstruction_miss", "visible_false_stop", "every_target_auc", "limiting_modeled_marginal_power", "bonferroni_joint_lower_bound"],
+          "properties": {
+            "pooled_all_obstruction_miss": {"$ref": "#/$defs/probability"},
+            "visible_false_stop": {"$ref": "#/$defs/probability"},
+            "every_target_auc": {"$ref": "#/$defs/probability"},
+            "limiting_modeled_marginal_power": {"$ref": "#/$defs/probability"},
+            "bonferroni_joint_lower_bound": {"$ref": "#/$defs/probability"}
+          }
+        }
+      }
+    }
+  }
+}

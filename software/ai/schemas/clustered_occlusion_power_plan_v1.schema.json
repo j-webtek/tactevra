@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/clustered_occlusion_power_plan_v1.schema.json",
+  "title": "Clustered occlusion evaluation power plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "sources", "method", "scenarios", "recommendation", "actual_evaluation_requirement", "identity_disclosure", "controller_authority", "hardware_writes", "physical_movements", "limitations", "plan_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.ai_clustered_occlusion_power_plan.v1"},
+    "scope": {"const": "SYNTHETIC_STATISTICAL_PLANNING_ONLY"},
+    "sources": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/source"}},
+    "method": {
+      "type": "object", "additionalProperties": false,
+      "required": ["declared_envelope_component_bound_mm", "icc_estimator", "icc_upper_method", "bootstrap_samples", "simulation_method", "simulation_trials", "simulation_seed", "offset_count", "rows_per_pose", "power_target", "design_rates", "fused_system_gate_limits"],
+      "properties": {
+        "declared_envelope_component_bound_mm": {"const": 2.0},
+        "icc_estimator": {"type": "string"}, "icc_upper_method": {"type": "string"},
+        "bootstrap_samples": {"type": "integer", "minimum": 1000},
+        "simulation_method": {"type": "string"}, "simulation_trials": {"type": "integer", "minimum": 1000},
+        "simulation_seed": {"type": "integer", "minimum": 0}, "offset_count": {"type": "integer", "minimum": 1},
+        "rows_per_pose": {"$ref": "#/$defs/endpointsInteger"}, "power_target": {"const": 0.9},
+        "design_rates": {"$ref": "#/$defs/endpointsNumber"}, "fused_system_gate_limits": {"$ref": "#/$defs/endpointsNumber"}
+      }
+    },
+    "scenarios": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/scenario"}},
+    "recommendation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "minimum_tested_pose_count", "sixty_four_pose_floor_passes", "applies_to"],
+      "properties": {
+        "status": {"enum": ["PLANNING_TARGET_IDENTIFIED", "NO_TESTED_SIZE_REACHES_POWER_TARGET"]},
+        "minimum_tested_pose_count": {"type": ["integer", "null"], "minimum": 64},
+        "sixty_four_pose_floor_passes": {"type": "boolean"},
+        "applies_to": {"const": "BROAD_SYNTHETIC_MID_MOTION_OCCLUSION_EVALUATION"}
+      }
+    },
+    "actual_evaluation_requirement": {"const": "SEEDED_POSE_CLUSTER_BOOTSTRAP_UCB_WORST_ACROSS_DECLARED_OFFSETS"},
+    "identity_disclosure": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pose_ids", "target_ids", "row_ids", "image_paths", "failure_identities"],
+      "properties": {
+        "pose_ids": {"const": 0}, "target_ids": {"const": 0}, "row_ids": {"const": 0},
+        "image_paths": {"const": 0}, "failure_identities": {"const": 0}
+      }
+    },
+    "controller_authority": {"const": false}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "plan_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "dataset_file_sha256", "manifest_file_sha256", "report_file_sha256", "dataset_content_sha256", "report_content_sha256", "target_catalog_sha256", "pose_count", "row_count", "declared_envelope_offset_count"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "dataset_file_sha256": {"$ref": "#/$defs/sha256"}, "manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+        "report_file_sha256": {"$ref": "#/$defs/sha256"}, "dataset_content_sha256": {"$ref": "#/$defs/sha256"},
+        "report_content_sha256": {"$ref": "#/$defs/sha256"}, "target_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "pose_count": {"type": "integer", "minimum": 2}, "row_count": {"type": "integer", "minimum": 1},
+        "declared_envelope_offset_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "endpointsNumber": {
+      "type": "object", "additionalProperties": false, "required": ["missed_abstention", "visible_false_stop"],
+      "properties": {"missed_abstention": {"type": "number", "minimum": 0, "maximum": 1}, "visible_false_stop": {"type": "number", "minimum": 0, "maximum": 1}}
+    },
+    "endpointsInteger": {
+      "type": "object", "additionalProperties": false, "required": ["missed_abstention", "visible_false_stop"],
+      "properties": {"missed_abstention": {"type": "integer", "minimum": 1}, "visible_false_stop": {"type": "integer", "minimum": 1}}
+    },
+    "scenario": {
+      "type": "object", "additionalProperties": false, "required": ["scenario_id", "correlations", "candidates"],
+      "properties": {
+        "scenario_id": {"enum": ["EMPIRICAL_UPPER_ICC", "PESSIMISTIC_ICC_FLOOR_0_30"]},
+        "correlations": {"$ref": "#/$defs/endpointsNumber"},
+        "candidates": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/candidate"}}
+      }
+    },
+    "candidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pose_count", "missed_abstention_power", "visible_false_stop_power", "joint_power"],
+      "properties": {
+        "pose_count": {"type": "integer", "minimum": 64},
+        "missed_abstention_power": {"type": "number", "minimum": 0, "maximum": 1},
+        "visible_false_stop_power": {"type": "number", "minimum": 0, "maximum": 1},
+        "joint_power": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

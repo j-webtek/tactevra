@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/reference_validity_v1.schema.json",
+  "type": "object",
+  "required": ["schema", "status", "reference_id", "frame_id", "reference_age_ms", "maximum_age_ms", "relative_lighting_drift", "maximum_relative_lighting_drift", "reasons", "hardware_writes", "physical_movements", "physical_authority", "result_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_reference_validity.v1"},
+    "status": {"enum": ["VALID", "ABSTAIN"]},
+    "reference_id": {"type": "string", "minLength": 1},
+    "frame_id": {"type": "string", "minLength": 1},
+    "reference_age_ms": {"type": "integer"},
+    "maximum_age_ms": {"type": "integer", "minimum": 1},
+    "relative_lighting_drift": {"type": "number", "minimum": 0},
+    "maximum_relative_lighting_drift": {"type": "number", "minimum": 0},
+    "reasons": {"type": "array", "uniqueItems": true, "items": {"enum": ["reference_created_after_frame", "reference_age_exceeded", "camera_calibration_changed", "fixture_pose_changed", "target_map_changed", "lighting_drift_exceeded"]}},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "result_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

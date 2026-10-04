@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_render_receipt_v1.schema.json",
+  "title": "Residual obstruction rendered crop receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "scope", "dataset_manifest_file_sha256", "dataset_sha256", "inventory_sha256",
+    "fixture_file_sha256", "fixture_bundle_sha256", "contract_file_sha256", "contract_sha256",
+    "source_manifest_file_sha256", "base_image_sha256", "file_count", "unique_file_sha256_count",
+    "total_file_bytes", "training_count", "development_count", "evaluation_count",
+    "expected_visible_count", "expected_abstain_count", "variant_metrics", "renderer", "verification",
+    "hardware_writes", "physical_movements", "physical_authority", "limitations", "receipt_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_render_receipt.v1"},
+    "scope": {"const": "SYNTHETIC_RENDERED_CROPS_NO_QUALIFICATION"},
+    "dataset_manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+    "dataset_sha256": {"$ref": "#/$defs/sha256"},
+    "inventory_sha256": {"$ref": "#/$defs/sha256"},
+    "fixture_file_sha256": {"$ref": "#/$defs/sha256"},
+    "fixture_bundle_sha256": {"$ref": "#/$defs/sha256"},
+    "contract_file_sha256": {"$ref": "#/$defs/sha256"},
+    "contract_sha256": {"$ref": "#/$defs/sha256"},
+    "source_manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+    "base_image_sha256": {"$ref": "#/$defs/sha256"},
+    "file_count": {"type": "integer", "const": 37125},
+    "unique_file_sha256_count": {"type": "integer", "const": 37125},
+    "total_file_bytes": {"type": "integer", "minimum": 1},
+    "training_count": {"type": "integer", "const": 27000},
+    "development_count": {"type": "integer", "const": 10125},
+    "evaluation_count": {"type": "integer", "const": 0},
+    "expected_visible_count": {"type": "integer", "const": 7425},
+    "expected_abstain_count": {"type": "integer", "const": 29700},
+    "variant_metrics": {
+      "type": "array", "minItems": 15, "maxItems": 15,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["variant_id", "observation_count", "changed_pixels_minimum", "changed_pixels_maximum", "safe_region_overlap_minimum", "safe_region_overlap_maximum"],
+        "properties": {
+          "variant_id": {"type": "string", "minLength": 1},
+          "observation_count": {"type": "integer", "const": 2475},
+          "changed_pixels_minimum": {"type": "integer", "minimum": 0, "maximum": 9216},
+          "changed_pixels_maximum": {"type": "integer", "minimum": 0, "maximum": 9216},
+          "safe_region_overlap_minimum": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "safe_region_overlap_maximum": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "renderer": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pillow_version", "numpy_version"],
+      "properties": {
+        "pillow_version": {"type": "string", "minLength": 1},
+        "numpy_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "verification": {
+      "type": "object", "additionalProperties": false,
+      "required": ["all_files_present", "all_file_hashes_match", "all_images_match_contract", "no_extra_files", "no_prohibited_model_input_masks", "global_duplicate_file_count"],
+      "properties": {
+        "all_files_present": {"const": true},
+        "all_file_hashes_match": {"const": true},
+        "all_images_match_contract": {"const": true},
+        "no_extra_files": {"const": true},
+        "no_prohibited_model_input_masks": {"const": true},
+        "global_duplicate_file_count": {"type": "integer", "const": 0}
+      }
+    },
+    "hardware_writes": {"type": "integer", "const": 0},
+    "physical_movements": {"type": "integer", "const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}},
+    "receipt_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

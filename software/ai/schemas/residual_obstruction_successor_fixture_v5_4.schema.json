@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_successor_fixture_v5_4.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "source", "preserved_splits", "development_selection", "evaluation_rotation", "evaluation_safety_gates", "power_binding", "render_sequence", "images_generated", "training_started", "development_opened", "evaluation_opened", "hardware_writes", "physical_movements", "physical_authority", "limitations", "bundle_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_successor_fixture.v5_4"},
+    "scope": {"const": "SYNTHETIC_V5_4_EXACT_ROTATION_AND_GATE_ROLE_REVISION_NO_QUALIFICATION"},
+    "status": {"const": "FROZEN_BEFORE_RENDER_INDEPENDENT_AUDIT_REQUIRED"},
+    "source_commit": {"$ref": "#/$defs/commit"},
+    "source": {"type": "object", "required": ["v5_file_sha256", "v5_bundle_sha256", "v5_3_file_sha256", "v5_3_report_sha256", "pretraining_file_sha256", "target_catalog_sha256"]},
+    "preserved_splits": {"type": "object", "required": ["training_scene_ids", "development_scene_ids", "lighting_ids", "obstruction_asset_ids", "pairwise_disjoint_required"]},
+    "development_selection": {
+      "type": "object", "required": ["candidate_count", "same_rows_for_every_candidate", "observation_count", "per_target_support", "aggregate_support", "adequacy", "point_safety_checks", "diagnostic_floors", "reported_not_powered", "selection_rule", "powered_confidence_claim"]
+    },
+    "evaluation_rotation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["algorithm", "salt", "scene_count", "targets_per_scene", "target_count", "appearances_per_scene", "variants_per_target", "observation_identities", "target_order", "scenes", "minimum_target_scene_exposures", "maximum_target_scene_exposures", "targets_with_minimum_exposure", "targets_with_maximum_exposure", "every_scene_contains_keyboard_and_phone", "procedural_seed_range", "images_generated"],
+      "properties": {
+        "algorithm": {"const": "SHA256_SALTED_TARGET_ORDER_CYCLIC_CONTIGUOUS_BLOCKS_V1"},
+        "salt": {"type": "string", "minLength": 1},
+        "scene_count": {"const": 224},
+        "targets_per_scene": {"const": 12},
+        "target_count": {"const": 75},
+        "appearances_per_scene": {"const": 3},
+        "variants_per_target": {"const": 12},
+        "observation_identities": {"const": 96768},
+        "target_order": {"type": "array", "minItems": 75, "maxItems": 75, "uniqueItems": true, "items": {"$ref": "#/$defs/target"}},
+        "scenes": {"type": "array", "minItems": 224, "maxItems": 224, "items": {"$ref": "#/$defs/scene"}},
+        "minimum_target_scene_exposures": {"const": 35},
+        "maximum_target_scene_exposures": {"const": 36},
+        "targets_with_minimum_exposure": {"const": 12},
+        "targets_with_maximum_exposure": {"const": 63},
+        "every_scene_contains_keyboard_and_phone": {"const": true},
+        "procedural_seed_range": {"prefixItems": [{"const": 53000}, {"const": 53223}], "items": false},
+        "images_generated": {"const": 0}
+      }
+    },
+    "evaluation_safety_gates": {"type": "object", "required": ["confidence", "maximum_pooled_all_obstruction_miss_upper", "maximum_cable_family_miss_upper", "maximum_dark_cable_30_60_miss_upper", "maximum_visible_false_stop_upper", "all_gates_required", "failure_result"]},
+    "power_binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["assumed_true_rates", "interpretation", "pessimistic_bonferroni_joint_lower_bound", "planning_only"],
+      "properties": {
+        "assumed_true_rates": {"type": "object"},
+        "interpretation": {"const": "POWER_IS_PROBABILITY_OF_PROVING_THE_SAFETY_BOUNDS_IF_TRUE_RATES_EQUAL_THE_ASSUMED_RATES_NOT_A_PREDICTION_THE_MODEL_WILL_PASS"},
+        "pessimistic_bonferroni_joint_lower_bound": {"const": 0.93055},
+        "planning_only": {"const": true}
+      }
+    },
+    "render_sequence": {"type": "object", "required": ["training_and_development_may_render_after_independent_fixture_audit", "evaluation_must_remain_identity_only_until_candidate_and_threshold_frozen", "evaluation_render_before_development_pass_prohibited", "evaluation_retuning_prohibited"]},
+    "images_generated": {"const": false},
+    "training_started": {"const": false},
+    "development_opened": {"const": false},
+    "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 5, "items": {"type": "string", "minLength": 1}},
+    "bundle_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "target": {
+      "type": "object", "additionalProperties": false, "required": ["device", "target_id"],
+      "properties": {"device": {"enum": ["keyboard", "phone"]}, "target_id": {"type": "string", "minLength": 1}}
+    },
+    "scene": {
+      "type": "object", "additionalProperties": false, "required": ["scene_id", "procedural_seed", "targets"],
+      "properties": {
+        "scene_id": {"type": "string", "pattern": "^v5_4_evaluation_scene_[0-9]{4}$"},
+        "procedural_seed": {"type": "integer", "minimum": 53000, "maximum": 53223},
+        "targets": {"type": "array", "minItems": 12, "maxItems": 12, "uniqueItems": true, "items": {"$ref": "#/$defs/target"}}
+      }
+    }
+  }
+}

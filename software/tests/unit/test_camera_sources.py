@@ -25,6 +25,8 @@ from rocell.vision import (  # noqa: E402
     StaleFrameError,
     TimestampQuality,
     UsbOpenCvCamera,
+    OPENCV_TOP_LEFT_BGR_ORIENTATION,
+    verify_opencv_top_left_bgr_orientation,
     jpeg_dimensions,
 )
 
@@ -55,6 +57,34 @@ class TickClock:
 class FakeFrame:
     def __init__(self, width: int = 640, height: int = 480, channels: int = 3) -> None:
         self.shape = (height, width, channels)
+
+
+class OrientationPatternFrame:
+    def __init__(self, labels: tuple[str, str, str, str], *, rgb_storage: bool = False) -> None:
+        self.shape = (40, 60, 3)
+        self._pixels = [[[0, 0, 0] for _ in range(60)] for _ in range(40)]
+        colors = {
+            "BLUE": (255, 0, 0),
+            "GREEN": (0, 255, 0),
+            "RED": (0, 0, 255),
+            "YELLOW": (0, 255, 255),
+        }
+        for (x_fraction, y_fraction), label in zip(
+            ((0.20, 0.20), (0.80, 0.20), (0.20, 0.80), (0.80, 0.80)),
+            labels,
+        ):
+            center_x = round((self.shape[1] - 1) * x_fraction)
+            center_y = round((self.shape[0] - 1) * y_fraction)
+            color = colors[label]
+            if rgb_storage:
+                color = tuple(reversed(color))
+            for y in range(center_y - 1, center_y + 2):
+                for x in range(center_x - 1, center_x + 2):
+                    self._pixels[y][x] = list(color)
+
+    def __getitem__(self, key: tuple[int, int]) -> list[int]:
+        y, x = key
+        return self._pixels[y][x]
 
 
 class FakeEncoded:
@@ -209,6 +239,43 @@ class CameraRecordTests(unittest.TestCase):
 
 
 class UsbOpenCvCameraTests(unittest.TestCase):
+    def test_opencv_orientation_sentinel_accepts_top_left_bgr_pattern(self) -> None:
+        frame = OrientationPatternFrame(("BLUE", "GREEN", "RED", "YELLOW"))
+
+        result = verify_opencv_top_left_bgr_orientation(frame)
+
+        self.assertEqual(result, OPENCV_TOP_LEFT_BGR_ORIENTATION)
+
+    def test_opencv_orientation_sentinel_rejects_vertical_flip(self) -> None:
+        frame = OrientationPatternFrame(("RED", "YELLOW", "BLUE", "GREEN"))
+
+        with self.assertRaisesRegex(CameraProbeError, "vertical flip"):
+            verify_opencv_top_left_bgr_orientation(frame)
+
+    def test_opencv_orientation_sentinel_rejects_horizontal_mirror(self) -> None:
+        frame = OrientationPatternFrame(("GREEN", "BLUE", "YELLOW", "RED"))
+
+        with self.assertRaisesRegex(CameraProbeError, "horizontal mirror"):
+            verify_opencv_top_left_bgr_orientation(frame)
+
+    def test_opencv_orientation_sentinel_rejects_rotation(self) -> None:
+        frame = OrientationPatternFrame(("YELLOW", "RED", "GREEN", "BLUE"))
+
+        with self.assertRaisesRegex(CameraProbeError, "180-degree rotation"):
+            verify_opencv_top_left_bgr_orientation(frame)
+
+    def test_opencv_orientation_sentinel_rejects_rgb_channel_order(self) -> None:
+        frame = OrientationPatternFrame(
+            ("BLUE", "GREEN", "RED", "YELLOW"), rgb_storage=True
+        )
+
+        with self.assertRaisesRegex(CameraProbeError, "RGB/BGR channel swap"):
+            verify_opencv_top_left_bgr_orientation(frame)
+
+    def test_opencv_orientation_sentinel_rejects_malformed_frame(self) -> None:
+        with self.assertRaisesRegex(CameraProbeError, "HxWx3"):
+            verify_opencv_top_left_bgr_orientation(FakeFrame(width=8, height=8))
+
     def test_usb_adapter_is_lazy_then_probes_and_captures_one_frame(self) -> None:
         capture = FakeVideoCapture([(True, FakeFrame())])
         fake_cv2 = FakeCv2(capture)

@@ -1,0 +1,217 @@
+{
+  "actual_evaluation_requirement": "SEEDED_POSE_CLUSTER_BOOTSTRAP_UCB_WORST_ACROSS_DECLARED_OFFSETS",
+  "controller_authority": false,
+  "hardware_writes": 0,
+  "identity_disclosure": {
+    "failure_identities": 0,
+    "image_paths": 0,
+    "pose_ids": 0,
+    "row_ids": 0,
+    "target_ids": 0
+  },
+  "limitations": [
+    "This is a synthetic statistical planning receipt, not deployment or physical qualification.",
+    "The beta-binomial and design-effect Wilson calculation approximates planning power; it is not the final qualification estimator.",
+    "The frozen v14 evaluation identities remain unavailable to candidate selection and are represented only by hashes and aggregate correlation.",
+    "The broad mid-motion budget does not replace a separate parked-pose synthetic and physical qualification set."
+  ],
+  "method": {
+    "bootstrap_samples": 5000,
+    "declared_envelope_component_bound_mm": 2.0,
+    "design_rates": {
+      "missed_abstention": 0.01,
+      "visible_false_stop": 0.06
+    },
+    "fused_system_gate_limits": {
+      "missed_abstention": 0.02,
+      "visible_false_stop": 0.1
+    },
+    "icc_estimator": "ONE_WAY_RANDOM_EFFECTS_UNEQUAL_CLUSTER_ANOVA_CLAMPED_0_1",
+    "icc_upper_method": "SEEDED_POSE_CLUSTER_BOOTSTRAP_95TH_PERCENTILE_MAX_ACROSS_SOURCES_AND_OFFSETS",
+    "offset_count": 17,
+    "power_target": 0.9,
+    "rows_per_pose": {
+      "missed_abstention": 45,
+      "visible_false_stop": 180
+    },
+    "simulation_method": "SEEDED_BETA_BINOMIAL_POSE_EFFECT_WITH_DESIGN_EFFECT_WILSON_PLANNING_BOUND",
+    "simulation_seed": 190202609,
+    "simulation_trials": 2000
+  },
+  "physical_movements": 0,
+  "plan_sha256": "754f06c26b6a7b7ade29ca3ca136d0d3ff5f7d5e994e7135ddf39ee3ceced288",
+  "recommendation": {
+    "applies_to": "BROAD_SYNTHETIC_MID_MOTION_OCCLUSION_EVALUATION",
+    "minimum_tested_pose_count": 2048,
+    "sixty_four_pose_floor_passes": false,
+    "status": "PLANNING_TARGET_IDENTIFIED"
+  },
+  "scenarios": [
+    {
+      "candidates": [
+        {
+          "joint_power": 0.0,
+          "missed_abstention_power": 0.0,
+          "pose_count": 64,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.0,
+          "missed_abstention_power": 0.0,
+          "pose_count": 128,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.0,
+          "missed_abstention_power": 0.0,
+          "pose_count": 256,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.001,
+          "missed_abstention_power": 0.001,
+          "pose_count": 512,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.027,
+          "missed_abstention_power": 0.027,
+          "pose_count": 768,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.1735,
+          "missed_abstention_power": 0.1735,
+          "pose_count": 1024,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.6815,
+          "missed_abstention_power": 0.6815,
+          "pose_count": 1536,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.936,
+          "missed_abstention_power": 0.936,
+          "pose_count": 2048,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 1.0,
+          "missed_abstention_power": 1.0,
+          "pose_count": 3072,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 1.0,
+          "missed_abstention_power": 1.0,
+          "pose_count": 4096,
+          "visible_false_stop_power": 1.0
+        }
+      ],
+      "correlations": {
+        "missed_abstention": 0.76757477,
+        "visible_false_stop": 0.024507274
+      },
+      "scenario_id": "EMPIRICAL_UPPER_ICC"
+    },
+    {
+      "candidates": [
+        {
+          "joint_power": 0.0,
+          "missed_abstention_power": 0.0,
+          "pose_count": 64,
+          "visible_false_stop_power": 0.0
+        },
+        {
+          "joint_power": 0.0,
+          "missed_abstention_power": 0.0,
+          "pose_count": 128,
+          "visible_false_stop_power": 0.201
+        },
+        {
+          "joint_power": 0.0,
+          "missed_abstention_power": 0.0,
+          "pose_count": 256,
+          "visible_false_stop_power": 0.9285
+        },
+        {
+          "joint_power": 0.0005,
+          "missed_abstention_power": 0.0005,
+          "pose_count": 512,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.031,
+          "missed_abstention_power": 0.031,
+          "pose_count": 768,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.1955,
+          "missed_abstention_power": 0.1955,
+          "pose_count": 1024,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.7,
+          "missed_abstention_power": 0.7,
+          "pose_count": 1536,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.927,
+          "missed_abstention_power": 0.927,
+          "pose_count": 2048,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 0.9965,
+          "missed_abstention_power": 0.9965,
+          "pose_count": 3072,
+          "visible_false_stop_power": 1.0
+        },
+        {
+          "joint_power": 1.0,
+          "missed_abstention_power": 1.0,
+          "pose_count": 4096,
+          "visible_false_stop_power": 1.0
+        }
+      ],
+      "correlations": {
+        "missed_abstention": 0.76757477,
+        "visible_false_stop": 0.3
+      },
+      "scenario_id": "PESSIMISTIC_ICC_FLOOR_0_30"
+    }
+  ],
+  "schema": "rocell.ai_clustered_occlusion_power_plan.v1",
+  "scope": "SYNTHETIC_STATISTICAL_PLANNING_ONLY",
+  "sources": [
+    {
+      "dataset_content_sha256": "db73af8b171eec859131673e7ddacbc2fa02728c1848eb1287b5afe277dba6ed",
+      "dataset_file_sha256": "3aa029d64b247601841e951f2645679391be55d138e7464b0769c6fe3eb25c60",
+      "declared_envelope_offset_count": 17,
+      "manifest_file_sha256": "7cac23de40eff04aede8f0b04bb8144f97b87ff3a179aea2cf5e1c91a61b894a",
+      "pose_count": 5,
+      "report_content_sha256": "d11a71c67e2f7072e52a4a28d9c2bdbf5f6da308c5704bfe47a379c79cad9f00",
+      "report_file_sha256": "4ceb8284f56e3f8b294a5f877bbdc2c8976a55cd5228b91336ff4fa8de90d554",
+      "row_count": 1125,
+      "source_id": "V13_DEVELOPMENT",
+      "target_catalog_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    {
+      "dataset_content_sha256": "98d30863887793a76e29dbcfeee48e4f6fe14e1d4a58f41cc232007d603b3379",
+      "dataset_file_sha256": "e1c92152eac5486b0d8eb4cb41976637353cb12e81b62ddb7a08e34a46a3bd54",
+      "declared_envelope_offset_count": 17,
+      "manifest_file_sha256": "306abc668e90a39ef24ab08dda03d5cb4e2e1873dde650ca4863e1afb6b99fc5",
+      "pose_count": 6,
+      "report_content_sha256": "97e26c28be37544d00b074ace9fb53b5b674f90ad5948208e72a5cdbbbc82521",
+      "report_file_sha256": "697882506d5ed294bf43727fac96da0751b0db689409b2a069df7e3ba8956585",
+      "row_count": 1350,
+      "source_id": "V14_FROZEN_EVALUATION",
+      "target_catalog_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  ]
+}

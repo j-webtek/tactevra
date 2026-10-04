@@ -27,6 +27,14 @@ still uninstalled. This schema is not a deployment-qualification schema.
 The [scene-observation schema](scene_observation_v0.schema.json) binds a strict
 multimodal scene assessment to exact image bytes. It describes visibility and
 image quality and cannot contain coordinates or controller commands.
+The synthetic [self-occlusion projection qualification](self_occlusion_projection_qualification_v1.schema.json)
+and [projection evidence](self_occlusion_projection_evidence_v1.schema.json)
+schemas bind a frame's device-exposure clock to bracketing measured-position
+receipt hashes, a qualified interpolation policy, commissioned camera/mesh
+identities, calibrated dilation provenance, and named-target overlap decisions.
+They deliberately carry no joint values, commands, transport fields, collision
+claims, or physical authority. Their only scope is `SYNTHETIC_OFFLINE_ONLY`;
+physical deployment requires a separately reviewed shared schema and evidence.
 The [shadow-preview schema](shadow_preview_v0.schema.json) binds one request,
 image, scene observation, precision observation, and guarded preview into a
 replayable offline record with zero hardware writes and no permit.
@@ -104,6 +112,12 @@ The [installed collision-geometry profile schema](installed_collision_geometry_p
 defines the measured, content-addressed body envelopes, source bindings,
 engineering exclusions, and clearance policy required before route screening may
 rely on the installed arm rather than diagnostic placeholders.
+The [collision exclusion-policy candidate schema](collision_exclusion_policy_candidate_v1.schema.json)
+defines the inert bridge between finite simulation evidence and a future
+reviewed installed profile. It binds the base contract, robot model, selected
+geometry, replay, upstream SRDF, and pair-review hashes. Proposed pairs never
+become effective in this document: `effective_exclusions` must be empty, the
+default remains `CHECK_COLLISION`, and every authority flag is false.
 
 The S4 zero-write controller boundary publishes five strict, closed schemas:
 the [T=102 encoding profile](zero_write_waveshare_t102_profile_v1.schema.json),
@@ -268,3 +282,81 @@ binds an offline synthetic error bound to a checkpoint, domain, target set,
 and distinct calibration/evaluation datasets. No qualification is installed.
 The producer constructs the existing shared ModelMotionBatch only after
 precision and scene checks; scene confidence cannot fill a localization gap.
+The [clustered occlusion power plan](clustered_occlusion_power_plan_v1.schema.json)
+records a synthetic-only, aggregate correlation and sample-size calculation.
+It discloses no pose, target, row, image, or failure identities; it cannot tune
+a model, open an evaluation set, qualify deployment, or grant physical authority.
+The [residual v4.2 remedy classification](residual_obstruction_v4_2_remedy_classification_v1.schema.json)
+binds the rejected development result to a measurement-first physical pilot.
+It keeps cable detection in scope, leaves the runtime lighting limit unset until
+real-camera measurement, ranks candidate remedies without selecting v5, and
+creates no qualification or physical authority.
+The [residual v5 synthetic fixture](residual_obstruction_successor_fixture_v5.schema.json)
+records the owner's later direction to continue simulation robustness research
+while physical inputs are blocked. It preserves the v4.2 rejection and physical
+pilot dependency while freezing two small edge/texture candidates, split-disjoint
+obstruction identities, perturbed geometry inputs, development gates, and an
+unrendered evaluation family. It is not a deployment-model selection.
+The [residual v5.1 pre-render amendment](residual_obstruction_v5_1_pre_render_v1.schema.json)
+preserves v5 while restoring the frozen 6% visible false-stop ceiling, retaining
+the 2% pooled all-obstruction miss ceiling, and marking all synthetic lighting
+as provisional. Its correlation-aware planning calculation blocks the original
+eight-scene development render as underpowered. The larger tested size is a
+planning result, not render authorization, physical qualification, or hardware
+remedy selection.
+The [residual v5.2 power attribution](residual_obstruction_v5_2_power_attribution_v1.schema.json)
+audits which gates v5.1 actually modeled, identifies unpowered family and q05
+requirements, and compares a full grid with balanced target rotation. It leaves
+the fixture and gates unchanged. Its sparse design is a partial-gate planning
+candidate and cannot authorize rendering or substitute for the physical pilot.
+The [residual v5.3 safety-gate amendment](residual_obstruction_v5_3_safety_gate_amendment_v1.schema.json)
+assigns powered evaluation claims to pooled, cable-family, dark-cable, and
+visible false-stop bounds. Per-target AUC and margin statistics remain
+development diagnostics. Its balanced evaluation recommendation retains a
+planning cushion, but the exact rotation and revised fixture remain unfrozen.
+The [residual v5.4 fixture](residual_obstruction_successor_fixture_v5_4.schema.json)
+freezes 224 evaluation scene identities and a deterministic 12-target balanced
+rotation while retaining evaluation as identity-only. Its independent
+[audit](residual_obstruction_v5_4_fixture_audit_v1.schema.json) verifies hashes,
+split isolation, target balance, development diagnostic support, and gate roles
+before training or development renderer implementation begins.
+The [residual physical pilot predeclaration](residual_obstruction_physical_pilot_v1.schema.json)
+separates clear, boundary, and obstructed cable coverage; requires placement
+and mask labels; assigns measurement and unopened escrow sessions before
+capture; and requires an isolated, de-energized arm with zero capture-phase
+movement or hardware writes.
+Its [v1.1 amendment](residual_obstruction_physical_pilot_v1_1.schema.json)
+binds the settled pose after isolation so servo sag cannot silently invalidate
+the camera geometry, and limits the one-session escrow to a non-statistical
+real-world sanity check. A powered real evaluation remains a separate campaign.
+The [physical ChArUco readiness probe](physical_charuco_probe_v1.schema.json)
+records a read-only Windows device inventory and an OpenCV ArUco tooling smoke.
+It explicitly separates the retained 5x7 smoke board from the production 12x9
+camera-calibration contract. A blocked receipt has zero captures, calibration,
+hardware writes, movements, or physical authority and cannot install intrinsics.
+The preserved probe incorrectly recorded 4 fps. The
+[B0477 commissioning amendment](b0477_commissioning_amendment_v1.schema.json)
+binds the repository-authoritative full-native 5472x3648 YUY2 9 fps mode,
+mode-specific calibration, locked optics and image controls, and distributed
+X/Y caliper measurements. It leaves all physical measurements and tolerances
+unset and grants no capture, calibration, deployment, or physical authority.
+The [parked-pose campaign](parked_pose_qualification_campaign_v1.schema.json)
+and [result](parked_pose_qualification_result_v1.schema.json) keep synthetic
+perturbation evidence separate from authorized physical park-and-settle cycles.
+They bind exposure, measured-feedback, projection, residual-observer, ChArUco,
+repeatability, and collection-effect evidence without carrying joint values or
+commands. Even complete evidence advances only to owner review of a supervised
+parked-observation workflow; physical deployment qualification remains false.
+The [parked-pose evidence index](parked_pose_evidence_index_v1.schema.json)
+and [preflight receipt](parked_pose_preflight_receipt_v1.schema.json) bind every
+campaign hash to one contained retained file, its byte count, artifact type,
+and declared custody. The preflight rejects missing, altered, extra, duplicate,
+traversing, or symlinked paths. A pass establishes file integrity only; custody
+labels, physical originality, measurement truth, and deployment readiness still
+require independent owner authentication.
+The [parked-pose custody declarations](parked_pose_custody_declarations_v1.schema.json)
+are an external input to the deterministic retained-package index builder. The
+builder verifies the declaration self-hash and campaign binding, inventories
+only existing regular files, and emits the evidence index consumed by the
+preflight. It does not create evidence bytes or infer custody. Declaration and
+custody-review authenticity remain owner-review responsibilities.

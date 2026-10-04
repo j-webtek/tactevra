@@ -1,0 +1,124 @@
+{
+  "authority": {
+    "clearance_replay": false,
+    "collision_query": false,
+    "controller": false,
+    "execution_permit": false,
+    "physical": false,
+    "transport": false
+  },
+  "base_contract_sha256": "d3238c0c95a1d2e7ff74fcb8dccc3eb0aadb0f897b2ea041319bbcd6442af5c3",
+  "content_sha256": "651adee0ee18c4d11233e3ed37389a4811236e08b54c0f91a32fd6dfa436e75a",
+  "default_pair_disposition": "CHECK_COLLISION",
+  "effective_exclusions": [],
+  "geometry_candidate_sha256": "0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6",
+  "installation_state": "CANDIDATE_UNINSTALLED",
+  "policy_id": "ROARM-M3-WP2-SRDF-CANDIDATE-20260929",
+  "proposed_exclusions": [
+    {
+      "body_pair": [
+        "robot:base_link",
+        "robot:link1"
+      ],
+      "supporting_evidence_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:base_link",
+        "robot:link2"
+      ],
+      "supporting_evidence_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:base_link",
+        "robot:link3"
+      ],
+      "supporting_evidence_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:gripper",
+        "robot:link3"
+      ],
+      "supporting_evidence_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:gripper",
+        "robot:link4"
+      ],
+      "supporting_evidence_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:gripper",
+        "robot:link5"
+      ],
+      "supporting_evidence_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link1",
+        "robot:link2"
+      ],
+      "supporting_evidence_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link1",
+        "robot:link3"
+      ],
+      "supporting_evidence_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:link2",
+        "robot:link3"
+      ],
+      "supporting_evidence_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link3",
+        "robot:link4"
+      ],
+      "supporting_evidence_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link3",
+        "robot:link5"
+      ],
+      "supporting_evidence_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:link4",
+        "robot:link5"
+      ],
+      "supporting_evidence_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    }
+  ],
+  "robot_model_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+  "schema": "rocell.collision_exclusion_policy_candidate.v1",
+  "source_bindings": {
+    "adjacent_policy_review": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+    "never_pair_review": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+    "selected_geometry_candidate": "0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6",
+    "selected_replay": "1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87",
+    "upstream_srdf": "29f1daaeea91a490b85581a9a62dd07be9ab959d7817fad89836c466e8288499"
+  }
+}

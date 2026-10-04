@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v4_2_remedy_classification_v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "robustness_file_sha256", "robustness_report_sha256", "hard_case_audit_file_sha256", "hard_case_audit_report_sha256", "invariants", "observed_failure_drivers", "candidate_remedies", "physical_pilot", "successor_decision_rule", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v4_2_remedy_classification.v1"},
+    "scope": {"const": "SYNTHETIC_FAILURE_CLASSIFICATION_AND_PHYSICAL_PILOT_PLAN_NO_QUALIFICATION"},
+    "status": {"const": "PHYSICAL_PILOT_REQUIRED_BEFORE_SUCCESSOR_SELECTION"},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "robustness_file_sha256": {"$ref": "#/$defs/sha256"},
+    "robustness_report_sha256": {"$ref": "#/$defs/sha256"},
+    "hard_case_audit_file_sha256": {"$ref": "#/$defs/sha256"},
+    "hard_case_audit_report_sha256": {"$ref": "#/$defs/sha256"},
+    "invariants": {
+      "type": "object", "additionalProperties": false,
+      "required": ["v4_2_rejected", "v4_2_gates_changed", "cable_cases_removed_from_required_detection", "cable_detector_backstop_required", "evaluation_opened", "v5_selected", "lighting_limit_guessed"],
+      "properties": {
+        "v4_2_rejected": {"const": true}, "v4_2_gates_changed": {"const": false},
+        "cable_cases_removed_from_required_detection": {"const": false},
+        "cable_detector_backstop_required": {"const": true}, "evaluation_opened": {"const": false},
+        "v5_selected": {"const": false}, "lighting_limit_guessed": {"const": false}
+      }
+    },
+    "observed_failure_drivers": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/rankedText"}},
+    "candidate_remedies": {
+      "type": "array", "minItems": 4,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["rank", "category", "remedy", "decision", "reason"],
+        "properties": {
+          "rank": {"type": "integer", "minimum": 1}, "category": {"enum": ["MODEL_INPUT", "DATA", "WORKCELL_RULE"]},
+          "remedy": {"$ref": "#/$defs/id"}, "decision": {"$ref": "#/$defs/id"}, "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "physical_pilot": {
+      "type": "object", "additionalProperties": false,
+      "required": ["purpose", "minimum_sessions", "target_ids", "required_observation_types", "dark_cable_coverage_fractions", "required_lighting_samples", "lighting_descriptor_fields", "maximum_relative_lighting_drift", "lighting_range_rule", "retain_original_image_bytes", "retain_reference_and_observation_hashes", "parked_pose_and_settle_required", "charuco_and_fixture_bindings_required"],
+      "properties": {
+        "purpose": {"const": "MEASURE_REMEDY_RELEVANCE_NOT_QUALIFY_DEPLOYMENT"}, "minimum_sessions": {"type": "integer", "minimum": 3},
+        "target_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "pattern": "^(keyboard|phone):"}},
+        "required_observation_types": {"type": "array", "minItems": 5, "uniqueItems": true, "items": {"enum": ["CLEAR_REFERENCE", "CLEAR_REPEAT", "DARK_CABLE", "TRANSLUCENT_CABLE", "HAND"]}},
+        "dark_cable_coverage_fractions": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"type": "number", "minimum": 0, "maximum": 1}},
+        "required_lighting_samples": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"enum": ["MEASURED_LOW", "MEASURED_NOMINAL", "MEASURED_HIGH"]}},
+        "lighting_descriptor_fields": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"enum": ["luminance", "red_green_ratio", "blue_green_ratio"]}},
+        "maximum_relative_lighting_drift": {"type": "null"}, "lighting_range_rule": {"const": "DERIVE_FROM_ACCEPTED_REAL_CAMERA_REFERENCE_VALIDITY_SAMPLES_BEFORE_SUCCESSOR_PREDECLARATION"},
+        "retain_original_image_bytes": {"const": true}, "retain_reference_and_observation_hashes": {"const": true},
+        "parked_pose_and_settle_required": {"const": true}, "charuco_and_fixture_bindings_required": {"const": true}
+      }
+    },
+    "successor_decision_rule": {
+      "type": "object", "additionalProperties": false,
+      "required": ["edge_texture_first", "resolution_second", "hard_example_weighting_third", "compare_against_unchanged_rgb_difference_baseline", "cable_detection_remains_in_scope", "training_and_test_lighting_must_fit_measured_runtime_admission_envelope", "freeze_before_new_development_results"],
+      "properties": {
+        "edge_texture_first": {"const": true}, "resolution_second": {"const": true}, "hard_example_weighting_third": {"const": true},
+        "compare_against_unchanged_rgb_difference_baseline": {"const": true}, "cable_detection_remains_in_scope": {"const": true},
+        "training_and_test_lighting_must_fit_measured_runtime_admission_envelope": {"const": true}, "freeze_before_new_development_results": {"const": true}
+      }
+    },
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+    "rankedText": {"type": "object", "additionalProperties": false, "required": ["priority", "driver", "evidence"], "properties": {"priority": {"type": "integer", "minimum": 1}, "driver": {"$ref": "#/$defs/id"}, "evidence": {"type": "string", "minLength": 1}}}
+  }
+}

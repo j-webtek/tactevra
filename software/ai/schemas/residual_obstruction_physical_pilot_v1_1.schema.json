@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_physical_pilot_v1_1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "v1_file_sha256", "v1_report_sha256", "preserved_v1", "post_isolation_pose_binding", "sag_interpretation", "escrow_scope", "capture_safety", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_physical_pilot.v1_1"},
+    "scope": {"const": "DEENERGIZED_REAL_CAMERA_MEASUREMENT_AND_ESCROW_PLAN_NO_QUALIFICATION"},
+    "status": {"const": "READY_FOR_DEENERGIZED_CAPTURE_WITH_POST_ISOLATION_POSE_CHECK"},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "v1_file_sha256": {"$ref": "#/$defs/sha256"}, "v1_report_sha256": {"$ref": "#/$defs/sha256"},
+    "preserved_v1": {"type": "object"},
+    "post_isolation_pose_binding": {"type": "object", "required": ["required", "performed_after_servo_power_isolation", "primary_method", "optional_secondary_method", "commanded_joint_state_prohibited", "minimum_stable_frame_count", "silhouette_tolerance_source", "silhouette_tolerance_value", "evidence_required_before_each_capture_group", "end_of_session_bracket_required", "every_image_binds_pose_evidence_sha256", "failure_decision"]},
+    "sag_interpretation": {"type": "object", "required": ["power_off_sag_is_possible", "pre_isolation_pose_evidence_is_insufficient", "post_isolation_pose_is_the_capture_pose", "manual_reposition_during_capture_phase_prohibited", "capture_phase_robot_movement_count", "capture_phase_hardware_write_count"]},
+    "escrow_scope": {"type": "object", "required": ["session_id", "target_count", "purpose", "statistical_gate", "two_percent_miss_rate_claim_permitted", "deployment_qualification_permitted", "pixels_opened", "open_rule", "powered_real_evaluation_is_separate_future_capture", "powered_real_evaluation_authorized", "reuse_as_powered_evaluation_prohibited"]},
+    "capture_safety": {"type": "object"},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "tactevra.ai_b0477_commissioning_amendment.v1",
+  "scope": "PRECAPTURE_CONTRACT_CORRECTION_NO_PHYSICAL_EVIDENCE",
+  "source_commit": "d5e26be9ca2a3e03cd10d49460d32db367da73be",
+  "superseded_probe_binding": {
+    "path": "software/ai/eval/physical_charuco_probe_blocked_v1.json",
+    "file_sha256": "5b593eb1b416c33fbbad0e092f4a454d865121c02817b601a3fe3f3e2b000eef",
+    "report_sha256": "b91b440cfbf1be6c9db559694a77f89db21332615f5694b10c4eb502892027a2",
+    "preserved_as_failed_evidence": true
+  },
+  "authoritative_bindings": [
+    {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    {
+      "path": "software/tests/fixtures/camera/b0477_nominal_uvc_inventory.json",
+      "sha256": "a0b53d709c45e7f77c0860ae757292746a47570ceeffc140ea548f5dfa29bcd7"
+    },
+    {
+      "path": "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json",
+      "sha256": "d00f71b9a6f2d721a97e6d3b03435261581630ee7b0c08738aae98be9d0b7a74"
+    }
+  ],
+  "mode_correction": {
+    "incorrect_fps_in_preserved_probe": 4,
+    "authoritative_maximum_fps": 9.0,
+    "reason": "The purchased profile, nominal UVC inventory, and sealed intrinsics rehearsal agree on the native mode."
+  },
+  "calibration_runtime_mode": {
+    "width_px": 5472,
+    "height_px": 3648,
+    "fps": 9.0,
+    "pixel_format": "YUY2",
+    "sensor_transform": "FULL_NATIVE_MODE"
+  },
+  "alternate_mode_rule": "SEPARATE_CALIBRATION_REQUIRED_UNLESS_CROP_BIN_SCALE_TRANSFORM_IS_MEASURED_AND_REVIEWED",
+  "optics_and_controls_gate": {
+    "manual_focus_locked": true,
+    "manual_aperture_locked": true,
+    "autofocus_disabled": true,
+    "auto_exposure_disabled": true,
+    "auto_white_balance_disabled": true,
+    "exposure_locked": true,
+    "gain_locked": true,
+    "white_balance_locked": true,
+    "focus_and_aperture_witness_required": true,
+    "controls_snapshot_required": true,
+    "settings_hash_binding_required": true
+  },
+  "print_scale_measurement_gate": {
+    "instrument": "CALIBRATED_CALIPERS",
+    "minimum_total_measurements": 8,
+    "minimum_horizontal_measurements": 4,
+    "minimum_vertical_measurements": 4,
+    "distributed_across_board": true,
+    "opposite_extents_required": true,
+    "raw_measurements_and_instrument_identity_retained": true,
+    "maximum_axis_scale_error_fraction": null,
+    "tolerance_status": "UNSET_PENDING_PHYSICAL_MEASUREMENT_AND_REVIEW"
+  },
+  "capture_plan": {
+    "training_views": 24,
+    "held_out_views": 8,
+    "corners_and_edges_required": true,
+    "varied_positions_angles_and_distances_required": true,
+    "training_and_held_out_reprojection_reported_separately": true,
+    "diagnostic_reprojection_target_px": 0.5,
+    "diagnostic_target_is_qualification_threshold": false
+  },
+  "ready_for_capture": false,
+  "camera_frames_requested": 0,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "No B0477 is connected and no focus, exposure, gain, white-balance, or print-scale value has been measured.",
+    "The nine-fps value is repository-authoritative rehearsal and purchase-profile evidence pending received-unit verification.",
+    "No print-scale tolerance is selected; physical measurements require review before admission."
+  ],
+  "report_sha256": "2a996b4a83f95cfae373a238430b41b44b1cd78ff64a33db33cd846eb87d00a7"
+}

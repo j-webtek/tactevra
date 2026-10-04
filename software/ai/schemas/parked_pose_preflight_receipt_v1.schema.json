@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/parked_pose_preflight_receipt_v1.schema.json",
+  "title": "Parked pose file-integrity preflight receipt v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "status", "campaign_sha256", "evidence_index_sha256", "custody_review_sha256", "verified_artifact_count", "verified_byte_count", "verified_physical_original_count", "verified_synthetic_count", "blockers", "physical_deployment_qualified", "controller_authority", "hardware_writes", "physical_movements", "limitations", "receipt_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.ai_parked_pose_preflight_receipt.v1"},
+    "scope": {"const": "READ_ONLY_FILE_INTEGRITY_ONLY"},
+    "status": {"enum": ["BLOCKED", "PASS_FILE_INTEGRITY_ONLY"]},
+    "campaign_sha256": {"$ref": "#/$defs/optionalSha"},
+    "evidence_index_sha256": {"$ref": "#/$defs/optionalSha"},
+    "custody_review_sha256": {"$ref": "#/$defs/optionalSha"},
+    "verified_artifact_count": {"type": "integer", "minimum": 0},
+    "verified_byte_count": {"type": "integer", "minimum": 0},
+    "verified_physical_original_count": {"type": "integer", "minimum": 0},
+    "verified_synthetic_count": {"type": "integer", "minimum": 0},
+    "blockers": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "physical_deployment_qualified": {"const": false}, "controller_authority": {"const": false},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "receipt_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "optionalSha": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+  }
+}

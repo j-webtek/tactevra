@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/parked_pose_evidence_index_v1.schema.json",
+  "title": "Parked pose retained evidence index v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "campaign_sha256", "custody_review_sha256", "entries", "index_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.ai_parked_pose_evidence_index.v1"},
+    "scope": {"const": "READ_ONLY_RETAINED_EVIDENCE_INDEX"},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"},
+    "custody_review_sha256": {"$ref": "#/$defs/sha256"},
+    "entries": {"type": "array", "minItems": 1, "maxItems": 100000, "items": {"$ref": "#/$defs/entry"}},
+    "index_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "entry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sha256", "relative_path", "size_bytes", "artifact_type", "custody"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "relative_path": {"type": "string", "minLength": 1, "maxLength": 512},
+        "size_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824},
+        "artifact_type": {
+          "enum": ["PARK_POSE_IDENTITY", "CAMERA_CALIBRATION", "CAMERA_TO_BOARD", "ROBOT_VISUAL_MESH", "TARGET_CATALOG", "PROJECTION_QUALIFICATION", "RESIDUAL_MODEL", "FUSION_POLICY", "REPEATABILITY_QUALIFICATION", "CHARUCO_DRIFT_QUALIFICATION", "COLLECTION_AUTHORIZATION", "CUSTODY_REVIEW", "SYNTHETIC_IMAGE", "RUNTIME_LIKE_PROJECTION", "TRUTH_MASK_LABEL", "PHYSICAL_IMAGE", "EXPOSURE_BINDING", "MEASURED_FEEDBACK_BRACKET", "PROJECTION_EVIDENCE", "RESIDUAL_OBSERVATION", "CHARUCO_CAPTURE", "PARK_REPEATABILITY_EVIDENCE", "CHARUCO_DRIFT_EVIDENCE"]
+        },
+        "custody": {"enum": ["REVIEWED_CONFIGURATION", "REVIEWED_SOFTWARE_ARTIFACT", "SYNTHETIC_RETAINED", "PHYSICAL_RETAINED_ORIGINAL", "AUTHORIZATION_RECORD"]}
+      }
+    }
+  }
+}

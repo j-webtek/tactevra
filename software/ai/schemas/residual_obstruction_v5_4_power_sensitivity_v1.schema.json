@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v5_4_power_sensitivity_v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "fixture_file_sha256", "fixture_bundle_sha256", "audit_file_sha256", "audit_report_sha256", "v5_3_file_sha256", "v5_3_report_sha256", "simulation", "interpretation", "pessimistic_joint_lower_bound", "fixture_or_gate_changed", "evaluation_render_authorized", "images_generated", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v5_4_power_sensitivity.v1"},
+    "scope": {"const": "SYNTHETIC_POWER_SENSITIVITY_NO_RENDER_NO_GATE_CHANGE"},
+    "status": {"const": "COMPLETE_FROZEN_ROTATION_UNCHANGED"},
+    "source_commit": {"$ref": "#/$defs/commit"},
+    "fixture_file_sha256": {"$ref": "#/$defs/sha"},
+    "fixture_bundle_sha256": {"$ref": "#/$defs/sha"},
+    "audit_file_sha256": {"$ref": "#/$defs/sha"},
+    "audit_report_sha256": {"$ref": "#/$defs/sha"},
+    "v5_3_file_sha256": {"$ref": "#/$defs/sha"},
+    "v5_3_report_sha256": {"$ref": "#/$defs/sha"},
+    "simulation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["trials", "seed", "scene_count", "targets_per_scene", "evaluation_observations", "assumed_true_miss_rate", "assumed_true_visible_false_stop_rate", "miss_gate_rate", "visible_false_stop_gate_rate", "joint_lower_bound", "scenarios"],
+      "properties": {
+        "trials": {"minimum": 5000}, "seed": {"type": "integer"}, "scene_count": {"const": 224},
+        "targets_per_scene": {"const": 12}, "evaluation_observations": {"const": 96768},
+        "assumed_true_miss_rate": {"const": 0.01}, "assumed_true_visible_false_stop_rate": {"const": 0.03},
+        "miss_gate_rate": {"const": 0.02}, "visible_false_stop_gate_rate": {"const": 0.06},
+        "joint_lower_bound": {"const": "BONFERRONI_WITHOUT_GATE_INDEPENDENCE_ASSUMPTION"},
+        "scenarios": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "object"}}
+      }
+    },
+    "interpretation": {"const": "MODERATE_IMPROVEMENT_CAN_PROVE_BOUNDS_UNDER_MODERATE_CLUSTERING_BUT_FROZEN_EVALUATION_IS_EFFECTIVELY_LARGE_IMPROVEMENT_OR_REJECTION_UNDER_PESSIMISTIC_CLUSTERING"},
+    "pessimistic_joint_lower_bound": {"type": "number", "maximum": 0.90},
+    "fixture_or_gate_changed": {"const": false}, "evaluation_render_authorized": {"const": false},
+    "images_generated": {"const": false}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {"commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

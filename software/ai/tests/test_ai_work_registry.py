@@ -39,8 +39,8 @@ def test_registry_covers_every_tracked_ai_test_once():
     receipt = audit_registry()
     assert receipt["status"] == "PASS"
     assert receipt["workstream_count"] == 7
-    assert receipt["tracked_ai_test_count"] == 35
-    assert receipt["documented_ai_test_count"] == 35
+    assert receipt["tracked_ai_test_count"] == 82
+    assert receipt["documented_ai_test_count"] == 82
     assert receipt["unowned_test_paths"] == []
     assert receipt["multiply_owned_test_paths"] == []
     assert receipt["controller_authority"] is False

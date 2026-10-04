@@ -1,0 +1,174 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v5_1_pre_render.v1",
+  "scope": "SYNTHETIC_PRE_RENDER_GATE_CORRECTION_AND_POWER_NO_QUALIFICATION",
+  "status": "BLOCKED_RENDER_PENDING_POWERED_FIXTURE_REVISION",
+  "source_commit": "aacbda9aeeb2e808d167b9fbba0aeeb98c424cd3",
+  "v5_file_sha256": "1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001",
+  "v5_bundle_sha256": "69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e",
+  "preserved_v5": true,
+  "gate_correction": {
+    "maximum_pooled_all_obstruction_miss_rate": 0.02,
+    "maximum_visible_false_stop_rate": 0.06,
+    "v5_preserved_false_stop_rate": 0.1,
+    "reason": "V4.2 failed 8.72% against the frozen 6% limit; v5 may not silently loosen that gate."
+  },
+  "lighting_scope": {
+    "status": "PROVISIONAL_SYNTHETIC_ONLY_UNMEASURED",
+    "may_select_hardware_remedy": false,
+    "may_set_runtime_reference_validity_envelope": false,
+    "physical_pilot_required_before_hardware_selection": true
+  },
+  "power_method": {
+    "simulation": "SEEDED_BETA_BINOMIAL_SCENE_EFFECT_PLUS_WILSON_UCB_AND_HANLEY_MCNEIL_AUC_APPROXIMATION",
+    "trials": 5000,
+    "seed": 55101,
+    "power_target": 0.9,
+    "design_rates": {
+      "pooled_miss": 0.005,
+      "visible_false_stop": 0.03
+    },
+    "gate_rates": {
+      "pooled_miss": 0.02,
+      "visible_false_stop": 0.06
+    },
+    "target_auc_design": 0.98,
+    "target_auc_gate": 0.95,
+    "target_count": 75,
+    "visible_rows_per_target_scene": 12,
+    "obstructed_rows_per_target_scene": 24,
+    "cluster_unit": "BASE_SCENE"
+  },
+  "scenarios": [
+    {
+      "scenario_id": "MODERATE_ICC_0_05",
+      "intracluster_correlation": 0.05,
+      "candidates": [
+        {
+          "scene_count": 8,
+          "development_observations": 21600,
+          "pooled_miss_power": 0.3384,
+          "visible_false_stop_power": 0.524,
+          "all_75_target_auc_power": 3.3e-05,
+          "conservative_joint_power": 3.3e-05
+        },
+        {
+          "scene_count": 16,
+          "development_observations": 43200,
+          "pooled_miss_power": 0.7588,
+          "visible_false_stop_power": 0.8046,
+          "all_75_target_auc_power": 0.444986,
+          "conservative_joint_power": 0.444986
+        },
+        {
+          "scene_count": 32,
+          "development_observations": 86400,
+          "pooled_miss_power": 0.9562,
+          "visible_false_stop_power": 0.976,
+          "all_75_target_auc_power": 0.996996,
+          "conservative_joint_power": 0.9562
+        },
+        {
+          "scene_count": 64,
+          "development_observations": 172800,
+          "pooled_miss_power": 0.9992,
+          "visible_false_stop_power": 0.9996,
+          "all_75_target_auc_power": 1.0,
+          "conservative_joint_power": 0.9992
+        },
+        {
+          "scene_count": 128,
+          "development_observations": 345600,
+          "pooled_miss_power": 1.0,
+          "visible_false_stop_power": 1.0,
+          "all_75_target_auc_power": 1.0,
+          "conservative_joint_power": 1.0
+        },
+        {
+          "scene_count": 256,
+          "development_observations": 691200,
+          "pooled_miss_power": 1.0,
+          "visible_false_stop_power": 1.0,
+          "all_75_target_auc_power": 1.0,
+          "conservative_joint_power": 1.0
+        }
+      ]
+    },
+    {
+      "scenario_id": "PESSIMISTIC_ICC_0_30",
+      "intracluster_correlation": 0.3,
+      "candidates": [
+        {
+          "scene_count": 8,
+          "development_observations": 21600,
+          "pooled_miss_power": 0.0,
+          "visible_false_stop_power": 0.0,
+          "all_75_target_auc_power": 0.0,
+          "conservative_joint_power": 0.0
+        },
+        {
+          "scene_count": 16,
+          "development_observations": 43200,
+          "pooled_miss_power": 0.0,
+          "visible_false_stop_power": 0.1408,
+          "all_75_target_auc_power": 0.0,
+          "conservative_joint_power": 0.0
+        },
+        {
+          "scene_count": 32,
+          "development_observations": 86400,
+          "pooled_miss_power": 0.0,
+          "visible_false_stop_power": 0.373,
+          "all_75_target_auc_power": 0.000363,
+          "conservative_joint_power": 0.0
+        },
+        {
+          "scene_count": 64,
+          "development_observations": 172800,
+          "pooled_miss_power": 0.5506,
+          "visible_false_stop_power": 0.6456,
+          "all_75_target_auc_power": 0.628959,
+          "conservative_joint_power": 0.5506
+        },
+        {
+          "scene_count": 128,
+          "development_observations": 345600,
+          "pooled_miss_power": 0.868,
+          "visible_false_stop_power": 0.9062,
+          "all_75_target_auc_power": 0.999117,
+          "conservative_joint_power": 0.868
+        },
+        {
+          "scene_count": 256,
+          "development_observations": 691200,
+          "pooled_miss_power": 0.9924,
+          "visible_false_stop_power": 0.9948,
+          "all_75_target_auc_power": 1.0,
+          "conservative_joint_power": 0.9924
+        }
+      ]
+    }
+  ],
+  "original_plan": {
+    "development_scene_count": 8,
+    "development_observations": 21600,
+    "passes_power_target": false
+  },
+  "recommendation": {
+    "minimum_tested_scene_count": 256,
+    "minimum_development_observations": 691200,
+    "status": "FIXTURE_REVISION_REQUIRED_BEFORE_RENDER"
+  },
+  "images_generated": false,
+  "training_started": false,
+  "evaluation_opened": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "Power is a planning approximation using predeclared moderate and pessimistic scene correlations, not observed v5 data.",
+    "The every-target AUC calculation is an analytic approximation and does not replace the frozen clustered development analysis.",
+    "The recommended larger campaign is not authorized for rendering until a revised fixture controls compute and scene diversity.",
+    "Physical measurements remain required before selecting a remedy for hardware."
+  ],
+  "report_sha256": "9d57ce6bf1de079c45fcc32e0902dfcd1d8348839fbb44ff9243a50f21b11b64"
+}

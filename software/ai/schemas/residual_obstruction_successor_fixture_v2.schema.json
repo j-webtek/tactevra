@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_successor_fixture_v2.schema.json",
+  "title": "Residual obstruction successor predeclaration v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "scope", "source", "view_groups", "appearance_groups", "variants",
+    "split_policy", "render_admission", "training_plan", "development_gate",
+    "evaluation_group_present", "images_generated", "training_started",
+    "hardware_writes", "physical_movements", "physical_authority", "limitations",
+    "bundle_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_successor_fixture.v2"},
+    "scope": {"const": "SYNTHETIC_SUCCESSOR_PREDECLARATION_NO_QUALIFICATION"},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["manifest_file_sha256", "corpus_sha256", "generator_sha256", "target_catalog_sha256", "camera_state", "diagnostic_file_sha256", "diagnostic_report_sha256"],
+      "properties": {
+        "manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+        "corpus_sha256": {"$ref": "#/$defs/sha256"},
+        "generator_sha256": {"$ref": "#/$defs/sha256"},
+        "target_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "camera_state": {"const": "SYNTHETIC_UNMEASURED_ARM_CAMERA"},
+        "diagnostic_file_sha256": {"$ref": "#/$defs/sha256"},
+        "diagnostic_report_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "view_groups": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"$ref": "#/$defs/view"}},
+    "appearance_groups": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"$ref": "#/$defs/appearance"}},
+    "variants": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"$ref": "#/$defs/variant"}},
+    "split_policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["training_view_count", "development_view_count", "training_appearance_count", "development_appearance_count", "view_ids_disjoint", "appearance_ids_disjoint", "target_count_per_view", "variant_count_per_target", "training_observation_count", "development_observation_count", "evaluation_observation_count"],
+      "properties": {
+        "training_view_count": {"const": 6}, "development_view_count": {"const": 3},
+        "training_appearance_count": {"const": 4}, "development_appearance_count": {"const": 3},
+        "view_ids_disjoint": {"const": true}, "appearance_ids_disjoint": {"const": true},
+        "target_count_per_view": {"const": 75}, "variant_count_per_target": {"const": 15},
+        "training_observation_count": {"const": 27000}, "development_observation_count": {"const": 10125},
+        "evaluation_observation_count": {"const": 0}
+      }
+    },
+    "render_admission": {
+      "type": "object", "additionalProperties": false,
+      "required": ["image_size_px", "target_crop_size_px", "crop_margin_fraction", "adjacent_distractor_must_differ_from_clear", "adjacent_distractor_minimum_changed_pixels", "adjacent_distractor_safe_region_overlap", "obstruction_mask_overlap_must_match_declared_range", "truth_mask_retained_for_labels_only", "truth_mask_prohibited_as_model_input", "runtime_geometry_mask_prohibited_as_model_input", "fail_on_duplicate_observation_bytes"],
+      "properties": {
+        "image_size_px": {"const": [1920, 1080]}, "target_crop_size_px": {"const": [96, 96]},
+        "crop_margin_fraction": {"const": 2.5},
+        "adjacent_distractor_must_differ_from_clear": {"const": true},
+        "adjacent_distractor_minimum_changed_pixels": {"const": 64},
+        "adjacent_distractor_safe_region_overlap": {"const": 0.0},
+        "obstruction_mask_overlap_must_match_declared_range": {"const": true},
+        "truth_mask_retained_for_labels_only": {"const": true},
+        "truth_mask_prohibited_as_model_input": {"const": true},
+        "runtime_geometry_mask_prohibited_as_model_input": {"const": true},
+        "fail_on_duplicate_observation_bytes": {"const": true}
+      }
+    },
+    "training_plan": {"type": "object"},
+    "development_gate": {"type": "object"},
+    "evaluation_group_present": {"const": false},
+    "images_generated": {"const": false},
+    "training_started": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "bundle_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "number3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+    "view": {
+      "type": "object", "additionalProperties": false,
+      "required": ["view_id", "split", "camera_translation_mm", "camera_rotation_rpy_deg", "parked_arm_state"],
+      "properties": {
+        "view_id": {"type": "string", "minLength": 1}, "split": {"enum": ["training", "development"]},
+        "camera_translation_mm": {"$ref": "#/$defs/number3"}, "camera_rotation_rpy_deg": {"$ref": "#/$defs/number3"},
+        "parked_arm_state": {"const": "SYNTHETIC_PARKED_OBSERVATION_REFERENCE"}
+      }
+    },
+    "appearance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["appearance_id", "split", "transform"],
+      "properties": {
+        "appearance_id": {"type": "string", "minLength": 1}, "split": {"enum": ["training", "development"]},
+        "transform": {"type": "object", "required": ["kind"]}
+      }
+    },
+    "variant": {
+      "type": "object", "additionalProperties": false,
+      "required": ["variant_id", "expected_decision", "residual_obstruction", "render_spec"],
+      "properties": {
+        "variant_id": {"type": "string", "minLength": 1}, "expected_decision": {"enum": ["VISIBLE", "ABSTAIN"]},
+        "residual_obstruction": {"enum": ["NONE", "CABLE", "TOOL", "HAND", "FOREIGN_OBJECT", "GLARE", "IMAGE_DEGRADED"]},
+        "render_spec": {"type": "object", "required": ["kind"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/geometry_first_fusion_replay_v1.schema.json",
+  "title": "Geometry-first fusion development replay v1",
+  "type": "object",
+  "required": ["schema", "scope", "source", "policy", "analysis", "evaluation_accessed", "render_started", "training_started", "candidate_promoted", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "confusion": {
+      "type": "object",
+      "required": ["true_abstain", "missed_abstain", "true_visible", "false_abstain"],
+      "additionalProperties": false,
+      "properties": {
+        "true_abstain": {"type": "integer", "minimum": 0},
+        "missed_abstain": {"type": "integer", "minimum": 0},
+        "true_visible": {"type": "integer", "minimum": 0},
+        "false_abstain": {"type": "integer", "minimum": 0}
+      }
+    },
+    "offset": {
+      "type": "object",
+      "required": ["x_mm", "x_px", "y_mm", "y_px"],
+      "additionalProperties": false,
+      "properties": {
+        "x_mm": {"type": "number"}, "x_px": {"type": "number"},
+        "y_mm": {"type": "number"}, "y_px": {"type": "number"}
+      }
+    }
+  },
+  "properties": {
+    "schema": {"const": "rocell.ai_geometry_first_fusion_replay.v1"},
+    "scope": {"const": "SYNTHETIC_CONSUMED_DEVELOPMENT_ONLY_NO_QUALIFICATION"},
+    "source": {
+      "type": "object",
+      "required": ["source_manifest_file_sha256", "source_receipt_sha256", "dataset_manifest_file_sha256", "dataset_sha256", "development_rows_file_sha256", "scorecard_file_sha256", "scorecard_sha256", "model_sha256", "target_catalog_sha256", "mask_atlases"],
+      "additionalProperties": false,
+      "properties": {
+        "source_manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+        "source_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "dataset_manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+        "dataset_sha256": {"$ref": "#/$defs/sha256"},
+        "development_rows_file_sha256": {"$ref": "#/$defs/sha256"},
+        "scorecard_file_sha256": {"$ref": "#/$defs/sha256"},
+        "scorecard_sha256": {"$ref": "#/$defs/sha256"},
+        "model_sha256": {"$ref": "#/$defs/sha256"},
+        "target_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "mask_atlases": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {
+            "type": "object", "required": ["atlas_key", "sha256"], "additionalProperties": false,
+            "properties": {"atlas_key": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"}}
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["visible_overlap_upper", "ambiguity_overlap_upper", "ambiguity_operational_decision", "fusion", "dilation_applied", "qualification_installed"],
+      "additionalProperties": false,
+      "properties": {
+        "visible_overlap_upper": {"const": 0.18},
+        "ambiguity_overlap_upper": {"const": 0.22},
+        "ambiguity_operational_decision": {"const": "ABSTAIN"},
+        "fusion": {"const": "GEOMETRY_OR_LEARNED_ABSTAIN"},
+        "dilation_applied": {"const": false},
+        "qualification_installed": {"const": false}
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["development_pose_count", "development_row_count", "recomputed_pose_target_count", "replayed_offset_count", "ambiguous_row_count", "ambiguous_row_ids", "measurements", "worst_strict_fused_missed_abstain", "worst_strict_fused_false_abstain", "worst_ambiguity_accepted_fused_missed_abstain", "worst_ambiguity_accepted_fused_false_abstain"],
+      "additionalProperties": false,
+      "properties": {
+        "development_pose_count": {"type": "integer", "minimum": 1},
+        "development_row_count": {"type": "integer", "minimum": 1},
+        "recomputed_pose_target_count": {"type": "integer", "minimum": 1},
+        "replayed_offset_count": {"type": "integer", "minimum": 1},
+        "ambiguous_row_count": {"type": "integer", "minimum": 0},
+        "ambiguous_row_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "measurements": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["offset", "geometry_confusion", "learned_confusion", "fused_confusion", "ambiguity_accepted_missed_abstain", "ambiguity_accepted_false_abstain", "geometry_abstain_count", "learned_abstain_count"],
+            "additionalProperties": false,
+            "properties": {
+              "offset": {"$ref": "#/$defs/offset"},
+              "geometry_confusion": {"$ref": "#/$defs/confusion"},
+              "learned_confusion": {"$ref": "#/$defs/confusion"},
+              "fused_confusion": {"$ref": "#/$defs/confusion"},
+              "ambiguity_accepted_missed_abstain": {"type": "integer", "minimum": 0},
+              "ambiguity_accepted_false_abstain": {"type": "integer", "minimum": 0},
+              "geometry_abstain_count": {"type": "integer", "minimum": 0},
+              "learned_abstain_count": {"type": "integer", "minimum": 0}
+            }
+          }
+        },
+        "worst_strict_fused_missed_abstain": {"type": "integer", "minimum": 0},
+        "worst_strict_fused_false_abstain": {"type": "integer", "minimum": 0},
+        "worst_ambiguity_accepted_fused_missed_abstain": {"type": "integer", "minimum": 0},
+        "worst_ambiguity_accepted_fused_false_abstain": {"type": "integer", "minimum": 0}
+      }
+    },
+    "evaluation_accessed": {"const": false},
+    "render_started": {"const": false},
+    "training_started": {"const": false},
+    "candidate_promoted": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}

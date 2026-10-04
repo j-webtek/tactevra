@@ -1,0 +1,142 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_physical_pilot.v1",
+  "scope": "DEENERGIZED_REAL_CAMERA_MEASUREMENT_AND_ESCROW_PLAN_NO_QUALIFICATION",
+  "status": "READY_FOR_DEENERGIZED_CAPTURE",
+  "source_commit": "579ca70f1fe95bcafd4cd94e447fbbf0c95fecef",
+  "remedy_file_sha256": "be596e603040d8f1a759ff27ffedb8c82ea408c51165a8fc566377ca342fbee1",
+  "remedy_report_sha256": "0aa55061d7002ef8b741f854b1d35d8bf079ba72a768ffe2e288748669e9cedf",
+  "supersedes_pilot_fields_only": {
+    "source_evidence_id": "E-20261002-AI-528",
+    "preserved_source_artifact": true,
+    "replaced_coverage_fractions": [
+      0.2,
+      0.4,
+      0.6
+    ],
+    "reason": "Separate clearly visible, ambiguity-boundary, and clearly obstructed real cases before capture."
+  },
+  "coverage_contract": [
+    {
+      "nominal_fraction": 0.1,
+      "role": "CLEARLY_VISIBLE",
+      "expected_decision": "VISIBLE",
+      "primary_metric_included": true
+    },
+    {
+      "nominal_fraction": 0.2,
+      "role": "BOUNDARY_PROBE",
+      "expected_decision": "EITHER_REPORTED",
+      "primary_metric_included": false
+    },
+    {
+      "nominal_fraction": 0.3,
+      "role": "CLEARLY_OBSTRUCTED",
+      "expected_decision": "ABSTAIN",
+      "primary_metric_included": true
+    },
+    {
+      "nominal_fraction": 0.6,
+      "role": "CLEARLY_OBSTRUCTED",
+      "expected_decision": "ABSTAIN",
+      "primary_metric_included": true
+    }
+  ],
+  "boundary_scoring": {
+    "boundary_fraction": 0.2,
+    "either_visible_or_abstain_accepted": true,
+    "rows_retained": true,
+    "rows_reported_separately": true,
+    "strict_visible_and_strict_abstain_counterfactuals_reported": true,
+    "silent_exclusion_prohibited": true
+  },
+  "coverage_measurement": {
+    "methods_required": [
+      "MEASURED_PLACEMENT_TEMPLATE",
+      "INDEPENDENT_HAND_ANNOTATED_MASK"
+    ],
+    "safe_region_source": "HASH_BOUND_TARGET_MAP",
+    "mask_and_template_artifacts_retained": true,
+    "annotator_blind_to_model_score": true,
+    "maximum_absolute_method_disagreement": 0.05,
+    "disagreement_decision": "LABEL_UNRESOLVED_RETAIN_AND_REPORT_NO_MODEL_METRIC",
+    "target_center_coverage_forces_abstain_label": true
+  },
+  "data_use": {
+    "measurement_session_ids": [
+      "physical_pilot_measurement_01",
+      "physical_pilot_measurement_02"
+    ],
+    "escrow_session_ids": [
+      "physical_pilot_escrow_01"
+    ],
+    "measurement_rows_may_select_remedy": true,
+    "measurement_rows_may_train_model": false,
+    "escrow_rows_may_select_remedy": false,
+    "escrow_rows_may_train_model": false,
+    "escrow_pixels_opened": false,
+    "escrow_open_rule": "ONLY_AFTER_CANDIDATE_REPRESENTATION_CHECKPOINT_AND_THRESHOLD_ARE_FROZEN",
+    "future_real_training_requires_separate_capture": true
+  },
+  "capture_safety": {
+    "arm_deenergized_during_every_capture": true,
+    "servo_power_isolated_and_verified": true,
+    "controller_command_channel_disconnected": true,
+    "park_pose_established_before_capture_phase": true,
+    "capture_phase_robot_movement_count": 0,
+    "capture_phase_hardware_write_count": 0,
+    "hand_case_requires_verified_energy_isolation": true,
+    "energized_capture_decision": "INVALID_RETAIN_AND_REPORT_DO_NOT_USE"
+  },
+  "capture_matrix": {
+    "target_ids": [
+      "keyboard:EQUAL",
+      "keyboard:F",
+      "keyboard:G",
+      "keyboard:H",
+      "keyboard:I",
+      "phone:key_a",
+      "phone:key_b",
+      "phone:key_c",
+      "phone:key_period"
+    ],
+    "observation_types": [
+      "CLEAR_REFERENCE",
+      "CLEAR_REPEAT",
+      "DARK_CABLE",
+      "TRANSLUCENT_CABLE",
+      "HAND"
+    ],
+    "lighting_samples": [
+      "MEASURED_LOW",
+      "MEASURED_NOMINAL",
+      "MEASURED_HIGH"
+    ],
+    "lighting_descriptor_fields": [
+      "luminance",
+      "red_green_ratio",
+      "blue_green_ratio"
+    ],
+    "maximum_relative_lighting_drift": null,
+    "minimum_sessions": 3,
+    "original_bytes_and_hashes_required": true,
+    "charuco_fixture_and_reference_bindings_required": true
+  },
+  "preserved_invariants": {
+    "v4_2_rejected": true,
+    "v4_2_gates_changed": false,
+    "cable_detection_required": true,
+    "lighting_limit_guessed": false,
+    "v5_selected": false,
+    "evaluation_opened": false
+  },
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "This predeclaration contains no physical pixels or measurements.",
+    "Boundary probes are reported separately and cannot be hidden from results.",
+    "Escrow remains unopened and no pilot row is authorized for training.",
+    "The capture plan does not qualify the camera, model, deployment, or execution."
+  ],
+  "report_sha256": "3bf5efb4638a9957f7b46ac999298c4ddc1191eb2ddbd0f5f98e22f9c9f2f4b8"
+}

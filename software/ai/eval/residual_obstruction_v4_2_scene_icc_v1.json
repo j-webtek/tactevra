@@ -1,0 +1,318 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v4_2_scene_icc.v1",
+  "scope": "CONSUMED_SYNTHETIC_DEVELOPMENT_ICC_ESTIMATE_AND_V5_PRE_RESULTS_AMENDMENT",
+  "status": "COMPLETE_ESTIMATE_RECONFIRM_WITH_V5_DEVELOPMENT_BEFORE_EVALUATION_RENDER",
+  "source_commit": "4f6897b7aa676612c661d0ee7f5e99336e8089de",
+  "source": {
+    "fixture_file_sha256": "26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5",
+    "fixture_bundle_sha256": "e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2",
+    "admission_file_sha256": "d1c4873a34df6ccc37a9191e27eac47bf86cc2a18cd3c7211f54ad3568c34311",
+    "admission_report_sha256": "d0a7107016703045f98e3b7d40e9222012e0b9fe7a433c429486b35a11e0066b",
+    "cnn_report_file_sha256": "a6f9947e24809fa9d0149fd9f87773296a28823ef0280d09c264dcabbaee72dd",
+    "cnn_report_sha256": "80ce5b72b65b84e6dfa0e3d5d174c6a87d72c929487d53eee53f0dd5b8342b82",
+    "robustness_file_sha256": "ee60b28369ea8dc56a5598bda8134b825af75666b5ff0b0121bab323842e0541",
+    "robustness_report_sha256": "776e4936c1733ea831847fa5142bfe605f8cc603cd23c601109a2cb66fa60ea5",
+    "allowlist_file_sha256": "94c903d158700e5e2796c1129380146c95c819cd5661c49625b5b1e375eaf28f",
+    "checkpoint_sha256": "68c993b679d81715eca9327f5df001117c0156bcf0034a79580951e1e91c4aad",
+    "reconstructed_development_probability_sha256": "2ad7d47922c8e37573e34028346d6bfd3ab240c7c6179b3b88ca7098a0f87f6b"
+  },
+  "threshold": 0.55,
+  "threshold_role": "V4_2_LEAST_BAD_REJECTED_DEVELOPMENT_THRESHOLD_NOT_CHANGED",
+  "endpoint_icc": {
+    "pooled_obstruction_miss": {
+      "scene_count": 8,
+      "rows_per_scene": 2700,
+      "error_count": 206,
+      "error_rate": 0.009537037037037037,
+      "scene_error_counts": {
+        "residual_v4_development_scene_01": 20,
+        "residual_v4_development_scene_02": 30,
+        "residual_v4_development_scene_03": 37,
+        "residual_v4_development_scene_04": 24,
+        "residual_v4_development_scene_05": 24,
+        "residual_v4_development_scene_06": 32,
+        "residual_v4_development_scene_07": 24,
+        "residual_v4_development_scene_08": 15
+      },
+      "scene_error_rates": {
+        "residual_v4_development_scene_01": 0.007407407407407408,
+        "residual_v4_development_scene_02": 0.011111111111111112,
+        "residual_v4_development_scene_03": 0.013703703703703704,
+        "residual_v4_development_scene_04": 0.008888888888888889,
+        "residual_v4_development_scene_05": 0.008888888888888889,
+        "residual_v4_development_scene_06": 0.011851851851851851,
+        "residual_v4_development_scene_07": 0.008888888888888889,
+        "residual_v4_development_scene_08": 0.005555555555555556
+      },
+      "ms_between": 0.018068783068783068,
+      "ms_within": 0.009443724013008933,
+      "icc_raw": 0.0003381490296485901,
+      "icc_nonnegative_for_planning": 0.0003381490296485901,
+      "delete_one_scene": [
+        {
+          "omitted_scene_id": "residual_v4_development_scene_01",
+          "icc_raw": 0.0003422586961799412
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_02",
+          "icc_raw": 0.00042483966848002794
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_03",
+          "icc_raw": 0.00013750877872529957
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_04",
+          "icc_raw": 0.0004399705537487882
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_05",
+          "icc_raw": 0.0004399705537487882
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_06",
+          "icc_raw": 0.0003737320235699055
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_07",
+          "icc_raw": 0.0004399705537487882
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_08",
+          "icc_raw": 0.00010826358845623474
+        }
+      ],
+      "delete_one_minimum": 0.00010826358845623474,
+      "delete_one_maximum": 0.0004399705537487882
+    },
+    "cable_family_miss": {
+      "scene_count": 8,
+      "rows_per_scene": 600,
+      "error_count": 144,
+      "error_rate": 0.03,
+      "scene_error_counts": {
+        "residual_v4_development_scene_01": 14,
+        "residual_v4_development_scene_02": 20,
+        "residual_v4_development_scene_03": 22,
+        "residual_v4_development_scene_04": 18,
+        "residual_v4_development_scene_05": 12,
+        "residual_v4_development_scene_06": 28,
+        "residual_v4_development_scene_07": 19,
+        "residual_v4_development_scene_08": 11
+      },
+      "scene_error_rates": {
+        "residual_v4_development_scene_01": 0.023333333333333334,
+        "residual_v4_development_scene_02": 0.03333333333333333,
+        "residual_v4_development_scene_03": 0.03666666666666667,
+        "residual_v4_development_scene_04": 0.03,
+        "residual_v4_development_scene_05": 0.02,
+        "residual_v4_development_scene_06": 0.04666666666666667,
+        "residual_v4_development_scene_07": 0.03166666666666667,
+        "residual_v4_development_scene_08": 0.018333333333333333
+      },
+      "ms_between": 0.05285714285714287,
+      "ms_within": 0.02907136894824708,
+      "icc_raw": 0.0013617855897459076,
+      "icc_nonnegative_for_planning": 0.0013617855897459076,
+      "delete_one_scene": [
+        {
+          "omitted_scene_id": "residual_v4_development_scene_01",
+          "icc_raw": 0.0014787192394684703
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_02",
+          "icc_raw": 0.0018478726608741579
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_03",
+          "icc_raw": 0.001678480195374447
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_04",
+          "icc_raw": 0.0018665455114473737
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_05",
+          "icc_raw": 0.0010846491675846818
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_06",
+          "icc_raw": 0.0001899972751959155
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_07",
+          "icc_raw": 0.0018756097703778716
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_08",
+          "icc_raw": 0.0008401021506854064
+        }
+      ],
+      "delete_one_minimum": 0.0001899972751959155,
+      "delete_one_maximum": 0.0018756097703778716
+    },
+    "dark_cable_proxy_rubber_miss": {
+      "scene_count": 8,
+      "rows_per_scene": 300,
+      "error_count": 138,
+      "error_rate": 0.0575,
+      "scene_error_counts": {
+        "residual_v4_development_scene_01": 14,
+        "residual_v4_development_scene_02": 20,
+        "residual_v4_development_scene_03": 21,
+        "residual_v4_development_scene_04": 17,
+        "residual_v4_development_scene_05": 11,
+        "residual_v4_development_scene_06": 25,
+        "residual_v4_development_scene_07": 19,
+        "residual_v4_development_scene_08": 11
+      },
+      "scene_error_rates": {
+        "residual_v4_development_scene_01": 0.04666666666666667,
+        "residual_v4_development_scene_02": 0.06666666666666667,
+        "residual_v4_development_scene_03": 0.07,
+        "residual_v4_development_scene_04": 0.056666666666666664,
+        "residual_v4_development_scene_05": 0.03666666666666667,
+        "residual_v4_development_scene_06": 0.08333333333333333,
+        "residual_v4_development_scene_07": 0.06333333333333334,
+        "residual_v4_development_scene_08": 0.03666666666666667
+      },
+      "ms_between": 0.08261904761904762,
+      "ms_within": 0.05413322185061316,
+      "icc_raw": 0.0017509855947813798,
+      "icc_nonnegative_for_planning": 0.0017509855947813798,
+      "delete_one_scene": [
+        {
+          "omitted_scene_id": "residual_v4_development_scene_01",
+          "icc_raw": 0.0020497922345306787
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_02",
+          "icc_raw": 0.002426637029810945
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_03",
+          "icc_raw": 0.0022110575192222327
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_04",
+          "icc_raw": 0.002585011543788639
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_05",
+          "icc_raw": 0.0008667788756451199
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_06",
+          "icc_raw": 0.0004800658058366555
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_07",
+          "icc_raw": 0.002559529298513538
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_08",
+          "icc_raw": 0.0008667788756451191
+        }
+      ],
+      "delete_one_minimum": 0.0004800658058366555,
+      "delete_one_maximum": 0.002585011543788639
+    },
+    "visible_false_stop": {
+      "scene_count": 8,
+      "rows_per_scene": 900,
+      "error_count": 467,
+      "error_rate": 0.0648611111111111,
+      "scene_error_counts": {
+        "residual_v4_development_scene_01": 74,
+        "residual_v4_development_scene_02": 43,
+        "residual_v4_development_scene_03": 64,
+        "residual_v4_development_scene_04": 46,
+        "residual_v4_development_scene_05": 60,
+        "residual_v4_development_scene_06": 62,
+        "residual_v4_development_scene_07": 61,
+        "residual_v4_development_scene_08": 57
+      },
+      "scene_error_rates": {
+        "residual_v4_development_scene_01": 0.08222222222222222,
+        "residual_v4_development_scene_02": 0.04777777777777778,
+        "residual_v4_development_scene_03": 0.07111111111111111,
+        "residual_v4_development_scene_04": 0.051111111111111114,
+        "residual_v4_development_scene_05": 0.06666666666666667,
+        "residual_v4_development_scene_06": 0.06888888888888889,
+        "residual_v4_development_scene_07": 0.06777777777777778,
+        "residual_v4_development_scene_08": 0.06333333333333334
+      },
+      "ms_between": 0.10950396825396826,
+      "ms_within": 0.06061503522432332,
+      "icc_raw": 0.0008953620088846085,
+      "icc_nonnegative_for_planning": 0.0008953620088846085,
+      "delete_one_scene": [
+        {
+          "omitted_scene_id": "residual_v4_development_scene_01",
+          "icc_raw": 0.00033432237627823314
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_02",
+          "icc_raw": 0.00026469881711759793
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_03",
+          "icc_raw": 0.0011358796269913744
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_04",
+          "icc_raw": 0.0005879447010311582
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_05",
+          "icc_raw": 0.0012282041188964553
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_06",
+          "icc_raw": 0.0011978949055283998
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_07",
+          "icc_raw": 0.0012169853976769381
+        },
+        {
+          "omitted_scene_id": "residual_v4_development_scene_08",
+          "icc_raw": 0.001215166800555568
+        }
+      ],
+      "delete_one_minimum": 0.00026469881711759793,
+      "delete_one_maximum": 0.0012282041188964553
+    }
+  },
+  "planning_recommendation": {
+    "v4_2_estimate_is_transfer_prior_only": true,
+    "reestimate_from_v5_development": true,
+    "evaluation_resize_permitted_before_pixels": true,
+    "safety_gates_may_change": false,
+    "evaluation_pixels_opened": false
+  },
+  "renderer_pre_results_amendment": {
+    "amendment_date": "2026-10-03",
+    "reason": "SMOKE_A_VISUAL_AUDIT_FOUND_COMMON_BLOCK_PRIMITIVES_UNREALISTIC",
+    "smoke_a_manifest_file_sha256": "413db98a9ce1c707ce49a6adab1c41dc93d6987b03e55e76a37a053cb945a49c",
+    "smoke_a_dataset_sha256": "15635967678197e375321419a665cdc03b70611655d7e78e42b5508183c580fa",
+    "smoke_b_manifest_file_sha256": "2e96f6429fd0d98bcc9d3989291d3c74b1deb460ca89fec17fb430c6706564e2",
+    "smoke_b_dataset_sha256": "3f4376f218c2e2119f07839f187cfc5cf5a77c3ed5c84322505cd04ecddcfb10",
+    "renderer_file_sha256": "652819d67eceaad9c95db469f6da778ab8d79a16c5534c514c6daa313435e56c",
+    "change": "FAMILY_MATCHED_ROUNDED_CABLE_ELLIPSOID_HAND_FOREIGN_AND_SPLIT_SPECIFIC_PROCEDURAL_GEOMETRY",
+    "made_before_v5_training_or_development_results": true,
+    "fixture_gates_rotation_and_identities_changed": false,
+    "failed_smoke_a_preserved": true
+  },
+  "evaluation_opened": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "Only eight consumed v4.2 development scenes inform each ICC estimate, so delete-one sensitivity is material.",
+    "V4.2 asset and scene structure differs from v5; these estimates are transfer priors, not fixed v5 correlations.",
+    "Binary-error ICC depends on the retained rejected threshold and endpoint definition.",
+    "No evaluation image, physical image, qualification, or execution authority is introduced."
+  ],
+  "report_sha256": "fa88dcdc97a7e52ca0df350030a3352032a184f35027b088475480a9cdfd0692"
+}

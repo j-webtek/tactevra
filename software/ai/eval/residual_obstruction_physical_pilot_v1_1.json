@@ -1,0 +1,149 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_physical_pilot.v1_1",
+  "scope": "DEENERGIZED_REAL_CAMERA_MEASUREMENT_AND_ESCROW_PLAN_NO_QUALIFICATION",
+  "status": "READY_FOR_DEENERGIZED_CAPTURE_WITH_POST_ISOLATION_POSE_CHECK",
+  "source_commit": "09303487afcf6abe840d727efdcb245971e2010a",
+  "v1_file_sha256": "48b551a1a4ae36d34367f20c1345314eedfdf3e166b91d8fcd0aa57935118c9d",
+  "v1_report_sha256": "3bf5efb4638a9957f7b46ac999298c4ddc1191eb2ddbd0f5f98e22f9c9f2f4b8",
+  "preserved_v1": {
+    "coverage_contract": [
+      {
+        "nominal_fraction": 0.1,
+        "role": "CLEARLY_VISIBLE",
+        "expected_decision": "VISIBLE",
+        "primary_metric_included": true
+      },
+      {
+        "nominal_fraction": 0.2,
+        "role": "BOUNDARY_PROBE",
+        "expected_decision": "EITHER_REPORTED",
+        "primary_metric_included": false
+      },
+      {
+        "nominal_fraction": 0.3,
+        "role": "CLEARLY_OBSTRUCTED",
+        "expected_decision": "ABSTAIN",
+        "primary_metric_included": true
+      },
+      {
+        "nominal_fraction": 0.6,
+        "role": "CLEARLY_OBSTRUCTED",
+        "expected_decision": "ABSTAIN",
+        "primary_metric_included": true
+      }
+    ],
+    "boundary_scoring": {
+      "boundary_fraction": 0.2,
+      "either_visible_or_abstain_accepted": true,
+      "rows_retained": true,
+      "rows_reported_separately": true,
+      "strict_visible_and_strict_abstain_counterfactuals_reported": true,
+      "silent_exclusion_prohibited": true
+    },
+    "coverage_measurement": {
+      "methods_required": [
+        "MEASURED_PLACEMENT_TEMPLATE",
+        "INDEPENDENT_HAND_ANNOTATED_MASK"
+      ],
+      "safe_region_source": "HASH_BOUND_TARGET_MAP",
+      "mask_and_template_artifacts_retained": true,
+      "annotator_blind_to_model_score": true,
+      "maximum_absolute_method_disagreement": 0.05,
+      "disagreement_decision": "LABEL_UNRESOLVED_RETAIN_AND_REPORT_NO_MODEL_METRIC",
+      "target_center_coverage_forces_abstain_label": true
+    },
+    "capture_matrix": {
+      "target_ids": [
+        "keyboard:EQUAL",
+        "keyboard:F",
+        "keyboard:G",
+        "keyboard:H",
+        "keyboard:I",
+        "phone:key_a",
+        "phone:key_b",
+        "phone:key_c",
+        "phone:key_period"
+      ],
+      "observation_types": [
+        "CLEAR_REFERENCE",
+        "CLEAR_REPEAT",
+        "DARK_CABLE",
+        "TRANSLUCENT_CABLE",
+        "HAND"
+      ],
+      "lighting_samples": [
+        "MEASURED_LOW",
+        "MEASURED_NOMINAL",
+        "MEASURED_HIGH"
+      ],
+      "lighting_descriptor_fields": [
+        "luminance",
+        "red_green_ratio",
+        "blue_green_ratio"
+      ],
+      "maximum_relative_lighting_drift": null,
+      "minimum_sessions": 3,
+      "original_bytes_and_hashes_required": true,
+      "charuco_fixture_and_reference_bindings_required": true
+    },
+    "v4_2_rejected": true,
+    "v5_selected": false,
+    "lighting_limit_guessed": false,
+    "evaluation_opened": false
+  },
+  "post_isolation_pose_binding": {
+    "required": true,
+    "performed_after_servo_power_isolation": true,
+    "primary_method": "PARK_SILHOUETTE_MATCH_AFTER_ISOLATION",
+    "optional_secondary_method": "PASSIVE_MEASURED_JOINT_FEEDBACK_AFTER_ISOLATION",
+    "commanded_joint_state_prohibited": true,
+    "minimum_stable_frame_count": 2,
+    "silhouette_tolerance_source": "COMMISSIONED_PARK_PROFILE",
+    "silhouette_tolerance_value": null,
+    "evidence_required_before_each_capture_group": true,
+    "end_of_session_bracket_required": true,
+    "every_image_binds_pose_evidence_sha256": true,
+    "failure_decision": "INVALID_RETAIN_AND_REPORT_DO_NOT_USE"
+  },
+  "sag_interpretation": {
+    "power_off_sag_is_possible": true,
+    "pre_isolation_pose_evidence_is_insufficient": true,
+    "post_isolation_pose_is_the_capture_pose": true,
+    "manual_reposition_during_capture_phase_prohibited": true,
+    "capture_phase_robot_movement_count": 0,
+    "capture_phase_hardware_write_count": 0
+  },
+  "escrow_scope": {
+    "session_id": "physical_pilot_escrow_01",
+    "target_count": 9,
+    "purpose": "REAL_WORLD_SANITY_CHECK_ONLY",
+    "statistical_gate": false,
+    "two_percent_miss_rate_claim_permitted": false,
+    "deployment_qualification_permitted": false,
+    "pixels_opened": false,
+    "open_rule": "ONLY_AFTER_CANDIDATE_REPRESENTATION_CHECKPOINT_AND_THRESHOLD_ARE_FROZEN",
+    "powered_real_evaluation_is_separate_future_capture": true,
+    "powered_real_evaluation_authorized": false,
+    "reuse_as_powered_evaluation_prohibited": true
+  },
+  "capture_safety": {
+    "arm_deenergized_during_every_capture": true,
+    "servo_power_isolated_and_verified": true,
+    "controller_command_channel_disconnected": true,
+    "park_pose_established_before_capture_phase": true,
+    "capture_phase_robot_movement_count": 0,
+    "capture_phase_hardware_write_count": 0,
+    "hand_case_requires_verified_energy_isolation": true,
+    "energized_capture_decision": "INVALID_RETAIN_AND_REPORT_DO_NOT_USE"
+  },
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "No post-isolation silhouette, passive joint feedback, or physical image exists in this predeclaration.",
+    "The one-session escrow is a real-world sanity check and cannot estimate a two-percent miss rate.",
+    "A powered real evaluation requires a separately authorized, powered, and statistically planned capture campaign.",
+    "No camera, model, deployment, or execution qualification is created."
+  ],
+  "report_sha256": "6cd43b4ebb316f76432c39932b08fdb4ada96ec087f5342573eb5ff28551e0f1"
+}

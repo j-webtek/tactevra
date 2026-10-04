@@ -1,0 +1,216 @@
+{
+  "adjacent_only_counterfactual": {
+    "excluded_case_count": 294,
+    "excluded_counts": {
+      "AGREEMENT_COLLISION": 54,
+      "AGREEMENT_FREE": 75,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 165
+    },
+    "excluded_pair_count": 6,
+    "retained_case_count": 735,
+    "retained_counts": {
+      "AGREEMENT_COLLISION": 3,
+      "AGREEMENT_FREE": 732,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 0
+    }
+  },
+  "blockers": [
+    "COUNTERFACTUAL_ONLY_NOT_INSTALLED",
+    "RUNTIME_POLICY_CONTRACT_NOT_SELECTED",
+    "FINITE_CORPUS_IS_NOT_CONTINUOUS_WORKSPACE_COVERAGE",
+    "NON_WATERTIGHT_RAW_MESHES",
+    "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "clearance_replay_admissible": false,
+  "collision_query_admissible": false,
+  "evidence_class": "PINNED_UPSTREAM_POLICY_COUNTERFACTUAL_ONLY",
+  "exclusion_profile_installable": false,
+  "false_positive_pair_review": [
+    {
+      "body_pair": [
+        "link1",
+        "link2"
+      ],
+      "false_positive_count": 23,
+      "governed_direct_joint_pair": true,
+      "srdf_reason": "Adjacent",
+      "supported_by_adjacent_policy_evidence": true
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link3"
+      ],
+      "false_positive_count": 49,
+      "governed_direct_joint_pair": true,
+      "srdf_reason": "Adjacent",
+      "supported_by_adjacent_policy_evidence": true
+    },
+    {
+      "body_pair": [
+        "link3",
+        "link4"
+      ],
+      "false_positive_count": 44,
+      "governed_direct_joint_pair": true,
+      "srdf_reason": "Adjacent",
+      "supported_by_adjacent_policy_evidence": true
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link5"
+      ],
+      "false_positive_count": 49,
+      "governed_direct_joint_pair": true,
+      "srdf_reason": "Adjacent",
+      "supported_by_adjacent_policy_evidence": true
+    }
+  ],
+  "full_srdf_counterfactual": {
+    "excluded_case_count": 588,
+    "excluded_counts": {
+      "AGREEMENT_COLLISION": 54,
+      "AGREEMENT_FREE": 369,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 165
+    },
+    "excluded_pair_count": 12,
+    "retained_case_count": 441,
+    "retained_counts": {
+      "AGREEMENT_COLLISION": 3,
+      "AGREEMENT_FREE": 438,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 0
+    }
+  },
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "upstream_srdf_semantics_do_not_install_a_local_runtime_policy",
+    "counterfactual_removes_entire_pair_cases_without_requerying_geometry",
+    "finite_replay_does_not_cover_continuous_joint_space",
+    "never_reason_pairs_require_separate_review_before_any_policy_selection",
+    "no_controller_hardware_or_physical_qualification"
+  ],
+  "method": {
+    "adjacent_support_rule": "SRDF_REASON_ADJACENT_AND_GOVERNED_DIRECT_JOINT_PAIR",
+    "counterfactual_scope": "PAIR_SUMMARY_COUNTS_ONLY",
+    "pair_normalization": "LEXICOGRAPHIC_LINK_NAMES",
+    "srdf_robot_name": "roarm_m3",
+    "urdf_robot_name": "roarm_m3"
+  },
+  "pair_exclusions_admissible": false,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+  "schema": "tactevra.isaac_sim_self_collision_policy_review.v1",
+  "source_bindings": {
+    "governed_urdf_file_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "replay_summary_file_sha256": "986cf17c52e4394ab19999a41625ac94cb73840397314f0877c2578739ef9b66",
+    "replay_summary_sha256": "1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d",
+    "upstream_srdf_path": "src/roarm_main/roarm_moveit/config/roarm_m3/roarm_m3.srdf",
+    "upstream_srdf_sha256": "29f1daaeea91a490b85581a9a62dd07be9ab959d7817fad89836c466e8288499"
+  },
+  "srdf_exclusions": [
+    {
+      "body_pair": [
+        "base_link",
+        "link1"
+      ],
+      "reason": "Adjacent"
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link2"
+      ],
+      "reason": "Never"
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link3"
+      ],
+      "reason": "Never"
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link3"
+      ],
+      "reason": "Never"
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link4"
+      ],
+      "reason": "Never"
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link5"
+      ],
+      "reason": "Adjacent"
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link2"
+      ],
+      "reason": "Adjacent"
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link3"
+      ],
+      "reason": "Never"
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link3"
+      ],
+      "reason": "Adjacent"
+    },
+    {
+      "body_pair": [
+        "link3",
+        "link4"
+      ],
+      "reason": "Adjacent"
+    },
+    {
+      "body_pair": [
+        "link3",
+        "link5"
+      ],
+      "reason": "Never"
+    },
+    {
+      "body_pair": [
+        "link4",
+        "link5"
+      ],
+      "reason": "Adjacent"
+    }
+  ],
+  "summary": {
+    "false_positive_case_count": 165,
+    "false_positive_pair_count": 4,
+    "governed_direct_joint_pair_count": 6,
+    "srdf_adjacent_exclusion_count": 6,
+    "srdf_exclusion_count": 12,
+    "srdf_never_exclusion_count": 6,
+    "unsupported_false_positive_pair_count": 0
+  },
+  "unsupported_false_positive_pairs": [],
+  "wire_commands": []
+}

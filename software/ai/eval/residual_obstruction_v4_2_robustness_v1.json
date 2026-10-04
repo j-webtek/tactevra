@@ -1,0 +1,2803 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v4_2_robustness.v1",
+  "scope": "SYNTHETIC_CONSUMED_DEVELOPMENT_ROBUSTNESS_NO_QUALIFICATION",
+  "status": "FAILED_DEVELOPMENT_GATES",
+  "fixture_bundle_sha256": "e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2",
+  "admission_report_sha256": "d0a7107016703045f98e3b7d40e9222012e0b9fe7a433c429486b35a11e0066b",
+  "cnn_report_sha256": "80ce5b72b65b84e6dfa0e3d5d174c6a87d72c929487d53eee53f0dd5b8342b82",
+  "checkpoint_sha256": "68c993b679d81715eca9327f5df001117c0156bcf0034a79580951e1e91c4aad",
+  "development_probability_sha256": "2ad7d47922c8e37573e34028346d6bfd3ab240c7c6179b3b88ca7098a0f87f6b",
+  "development_count": 28800,
+  "selected_threshold": null,
+  "development_gate_met": false,
+  "threshold_measurements": [
+    {
+      "threshold": 0.05,
+      "missed_obstructions": 30,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.001388888888888889,
+      "missed_obstruction_scene_cluster_upper": 0.0018981481481481482,
+      "visible_false_stops": 1541,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.2140277777777778,
+      "visible_false_stop_scene_cluster_upper": 0.23569444444444446,
+      "maximum_appearance_missed_obstruction_rate": 0.0024074074074074076,
+      "maximum_appearance_visible_false_stop_rate": 0.24888888888888888,
+      "maximum_family_missed_obstruction_rate": 0.005,
+      "maximum_family_visible_false_stop_rate": 0.30416666666666664,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 9,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0016666666666666668,
+          "visible_false_stops": 420,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.23333333333333334
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 1,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.00018518518518518518,
+          "visible_false_stops": 410,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.22777777777777777
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 7,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0012962962962962963,
+          "visible_false_stops": 263,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.1461111111111111
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 13,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0024074074074074076,
+          "visible_false_stops": 448,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.24888888888888888
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 24,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.005,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 811,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.16895833333333332
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 0,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 0,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 730,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.30416666666666664
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 6,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.00125,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.1,
+      "missed_obstructions": 50,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.0023148148148148147,
+      "missed_obstruction_scene_cluster_upper": 0.002916666666666667,
+      "visible_false_stops": 1184,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.16444444444444445,
+      "visible_false_stop_scene_cluster_upper": 0.18138888888888888,
+      "maximum_appearance_missed_obstruction_rate": 0.003148148148148148,
+      "maximum_appearance_visible_false_stop_rate": 0.19833333333333333,
+      "maximum_family_missed_obstruction_rate": 0.007916666666666667,
+      "maximum_family_visible_false_stop_rate": 0.23875,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 16,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.002962962962962963,
+          "visible_false_stops": 332,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.18444444444444444
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 5,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.000925925925925926,
+          "visible_false_stops": 304,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.1688888888888889
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 12,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0022222222222222222,
+          "visible_false_stops": 191,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.10611111111111111
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 17,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.003148148148148148,
+          "visible_false_stops": 357,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.19833333333333333
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 38,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.007916666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 611,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.12729166666666666
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 3,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.00125,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 0,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 573,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.23875
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 9,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.001875,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.15,
+      "missed_obstructions": 69,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.0031944444444444446,
+      "missed_obstruction_scene_cluster_upper": 0.004027777777777778,
+      "visible_false_stops": 1008,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.14,
+      "visible_false_stop_scene_cluster_upper": 0.15430555555555556,
+      "maximum_appearance_missed_obstruction_rate": 0.0044444444444444444,
+      "maximum_appearance_visible_false_stop_rate": 0.17055555555555554,
+      "maximum_family_missed_obstruction_rate": 0.011041666666666667,
+      "maximum_family_visible_false_stop_rate": 0.20041666666666666,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 22,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.004074074074074074,
+          "visible_false_stops": 287,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.15944444444444444
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 7,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0012962962962962963,
+          "visible_false_stops": 250,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.1388888888888889
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 16,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.002962962962962963,
+          "visible_false_stops": 164,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.09111111111111111
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 24,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0044444444444444444,
+          "visible_false_stops": 307,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.17055555555555554
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 53,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.011041666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 527,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.10979166666666666
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 5,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.0020833333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 0,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 481,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.20041666666666666
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 11,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.0022916666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.2,
+      "missed_obstructions": 81,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.00375,
+      "missed_obstruction_scene_cluster_upper": 0.004675925925925926,
+      "visible_false_stops": 873,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.12125,
+      "visible_false_stop_scene_cluster_upper": 0.13305555555555557,
+      "maximum_appearance_missed_obstruction_rate": 0.005185185185185185,
+      "maximum_appearance_visible_false_stop_rate": 0.15055555555555555,
+      "maximum_family_missed_obstruction_rate": 0.012291666666666666,
+      "maximum_family_visible_false_stop_rate": 0.16916666666666666,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 23,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0042592592592592595,
+          "visible_false_stops": 250,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.1388888888888889
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 7,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0012962962962962963,
+          "visible_false_stops": 207,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.115
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 23,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0042592592592592595,
+          "visible_false_stops": 145,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.08055555555555556
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 28,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.005185185185185185,
+          "visible_false_stops": 271,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.15055555555555555
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 59,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.012291666666666666,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 467,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.09729166666666667
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 5,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.0020833333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 1,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.00010416666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 406,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.16916666666666666
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 16,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.0033333333333333335,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.25,
+      "missed_obstructions": 97,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.0044907407407407405,
+      "missed_obstruction_scene_cluster_upper": 0.005324074074074074,
+      "visible_false_stops": 782,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.10861111111111112,
+      "visible_false_stop_scene_cluster_upper": 0.11763888888888889,
+      "maximum_appearance_missed_obstruction_rate": 0.005740740740740741,
+      "maximum_appearance_visible_false_stop_rate": 0.13666666666666666,
+      "maximum_family_missed_obstruction_rate": 0.014166666666666666,
+      "maximum_family_visible_false_stop_rate": 0.15375,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 25,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.004629629629629629,
+          "visible_false_stops": 221,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.12277777777777778
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 11,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.002037037037037037,
+          "visible_false_stops": 189,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.105
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 30,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.005555555555555556,
+          "visible_false_stops": 126,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 31,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.005740740740740741,
+          "visible_false_stops": 246,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.13666666666666666
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 68,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.014166666666666666,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 413,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.08604166666666667
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 7,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.002916666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 2,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.00020833333333333335,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 369,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.15375
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 20,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.004166666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.3,
+      "missed_obstructions": 116,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.00537037037037037,
+      "missed_obstruction_scene_cluster_upper": 0.0062037037037037035,
+      "visible_false_stops": 700,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.09722222222222222,
+      "visible_false_stop_scene_cluster_upper": 0.10583333333333333,
+      "maximum_appearance_missed_obstruction_rate": 0.007037037037037037,
+      "maximum_appearance_visible_false_stop_rate": 0.12277777777777778,
+      "maximum_family_missed_obstruction_rate": 0.016666666666666666,
+      "maximum_family_visible_false_stop_rate": 0.1325,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 33,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.006111111111111111,
+          "visible_false_stops": 201,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.11166666666666666
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 12,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0022222222222222222,
+          "visible_false_stops": 163,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.09055555555555556
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 33,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.006111111111111111,
+          "visible_false_stops": 115,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.06388888888888888
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 38,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.007037037037037037,
+          "visible_false_stops": 221,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.12277777777777778
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 80,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.016666666666666666,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 382,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.07958333333333334
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 11,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.004583333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 3,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0003125,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 318,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.1325
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 22,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.004583333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.35,
+      "missed_obstructions": 126,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.005833333333333334,
+      "missed_obstruction_scene_cluster_upper": 0.006666666666666667,
+      "visible_false_stops": 653,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.09069444444444444,
+      "visible_false_stop_scene_cluster_upper": 0.09902777777777778,
+      "maximum_appearance_missed_obstruction_rate": 0.0077777777777777776,
+      "maximum_appearance_visible_false_stop_rate": 0.11388888888888889,
+      "maximum_family_missed_obstruction_rate": 0.017708333333333333,
+      "maximum_family_visible_false_stop_rate": 0.12291666666666666,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 33,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.006111111111111111,
+          "visible_false_stops": 186,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.10333333333333333
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 14,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0025925925925925925,
+          "visible_false_stops": 152,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.08444444444444445
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 37,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.006851851851851852,
+          "visible_false_stops": 110,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.06111111111111111
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 42,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0077777777777777776,
+          "visible_false_stops": 205,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.11388888888888889
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 85,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.017708333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 358,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.07458333333333333
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 13,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.005416666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 3,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0003125,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 295,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.12291666666666666
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 25,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.005208333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.4,
+      "missed_obstructions": 149,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.006898148148148148,
+      "missed_obstruction_scene_cluster_upper": 0.00800925925925926,
+      "visible_false_stops": 595,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.08263888888888889,
+      "visible_false_stop_scene_cluster_upper": 0.08986111111111111,
+      "maximum_appearance_missed_obstruction_rate": 0.008703703703703703,
+      "maximum_appearance_visible_false_stop_rate": 0.105,
+      "maximum_family_missed_obstruction_rate": 0.022083333333333333,
+      "maximum_family_visible_false_stop_rate": 0.10833333333333334,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 39,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.007222222222222222,
+          "visible_false_stops": 166,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.09222222222222222
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 16,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.002962962962962963,
+          "visible_false_stops": 142,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07888888888888888
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 47,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.008703703703703703,
+          "visible_false_stops": 98,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.05444444444444444
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 47,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.008703703703703703,
+          "visible_false_stops": 189,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.105
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 106,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.022083333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 335,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.06979166666666667
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 15,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.00625,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 3,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0003125,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 260,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.10833333333333334
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 25,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.005208333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.45,
+      "missed_obstructions": 169,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.007824074074074074,
+      "missed_obstruction_scene_cluster_upper": 0.009074074074074075,
+      "visible_false_stops": 548,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.07611111111111112,
+      "visible_false_stop_scene_cluster_upper": 0.08319444444444445,
+      "maximum_appearance_missed_obstruction_rate": 0.010185185185185186,
+      "maximum_appearance_visible_false_stop_rate": 0.09888888888888889,
+      "maximum_family_missed_obstruction_rate": 0.025208333333333333,
+      "maximum_family_visible_false_stop_rate": 0.10041666666666667,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 45,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.008333333333333333,
+          "visible_false_stops": 151,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.08388888888888889
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 17,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.003148148148148148,
+          "visible_false_stops": 131,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07277777777777777
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 52,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.00962962962962963,
+          "visible_false_stops": 88,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.04888888888888889
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 55,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.010185185185185186,
+          "visible_false_stops": 178,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.09888888888888889
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 121,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.025208333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 307,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.06395833333333334
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 17,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.007083333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 3,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0003125,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 241,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.10041666666666667
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 28,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.005833333333333334,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.5,
+      "missed_obstructions": 185,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.008564814814814815,
+      "missed_obstruction_scene_cluster_upper": 0.009953703703703704,
+      "visible_false_stops": 501,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.06958333333333333,
+      "visible_false_stop_scene_cluster_upper": 0.07583333333333334,
+      "maximum_appearance_missed_obstruction_rate": 0.011296296296296296,
+      "maximum_appearance_visible_false_stop_rate": 0.09222222222222222,
+      "maximum_family_missed_obstruction_rate": 0.027291666666666665,
+      "maximum_family_visible_false_stop_rate": 0.0925,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 49,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.009074074074074075,
+          "visible_false_stops": 138,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07666666666666666
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 19,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0035185185185185185,
+          "visible_false_stops": 120,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.06666666666666667
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 56,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01037037037037037,
+          "visible_false_stops": 77,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.042777777777777776
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 61,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.011296296296296296,
+          "visible_false_stops": 166,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.09222222222222222
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 131,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.027291666666666665,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 279,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.058125
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 19,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.007916666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 5,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0005208333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 222,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.0925
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 30,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.00625,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.55,
+      "missed_obstructions": 206,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.009537037037037037,
+      "missed_obstruction_scene_cluster_upper": 0.010972222222222222,
+      "visible_false_stops": 467,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.0648611111111111,
+      "visible_false_stop_scene_cluster_upper": 0.07069444444444445,
+      "maximum_appearance_missed_obstruction_rate": 0.012037037037037037,
+      "maximum_appearance_visible_false_stop_rate": 0.08722222222222223,
+      "maximum_family_missed_obstruction_rate": 0.03,
+      "maximum_family_visible_false_stop_rate": 0.08541666666666667,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 56,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01037037037037037,
+          "visible_false_stops": 130,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07222222222222222
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 21,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.0038888888888888888,
+          "visible_false_stops": 108,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.06
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 65,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.012037037037037037,
+          "visible_false_stops": 72,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.04
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 64,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.011851851851851851,
+          "visible_false_stops": 157,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.08722222222222223
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 144,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.03,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 262,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.05458333333333333
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 22,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.009166666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 6,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.000625,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 205,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.08541666666666667
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 34,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.007083333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.6,
+      "missed_obstructions": 230,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.010648148148148148,
+      "missed_obstruction_scene_cluster_upper": 0.012083333333333333,
+      "visible_false_stops": 413,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.05736111111111111,
+      "visible_false_stop_scene_cluster_upper": 0.06291666666666666,
+      "maximum_appearance_missed_obstruction_rate": 0.013703703703703704,
+      "maximum_appearance_visible_false_stop_rate": 0.07833333333333334,
+      "maximum_family_missed_obstruction_rate": 0.032916666666666664,
+      "maximum_family_visible_false_stop_rate": 0.07458333333333333,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 62,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.011481481481481481,
+          "visible_false_stops": 110,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.06111111111111111
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 27,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.005,
+          "visible_false_stops": 99,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.055
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 74,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.013703703703703704,
+          "visible_false_stops": 63,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.035
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 67,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.012407407407407407,
+          "visible_false_stops": 141,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07833333333333334
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 158,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.032916666666666664,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 234,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.04875
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 28,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.011666666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 7,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0007291666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 179,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.07458333333333333
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 37,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.0077083333333333335,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.65,
+      "missed_obstructions": 256,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.011851851851851851,
+      "missed_obstruction_scene_cluster_upper": 0.013564814814814814,
+      "visible_false_stops": 377,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.05236111111111111,
+      "visible_false_stop_scene_cluster_upper": 0.05736111111111111,
+      "maximum_appearance_missed_obstruction_rate": 0.016296296296296295,
+      "maximum_appearance_visible_false_stop_rate": 0.07166666666666667,
+      "maximum_family_missed_obstruction_rate": 0.037083333333333336,
+      "maximum_family_visible_false_stop_rate": 0.06458333333333334,
+      "point_and_cluster_gate_met": true,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 66,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.012222222222222223,
+          "visible_false_stops": 98,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.05444444444444444
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 31,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.005740740740740741,
+          "visible_false_stops": 89,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.049444444444444444
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 88,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.016296296296296295,
+          "visible_false_stops": 61,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.03388888888888889
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 71,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.013148148148148148,
+          "visible_false_stops": 129,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.07166666666666667
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 178,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.037083333333333336,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 222,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.04625
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 32,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.013333333333333334,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 8,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0008333333333333334,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 155,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.06458333333333334
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 38,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.007916666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.7,
+      "missed_obstructions": 292,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.013518518518518518,
+      "missed_obstruction_scene_cluster_upper": 0.015416666666666667,
+      "visible_false_stops": 342,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.0475,
+      "visible_false_stop_scene_cluster_upper": 0.05305555555555556,
+      "maximum_appearance_missed_obstruction_rate": 0.01814814814814815,
+      "maximum_appearance_visible_false_stop_rate": 0.06444444444444444,
+      "maximum_family_missed_obstruction_rate": 0.041041666666666664,
+      "maximum_family_visible_false_stop_rate": 0.0575,
+      "point_and_cluster_gate_met": true,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 82,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.015185185185185185,
+          "visible_false_stops": 87,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.04833333333333333
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 35,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.006481481481481481,
+          "visible_false_stops": 85,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.04722222222222222
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 98,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01814814814814815,
+          "visible_false_stops": 54,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.03
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 77,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01425925925925926,
+          "visible_false_stops": 116,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.06444444444444444
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 197,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.041041666666666664,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 204,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.0425
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 38,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.015833333333333335,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 13,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0013541666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 138,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.0575
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 44,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.009166666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.75,
+      "missed_obstructions": 353,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.016342592592592593,
+      "missed_obstruction_scene_cluster_upper": 0.018935185185185187,
+      "visible_false_stops": 308,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.042777777777777776,
+      "visible_false_stop_scene_cluster_upper": 0.04791666666666667,
+      "maximum_appearance_missed_obstruction_rate": 0.021296296296296296,
+      "maximum_appearance_visible_false_stop_rate": 0.056666666666666664,
+      "maximum_family_missed_obstruction_rate": 0.049791666666666665,
+      "maximum_family_visible_false_stop_rate": 0.05,
+      "point_and_cluster_gate_met": true,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 102,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01888888888888889,
+          "visible_false_stops": 78,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.043333333333333335
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 49,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.009074074074074075,
+          "visible_false_stops": 77,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.042777777777777776
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 115,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.021296296296296296,
+          "visible_false_stops": 51,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.028333333333333332
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 87,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01611111111111111,
+          "visible_false_stops": 102,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.056666666666666664
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 239,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.049791666666666665,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 188,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.03916666666666667
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 50,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.020833333333333332,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 14,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0014583333333333334,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 120,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.05
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 50,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.010416666666666666,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.8,
+      "missed_obstructions": 398,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.018425925925925925,
+      "missed_obstruction_scene_cluster_upper": 0.021157407407407406,
+      "visible_false_stops": 266,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.036944444444444446,
+      "visible_false_stop_scene_cluster_upper": 0.042083333333333334,
+      "maximum_appearance_missed_obstruction_rate": 0.023333333333333334,
+      "maximum_appearance_visible_false_stop_rate": 0.05,
+      "maximum_family_missed_obstruction_rate": 0.05645833333333333,
+      "maximum_family_visible_false_stop_rate": 0.04375,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 118,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.02185185185185185,
+          "visible_false_stops": 64,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.035555555555555556
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 54,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.01,
+          "visible_false_stops": 66,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.03666666666666667
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 126,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.023333333333333334,
+          "visible_false_stops": 46,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.025555555555555557
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 100,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.018518518518518517,
+          "visible_false_stops": 90,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.05
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 271,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.05645833333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 161,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.033541666666666664
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 55,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.022916666666666665,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 15,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0015625,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 105,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.04375
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 57,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.011875,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.85,
+      "missed_obstructions": 471,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.021805555555555557,
+      "missed_obstruction_scene_cluster_upper": 0.02449074074074074,
+      "visible_false_stops": 213,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.029583333333333333,
+      "visible_false_stop_scene_cluster_upper": 0.034583333333333334,
+      "maximum_appearance_missed_obstruction_rate": 0.02722222222222222,
+      "maximum_appearance_visible_false_stop_rate": 0.03944444444444444,
+      "maximum_family_missed_obstruction_rate": 0.065,
+      "maximum_family_visible_false_stop_rate": 0.034166666666666665,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 140,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.025925925925925925,
+          "visible_false_stops": 50,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.027777777777777776
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 65,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.012037037037037037,
+          "visible_false_stops": 53,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.029444444444444443
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 147,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.02722222222222222,
+          "visible_false_stops": 39,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.021666666666666667
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 119,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.022037037037037036,
+          "visible_false_stops": 71,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.03944444444444444
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 312,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.065,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 131,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.027291666666666665
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 68,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.028333333333333332,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 18,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.001875,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 82,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.034166666666666665
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 73,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.015208333333333334,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.9,
+      "missed_obstructions": 601,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.027824074074074074,
+      "missed_obstruction_scene_cluster_upper": 0.03138888888888889,
+      "visible_false_stops": 155,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.021527777777777778,
+      "visible_false_stop_scene_cluster_upper": 0.025416666666666667,
+      "maximum_appearance_missed_obstruction_rate": 0.03611111111111111,
+      "maximum_appearance_visible_false_stop_rate": 0.029444444444444443,
+      "maximum_family_missed_obstruction_rate": 0.081875,
+      "maximum_family_visible_false_stop_rate": 0.02375,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 175,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.032407407407407406,
+          "visible_false_stops": 33,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.018333333333333333
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 83,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.015370370370370371,
+          "visible_false_stops": 34,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.01888888888888889
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 195,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.03611111111111111,
+          "visible_false_stops": 35,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.019444444444444445
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 148,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.027407407407407408,
+          "visible_false_stops": 53,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.029444444444444443
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 393,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.081875,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 98,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.020416666666666666
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 88,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.03666666666666667,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 25,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.0026041666666666665,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 57,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.02375
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 95,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.019791666666666666,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    },
+    {
+      "threshold": 0.95,
+      "missed_obstructions": 871,
+      "obstruction_count": 21600,
+      "missed_obstruction_rate": 0.040324074074074075,
+      "missed_obstruction_scene_cluster_upper": 0.044398148148148145,
+      "visible_false_stops": 106,
+      "visible_count": 7200,
+      "visible_false_stop_rate": 0.014722222222222222,
+      "visible_false_stop_scene_cluster_upper": 0.017638888888888888,
+      "maximum_appearance_missed_obstruction_rate": 0.05148148148148148,
+      "maximum_appearance_visible_false_stop_rate": 0.020555555555555556,
+      "maximum_family_missed_obstruction_rate": 0.11270833333333333,
+      "maximum_family_visible_false_stop_rate": 0.015833333333333335,
+      "point_and_cluster_gate_met": false,
+      "worst_appearance_gate_met": false,
+      "worst_family_gate_met": false,
+      "target_auc_and_margin_gate_met": false,
+      "appearance_metrics": [
+        {
+          "appearance_id": "v4_development_cool_sensor_04",
+          "missed_obstructions": 257,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.047592592592592596,
+          "visible_false_stops": 19,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.010555555555555556
+        },
+        {
+          "appearance_id": "v4_development_dim_ambient_03",
+          "missed_obstructions": 127,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.02351851851851852,
+          "visible_false_stops": 25,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.013888888888888888
+        },
+        {
+          "appearance_id": "v4_development_neutral_01",
+          "missed_obstructions": 278,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.05148148148148148,
+          "visible_false_stops": 25,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.013888888888888888
+        },
+        {
+          "appearance_id": "v4_development_warm_side_02",
+          "missed_obstructions": 209,
+          "obstruction_count": 5400,
+          "missed_obstruction_rate": 0.038703703703703705,
+          "visible_false_stops": 37,
+          "visible_count": 1800,
+          "visible_false_stop_rate": 0.020555555555555556
+        }
+      ],
+      "family_metrics": [
+        {
+          "variant_family": "CABLE",
+          "missed_obstructions": 541,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.11270833333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "DISTRACTOR",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 68,
+          "visible_count": 4800,
+          "visible_false_stop_rate": 0.014166666666666666
+        },
+        {
+          "variant_family": "FOREIGN_OBJECT",
+          "missed_obstructions": 131,
+          "obstruction_count": 2400,
+          "missed_obstruction_rate": 0.05458333333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "IMAGE_QUALITY",
+          "missed_obstructions": 53,
+          "obstruction_count": 9600,
+          "missed_obstruction_rate": 0.005520833333333333,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        },
+        {
+          "variant_family": "NONE",
+          "missed_obstructions": 0,
+          "obstruction_count": 0,
+          "missed_obstruction_rate": 0.0,
+          "visible_false_stops": 38,
+          "visible_count": 2400,
+          "visible_false_stop_rate": 0.015833333333333335
+        },
+        {
+          "variant_family": "TOOL",
+          "missed_obstructions": 146,
+          "obstruction_count": 4800,
+          "missed_obstruction_rate": 0.030416666666666668,
+          "visible_false_stops": 0,
+          "visible_count": 0,
+          "visible_false_stop_rate": 0.0
+        }
+      ],
+      "gate_met": false
+    }
+  ],
+  "target_metrics": {
+    "targets": [
+      {
+        "target_id": "keyboard:0",
+        "auc": 0.9972149884259259,
+        "visible_q95": 0.92796391248703,
+        "obstructed_q05": 0.98908731341362,
+        "quantile_margin": 0.061123400926589966,
+        "strict_extreme_margin": -0.45572251081466675
+      },
+      {
+        "target_id": "keyboard:1",
+        "auc": 0.9993127893518519,
+        "visible_q95": 0.17083093523979187,
+        "obstructed_q05": 0.9861232668161393,
+        "quantile_margin": 0.8152923315763474,
+        "strict_extreme_margin": -0.7599244713783264
+      },
+      {
+        "target_id": "keyboard:2",
+        "auc": 0.9999276620370371,
+        "visible_q95": 0.05147263500839472,
+        "obstructed_q05": 0.9878952443599701,
+        "quantile_margin": 0.9364226093515754,
+        "strict_extreme_margin": -0.3426706790924072
+      },
+      {
+        "target_id": "keyboard:3",
+        "auc": 0.9988064236111112,
+        "visible_q95": 0.14479153975844383,
+        "obstructed_q05": 0.9897850394248963,
+        "quantile_margin": 0.8449934996664524,
+        "strict_extreme_margin": -0.7799010276794434
+      },
+      {
+        "target_id": "keyboard:4",
+        "auc": 0.9994212962962963,
+        "visible_q95": 0.5879101753234863,
+        "obstructed_q05": 0.9895802855491638,
+        "quantile_margin": 0.40167011022567745,
+        "strict_extreme_margin": -0.42015892267227173
+      },
+      {
+        "target_id": "keyboard:5",
+        "auc": 0.9995298032407407,
+        "visible_q95": 0.052165668457746506,
+        "obstructed_q05": 0.9978543370962143,
+        "quantile_margin": 0.9456886686384678,
+        "strict_extreme_margin": -0.2048032283782959
+      },
+      {
+        "target_id": "keyboard:6",
+        "auc": 0.9996744791666666,
+        "visible_q95": 0.08549833670258522,
+        "obstructed_q05": 0.9894294649362564,
+        "quantile_margin": 0.9039311282336712,
+        "strict_extreme_margin": -0.5699455738067627
+      },
+      {
+        "target_id": "keyboard:7",
+        "auc": 0.9997829861111112,
+        "visible_q95": 0.1165461391210556,
+        "obstructed_q05": 0.9984840363264084,
+        "quantile_margin": 0.8819378972053528,
+        "strict_extreme_margin": -0.5108421444892883
+      },
+      {
+        "target_id": "keyboard:8",
+        "auc": 0.9991319444444444,
+        "visible_q95": 0.5220620781183243,
+        "obstructed_q05": 0.9785170555114746,
+        "quantile_margin": 0.45645497739315033,
+        "strict_extreme_margin": -0.679027795791626
+      },
+      {
+        "target_id": "keyboard:9",
+        "auc": 0.9985532407407407,
+        "visible_q95": 0.10835753194987774,
+        "obstructed_q05": 0.9922616004943847,
+        "quantile_margin": 0.883904068544507,
+        "strict_extreme_margin": -0.8540856838226318
+      },
+      {
+        "target_id": "keyboard:A",
+        "auc": 0.9997829861111112,
+        "visible_q95": 0.6479535102844238,
+        "obstructed_q05": 0.9930008530616761,
+        "quantile_margin": 0.34504734277725224,
+        "strict_extreme_margin": -0.0709187388420105
+      },
+      {
+        "target_id": "keyboard:APOSTROPHE",
+        "auc": 0.9998191550925926,
+        "visible_q95": 0.1383814811706543,
+        "obstructed_q05": 0.9590271085500717,
+        "quantile_margin": 0.8206456273794174,
+        "strict_extreme_margin": -0.367317259311676
+      },
+      {
+        "target_id": "keyboard:B",
+        "auc": 0.9981553819444444,
+        "visible_q95": 0.39098048210144043,
+        "obstructed_q05": 0.9144467353820801,
+        "quantile_margin": 0.5234662532806397,
+        "strict_extreme_margin": -0.7128413915634155
+      },
+      {
+        "target_id": "keyboard:C",
+        "auc": 0.9982638888888888,
+        "visible_q95": 0.45887620747089386,
+        "obstructed_q05": 0.9834802865982055,
+        "quantile_margin": 0.5246040791273117,
+        "strict_extreme_margin": -0.9090246558189392
+      },
+      {
+        "target_id": "keyboard:COMMA",
+        "auc": 1.0,
+        "visible_q95": 0.04141025152057409,
+        "obstructed_q05": 0.9791874676942826,
+        "quantile_margin": 0.9377772161737085,
+        "strict_extreme_margin": 0.6369355916976929
+      },
+      {
+        "target_id": "keyboard:D",
+        "auc": 0.9993127893518519,
+        "visible_q95": 0.2162036970257759,
+        "obstructed_q05": 0.9437076926231385,
+        "quantile_margin": 0.7275039955973626,
+        "strict_extreme_margin": -0.6891894340515137
+      },
+      {
+        "target_id": "keyboard:E",
+        "auc": 0.9937065972222222,
+        "visible_q95": 0.7665989398956299,
+        "obstructed_q05": 0.970265394449234,
+        "quantile_margin": 0.2036664545536041,
+        "strict_extreme_margin": -0.856891393661499
+      },
+      {
+        "target_id": "keyboard:ENTER",
+        "auc": 0.9995298032407407,
+        "visible_q95": 0.33763085305690765,
+        "obstructed_q05": 0.9988537549972534,
+        "quantile_margin": 0.6612229019403457,
+        "strict_extreme_margin": -0.9525350332260132
+      },
+      {
+        "target_id": "keyboard:EQUAL",
+        "auc": 0.9949363425925926,
+        "visible_q95": 0.2404068559408188,
+        "obstructed_q05": 0.7056202828884125,
+        "quantile_margin": 0.4652134269475937,
+        "strict_extreme_margin": -0.5754218101501465
+      },
+      {
+        "target_id": "keyboard:F",
+        "auc": 0.9990957754629629,
+        "visible_q95": 0.38865286111831665,
+        "obstructed_q05": 0.9510451465845108,
+        "quantile_margin": 0.5623922854661941,
+        "strict_extreme_margin": -0.573456883430481
+      },
+      {
+        "target_id": "keyboard:G",
+        "auc": 0.9960214120370371,
+        "visible_q95": 0.7120968848466873,
+        "obstructed_q05": 0.8915109127759934,
+        "quantile_margin": 0.17941402792930605,
+        "strict_extreme_margin": -0.873584508895874
+      },
+      {
+        "target_id": "keyboard:H",
+        "auc": 0.9994574652777778,
+        "visible_q95": 0.09020058065652847,
+        "obstructed_q05": 0.9825266093015671,
+        "quantile_margin": 0.8923260286450386,
+        "strict_extreme_margin": -0.8293959498405457
+      },
+      {
+        "target_id": "keyboard:I",
+        "auc": 0.9997468171296297,
+        "visible_q95": 0.5135015472769737,
+        "obstructed_q05": 0.9885728389024735,
+        "quantile_margin": 0.47507129162549977,
+        "strict_extreme_margin": -0.2668997645378113
+      },
+      {
+        "target_id": "keyboard:J",
+        "auc": 0.9996383101851852,
+        "visible_q95": 0.4679606184363365,
+        "obstructed_q05": 0.9851387500762939,
+        "quantile_margin": 0.5171781316399574,
+        "strict_extreme_margin": -0.18379616737365723
+      },
+      {
+        "target_id": "keyboard:K",
+        "auc": 0.9959852430555556,
+        "visible_q95": 0.3830897808074951,
+        "obstructed_q05": 0.8678049564361572,
+        "quantile_margin": 0.48471517562866206,
+        "strict_extreme_margin": -0.8916683197021484
+      },
+      {
+        "target_id": "keyboard:L",
+        "auc": 0.9997106481481481,
+        "visible_q95": 0.5766747742891312,
+        "obstructed_q05": 0.9957792520523071,
+        "quantile_margin": 0.41910447776317594,
+        "strict_extreme_margin": -0.3118200898170471
+      },
+      {
+        "target_id": "keyboard:M",
+        "auc": 1.0,
+        "visible_q95": 0.2841392457485199,
+        "obstructed_q05": 0.9902126431465149,
+        "quantile_margin": 0.706073397397995,
+        "strict_extreme_margin": 0.23006880283355713
+      },
+      {
+        "target_id": "keyboard:MINUS",
+        "auc": 0.9995298032407407,
+        "visible_q95": 0.3870786651968956,
+        "obstructed_q05": 0.9981976687908173,
+        "quantile_margin": 0.6111190035939217,
+        "strict_extreme_margin": -0.32233768701553345
+      },
+      {
+        "target_id": "keyboard:N",
+        "auc": 0.9978298611111112,
+        "visible_q95": 0.7079459428787231,
+        "obstructed_q05": 0.9511949956417084,
+        "quantile_margin": 0.24324905276298525,
+        "strict_extreme_margin": -0.749709963798523
+      },
+      {
+        "target_id": "keyboard:O",
+        "auc": 0.9980830439814815,
+        "visible_q95": 0.7346473038196564,
+        "obstructed_q05": 0.967544150352478,
+        "quantile_margin": 0.2328968465328216,
+        "strict_extreme_margin": -0.3229677081108093
+      },
+      {
+        "target_id": "keyboard:P",
+        "auc": 0.9993127893518519,
+        "visible_q95": 0.16937747225165367,
+        "obstructed_q05": 0.9662716060876846,
+        "quantile_margin": 0.7968941338360309,
+        "strict_extreme_margin": -0.8408810496330261
+      },
+      {
+        "target_id": "keyboard:PERIOD",
+        "auc": 0.9987702546296297,
+        "visible_q95": 0.3522060438990593,
+        "obstructed_q05": 0.9882263660430908,
+        "quantile_margin": 0.6360203221440315,
+        "strict_extreme_margin": -0.9276906847953796
+      },
+      {
+        "target_id": "keyboard:Q",
+        "auc": 0.9993851273148148,
+        "visible_q95": 0.8664799779653549,
+        "obstructed_q05": 0.9913825243711472,
+        "quantile_margin": 0.12490254640579224,
+        "strict_extreme_margin": -0.11790609359741211
+      },
+      {
+        "target_id": "keyboard:R",
+        "auc": 0.9976490162037037,
+        "visible_q95": 0.32455160468816757,
+        "obstructed_q05": 0.9333786785602569,
+        "quantile_margin": 0.6088270738720893,
+        "strict_extreme_margin": -0.59763503074646
+      },
+      {
+        "target_id": "keyboard:S",
+        "auc": 0.9997468171296297,
+        "visible_q95": 0.2844479903578758,
+        "obstructed_q05": 0.989800900220871,
+        "quantile_margin": 0.7053529098629951,
+        "strict_extreme_margin": -0.5053304433822632
+      },
+      {
+        "target_id": "keyboard:SEMICOLON",
+        "auc": 0.9990957754629629,
+        "visible_q95": 0.14997969567775726,
+        "obstructed_q05": 0.9440218031406402,
+        "quantile_margin": 0.794042107462883,
+        "strict_extreme_margin": -0.7804138660430908
+      },
+      {
+        "target_id": "keyboard:SLASH",
+        "auc": 0.9981915509259259,
+        "visible_q95": 0.08927124738693237,
+        "obstructed_q05": 0.8866035848855972,
+        "quantile_margin": 0.7973323374986648,
+        "strict_extreme_margin": -0.6301178932189941
+      },
+      {
+        "target_id": "keyboard:SPACE",
+        "auc": 0.9985532407407407,
+        "visible_q95": 0.8005224317312241,
+        "obstructed_q05": 0.9870606571435928,
+        "quantile_margin": 0.18653822541236875,
+        "strict_extreme_margin": -0.8563612699508667
+      },
+      {
+        "target_id": "keyboard:T",
+        "auc": 0.9981553819444444,
+        "visible_q95": 0.5554308742284775,
+        "obstructed_q05": 0.9449364125728608,
+        "quantile_margin": 0.3895055383443833,
+        "strict_extreme_margin": -0.7604770660400391
+      },
+      {
+        "target_id": "keyboard:TAB",
+        "auc": 0.9984809027777778,
+        "visible_q95": 0.5241454988718033,
+        "obstructed_q05": 0.9697359472513198,
+        "quantile_margin": 0.44559044837951656,
+        "strict_extreme_margin": -0.7388360500335693
+      },
+      {
+        "target_id": "keyboard:U",
+        "auc": 0.9982638888888888,
+        "visible_q95": 0.3175021633505821,
+        "obstructed_q05": 0.9500477731227874,
+        "quantile_margin": 0.6325456097722053,
+        "strict_extreme_margin": -0.7146703004837036
+      },
+      {
+        "target_id": "keyboard:V",
+        "auc": 0.9992404513888888,
+        "visible_q95": 0.5555129051208496,
+        "obstructed_q05": 0.9876328527927398,
+        "quantile_margin": 0.4321199476718902,
+        "strict_extreme_margin": -0.45720791816711426
+      },
+      {
+        "target_id": "keyboard:W",
+        "auc": 0.9992766203703703,
+        "visible_q95": 0.6252855062484741,
+        "obstructed_q05": 0.9961214751005173,
+        "quantile_margin": 0.3708359688520432,
+        "strict_extreme_margin": -0.5140755772590637
+      },
+      {
+        "target_id": "keyboard:X",
+        "auc": 0.9982277199074074,
+        "visible_q95": 0.4860198199748993,
+        "obstructed_q05": 0.9647444605827331,
+        "quantile_margin": 0.4787246406078338,
+        "strict_extreme_margin": -0.8391779661178589
+      },
+      {
+        "target_id": "keyboard:Y",
+        "auc": 0.9963107638888888,
+        "visible_q95": 0.5398069471120834,
+        "obstructed_q05": 0.9121203929185867,
+        "quantile_margin": 0.3723134458065033,
+        "strict_extreme_margin": -0.9503132700920105
+      },
+      {
+        "target_id": "keyboard:Z",
+        "auc": 1.0,
+        "visible_q95": 0.21717790514230728,
+        "obstructed_q05": 0.9967539012432098,
+        "quantile_margin": 0.7795759961009026,
+        "strict_extreme_margin": 0.058239102363586426
+      },
+      {
+        "target_id": "phone:key_a",
+        "auc": 0.9525101273148148,
+        "visible_q95": 0.9933381080627441,
+        "obstructed_q05": 0.6802757501602174,
+        "quantile_margin": -0.3130623579025268,
+        "strict_extreme_margin": -0.9508219957351685
+      },
+      {
+        "target_id": "phone:key_b",
+        "auc": 0.9807581018518519,
+        "visible_q95": 0.979006290435791,
+        "obstructed_q05": 0.8765557467937469,
+        "quantile_margin": -0.10245054364204409,
+        "strict_extreme_margin": -0.9514713287353516
+      },
+      {
+        "target_id": "phone:key_c",
+        "auc": 0.9864728009259259,
+        "visible_q95": 0.9154252707958221,
+        "obstructed_q05": 0.8684465765953064,
+        "quantile_margin": -0.0469786942005157,
+        "strict_extreme_margin": -0.7218613624572754
+      },
+      {
+        "target_id": "phone:key_d",
+        "auc": 0.9935257523148148,
+        "visible_q95": 0.8460865467786789,
+        "obstructed_q05": 0.9665622025728225,
+        "quantile_margin": 0.12047565579414365,
+        "strict_extreme_margin": -0.9224437475204468
+      },
+      {
+        "target_id": "phone:key_e",
+        "auc": 0.9972149884259259,
+        "visible_q95": 0.9490381181240082,
+        "obstructed_q05": 0.9966056704521179,
+        "quantile_margin": 0.04756755232810972,
+        "strict_extreme_margin": -0.15887540578842163
+      },
+      {
+        "target_id": "phone:key_enter",
+        "auc": 0.9973958333333334,
+        "visible_q95": 0.2845674604177475,
+        "obstructed_q05": 0.7975517123937607,
+        "quantile_margin": 0.5129842519760132,
+        "strict_extreme_margin": -0.8029722571372986
+      },
+      {
+        "target_id": "phone:key_f",
+        "auc": 0.9998914930555556,
+        "visible_q95": 0.14891579747200012,
+        "obstructed_q05": 0.974240380525589,
+        "quantile_margin": 0.8253245830535889,
+        "strict_extreme_margin": -0.04774811863899231
+      },
+      {
+        "target_id": "phone:key_g",
+        "auc": 0.9980830439814815,
+        "visible_q95": 0.20883509889245033,
+        "obstructed_q05": 0.9598969668149948,
+        "quantile_margin": 0.7510618679225445,
+        "strict_extreme_margin": -0.9893056154251099
+      },
+      {
+        "target_id": "phone:key_h",
+        "auc": 0.9998914930555556,
+        "visible_q95": 0.08936621807515621,
+        "obstructed_q05": 0.9953503847122193,
+        "quantile_margin": 0.905984166637063,
+        "strict_extreme_margin": -0.6172813773155212
+      },
+      {
+        "target_id": "phone:key_i",
+        "auc": 0.9992042824074074,
+        "visible_q95": 0.8800855726003647,
+        "obstructed_q05": 0.9889598071575165,
+        "quantile_margin": 0.10887423455715184,
+        "strict_extreme_margin": -0.11012893915176392
+      },
+      {
+        "target_id": "phone:key_j",
+        "auc": 0.9992404513888888,
+        "visible_q95": 0.5376489609479904,
+        "obstructed_q05": 0.9797949522733689,
+        "quantile_margin": 0.44214599132537846,
+        "strict_extreme_margin": -0.5815529823303223
+      },
+      {
+        "target_id": "phone:key_k",
+        "auc": 0.9999638310185185,
+        "visible_q95": 0.18075913563370705,
+        "obstructed_q05": 0.9921810686588287,
+        "quantile_margin": 0.8114219330251217,
+        "strict_extreme_margin": -0.20713487267494202
+      },
+      {
+        "target_id": "phone:key_l",
+        "auc": 1.0,
+        "visible_q95": 0.03317051101475954,
+        "obstructed_q05": 0.9912138789892196,
+        "quantile_margin": 0.9580433679744601,
+        "strict_extreme_margin": 0.1548737734556198
+      },
+      {
+        "target_id": "phone:key_m",
+        "auc": 0.9977575231481481,
+        "visible_q95": 0.6894909590482712,
+        "obstructed_q05": 0.885018476843834,
+        "quantile_margin": 0.19552751779556277,
+        "strict_extreme_margin": -0.5490577220916748
+      },
+      {
+        "target_id": "phone:key_n",
+        "auc": 0.9991319444444444,
+        "visible_q95": 0.5400478839874268,
+        "obstructed_q05": 0.9829683661460876,
+        "quantile_margin": 0.44292048215866087,
+        "strict_extreme_margin": -0.5861713886260986
+      },
+      {
+        "target_id": "phone:key_o",
+        "auc": 0.9934895833333334,
+        "visible_q95": 0.8085627853870392,
+        "obstructed_q05": 0.9193200260400772,
+        "quantile_margin": 0.11075724065303805,
+        "strict_extreme_margin": -0.9140819907188416
+      },
+      {
+        "target_id": "phone:key_p",
+        "auc": 0.9977575231481481,
+        "visible_q95": 0.258782722055912,
+        "obstructed_q05": 0.9565845966339112,
+        "quantile_margin": 0.6978018745779991,
+        "strict_extreme_margin": -0.986012876033783
+      },
+      {
+        "target_id": "phone:key_period",
+        "auc": 0.9845920138888888,
+        "visible_q95": 0.7778542041778564,
+        "obstructed_q05": 0.6815844118595124,
+        "quantile_margin": -0.0962697923183441,
+        "strict_extreme_margin": -0.9772347211837769
+      },
+      {
+        "target_id": "phone:key_q",
+        "auc": 0.9981553819444444,
+        "visible_q95": 0.7150445431470871,
+        "obstructed_q05": 0.9763402223587037,
+        "quantile_margin": 0.26129567921161656,
+        "strict_extreme_margin": -0.6946471929550171
+      },
+      {
+        "target_id": "phone:key_r",
+        "auc": 0.9961299189814815,
+        "visible_q95": 0.9100731164216995,
+        "obstructed_q05": 0.9888091921806336,
+        "quantile_margin": 0.07873607575893404,
+        "strict_extreme_margin": -0.9620605111122131
+      },
+      {
+        "target_id": "phone:key_s",
+        "auc": 0.9998914930555556,
+        "visible_q95": 0.34482696652412415,
+        "obstructed_q05": 0.982894504070282,
+        "quantile_margin": 0.6380675375461579,
+        "strict_extreme_margin": -0.14414286613464355
+      },
+      {
+        "target_id": "phone:key_space",
+        "auc": 0.9990596064814815,
+        "visible_q95": 0.36879994720220566,
+        "obstructed_q05": 0.9960943132638931,
+        "quantile_margin": 0.6272943660616874,
+        "strict_extreme_margin": -0.5555533766746521
+      },
+      {
+        "target_id": "phone:key_t",
+        "auc": 0.9994574652777778,
+        "visible_q95": 0.7199163436889648,
+        "obstructed_q05": 0.9859985083341598,
+        "quantile_margin": 0.26608216464519496,
+        "strict_extreme_margin": -0.19154661893844604
+      },
+      {
+        "target_id": "phone:key_u",
+        "auc": 0.9967447916666666,
+        "visible_q95": 0.564246192574501,
+        "obstructed_q05": 0.9702228814363479,
+        "quantile_margin": 0.4059766888618469,
+        "strict_extreme_margin": -0.8827774524688721
+      },
+      {
+        "target_id": "phone:key_v",
+        "auc": 0.9819878472222222,
+        "visible_q95": 0.9470264166593552,
+        "obstructed_q05": 0.9312084555625916,
+        "quantile_margin": -0.01581796109676359,
+        "strict_extreme_margin": -0.9928022623062134
+      },
+      {
+        "target_id": "phone:key_w",
+        "auc": 0.9869068287037037,
+        "visible_q95": 0.9914252609014511,
+        "obstructed_q05": 0.9867695450782776,
+        "quantile_margin": -0.0046557158231734785,
+        "strict_extreme_margin": -0.9679210186004639
+      },
+      {
+        "target_id": "phone:key_x",
+        "auc": 0.9907045717592593,
+        "visible_q95": 0.855378270149231,
+        "obstructed_q05": 0.8739943385124207,
+        "quantile_margin": 0.01861606836318974,
+        "strict_extreme_margin": -0.9739632606506348
+      },
+      {
+        "target_id": "phone:key_y",
+        "auc": 0.9802155671296297,
+        "visible_q95": 0.9549786746501923,
+        "obstructed_q05": 0.817599293589592,
+        "quantile_margin": -0.13737938106060021,
+        "strict_extreme_margin": -0.9925321340560913
+      },
+      {
+        "target_id": "phone:key_z",
+        "auc": 0.9973234953703703,
+        "visible_q95": 0.8103272169828415,
+        "obstructed_q05": 0.9548623830080033,
+        "quantile_margin": 0.1445351660251618,
+        "strict_extreme_margin": -0.816312313079834
+      }
+    ],
+    "minimum_auc": 0.9525101273148148,
+    "q05_auc": 0.9838107638888889,
+    "q05_quantile_margin": -0.06176602363586421,
+    "minimum_strict_extreme_margin_diagnostic": -0.9928022623062134
+  },
+  "target_auc_and_margin_gate_met": false,
+  "model_output_semantics": "UNCALIBRATED_RANKING_SCORE_NOT_CONFIDENCE",
+  "candidate_workcell_mitigation": "PROHIBIT_CABLE_ROUTING_ACROSS_KEYBOARD_OR_PHONE_INTERACTION_SURFACES",
+  "evaluation_opened": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "Synthetic consumed-development scoring is not physical qualification",
+    "Model scores are ranking values and are not calibrated confidence",
+    "Frozen evaluation reuses procedural obstruction assets",
+    "Real clear, cable, and hand captures remain required"
+  ],
+  "report_sha256": "776e4936c1733ea831847fa5142bfe605f8cc603cd23c601109a2cb66fa60ea5"
+}

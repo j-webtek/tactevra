@@ -1,0 +1,65 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v5_4_power_sensitivity.v1",
+  "scope": "SYNTHETIC_POWER_SENSITIVITY_NO_RENDER_NO_GATE_CHANGE",
+  "status": "COMPLETE_FROZEN_ROTATION_UNCHANGED",
+  "source_commit": "d5119e64b62e8afb891644fc3b0e8f97916c372b",
+  "fixture_file_sha256": "85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3",
+  "fixture_bundle_sha256": "44c83dbee7fef8520bfdf825c94c2c34f61cf4b9d6d0db909e914c53ef6fa085",
+  "audit_file_sha256": "cebef0b75b9d60c3c40467a8a0a4e4561b4248d35fe6d61eee07fe00dd386cd2",
+  "audit_report_sha256": "693ccaf4e4c69bd643a880470ce9c3ae3f99e61c9166287929645a7672c012bc",
+  "v5_3_file_sha256": "2c61d39c28cb4b56dc4dbcaa474de055285a5ea4f976583645f7f3814917fdeb",
+  "v5_3_report_sha256": "1a3bea5b88566b55c8a621b7b0a94d0a6e0dfc4130dafd46ef0cc1354bf680e6",
+  "simulation": {
+    "trials": 20000,
+    "seed": 55401,
+    "scene_count": 224,
+    "targets_per_scene": 12,
+    "evaluation_observations": 96768,
+    "assumed_true_miss_rate": 0.01,
+    "assumed_true_visible_false_stop_rate": 0.03,
+    "miss_gate_rate": 0.02,
+    "visible_false_stop_gate_rate": 0.06,
+    "joint_lower_bound": "BONFERRONI_WITHOUT_GATE_INDEPENDENCE_ASSUMPTION",
+    "scenarios": [
+      {
+        "scenario_id": "MODERATE_ICC_0_05",
+        "intracluster_correlation": 0.05,
+        "marginal_power": {
+          "pooled_all_obstruction_miss": 1.0,
+          "cable_family_miss": 0.99985,
+          "dark_cable_30_60_miss": 0.9994,
+          "visible_false_stop": 1.0
+        },
+        "limiting_marginal_power": 0.9994,
+        "bonferroni_joint_lower_bound": 0.99925
+      },
+      {
+        "scenario_id": "PESSIMISTIC_ICC_0_30",
+        "intracluster_correlation": 0.3,
+        "marginal_power": {
+          "pooled_all_obstruction_miss": 0.687,
+          "cable_family_miss": 0.6899,
+          "dark_cable_30_60_miss": 0.6767,
+          "visible_false_stop": 0.98895
+        },
+        "limiting_marginal_power": 0.6767,
+        "bonferroni_joint_lower_bound": 0.04255
+      }
+    ]
+  },
+  "interpretation": "MODERATE_IMPROVEMENT_CAN_PROVE_BOUNDS_UNDER_MODERATE_CLUSTERING_BUT_FROZEN_EVALUATION_IS_EFFECTIVELY_LARGE_IMPROVEMENT_OR_REJECTION_UNDER_PESSIMISTIC_CLUSTERING",
+  "pessimistic_joint_lower_bound": 0.04255,
+  "fixture_or_gate_changed": false,
+  "evaluation_render_authorized": false,
+  "images_generated": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "The 1% miss rate and 3% false-stop rate are hypothetical true rates, not predictions of v5 performance.",
+    "The result estimates ability to prove the frozen bounds, not the probability that a trained candidate achieves the assumed rates.",
+    "The pessimistic ICC scenario has a dependence-free joint lower bound below the 0.90 power target.",
+    "No synthetic result establishes physical-camera transfer or deployment qualification."
+  ],
+  "report_sha256": "0b423322cd54c622702fc0b9cd7a347c55eb4b3a81406f76f4e06ae52a4abe54"
+}

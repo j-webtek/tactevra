@@ -17,7 +17,16 @@ sys.path.insert(0, str(AI_DIR.parent / "src"))
 sys.path.insert(0, str(AI_DIR / "train"))
 
 from rocell_ai.baseline import propose  # noqa: E402
-from rocell_ai.adapter import inspect  # noqa: E402
+from rocell_ai.adapter import (  # noqa: E402
+    StickyKeysReplayError,
+    build_keyboard_target_extension_proposal,
+    compile_virtual_us_sticky_keys,
+    inspect,
+    planner_capability_contract,
+    replay_virtual_us_sticky_keys,
+    run_seeded_sticky_keys_replay,
+    US_PRINTABLE_BASE_KEY_IDS,
+)
 from rocell_ai.admission import admit  # noqa: E402
 from rocell_ai.admission_eval import evaluate_admission  # noqa: E402
 from rocell_ai.grounded import propose as grounded_propose  # noqa: E402
@@ -106,6 +115,423 @@ class OfflineContractTests(unittest.TestCase):
         self.assertEqual(stale["reason"], "stale_observation")
         with self.assertRaisesRegex(ValueError, "reference mismatch"):
             inspect(proposal, {"ref": "other", "fresh": True})
+
+    def test_planner_shift_and_phone_layers_fail_closed_until_commissioned(self) -> None:
+        blocked = planner_capability_contract()
+        self.assertEqual(blocked["keyboard"]["strategy"], "STICKY_KEYS_SEQUENTIAL_MODIFIER")
+        self.assertFalse(blocked["keyboard"]["simultaneous_chord_supported"])
+        self.assertEqual(blocked["keyboard"]["blocked_reason"], "keyboard_modifier_uncommissioned")
+        self.assertTrue(blocked["phone"]["adb_verification_before_every_press"])
+        self.assertEqual(blocked["phone"]["blocked_reason"], "phone_layer_uncommissioned")
+        self.assertFalse(blocked["language_model_may_emit_target_ids"])
+        self.assertEqual(blocked["hardware_commands_generated"], 0)
+
+        ready = planner_capability_contract(
+            keyboard_target_ids=(*US_PRINTABLE_BASE_KEY_IDS, "SHIFT"),
+            sticky_keys_verified=True,
+            phone_target_ids=("key_shift", "key_symbols", "key_letters"),
+            adb_layer_verification=True,
+        )
+        self.assertTrue(ready["keyboard"]["ready"])
+        self.assertTrue(ready["phone"]["ready"])
+        self.assertNotEqual(ready["contract_sha256"], blocked["contract_sha256"])
+
+        def proposal(device: str, text: str) -> dict[str, str]:
+            return {
+                "schema": "rocell.ai_task_proposal.v0",
+                "request_id": f"{device}-{ord(text[0])}",
+                "observation_ref": "capability-observation",
+                "decision": "type_text",
+                "device": device,
+                "text": text,
+            }
+
+        observation = {
+            "ref": "capability-observation",
+            "fresh": True,
+            "phone_state": "KEYBOARD_LOWER",
+        }
+        for text in ("A", "!"):
+            self.assertEqual(
+                inspect(proposal("keyboard", text), observation)["reason"],
+                "keyboard_modifier_uncommissioned",
+            )
+        for text in ("A", "1", "!"):
+            self.assertEqual(
+                inspect(proposal("phone", text), observation)["reason"],
+                "phone_layer_uncommissioned",
+            )
+        self.assertEqual(inspect(proposal("keyboard", "a"), observation)["status"], "accepted")
+        self.assertEqual(inspect(proposal("phone", "a"), observation)["status"], "accepted")
+
+    def test_five_key_catalog_proposal_blocks_unqualified_install_and_render(self) -> None:
+        catalog = AI_DIR.parent / "config" / "nominal_target_profiles.json"
+        geometry = AI_DIR.parents[1] / "presentations" / "blender" / "build_workcell_explainer.py"
+        first = build_keyboard_target_extension_proposal(catalog, geometry, "a" * 40)
+        second = build_keyboard_target_extension_proposal(catalog, geometry, "a" * 40)
+        self.assertEqual(first, second)
+        self.assertEqual(first["active_catalog"]["keyboard_target_count"], 46)
+        self.assertEqual(first["active_catalog"]["total_target_count"], 75)
+        self.assertFalse(first["shared_catalog_install_authorized"])
+        self.assertFalse(first["compiler_expansion_authorized"])
+        self.assertFalse(first["v5_5_render_gate"]["render_authorized"])
+        self.assertEqual(
+            first["v5_5_render_gate"]["required_total_target_count_after_admission"], 80
+        )
+        self.assertFalse(first["v5_5_render_gate"]["physical_camera_evidence_required"])
+        self.assertFalse(first["physical_commissioning_gate"]["blocks_synthetic_render"])
+        self.assertFalse(first["physical_commissioning_gate"]["hardware_use_authorized"])
+        targets = {row["target_id"]: row for row in first["targets"]}
+        self.assertEqual(set(targets), {
+            "SHIFT", "BACKSLASH", "GRAVE", "LEFT_BRACKET", "RIGHT_BRACKET"
+        })
+        self.assertEqual(
+            targets["GRAVE"]["proposal_status"],
+            "BLOCKED_AWAITING_DIRECT_CALIPER_MEASUREMENT",
+        )
+        self.assertIsNone(targets["GRAVE"]["press_point_xy_mm"])
+        self.assertEqual(
+            targets["SHIFT"]["proposal_status"],
+            "PROVISIONAL_SIMULATION_ONLY_PENDING_SHARED_REVIEW",
+        )
+        self.assertEqual(targets["SHIFT"]["press_point_xy_mm"], [20.0, 48.0])
+        self.assertEqual(targets["SHIFT"]["safe_half_extent_mm"], [7.0, 7.0])
+        self.assertIn(
+            "GRAVE_DIRECT_CALIPER_MEASUREMENT_PENDING",
+            first["v5_5_render_gate"]["blockers"],
+        )
+        self.assertIn(
+            "ARM_RUNTIME_REACH_OPTIMIZER_CURRENTLY_LOCKED_TO_75_TARGETS",
+            first["v5_5_render_gate"]["blockers"],
+        )
+        self.assertNotIn(
+            "COMMISSIONED_CAMERA_VISIBILITY_NOT_PROVEN",
+            first["v5_5_render_gate"]["blockers"],
+        )
+        self.assertEqual(
+            first["grave_measurement"]["status"],
+            "AWAITING_DIRECT_PHYSICAL_READINGS",
+        )
+        self.assertEqual(len(first["grave_measurement"]["method_sha256"]), 64)
+        self.assertEqual(
+            first["grave_measurement"]["method"]["measurement_surface"]["surface"],
+            "KEYCAP_TOP_PRESS_SURFACE",
+        )
+        self.assertIn(
+            "KEYCAP_BASE",
+            first["grave_measurement"]["method"]["measurement_surface"]["exclude"],
+        )
+        self.assertIsNone(first["grave_measurement"]["derived_geometry"])
+        arm_contract = first["arm_lane_catalog_contract"]
+        self.assertEqual(
+            arm_contract["required_behavior"],
+            "VALIDATE_LOADED_FROZEN_CATALOG_HASH_THEN_ENUMERATE_ITS_CONTENTS",
+        )
+        self.assertEqual(
+            arm_contract["prohibited_behavior"],
+            "HARDCODE_EXPECTED_TOTAL_OR_PER_DEVICE_TARGET_COUNTS",
+        )
+        self.assertFalse(arm_contract["arm_lane_status_changed"])
+        self.assertEqual(first["hardware_writes"], 0)
+        self.assertEqual(first["physical_movements"], 0)
+        self.assertFalse(first["physical_authority"])
+
+    def test_five_key_catalog_proposal_rejects_changed_geometry_source(self) -> None:
+        catalog = AI_DIR.parent / "config" / "nominal_target_profiles.json"
+        source = AI_DIR.parents[1] / "presentations" / "blender" / "build_workcell_explainer.py"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            changed = Path(temp_dir) / "geometry.py"
+            changed.write_text(
+                source.read_text(encoding="utf-8").replace(
+                    '("[", ox + 231.5, oy + 90.0, 15.6)',
+                    '("[", ox + 232.0, oy + 90.0, 15.6)',
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "LEFT_BRACKET seed"):
+                build_keyboard_target_extension_proposal(catalog, changed, "b" * 40)
+
+    def test_photo_geometry_study_proposes_simulation_only_correction(self) -> None:
+        catalog = AI_DIR.parent / "config" / "nominal_target_profiles.json"
+        geometry = AI_DIR.parents[1] / "presentations" / "blender" / "build_workcell_explainer.py"
+        required = (
+            "SHIFT", "BACKSLASH", "GRAVE", "LEFT_BRACKET", "RIGHT_BRACKET"
+        )
+        number_row = (
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "MINUS", "EQUAL"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            photo = root / "photo.jpg"
+            photo.write_bytes(b"synthetic-test-photo")
+            source_sha256 = hashlib.sha256(photo.read_bytes()).hexdigest()
+            inferred = {
+                target_id: {"inferred_local_xy_mm": [20.0 + index, 90.0]}
+                for index, target_id in enumerate((*required, *number_row))
+            }
+            comparison = {
+                target_id: {
+                    "current_local_xy_mm": [22.0 + index * 19.05, 111.0],
+                    "photo_inferred_local_xy_mm": inferred[target_id]["inferred_local_xy_mm"],
+                    "delta_mm": [1.0, -7.0],
+                }
+                for index, target_id in enumerate(number_row)
+            }
+            study = root / "study.json"
+            study.write_text(json.dumps({
+                "schema": "rocell.keyboard_photo_geometry_study.v1",
+                "status": "PHOTO_DERIVED_SIMULATION_ONLY_NOMINAL",
+                "physical_release_effect": "NONE",
+                "source": {"sha256": source_sha256},
+                "fit": {
+                    "median_reprojection_error_px": 0.5,
+                    "max_reprojection_error_px": 1.5,
+                    "mean_reprojection_error_px": 0.7,
+                },
+                "inferred_targets": inferred,
+                "current_number_row_comparison": comparison,
+                "hardware_write_count": 0,
+                "physical_movement_count": 0,
+                "measurement_reading_count": 0,
+            }), encoding="utf-8")
+            result = build_keyboard_target_extension_proposal(
+                catalog,
+                geometry,
+                "c" * 40,
+                photo_geometry_study_path=study,
+                photo_source_path=photo,
+            )
+            targets = {row["target_id"]: row for row in result["targets"]}
+            self.assertEqual(
+                targets["GRAVE"]["proposal_status"],
+                "PHOTO_DERIVED_SIMULATION_ONLY_PENDING_SHARED_REVIEW",
+            )
+            self.assertEqual(targets["GRAVE"]["press_point_xy_mm"], [22.0, 90.0])
+            self.assertEqual(len(result["existing_target_corrections"]), 12)
+            self.assertEqual(
+                result["grave_measurement"]["status"],
+                "AWAITING_DIRECT_PHYSICAL_READINGS",
+            )
+            self.assertNotIn(
+                "GRAVE_DIRECT_CALIPER_MEASUREMENT_PENDING",
+                result["v5_5_render_gate"]["blockers"],
+            )
+            self.assertIn(
+                "PHOTO_DERIVED_GEOMETRY_NOT_INSTALLED_IN_SHARED_CATALOG",
+                result["v5_5_render_gate"]["blockers"],
+            )
+            self.assertFalse(result["shared_catalog_install_authorized"])
+            self.assertFalse(result["physical_commissioning_gate"]["hardware_use_authorized"])
+            study_data = json.loads(study.read_text(encoding="utf-8"))
+            study_data["source"]["sha256"] = "0" * 64
+            study.write_text(json.dumps(study_data), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "source hash mismatch"):
+                build_keyboard_target_extension_proposal(
+                    catalog,
+                    geometry,
+                    "d" * 40,
+                    photo_geometry_study_path=study,
+                    photo_source_path=photo,
+                )
+
+    def test_physical_measurements_replace_rejected_photo_fit_for_simulation(self) -> None:
+        catalog = AI_DIR.parent / "config" / "nominal_target_profiles.json"
+        geometry = AI_DIR.parents[1] / "presentations" / "blender" / "build_workcell_explainer.py"
+        values = {
+            "grave_top_width_x": 14.0,
+            "grave_top_height_y": 14.0,
+            "reference_1_top_width_x": 14.0,
+            "reference_1_top_height_y": 14.0,
+            "grave_left_edge_to_1_left_edge_x": 19.39,
+            "grave_front_edge_minus_1_front_edge_y": 0.0,
+            "1_left_edge_to_6_left_edge_x": 95.99,
+            "6_left_edge_to_equal_left_edge_x": 114.48,
+            "housing_left_to_q_left_top_edge_x": 37.60,
+            "housing_left_to_1_left_top_edge_x": 29.21,
+            "housing_left_to_grave_left_top_edge_x": 10.12,
+            "housing_front_to_1_front_top_edge_y": 101.87,
+            "housing_front_to_q_front_top_edge_y": 82.47,
+            "shift_top_width_x": 37.76,
+            "shift_top_height_y": 14.80,
+            "housing_left_to_shift_left_top_edge_x": 10.42,
+            "housing_front_to_shift_front_top_edge_y": 44.57,
+            "left_bracket_top_width_x": 14.0,
+            "left_bracket_top_height_y": 14.0,
+            "right_bracket_top_width_x": 14.0,
+            "right_bracket_top_height_y": 14.0,
+            "backslash_top_width_x": 14.0,
+            "backslash_top_height_y": 14.0,
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            session = root / "measurements.json"
+            session.write_text(json.dumps({
+                "schema": "rocell.keyboard_physical_measurement_session.v1",
+                "status": "SUFFICIENT_FOR_SIMULATION_GEOMETRY_FIT",
+                "keyboard_identity": "PERIXX_PERIBOARD_409_SUFFIX_0103",
+                "coordinate_surface": "KEYCAP_TOP_PRESS_SURFACE",
+                "measurements": [
+                    {"sequence": index, "measurement_id": measurement_id,
+                     "value_mm": value}
+                    for index, (measurement_id, value) in enumerate(values.items(), start=1)
+                ],
+                "hardware_write_count": 0,
+                "physical_movement_count": 0,
+                "physical_authority": False,
+            }), encoding="utf-8")
+            rejection = root / "rejection.json"
+            rejection.write_text(json.dumps({
+                "schema": "rocell.photo_catalog_candidate_rejection.v1",
+                "status": "REJECTED_BY_PHYSICAL_MEASUREMENT",
+                "candidate_file_sha256": "e" * 64,
+                "active_repository_catalog_changed": False,
+            }), encoding="utf-8")
+            result = build_keyboard_target_extension_proposal(
+                catalog,
+                geometry,
+                "e" * 40,
+                measurement_session_path=session,
+                rejected_photo_candidate_path=rejection,
+            )
+            targets = {row["target_id"]: row for row in result["targets"]}
+            self.assertEqual(targets["GRAVE"]["press_point_xy_mm"], [17.12, 108.87])
+            self.assertEqual(targets["SHIFT"]["press_point_xy_mm"], [29.3, 51.97])
+            self.assertEqual(targets["SHIFT"]["safe_half_extent_mm"], [7.0, 6.4])
+            self.assertEqual(targets["SHIFT"]["coordinate_class"], "MEASURED")
+            self.assertEqual(targets["GRAVE"]["coordinate_class"], "MEASURED")
+            self.assertIn(
+                "MEASURED_HOUSING_LEFT",
+                targets["GRAVE"]["coordinate_provenance"]["x"],
+            )
+            self.assertEqual(
+                targets["LEFT_BRACKET"]["press_point_xy_mm"][0], 235.936364
+            )
+            self.assertEqual(
+                targets["RIGHT_BRACKET"]["press_point_xy_mm"][0], 255.07
+            )
+            self.assertEqual(
+                targets["BACKSLASH"]["press_point_xy_mm"][0], 274.203636
+            )
+            self.assertEqual(targets["LEFT_BRACKET"]["safe_half_extent_mm"], [6.0, 6.0])
+            self.assertEqual(
+                targets["BACKSLASH"]["coordinate_class"],
+                "MIXED_MEASURED_ANCHOR_TOPOLOGY_INFERRED",
+            )
+            self.assertTrue(all(
+                row["proposal_status"]
+                == "MEASUREMENT_DERIVED_SIMULATION_ONLY_PENDING_SHARED_REVIEW"
+                for row in targets.values()
+            ))
+            self.assertEqual(result["grave_measurement"]["status"],
+                             "MEASURED_SINGLE_READING_SIMULATION_FIT_ONLY")
+            self.assertEqual(result["physical_measurement_session"]["measurement_count"], 23)
+            self.assertEqual(len(result["existing_target_corrections"]), 22)
+            self.assertEqual(result["rejected_photo_candidate"]["status"],
+                             "REJECTED_BY_PHYSICAL_MEASUREMENT")
+            self.assertIn(
+                "MEASUREMENT_DERIVED_GEOMETRY_NOT_INSTALLED_IN_SHARED_CATALOG",
+                result["v5_5_render_gate"]["blockers"],
+            )
+            self.assertNotIn(
+                "GRAVE_DIRECT_CALIPER_MEASUREMENT_PENDING",
+                result["v5_5_render_gate"]["blockers"],
+            )
+            self.assertFalse(result["shared_catalog_install_authorized"])
+            self.assertFalse(result["physical_commissioning_gate"]["hardware_use_authorized"])
+
+            changed = json.loads(session.read_text(encoding="utf-8"))
+            changed["measurements"] = changed["measurements"][:-1]
+            session.write_text(json.dumps(changed), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "missing required rows"):
+                build_keyboard_target_extension_proposal(
+                    catalog,
+                    geometry,
+                    "f" * 40,
+                    measurement_session_path=session,
+                    rejected_photo_candidate_path=rejection,
+                )
+
+    def test_sticky_keys_virtual_replay_covers_printable_ascii(self) -> None:
+        printable_ascii = "".join(chr(value) for value in range(32, 127))
+        sequence = compile_virtual_us_sticky_keys(
+            printable_ascii,
+            commissioned_key_ids=(*US_PRINTABLE_BASE_KEY_IDS, "SHIFT"),
+        )
+        replay = replay_virtual_us_sticky_keys(
+            sequence,
+            five_shift_shortcut_disabled=True,
+            turn_off_on_two_keys_disabled=True,
+        )
+        self.assertEqual(replay["text"], printable_ascii)
+        self.assertEqual(replay["final_modifier_state"], "OFF")
+        self.assertFalse(replay["dialog_triggered"])
+        self.assertFalse(replay["sticky_keys_disabled"])
+        self.assertFalse(any(
+            left == right == "SHIFT" for left, right in zip(sequence, sequence[1:])
+        ))
+        shifted_count = sum(character.isupper() or character in '~!@#$%^&*()_+{}|:"<>?'
+                            for character in printable_ascii)
+        self.assertEqual(sequence.count("SHIFT"), shifted_count)
+
+    def test_sticky_keys_compiler_rejects_uncommissioned_catalog_keys(self) -> None:
+        catalog = json.loads(
+            (AI_DIR.parent / "config" / "nominal_target_profiles.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        keyboard = catalog["keyboard"]
+        commissioned = tuple(
+            key_id
+            for row in keyboard["rows"]
+            for key_id in row["key_ids"]
+        ) + tuple(keyboard["explicit_targets"])
+        contract = planner_capability_contract(keyboard_target_ids=commissioned)
+        self.assertEqual(contract["keyboard"]["required_base_key_count"], 48)
+        self.assertEqual(
+            contract["keyboard"]["missing_base_key_ids"],
+            ["BACKSLASH", "GRAVE", "LEFT_BRACKET", "RIGHT_BRACKET"],
+        )
+        self.assertEqual(contract["keyboard"]["missing_modifier_key_ids"], ["SHIFT"])
+        self.assertEqual(
+            compile_virtual_us_sticky_keys("a", commissioned_key_ids=commissioned),
+            ("A",),
+        )
+        with self.assertRaisesRegex(StickyKeysReplayError, "GRAVE"):
+            compile_virtual_us_sticky_keys("`", commissioned_key_ids=commissioned)
+        with self.assertRaisesRegex(StickyKeysReplayError, "SHIFT"):
+            compile_virtual_us_sticky_keys("A", commissioned_key_ids=commissioned)
+
+    def test_seeded_sticky_keys_random_string_replay_is_reproducible(self) -> None:
+        first = run_seeded_sticky_keys_replay(
+            seed=190055, string_count=5000, maximum_length=64
+        )
+        second = run_seeded_sticky_keys_replay(
+            seed=190055, string_count=5000, maximum_length=64
+        )
+        self.assertEqual(first, second)
+        self.assertEqual(first["fixed_cases"], ["AA", "!!", "aA", "A", " A"])
+        self.assertEqual(first["total_string_count"], 5005)
+        self.assertEqual(first["failures"], 0)
+
+    def test_sticky_keys_replay_rejects_lock_dialog_and_disable_risks(self) -> None:
+        with self.assertRaisesRegex(StickyKeysReplayError, "locked state"):
+            replay_virtual_us_sticky_keys(
+                ("SHIFT", "SHIFT", "A"),
+                five_shift_shortcut_disabled=True,
+                turn_off_on_two_keys_disabled=True,
+            )
+        with self.assertRaisesRegex(StickyKeysReplayError, "five-Shift shortcut"):
+            replay_virtual_us_sticky_keys(
+                ("A",),
+                five_shift_shortcut_disabled=False,
+                turn_off_on_two_keys_disabled=True,
+            )
+        with self.assertRaisesRegex(StickyKeysReplayError, "two-key disable"):
+            replay_virtual_us_sticky_keys(
+                ("A",),
+                five_shift_shortcut_disabled=True,
+                turn_off_on_two_keys_disabled=False,
+            )
 
     def test_simulated_review_and_held_out_failure_are_explicit(self) -> None:
         folder = AI_DIR / "eval"

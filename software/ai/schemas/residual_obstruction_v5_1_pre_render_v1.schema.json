@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v5_1_pre_render_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "v5_file_sha256", "v5_bundle_sha256", "preserved_v5", "gate_correction", "lighting_scope", "power_method", "scenarios", "original_plan", "recommendation", "images_generated", "training_started", "evaluation_opened", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v5_1_pre_render.v1"},
+    "scope": {"const": "SYNTHETIC_PRE_RENDER_GATE_CORRECTION_AND_POWER_NO_QUALIFICATION"},
+    "status": {"const": "BLOCKED_RENDER_PENDING_POWERED_FIXTURE_REVISION"},
+    "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "v5_file_sha256": {"$ref": "#/$defs/sha256"}, "v5_bundle_sha256": {"$ref": "#/$defs/sha256"}, "preserved_v5": {"const": true},
+    "gate_correction": {"type": "object", "required": ["maximum_pooled_all_obstruction_miss_rate", "maximum_visible_false_stop_rate", "v5_preserved_false_stop_rate", "reason"], "properties": {"maximum_pooled_all_obstruction_miss_rate": {"const": 0.02}, "maximum_visible_false_stop_rate": {"const": 0.06}, "v5_preserved_false_stop_rate": {"const": 0.10}, "reason": {"type": "string"}}},
+    "lighting_scope": {"type": "object", "required": ["status", "may_select_hardware_remedy", "may_set_runtime_reference_validity_envelope", "physical_pilot_required_before_hardware_selection"]},
+    "power_method": {"type": "object", "required": ["simulation", "trials", "seed", "power_target", "design_rates", "gate_rates", "target_auc_design", "target_auc_gate", "target_count", "visible_rows_per_target_scene", "obstructed_rows_per_target_scene", "cluster_unit"]},
+    "scenarios": {"type": "array", "minItems": 2, "maxItems": 2},
+    "original_plan": {"type": "object", "required": ["development_scene_count", "development_observations", "passes_power_target"]},
+    "recommendation": {"type": "object", "required": ["minimum_tested_scene_count", "minimum_development_observations", "status"]},
+    "images_generated": {"const": false}, "training_started": {"const": false}, "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1}, "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

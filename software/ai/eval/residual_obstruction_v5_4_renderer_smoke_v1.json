@@ -1,0 +1,109 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v5_4_renderer_smoke.v1",
+  "scope": "SYNTHETIC_TRAINING_RENDERER_SMOKE_NO_QUALIFICATION",
+  "status": "PASS_TRAINING_DEVELOPMENT_CAMPAIGN_RENDER_AUTHORIZED_EVALUATION_BLOCKED",
+  "source_commit": "cc4b7ed92640f9d6f8c8f9a45d360ab942689dfc",
+  "fixture_file_sha256": "85e69199edeafa2e6adfa9cb242313b474c943cd57e2dc6b21c8c7ecc9c8d2b3",
+  "fixture_bundle_sha256": "44c83dbee7fef8520bfdf825c94c2c34f61cf4b9d6d0db909e914c53ef6fa085",
+  "renderer_file_sha256": "74154eee63b6606e4891f39d5ef3f6ed2462f21335bbf25b482f5872eacddb0f",
+  "external_manifest_file_sha256": "af3b73bffb1c30fd5ba60788db191c20161b9f7e02ef2df769d32e3e225ff43d",
+  "external_manifest_dataset_sha256": "81ccdb1ab0882afa1c0d0535befd074c42ae995308ded248c9546805bde8693d",
+  "external_status_file_sha256": "d0a80f65d421873e000bf743684d8e236bd5b13ce5b83c91ef58c925710a21f0",
+  "metrics": {
+    "scene_count": 1,
+    "target_count": 4,
+    "appearance_count": 3,
+    "variant_count": 12,
+    "observation_count": 144,
+    "reference_count": 12,
+    "file_count": 601,
+    "unique_obstruction_asset_count": 14,
+    "unique_render_descriptor_count": 32,
+    "unique_arm_projection_mask_count": 1,
+    "nonempty_arm_projection_mask_count": 0,
+    "overlap_ranges": {
+      "adjacent_left": {
+        "minimum": 0.0,
+        "maximum": 0.0
+      },
+      "adjacent_right": {
+        "minimum": 0.0,
+        "maximum": 0.0
+      },
+      "clear": {
+        "minimum": 0.0,
+        "maximum": 0.0
+      },
+      "dark_cable_10": {
+        "minimum": 0.09963547995139732,
+        "maximum": 0.10042092603728202
+      },
+      "dark_cable_30": {
+        "minimum": 0.29765484064942876,
+        "maximum": 0.30037546933667086
+      },
+      "dark_cable_60": {
+        "minimum": 0.5929526123936817,
+        "maximum": 0.6007509386733417
+      },
+      "foreign_40": {
+        "minimum": 0.39173967459324155,
+        "maximum": 0.4016837041491281
+      },
+      "hand_30": {
+        "minimum": 0.27961515333734216,
+        "maximum": 0.293125
+      },
+      "hand_60": {
+        "minimum": 0.563125,
+        "maximum": 0.5857321652065082
+      },
+      "tool_40": {
+        "minimum": 0.423331328923632,
+        "maximum": 0.43178973717146435
+      },
+      "translucent_cable_30": {
+        "minimum": 0.29765484064942876,
+        "maximum": 0.30037546933667086
+      },
+      "translucent_cable_60": {
+        "minimum": 0.5929526123936817,
+        "maximum": 0.6007509386733417
+      }
+    }
+  },
+  "visual_audit": {
+    "reviewed_variants": [
+      "clear",
+      "adjacent_right",
+      "dark_cable_10",
+      "dark_cable_60",
+      "hand_60",
+      "foreign_40"
+    ],
+    "pair_alignment": "PASS",
+    "coverage_progression": "PASS",
+    "finding": "FAMILY_MATCHED_PROCEDURAL_GEOMETRY_PASSES_TRAINING_SMOKE_VISUAL_REVIEW_WITH_SYNTHETIC_ONLY_LIMITATION"
+  },
+  "descriptor_and_projection_audit": {
+    "render_descriptors_hash_bound": true,
+    "geometry_material_texture_fields_present": true,
+    "arm_projection_masks_hash_verified": true,
+    "arm_projection_uses_simulator_truth": false,
+    "empty_masks_expected_for_parked_pose_smoke": true
+  },
+  "campaign_render_authorized": true,
+  "evaluation_render_authorized": false,
+  "model_training_started": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "The smoke uses one training scene and four targets and is not a model-quality sample.",
+    "Procedural obstruction geometry is family-matched but remains synthetic and does not prove real appearance diversity.",
+    "All four parked-pose smoke target views have empty analytic arm masks; the artifacts validate derivation and custody, not positive arm-mask overlap behavior.",
+    "Synthetic RGB and overlap truth do not establish physical-camera transfer.",
+    "The external pixel corpus remains outside Git and evaluation identities remain unopened."
+  ],
+  "report_sha256": "000a3707b95b5219bb8418305404cd117648b5ec15f6b59b717d5c97557bade9"
+}

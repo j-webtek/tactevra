@@ -1,0 +1,45 @@
+{
+  "canonical_receipt_sha256": {
+    "four_backend_admission": "39fa5e2f3680490c9d6b378e4501fac808b7bf820f7c7893813904b36a2690f2",
+    "isaac_full": "78eb6abeb05abc89eb702c142e56d4cd4d30fa5d8b3719addfc31be3667e6a59"
+  },
+  "external_file_sha256": {
+    "failed_attempt_record": "38e13becbe9b90566830d6845c90b1827d2b89143b5b544df5d60224b2380549",
+    "four_backend_admission": "78e6ea66b17db10b522200da45a35d31657a761947160ac55bb013ed131cd71d",
+    "isaac_full_run1": "bf71b9e7e839b42c6447d052ceb6cd5f072dd57c35d3ad3404369fb03f2143b1",
+    "isaac_full_run2": "bf71b9e7e839b42c6447d052ceb6cd5f072dd57c35d3ad3404369fb03f2143b1"
+  },
+  "gates": {
+    "all_133_rows_exact_order": true,
+    "isaac_vs_schedule_reference": true,
+    "mujoco_vs_rocell": true,
+    "mujoco_warp_vs_mujoco": true
+  },
+  "hardware_write_count": 0,
+  "limitations": [
+    "meshless kinematic model and unmeasured synthetic placement/tool overlay",
+    "joint teleport comparison without dynamics, collision, contact, controller, or hardware",
+    "direct pairwise Isaac metrics are diagnostics under preexisting backend gates"
+  ],
+  "metrics": {
+    "isaac_vs_mujoco_mm": 0.00027106083166082413,
+    "isaac_vs_mujoco_warp_mm": 0.0002801399314244456,
+    "isaac_vs_rocell_mm": 0.0002710608315793465,
+    "isaac_vs_schedule_reference_mm": 0.07684842940066568
+  },
+  "physical_authority": false,
+  "physical_movement_count": 0,
+  "physics_step_count": 0,
+  "same_stack_isaac_byte_identical": true,
+  "sample_count": 133,
+  "schema": "rocell.four_backend_fk_summary.v1",
+  "scope": "SYNTHETIC_OFFLINE_TELEPORT_FK_ONLY",
+  "status": "PASS_KINEMATIC_ONLY",
+  "summary_sha256": "23a1321ec62fb9eb81b5bdaa1c42e4d541323a41fc73415e0a03a7ff125fce20",
+  "thresholds": {
+    "direct_pairwise_isaac_diagnostics": "REPORTED_WITHOUT_NEW_POST_RESULT_GATE",
+    "isaac_vs_schedule_reference_mm": 0.25,
+    "mujoco_vs_rocell_mm": 0.1,
+    "mujoco_warp_vs_mujoco_mm": 0.01
+  }
+}

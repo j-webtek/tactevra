@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v5_4_renderer_smoke_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "fixture_file_sha256", "fixture_bundle_sha256", "renderer_file_sha256", "external_manifest_file_sha256", "external_manifest_dataset_sha256", "external_status_file_sha256", "metrics", "visual_audit", "descriptor_and_projection_audit", "campaign_render_authorized", "evaluation_render_authorized", "model_training_started", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v5_4_renderer_smoke.v1"},
+    "scope": {"const": "SYNTHETIC_TRAINING_RENDERER_SMOKE_NO_QUALIFICATION"},
+    "status": {"const": "PASS_TRAINING_DEVELOPMENT_CAMPAIGN_RENDER_AUTHORIZED_EVALUATION_BLOCKED"},
+    "source_commit": {"$ref": "#/$defs/commit"},
+    "fixture_file_sha256": {"$ref": "#/$defs/sha"}, "fixture_bundle_sha256": {"$ref": "#/$defs/sha"},
+    "renderer_file_sha256": {"$ref": "#/$defs/sha"}, "external_manifest_file_sha256": {"$ref": "#/$defs/sha"},
+    "external_manifest_dataset_sha256": {"$ref": "#/$defs/sha"}, "external_status_file_sha256": {"$ref": "#/$defs/sha"},
+    "metrics": {"type": "object", "required": ["scene_count", "target_count", "appearance_count", "variant_count", "observation_count", "reference_count", "file_count", "unique_obstruction_asset_count", "unique_render_descriptor_count", "unique_arm_projection_mask_count", "nonempty_arm_projection_mask_count", "overlap_ranges"]},
+    "visual_audit": {"type": "object", "required": ["reviewed_variants", "pair_alignment", "coverage_progression", "finding"]},
+    "descriptor_and_projection_audit": {"type": "object", "required": ["render_descriptors_hash_bound", "geometry_material_texture_fields_present", "arm_projection_masks_hash_verified", "arm_projection_uses_simulator_truth", "empty_masks_expected_for_parked_pose_smoke"]},
+    "campaign_render_authorized": {"const": true}, "evaluation_render_authorized": {"const": false},
+    "model_training_started": {"const": false}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {"commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

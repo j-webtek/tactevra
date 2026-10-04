@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v2_diagnostic_v1.schema.json",
+  "title": "Residual obstruction v2 consumed-development diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "fixture_file_sha256", "fixture_bundle_sha256", "contract_file_sha256", "contract_sha256", "dataset_manifest_file_sha256", "dataset_sha256", "model_sha256", "scorecard_file_sha256", "scorecard_result_sha256", "development_count", "obstruction_count", "visible_count", "pairwise_auc", "visible_probability", "obstruction_probability", "diagnostic_thresholds", "groups", "target_separation", "findings", "checkpoint_changed", "threshold_changed", "evaluation_opened", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v2_diagnostic.v1"},
+    "scope": {"const": "CONSUMED_SYNTHETIC_DEVELOPMENT_DIAGNOSTIC_NO_QUALIFICATION"},
+    "fixture_file_sha256": {"$ref": "#/$defs/sha256"}, "fixture_bundle_sha256": {"$ref": "#/$defs/sha256"},
+    "contract_file_sha256": {"$ref": "#/$defs/sha256"}, "contract_sha256": {"$ref": "#/$defs/sha256"},
+    "dataset_manifest_file_sha256": {"$ref": "#/$defs/sha256"}, "dataset_sha256": {"$ref": "#/$defs/sha256"},
+    "model_sha256": {"$ref": "#/$defs/sha256"}, "scorecard_file_sha256": {"$ref": "#/$defs/sha256"},
+    "scorecard_result_sha256": {"$ref": "#/$defs/sha256"},
+    "development_count": {"const": 10125}, "obstruction_count": {"const": 8100}, "visible_count": {"const": 2025},
+    "pairwise_auc": {"type": "number", "minimum": 0, "maximum": 1},
+    "visible_probability": {"$ref": "#/$defs/stats"}, "obstruction_probability": {"$ref": "#/$defs/stats"},
+    "diagnostic_thresholds": {"const": [0.1, 0.2]},
+    "groups": {
+      "type": "object", "additionalProperties": false, "required": ["variant", "appearance", "view", "target"],
+      "properties": {
+        "variant": {"type": "array", "minItems": 15, "maxItems": 15, "items": {"$ref": "#/$defs/group"}},
+        "appearance": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/group"}},
+        "view": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/group"}},
+        "target": {"type": "array", "minItems": 75, "maxItems": 75, "items": {"$ref": "#/$defs/group"}}
+      }
+    },
+    "target_separation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["target_count", "locally_separable_count", "nonseparable_count", "best_margin", "worst_margin"],
+      "properties": {
+        "target_count": {"const": 75}, "locally_separable_count": {"type": "integer", "minimum": 0, "maximum": 75},
+        "nonseparable_count": {"type": "integer", "minimum": 0, "maximum": 75},
+        "best_margin": {"type": "number"}, "worst_margin": {"type": "number"}
+      }
+    },
+    "findings": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/finding"}},
+    "checkpoint_changed": {"const": false}, "threshold_changed": {"const": false}, "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "stats": {"type": "object", "additionalProperties": false, "required": ["minimum", "maximum", "mean", "median"], "properties": {"minimum": {"type": "number"}, "maximum": {"type": "number"}, "mean": {"type": "number"}, "median": {"type": "number"}}},
+    "decision": {"type": "object", "additionalProperties": false, "required": ["threshold", "missed_obstructions", "obstruction_count", "visible_false_stops", "visible_count"], "properties": {"threshold": {"enum": [0.1, 0.2]}, "missed_obstructions": {"type": "integer", "minimum": 0}, "obstruction_count": {"type": "integer", "minimum": 0}, "visible_false_stops": {"type": "integer", "minimum": 0}, "visible_count": {"type": "integer", "minimum": 0}}},
+    "group": {"type": "object", "additionalProperties": false, "required": ["group_id", "count", "visible_probability", "obstruction_probability", "separation_margin", "threshold_decisions"], "properties": {"group_id": {"type": "string", "minLength": 1}, "count": {"type": "integer", "minimum": 1}, "visible_probability": {"oneOf": [{"$ref": "#/$defs/stats"}, {"type": "null"}]}, "obstruction_probability": {"oneOf": [{"$ref": "#/$defs/stats"}, {"type": "null"}]}, "separation_margin": {"type": ["number", "null"]}, "threshold_decisions": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/decision"}}}},
+    "finding": {"type": "object", "additionalProperties": false, "required": ["finding_id", "evidence", "successor_dependency"], "properties": {"finding_id": {"type": "string", "minLength": 1}, "evidence": {"type": "string", "minLength": 1}, "successor_dependency": {"type": "string", "minLength": 1}}}
+  }
+}

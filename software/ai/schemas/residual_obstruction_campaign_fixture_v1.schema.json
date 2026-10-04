@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_campaign_fixture_v1.schema.json",
+  "title": "Residual obstruction pretraining campaign fixture v1",
+  "type": "object",
+  "required": ["schema", "scope", "source", "split_policy", "observations", "training_plan", "development_gate", "evaluation_group_present", "images_generated", "training_started", "hardware_writes", "physical_movements", "physical_authority", "limitations", "bundle_sha256"],
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "point": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}], "items": false},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$"},
+    "counts": {
+      "type": "object", "required": ["total", "visible", "abstain"], "additionalProperties": false,
+      "properties": {"total": {"type": "integer", "minimum": 1}, "visible": {"type": "integer", "minimum": 1}, "abstain": {"type": "integer", "minimum": 1}}
+    }
+  },
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_campaign_fixture.v1"},
+    "scope": {"const": "SYNTHETIC_PRETRAINING_FREEZE_NO_QUALIFICATION"},
+    "source": {
+      "type": "object", "required": ["manifest_file_sha256", "corpus_sha256", "generator_sha256", "target_catalog_sha256", "camera_state"], "additionalProperties": false,
+      "properties": {
+        "manifest_file_sha256": {"$ref": "#/$defs/sha256"}, "corpus_sha256": {"$ref": "#/$defs/sha256"},
+        "generator_sha256": {"$ref": "#/$defs/sha256"}, "target_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "camera_state": {"type": "string", "minLength": 1}
+      }
+    },
+    "split_policy": {
+      "type": "object", "required": ["training_pose_ids", "development_pose_ids", "evaluation_pose_ids", "pose_ids_disjoint", "target_count_per_split", "variants", "split_counts"], "additionalProperties": false,
+      "properties": {
+        "training_pose_ids": {"const": ["hover_t"]}, "development_pose_ids": {"const": ["hover_e"]},
+        "evaluation_pose_ids": {"const": []}, "pose_ids_disjoint": {"const": true},
+        "target_count_per_split": {"type": "integer", "minimum": 1},
+        "variants": {"type": "array", "minItems": 8, "maxItems": 8, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "split_counts": {
+          "type": "object", "required": ["training", "development"], "additionalProperties": false,
+          "properties": {"training": {"$ref": "#/$defs/counts"}, "development": {"$ref": "#/$defs/counts"}}
+        }
+      }
+    },
+    "observations": {
+      "type": "array", "minItems": 1, "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "required": ["observation_id", "split", "source_pose_id", "base_image_path", "base_image_sha256", "device", "target_id", "target_center_px", "target_safe_polygon_px", "crop_size_px", "crop_margin_fraction", "variant_id", "residual_obstruction", "expected_decision", "render_spec", "truth_mask_used_as_model_input", "runtime_geometry_mask_used_as_model_input"],
+        "additionalProperties": false,
+        "properties": {
+          "observation_id": {"$ref": "#/$defs/id"}, "split": {"enum": ["training", "development"]},
+          "source_pose_id": {"enum": ["hover_t", "hover_e"]}, "base_image_path": {"type": "string", "minLength": 1},
+          "base_image_sha256": {"$ref": "#/$defs/sha256"}, "device": {"enum": ["keyboard", "phone"]},
+          "target_id": {"$ref": "#/$defs/id"}, "target_center_px": {"$ref": "#/$defs/point"},
+          "target_safe_polygon_px": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/point"}},
+          "crop_size_px": {"const": [96, 96]}, "crop_margin_fraction": {"const": 1.5},
+          "variant_id": {"$ref": "#/$defs/id"},
+          "residual_obstruction": {"enum": ["NONE", "CABLE", "TOOL", "HAND", "FOREIGN_OBJECT", "GLARE", "IMAGE_DEGRADED"]},
+          "expected_decision": {"enum": ["VISIBLE", "ABSTAIN"]},
+          "render_spec": {"type": "object", "minProperties": 2},
+          "truth_mask_used_as_model_input": {"const": false}, "runtime_geometry_mask_used_as_model_input": {"const": false}
+        }
+      }
+    },
+    "training_plan": {
+      "type": "object", "required": ["algorithm", "input_size_px", "input_channels", "convolution_channels", "epochs", "batch_size", "learning_rate", "weight_decay", "positive_class_weight", "seed", "threshold_candidates"], "additionalProperties": false,
+      "properties": {
+        "algorithm": {"const": "target_crop_residual_cnn_v1"}, "input_size_px": {"const": [96, 96]},
+        "input_channels": {"const": ["RGB", "TARGET_ID_EMBEDDING"]}, "convolution_channels": {"const": [16, 32, 64]},
+        "epochs": {"const": 12}, "batch_size": {"const": 64}, "learning_rate": {"const": 0.0005},
+        "weight_decay": {"const": 0.0001}, "positive_class_weight": {"const": 1.0}, "seed": {"const": 19017},
+        "threshold_candidates": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1}}
+      }
+    },
+    "development_gate": {
+      "type": "object", "required": ["missed_obstruction_rate_upper", "visible_false_stop_rate_upper", "confidence_level", "target_cluster_bootstrap_resamples", "target_cluster_bootstrap_seed", "point_and_cluster_upper_bounds_must_pass", "evaluation_must_remain_unopened"], "additionalProperties": false,
+      "properties": {
+        "missed_obstruction_rate_upper": {"const": 0.02}, "visible_false_stop_rate_upper": {"const": 0.1},
+        "confidence_level": {"const": 0.95}, "target_cluster_bootstrap_resamples": {"const": 2000},
+        "target_cluster_bootstrap_seed": {"const": 19017}, "point_and_cluster_upper_bounds_must_pass": {"const": true},
+        "evaluation_must_remain_unopened": {"const": true}
+      }
+    },
+    "evaluation_group_present": {"const": false}, "images_generated": {"const": false}, "training_started": {"const": false},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "bundle_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}

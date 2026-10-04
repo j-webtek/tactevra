@@ -84,6 +84,16 @@ The adapter accepts only canonical runtime records. It must not reinterpret
 English, identify keys from their names, solve a different route silently, or
 infer missing calibration. Missing or contradictory input fails closed.
 
+### Relationship to MuJoCo Warp
+
+Isaac remains the higher-fidelity visual reference. The planned
+[MuJoCo Warp integration](MUJOCO_WARP_INTEGRATION_PLAN.md) is a separate
+high-throughput secondary oracle that consumes the same admitted schedule.
+MuJoCo Warp may accelerate batched geometry, placement, overflow, and later
+contact-sensitivity work only after paired parity gates pass. Neither simulator
+may promote the other, and disagreement is retained as evidence rather than
+resolved by silently preferring one backend.
+
 ## Compute and execution assumption
 
 The planned integration runner may use a workstation with two RTX 3090 GPUs.

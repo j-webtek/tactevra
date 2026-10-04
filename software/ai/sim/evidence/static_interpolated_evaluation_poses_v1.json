@@ -1,0 +1,193 @@
+{
+  "bundle_sha256": "93b77619af1bb90a3261b36cdbd7a209c3ac5bddf3b8a26b05fa2ae2b4625985",
+  "controller_commands": [],
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "interpolated states are static perception fixtures, not a motion trajectory",
+    "no dynamics, collision, clearance, or reachability claim is made",
+    "source and generated coordinates are synthetic and unmeasured",
+    "the fixture cannot qualify deployment or physical execution"
+  ],
+  "method": "linear_joint_interpolation_at_predeclared_rational_path_fractions",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "sample_count": 6,
+  "samples": [
+    {
+      "action_index": null,
+      "expected_tool_tip_board_mm": [
+        259.98328173374614,
+        68.84829721362229,
+        52.01857585139319
+      ],
+      "interpolation_alpha": 0.8947368421052632,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.0018444468986180673,
+        "link1_to_link2": 0.7938885753075042,
+        "link2_to_link3": 1.359318200660819,
+        "link3_to_link4": -0.5824068690569921,
+        "link4_to_link5": -1.3237475850579074e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "sequence": 1001,
+      "source_interval": [
+        13,
+        14
+      ],
+      "source_path_fraction": [
+        2,
+        19
+      ],
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "expected_tool_tip_board_mm": [
+        216.55,
+        154.0,
+        22.315789473684212
+      ],
+      "interpolation_alpha": 0.7368421052631579,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.15741494374489703,
+        "link1_to_link2": 0.698020062294035,
+        "link2_to_link3": 1.9415237506058112,
+        "link3_to_link4": -1.068743813627456,
+        "link4_to_link5": 3.6522001101957124e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "sequence": 1002,
+      "source_interval": [
+        34,
+        35
+      ],
+      "source_path_fraction": [
+        5,
+        19
+      ],
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "expected_tool_tip_board_mm": [
+        140.87401315789475,
+        183.01315789473682,
+        26.0
+      ],
+      "interpolation_alpha": 0.5789473684210527,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3485984284973015,
+        "link1_to_link2": 0.7111238901657155,
+        "link2_to_link3": 1.8480536254837383,
+        "link3_to_link4": -0.988377515660352,
+        "link4_to_link5": 9.811410879337788e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "sequence": 1003,
+      "source_interval": [
+        55,
+        56
+      ],
+      "source_path_fraction": [
+        8,
+        19
+      ],
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "expected_tool_tip_board_mm": [
+        159.95761772853186,
+        177.0650969529086,
+        26.0
+      ],
+      "interpolation_alpha": 0.42105263157894735,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.3032623024212502,
+        "link1_to_link2": 0.6982423948430394,
+        "link2_to_link3": 1.8901344670187674,
+        "link3_to_link4": -1.0175768618486223,
+        "link4_to_link5": 3.811041456403758e-10
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "sequence": 1004,
+      "source_interval": [
+        76,
+        77
+      ],
+      "source_path_fraction": [
+        11,
+        19
+      ],
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "expected_tool_tip_board_mm": [
+        256.59916897506923,
+        142.51108033240996,
+        26.0
+      ],
+      "interpolation_alpha": 0.2631578947368421,
+      "joint_positions_rad": {
+        "base_link_to_link1": -0.056643048575267044,
+        "link1_to_link2": 0.6762551000892905,
+        "link2_to_link3": 1.9645609354985194,
+        "link3_to_link4": -1.0700160340202036,
+        "link4_to_link5": 4.231535204423809e-12
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "sequence": 1005,
+      "source_interval": [
+        97,
+        98
+      ],
+      "source_path_fraction": [
+        14,
+        19
+      ],
+      "target_id": null
+    },
+    {
+      "action_index": null,
+      "expected_tool_tip_board_mm": [
+        286.50058479532163,
+        73.29824561403508,
+        47.356725146198826
+      ],
+      "interpolation_alpha": 0.10526315789473684,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.05027751452590212,
+        "link1_to_link2": 0.7682624978438395,
+        "link2_to_link3": 1.465667356689165,
+        "link3_to_link4": -0.6631299847919185,
+        "link4_to_link5": -2.3537378510484685e-11
+      },
+      "phase": "STATIC_INTERPOLATED_POSE",
+      "phase_endpoint": false,
+      "sequence": 1006,
+      "source_interval": [
+        118,
+        119
+      ],
+      "source_path_fraction": [
+        17,
+        19
+      ],
+      "target_id": null
+    }
+  ],
+  "schema": "tactevra.ai_static_interpolated_pose_fixture.v1",
+  "scope": "SYNTHETIC_STATIC_PERCEPTION_RENDER_ONLY",
+  "source": {
+    "sample_count": 133,
+    "schedule_bundle_sha256": "52e8e1977cc88bc4d80b1664ccaaec5b4a2d4286c744bf74655f3d683577d71a",
+    "schedule_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42"
+  }
+}

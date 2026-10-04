@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v4_2_admission_v1.schema.json",
+  "type": "object",
+  "required": ["schema", "status", "campaign_admitted", "fixture_file_sha256", "fixture_bundle_sha256", "manifest_count", "manifests", "verified_observation_count", "unique_observation_rgb_count", "verified_reference_count", "expected_reference_count", "verified_by_split", "expected_by_split", "missing_by_split", "evaluation_observation_count", "training_started", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v4_2_admission.v1"},
+    "status": {"enum": ["PASS", "PARTIAL"]},
+    "campaign_admitted": {"type": "boolean"},
+    "fixture_file_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fixture_bundle_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "manifest_count": {"type": "integer", "minimum": 1},
+    "manifests": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "verified_observation_count": {"type": "integer", "minimum": 1},
+    "unique_observation_rgb_count": {"type": "integer", "minimum": 1},
+    "verified_reference_count": {"type": "integer", "minimum": 1},
+    "expected_reference_count": {"const": 1500},
+    "verified_by_split": {"$ref": "#/$defs/splitCounts"},
+    "expected_by_split": {"$ref": "#/$defs/splitCounts"},
+    "missing_by_split": {"$ref": "#/$defs/splitCounts"},
+    "evaluation_observation_count": {"const": 0},
+    "training_started": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "splitCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["training", "development"],
+      "properties": {
+        "training": {"type": "integer", "minimum": 0},
+        "development": {"type": "integer", "minimum": 0}
+      }
+    }
+  },
+  "additionalProperties": false
+}

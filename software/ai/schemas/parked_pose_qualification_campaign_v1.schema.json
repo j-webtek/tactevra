@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/parked_pose_qualification_campaign_v1.schema.json",
+  "title": "Parked pose observation qualification campaign v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "campaign_id", "source_commit", "domain_id", "park_pose_identity_sha256", "camera_calibration_sha256", "camera_to_board_sha256", "robot_visual_mesh_sha256", "target_catalog_sha256", "projection_qualification_sha256", "residual_model_sha256", "fusion_policy_sha256", "repeatability_qualification_sha256", "charuco_drift_qualification_sha256", "requirements", "synthetic_observations", "physical_cycles", "collection_effects", "controller_authority", "hardware_writes", "physical_movements", "limitations", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.ai_parked_pose_qualification_campaign.v1"},
+    "scope": {"const": "SUPERVISED_PARKED_OBSERVATION_EVIDENCE_ONLY"},
+    "campaign_id": {"$ref": "#/$defs/id"}, "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "domain_id": {"$ref": "#/$defs/id"},
+    "park_pose_identity_sha256": {"$ref": "#/$defs/sha256"}, "camera_calibration_sha256": {"$ref": "#/$defs/sha256"},
+    "camera_to_board_sha256": {"$ref": "#/$defs/sha256"}, "robot_visual_mesh_sha256": {"$ref": "#/$defs/sha256"},
+    "target_catalog_sha256": {"$ref": "#/$defs/sha256"}, "projection_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "residual_model_sha256": {"$ref": "#/$defs/sha256"}, "fusion_policy_sha256": {"$ref": "#/$defs/sha256"},
+    "repeatability_qualification_sha256": {"$ref": "#/$defs/sha256"}, "charuco_drift_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "requirements": {
+      "type": "object", "additionalProperties": false,
+      "required": ["minimum_synthetic_observations", "required_lighting_variant_ids", "required_calibration_perturbation_ids", "required_synthetic_residual_obstructions", "minimum_physical_completed_cycles", "minimum_physical_sessions", "required_physical_residual_obstructions", "required_physical_lighting_condition_ids", "maximum_park_repeatability_mm", "maximum_charuco_drift_mm"],
+      "properties": {
+        "minimum_synthetic_observations": {"type": "integer", "minimum": 1},
+        "required_lighting_variant_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "required_calibration_perturbation_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "required_synthetic_residual_obstructions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/obstructionNonzero"}},
+        "minimum_physical_completed_cycles": {"const": 30}, "minimum_physical_sessions": {"type": "integer", "minimum": 3},
+        "required_physical_residual_obstructions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/obstructionNonzero"}},
+        "required_physical_lighting_condition_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "maximum_park_repeatability_mm": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+        "maximum_charuco_drift_mm": {"type": "number", "exclusiveMinimum": 0, "maximum": 100}
+      }
+    },
+    "synthetic_observations": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/synthetic"}},
+    "physical_cycles": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/physical"}},
+    "collection_effects": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hardware_write_count", "physical_movement_count", "authorization_evidence_sha256"],
+      "properties": {
+        "hardware_write_count": {"type": "integer", "minimum": 0},
+        "physical_movement_count": {"type": "integer", "minimum": 0},
+        "authorization_evidence_sha256": {"oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+      }
+    },
+    "controller_authority": {"const": false}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "campaign_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "decision": {"enum": ["VISIBLE", "ABSTAIN"]},
+    "obstruction": {"enum": ["NONE", "CABLE", "TOOL", "HAND", "FOREIGN_OBJECT", "GLARE", "IMAGE_DEGRADED"]},
+    "obstructionNonzero": {"enum": ["CABLE", "TOOL", "HAND", "FOREIGN_OBJECT", "GLARE", "IMAGE_DEGRADED"]},
+    "common": {
+      "type": "object",
+      "required": ["observation_id", "image_sha256", "known_self_occlusion", "residual_obstruction", "geometric_decision", "residual_decision", "fused_decision"],
+      "properties": {
+        "observation_id": {"$ref": "#/$defs/id"}, "image_sha256": {"$ref": "#/$defs/sha256"},
+        "known_self_occlusion": {"type": "boolean"}, "residual_obstruction": {"$ref": "#/$defs/obstruction"},
+        "geometric_decision": {"$ref": "#/$defs/decision"}, "residual_decision": {"$ref": "#/$defs/decision"},
+        "fused_decision": {"$ref": "#/$defs/decision"}
+      }
+    },
+    "synthetic": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["observation_id", "image_sha256", "known_self_occlusion", "residual_obstruction", "geometric_decision", "residual_decision", "fused_decision", "lighting_variant_id", "calibration_perturbation_id", "runtime_like_projection_sha256", "truth_mask_label_sha256", "truth_mask_used_as_model_input"],
+          "properties": {
+            "observation_id": {"$ref": "#/$defs/id"}, "image_sha256": {"$ref": "#/$defs/sha256"},
+            "known_self_occlusion": {"type": "boolean"}, "residual_obstruction": {"$ref": "#/$defs/obstruction"},
+            "geometric_decision": {"$ref": "#/$defs/decision"}, "residual_decision": {"$ref": "#/$defs/decision"}, "fused_decision": {"$ref": "#/$defs/decision"},
+            "lighting_variant_id": {"$ref": "#/$defs/id"}, "calibration_perturbation_id": {"$ref": "#/$defs/id"},
+            "runtime_like_projection_sha256": {"$ref": "#/$defs/sha256"}, "truth_mask_label_sha256": {"$ref": "#/$defs/sha256"},
+            "truth_mask_used_as_model_input": {"const": false}
+          }
+        }
+      ]
+    },
+    "physical": {
+      "allOf": [
+        {"$ref": "#/$defs/common"},
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["observation_id", "image_sha256", "known_self_occlusion", "residual_obstruction", "geometric_decision", "residual_decision", "fused_decision", "session_id", "lighting_condition_id", "park_completed", "settled_before_capture", "exposure_binding_sha256", "measured_feedback_bracket_sha256", "projection_evidence_sha256", "residual_observation_sha256", "charuco_capture_sha256", "park_repeatability_mm", "park_repeatability_evidence_sha256", "charuco_drift_mm", "charuco_drift_evidence_sha256"],
+          "properties": {
+            "observation_id": {"$ref": "#/$defs/id"}, "image_sha256": {"$ref": "#/$defs/sha256"},
+            "known_self_occlusion": {"type": "boolean"}, "residual_obstruction": {"$ref": "#/$defs/obstruction"},
+            "geometric_decision": {"$ref": "#/$defs/decision"}, "residual_decision": {"$ref": "#/$defs/decision"}, "fused_decision": {"$ref": "#/$defs/decision"},
+            "session_id": {"$ref": "#/$defs/id"}, "lighting_condition_id": {"$ref": "#/$defs/id"},
+            "park_completed": {"type": "boolean"}, "settled_before_capture": {"type": "boolean"},
+            "exposure_binding_sha256": {"$ref": "#/$defs/sha256"}, "measured_feedback_bracket_sha256": {"$ref": "#/$defs/sha256"},
+            "projection_evidence_sha256": {"$ref": "#/$defs/sha256"}, "residual_observation_sha256": {"$ref": "#/$defs/sha256"},
+            "charuco_capture_sha256": {"$ref": "#/$defs/sha256"},
+            "park_repeatability_mm": {"type": "number", "minimum": 0, "maximum": 1000}, "park_repeatability_evidence_sha256": {"$ref": "#/$defs/sha256"},
+            "charuco_drift_mm": {"type": "number", "minimum": 0, "maximum": 1000}, "charuco_drift_evidence_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      ]
+    }
+  }
+}

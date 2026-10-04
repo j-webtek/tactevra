@@ -1,0 +1,1315 @@
+{
+  "adjacency_scope_summary": {
+    "ADJACENT": {
+      "AGREEMENT_COLLISION": 54,
+      "AGREEMENT_FREE": 49,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 191
+    },
+    "NONADJACENT": {
+      "AGREEMENT_COLLISION": 3,
+      "AGREEMENT_FREE": 731,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 1
+    }
+  },
+  "blockers": [
+    "CANDIDATE_FALSE_POSITIVE_COLLISIONS_OBSERVED",
+    "NONADJACENT_FALSE_POSITIVE_OBSERVED",
+    "FINITE_CORPUS_IS_NOT_CONTINUOUS_WORKSPACE_COVERAGE",
+    "SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED",
+    "NON_WATERTIGHT_RAW_MESHES",
+    "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "candidate_profile_installable": false,
+  "clearance_replay_admissible": false,
+  "collision_query_admissible": false,
+  "evidence_class": "OFFLINE_GOVERNED_LIMIT_COLLISION_DIFFERENTIAL_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "finite_deterministic_samples_do_not_cover_continuous_joint_space",
+    "adjacent_contacts_are_reported_without_policy_exclusion",
+    "raw_non_watertight_meshes_are_supported_by_fcl_but_not_repaired",
+    "no_tool_camera_support_environment_clearance_or_contact_dynamics",
+    "no_installed_profile_controller_hardware_or_physical_qualification"
+  ],
+  "method": {
+    "adjacent_pairs_are_measured_not_excluded": true,
+    "collision_backend": "python-fcl via trimesh CollisionManager",
+    "halton_bases": [
+      2,
+      3,
+      5,
+      7,
+      11,
+      13
+    ],
+    "halton_sample_count": 32,
+    "joint_limits": [
+      {
+        "joint_name": "base_link_to_link1",
+        "lower_rad": -3.1416,
+        "upper_rad": 3.1416
+      },
+      {
+        "joint_name": "link1_to_link2",
+        "lower_rad": -1.5708,
+        "upper_rad": 1.5708
+      },
+      {
+        "joint_name": "link2_to_link3",
+        "lower_rad": -1.0,
+        "upper_rad": 2.95
+      },
+      {
+        "joint_name": "link3_to_link4",
+        "lower_rad": -1.5708,
+        "upper_rad": 1.5708
+      },
+      {
+        "joint_name": "link4_to_link5",
+        "lower_rad": -3.1416,
+        "upper_rad": 3.1416
+      },
+      {
+        "joint_name": "link5_to_gripper_link",
+        "lower_rad": 0.0,
+        "upper_rad": 1.5
+      }
+    ],
+    "pose_families": [
+      "GOVERNED_ANCHOR",
+      "LIMIT_ANCHOR",
+      "SINGLE_JOINT_LIMIT",
+      "HALTON_INTERIOR"
+    ]
+  },
+  "pair_exclusions_admissible": false,
+  "pair_summary": [
+    {
+      "body_pair": [
+        "base_link",
+        "link1"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 49,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": true,
+      "minimum_candidate_box_signed_distance_mm": -4e-06,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link2"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 32.005638,
+      "minimum_raw_mesh_signed_distance_mm": 34.948688
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link3"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 26.995907,
+      "minimum_raw_mesh_signed_distance_mm": 34.870661
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link4"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 8.432011,
+      "minimum_raw_mesh_signed_distance_mm": 39.23697
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 9.491677,
+      "minimum_raw_mesh_signed_distance_mm": 10.544489
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 7.694072,
+      "minimum_raw_mesh_signed_distance_mm": 7.694098
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link2"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 49
+      },
+      "kinematically_adjacent": true,
+      "minimum_candidate_box_signed_distance_mm": -28.641044,
+      "minimum_raw_mesh_signed_distance_mm": 0.135834
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link3"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 55.763873,
+      "minimum_raw_mesh_signed_distance_mm": 55.763896
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link4"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 29.38184,
+      "minimum_raw_mesh_signed_distance_mm": 38.690981
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 4.294253,
+      "minimum_raw_mesh_signed_distance_mm": 23.019696
+    },
+    {
+      "body_pair": [
+        "link1",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 48,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": -35.051498,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link3"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 49
+      },
+      "kinematically_adjacent": true,
+      "minimum_candidate_box_signed_distance_mm": -24.513627,
+      "minimum_raw_mesh_signed_distance_mm": 0.610001
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link4"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 48,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": -10.196232,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 48,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": -21.608616,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link2",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 48,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 1
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": -13.915923,
+      "minimum_raw_mesh_signed_distance_mm": 13.607432
+    },
+    {
+      "body_pair": [
+        "link3",
+        "link4"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 5,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 44
+      },
+      "kinematically_adjacent": true,
+      "minimum_candidate_box_signed_distance_mm": -25.259442,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link3",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 36.937687,
+      "minimum_raw_mesh_signed_distance_mm": 36.937693
+    },
+    {
+      "body_pair": [
+        "link3",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 71.153536,
+      "minimum_raw_mesh_signed_distance_mm": 78.590082
+    },
+    {
+      "body_pair": [
+        "link4",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": true,
+      "minimum_candidate_box_signed_distance_mm": 0.603777,
+      "minimum_raw_mesh_signed_distance_mm": 0.60385
+    },
+    {
+      "body_pair": [
+        "link4",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "kinematically_adjacent": false,
+      "minimum_candidate_box_signed_distance_mm": 34.73336,
+      "minimum_raw_mesh_signed_distance_mm": 39.39208
+    },
+    {
+      "body_pair": [
+        "link5",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 49
+      },
+      "kinematically_adjacent": true,
+      "minimum_candidate_box_signed_distance_mm": -30.192366,
+      "minimum_raw_mesh_signed_distance_mm": 0.297517
+    }
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "pose_count": 49,
+  "pose_results": [
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "GOVERNED_ANCHOR",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "zero"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "GOVERNED_ANCHOR",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        1.570796326795,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "home"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "GOVERNED_ANCHOR",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        2.618,
+        -1.0472,
+        0.0,
+        0.0
+      ],
+      "pose_name": "ready"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "LIMIT_ANCHOR",
+      "joint_positions_rad": [
+        -3.1416,
+        -1.5708,
+        -1.0,
+        -1.5708,
+        -3.1416,
+        0.0
+      ],
+      "pose_name": "all_lower"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 3,
+        "AGREEMENT_FREE": 14,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "LIMIT_ANCHOR",
+      "joint_positions_rad": [
+        3.1416,
+        1.5708,
+        2.95,
+        1.5708,
+        3.1416,
+        1.5
+      ],
+      "pose_name": "all_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "LIMIT_ANCHOR",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.975,
+        0.0,
+        0.0,
+        0.75
+      ],
+      "pose_name": "all_midpoint"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        -3.1416,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_1_lower"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        3.1416,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_1_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        -1.5708,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_2_lower"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        1.5708,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_2_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_3_lower"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        2.95,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_3_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        -1.5708,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_4_lower"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        1.5708,
+        0.0,
+        0.0
+      ],
+      "pose_name": "joint_4_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -3.1416,
+        0.0
+      ],
+      "pose_name": "joint_5_lower"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        3.1416,
+        0.0
+      ],
+      "pose_name": "joint_5_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "SINGLE_JOINT_LIMIT",
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.5
+      ],
+      "pose_name": "joint_6_upper"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        0.0,
+        -0.5236,
+        -0.21,
+        -1.122,
+        -2.5704,
+        0.115384615385
+      ],
+      "pose_name": "halton_001"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -1.5708,
+        0.5236,
+        0.58,
+        -0.6732,
+        -1.9992,
+        0.230769230769
+      ],
+      "pose_name": "halton_002"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        1.5708,
+        -1.221733333333,
+        1.37,
+        -0.2244,
+        -1.428,
+        0.346153846154
+      ],
+      "pose_name": "halton_003"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -2.3562,
+        -0.174533333333,
+        2.16,
+        0.2244,
+        -0.8568,
+        0.461538461538
+      ],
+      "pose_name": "halton_004"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        0.7854,
+        0.872666666667,
+        -0.842,
+        0.6732,
+        -0.2856,
+        0.576923076923
+      ],
+      "pose_name": "halton_005"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -0.7854,
+        -0.872666666667,
+        -0.052,
+        1.122,
+        0.2856,
+        0.692307692308
+      ],
+      "pose_name": "halton_006"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        2.3562,
+        0.174533333333,
+        0.738,
+        -1.506685714286,
+        0.8568,
+        0.807692307692
+      ],
+      "pose_name": "halton_007"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -2.7489,
+        1.221733333333,
+        1.528,
+        -1.057885714286,
+        1.428,
+        0.923076923077
+      ],
+      "pose_name": "halton_008"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        0.3927,
+        -1.454444444444,
+        2.318,
+        -0.609085714286,
+        1.9992,
+        1.038461538462
+      ],
+      "pose_name": "halton_009"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -1.1781,
+        -0.407244444444,
+        -0.684,
+        -0.160285714286,
+        2.5704,
+        1.153846153846
+      ],
+      "pose_name": "halton_010"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        1.9635,
+        0.639955555556,
+        0.106,
+        0.288514285714,
+        -3.089672727273,
+        1.269230769231
+      ],
+      "pose_name": "halton_011"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -1.9635,
+        -1.105377777778,
+        0.896,
+        0.737314285714,
+        -2.518472727273,
+        1.384615384615
+      ],
+      "pose_name": "halton_012"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        1.1781,
+        -0.058177777778,
+        1.686,
+        1.186114285714,
+        -1.947272727273,
+        0.008875739645
+      ],
+      "pose_name": "halton_013"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -0.3927,
+        0.989022222222,
+        2.476,
+        -1.442571428571,
+        -1.376072727273,
+        0.12426035503
+      ],
+      "pose_name": "halton_014"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 2,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 3
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        2.7489,
+        -0.756311111111,
+        -0.526,
+        -0.993771428571,
+        -0.804872727273,
+        0.239644970414
+      ],
+      "pose_name": "halton_015"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -2.94525,
+        0.290888888889,
+        0.264,
+        -0.544971428571,
+        -0.233672727273,
+        0.355029585799
+      ],
+      "pose_name": "halton_016"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        0.19635,
+        1.338088888889,
+        1.054,
+        -0.096171428571,
+        0.337527272727,
+        0.470414201183
+      ],
+      "pose_name": "halton_017"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -1.37445,
+        -1.338088888889,
+        1.844,
+        0.352628571429,
+        0.908727272727,
+        0.585798816568
+      ],
+      "pose_name": "halton_018"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 3,
+        "AGREEMENT_FREE": 14,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        1.76715,
+        -0.290888888889,
+        2.634,
+        0.801428571429,
+        1.479927272727,
+        0.701183431953
+      ],
+      "pose_name": "halton_019"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -2.15985,
+        0.756311111111,
+        -0.368,
+        1.250228571429,
+        2.051127272727,
+        0.816568047337
+      ],
+      "pose_name": "halton_020"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        0.98175,
+        -0.989022222222,
+        0.422,
+        -1.378457142857,
+        2.622327272727,
+        0.931952662722
+      ],
+      "pose_name": "halton_021"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 2,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 3
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -0.58905,
+        0.058177777778,
+        1.212,
+        -0.929657142857,
+        -3.037745454545,
+        1.047337278107
+      ],
+      "pose_name": "halton_022"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        2.55255,
+        1.105377777778,
+        2.002,
+        -0.480857142857,
+        -2.466545454545,
+        1.162721893491
+      ],
+      "pose_name": "halton_023"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -2.55255,
+        -0.639955555556,
+        2.792,
+        -0.032057142857,
+        -1.895345454545,
+        1.278106508876
+      ],
+      "pose_name": "halton_024"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        0.58905,
+        0.407244444444,
+        -0.9684,
+        0.416742857143,
+        -1.324145454545,
+        1.39349112426
+      ],
+      "pose_name": "halton_025"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 2,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 3
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -0.98175,
+        1.454444444444,
+        -0.1784,
+        0.865542857143,
+        -0.752945454545,
+        0.01775147929
+      ],
+      "pose_name": "halton_026"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        2.15985,
+        -1.532014814815,
+        0.6116,
+        1.314342857143,
+        -0.181745454545,
+        0.133136094675
+      ],
+      "pose_name": "halton_027"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -1.76715,
+        -0.484814814815,
+        1.4016,
+        -1.314342857143,
+        0.389454545455,
+        0.248520710059
+      ],
+      "pose_name": "halton_028"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 2,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 3
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        1.37445,
+        0.562385185185,
+        2.1916,
+        -0.865542857143,
+        0.960654545455,
+        0.363905325444
+      ],
+      "pose_name": "halton_029"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -0.19635,
+        -1.182948148148,
+        -0.8104,
+        -0.416742857143,
+        1.531854545455,
+        0.479289940828
+      ],
+      "pose_name": "halton_030"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        2.94525,
+        -0.135748148148,
+        -0.0204,
+        0.032057142857,
+        2.103054545455,
+        0.594674556213
+      ],
+      "pose_name": "halton_031"
+    },
+    {
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 16,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 4
+      },
+      "family": "HALTON_INTERIOR",
+      "joint_positions_rad": [
+        -3.043425,
+        0.911451851852,
+        0.7696,
+        0.480857142857,
+        2.674254545455,
+        0.710059171598
+      ],
+      "pose_name": "halton_032"
+    }
+  ],
+  "receipt_sha256": "72635bbb2712676cf33973d50efc4394d642b81077822f1188140f9503a957fd",
+  "schema": "tactevra.isaac_sim_collision_joint_space_summary.v1",
+  "source_bindings": {
+    "detailed_receipt_file_sha256": "9a33d753335f4156cd25fcee21eeecd71fd8c684ec8585bb7ab066f21be7bc05",
+    "detailed_receipt_sha256": "04aaee95e298cca7b09d9873197dddc669f07beec92bcf5f6f093019fb10e746",
+    "governed_urdf_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "mesh_receipt_sha256": "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954",
+    "python_fcl_version": "0.7.0.11",
+    "python_fcl_wheel_sha256": "63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f",
+    "reduction_receipt_sha256": "68f0aa41c4f46e12b563285f5a48b65f3d0457a7939a1bf537dec93b11740bcb",
+    "trimesh_version": "4.11.1",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
+  },
+  "summary": {
+    "AGREEMENT_COLLISION": 57,
+    "AGREEMENT_FREE": 780,
+    "CANDIDATE_FALSE_NEGATIVE": 0,
+    "CANDIDATE_FALSE_POSITIVE": 192,
+    "PAIR_CASES": 1029
+  },
+  "wire_commands": []
+}

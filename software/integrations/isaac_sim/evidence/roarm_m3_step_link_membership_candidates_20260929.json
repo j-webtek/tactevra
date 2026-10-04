@@ -1,0 +1,6140 @@
+{
+  "blockers": [
+    "FIXED_POSE_STEP_HAS_NO_REVIEWED_JOINT_OR_MATE_GRAPH",
+    "BASE_LINK_AND_LINK1_REQUIRE_MOTION_SEPARATION_EVIDENCE",
+    "DISTAL_LINK5_AND_GRIPPER_REQUIRE_MOTION_SEPARATION_EVIDENCE",
+    "JOINT_CROSSING_COMPONENT_GROUPS_REQUIRE_LEAF_LEVEL_REVIEW",
+    "COLLISION_REDUCTION_NOT_REVIEWED",
+    "TOOL_GEOMETRY_MISSING",
+    "CAMERA_SUPPORT_GEOMETRY_MISSING",
+    "ROBOT_PLACEMENT_NOMINAL_UNMEASURED",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "clearance_replay_admissible": false,
+  "collision_geometry_admissible": false,
+  "components": [
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 15.141037,
+      "centroid_cad_mm": [
+        6.249999,
+        -0.100008,
+        140.216837
+      ],
+      "crossed_joint_origins": [
+        "link1_to_link2"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALSHOULDER1_kGu4",
+      "maximum_cad_mm": [
+        21.004997,
+        39.409972,
+        167.374403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -8.504998,
+        -39.609987,
+        113.059271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 3.032765,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 18.173802,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "AL-SHOULDER",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.501114,
+      "centroid_cad_mm": [
+        19.947785,
+        -0.099995,
+        351.666837
+      ],
+      "crossed_joint_origins": [
+        "link2_to_link3"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALELBOWA1_nD8g4",
+      "maximum_cad_mm": [
+        47.007393,
+        20.109996,
+        369.874405
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -7.111824,
+        -20.309987,
+        333.45927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 16.017577,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 18.518691,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "AL-ELBOW-A",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.368447,
+      "centroid_cad_mm": [
+        65.105487,
+        -0.849999,
+        371.153187
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALELBOWB1_nD8g4",
+      "maximum_cad_mm": [
+        87.800487,
+        16.909999,
+        375.38197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        42.410487,
+        -18.609998,
+        366.924404
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.308447,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 30.676894,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "AL-ELBOW-B",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 20.635653,
+      "centroid_cad_mm": [
+        7.005001,
+        6e-06,
+        101.423341
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALBASE1_qAV3",
+      "maximum_cad_mm": [
+        34.393894,
+        36.210006,
+        119.246683
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -20.383892,
+        -36.209993,
+        83.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6e-06,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.635659,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "AL-BASE",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.914322,
+      "centroid_cad_mm": [
+        317.926798,
+        -3.499999,
+        346.188032
+      ],
+      "crossed_joint_origins": [
+        "link5_to_gripper_link"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__AL1_w43p1jXs3ng5WV0edFx0yxV1Vnt2ep7",
+      "maximum_cad_mm": [
+        356.851785,
+        9.12,
+        365.87184
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        279.00181,
+        -16.119998,
+        326.504225
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.277458,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 12.19178,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "AL-\u8f7b\u91cf\u5316\u5939\u5934-\u6d3b\u52a8\u4fa7",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.661321,
+      "centroid_cad_mm": [
+        304.951786,
+        18.145,
+        346.58805
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__AL1_w43p1jXs3yd6fe8Vx4x0Vn6mos4ep7",
+      "maximum_cad_mm": [
+        356.85178,
+        30.120001,
+        363.82183
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        253.051792,
+        6.17,
+        329.35427
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 18.3702,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.031521,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "AL-\u8f7b\u91cf\u5316\u5939\u5934-\u56fa\u5b9a\u4fa7",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 22.683123,
+      "centroid_cad_mm": [
+        260.153706,
+        -0.008783,
+        346.06182
+      ],
+      "crossed_joint_origins": [
+        "link4_to_link5"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__AL1_w43p1xjy3dVCn0ucDp5uWV4XW7",
+      "maximum_cad_mm": [
+        283.598683,
+        16.370001,
+        363.821814
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        236.708729,
+        -16.387568,
+        328.301825
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 2.334631,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 25.017754,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "AL-\u8f7b\u91cf\u5316\u5939\u5934-\u5e95\u5ea7",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 26.971601,
+      "centroid_cad_mm": [
+        -1.895013,
+        4e-06,
+        35.35
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALA1_f63Y2amp4mlQz4nWn3vh6",
+      "maximum_cad_mm": [
+        39.604987,
+        30.399998,
+        36.1
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -43.395013,
+        -30.39999,
+        34.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 8.900014,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 35.871615,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "AL-\u8f7b\u91cf\u5316\u5e95\u5ea7-A",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.199995,
+      "centroid_cad_mm": [
+        7.005006,
+        -2e-06,
+        75.3
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__AL511051_ZC3x3esY7ykRmYEfwAj8VhGdpLpClhv0oXv1Voj1",
+      "maximum_cad_mm": [
+        19.505006,
+        12.499998,
+        76.3
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -5.494994,
+        -12.500002,
+        74.3
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 5e-06,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 5.2,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "AL-\u8235\u673a\u578b\u6750\u5e95\u5ea7-51105\u8f74\u627f\u5b9a\u4f4d\u7247",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 6.796114,
+      "centroid_cad_mm": [
+        19.505,
+        -0.0,
+        55.4
+      ],
+      "crossed_joint_origins": [
+        "base_link_to_link1"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v11_l9l8",
+      "maximum_cad_mm": [
+        42.116706,
+        12.361704,
+        74.3
+      ],
+      "mesh_count": 8,
+      "minimum_cad_mm": [
+        -3.106706,
+        -12.361704,
+        36.499999
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.499999,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 19.296113,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "ST3215",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.117417,
+      "centroid_cad_mm": [
+        24.005001,
+        17.0,
+        53.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M335v11_d75f2z4eix7jxRmwUoWd1qxx2",
+      "maximum_cad_mm": [
+        27.005001,
+        20.0,
+        71.1
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        21.005001,
+        14.0,
+        36.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.04163,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.159047,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u5706\u5f62\u9694\u79bb\u67f1 M3*35",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 46.283115,
+      "centroid_cad_mm": [
+        6.561622,
+        -4.496661,
+        19.499761
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__GeneralDriverforRobots1v11_YREIQu7x0YI",
+      "maximum_cad_mm": [
+        39.51583,
+        28.010824,
+        33.499998
+      ],
+      "mesh_count": 520,
+      "minimum_cad_mm": [
+        -26.392586,
+        -37.004145,
+        5.499524
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.518467,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 50.801582,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "General Driver for Robots(1)",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.023042,
+      "centroid_cad_mm": [
+        -21.995,
+        -24.5,
+        27.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M2514v11_e86q2p0h4qtr8Xyv1igo3uym0",
+      "maximum_cad_mm": [
+        -19.695,
+        -21.844189,
+        34.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -24.295,
+        -27.155811,
+        20.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 56.986841,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*14",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 30.604853,
+      "centroid_cad_mm": [
+        -21.995,
+        24.5,
+        13.0
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M25164v11_f97V3Kj0c5tWZAyxc2zhb4Zvs0",
+      "maximum_cad_mm": [
+        -19.695,
+        27.155811,
+        23.0
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -24.295,
+        21.844189,
+        3.0
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 68.568652,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*16+4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 8.0,
+      "centroid_cad_mm": [
+        7.005001,
+        -0.0,
+        78.1
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__BEARING51105v11_xFg6X7",
+      "maximum_cad_mm": [
+        28.005001,
+        21.0,
+        83.6
+      ],
+      "mesh_count": 20,
+      "minimum_cad_mm": [
+        -13.994999,
+        -21.0,
+        72.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 0.0,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 8.0,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "BEARING-51105",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 3.207647,
+      "centroid_cad_mm": [
+        7.005001,
+        -19.01,
+        110.559271
+      ],
+      "crossed_joint_origins": [
+        "link1_to_link2"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v111_mA9q2Qp7",
+      "maximum_cad_mm": [
+        19.366705,
+        -0.109999,
+        133.170977
+      ],
+      "mesh_count": 7,
+      "minimum_cad_mm": [
+        -5.356703,
+        -37.91,
+        87.947566
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.01,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 22.217647,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "ST3215_1",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 3.207647,
+      "centroid_cad_mm": [
+        7.005001,
+        19.01,
+        110.559271
+      ],
+      "crossed_joint_origins": [
+        "link1_to_link2"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v121_mA9q2Qp7",
+      "maximum_cad_mm": [
+        19.366705,
+        37.91,
+        133.170977
+      ],
+      "mesh_count": 7,
+      "minimum_cad_mm": [
+        -5.356703,
+        0.109999,
+        87.947566
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.01,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 22.217647,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "ST3215_2",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 10.406011,
+      "centroid_cad_mm": [
+        -20.674,
+        9.79,
+        43.28
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__WIFIATv11_l9s3g4",
+      "maximum_cad_mm": [
+        -15.924,
+        14.54,
+        65.51
+      ],
+      "mesh_count": 4,
+      "minimum_cad_mm": [
+        -25.424,
+        5.04,
+        21.05
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 29.359346,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.765357,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "WIFI-AT",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 12.924537,
+      "centroid_cad_mm": [
+        -34.494998,
+        24.0,
+        32.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__DC5521v11_l9l8",
+      "maximum_cad_mm": [
+        -29.494998,
+        29.0,
+        39.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -39.494998,
+        19.0,
+        25.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 47.940066,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 60.864603,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "DC5521",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 14.704706,
+      "centroid_cad_mm": [
+        -34.494998,
+        -5.100001,
+        32.075
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__OLEDJTv11_l9s3g4",
+      "maximum_cad_mm": [
+        -27.394998,
+        17.899999,
+        36.25
+      ],
+      "mesh_count": 18,
+      "minimum_cad_mm": [
+        -41.594998,
+        -28.100001,
+        27.9
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 41.812199,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 56.516905,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "OLED-JT",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 95.303254,
+      "centroid_cad_mm": [
+        7.0074,
+        13.8,
+        247.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__1020200mmv11_rCZBYwbAtaZ1wco5",
+      "maximum_cad_mm": [
+        17.0074,
+        18.8,
+        347.416837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -2.9926,
+        8.8,
+        147.416837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.942566,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 116.24582,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "1020\u94dd\u578b\u6750200mm",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 11.503135,
+      "centroid_cad_mm": [
+        49.507399,
+        -0.29,
+        359.874403
+      ],
+      "crossed_joint_origins": [
+        "link2_to_link3"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v131_mA9q2Qp7",
+      "maximum_cad_mm": [
+        72.119105,
+        18.61,
+        372.236107
+      ],
+      "mesh_count": 8,
+      "minimum_cad_mm": [
+        26.895694,
+        -19.190001,
+        347.5127
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 1.041439,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 12.544574,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "ST3215_3",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 38.174811,
+      "centroid_cad_mm": [
+        79.300486,
+        -0.85,
+        363.13197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__LEGHOLDERv11_rCz4r5",
+      "maximum_cad_mm": [
+        84.350486,
+        13.15,
+        373.88197
+      ],
+      "mesh_count": 2,
+      "minimum_cad_mm": [
+        74.250485,
+        -14.85,
+        352.38197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.341822,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 42.516633,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "LEG-HOLDER",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 21.266489,
+      "centroid_cad_mm": [
+        276.50179,
+        -0.88,
+        346.021817
+      ],
+      "crossed_joint_origins": [
+        "link5_to_gripper_link"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v141_mA9q2Qp7",
+      "maximum_cad_mm": [
+        299.113496,
+        11.481704,
+        364.921817
+      ],
+      "mesh_count": 8,
+      "minimum_cad_mm": [
+        253.890084,
+        -13.241704,
+        327.121816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 2.457161,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 23.72365,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "ST3215_4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 17.577825,
+      "centroid_cad_mm": [
+        280.701789,
+        -11.13,
+        360.896816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v11_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        282.376789,
+        -9.455,
+        363.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        279.026789,
+        -12.805,
+        357.821816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.46088,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 38.038705,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.648575,
+      "centroid_cad_mm": [
+        2.055255,
+        4.948306,
+        76.74
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3v11_b53x5wnr5wXJkq1cxu0",
+      "maximum_cad_mm": [
+        4.655255,
+        7.546506,
+        77.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -0.544745,
+        2.350106,
+        76.3
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.99898,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.647555,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u5f39\u6027\u57ab\u7247 M3",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.117416,
+      "centroid_cad_mm": [
+        -9.994999,
+        17.0,
+        53.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M335v12_d75f2z4eix7jxRmwUoWd1qxx2",
+      "maximum_cad_mm": [
+        -6.994999,
+        20.0,
+        71.1
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -12.994999,
+        14.0,
+        36.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.041631,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.159047,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u5706\u5f62\u9694\u79bb\u67f1 M3*35",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.117417,
+      "centroid_cad_mm": [
+        24.005001,
+        -17.0,
+        53.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M335v13_d75f2z4eix7jxRmwUoWd1qxx2",
+      "maximum_cad_mm": [
+        27.005001,
+        -14.0,
+        71.1
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        21.005001,
+        -20.0,
+        36.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.04163,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.159047,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u5706\u5f62\u9694\u79bb\u67f1 M3*35",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.117416,
+      "centroid_cad_mm": [
+        -9.994999,
+        -17.0,
+        53.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M335v14_d75f2z4eix7jxRmwUoWd1qxx2",
+      "maximum_cad_mm": [
+        -6.994999,
+        -14.0,
+        71.1
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -12.994999,
+        -20.0,
+        36.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.041631,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.159047,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u5706\u5f62\u9694\u79bb\u67f1 M3*35",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.023042,
+      "centroid_cad_mm": [
+        36.005,
+        -24.499999,
+        27.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M2514v12_e86q2p0h4qtr8Xyv1igo3uym0",
+      "maximum_cad_mm": [
+        38.305,
+        -21.844187,
+        34.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        33.705,
+        -27.15581,
+        20.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963797,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 56.986839,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*14",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.023042,
+      "centroid_cad_mm": [
+        -21.995,
+        24.5,
+        27.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M2514v13_e86q2p0h4qtr8Xyv1igo3uym0",
+      "maximum_cad_mm": [
+        -19.695,
+        27.155811,
+        34.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -24.295,
+        21.844189,
+        20.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 56.986841,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*14",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.023042,
+      "centroid_cad_mm": [
+        36.005,
+        24.5,
+        27.6
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M2514v14_e86q2p0h4qtr8Xyv1igo3uym0",
+      "maximum_cad_mm": [
+        38.305,
+        27.155811,
+        34.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        33.705,
+        21.844189,
+        20.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963798,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 56.98684,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*14",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 30.604853,
+      "centroid_cad_mm": [
+        -21.995,
+        -24.5,
+        13.0
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M25164v12_f97V3Kj0c5tWZAyxc2zhb4Zvs0",
+      "maximum_cad_mm": [
+        -19.695,
+        -21.844189,
+        23.0
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -24.295,
+        -27.155811,
+        3.0
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 68.568652,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*16+4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 30.604853,
+      "centroid_cad_mm": [
+        36.005,
+        24.5,
+        13.0
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M25164v13_f97V3Kj0c5tWZAyxc2zhb4Zvs0",
+      "maximum_cad_mm": [
+        38.305,
+        27.155811,
+        23.0
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        33.705,
+        21.844189,
+        3.0
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963798,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 68.568651,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*16+4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 30.604854,
+      "centroid_cad_mm": [
+        36.005,
+        -24.499999,
+        13.0
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M25164v14_f97V3Kj0c5tWZAyxc2zhb4Zvs0",
+      "maximum_cad_mm": [
+        38.305,
+        -21.844187,
+        23.0
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        33.705,
+        -27.15581,
+        3.0
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963797,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 68.568651,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u516d\u89d2\u94dc\u67f1 M2.5*16+4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 95.19489,
+      "centroid_cad_mm": [
+        7.007401,
+        -14.0,
+        247.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__1020200mmv12_rCZBYwbAtaZ1wco5",
+      "maximum_cad_mm": [
+        17.007401,
+        -9.0,
+        347.416837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -2.992599,
+        -19.0,
+        147.416837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.074816,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 116.269706,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "1020\u94dd\u578b\u6750200mm",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 38.271627,
+      "centroid_cad_mm": [
+        139.200486,
+        -0.85,
+        363.13197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__LEGHOLDERv12_rCz4r5",
+      "maximum_cad_mm": [
+        144.250486,
+        13.15,
+        373.88197
+      ],
+      "mesh_count": 2,
+      "minimum_cad_mm": [
+        134.150485,
+        -14.85,
+        352.38197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.341779,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 42.613406,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "LEG-HOLDER",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 8.614079,
+      "centroid_cad_mm": [
+        256.251789,
+        -11.13,
+        361.896816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v12_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        257.926789,
+        -9.455,
+        364.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        254.576789,
+        -12.805,
+        358.821816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.307087,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.921166,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 8.868821,
+      "centroid_cad_mm": [
+        256.251789,
+        9.37,
+        361.896816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v13_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        257.926789,
+        11.045,
+        364.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        254.576789,
+        7.695,
+        358.821816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.443813,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.312634,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 18.047359,
+      "centroid_cad_mm": [
+        280.701789,
+        9.37,
+        361.896816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v14_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        282.376789,
+        11.045,
+        364.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        279.026789,
+        7.695,
+        358.821816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.443774,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 38.491133,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.477331,
+      "centroid_cad_mm": [
+        280.701789,
+        9.37,
+        331.27925
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v15_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        282.376789,
+        11.045,
+        334.35425
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        279.026789,
+        7.695,
+        328.20425
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 13.103719,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 15.58105,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 12.441615,
+      "centroid_cad_mm": [
+        260.001789,
+        -11.13,
+        330.226816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v16_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        261.676789,
+        -9.455,
+        333.301816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        258.326789,
+        -12.805,
+        327.151816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 17.496188,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.937803,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.346503,
+      "centroid_cad_mm": [
+        280.701789,
+        -11.13,
+        331.226816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v17_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        282.376789,
+        -9.455,
+        334.301816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        279.026789,
+        -12.805,
+        328.151816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 14.390165,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 16.736668,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 13.670619,
+      "centroid_cad_mm": [
+        260.001789,
+        9.37,
+        331.27925
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v18_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        261.676789,
+        11.045,
+        334.35425
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        258.326789,
+        7.695,
+        328.20425
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 15.580944,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.251563,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.756778,
+      "centroid_cad_mm": [
+        17.255001,
+        -33.285,
+        114.75927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v19_d75g2z4fyz6muTWY7akAsJmGpjf0rZp3st1ZlSZYw0aol1",
+      "maximum_cad_mm": [
+        18.930001,
+        -30.21,
+        116.43427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        15.580001,
+        -36.36,
+        113.084271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 34.827485,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 35.584263,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.709372,
+      "centroid_cad_mm": [
+        45.3074,
+        -15.685,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v110_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        46.9824,
+        -12.61,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        43.6324,
+        -18.76,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.302433,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.011805,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.713827,
+      "centroid_cad_mm": [
+        69.7574,
+        -15.685,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v111_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        71.4324,
+        -12.61,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        68.0824,
+        -18.76,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.30236,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 38.016187,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.756778,
+      "centroid_cad_mm": [
+        -3.244999,
+        -33.285,
+        114.75927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v112_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        -1.569999,
+        -30.21,
+        116.43427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -4.919999,
+        -36.36,
+        113.084271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 34.827485,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 35.584263,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.826697,
+      "centroid_cad_mm": [
+        45.3074,
+        13.985,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v113_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        46.9824,
+        17.06,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        43.6324,
+        10.91,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 17.948628,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 19.775325,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 16.157411,
+      "centroid_cad_mm": [
+        66.0074,
+        13.985,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v114_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        67.6824,
+        17.06,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        64.3324,
+        10.91,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 17.948688,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 34.106099,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.756778,
+      "centroid_cad_mm": [
+        -3.244999,
+        33.285,
+        114.75927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v115_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        -1.569999,
+        36.36,
+        116.43427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -4.919999,
+        30.21,
+        113.084271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 34.827485,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 35.584263,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.756778,
+      "centroid_cad_mm": [
+        17.255001,
+        33.285,
+        114.75927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v116_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        18.930001,
+        36.36,
+        116.43427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        15.580001,
+        30.21,
+        113.084271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 34.827485,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 35.584263,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.280317,
+      "centroid_cad_mm": [
+        17.255001,
+        -34.285,
+        94.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v117_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        18.930001,
+        -31.21,
+        95.73427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        15.580001,
+        -37.36,
+        92.384271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 35.784406,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 43.064723,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.280317,
+      "centroid_cad_mm": [
+        -3.244999,
+        -34.285,
+        94.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v118_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        -1.569999,
+        -31.21,
+        95.73427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -4.919999,
+        -37.36,
+        92.384271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 35.784406,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 43.064723,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.280317,
+      "centroid_cad_mm": [
+        -3.244999,
+        34.285,
+        94.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v119_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        -1.569999,
+        37.36,
+        95.73427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -4.919999,
+        31.21,
+        92.384271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 35.784406,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 43.064723,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.280317,
+      "centroid_cad_mm": [
+        17.255001,
+        34.285,
+        94.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v120_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        18.930001,
+        37.36,
+        95.73427
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        15.580001,
+        31.21,
+        92.384271
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 35.784406,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 43.064723,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.005374,
+      "centroid_cad_mm": [
+        36.005001,
+        10.25,
+        70.675
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v121_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        37.680001,
+        11.925,
+        73.75
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.330001,
+        8.575,
+        67.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 30.758129,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 30.763503,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.005374,
+      "centroid_cad_mm": [
+        36.005001,
+        -10.25,
+        70.675
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v122_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        37.680001,
+        -8.575,
+        73.75
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.330001,
+        -11.925,
+        67.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 30.758129,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 30.763503,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.648016,
+      "centroid_cad_mm": [
+        11.954747,
+        -4.951186,
+        76.74
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3v12_b53x5wnr5wXJkq1cxu0",
+      "maximum_cad_mm": [
+        14.554747,
+        -2.352986,
+        77.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        9.354747,
+        -7.549386,
+        76.3
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 7.001016,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.649032,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u5f39\u6027\u57ab\u7247 M3",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.648017,
+      "centroid_cad_mm": [
+        2.053815,
+        -4.949746,
+        76.74
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3v13_b53x5wnr5wXJkq1cxu0",
+      "maximum_cad_mm": [
+        4.652015,
+        -2.349746,
+        77.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -0.544385,
+        -7.549746,
+        76.3
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 7.001016,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.649033,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u5f39\u6027\u57ab\u7247 M3",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.648575,
+      "centroid_cad_mm": [
+        11.954747,
+        4.948306,
+        76.74
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3v14_b53x5wnr5wXJkq1cxu0",
+      "maximum_cad_mm": [
+        14.554747,
+        7.546506,
+        77.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        9.354747,
+        2.350106,
+        76.3
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.99898,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.647555,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u5f39\u6027\u57ab\u7247 M3",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 3.75,
+      "centroid_cad_mm": [
+        7.005001,
+        -0.0,
+        73.85
+      ],
+      "crossed_joint_origins": [
+        "base_link_to_link1"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x8v11_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        9.755001,
+        2.75,
+        79.4
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        -2.75,
+        68.3
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 0.0,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 3.75,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.087242,
+      "centroid_cad_mm": [
+        -9.994999,
+        17.0,
+        72.15
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v11_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        -7.244999,
+        19.75,
+        75.7
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -12.744999,
+        14.25,
+        68.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.041631,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.128873,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.087242,
+      "centroid_cad_mm": [
+        -9.994999,
+        -17.0,
+        72.15
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v12_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        -7.244999,
+        -14.25,
+        75.7
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -12.744999,
+        -19.75,
+        68.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.041631,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.128873,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.087243,
+      "centroid_cad_mm": [
+        24.005001,
+        17.0,
+        72.15
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v13_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        26.755001,
+        19.75,
+        75.7
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        21.255001,
+        14.25,
+        68.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.04163,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.128873,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.087243,
+      "centroid_cad_mm": [
+        24.005001,
+        -17.0,
+        72.15
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v14_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        26.755001,
+        -14.25,
+        75.7
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        21.255001,
+        -19.75,
+        68.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.04163,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.128873,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.461339,
+      "centroid_cad_mm": [
+        -9.994999,
+        -17.0,
+        35.05
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v15_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        -7.244999,
+        -14.25,
+        38.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -12.744999,
+        -19.75,
+        31.5
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.041631,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 42.50297,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.46134,
+      "centroid_cad_mm": [
+        24.005001,
+        17.0,
+        35.05
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v16_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        26.755001,
+        19.75,
+        38.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        21.255001,
+        14.25,
+        31.5
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.04163,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 42.50297,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.46134,
+      "centroid_cad_mm": [
+        24.005001,
+        -17.0,
+        35.05
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v17_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        26.755001,
+        -14.25,
+        38.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        21.255001,
+        -19.75,
+        31.5
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.04163,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 42.50297,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.461339,
+      "centroid_cad_mm": [
+        -9.994999,
+        17.0,
+        35.05
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v18_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        -7.244999,
+        19.75,
+        38.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -12.744999,
+        14.25,
+        31.5
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.041631,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 42.50297,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.00016,
+      "centroid_cad_mm": [
+        0.004999,
+        38.96,
+        123.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v19_d75p7Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        2.754999,
+        42.51,
+        125.80927
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -2.745001,
+        35.41,
+        120.30927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 39.596332,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.596492,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.456946,
+      "centroid_cad_mm": [
+        7.005001,
+        -39.16,
+        116.059268
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v110_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        9.755001,
+        -35.61,
+        118.809268
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        -42.71,
+        113.309268
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 39.16,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.616946,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.044063,
+      "centroid_cad_mm": [
+        14.005003,
+        -39.16,
+        123.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v111_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        16.755003,
+        -35.61,
+        125.80927
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        11.255003,
+        -42.71,
+        120.30927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 39.74923,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.793293,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.000159,
+      "centroid_cad_mm": [
+        0.004999,
+        -39.16,
+        123.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v112_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        2.754999,
+        -35.61,
+        125.80927
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -2.745001,
+        -42.71,
+        120.30927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 39.793134,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.793293,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.04428,
+      "centroid_cad_mm": [
+        14.005003,
+        38.96,
+        123.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v113_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        16.755003,
+        42.51,
+        125.80927
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        11.255003,
+        35.41,
+        120.30927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 39.552212,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.596492,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.799954,
+      "centroid_cad_mm": [
+        7.005001,
+        38.96,
+        130.059272
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v114_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        9.755001,
+        42.51,
+        132.809272
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        35.41,
+        127.309272
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 38.972976,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.77293,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.459264,
+      "centroid_cad_mm": [
+        7.005001,
+        38.96,
+        116.059268
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v115_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        9.755001,
+        42.51,
+        118.809268
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        35.41,
+        113.309268
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 38.96,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.419264,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.795959,
+      "centroid_cad_mm": [
+        7.005001,
+        -39.16,
+        130.059272
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v116_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        9.755001,
+        -35.61,
+        132.809272
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        -42.71,
+        127.309272
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 39.172903,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.968862,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.013141,
+      "centroid_cad_mm": [
+        7.005001,
+        37.46,
+        123.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v117_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        9.755001,
+        41.01,
+        125.80927
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        33.91,
+        120.30927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.460211,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 37.473352,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.013142,
+      "centroid_cad_mm": [
+        7.005001,
+        -37.46,
+        123.05927
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v118_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        9.755001,
+        -33.91,
+        125.80927
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        4.255001,
+        -41.01,
+        120.30927
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.46021,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 37.473352,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.0,
+      "centroid_cad_mm": [
+        30.007398,
+        19.66,
+        359.874403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v119_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        32.757398,
+        23.21,
+        362.624403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        27.257398,
+        16.11,
+        357.124403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.892649,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.892649,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.0,
+      "centroid_cad_mm": [
+        37.0074,
+        18.16,
+        359.874403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v120_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        39.7574,
+        21.71,
+        362.624403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.2574,
+        14.61,
+        357.124403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 18.187638,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 18.187638,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.872117,
+      "centroid_cad_mm": [
+        37.0074,
+        -19.86,
+        352.874401
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v121_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        39.7574,
+        -16.31,
+        355.624401
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.2574,
+        -23.41,
+        350.124401
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.87425,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.746367,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.0,
+      "centroid_cad_mm": [
+        30.007398,
+        -19.86,
+        359.874403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v122_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        32.757398,
+        -16.31,
+        362.624403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        27.257398,
+        -23.41,
+        357.124403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.080751,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.080751,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.207932,
+      "centroid_cad_mm": [
+        44.007402,
+        19.66,
+        359.874403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v123_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        46.757402,
+        23.21,
+        362.624403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        41.257402,
+        16.11,
+        357.124403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.685567,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.893499,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.0,
+      "centroid_cad_mm": [
+        37.0074,
+        19.66,
+        366.874405
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v124_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        39.7574,
+        23.21,
+        369.624405
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.2574,
+        16.11,
+        364.124405
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.225566,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.225566,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.880594,
+      "centroid_cad_mm": [
+        37.0074,
+        19.66,
+        352.874401
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v125_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        39.7574,
+        23.21,
+        355.624401
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.2574,
+        16.11,
+        350.124401
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.674611,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.555205,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.196555,
+      "centroid_cad_mm": [
+        44.007402,
+        -19.86,
+        359.874403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v126_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        46.757402,
+        -16.31,
+        362.624403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        41.257402,
+        -23.41,
+        357.124403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.885039,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.081594,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.0,
+      "centroid_cad_mm": [
+        37.0074,
+        -19.86,
+        366.874405
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v127_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        39.7574,
+        -16.31,
+        369.624405
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.2574,
+        -23.41,
+        364.124405
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.410744,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.410744,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 11.675433,
+      "centroid_cad_mm": [
+        284.052043,
+        4.069746,
+        326.95425
+      ],
+      "crossed_joint_origins": [
+        "link5_to_gripper_link"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v128_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        286.802043,
+        6.819746,
+        330.50425
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        281.302043,
+        1.319746,
+        323.40425
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 5.58452,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 17.259953,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 17.719694,
+      "centroid_cad_mm": [
+        284.052043,
+        -5.829746,
+        365.421816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v129_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        286.802043,
+        -3.079746,
+        368.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        281.302043,
+        -8.579746,
+        361.871816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 22.463895,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 40.183589,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 13.934875,
+      "centroid_cad_mm": [
+        289.001789,
+        -0.88,
+        327.571816
+      ],
+      "crossed_joint_origins": [
+        "link5_to_gripper_link"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v130_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        291.751789,
+        1.87,
+        331.121816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        286.251789,
+        -3.63,
+        324.021817
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 2.244509,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 16.179384,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 11.927976,
+      "centroid_cad_mm": [
+        293.951535,
+        -5.829746,
+        326.95425
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v131_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        296.701535,
+        -3.079746,
+        330.50425
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        291.201535,
+        -8.579746,
+        323.40425
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 5.828987,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 17.756963,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 10.786416,
+      "centroid_cad_mm": [
+        284.052043,
+        -5.829746,
+        326.95425
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v132_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        286.802043,
+        -3.079746,
+        330.50425
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        281.302043,
+        -8.579746,
+        323.40425
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.970525,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 17.756941,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 15.091558,
+      "centroid_cad_mm": [
+        293.951535,
+        4.069746,
+        365.421816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v133_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        296.701535,
+        6.819746,
+        368.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        291.201535,
+        1.319746,
+        361.871816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 22.073113,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 37.164671,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 13.188625,
+      "centroid_cad_mm": [
+        293.951535,
+        4.069746,
+        326.95425
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v134_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        296.701535,
+        6.819746,
+        330.50425
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        291.201535,
+        1.319746,
+        323.40425
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.071372,
+          "link_name": "gripper_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 17.259997,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 17.893343,
+      "centroid_cad_mm": [
+        284.052043,
+        4.069746,
+        365.421816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v135_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        286.802043,
+        6.819746,
+        368.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        281.302043,
+        1.319746,
+        361.871816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 22.073142,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 39.966485,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 14.934188,
+      "centroid_cad_mm": [
+        293.951535,
+        -5.829746,
+        365.421816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v136_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        296.701535,
+        -3.079746,
+        368.971816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        291.201535,
+        -8.579746,
+        361.871816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 22.46385,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 37.398038,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 31.72176,
+      "centroid_cad_mm": [
+        79.300486,
+        10.15,
+        365.88197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M322v11_d75f2z4fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        82.050486,
+        12.9,
+        378.38197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        76.550486,
+        7.4,
+        353.38197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.334423,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 44.056183,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*22",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 30.711706,
+      "centroid_cad_mm": [
+        79.300486,
+        -11.85,
+        365.88197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M322v12_d75f2z4fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        82.050486,
+        -9.1,
+        378.38197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        76.550486,
+        -14.6,
+        353.38197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 13.766855,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 44.478561,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*22",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.32036,
+      "centroid_cad_mm": [
+        -21.995,
+        24.5,
+        32.71081
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v11_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        -20.15581,
+        26.33919,
+        36.71081
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -23.83419,
+        22.66081,
+        28.71081
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 53.284159,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 13.7181,
+      "centroid_cad_mm": [
+        -34.494998,
+        14.9,
+        32.71081
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v12_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        -32.655808,
+        16.73919,
+        36.71081
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -36.334188,
+        13.06081,
+        28.71081
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 44.093763,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 57.811863,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 12.738868,
+      "centroid_cad_mm": [
+        -34.494998,
+        -25.1,
+        32.71081
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v13_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        -32.655808,
+        -23.26081,
+        36.71081
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -36.334188,
+        -26.93919,
+        28.71081
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 48.500102,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 61.23897,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.32036,
+      "centroid_cad_mm": [
+        -21.995,
+        -24.5,
+        32.71081
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v14_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        -20.15581,
+        -22.66081,
+        36.71081
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -23.83419,
+        -26.33919,
+        28.71081
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 53.284159,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.32036,
+      "centroid_cad_mm": [
+        36.005,
+        24.5,
+        32.71081
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v15_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        37.84419,
+        26.33919,
+        36.71081
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.16581,
+        22.66081,
+        28.71081
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963798,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 53.284158,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.32036,
+      "centroid_cad_mm": [
+        36.005,
+        -24.499999,
+        32.71081
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v16_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        37.84419,
+        -22.660808,
+        36.71081
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.16581,
+        -26.339189,
+        28.71081
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963797,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 53.284157,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 37.569902,
+      "centroid_cad_mm": [
+        -21.995,
+        -24.5,
+        4.8
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v17_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        -20.15581,
+        -22.66081,
+        8.8
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -23.83419,
+        -26.33919,
+        0.8
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 75.533701,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 37.569902,
+      "centroid_cad_mm": [
+        -21.995,
+        24.5,
+        4.8
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v18_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        -20.15581,
+        26.33919,
+        8.8
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -23.83419,
+        22.66081,
+        0.8
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963799,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 75.533701,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 37.569903,
+      "centroid_cad_mm": [
+        36.005,
+        24.5,
+        4.8
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v19_e86r2q0h4rif8rdh0XjCuaf1vVg2tqPkrq0jqe1",
+      "maximum_cad_mm": [
+        37.84419,
+        26.33919,
+        8.8
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.16581,
+        22.66081,
+        0.8
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963798,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 75.533701,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 37.569903,
+      "centroid_cad_mm": [
+        36.005,
+        -24.5,
+        4.8
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__KM258v110_f96W3u0t4xaV9eck0beDfkj1tvl2hYRuht0uZi1",
+      "maximum_cad_mm": [
+        37.84419,
+        -22.66081,
+        8.8
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        34.16581,
+        -26.33919,
+        0.8
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 37.963798,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 75.533701,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6c89\u5934\u87ba\u4e1d KM2.5*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.529851,
+      "centroid_cad_mm": [
+        14.0074,
+        11.8,
+        344.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v11_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        19.5074,
+        17.3,
+        349.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        8.5074,
+        6.3,
+        338.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.08766,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.617511,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 4.60878,
+      "centroid_cad_mm": [
+        0.0074,
+        11.8,
+        344.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v12_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        5.5074,
+        17.3,
+        349.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -5.4926,
+        6.3,
+        338.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 36.829867,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 41.438647,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 5.511508,
+      "centroid_cad_mm": [
+        14.0074,
+        -12.0,
+        344.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v13_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        19.5074,
+        -6.5,
+        349.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        8.5074,
+        -17.5,
+        338.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 24.186164,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 29.697672,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 4.601612,
+      "centroid_cad_mm": [
+        0.0074,
+        -12.0,
+        344.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v14_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        5.5074,
+        -6.5,
+        349.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -5.4926,
+        -17.5,
+        338.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 36.894366,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 41.495978,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.110797,
+      "centroid_cad_mm": [
+        14.0074,
+        -12.0,
+        150.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v15_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        19.5074,
+        -6.5,
+        155.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        8.5074,
+        -17.5,
+        144.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.467685,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 31.578482,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.22769,
+      "centroid_cad_mm": [
+        14.0074,
+        11.8,
+        150.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v16_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        19.5074,
+        17.3,
+        155.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        8.5074,
+        6.3,
+        144.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.275334,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 31.503024,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.702597,
+      "centroid_cad_mm": [
+        0.0074,
+        11.8,
+        150.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v17_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        5.5074,
+        17.3,
+        155.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -5.4926,
+        6.3,
+        144.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 15.799361,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 31.501958,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.628148,
+      "centroid_cad_mm": [
+        0.0074,
+        -12.0,
+        150.416837
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__CM510v18_e86q2l5lqp7zeBoAcrV0beDly8VcItjk4YlSocBtyl0lXp1",
+      "maximum_cad_mm": [
+        5.5074,
+        -6.5,
+        155.916837
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -5.4926,
+        -17.5,
+        144.916837
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 15.94927,
+          "link_name": "link2"
+        },
+        {
+          "centroid_to_support_segment_mm": 31.577418,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u6241\u5e73\u5934\u5185\u516d\u89d2\u87ba\u4e1d CM5*10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 3.808023,
+      "centroid_cad_mm": [
+        312.518006,
+        21.12,
+        346.588033
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__12VLEDv11_i97h9",
+      "maximum_cad_mm": [
+        327.518006,
+        30.12,
+        355.588033
+      ],
+      "mesh_count": 3,
+      "minimum_cad_mm": [
+        297.518006,
+        12.12,
+        337.588033
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.313964,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 25.121987,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "12V LED",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 59.325044,
+      "centroid_cad_mm": [
+        -2.994985,
+        -4e-06,
+        1.5
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__A1_g3s0Yrk2Yf9wa9s3Veo1",
+      "maximum_cad_mm": [
+        43.005015,
+        40.799999,
+        3.0
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -48.994985,
+        -40.800007,
+        0.0
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 9.999986,
+          "link_name": "base_link"
+        },
+        {
+          "centroid_to_support_segment_mm": 69.32503,
+          "link_name": "link1"
+        }
+      ],
+      "product_id": "\u591a\u529f\u80fd\u5e95\u5ea7-A",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 3.579455,
+      "centroid_cad_mm": [
+        314.018006,
+        21.120008,
+        346.588033
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M10v11_c64t6mlb8stn1",
+      "maximum_cad_mm": [
+        316.018006,
+        29.202909,
+        353.588033
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        312.018006,
+        13.037107,
+        339.588033
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.313977,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.893432,
+          "link_name": "gripper_link"
+        }
+      ],
+      "product_id": "\u87ba\u6bcd M10",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.046365,
+      "centroid_cad_mm": [
+        17.765863,
+        -2.3e-05,
+        71.1
+      ],
+      "crossed_joint_origins": [
+        "base_link_to_link1"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__v11_Z3Y1p1jtb4uj7kd6w45qgQ5V9jii27oqS",
+      "maximum_cad_mm": [
+        51.526728,
+        22.999977,
+        72.6
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -15.995001,
+        -23.000023,
+        69.6
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 10.760862,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 10.807227,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u8235\u673a\u578b\u6750\u5e95\u5ea7-\u8235\u673a\u5b89\u88c5\u5ea7",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 18.457596,
+      "centroid_cad_mm": [
+        153.395485,
+        -0.850001,
+        371.153187
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALELBOWBv11_pBl48r5",
+      "maximum_cad_mm": [
+        176.090484,
+        16.909998,
+        375.38197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        130.700485,
+        -18.609999,
+        366.924404
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.308424,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 30.76602,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "AL-ELBOW-B_1",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 31.81511,
+      "centroid_cad_mm": [
+        139.200486,
+        10.15,
+        365.88197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M322v13_d75f2z4fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        141.950486,
+        12.9,
+        378.38197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        136.450486,
+        7.4,
+        353.38197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 12.334604,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 44.149714,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*22",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 30.804277,
+      "centroid_cad_mm": [
+        139.200486,
+        -11.85,
+        365.88197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M322v14_d75f2z4fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        141.950486,
+        -9.1,
+        378.38197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        136.450486,
+        -14.6,
+        353.38197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 13.766666,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 44.570943,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*22",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 9.666385,
+      "centroid_cad_mm": [
+        170.725944,
+        -0.79,
+        359.874404
+      ],
+      "crossed_joint_origins": [
+        "link3_to_link4"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v151_mA9q2Qp7",
+      "maximum_cad_mm": [
+        195.070022,
+        18.010001,
+        373.450854
+      ],
+      "mesh_count": 8,
+      "minimum_cad_mm": [
+        146.381866,
+        -19.59,
+        346.297953
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 1.274259,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 10.940644,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "SCS215",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.719468,
+      "centroid_cad_mm": [
+        202.89643,
+        -0.88001,
+        369.627542
+      ],
+      "crossed_joint_origins": [
+        "link3_to_link4"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__av2v11_d64t6hbh7nxw1",
+      "maximum_cad_mm": [
+        234.251137,
+        19.330073,
+        389.380716
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        171.541722,
+        -21.090093,
+        349.874368
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 16.161125,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 23.880593,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u624b\u8155a v2",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.229808,
+      "centroid_cad_mm": [
+        186.443317,
+        18.88,
+        364.824149
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v137_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        189.193317,
+        22.43,
+        367.574149
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        183.693317,
+        15.33,
+        362.074149
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.151939,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.381747,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.846755,
+      "centroid_cad_mm": [
+        186.443317,
+        18.88,
+        354.924657
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v138_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        189.193317,
+        22.43,
+        357.674657
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        183.693317,
+        15.33,
+        352.174657
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.043212,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 19.889967,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.649688,
+      "centroid_cad_mm": [
+        176.543825,
+        18.88,
+        354.924657
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v139_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        179.293825,
+        22.43,
+        357.674657
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        173.793825,
+        15.33,
+        352.174657
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.289274,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 19.938962,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.63358,
+      "centroid_cad_mm": [
+        176.543825,
+        18.88,
+        364.824149
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v140_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        179.293825,
+        22.43,
+        367.574149
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        173.793825,
+        15.33,
+        362.074149
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.795982,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 20.429562,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.597872,
+      "centroid_cad_mm": [
+        176.543825,
+        -20.64,
+        354.924657
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v141_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        179.293825,
+        -17.09,
+        357.674657
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        173.793825,
+        -24.19,
+        352.174657
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.013854,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.611726,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.778391,
+      "centroid_cad_mm": [
+        186.443317,
+        -20.64,
+        354.924657
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v142_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        189.193317,
+        -17.09,
+        357.674657
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        183.693317,
+        -24.19,
+        352.174657
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 20.788141,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.566532,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.212547,
+      "centroid_cad_mm": [
+        186.443317,
+        -20.64,
+        364.824149
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v143_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        189.193317,
+        -17.09,
+        367.574149
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        183.693317,
+        -24.19,
+        362.074149
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.808354,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 22.020901,
+          "link_name": "link3"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.585247,
+      "centroid_cad_mm": [
+        176.543825,
+        -20.64,
+        364.824149
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v144_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        179.293825,
+        -17.09,
+        367.574149
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        173.793825,
+        -24.19,
+        362.074149
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.479918,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 22.065165,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 14.829673,
+      "centroid_cad_mm": [
+        216.951137,
+        -0.88,
+        356.829444
+      ],
+      "crossed_joint_origins": [
+        "link4_to_link5"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v11_l9l8cxi9xrv0zff0",
+      "maximum_cad_mm": [
+        235.751137,
+        12.696451,
+        381.173521
+      ],
+      "mesh_count": 7,
+      "minimum_cad_mm": [
+        198.151137,
+        -14.456451,
+        332.485366
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 7.689525,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 22.519198,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "SCS215_1",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 3.182479,
+      "centroid_cad_mm": [
+        241.979921,
+        -0.880053,
+        349.191779
+      ],
+      "crossed_joint_origins": [
+        "link4_to_link5"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__bv11_b4a4wuv4oYY1",
+      "maximum_cad_mm": [
+        248.208704,
+        13.119947,
+        362.321784
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        235.751137,
+        -14.880053,
+        336.061775
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 5.534918,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 8.717397,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u624b\u8155b",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.130157,
+      "centroid_cad_mm": [
+        236.801137,
+        4.069746,
+        351.011562
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v145_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        240.351137,
+        6.819746,
+        353.761562
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        233.251137,
+        1.319746,
+        348.261562
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 8.344631,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 8.474788,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.116605,
+      "centroid_cad_mm": [
+        236.801137,
+        -5.829746,
+        351.011562
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v146_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        240.351137,
+        -3.079746,
+        353.761562
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        233.251137,
+        -8.579746,
+        348.261562
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 9.329483,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.446088,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.186762,
+      "centroid_cad_mm": [
+        236.801137,
+        -5.829746,
+        341.11207
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v147_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        240.351137,
+        -3.079746,
+        343.86207
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        233.251137,
+        -8.579746,
+        338.36207
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.388628,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 6.57539,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.244049,
+      "centroid_cad_mm": [
+        236.801137,
+        4.069746,
+        341.11207
+      ],
+      "crossed_joint_origins": [
+        "link4_to_link5"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v148_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        240.351137,
+        6.819746,
+        343.86207
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        233.251137,
+        1.319746,
+        338.36207
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.838199,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 5.082248,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 19.483617,
+      "centroid_cad_mm": [
+        148.743571,
+        13.985,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v123_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        150.418571,
+        17.06,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        147.068571,
+        10.91,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 17.948924,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 37.432541,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.747985,
+      "centroid_cad_mm": [
+        173.193571,
+        -15.685,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v124_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        174.868571,
+        -12.61,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        171.518571,
+        -18.76,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.302051,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 21.050036,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 15.616283,
+      "centroid_cad_mm": [
+        152.493571,
+        -15.685,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v125_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        154.168571,
+        -12.61,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        150.818571,
+        -18.76,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.302113,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 34.918396,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.904888,
+      "centroid_cad_mm": [
+        173.193571,
+        13.485,
+        370.124403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v126_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        174.868571,
+        16.56,
+        371.799403
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        171.518571,
+        10.41,
+        368.449403
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 17.562198,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 19.467086,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.569123,
+      "centroid_cad_mm": [
+        230.826137,
+        9.37,
+        375.061816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v127_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        233.901138,
+        11.045,
+        376.736816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        227.751137,
+        7.695,
+        373.386816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 30.433967,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 33.00309,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.524201,
+      "centroid_cad_mm": [
+        230.826137,
+        -11.13,
+        375.061816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v128_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        233.901138,
+        -9.455,
+        376.736816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        227.751137,
+        -12.805,
+        373.386816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 31.020539,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 33.54474,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.830742,
+      "centroid_cad_mm": [
+        230.826137,
+        9.37,
+        354.361816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v129_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        233.901138,
+        11.045,
+        356.036816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        227.751137,
+        7.695,
+        352.686816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 13.016382,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 14.847124,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 1.680753,
+      "centroid_cad_mm": [
+        230.826137,
+        -11.13,
+        354.361816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__PA25v130_e85q2k5lqp7ZbW0Wq7zcBWLnHvuh0ntw3Zy1sxTjty0lXp1",
+      "maximum_cad_mm": [
+        233.901138,
+        -9.455,
+        356.036816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        227.751137,
+        -12.805,
+        352.686816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 14.334325,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 16.015078,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u5706\u5934\u5c16\u5c3e\u81ea\u653b\u87ba\u4e1d PA2*5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.227429,
+      "centroid_cad_mm": [
+        245.208704,
+        10.12,
+        362.321816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M36v11_f6p1w3yip5xp8e8wmPusAvah0WYq2owMiV9pid0Ycb1",
+      "maximum_cad_mm": [
+        247.958704,
+        12.87,
+        366.821816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        242.458704,
+        7.37,
+        357.821816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 21.170589,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 23.398018,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1dM3*6",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "DISTAL_LINK_SUPPORT_SEGMENTS_OVERLAP_IN_FIXED_POSE"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.14529,
+      "centroid_cad_mm": [
+        245.208704,
+        -11.88,
+        362.321816
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M36v12_f6p1w3yip5xp8e8wmPusAvah0WYq2owMiV9pid0Ycb1",
+      "maximum_cad_mm": [
+        247.958704,
+        -9.13,
+        366.821816
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        242.458704,
+        -14.63,
+        357.821816
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 22.065252,
+          "link_name": "link5"
+        },
+        {
+          "centroid_to_support_segment_mm": 24.210542,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1dM3*6",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD",
+        "COMPONENT_BOUNDS_CROSS_GOVERNED_JOINT_ORIGIN"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.067813,
+      "centroid_cad_mm": [
+        235.301137,
+        -0.88,
+        346.061816
+      ],
+      "crossed_joint_origins": [
+        "link4_to_link5"
+      ],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v149_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        238.851137,
+        3.009087,
+        349.950904
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        231.751137,
+        -4.769087,
+        342.172729
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 2.426937,
+          "link_name": "link4"
+        },
+        {
+          "centroid_to_support_segment_mm": 2.49475,
+          "link_name": "link5"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 0.000253,
+      "centroid_cad_mm": [
+        181.493571,
+        -19.14,
+        359.874403
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M3x4v150_e85k8fyz6oiAv9tpTXjCoXn0akZ3vqPVZArqh0uZi1",
+      "maximum_cad_mm": [
+        185.382658,
+        -15.59,
+        363.763491
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        177.604484,
+        -22.69,
+        355.985316
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 19.165481,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 19.165734,
+          "link_name": "link4"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3x4",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [],
+      "ambiguous": false,
+      "candidate_margin_mm": 68.032909,
+      "centroid_cad_mm": [
+        109.250486,
+        -0.85,
+        363.13197
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__141670v21_l9s3g4bkW8waRzdW3ZjBvnClj0jewJ",
+      "maximum_cad_mm": [
+        144.250486,
+        7.15,
+        371.13197
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        74.250486,
+        -8.85,
+        355.13197
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 4.3418,
+          "link_name": "link3"
+        },
+        {
+          "centroid_to_support_segment_mm": 72.374709,
+          "link_name": "link2"
+        }
+      ],
+      "product_id": "\u78b3\u7ea4\u7ef4\u7ba1\uff0c\u518514\u591616-70",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.607102,
+      "centroid_cad_mm": [
+        2.055255,
+        -4.949746,
+        76.68
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M345v11_h7z1Eo4ukp9alz3",
+      "maximum_cad_mm": [
+        4.341236,
+        -2.352718,
+        81.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -0.230726,
+        -7.546775,
+        72.18
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.6071,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u94dc\u67f1M3*4+5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.907172,
+      "centroid_cad_mm": [
+        3.554424,
+        4.899829,
+        76.68
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M345v12_h7z1Eo4ukp9alz3",
+      "maximum_cad_mm": [
+        5.840405,
+        7.496858,
+        81.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        1.268443,
+        2.302801,
+        72.18
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 5.992896,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 8.900068,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u94dc\u67f1M3*4+5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.607102,
+      "centroid_cad_mm": [
+        11.954747,
+        4.949746,
+        76.68
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M345v13_h7z1Eo4ukp9alz3",
+      "maximum_cad_mm": [
+        14.240728,
+        7.546775,
+        81.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        9.668766,
+        2.352718,
+        72.18
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.6071,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u94dc\u67f1M3*4+5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 2.607102,
+      "centroid_cad_mm": [
+        11.954747,
+        -4.949746,
+        76.68
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M345v14_h7z1Eo4ukp9alz3",
+      "maximum_cad_mm": [
+        14.240728,
+        -2.352718,
+        81.18
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        9.668766,
+        -7.546775,
+        72.18
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 9.6071,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u94dc\u67f1M3*4+5",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.370196,
+      "centroid_cad_mm": [
+        11.954747,
+        4.949746,
+        82.65
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M38v11_c64V2i4Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        14.704747,
+        7.699746,
+        88.2
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        9.204747,
+        2.199746,
+        77.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 14.370194,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.370196,
+      "centroid_cad_mm": [
+        2.055255,
+        4.949746,
+        82.65
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M38v12_c64V2i4Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        4.805255,
+        7.699746,
+        88.2
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -0.694745,
+        2.199746,
+        77.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 14.370194,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.370196,
+      "centroid_cad_mm": [
+        2.055255,
+        -4.949746,
+        82.65
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M38v13_c64V2i4Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        4.805255,
+        -2.199746,
+        88.2
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        -0.694745,
+        -7.699746,
+        77.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 14.370194,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*8",
+      "reviewed_dynamic_link_assignment": null
+    },
+    {
+      "ambiguity_reasons": [
+        "NEAREST_LINK_MARGIN_AT_OR_BELOW_THRESHOLD"
+      ],
+      "ambiguous": true,
+      "candidate_margin_mm": 7.370196,
+      "centroid_cad_mm": [
+        11.954747,
+        -4.949746,
+        82.65
+      ],
+      "crossed_joint_origins": [],
+      "instance_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__M38v14_c64V2i4Zbf6dm9X9foRynBcZk0Yex2ceOrm9qmf0jqe1",
+      "maximum_cad_mm": [
+        14.704747,
+        -2.199746,
+        88.2
+      ],
+      "mesh_count": 1,
+      "minimum_cad_mm": [
+        9.204747,
+        -7.699746,
+        77.1
+      ],
+      "nearest_candidates": [
+        {
+          "centroid_to_support_segment_mm": 6.999998,
+          "link_name": "link1"
+        },
+        {
+          "centroid_to_support_segment_mm": 14.370194,
+          "link_name": "base_link"
+        }
+      ],
+      "product_id": "\u9ed1\u8272\u91d1\u5c5e\u676f\u5934\u5185\u516d\u89d2\u87ba\u4e1d M3*8",
+      "reviewed_dynamic_link_assignment": null
+    }
+  ],
+  "dynamic_link_assignment_admissible": false,
+  "evidence_class": "CAD_LINK_MEMBERSHIP_CANDIDATES_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "inventory": {
+    "ambiguous_component_count": 114,
+    "complete_mesh_partition": true,
+    "covered_mesh_count": 770,
+    "direct_component_count": 162,
+    "joint_crossing_component_count": 19,
+    "reviewed_assignment_count": 0,
+    "stage_mesh_count": 770,
+    "unambiguous_candidate_count": 48
+  },
+  "limitations": [
+    "nearest_support_segment_is_a_candidate_heuristic_not_rigid_membership_proof",
+    "single_fixed_pose_cannot_separate_components_that_move_together_at_that_pose",
+    "direct_component_subtrees_can_contain_parts_on_both_sides_of_a_joint",
+    "no_link_local_shapes_inertia_dynamics_clearance_contact_or_physical_qualification"
+  ],
+  "method": {
+    "candidate_margin_threshold_mm": 10.0,
+    "candidate_metric": "component_aabb_centroid_to_governed_link_support_segment",
+    "component_partition": "direct_children_of_converted_step_assembly",
+    "joint_origin_padding_mm": 2.25,
+    "joint_origins_cad_mm": {
+      "base_link_to_link1": [
+        7.005001,
+        0.0,
+        70.1
+      ],
+      "link1_to_link2": [
+        7.005001,
+        0.0,
+        122.059
+      ],
+      "link2_to_link3": [
+        37.006131129528654,
+        -0.00011020349951060392,
+        358.8741102019019
+      ],
+      "link3_to_link4": [
+        181.5921311285532,
+        -0.0006412975325794887,
+        358.8741102019019
+      ],
+      "link4_to_link5": [
+        235.24513112819125,
+        -0.0008383758016180889,
+        343.7271102019019
+      ],
+      "link5_to_gripper_link": [
+        287.2802002606285,
+        -0.0010986437203409877,
+        324.9063013373834
+      ]
+    },
+    "pose": "home",
+    "support_segments_cad_mm": {
+      "base_link": [
+        [
+          7.005001,
+          0.0,
+          3.3063772192690754e-13
+        ],
+        [
+          7.005001,
+          0.0,
+          70.1
+        ]
+      ],
+      "gripper_link": [
+        [
+          287.2802002606285,
+          -0.0010986437203409877,
+          324.9063013373834
+        ],
+        [
+          350.67313112663385,
+          -0.0012623649628823055,
+          343.72753419262057
+        ]
+      ],
+      "link1": [
+        [
+          7.005001,
+          0.0,
+          70.1
+        ],
+        [
+          7.005001,
+          0.0,
+          122.059
+        ]
+      ],
+      "link2": [
+        [
+          7.005001,
+          0.0,
+          122.059
+        ],
+        [
+          37.006131129528654,
+          -0.00011020349951060392,
+          358.8741102019019
+        ]
+      ],
+      "link3": [
+        [
+          37.006131129528654,
+          -0.00011020349951060392,
+          358.8741102019019
+        ],
+        [
+          181.5921311285532,
+          -0.0006412975325794887,
+          358.8741102019019
+        ]
+      ],
+      "link4": [
+        [
+          181.5921311285532,
+          -0.0006412975325794887,
+          358.8741102019019
+        ],
+        [
+          235.24513112819125,
+          -0.0008383758016180889,
+          343.7271102019019
+        ]
+      ],
+      "link5": [
+        [
+          235.24513112819125,
+          -0.0008383758016180889,
+          343.7271102019019
+        ],
+        [
+          350.67313112663385,
+          -0.0012623649628823055,
+          343.72753419262057
+        ]
+      ]
+    }
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "c1ecd6b636368e38ae815aca436699d9fa44ca7e70e1456048794d0f5769fd78",
+  "schema": "tactevra.isaac_sim_step_link_membership_candidates.v1",
+  "source_bindings": {
+    "cad_usd_sha256": "cfcd4e6170350d948de1976164665ddde99cfad457b72730f7ffcbdd119496d3",
+    "pose_receipt_file_sha256": "e4271e62147c8e421e4d303365563514da24fbe33b1ae46328dddffad3827f50",
+    "pose_receipt_sha256": "3817f28d9171ee3cb33d024f3f31e57495b02fb383ba60277953f6148ba00f3f",
+    "urdf_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+  },
+  "wire_commands": []
+}

@@ -1,0 +1,225 @@
+{
+  "articulation_positions_changed": 0,
+  "assessment": {
+    "action_count": 4,
+    "actions": [
+      {
+        "action_index": 0,
+        "nominal_center_board_mm": [
+          216.55,
+          154.0,
+          21.0
+        ],
+        "placed_safe_region": {
+          "center_board_mm": [
+            244.71923857103974,
+            166.31167317324545,
+            21.0
+          ],
+          "half_extent_mm": [
+            7.0,
+            7.0
+          ],
+          "source": "RIGID_FIT_FROM_SYNTHETIC_BATCH_TARGETS",
+          "yaw_rad": 2.9994362637139624
+        },
+        "proposal_center_board_mm": [
+          244.71923857103974,
+          166.31167317324545,
+          21.0
+        ],
+        "proposal_center_inside_inferred_placed_safe_region": true,
+        "proposal_sha256": "5585c99a030dcf56c92bfa8448784a9af301368368f88e34ba56d9d117142b94",
+        "signed_edge_margins_mm": {
+          "front": 7.0,
+          "left": 7.000000000000028,
+          "rear": 7.0,
+          "right": 6.999999999999972
+        },
+        "target_id": "H",
+        "uncertainty_disk_fits_inferred_placed_safe_region": false
+      },
+      {
+        "action_index": 1,
+        "nominal_center_board_mm": [
+          216.55,
+          154.0,
+          21.0
+        ],
+        "placed_safe_region": {
+          "center_board_mm": [
+            244.71923857103974,
+            166.31167317324545,
+            21.0
+          ],
+          "half_extent_mm": [
+            7.0,
+            7.0
+          ],
+          "source": "RIGID_FIT_FROM_SYNTHETIC_BATCH_TARGETS",
+          "yaw_rad": 2.9994362637139624
+        },
+        "proposal_center_board_mm": [
+          244.71923857103974,
+          166.31167317324545,
+          21.0
+        ],
+        "proposal_center_inside_inferred_placed_safe_region": true,
+        "proposal_sha256": "52a77023084a92915bcdb354c5ab35ad194c06a21598be2301fd10346ab08bca",
+        "signed_edge_margins_mm": {
+          "front": 7.0,
+          "left": 7.000000000000028,
+          "rear": 7.0,
+          "right": 6.999999999999972
+        },
+        "target_id": "H",
+        "uncertainty_disk_fits_inferred_placed_safe_region": false
+      },
+      {
+        "action_index": 2,
+        "nominal_center_board_mm": [
+          107.0,
+          196.0,
+          21.0
+        ],
+        "placed_safe_region": {
+          "center_board_mm": [
+            347.2137047761767,
+            109.2145025137106,
+            21.0
+          ],
+          "half_extent_mm": [
+            7.0,
+            7.0
+          ],
+          "source": "RIGID_FIT_FROM_SYNTHETIC_BATCH_TARGETS",
+          "yaw_rad": 2.9994362637139624
+        },
+        "proposal_center_board_mm": [
+          347.2137047761767,
+          109.2145025137106,
+          21.0
+        ],
+        "proposal_center_inside_inferred_placed_safe_region": true,
+        "proposal_sha256": "87c7fe65cba7349557bc13161969c279edc4ce764cede40c7e4820c52d27fe54",
+        "signed_edge_margins_mm": {
+          "front": 6.999999999999943,
+          "left": 6.999999999999986,
+          "rear": 7.000000000000057,
+          "right": 7.000000000000014
+        },
+        "target_id": "1",
+        "uncertainty_disk_fits_inferred_placed_safe_region": false
+      },
+      {
+        "action_index": 3,
+        "nominal_center_board_mm": [
+          283.2,
+          133.0,
+          21.0
+        ],
+        "placed_safe_region": {
+          "center_board_mm": [
+            181.71679114865879,
+            196.54268570657155,
+            21.0
+          ],
+          "half_extent_mm": [
+            7.0,
+            7.0
+          ],
+          "source": "RIGID_FIT_FROM_SYNTHETIC_BATCH_TARGETS",
+          "yaw_rad": 2.9994362637139624
+        },
+        "proposal_center_board_mm": [
+          181.71679114865879,
+          196.54268570657155,
+          21.0
+        ],
+        "proposal_center_inside_inferred_placed_safe_region": true,
+        "proposal_sha256": "82287efc2c50caec119a1c25d2f188687227b10138c945b611c71c679232ab6c",
+        "signed_edge_margins_mm": {
+          "front": 6.999999999999972,
+          "left": 7.000000000000057,
+          "rear": 7.000000000000028,
+          "right": 6.999999999999943
+        },
+        "target_id": "PERIOD",
+        "uncertainty_disk_fits_inferred_placed_safe_region": false
+      }
+    ],
+    "adjacent_repeat_action_indexes": [
+      1
+    ],
+    "all_proposal_centers_inside_inferred_placed_safe_regions": true,
+    "all_uncertainty_disks_fit_inferred_placed_safe_regions": false,
+    "inferred_synthetic_placement": {
+      "maximum_fit_residual_mm": 7.105427357601002e-14,
+      "runtime_calibration": false,
+      "translation_board_xy_mm": [
+        480.9032764913293,
+        288.07785374760385
+      ],
+      "unique_target_count": 3,
+      "yaw_rad": 2.9994362637139624
+    },
+    "ordered_target_ids": [
+      "H",
+      "H",
+      "1",
+      "PERIOD"
+    ],
+    "uncertainty_bound_type": "planar_l2_disk",
+    "uncertainty_error_bound_mm": 14.400834977163141
+  },
+  "authored_prim_paths": [
+    "/RC03/CommandRehearsal/action_000_H/ProposalCenter",
+    "/RC03/CommandRehearsal/action_000_H/UncertaintyDisk",
+    "/RC03/CommandRehearsal/action_000_H/NominalSafeRegion",
+    "/RC03/CommandRehearsal/action_001_H/ProposalCenter",
+    "/RC03/CommandRehearsal/action_001_H/UncertaintyDisk",
+    "/RC03/CommandRehearsal/action_001_H/NominalSafeRegion",
+    "/RC03/CommandRehearsal/action_002_1/ProposalCenter",
+    "/RC03/CommandRehearsal/action_002_1/UncertaintyDisk",
+    "/RC03/CommandRehearsal/action_002_1/NominalSafeRegion",
+    "/RC03/CommandRehearsal/action_003_PERIOD/ProposalCenter",
+    "/RC03/CommandRehearsal/action_003_PERIOD/UncertaintyDisk",
+    "/RC03/CommandRehearsal/action_003_PERIOD/NominalSafeRegion"
+  ],
+  "batch_scope": "SYNTHETIC_CONTRACT_FIXTURE_ONLY",
+  "controller_commands": [],
+  "evidence_class": "SYNTHETIC_COMMAND_SCENE_OVERLAY_ONLY",
+  "external_files": [
+    {
+      "path": "rc03_model_motion_overlay.usda",
+      "sha256": "a7dcc53a5ed5d83d47aa524818978e5b7d363008c452a81c5d30e59e6703532b",
+      "size_bytes": 11548
+    }
+  ],
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "The batch is a synthetic contract fixture, not deployment-qualified perception.",
+    "Nominal key regions are design-time simulation geometry, not measured installed safe regions.",
+    "The overlay visualizes proposals and uncertainty; it does not replay a joint schedule.",
+    "No physics contact, collision clearance, controller encoding, or task effect was evaluated."
+  ],
+  "next_dependency": "Replay a source-bound zero-write joint schedule from the arm typing pipeline against this exact scene and compare simulated TCP contact to ordered targets.",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_steps": 0,
+  "receipt_sha256": "e2f7ecf984dca7e07a3a7e760fbb894f0b5f4192e4469d215e7852a529fe25ef",
+  "schema": "tactevra.isaac_sim_model_motion_overlay.v1",
+  "source_bindings": {
+    "batch_file_sha256": "26fa25a5824c2bd3e1b8312f91b801afa02c240487771533b8faed5c4bd531c5",
+    "batch_metadata_sha256": "930cab4459878911069043e99b6718113971fc6c7fee78c6a4d29501462b7afd",
+    "batch_sha256": "ffe9777410258064ee07b1202b3de1f3b972cbcf69b6f4be8732f4e34d885b19",
+    "nominal_target_geometry_source_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2",
+    "scene_receipt_file_sha256": "df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b",
+    "scene_receipt_sha256": "0d080880e6c7915cae43d04771c9a17748060c4d682a1de86003d54021067bcd",
+    "scene_usd_sha256": "77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35",
+    "static_target_catalog_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276"
+  },
+  "status": "BLOCKED_UNCERTAINTY_CROSSES_INFERRED_SAFE_REGIONS",
+  "wire_commands": []
+}

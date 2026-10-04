@@ -1,0 +1,368 @@
+{
+  "blockers": [
+    "RAW_VISUAL_TRIANGLE_MESHES_ARE_NOT_REDUCED_COLLISION_SHAPES",
+    "LINK1_AND_LINK5_MESHES_ARE_NOT_WATERTIGHT",
+    "GRIPPER_LEFT_MESH_IS_UNREFERENCED_BY_XACRO",
+    "SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED",
+    "TOOL_GEOMETRY_MISSING",
+    "CAMERA_SUPPORT_GEOMETRY_MISSING",
+    "ROBOT_PLACEMENT_NOMINAL_UNMEASURED",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "clearance_replay_admissible": false,
+  "evidence_class": "UPSTREAM_LINK_MESH_GROUPING_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "home_pose_step_envelope_comparison": {
+    "maximum_absolute_bound_residual_mm": 1.910001,
+    "mesh_minus_step_bound_residuals_mm": [
+      [
+        -1.4e-05,
+        1.910001,
+        -0.999998
+      ],
+      [
+        -1.720986,
+        -1.710001,
+        -1.837006
+      ]
+    ],
+    "mesh_union_bounds_cad_mm": [
+      [
+        -48.994999,
+        -40.799999,
+        -0.999998
+      ],
+      [
+        355.130799,
+        40.799999,
+        387.54371
+      ]
+    ],
+    "pass": true,
+    "step_assembly_bounds_cad_mm": [
+      [
+        -48.994985,
+        -42.71,
+        0.0
+      ],
+      [
+        356.851785,
+        42.51,
+        389.380716
+      ]
+    ],
+    "threshold_mm": 2.0
+  },
+  "limitations": [
+    "global_envelope_agreement_does_not_prove_surface_or_link_local_equivalence",
+    "xacro_reuses_high_detail_visual_meshes_as_collision_meshes",
+    "no_convex_reduction_self_collision_differential_or_clearance_validation",
+    "no_tool_camera_support_measured_placement_dynamics_or_physical_qualification"
+  ],
+  "mesh_inventory": [
+    {
+      "byte_count": 3284,
+      "connected_body_count": 2,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/base_link.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          -48.994999,
+          -40.799999,
+          -0.999998
+        ],
+        [
+          49.526707,
+          40.799999,
+          71.6
+        ]
+      ],
+      "is_volume": true,
+      "link_name": "base_link",
+      "local_bounds_mm": [
+        [
+          -56.0,
+          -40.799999,
+          -71.099998
+        ],
+        [
+          42.521706,
+          40.799999,
+          1.5
+        ]
+      ],
+      "processed_vertex_count": 36,
+      "sha256": "55cbfcc2cfb995ab11d8a6ce7c2132283721b9c69cd05b4c7b9d6404e9d8fded",
+      "triangle_count": 64,
+      "watertight": true,
+      "winding_consistent": true
+    },
+    {
+      "byte_count": 12784,
+      "connected_body_count": 2,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/link1.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          -20.383888,
+          -36.209999,
+          71.6
+        ],
+        [
+          34.39389,
+          36.209999,
+          132.246683
+        ]
+      ],
+      "is_volume": false,
+      "link_name": "link1",
+      "local_bounds_mm": [
+        [
+          -27.388889,
+          -36.209999,
+          1.5
+        ],
+        [
+          27.388889,
+          36.209999,
+          62.146683
+        ]
+      ],
+      "processed_vertex_count": 121,
+      "sha256": "022fdd2df4fa57748f56337fb1b3b3cce81dd116e0f608ccab51d6f1eacb552c",
+      "triangle_count": 254,
+      "watertight": false,
+      "winding_consistent": true
+    },
+    {
+      "byte_count": 468284,
+      "connected_body_count": 2,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/link2.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          -8.505241,
+          -39.610052,
+          112.059256
+        ],
+        [
+          47.006623,
+          39.41004,
+          368.874528
+        ]
+      ],
+      "is_volume": true,
+      "link_name": "link2",
+      "local_bounds_mm": [
+        [
+          -9.999729,
+          -15.509999,
+          -39.610001
+        ],
+        [
+          246.815399,
+          40.002399,
+          39.41
+        ]
+      ],
+      "processed_vertex_count": 4678,
+      "sha256": "5acd32a9f662221deb58ea2ca338c5d6726cbcd7664e7dcdb93bac722820b025",
+      "triangle_count": 9364,
+      "watertight": true,
+      "winding_consistent": true
+    },
+    {
+      "byte_count": 34484,
+      "connected_body_count": 4,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/link3.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          26.896472,
+          -17.520286,
+          346.513711
+        ],
+        [
+          191.702774,
+          17.99987,
+          374.381277
+        ]
+      ],
+      "is_volume": true,
+      "link_name": "link3",
+      "local_bounds_mm": [
+        [
+          -15.507167,
+          -154.696579,
+          -17.52
+        ],
+        [
+          12.360399,
+          10.109596,
+          18.0
+        ]
+      ],
+      "processed_vertex_count": 348,
+      "sha256": "80c4e9b1084bf1c7d975398eb11e7ba4e7dc69e62ff4adefcac38a0e0f5a4069",
+      "triangle_count": 688,
+      "watertight": true,
+      "winding_consistent": true
+    },
+    {
+      "byte_count": 9284,
+      "connected_body_count": 2,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/link4.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          172.091631,
+          -20.200634,
+          333.616635
+        ],
+        [
+          233.891781,
+          20.199593,
+          387.54371
+        ]
+      ],
+      "is_volume": true,
+      "link_name": "link4",
+      "local_bounds_mm": [
+        [
+          -28.6696,
+          -52.299576,
+          -20.1998
+        ],
+        [
+          25.257475,
+          9.500426,
+          20.200199
+        ]
+      ],
+      "processed_vertex_count": 90,
+      "sha256": "bb334cafafa5f5adeedb4d430b325b436eafa833fa851ea782d9c785698f8c09",
+      "triangle_count": 184,
+      "watertight": true,
+      "winding_consistent": true
+    },
+    {
+      "byte_count": 704684,
+      "connected_body_count": 6,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/link5.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          234.495527,
+          -15.499004,
+          325.953525
+        ],
+        [
+          355.130799,
+          30.996954,
+          361.473805
+        ]
+      ],
+      "is_volume": false,
+      "link_name": "link5",
+      "local_bounds_mm": [
+        [
+          -30.998081,
+          -17.746346,
+          -0.749511
+        ],
+        [
+          15.497934,
+          17.773653,
+          119.88562
+        ]
+      ],
+      "processed_vertex_count": 6926,
+      "sha256": "1d63f374a78c1419b21eec63fa8efeef40d0d42ca89c5de3ceb0d86476d9c7eb",
+      "triangle_count": 14092,
+      "watertight": false,
+      "winding_consistent": true
+    },
+    {
+      "byte_count": 684984,
+      "connected_body_count": 1,
+      "git_path": "src/roarm_main/roarm_description/meshes/roarm_m3/gripper_link.stl",
+      "home_pose_bounds_cad_mm": [
+        [
+          276.512661,
+          -15.241471,
+          324.15599
+        ],
+        [
+          354.362741,
+          9.998817,
+          363.523871
+        ]
+      ],
+      "is_volume": true,
+      "link_name": "gripper_link",
+      "local_bounds_mm": [
+        [
+          -10.767397,
+          -9.999632,
+          -38.617344
+        ],
+        [
+          67.082603,
+          15.240367,
+          0.750222
+        ]
+      ],
+      "processed_vertex_count": 6831,
+      "sha256": "7946a374e24a2f467a0581b4946e0ec41b1b86a92f070bc00aa9bced1bf65a56",
+      "triangle_count": 13698,
+      "watertight": true,
+      "winding_consistent": true
+    }
+  ],
+  "mesh_totals": {
+    "connected_body_count": 19,
+    "non_watertight_mesh_count": 2,
+    "processed_vertex_count": 19030,
+    "referenced_mesh_count": 7,
+    "triangle_count": 38344,
+    "unreferenced_mesh_paths": [
+      "src/roarm_main/roarm_description/meshes/roarm_m3/gripper_left_link.stl"
+    ],
+    "watertight_mesh_count": 5
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "raw_mesh_collision_admissible": false,
+  "receipt_sha256": "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954",
+  "reduced_collision_geometry_admissible": false,
+  "schema": "tactevra.isaac_sim_upstream_link_meshes.v1",
+  "source_bindings": {
+    "governed_urdf_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "pose_receipt_file_sha256": "e4271e62147c8e421e4d303365563514da24fbe33b1ae46328dddffad3827f50",
+    "pose_receipt_sha256": "3817f28d9171ee3cb33d024f3f31e57495b02fb383ba60277953f6148ba00f3f",
+    "step_receipt_file_sha256": "255a3612d1c932646f3ba4c09357f5337b679d46a1aeb210ffe9976a5c93ddbb",
+    "step_receipt_sha256": "b51c20e34c3b3edfa4ba40b88d04299aa346803b43b12909dade7c41c44cf967",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d",
+    "upstream_repository": "https://github.com/waveshareteam/roarm_ws",
+    "upstream_tree_oid_sha1": "3a1d24388e15b318ba0c5305a94b5140b5b239bd",
+    "xacro_git_path": "src/roarm_main/roarm_description/urdf/roarm_m3/roarm_m3.xacro",
+    "xacro_sha256": "b6333849d0e377008eee0a87a5b8cdcf44f7a73edf3d7600e95506a023a234b6"
+  },
+  "step_product_mapping_admissible": false,
+  "wire_commands": [],
+  "xacro_binding": {
+    "link_count": 7,
+    "link_mesh_grouping_supported": true,
+    "mesh_origin_rpy": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mesh_origin_xyz": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mesh_scale": [
+      0.001,
+      0.001,
+      0.001
+    ],
+    "visual_and_collision_references_identical": true
+  }
+}

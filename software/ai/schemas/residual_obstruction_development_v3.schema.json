@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_development_v3.schema.json",
+  "title": "Residual obstruction synthetic Isaac development result v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scope", "status", "fixture_file_sha256", "fixture_bundle_sha256", "admission_file_sha256", "admission_receipt_sha256", "lineage_file_sha256", "model_sha256", "model_bytes", "training_plan", "training_device", "training_count", "development_count", "evaluation_count", "epoch_losses", "selected_threshold", "selected_measurement", "threshold_measurements", "target_separation", "development_probability_sha256", "development_identity_sha256", "evaluation_opened", "hardware_writes", "physical_movements", "physical_authority", "limitations", "result_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_development.v3"},
+    "scope": {"const": "SYNTHETIC_ISAAC_DEVELOPMENT_ONLY_NO_QUALIFICATION"},
+    "status": {"enum": ["PASSED_DEVELOPMENT_GATE", "FAILED_DEVELOPMENT_GATE"]},
+    "fixture_file_sha256": {"$ref": "#/$defs/hash"},
+    "fixture_bundle_sha256": {"$ref": "#/$defs/hash"},
+    "admission_file_sha256": {"$ref": "#/$defs/hash"},
+    "admission_receipt_sha256": {"$ref": "#/$defs/hash"},
+    "lineage_file_sha256": {"$ref": "#/$defs/hash"},
+    "model_sha256": {"$ref": "#/$defs/hash"},
+    "model_bytes": {"type": "integer", "minimum": 1},
+    "training_plan": {"type": "object"},
+    "training_device": {"enum": ["cuda", "cpu"]},
+    "training_count": {"const": 28800},
+    "development_count": {"const": 14400},
+    "evaluation_count": {"const": 0},
+    "epoch_losses": {"type": "array", "minItems": 24, "maxItems": 24, "items": {"$ref": "#/$defs/epoch"}},
+    "selected_threshold": {"type": ["number", "null"], "minimum": 0.05, "maximum": 0.95},
+    "selected_measurement": {"oneOf": [{"$ref": "#/$defs/measurement"}, {"type": "null"}]},
+    "threshold_measurements": {"type": "array", "minItems": 19, "maxItems": 19, "items": {"$ref": "#/$defs/measurement"}},
+    "target_separation": {"type": "array", "minItems": 75, "maxItems": 75, "items": {"$ref": "#/$defs/target"}},
+    "development_probability_sha256": {"$ref": "#/$defs/hash"},
+    "development_identity_sha256": {"$ref": "#/$defs/hash"},
+    "evaluation_opened": {"const": false},
+    "hardware_writes": {"const": 0},
+    "physical_movements": {"const": 0},
+    "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+    "result_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "epoch": {
+      "type": "object", "additionalProperties": false,
+      "required": ["epoch", "classification", "appearance_consistency", "combined"],
+      "properties": {
+        "epoch": {"type": "integer", "minimum": 1, "maximum": 24},
+        "classification": {"type": "number", "minimum": 0},
+        "appearance_consistency": {"type": "number", "minimum": 0},
+        "combined": {"type": "number", "minimum": 0}
+      }
+    },
+    "rateRow": {
+      "type": "object", "additionalProperties": false,
+      "required": ["missed_obstructions", "obstruction_count", "missed_obstruction_rate", "visible_false_stops", "visible_count", "visible_false_stop_rate"],
+      "properties": {
+        "appearance_id": {"type": "string", "minLength": 1},
+        "family": {"type": "string", "minLength": 1},
+        "missed_obstructions": {"type": "integer", "minimum": 0},
+        "obstruction_count": {"type": "integer", "minimum": 0},
+        "missed_obstruction_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "visible_false_stops": {"type": "integer", "minimum": 0},
+        "visible_count": {"type": "integer", "minimum": 0},
+        "visible_false_stop_rate": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "oneOf": [
+        {"required": ["appearance_id"], "not": {"required": ["family"]}},
+        {"required": ["family"], "not": {"required": ["appearance_id"]}}
+      ]
+    },
+    "measurement": {
+      "type": "object", "additionalProperties": false,
+      "required": ["threshold", "missed_obstructions", "obstruction_count", "missed_obstruction_rate", "missed_obstruction_scene_cluster_upper", "visible_false_stops", "visible_count", "visible_false_stop_rate", "visible_false_stop_scene_cluster_upper", "maximum_appearance_missed_obstruction_rate", "maximum_appearance_visible_false_stop_rate", "maximum_family_missed_obstruction_rate", "maximum_family_visible_false_stop_rate", "minimum_target_separation_margin", "point_and_cluster_gate_met", "worst_appearance_gate_met", "worst_family_gate_met", "target_separation_gate_met", "appearance_metrics", "family_metrics", "gate_met"],
+      "properties": {
+        "threshold": {"type": "number", "minimum": 0.05, "maximum": 0.95},
+        "missed_obstructions": {"type": "integer", "minimum": 0},
+        "obstruction_count": {"const": 10800},
+        "missed_obstruction_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "missed_obstruction_scene_cluster_upper": {"type": "number", "minimum": 0, "maximum": 1},
+        "visible_false_stops": {"type": "integer", "minimum": 0},
+        "visible_count": {"const": 3600},
+        "visible_false_stop_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "visible_false_stop_scene_cluster_upper": {"type": "number", "minimum": 0, "maximum": 1},
+        "maximum_appearance_missed_obstruction_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "maximum_appearance_visible_false_stop_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "maximum_family_missed_obstruction_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "maximum_family_visible_false_stop_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "minimum_target_separation_margin": {"type": "number", "minimum": -1, "maximum": 1},
+        "point_and_cluster_gate_met": {"type": "boolean"},
+        "worst_appearance_gate_met": {"type": "boolean"},
+        "worst_family_gate_met": {"type": "boolean"},
+        "target_separation_gate_met": {"type": "boolean"},
+        "appearance_metrics": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/rateRow"}},
+        "family_metrics": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"$ref": "#/$defs/rateRow"}},
+        "gate_met": {"type": "boolean"}
+      }
+    },
+    "target": {
+      "type": "object", "additionalProperties": false,
+      "required": ["target_id", "visible_count", "obstruction_count", "maximum_visible_probability", "minimum_obstruction_probability", "separation_margin", "locally_separable"],
+      "properties": {
+        "target_id": {"type": "string", "minLength": 1},
+        "visible_count": {"const": 48},
+        "obstruction_count": {"const": 144},
+        "maximum_visible_probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "minimum_obstruction_probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "separation_margin": {"type": "number", "minimum": -1, "maximum": 1},
+        "locally_separable": {"type": "boolean"}
+      }
+    }
+  }
+}

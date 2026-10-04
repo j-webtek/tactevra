@@ -1,0 +1,129 @@
+{
+  "all_samples_pass": true,
+  "contact_events": [
+    {
+      "action_index": 0,
+      "expected_tool_tip_board_mm": [
+        216.55,
+        154.0,
+        21.0
+      ],
+      "isaac_tool_tip_board_mm": [
+        216.54993267473208,
+        154.00001330856887,
+        21.00003451856597
+      ],
+      "maximum_joint_tracking_error_rad": 5.520825996363499e-08,
+      "phase": "CONTACT",
+      "phase_endpoint": true,
+      "sequence": 35,
+      "target_id": "H",
+      "time_from_start_ns": 8861613211,
+      "tool_tip_error_mm": 7.682018682808492e-05
+    },
+    {
+      "action_index": 1,
+      "expected_tool_tip_board_mm": [
+        216.55,
+        154.0,
+        21.0
+      ],
+      "isaac_tool_tip_board_mm": [
+        216.54993267473208,
+        154.00001330856887,
+        21.00003451856597
+      ],
+      "maximum_joint_tracking_error_rad": 5.520825996363499e-08,
+      "phase": "CONTACT",
+      "phase_endpoint": true,
+      "sequence": 38,
+      "target_id": "H",
+      "time_from_start_ns": 10839733805,
+      "tool_tip_error_mm": 7.682018682808492e-05
+    },
+    {
+      "action_index": 2,
+      "expected_tool_tip_board_mm": [
+        107.0,
+        196.0,
+        21.0
+      ],
+      "isaac_tool_tip_board_mm": [
+        107.00012831048616,
+        196.0001014919147,
+        20.99991352017866
+      ],
+      "maximum_joint_tracking_error_rad": 3.134983028729721e-08,
+      "phase": "CONTACT",
+      "phase_endpoint": true,
+      "sequence": 64,
+      "target_id": "1",
+      "time_from_start_ns": 18316473139,
+      "tool_tip_error_mm": 0.0001850485047460475
+    },
+    {
+      "action_index": 3,
+      "expected_tool_tip_board_mm": [
+        283.2,
+        133.0,
+        21.0
+      ],
+      "isaac_tool_tip_board_mm": [
+        283.2000028355894,
+        133.000051750806,
+        20.999863623802586
+      ],
+      "maximum_joint_tracking_error_rad": 3.149483607245429e-08,
+      "phase": "CONTACT",
+      "phase_endpoint": true,
+      "sequence": 104,
+      "target_id": "PERIOD",
+      "time_from_start_ns": 29065037324,
+      "tool_tip_error_mm": 0.00014589261019436637
+    }
+  ],
+  "controller_commands": [],
+  "driver_version": "595.97",
+  "evidence_class": "KINEMATIC_SCHEDULE_REPLAY_DIAGNOSTIC_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "unmeasured_simulation_only_robot_layout_and_tool_length",
+    "joint_teleport_fk_replay_without_dynamics_or_controller_tracking",
+    "installed_geometry_collision_screening_not_executed",
+    "invalid_imported_mass_and_inertia_placeholders",
+    "no_contact_force_key_travel_or_physical_qualification"
+  ],
+  "maximum_joint_tracking_error_rad": 5.923525581152944e-08,
+  "maximum_tool_tip_error_mm": 0.07684842940066568,
+  "ordered_contact_target_ids": [
+    "H",
+    "H",
+    "1",
+    "PERIOD"
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_steps": 0,
+  "receipt_sha256": "ea6cc125388ac4b71c2a73374604a2ca672c21889d016cb17af1faebf6fe01cc",
+  "remaining_blockers": [
+    "MEASURED_INSTALLED_DYNAMICS_REQUIRED",
+    "INSTALLED_GEOMETRY_COLLISION_SCREENING_REQUIRED",
+    "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION"
+  ],
+  "sample_count": 133,
+  "schema": "tactevra.isaac_joint_schedule_replay.v1",
+  "source_bindings": {
+    "arm_commit": "5072c163152848bd8d78fa3fbc024e32177ac98d",
+    "arm_report_sha256": "681455f0b734e924f0074ccfb7228ecb94c04ba62f5657f9d66b27af438c618b",
+    "bundle_file_sha256": "4aece6ef7c7194aea59af2263caff6d4a3be65273a5df92348bf796b7103bb8c",
+    "bundle_sha256": "b890df278560724de964b374b4d4cc46e0e9c51b430051319034a1d259fdfdc0",
+    "robot_import_receipt_file_sha256": "f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde",
+    "robot_usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2",
+    "virtual_profile_sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+  },
+  "thresholds": {
+    "maximum_joint_tracking_error_rad": 1e-06,
+    "maximum_tool_tip_error_mm": 0.25
+  }
+}

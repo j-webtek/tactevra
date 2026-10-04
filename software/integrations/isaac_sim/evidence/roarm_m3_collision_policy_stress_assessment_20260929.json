@@ -1,0 +1,437 @@
+{
+  "blockers": [
+    "CANDIDATE_UNINSTALLED",
+    "EFFECTIVE_EXCLUSIONS_EMPTY",
+    "HELD_OUT_FINITE_CORPUS_IS_NOT_CONTINUOUS_WORKSPACE_PROOF",
+    "INSTALLED_MEASURED_GEOMETRY_ABSENT",
+    "ENGINEERING_ACCEPTANCE_ABSENT",
+    "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING"
+  ],
+  "clearance_replay_admissible": false,
+  "collision_query_admissible": false,
+  "controller_authority": false,
+  "default_pair_disposition": "CHECK_COLLISION",
+  "effective_exclusions": [],
+  "evidence_class": "HELD_OUT_POLICY_CANDIDATE_STRESS_ONLY",
+  "execution_permit_authority": false,
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "installation_state": "CANDIDATE_UNINSTALLED",
+  "limitations": [
+    "held_out_finite_samples_do_not_cover_continuous_joint_space",
+    "stress_support_does_not_install_or_promote_exclusions",
+    "raw_non_watertight_meshes_are_not_repaired",
+    "no_measured_installed_tool_camera_support_or_environment_geometry",
+    "no_controller_hardware_or_physical_qualification"
+  ],
+  "method": {
+    "continuous_workspace_claimed": false,
+    "corpus_relation": "DISJOINT_FROM_ORIGINAL_HALTON_1_THROUGH_32",
+    "halton_sample_count": 256,
+    "halton_start_index": 1001,
+    "never_support_rule": "ALL_CASES_FREE_WITH_POSITIVE_RECORDED_MINIMA",
+    "pose_family": "HALTON_INTERIOR"
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "proposed_pair_reviews": [
+    {
+      "body_pair": [
+        "robot:base_link",
+        "robot:link1"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 256,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": null,
+      "minimum_candidate_box_signed_distance_mm": -4e-06,
+      "minimum_raw_mesh_signed_distance_mm": 0.0,
+      "replay_body_pair": [
+        "base_link",
+        "link1"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:base_link",
+        "robot:link2"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 33.258095,
+      "minimum_raw_mesh_signed_distance_mm": 35.179461,
+      "replay_body_pair": [
+        "base_link",
+        "link2"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:base_link",
+        "robot:link3"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 26.572228,
+      "minimum_raw_mesh_signed_distance_mm": 45.597019,
+      "replay_body_pair": [
+        "base_link",
+        "link3"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:gripper",
+        "robot:link3"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 71.073044,
+      "minimum_raw_mesh_signed_distance_mm": 76.370874,
+      "replay_body_pair": [
+        "gripper_link",
+        "link3"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:gripper",
+        "robot:link4"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 34.728113,
+      "minimum_raw_mesh_signed_distance_mm": 39.481162,
+      "replay_body_pair": [
+        "gripper_link",
+        "link4"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:gripper",
+        "robot:link5"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 256
+      },
+      "held_out_supports_never_reason": null,
+      "minimum_candidate_box_signed_distance_mm": -30.192605,
+      "minimum_raw_mesh_signed_distance_mm": 0.297517,
+      "replay_body_pair": [
+        "gripper_link",
+        "link5"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link1",
+        "robot:link2"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 100,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 156
+      },
+      "held_out_supports_never_reason": null,
+      "minimum_candidate_box_signed_distance_mm": -6.367342,
+      "minimum_raw_mesh_signed_distance_mm": 0.182556,
+      "replay_body_pair": [
+        "link1",
+        "link2"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link1",
+        "robot:link3"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 61.320282,
+      "minimum_raw_mesh_signed_distance_mm": 61.323259,
+      "replay_body_pair": [
+        "link1",
+        "link3"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:link2",
+        "robot:link3"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 256
+      },
+      "held_out_supports_never_reason": null,
+      "minimum_candidate_box_signed_distance_mm": -20.096962,
+      "minimum_raw_mesh_signed_distance_mm": 0.610001,
+      "replay_body_pair": [
+        "link2",
+        "link3"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link3",
+        "robot:link4"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 42,
+        "AGREEMENT_FREE": 0,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 214
+      },
+      "held_out_supports_never_reason": null,
+      "minimum_candidate_box_signed_distance_mm": -25.329367,
+      "minimum_raw_mesh_signed_distance_mm": 0.0,
+      "replay_body_pair": [
+        "link3",
+        "link4"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    },
+    {
+      "body_pair": [
+        "robot:link3",
+        "robot:link5"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 36.934659,
+      "minimum_raw_mesh_signed_distance_mm": 36.934955,
+      "replay_body_pair": [
+        "link3",
+        "link5"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_NEVER"
+    },
+    {
+      "body_pair": [
+        "robot:link4",
+        "robot:link5"
+      ],
+      "case_count": 256,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 256,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "held_out_supports_never_reason": null,
+      "minimum_candidate_box_signed_distance_mm": 0.603777,
+      "minimum_raw_mesh_signed_distance_mm": 0.60385,
+      "replay_body_pair": [
+        "link4",
+        "link5"
+      ],
+      "upstream_reason": "UPSTREAM_SRDF_ADJACENT"
+    }
+  ],
+  "receipt_sha256": "8b2662fb183022d93600d4dd72be815e2b0f3a0b0d77722bcd52f478e411bc9a",
+  "retained_nonzero_pair_reviews": [
+    {
+      "body_pair": [
+        "base_link",
+        "link4"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 255,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 1
+      },
+      "minimum_candidate_box_signed_distance_mm": -1.982684,
+      "minimum_raw_mesh_signed_distance_mm": 16.035708
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 5,
+        "AGREEMENT_FREE": 249,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 2
+      },
+      "minimum_candidate_box_signed_distance_mm": -42.697569,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "gripper_link"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 6,
+        "AGREEMENT_FREE": 249,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 1
+      },
+      "minimum_candidate_box_signed_distance_mm": -20.260577,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 5,
+        "AGREEMENT_FREE": 248,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 3
+      },
+      "minimum_candidate_box_signed_distance_mm": -45.112963,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link1"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 4,
+        "AGREEMENT_FREE": 247,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 5
+      },
+      "minimum_candidate_box_signed_distance_mm": -43.547053,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link4"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 1,
+        "AGREEMENT_FREE": 255,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "minimum_candidate_box_signed_distance_mm": -1.94702,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "link2",
+        "link5"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 9,
+        "AGREEMENT_FREE": 247,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "minimum_candidate_box_signed_distance_mm": -49.555987,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link2"
+      ],
+      "counts": {
+        "AGREEMENT_COLLISION": 6,
+        "AGREEMENT_FREE": 249,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 1
+      },
+      "minimum_candidate_box_signed_distance_mm": -23.648413,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    }
+  ],
+  "schema": "tactevra.isaac_sim_collision_policy_stress.v1",
+  "source_bindings": {
+    "base_contract_sha256": "d3238c0c95a1d2e7ff74fcb8dccc3eb0aadb0f897b2ea041319bbcd6442af5c3",
+    "candidate_content_sha256": "651adee0ee18c4d11233e3ed37389a4811236e08b54c0f91a32fd6dfa436e75a",
+    "candidate_file_sha256": "88e31c4b525ded8ca48d4bae7cf70faff396e2d9f92249296f2b2f3a9c1d3c3f",
+    "geometry_candidate_sha256": "0568f7ba269cf190ca4b9d6bc41ac17c90c72c3489fad433bb064ca2239e5fc6",
+    "robot_model_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "stress_replay_file_sha256": "8b598c5b582f063a5989cd434ef2f4d2a842445c69aa8706becd7948681dc31b",
+    "stress_replay_sha256": "199a8f77e6cdbc00154ae0f01aca490b4a074c56b6b28dcf0ace641390b8ffe8"
+  },
+  "summary": {
+    "contradicted_never_pair_count": 0,
+    "proposed_adjacent_pair_count": 6,
+    "proposed_never_pair_count": 6,
+    "proposed_pair_count": 12,
+    "retained_collision_pair_count": 7,
+    "retained_false_negative_pair_count": 0,
+    "retained_false_positive_pair_count": 6,
+    "retained_pair_count": 9,
+    "retained_pair_counts": {
+      "AGREEMENT_COLLISION": 36,
+      "AGREEMENT_FREE": 2255,
+      "CANDIDATE_FALSE_NEGATIVE": 0,
+      "CANDIDATE_FALSE_POSITIVE": 13
+    },
+    "stress_pair_case_count": 5376,
+    "stress_pose_count": 256,
+    "supported_never_pair_count": 6
+  },
+  "transport_authority": false,
+  "wire_commands": []
+}

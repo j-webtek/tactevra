@@ -153,3 +153,62 @@ A model-driven command path is operational only when it demonstrates:
 4. Place that encoder behind a sole-writer transport with a separate
    single-use execution permit and correlated receipts.
 5. Connect independent outcome verification and qualify one key before strings.
+# Planner capability decision: shifted and layered characters
+
+The first desktop strategy is commissioned Sticky Keys with sequential
+`SHIFT`, then base-key presses. The arm never attempts a simultaneous chord.
+Caps Lock optimization is deferred because it does not cover shifted symbols
+and adds state that must be observed and recovered. Until the target catalog
+contains a commissioned `SHIFT` target and the host supplies hash-bound Sticky
+Keys commissioning evidence, uppercase and shifted-symbol requests fail closed
+as `keyboard_modifier_uncommissioned`.
+
+The commissioning checklist must prove all four host settings: Sticky Keys is
+enabled; one Shift press latches exactly the next key; the five-Shift shortcut
+and its focus-stealing dialog are disabled; and “turn off Sticky Keys when two
+keys are pressed at once” is disabled. The compiler may never emit consecutive
+Shift presses because two presses enter modifier-lock state. A host keystroke
+and modifier-state log must show `LATCHED` after every Shift and `OFF` after the
+following base key. Missing or mismatched evidence blocks the action sequence.
+
+Printable US ASCII requires 48 distinct base-key targets plus `SHIFT`. The
+current 46-target keyboard catalog contains 44 of those base keys; `GRAVE`,
+`LEFT_BRACKET`, `RIGHT_BRACKET`, and `BACKSLASH` are absent, while `TAB`,
+and `ENTER` do not close that printable-character gap.
+The deterministic compiler now receives the commissioned target-ID set and
+rejects a character before producing a plan if any required base or modifier
+key is absent. A complete virtual layout may be used only for replay evidence,
+not to claim commissioned capability.
+
+The frozen seeded replay uses seed `190055`, five edge cases (`AA`, `!!`, `aA`,
+`A`, and ` A`), and 5,000 random printable-ASCII strings of length 1–64. It
+replays 160,925 requested characters through 240,468 virtual presses, including
+79,543 one-shot Shift presses, with zero failures. The exact case population is
+hash-bound so later compiler changes must replay the same strings.
+
+Arm-side reachability screening must be catalog driven. The runtime validates
+the loaded target catalog against the active frozen catalog SHA-256, validates
+each target's device, identity, center, safe region, and source state, then
+screens every ordered catalog target exactly once and binds that ordered
+identity list into its report. It must not encode an expected total or
+per-device target count in source code. Catalog mutation, duplicate target IDs,
+hash mismatch, or a missing screening result fails closed. This requirement
+lets future reviewed catalog additions remain data changes while preserving an
+exact runtime binding.
+
+The `GRAVE` measurement uses the keycap top press surface, excluding the
+tapered sidewall, base, and switch housing. All width, height, and reference
+edge offsets use that same top surface because it is both visible to the camera
+and contacted by the tool.
+
+The phone strategy is a verified layer state machine. Lowercase, uppercase,
+and symbol layers are distinct observed states. Every future transition and
+character tap requires ADB confirmation of the currently visible layer before
+the press. Until `key_shift`, `key_symbols`, and `key_letters` transition
+targets and ADB layer verification are commissioned, layered phone characters
+fail closed as `phone_layer_uncommissioned`.
+
+These capability facts are deterministic commissioning inputs. The language
+model emits only intent and exact text; it cannot emit key IDs, layer claims,
+coordinates, commands, or authority. The current lowercase profiles and target
+catalogs remain unchanged.

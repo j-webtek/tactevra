@@ -1,0 +1,176 @@
+{
+  "blockers": [
+    "FINITE_CORPUS_DOES_NOT_PROVE_NEVER_COLLISION",
+    "RUNTIME_POLICY_CONTRACT_NOT_SELECTED",
+    "EXCLUSION_PROFILE_NOT_INSTALLED",
+    "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "clearance_replay_admissible": false,
+  "collision_query_admissible": false,
+  "evidence_class": "FINITE_REPLAY_SRDF_NEVER_REVIEW_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "finite_samples_support_but_do_not_prove_never_collision_semantics",
+    "pair_summary_minima_do_not_establish_continuous_clearance",
+    "no_runtime_exclusion_contract_or_profile_installation",
+    "no_controller_hardware_or_physical_qualification"
+  ],
+  "method": {
+    "continuous_workspace_claimed": false,
+    "scope": "COMMITTED_49_POSE_PAIR_SUMMARY",
+    "support_rule": "ALL_PAIR_CASES_AGREEMENT_FREE_AND_POSITIVE_RECORDED_MINIMA"
+  },
+  "never_exclusions_installable": false,
+  "never_pair_reviews": [
+    {
+      "body_pair": [
+        "base_link",
+        "link2"
+      ],
+      "case_count": 49,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "finite_replay_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 33.679536,
+      "minimum_raw_mesh_signed_distance_mm": 34.948688
+    },
+    {
+      "body_pair": [
+        "base_link",
+        "link3"
+      ],
+      "case_count": 49,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "finite_replay_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 26.995907,
+      "minimum_raw_mesh_signed_distance_mm": 34.870661
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link3"
+      ],
+      "case_count": 49,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "finite_replay_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 71.153536,
+      "minimum_raw_mesh_signed_distance_mm": 78.590082
+    },
+    {
+      "body_pair": [
+        "gripper_link",
+        "link4"
+      ],
+      "case_count": 49,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "finite_replay_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 34.73336,
+      "minimum_raw_mesh_signed_distance_mm": 39.39208
+    },
+    {
+      "body_pair": [
+        "link1",
+        "link3"
+      ],
+      "case_count": 49,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "finite_replay_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 55.763873,
+      "minimum_raw_mesh_signed_distance_mm": 55.763896
+    },
+    {
+      "body_pair": [
+        "link3",
+        "link5"
+      ],
+      "case_count": 49,
+      "counts": {
+        "AGREEMENT_COLLISION": 0,
+        "AGREEMENT_FREE": 49,
+        "CANDIDATE_FALSE_NEGATIVE": 0,
+        "CANDIDATE_FALSE_POSITIVE": 0
+      },
+      "finite_replay_supports_never_reason": true,
+      "minimum_candidate_box_signed_distance_mm": 36.937687,
+      "minimum_raw_mesh_signed_distance_mm": 36.937693
+    }
+  ],
+  "pair_exclusions_admissible": false,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "a2210f019e0dae09274be1e30b36dbaf69ffe3064b54030bb699568c9230c0e8",
+  "retained_nonexcluded_nonadjacent_collisions": [
+    {
+      "agreement_collision_count": 1,
+      "body_pair": [
+        "gripper_link",
+        "link1"
+      ],
+      "minimum_candidate_box_signed_distance_mm": -35.051498,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "agreement_collision_count": 1,
+      "body_pair": [
+        "link2",
+        "link4"
+      ],
+      "minimum_candidate_box_signed_distance_mm": -6.198631,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    },
+    {
+      "agreement_collision_count": 1,
+      "body_pair": [
+        "link2",
+        "link5"
+      ],
+      "minimum_candidate_box_signed_distance_mm": -21.608616,
+      "minimum_raw_mesh_signed_distance_mm": 0.0
+    }
+  ],
+  "schema": "tactevra.isaac_sim_srdf_never_pair_review.v1",
+  "source_bindings": {
+    "policy_review_file_sha256": "91365b63c7e1fc032d4d94fcd098dfb233079f7777326c89d2c5b7ddeec7e04d",
+    "policy_review_sha256": "c6c1df0b304f7f8b36bd6b8e1015244d1b5e427b24476a85f84b846de5001423",
+    "replay_summary_file_sha256": "986cf17c52e4394ab19999a41625ac94cb73840397314f0877c2578739ef9b66",
+    "replay_summary_sha256": "1cad314d6901c0f639c4771f7be79b235eeadf844eba600129d4f8bb45991b87",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d",
+    "upstream_srdf_sha256": "29f1daaeea91a490b85581a9a62dd07be9ab959d7817fad89836c466e8288499"
+  },
+  "summary": {
+    "all_never_pair_cases_agreement_free": true,
+    "contradicted_never_pair_count": 0,
+    "never_pair_case_count": 294,
+    "never_pair_count": 6,
+    "retained_nonexcluded_nonadjacent_collision_case_count": 3,
+    "retained_nonexcluded_nonadjacent_collision_pair_count": 3,
+    "supported_never_pair_count": 6
+  },
+  "wire_commands": []
+}

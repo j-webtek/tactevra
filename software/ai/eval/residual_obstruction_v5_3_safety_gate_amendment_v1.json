@@ -1,0 +1,333 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_v5_3_safety_gate_amendment.v1",
+  "scope": "SYNTHETIC_GATE_ROLE_AND_COMPLETE_SAFETY_POWER_NO_RENDER",
+  "status": "READY_FOR_FIXTURE_REVISION_RENDER_STILL_BLOCKED",
+  "source_commit": "c8a9e4d0ffd89e035087afe783deb6cfdc8dfcd6",
+  "v5_file_sha256": "1ecc590968a5b7590c14dfd0c7c0804d4c7ffcad2e607e8e43418616a22f8001",
+  "v5_bundle_sha256": "69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e",
+  "v5_2_file_sha256": "1df76cb8aa84e3ac4239ad6f506c3f56e39d19adf26146502ed07ab7a7ccf7af",
+  "v5_2_report_sha256": "ac77da122ae5d4ef9dad38f7aa8f36a2064d53c9c5f0c2226f5f5d53dd49a85c",
+  "gate_roles": {
+    "development_candidate_selection": {
+      "point_estimate_safety_checks": {
+        "maximum_pooled_all_obstruction_miss_rate": 0.02,
+        "maximum_cable_family_miss_rate": 0.02,
+        "maximum_dark_cable_30_60_miss_rate": 0.02,
+        "maximum_visible_false_stop_rate": 0.06
+      },
+      "diagnostic_floors": {
+        "minimum_every_target_auc": 0.9,
+        "minimum_linear_q05_target_auc": 0.95
+      },
+      "reported_not_powered": [
+        "LINEAR_Q05_TARGET_QUANTILE_MARGIN",
+        "PER_TARGET_ERROR_TABLE",
+        "HARD_CASE_FAMILY_TABLE",
+        "BASELINE_UPLIFT"
+      ],
+      "selection_rule": "LOWEST_PARAMETER_CANDIDATE_PASSING_POINT_SAFETY_CHECKS_AND_DIAGNOSTIC_FLOORS"
+    },
+    "single_use_evaluation_safety_gates": {
+      "confidence": "ONE_SIDED_95_PERCENT_UPPER_BOUND",
+      "maximum_pooled_all_obstruction_miss_upper": 0.02,
+      "maximum_cable_family_miss_upper": 0.02,
+      "maximum_dark_cable_30_60_miss_upper": 0.02,
+      "maximum_visible_false_stop_upper": 0.06,
+      "all_gates_required": true,
+      "failure_result": "REJECT_FROZEN_CANDIDATE_NO_RETUNING_ON_EVALUATION"
+    }
+  },
+  "power_assumptions": {
+    "trials": 20000,
+    "seed": 55301,
+    "power_target": 0.9,
+    "planning_selection_joint_lower_bound_target": 0.93,
+    "pooled_all_obstruction_miss_design_rate": 0.005,
+    "cable_family_miss_design_rate": 0.005,
+    "dark_cable_30_60_miss_design_rate": 0.005,
+    "visible_false_stop_design_rate": 0.03,
+    "rationale": "Miss alternatives are one quarter of the 2% safety ceiling; false-stop alternative is half of the 6% usability ceiling; the selected design uses a 0.93 joint lower-bound planning cushion above the 0.90 requirement.",
+    "joint_lower_bound": "BONFERRONI_WITHOUT_GATE_INDEPENDENCE_ASSUMPTION"
+  },
+  "evaluation_rotation": {
+    "targets_per_scene": 12,
+    "target_count": 75,
+    "rows_per_target_scene": 36,
+    "family_rows_per_target_scene": {
+      "pooled_all_obstruction_miss": 24,
+      "cable_family_miss": 12,
+      "dark_cable_30_60_miss": 6,
+      "visible_false_stop": 12
+    },
+    "scenarios": [
+      {
+        "scenario_id": "MODERATE_ICC_0_05",
+        "intracluster_correlation": 0.05,
+        "candidates": [
+          {
+            "scene_count": 128,
+            "evaluation_observations": 55296,
+            "minimum_target_scene_exposures": 20,
+            "maximum_target_scene_exposures": 21,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 160,
+            "evaluation_observations": 69120,
+            "minimum_target_scene_exposures": 25,
+            "maximum_target_scene_exposures": 26,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 192,
+            "evaluation_observations": 82944,
+            "minimum_target_scene_exposures": 30,
+            "maximum_target_scene_exposures": 31,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 208,
+            "evaluation_observations": 89856,
+            "minimum_target_scene_exposures": 33,
+            "maximum_target_scene_exposures": 34,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 216,
+            "evaluation_observations": 93312,
+            "minimum_target_scene_exposures": 34,
+            "maximum_target_scene_exposures": 35,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 224,
+            "evaluation_observations": 96768,
+            "minimum_target_scene_exposures": 35,
+            "maximum_target_scene_exposures": 36,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 240,
+            "evaluation_observations": 103680,
+            "minimum_target_scene_exposures": 38,
+            "maximum_target_scene_exposures": 39,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          },
+          {
+            "scene_count": 256,
+            "evaluation_observations": 110592,
+            "minimum_target_scene_exposures": 40,
+            "maximum_target_scene_exposures": 41,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 1.0,
+              "cable_family_miss": 1.0,
+              "dark_cable_30_60_miss": 1.0,
+              "visible_false_stop": 1.0
+            },
+            "limiting_marginal_power": 1.0,
+            "bonferroni_joint_lower_bound": 1.0
+          }
+        ]
+      },
+      {
+        "scenario_id": "PESSIMISTIC_ICC_0_30",
+        "intracluster_correlation": 0.3,
+        "candidates": [
+          {
+            "scene_count": 128,
+            "evaluation_observations": 55296,
+            "minimum_target_scene_exposures": 20,
+            "maximum_target_scene_exposures": 21,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.8644,
+              "cable_family_miss": 0.862,
+              "dark_cable_30_60_miss": 0.8534,
+              "visible_false_stop": 0.8974
+            },
+            "limiting_marginal_power": 0.8534,
+            "bonferroni_joint_lower_bound": 0.4772
+          },
+          {
+            "scene_count": 160,
+            "evaluation_observations": 69120,
+            "minimum_target_scene_exposures": 25,
+            "maximum_target_scene_exposures": 26,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.93065,
+              "cable_family_miss": 0.9265,
+              "dark_cable_30_60_miss": 0.9266,
+              "visible_false_stop": 0.9509
+            },
+            "limiting_marginal_power": 0.9265,
+            "bonferroni_joint_lower_bound": 0.73465
+          },
+          {
+            "scene_count": 192,
+            "evaluation_observations": 82944,
+            "minimum_target_scene_exposures": 30,
+            "maximum_target_scene_exposures": 31,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.9634,
+              "cable_family_miss": 0.9623,
+              "dark_cable_30_60_miss": 0.96235,
+              "visible_false_stop": 0.97605
+            },
+            "limiting_marginal_power": 0.9623,
+            "bonferroni_joint_lower_bound": 0.8641
+          },
+          {
+            "scene_count": 208,
+            "evaluation_observations": 89856,
+            "minimum_target_scene_exposures": 33,
+            "maximum_target_scene_exposures": 34,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.9735,
+              "cable_family_miss": 0.97205,
+              "dark_cable_30_60_miss": 0.97225,
+              "visible_false_stop": 0.9836
+            },
+            "limiting_marginal_power": 0.97205,
+            "bonferroni_joint_lower_bound": 0.9014
+          },
+          {
+            "scene_count": 216,
+            "evaluation_observations": 93312,
+            "minimum_target_scene_exposures": 34,
+            "maximum_target_scene_exposures": 35,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.97785,
+              "cable_family_miss": 0.97695,
+              "dark_cable_30_60_miss": 0.97635,
+              "visible_false_stop": 0.98675
+            },
+            "limiting_marginal_power": 0.97635,
+            "bonferroni_joint_lower_bound": 0.9179
+          },
+          {
+            "scene_count": 224,
+            "evaluation_observations": 96768,
+            "minimum_target_scene_exposures": 35,
+            "maximum_target_scene_exposures": 36,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.9817,
+              "cable_family_miss": 0.9809,
+              "dark_cable_30_60_miss": 0.97985,
+              "visible_false_stop": 0.9881
+            },
+            "limiting_marginal_power": 0.97985,
+            "bonferroni_joint_lower_bound": 0.93055
+          },
+          {
+            "scene_count": 240,
+            "evaluation_observations": 103680,
+            "minimum_target_scene_exposures": 38,
+            "maximum_target_scene_exposures": 39,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.98755,
+              "cable_family_miss": 0.98685,
+              "dark_cable_30_60_miss": 0.98555,
+              "visible_false_stop": 0.9919
+            },
+            "limiting_marginal_power": 0.98555,
+            "bonferroni_joint_lower_bound": 0.95185
+          },
+          {
+            "scene_count": 256,
+            "evaluation_observations": 110592,
+            "minimum_target_scene_exposures": 40,
+            "maximum_target_scene_exposures": 41,
+            "marginal_power": {
+              "pooled_all_obstruction_miss": 0.99175,
+              "cable_family_miss": 0.99125,
+              "dark_cable_30_60_miss": 0.99,
+              "visible_false_stop": 0.99455
+            },
+            "limiting_marginal_power": 0.99,
+            "bonferroni_joint_lower_bound": 0.96755
+          }
+        ]
+      }
+    ],
+    "recommended_scene_count": 224,
+    "recommended_evaluation_observations": 96768,
+    "minimum_target_scene_exposures": 35,
+    "maximum_target_scene_exposures": 36,
+    "exact_rotation_frozen": false,
+    "render_authorized": false
+  },
+  "development_role": {
+    "scene_count": 8,
+    "observation_count": 21600,
+    "powered_confidence_claim": false,
+    "purpose": "CANDIDATE_SELECTION_POINT_ESTIMATES_DIAGNOSTICS_AND_THRESHOLD_FREEZE"
+  },
+  "evaluation_role": {
+    "purpose": "ONE_SINGLE_USE_POWERED_SAFETY_CLAIM_AFTER_CANDIDATE_AND_THRESHOLD_FREEZE",
+    "candidate_count": 1,
+    "retuning_after_open": false
+  },
+  "limitations": [
+    "Design rates are planning alternatives, not observed v5 performance.",
+    "The exact 12-target rotation and expanded evaluation scene identities remain unfrozen.",
+    "Synthetic lighting and obstruction properties remain provisional until the physical pilot.",
+    "Per-target AUC diagnostics detect broken targets but are not deployment safety claims.",
+    "This amendment does not revise the v5 fixture or authorize rendering."
+  ],
+  "images_generated": false,
+  "training_started": false,
+  "development_opened": false,
+  "evaluation_opened": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "report_sha256": "1a3bea5b88566b55c8a621b7b0a94d0a6e0dfc4130dafd46ef0cc1354bf680e6"
+}

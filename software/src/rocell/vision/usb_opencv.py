@@ -33,6 +33,112 @@ from .camera import (
 )
 
 
+OPENCV_ORIENTATION_PATTERN_VERSION = "rocell.opencv_orientation_pattern.v1"
+OPENCV_TOP_LEFT_BGR_ORIENTATION = "TOP_LEFT_BGR_NO_MIRROR"
+_ORIENTATION_SAMPLE_FRACTIONS = (
+    (0.20, 0.20),
+    (0.80, 0.20),
+    (0.20, 0.80),
+    (0.80, 0.80),
+)
+_ORIENTATION_COLORS_BGR = {
+    "BLUE": (255.0, 0.0, 0.0),
+    "GREEN": (0.0, 255.0, 0.0),
+    "RED": (0.0, 0.0, 255.0),
+    "YELLOW": (0.0, 255.0, 255.0),
+    "CYAN": (255.0, 255.0, 0.0),
+}
+_EXPECTED_ORIENTATION_LABELS = ("BLUE", "GREEN", "RED", "YELLOW")
+
+
+def verify_opencv_top_left_bgr_orientation(
+    frame: Any,
+    *,
+    maximum_normalized_color_distance: float = 90.0,
+) -> str:
+    """Verify an asymmetric four-marker commissioning frame.
+
+    The physical or displayed pattern has blue at top left, green at top right,
+    red at bottom left, and yellow at bottom right.  OpenCV must deliver the
+    decoded frame with a top-left row origin and BGR channel order.  This check
+    is deliberately separate from camera opening: a commissioned workflow must
+    place the known pattern in view and call this function on the actual decoded
+    frame before ordinary captures are admitted.
+    """
+
+    shape = getattr(frame, "shape", None)
+    if (
+        not isinstance(shape, tuple)
+        or len(shape) != 3
+        or isinstance(shape[0], bool)
+        or isinstance(shape[1], bool)
+        or not isinstance(shape[0], int)
+        or not isinstance(shape[1], int)
+        or shape[0] < 16
+        or shape[1] < 16
+        or not isinstance(shape[2], int)
+        or shape[2] < 3
+    ):
+        raise CameraProbeError("orientation pattern frame must be HxWx3+ with at least 16 pixels per axis")
+    if (
+        isinstance(maximum_normalized_color_distance, bool)
+        or not isinstance(maximum_normalized_color_distance, (int, float))
+        or not math.isfinite(float(maximum_normalized_color_distance))
+        or not 0 < float(maximum_normalized_color_distance) < 255
+    ):
+        raise CameraConfigurationError(
+            "maximum_normalized_color_distance must be finite and between 0 and 255"
+        )
+
+    height, width = shape[:2]
+    radius = max(1, min(height, width) // 50)
+    observed_labels: list[str] = []
+    for x_fraction, y_fraction in _ORIENTATION_SAMPLE_FRACTIONS:
+        center_x = round((width - 1) * x_fraction)
+        center_y = round((height - 1) * y_fraction)
+        totals = [0.0, 0.0, 0.0]
+        count = 0
+        for y in range(max(0, center_y - radius), min(height, center_y + radius + 1)):
+            for x in range(max(0, center_x - radius), min(width, center_x + radius + 1)):
+                pixel = frame[y, x]
+                try:
+                    channels = tuple(float(pixel[index]) for index in range(3))
+                except (IndexError, TypeError, ValueError) as exc:
+                    raise CameraProbeError("orientation pattern frame pixels must expose three numeric channels") from exc
+                if any(not math.isfinite(value) or value < 0 or value > 255 for value in channels):
+                    raise CameraProbeError("orientation pattern frame channels must be finite bytes")
+                for index, value in enumerate(channels):
+                    totals[index] += value
+                count += 1
+        mean = tuple(value / count for value in totals)
+        peak = max(mean)
+        if peak < 32:
+            raise CameraProbeError("orientation marker is too dark to classify")
+        normalized = tuple(value * 255.0 / peak for value in mean)
+        distances = {
+            label: math.sqrt(sum((actual - expected) ** 2 for actual, expected in zip(normalized, color)))
+            for label, color in _ORIENTATION_COLORS_BGR.items()
+        }
+        label, distance = min(distances.items(), key=lambda item: item[1])
+        if distance > float(maximum_normalized_color_distance):
+            raise CameraProbeError("orientation marker color is outside the commissioned BGR pattern")
+        observed_labels.append(label)
+
+    observed = tuple(observed_labels)
+    if observed == _EXPECTED_ORIENTATION_LABELS:
+        return OPENCV_TOP_LEFT_BGR_ORIENTATION
+    known_failures = {
+        ("RED", "YELLOW", "BLUE", "GREEN"): "vertical flip",
+        ("GREEN", "BLUE", "YELLOW", "RED"): "horizontal mirror",
+        ("YELLOW", "RED", "GREEN", "BLUE"): "180-degree rotation",
+        ("RED", "GREEN", "BLUE", "CYAN"): "RGB/BGR channel swap",
+    }
+    failure = known_failures.get(observed, "unexpected marker permutation")
+    raise CameraProbeError(
+        f"OpenCV orientation sentinel rejected {failure}: observed {observed!r}"
+    )
+
+
 def _validate_selector(value: object) -> int | str:
     if isinstance(value, bool):
         raise CameraConfigurationError("index_or_path must be an integer index or path")

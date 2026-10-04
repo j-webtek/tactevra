@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/residual_obstruction_v4_2_scene_icc_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "scope", "status", "source_commit", "source", "threshold", "threshold_role", "endpoint_icc", "planning_recommendation", "renderer_pre_results_amendment", "evaluation_opened", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "properties": {
+    "schema": {"const": "tactevra.ai_residual_obstruction_v4_2_scene_icc.v1"},
+    "scope": {"const": "CONSUMED_SYNTHETIC_DEVELOPMENT_ICC_ESTIMATE_AND_V5_PRE_RESULTS_AMENDMENT"},
+    "status": {"const": "COMPLETE_ESTIMATE_RECONFIRM_WITH_V5_DEVELOPMENT_BEFORE_EVALUATION_RENDER"},
+    "source_commit": {"$ref": "#/$defs/commit"}, "source": {"type": "object"},
+    "threshold": {"const": 0.55},
+    "threshold_role": {"const": "V4_2_LEAST_BAD_REJECTED_DEVELOPMENT_THRESHOLD_NOT_CHANGED"},
+    "endpoint_icc": {"type": "object", "required": ["pooled_obstruction_miss", "cable_family_miss", "dark_cable_proxy_rubber_miss", "visible_false_stop"], "additionalProperties": {"$ref": "#/$defs/endpoint"}},
+    "planning_recommendation": {"type": "object", "required": ["v4_2_estimate_is_transfer_prior_only", "reestimate_from_v5_development", "evaluation_resize_permitted_before_pixels", "safety_gates_may_change", "evaluation_pixels_opened"]},
+    "renderer_pre_results_amendment": {"type": "object", "required": ["amendment_date", "reason", "smoke_a_manifest_file_sha256", "smoke_a_dataset_sha256", "smoke_b_manifest_file_sha256", "smoke_b_dataset_sha256", "renderer_file_sha256", "change", "made_before_v5_training_or_development_results", "fixture_gates_rotation_and_identities_changed", "failed_smoke_a_preserved"]},
+    "evaluation_opened": {"const": false}, "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "endpoint": {"type": "object", "required": ["scene_count", "rows_per_scene", "error_count", "error_rate", "scene_error_counts", "scene_error_rates", "ms_between", "ms_within", "icc_raw", "icc_nonnegative_for_planning", "delete_one_scene", "delete_one_minimum", "delete_one_maximum"]}
+  }
+}

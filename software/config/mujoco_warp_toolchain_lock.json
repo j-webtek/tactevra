@@ -1,0 +1,51 @@
+{
+  "schema": "rocell.mujoco_warp_toolchain_lock.v1",
+  "selection_status": "MW0_SELECTED",
+  "python_version": "3.12.0",
+  "packages": {
+    "absl-py": "2.5.0",
+    "etils": "1.14.0",
+    "fsspec": "2026.9.0",
+    "glfw": "2.10.2",
+    "mujoco": "3.14.0",
+    "mujoco-warp": "3.13.0",
+    "numpy": "2.5.3",
+    "PyOpenGL": "3.1.10",
+    "typing_extensions": "4.16.0",
+    "warp-lang": "1.17.0",
+    "websockets": "17.2",
+    "zipp": "4.1.1"
+  },
+  "wheels": {
+    "absl_py-2.5.0-py3-none-any.whl": "0f17b89f2a4eaaedc4f28c622998aa690564b3012a396a4ffad0821007fe03ba",
+    "etils-1.14.0-py3-none-any.whl": "b5df7341f54dbe1405a4450b2741207b4a8c279780402b45f87202b94dfc52b4",
+    "fsspec-2026.9.0-py3-none-any.whl": "8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f",
+    "glfw-2.10.2-py2.py3-none-win_amd64.whl": "15fd0666cd8f1b0ecb535c3abb712b8ddda053bf8d16de2353b1c6ced0e65402",
+    "mujoco_warp-3.13.0-py3-none-any.whl": "cb1f74c36684ef5d2b610926d8979db8aa39fd78613a7130cf6a7ef802ee5e3c",
+    "mujoco-3.14.0-cp312-cp312-win_amd64.whl": "d1777cd426f9155bed514d2362c74d6456df784bb84b00759bc253b64564e92c",
+    "numpy-2.5.3-cp312-cp312-win_amd64.whl": "0a59a421a32580a009e8a1751345bf829631b990dc1794b80514ab722b435def",
+    "pyopengl-3.1.10-py3-none-any.whl": "794a943daced39300879e4e47bd94525280685f42dbb5a998d336cfff151d74f",
+    "typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+    "warp_lang-1.17.0-py3-none-win_amd64.whl": "ca35c82242a7553046f09023bbe56750b5c3d9af72625bd1a905a56d3189771d",
+    "websockets-17.2-cp312-cp312-win_amd64.whl": "faa763b677e96f1beccc6b4d7e8c079dfeed2f249f57a19debc321b519ee64ec",
+    "zipp-4.1.1-py3-none-any.whl": "8979f52d874162f485ff2981e3891f3a3317b7a3dd43ff1e1775b9304f307a9c"
+  },
+  "host": {
+    "platform_prefix": "Windows-11-10.0.26200",
+    "driver_version": "595.97",
+    "gpu_uuids": [
+      "GPU-e428f4d7-ea02-2a73-2aeb-88b30949dae1",
+      "GPU-2e3457e2-aa15-ef1d-e417-b29c8cf1ba77"
+    ],
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "compute_capability": "8.6",
+    "minimum_gpu_count": 2
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "installed_license_sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
+  },
+  "hardware_access": false,
+  "physical_authority": false,
+  "wire_commands": []
+}

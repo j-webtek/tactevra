@@ -1,0 +1,374 @@
+{
+  "schema": "tactevra.ai_residual_obstruction_successor_fixture.v5",
+  "scope": "SYNTHETIC_ISAAC_V5_PREDECLARATION_NO_QUALIFICATION",
+  "status": "FROZEN_BEFORE_RENDER",
+  "source_commit": "8944f6a02534b414858777b050113c8b8ced1e86",
+  "source": {
+    "remedy_file_sha256": "be596e603040d8f1a759ff27ffedb8c82ea408c51165a8fc566377ca342fbee1",
+    "remedy_report_sha256": "0aa55061d7002ef8b741f854b1d35d8bf079ba72a768ffe2e288748669e9cedf",
+    "robustness_file_sha256": "ee60b28369ea8dc56a5598bda8134b825af75666b5ff0b0121bab323842e0541",
+    "robustness_report_sha256": "776e4936c1733ea831847fa5142bfe605f8cc603cd23c601109a2cb66fa60ea5",
+    "v4_2_fixture_file_sha256": "26eb0de03e7865711273802abd1ddc518f066e5fc0aa0f0d81a6c71f683d34e5",
+    "v4_2_fixture_bundle_sha256": "e7c6b614a00e4f6b550e0fe00419758e40a6d779d825b92933f425342eda38c2",
+    "target_catalog_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+  },
+  "sequence_amendment": {
+    "previous_rule": "PHYSICAL_PILOT_REQUIRED_BEFORE_SUCCESSOR_SELECTION",
+    "owner_direction": "CONTINUE_SIMULATION_ROBUSTNESS_RESEARCH_WHILE_PHYSICAL_INPUTS_BLOCKED",
+    "allowed_effect": "SELECT_SYNTHETIC_RESEARCH_CANDIDATES_ONLY",
+    "physical_pilot_still_required_for": [
+      "RUNTIME_LIGHTING_ENVELOPE",
+      "SIM_TO_REAL_TRANSFER",
+      "PHYSICAL_QUALIFICATION"
+    ],
+    "v4_2_rejection_preserved": true,
+    "evaluation_remains_unrendered": true
+  },
+  "split_identities": {
+    "scenes": {
+      "training": [
+        "v5_training_scene_01",
+        "v5_training_scene_02",
+        "v5_training_scene_03",
+        "v5_training_scene_04",
+        "v5_training_scene_05",
+        "v5_training_scene_06",
+        "v5_training_scene_07",
+        "v5_training_scene_08",
+        "v5_training_scene_09",
+        "v5_training_scene_10",
+        "v5_training_scene_11",
+        "v5_training_scene_12",
+        "v5_training_scene_13",
+        "v5_training_scene_14",
+        "v5_training_scene_15",
+        "v5_training_scene_16"
+      ],
+      "development": [
+        "v5_development_scene_01",
+        "v5_development_scene_02",
+        "v5_development_scene_03",
+        "v5_development_scene_04",
+        "v5_development_scene_05",
+        "v5_development_scene_06",
+        "v5_development_scene_07",
+        "v5_development_scene_08"
+      ],
+      "evaluation": [
+        "v5_evaluation_scene_01",
+        "v5_evaluation_scene_02",
+        "v5_evaluation_scene_03",
+        "v5_evaluation_scene_04",
+        "v5_evaluation_scene_05",
+        "v5_evaluation_scene_06",
+        "v5_evaluation_scene_07",
+        "v5_evaluation_scene_08"
+      ]
+    },
+    "lighting": {
+      "training": [
+        "v5_training_light_01",
+        "v5_training_light_02",
+        "v5_training_light_03"
+      ],
+      "development": [
+        "v5_development_light_01",
+        "v5_development_light_02",
+        "v5_development_light_03"
+      ],
+      "evaluation": [
+        "v5_evaluation_light_01",
+        "v5_evaluation_light_02",
+        "v5_evaluation_light_03"
+      ]
+    },
+    "obstruction_assets": {
+      "training": [
+        "v5_train_dark_cable_01",
+        "v5_train_dark_cable_02",
+        "v5_train_dark_cable_03",
+        "v5_train_dark_cable_04",
+        "v5_train_translucent_cable_01",
+        "v5_train_translucent_cable_02",
+        "v5_train_translucent_cable_03",
+        "v5_train_hand_01",
+        "v5_train_hand_02",
+        "v5_train_hand_03",
+        "v5_train_tool_foreign_01",
+        "v5_train_tool_foreign_02",
+        "v5_train_tool_foreign_03",
+        "v5_train_tool_foreign_04"
+      ],
+      "development": [
+        "v5_dev_dark_cable_01",
+        "v5_dev_dark_cable_02",
+        "v5_dev_dark_cable_03",
+        "v5_dev_translucent_cable_01",
+        "v5_dev_translucent_cable_02",
+        "v5_dev_hand_01",
+        "v5_dev_hand_02",
+        "v5_dev_tool_foreign_01",
+        "v5_dev_tool_foreign_02",
+        "v5_dev_tool_foreign_03"
+      ],
+      "evaluation": [
+        "v5_eval_dark_cable_01",
+        "v5_eval_dark_cable_02",
+        "v5_eval_dark_cable_03",
+        "v5_eval_translucent_cable_01",
+        "v5_eval_translucent_cable_02",
+        "v5_eval_hand_01",
+        "v5_eval_hand_02",
+        "v5_eval_tool_foreign_01",
+        "v5_eval_tool_foreign_02",
+        "v5_eval_tool_foreign_03"
+      ]
+    },
+    "pairwise_disjoint_required": true,
+    "procedural_seed_ranges": {
+      "training": [
+        51000,
+        51999
+      ],
+      "development": [
+        52000,
+        52999
+      ],
+      "evaluation": [
+        53000,
+        53999
+      ]
+    }
+  },
+  "variants": [
+    {
+      "variant_id": "clear",
+      "family": "NONE",
+      "decision": "VISIBLE"
+    },
+    {
+      "variant_id": "adjacent_left",
+      "family": "DISTRACTOR",
+      "decision": "VISIBLE"
+    },
+    {
+      "variant_id": "adjacent_right",
+      "family": "DISTRACTOR",
+      "decision": "VISIBLE"
+    },
+    {
+      "variant_id": "dark_cable_10",
+      "family": "CABLE",
+      "decision": "VISIBLE",
+      "coverage": 0.1
+    },
+    {
+      "variant_id": "dark_cable_30",
+      "family": "CABLE",
+      "decision": "ABSTAIN",
+      "coverage": 0.3
+    },
+    {
+      "variant_id": "dark_cable_60",
+      "family": "CABLE",
+      "decision": "ABSTAIN",
+      "coverage": 0.6
+    },
+    {
+      "variant_id": "translucent_cable_30",
+      "family": "CABLE",
+      "decision": "ABSTAIN",
+      "coverage": 0.3
+    },
+    {
+      "variant_id": "translucent_cable_60",
+      "family": "CABLE",
+      "decision": "ABSTAIN",
+      "coverage": 0.6
+    },
+    {
+      "variant_id": "hand_30",
+      "family": "HAND",
+      "decision": "ABSTAIN",
+      "coverage": 0.3
+    },
+    {
+      "variant_id": "hand_60",
+      "family": "HAND",
+      "decision": "ABSTAIN",
+      "coverage": 0.6
+    },
+    {
+      "variant_id": "tool_40",
+      "family": "TOOL",
+      "decision": "ABSTAIN",
+      "coverage": 0.4
+    },
+    {
+      "variant_id": "foreign_40",
+      "family": "FOREIGN_OBJECT",
+      "decision": "ABSTAIN",
+      "coverage": 0.4
+    }
+  ],
+  "render_contract": {
+    "targets": 75,
+    "appearances_per_scene": 3,
+    "variants_per_target": 12,
+    "training_observations": 43200,
+    "development_observations": 21600,
+    "evaluation_observation_identities": 21600,
+    "evaluation_images_generated": 0,
+    "commissioned_reference_per_target_scene_lighting": true,
+    "same_obstruction_mesh_or_material_across_splits_prohibited": true,
+    "asset_geometry_material_texture_hashes_required": true,
+    "arm_mask_from_perturbed_measured_state_not_ground_truth_mask": true,
+    "camera_translation_jitter_mm": [
+      3.0,
+      3.0,
+      1.5
+    ],
+    "camera_rotation_jitter_deg": [
+      0.8,
+      0.8,
+      1.0
+    ],
+    "joint_measurement_noise_and_backlash_required": true,
+    "capture_timestamp_offset_ms": [
+      -150,
+      150
+    ],
+    "lighting_scope": "BROAD_SYNTHETIC_RESEARCH_RANGE_NOT_RUNTIME_ADMISSION"
+  },
+  "candidate_models": [
+    {
+      "candidate_id": "V5_EDGE_TEXTURE_96",
+      "local_size_px": 96,
+      "context_size_px": null,
+      "channels": [
+        "CURRENT_RGB",
+        "REFERENCE_RGB",
+        "ABS_RGB_DIFFERENCE",
+        "SOBEL_MAGNITUDE_DIFFERENCE",
+        "LOCAL_TEXTURE_DIFFERENCE",
+        "SAFE_REGION_MASK"
+      ],
+      "spatial_feature_map": [
+        6,
+        6
+      ],
+      "maximum_trainable_parameters": 2000000
+    },
+    {
+      "candidate_id": "V5_EDGE_TEXTURE_MULTISCALE_96_192",
+      "local_size_px": 96,
+      "context_size_px": 192,
+      "channels": [
+        "CURRENT_RGB",
+        "REFERENCE_RGB",
+        "ABS_RGB_DIFFERENCE",
+        "SOBEL_MAGNITUDE_DIFFERENCE",
+        "LOCAL_TEXTURE_DIFFERENCE",
+        "SAFE_REGION_MASK",
+        "WIDE_CONTEXT_RGB_DIFFERENCE"
+      ],
+      "spatial_feature_map": [
+        6,
+        6
+      ],
+      "maximum_trainable_parameters": 3000000
+    }
+  ],
+  "training_contract": {
+    "offline_capable": true,
+    "selected_normalization": "SELF_CROP_P05_P95",
+    "unchanged_training_free_baseline_required": true,
+    "unchanged_v4_2_checkpoint_comparison_required": true,
+    "balanced_by": [
+      "TARGET",
+      "DECISION",
+      "VARIANT_FAMILY",
+      "SCENE",
+      "LIGHTING"
+    ],
+    "memorization_rows": 500,
+    "minimum_memorization_accuracy": 0.995,
+    "random_seed": 55001,
+    "thresholds": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95
+    ],
+    "model_output_semantics": "UNCALIBRATED_RANKING_SCORE_NOT_CONFIDENCE"
+  },
+  "development_gates": {
+    "maximum_pooled_missed_obstruction_rate": 0.02,
+    "maximum_pooled_visible_false_stop_rate": 0.1,
+    "maximum_scene_cluster_missed_upper_95": 0.02,
+    "maximum_scene_cluster_false_stop_upper_95": 0.1,
+    "maximum_cable_family_missed_rate": 0.02,
+    "maximum_dark_cable_30_60_missed_rate": 0.02,
+    "maximum_visible_false_stop_rate": 0.1,
+    "minimum_every_target_auc": 0.95,
+    "minimum_linear_q05_target_auc": 0.98,
+    "minimum_linear_q05_target_quantile_margin": 0.05,
+    "v4_2_no_regression_metrics": [
+      "EVERY_TARGET_AUC",
+      "LINEAR_Q05_TARGET_AUC"
+    ],
+    "hard_case_reports_required": [
+      "DARK_ON_DARK_BOUNDARY_ALIGNED_CABLE",
+      "THIN_CABLE",
+      "REFLECTIVE_CABLE",
+      "ADJACENT_OBJECT",
+      "LIGHTING_PLUS_CAMERA_JITTER",
+      "PERTURBED_ARM_MASK"
+    ],
+    "selection_rule": "LOWEST_PARAMETER_CANDIDATE_PASSING_EVERY_GATE",
+    "no_passing_candidate_result": "REJECT_ALL_KEEP_EVALUATION_CLOSED"
+  },
+  "end_to_end_follow_on": {
+    "required_after_development_pass": true,
+    "actual_model_motion_batch_v2_output_required": true,
+    "simulated_missions": [
+      "TYPE_HELLO",
+      "TYPE_REPEATED_KEYS",
+      "TYPE_NUMBERS_AND_PUNCTUATION",
+      "ABSTAIN_ON_OBSTRUCTION",
+      "ABSTAIN_ON_STALE_EVIDENCE",
+      "ABSTAIN_ON_UNCERTAINTY"
+    ],
+    "wrong_target_contacts_allowed": 0,
+    "hardware_authority": false
+  },
+  "images_generated": false,
+  "training_started": false,
+  "development_opened": false,
+  "evaluation_opened": false,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "limitations": [
+    "This selects synthetic research candidates before physical pilot data under the owner's explicit direction; it does not select a deployment model.",
+    "Lighting ranges remain synthetic research conditions and cannot set runtime reference-validity limits.",
+    "Rendered obstruction assets remain approximations even though their identities are split-disjoint.",
+    "No image, checkpoint, threshold, evaluation result, physical qualification, or execution authority exists."
+  ],
+  "bundle_sha256": "69da1cafb2d501907a580c4fe5e4c8d2731f05b3ebd6fd77d98a69d964c51b2e"
+}

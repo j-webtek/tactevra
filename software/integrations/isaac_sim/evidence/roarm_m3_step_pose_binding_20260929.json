@@ -1,0 +1,378 @@
+{
+  "blockers": [
+    "CAD_PRODUCT_GROUPS_NOT_ASSIGNED_TO_DYNAMIC_LINKS",
+    "COLLISION_REDUCTION_NOT_REVIEWED",
+    "TOOL_GEOMETRY_MISSING",
+    "CAMERA_SUPPORT_GEOMETRY_MISSING",
+    "ROBOT_PLACEMENT_NOMINAL_UNMEASURED",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "cad_T_urdf_world": {
+    "derivation": {
+      "x_mm": "mean X center of the ST3215_1/ST3215_2 shoulder-servo bounds",
+      "y_mm": "midplane between the facing ST3215_1/ST3215_2 shoulder-servo bounds",
+      "z_mm": "minimum Z of the complete CAD assembly bound"
+    },
+    "provenance": "derived_from_pinned_cad_bounds",
+    "rotation_row_major": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "translation_mm": [
+      7.005001,
+      0.0,
+      0.0
+    ]
+  },
+  "candidates": [
+    {
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maximum_residual_mm": 305.130844,
+      "pose_name": "zero",
+      "rms_residual_mm": 170.411486,
+      "supported_witness_count": 3,
+      "witness_residuals": [
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "base_link",
+          "predicted_origin_cad_mm": [
+            7.005001,
+            0.0,
+            70.1
+          ],
+          "product_id": "ST3215"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link2",
+          "predicted_origin_cad_mm": [
+            7.005001,
+            0.0,
+            122.059
+          ],
+          "product_id": "AL-SHOULDER"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link3",
+          "predicted_origin_cad_mm": [
+            37.006131,
+            -0.00011,
+            358.87411
+          ],
+          "product_id": "AL-ELBOW-A"
+        },
+        {
+          "distance_to_product_aabb_mm": 169.898376,
+          "link_name": "link4",
+          "predicted_origin_cad_mm": [
+            37.006131,
+            -0.00011,
+            503.46011
+          ],
+          "product_id": "SCS215"
+        },
+        {
+          "distance_to_product_aabb_mm": 228.626675,
+          "link_name": "link5",
+          "predicted_origin_cad_mm": [
+            52.153131,
+            -0.000166,
+            557.11311
+          ],
+          "product_id": "SCS215_1"
+        },
+        {
+          "distance_to_product_aabb_mm": 305.130844,
+          "link_name": "gripper_link",
+          "predicted_origin_cad_mm": [
+            70.97394,
+            -0.000304,
+            609.148179
+          ],
+          "product_id": "ST3215_4"
+        }
+      ]
+    },
+    {
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        1.5707963267948966,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maximum_residual_mm": 2.215515,
+      "pose_name": "home",
+      "rms_residual_mm": 0.90448,
+      "supported_witness_count": 6,
+      "witness_residuals": [
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "base_link",
+          "predicted_origin_cad_mm": [
+            7.005001,
+            0.0,
+            70.1
+          ],
+          "product_id": "ST3215"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link2",
+          "predicted_origin_cad_mm": [
+            7.005001,
+            0.0,
+            122.059
+          ],
+          "product_id": "AL-SHOULDER"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link3",
+          "predicted_origin_cad_mm": [
+            37.006131,
+            -0.00011,
+            358.87411
+          ],
+          "product_id": "AL-ELBOW-A"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link4",
+          "predicted_origin_cad_mm": [
+            181.592131,
+            -0.000641,
+            358.87411
+          ],
+          "product_id": "SCS215"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link5",
+          "predicted_origin_cad_mm": [
+            235.245131,
+            -0.000838,
+            343.72711
+          ],
+          "product_id": "SCS215_1"
+        },
+        {
+          "distance_to_product_aabb_mm": 2.215515,
+          "link_name": "gripper_link",
+          "predicted_origin_cad_mm": [
+            287.2802,
+            -0.001099,
+            324.906301
+          ],
+          "product_id": "ST3215_4"
+        }
+      ]
+    },
+    {
+      "joint_positions_rad": [
+        0.0,
+        0.0,
+        2.618,
+        -1.0472,
+        0.0,
+        0.0
+      ],
+      "maximum_residual_mm": 133.237718,
+      "pose_name": "ready",
+      "rms_residual_mm": 87.601587,
+      "supported_witness_count": 3,
+      "witness_residuals": [
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "base_link",
+          "predicted_origin_cad_mm": [
+            7.005001,
+            0.0,
+            70.1
+          ],
+          "product_id": "ST3215"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link2",
+          "predicted_origin_cad_mm": [
+            7.005001,
+            0.0,
+            122.059
+          ],
+          "product_id": "AL-SHOULDER"
+        },
+        {
+          "distance_to_product_aabb_mm": 0.0,
+          "link_name": "link3",
+          "predicted_origin_cad_mm": [
+            37.006131,
+            -0.00011,
+            358.87411
+          ],
+          "product_id": "AL-ELBOW-A"
+        },
+        {
+          "distance_to_product_aabb_mm": 118.586796,
+          "link_name": "link4",
+          "predicted_origin_cad_mm": [
+            109.298365,
+            -0.000376,
+            233.658519
+          ],
+          "product_id": "SCS215"
+        },
+        {
+          "distance_to_product_aabb_mm": 119.285836,
+          "link_name": "link5",
+          "predicted_origin_cad_mm": [
+            162.951309,
+            -0.000573,
+            218.511322
+          ],
+          "product_id": "SCS215_1"
+        },
+        {
+          "distance_to_product_aabb_mm": 133.237718,
+          "link_name": "gripper_link",
+          "predicted_origin_cad_mm": [
+            214.986309,
+            -0.000833,
+            199.690322
+          ],
+          "product_id": "ST3215_4"
+        }
+      ]
+    }
+  ],
+  "classification_margin_max_residual_mm": 131.022203,
+  "clearance_replay_admissible": false,
+  "collision_geometry_admissible": false,
+  "dynamic_link_assignment_admissible": false,
+  "evidence_class": "CAD_POSE_HYPOTHESIS_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "aabb_witnesses_classify_pose_but_do_not_define_exact_joint_axes",
+    "cad_product_membership_per_dynamic_link_remains_unreviewed",
+    "no_reduced_collision_shapes_or_self_collision_validation",
+    "no_inertia_dynamics_trajectory_clearance_contact_or_physical_qualification"
+  ],
+  "maximum_supported_residual_mm": 2.25,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "pose_hypothesis_supported": true,
+  "receipt_sha256": "3817f28d9171ee3cb33d024f3f31e57495b02fb383ba60277953f6148ba00f3f",
+  "runner_up_pose": "ready",
+  "schema": "tactevra.isaac_sim_step_pose_binding.v1",
+  "selected_pose_hypothesis": "home",
+  "source_bindings": {
+    "cad_usd_sha256": "cfcd4e6170350d948de1976164665ddde99cfad457b72730f7ffcbdd119496d3",
+    "step_inspection_receipt_file_sha256": "255a3612d1c932646f3ba4c09357f5337b679d46a1aeb210ffe9976a5c93ddbb",
+    "step_inspection_receipt_sha256": "b51c20e34c3b3edfa4ba40b88d04299aa346803b43b12909dade7c41c44cf967",
+    "urdf_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+  },
+  "wire_commands": [],
+  "witness_bounds": {
+    "base_link": {
+      "maximum_cad_mm": [
+        42.116706,
+        12.361704,
+        74.3
+      ],
+      "minimum_cad_mm": [
+        -3.106706,
+        -12.361704,
+        36.499999
+      ],
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v11_l9l8",
+      "product_id": "ST3215"
+    },
+    "gripper_link": {
+      "maximum_cad_mm": [
+        299.113496,
+        11.481704,
+        364.921817
+      ],
+      "minimum_cad_mm": [
+        253.890084,
+        -13.241704,
+        327.121816
+      ],
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v141_mA9q2Qp7",
+      "product_id": "ST3215_4"
+    },
+    "link2": {
+      "maximum_cad_mm": [
+        21.004997,
+        39.409972,
+        167.374403
+      ],
+      "minimum_cad_mm": [
+        -8.504998,
+        -39.609987,
+        113.059271
+      ],
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALSHOULDER1_kGu4",
+      "product_id": "AL-SHOULDER"
+    },
+    "link3": {
+      "maximum_cad_mm": [
+        47.007393,
+        20.109996,
+        369.874405
+      ],
+      "minimum_cad_mm": [
+        -7.111824,
+        -20.309987,
+        333.45927
+      ],
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ALELBOWA1_nD8g4",
+      "product_id": "AL-ELBOW-A"
+    },
+    "link4": {
+      "maximum_cad_mm": [
+        195.070022,
+        18.010001,
+        373.450854
+      ],
+      "minimum_cad_mm": [
+        146.381866,
+        -19.59,
+        346.297953
+      ],
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v151_mA9q2Qp7",
+      "product_id": "SCS215"
+    },
+    "link5": {
+      "maximum_cad_mm": [
+        235.751137,
+        12.696451,
+        381.173521
+      ],
+      "minimum_cad_mm": [
+        198.151137,
+        -14.456451,
+        332.485366
+      ],
+      "prim_path": "/roarm_m3_official/tn__RoArmM3SASMTYPE0SP_wIr4f0V28EJ/tn__ST3215v11_l9l8cxi9xrv0zff0",
+      "product_id": "SCS215_1"
+    }
+  }
+}

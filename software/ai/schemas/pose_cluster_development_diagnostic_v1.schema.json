@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/pose_cluster_development_diagnostic_v1.schema.json",
+  "title": "Pose cluster development diagnostic v1",
+  "type": "object",
+  "required": ["schema", "scope", "source", "analysis", "v16_design_requirements", "evaluation_accessed", "render_started", "candidate_promoted", "hardware_writes", "physical_movements", "physical_authority", "limitations", "report_sha256"],
+  "additionalProperties": false,
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "offset": {
+      "type": "object",
+      "required": ["x_mm", "x_px", "y_mm", "y_px"],
+      "additionalProperties": false,
+      "properties": {"x_mm": {"type": "number"}, "x_px": {"type": "number"}, "y_mm": {"type": "number"}, "y_px": {"type": "number"}}
+    },
+    "stringCounts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 1}},
+    "pose": {
+      "type": "object",
+      "required": ["pose_id", "source_interval", "source_path_fraction", "expected_tool_tip_board_mm", "abstain_row_count", "visible_row_count", "missed_abstain_across_offsets", "false_abstain_across_offsets", "maximum_missed_abstain_at_one_offset", "maximum_false_abstain_at_one_offset", "missed_target_counts", "missed_lighting_counts"],
+      "additionalProperties": false,
+      "properties": {
+        "pose_id": {"type": "string", "minLength": 1},
+        "source_interval": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "items": false},
+        "source_path_fraction": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer", "minimum": 1}], "items": false},
+        "expected_tool_tip_board_mm": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}, {"type": "number"}], "items": false},
+        "abstain_row_count": {"type": "integer", "minimum": 1},
+        "visible_row_count": {"type": "integer", "minimum": 1},
+        "missed_abstain_across_offsets": {"type": "integer", "minimum": 1},
+        "false_abstain_across_offsets": {"type": "integer", "minimum": 0},
+        "maximum_missed_abstain_at_one_offset": {"type": "integer", "minimum": 1},
+        "maximum_false_abstain_at_one_offset": {"type": "integer", "minimum": 0},
+        "missed_target_counts": {"$ref": "#/$defs/stringCounts"},
+        "missed_lighting_counts": {"$ref": "#/$defs/stringCounts"}
+      }
+    }
+  },
+  "properties": {
+    "schema": {"const": "rocell.ai_pose_cluster_development_diagnostic.v1"},
+    "scope": {"const": "SYNTHETIC_DEVELOPMENT_ONLY_NO_QUALIFICATION"},
+    "source": {
+      "type": "object",
+      "required": ["dataset_manifest_file_sha256", "dataset_sha256", "development_rows_file_sha256", "scorecard_file_sha256", "scorecard_sha256", "model_sha256", "target_catalog_sha256", "pose_fixture_file_sha256", "pose_fixture_sha256", "selected_threshold", "selected_bound_mm"],
+      "additionalProperties": false,
+      "properties": {
+        "dataset_manifest_file_sha256": {"$ref": "#/$defs/sha256"}, "dataset_sha256": {"$ref": "#/$defs/sha256"},
+        "development_rows_file_sha256": {"$ref": "#/$defs/sha256"}, "scorecard_file_sha256": {"$ref": "#/$defs/sha256"},
+        "scorecard_sha256": {"$ref": "#/$defs/sha256"}, "model_sha256": {"$ref": "#/$defs/sha256"},
+        "target_catalog_sha256": {"$ref": "#/$defs/sha256"}, "pose_fixture_file_sha256": {"$ref": "#/$defs/sha256"},
+        "pose_fixture_sha256": {"$ref": "#/$defs/sha256"},
+        "selected_threshold": {"type": "number", "minimum": 0, "maximum": 1}, "selected_bound_mm": {"type": "number", "minimum": 0}
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["development_pose_count", "development_row_count", "in_bound_offset_count", "missed_abstain_across_offsets", "false_abstain_across_offsets", "poses_with_any_missed_abstain", "pose_target_pairs_with_any_missed_abstain", "dominant_missed_pose_target", "top_two_pose_fraction_of_all_misses", "worst_clustered_miss_offset", "failed_pose_clusters"],
+      "additionalProperties": false,
+      "properties": {
+        "development_pose_count": {"type": "integer", "minimum": 2}, "development_row_count": {"type": "integer", "minimum": 1},
+        "in_bound_offset_count": {"type": "integer", "minimum": 1}, "missed_abstain_across_offsets": {"type": "integer", "minimum": 1},
+        "false_abstain_across_offsets": {"type": "integer", "minimum": 0}, "poses_with_any_missed_abstain": {"type": "integer", "minimum": 1},
+        "pose_target_pairs_with_any_missed_abstain": {"type": "integer", "minimum": 1},
+        "dominant_missed_pose_target": {
+          "type": "object", "required": ["pose_id", "target_id", "count", "fraction_of_all_misses"], "additionalProperties": false,
+          "properties": {"pose_id": {"type": "string", "minLength": 1}, "target_id": {"type": "string", "minLength": 1}, "count": {"type": "integer", "minimum": 1}, "fraction_of_all_misses": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}}
+        },
+        "top_two_pose_fraction_of_all_misses": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+        "worst_clustered_miss_offset": {
+          "type": "object", "required": ["offset", "missed_abstain_upper_95", "visible_false_abstain_upper_95"], "additionalProperties": false,
+          "properties": {"offset": {"$ref": "#/$defs/offset"}, "missed_abstain_upper_95": {"type": "number", "minimum": 0, "maximum": 1}, "visible_false_abstain_upper_95": {"type": "number", "minimum": 0, "maximum": 1}}
+        },
+        "failed_pose_clusters": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/pose"}}
+      }
+    },
+    "v16_design_requirements": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "evaluation_accessed": {"const": false}, "render_started": {"const": false}, "candidate_promoted": {"const": false},
+    "hardware_writes": {"const": 0}, "physical_movements": {"const": 0}, "physical_authority": {"const": false},
+    "limitations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "report_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}
