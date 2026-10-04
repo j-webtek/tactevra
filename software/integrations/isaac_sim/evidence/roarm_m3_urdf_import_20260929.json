@@ -1,0 +1,622 @@
+{
+  "articulation_root_normalization": {
+    "demoted_importer_root_path": "/roarm_m3/Geometry/world/base_link/link1",
+    "expected_live_dof_order": [
+      "base_link_to_link1",
+      "link1_to_link2",
+      "link2_to_link3",
+      "link3_to_link4",
+      "link4_to_link5",
+      "link5_to_gripper_link"
+    ],
+    "promoted_root_path": "/roarm_m3/Geometry/world/base_link",
+    "reason": "PRESERVE_BASE_ROTATION_DOF_AFTER_FIXED_JOINT_COLLAPSE"
+  },
+  "default_prim": "/roarm_m3",
+  "driver_version": "595.97",
+  "evidence_class": "KINEMATIC_IMPORT_ONLY",
+  "external_files": [
+    {
+      "path": "roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda",
+      "sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2",
+      "size_bytes": 11589
+    }
+  ],
+  "external_files_manifest_sha256": "a90723acc972d8346d716fdda633084464990fd73eff1ad0e33f8c6cf62bad0f",
+  "fixed_joint_resolution": [
+    {
+      "imported_child_local_transform": [
+        [
+          -3.6954857001170183e-06,
+          -4.552302979021761e-12,
+          0.9999999999931717,
+          0.0
+        ],
+        [
+          -0.9999999999863434,
+          -3.6954857001170183e-06,
+          -3.695485700061507e-06,
+          0.0
+        ],
+        [
+          3.695485700061507e-06,
+          -0.9999999999931717,
+          9.104272891136134e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.115428,
+          1.0
+        ]
+      ],
+      "imported_child_path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/hand_tcp",
+      "representation": "COLLAPSED_TO_NESTED_XFORM",
+      "source_child_link": "hand_tcp",
+      "source_joint": "link5_to_hand_tcp"
+    },
+    {
+      "imported_child_local_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0701,
+          1.0
+        ]
+      ],
+      "imported_child_path": "/roarm_m3/Geometry/world/base_link",
+      "representation": "COLLAPSED_TO_NESTED_XFORM",
+      "source_child_link": "base_link",
+      "source_joint": "world_to_base_link"
+    }
+  ],
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "import_config": {
+    "allow_self_collision": false,
+    "collision_from_visuals": false,
+    "collision_type": "Convex Hull",
+    "debug_mode": false,
+    "fix_base": null,
+    "joint_drive_type": null,
+    "joint_target_type": null,
+    "link_density": null,
+    "merge_fixed_joints": false,
+    "merge_mesh": false,
+    "override_joint_damping": null,
+    "override_joint_stiffness": null,
+    "robot_type": "Default",
+    "ros_package_paths": [],
+    "run_asset_transformer": false,
+    "run_multi_physics_conversion": false
+  },
+  "import_config_sha256": "3783fc6a2e82894e278e3a74020f20dfdb1207ea7dc21490142975cd4b253387",
+  "joints": [
+    {
+      "attributes": {
+        "newton:velocityLimit": 0.0,
+        "physics:axis": "Z",
+        "physics:localPos0": "(0, 0, 0)",
+        "physics:localPos1": "(0, 0, 0)",
+        "physics:localRot0": "(1, 0, 0, 0)",
+        "physics:localRot1": "(1, 0, 0, 0)",
+        "physics:lowerLimit": -180.00042724609375,
+        "physics:upperLimit": 180.00042724609375,
+        "urdf:limit:effort": 0.0
+      },
+      "name": "base_link_to_link1",
+      "path": "/roarm_m3/Physics/base_link_to_link1",
+      "relationships": {
+        "physics:body0": [
+          "/roarm_m3/Geometry/world/base_link"
+        ],
+        "physics:body1": [
+          "/roarm_m3/Geometry/world/base_link/link1"
+        ]
+      },
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "attributes": {
+        "newton:velocityLimit": 0.0,
+        "physics:axis": "Z",
+        "physics:localPos0": "(0, 0, 0.051959)",
+        "physics:localPos1": "(0, 0, 0)",
+        "physics:localRot0": "(-0.49999815, 0.5, 0.5, 0.50000185)",
+        "physics:localRot1": "(1, 0, 0, 0)",
+        "physics:lowerLimit": -90.00021362304688,
+        "physics:upperLimit": 90.00021362304688,
+        "urdf:limit:effort": 0.0
+      },
+      "name": "link1_to_link2",
+      "path": "/roarm_m3/Physics/link1_to_link2",
+      "relationships": {
+        "physics:body0": [
+          "/roarm_m3/Geometry/world/base_link/link1"
+        ],
+        "physics:body1": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2"
+        ]
+      },
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "attributes": {
+        "newton:velocityLimit": 0.0,
+        "physics:axis": "Z",
+        "physics:localPos0": "(0.236815, 0.030002, -1.8557644e-23)",
+        "physics:localPos1": "(0, 0, 0)",
+        "physics:localRot0": "(-0.70710546, 9.248329e-17, -5.551115e-17, -0.7071081)",
+        "physics:localRot1": "(1, 0, 0, 0)",
+        "physics:lowerLimit": -57.295780181884766,
+        "physics:upperLimit": 169.02255249023438,
+        "urdf:limit:effort": 0.0
+      },
+      "name": "link2_to_link3",
+      "path": "/roarm_m3/Physics/link2_to_link3",
+      "relationships": {
+        "physics:body0": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2"
+        ],
+        "physics:body1": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3"
+        ]
+      },
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "attributes": {
+        "newton:velocityLimit": 0.0,
+        "physics:axis": "Z",
+        "physics:localPos0": "(0, -0.144586, 1.5828715e-24)",
+        "physics:localPos1": "(0, 0, 0)",
+        "physics:localRot0": "(1, 0, 0, 0)",
+        "physics:localRot1": "(1, 0, 0, 0)",
+        "physics:lowerLimit": -90.00021362304688,
+        "physics:upperLimit": 90.00021362304688,
+        "urdf:limit:effort": 0.0
+      },
+      "name": "link3_to_link4",
+      "path": "/roarm_m3/Physics/link3_to_link4",
+      "relationships": {
+        "physics:body0": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3"
+        ],
+        "physics:body1": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4"
+        ]
+      },
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "attributes": {
+        "newton:velocityLimit": 0.0,
+        "physics:axis": "Z",
+        "physics:localPos0": "(0.015147, -0.053653, -2.6286007e-23)",
+        "physics:localPos1": "(0, 0, 0)",
+        "physics:localRot0": "(-0.49999815, -0.5, -0.5, 0.50000185)",
+        "physics:localRot1": "(1, 0, 0, 0)",
+        "physics:lowerLimit": -180.00042724609375,
+        "physics:upperLimit": 180.00042724609375,
+        "urdf:limit:effort": 0.0
+      },
+      "name": "link4_to_link5",
+      "path": "/roarm_m3/Physics/link4_to_link5",
+      "relationships": {
+        "physics:body0": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4"
+        ],
+        "physics:body1": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5"
+        ]
+      },
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "attributes": {
+        "newton:velocityLimit": 0.0,
+        "physics:axis": "Z",
+        "physics:localPos0": "(-5.293956e-23, 0.018821, 0.052035)",
+        "physics:localPos1": "(0, 0, 0)",
+        "physics:localRot0": "(0.49999815, -0.5, -0.5, -0.50000185)",
+        "physics:localRot1": "(1, 0, 0, 0)",
+        "physics:lowerLimit": 0.0,
+        "physics:upperLimit": 85.94367218017578,
+        "urdf:limit:effort": 0.0
+      },
+      "name": "link5_to_gripper_link",
+      "path": "/roarm_m3/Physics/link5_to_gripper_link",
+      "relationships": {
+        "physics:body0": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5"
+        ],
+        "physics:body1": [
+          "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/gripper_link"
+        ]
+      },
+      "type": "PhysicsRevoluteJoint"
+    }
+  ],
+  "limitations": [
+    "meshless_kinematic_projection",
+    "zero_effort_and_velocity_placeholders",
+    "no_inertial_or_dynamic_qualification",
+    "no_fk_parity_result",
+    "no_physical_qualification"
+  ],
+  "links": [
+    {
+      "local_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0701,
+          1.0
+        ]
+      ],
+      "name": "base_link",
+      "path": "/roarm_m3/Geometry/world/base_link"
+    },
+    {
+      "local_transform": [
+        [
+          -3.6954857001170183e-06,
+          4.552525023626686e-12,
+          0.9999999999931717,
+          0.0
+        ],
+        [
+          0.9999999999863434,
+          -3.6954857001170183e-06,
+          3.6954857001170183e-06,
+          0.0
+        ],
+        [
+          3.6954857001170183e-06,
+          0.9999999999931717,
+          9.104050846531209e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.018821,
+          0.052035,
+          1.0
+        ]
+      ],
+      "name": "gripper_link",
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/gripper_link"
+    },
+    {
+      "local_transform": [
+        [
+          -3.6954857001170183e-06,
+          -4.552302979021761e-12,
+          0.9999999999931717,
+          0.0
+        ],
+        [
+          -0.9999999999863434,
+          -3.6954857001170183e-06,
+          -3.695485700061507e-06,
+          0.0
+        ],
+        [
+          3.695485700061507e-06,
+          -0.9999999999931717,
+          9.104272891136134e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.115428,
+          1.0
+        ]
+      ],
+      "name": "hand_tcp",
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/hand_tcp"
+    },
+    {
+      "local_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "name": "link1",
+      "path": "/roarm_m3/Geometry/world/base_link/link1"
+    },
+    {
+      "local_transform": [
+        [
+          -3.6954857001170183e-06,
+          4.552525023626686e-12,
+          0.9999999999931717,
+          0.0
+        ],
+        [
+          0.9999999999863434,
+          -3.6954857001170183e-06,
+          3.6954857001170183e-06,
+          0.0
+        ],
+        [
+          3.6954857001170183e-06,
+          0.9999999999931717,
+          9.104050846531209e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.051959,
+          1.0
+        ]
+      ],
+      "name": "link2",
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2"
+    },
+    {
+      "local_transform": [
+        [
+          -3.7431477082350284e-06,
+          0.9999999999929946,
+          0.0,
+          0.0
+        ],
+        [
+          -0.9999999999929946,
+          -3.7431477082350284e-06,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.236815,
+          0.030002,
+          0.0,
+          1.0
+        ]
+      ],
+      "name": "link3",
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3"
+    },
+    {
+      "local_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.144586,
+          0.0,
+          1.0
+        ]
+      ],
+      "name": "link4",
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4"
+    },
+    {
+      "local_transform": [
+        [
+          -3.6954857001170183e-06,
+          4.552525023626686e-12,
+          -0.9999999999931717,
+          0.0
+        ],
+        [
+          0.9999999999863434,
+          -3.6954857001170183e-06,
+          -3.6954857001170183e-06,
+          0.0
+        ],
+        [
+          -3.6954857001170183e-06,
+          -0.9999999999931717,
+          9.104050846531209e-12,
+          0.0
+        ],
+        [
+          0.015147,
+          -0.053653,
+          0.0,
+          1.0
+        ]
+      ],
+      "name": "link5",
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5"
+    },
+    {
+      "local_transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "name": "world",
+      "path": "/roarm_m3/Geometry/world"
+    }
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "prims": [
+    {
+      "path": "/roarm_m3",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry",
+      "type": "Scope"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/gripper_link",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/hand_tcp",
+      "type": "Xform"
+    },
+    {
+      "path": "/roarm_m3/Physics",
+      "type": "Scope"
+    },
+    {
+      "path": "/roarm_m3/Physics/base_link_to_link1",
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "path": "/roarm_m3/Physics/link1_to_link2",
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "path": "/roarm_m3/Physics/link2_to_link3",
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "path": "/roarm_m3/Physics/link3_to_link4",
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "path": "/roarm_m3/Physics/link4_to_link5",
+      "type": "PhysicsRevoluteJoint"
+    },
+    {
+      "path": "/roarm_m3/Physics/link5_to_gripper_link",
+      "type": "PhysicsRevoluteJoint"
+    }
+  ],
+  "receipt_sha256": "ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85",
+  "schema": "tactevra.isaac_sim_urdf_import.v1",
+  "source": {
+    "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+    "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
+  },
+  "wire_commands": []
+}

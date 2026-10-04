@@ -6405,3 +6405,448 @@ rewriting history. New entries must use a unique evidence ID.
   can choose exact-input reuse only for qualified lifecycle/build/calibration
   identities while preserving complete-solve fallback and zero automatic
   retry. Do not attach physical authority at that gate.
+
+### E-20260929-INT-424 — Isaac WP0 test checkout was incomplete
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `2973bf912445ce70be26c8e88c6eb6ae256b4611`.
+- Change: ran the merged Isaac request/receipt contract suite beside the new
+  runner-probe tests in the issue #190 worktree before the sparse checkout had
+  materialized every tracked WP0 input.
+- Inputs/fixtures: tracked paths
+  `software/tests/fixtures/isaac_sim/` and `software/schemas/`; contract-test
+  source SHA-256
+  `01bc2497819d266ee7081646a3e7d4a2ea6557130eac30a222a422ee21805e2b`.
+- Command: `python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`; then
+  `git sparse-checkout add software/tests/fixtures software/integrations; python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`.
+- Result: BLOCKED. The first attempt reported 8 failed and 6 passed because all
+  tracked Isaac fixtures were absent. The second reported 2 failed and 12
+  passed because both tracked JSON schemas were still absent. Both failures
+  were checkout-materialization errors; no validator behavior was changed.
+- Artifacts: console results only; tracked fixtures and schemas remain the
+  unchanged test inputs.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is worktree setup evidence. It evaluates no Isaac physics,
+  USD asset, collision, contact, camera, arm command, or physical outcome.
+- Supersedes: none; both failed attempts remain recorded here.
+- Next dependency: materialize `software/schemas/` and rerun the identical
+  focused suite before relying on WP0 results.
+
+### E-20260929-INT-425 — Isaac Sim 6.1.0 runner candidate installed and bound
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `2973bf912445ce70be26c8e88c6eb6ae256b4611`.
+- Change: installed the exact Isaac Sim 6.1.0 Python distribution and CUDA 13
+  Torch in a dedicated external environment; added a standard-library-only
+  host probe that hashes installed distribution metadata without importing or
+  launching Isaac; retained a compact zero-authority candidate report; and
+  added deterministic, fail-closed hardware-free tests and runner guidance.
+- Inputs/fixtures: host-probe artifact SHA-256
+  `063a4fe5afae0f786043b9eae36cad28b69ca224eddb8e47c84252dc757eb017`;
+  probe source SHA-256
+  `d911c6d30fc365e78b943712db2abeedb72326ef3dd2ce7b8b6315ffbc750914`;
+  probe-test SHA-256
+  `2b72270544a3919256a4b52dad0d96bbdef5473a3ccdcd40d55ae97281186b1f`;
+  unchanged fail-closed toolchain-lock SHA-256
+  `171da8d802226145f382041e1ca321cc1665ecb1f356933e48b4a5989928d42e`.
+  The report binds 26 distributions, installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`,
+  extension digest
+  `3a510e375fc27c0ac2b540e14976ef6ae4255286d43753b45fc999ce2188e8bc`,
+  driver 591.86, and two RTX 3090 GPUs with 24576 MiB each.
+- Command: `py -3.12 -m venv C:\IsaacSim\env_6_1_0`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install --upgrade pip`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130`;
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install "isaacsim[all,extscache]==6.1.0.0" --extra-index-url https://pypi.nvidia.com`;
+  `$env:PYTHONPATH = (Resolve-Path 'software/src').Path; C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_probe --output software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json`;
+  `git sparse-checkout add software/schemas; python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_repository_artifacts.py`.
+- Result: PASS for installation, non-launching evidence capture, and repository
+  checks. Exact installed versions are Isaac Sim 6.1.0.0 and Torch
+  2.11.0+cu130; Torch reports CUDA available with two RTX 3090 devices. The
+  focused suite passed 14 tests in 0.53 seconds. Documentation, evidence-scope,
+  and repository-artifact audits passed. The candidate correctly reports
+  `CANDIDATE_BLOCKED` with four named blockers.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json`;
+  `software/src/rocell/integrations/isaac_sim/host_probe.py`;
+  `software/tests/unit/test_isaac_sim_host_probe.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: Isaac Sim was not launched and no NVIDIA license/EULA was
+  accepted by automation. The host driver 591.86 is below NVIDIA's documented
+  tested Windows driver 595.97, and RTX 3090 is outside the documented 6.1.0
+  minimum GPU set. No settings profile, live extension export, USD import,
+  kinematic parity, simulation data, collision/contact evidence, controller
+  access, or physical qualification exists. The repository lock remains
+  `UNSELECTED`; this result changes no AI lane, arm lane, or integration gate.
+- Supersedes: none. INT-424 remains visible failed setup evidence.
+- Next dependency: obtain explicit acceptance for NVIDIA's applicable terms
+  and a reviewed driver update, then run a first standalone/headless
+  compatibility launch and retain the live version, extension, and settings
+  identities before proposing a selected toolchain lock.
+
+### E-20260929-INT-426 — NVIDIA outer installer failed before driver update
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: downloaded the official NVIDIA 595.97 Windows package after owner
+  authorization, verified its Windows signature, and attempted its outer
+  self-extracting silent installer.
+- Inputs/fixtures: official 957,358,592-byte installer SHA-256
+  `979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`;
+  valid Authenticode signer `NVIDIA Corporation`, certificate thumbprint
+  `B66776FC8E70C58ED98199E8391264C827AAC534`.
+- Command: `Start-Process -FilePath C:\IsaacSim\installers\595.97-desktop-win10-win11-64bit-international-dch-whql.exe -ArgumentList '-s','-noreboot' -Verb RunAs -PassThru -Wait`.
+- Result: FAIL. The signed outer installer exited `-2147024891`
+  (`0x80070005`, access denied), and both GPUs continued to report driver
+  591.86. No retry result was substituted for this failed attempt.
+- Artifacts: installer retained externally at the hash above; console result
+  only. No installer binary or extracted driver payload is committed.
+- Hardware writes: 0 robot/controller writes. The unsuccessful driver
+  installer may have updated NVIDIA application support files but did not
+  change the active display driver.
+- Physical movements: 0.
+- Limitations: operating-system driver installation evidence only. It tests no
+  Isaac process, scene, robot model, physics, rendering, or physical system.
+- Supersedes: none; INT-425 remains the prelaunch candidate boundary.
+- Next dependency: extract the same verified package and run its signed inner
+  display-driver installer with NVIDIA's documented silent switches.
+
+### E-20260929-INT-427 — initial headless receipt extraction failed closed
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: attempted to retain structured evidence from the newly installed
+  Isaac environment after driver correction.
+- Inputs/fixtures: Isaac Sim 6.1.0.0 installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`;
+  NVIDIA driver 595.97; external smoke scripts and logs.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe C:\IsaacSim\smoke_6_1_0.py *> C:\IsaacSim\evidence\first_launch_6_1_0.log` and two corrected reruns of the same command.
+- Result: FAIL in retained stages. The first command could not create its log
+  because the evidence directory was absent. After creating the directory,
+  Isaac started and shut down but the script called nonexistent
+  `IApp.get_version`, initially without a durable error receipt and then with a
+  retained `AttributeError` status. Isaac's shutdown forced process exit zero,
+  demonstrating that exit code alone is insufficient evidence.
+- Artifacts: external logs SHA-256
+  `53bf754512d4bd640b576a8ecf1037221347a10c281141f640e4fda08f1789c3`
+  and failed status JSON; neither is promoted as a passing receipt.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the Isaac application did initialize, but these attempts do not
+  provide a valid version/extension/settings receipt and cannot select the
+  repository lock. No USD scene or robot asset was loaded.
+- Supersedes: none; these failures remain visible alongside the later corrected
+  probe.
+- Next dependency: use Kit 6.1's `get_app_version` API, write an explicit PASS
+  or ERROR sidecar before shutdown, and validate the resulting canonical
+  receipt in hardware-free CI.
+
+### E-20260929-INT-428 — driver-qualified Isaac headless launch verified
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: INTEGRATION.
+- Commit: `b071fa10a392ba1ea3c51135f3d7a48b464aa33e`.
+- Change: extracted the verified 595.97 package, verified the inner NVIDIA
+  `setup.exe` signature, installed the display driver directly, confirmed CUDA
+  health, implemented a current-API headless launch probe with an explicit
+  status sidecar, retained its canonical receipt, and added hardware-free
+  receipt validation.
+- Inputs/fixtures: first-launch receipt file SHA-256
+  `bc41e5070109de62a1a78388e9b46ebd8a0882cecc567141ad43ea9ba90b20ee`;
+  receipt content SHA-256
+  `fa28e3a5878f77cc928a93861b35cdf9fac53b857840fbdacef9907aefc1d0ee`;
+  probe source SHA-256
+  `db9df17670a32d134f54030883288359803852031a6caab37efccf57ff103b0e`;
+  test source SHA-256
+  `e23fe207f0a03ef69b018af6158bb3f27d0763873134af69503a89ec880e9280`;
+  installer and installation identities from INT-426 and INT-425.
+- Command: `C:\IsaacSim\tools\7zr.exe x C:\IsaacSim\installers\595.97-desktop-win10-win11-64bit-international-dch-whql.exe -oC:\IsaacSim\installers\595.97-extracted -y`;
+  `Start-Process -FilePath C:\IsaacSim\installers\595.97-extracted\setup.exe -WorkingDirectory C:\IsaacSim\installers\595.97-extracted -ArgumentList '-s','-n','Display.Driver' -Verb RunAs -PassThru -Wait`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_launch_probe.py --output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.json --status-output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.status.json --installation-sha256 ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258 --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`;
+  `python -m py_compile software/integrations/isaac_sim/first_launch_probe.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS for the bounded compatibility launch and repository checks.
+  Both RTX 3090s report driver 595.97 and Torch 2.11.0+cu130 retained CUDA 13.0
+  access. Isaac Sim 6.1.0.0 / Kit 6.1.0 started headlessly and shut down; the
+  receipt binds 303 unique enabled extensions at digest
+  `6e0d70db81fe16273341e65bd3cf0bc70dffe4a88a5cc0a7bacf51110dd27c70`
+  and the launch settings at digest
+  `0cbc21c4dbeeb7b2a0ce6c4c4875681834da8c12c83aa49cd36f09654b3ea473`.
+  The focused suite passed 17 tests in 0.82 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/windows_dual_rtx3090_first_launch_20260929.json`;
+  `software/integrations/isaac_sim/first_launch_probe.py`;
+  `software/tests/unit/test_isaac_sim_first_launch_evidence.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0 robot/controller writes. One authorized operating-system
+  display-driver update occurred and is outside the robot authority boundary.
+- Physical movements: 0.
+- Limitations: this is compatibility-startup evidence only. No USD scene,
+  RoArm asset, physics step, rendered frame, collision/contact check, trajectory,
+  robot transport, or physical qualification exists. RTX 3090 remains outside
+  NVIDIA's documented 6.1.0 minimum GPU set. The log reports device 0 at PCIe
+  x4 versus x16 maximum, no CUDA peer access, a stale localhost Omniverse proxy,
+  and an OpenUSD asset-converter build warning. The toolchain lock remains
+  `UNSELECTED`, and no AI, arm, or integration gate status changed.
+- Supersedes: none. INT-426 and INT-427 remain visible failed evidence.
+- Next dependency: isolate or resolve the OpenUSD asset-converter warning,
+  define the governed RoArm import inputs, and begin WP1 joint/link/axis/unit
+  mapping plus deterministic FK parity before reviewing a selected lock.
+
+### E-20260929-INT-429 — initial Isaac URDF joint mapping assumption failed closed
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `8594c10b6a757e743388c7440aab2f31014ac463`.
+- Change: ran the first governed import probe against the pinned meshless
+  RoArm-M3 URDF and required every source joint to appear as a USD Physics
+  joint.
+- Inputs/fixtures: governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  Isaac Sim 6.1.0.0 installation digest
+  `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`;
+  NVIDIA driver 595.97.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-001a --receipt C:\IsaacSim\evidence\urdf_import_001.json --status-output C:\IsaacSim\evidence\urdf_import_001.status.json`.
+- Result: FAIL. Isaac emitted all nine source links and six movable joints but
+  did not emit `world_to_base_link` or `link5_to_hand_tcp` as Physics joint
+  prims. The explicit status was `RuntimeError: imported joint mismatch:
+  missing=['link5_to_hand_tcp', 'world_to_base_link'], extra=[]`.
+- Artifacts: failed status and 11,450-byte generated USD retained externally
+  under `C:\IsaacSim\evidence` and
+  `C:\IsaacSim\artifacts\issue190\wp1-import-001a`; neither is promoted as
+  passing evidence.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: importer representation discovery only. No physics step, FK
+  parity, collision/contact result, rendering, robot transport, or physical
+  qualification was attempted.
+- Supersedes: none; this failed assumption remains visible beside INT-430.
+- Next dependency: classify the two fixed source joints from their imported
+  nested transforms while continuing to require exact movable-joint and link
+  sets.
+
+### E-20260929-INT-430 — governed RoArm URDF import and mapping retained
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `8594c10b6a757e743388c7440aab2f31014ac463`.
+- Change: implemented the bounded Isaac URDF import probe, retained a compact
+  canonical mapping receipt, explicitly represented the two collapsed fixed
+  joints, bound the external generated USD manifest, added hardware-free
+  receipt tests, and documented reproduction and scope.
+- Inputs/fixtures: governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  probe SHA-256
+  `ff3b6575376b1d7e037d3b45dbdcc06e9c3da9e6d0b0c99c121812f669f27fff`;
+  committed receipt file SHA-256
+  `d537aa8aa0c4dc30eff62fd918b45c6afb103a8a81fd2180cdb7add757139ae1`;
+  receipt content SHA-256
+  `24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343`;
+  test SHA-256
+  `6007d4ec370bc1fcbde9423543ceaadf97b1a216126f9764b99e4d85a323b596`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-002 --receipt C:\IsaacSim\evidence\urdf_import_002.json --status-output C:\IsaacSim\evidence\urdf_import_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/urdf_import_probe.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS. The receipt binds nine unique links, six unique movable Physics
+  joints, and both source fixed joints as collapsed nested transforms. The one
+  external 11,450-byte USD has SHA-256
+  `492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6`;
+  its canonical manifest digest is
+  `b84b6b6542c76dbffa4f43446db53d724a9c6e44333a43654eb351ca40e7d378`.
+  The focused suite passed 22 tests in 1.06 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json`;
+  `software/integrations/isaac_sim/urdf_import_probe.py`;
+  `software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `software/integrations/isaac_sim/README.md`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: meshless kinematic-import evidence only. The source retains zero
+  effort and velocity placeholders and lacks inertial, visual, and collision
+  geometry. No dynamics, FK parity, trajectory, clearance, contact, render,
+  hardware, or physical qualification claim is made. RTX 3090 remains outside
+  NVIDIA's documented Isaac 6.1.0 minimum GPU set, and the toolchain lock
+  remains `UNSELECTED`.
+- Supersedes: none. INT-429 remains retained failed evidence.
+- Next dependency: set actual Isaac articulation states for the fixed zero,
+  home, and ready corpus and compare the imported `hand_tcp` world pose against
+  governed FK values before reviewing runner selection.
+
+### E-20260929-INT-431 — unnormalized Isaac articulation omitted base rotation DOF
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `21cd36177f37e788bca8951d664a804398826155`.
+- Change: opened the retained unnormalized USD in a live Isaac physics
+  articulation, enumerated its DOFs, teleported the exposed joints through the
+  fixed corpus, and retained the topology blocker separately from its otherwise
+  passing base-zero pose measurements.
+- Inputs/fixtures: unnormalized import receipt content SHA-256
+  `24f8a531ca3544ffcbc5514146a0988a1d9004533c031f6b7665fb1c2262c343`;
+  preserved unnormalized receipt file SHA-256
+  `5113c2ba391cfd8720358ce0386dcdb34c01a8afcb0bd27296eb322a395fccca`;
+  unnormalized external USD SHA-256
+  `492ebbc606aa050251074736dbedd3fa5bb72ba6d8175269ba7c955f52e180b6`;
+  governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\fk_parity_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-002\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --output C:\IsaacSim\evidence\fk_parity_001.json --status-output C:\IsaacSim\evidence\fk_parity_001.status.json`.
+- Result: BLOCKED. The three base-zero corpus poses passed the provisional
+  0.1 mm / 0.05 degree thresholds, but the live articulation exposed only five
+  DOFs and omitted `base_link_to_link1`. The status receipt recorded
+  `parity_pass=true`, `status=BLOCKED`, content SHA-256
+  `0e5f00a8ea1ec378f35823026efa41a467503e65652604d63eaffe5dfece2017`.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_unnormalized_20260929.json`;
+  blocked parity receipt and logs retained externally in `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: base-zero kinematic diagnostic only. It could not test nonzero
+  base rotation, performed no dynamics step, and provides no collision,
+  contact, render, hardware, or physical qualification.
+- Supersedes: none. INT-429 and INT-430 remain visible import evidence.
+- Next dependency: deterministically promote the collapsed `base_link` to the
+  articulation root and rerun the identical corpus with all six DOFs visible.
+
+### E-20260929-INT-432 — complete six-DOF Isaac FK corpus passes
+
+- Stage: S2/S3 simulation oracle WP1.
+- Lane: INTEGRATION.
+- Commit: `21cd36177f37e788bca8951d664a804398826155`.
+- Change: normalized the generated USD articulation root to `base_link`,
+  preserved all six source movable joints in live Isaac order, implemented the
+  live articulation FK probe, retained canonical import and parity receipts,
+  added hardware-free evidence tests, and documented the bounded result.
+- Inputs/fixtures: normalized import receipt file SHA-256
+  `f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde`;
+  import receipt content SHA-256
+  `ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85`;
+  parity receipt file SHA-256
+  `73568d4d8387426345d8df47eb23509866d307e39c55061a18a847e4698bba0e`;
+  parity receipt content SHA-256
+  `baa6fd635e3004f75426234cc3ff72da240dae8c0b69074e7882dfbdbea2287e`;
+  normalized external USD SHA-256
+  `a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2`;
+  import probe SHA-256
+  `c12cddef1b972b96bc53303aaa92341f6f54c3b78d0dac0cc08f9f5bc4923d55`;
+  FK probe SHA-256
+  `0426a628b51420998486fb5c58f97cd393f915a3edbe791dd81518bbc3e7fcbf`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-003 --receipt C:\IsaacSim\evidence\urdf_import_003.json --status-output C:\IsaacSim\evidence\urdf_import_003.status.json`;
+  `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\fk_parity_probe.py --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --import-receipt C:\IsaacSim\evidence\urdf_import_003.json --output C:\IsaacSim\evidence\fk_parity_002.json --status-output C:\IsaacSim\evidence\fk_parity_002.status.json`;
+  `python -m pytest software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS for the bounded kinematic parity corpus. The live articulation
+  exposes the exact six-DOF source order. Zero, home, and ready all pass at
+  thresholds 0.1 mm translation and 0.05 degrees rotation; worst translation
+  error is 0.00012833903159220256 mm and reported rotation error is 0 degrees.
+  The focused suite passed 27 tests in 1.29 seconds and all four repository
+  audits passed.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json`;
+  `software/integrations/isaac_sim/evidence/roarm_m3_fk_parity_20260929.json`;
+  `software/integrations/isaac_sim/urdf_import_probe.py`;
+  `software/integrations/isaac_sim/fk_parity_probe.py`;
+  `software/tests/unit/test_isaac_sim_urdf_import_evidence.py`;
+  `software/tests/unit/test_isaac_sim_fk_parity_evidence.py`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: parity uses instantaneous articulation teleport and the imported
+  fixed `hand_tcp` transform without a dynamics step. The meshless source has
+  invalid mass and inertia placeholders and no visual or collision geometry.
+  This result makes no dynamics, trajectory, clearance, contact, rendering,
+  controller, hardware, or physical qualification claim. RTX 3090 remains
+  outside NVIDIA's documented Isaac 6.1.0 minimum GPU set, and the repository
+  toolchain lock remains `UNSELECTED`. No AI, arm, or integration gate status
+  changed.
+- Supersedes: INT-431's missing-base-DOF topology for the normalized artifact
+  only; INT-431 remains retained failed evidence.
+- Next dependency: define and import governed reduced collision geometry and
+  valid inertial properties before any dynamics, clearance, or contact oracle
+  work; runner lock selection remains a separate review decision.
+
+### E-20260929-INT-433 — nominal RC03 rigid scene retained with collision blockers
+
+- Stage: S2/S3 simulation oracle WP2.
+- Lane: INTEGRATION.
+- Commit: `0ffb24b5860cea90ad3338429a4adf19134f0727`.
+- Change: projected the strict RC03 nominal scene into a metre-based external
+  Isaac USD, referenced the normalized six-DOF robot at the frozen nominal
+  board transform, retained six static rigid obstacle envelopes, six nominal
+  fiducials and the nominal `H` target marker, and added a compact canonical
+  receipt plus hardware-free validation. Collision queries and hover replay
+  are explicitly inadmissible.
+- Inputs/fixtures: scene-probe SHA-256
+  `69fb0caa5045e8fb3938f2ad71859f0da35963ddd85dfe847a593a5dd4a4f945`;
+  test SHA-256
+  `af86a721b2b3a584a1d0894f5c3b67e5f7082353f197d040235d6b4674752a0f`;
+  committed receipt file SHA-256
+  `df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b`;
+  receipt content SHA-256
+  `0d080880e6c7915cae43d04771c9a17748060c4d682a1de86003d54021067bcd`;
+  target-profile SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  simulation-hardware-profile SHA-256
+  `6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190`;
+  RC03 layout SHA-256
+  `e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1`;
+  AprilTag-map SHA-256
+  `81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700`;
+  normalized robot-import receipt file SHA-256
+  `f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde`.
+- Command: `$env:OMNI_KIT_ACCEPT_EULA='YES'; C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_scene_probe.py --workspace . --rc03-root active-project\RoCell_v0_3 --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda --robot-import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json --output-dir C:\IsaacSim\artifacts\issue190\wp2-scene-002 --receipt C:\IsaacSim\evidence\rc03_scene_002.json --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json`;
+  `python -m py_compile software/integrations/isaac_sim/rc03_scene_probe.py software/tests/unit/test_isaac_sim_rc03_scene_evidence.py`;
+  `python -m pytest software/tests/unit/test_isaac_sim_fk_evidence.py software/tests/unit/test_isaac_sim_import_evidence.py software/tests/unit/test_isaac_sim_host_evidence.py -q`;
+  `python -m pytest software/tests/unit/test_isaac_sim_rc03_scene_evidence.py software/tests/unit/test_isaac_sim_urdf_import_evidence.py software/tests/unit/test_isaac_sim_fk_parity_evidence.py software/tests/unit/test_isaac_sim_first_launch_evidence.py software/tests/unit/test_isaac_sim_host_probe.py software/tests/unit/test_isaac_sim_contracts.py -q`;
+  `python scripts/ci/check_docs.py`; `python scripts/ci/check_evidence_scope.py`;
+  `python scripts/ci/check_public_records.py`;
+  `python scripts/ci/check_repository_artifacts.py`; `git diff --check`.
+- Result: PASS_WITH_BLOCKERS for bounded rigid scene composition. The external
+  6,847-byte stage SHA-256 is
+  `77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35`,
+  with canonical external-manifest digest
+  `fcd219cab737e48ccffd464360705a9de931ab46a23640f4336bc4223b662664`.
+  Reopening the stage found exactly six collision prims and all six composed
+  robot joints. The corrected focused suite passed 32 tests in 1.49 seconds,
+  and all four repository audits passed. The earlier focused-test command
+  failed before collection because it named three nonexistent test files;
+  that failed attempt is retained here and was corrected without rewriting it.
+- Artifacts:
+  `software/integrations/isaac_sim/evidence/rc03_nominal_rigid_scene_20260929.json`;
+  `software/integrations/isaac_sim/rc03_scene_probe.py`;
+  `software/tests/unit/test_isaac_sim_rc03_scene_evidence.py`;
+  external USD and status evidence under
+  `C:\IsaacSim\artifacts\issue190\wp2-scene-002` and
+  `C:\IsaacSim\evidence`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the board, keyboard, phone and three station bodies are static
+  nominal envelopes. The station heights are 35 mm conservative proxies. Arm
+  links, the tool and camera support have no collision geometry; source
+  inertial properties are invalid; robot placement is nominal and unmeasured;
+  and the Isaac toolchain lock remains `UNSELECTED`. This evidence provides no
+  dynamics, trajectory, clearance, contact, rendering, controller, hardware or
+  physical qualification, and changes no AI, arm or integration gate status.
+- Supersedes: none. INT-431 and INT-432 remain the governing topology and FK
+  evidence.
+- Next dependency: define reviewed reduced collision geometry for the arm,
+  tool and camera support, replace fixture proxies with governed solid heights,
+  and obtain measured robot placement before any clearance or hover oracle is
+  admissible.

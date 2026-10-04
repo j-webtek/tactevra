@@ -23,6 +23,157 @@ It does **not** import Isaac Sim, load a USD scene, use a GPU, run physics, or
 produce clearance/contact evidence. A fake-adapter `PASS` has evidence class
 `CONTRACT_TEST_ONLY` and expressly establishes only contract behavior.
 
+## Initial Windows runner candidate installed 2026-09-29
+
+The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
+containing CPython 3.12, `torch==2.11.0+cu130`, and
+`isaacsim[all,extscache]==6.1.0.0`. Torch enumerates both installed NVIDIA
+GeForce RTX 3090 GPUs. The compact
+[`host probe`](evidence/windows_dual_rtx3090_candidate_20260929.json) binds 26
+Isaac/Torch distributions through their installed `METADATA` and `RECORD`
+hashes and records zero hardware writes and zero physical movements.
+
+This is a blocked candidate, not a selected runner. Isaac Sim has not been
+launched, no NVIDIA terms were accepted by automation, and the settings
+profile remains unavailable. NVIDIA documents driver 595.97 as tested for
+Isaac Sim 6.1.0 on Windows; the host currently reports 591.86. The RTX 3090 is
+also outside NVIDIA's documented minimum GPU set for 6.1.0 even though each
+card has 24 GiB VRAM and RT capability. Compatibility must therefore be
+measured after a reviewed driver and license decision.
+
+The initial candidate report is retained as historical prelaunch evidence. The
+driver and launch blockers in that report were subsequently addressed as
+described below. The exact package installation commands were:
+
+```powershell
+py -3.12 -m venv C:\IsaacSim\env_6_1_0
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install --upgrade pip
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install "isaacsim[all,extscache]==6.1.0.0" --extra-index-url https://pypi.nvidia.com
+```
+
+Reproduce the non-launching probe from the repository root:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path 'software/src').Path
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_probe `
+  --output software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json
+```
+
+The probe imports neither Isaac Sim nor Torch. It cannot accept a license,
+start a simulator, open robot transport, or generate wire commands.
+
+## Driver-qualified compatibility launch
+
+The project owner authorized NVIDIA's terms for internal use and installation
+of the tested Windows driver. The signed NVIDIA 595.97 installer has SHA-256
+`979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`.
+The outer self-extractor failed once with Windows access denied; extracting the
+same signed archive and running its signed `setup.exe -s -n Display.Driver`
+succeeded. Both GPUs then reported driver 595.97 and Torch retained CUDA access.
+
+[`first_launch_probe.py`](first_launch_probe.py) subsequently started Isaac Sim
+headlessly and shut it down without creating a scene. The retained
+[`launch receipt`](evidence/windows_dual_rtx3090_first_launch_20260929.json)
+binds:
+
+- Isaac Sim distribution 6.1.0.0 and Kit application 6.1.0;
+- the exact 26-distribution installation digest;
+- driver 595.97 and both 24 GiB RTX 3090 identities;
+- 303 live enabled extensions and their canonical digest;
+- the five-field headless launch profile and its canonical digest; and
+- zero hardware writes, movements, wire commands, or physical authority.
+
+Reproduce the compatibility launch only in the installed external environment:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_launch_probe.py `
+  --output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.json `
+  --status-output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.status.json `
+  --installation-sha256 ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258 `
+  --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122
+```
+
+The compatibility launch passes, but the repository toolchain lock remains
+`UNSELECTED`. The RTX 3090 remains outside NVIDIA's documented 6.1.0 minimum
+GPU set. The launch also reported PCIe device 0 at width x4 versus its x16
+maximum, no CUDA peer access between the GPUs, a stale localhost Omniverse
+proxy setting, and an OpenUSD asset-converter build warning. WP1 must resolve
+or explicitly isolate the OpenUSD importer warning and prove import/FK parity
+before a runner-selection change can be reviewed.
+
+## Governed RoArm URDF import
+
+[`urdf_import_probe.py`](urdf_import_probe.py) imports the pinned, meshless
+RoArm-M3 kinematic URDF into a caller-supplied external directory. The compact
+[`import receipt`](evidence/roarm_m3_urdf_import_20260929.json) binds the exact
+source URDF, importer configuration, generated USD manifest, all nine source
+links, six movable USD Physics joints, and the two source fixed joints that the
+Isaac importer represents as nested transforms.
+
+The generated USD is deliberately retained outside Git at
+`C:\IsaacSim\artifacts\issue190\wp1-import-003`. Its manifest is committed,
+but the stage itself is not. The receipt is kinematic import evidence only: it
+contains no trajectory, wire command, hardware access, physical authority,
+dynamics qualification, or FK parity claim.
+
+Reproduce the bounded import on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py `
+  --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-003 `
+  --receipt C:\IsaacSim\evidence\urdf_import_003.json `
+  --status-output C:\IsaacSim\evidence\urdf_import_003.status.json
+```
+
+The importer promotes `base_link` to the USD articulation root after Isaac's
+fixed-joint collapse. This preserves all six source movable joints in the live
+articulation DOF view. The original unnormalized import and its missing-base-DOF
+diagnostic remain retained evidence.
+
+[`fk_parity_probe.py`](fk_parity_probe.py) teleports only the live in-memory
+articulation through the governed zero, home, and ready corpus and reads the
+`link5` physics transform plus the imported fixed `hand_tcp` transform. The
+retained [`FK receipt`](evidence/roarm_m3_fk_parity_20260929.json) exposes the
+complete six-DOF order and passes all three cases at a worst translation error
+below 0.00013 mm. This is kinematic parity only. The imported model has invalid
+mass and inertia placeholders, and no dynamics, collision, contact, rendering,
+hardware, or physical qualification follows from this result.
+
+## Nominal RC03 rigid scene
+
+[`rc03_scene_probe.py`](rc03_scene_probe.py) consumes the existing strict RC03
+scene loader and composes an external metre-based USD stage containing the
+governed board, keyboard and phone envelopes, three conservative station
+proxies, six nominal fiducials, the nominal `H` target marker, and a reference
+to the normalized robot USD at the frozen nominal board transform. The compact
+[`scene receipt`](evidence/rc03_nominal_rigid_scene_20260929.json) binds every
+source file, the external stage, six static collision prims, and the six
+composed robot joints.
+
+This is scene-composition evidence only. Collision queries and hover replay
+remain explicitly inadmissible because robot-link and tool collision geometry,
+valid inertial properties, camera-support solids, controlled fixture heights,
+measured robot placement, and a selected Isaac toolchain lock are unavailable.
+The probe does not accept or derive a trajectory.
+
+Reproduce it on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_scene_probe.py `
+  --workspace . `
+  --rc03-root active-project\RoCell_v0_3 `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --robot-import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp2-scene-002 `
+  --receipt C:\IsaacSim\evidence\rc03_scene_002.json `
+  --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
@@ -72,4 +223,3 @@ operation is asset import and kinematic parity (WP1), not trajectory execution:
 
 See the full [integration plan](../../docs/ISAAC_SIM_INTEGRATION_PLAN.md) for
 work packages, acceptance gates, ownership, evidence, and limitations.
-

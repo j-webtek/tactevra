@@ -1,0 +1,219 @@
+{
+  "blockers": [
+    "DRIVER_BELOW_TESTED_MINIMUM",
+    "GPU_MODEL_NOT_IN_DOCUMENTED_MINIMUM_SET",
+    "ISAAC_EULA_NOT_ACCEPTED_BY_AUTOMATION",
+    "APPLICATION_NOT_LAUNCHED"
+  ],
+  "captured_at": "2026-09-29T20:20:19Z",
+  "extension_lock_sha256": "3a510e375fc27c0ac2b540e14976ef6ae4255286d43753b45fc999ce2188e8bc",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "host": {
+    "architecture": "AMD64",
+    "installation_volume_free_bytes": 138932752384,
+    "os": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26200",
+    "physical_memory_bytes": 137134125056,
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel"
+  },
+  "installation_sha256": "ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258",
+  "isaac_sim_version": "6.1.0.0",
+  "launch_status": "NOT_RUN",
+  "license_review_status": "NOT_ACCEPTED_BY_AUTOMATION",
+  "nvidia": {
+    "driver_version": "591.86",
+    "gpus": [
+      {
+        "compute_capability": "8.6",
+        "index": 0,
+        "memory_total_mb": 24576,
+        "name": "NVIDIA GeForce RTX 3090"
+      },
+      {
+        "compute_capability": "8.6",
+        "index": 1,
+        "memory_total_mb": 24576,
+        "name": "NVIDIA GeForce RTX 3090"
+      }
+    ]
+  },
+  "packages": [
+    {
+      "metadata_sha256": "c602247b781250efa3e0acef5d02f62c282288d31d2b367dcd50bd5aafd39cec",
+      "name": "isaacsim",
+      "record_sha256": "9d26ed3334d00fcb8dee97e80e07550f26311b0effa1b4ef2db199000e920730",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "34d201eb595b655d081f59d4db7b66f944cc2b4b0c91ad049641a2d82b558aaa",
+      "name": "isaacsim-app",
+      "record_sha256": "ca2632dc889f38f17322b9252b837055fc66da4ba9b50da09c2a9e59a5370495",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "08766786a4ff0046dc68d6840a91b5fe28c8ae3368bd3e2f565a8fce96040551",
+      "name": "isaacsim-asset",
+      "record_sha256": "f3d1c48006310d7f5b61dc6fa0a819231e1d51ac2aea5238f7fac0245828ab59",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "edea01afcf3f35fb85215f8bde4f1a538299ddfe11b74ced0f96523aca198cb0",
+      "name": "isaacsim-benchmark",
+      "record_sha256": "3139c768f8a17cb534699e60764512e28092796a9b12de5b6bd20ddd50ffe6a4",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "6fd8d991a81f91a713bfb042c61eade5523b058a133e4253558a1fbdb6d02bc2",
+      "name": "isaacsim-code-editor",
+      "record_sha256": "41766d8e0418195c7405fe390d83ee95284eb9020fe8bf026468a45ad6bc2c3a",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "bfafdcb046868d0dd1c1552e9a3713245c436b8c416dd7e03039d51d7e5f7518",
+      "name": "isaacsim-core",
+      "record_sha256": "5e04521ce34a56d31af6d6e9a4f2e38eb77b4b8e4aed0581e3441ab1756c8ec9",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "7f9a5d50ead1cc7d23a14d35e427b1dcb5604aa983ba0d81e419837ae83827eb",
+      "name": "isaacsim-cortex",
+      "record_sha256": "c18e9c428657626b2789fd161c816e1d9630c1c30a3959cfbd86cff89c5e8383",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "d32fb892a817a411aadb4c819f9fe4cea9317b3ef63ba9b2d5f189ca2e06e16b",
+      "name": "isaacsim-example",
+      "record_sha256": "9b49e9539433f2d59b081c4363ab2f8bb536023905c6806425c7eff973d65ccb",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "18ac585c1d0a3d5bb94ac45e3777ace1808abafd4b62d0f36d30b29b5ee24af6",
+      "name": "isaacsim-extscache-kit",
+      "record_sha256": "f771d154444abfff83b9e60a543d716745d526d59811f52326c7ad0233def970",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "7c0c9741f3e1407d596d950689db2c4625d3ac1d303607da50b068f78630cf09",
+      "name": "isaacsim-extscache-kit-sdk",
+      "record_sha256": "a3d96172340d634141db1eb4a13f957d6f99ba7af4cd68286f74d4a065a067b9",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "40f9c1689c32aa51187934cfa0b66458a928c7e5bf6067f275b7b15a4008db2d",
+      "name": "isaacsim-extscache-physics",
+      "record_sha256": "b3431139250c6a67f290d3a1780d9879657e0d77f23cb7a9e3cff56c32bcfda2",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "cfa90ac63e926bc21faa360a46ee5f735e57cf9d692fb6921e948c8168842e95",
+      "name": "isaacsim-gui",
+      "record_sha256": "4316caaf02dd2ca04e9cfb1dbdc71e7d44ff83fd36b884b47304a72c8ccb0499",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "327d161bb3b41c6a64cdfe3d95471da7c0e6e5562a4e8c59a776ed0838472001",
+      "name": "isaacsim-kernel",
+      "record_sha256": "45dd59be07cdceaa3843943f25829f32d43440f1f890db8e4062485fe7c5f9ae",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "418d478628bfc5dabc85cf5c26cc9f9ba05cbf32d8996be880c5203675fd8e6b",
+      "name": "isaacsim-replicator",
+      "record_sha256": "c6ae26669a491ecac9b2d6cc052b8811f36d2790b1da370cd94259168e323b28",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "77373fdcb182905e64f0deb90d9c1203d5d43f3c1180e8bac5e9cf5c4e9a67b4",
+      "name": "isaacsim-rl",
+      "record_sha256": "1c5494f918352c48c2323f7ddf9a3ee14a16ccfc0f38181d82c0d7e583066bc4",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "5ca4cc349e3ffff0633ba75fbeb285c86a99f92212166cec231881823b0bf487",
+      "name": "isaacsim-robot",
+      "record_sha256": "213579b49e49cd1c922c1abfd557333144b68869fbb876897940d8ac8d130b74",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "47390a8f7ee8b979a0cf2102a46713df90dd8b1354824768dfe621f9bc99e767",
+      "name": "isaacsim-robot-motion",
+      "record_sha256": "bc0f2cecb188e44188a8d82bca89c971866c15b1a12633abeb7b68334cbc910b",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "314aa6c57c1a6c749cc55ab4f860131675d44c499fd5e8f5f9b7406504923915",
+      "name": "isaacsim-robot-setup",
+      "record_sha256": "24e525b7bd0cd002c512a6aff524e1677b9e7b69d59d09fa82d6e7f0728a93b5",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "1dbcef06e0a51ffe905c5251000fe9ec84d0a50cd535d269f017d2c827316e01",
+      "name": "isaacsim-ros1",
+      "record_sha256": "611e355d6ad33f2aaf98547c16b9905b9ed51627fa42f37b4b8f3b972a9452da",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "4009b2188709f7f456daf4066eadbe7683bc13f5577d58d7e91d108f4518a8fb",
+      "name": "isaacsim-ros2",
+      "record_sha256": "125a43f9b16bddb78e0dcc7fa4ddac74a86563429d6e9a32cf038deca6d6b535",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "a36b9a02a051d559bf423c92b9cf3992bbfc1fe4ad66ac340a0f90474ddb30fa",
+      "name": "isaacsim-sensor",
+      "record_sha256": "f7114c9359e15451cb270c6f8d8565c69d4e47e3ab42fc4765066af468ad6949",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "4e5d8c2c27b1fb1ae80af0f1c68af1febd1706a1a27fabba6f607f88c7ca5cdd",
+      "name": "isaacsim-storage",
+      "record_sha256": "7371e8e457b4d49c96a84e403af2ca5aa2d39faa8ad7b89fa6092aa032a2a30c",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "941e7d09881c9be6a82c4ce478e8fde84afd3891a4e4711ead34344354ebdd34",
+      "name": "isaacsim-template",
+      "record_sha256": "c411e8604d410bfbffc2ee73ec5d03ee2b899d67465e73832f6907598323f9f8",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "4b1f92071d22b6bf81ba4f85bc7d34282c1bf080ac59e77066e96cc297101079",
+      "name": "isaacsim-test",
+      "record_sha256": "44e826bd25069b9a643a416c222cf02468ce04aad9483363666c1f1766c7b593",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "c27a27cbff0399e7e5fb59eccb330028f31fc72ade572df298a6826c18e836d4",
+      "name": "isaacsim-utils",
+      "record_sha256": "87e4f5fc81b7c423c612632ed5e8389d98ff2f2b0e4b6a8cba50f1e3d668cdac",
+      "version": "6.1.0.0"
+    },
+    {
+      "metadata_sha256": "2443d629fe76d70bf402d66d6b6202ca89d448bb638bf13458f0737006a3b459",
+      "name": "torch",
+      "record_sha256": "7edd7b138ebd7ceabc3c7f89022aeccc6de31dfbd8c7eee983b87cd2e926db82",
+      "version": "2.11.0+cu130"
+    }
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "probe_sha256": "cf4eaf0e9cc174b4d89a70037a5ff5b440bf7fb97ab3d41ffcd2fcb220f708b6",
+  "python": {
+    "executable": "C:\\IsaacSim\\env_6_1_0\\Scripts\\python.exe",
+    "implementation": "CPython",
+    "version": "3.12.0"
+  },
+  "requirements": {
+    "driver_meets_tested_minimum": false,
+    "each_gpu_at_least_16_gib": true,
+    "gpu_model_in_documented_minimum_set": false,
+    "ram_at_least_32_gib": true,
+    "tested_driver_minimum": "595.97"
+  },
+  "schema": "rocell.isaac_sim_host_probe.v1",
+  "selection_status": "CANDIDATE_BLOCKED",
+  "settings_profile_sha256": null,
+  "wire_commands": []
+}
