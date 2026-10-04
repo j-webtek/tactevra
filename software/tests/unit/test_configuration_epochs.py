@@ -154,3 +154,10 @@ def test_rejects_float_anywhere(tmp_path: Path) -> None:
 def test_rejects_policy_outside_workspace(tmp_path: Path) -> None:
     with pytest.raises(ConfigurationEpochPolicyError, match="beneath the workspace"):
         load_configuration_epoch_policy(tmp_path, POLICY_PATH)
+
+
+def test_rejects_oversized_policy_at_file_boundary(tmp_path: Path) -> None:
+    path = tmp_path / "oversized.json"
+    path.write_bytes(b" " * (256 * 1024 + 1))
+    with pytest.raises(ConfigurationEpochPolicyError, match="could not read"):
+        load_configuration_epoch_policy(tmp_path, path)

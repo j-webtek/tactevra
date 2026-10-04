@@ -31,13 +31,14 @@ def build(root: Path, output_dir: Path) -> dict:
             "review exchange output already exists; refusing to overwrite")
     members = {
         "source/native_t102_serial_transport_v1.py": (
-            root / "software/src/rocell/providers/windows/"
+            root / "software/native/review/arm054-candidate/source/"
             "native_t102_serial_transport_v1.py").read_bytes(),
         "tests/test_windows_native_t102_serial_transport_v1.py": (
-            root / "software/tests/unit/"
+            root / "software/native/review/arm054-candidate/tests/"
             "test_windows_native_t102_serial_transport_v1.py").read_bytes(),
         "docs/WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md": (
-            root / "software/docs/WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md"
+            root / "software/native/review/arm054-candidate/docs/"
+            "WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md"
         ).read_bytes(),
     }
     packet = build_native_t102_adapter_review_packet_v1(

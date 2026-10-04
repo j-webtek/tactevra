@@ -19,6 +19,10 @@ import re
 from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
+from rocell.application.physical_onboarding_durability import (
+    PhysicalOnboardingDurabilityError,
+    read_bounded_regular_file,
+)
 from rocell.application.physical_onboarding import PhysicalOnboardingStage
 
 
@@ -211,8 +215,11 @@ def load_configuration_epoch_policy(
     selected = DEFAULT_CONFIGURATION_EPOCH_POLICY if policy_path is None else policy_path
     resolved = _resolve_policy(Path(workspace), Path(selected))
     try:
-        payload = resolved.read_bytes()
-    except OSError as exc:
+        payload = read_bounded_regular_file(
+            resolved, maximum_bytes=MAX_CONFIGURATION_EPOCH_POLICY_BYTES,
+            label="configuration epoch policy",
+        )
+    except (OSError, PhysicalOnboardingDurabilityError) as exc:
         raise ConfigurationEpochPolicyError("could not read configuration epoch policy") from exc
     if not payload or len(payload) > MAX_CONFIGURATION_EPOCH_POLICY_BYTES:
         raise ConfigurationEpochPolicyError("configuration epoch policy size is invalid")

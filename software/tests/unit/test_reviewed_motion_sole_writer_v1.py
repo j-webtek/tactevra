@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 import jsonschema
@@ -9,7 +10,7 @@ import pytest
 from rocell.application.context import load_simulation_context
 from rocell.application.reviewed_motion_permit_bridge_v1 import (
     ReviewedActionLifecycleV1,
-    issue_reviewed_motion_permit_v1,
+    ReviewedMotionPermitAdmissionV1,
 )
 from rocell.application.reviewed_motion_sole_writer_v1 import (
     IncapableReviewedMotionIoV1,
@@ -23,6 +24,7 @@ from rocell.application.single_action_execution_review_v1 import (
 )
 from rocell.arm.protocol import CartesianGoal
 from rocell.rc03.build_snapshot import Capability
+from rocell.safety.permit import MotionPermit, goal_hash
 from rocell.safety.supervisor import SafetySupervisor
 
 import test_single_action_execution_review_v1 as execution_review
@@ -56,10 +58,30 @@ def _issued(context, released_snapshot):
     supervisor = SafetySupervisor(released_snapshot)
     _advance_to_armed(supervisor)
     goal = CartesianGoal(101, 202, 303, 0.1, 0.2, 0.3, 0.15)
-    permit, admission = issue_reviewed_motion_permit_v1(
-        supervisor, review, consumption, Capability.KEYBOARD_CONTACT, [goal],
-        calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(100),
-        runtime=_healthy_runtime(), ttl_s=2, now_monotonic=100)
+    # Hardware-incapable Cartesian rehearsal retains its legacy test fixture.
+    # Physical review issuance accepts only the exact reviewed T102 goal.
+    permit = MotionPermit._issue(
+        capability=Capability.KEYBOARD_CONTACT,
+        snapshot_hash="c" * 64, plan_hash=review.review_sha256,
+        goals=(goal,), ttl_s=2, now_monotonic=100,
+    )
+    unsigned = {
+        "review_sha256": review.review_sha256,
+        "consumption_sha256": consumption["consumption_sha256"],
+        "capability": Capability.KEYBOARD_CONTACT.value,
+        "snapshot_sha256": permit.snapshot_hash,
+        "plan_hash": permit.plan_hash,
+        "ordered_goal_sha256": [goal_hash(goal)],
+        "permit_expires_at_monotonic": permit.expires_at_monotonic,
+    }
+    binding = hashlib.sha256(json.dumps(
+        unsigned, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        allow_nan=False).encode()).hexdigest()
+    admission = ReviewedMotionPermitAdmissionV1(
+        review.review_sha256, consumption["consumption_sha256"],
+        Capability.KEYBOARD_CONTACT, permit.snapshot_hash,
+        (goal_hash(goal),), permit.expires_at_monotonic, binding,
+    )
     return goal, permit, admission, ReviewedActionLifecycleV1(admission)
 
 

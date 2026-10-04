@@ -34,7 +34,16 @@ def main() -> None:
             or "getting no sync reply" not in rows[1].get("error", "")):
         raise ValueError("Not the pinned pre-write r89 failure; no reset")
 
+    pinned = root / ".firmware-tools/esptool-api-4.6"
+    if not pinned.is_dir():
+        raise ValueError("Pinned firmware dependency directory is unavailable")
+    sys.path.insert(0, str(pinned))
     import serial
+    from serial.tools import list_ports
+    if (serial.__version__ != "3.5"
+            or not Path(serial.__file__).resolve().is_relative_to(pinned.resolve())
+            or not Path(list_ports.__file__).resolve().is_relative_to(pinned.resolve())):
+        raise ValueError("Unexpected pyserial implementation")
     from serial.tools.list_ports import comports
 
     matches = [port for port in comports() if port.device == "COM7"
@@ -43,8 +52,6 @@ def main() -> None:
     if len(matches) != 1:
         raise ValueError("Expected USB adapter not identified")
 
-    pinned = root / ".firmware-tools/esptool-api-4.6"
-    sys.path.insert(0, str(pinned))
     import esptool
     from esptool.reset import HardReset
 

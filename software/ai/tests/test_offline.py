@@ -34,6 +34,13 @@ from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_current_grounding_rejects_oversized_request_before_regex(self) -> None:
+        with self.assertRaisesRegex(ValueError, "grounding input limit"):
+            grounded_propose(
+                request_id="bounded", request="a" * 8193,
+                observation={"ref": "fixture", "fresh": True},
+            )
+
     def test_quoted_control_words_are_literal_text(self) -> None:
         value = propose(
             request_id="quoted",

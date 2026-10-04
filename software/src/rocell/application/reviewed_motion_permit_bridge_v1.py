@@ -14,7 +14,7 @@ import json
 import math
 import re
 from threading import Lock
-from typing import Any, Iterable, Mapping
+from typing import Any, Mapping
 
 from rocell.calibration.artifacts import CalibrationResolution
 from rocell.rc03.build_snapshot import Capability
@@ -24,6 +24,7 @@ from rocell.safety.preflight import RuntimeStatus
 from rocell.safety.supervisor import SafetySupervisor
 
 from .single_action_execution_review_v1 import SingleActionExecutionReviewV1
+from .t102_machine_ledger_v1 import reserve_review
 
 
 ADMISSION_SCHEMA = "rocell.reviewed_motion_permit_admission.v1"
@@ -226,7 +227,6 @@ def issue_reviewed_motion_permit_v1(
     review: SingleActionExecutionReviewV1,
     consumption_receipt: Mapping[str, Any],
     capability: Capability,
-    goals: Iterable[object],
     *,
     calibrations: CalibrationResolution,
     interlocks: InterlockSnapshot,
@@ -271,10 +271,16 @@ def issue_reviewed_motion_permit_v1(
     if capability is not expected_capability:
         raise ReviewedMotionPermitBridgeError(
             "capability differs from reviewed device/interaction")
-    goal_tuple = tuple(goals)
-    if not goal_tuple:
-        raise ReviewedMotionPermitBridgeError("at least one exact goal is required")
+    goal_tuple = (dict(review.reviewed_t102_goal),)
     goal_hashes = tuple(goal_hash(goal) for goal in goal_tuple)
+    if goal_hashes != (review.reviewed_t102_goal_sha256,):
+        raise ReviewedMotionPermitBridgeError(
+            "requested goal differs from the reviewed T102 trajectory and profile")
+    # A failed preflight still burns this review. Re-presenting a copied
+    # consumption receipt cannot mint another physical permit.
+    reserve_review(
+        consumption_sha256, review.review_sha256,
+        review.reviewed_t102_goal_sha256)
     report = supervisor.evaluate(
         capability,
         plan_hash=review.review_sha256,

@@ -2430,6 +2430,17 @@ ACTIONS = (
         "stop",
     ),
 )
+# These historical live actions do not consume a reviewed, unit-bound motion
+# capability. Keep their definitions for reading old diagnostic records, but
+# do not expose or dispatch them as current wizard actions.
+_UNREVIEWED_LIVE_MOTION_ACTIONS = frozenset({
+    item.action_id for item in ACTIONS
+    if item.action_id.startswith("run_wifi_roll_")
+} | {"run_micro_commissioning"})
+ACTIONS = tuple(
+    item for item in ACTIONS
+    if item.action_id not in _UNREVIEWED_LIVE_MOTION_ACTIONS
+)
 ACTION_BY_ID = {item.action_id: item for item in ACTIONS}
 
 

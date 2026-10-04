@@ -23,13 +23,13 @@ def inputs():
     return {
         "candidate_members": {
             "source/native_t102_serial_transport_v1.py": (
-                ROOT / "software/src/rocell/providers/windows/"
+                ROOT / "software/native/review/arm054-candidate/source/"
                 "native_t102_serial_transport_v1.py").read_bytes(),
             "tests/test_windows_native_t102_serial_transport_v1.py": (
-                ROOT / "software/tests/unit/"
+                ROOT / "software/native/review/arm054-candidate/tests/"
                 "test_windows_native_t102_serial_transport_v1.py").read_bytes(),
             "docs/WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md": (
-                ROOT / "software/docs/"
+                ROOT / "software/native/review/arm054-candidate/docs/"
                 "WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md").read_bytes(),
         },
         "verification_record": (
@@ -59,6 +59,16 @@ def test_changed_candidate_source_is_rejected_by_retained_verification():
     values["candidate_members"] = dict(values["candidate_members"])
     values["candidate_members"][
         "source/native_t102_serial_transport_v1.py"] += b"\n# changed\n"
+    with pytest.raises(NativeT102AdapterReviewPacketError, match="exact"):
+        build_native_t102_adapter_review_packet_v1(**values)
+
+
+def test_current_adapter_requires_fresh_offline_verification():
+    values = inputs()
+    values["candidate_members"] = dict(values["candidate_members"])
+    values["candidate_members"]["source/native_t102_serial_transport_v1.py"] = (
+        ROOT / "software/src/rocell/providers/windows/"
+        "native_t102_serial_transport_v1.py").read_bytes()
     with pytest.raises(NativeT102AdapterReviewPacketError, match="exact"):
         build_native_t102_adapter_review_packet_v1(**values)
 
@@ -100,3 +110,15 @@ def test_inspector_rejects_added_or_tampered_members():
             archive.writestr(item.filename, data)
     with pytest.raises(NativeT102AdapterReviewPacketError, match="digest"):
         inspect_native_t102_adapter_review_packet_v1(tampered.getvalue())
+
+
+def test_inspector_rejects_compressed_expected_members_before_expansion():
+    packet = build_native_t102_adapter_review_packet_v1(**inputs()).packet_bytes
+    output = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(packet)) as source, zipfile.ZipFile(
+        output, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for item in source.infolist():
+            archive.writestr(item.filename, source.read(item.filename))
+    with pytest.raises(NativeT102AdapterReviewPacketError, match="format bound"):
+        inspect_native_t102_adapter_review_packet_v1(output.getvalue())

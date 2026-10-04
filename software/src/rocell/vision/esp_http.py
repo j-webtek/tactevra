@@ -16,7 +16,7 @@ import time
 from typing import Any, Callable, Mapping, Sequence
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
-from urllib.request import Request, urlopen as stdlib_urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 import uuid
 
 from .camera import (
@@ -41,6 +41,14 @@ from .camera import (
 
 class CameraHttpError(CameraCaptureError):
     """An ESP snapshot/status HTTP exchange failed without retry."""
+
+
+class _NoRedirectHandler(HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        return None
+
+
+_NO_REDIRECT_OPENER = build_opener(_NoRedirectHandler())
 
 
 def _validate_text(name: str, value: object, *, maximum: int = 1024) -> str:
@@ -202,7 +210,7 @@ class EspHttpCamera:
             raise CameraConfigurationError("clock_ns must be callable")
         if capture_id_factory is not None and not callable(capture_id_factory):
             raise CameraConfigurationError("capture_id_factory must be callable")
-        self._urlopen = urlopen or stdlib_urlopen
+        self._urlopen = urlopen or _NO_REDIRECT_OPENER.open
         self._clock_ns = clock_ns
         self._capture_id_factory = capture_id_factory or (lambda: uuid.uuid4().hex)
         self._is_open = False
@@ -291,6 +299,15 @@ class EspHttpCamera:
         if callable(closer):
             closer()
 
+    @staticmethod
+    def _set_response_timeout(response: Any, remaining_s: float) -> None:
+        # urllib's HTTPResponse wraps a buffered SocketIO. A socket timeout is
+        # per recv, so reset it to the shrinking total budget before each read.
+        socket = getattr(getattr(getattr(response, "fp", None), "raw", None),
+                         "_sock", None)
+        if socket is not None:
+            socket.settimeout(remaining_s)
+
     def _fetch(
         self,
         endpoint: str,
@@ -313,7 +330,9 @@ class EspHttpCamera:
         )
         response: Any = None
         try:
-            response = self._urlopen(request, timeout=self.timeout_s)
+            deadline_ns = request_ns + int(self.max_capture_duration_s * 1e9)
+            response = self._urlopen(
+                request, timeout=min(self.timeout_s, self.max_capture_duration_s))
             if self._response_status(response) != 200:
                 raise CameraHttpError("ESP HTTP endpoint did not return status 200")
             final_url_getter = getattr(response, "geturl", None)
@@ -357,14 +376,32 @@ class EspHttpCamera:
                     if age < 0:
                         raise CameraHttpError("ESP HTTP Age header is negative")
 
-            first = response.read(1)
-            first_byte_ns = self._clock_ns()
-            if not isinstance(first, bytes) or not first:
+            chunks: list[bytes] = []
+            total = 0
+            first_byte_ns: int | None = None
+            reader = getattr(response, "read1", None)
+            if not callable(reader):
+                reader = response.read
+            while total <= maximum_bytes:
+                remaining_ns = deadline_ns - self._clock_ns()
+                if remaining_ns <= 0:
+                    raise CameraHttpError("ESP HTTP response exceeded total duration")
+                self._set_response_timeout(response, remaining_ns / 1e9)
+                chunk = reader(min(64 * 1024, maximum_bytes + 1 - total))
+                received_ns = self._clock_ns()
+                if received_ns > deadline_ns:
+                    raise CameraHttpError("ESP HTTP response exceeded total duration")
+                if not isinstance(chunk, bytes):
+                    raise CameraHttpError("ESP HTTP response body is not bytes")
+                if not chunk:
+                    break
+                if first_byte_ns is None:
+                    first_byte_ns = received_ns
+                chunks.append(chunk)
+                total += len(chunk)
+            if first_byte_ns is None:
                 raise CameraHttpError("ESP HTTP response body is empty")
-            remainder = response.read(maximum_bytes)
-            if not isinstance(remainder, bytes):
-                raise CameraHttpError("ESP HTTP response body is not bytes")
-            payload = first + remainder
+            payload = b"".join(chunks)
             complete_ns = self._clock_ns()
             if len(payload) > maximum_bytes:
                 raise FrameLimitError(

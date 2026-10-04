@@ -513,10 +513,23 @@ class SubprocessArgvCommandRunner:
             or not 1 <= timeout_seconds <= COMMAND_TIMEOUT_SECONDS
         ):
             raise PhysicalDeviceInventoryError("command timeout is outside policy")
+        environment = None
+        if os.name == "nt" and argv == WINDOWS_CAMERA_PNP_ARGV:
+            system32 = Path(argv[0]).parents[2]
+            windows = system32.parent
+            environment = {
+                "SystemRoot": str(windows),
+                "WINDIR": str(windows),
+                "PATH": str(system32),
+                "PSModulePath": str(
+                    system32 / "WindowsPowerShell" / "v1.0" / "Modules"
+                ),
+            }
         completed = subprocess.run(  # noqa: S603 - fixed argv supplied by this module
             list(argv),
             check=False,
             shell=False,
+            env=environment,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             timeout=timeout_seconds,
@@ -565,8 +578,23 @@ ConvertTo-Json -InputObject $devices -Compress -Depth 4
 """.strip()
 
 
+def _trusted_windows_powershell() -> str:
+    if os.name != "nt":
+        return "powershell.exe"  # Only used by injected runners on non-Windows.
+    import ctypes
+
+    buffer = ctypes.create_unicode_buffer(32768)
+    length = ctypes.windll.kernel32.GetSystemDirectoryW(buffer, len(buffer))
+    if not 0 < length < len(buffer):
+        raise PhysicalDeviceInventoryError("Windows system directory is unavailable")
+    path = Path(buffer.value) / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    if not path.is_file():
+        raise PhysicalDeviceInventoryError("trusted Windows PowerShell is unavailable")
+    return str(path)
+
+
 WINDOWS_CAMERA_PNP_ARGV = (
-    "powershell.exe",
+    _trusted_windows_powershell(),
     "-NoLogo",
     "-NoProfile",
     "-NonInteractive",

@@ -15,15 +15,16 @@ def build(root: Path, output: Path | None = None) -> dict:
     result = build_native_t102_adapter_review_packet_v1(
         candidate_members={
             "source/native_t102_serial_transport_v1.py": (
-                root / "software/src/rocell/providers/windows/"
+                root / "software/native/review/arm054-candidate/source/"
                 "native_t102_serial_transport_v1.py"
             ).read_bytes(),
             "tests/test_windows_native_t102_serial_transport_v1.py": (
-                root / "software/tests/unit/"
+                root / "software/native/review/arm054-candidate/tests/"
                 "test_windows_native_t102_serial_transport_v1.py"
             ).read_bytes(),
             "docs/WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md": (
-                root / "software/docs/WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md"
+                root / "software/native/review/arm054-candidate/docs/"
+                "WINDOWS_NATIVE_T102_SERIAL_ADAPTER.md"
             ).read_bytes(),
         },
         verification_record=(

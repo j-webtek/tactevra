@@ -161,9 +161,6 @@ def main():
     if args.received:
         for name in ('native_diagnostic_owner.h','reference_elbow_admission.h','received_session.h','diagnostic_receipt.h','fresh_elbow_baseline.h'):
             outputs[name]=(root/'firmware/diagnostics'/name).read_bytes()
-        text=outputs['espnow_owner.h'].decode()
-        outputs['espnow_owner.h']=replace_once(text,'  if (message.cmd==0) {',
-            '  if (message.cmd==0) {\n    if (rocellRejectDiagnosticInterference()) return;').encode()
     if args.diagnostic_boot:
         outputs['diagnostic_boot.h']=(root/'firmware/diagnostics/diagnostic_boot.h').read_bytes()
     if args.configured:

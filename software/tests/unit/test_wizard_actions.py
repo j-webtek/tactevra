@@ -17,6 +17,8 @@ from rocell.application.wizard_actions import (
 
 def test_registry_is_unique_and_has_only_expected_semantic_actions() -> None:
     assert len(ACTIONS) == len(ACTION_BY_ID)
+    assert "run_micro_commissioning" not in ACTION_BY_ID
+    assert not any(name.startswith("run_wifi_roll_") for name in ACTION_BY_ID)
     assert set(ACTION_BY_ID) == {
         'run_held_pair',
         'review_observed_pair',
@@ -40,29 +42,10 @@ def test_registry_is_unique_and_has_only_expected_semantic_actions() -> None:
         'observe_arm_wifi_feedback_spaced',
         'read_arm_wifi_feedback',
         'sample_arm_wifi_feedback',
-        'run_micro_commissioning',
         'simulate_discrete_transaction',
         'simulate_servo_diagnostics',
         'simulate_micro_correction',
-        'run_wifi_roll_adjacent_high_trial',
-        'run_wifi_roll_adjacent_lookup_trial',
-        'run_wifi_roll_adjacent_low_trial',
-        'run_wifi_roll_adjacent_trial',
-        'run_wifi_roll_center_down_trial',
-        'run_wifi_roll_center_up_trial',
-        'run_wifi_roll_corrected_down_trial',
-        'run_wifi_roll_corrected_up_trial',
-        'run_wifi_roll_high_trial',
-        'run_wifi_roll_lookup_trial',
-        'run_wifi_roll_low_trial',
-        'run_wifi_roll_negative_trial',
-        'run_wifi_roll_probe_high_trial',
-        'run_wifi_roll_probe_low_trial',
-        'run_wifi_roll_sweep_center_trial',
-        'run_wifi_roll_sweep_high_trial',
-        'run_wifi_roll_sweep_low_trial',
-        'run_wifi_roll_trial',
-        'run_wifi_roll_zero_trial',
+        'review_pose_policy',
         "record_observational_movement",
         "run_observational_movement",
         "setup_observational_movement",

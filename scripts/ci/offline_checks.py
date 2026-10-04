@@ -34,6 +34,7 @@ TESTS = (
     "software/tests/unit/test_native_t102_executor_rehearsal_v1.py",
     "software/tests/unit/test_native_t102_terminal_receipt_journal_v1.py",
     "software/tests/unit/test_native_t102_production_transport_v1.py",
+    "software/tests/unit/test_t102_machine_ledger_v1.py",
     "software/tests/unit/test_windows_native_t102_serial_transport_v1.py",
     "software/tests/unit/test_native_t102_adapter_review_packet_v1.py",
     "software/tests/unit/test_native_t102_adapter_review_decision_v1.py",

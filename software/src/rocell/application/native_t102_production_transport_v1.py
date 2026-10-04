@@ -1,10 +1,9 @@
 """Production-shaped native T=102 transport boundary with no bundled opener.
 
-This module deliberately stops one layer short of Windows or pyserial.  It
-defines the exact endpoint, external-authority, single-use transport, capture,
-and durable attempt contracts that such an adapter must satisfy.  The
-repository does not contain an authority issuer or a concrete transport
-implementation; importing this module cannot enumerate or open hardware.
+This module defines the exact endpoint, machine-pinned Ed25519 authority,
+single-use ledger, transport, capture, and durable attempt contracts. The
+repository does not contain an authority issuer or provisioned issuer key;
+importing this module cannot enumerate or open hardware.
 
 An execution attempt is made durable before ``open_once``.  Once that marker
 exists, every outcome is no-retry, including a process crash.  Test doubles
@@ -15,6 +14,7 @@ explicitly unqualified and is never promoted to an authentic physical result.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import base64
 from dataclasses import dataclass
 from enum import Enum
 import hashlib
@@ -23,20 +23,28 @@ import math
 import os
 from pathlib import Path
 import re
+import time
 from threading import Lock
 from typing import Any, Mapping, Protocol, Sequence
 
 from rocell.arm.all_joint_command import JOINT_FIELDS
 from rocell.arm.protocol import decode_line, encode_line
+from rocell.safety.permit import MotionPermit, goal_hash
 
 from .native_t102_handoff_journal_v1 import DurableNativeT102HandoffV1
 from .production_controller_runtime_contract_v1 import RuntimeCommandFrameV1
 from .reviewed_motion_permit_bridge_v1 import ReviewedMotionPermitAdmissionV1
+from . import t102_machine_ledger_v1 as machine_ledger
 
 
 ENDPOINT_SCHEMA = "rocell.native_t102_pinned_endpoint.v1"
 AUTHORITY_SCHEMA = "rocell.external_native_t102_authority.v1"
 VERIFICATION_SCHEMA = "rocell.external_native_t102_authority_verification.v1"
+_AUTHORITY_ISSUER = object()
+
+
+def _trusted_monotonic_ns() -> int:
+    return time.monotonic_ns()
 STARTED_SCHEMA = "rocell.native_t102_production_attempt_started.v1"
 RECEIPT_SCHEMA = "rocell.native_t102_production_transport_receipt.v1"
 TERMINAL_SCHEMA = "rocell.native_t102_production_attempt_terminal.v1"
@@ -163,6 +171,7 @@ class PinnedNativeT102EndpointV1:
 class ExternalNativeT102AuthorityRecordV1:
     authority_id: str
     approval_record_sha256: str
+    review_sha256: str
     claim_sha256: str
     frame_sha256: str
     wire_bytes_sha256: str
@@ -182,7 +191,7 @@ class ExternalNativeT102AuthorityRecordV1:
         _identifier(self.controller_session_id, "controller_session_id")
         _identifier(self.issuer_key_id, "issuer_key_id")
         for name in (
-            "approval_record_sha256", "claim_sha256", "frame_sha256",
+            "approval_record_sha256", "review_sha256", "claim_sha256", "frame_sha256",
             "wire_bytes_sha256", "endpoint_sha256",
             "configuration_epoch_sha256", "encoding_profile_sha256",
         ):
@@ -204,7 +213,9 @@ class ExternalNativeT102AuthorityRecordV1:
             "schema": AUTHORITY_SCHEMA,
             "scope": AUTHORITY_SCOPE,
             "authority_id": self.authority_id,
+            "issuer_key_id": self.issuer_key_id,
             "approval_record_sha256": self.approval_record_sha256,
+            "review_sha256": self.review_sha256,
             "claim_sha256": self.claim_sha256,
             "frame_sha256": self.frame_sha256,
             "wire_bytes_sha256": self.wire_bytes_sha256,
@@ -226,7 +237,6 @@ class ExternalNativeT102AuthorityRecordV1:
     def to_dict(self) -> dict[str, Any]:
         return {
             **self.signed_payload(),
-            "issuer_key_id": self.issuer_key_id,
             "detached_signature": self.detached_signature,
             "signed_payload_sha256": self.signed_payload_sha256,
         }
@@ -271,11 +281,77 @@ class ExternalAuthorityVerificationV1:
 
 
 class ExternalNativeT102AuthorityVerifierV1(Protocol):
-    """Implemented outside this repository by the physical authority owner."""
+    """Verification interface; production selects the machine-pinned verifier."""
 
     def verify_external_native_t102_authority(
         self, record: ExternalNativeT102AuthorityRecordV1,
+        now_monotonic_ns: int,
     ) -> ExternalAuthorityVerificationV1: ...
+
+
+class MachinePinnedEd25519AuthorityVerifierV1:
+    """Verify an external issuer signature with an installed public keyring."""
+
+    def verify_external_native_t102_authority(
+        self, record: ExternalNativeT102AuthorityRecordV1,
+        now_monotonic_ns: int,
+    ) -> ExternalAuthorityVerificationV1:
+        path = machine_ledger.machine_root().parent / "t102-authority-keys-v1.json"
+        if path.is_symlink() or not path.is_file():
+            raise NativeT102ProductionTransportError(
+                "machine T102 issuer keyring is unavailable")
+        try:
+            with path.open("rb") as stream:
+                raw = stream.read(16_385)
+            if len(raw) > 16_384:
+                raise ValueError("oversized keyring")
+            document = json.loads(raw)
+            if set(document) != {"schema", "keys"} or document["schema"] != (
+                "rocell.native_t102_issuer_keyring.v1"
+            ) or not isinstance(document["keys"], dict):
+                raise ValueError("invalid keyring")
+            encoded_key = document["keys"][record.issuer_key_id]
+            if not isinstance(encoded_key, str):
+                raise ValueError("invalid issuer key")
+            key_bytes = base64.b64decode(encoded_key, validate=True)
+            signature = base64.b64decode(record.detached_signature, validate=True)
+            if len(key_bytes) != 32 or len(signature) != 64:
+                raise ValueError("invalid Ed25519 sizes")
+            from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+                Ed25519PublicKey,
+            )
+            Ed25519PublicKey.from_public_bytes(key_bytes).verify(
+                signature, _canonical(record.signed_payload()))
+        except Exception as exc:
+            raise NativeT102ProductionTransportError(
+                "external T102 authority signature was not verified") from exc
+        return ExternalAuthorityVerificationV1(
+            approved=True,
+            signed_payload_sha256=record.signed_payload_sha256,
+            verifier_id="machine-pinned-ed25519-v1",
+            verifier_build_sha256=hashlib.sha256(
+                b"rocell.machine-pinned-ed25519-v1").hexdigest(),
+            verified_monotonic_ns=now_monotonic_ns,
+            decision_code="APPROVED_EXACT_SINGLE_ACTION",
+        )
+
+
+def _machine_verifier() -> ExternalNativeT102AuthorityVerifierV1:
+    return MachinePinnedEd25519AuthorityVerifierV1()
+
+
+def _verify_machine_authority_at_sink(
+    record: ExternalNativeT102AuthorityRecordV1,
+    now_monotonic_ns: int,
+) -> None:
+    decision = MachinePinnedEd25519AuthorityVerifierV1().verify_external_native_t102_authority(
+        record, now_monotonic_ns)
+    if (
+        decision.approved is not True
+        or decision.signed_payload_sha256 != record.signed_payload_sha256
+    ):
+        raise NativeT102ProductionTransportError(
+            "native T102 sink rejected external issuer signature")
 
 
 class AdmittedExternalNativeT102AuthorityV1:
@@ -284,7 +360,11 @@ class AdmittedExternalNativeT102AuthorityV1:
     def __init__(
         self, record: ExternalNativeT102AuthorityRecordV1,
         verification: ExternalAuthorityVerificationV1,
+        *, _issuer: object,
     ) -> None:
+        if _issuer is not _AUTHORITY_ISSUER:
+            raise NativeT102ProductionTransportError(
+                "admitted authority must come from the machine verifier")
         self.record = record
         self.verification = verification
         self._consumed = False
@@ -325,18 +405,16 @@ class AdmittedExternalNativeT102AuthorityV1:
 
 def admit_external_native_t102_authority_v1(
     record: ExternalNativeT102AuthorityRecordV1,
-    verifier: ExternalNativeT102AuthorityVerifierV1, *,
-    now_monotonic_ns: int,
 ) -> AdmittedExternalNativeT102AuthorityV1:
-    """Verify externally; this code has no issuer, keyring, or approval bypass."""
+    """Verify against the installed issuer keyring, never a caller verifier."""
 
     if not isinstance(record, ExternalNativeT102AuthorityRecordV1):
         raise TypeError("record must be ExternalNativeT102AuthorityRecordV1")
-    now = _positive_ns(now_monotonic_ns, "now_monotonic_ns")
-    method = getattr(verifier, "verify_external_native_t102_authority", None)
+    now = _positive_ns(_trusted_monotonic_ns(), "trusted_monotonic_ns")
+    method = getattr(_machine_verifier(), "verify_external_native_t102_authority", None)
     if not callable(method):
         raise TypeError("an external native T102 authority verifier is required")
-    result = method(record)
+    result = method(record, now)
     if not isinstance(result, ExternalAuthorityVerificationV1):
         raise NativeT102ProductionTransportError(
             "external verifier returned an invalid decision")
@@ -351,7 +429,8 @@ def admit_external_native_t102_authority_v1(
     ):
         raise NativeT102ProductionTransportError(
             "external authority was not positively verified for this lifetime")
-    return AdmittedExternalNativeT102AuthorityV1(record, result)
+    return AdmittedExternalNativeT102AuthorityV1(
+        record, result, _issuer=_AUTHORITY_ISSUER)
 
 
 @dataclass(frozen=True, slots=True)
@@ -417,6 +496,39 @@ class NativeT102ProductionTransportV1(ABC):
 
     @abstractmethod
     def close_once(self) -> None: ...
+
+    def bind_execution(self, grant: NativeT102ExecutionGrantV1) -> None:
+        """Bind a checked execution to a concrete hardware provider."""
+
+
+_TRANSPORT_GRANT_ISSUER = object()
+
+
+class NativeT102ExecutionGrantV1:
+    """Process-local binding for the one hardware open/write lifecycle."""
+
+    def __init__(self, endpoint_sha256: str, wire_bytes: bytes, *, _issuer: object) -> None:
+        if _issuer is not _TRANSPORT_GRANT_ISSUER:
+            raise NativeT102ProductionTransportError("transport grant issuer required")
+        self.endpoint_sha256 = endpoint_sha256
+        self.wire_bytes = wire_bytes
+        self._spent = False
+        self._lock = Lock()
+
+    def consume(self, endpoint_sha256: str, wire_bytes: bytes) -> None:
+        with self._lock:
+            if self._spent or self.endpoint_sha256 != endpoint_sha256 \
+                    or self.wire_bytes != wire_bytes:
+                raise NativeT102ProductionTransportError(
+                    "transport grant spent or differs from exact execution")
+            self._spent = True
+
+
+def _issue_native_t102_execution_grant_v1(
+    endpoint: PinnedNativeT102EndpointV1, frame: RuntimeCommandFrameV1,
+) -> NativeT102ExecutionGrantV1:
+    return NativeT102ExecutionGrantV1(
+        endpoint.endpoint_sha256, frame.wire_bytes, _issuer=_TRANSPORT_GRANT_ISSUER)
 
 
 @dataclass(frozen=True, slots=True)
@@ -874,6 +986,7 @@ def execute_native_t102_production_candidate_v1(
     authority: AdmittedExternalNativeT102AuthorityV1,
     endpoint: PinnedNativeT102EndpointV1,
     transport: NativeT102ProductionTransportV1, *,
+    motion_permit: MotionPermit,
     adapter_candidate_sha256: str,
     started_monotonic_ns: int,
     assessment_monotonic_ns: int,
@@ -894,6 +1007,10 @@ def execute_native_t102_production_candidate_v1(
         raise TypeError("endpoint must be PinnedNativeT102EndpointV1")
     if not isinstance(transport, NativeT102ProductionTransportV1):
         raise TypeError("transport must implement NativeT102ProductionTransportV1")
+    if not isinstance(motion_permit, MotionPermit):
+        raise TypeError("motion_permit must be a MotionPermit")
+    if not isinstance(admission, ReviewedMotionPermitAdmissionV1):
+        raise TypeError("admission must be ReviewedMotionPermitAdmissionV1")
     if isinstance(settlement_tolerance_rad, bool) \
             or not isinstance(settlement_tolerance_rad, (int, float)) \
             or not 0 <= float(settlement_tolerance_rad) <= 0.25:
@@ -906,11 +1023,51 @@ def execute_native_t102_production_candidate_v1(
     if not started_ns <= assessment_ns <= completed_ns:
         raise NativeT102ProductionTransportError(
             "attempt times must be monotonic")
+    trusted_now = _positive_ns(_trusted_monotonic_ns(), "trusted_monotonic_ns")
+    if (
+        trusted_now >= frame.expires_monotonic_ns
+        or trusted_now < authority.record.issued_monotonic_ns
+        or trusted_now >= authority.record.expires_monotonic_ns
+    ):
+        raise NativeT102ProductionTransportError(
+            "native T102 frame or external authority expired")
+    if (
+        authority.verification.approved is not True
+        or authority.verification.decision_code
+        != "APPROVED_EXACT_SINGLE_ACTION"
+        or authority.verification.signed_payload_sha256
+        != authority.record.signed_payload_sha256
+    ):
+        raise NativeT102ProductionTransportError(
+            "admitted external authority verification differs from signed record")
+    _verify_machine_authority_at_sink(authority.record, trusted_now)
+    if authority.record.review_sha256 != admission.review_sha256:
+        raise NativeT102ProductionTransportError(
+            "external T102 authority does not bind this reviewed action")
+    message = decode_line(frame.wire_bytes)
+    if (
+        message.get("T") != 102
+        or tuple(message) != ("T", *JOINT_FIELDS, "spd", "acc")
+        or goal_hash(message) not in admission.ordered_goal_sha256
+        or motion_permit.capability is not admission.capability
+        or motion_permit.plan_hash != admission.review_sha256
+        or motion_permit.snapshot_hash != admission.snapshot_sha256
+        or motion_permit.expires_at_monotonic
+        != admission.permit_expires_at_monotonic
+    ):
+        raise NativeT102ProductionTransportError(
+            "motion permit or exact T102 goal differs from admission")
     snapshot = handoff.verify_claimed_inputs(
         frame, admission, adapter_candidate_sha256=adapter_candidate_sha256,
         now_monotonic_ns=started_ns,
     )
     assert snapshot.claim_sha256 is not None
+    machine_ledger.spend_execution(
+        admission.consumption_sha256, admission.review_sha256,
+        goal_hash(message),
+        authority.record.authority_id, authority.record.issuer_key_id,
+        authority.record.signed_payload_sha256, snapshot.claim_sha256,
+    )
     journal = DurableNativeT102ProductionAttemptV1.begin(
         receipt_root, claim_sha256=snapshot.claim_sha256,
         prepared_sha256=snapshot.prepared_sha256, frame=frame,
@@ -922,8 +1079,11 @@ def execute_native_t102_production_candidate_v1(
     # uncertain attempt rather than allowing the external record to replay.
     authority.consume(
         claim_sha256=snapshot.claim_sha256, frame=frame, endpoint=endpoint,
-        now_monotonic_ns=started_ns,
+        now_monotonic_ns=trusted_now,
     )
+    if motion_permit.allows(message, now_monotonic=trusted_now / 1_000_000_000) is not True:
+        raise NativeT102ProductionTransportError(
+            "exact motion permit was not consumable; no transport opened")
     status = "CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED"
     error_code: str | None = None
     confirmed = 0
@@ -931,6 +1091,7 @@ def execute_native_t102_production_candidate_v1(
     feedback_hashes: tuple[str, ...] = ()
     maximum_error: float | None = None
     try:
+        transport.bind_execution(_issue_native_t102_execution_grant_v1(endpoint, frame))
         observed = transport.open_once(endpoint)
         if not isinstance(observed, PinnedNativeT102EndpointV1) \
                 or observed.endpoint_sha256 != endpoint.endpoint_sha256:
@@ -1018,6 +1179,7 @@ __all__ = [
     "ExternalAuthorityVerificationV1",
     "ExternalNativeT102AuthorityRecordV1",
     "ExternalNativeT102AuthorityVerifierV1",
+    "MachinePinnedEd25519AuthorityVerifierV1",
     "NativeT102ControllerCaptureV1", "NativeT102FeedbackSampleV1",
     "NativeT102ProductionTransportError",
     "NativeT102ProductionTransportReceiptV1",

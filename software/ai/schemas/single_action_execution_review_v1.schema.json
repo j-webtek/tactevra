@@ -12,6 +12,8 @@
     "installed_collision_policy_qualification_sha256",
     "installed_controller_qualification_evidence_sha256",
     "installed_controller_qualification_report_sha256",
+    "t102_command_profile_sha256", "reviewed_t102_goal",
+    "reviewed_t102_goal_sha256",
     "configuration_epoch_sha256", "controller_session_id",
     "issued_monotonic_ns", "deadline_monotonic_ns", "single_use_required",
     "permit_issued", "automatic_retry_allowed", "controller_commands",
@@ -32,6 +34,21 @@
     "installed_collision_policy_qualification_sha256": {"$ref": "#/$defs/hash"},
     "installed_controller_qualification_evidence_sha256": {"$ref": "#/$defs/hash"},
     "installed_controller_qualification_report_sha256": {"$ref": "#/$defs/hash"},
+    "t102_command_profile_sha256": {"$ref": "#/$defs/hash"},
+    "reviewed_t102_goal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["T", "base", "shoulder", "elbow", "wrist", "roll", "hand", "spd", "acc"],
+      "properties": {
+        "T": {"const": 102},
+        "base": {"type": "number"}, "shoulder": {"type": "number"},
+        "elbow": {"type": "number"}, "wrist": {"type": "number"},
+        "roll": {"type": "number"}, "hand": {"type": "number"},
+        "spd": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "acc": {"type": "integer", "minimum": 1, "maximum": 255}
+      }
+    },
+    "reviewed_t102_goal_sha256": {"$ref": "#/$defs/hash"},
     "configuration_epoch_sha256": {"$ref": "#/$defs/hash"},
     "controller_session_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
     "issued_monotonic_ns": {"type": "integer", "minimum": 1},

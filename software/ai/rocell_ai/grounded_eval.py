@@ -9,10 +9,10 @@ from typing import Any
 
 from .adapter import inspect
 from .evaluation import load_benchmark
-from .grounded import propose
+from .grounded_frozen_v9 import propose
 
 
-POLICY_SHA256 = hashlib.sha256(Path(__file__).with_name("grounded.py").read_bytes()).hexdigest()
+POLICY_SHA256 = hashlib.sha256(Path(__file__).with_name("grounded_frozen_v9.py").read_bytes()).hexdigest()
 
 
 def evaluate_grounded(cases_path: Path, manifest_path: Path) -> dict[str, Any]:

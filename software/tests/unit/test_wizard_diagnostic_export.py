@@ -27,6 +27,16 @@ def test_shared_sanitizer_is_bounded_and_redacts_before_persistence() -> None:
         sanitize_diagnostic_record({}, maximum_bytes=True)
 
 
+@pytest.mark.parametrize("key", [
+    "api_token", "auth_token", "github_token", "id_token",
+    "Bearer-Token", "API.Token", "refresh_token",
+])
+def test_shared_sanitizer_redacts_token_key_variants(key: str) -> None:
+    assert sanitize_diagnostic_record({key: "bare-secret-value"}) == {
+        key: "[REDACTED]"
+    }
+
+
 def _snapshot() -> dict[str, Any]:
     return {
         "session_id": "rehearsal-001",

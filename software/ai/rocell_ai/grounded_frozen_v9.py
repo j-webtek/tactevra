@@ -67,8 +67,6 @@ def propose(*, request_id: str, request: str, observation: dict[str, Any]) -> di
         raise ValueError("request_id must be nonempty")
     if not isinstance(request, str) or not isinstance(observation, dict):
         raise TypeError("request and observation are required")
-    if len(request) > 8192 or len(request.encode("utf-8")) > 32 * 1024:
-        raise ValueError("request exceeds grounding input limit")
     observation_ref = observation.get("ref")
     if not isinstance(observation_ref, str) or not observation_ref.strip():
         raise ValueError("observation.ref must be nonempty")

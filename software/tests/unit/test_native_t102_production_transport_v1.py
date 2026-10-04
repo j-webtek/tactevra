@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +16,9 @@ from referencing import Registry, Resource
 from rocell.application.native_t102_handoff_journal_v1 import (
     DurableNativeT102HandoffV1,
 )
+import rocell.application.native_t102_production_transport_v1 as production_module
+import rocell.application.t102_machine_ledger_v1 as ledger_module
+from rocell.application.t102_machine_ledger_v1 import T102MachineLedgerError
 from rocell.application.native_t102_production_transport_v1 import (
     DurableNativeT102ProductionAttemptV1,
     ExternalAuthorityVerificationV1,
@@ -36,13 +41,28 @@ from rocell.application.reviewed_motion_permit_bridge_v1 import (
 from rocell.arm.all_joint_command import all_joint_command
 from rocell.arm.protocol import encode_line
 from rocell.rc03.build_snapshot import Capability
-from rocell.safety.permit import goal_hash
+from rocell.safety.permit import MotionPermit, goal_hash
 
 
 ADAPTER = "f" * 64
 APPROVAL = "9" * 64
 VERIFIER_BUILD = "8" * 64
 WORKSPACE = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(autouse=True)
+def machine_ledger(tmp_path, monkeypatch):
+    root = tmp_path / "machine-ledger"
+    root.mkdir()
+    monkeypatch.setattr(ledger_module, "machine_root",
+                        lambda: root)
+    monkeypatch.setattr(production_module, "_machine_verifier",
+                        lambda: ScriptedVerifier())
+    monkeypatch.setattr(production_module, "_trusted_monotonic_ns",
+                        lambda: 1_070)
+    monkeypatch.setattr(production_module, "_verify_machine_authority_at_sink",
+                        lambda record, now: None)
+    return root
 
 
 def _hash(value):
@@ -98,6 +118,15 @@ def _admission(message):
         **values, permit_binding_sha256=binding)
 
 
+def _motion_permit(message, admission):
+    return MotionPermit._issue(
+        capability=admission.capability,
+        snapshot_hash=admission.snapshot_sha256,
+        plan_hash=admission.review_sha256,
+        goals=(message,), ttl_s=102.0, now_monotonic=0.0,
+    )
+
+
 def _endpoint(**changes):
     values = dict(
         port_name="COM7", usb_vid="10C4", usb_pid="EA60",
@@ -107,10 +136,14 @@ def _endpoint(**changes):
     return PinnedNativeT102EndpointV1(**values)
 
 
-def _claimed(tmp_path):
+def _claimed(tmp_path, *, reserve=True):
     message = _message()
     frame = _frame(message)
     admission = _admission(message)
+    if reserve:
+        ledger_module.reserve_review(admission.consumption_sha256,
+                                     admission.review_sha256,
+                                     admission.ordered_goal_sha256[0])
     handoff_root = tmp_path / "handoff"
     receipt_root = tmp_path / "receipts"
     handoff_root.mkdir()
@@ -132,7 +165,7 @@ class ScriptedVerifier:
         self.crossed = crossed
         self.calls = 0
 
-    def verify_external_native_t102_authority(self, record):
+    def verify_external_native_t102_authority(self, record, now_monotonic_ns):
         self.calls += 1
         return ExternalAuthorityVerificationV1(
             approved=self.approved,
@@ -146,11 +179,12 @@ class ScriptedVerifier:
         )
 
 
-def _authority(handoff, frame, endpoint, *, verifier=None, **changes):
+def _authority(handoff, frame, endpoint, **changes):
     snapshot = handoff.snapshot()
     values = dict(
         authority_id="arm053-authority-1",
         approval_record_sha256=APPROVAL,
+        review_sha256="a" * 64,
         claim_sha256=snapshot.claim_sha256,
         frame_sha256=frame.frame_sha256,
         wire_bytes_sha256=frame.wire_bytes_sha256,
@@ -166,9 +200,7 @@ def _authority(handoff, frame, endpoint, *, verifier=None, **changes):
     )
     values.update(changes)
     record = ExternalNativeT102AuthorityRecordV1(**values)
-    verifier = verifier or ScriptedVerifier()
-    return record, admit_external_native_t102_authority_v1(
-        record, verifier, now_monotonic_ns=1_070)
+    return record, admit_external_native_t102_authority_v1(record)
 
 
 def _capture(frame, *, error=0.0):
@@ -254,6 +286,7 @@ def _execute(tmp_path, *, transport_factory=None):
     transport = ((transport_factory or ScriptedTransport)(frame))
     result = execute_native_t102_production_candidate_v1(
         root, handoff, frame, admission, authority, endpoint, transport,
+        motion_permit=_motion_permit(_message(), admission),
         adapter_candidate_sha256=ADAPTER,
         started_monotonic_ns=1_100,
         assessment_monotonic_ns=1_200,
@@ -335,13 +368,109 @@ def test_started_record_alone_is_retry_forbidden(tmp_path):
 
 
 @pytest.mark.parametrize("approved,crossed", [(False, False), (True, True)])
-def test_external_verifier_denial_or_crossing_rejects(approved, crossed, tmp_path):
+def test_external_verifier_denial_or_crossing_rejects(
+    approved, crossed, tmp_path, monkeypatch,
+):
     _, handoff, frame, _ = _claimed(tmp_path)
     endpoint = _endpoint()
     verifier = ScriptedVerifier(approved=approved, crossed=crossed)
+    monkeypatch.setattr(production_module, "_machine_verifier", lambda: verifier)
     with pytest.raises(NativeT102ProductionTransportError, match="not positively"):
-        _authority(handoff, frame, endpoint, verifier=verifier)
+        _authority(handoff, frame, endpoint)
     assert verifier.calls == 1
+
+
+def test_machine_keyring_verifies_signature_and_rejects_forged_payload(
+    tmp_path, machine_ledger, monkeypatch,
+):
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    _, handoff, frame, _ = _claimed(tmp_path)
+    record, _ = _authority(handoff, frame, _endpoint())
+    private_key = Ed25519PrivateKey.generate()
+    public_key = private_key.public_key().public_bytes(
+        serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    keyring = machine_ledger.parent / "t102-authority-keys-v1.json"
+    keyring.write_text(json.dumps({
+        "schema": "rocell.native_t102_issuer_keyring.v1",
+        "keys": {
+            record.issuer_key_id: base64.b64encode(public_key).decode(),
+            "same-key-alias": base64.b64encode(public_key).decode(),
+        },
+    }), encoding="utf-8")
+    signature = private_key.sign(json.dumps(
+        record.signed_payload(), sort_keys=True, separators=(",", ":"),
+        ensure_ascii=True, allow_nan=False).encode())
+    signed = replace(record, detached_signature=base64.b64encode(signature).decode())
+    monkeypatch.setattr(production_module, "_machine_verifier",
+                        production_module.MachinePinnedEd25519AuthorityVerifierV1)
+    admitted = admit_external_native_t102_authority_v1(signed)
+    assert admitted.record == signed
+    with pytest.raises(NativeT102ProductionTransportError, match="signature"):
+        admit_external_native_t102_authority_v1(
+            replace(signed, endpoint_sha256="f" * 64))
+    with pytest.raises(NativeT102ProductionTransportError, match="signature"):
+        admit_external_native_t102_authority_v1(
+            replace(signed, review_sha256="f" * 64))
+    with pytest.raises(NativeT102ProductionTransportError, match="signature"):
+        admit_external_native_t102_authority_v1(
+            replace(signed, issuer_key_id="same-key-alias"))
+
+
+def test_trusted_clock_rejects_expired_authority(
+    tmp_path, monkeypatch,
+):
+    _, handoff, frame, _ = _claimed(tmp_path)
+    record, _ = _authority(handoff, frame, _endpoint())
+    monkeypatch.setattr(production_module, "_trusted_monotonic_ns",
+                        lambda: 3_000)
+    with pytest.raises(NativeT102ProductionTransportError,
+                       match="not positively"):
+        admit_external_native_t102_authority_v1(
+            record)
+
+
+def test_native_sink_rechecks_machine_signature_even_for_admitted_wrapper(
+    tmp_path, monkeypatch,
+):
+    root, handoff, frame, admission = _claimed(tmp_path)
+    _, authority = _authority(handoff, frame, _endpoint())
+    monkeypatch.setattr(
+        production_module, "_verify_machine_authority_at_sink",
+        lambda record, now: production_module.MachinePinnedEd25519AuthorityVerifierV1(
+        ).verify_external_native_t102_authority(record, now),
+    )
+    transport = ScriptedTransport(frame)
+    with pytest.raises(NativeT102ProductionTransportError,
+                       match="keyring is unavailable"):
+        execute_native_t102_production_candidate_v1(
+            root, handoff, frame, admission, authority, _endpoint(), transport,
+            motion_permit=_motion_permit(_message(), admission),
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_100, assessment_monotonic_ns=1_200,
+            completed_monotonic_ns=1_250,
+        )
+    assert transport.open_attempts == 0
+
+
+def test_signed_authority_for_another_review_cannot_open_transport(tmp_path):
+    root, handoff, frame, admission = _claimed(tmp_path)
+    endpoint = _endpoint()
+    _, authority = _authority(
+        handoff, frame, endpoint, review_sha256="9" * 64)
+    transport = ScriptedTransport(frame)
+    with pytest.raises(NativeT102ProductionTransportError,
+                       match="does not bind this reviewed action"):
+        execute_native_t102_production_candidate_v1(
+            root, handoff, frame, admission, authority, endpoint, transport,
+            motion_permit=_motion_permit(_message(), admission),
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_100, assessment_monotonic_ns=1_200,
+            completed_monotonic_ns=1_250,
+        )
+    assert transport.open_attempts == 0
+    assert transport.write_attempts == 0
 
 
 def test_endpoint_mismatch_opens_once_but_never_writes(tmp_path):
@@ -404,25 +533,83 @@ def test_authority_has_exactly_one_concurrent_consumer(tmp_path):
     root, handoff, frame, admission = _claimed(tmp_path)
     endpoint = _endpoint()
     _, authority = _authority(handoff, frame, endpoint)
+    motion_permit = _motion_permit(_message(), admission)
 
     def consume(index):
         transport = ScriptedTransport(frame)
         try:
             execute_native_t102_production_candidate_v1(
                 root, handoff, frame, admission, authority, endpoint, transport,
+                motion_permit=motion_permit,
                 adapter_candidate_sha256=ADAPTER,
                 started_monotonic_ns=1_100 + index,
                 assessment_monotonic_ns=1_200 + index,
                 completed_monotonic_ns=1_250 + index,
             )
             return "CONSUMED"
-        except NativeT102ProductionTransportError:
+        except (NativeT102ProductionTransportError, T102MachineLedgerError):
             return "REJECTED"
 
     with ThreadPoolExecutor(max_workers=8) as pool:
         outcomes = list(pool.map(consume, range(8)))
     assert outcomes.count("CONSUMED") == 1
     assert outcomes.count("REJECTED") == 7
+
+
+def test_native_sink_rejects_wrong_or_consumed_motion_permit_before_open(tmp_path):
+    root, handoff, frame, admission = _claimed(tmp_path)
+    endpoint = _endpoint()
+    _, authority = _authority(handoff, frame, endpoint)
+    transport = ScriptedTransport(frame)
+    wrong = MotionPermit._issue(
+        capability=admission.capability,
+        snapshot_hash=admission.snapshot_sha256,
+        plan_hash=admission.review_sha256,
+        goals=(all_joint_command([0, 0, 0, 0, 0, 0], speed=20,
+                                 acceleration=1),),
+        ttl_s=102.0, now_monotonic=0.0,
+    )
+    with pytest.raises(NativeT102ProductionTransportError,
+                       match="not consumable"):
+        execute_native_t102_production_candidate_v1(
+            root, handoff, frame, admission, authority, endpoint, transport,
+            motion_permit=wrong, adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_100, assessment_monotonic_ns=1_200,
+            completed_monotonic_ns=1_250,
+        )
+    assert transport.open_attempts == 0
+    assert wrong.remaining_uses == 1
+
+
+def test_reconstructed_authority_cannot_replay_with_another_receipt_root(
+    tmp_path, machine_ledger,
+):
+    root, handoff, frame, admission = _claimed(tmp_path)
+    endpoint = _endpoint()
+    _, first_authority = _authority(handoff, frame, endpoint)
+    execute_native_t102_production_candidate_v1(
+        root, handoff, frame, admission, first_authority, endpoint,
+        ScriptedTransport(frame),
+        motion_permit=_motion_permit(_message(), admission),
+        adapter_candidate_sha256=ADAPTER,
+        started_monotonic_ns=1_100, assessment_monotonic_ns=1_200,
+        completed_monotonic_ns=1_250,
+    )
+    other_root = tmp_path / "other-receipts"
+    other_root.mkdir()
+    _, reconstructed = _authority(handoff, frame, endpoint)
+    second_transport = ScriptedTransport(frame)
+    with pytest.raises(T102MachineLedgerError, match="already spent"):
+        execute_native_t102_production_candidate_v1(
+            other_root, handoff, frame, admission, reconstructed, endpoint,
+            second_transport,
+            motion_permit=_motion_permit(_message(), admission),
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_101, assessment_monotonic_ns=1_201,
+            completed_monotonic_ns=1_251,
+        )
+    assert second_transport.open_attempts == 0
+    assert len(tuple(machine_ledger.iterdir())) == 3
 
 
 def test_rehashed_impossible_terminal_receipt_fails_closed(tmp_path):
@@ -463,7 +650,7 @@ def test_noncanonical_or_unexpected_attempt_content_fails_closed(tmp_path):
     # A separate attempt proves an unexpected file fails before trusting state.
     other = tmp_path / "other"
     other.mkdir()
-    root2, handoff2, frame2, _ = _claimed(other)
+    root2, handoff2, frame2, _ = _claimed(other, reserve=False)
     endpoint2 = _endpoint()
     _, authority2 = _authority(handoff2, frame2, endpoint2)
     snapshot2 = handoff2.snapshot()

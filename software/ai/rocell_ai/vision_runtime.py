@@ -7,7 +7,7 @@ import json
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from .scene_observation import (
     FrameEvidence, build_observation, model_output_schema, validate_model_output,
@@ -29,6 +29,14 @@ Markdown, or facts from previous images."""
 PostJson = Callable[[str, dict[str, Any], float], dict[str, Any]]
 
 
+class _NoRedirectHandler(HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        return None
+
+
+_NO_REDIRECT_OPENER = build_opener(_NoRedirectHandler())
+
+
 def _endpoint(value: str) -> str:
     parsed = urlparse(value)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
@@ -43,7 +51,7 @@ def _post_json(url: str, payload: dict[str, Any], timeout_seconds: float) -> dic
         headers={"Content-Type": "application/json", "Accept": "application/json"},
         method="POST",
     )
-    with urlopen(request, timeout=timeout_seconds) as response:
+    with _NO_REDIRECT_OPENER.open(request, timeout=timeout_seconds) as response:
         if getattr(response, "status", 200) != 200:
             raise RuntimeError(f"vision runtime returned HTTP {response.status}")
         body = response.read(4 * 1024 * 1024 + 1)

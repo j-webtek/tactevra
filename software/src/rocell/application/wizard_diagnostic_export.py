@@ -175,7 +175,7 @@ def _sanitize(value: object, *, depth: int = 0, budget: list[int] | None = None)
                 )
             normalized = re.sub(r"[^a-z0-9]", "", key.lower())
             secret = normalized in _SECRET_KEYS or normalized.endswith(
-                ("password", "secret", "apikey", "accesstoken", "refreshtoken")
+                ("password", "secret", "apikey", "token")
             )
             result[key] = (
                 "[REDACTED]"

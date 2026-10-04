@@ -19,7 +19,6 @@ import time
 from typing import Any, Callable, Iterable
 
 from rocell.application.native_t102_production_transport_v1 import (
-    NativeT102ExecutionGrantV1,
     NativeT102ControllerCaptureV1,
     NativeT102FeedbackSampleV1,
     NativeT102ProductionTransportError,
@@ -179,16 +178,7 @@ class WindowsNativeT102SerialTransportV1(NativeT102ProductionTransportV1):
         self._capture_attempts = 0
         self._close_attempts = 0
         self._full_t102_write = False
-        self._execution_grant: NativeT102ExecutionGrantV1 | None = None
         self._lock = threading.RLock()
-
-    def bind_execution(self, grant: NativeT102ExecutionGrantV1) -> None:
-        with self._lock:
-            if not isinstance(grant, NativeT102ExecutionGrantV1) \
-                    or self._execution_grant is not None or self._open_attempts:
-                raise WindowsNativeT102SerialTransportError(
-                    "one checked execution grant is required before opening")
-            self._execution_grant = grant
 
     @property
     def open_attempts(self) -> int:
@@ -213,13 +203,9 @@ class WindowsNativeT102SerialTransportV1(NativeT102ProductionTransportV1):
             if self._open_attempts:
                 raise WindowsNativeT102SerialTransportError(
                     "serial endpoint cannot be reopened")
+            self._open_attempts = 1
             if not isinstance(endpoint, PinnedNativeT102EndpointV1):
                 raise TypeError("endpoint must be PinnedNativeT102EndpointV1")
-            if self._execution_grant is None \
-                    or self._execution_grant.endpoint_sha256 != endpoint.endpoint_sha256:
-                raise WindowsNativeT102SerialTransportError(
-                    "checked execution grant does not match serial endpoint")
-            self._open_attempts = 1
             factory = self._serial_factory
             inventory = self._port_inventory
             if factory is None or inventory is None:
@@ -286,15 +272,6 @@ class WindowsNativeT102SerialTransportV1(NativeT102ProductionTransportV1):
                     "T=102 command cannot be resent")
             self._write_attempts = 1
             _validate_t102(payload)
-            if self._execution_grant is None or self._endpoint is None:
-                raise WindowsNativeT102SerialTransportError(
-                    "checked execution grant and opened endpoint required")
-            try:
-                self._execution_grant.consume(
-                    self._endpoint.endpoint_sha256, payload)
-            except NativeT102ProductionTransportError as exc:
-                raise WindowsNativeT102SerialTransportError(
-                    "checked execution grant does not match T102 payload") from exc
             connection = self._opened_connection()
             require_quiescent_receive_buffer(connection)
             count = self._write_exactly_once(connection, payload)

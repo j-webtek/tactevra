@@ -18,11 +18,14 @@ from rocell.application.installed_controller_qualification_v1 import (
     ReviewDisposition as ControllerReviewDisposition,
 )
 from rocell.application.context import load_simulation_context
+from rocell.arm.all_joint_command import all_joint_command
+from rocell.kinematics import ARM_JOINT_NAMES
 from rocell.application.phase_local_contact_envelope_gate import (
     bind_phase_local_contact_envelope_gate,
 )
 from rocell.application.single_action_execution_review_v1 import (
     InstalledCollisionPolicyQualificationV1,
+    InstalledT102CommandProfileV1,
     PhysicalEvidenceOrigin,
     PhysicalReviewDisposition,
     SingleActionExecutionReviewError,
@@ -91,9 +94,22 @@ def _inputs(context):
         evaluated_monotonic_ns=950,
         blockers=(),
     )
+    t102_profile = InstalledT102CommandProfileV1(
+        trajectory_execution_envelope_v2_sha256=envelope.envelope_v2_sha256,
+        controller_qualification_evidence_sha256=controller_evidence.evidence_sha256,
+        observed_hand_feedback_sha256="a" * 64,
+        reviewed_path_evidence_sha256="b" * 64,
+        independent_approval_sha256="c" * 64,
+        hand_target_rad=0.0, speed=20, acceleration=1,
+        captured_monotonic_ns=900,
+        valid_until_monotonic_ns=10_000,
+        evidence_origin=PhysicalEvidenceOrigin.PHYSICAL_RETAINED_ORIGINALS,
+        review_disposition=PhysicalReviewDisposition.INDEPENDENTLY_APPROVED,
+    )
     return (
         batch, proposal, envelope, contact_report,
         collision_qualification, controller_evidence, controller_qualification,
+        t102_profile,
     )
 
 
@@ -103,6 +119,17 @@ def _review(context):
         review_id="arm-046-action-0",
         issued_monotonic_ns=1_000,
         deadline_monotonic_ns=2_000,
+    )
+
+
+def _t102_goal(context):
+    inputs = _inputs(context)
+    endpoint = inputs[2].measured_envelope.waypoints[-1].joint_positions_rad
+    profile = inputs[7]
+    return all_joint_command(
+        [*(endpoint[name] for name in ARM_JOINT_NAMES),
+         profile.hand_target_rad],
+        speed=profile.speed, acceleration=profile.acceleration,
     )
 
 
@@ -166,6 +193,24 @@ def test_review_rejects_stale_controller_or_collision_evidence(context) -> None:
     with pytest.raises(SingleActionExecutionReviewError, match="stale"):
         build_single_action_execution_review_v1(
             *values, review_id="stale", issued_monotonic_ns=1_000,
+            deadline_monotonic_ns=2_000,
+        )
+
+    values = list(_inputs(context))
+    values[4] = replace(values[4], valid_until_monotonic_ns=1_500)
+    with pytest.raises(SingleActionExecutionReviewError, match="outlives"):
+        build_single_action_execution_review_v1(
+            *values, review_id="outlives-collision", issued_monotonic_ns=1_000,
+            deadline_monotonic_ns=2_000,
+        )
+
+    values = list(_inputs(context))
+    values[7] = replace(
+        values[7], evidence_origin=PhysicalEvidenceOrigin.SYNTHETIC_TEST_ONLY)
+    with pytest.raises(SingleActionExecutionReviewError,
+                       match="approved single-T102"):
+        build_single_action_execution_review_v1(
+            *values, review_id="synthetic-t102", issued_monotonic_ns=1_000,
             deadline_monotonic_ns=2_000,
         )
 

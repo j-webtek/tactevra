@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import islice
 from enum import Enum
 import hashlib
 import json
@@ -77,6 +78,9 @@ class VerifyPhoneState:
 
 
 SemanticAction: TypeAlias = PressKey | TapPhoneTarget | VerifyPhoneState
+MAX_PLAN_TEXT_CHARS = 4096
+MAX_PLAN_TEXT_BYTES = 16 * 1024
+MAX_SEMANTIC_ACTIONS = 8192
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,7 +100,9 @@ class ActionPlan:
             self.requested_text_sha256
         ):
             raise ValueError("requested_text_sha256 must be a lowercase SHA-256 digest")
-        actions = tuple(self.actions)
+        actions = tuple(islice(self.actions, MAX_SEMANTIC_ACTIONS + 1))
+        if len(actions) > MAX_SEMANTIC_ACTIONS:
+            raise ValueError("action plan exceeds semantic action limit")
         for action in actions:
             if not isinstance(action, (PressKey, TapPhoneTarget, VerifyPhoneState)):
                 raise TypeError(f"Unsupported semantic action {type(action).__name__}")
@@ -187,6 +193,8 @@ class ActionPlan:
     ) -> "ActionPlan":
         if not isinstance(text, str):
             raise TypeError("text must be a string")
+        if len(text) > MAX_PLAN_TEXT_CHARS or len(text.encode("utf-8")) > MAX_PLAN_TEXT_BYTES:
+            raise ValueError("text exceeds action plan input limit")
         return cls(
             device=device,
             profile_id=profile_id,

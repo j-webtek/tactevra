@@ -868,13 +868,21 @@ def load_target_accuracy_budget_policy(
 ) -> TargetAccuracyBudgetPolicy:
     """Load the exact additive policy without importing a device backend."""
 
+    from rocell.application.physical_onboarding_durability import (
+        PhysicalOnboardingDurabilityError,
+        read_bounded_regular_file,
+    )
+
     selected = (
         DEFAULT_TARGET_ACCURACY_BUDGET_POLICY if policy_path is None else policy_path
     )
     resolved = _resolve_policy(Path(workspace), Path(selected))
     try:
-        payload = resolved.read_bytes()
-    except OSError as exc:
+        payload = read_bounded_regular_file(
+            resolved, maximum_bytes=MAX_TARGET_ACCURACY_BUDGET_POLICY_BYTES,
+            label="accuracy policy",
+        )
+    except (OSError, PhysicalOnboardingDurabilityError) as exc:
         raise AccuracyBudgetPolicyError("could not read accuracy policy") from exc
     if not payload or len(payload) > MAX_TARGET_ACCURACY_BUDGET_POLICY_BYTES:
         raise AccuracyBudgetPolicyError("accuracy policy size is invalid")

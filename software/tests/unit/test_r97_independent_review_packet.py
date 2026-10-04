@@ -91,3 +91,15 @@ def test_inspector_rejects_tampered_member():
             archive.writestr(item.filename, data)
     with pytest.raises(R97IndependentReviewPacketError, match="digest"):
         inspect_r97_review_packet(output.getvalue())
+
+
+def test_inspector_rejects_compressed_expected_members_before_expansion():
+    packet = build_r97_review_packet(**_inputs()).packet_bytes
+    output = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(packet)) as source, zipfile.ZipFile(
+        output, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for item in source.infolist():
+            archive.writestr(item.filename, source.read(item.filename))
+    with pytest.raises(R97IndependentReviewPacketError, match="format bound"):
+        inspect_r97_review_packet(output.getvalue())

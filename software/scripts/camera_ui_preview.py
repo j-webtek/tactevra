@@ -7,9 +7,11 @@ Then open the printed URL and choose Camera. Ctrl+C stops this preview only.
 """
 
 import argparse
+import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import secrets
 
 
 ACTION = "physical_camera_operating_assessment"
@@ -229,6 +231,7 @@ def example_activity():
 
 
 def handler(scenario, *, saved_preview=None):
+    token = secrets.token_urlsafe(32)
     static = Path(__file__).resolve().parents[1] / "src/rocell/ui/static"
     view, operation = example_view(scenario)
     records = example_activity() if scenario == "activity" else {OPERATION: operation}
@@ -238,7 +241,24 @@ def handler(scenario, *, saved_preview=None):
     record_routes = {"/api/operations/" + key: value for key, value in records.items()}
 
     class PreviewHandler(BaseHTTPRequestHandler):
+        session_token = token
+
         def do_GET(self):
+            host = self.headers.get_all("Host")
+            expected_origin = f"http://127.0.0.1:{self.server.server_port}"
+            if host != [f"127.0.0.1:{self.server.server_port}"]:
+                self.send_error(403, "Invalid local host")
+                return
+            origins = self.headers.get_all("Origin")
+            if (origins and origins != [expected_origin]) or self.headers.get("Sec-Fetch-Site") == "cross-site":
+                self.send_error(403, "Invalid local origin")
+                return
+            if self.path.startswith("/api/"):
+                supplied = self.headers.get_all("X-RoCell-Token")
+                if (not supplied or len(supplied) != 1
+                        or not hmac.compare_digest(supplied[0], token)):
+                    self.send_error(401, "Preview session required")
+                    return
             routes = {
                 "/": (static / "index.html", "text/html; charset=utf-8"),
                 "/assets/app.js": (static / "app.js", "text/javascript; charset=utf-8"),
@@ -267,6 +287,8 @@ def handler(scenario, *, saved_preview=None):
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(payload)))
             self.send_header("Cache-Control", "no-store")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.end_headers()
             self.wfile.write(payload)
@@ -324,12 +346,13 @@ def main():
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument('--micro-export', type=Path, help='Read-only historical coordinator export preview')
     args = parser.parse_args()
+    preview_handler = handler(args.scenario,
+        saved_preview=saved_micro_preview(args.micro_export) if args.micro_export else None)
     with ThreadingHTTPServer(
-        ("127.0.0.1", args.port), handler(args.scenario,
-            saved_preview=saved_micro_preview(args.micro_export) if args.micro_export else None)
+        ("127.0.0.1", args.port), preview_handler
     ) as server:
         print(
-            f"Read-only UI preview: http://127.0.0.1:{server.server_port}/#session=ui-preview&csrf=ui-preview",
+            f"Read-only UI preview: http://127.0.0.1:{server.server_port}/#session={preview_handler.session_token}&csrf=ui-preview",
             flush=True,
         )
         try:

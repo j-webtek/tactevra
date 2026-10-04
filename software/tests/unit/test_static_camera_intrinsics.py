@@ -518,6 +518,13 @@ def test_fixture_loader_rejects_path_escape(tmp_path: Path) -> None:
         load_static_camera_intrinsics_rehearsal(outside, fixture_root=fixture_root)
 
 
+def test_fixture_loader_rejects_oversized_file_at_boundary(tmp_path: Path) -> None:
+    path = tmp_path / "oversized.json"
+    path.write_bytes(b" " * (MAX_STATIC_CAMERA_INTRINSICS_BYTES + 1))
+    with pytest.raises(StaticCameraIntrinsicsError, match="cannot read"):
+        load_static_camera_intrinsics_rehearsal(path, fixture_root=tmp_path)
+
+
 def test_assessor_requires_the_exact_profile_source_hash() -> None:
     artifact = parse_static_camera_intrinsics_json(FIXTURE_PATH.read_bytes())
     profile = load_camera_profile()

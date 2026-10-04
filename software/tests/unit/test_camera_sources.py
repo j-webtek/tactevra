@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from collections import deque
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
 import sys
+from threading import Thread
+import time
 import unittest
 
 
@@ -389,6 +392,75 @@ class UsbOpenCvCameraTests(unittest.TestCase):
 
 
 class EspHttpCameraTests(unittest.TestCase):
+    def test_default_http_client_enforces_total_slow_body_deadline(self) -> None:
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.end_headers()
+                for _ in range(12):
+                    try:
+                        self.wfile.write(b"x")
+                        self.wfile.flush()
+                    except (BrokenPipeError, ConnectionResetError):
+                        break
+                    time.sleep(0.06)
+
+            def log_message(self, *_args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            camera = EspHttpCamera(
+                f"http://127.0.0.1:{server.server_port}", identity="slow-body",
+                status_path=None, timeout_s=0.5, max_capture_duration_s=0.2,
+            )
+            camera.open()
+            start = time.monotonic()
+            with self.assertRaises(CameraHttpError):
+                camera.capture()
+            self.assertLess(time.monotonic() - start, 0.45)
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
+    def test_default_http_client_never_follows_camera_redirect(self) -> None:
+        target_requests = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path.startswith("/capture"):
+                    self.send_response(302)
+                    self.send_header("Location", "/target")
+                    self.end_headers()
+                else:
+                    target_requests.append(self.path)
+                    self.send_response(200)
+                    self.end_headers()
+
+            def log_message(self, *_args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            camera = EspHttpCamera(
+                f"http://127.0.0.1:{server.server_port}",
+                identity="redirect-test", status_path=None,
+            )
+            camera.open()
+            with self.assertRaises(CameraHttpError):
+                camera.capture()
+            self.assertEqual(target_requests, [])
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
     @staticmethod
     def _camera_for_capture_headers(
         header_sets: list[dict[str, str]],

@@ -25,12 +25,17 @@ access to the shared servo library/cache or JSON state.
 
 ## Implemented handoff primitive
 
+The generated owner candidate now discards every ESP-NOW receive callback.
+The reference packet has no authentication or replay protection, so it cannot
+be admitted to a physical command path. Re-enabling follower commands requires
+a separately reviewed authenticated protocol and motion admission boundary.
+
 `firmware/diagnostics/callback_handoff.h` copies an exact bounded payload and sender
 into a fixed-capacity queue. Callback operations use a single nonblocking lock
 attempt, never a wait loop or device call. Overflow, malformed length or producer
 contention latches a fault. After a fault no queued command can be consumed through
-this object; no automatic reset/replay is supplied. The owner separately validates
-authorization, command content and identity before execution.
+this object; no automatic reset/replay is supplied. This primitive remains for
+host rehearsal, while the generated ESP-NOW owner ingress is disabled.
 
 Host tests cover copying versus caller mutation, FIFO/wraparound, empty queue,
 overflow, malformed length and 100 concurrent-producer trials. C++14 is used by

@@ -1101,6 +1101,11 @@ def load_static_camera_intrinsics_rehearsal(
 ) -> StaticCameraIntrinsicsRehearsal:
     """Load a JSON rehearsal only from within the explicitly supplied root."""
 
+    from rocell.application.physical_onboarding_durability import (
+        PhysicalOnboardingDurabilityError,
+        read_bounded_regular_file,
+    )
+
     root = Path(fixture_root).resolve()
     selected = Path(path)
     if not selected.is_absolute():
@@ -1111,8 +1116,11 @@ def load_static_camera_intrinsics_rehearsal(
     except ValueError as exc:
         raise StaticCameraIntrinsicsError("intrinsics fixture path escapes fixture root") from exc
     try:
-        payload = selected.read_bytes()
-    except OSError as exc:
+        payload = read_bounded_regular_file(
+            selected, maximum_bytes=MAX_STATIC_CAMERA_INTRINSICS_BYTES,
+            label="intrinsics fixture",
+        )
+    except (OSError, PhysicalOnboardingDurabilityError) as exc:
         raise StaticCameraIntrinsicsError(f"cannot read intrinsics fixture {selected}: {exc}") from exc
     return parse_static_camera_intrinsics_json(payload, source_path=selected)
 

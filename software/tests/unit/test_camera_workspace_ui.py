@@ -117,8 +117,9 @@ def test_example_check_contract_tracks_the_production_assessor():
 
 def test_design_preview_only_serves_explicit_read_only_routes():
     # Loopback test server only. No wizard service or device provider is created.
+    preview_handler = EXAMPLES["handler"]("incomplete")
     with ThreadingHTTPServer(
-        ("127.0.0.1", 0), EXAMPLES["handler"]("incomplete")
+        ("127.0.0.1", 0), preview_handler
     ) as server:
         thread = Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -136,7 +137,9 @@ def test_design_preview_only_serves_explicit_read_only_routes():
                 ("GET", "/../README.md", 404),
                 ("GET", "/api/images/example", 404),
             ]:
-                connection.request(method, path)
+                connection.request(method, path, headers={
+                    "X-RoCell-Token": preview_handler.session_token,
+                })
                 response = connection.getresponse()
                 data = response.read()
                 assert response.status == expected
@@ -145,6 +148,19 @@ def test_design_preview_only_serves_explicit_read_only_routes():
                 if path == "/":
                     assert b"FICTIONAL DATA - NO HARDWARE ACCESS" in data
             connection.close()
+            guarded = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+            guarded.request("GET", "/api/view")
+            response = guarded.getresponse()
+            assert response.status == 401
+            response.read()
+            guarded.request("GET", "/api/view", headers={
+                "X-RoCell-Token": preview_handler.session_token,
+                "Origin": "https://untrusted.example",
+            })
+            response = guarded.getresponse()
+            assert response.status == 403
+            response.read()
+            guarded.close()
         finally:
             server.shutdown()
             thread.join(timeout=5)

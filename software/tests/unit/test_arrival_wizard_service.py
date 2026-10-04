@@ -21,15 +21,14 @@ from rocell.application.wizard_diagnostic_export import verify_export
 WORKSPACE = Path(__file__).resolve().parents[3]
 
 
-@pytest.mark.parametrize('name,command',[('low','0.85'),('center','0.95'),('high','1.05')])
-def test_sweep_preview_is_explicit_and_inert(make_service,monkeypatch,name,command):
+@pytest.mark.parametrize('name',['low','center','high'])
+def test_unreviewed_sweep_actions_are_not_available(make_service,monkeypatch,name):
     from rocell.providers.windows import wifi_discrete_native as native
     def forbidden(**kwargs):raise AssertionError('Preview must never dispatch')
     monkeypatch.setattr(native,'run_native_roll_sweep_'+name+'_trial',forbidden)
     service,runner,_=make_service(mode='physical')
-    ticket=service.prepare_action('run_wifi_roll_sweep_'+name+'_trial',{},service.view()['revision'])
-    assert command in json.dumps(ticket)
-    assert 'characterization' in json.dumps(ticket).lower()
+    with pytest.raises(WizardError, match='not registered'):
+        service.prepare_action('run_wifi_roll_sweep_'+name+'_trial',{},service.view()['revision'])
     assert not runner.calls
 
 

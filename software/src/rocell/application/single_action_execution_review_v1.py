@@ -1,7 +1,8 @@
 """Single-use, zero-authority review admission for one exact v2 action.
 
 This boundary joins model, trajectory, collision/contact, and installed-controller
-lineage.  It never encodes a command, opens hardware, or issues a motion permit.
+lineage. It derives an offline exact T102 goal hash, but never encodes wire
+bytes, opens hardware, or issues a motion permit.
 Consumption only records that the exact review was used once by a future permit
 issuer; the safety supervisor remains the sole source of physical authority.
 """
@@ -12,11 +13,16 @@ from dataclasses import dataclass
 from enum import Enum
 import hashlib
 import json
+import math
 import re
 from threading import Lock
+from types import MappingProxyType
 from typing import Any, Mapping
 
 from rocell.models import ModelMotionBatchV2, ModelMotionProposalV2
+from rocell.arm.all_joint_command import all_joint_command
+from rocell.kinematics import ARM_JOINT_NAMES
+from rocell.safety.permit import goal_hash
 
 from .installed_controller_qualification_v1 import (
     EvidenceOrigin as ControllerEvidenceOrigin,
@@ -37,6 +43,71 @@ _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 
 class SingleActionExecutionReviewError(ValueError):
     """Review evidence is malformed, crossed, stale, cancelled, or reused."""
+
+
+@dataclass(frozen=True, slots=True)
+class InstalledT102CommandProfileV1:
+    """Physical review of the missing hand, firmware settings, and path."""
+
+    trajectory_execution_envelope_v2_sha256: str
+    controller_qualification_evidence_sha256: str
+    observed_hand_feedback_sha256: str
+    reviewed_path_evidence_sha256: str
+    independent_approval_sha256: str
+    hand_target_rad: float
+    speed: int
+    acceleration: int
+    captured_monotonic_ns: int
+    valid_until_monotonic_ns: int
+    evidence_origin: PhysicalEvidenceOrigin
+    review_disposition: PhysicalReviewDisposition
+
+    def __post_init__(self) -> None:
+        for field in (
+            "trajectory_execution_envelope_v2_sha256",
+            "controller_qualification_evidence_sha256",
+            "observed_hand_feedback_sha256", "reviewed_path_evidence_sha256",
+            "independent_approval_sha256",
+        ):
+            _digest(getattr(self, field), field)
+        if isinstance(self.hand_target_rad, bool) or not isinstance(
+            self.hand_target_rad, (int, float)
+        ) or not math.isfinite(self.hand_target_rad):
+            raise SingleActionExecutionReviewError("hand target must be finite")
+        if type(self.speed) is not int or not 1 <= self.speed <= 65535:
+            raise SingleActionExecutionReviewError("T102 speed is invalid")
+        if type(self.acceleration) is not int or not 1 <= self.acceleration <= 255:
+            raise SingleActionExecutionReviewError("T102 acceleration is invalid")
+        captured = _positive_ns(
+            self.captured_monotonic_ns, "captured_monotonic_ns")
+        valid_until = _positive_ns(
+            self.valid_until_monotonic_ns, "valid_until_monotonic_ns")
+        if valid_until <= captured:
+            raise SingleActionExecutionReviewError(
+                "T102 profile expiry must follow capture")
+        if not isinstance(self.evidence_origin, PhysicalEvidenceOrigin) or not isinstance(
+            self.review_disposition, PhysicalReviewDisposition
+        ):
+            raise SingleActionExecutionReviewError("T102 profile provenance is invalid")
+
+    @property
+    def profile_sha256(self) -> str:
+        return _sha256({
+            "schema": "rocell.installed_t102_command_profile.v1",
+            "trajectory_execution_envelope_v2_sha256":
+                self.trajectory_execution_envelope_v2_sha256,
+            "controller_qualification_evidence_sha256":
+                self.controller_qualification_evidence_sha256,
+            "observed_hand_feedback_sha256": self.observed_hand_feedback_sha256,
+            "reviewed_path_evidence_sha256": self.reviewed_path_evidence_sha256,
+            "independent_approval_sha256": self.independent_approval_sha256,
+            "hand_target_rad": self.hand_target_rad,
+            "speed": self.speed, "acceleration": self.acceleration,
+            "captured_monotonic_ns": self.captured_monotonic_ns,
+            "valid_until_monotonic_ns": self.valid_until_monotonic_ns,
+            "evidence_origin": self.evidence_origin.value,
+            "review_disposition": self.review_disposition.value,
+        })
 
 
 class PhysicalEvidenceOrigin(str, Enum):
@@ -192,6 +263,9 @@ class SingleActionExecutionReviewV1:
     installed_collision_policy_qualification_sha256: str
     installed_controller_qualification_evidence_sha256: str
     installed_controller_qualification_report_sha256: str
+    t102_command_profile_sha256: str
+    reviewed_t102_goal: Mapping[str, Any]
+    reviewed_t102_goal_sha256: str
     configuration_epoch_sha256: str
     controller_session_id: str
     issued_monotonic_ns: int
@@ -210,9 +284,21 @@ class SingleActionExecutionReviewV1:
             "installed_collision_policy_qualification_sha256",
             "installed_controller_qualification_evidence_sha256",
             "installed_controller_qualification_report_sha256",
+            "t102_command_profile_sha256", "reviewed_t102_goal_sha256",
             "configuration_epoch_sha256",
         ):
             _digest(getattr(self, field), field)
+        if not isinstance(self.reviewed_t102_goal, Mapping):
+            raise SingleActionExecutionReviewError("reviewed T102 goal is required")
+        goal = dict(self.reviewed_t102_goal)
+        if (
+            tuple(goal) != ("T", "base", "shoulder", "elbow", "wrist",
+                            "roll", "hand", "spd", "acc")
+            or goal.get("T") != 102
+            or goal_hash(goal) != self.reviewed_t102_goal_sha256
+        ):
+            raise SingleActionExecutionReviewError("reviewed T102 goal is invalid")
+        object.__setattr__(self, "reviewed_t102_goal", MappingProxyType(goal))
         if isinstance(self.action_index, bool) or not isinstance(
             self.action_index, int
         ) or self.action_index < 0:
@@ -245,6 +331,9 @@ class SingleActionExecutionReviewV1:
                 self.installed_collision_policy_qualification_sha256),
             "installed_controller_qualification_report_sha256": (
                 self.installed_controller_qualification_report_sha256),
+            "t102_command_profile_sha256": self.t102_command_profile_sha256,
+            "reviewed_t102_goal": dict(self.reviewed_t102_goal),
+            "reviewed_t102_goal_sha256": self.reviewed_t102_goal_sha256,
             "installed_controller_qualification_evidence_sha256": (
                 self.installed_controller_qualification_evidence_sha256),
             "configuration_epoch_sha256": self.configuration_epoch_sha256,
@@ -277,6 +366,7 @@ def build_single_action_execution_review_v1(
     collision_qualification: InstalledCollisionPolicyQualificationV1,
     controller_evidence: InstalledControllerQualificationEvidenceV1,
     controller_qualification: InstalledControllerQualificationReportV1,
+    t102_profile: InstalledT102CommandProfileV1,
     *,
     review_id: str,
     issued_monotonic_ns: int,
@@ -304,6 +394,8 @@ def build_single_action_execution_review_v1(
         controller_qualification, InstalledControllerQualificationReportV1
     ):
         raise TypeError("controller_qualification has the wrong type")
+    if not isinstance(t102_profile, InstalledT102CommandProfileV1):
+        raise TypeError("t102_profile has the wrong type")
     now = _positive_ns(issued_monotonic_ns, "issued_monotonic_ns")
     contact_hash = _verified_report_hash(
         contact_gate_report, "contact_envelope_gate_sha256",
@@ -384,6 +476,36 @@ def build_single_action_execution_review_v1(
     ):
         raise SingleActionExecutionReviewError(
             "installed controller evidence differs from the execution envelope")
+    latest_deadline = min(
+        envelope.measured_envelope.deadline_monotonic_ns,
+        collision_qualification.valid_until_monotonic_ns,
+        controller_evidence.valid_until_monotonic_ns,
+        t102_profile.valid_until_monotonic_ns,
+    )
+    if deadline_monotonic_ns > latest_deadline:
+        raise SingleActionExecutionReviewError(
+            "execution review outlives a reviewed envelope or qualification")
+    if (
+        t102_profile.trajectory_execution_envelope_v2_sha256
+        != envelope.envelope_v2_sha256
+        or t102_profile.controller_qualification_evidence_sha256
+        != controller_evidence.evidence_sha256
+        or t102_profile.evidence_origin
+        is not PhysicalEvidenceOrigin.PHYSICAL_RETAINED_ORIGINALS
+        or t102_profile.review_disposition
+        is not PhysicalReviewDisposition.INDEPENDENTLY_APPROVED
+        or not t102_profile.captured_monotonic_ns <= now
+        <= t102_profile.valid_until_monotonic_ns
+        or len(envelope.measured_envelope.waypoints) != 2
+    ):
+        raise SingleActionExecutionReviewError(
+            "an approved single-T102 command profile is required")
+    endpoint = envelope.measured_envelope.waypoints[-1].joint_positions_rad
+    reviewed_goal = all_joint_command(
+        [*(endpoint[name] for name in ARM_JOINT_NAMES),
+         t102_profile.hand_target_rad],
+        speed=t102_profile.speed, acceleration=t102_profile.acceleration,
+    )
     return SingleActionExecutionReviewV1(
         review_id=review_id,
         batch_sha256=batch.batch_sha256,
@@ -399,6 +521,9 @@ def build_single_action_execution_review_v1(
             controller_evidence.evidence_sha256),
         installed_controller_qualification_report_sha256=(
             controller_qualification.report_sha256),
+        t102_command_profile_sha256=t102_profile.profile_sha256,
+        reviewed_t102_goal=reviewed_goal,
+        reviewed_t102_goal_sha256=goal_hash(reviewed_goal),
         configuration_epoch_sha256=(
             envelope.measured_envelope.configuration_epoch_sha256),
         controller_session_id=envelope.measured_envelope.controller_session_id,
@@ -473,6 +598,7 @@ class SingleUseExecutionReviewGateV1:
 __all__ = [
     "CONSUMPTION_SCHEMA", "MAX_REVIEW_TTL_NS", "QUALIFICATION_SCHEMA",
     "REVIEW_SCHEMA", "InstalledCollisionPolicyQualificationV1",
+    "InstalledT102CommandProfileV1",
     "PhysicalEvidenceOrigin", "PhysicalReviewDisposition",
     "SingleActionExecutionReviewError", "SingleActionExecutionReviewV1",
     "SingleUseExecutionReviewGateV1", "build_single_action_execution_review_v1",

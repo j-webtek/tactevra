@@ -95,17 +95,24 @@ def preflight(root: Path, *, second_attempt: bool = False) -> dict:
 
 def install(root: Path, prepared: dict) -> None:
     # Enumerate before the first controller reset. No alternate port fallback.
+    pinned = root / ".firmware-tools/esptool-api-4.6"
+    if not pinned.is_dir():
+        raise ValueError("Pinned firmware dependency directory is unavailable")
+    sys.path.insert(0, str(pinned))
+    import serial
+    from serial.tools import list_ports
+    if (serial.__version__ != "3.5"
+            or not Path(serial.__file__).resolve().is_relative_to(pinned.resolve())
+            or not Path(list_ports.__file__).resolve().is_relative_to(pinned.resolve())):
+        raise ValueError("Unexpected pyserial implementation")
     from serial.tools.list_ports import comports
     matches = [item for item in comports() if item.device == PORT and
                item.vid == 0x10c4 and item.pid == 0xea60 and
                item.serial_number == USB_SERIAL]
     if len(matches) != 1:
         raise ValueError("Expected USB adapter not identified")
-    pinned = root / ".firmware-tools/esptool-api-4.6"
-    sys.path.insert(0, str(pinned))
     import esptool
     from esptool import cmds, loader
-    import serial
     from deploy_reviewed_diagnostic_app import longer_reset_rom
     if esptool.__version__ != "4.6" or not Path(esptool.__file__).resolve().is_relative_to(pinned.resolve()):
         raise ValueError("Unexpected esptool implementation")

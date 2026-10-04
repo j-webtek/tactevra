@@ -11,6 +11,8 @@ import pytest
 from rocell.application.native_t102_handoff_journal_v1 import (
     DurableNativeT102HandoffV1,
 )
+import rocell.application.native_t102_production_transport_v1 as production_module
+import rocell.application.t102_machine_ledger_v1 as ledger_module
 from rocell.application.native_t102_production_transport_v1 import (
     ExternalAuthorityVerificationV1,
     ExternalNativeT102AuthorityRecordV1,
@@ -32,10 +34,24 @@ from rocell.providers.windows.native_t102_serial_transport_v1 import (
     WindowsNativeT102SerialTransportV1,
 )
 from rocell.rc03.build_snapshot import Capability
-from rocell.safety.permit import goal_hash
+from rocell.safety.permit import MotionPermit, goal_hash
 
 
 ADAPTER = "f" * 64
+
+
+@pytest.fixture(autouse=True)
+def machine_ledger(tmp_path, monkeypatch):
+    root = tmp_path / "machine-ledger"
+    root.mkdir()
+    monkeypatch.setattr(ledger_module, "machine_root",
+                        lambda: root)
+    monkeypatch.setattr(production_module, "_machine_verifier",
+                        lambda: Verifier())
+    monkeypatch.setattr(production_module, "_trusted_monotonic_ns",
+                        lambda: 1_070)
+    monkeypatch.setattr(production_module, "_verify_machine_authority_at_sink",
+                        lambda record, now: None)
 
 
 def digest(value):
@@ -82,6 +98,15 @@ def admission():
         **values, permit_binding_sha256=binding)
 
 
+def motion_permit(issued_admission):
+    return MotionPermit._issue(
+        capability=issued_admission.capability,
+        snapshot_hash=issued_admission.snapshot_sha256,
+        plan_hash=issued_admission.review_sha256,
+        goals=(message(),), ttl_s=102.0, now_monotonic=0.0,
+    )
+
+
 def endpoint(port="COM7"):
     return PinnedNativeT102EndpointV1(
         port_name=port, usb_vid="10C4", usb_pid="EA60",
@@ -89,7 +114,7 @@ def endpoint(port="COM7"):
 
 
 class Verifier:
-    def verify_external_native_t102_authority(self, record):
+    def verify_external_native_t102_authority(self, record, now_monotonic_ns):
         return ExternalAuthorityVerificationV1(
             approved=True,
             signed_payload_sha256=record.signed_payload_sha256,
@@ -104,6 +129,7 @@ def authority(handoff, command_frame, pinned):
     record = ExternalNativeT102AuthorityRecordV1(
         authority_id="arm055-authority-1",
         approval_record_sha256="9" * 64,
+        review_sha256="a" * 64,
         claim_sha256=handoff.snapshot().claim_sha256,
         frame_sha256=command_frame.frame_sha256,
         wire_bytes_sha256=command_frame.wire_bytes_sha256,
@@ -116,8 +142,7 @@ def authority(handoff, command_frame, pinned):
         issuer_key_id="outside-authority-key-1",
         detached_signature="TEST-SIGNATURE-NOT-A-PRODUCTION-KEY",
     )
-    return admit_external_native_t102_authority_v1(
-        record, Verifier(), now_monotonic_ns=1_070)
+    return admit_external_native_t102_authority_v1(record)
 
 
 @dataclass
@@ -152,6 +177,9 @@ class Serial:
 def prepared(tmp_path):
     command_frame = frame()
     permit = admission()
+    ledger_module.reserve_review(permit.consumption_sha256,
+                                 permit.review_sha256,
+                                 permit.ordered_goal_sha256[0])
     handoff_root = tmp_path / "handoff"
     receipt_root = tmp_path / "receipts"
     handoff_root.mkdir(); receipt_root.mkdir()
@@ -181,6 +209,7 @@ def test_real_adapter_class_composes_through_durable_authority_boundary(tmp_path
     adapter = transport(native)
     journal, receipt, terminal = execute_native_t102_production_candidate_v1(
         root, handoff, command_frame, permit, admitted, pinned, adapter,
+        motion_permit=motion_permit(permit),
         adapter_candidate_sha256=ADAPTER,
         started_monotonic_ns=1_100,
         assessment_monotonic_ns=1_200,
@@ -204,7 +233,7 @@ def test_crossed_authority_is_durably_started_and_rejected_before_adapter_open(t
     with pytest.raises(NativeT102ProductionTransportError, match="binding or lifetime"):
         execute_native_t102_production_candidate_v1(
             root, handoff, command_frame, permit, admitted, endpoint("COM8"),
-            adapter, adapter_candidate_sha256=ADAPTER,
+            adapter, motion_permit=motion_permit(permit), adapter_candidate_sha256=ADAPTER,
             started_monotonic_ns=1_100,
             assessment_monotonic_ns=1_200,
             completed_monotonic_ns=1_250,

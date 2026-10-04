@@ -249,7 +249,24 @@ def inspect_native_t102_adapter_review_packet_v1(
                 if path.is_absolute() or ".." in path.parts or "\\" in name:
                     raise NativeT102AdapterReviewPacketError(
                         "review packet contains an unsafe member path")
-            payloads = {name: archive.read(name) for name in names}
+            if any(
+                item.compress_type != zipfile.ZIP_STORED
+                or item.flag_bits & 1
+                or item.file_size > MAX_PACKET_BYTES
+                for item in infos
+            ) or sum(item.file_size for item in infos) > MAX_PACKET_BYTES:
+                raise NativeT102AdapterReviewPacketError(
+                    "review packet member exceeds size or format bound")
+            payloads = {}
+            remaining = MAX_PACKET_BYTES
+            for item in infos:
+                with archive.open(item) as member:
+                    data = member.read(min(item.file_size, remaining) + 1)
+                if len(data) != item.file_size or len(data) > remaining:
+                    raise NativeT102AdapterReviewPacketError(
+                        "review packet member exceeds size bound")
+                payloads[item.filename] = data
+                remaining -= len(data)
     except (zipfile.BadZipFile, RuntimeError) as exc:
         raise NativeT102AdapterReviewPacketError(
             "review packet is not a valid archive") from exc

@@ -15,6 +15,8 @@ from rocell.application.reviewed_motion_permit_bridge_v1 import (
 from rocell.application.single_action_execution_review_v1 import (
     SingleUseExecutionReviewGateV1,
 )
+import rocell.application.t102_machine_ledger_v1 as ledger_module
+from rocell.application.t102_machine_ledger_v1 import T102MachineLedgerError
 from rocell.rc03.build_snapshot import Capability
 from rocell.safety.permit import goal_hash
 from rocell.safety.supervisor import AuthorizationError, SafetySupervisor
@@ -29,6 +31,14 @@ from test_safety_core import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(autouse=True)
+def machine_ledger(tmp_path, monkeypatch):
+    root = tmp_path / "machine-ledger"
+    root.mkdir()
+    monkeypatch.setattr(ledger_module, "machine_root", lambda: root)
+    return root
 
 
 @pytest.fixture(scope="module")
@@ -57,10 +67,9 @@ def test_consumed_review_can_reach_only_exact_supervisor_permit(
     supervisor = SafetySupervisor(released_snapshot)
     _advance_to_armed(supervisor)
     now = 100.0
-    goal = {"T": 104, "x": 1, "y": 2, "z": 3, "t": 0, "r": 0,
-            "g": 0, "spd": 0.1}
+    goal = execution_review._t102_goal(context)
     permit, admission = issue_reviewed_motion_permit_v1(
-        supervisor, review, receipt, Capability.KEYBOARD_CONTACT, [goal],
+        supervisor, review, receipt, Capability.KEYBOARD_CONTACT,
         calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(now),
         runtime=_healthy_runtime(), ttl_s=2.0, now_monotonic=now,
     )
@@ -72,6 +81,24 @@ def test_consumed_review_can_reach_only_exact_supervisor_permit(
     _validate("reviewed_motion_permit_admission_v1.schema.json", admission.to_dict())
 
 
+def test_copied_consumption_receipt_cannot_issue_a_second_permit(
+    context, released_snapshot,
+) -> None:
+    review, receipt = _consumed(context)
+    supervisor = SafetySupervisor(released_snapshot)
+    _advance_to_armed(supervisor)
+    arguments = dict(
+        calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(100),
+        runtime=_healthy_runtime(), ttl_s=2, now_monotonic=100,
+    )
+    issue_reviewed_motion_permit_v1(
+        supervisor, review, receipt, Capability.KEYBOARD_CONTACT, **arguments)
+    with pytest.raises(T102MachineLedgerError, match="already spent"):
+        issue_reviewed_motion_permit_v1(
+            supervisor, review, dict(receipt), Capability.KEYBOARD_CONTACT,
+            **arguments)
+
+
 def test_wrong_capability_and_tampered_consumption_reject_before_preflight(
     context, released_snapshot,
 ) -> None:
@@ -79,15 +106,35 @@ def test_wrong_capability_and_tampered_consumption_reject_before_preflight(
     supervisor = SafetySupervisor(released_snapshot)
     with pytest.raises(ReviewedMotionPermitBridgeError, match="capability differs"):
         issue_reviewed_motion_permit_v1(
-            supervisor, review, receipt, Capability.EMPTY_CELL_MOTION, [{"T": 104}],
+            supervisor, review, receipt, Capability.EMPTY_CELL_MOTION,
             calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(10),
             runtime=_healthy_runtime(), ttl_s=2, now_monotonic=10)
     tampered = {**receipt, "proposal_v2_sha256": "f" * 64}
     with pytest.raises(ReviewedMotionPermitBridgeError, match="content hash"):
         issue_reviewed_motion_permit_v1(
-            supervisor, review, tampered, Capability.KEYBOARD_CONTACT, [{"T": 104}],
+            supervisor, review, tampered, Capability.KEYBOARD_CONTACT,
             calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(10),
             runtime=_healthy_runtime(), ttl_s=2, now_monotonic=10)
+
+
+def test_permit_issuance_rejects_unreviewed_t102_target_and_settings(
+    context, released_snapshot,
+) -> None:
+    review, receipt = _consumed(context)
+    supervisor = SafetySupervisor(released_snapshot)
+    _advance_to_armed(supervisor)
+    approved = dict(review.reviewed_t102_goal)
+    for changed in ({"base": approved["base"] + 0.01},
+                    {"hand": approved["hand"] + 0.01},
+                    {"spd": approved["spd"] + 1}):
+        with pytest.raises(TypeError):
+            issue_reviewed_motion_permit_v1(
+                supervisor, review, receipt, Capability.KEYBOARD_CONTACT,
+                [{**approved, **changed}],
+                calibrations=_valid_calibrations(),
+                interlocks=_healthy_interlocks(100),
+                runtime=_healthy_runtime(), ttl_s=2, now_monotonic=100,
+            )
 
 
 def test_supervisor_still_blocks_missing_current_physical_conditions(
@@ -98,9 +145,15 @@ def test_supervisor_still_blocks_missing_current_physical_conditions(
     _advance_to_armed(supervisor)
     with pytest.raises(AuthorizationError, match="Preflight is blocked"):
         issue_reviewed_motion_permit_v1(
-            supervisor, review, receipt, Capability.KEYBOARD_CONTACT, [{"T": 104}],
+            supervisor, review, receipt, Capability.KEYBOARD_CONTACT,
             calibrations=_valid_calibrations(),
             interlocks=_healthy_interlocks(10), runtime=type(_healthy_runtime())(),
+            ttl_s=2, now_monotonic=10)
+    with pytest.raises(T102MachineLedgerError, match="already spent"):
+        issue_reviewed_motion_permit_v1(
+            supervisor, review, receipt, Capability.KEYBOARD_CONTACT,
+            calibrations=_valid_calibrations(),
+            interlocks=_healthy_interlocks(10), runtime=_healthy_runtime(),
             ttl_s=2, now_monotonic=10)
 
 
@@ -112,9 +165,9 @@ def test_lifecycle_is_hash_chained_terminal_and_never_retries(
     supervisor = SafetySupervisor(released_snapshot)
     _advance_to_armed(supervisor)
     now = 100.0
-    goal = {"T": 104, "x": 1}
+    goal = execution_review._t102_goal(context)
     permit, admission = issue_reviewed_motion_permit_v1(
-        supervisor, review, receipt, Capability.KEYBOARD_CONTACT, [goal],
+        supervisor, review, receipt, Capability.KEYBOARD_CONTACT,
         calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(now),
         runtime=_healthy_runtime(), ttl_s=2, now_monotonic=now)
     lifecycle = ReviewedActionLifecycleV1(admission)
@@ -165,9 +218,9 @@ def test_lifecycle_rejects_caller_authored_or_tampered_start(
     review, receipt = _consumed(context)
     supervisor = SafetySupervisor(released_snapshot)
     _advance_to_armed(supervisor)
-    goal = {"T": 104, "x": 1}
+    goal = execution_review._t102_goal(context)
     _, admission = issue_reviewed_motion_permit_v1(
-        supervisor, review, receipt, Capability.KEYBOARD_CONTACT, [goal],
+        supervisor, review, receipt, Capability.KEYBOARD_CONTACT,
         calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(100),
         runtime=_healthy_runtime(), ttl_s=2, now_monotonic=100)
     lifecycle = ReviewedActionLifecycleV1(admission)

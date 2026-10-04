@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from . import SCHEMA_ID
+from rocell.models.actions import MAX_PLAN_TEXT_CHARS, MAX_PLAN_TEXT_BYTES
 
 
 _SHARED = {"schema", "request_id", "observation_ref", "decision"}
@@ -38,6 +39,9 @@ def validate_proposal(value: Any) -> None:
             raise ValueError("invalid device")
         if not isinstance(value["text"], str) or not value["text"]:
             raise ValueError("text must be nonempty")
+        if (len(value["text"]) > MAX_PLAN_TEXT_CHARS
+                or len(value["text"].encode("utf-8")) > MAX_PLAN_TEXT_BYTES):
+            raise ValueError("text exceeds proposal input limit")
     elif not isinstance(value["reason"], str) or value["reason"] not in _REASONS[decision]:
         raise ValueError("invalid reason")
 

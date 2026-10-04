@@ -3,16 +3,19 @@
 from __future__ import annotations
 
 import json
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import sys
+from threading import Thread
 import unittest
+from urllib.error import HTTPError
 
 
 AI_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AI_DIR))
 
 from rocell_ai.scene_observation import FrameEvidence, validate_observation  # noqa: E402
-from rocell_ai.vision_runtime import LlamaCppVisionObserver, OllamaVisionObserver  # noqa: E402
+from rocell_ai.vision_runtime import LlamaCppVisionObserver, OllamaVisionObserver, _post_json  # noqa: E402
 
 
 def output() -> dict:
@@ -25,6 +28,36 @@ def output() -> dict:
 
 
 class VisionRuntimeTests(unittest.TestCase):
+    def test_post_client_rejects_redirect_before_target_request(self) -> None:
+        target_requests = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                if self.path == "/redirect":
+                    self.send_response(307)
+                    self.send_header("Location", "/target")
+                else:
+                    target_requests.append(self.path)
+                    self.send_response(200)
+                self.end_headers()
+
+            def log_message(self, *_args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            with self.assertRaises(HTTPError):
+                _post_json(
+                    f"http://127.0.0.1:{server.server_port}/redirect", {}, 2.0
+                )
+            self.assertEqual(target_requests, [])
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join(timeout=2)
+
     def setUp(self) -> None:
         self.frame = FrameEvidence("f-1", "2026-09-25T14:00:00Z", b"\xff\xd8\xffimage")
 

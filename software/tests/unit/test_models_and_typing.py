@@ -5,6 +5,8 @@ import pytest
 from rocell.models.actions import (
     ActionPlan,
     Device,
+    MAX_PLAN_TEXT_CHARS,
+    MAX_SEMANTIC_ACTIONS,
     PressKey,
     TapPhoneTarget,
     VerifyPhoneState,
@@ -49,6 +51,23 @@ def test_keyboard_rejects_unsupported_character_with_index() -> None:
         KeyboardCompiler().compile("ab", profile)
     assert caught.value.character == "b"
     assert caught.value.index == 1
+
+
+def test_text_and_action_limits_reject_before_large_compilation() -> None:
+    keyboard = KeyboardProfile("keyboard/test", {"a": ("KEY_A",)})
+    with pytest.raises(ValueError, match="input limit"):
+        KeyboardCompiler().compile("a" * (MAX_PLAN_TEXT_CHARS + 1), keyboard)
+    phone = PhoneProfile(
+        "phone/test", {"a": PhoneKeySpec("KEY_A", "KEYBOARD_LOWER", verify_after=True)},
+    )
+    with pytest.raises(ValueError, match="semantic action limit"):
+        PhoneCompiler().compile("a" * MAX_PLAN_TEXT_CHARS, phone)
+    with pytest.raises(ValueError, match="semantic action limit"):
+        ActionPlan.from_text(
+            device=Device.KEYBOARD, profile_id="keyboard/test", text="a",
+            actions=(PressKey("KEY_A") for _ in range(MAX_SEMANTIC_ACTIONS + 1)),
+            required_calibrations=(),
+        )
 
 
 def test_profile_mapping_is_immutable() -> None:

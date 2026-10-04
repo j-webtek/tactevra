@@ -8,9 +8,7 @@ import sys
 import pytest
 
 from rocell.application.native_t102_production_transport_v1 import (
-    NativeT102ExecutionGrantV1,
     PinnedNativeT102EndpointV1,
-    _TRANSPORT_GRANT_ISSUER,
 )
 from rocell.arm.all_joint_command import all_joint_command
 from rocell.arm.protocol import encode_line
@@ -85,34 +83,11 @@ def lines(ordinal=1):
 
 def adapter(serial, inventory=lambda: [PortInfo()]):
     ticks = iter((1_150, 1_160))
-    transport = WindowsNativeT102SerialTransportV1(
+    return WindowsNativeT102SerialTransportV1(
         serial_factory=lambda: serial,
         port_inventory=inventory,
         monotonic_ns=lambda: next(ticks),
     )
-    transport.bind_execution(NativeT102ExecutionGrantV1(
-        endpoint().endpoint_sha256, command(), _issuer=_TRANSPORT_GRANT_ISSUER))
-    return transport
-
-
-def test_direct_serial_open_without_checked_execution_grant_is_rejected():
-    serial = FakeSerial(lines())
-    transport = WindowsNativeT102SerialTransportV1(
-        serial_factory=lambda: serial, port_inventory=lambda: [PortInfo()])
-    with pytest.raises(WindowsNativeT102SerialTransportError, match="grant"):
-        transport.open_once(endpoint())
-    assert serial.opens == 0
-
-
-def test_grant_rejects_different_t102_payload_before_write():
-    serial = FakeSerial(lines())
-    transport = adapter(serial)
-    transport.open_once(endpoint())
-    different = encode_line(all_joint_command(
-        [.2, .2, .3, .4, .5, .6], speed=20, acceleration=1))
-    with pytest.raises(WindowsNativeT102SerialTransportError, match="grant"):
-        transport.write_once(different)
-    assert serial.writes == []
 
 
 def test_import_and_construction_do_not_load_pyserial_or_open_hardware():

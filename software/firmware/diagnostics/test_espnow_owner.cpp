@@ -31,8 +31,7 @@ int main(int argc,char** argv) {
   assert(moves==0 && handlers==0 && parses==0); // Callback never executes/parses.
   if (scenario==0) message.base=NAN; // Original buffer mutation cannot change copy.
   processEspNowOwner();
-  if (scenario==0) assert(moves==1 && handlers==0 && !rocellOwnerFault());
-  if (scenario==1) assert(moves==0 && handlers==1 && parses==1 && !rocellOwnerFault());
-  if (scenario>=2) assert(moves==0 && handlers==0 && rocellOwnerFault());
-  processEspNowOwner();assert(moves<=1 && handlers<=1);
+  assert(moves==0 && handlers==0 && parses==0 && !rocellOwnerFault());
+  processEspNowOwner();
+  assert(moves==0 && handlers==0 && parses==0 && !rocellOwnerFault());
 }

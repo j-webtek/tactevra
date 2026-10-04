@@ -94,7 +94,8 @@ def test_windows_pnp_inventory_uses_only_fixed_argv_and_keeps_zero_authority() -
     )
 
     assert runner.calls == [(WINDOWS_CAMERA_PNP_ARGV, 15)]
-    assert WINDOWS_CAMERA_PNP_ARGV[0] == "powershell.exe"
+    assert Path(WINDOWS_CAMERA_PNP_ARGV[0]).is_absolute()
+    assert Path(WINDOWS_CAMERA_PNP_ARGV[0]).name.lower() == "powershell.exe"
     assert "-NonInteractive" in WINDOWS_CAMERA_PNP_ARGV
     assert len(cameras.candidates) == 1
     candidate = cameras.candidates[0]
@@ -208,6 +209,7 @@ def test_concrete_command_runner_passes_argv_with_shell_disabled(
     assert calls[0][0] == list(WINDOWS_CAMERA_PNP_ARGV)
     assert calls[0][1]["shell"] is False
     assert calls[0][1]["check"] is False
+    assert calls[0][1]["env"]["PATH"] == str(Path(WINDOWS_CAMERA_PNP_ARGV[0]).parents[2])
 
 
 def test_injected_serial_enumerator_never_opens_or_connects() -> None:

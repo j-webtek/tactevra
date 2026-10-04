@@ -28,6 +28,7 @@ from rocell.application.reviewed_t102_runtime_bridge_v1 import (
 from rocell.application.single_action_execution_review_v1 import (
     SingleUseExecutionReviewGateV1,
 )
+import rocell.application.t102_machine_ledger_v1 as ledger_module
 from rocell.arm.all_joint_command import all_joint_command
 from rocell.arm.protocol import encode_line
 from rocell.rc03.build_snapshot import Capability
@@ -43,6 +44,14 @@ from test_safety_core import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(autouse=True)
+def machine_ledger(tmp_path, monkeypatch):
+    root = tmp_path / "machine-ledger"
+    root.mkdir()
+    monkeypatch.setattr(ledger_module, "machine_root", lambda: root)
+    return root
 SESSION = "controller-session-arm049"
 EPOCH = "d" * 64
 PROFILE = "e" * 64
@@ -68,7 +77,7 @@ def _manifest():
 
 def _message(offset=0.0):
     return all_joint_command(
-        [offset + value for value in (.1, .2, .3, .4, .5, .6)],
+        [offset + value for value in (.1, .1, .1, .1, .1, 0.0)],
         speed=20, acceleration=1)
 
 
@@ -94,7 +103,7 @@ def _ack(sequence=1):
     })
 
 
-def _feedback(ns, joints=(.1, .2, .3, .4, .5, .6)):
+def _feedback(ns, joints=(.1, .1, .1, .1, .1, 0.0)):
     return {
         "captured_monotonic_ns": ns,
         "response_bytes": encode_line({
@@ -112,7 +121,7 @@ def _issued(context, released_snapshot, message=None):
     supervisor = SafetySupervisor(released_snapshot)
     _advance_to_armed(supervisor)
     permit, admission = issue_reviewed_motion_permit_v1(
-        supervisor, review, consumption, Capability.KEYBOARD_CONTACT, [message],
+        supervisor, review, consumption, Capability.KEYBOARD_CONTACT,
         calibrations=_valid_calibrations(), interlocks=_healthy_interlocks(100),
         runtime=_healthy_runtime(), ttl_s=2, now_monotonic=100)
     return (
@@ -198,7 +207,7 @@ def test_wrong_ack_after_full_write_is_uncertain_and_terminal(context, released_
 
 
 def test_acknowledged_but_unsettled_or_stale_feedback_is_uncertain(
-    context, released_snapshot,
+    context, released_snapshot, machine_ledger, monkeypatch,
 ):
     report, _, _ = _run(
         context, released_snapshot,
@@ -210,6 +219,9 @@ def test_acknowledged_but_unsettled_or_stale_feedback_is_uncertain(
     assert report["runtime_report"]["terminal_reason"] == (
         "COMMAND_ARRIVAL_UNCERTAIN")
 
+    second_root = machine_ledger.parent / "second-machine-ledger"
+    second_root.mkdir()
+    monkeypatch.setattr(ledger_module, "machine_root", lambda: second_root)
     stale, _, _ = _run(
         context, released_snapshot,
         feedback=[_feedback(1_100), _feedback(1_200)],
