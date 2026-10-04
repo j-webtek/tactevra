@@ -458,6 +458,7 @@ def phase0_collision_intake(fixture: dict[str, Any], *, workspace: Path) -> dict
             positions["link5_to_gripper_link"] = context.scenario.fixed_gripper_position
             fk = model.forward_kinematics(positions)
             transforms = {name: board_t_world.compose(transform) for name, transform in fk.items()}
+            transforms["board"] = RigidTransform.identity("board")
             gripper = transforms["gripper_link"].translation_mm
             anchor = Vec3(variant["cable_anchor_x_mm"], section["moving_cable"]["route_family"]["fixed_anchor_board_y_mm"], variant["cable_anchor_z_mm"])
             midpoint = (gripper + anchor).scaled(0.5) + Vec3(0, 0, -variant["cable_offset_fraction"] * section["moving_cable"]["swept_offset_mm_range"][1])

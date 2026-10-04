@@ -107,4 +107,6 @@ def test_phase0_collision_candidate_runs_but_cannot_release_gates():
     assert result["variant_count"] > 10
     assert result["pose_count_per_variant"] == 46
     assert result["decision"] == "STOP"
+    assert result["status_counts"].get("BLOCKED_INCOMPLETE_POSE", 0) == 0
+    assert result["status_counts"].get("COLLISION_DETECTED", 0) > 0
     assert result["hardware_write_count"] == result["physical_movement_count"] == 0
