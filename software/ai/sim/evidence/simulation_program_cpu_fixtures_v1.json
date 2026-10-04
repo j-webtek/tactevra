@@ -30,6 +30,34 @@
     "mjcf": {
       "path": "C:/MuJoCoWarp/evidence/mw1/roarm_m3_kinematic.mjcf",
       "sha256": "448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0"
+    },
+    "ws5_cpu_receipt": {
+      "path": "C:/IsaacSim/evidence/issue190/simulation_program/cpu_program_v1_2.json",
+      "sha256": "ba4ec5943d7bbf2a22f1e0ecfa6da43229e7e55c308a14f802c9e8fadb16636b"
+    },
+    "official_mesh_inventory": {
+      "path": "software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_meshes_20260929.json",
+      "sha256": "ab8749f813a20cc93e804eddfaccca8d1997a9d6ef86eb6cebf7368e6e368640"
+    },
+    "link_box_reduction": {
+      "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+      "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+    },
+    "workcell_layout": {
+      "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+      "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+    },
+    "camera_profile": {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    "camera_cage_mesh": {
+      "path": "hardware/static_overhead_camera/cad/output/stl/camera_cage_body.stl",
+      "sha256": "ded4d2b85fadeaca7c27b9c2a34f34203ebb02f2e730d8377fb1bca953e90052"
+    },
+    "camera_carriage_mesh": {
+      "path": "hardware/static_overhead_camera/cad/output/stl/camera_xy_carriage.stl",
+      "sha256": "3de3b975d353a062d257c74445a93e1e2d6570c723f1922db1a0182b162b511b"
     }
   },
   "sections": {
@@ -342,6 +370,64 @@
       ],
       "decision": "Covered targets abstain; uncovered checks require conservative projected-mask coverage of held-out arm masks. Physical mid-motion use remains blocked.",
       "section_sha256": "8e108a5da8ae9bdf9768656c7bbcfb2295f65ca67269f0542ffad6d9b057dd9d"
+    },
+    "workstream_5_attribution": {
+      "input_receipt_sha256": "7605ec776f8a59fdf71607cc379b2187828ec729981156c465a91a003e76e48d",
+      "outcome_for_insufficient_cells": 35,
+      "factors": [
+        "noise_mm",
+        "initial_bias_mm",
+        "target_fraction"
+      ],
+      "metrics": [
+        "one_way_eta_squared",
+        "level_mean_outcome",
+        "insufficient_rate_by_level",
+        "pairwise_interaction_range"
+      ],
+      "decision": "Rank drivers by one-way eta-squared on selected probes with insufficient cells coded only as the frozen above-grid sentinel 35; separately report raw insufficient counts so the encoding cannot hide failure. No hardware policy is selected.",
+      "section_sha256": "e7e5770f862256dee83e1d172cfc57f552c9b840847c95cf11f494f82a1ef9ea"
+    },
+    "collision_candidate": {
+      "status": "EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_FAMILY",
+      "installed_profile_eligible": false,
+      "robot_geometry": "EXACT_PINNED_OFFICIAL_MESH_DERIVED_CONSERVATIVE_BOXES",
+      "workcell_geometry": [
+        "board_solid",
+        "keyboard",
+        "phone",
+        "keyboard_left_station",
+        "keyboard_right_station",
+        "phone_station"
+      ],
+      "camera_mount_geometry": "EXACT_PINNED_STATIC_OVERHEAD_CAD_MESH_BOUNDS",
+      "unmeasured_ranges": {
+        "tool_length_mm": [
+          80,
+          120
+        ],
+        "tool_radius_mm": [
+          1,
+          6
+        ],
+        "camera_module_depth_mm": [
+          3,
+          30
+        ],
+        "clearance_margin_mm": [
+          0,
+          10
+        ]
+      },
+      "required_variant_axes": [
+        "tool_length_mm",
+        "tool_radius_mm",
+        "camera_module_depth_mm",
+        "clearance_margin_mm"
+      ],
+      "evidence_state": "PINNED_DIGITAL_CANDIDATE",
+      "decision": "Candidate may drive simulation collision diagnostics only after exact source validation and geometry audit. It must be rejected by InstalledCollisionGeometryProfile because evidence is not ACCEPTED_MEASURED. Cable and installed clamp remain explicit blockers rather than invented geometry.",
+      "section_sha256": "0f0931d540e83e1557526cf1bb6809f952356b946db763abc292ccd9eadc5e6f"
     }
   },
   "counters": {
@@ -352,8 +438,8 @@
     "transport": 0
   },
   "gpu_execution_authorized": false,
-  "supersedes_fixture_sha256": "d1bcb90ff5fba828ead7d4834c5f59d52e8c65d03710faa955b26bf7c0e6e408",
-  "amendment": "Pre-result governance correction: bind the required simulator, driver, and GPU stack. Parameter ranges, section hashes, metrics, and decisions are unchanged.",
+  "supersedes_fixture_sha256": "fc9199b02027e391c41700615757439d6833b23df8a30aa3d57c9adbad5e35e3",
+  "amendment": "Pre-analysis CPU extension: freeze WS5 variance attribution and an uninstalled collision-candidate family. Existing workstream sections and decisions are unchanged.",
   "runtime_stack": {
     "gpu": [
       "NVIDIA GeForce RTX 3090",
@@ -365,5 +451,5 @@
     "isaac_kit": "6.1.0",
     "isaac_version_source": "C:/IsaacSim/evidence/first_launch_receipt_6_1_0.json"
   },
-  "fixture_sha256": "fc9199b02027e391c41700615757439d6833b23df8a30aa3d57c9adbad5e35e3"
+  "fixture_sha256": "399f26392856104b5ffe80b3520733ccc5e57ca362cc39232a8e775cb1a571ae"
 }
