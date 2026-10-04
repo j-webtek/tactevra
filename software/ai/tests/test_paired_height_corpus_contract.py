@@ -44,6 +44,9 @@ def test_frozen_resolution_noise_experiment_and_decision_rules() -> None:
     assert [row["input_resolution_px"] for row in value["candidates"]] == [96, 192]
     assert {row["input_channel_count"] for row in value["candidates"]} == {12}
     assert {row["parameter_count"] for row in value["candidates"]} == {43_321}
+    assert {row["final_pooling"] for row in value["candidates"]} == {
+        "ADAPTIVE_AVERAGE_6X6"
+    }
     assert len(value["run_matrix"]) == 6
 
     def profile(winner: str) -> dict:
@@ -93,6 +96,7 @@ def test_paired_height_model_retains_192_detail_until_final_pool() -> None:
     for size in (96, 192):
         model = paired_height_resolution_spatial_model(torch, size)
         assert sum(parameter.numel() for parameter in model.parameters()) == 43_321
+        assert isinstance(list(model.children())[11], torch.nn.AdaptiveAvgPool2d)
         value = torch.zeros((1, 12, size, size), dtype=torch.float32)
         for layer in list(model.children())[:11]:
             value = layer(value)

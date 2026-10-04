@@ -62,7 +62,7 @@ def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]
         "model_family", "physical_footprint_mm", "feature_channels", "conv_channels",
         "normalization", "spatial_feature_map", "optimizer", "maximum_epochs",
         "batch_size", "learning_rate", "weight_decay", "training_seed",
-        "feature_encoding", "input_channel_count", "parameter_count",
+        "feature_encoding", "input_channel_count", "parameter_count", "final_pooling",
     )
     if any(candidates[0][field] != candidates[1][field] for field in parity_fields):
         raise ValueError("resolution must be the only candidate difference")
@@ -80,6 +80,8 @@ def load_resolution_noise_experiment(path: Path) -> tuple[dict[str, Any], bytes]
         raise ValueError("frozen model must consume twelve scalar channels")
     if candidates[0]["parameter_count"] != 43_321:
         raise ValueError("frozen parameter count differs")
+    if candidates[0]["final_pooling"] != "ADAPTIVE_AVERAGE_6X6":
+        raise ValueError("frozen final pooling differs")
     if value.get("evaluation_opened") is not False:
         raise ValueError("evaluation must remain unopened")
     if value.get("physical_authority") is not False:
