@@ -235,6 +235,34 @@ python software\integrations\isaac_sim\upstream_link_mesh_binding_probe.py `
   --status-output C:\IsaacSim\evidence\upstream_link_mesh_binding_001.status.json
 ```
 
+## Conservative link-local box candidates
+
+[`link_mesh_reduction_probe.py`](link_mesh_reduction_probe.py) derives one
+deterministic, link-local identity-oriented box per processed connected mesh
+component. `link5` has 114 processed fragments, so the generator applies its
+declared 64-primitives-per-body limit and emits one whole-link envelope instead.
+The retained
+[`reduction receipt`](evidence/roarm_m3_link_mesh_reduction_20261004.json)
+contains 14 candidate boxes across seven links and proves zero source-vertex
+overflow after serialization.
+
+These boxes are conservative candidates, not an installed collision profile.
+The largest box/source volume ratio among watertight components is 21.141, two
+source components are not watertight, and false-positive collision behavior and
+self-collision pair policy remain unqualified. The receipt therefore denies
+candidate installation, collision admission, and clearance replay.
+
+Reproduce the candidate reduction without installing a profile:
+
+```powershell
+$env:PYTHONUTF8='1'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\link_mesh_reduction_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --output C:\IsaacSim\evidence\link_mesh_reduction_003.json `
+  --status-output C:\IsaacSim\evidence\link_mesh_reduction_003.status.json
+```
+
 ## Verify WP0
 
 From `software/`:

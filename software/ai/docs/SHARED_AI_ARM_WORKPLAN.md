@@ -1191,6 +1191,16 @@ source provenance only. It deliberately does not prove robot-frame alignment,
 install reduced collision geometry, choose self-collision pairs, run clearance
 replay, or grant simulator, controller, hardware, or physical authority.
 
+`E-20261004-INT-455` derives 14 deterministic link-local box candidates from
+those exact source meshes. All 19,030 processed source vertices remain inside
+their serialized candidate boxes. `link5` exceeds the runtime contract's
+64-primitives-per-body limit with 114 processed fragments and therefore uses a
+declared whole-link envelope. The largest box/source volume ratio among
+watertight components is 21.140797, so these shapes are intentionally retained
+as conservative candidates only. They are not installed, and false-positive
+collision behavior, self-collision pair policy, clearance replay, tool/camera
+support geometry, controller access, and physical authority remain blocked.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
