@@ -22,9 +22,20 @@ def _target_ids(profile: dict[str, Any], device: str) -> list[str]:
     return ids
 
 
-def build(v5_path: Path, candidate_path: Path, output: Path, source_commit: str) -> dict[str, Any]:
+def build(
+    v5_path: Path,
+    candidate_path: Path,
+    coverage_path: Path,
+    capsule_path: Path,
+    mesh_path: Path,
+    output: Path,
+    source_commit: str,
+) -> dict[str, Any]:
     v5_raw = v5_path.resolve(strict=True).read_bytes()
     candidate_raw = candidate_path.resolve(strict=True).read_bytes()
+    coverage_raw = coverage_path.resolve(strict=True).read_bytes()
+    capsule_raw = capsule_path.resolve(strict=True).read_bytes()
+    mesh_raw = mesh_path.resolve(strict=True).read_bytes()
     v5 = json.loads(v5_raw)
     candidate = json.loads(candidate_raw)
     training_scenes = list(v5["split_identities"]["scenes"]["training"])
@@ -43,19 +54,21 @@ def build(v5_path: Path, candidate_path: Path, output: Path, source_commit: str)
         "status": "FROZEN_BEFORE_RENDER",
         "source_commit": source_commit,
         "bindings": {
+            "rejected_v1_3_fixture_file_sha256": "cf51c934646fbb928e2ccc17f82169561fb8aafee07757126b32a97247bb4654",
             "superseded_v1_2_fixture_file_sha256": "2ab9382feb524c9787653f06eedb38684caae37ef57ef541e6582bf9a6241b3a",
             "superseded_v1_1_fixture_file_sha256": "2376dd8f1e38c5f479311f1054837ca3d1f76e133d80329d9242424a968b6476",
             "superseded_pre_render_fixture_file_sha256": "c90f8cdbc6835e01a099265da6c238d01d982b343d667f0e57484d2c5a49fbe9",
             "v5_source_file_sha256": sha256_bytes(v5_raw),
             "measured_80_target_candidate_file_sha256": sha256_bytes(candidate_raw),
             "candidate_installed": False,
-            "height_admission_result_sha256": "82f04415dace8e22fd8a46078fed01a0d2e9288752e66ee5255c2e0b53aa5fad",
-            "official_mesh_result_sha256": "9664f973e145224309615b8e60e868a83cc1033547386ed5833aa55113f3c61a",
-            "paired_smoke_result_sha256": "4d54aad0e78d39d1242e13aee967e16619d5c1c2cec13c943e961878420cbae1",
+            "complete_crop_coverage_result_sha256": sha256_bytes(coverage_raw),
+            "height_admission_result_sha256": sha256_bytes(capsule_raw),
+            "official_mesh_result_sha256": sha256_bytes(mesh_raw),
+            "affected_phone_smoke_result_sha256": None,
         },
         "camera": {
             "orientation": "EXACT_NADIR_FIXED",
-            "center_board_xy_mm": [305.0, 228.5],
+            "center_board_xy_mm": [333.5044034818228, 228.5],
             "heights_board_mm": list(heights),
             "focal_length_mm": 16.0,
             "native_mode_px": [5472, 3648],
@@ -68,7 +81,7 @@ def build(v5_path: Path, candidate_path: Path, output: Path, source_commit: str)
             "lossless_source_format": "PNG_RGB8",
             "stored_encoding": "UINT8_SRGB_GAMMA_ENCODED_RGB",
             "local_physical_extent_xy_mm": [48.0, 48.0],
-            "context_physical_extent_xy_mm": [72.0, 72.0],
+            "physical_footprint_role": "SHARED_BY_96_AND_192_RESOLUTION_CANDIDATES",
             "stored_native_crop_support_range_px": [320, 480],
             "stored_left_and_right_bounds_must_be_even": True,
             "derived_local_tensor_sizes_px": [[96, 96], [192, 192]],
@@ -150,6 +163,17 @@ def build(v5_path: Path, candidate_path: Path, output: Path, source_commit: str)
             "three_training_heights_only_support_discrete_height_claims": True,
         },
         "evaluation_identities_present": False,
+        "pre_render_gates": {
+            "complete_crop_coverage": "PASS_SYNTHETIC_FULL_CROP_COVERAGE",
+            "parked_arm_capsule": "PASS_PROVISIONAL_CAPSULE_HEIGHT_ADMISSION",
+            "official_visual_mesh": "PASS_SIMULATION_ONLY",
+            "affected_phone_smoke": "PENDING",
+        },
+        "rerender_contract": {
+            "complete_training_rerender_required": True,
+            "rejected_v1_3_row_reuse_forbidden": True,
+            "mixed_camera_centers_forbidden": True,
+        },
         "images_generated": False,
         "training_started": False,
         "hardware_writes": 0,
@@ -160,6 +184,7 @@ def build(v5_path: Path, candidate_path: Path, output: Path, source_commit: str)
             "Stored RGB8 sRGB cannot recover information discarded before storage; linear decoding is an approximation until high-bit-depth linear rendering is available.",
             "The loader remains exploratory until a hash-bound measured B0477 noise profile exists.",
             "The 80-target measured candidate is external and uninstalled.",
+            "The synthetic 19.453 mm mounting tolerance is not physical qualification.",
             "Training distributes heights across scenes; development repeats every identity at all heights and must cluster statistics by identity.",
             "Only 700, 850, and 1000 mm are represented; intermediate heights are reserved for a future unopened evaluation fixture.",
             "Evaluation identities and pixels are absent and no integration gate is changed.",
@@ -178,10 +203,21 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--v5", type=Path, required=True)
     parser.add_argument("--candidate", type=Path, required=True)
+    parser.add_argument("--coverage-result", type=Path, required=True)
+    parser.add_argument("--capsule-result", type=Path, required=True)
+    parser.add_argument("--mesh-result", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source-commit", required=True)
     args = parser.parse_args()
-    result = build(args.v5, args.candidate, args.output, args.source_commit)
+    result = build(
+        args.v5,
+        args.candidate,
+        args.coverage_result,
+        args.capsule_result,
+        args.mesh_result,
+        args.output,
+        args.source_commit,
+    )
     print(json.dumps({"bundle_sha256": result["bundle_sha256"], **result["planned_counts"]}, sort_keys=True))
     return 0
 

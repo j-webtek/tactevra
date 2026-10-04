@@ -1,0 +1,33 @@
+{
+  "appearance_count": 3,
+  "development_rows_allowed": 0,
+  "evaluation_rows_allowed": 0,
+  "exact_admission_required": true,
+  "exact_command": "$env:OMNI_KIT_ACCEPT_EULA='YES'; $env:CUDA_VISIBLE_DEVICES='0'; C:\\IsaacSim\\env_6_1_0\\Scripts\\python.exe C:\\IsaacSim\\evidence\\issue190\\paired_height_v1_4_phone_smoke\\run_phone_edge_smoke_v1_4.py",
+  "expected_source_rows": 144,
+  "fixture_sha256": "d1ecfedc02d0493aa5589e09d794d683ac1dc82708f1fa39e76ba9789fd08db6",
+  "hardware_writes": 0,
+  "height_board_mm": 700,
+  "independent_target_renders_required": true,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "renderer": {
+    "path": "C:\\IsaacSim\\evidence\\issue190\\paired_height_v1_4_phone_smoke\\run_phone_edge_smoke_v1_4.py",
+    "sha256": "4db6dbc5590f557e553331a98c594511431db6aa68e24e696f84feaae033974f"
+  },
+  "result_present": false,
+  "scene_ids": [
+    "v5_training_scene_01"
+  ],
+  "schema": "tactevra.ai_paired_height_v1_4_phone_edge_smoke_plan.v1",
+  "scope": "SYNTHETIC_TRAINING_ONLY_SMOKE_NO_PHYSICAL_AUTHORITY",
+  "source_commit": "57d4caa8",
+  "status": "FROZEN_BEFORE_RENDER",
+  "target_keys": [
+    "phone:key_o",
+    "phone:key_p",
+    "phone:key_l",
+    "phone:key_enter"
+  ],
+  "variant_count": 12
+}

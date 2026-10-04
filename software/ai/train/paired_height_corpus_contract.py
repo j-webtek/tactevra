@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any, Iterator
 
 
-FIXTURE_SCHEMA = "tactevra.ai_residual_obstruction_paired_height_fixture.v1_3"
-SHARD_SCHEMA = "tactevra.ai_residual_obstruction_paired_height_shard.v1_3"
+FIXTURE_SCHEMA = "tactevra.ai_residual_obstruction_paired_height_fixture.v1_4"
+SHARD_SCHEMA = "tactevra.ai_residual_obstruction_paired_height_shard.v1_4"
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
@@ -47,6 +47,12 @@ def load_fixture(path: Path) -> tuple[dict[str, Any], bytes]:
         raise ValueError("paired output sizes must be exactly 96 and 192")
     if output.get("stored_artifact") != "SENSOR_ALIGNED_NATIVE_RGB8_PNG":
         raise ValueError("fixture must store native sensor-aligned crops")
+    if output.get("local_physical_extent_xy_mm") != [48.0, 48.0]:
+        raise ValueError("paired candidates must share the frozen 48 mm source footprint")
+    if "context_physical_extent_xy_mm" in output:
+        raise ValueError("unused context footprint declarations are forbidden")
+    if output.get("same_stored_native_pixels_for_both_candidates") is not True:
+        raise ValueError("paired candidates must derive from identical native pixels")
     if output.get("camera_model_order") != [
         "DECODE_STORED_SRGB_TO_LINEAR",
         "LINEAR_EXPOSURE_GAIN",

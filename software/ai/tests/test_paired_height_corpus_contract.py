@@ -25,7 +25,7 @@ from train.paired_height_corpus_contract import (  # noqa: E402
 
 
 ROOT = AI_ROOT
-FIXTURE = ROOT / "sim/evidence/residual_obstruction_paired_height_v1_3.json"
+FIXTURE = ROOT / "sim/evidence/residual_obstruction_paired_height_v1_4.json"
 
 
 def test_frozen_fixture_counts_and_balances_heights() -> None:
@@ -44,6 +44,9 @@ def test_frozen_fixture_counts_and_balances_heights() -> None:
         850: 5,
         1000: 5,
     }
+    assert fixture["camera"]["center_board_xy_mm"] == [333.5044034818228, 228.5]
+    assert "context_physical_extent_xy_mm" not in fixture["output_contract"]
+    assert fixture["rerender_contract"]["rejected_v1_3_row_reuse_forbidden"] is True
 
 
 def test_rows_are_deterministic_and_development_is_height_paired() -> None:
