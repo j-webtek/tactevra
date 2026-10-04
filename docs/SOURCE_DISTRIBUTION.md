@@ -78,6 +78,14 @@ observed 6,266 files. The measured tree is 649,454,909 logical bytes with
 and the logical-byte, single-blob, duplicate-byte, and reduction limits remain
 unchanged.
 
+The conservative per-link box-candidate increment adds three more governed
+paths: one deterministic reducer, one retained candidate receipt, and one
+evidence test. The reviewed tracked-file ceiling moves from 6,266 to the exact
+observed 6,269 files. The measured tree is 649,495,261 logical bytes with
+4,890,152 governed duplicate bytes. The candidate receipt references upstream
+mesh hashes rather than copying mesh blobs, so all byte and reduction limits
+remain unchanged.
+
 The preferred order is:
 
 1. replace repeated instructional STL copies with one canonical tracked object
