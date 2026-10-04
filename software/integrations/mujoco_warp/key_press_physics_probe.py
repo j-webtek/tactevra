@@ -381,6 +381,125 @@ def phone_cells(fixture: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def _board_tip_from_mujoco(
+    data: Any,
+    hand_id: int,
+    board_t_world: Any,
+    tool_length_mm: float,
+    np: Any,
+) -> Any:
+    position = np.asarray(data.xpos[hand_id], dtype=np.float64) * 1000.0
+    rotation = np.asarray(data.xmat[hand_id], dtype=np.float64).reshape(3, 3)
+    world = position + rotation @ np.asarray([0.0, 0.0, -tool_length_mm])
+    return (board_t_world @ np.concatenate((world, [1.0])))[:3]
+
+
+def landing_prepass(fixture: dict[str, Any], *, workspace: Path) -> dict[str, Any]:
+    """Reproduce the frozen MW2UC joint draws with standard MuJoCo FK only."""
+    import mujoco
+    import numpy as np
+
+    binding = fixture["bindings"]
+    bundle = json.loads(
+        _resolve(workspace, binding["pose_bundle"]["path"]).read_text(encoding="utf-8")
+    )
+    profile = json.loads(
+        _resolve(workspace, binding["virtual_profile"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    model = mujoco.MjModel.from_xml_path(
+        str(_resolve(workspace, binding["arm_mjcf"]["path"]))
+    )
+    data = mujoco.MjData(model)
+    hand_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "hand_tcp")
+    poses = bundle["poses"]
+    target_count = len(poses)
+    if target_count != 51 or model.nq != 6 or hand_id < 0:
+        raise ValueError("MW2UC pose or arm model topology changed")
+    nominal = np.asarray(
+        [pose["joint_positions_rad"] + [0.0] for pose in poses], dtype=np.float64
+    )
+    centers = np.asarray([pose["center_board_mm"] for pose in poses], dtype=np.float64)
+    board_t_world = np.asarray(
+        profile["study_input"]["derived_solver_transform"]["matrix_row_major"],
+        dtype=np.float64,
+    ).reshape(4, 4)
+    tool_length = float(
+        profile["study_input"]["route_tool_lengths_mm"]["keyboard"]
+    )
+    design = fixture["landing_model"]
+    retained_worlds = json.loads(
+        _resolve(workspace, binding["mw2uc_cuda0"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )["worlds_per_target_per_fk_scenario"]
+    rng = np.random.Generator(np.random.PCG64(design["seed"]))
+    fixed_signs = (
+        rng.integers(0, 2, size=(target_count, 5), dtype=np.int8).astype(np.float64)
+        * 2.0
+        - 1.0
+    )
+    systematic_unit = rng.uniform(-1.0, 1.0, size=5)
+    random_unit = rng.normal(0.0, 1.0, size=(target_count, retained_worlds, 5))
+    sample_count = design["samples_per_target_scenario"]
+    rows = []
+    for target_index, pose in enumerate(poses):
+        for scenario in design["scenarios"]:
+            fixed = scenario["fixed_rad"]
+            fixed_q = nominal[target_index].copy()
+            fixed_q[:5] += fixed_signs[target_index] * fixed + systematic_unit * fixed
+            data.qpos[:] = fixed_q
+            mujoco.mj_forward(model, data)
+            fixed_tip = _board_tip_from_mujoco(
+                data, hand_id, board_t_world, tool_length, np
+            )
+            fixed_delta = fixed_tip - centers[target_index]
+            offsets = []
+            for sample_index in range(sample_count):
+                qpos = fixed_q.copy()
+                qpos[:5] += (
+                    random_unit[target_index, sample_index]
+                    * scenario["random_sigma_rad"]
+                )
+                data.qpos[:] = qpos
+                mujoco.mj_forward(model, data)
+                raw_tip = _board_tip_from_mujoco(
+                    data, hand_id, board_t_world, tool_length, np
+                )
+                corrected = raw_tip - (
+                    1.0 - scenario["residual_fraction"]
+                ) * fixed_delta
+                delta = corrected - centers[target_index]
+                offsets.append([float(delta[0]), float(delta[1])])
+            rows.append(
+                {
+                    "target_id": pose["target_id"],
+                    "scenario_id": scenario["id"],
+                    "offset_xy_mm": offsets,
+                }
+            )
+    return {
+        "schema": "tactevra.ws2_landing_prepass.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "algorithm": design["algorithm"],
+        "target_count": target_count,
+        "scenario_count": len(design["scenarios"]),
+        "samples_per_target_scenario": sample_count,
+        "source_worlds_per_target": retained_worlds,
+        "rows": rows,
+        "mujoco_forward_calls": target_count
+        * len(design["scenarios"])
+        * (sample_count + 1),
+        "physics_steps": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_commands": [],
+        "physical_authority": False,
+    }
+
+
 def compare_receipts(
     fixture: dict[str, Any], left: dict[str, Any], right: dict[str, Any]
 ) -> dict[str, Any]:
@@ -443,7 +562,10 @@ def _write(path: Path, value: dict[str, Any]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("manifest", "cpu-smoke", "phone", "compare"))
+    parser.add_argument(
+        "mode",
+        choices=("manifest", "cpu-smoke", "landing-prepass", "phone", "compare"),
+    )
     parser.add_argument("--fixture", type=Path, required=True)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--output", type=Path, required=True)
@@ -456,6 +578,8 @@ def main() -> int:
         result = build_manifest(fixture, workspace=workspace)
     elif args.mode == "cpu-smoke":
         result = cpu_contact_smoke(fixture, workspace=workspace)
+    elif args.mode == "landing-prepass":
+        result = landing_prepass(fixture, workspace=workspace)
     elif args.mode == "phone":
         rows = phone_cells(fixture)
         result = {
