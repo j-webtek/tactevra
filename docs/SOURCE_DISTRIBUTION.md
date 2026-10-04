@@ -70,6 +70,14 @@ tree remains 649,432,899 logical
 bytes with 4,890,152 governed duplicate bytes; the logical-byte, single-blob,
 duplicate-byte, and reduction limits are unchanged.
 
+The official per-link mesh-binding increment adds three net governed paths: one
+read-only probe, one compact retained receipt, and one evidence test. The
+reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
+observed 6,266 files. The measured tree is 649,454,909 logical bytes with
+4,890,152 governed duplicate bytes. No mesh blob was copied into the repository,
+and the logical-byte, single-blob, duplicate-byte, and reduction limits remain
+unchanged.
+
 The preferred order is:
 
 1. replace repeated instructional STL copies with one canonical tracked object
