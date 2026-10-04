@@ -18,6 +18,7 @@
 | Phase 5 scenario regression | `4bc2d5e590db4acc908b49e2b5adf9c39e1929595a0923db634c45b58322906b` | `7ebd04c2da191971a623abee5715df231c937f764dfa575572f9977d26b42234` | CI 6/7 and nightly 51/84; 33 false acceptances remain visible. |
 | Phase 7 independent-observer drill | `46a6610ae7842e7b68d5e38a9776800c358c8d0f3e91d9897fdac5b407bfe95d` | `b7e768d99bdd9da3c7db002629d29e0618498ef32a3f574282fe42b63a062448` | Under frozen synthetic ranges, 16/33 old gaps can be consequential and fused simulated observers leave zero consequential gaps undetected. No physical observer is qualified. |
 | Phase 7 candidate A-F shadow | `d57688b29625cdb4409efe4604513a0709d923e5da5bd8cd8cbe2d835001a845` | `48d0f77011445be3e900d9323061248b6057789c2cbe9a3db3879dd58747c3e5` | A-F produce 198 predicted telemetry samples in a separate shadow path. Candidate collision remains `STOP`; the official Stage A stop is unchanged. |
+| Phase 8 candidate collision attribution | `f8603f979cce8775658fa371ec768adcff9377a1879f2364b8bc7d75a38879c5` | `885667bd60df7ac8f4d27bab23d390a3dec30fa0e3997c18d33d3a9ddec20ce1` | Fourteen of 40 favorable-size route endpoints avoid consequential contacts on the 46 keyboard poses. Remaining consequential pairs are cable-related. A-D are unevaluated, and expected structural contacts remain unreviewed blockers. |
 
 The governing fixture is
 [`first_motion_readiness_v1.json`](../ai/sim/evidence/first_motion_readiness_v1.json),
