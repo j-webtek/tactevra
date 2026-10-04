@@ -448,3 +448,10 @@ parameter grid. Generated receipts remain external and are referenced by hash.
 The two-file increase from 6,347 to 6,349 retains the consolidated CPU
 simulation harness and its focused tests. One implementation serves all frozen
 sections; workstream receipts and parameter-grid rows remain external.
+
+The Workstream 2 key-press physics freeze adds one compact, hash-bound fixture.
+It binds the exact 51-key MW2UC landing evidence, preserves every unmeasured
+mechanical/contact quantity as an endpoint-and-midpoint range design, freezes
+cross-GPU agreement and stop rules, and keeps all generated rows and receipts
+external. The exact tracked-file count and governed ceiling are therefore
+6,359; every byte, blob, duplicate, and reduction limit remains unchanged.
