@@ -125,6 +125,35 @@ def paired_resolution_spatial_model(torch: Any, input_size_px: int) -> Any:
     )
 
 
+def paired_height_resolution_spatial_model(torch: Any, input_size_px: int) -> Any:
+    """Build the frozen twelve-channel paired-height comparison model.
+
+    Both resolutions retain the same two early 2x pooling operations.  The
+    192-pixel candidate therefore carries a 48x48 map into the final adaptive
+    pool while the 96-pixel candidate carries 24x24.  The final 6x6 cells cover
+    the same physical region because both inputs represent the same 48 mm crop.
+    """
+
+    if isinstance(input_size_px, bool) or input_size_px not in {96, 192}:
+        raise ValueError("paired-height input_size_px must be 96 or 192")
+    return torch.nn.Sequential(
+        torch.nn.Conv2d(12, 24, 3, padding=1),
+        torch.nn.GroupNorm(6, 24),
+        torch.nn.ReLU(),
+        torch.nn.MaxPool2d(2),
+        torch.nn.Conv2d(24, 48, 3, padding=1),
+        torch.nn.GroupNorm(8, 48),
+        torch.nn.ReLU(),
+        torch.nn.MaxPool2d(2),
+        torch.nn.Conv2d(48, 64, 3, padding=1),
+        torch.nn.GroupNorm(8, 64),
+        torch.nn.ReLU(),
+        torch.nn.AdaptiveAvgPool2d((6, 6)),
+        torch.nn.Flatten(),
+        torch.nn.Linear(64 * 36, 1),
+    )
+
+
 def train_one(
     arrays: np.ndarray, labels: np.ndarray, settings: dict[str, Any], seed: int
 ) -> dict[str, Any]:

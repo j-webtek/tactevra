@@ -10,6 +10,7 @@ import pytest
 
 AI_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AI_ROOT))
+sys.path.insert(0, str(AI_ROOT / "train"))
 
 from train.paired_height_corpus_contract import (  # noqa: E402
     SHARD_SCHEMA,
@@ -24,6 +25,9 @@ from train.paired_height_corpus_contract import (  # noqa: E402
     noise_stddev_for_linear_brightness,
     spatially_correlate_noise,
     sha256_bytes,
+)
+from train.run_residual_obstruction_v4_2_memorization import (  # noqa: E402
+    paired_height_resolution_spatial_model,
 )
 
 
@@ -81,6 +85,24 @@ def test_resolution_noise_experiment_rejects_qualifying_claim(tmp_path: Path) ->
     path.write_text(json.dumps(value), encoding="utf-8")
     with pytest.raises(ValueError, match="qualifying mode is forbidden"):
         load_resolution_noise_experiment(path)
+
+
+def test_paired_height_model_retains_192_detail_until_final_pool() -> None:
+    torch = pytest.importorskip("torch")
+    pre_adaptive_shapes = {}
+    for size in (96, 192):
+        model = paired_height_resolution_spatial_model(torch, size)
+        assert sum(parameter.numel() for parameter in model.parameters()) == 43_321
+        value = torch.zeros((1, 12, size, size), dtype=torch.float32)
+        for layer in list(model.children())[:11]:
+            value = layer(value)
+        pre_adaptive_shapes[size] = tuple(value.shape)
+        value = list(model.children())[11](value)
+        assert tuple(value.shape) == (1, 64, 6, 6)
+    assert pre_adaptive_shapes == {
+        96: (1, 64, 24, 24),
+        192: (1, 64, 48, 48),
+    }
 
 
 def test_frozen_fixture_counts_and_balances_heights() -> None:
