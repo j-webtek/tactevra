@@ -1201,6 +1201,16 @@ as conservative candidates only. They are not installed, and false-positive
 collision behavior, self-collision pair policy, clearance replay, tool/camera
 support geometry, controller access, and physical authority remain blocked.
 
+`E-20261004-INT-456` compares those candidates with the exact source-bound
+meshes for every one of the 21 unordered link pairs at the governed zero,
+home, and ready poses. Across 63 pair-pose cases it retains 48 free-space
+agreements, three collision agreements, 12 conservative-candidate false
+positives, and zero observed candidate false negatives. All 12 false positives
+are kinematically adjacent pairs, but the probe does not silently exclude them.
+Three poses are not continuous workspace coverage, so self-collision policy,
+candidate installation, collision admission, clearance replay, tool/camera
+support geometry, controller access, and physical authority remain blocked.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

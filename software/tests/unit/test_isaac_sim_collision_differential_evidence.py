@@ -10,7 +10,7 @@ from rocell.integrations.isaac_sim import canonical_sha256
 WORKSPACE = Path(__file__).resolve().parents[3]
 RECEIPT = (
     WORKSPACE / "software/integrations/isaac_sim/evidence"
-    / "roarm_m3_collision_differential_20260929.json"
+    / "roarm_m3_collision_differential_20261004.json"
 )
 
 
@@ -36,16 +36,19 @@ def test_differential_binds_current_source_receipts_and_fcl_wheel() -> None:
     bindings = _load()["source_bindings"]
     mesh = (
         WORKSPACE / "software/integrations/isaac_sim/evidence"
-        / "roarm_m3_upstream_link_meshes_20260929.json"
+        / "roarm_m3_upstream_link_mesh_binding_20261004.json"
     )
     reduction = (
         WORKSPACE / "software/integrations/isaac_sim/evidence"
-        / "roarm_m3_link_mesh_reduction_20260929.json"
+        / "roarm_m3_link_mesh_reduction_20261004.json"
     )
     assert bindings["mesh_receipt_file_sha256"] == _digest(mesh)
+    assert bindings["mesh_receipt_sha256"] == (
+        "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e"
+    )
     assert bindings["reduction_receipt_file_sha256"] == _digest(reduction)
     assert bindings["reduction_receipt_sha256"] == (
-        "e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab"
+        "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178"
     )
     assert bindings["python_fcl_version"] == "0.7.0.11"
     assert bindings["python_fcl_wheel_sha256"] == (

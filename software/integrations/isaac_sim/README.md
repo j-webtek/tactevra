@@ -263,6 +263,39 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\link_me
   --status-output C:\IsaacSim\evidence\link_mesh_reduction_003.status.json
 ```
 
+## Three-pose link-collision differential
+
+[`collision_differential_probe.py`](collision_differential_probe.py) compares
+the 14 conservative box candidates with the exact source-bound meshes for all
+21 unordered link pairs at the governed zero, home, and ready poses. The
+retained
+[`differential receipt`](evidence/roarm_m3_collision_differential_20261004.json)
+records 63 pair-pose cases: 48 free-space agreements, three collision
+agreements, 12 candidate false positives, and zero observed candidate false
+negatives. Every observed false positive is between kinematically adjacent
+links, but adjacent pairs are deliberately measured rather than filtered.
+
+This small corpus does not establish workspace coverage or authorize an
+exclusion policy. The probe pins the exact `python-fcl 0.7.0.11` CPython 3.12
+wheel by SHA-256 and remains offline, zero-write, and non-installing. Candidate
+installation, collision admission, and clearance replay remain denied until
+the self-collision pair policy and broader joint-space differential are
+reviewed.
+
+Reproduce the comparison from an isolated Python 3.12 environment containing
+the exact pinned wheel and `trimesh 4.11.1`:
+
+```powershell
+python software\integrations\isaac_sim\collision_differential_probe.py `
+  --workspace . `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20261004.json `
+  --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl `
+  --output C:\IsaacSim\evidence\collision_differential_004.json `
+  --status-output C:\IsaacSim\evidence\collision_differential_004.status.json
+```
+
 ## Verify WP0
 
 From `software/`:

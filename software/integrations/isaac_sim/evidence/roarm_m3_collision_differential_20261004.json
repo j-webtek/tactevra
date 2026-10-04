@@ -849,15 +849,15 @@
       "pose_name": "ready"
     }
   ],
-  "receipt_sha256": "46e9133e7e8bc0529f03f3e1fb97e0927a5e3eff77a3d1d0282498c2d397f58f",
+  "receipt_sha256": "e955990d357694705bfc078643782622491425dd33a7cecb23314b58e5833e61",
   "schema": "tactevra.isaac_sim_collision_differential.v1",
   "source_bindings": {
-    "mesh_receipt_file_sha256": "ab8749f813a20cc93e804eddfaccca8d1997a9d6ef86eb6cebf7368e6e368640",
-    "mesh_receipt_sha256": "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954",
+    "mesh_receipt_file_sha256": "8408214ddc9bec69ffb65a4928e22bbdd83f99c6590576ff6a4ef61599c3703d",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
     "python_fcl_version": "0.7.0.11",
     "python_fcl_wheel_sha256": "63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f",
-    "reduction_receipt_file_sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431",
-    "reduction_receipt_sha256": "e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab",
+    "reduction_receipt_file_sha256": "d9d49bbb97a207a56db2a15cb55b12dc63f6ce89e35998a139ccd112f2061714",
+    "reduction_receipt_sha256": "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178",
     "trimesh_version": "4.11.1",
     "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
   },

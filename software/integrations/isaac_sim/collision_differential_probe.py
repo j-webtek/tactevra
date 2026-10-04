@@ -13,10 +13,10 @@ import sys
 
 UPSTREAM_COMMIT = "40dbd84b553695212fab713e8465f817ba95454d"
 EXPECTED_MESH_RECEIPT_SHA256 = (
-    "77b7c16e2d7c7a8ee0579b071d6a911516a8ba6d675188971e0c54e466b30954"
+    "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e"
 )
 EXPECTED_REDUCTION_RECEIPT_SHA256 = (
-    "e714a88c01b567f54b2e8c91b8f1144fcc35db38d2953dfe2c6f31e1d576adab"
+    "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178"
 )
 EXPECTED_FCL_VERSION = "0.7.0.11"
 EXPECTED_FCL_WHEEL_SHA256 = (
@@ -231,17 +231,21 @@ def main() -> int:
             ],
         }
         receipt["receipt_sha256"] = canonical_sha256(receipt)
-        args.output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        args.output.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         args.status_output.write_text(json.dumps({
             "status": "PASS_WITH_BLOCKERS",
             "receipt_sha256": receipt["receipt_sha256"],
             **totals,
             "blockers": blockers,
-        }, sort_keys=True) + "\n", encoding="utf-8")
+        }, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     except BaseException as exc:
         args.status_output.write_text(json.dumps({
             "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
-        }, sort_keys=True) + "\n", encoding="utf-8")
+        }, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
         raise
     return 0
 
