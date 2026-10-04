@@ -428,6 +428,109 @@
       "evidence_state": "PINNED_DIGITAL_CANDIDATE",
       "decision": "Candidate may drive simulation collision diagnostics only after exact source validation and geometry audit. It must be rejected by InstalledCollisionGeometryProfile because evidence is not ACCEPTED_MEASURED. Cable and installed clamp remain explicit blockers rather than invented geometry.",
       "section_sha256": "0f0931d540e83e1557526cf1bb6809f952356b946db763abc292ccd9eadc5e6f"
+    },
+    "phase0_collision_mode": {
+      "mode": "EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE",
+      "installed_profile_eligible": false,
+      "tool": {
+        "length_mm_range": [
+          80,
+          120
+        ],
+        "radius_mm_range": [
+          1,
+          6
+        ],
+        "provisional_nominal_length_mm": 100,
+        "provisional_nominal_radius_mm": 3.5,
+        "replacement_rule": "WS2 selected nominal replaces provisional values"
+      },
+      "moving_cable": {
+        "radius_mm_range": [
+          2,
+          12
+        ],
+        "swept_offset_mm_range": [
+          0,
+          100
+        ],
+        "configuration_samples": [
+          0,
+          0.25,
+          0.5,
+          0.75,
+          1
+        ]
+      },
+      "camera_contract": "STATIC_OVERHEAD_CAGE_AND_CARRIAGE_REPLACE_LEGACY_ARM_CAMERA_FRAMES",
+      "self_collision_exclusions": {
+        "state": "UNREVIEWED",
+        "admission": "NO_SELF_COLLISION_PAIR_MAY_BE_EXCLUDED"
+      },
+      "clearance_margin_mm_range": [
+        0,
+        10
+      ],
+      "screen_scope": "ROBOT_AND_TOOL_AGAINST_BOARD_KEYBOARD_PHONE_STATIONS_STATIC_CAMERA_AND_CABLE_SWEEP",
+      "decision": "Every range endpoint and cable sample must be screened. Any collision or incomplete transform stops that case. Mode cannot satisfy or be converted to InstalledCollisionGeometryProfile.",
+      "section_sha256": "74cd6454b062abe7babff9969590c78af83625ade6afbf80b4c633e327c31532"
+    },
+    "phase0_landing_sensors": {
+      "trial_count": 2000,
+      "seed": 1905201,
+      "probe_counts": [
+        1,
+        2,
+        3,
+        5,
+        8,
+        13,
+        21,
+        34
+      ],
+      "bias_mm": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "residual_fraction": [
+        0.1,
+        0.15,
+        0.2,
+        0.25
+      ],
+      "probe_seconds_range": [
+        2,
+        10
+      ],
+      "options": {
+        "ADB_TOUCHSCREEN_COORDINATES": {
+          "noise_mm_range": [
+            0.25,
+            3.0
+          ],
+          "contact_visibility": "DEVICE_EVENT_COORDINATE_ONLY"
+        },
+        "TEMPORARY_TOUCH_SURFACE_AT_KEYBOARD": {
+          "noise_mm_range": [
+            0.1,
+            2.0
+          ],
+          "contact_visibility": "TOUCH_EVENT_COORDINATE"
+        },
+        "MARKING_TIP_CAMERA_AFTER_RETRACT": {
+          "noise_mm_range": [
+            0.25,
+            2.5
+          ],
+          "contact_visibility": "POST_RETRACT_MARK_LOCATION"
+        }
+      },
+      "overhead_camera_contact_visibility": "OCCLUDED_AT_PRESS_NOT_AN_OBSERVATION_OPTION",
+      "noise_samples_per_range": 5,
+      "decision": "An option is feasible for a cell only when the 95th-percentile residual ratio meets target within 34 probes at every sampled noise level in its declared range. Report commissioning time as a range; do not select physical hardware.",
+      "section_sha256": "e310f519e4f54e070019518af23076921e883d3347a61e5e24f4f5ca3bf95340"
     }
   },
   "counters": {
@@ -438,8 +541,8 @@
     "transport": 0
   },
   "gpu_execution_authorized": false,
-  "supersedes_fixture_sha256": "fc9199b02027e391c41700615757439d6833b23df8a30aa3d57c9adbad5e35e3",
-  "amendment": "Pre-analysis CPU extension: freeze WS5 variance attribution and an uninstalled collision-candidate family. Existing workstream sections and decisions are unchanged.",
+  "supersedes_fixture_sha256": "399f26392856104b5ffe80b3520733ccc5e57ca362cc39232a8e775cb1a571ae",
+  "amendment": "Phase 0 pre-result freeze: executable uninstalled collision-candidate mode and landing-observation sensor comparison. Prior sections remain unchanged.",
   "runtime_stack": {
     "gpu": [
       "NVIDIA GeForce RTX 3090",
@@ -451,5 +554,5 @@
     "isaac_kit": "6.1.0",
     "isaac_version_source": "C:/IsaacSim/evidence/first_launch_receipt_6_1_0.json"
   },
-  "fixture_sha256": "399f26392856104b5ffe80b3520733ccc5e57ca362cc39232a8e775cb1a571ae"
+  "fixture_sha256": "5c92f4ab834a1805b319a8cf89000cd8435e3854c9dffcd87e0c146ed59f04a2"
 }
