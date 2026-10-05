@@ -11401,3 +11401,11 @@ rewriting history. New entries must use a unique evidence ID.
 - Repair: this successor restores the full ledger prefix from `dd4054fc` byte-for-byte, retains the WS2 E-667 record, appends the tool guard as unique E-668, and appends this correction. No implementation, fixture, result, metric, or threshold changed.
 - Process correction: subsequent validation and commit commands must be conditionally chained so a failed policy check prevents commit execution.
 - Authority: hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. Arm-lane status and integration gates remain unchanged.
+
+### E-20261005-INT-670 — length-specific pose-family solver implemented before execution
+
+- Frozen fixture commit `ae2227f1`; tool-configuration guard implementation `2a561af1c5710d98b037250146ad63843624c8c4`; evidence-identity repair `e86bdb5e`. No pose-family result was opened before this implementation.
+- Implementation: the successor now solves each of the five frozen total tool lengths independently against all 46 contact targets, seeded only by the legacy joints. It records exact failed target IDs and IK residuals by length, creates all 20 length/exposure/radius profiles, embeds the canonical tool configuration in every pose bundle, recomputes the bundle receipt, and immediately revalidates each bundle/configuration pair. No legacy joint pose is reused as a result for a different tool length.
+- Decision behavior: a length reaches the target only when its own numerical IK solution exists; a family passes reach only when all 46 targets solve. This stage does not select a tool because continuous clearance and dual-GPU calibrated-residual results remain pending.
+- Exact validation: Ruff and `py_compile` pass; `$env:PYTHONPATH='software/src;software/ai'; python -m pytest -q software/ai/tests/test_first_motion_controller_emulator.py` -> `29 passed in 5.37s`.
+- Authority before execution: GPU jobs 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. Prior STOP and official readiness remain unchanged.

@@ -212,6 +212,122 @@ def validate_pose_bundle_tool_configuration(
         raise ValueError("tool-bound pose bundle carries physical authority")
 
 
+def solve_tool_bound_pose_families(
+    fixture: dict[str, Any], *, workspace: Path,
+) -> dict[str, Any]:
+    """Solve one independently bound target-pose family per frozen tool profile."""
+
+    prior_path = Path(fixture["bindings"]["prior_fixture"]["path"])
+    if not prior_path.is_absolute():
+        prior_path = workspace / prior_path
+    prior = load_target_contact_cad_fixture(prior_path)
+    passive_path = Path(prior["bindings"]["prior_fixture"]["path"])
+    if not passive_path.is_absolute():
+        passive_path = workspace / passive_path
+    passive = load_passive_tool_rerun_fixture(passive_path)
+    design_path = Path(passive["bindings"]["collision_design_fixture"]["path"])
+    if not design_path.is_absolute():
+        design_path = workspace / design_path
+    world = _World(json.loads(design_path.read_text(encoding="utf-8")), workspace)
+
+    legacy_path = Path(fixture["bindings"]["legacy_pose_bundle"]["path"])
+    legacy = json.loads(legacy_path.read_text(encoding="utf-8"))
+    targets = legacy["poses"]
+    if len(targets) != 46:
+        raise ValueError("tool-bound successor requires exactly 46 target poses")
+    profiles: list[dict[str, Any]] = []
+    reach_by_length: dict[str, dict[str, Any]] = {}
+    solved_by_length: dict[float, tuple[list[dict[str, Any]], list[str]]] = {}
+
+    for length in fixture["length_sweep"]["total_hand_tcp_to_tip_length_mm"]:
+        solver = world.solver(float(length))
+        poses: list[dict[str, Any]] = []
+        failures: list[str] = []
+        for source in targets:
+            seed = tuple(float(value) for value in source["joint_positions_rad"])
+            xyz = source["contact_target_board_mm"]
+            target = (float(xyz["x"]), float(xyz["y"]), float(xyz["z"]))
+            solved = _solve_seeded(world, solver, target, seed)
+            if solved is None:
+                failures.append(source["target_id"])
+                continue
+            achieved = _tip_xyz(world, solved, float(length))
+            error = math.sqrt(sum(
+                (actual - expected) ** 2
+                for actual, expected in zip(achieved, target, strict=True)
+            ))
+            poses.append({
+                "target_id": source["target_id"],
+                "contact_target_board_mm": dict(source["contact_target_board_mm"]),
+                "joint_positions_rad": list(solved),
+                "achieved_tip_board_mm": list(achieved),
+                "ik_position_error_mm": error,
+            })
+        solved_by_length[float(length)] = (poses, failures)
+        reach_by_length[str(float(length))] = {
+            "solved_target_count": len(poses),
+            "failed_target_ids": failures,
+            "all_targets_reached": not failures and len(poses) == len(targets),
+            "maximum_ik_position_error_mm": max(
+                (row["ik_position_error_mm"] for row in poses), default=None),
+        }
+
+    for length, exposed, radius in product(
+        fixture["length_sweep"]["total_hand_tcp_to_tip_length_mm"],
+        fixture["length_sweep"]["distal_tip_exposed_length_mm"],
+        fixture["length_sweep"]["distal_tip_radius_mm"],
+    ):
+        poses, failures = solved_by_length[float(length)]
+        config = tool_configuration(
+            fixture, legacy, total_length_mm=float(length),
+            exposed_length_mm=float(exposed), tip_radius_mm=float(radius),
+        )
+        base = {
+            "scope": SCOPE,
+            "status": "PASS_EXPLORATORY_POSE_SOURCE" if not failures
+            else "STOP_UNREACHABLE_TARGETS",
+            "fixture_sha256": fixture["fixture_sha256"],
+            "joint_order": list(legacy["joint_order"]),
+            "layout_overlay": legacy["layout_overlay"],
+            "target_count": len(targets),
+            "solved_target_count": len(poses),
+            "failed_target_ids": list(failures),
+            "poses": poses,
+            "limitations": [
+                "All geometry, placement, tool dimensions, and solver inputs are exploratory.",
+                "Pose reach does not prove collision clearance or landing robustness.",
+            ],
+        }
+        bundle = bind_pose_bundle_tool_configuration(base, config)
+        validate_pose_bundle_tool_configuration(bundle, config)
+        profiles.append({
+            "tool_configuration_sha256": bundle["tool_configuration_sha256"],
+            "pose_bundle": bundle,
+        })
+
+    result = {
+        "schema": "tactevra.tool_bound_pose_family_result.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "reach_by_length_mm": reach_by_length,
+        "profiles": profiles,
+        "profile_count": len(profiles),
+        "decision": "PASS_ALL_LENGTHS_REACH_ALL_TARGETS" if all(
+            row["all_targets_reached"] for row in reach_by_length.values()
+        ) else "STOP_ONE_OR_MORE_LENGTHS_UNREACHABLE",
+        "evaluation_opened": False,
+        "gpu_job_count": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
 def _joint_map(world: _World, joints: tuple[float, ...]) -> dict[str, JointPosition]:
     values = {name: JointPosition.radians(value) for name, value in zip(
         world.pose_bundle["joint_order"], joints, strict=True)}
@@ -1124,6 +1240,7 @@ __all__ = [
     "run_clearance_waypoint_study",
     "run_passive_tool_first_motion_rerun",
     "run_target_contact_cad_refinement",
+    "solve_tool_bound_pose_families",
     "tool_configuration",
     "validate_pose_bundle_tool_configuration",
 ]
