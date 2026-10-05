@@ -34,6 +34,16 @@ WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json
 WS2_STAGED_V2 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v2.json"
 WS2_STAGED_V3 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v3.json"
 WS2_MECHANISMS = ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
+WS2_VECTOR_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v1.json"
+)
+WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_stage_a_vectorized_throughput",
+    ROOT / "software/ai/sim/run_ws2_stage_a_vectorized_throughput.py",
+)
+assert WS2_VECTOR_SPEC and WS2_VECTOR_SPEC.loader
+WS2_VECTOR_RUNNER = importlib.util.module_from_spec(WS2_VECTOR_SPEC)
+WS2_VECTOR_SPEC.loader.exec_module(WS2_VECTOR_RUNNER)
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
     ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
@@ -362,6 +372,60 @@ def test_ws2_key_mechanisms_separate_safe_regions_from_physical_geometry():
     assert fixture["stage_a_partition"]["missing_physical_geometry"] == "STOP"
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())
+
+
+def test_ws2_vectorized_ordinary_batch_keeps_mechanism_compiled():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=fixture
+    )
+    staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED_V3, workspace=ROOT, parent=fixture, execution=execution
+    )
+    rows = WS2_PROBE.stage_a_vectorized_ordinary_batch_rows(
+        fixture, staged, target_id="G"
+    )
+    assert len(rows) == 1_536
+    assert {row["target_id"] for row in rows} == {"G"}
+    assert len({row["scenario_id"] for row in rows}) == 4
+    assert len({row["landing_sample_index"] for row in rows}) == 8
+    assert len({row["recipe_index"] for row in rows}) == 12
+    assert {row["compliance_id"] for row in rows} == {
+        "k0.0715_t3",
+        "k0.0715_t6",
+        "k0.286_t3",
+        "k0.286_t6",
+    }
+    assert len({WS2_PROBE._sha_value(row) for row in rows}) == len(rows)
+
+
+def test_ws2_vectorized_throughput_fixture_stays_non_authorizing():
+    fixture = WS2_VECTOR_RUNNER.load_fixture(WS2_VECTOR_FIXTURE)
+    assert fixture["population"]["worlds_per_compiled_batch"] == 1_536
+    assert fixture["population"]["ordinary_compiled_batch_count"] == 10_716
+    assert fixture["population"]["ordinary_world_count"] == 16_459_776
+    assert fixture["population"]["blocked_special_targets"] == [
+        "SHIFT",
+        "ENTER",
+        "SPACE",
+        "TAB",
+    ]
+    left = {
+        "device": "cuda:0",
+        "fixture_sha256": fixture["fixture_sha256"],
+        "wall_elapsed_seconds": 1.0,
+        "status": "PASS_VECTORIZED_ORDINARY_DEVICE_SMOKE",
+        "receipt_sha256": "a" * 64,
+    }
+    right = {
+        **left,
+        "device": "cuda:1",
+        "receipt_sha256": "b" * 64,
+    }
+    result = WS2_VECTOR_RUNNER.compare(fixture, left, right)
+    assert result["status"] == "PASS_ORDINARY_VECTORIZED_THROUGHPUT"
+    assert result["stage_a_launch_authorized"] is False
+    assert result["physical_authority"] is False
 
 
 def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):

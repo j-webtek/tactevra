@@ -508,6 +508,46 @@ def stage_a_homogeneous_batches(
     return batches
 
 
+def stage_a_vectorized_ordinary_batch_rows(
+    fixture: dict[str, Any],
+    staged: dict[str, Any],
+    *,
+    target_id: str,
+) -> list[dict[str, Any]]:
+    """Build one target's Stage A rows with recipe/compliance as world controls.
+
+    This changes scheduling only.  The physical profile, tip, target-specific
+    neighborhood, and mechanism remain compiled-model identities.
+    """
+    scenarios = [row["id"] for row in fixture["landing_model"]["scenarios"]]
+    landings = list(staged["stage_a_coarse"]["landing_sample_indices"])
+    recipes = coarse_recipe_indices(fixture, staged)
+    compliance_ids = list(
+        staged["stage_a_coarse"]["throughput_selected_compliance"]["over_budget"]
+    )
+    rows = [
+        {
+            "target_id": target_id,
+            "scenario_id": scenario_id,
+            "landing_sample_index": landing_index,
+            "recipe_index": recipe_index,
+            "compliance_id": compliance_id,
+        }
+        for scenario_id in scenarios
+        for landing_index in landings
+        for recipe_index in recipes
+        for compliance_id in compliance_ids
+    ]
+    expected = (
+        len(scenarios) * len(landings) * len(recipes) * len(compliance_ids)
+    )
+    if len(rows) != expected or len(rows) > 4096:
+        raise ValueError("vectorized Stage A batch population changed")
+    if len({_sha_value(row) for row in rows}) != len(rows):
+        raise ValueError("vectorized Stage A batch rows are not unique")
+    return rows
+
+
 def primary_failure(row: dict[str, Any]) -> str:
     if not row.get("finite", True) or not row.get("overflow_zero", True):
         return "NONFINITE_OR_OVERFLOW"
@@ -980,14 +1020,24 @@ def run_smoke_worker(
     batch_rows = (
         None if control is None else control["control"].get("batch_rows")
     )
+    vectorized_world_controls = bool(
+        control is not None
+        and control["control"].get("vectorized_world_controls", False)
+    )
     if batch_rows is not None:
         if not batch_rows:
             raise ValueError("Stage A batch rows cannot be empty")
         required = {"target_id", "scenario_id", "landing_sample_index"}
+        if vectorized_world_controls:
+            required |= {"recipe_index", "compliance_id"}
         if any(set(row) != required for row in batch_rows):
             raise ValueError("Stage A batch row identity changed")
         smoke["target_id"] = batch_rows[0]["target_id"]
         smoke["expected_world_count"] = len(batch_rows)
+        if vectorized_world_controls and any(
+            row["target_id"] != smoke["target_id"] for row in batch_rows
+        ):
+            raise ValueError("vectorized Stage A batch mixes target mechanisms")
     catalog = json.loads(
         _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
         .read_text(encoding="utf-8")
@@ -1015,7 +1065,10 @@ def run_smoke_worker(
     )
     tip = next(row for row in tip_geometries(fixture) if row["tip_id"] == smoke["tip_id"])
     recipes = {row["recipe_index"]: row for row in recipe_rows(fixture)}
-    if len(smoke["recipe_indices"]) != 1 or len(smoke["scenario_ids"]) != 1:
+    if (
+        not vectorized_world_controls
+        and (len(smoke["recipe_indices"]) != 1 or len(smoke["scenario_ids"]) != 1)
+    ):
         raise ValueError("bounded smoke must contain one recipe and scenario")
     recipe = recipes[smoke["recipe_indices"][0]]
     if control is not None:
@@ -1053,12 +1106,49 @@ def run_smoke_worker(
     if nworld != smoke["expected_world_count"]:
         raise ValueError("bounded smoke world count changed")
 
+    world_recipes = [recipe] * nworld
+    world_compliance: list[dict[str, Any]] | None = None
+    if vectorized_world_controls:
+        if control is None or control["control"].get("recipe_override"):
+            raise ValueError("vectorized Stage A forbids recipe overrides")
+        world_recipes = [recipes[int(row["recipe_index"])] for row in row_identities]
+        compliance_options = control["control"].get("tool_compliance_options")
+        if not isinstance(compliance_options, list) or not compliance_options:
+            raise ValueError("vectorized Stage A requires compliance options")
+        compliance_lookup = {
+            str(row["compliance_id"]): row for row in compliance_options
+        }
+        if len(compliance_lookup) != len(compliance_options):
+            raise ValueError("vectorized Stage A compliance IDs are not unique")
+        world_compliance = []
+        for identity in row_identities:
+            try:
+                option = compliance_lookup[str(identity["compliance_id"])]
+            except KeyError as exc:
+                raise ValueError("unknown vectorized compliance identity") from exc
+            if set(option) != {
+                "compliance_id",
+                "stiffness_n_per_mm",
+                "travel_mm",
+            }:
+                raise ValueError("vectorized compliance option changed")
+            if (
+                float(option["stiffness_n_per_mm"]) <= 0.0
+                or float(option["travel_mm"]) <= 0.0
+            ):
+                raise ValueError("vectorized compliance values must be positive")
+            world_compliance.append(option)
+
     tool_compliance = (
         None if control is None else control["control"].get("tool_compliance")
     )
     tool_compliance_model = (
         None if control is None else control["control"].get("tool_compliance_model")
     )
+    if vectorized_world_controls:
+        if tool_compliance is not None:
+            raise ValueError("vectorized Stage A forbids scalar compliance")
+        tool_compliance_model = "SERIES_QUASISTATIC"
     switch_window = (
         None if control is None else control["control"].get("switch_closure_window_ms")
     )
@@ -1084,7 +1174,12 @@ def run_smoke_worker(
         fixture,
         profile,
         tip,
-        target["half_extent_mm"],
+        (
+            control["control"].get("physical_keycap_half_extent_mm")
+            if control is not None
+            else None
+        )
+        or target["half_extent_mm"],
         float(catalog["keyboard"]["pitch_mm"]),
         tool_compliance if tool_compliance_model == "NESTED_MOCAP_JOINT" else None,
     )
@@ -1132,15 +1227,36 @@ def run_smoke_worker(
     actuation_mm = values["travel_mm"] * values["actuation_fraction"]
     bottom_mm = values["travel_mm"] * values["bottom_out_fraction"]
     tip_extent_mm = tip["radius_mm"] + tip["half_length_mm"]
-    approach_s = recipe["press_depth_mm"] / recipe["approach_mm_s"]
-    dwell_s = recipe["dwell_ms"] / 1000.0
-    release_s = recipe["press_depth_mm"] / recipe["release_mm_s"]
+    press_depth_mm = np.asarray(
+        [float(row["press_depth_mm"]) for row in world_recipes], dtype=np.float64
+    )
+    approach_s = press_depth_mm / np.asarray(
+        [float(row["approach_mm_s"]) for row in world_recipes], dtype=np.float64
+    )
+    dwell_s = np.asarray(
+        [float(row["dwell_ms"]) / 1000.0 for row in world_recipes],
+        dtype=np.float64,
+    )
+    release_s = press_depth_mm / np.asarray(
+        [float(row["release_mm_s"]) for row in world_recipes], dtype=np.float64
+    )
     motion_s = approach_s + dwell_s + release_s
     release = dict(execution["numerical_protocol"]["release"])
     if control is not None and control["control"].get("control_kind") == "RELEASE":
         release.update(control["control"]["release_protocol_override"])
     extra_s = release["additional_settle_seconds"]
-    total_steps = math.ceil((motion_s + extra_s) / dt)
+    total_steps = math.ceil((float(np.max(motion_s)) + extra_s) / dt)
+
+    compliance_stiffness = compliance_travel = None
+    if world_compliance is not None:
+        compliance_stiffness = np.asarray(
+            [float(row["stiffness_n_per_mm"]) for row in world_compliance],
+            dtype=np.float64,
+        )
+        compliance_travel = np.asarray(
+            [float(row["travel_mm"]) for row in world_compliance],
+            dtype=np.float64,
+        )
 
     actuation_count = np.zeros(nworld, dtype=np.int64)
     neighbor_contact = np.zeros(nworld, dtype=bool)
@@ -1156,30 +1272,65 @@ def run_smoke_worker(
     if settle_pass:
         for step in range(total_steps):
             elapsed = step * dt
-            if elapsed < approach_s:
-                displacement = recipe["press_depth_mm"] * elapsed / approach_s
-            elif elapsed < approach_s + dwell_s:
-                displacement = recipe["press_depth_mm"]
-            elif elapsed < motion_s:
-                displacement = recipe["press_depth_mm"] * (
-                    1.0 - (elapsed - approach_s - dwell_s) / release_s
+            if vectorized_world_controls:
+                displacement = np.where(
+                    elapsed < approach_s,
+                    press_depth_mm * elapsed / approach_s,
+                    np.where(
+                        elapsed < approach_s + dwell_s,
+                        press_depth_mm,
+                        np.where(
+                            elapsed < motion_s,
+                            press_depth_mm
+                            * (1.0 - (elapsed - approach_s - dwell_s) / release_s),
+                            0.0,
+                        ),
+                    ),
                 )
             else:
-                displacement = 0.0
+                if elapsed < approach_s[0]:
+                    scalar_displacement = press_depth_mm[0] * elapsed / approach_s[0]
+                elif elapsed < approach_s[0] + dwell_s[0]:
+                    scalar_displacement = press_depth_mm[0]
+                elif elapsed < motion_s[0]:
+                    scalar_displacement = press_depth_mm[0] * (
+                        1.0
+                        - (elapsed - approach_s[0] - dwell_s[0]) / release_s[0]
+                    )
+                else:
+                    scalar_displacement = 0.0
+                displacement = np.full(nworld, scalar_displacement)
             effective_displacement = displacement
-            modeled_compression_mm = 0.0
-            modeled_tool_force_n = 0.0
+            modeled_compression_mm: Any = np.zeros(nworld, dtype=np.float64)
+            modeled_tool_force_n: Any = np.zeros(nworld, dtype=np.float64)
             if tool_compliance_model == "SERIES_QUASISTATIC":
-                (
-                    effective_displacement,
-                    modeled_compression_mm,
-                    modeled_tool_force_n,
-                ) = series_compliance_displacement(
-                    displacement,
-                    key_stiffness_n_per_mm=values["spring_n_per_mm"],
-                    tool_stiffness_n_per_mm=tool_compliance["stiffness_n_per_mm"],
-                    tool_travel_mm=tool_compliance["travel_mm"],
-                )
+                if world_compliance is None:
+                    (
+                        effective_scalar,
+                        compression_scalar,
+                        force_scalar,
+                    ) = series_compliance_displacement(
+                        float(displacement[0]),
+                        key_stiffness_n_per_mm=values["spring_n_per_mm"],
+                        tool_stiffness_n_per_mm=tool_compliance[
+                            "stiffness_n_per_mm"
+                        ],
+                        tool_travel_mm=tool_compliance["travel_mm"],
+                    )
+                    effective_displacement = np.full(nworld, effective_scalar)
+                    modeled_compression_mm = np.full(nworld, compression_scalar)
+                    modeled_tool_force_n = np.full(nworld, force_scalar)
+                else:
+                    modeled_compression_mm = np.minimum(
+                        displacement
+                        * values["spring_n_per_mm"]
+                        / (values["spring_n_per_mm"] + compliance_stiffness),
+                        compliance_travel,
+                    )
+                    effective_displacement = displacement - modeled_compression_mm
+                    modeled_tool_force_n = (
+                        compliance_stiffness * modeled_compression_mm
+                    )
             z_m = (
                 tip_extent_mm
                 - rest_qpos[:, center_joint] * 1000.0
@@ -1258,18 +1409,24 @@ def run_smoke_worker(
     rows = []
     for index in range(nworld):
         identity = row_identities[index]
+        row_recipe = world_recipes[index]
         margins = depth_margin_metrics(
             float(peak_mm[index]), float(actuation_mm), float(bottom_mm)
         )
         row = {
             "row_id": (
                 f"{identity['target_id']}__{identity['scenario_id']}"
-                f"__r{recipe['recipe_index']:03d}"
+                f"__r{int(row_recipe['recipe_index']):03d}"
                 f"__l{identity['landing_sample_index']:03d}"
+                + (
+                    f"__{identity['compliance_id']}"
+                    if vectorized_world_controls
+                    else ""
+                )
             ),
             "target_id": identity["target_id"],
             "scenario_id": identity["scenario_id"],
-            "recipe_index": recipe["recipe_index"],
+            "recipe_index": int(row_recipe["recipe_index"]),
             "landing_sample_index": identity["landing_sample_index"],
             "actuation_count": int(actuation_count[index]),
             "auto_repeat_count": int(repeats[index]),
@@ -1277,7 +1434,7 @@ def run_smoke_worker(
             "bottom_out_overflow": bool(bottom_overflow[index]),
             "release_complete": bool(release_complete[index]),
             "force_within_available": bool(
-                peak_force[index] <= recipe["available_press_force_n"]
+                peak_force[index] <= float(row_recipe["available_press_force_n"])
             ),
             "partial_press": bool(actuation_count[index] == 0),
             "double_actuation": bool(actuation_count[index] > 1),
@@ -1296,7 +1453,9 @@ def run_smoke_worker(
             )
         if control is not None:
             row["control_id"] = control["control"]["control_id"]
-        if tool_compliance is not None:
+        if vectorized_world_controls:
+            row["compliance_id"] = identity["compliance_id"]
+        if tool_compliance is not None or world_compliance is not None:
             row["peak_tool_compression_mm"] = float(
                 peak_tool_compression_mm[index]
             )
@@ -1373,6 +1532,11 @@ def run_smoke_worker(
         if tool_compliance is not None:
             receipt["tool_compliance"] = tool_compliance
             receipt["tool_compliance_model"] = tool_compliance_model
+        if world_compliance is not None:
+            receipt["vectorized_world_controls"] = True
+            receipt["tool_compliance_options"] = control["control"][
+                "tool_compliance_options"
+            ]
         positive_pass = bool(
             all(row["actuation_count"] == 1 for row in rows)
             and not any(row["partial_press"] for row in rows)
