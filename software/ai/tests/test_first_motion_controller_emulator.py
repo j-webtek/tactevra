@@ -498,3 +498,46 @@ def test_selected_passive_stylus_fixture_omits_moving_cable() -> None:
     assert "attachment:contact_tool" in body_ids
     assert "attachment:moving_cable" not in body_ids
     assert "attachment:moving_cable" not in requirement_ids
+
+
+def test_continuous_convex_sweep_catches_between_endpoint_contact() -> None:
+    from rocell.geometry import RigidTransform, Rotation3, Vec3
+    from rocell_ai.tool_bound_exact_clearance import (
+        convex_sweep_box_distance_mm,
+    )
+
+    local = np.asarray(((0.0, 0.0, 0.0),))
+    start = RigidTransform(
+        "board", "tool", Rotation3.identity(), Vec3(-2.0, 0.0, 0.0))
+    end = RigidTransform(
+        "board", "tool", Rotation3.identity(), Vec3(2.0, 0.0, 0.0))
+    # Both endpoints lie outside this box, but the continuous sweep crosses it.
+    distance = convex_sweep_box_distance_mm(
+        local, start, end, box_center_mm=(0.0, 0.0, 0.0),
+        box_size_mm=(1.0, 1.0, 1.0))
+    assert distance == pytest.approx(0.0, abs=1e-9)
+
+
+def test_continuous_convex_sweep_reports_margin_and_rejects_rotation() -> None:
+    from rocell.geometry import RigidTransform, Rotation3, Vec3
+    from rocell_ai.tool_bound_exact_clearance import (
+        convex_sweep_box_distance_mm,
+    )
+
+    local = np.asarray(((0.0, 0.0, 0.0),))
+    start = RigidTransform(
+        "board", "tool", Rotation3.identity(), Vec3(-2.0, 5.0, 0.0))
+    end = RigidTransform(
+        "board", "tool", Rotation3.identity(), Vec3(2.0, 5.0, 0.0))
+    distance = convex_sweep_box_distance_mm(
+        local, start, end, box_center_mm=(0.0, 0.0, 0.0),
+        box_size_mm=(1.0, 1.0, 1.0), margin_mm=1.0)
+    assert distance == pytest.approx(3.5, abs=1e-8)
+
+    rotated = RigidTransform(
+        "board", "tool", Rotation3.from_rpy(0.0, 0.0, 0.1),
+        Vec3(2.0, 5.0, 0.0))
+    with pytest.raises(ValueError, match="fixed orientation"):
+        convex_sweep_box_distance_mm(
+            local, start, rotated, box_center_mm=(0.0, 0.0, 0.0),
+            box_size_mm=(1.0, 1.0, 1.0))
