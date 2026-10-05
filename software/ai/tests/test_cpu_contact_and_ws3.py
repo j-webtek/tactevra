@@ -12,7 +12,9 @@ from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
     load_cpu_contact_fixture,
     prepare_ws3_transition_harness,
+    run_stage_ef_contact_screen,
     run_phone_capacitive_matrix,
+    run_ws3_transition_screen,
     validate_ws2_recipe_binding,
 )
 
@@ -66,6 +68,14 @@ def test_phone_matrix_covers_area_and_timing_ranges():
     assert result["physical_authority"] is False
 
 
+def test_stage_ef_full_frozen_population_passes_exact_screen():
+    result = run_stage_ef_contact_screen(_load(), workspace=ROOT)
+    assert result["row_count"] == 2 * 46 * 2 * 2
+    assert result["pass_row_count"] == result["row_count"]
+    assert result["global_minimum_non_target_clearance_mm"] == pytest.approx(7.5)
+    assert result["decision"] == "PASS_EXPLORATORY_STAGE_EF_EXACT_CONTACT"
+
+
 def test_ws3_preparation_enumerates_all_pairs_and_stops_without_recipe():
     result = prepare_ws3_transition_harness(_load(), workspace=ROOT)
     assert result["target_count"] == 46
@@ -90,6 +100,11 @@ def test_ws3_rejects_wrong_recipe_hash(tmp_path):
         validate_ws2_recipe_binding(fixture, workspace=ROOT)
 
 
+def test_ws3_screen_stops_before_geometry_without_recipe():
+    with pytest.raises(ValueError, match="not bound"):
+        run_ws3_transition_screen(_load(), workspace=ROOT)
+
+
 def test_ws3_rejects_nonpassing_recipe(tmp_path):
     fixture = _load()
     recipe = {
@@ -110,4 +125,3 @@ def test_ws3_rejects_nonpassing_recipe(tmp_path):
     fixture = _rehash_fixture(fixture)
     with pytest.raises(ValueError, match="not admitted"):
         validate_ws2_recipe_binding(fixture, workspace=ROOT)
-

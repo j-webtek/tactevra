@@ -470,9 +470,184 @@ def prepare_ws3_transition_harness(
     return result
 
 
+def run_ws3_transition_screen(
+    fixture: dict[str, Any], *, workspace: Path
+) -> dict[str, Any]:
+    """Run the frozen exact key-clearance screen after WS2 admits a recipe.
+
+    Source release uses the source pose orientation. Rise, transit, and descent
+    use the destination approach orientation. The reorientation between those
+    two fixed-orientation families is intentionally outside this key-only
+    screen and remains a workcell collision-planning dependency.
+    """
+
+    recipe = validate_ws2_recipe_binding(fixture, workspace=workspace)
+    exact_fixture, pose_family, world = _load_geometry(fixture, workspace=workspace)
+    section = fixture["sections"]["workstream_3"]
+    ef_section = fixture["sections"]["stage_ef_contact"]
+    widths = tuple(float(value) for value in ef_section["keycap_width_height_mm"])
+    thicknesses = tuple(float(value) for value in ef_section["keycap_thickness_mm"])
+    thresholds = tuple(float(value) for value in section["minimum_clearance_mm"])
+    rows: list[dict[str, Any]] = []
+    for profile in pose_family["profiles"]:
+        bundle = profile["pose_bundle"]
+        config = bundle["tool_configuration"]
+        length = float(config["total_hand_tcp_to_tip_length_mm"])
+        components = _component_shapes(exact_fixture, workspace, config)
+        boxes = {
+            (width, thickness): _key_boxes(bundle, width, thickness)
+            for width in widths
+            for thickness in thicknesses
+        }
+        poses = {row["target_id"]: row for row in bundle["poses"]}
+        transforms = {}
+        contacts = {}
+        for target_id, pose in poses.items():
+            xyz = pose["contact_target_board_mm"]
+            contacts[target_id] = (
+                float(xyz["x"]), float(xyz["y"]), float(xyz["z"])
+            )
+            transforms[target_id] = _hand_board_transform(
+                world, tuple(float(value) for value in pose["joint_positions_rad"])
+            )
+        for source_id, source_pose in poses.items():
+            del source_pose
+            for destination_id in poses:
+                source_contact = contacts[source_id]
+                destination_contact = contacts[destination_id]
+                source_orientation = transforms[source_id]
+                destination_orientation = transforms[destination_id]
+                for hover_mm in section["hover_height_above_contact_mm"]:
+                    source_hover = (
+                        source_contact[0], source_contact[1],
+                        source_contact[2] + float(hover_mm),
+                    )
+                    destination_hover = (
+                        destination_contact[0], destination_contact[1],
+                        destination_contact[2] + float(hover_mm),
+                    )
+                    for transit_z in section["transit_height_board_z_mm"]:
+                        source_transit = (
+                            source_contact[0], source_contact[1], float(transit_z)
+                        )
+                        destination_transit = (
+                            destination_contact[0], destination_contact[1],
+                            float(transit_z),
+                        )
+                        phase_points = (
+                            (
+                                "SOURCE_RELEASE", source_orientation,
+                                source_contact, source_hover, source_id,
+                            ),
+                            (
+                                "SOURCE_RISE", destination_orientation,
+                                source_hover, source_transit, None,
+                            ),
+                            (
+                                "TRANSIT", destination_orientation,
+                                source_transit, destination_transit, None,
+                            ),
+                            (
+                                "DESTINATION_DESCENT", destination_orientation,
+                                destination_transit, destination_hover, None,
+                            ),
+                        )
+                        minimum = float("inf")
+                        limiting = None
+                        for phase, orientation, start, end, admitted_target in phase_points:
+                            start_transform = _translated_transform(
+                                orientation, start, length
+                            )
+                            end_transform = _translated_transform(orientation, end, length)
+                            for component in components:
+                                swept, swept_aabb = _swept_collider_and_aabb(
+                                    component["vertices"], start_transform,
+                                    end_transform, margin_mm=component["margin_mm"]
+                                )
+                                for width in widths:
+                                    for thickness in thicknesses:
+                                        distance, key_id = _nearest_key_distance(
+                                            swept,
+                                            swept_aabb,
+                                            boxes[(width, thickness)],
+                                            requested_target_id=(
+                                                admitted_target
+                                                if admitted_target is not None
+                                                else "__NO_ADMITTED_TARGET__"
+                                            ),
+                                            component=component["component"],
+                                        )
+                                        if distance < minimum:
+                                            minimum = distance
+                                            limiting = {
+                                                "phase": phase,
+                                                "key_id": key_id,
+                                                "component": component["component"],
+                                                "key_width_mm": width,
+                                                "key_thickness_mm": thickness,
+                                            }
+                        passes = {
+                            str(value): minimum + 1e-9 >= value
+                            for value in thresholds
+                        }
+                        rows.append({
+                            "tool_configuration_sha256": profile[
+                                "tool_configuration_sha256"
+                            ],
+                            "source_target_id": source_id,
+                            "destination_target_id": destination_id,
+                            "hover_height_mm": float(hover_mm),
+                            "transit_height_mm": float(transit_z),
+                            "minimum_key_clearance_mm": minimum,
+                            "limiting_case": limiting,
+                            "threshold_pass": passes,
+                            "decision": (
+                                "PASS_EXPLORATORY_TRANSITION_KEY_CLEARANCE"
+                                if all(passes.values())
+                                else "STOP_TRANSITION_KEY_CLEARANCE"
+                            ),
+                        })
+    decision = (
+        "PASS_EXPLORATORY_WS3_EXACT_KEY_CLEARANCE"
+        if all(
+            row["decision"] == "PASS_EXPLORATORY_TRANSITION_KEY_CLEARANCE"
+            for row in rows
+        )
+        else "STOP_WS3_EXACT_KEY_CLEARANCE"
+    )
+    result = {
+        "schema": "tactevra.ws3_exact_key_clearance_result.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "section_sha256": section["section_sha256"],
+        "pose_family_receipt_sha256": pose_family["receipt_sha256"],
+        "press_recipe_receipt_sha256": recipe["receipt_sha256"],
+        "row_count": len(rows),
+        "minimum_key_clearance_mm": min(row["minimum_key_clearance_mm"] for row in rows),
+        "pass_row_count": sum(
+            row["decision"] == "PASS_EXPLORATORY_TRANSITION_KEY_CLEARANCE"
+            for row in rows
+        ),
+        "rows": rows,
+        "policy_recommendation": None,
+        "decision": decision,
+        "gpu_job_count": 0,
+        **{name: 0 for name in COUNTER_NAMES},
+        "physical_authority": False,
+        "limitations": fixture["limitations"] + [
+            "Key-only screening omits the source-to-destination orientation change.",
+            "Full robot/workcell continuous collision screening remains required.",
+        ],
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("stage-ef", "phone", "ws3-prepare"))
+    parser.add_argument(
+        "mode", choices=("stage-ef", "phone", "ws3-prepare", "ws3-screen")
+    )
     parser.add_argument("--fixture", required=True, type=Path)
     parser.add_argument("--workspace", default=Path("."), type=Path)
     parser.add_argument("--output", required=True, type=Path)
@@ -483,8 +658,10 @@ def main() -> None:
         result = run_stage_ef_contact_screen(fixture, workspace=workspace)
     elif args.mode == "phone":
         result = run_phone_capacitive_matrix(fixture)
-    else:
+    elif args.mode == "ws3-prepare":
         result = prepare_ws3_transition_harness(fixture, workspace=workspace)
+    else:
+        result = run_ws3_transition_screen(fixture, workspace=workspace)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps({
