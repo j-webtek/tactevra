@@ -5,6 +5,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 from rocell_ai.simulation_program_cpu import (
     CANDIDATE_MODE,
     calibration_budget,
@@ -239,6 +241,79 @@ def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Pat
         raise AssertionError("bottom-out positive control was admitted")
 
 
+def test_ws2_release_control_requires_long_settle_and_scores_both_depth_margins(
+    tmp_path: Path,
+):
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=fixture
+    )
+    control = {
+        "schema": "tactevra.ws2_release_control_fixture.v1",
+        "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+        "bindings": {
+            "campaign_fixture": {
+                "path": str(WS2_FIXTURE_V2),
+                "sha256": WS2_PROBE._sha_file(WS2_FIXTURE_V2),
+                "fixture_sha256": fixture["fixture_sha256"],
+            },
+            "execution_fixture": {
+                "path": str(WS2_EXECUTION_V2),
+                "sha256": WS2_PROBE._sha_file(WS2_EXECUTION_V2),
+                "fixture_sha256": execution["fixture_sha256"],
+            },
+        },
+        "control": {
+            "control_id": "RELEASE_REFERENCE_FULL_RETRACT_2S",
+            "control_kind": "RELEASE",
+            "target_id": "GRAVE",
+            "profile_id": "BASELINE",
+            "tip_id": "sphere-r1",
+            "scenario_id": "HIGH_SOURCE_LOW_RESIDUAL",
+            "base_recipe_index": 0,
+            "landing_sample_indices": list(range(64)),
+            "recipe_override": {"press_depth_mm": 2.4},
+            "release_protocol_override": {
+                "additional_settle_seconds": 2.0,
+                "position_error_limit_mm": 0.05,
+                "velocity_limit_mm_s": 0.05,
+            },
+        },
+        "counters": {
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "real_commands": 0,
+            "permits": 0,
+            "transport_operations": 0,
+        },
+        "physical_authority": False,
+    }
+    control["fixture_sha256"] = WS2_PROBE._sha_value(control)
+    path = tmp_path / "release_control.json"
+    path.write_text(json.dumps(control), encoding="utf-8")
+    loaded = WS2_PROBE.load_positive_control_fixture(
+        path, workspace=ROOT, parent=fixture, execution=execution
+    )
+    assert loaded["control"]["control_kind"] == "RELEASE"
+
+    margins = WS2_PROBE.depth_margin_metrics(2.4, 1.8, 3.0)
+    assert margins == {
+        "actuation_margin_mm": pytest.approx(0.6),
+        "bottom_out_margin_mm": pytest.approx(0.6),
+        "minimum_depth_margin_mm": pytest.approx(0.6),
+        "midpoint_error_mm": pytest.approx(0.0),
+    }
+
+    control.pop("fixture_sha256")
+    control["control"]["release_protocol_override"]["additional_settle_seconds"] = 0.5
+    control["fixture_sha256"] = WS2_PROBE._sha_value(control)
+    path.write_text(json.dumps(control), encoding="utf-8")
+    with pytest.raises(ValueError, match="at least one second"):
+        WS2_PROBE.load_positive_control_fixture(
+            path, workspace=ROOT, parent=fixture, execution=execution
+        )
+
+
 def test_ws2_tampering_and_cross_gpu_drift_stop():
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
     left = {
@@ -256,6 +331,12 @@ def test_ws2_tampering_and_cross_gpu_drift_stop():
                 "peak_penetration_mm": 2.0,
                 "peak_required_force_n": 0.5,
                 "dwell_above_actuation_ms": 100.0,
+                "actuation_margin_mm": 0.2,
+                "bottom_out_margin_mm": 1.0,
+                "minimum_depth_margin_mm": 0.2,
+                "midpoint_error_mm": 0.4,
+                "final_position_error_mm": 0.0,
+                "final_velocity_mm_s": 0.0,
             }
         ],
     }

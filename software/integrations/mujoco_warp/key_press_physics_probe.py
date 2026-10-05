@@ -32,6 +32,12 @@ CONTINUOUS_METRICS = (
     "peak_penetration_mm",
     "peak_required_force_n",
     "dwell_above_actuation_ms",
+    "actuation_margin_mm",
+    "bottom_out_margin_mm",
+    "minimum_depth_margin_mm",
+    "midpoint_error_mm",
+    "final_position_error_mm",
+    "final_velocity_mm_s",
 )
 
 
@@ -166,7 +172,44 @@ def load_positive_control_fixture(
         raise ValueError("positive-control depth must lie between actuation and bottom-out")
     if control["landing_sample_indices"] != list(range(64)):
         raise ValueError("positive-control landing population changed")
+    kind = control.get("control_kind", "ACTUATION")
+    if kind not in {"ACTUATION", "RELEASE"}:
+        raise ValueError("unknown positive-control kind")
+    if kind == "RELEASE":
+        release = control.get("release_protocol_override")
+        if set(release or {}) != {
+            "additional_settle_seconds",
+            "position_error_limit_mm",
+            "velocity_limit_mm_s",
+        }:
+            raise ValueError("release control requires the exact release protocol override")
+        if float(release["additional_settle_seconds"]) < 1.0:
+            raise ValueError("release control requires at least one second of extra settle")
+        if float(release["position_error_limit_mm"]) <= 0.0 or float(
+            release["velocity_limit_mm_s"]
+        ) <= 0.0:
+            raise ValueError("release-control reset tolerances must be positive")
     return fixture
+
+
+def depth_margin_metrics(
+    peak_penetration_mm: float, actuation_mm: float, bottom_out_mm: float
+) -> dict[str, float]:
+    """Score both sides of the modeled press window without changing admission."""
+    values = (peak_penetration_mm, actuation_mm, bottom_out_mm)
+    if not all(math.isfinite(float(value)) for value in values):
+        raise ValueError("depth-margin inputs must be finite")
+    if not 0.0 < actuation_mm < bottom_out_mm:
+        raise ValueError("depth-margin window is invalid")
+    actuation_margin = peak_penetration_mm - actuation_mm
+    bottom_margin = bottom_out_mm - peak_penetration_mm
+    midpoint = (actuation_mm + bottom_out_mm) / 2.0
+    return {
+        "actuation_margin_mm": actuation_margin,
+        "bottom_out_margin_mm": bottom_margin,
+        "minimum_depth_margin_mm": min(actuation_margin, bottom_margin),
+        "midpoint_error_mm": abs(peak_penetration_mm - midpoint),
+    }
 
 
 def load_staged_fixture(
@@ -866,7 +909,10 @@ def run_smoke_worker(
     dwell_s = recipe["dwell_ms"] / 1000.0
     release_s = recipe["press_depth_mm"] / recipe["release_mm_s"]
     motion_s = approach_s + dwell_s + release_s
-    extra_s = execution["numerical_protocol"]["release"]["additional_settle_seconds"]
+    release = dict(execution["numerical_protocol"]["release"])
+    if control is not None and control["control"].get("control_kind") == "RELEASE":
+        release.update(control["control"]["release_protocol_override"])
+    extra_s = release["additional_settle_seconds"]
     total_steps = math.ceil((motion_s + extra_s) / dt)
 
     actuation_count = np.zeros(nworld, dtype=np.int64)
@@ -931,11 +977,13 @@ def run_smoke_worker(
     final_qvel = np.asarray(data.qvel.numpy(), dtype=np.float64)
     overflow = np.asarray(data.overflow.numpy(), dtype=np.int64)
     finite = bool(np.isfinite(final_qpos).all() and np.isfinite(final_qvel).all())
-    release = execution["numerical_protocol"]["release"]
+    final_position_error_mm = np.abs(
+        (final_qpos[:, center_joint] - rest_qpos[:, center_joint]) * 1000.0
+    )
+    final_velocity_mm_s = np.abs(final_qvel[:, center_joint] * 1000.0)
     release_complete = (
-        np.abs((final_qpos[:, center_joint] - rest_qpos[:, center_joint]) * 1000.0)
-        <= release["position_error_limit_mm"]
-    ) & (np.abs(final_qvel[:, center_joint] * 1000.0) <= release["velocity_limit_mm_s"])
+        final_position_error_mm <= release["position_error_limit_mm"]
+    ) & (final_velocity_mm_s <= release["velocity_limit_mm_s"])
     minimum_delay = min(fixture["recipe_design"]["os_repeat_delay_ms_samples"])
     minimum_period = min(fixture["recipe_design"]["os_repeat_period_ms_samples"])
     active_ms = maximum_active_run * dt * 1000.0
@@ -946,6 +994,9 @@ def run_smoke_worker(
     )
     rows = []
     for index in range(nworld):
+        margins = depth_margin_metrics(
+            float(peak_mm[index]), float(actuation_mm), float(bottom_mm)
+        )
         row = {
             "row_id": (
                 f"{target['target_id']}__{scenario_id}__r{recipe['recipe_index']:03d}"
@@ -968,6 +1019,9 @@ def run_smoke_worker(
             "peak_penetration_mm": float(peak_mm[index]),
             "peak_required_force_n": float(peak_force[index]),
             "dwell_above_actuation_ms": float(active_ms[index]),
+            **margins,
+            "final_position_error_mm": float(final_position_error_mm[index]),
+            "final_velocity_mm_s": float(final_velocity_mm_s[index]),
         }
         if control is not None:
             row["control_id"] = control["control"]["control_id"]
@@ -1001,6 +1055,25 @@ def run_smoke_worker(
         "finite": finite,
         "overflow_zero": bool((overflow == 0).all()),
         "rows": rows,
+        "depth_margin_summary": {
+            "minimum_actuation_margin_mm": min(
+                row["actuation_margin_mm"] for row in rows
+            ),
+            "minimum_bottom_out_margin_mm": min(
+                row["bottom_out_margin_mm"] for row in rows
+            ),
+            "minimum_two_sided_margin_mm": min(
+                row["minimum_depth_margin_mm"] for row in rows
+            ),
+            "maximum_midpoint_error_mm": max(
+                row["midpoint_error_mm"] for row in rows
+            ),
+            "selection_priority": (
+                "MAXIMIZE_WORST_CASE_MINIMUM_DEPTH_MARGIN_THEN_MINIMIZE_"
+                "WORST_CASE_MIDPOINT_ERROR"
+            ),
+            "admission_gate_changed": False,
+        },
         "status": (
             "PASS_EXPLORATORY_SMOKE"
             if settle_pass and finite and (overflow == 0).all() and len(rows) == nworld
@@ -1016,11 +1089,18 @@ def run_smoke_worker(
     if control is not None:
         receipt["positive_control_fixture_sha256"] = control["fixture_sha256"]
         receipt["control_id"] = control["control"]["control_id"]
+        control_kind = control["control"].get("control_kind", "ACTUATION")
+        receipt["control_kind"] = control_kind
         receipt["effective_recipe"] = recipe
+        receipt["effective_release_protocol"] = release
         positive_pass = bool(
             all(row["actuation_count"] == 1 for row in rows)
             and not any(row["partial_press"] for row in rows)
             and not any(row["bottom_out_overflow"] for row in rows)
+            and (
+                control_kind != "RELEASE"
+                or all(row["release_complete"] for row in rows)
+            )
             and settle_pass
             and finite
             and (overflow == 0).all()
