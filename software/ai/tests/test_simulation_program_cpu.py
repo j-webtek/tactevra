@@ -25,6 +25,8 @@ ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json"
 WS2_FIXTURE = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v1.json"
 WS2_EXECUTION = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v1.json"
+WS2_FIXTURE_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json"
+WS2_EXECUTION_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json"
 WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json"
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
@@ -149,6 +151,31 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
     assert WS2_PROBE.coarse_recipe_indices(fixture, staged) == [
         0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
     ]
+
+
+def test_ws2_runtime_amendment_changes_only_stack_identity():
+    original = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    amended = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=amended
+    )
+    assert amended["runtime_stack"]["mujoco_warp"] == "3.14.0"
+    assert amended["runtime_stack"]["warp"] == "1.18.0"
+    assert amended["runtime_compatibility_amendment"]["status"] == (
+        "PRE_RESULT_RUNTIME_ONLY_AMENDMENT"
+    )
+    for key in (
+        "contact_model",
+        "landing_model",
+        "recipe_design",
+        "decision",
+        "metrics",
+        "counters",
+    ):
+        assert amended[key] == original[key]
+    assert execution["smoke"]["expected_world_count"] == 64
+    assert execution["physical_authority"] is False
+    assert not any(execution["counters"].values())
 
 
 def test_ws2_tampering_and_cross_gpu_drift_stop():
