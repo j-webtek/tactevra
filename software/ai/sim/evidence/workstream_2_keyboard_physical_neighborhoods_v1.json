@@ -1,0 +1,177 @@
+{
+  "additional_photo_annotations_px": {
+    "ENTER": [
+      801.0,
+      561.0
+    ],
+    "SPACE": [
+      488.0,
+      664.0
+    ],
+    "TAB": [
+      143.0,
+      519.0
+    ]
+  },
+  "annotation_method": "MANUAL_CENTER_OF_VISIBLE_KEYCAP_TOP_FROM_BOUND_OVERVIEW_IMAGE_THEN_INVERSE_BOUND_HOMOGRAPHY",
+  "bindings": {
+    "candidate_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "measurement_session": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/keyboard_physical_measurement_session_v1.json",
+      "sha256": "e500d2a2e629a8bd6c04d15a358528267c6a2b2c5f2cd0454a7b5434d551f847"
+    },
+    "mechanism_contract": {
+      "path": "C:/Users/WebTek/Desktop/tactevra-issue-190/software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json",
+      "sha256": "94c9f31a8b6f244d2b8e6ba45d2f09c5f3e502e01fbf9689368290e6a81891f2"
+    },
+    "photo_geometry": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/keyboard_photo_geometry_v1.json",
+      "sha256": "291afd44efcfaf6b43ff79263805e96d0bcbaa1b25397b457fb14e96a385e3c2"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "dimensions_mm": {
+    "special": {
+      "ENTER": {
+        "source": "INFERRED_2_25U_TOP_FROM_MEASURED_14MM_STANDARD_AND_19_05MM_PITCH",
+        "value": [
+          37.8125,
+          14.0
+        ]
+      },
+      "SHIFT": {
+        "source": "MEASURED_SINGLE_READING_TOP_SURFACE",
+        "value": [
+          37.76,
+          14.8
+        ]
+      },
+      "SPACE": {
+        "source": "INFERRED_6_25U_TOP_FROM_MEASURED_14MM_STANDARD_AND_19_05MM_PITCH",
+        "value": [
+          114.0125,
+          14.0
+        ]
+      },
+      "TAB": {
+        "source": "INFERRED_1_5U_TOP_FROM_MEASURED_14MM_STANDARD_AND_19_05MM_PITCH",
+        "value": [
+          23.525,
+          14.0
+        ]
+      }
+    },
+    "standard_measured_top": {
+      "source": "MEASURED_GRAVE_AND_1_TOP_SURFACES_OPERATOR_CONFIRMED_COMMON_SIZE",
+      "value": [
+        14.0,
+        14.0
+      ]
+    },
+    "unit_formula": "top_width_mm = 14 + (units - 1) * 19.05",
+    "validation": "formula predicts SHIFT 37.8125 mm versus measured 37.76 mm; absolute difference 0.0525 mm"
+  },
+  "fixture_sha256": "b247efba8ea73e573845ee49616fff3b0df92aabd81f7c4ec55c3941d797d1f0",
+  "limitations": [
+    "photo coordinates and inferred wide-key dimensions are simulation-only",
+    "stabilizer stiffness friction hysteresis tilt and off-center coupling remain unmeasured",
+    "press targets remain separate from collision geometry",
+    "physical commissioning remains required"
+  ],
+  "mechanism_by_target": {
+    "ENTER": "STABILIZED_IDEAL_GUIDED_EXPLORATORY",
+    "SHIFT": "STABILIZED_IDEAL_GUIDED_EXPLORATORY",
+    "SPACE": "STABILIZED_IDEAL_GUIDED_EXPLORATORY",
+    "TAB": "WIDE_UNSTABILIZED_IDEAL_GUIDED_EXPLORATORY"
+  },
+  "neighborhood": {
+    "derivation": "10 mm maximum planar landing offset plus 6 mm maximum vertical-tip radius plus 2 mm numerical margin; axial capsule half-length acts in Z and is excluded from planar reach",
+    "influence_radius_mm": 18.0
+  },
+  "physical_authority": false,
+  "regularized_rows": [
+    {
+      "pitch_mm": 19.133636363636363,
+      "source": "MEASURED_GRAVE_ANCHOR_PLUS_MEASURED_MEAN_NUMBER_ROW_PITCH",
+      "target_ids": [
+        "GRAVE",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "MINUS",
+        "EQUAL"
+      ]
+    }
+  ],
+  "schema": "tactevra.ws2_keyboard_physical_neighborhoods.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "target_order": [
+    "A",
+    "S",
+    "D",
+    "F",
+    "G",
+    "H",
+    "J",
+    "K",
+    "L",
+    "SEMICOLON",
+    "APOSTROPHE",
+    "Z",
+    "X",
+    "C",
+    "V",
+    "B",
+    "N",
+    "M",
+    "COMMA",
+    "PERIOD",
+    "SLASH",
+    "TAB",
+    "ENTER",
+    "SPACE",
+    "1",
+    "Q",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "0",
+    "MINUS",
+    "EQUAL",
+    "W",
+    "E",
+    "R",
+    "T",
+    "Y",
+    "U",
+    "I",
+    "O",
+    "P",
+    "SHIFT",
+    "BACKSLASH",
+    "GRAVE",
+    "LEFT_BRACKET",
+    "RIGHT_BRACKET"
+  ]
+}

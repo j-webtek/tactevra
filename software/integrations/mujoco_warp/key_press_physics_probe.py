@@ -87,13 +87,15 @@ def load_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
             if _sha_value(normalized) != binding["content_sha256"]:
                 raise ValueError(f"bound content identity changed: {name}")
     program = json.loads(
-        _resolve(workspace, fixture["bindings"]["program_fixture"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["program_fixture"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     section = program["sections"]["workstream_2"]
-    if section["section_sha256"] != fixture["bindings"]["program_fixture"][
-        "section_sha256"
-    ]:
+    if (
+        section["section_sha256"]
+        != fixture["bindings"]["program_fixture"]["section_sha256"]
+    ):
         raise ValueError("governing WS2 section changed")
     return fixture
 
@@ -120,12 +122,14 @@ def load_execution_fixture(
     if parent_binding["fixture_sha256"] != parent["fixture_sha256"]:
         raise ValueError("execution fixture parent identity mismatch")
     landing = json.loads(
-        _resolve(workspace, fixture["bindings"]["landing_prepass"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["landing_prepass"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
-    if landing.get("receipt_sha256") != fixture["bindings"]["landing_prepass"][
-        "receipt_sha256"
-    ]:
+    if (
+        landing.get("receipt_sha256")
+        != fixture["bindings"]["landing_prepass"]["receipt_sha256"]
+    ):
         raise ValueError("execution landing receipt identity mismatch")
     return fixture
 
@@ -151,13 +155,15 @@ def load_positive_control_fixture(
         source = _resolve(workspace, binding["path"])
         if _sha_file(source) != binding["sha256"]:
             raise ValueError(f"positive-control binding changed: {name}")
-    if fixture["bindings"]["campaign_fixture"]["fixture_sha256"] != parent[
-        "fixture_sha256"
-    ]:
+    if (
+        fixture["bindings"]["campaign_fixture"]["fixture_sha256"]
+        != parent["fixture_sha256"]
+    ):
         raise ValueError("positive-control campaign identity mismatch")
-    if fixture["bindings"]["execution_fixture"]["fixture_sha256"] != execution[
-        "fixture_sha256"
-    ]:
+    if (
+        fixture["bindings"]["execution_fixture"]["fixture_sha256"]
+        != execution["fixture_sha256"]
+    ):
         raise ValueError("positive-control execution identity mismatch")
     control = fixture["control"]
     profile = next(
@@ -170,7 +176,9 @@ def load_positive_control_fixture(
     bottom_mm = values["travel_mm"] * values["bottom_out_fraction"]
     depth_mm = float(control["recipe_override"]["press_depth_mm"])
     if not actuation_mm < depth_mm < bottom_mm:
-        raise ValueError("positive-control depth must lie between actuation and bottom-out")
+        raise ValueError(
+            "positive-control depth must lie between actuation and bottom-out"
+        )
     if control["landing_sample_indices"] != list(range(64)):
         raise ValueError("positive-control landing population changed")
     kind = control.get("control_kind", "ACTUATION")
@@ -183,12 +191,17 @@ def load_positive_control_fixture(
             "position_error_limit_mm",
             "velocity_limit_mm_s",
         }:
-            raise ValueError("release control requires the exact release protocol override")
+            raise ValueError(
+                "release control requires the exact release protocol override"
+            )
         if float(release["additional_settle_seconds"]) < 1.0:
-            raise ValueError("release control requires at least one second of extra settle")
-        if float(release["position_error_limit_mm"]) <= 0.0 or float(
-            release["velocity_limit_mm_s"]
-        ) <= 0.0:
+            raise ValueError(
+                "release control requires at least one second of extra settle"
+            )
+        if (
+            float(release["position_error_limit_mm"]) <= 0.0
+            or float(release["velocity_limit_mm_s"]) <= 0.0
+        ):
             raise ValueError("release-control reset tolerances must be positive")
     return fixture
 
@@ -229,12 +242,15 @@ def series_compliance_displacement(
     )
     if not all(math.isfinite(float(value)) for value in values):
         raise ValueError("series-compliance inputs must be finite")
-    if commanded_mm < 0.0 or min(
-        key_stiffness_n_per_mm, tool_stiffness_n_per_mm, tool_travel_mm
-    ) <= 0.0:
+    if (
+        commanded_mm < 0.0
+        or min(key_stiffness_n_per_mm, tool_stiffness_n_per_mm, tool_travel_mm) <= 0.0
+    ):
         raise ValueError("series-compliance inputs are outside the physical domain")
-    unconstrained_compression = commanded_mm * key_stiffness_n_per_mm / (
-        key_stiffness_n_per_mm + tool_stiffness_n_per_mm
+    unconstrained_compression = (
+        commanded_mm
+        * key_stiffness_n_per_mm
+        / (key_stiffness_n_per_mm + tool_stiffness_n_per_mm)
     )
     compression_mm = min(unconstrained_compression, tool_travel_mm)
     effective_key_command_mm = commanded_mm - compression_mm
@@ -277,18 +293,22 @@ def load_staged_fixture(
     if fixture.get("gpu_execution_authorized") is not False:
         raise ValueError("WS2 staged-search fixture unexpectedly authorizes execution")
     if any(fixture.get("counters", {}).values()):
-        raise ValueError("WS2 staged-search fixture contains nonzero authority counters")
+        raise ValueError(
+            "WS2 staged-search fixture contains nonzero authority counters"
+        )
     for name, binding in fixture["bindings"].items():
         source = _resolve(workspace, binding["path"])
         if _sha_file(source) != binding["sha256"]:
             raise ValueError(f"staged-search binding changed: {name}")
-    if fixture["bindings"]["campaign_fixture"]["fixture_sha256"] != parent[
-        "fixture_sha256"
-    ]:
+    if (
+        fixture["bindings"]["campaign_fixture"]["fixture_sha256"]
+        != parent["fixture_sha256"]
+    ):
         raise ValueError("staged-search campaign identity mismatch")
-    if fixture["bindings"]["execution_fixture"]["fixture_sha256"] != execution[
-        "fixture_sha256"
-    ]:
+    if (
+        fixture["bindings"]["execution_fixture"]["fixture_sha256"]
+        != execution["fixture_sha256"]
+    ):
         raise ValueError("staged-search execution identity mismatch")
     return fixture
 
@@ -343,15 +363,21 @@ def physical_profiles(fixture: dict[str, Any]) -> list[dict[str, Any]]:
             profiles.append({"profile_id": f"{name}__{label}", "values": values})
     expected = design["profile_count"]
     if len(profiles) != expected:
-        raise ValueError(f"physical profile count changed: {len(profiles)} != {expected}")
+        raise ValueError(
+            f"physical profile count changed: {len(profiles)} != {expected}"
+        )
     return profiles
 
 
 def tip_geometries(fixture: dict[str, Any]) -> list[dict[str, Any]]:
     families = fixture["contact_model"]["tip_families"]
     tips = [
-        {"tip_id": f"sphere-r{radius:g}", "shape": "sphere", "radius_mm": radius,
-         "half_length_mm": 0.0}
+        {
+            "tip_id": f"sphere-r{radius:g}",
+            "shape": "sphere",
+            "radius_mm": radius,
+            "half_length_mm": 0.0,
+        }
         for radius in families["sphere"]["radius_samples_mm"]
     ]
     for radius in families["capsule"]["radius_samples_mm"]:
@@ -380,7 +406,9 @@ def recipe_rows(fixture: dict[str, Any]) -> list[dict[str, float | int]]:
         row: dict[str, float | int] = {"recipe_index": index}
         for name, bounds in dimensions.items():
             fraction = (float(permutations[name][index]) + 0.5) / count
-            row[name] = float(bounds[0]) + fraction * (float(bounds[1]) - float(bounds[0]))
+            row[name] = float(bounds[0]) + fraction * (
+                float(bounds[1]) - float(bounds[0])
+            )
         rows.append(row)
     return rows
 
@@ -401,9 +429,7 @@ def _distance(left: tuple[float, ...], right: tuple[float, ...]) -> float:
     return math.sqrt(sum((a - b) ** 2 for a, b in zip(left, right, strict=True)))
 
 
-def coarse_recipe_indices(
-    fixture: dict[str, Any], staged: dict[str, Any]
-) -> list[int]:
+def coarse_recipe_indices(fixture: dict[str, Any], staged: dict[str, Any]) -> list[int]:
     vectors = _normalized_recipe_vectors(fixture)
     count = staged["stage_a_coarse"]["recipe_selection"]["count"]
     selected = [min(vectors)]
@@ -434,8 +460,9 @@ def stage_a_homogeneous_batches(
     tip, recipe, and tool compliance are identical.
     """
     catalog = json.loads(
-        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     classes: dict[tuple[float, float], list[str]] = {}
     for target in _target_records(catalog):
@@ -446,9 +473,7 @@ def stage_a_homogeneous_batches(
     scenarios = [row["id"] for row in fixture["landing_model"]["scenarios"]]
     recipes = coarse_recipe_indices(fixture, staged)
     landings = list(staged["stage_a_coarse"]["landing_sample_indices"])
-    selected = staged["stage_a_coarse"]["throughput_selected_compliance"][
-        "over_budget"
-    ]
+    selected = staged["stage_a_coarse"]["throughput_selected_compliance"]["over_budget"]
     compliance = []
     for identity in selected:
         match = re.fullmatch(r"k([0-9.]+)_t([0-9.]+)", identity)
@@ -538,9 +563,7 @@ def stage_a_vectorized_ordinary_batch_rows(
         for recipe_index in recipes
         for compliance_id in compliance_ids
     ]
-    expected = (
-        len(scenarios) * len(landings) * len(recipes) * len(compliance_ids)
-    )
+    expected = len(scenarios) * len(landings) * len(recipes) * len(compliance_ids)
     if len(rows) != expected or len(rows) > 4096:
         raise ValueError("vectorized Stage A batch population changed")
     if len({_sha_value(row) for row in rows}) != len(rows):
@@ -618,7 +641,9 @@ def refinement_plan(
                     candidate,
                 ),
             )[: staged["stage_b_refinement"]["maximum_new_recipe_indices_per_boundary"]]
-            refine.extend({**boundary_id, "recipe_index": candidate} for candidate in unrun)
+            refine.extend(
+                {**boundary_id, "recipe_index": candidate} for candidate in unrun
+            )
     unique = {
         tuple(row[field] for field in (*identity_fields, "recipe_index")): row
         for row in refine
@@ -644,12 +669,14 @@ def refinement_plan(
 
 def build_manifest(fixture: dict[str, Any], *, workspace: Path) -> dict[str, Any]:
     catalog = json.loads(
-        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     pose_bundle = json.loads(
-        _resolve(workspace, fixture["bindings"]["pose_bundle"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["pose_bundle"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     targets = _target_records(catalog)
     pose_ids = [row["target_id"] for row in pose_bundle["poses"]]
@@ -695,7 +722,9 @@ def build_manifest(fixture: dict[str, Any], *, workspace: Path) -> dict[str, Any
         "tip_geometry_count": len(tips),
         "recipe_count": len(recipe_rows(fixture)),
         "landing_scenario_count": len(fixture["landing_model"]["scenarios"]),
-        "landing_samples_per_row": fixture["landing_model"]["samples_per_target_scenario"],
+        "landing_samples_per_row": fixture["landing_model"][
+            "samples_per_target_scenario"
+        ],
         "logical_scored_row_count": logical_rows,
         "physics_world_count": logical_rows
         * fixture["landing_model"]["samples_per_target_scenario"],
@@ -726,6 +755,7 @@ def build_contact_mjcf(
     half_extent_mm: list[float],
     pitch_mm: float,
     tool_compliance: dict[str, float] | None = None,
+    physical_neighborhood: list[dict[str, Any]] | None = None,
 ) -> str:
     values = profile["values"]
     width = values["keycap_width_height_mm"] * half_extent_mm[0] / half_extent_mm[1]
@@ -738,35 +768,49 @@ def build_contact_mjcf(
     mass = values["keycap_mass_kg"]
     friction = values["friction_coefficient"]
     bodies = []
-    for index, (x_index, y_index) in enumerate(
-        (x, y) for y in (-1, 0, 1) for x in (-1, 0, 1)
-    ):
+    if physical_neighborhood is None:
+        physical_neighborhood = [
+            {
+                "relative_xy_mm": [x * pitch_mm, y * pitch_mm],
+                "size_xy_mm": [width, height],
+            }
+            for y in (-1, 0, 1)
+            for x in (-1, 0, 1)
+        ]
+    for index, key in enumerate(physical_neighborhood):
+        x_mm, y_mm = key["relative_xy_mm"]
+        key_width, key_height = key["size_xy_mm"]
         bodies.append(
             f'<body name="key_{index}" '
-            f'pos="{x_index * pitch_mm / 1000:.9f} '
-            f'{y_index * pitch_mm / 1000:.9f} 0">'
+            f'pos="{x_mm / 1000:.9f} {y_mm / 1000:.9f} 0">'
             f'<joint name="key_joint_{index}" type="slide" axis="0 0 -1" '
             f'range="0 {bottom / 1000:.9f}" stiffness="{spring:.9f}" '
             f'damping="{damping:.9f}"/>'
             f'<geom name="key_geom_{index}" type="box" '
             f'pos="0 0 {-thickness / 2000:.9f}" '
-            f'size="{width / 2000:.9f} {height / 2000:.9f} '
+            f'size="{key_width / 2000:.9f} {key_height / 2000:.9f} '
             f'{thickness / 2000:.9f}" mass="{mass:.9f}" '
             f'friction="{friction:.9f} 0.005 0.0001"/></body>'
         )
     if tip["shape"] == "sphere":
-        tip_geom = f'<geom name="tip" type="sphere" size="{tip["radius_mm"] / 1000:.9f}"/>'
+        tip_geom = (
+            f'<geom name="tip" type="sphere" size="{tip["radius_mm"] / 1000:.9f}"/>'
+        )
     else:
         tip_geom = (
             f'<geom name="tip" type="capsule" size="{tip["radius_mm"] / 1000:.9f} '
             f'{tip["half_length_mm"] / 1000:.9f}"/>'
         )
     if tool_compliance is None:
-        tip_body = f'<body name="tip_mocap" mocap="true" pos="0 0 0.02">{tip_geom}</body>'
+        tip_body = (
+            f'<body name="tip_mocap" mocap="true" pos="0 0 0.02">{tip_geom}</body>'
+        )
     else:
         required = {"stiffness_n_per_mm", "damping_n_s_per_mm", "travel_mm"}
         if set(tool_compliance) != required:
-            raise ValueError("tool compliance requires exact stiffness, damping, and travel")
+            raise ValueError(
+                "tool compliance requires exact stiffness, damping, and travel"
+            )
         stiffness = float(tool_compliance["stiffness_n_per_mm"])
         tool_damping = float(tool_compliance["damping_n_s_per_mm"])
         tool_travel = float(tool_compliance["travel_mm"])
@@ -779,7 +823,7 @@ def build_contact_mjcf(
             f'range="0 {tool_travel / 1000:.9f}" '
             f'stiffness="{stiffness * 1000.0:.9f}" '
             f'damping="{tool_damping * 1000.0:.9f}"/>'
-            f'{tip_geom}</body></body>'
+            f"{tip_geom}</body></body>"
         )
     return (
         '<mujoco model="tactevra_ws2"><compiler angle="radian"/>'
@@ -789,7 +833,7 @@ def build_contact_mjcf(
         '<geom name="bottom_stop" type="plane" pos="0 0 -0.020" size="0 0 0.1"/>'
         + "".join(bodies)
         + tip_body
-        + '</worldbody></mujoco>'
+        + "</worldbody></mujoco>"
     )
 
 
@@ -797,12 +841,15 @@ def cpu_contact_smoke(fixture: dict[str, Any], *, workspace: Path) -> dict[str, 
     import mujoco
 
     catalog = json.loads(
-        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     profiles = physical_profiles(fixture)
     tips = tip_geometries(fixture)
-    target = next(row for row in _target_records(catalog) if row["target_id"] == "EQUAL")
+    target = next(
+        row for row in _target_records(catalog) if row["target_id"] == "EQUAL"
+    )
     selected_profiles = [profiles[0], profiles[1], profiles[2]]
     selected_tips = [tips[0], tips[-1]]
     compiled = []
@@ -907,14 +954,10 @@ def landing_prepass(fixture: dict[str, Any], *, workspace: Path) -> dict[str, An
         profile["study_input"]["derived_solver_transform"]["matrix_row_major"],
         dtype=np.float64,
     ).reshape(4, 4)
-    tool_length = float(
-        profile["study_input"]["route_tool_lengths_mm"]["keyboard"]
-    )
+    tool_length = float(profile["study_input"]["route_tool_lengths_mm"]["keyboard"])
     design = fixture["landing_model"]
     retained_worlds = json.loads(
-        _resolve(workspace, binding["mw2uc_cuda0"]["path"]).read_text(
-            encoding="utf-8"
-        )
+        _resolve(workspace, binding["mw2uc_cuda0"]["path"]).read_text(encoding="utf-8")
     )["worlds_per_target_per_fk_scenario"]
     rng = np.random.Generator(np.random.PCG64(design["seed"]))
     fixed_signs = (
@@ -949,9 +992,9 @@ def landing_prepass(fixture: dict[str, Any], *, workspace: Path) -> dict[str, An
                 raw_tip = _board_tip_from_mujoco(
                     data, hand_id, board_t_world, tool_length, np
                 )
-                corrected = raw_tip - (
-                    1.0 - scenario["residual_fraction"]
-                ) * fixed_delta
+                corrected = (
+                    raw_tip - (1.0 - scenario["residual_fraction"]) * fixed_delta
+                )
                 delta = corrected - centers[target_index]
                 offsets.append([float(delta[0]), float(delta[1])])
             rows.append(
@@ -983,9 +1026,7 @@ def landing_prepass(fixture: dict[str, Any], *, workspace: Path) -> dict[str, An
 
 
 def _mocap_positions(np: Any, x_m: Any, y_m: Any, z_m: Any) -> Any:
-    return np.stack((x_m, y_m, z_m), axis=1).reshape(len(x_m), 1, 3).astype(
-        np.float32
-    )
+    return np.stack((x_m, y_m, z_m), axis=1).reshape(len(x_m), 1, 3).astype(np.float32)
 
 
 def run_smoke_worker(
@@ -1017,9 +1058,7 @@ def run_smoke_worker(
             "expected_world_count": len(control["control"]["landing_sample_indices"]),
         }
     )
-    batch_rows = (
-        None if control is None else control["control"].get("batch_rows")
-    )
+    batch_rows = None if control is None else control["control"].get("batch_rows")
     vectorized_world_controls = bool(
         control is not None
         and control["control"].get("vectorized_world_controls", False)
@@ -1039,8 +1078,9 @@ def run_smoke_worker(
         ):
             raise ValueError("vectorized Stage A batch mixes target mechanisms")
     catalog = json.loads(
-        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     targets = _target_records(catalog)
     target = next(row for row in targets if row["target_id"] == smoke["target_id"])
@@ -1055,27 +1095,30 @@ def run_smoke_worker(
         }
         expected_extent = tuple(float(value) for value in target["half_extent_mm"])
         if any(
-            tuple(float(value) for value in row["half_extent_mm"])
-            != expected_extent
+            tuple(float(value) for value in row["half_extent_mm"]) != expected_extent
             for row in batch_targets.values()
         ):
             raise ValueError("Stage A batch mixes key geometry classes")
     profile = next(
-        row for row in physical_profiles(fixture) if row["profile_id"] == smoke["profile_id"]
+        row
+        for row in physical_profiles(fixture)
+        if row["profile_id"] == smoke["profile_id"]
     )
-    tip = next(row for row in tip_geometries(fixture) if row["tip_id"] == smoke["tip_id"])
+    tip = next(
+        row for row in tip_geometries(fixture) if row["tip_id"] == smoke["tip_id"]
+    )
     recipes = {row["recipe_index"]: row for row in recipe_rows(fixture)}
-    if (
-        not vectorized_world_controls
-        and (len(smoke["recipe_indices"]) != 1 or len(smoke["scenario_ids"]) != 1)
+    if not vectorized_world_controls and (
+        len(smoke["recipe_indices"]) != 1 or len(smoke["scenario_ids"]) != 1
     ):
         raise ValueError("bounded smoke must contain one recipe and scenario")
     recipe = recipes[smoke["recipe_indices"][0]]
     if control is not None:
         recipe = {**recipe, **control["control"]["recipe_override"]}
     landing = json.loads(
-        _resolve(workspace, execution["bindings"]["landing_prepass"]["path"])
-        .read_text(encoding="utf-8")
+        _resolve(workspace, execution["bindings"]["landing_prepass"]["path"]).read_text(
+            encoding="utf-8"
+        )
     )
     landing_lookup = {
         (row["target_id"], row["scenario_id"]): row["offset_xy_mm"]
@@ -1154,8 +1197,7 @@ def run_smoke_worker(
     )
     if switch_window is not None:
         if set(switch_window) != {"minimum", "maximum"} or not (
-            0.0 <= float(switch_window["minimum"])
-            <= float(switch_window["maximum"])
+            0.0 <= float(switch_window["minimum"]) <= float(switch_window["maximum"])
         ):
             raise ValueError("invalid switch closure window")
     if tool_compliance_model not in {None, "NESTED_MOCAP_JOINT", "SERIES_QUASISTATIC"}:
@@ -1182,6 +1224,9 @@ def run_smoke_worker(
         or target["half_extent_mm"],
         float(catalog["keyboard"]["pitch_mm"]),
         tool_compliance if tool_compliance_model == "NESTED_MOCAP_JOINT" else None,
+        control["control"].get("physical_neighborhood")
+        if control is not None
+        else None,
     )
     overall_started = time.perf_counter()
     model = mujoco.MjModel.from_xml_string(xml)
@@ -1222,7 +1267,17 @@ def run_smoke_worker(
             break
     settle_pass = settled_count >= settle["consecutive_steps"]
     rest_qpos = np.asarray(data.qpos.numpy(), dtype=np.float64)
-    center_joint = 4
+    center_joint = int(
+        control["control"].get("target_joint_index", 4) if control is not None else 4
+    )
+    key_joint_count = (
+        len(
+            control["control"].get("physical_neighborhood", [])
+            if control is not None
+            else []
+        )
+        or 9
+    )
     values = profile["values"]
     actuation_mm = values["travel_mm"] * values["actuation_fraction"]
     bottom_mm = values["travel_mm"] * values["bottom_out_fraction"]
@@ -1294,8 +1349,7 @@ def run_smoke_worker(
                     scalar_displacement = press_depth_mm[0]
                 elif elapsed < motion_s[0]:
                     scalar_displacement = press_depth_mm[0] * (
-                        1.0
-                        - (elapsed - approach_s[0] - dwell_s[0]) / release_s[0]
+                        1.0 - (elapsed - approach_s[0] - dwell_s[0]) / release_s[0]
                     )
                 else:
                     scalar_displacement = 0.0
@@ -1312,9 +1366,7 @@ def run_smoke_worker(
                     ) = series_compliance_displacement(
                         float(displacement[0]),
                         key_stiffness_n_per_mm=values["spring_n_per_mm"],
-                        tool_stiffness_n_per_mm=tool_compliance[
-                            "stiffness_n_per_mm"
-                        ],
+                        tool_stiffness_n_per_mm=tool_compliance["stiffness_n_per_mm"],
                         tool_travel_mm=tool_compliance["travel_mm"],
                     )
                     effective_displacement = np.full(nworld, effective_scalar)
@@ -1328,9 +1380,7 @@ def run_smoke_worker(
                         compliance_travel,
                     )
                     effective_displacement = displacement - modeled_compression_mm
-                    modeled_tool_force_n = (
-                        compliance_stiffness * modeled_compression_mm
-                    )
+                    modeled_tool_force_n = compliance_stiffness * modeled_compression_mm
             z_m = (
                 tip_extent_mm
                 - rest_qpos[:, center_joint] * 1000.0
@@ -1351,22 +1401,27 @@ def run_smoke_worker(
             active_run = np.where(now_active, active_run + 1, 0)
             maximum_active_run = np.maximum(maximum_active_run, active_run)
             active = now_active
-            neighbor_contact |= np.max(np.delete(relative_mm[:, :9], center_joint, axis=1), axis=1) > execution[
-                "numerical_protocol"
-            ]["neighbor_contact_displacement_mm"]
-            peak_mm = np.maximum(peak_mm, center_mm)
-            required = (
-                values["spring_n_per_mm"] * np.maximum(center_mm, 0.0)
-                + values["damping_n_s_per_mm"]
-                * np.maximum(qvel[:, center_joint] * 1000.0, 0.0)
+            neighbor_columns = np.delete(
+                relative_mm[:, :key_joint_count], center_joint, axis=1
             )
+            if neighbor_columns.shape[1]:
+                neighbor_contact |= (
+                    np.max(neighbor_columns, axis=1)
+                    > execution["numerical_protocol"][
+                        "neighbor_contact_displacement_mm"
+                    ]
+                )
+            peak_mm = np.maximum(peak_mm, center_mm)
+            required = values["spring_n_per_mm"] * np.maximum(center_mm, 0.0) + values[
+                "damping_n_s_per_mm"
+            ] * np.maximum(qvel[:, center_joint] * 1000.0, 0.0)
             peak_force = np.maximum(peak_force, required)
             if tool_compliance_model == "NESTED_MOCAP_JOINT":
                 compression_mm = np.maximum(relative_mm[:, 9], 0.0)
-                tool_force = (
-                    tool_compliance["stiffness_n_per_mm"] * compression_mm
-                    + tool_compliance["damping_n_s_per_mm"]
-                    * np.maximum(qvel[:, 9] * 1000.0, 0.0)
+                tool_force = tool_compliance[
+                    "stiffness_n_per_mm"
+                ] * compression_mm + tool_compliance["damping_n_s_per_mm"] * np.maximum(
+                    qvel[:, 9] * 1000.0, 0.0
                 )
                 peak_tool_compression_mm = np.maximum(
                     peak_tool_compression_mm, compression_mm
@@ -1376,9 +1431,7 @@ def run_smoke_worker(
                 peak_tool_compression_mm = np.maximum(
                     peak_tool_compression_mm, modeled_compression_mm
                 )
-                peak_tool_force_n = np.maximum(
-                    peak_tool_force_n, modeled_tool_force_n
-                )
+                peak_tool_force_n = np.maximum(peak_tool_force_n, modeled_tool_force_n)
             bottom_overflow |= qpos[:, center_joint] * 1000.0 > (
                 bottom_mm
                 + execution["numerical_protocol"]["bottom_out_numerical_tolerance_mm"]
@@ -1456,9 +1509,7 @@ def run_smoke_worker(
         if vectorized_world_controls:
             row["compliance_id"] = identity["compliance_id"]
         if tool_compliance is not None or world_compliance is not None:
-            row["peak_tool_compression_mm"] = float(
-                peak_tool_compression_mm[index]
-            )
+            row["peak_tool_compression_mm"] = float(peak_tool_compression_mm[index])
             row["peak_tool_force_n"] = float(peak_tool_force_n[index])
         row["admitted"] = bool(
             row["actuation_count"] == 1
@@ -1501,9 +1552,7 @@ def run_smoke_worker(
             "minimum_two_sided_margin_mm": min(
                 row["minimum_depth_margin_mm"] for row in rows
             ),
-            "maximum_midpoint_error_mm": max(
-                row["midpoint_error_mm"] for row in rows
-            ),
+            "maximum_midpoint_error_mm": max(row["midpoint_error_mm"] for row in rows),
             "selection_priority": (
                 "MAXIMIZE_WORST_CASE_MINIMUM_DEPTH_MARGIN_THEN_MINIMIZE_"
                 "WORST_CASE_MIDPOINT_ERROR"
@@ -1563,9 +1612,10 @@ def compare_receipts(
 ) -> dict[str, Any]:
     if left.get("device") == right.get("device"):
         raise ValueError("cross-GPU comparison requires distinct devices")
-    if left.get("fixture_sha256") != fixture["fixture_sha256"] or right.get(
-        "fixture_sha256"
-    ) != fixture["fixture_sha256"]:
+    if (
+        left.get("fixture_sha256") != fixture["fixture_sha256"]
+        or right.get("fixture_sha256") != fixture["fixture_sha256"]
+    ):
         raise ValueError("receipt fixture identity mismatch")
     left_rows = {row["row_id"]: row for row in left.get("rows", [])}
     right_rows = {row["row_id"]: row for row in right.get("rows", [])}
@@ -1608,14 +1658,18 @@ def _stack() -> dict[str, Any]:
     )
     return {
         "platform": platform.platform(),
-        "gpus": [line.strip() for line in completed.stdout.splitlines() if line.strip()],
+        "gpus": [
+            line.strip() for line in completed.stdout.splitlines() if line.strip()
+        ],
     }
 
 
 def _write(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     value["receipt_sha256"] = _sha_value(value)
-    path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> int:
@@ -1693,7 +1747,11 @@ def main() -> int:
             json.loads(args.right.read_text(encoding="utf-8")),
         )
     _write(args.output, result)
-    print(json.dumps({"status": result.get("status", "COMPLETE"), "output": str(args.output)}))
+    print(
+        json.dumps(
+            {"status": result.get("status", "COMPLETE"), "output": str(args.output)}
+        )
+    )
     return 0
 
 

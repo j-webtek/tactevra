@@ -11,6 +11,7 @@ import re
 from typing import Any
 
 from integrations.mujoco_warp import key_press_physics_probe as probe
+from ai.sim import keyboard_physical_neighborhoods as neighborhoods
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -36,9 +37,7 @@ def load_fixture(path: Path) -> dict[str, Any]:
     if value_sha(fixture) != claimed:
         raise ValueError("fixture self-hash mismatch")
     fixture["fixture_sha256"] = claimed
-    if fixture["physical_authority"] is not False or any(
-        fixture["counters"].values()
-    ):
+    if fixture["physical_authority"] is not False or any(fixture["counters"].values()):
         raise ValueError("authority violation")
     for binding in fixture["bindings"].values():
         source = Path(binding["path"])
@@ -65,15 +64,17 @@ def load_bound(fixture: dict[str, Any]):
         execution=execution,
     )
     mechanism = json.loads(
-        (ROOT / fixture["bindings"]["mechanisms"]["path"]).read_text(
-            encoding="utf-8"
-        )
+        (ROOT / fixture["bindings"]["mechanisms"]["path"]).read_text(encoding="utf-8")
     )
     claimed = mechanism.pop("fixture_sha256")
     if probe._sha_value(mechanism) != claimed:
         raise ValueError("mechanism fixture self-hash mismatch")
     mechanism["fixture_sha256"] = claimed
-    return campaign, execution, staged, mechanism
+    neighborhood_fixture = neighborhoods.load_fixture(
+        ROOT / fixture["bindings"]["physical_neighborhoods"]["path"]
+    )
+    physical = neighborhoods.deduplicated_neighborhoods(neighborhood_fixture)
+    return campaign, execution, staged, mechanism, physical
 
 
 def compliance_options(staged: dict[str, Any]) -> list[dict[str, Any]]:
@@ -95,20 +96,25 @@ def compliance_options(staged: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def run_device(fixture: dict[str, Any], device: str) -> dict[str, Any]:
-    campaign, execution, staged, mechanism = load_bound(fixture)
+    campaign, execution, staged, mechanism, physical = load_bound(fixture)
     smoke = fixture["smoke"]
     stabilized = set(
         mechanism["mechanism_classes"]["STABILIZED_UNMEASURED"]["target_ids"]
     )
     wide_unknown = set(
-        mechanism["mechanism_classes"][
-            "WIDE_UNSTABILIZED_GEOMETRY_UNMEASURED"
-        ]["target_ids"]
+        mechanism["mechanism_classes"]["WIDE_UNSTABILIZED_GEOMETRY_UNMEASURED"][
+            "target_ids"
+        ]
     )
     if smoke["target_id"] in stabilized | wide_unknown:
         raise ValueError("throughput representative is not an admitted ordinary key")
     rows = probe.stage_a_vectorized_ordinary_batch_rows(
         campaign, staged, target_id=smoke["target_id"]
+    )
+    physical_neighborhood = next(
+        row
+        for row in physical["neighborhoods"]
+        if row["target_id"] == smoke["target_id"]
     )
     control = {
         "fixture_sha256": fixture["fixture_sha256"],
@@ -120,17 +126,15 @@ def run_device(fixture: dict[str, Any], device: str) -> dict[str, Any]:
             "tip_id": smoke["tip_id"],
             "scenario_id": rows[0]["scenario_id"],
             "base_recipe_index": rows[0]["recipe_index"],
-            "landing_sample_indices": [
-                row["landing_sample_index"] for row in rows
-            ],
+            "landing_sample_indices": [row["landing_sample_index"] for row in rows],
             "batch_rows": rows,
             "vectorized_world_controls": True,
             "recipe_override": {},
             "tool_compliance_model": "SERIES_QUASISTATIC",
             "tool_compliance_options": compliance_options(staged),
-            "physical_keycap_half_extent_mm": smoke[
-                "physical_keycap_half_extent_mm"
-            ],
+            "physical_keycap_half_extent_mm": smoke["physical_keycap_half_extent_mm"],
+            "physical_neighborhood": physical_neighborhood["members"],
+            "target_joint_index": physical_neighborhood["target_joint_index"],
             "switch_closure_window_ms": smoke["switch_closure_window_ms"],
         },
     }
@@ -175,10 +179,7 @@ def compare(
 ) -> dict[str, Any]:
     if left["device"] == right["device"]:
         raise ValueError("distinct devices required")
-    if any(
-        row["fixture_sha256"] != fixture["fixture_sha256"]
-        for row in (left, right)
-    ):
+    if any(row["fixture_sha256"] != fixture["fixture_sha256"] for row in (left, right)):
         raise ValueError("fixture identity mismatch")
     batch_count = fixture["population"]["ordinary_compiled_batch_count"]
     device_batch_counts = {
@@ -194,10 +195,13 @@ def compare(
         for row in (left, right)
     }
     projected_hours = max(projected.values())
-    admitted = all(
-        row["status"] == "PASS_VECTORIZED_ORDINARY_DEVICE_SMOKE"
-        for row in (left, right)
-    ) and projected_hours <= fixture["decision"]["maximum_two_gpu_hours"]
+    admitted = (
+        all(
+            row["status"] == "PASS_VECTORIZED_ORDINARY_DEVICE_SMOKE"
+            for row in (left, right)
+        )
+        and projected_hours <= fixture["decision"]["maximum_two_gpu_hours"]
+    )
     result = {
         "schema": "tactevra.ws2_stage_a_vectorized_throughput_comparison.v1",
         "scope": fixture["scope"],
@@ -211,9 +215,7 @@ def compare(
             else "STOP_ORDINARY_VECTORIZED_THROUGHPUT"
         ),
         "stage_a_launch_authorized": False,
-        "blocked_special_targets": fixture["population"][
-            "blocked_special_targets"
-        ],
+        "blocked_special_targets": fixture["population"]["blocked_special_targets"],
         "hardware_write_count": 0,
         "physical_movement_count": 0,
         "physical_authority": False,

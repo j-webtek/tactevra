@@ -27,16 +27,23 @@ from rocell_ai.simulation_program_cpu import (
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/simulation_program_cpu_fixtures_v1.json"
 WS2_FIXTURE = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v1.json"
-WS2_EXECUTION = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v1.json"
-WS2_FIXTURE_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json"
-WS2_EXECUTION_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json"
+WS2_EXECUTION = (
+    ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v1.json"
+)
+WS2_FIXTURE_V2 = (
+    ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json"
+)
+WS2_EXECUTION_V2 = (
+    ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json"
+)
 WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json"
 WS2_STAGED_V2 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v2.json"
 WS2_STAGED_V3 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v3.json"
-WS2_MECHANISMS = ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
+WS2_MECHANISMS = (
+    ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
+)
 WS2_VECTOR_FIXTURE = (
-    ROOT
-    / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v1_1.json"
+    ROOT / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2.json"
 )
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",
@@ -60,11 +67,18 @@ def test_fixture_is_section_hashed_and_zero_authority():
     assert fixture["runtime_stack"]["nvidia_driver"] == "595.97"
     assert fixture["runtime_stack"]["warp"] == "1.17.0"
     assert set(fixture["counters"].values()) == {0}
-    assert set(fixture["sections"]) == {"workstream_1_cpu", "workstream_2",
-                                         "workstream_3", "workstream_4",
-                                         "workstream_5", "workstream_6",
-                                         "workstream_5_attribution", "collision_candidate",
-                                         "phase0_collision_mode", "phase0_landing_sensors"}
+    assert set(fixture["sections"]) == {
+        "workstream_1_cpu",
+        "workstream_2",
+        "workstream_3",
+        "workstream_4",
+        "workstream_5",
+        "workstream_6",
+        "workstream_5_attribution",
+        "collision_candidate",
+        "phase0_collision_mode",
+        "phase0_landing_sensors",
+    }
 
 
 def test_candidate_mode_is_separate_and_installed_rejection_remains():
@@ -90,7 +104,7 @@ def test_recovery_fails_closed_and_calibration_preserves_failures():
 def test_continuous_pair_enumeration_and_mid_motion_mask_sentinels():
     fixture = load_program_fixture(FIXTURE)
     policy = continuous_policy_smoke(fixture)
-    assert policy["ordered_pair_count"] == 51 ** 2
+    assert policy["ordered_pair_count"] == 51**2
     assert policy["recommended_policy"] is None
     masks = mid_motion_mask_smoke(fixture)
     assert masks["positive_arm_mask_overlap"] is True
@@ -102,7 +116,11 @@ def test_ws5_attribution_and_collision_candidate_remain_exploratory():
     fixture = load_program_fixture(FIXTURE)
     attribution = calibration_attribution(fixture)
     assert attribution["insufficient_cell_count"] == 15
-    assert attribution["factor_ranking"][0] in {"noise_mm", "initial_bias_mm", "target_fraction"}
+    assert attribution["factor_ranking"][0] in {
+        "noise_mm",
+        "initial_bias_mm",
+        "target_fraction",
+    }
     candidate = collision_candidate(fixture, workspace=ROOT)
     assert len(candidate["robot_bodies"]) == 7
     assert len(candidate["workcell_bodies"]) == 6
@@ -115,7 +133,10 @@ def test_combined_receipt_is_deterministic_and_gpu_blocked():
     first = run_all(FIXTURE)
     second = run_all(FIXTURE)
     assert first == second
-    assert gpu_readiness(load_program_fixture(FIXTURE))["gpu_execution_authorized"] is False
+    assert (
+        gpu_readiness(load_program_fixture(FIXTURE))["gpu_execution_authorized"]
+        is False
+    )
     assert not any(first["counters"].values())
     json.dumps(first, allow_nan=False)
 
@@ -166,7 +187,18 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
     assert execution["smoke"]["devices"] == ["cuda:0", "cuda:1"]
     assert staged["stage_a_coarse"]["expected_worlds"] == 4_465_152
     assert WS2_PROBE.coarse_recipe_indices(fixture, staged) == [
-        0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
+        0,
+        17,
+        90,
+        47,
+        82,
+        89,
+        6,
+        33,
+        34,
+        71,
+        41,
+        49,
     ]
 
 
@@ -234,22 +266,37 @@ def test_ws2_compliant_stage_a_expands_every_identity_before_gpu_execution():
     assert amended_staged["reference_superset"]["scored_rows"] == (
         original_staged["reference_superset"]["scored_rows"] * 6
     )
-    assert amended_staged["stage_a_coarse"]["landing_sample_indices"] == (
-        original_staged["stage_a_coarse"]["landing_sample_indices"]
+    assert (
+        amended_staged["stage_a_coarse"]["landing_sample_indices"]
+        == (original_staged["stage_a_coarse"]["landing_sample_indices"])
     )
-    assert amended_staged["stage_a_coarse"]["recipe_selection"] == (
-        original_staged["stage_a_coarse"]["recipe_selection"]
+    assert (
+        amended_staged["stage_a_coarse"]["recipe_selection"]
+        == (original_staged["stage_a_coarse"]["recipe_selection"])
     )
-    assert amended_staged["stage_b_refinement"][
-        "maximum_new_recipe_indices_per_boundary"
-    ] == original_staged["stage_b_refinement"][
-        "maximum_new_recipe_indices_per_boundary"
-    ]
-    assert amended_staged["stage_c_confirmation"]["selection"] == (
-        original_staged["stage_c_confirmation"]["selection"]
+    assert (
+        amended_staged["stage_b_refinement"]["maximum_new_recipe_indices_per_boundary"]
+        == original_staged["stage_b_refinement"][
+            "maximum_new_recipe_indices_per_boundary"
+        ]
+    )
+    assert (
+        amended_staged["stage_c_confirmation"]["selection"]
+        == (original_staged["stage_c_confirmation"]["selection"])
     )
     assert WS2_PROBE.coarse_recipe_indices(amended, amended_staged) == [
-        0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
+        0,
+        17,
+        90,
+        47,
+        82,
+        89,
+        6,
+        33,
+        34,
+        71,
+        41,
+        49,
     ]
     assert amended_staged["stage_a_coarse"]["expected_worlds"] == 26_790_912
 
@@ -296,24 +343,32 @@ def test_ws2_debounce_successor_freezes_hold_and_throughput_populations():
     row["partial_press"] = True
     assert WS2_PROBE.primary_failure(row) == "PARTIAL_PRESS"
     throughput = staged["throughput_decision"]
-    assert throughput["full_grid_if"][
-        "projected_two_gpu_wall_hours_at_median_smoke_rate_lte"
-    ] == 12.0
+    assert (
+        throughput["full_grid_if"][
+            "projected_two_gpu_wall_hours_at_median_smoke_rate_lte"
+        ]
+        == 12.0
+    )
     population = staged["stage_a_coarse"]["throughput_selected_compliance"]
     assert population["inside_budget"] == [
-        "k0.0715_t3", "k0.0715_t6", "k0.143_t3",
-        "k0.143_t6", "k0.286_t3", "k0.286_t6",
+        "k0.0715_t3",
+        "k0.0715_t6",
+        "k0.143_t3",
+        "k0.143_t6",
+        "k0.286_t3",
+        "k0.286_t6",
     ]
     assert staged["stage_a_coarse"]["full_compliance_expected_worlds"] == 26_790_912
     assert population["over_budget"] == [
-        "k0.0715_t3", "k0.0715_t6", "k0.286_t3", "k0.286_t6"
+        "k0.0715_t3",
+        "k0.0715_t6",
+        "k0.286_t3",
+        "k0.286_t6",
     ]
     assert staged["stage_a_coarse"]["coarse_compliance_expected_worlds"] == 17_860_608
-    assert staged["stage_b_refinement"][
-        "compliance_refinement_if_stage_a_over_budget"
-    ]["omitted_stage_a_combinations"] == [
-        "k0.143_t3", "k0.143_t6"
-    ]
+    assert staged["stage_b_refinement"]["compliance_refinement_if_stage_a_over_budget"][
+        "omitted_stage_a_combinations"
+    ] == ["k0.143_t3", "k0.143_t6"]
     assert population["selection_made_only_from_frozen_smoke_throughput"] is True
     assert staged["physical_authority"] is False
     assert not any(staged["counters"].values())
@@ -327,24 +382,28 @@ def test_ws2_stage_a_batches_are_homogeneous_and_exact():
     staged = WS2_PROBE.load_staged_fixture(
         WS2_STAGED_V3, workspace=ROOT, parent=fixture, execution=execution
     )
-    batches = WS2_PROBE.stage_a_homogeneous_batches(
-        fixture, staged, workspace=ROOT
-    )
+    batches = WS2_PROBE.stage_a_homogeneous_batches(fixture, staged, workspace=ROOT)
     assert len(batches) == 65_664
     assert sum(row["world_count"] for row in batches) == 17_860_608
     assert sorted({row["world_count"] for row in batches}) == [32, 672, 832]
     assert {row["tool_compliance"]["compliance_id"] for row in batches} == {
-        "k0.0715_t3", "k0.0715_t6", "k0.286_t3", "k0.286_t6"
+        "k0.0715_t3",
+        "k0.0715_t6",
+        "k0.286_t3",
+        "k0.286_t6",
     }
     assert all(
         len({tuple(row["half_extent_mm"])}) == 1
         and row["world_count"] == len(row["rows"])
         for row in batches
     )
-    assert abs(
-        sum(row["world_count"] for row in batches if row["device"] == "cuda:0")
-        - sum(row["world_count"] for row in batches if row["device"] == "cuda:1")
-    ) <= 832
+    assert (
+        abs(
+            sum(row["world_count"] for row in batches if row["device"] == "cuda:0")
+            - sum(row["world_count"] for row in batches if row["device"] == "cuda:1")
+        )
+        <= 832
+    )
 
 
 def test_ws2_key_mechanisms_separate_safe_regions_from_physical_geometry():
@@ -362,14 +421,12 @@ def test_ws2_key_mechanisms_separate_safe_regions_from_physical_geometry():
     stabilized = fixture["mechanism_classes"]["STABILIZED_UNMEASURED"]
     assert stabilized["target_ids"] == ["SHIFT", "ENTER", "SPACE"]
     assert stabilized["prospective_target_ids"] == ["BACKSPACE"]
-    assert fixture["known_physical_keycap_top_mm"]["SHIFT"]["value"] == [
-        37.76, 14.8
-    ]
+    assert fixture["known_physical_keycap_top_mm"]["SHIFT"]["value"] == [37.76, 14.8]
     assert fixture["known_physical_keycap_top_mm"]["ENTER"]["value"] is None
     assert fixture["known_physical_keycap_top_mm"]["SPACE"]["value"] is None
-    assert fixture["mechanism_classes"][
-        "WIDE_UNSTABILIZED_GEOMETRY_UNMEASURED"
-    ]["target_ids"] == ["TAB"]
+    assert fixture["mechanism_classes"]["WIDE_UNSTABILIZED_GEOMETRY_UNMEASURED"][
+        "target_ids"
+    ] == ["TAB"]
     assert fixture["stage_a_partition"]["missing_physical_geometry"] == "STOP"
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())
@@ -403,14 +460,10 @@ def test_ws2_vectorized_ordinary_batch_keeps_mechanism_compiled():
 def test_ws2_vectorized_throughput_fixture_stays_non_authorizing():
     fixture = WS2_VECTOR_RUNNER.load_fixture(WS2_VECTOR_FIXTURE)
     assert fixture["population"]["worlds_per_compiled_batch"] == 1_536
-    assert fixture["population"]["ordinary_compiled_batch_count"] == 10_716
-    assert fixture["population"]["ordinary_world_count"] == 16_459_776
-    assert fixture["population"]["blocked_special_targets"] == [
-        "SHIFT",
-        "ENTER",
-        "SPACE",
-        "TAB",
-    ]
+    assert fixture["population"]["ordinary_compiled_batch_count"] == 10_260
+    assert fixture["population"]["ordinary_world_count"] == 26_790_912
+    assert fixture["population"]["physical_neighborhood_signature_count"] == 45
+    assert fixture["population"]["blocked_special_targets"] == []
     left = {
         "device": "cuda:0",
         "fixture_sha256": fixture["fixture_sha256"],
