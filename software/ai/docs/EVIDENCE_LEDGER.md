@@ -11734,3 +11734,9 @@ rewriting history. New entries must use a unique evidence ID.
 - Metrics: fresh target `EQUAL`; 18 cells and 1,152 worlds per GPU; five cells pass all 64 landings; maximum cross-GPU delta `0.0`. Passing cells match the center effective-depth family, with 2-4 ms maximum hold and minimum passing two-sided margin `0.0031467625405641186` mm.
 - Decision: the explicit frozen v4 rule is satisfied, so exploratory Stage A may now execute. This authorizes only the predeclared simulation search; it does not select a physical compliance, tip, tool, or press recipe. Keyboard outcomes must be reported by geometry and phone contact remains a separate workstream.
 - Stack, limitations, and authority: two RTX 3090 GPUs, driver 595.97, MuJoCo/MuJoCo Warp 3.14.0, Warp 1.18.0; Isaac not invoked. Quasistatic, single-target, thin-margin simulation evidence only. Hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
+
+### E-20261005-INT-WS2-STAGE-A-COMPLIANCE-CLAIM-001 - claim compliant Stage A identity amendment
+
+- Stage/lane and base: S3 AI/model plus simulation on `issue/190-isaac-sim-host`; base `aa45b061`. Claim the next bounded increment before implementation: amend the frozen Stage A identity/sharding contract so every coarse identity crosses the declared compliant-tool stiffness `[0.0715,0.143,0.286] N/mm` and travel `[3,6] mm` ranges.
+- Stop rule: do not execute the older 4,465,152-world Stage A because it omits tool compliance. Freeze the enlarged counts, deterministic shard identity, metrics, and decision rules before GPU execution; preserve the old fixture as historical evidence. Phone contact remains separate.
+- Authority: planning only. GPU jobs 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
