@@ -11248,6 +11248,8 @@ rewriting history. New entries must use a unique evidence ID.
 - Planned frozen questions: identify which Stage C endpoint identities and tool axial zones produce each contact; compare conservative boxes with controlled station meshes without promoting either to installed geometry; and screen E/F using WS2's frozen 11-15 mm keycap width/height range so only target-key top contact during PRESS is admitted and every neighbor contact remains a stop.
 - Authority: execution has not started. GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Official readiness and evaluation status are unchanged.
 
+Claim addendum (2026-10-04): the claim entered Git in full commit `95c34b9352f56b1adc380f0bcdfc3c37d9fb011b`. The prior passive-tool Stage C evidence exercised only target `G`; the successor must broaden Stage C to all 46 bound keyboard targets before making any per-target inference.
+
 ### E-20261004-INT-656 — low-noise shortcut and dark-cable boundary audit
 
 - Stage/lane: S2 AI/model diagnostics under the exact v1.4 scoring claim `296671f1dc4f8a4fce352f0235f649e8ddad24af` and guard implementation `61e1af209cf7660221571d2427ab2067324dde51`. Only the completed low-noise development report and the already-produced training-free baseline were read; moderate/high scoring and evaluation were not opened by this audit.
