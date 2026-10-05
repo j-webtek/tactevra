@@ -309,3 +309,10 @@ At this change the repository contains 6,275 tracked files, 649,591,121 logical
 bytes, and 4,890,152 governed duplicate bytes. The file-count ceiling advances
 from 6,272 to 6,275 for those reviewed paths only; the logical-byte and
 duplicate-byte ceilings do not change.
+
+The stage-two pre-camera runtime reconciliation retains the reviewed runtime,
+session, shadow-evidence, permit-readiness, and observed-entry qualification
+sources alongside the later release and Isaac Sim evidence already on `main`.
+The reconciled tree contains 6,362 tracked files and 651,290,447 logical bytes;
+the reviewed file-count ceiling advances to 6,365 while the logical-byte and
+duplicate-byte ceilings remain unchanged.

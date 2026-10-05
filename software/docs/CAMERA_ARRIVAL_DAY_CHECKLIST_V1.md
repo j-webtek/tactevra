@@ -254,6 +254,13 @@ accepted review, immutable hash, and downstream-consumer receipt. Completion
 means the evidence is ready for offline qualification review. It does not mean
 the arm may move or type.
 
+Continue from that offline-review boundary using
+[Camera-to-First-Key Commissioning Runbook V1](CAMERA_TO_FIRST_KEY_COMMISSIONING_RUNBOOK_V1.md).
+Its machine-readable fixture-replacement registry connects the camera-arrival
+evidence to the ARM-149-ARM-155 observed-pose, collision, dynamics, tracking,
+settling, and telemetry-coverage chain. Camera-arrival completion alone cannot
+substitute for any of those installed physical qualifications.
+
 ## Retain and resume one arrival session
 
 Create the manifest once with caller-selected candidate identities and a new

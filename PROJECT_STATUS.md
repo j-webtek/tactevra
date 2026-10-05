@@ -830,6 +830,232 @@ exact-cache hit, while calibration/evidence mismatch and lifecycle transitions
 remain complete-solve-only. One host observation improved from 2.3158146 s cold
 to 0.3004444 s warm, but this is diagnostic software timing—not final-camera,
 controller, device-effect, or physical typing evidence.
+ARM-136 broadens the same integration to five mixed actual-emitter sequences in
+one FIFO service generation. Both cold and warm rounds completed all requests in
+order. The cold round reused 138 of 186 exact solver inputs and fully solved 48;
+the warm round reused 186 of 186. Recorded cold p50/p95 were
+0.2685515/1.3913187 seconds, versus 0.1982934/0.2997009 seconds warm. Those are
+five-sample host diagnostics only. They do not establish stable tails,
+controller throughput, physical typing speed, or deployment authority; the
+campaign opened no transport and produced zero hardware writes and movements.
+ARM-137 repeats that workload across 20 isolated cold/prewarmed service pairs.
+All 200 measured requests retained FIFO order and exact cold/warm shadow-receipt
+equivalence. The 100-sample cold p50/p95/p99 were
+0.2736679/1.4014767/1.4241501 seconds; warm values were
+0.1959784/0.3044458/0.3157095 seconds. Each replacement paid the expected cold
+solve cost, each measured warm lane hit 186/186 exact inputs, and the bounded
+cache reported no capacity skips. This strengthens the software case for a
+long-lived qualified service, but it remains synthetic host evidence with no
+controller, physical motion, key contact, or independent device effect.
+ARM-138 now covers the long-lived warm service under bounded disturbances. It
+preserves FIFO completion at the eight-request queue limit, rejects overflow,
+cancels selected work before planning, and rejects three malformed or duplicate
+submissions with zero cache activity. Reload and restart reject stale queued
+requests and retire cache eligibility; no request is automatically retried.
+Only a new explicitly qualified service restores the warm path, and its output
+matches the retained reference receipt. The seven-case result remains synthetic
+and zero-authority, with no controller, transport, hardware write, or movement.
+ARM-139 adds a runtime supervisor so cache eligibility is no longer an implicit
+service detail. Qualified startup is `WARM`; known mismatch is
+`FULL_SOLVE_ONLY`; reload, restart, and invalidation are
+`REQUALIFICATION_REQUIRED`. New submissions are blocked in the latter state,
+stale work is not retried, and explicit fallback cannot retain exact reuse. A
+separately qualified replacement restores `WARM` and reproduces the reference
+plan. This remains shadow-only software scaffolding with no controller or
+physical authority.
+ARM-140 places the canonical model-command bytes behind that supervisor. The
+gateway returns signed `ADMITTED` or `REJECTED` receipts, distinguishes queue
+pressure, request bounds, malformed input, and requalification blockers, and
+never permits an automatic retry. Its retained eight-case campaign preserves
+the exact reference shadow result through warm admission, complete-solve
+fallback, and qualified replacement. The gateway remains deliberately detached
+from every executor, controller, and transport: it proves safe model-to-planner
+admission, not physical dispatch or typing.
+ARM-141 adds the bounded command-session ledger above that gateway. Every
+retained request now has one mission identity, ingress fingerprint, admission
+receipt, and hash-chained terminal shadow outcome. Identical resubmission is an
+idempotent lookup; changed reuse of the same request ID fails closed. Completion,
+cancellation, stale-generation rejection, admission rejection, capacity
+exhaustion, and terminal lookup are all retained in an eight-case campaign.
+This resolves caller-side outcome ambiguity only; the ledger remains detached
+from execution, transport, controller writes, and physical movement.
+ARM-142 seals the completed session, original admission, terminal service
+receipt, and detailed shadow-planning receipt into one deterministic execution-
+handoff candidate. It preserves the exact execution-plan, trajectory, IK,
+schedule, and collision-intake hashes but explicitly remains blocked on
+installed collision evidence, fresh observed/controller state, a one-use
+permit, and independent effect verification. Cross-request lineage swaps,
+noncompleted sessions, and authority tampering fail closed. The candidate is
+not eligible for an executor and creates no permit or controller command.
+ARM-143 retains the exact full shadow-planning receipt inside the bounded
+runtime before `SHADOW_COMPLETED` can be reported. Retrieval requires both the
+request identity and terminal content hash; repeat reads return the same
+canonical artifact without re-planning, while changed replacement, wrong hash,
+unknown request, and capacity overflow fail closed. Canceled and stale requests
+retain no artifact. This closes the caller-side reconstruction gap used by
+ARM-142 but remains an in-memory, zero-authority store with no executor,
+controller, transport, automatic retry, hardware write, or movement.
+The retained eight-case campaign was generated from clean framework commit
+`69ef09bab0b62cceb2ab78b35e4f3c733137fd8d`; the governed offline matrix passes
+863 tests after its evidence pin is enabled.
+ARM-144 adds one canonical ledger-owned assembly API above ARM-143. A caller
+provides only the completed request ID; the assembler retrieves the signed
+session, admission, terminal service receipt, and exact retained shadow
+artifact, then returns the existing blocked ARM-142 candidate without running
+the planner again. Queued, canceled, stale, rejected, and unknown requests fail
+closed. Candidate reconstruction remains available after supervisor
+invalidation for audit, but never becomes permit- or executor-eligible.
+Its retained eight-case campaign was generated from clean framework commit
+`5fb4801956c800dba75c56722911acaf99493fb2`; the governed offline matrix now
+passes 873 tests after evidence pinning.
+ARM-145 closes the materialization gap discovered before permit review. The
+runtime now retains the actual execution-plan, trajectory, IK-screen,
+joint-schedule, and collision-intake documents—not only their hashes—and binds
+all five back to the terminal shadow receipt. The bundle remains explicitly
+`SYNTHETIC_OFFLINE_SHADOW_ONLY`, is not permit-review-ready, and preserves the
+installed-collision, fresh observed/controller state, and independent-verifier
+requirements. Incomplete requests produce no bundle; completed materialization
+remains immutable and audit-readable after runtime invalidation.
+The retained eight-case campaign is
+[`typing_shadow_materialization_campaign_v1.json`](software/ai/eval/typing_shadow_materialization_campaign_v1.json),
+generated from clean framework commit
+`81d25e1a06484b7c89f6048e5795c8372769dcbb`. It proves exact five-stage
+retention, repeat and post-invalidation retrieval, content-tamper rejection,
+and absence for queued, canceled, stale, and unknown requests. The governed
+offline matrix now passes 883 tests after evidence pinning.
+ARM-146 adds a deterministic, non-dispatching readiness map between that
+retained batch-level evidence and the existing per-action physical review
+contracts. It confirms the three satisfied shadow prerequisites, then reports
+eight exact blockers and their owning adapters. The current report is always
+blocked: it refuses to accept caller-supplied booleans or hashes as substitutes
+for typed physical-original evidence, and cannot issue a review, permit, wire
+command, or hardware access. This prevents ARM-145's synthetic materialization
+from being accidentally promoted into execution eligibility. The governed
+offline matrix passes 887 tests with ARM-146 included.
+ARM-147 implements the first typed prerequisite adapter. It binds one fresh
+`ObservedPlannerStartState` and one independently approved installed-controller
+qualification to the retained plan's exact calibration and controller session.
+Only the fresh-observed-state and fresh-controller blockers are resolved; six
+model, trajectory, collision, verifier, and per-action blockers remain. The
+sealed binding is still ineligible for review, permit, encoding, or execution.
+The governed offline matrix passes 890 tests with ARM-147 included.
+
+ARM-148 now converts that authenticated fresh state into the exact seed required
+for deterministic trajectory re-screening. The seed binds the retained request
+and materialization, ARM-147 binding, active build and calibration snapshots,
+controller session, freshness window, and measured five-joint pose. It truthfully
+declares physical-feedback provenance while declaring IK and collision incomplete
+and emitting no controller or wire commands. This corrects an ordering hazard:
+the synthetic shadow collision intake cannot be promoted into installed
+continuous-collision evidence. A future measured-trajectory adapter must first
+re-screen the retained route from this observed seed, then qualify installed
+geometry and measured dynamics before any per-action review can begin.
+The governed offline matrix passes 893 tests with ARM-148 included.
+
+ARM-149 now re-screens the retained Cartesian route through the unchanged
+deterministic IK implementation using the ARM-148 measured joint seed. It
+reconstructs and byte-compares the retained execution and trajectory plans,
+binds the resulting joint sequence to the active build, calibration, observed
+state, and controller session, and keeps the original synthetic seed contract
+separate. A passing result establishes bounded numerical IK and joint continuity
+from that seed only. It does not establish a safe physical transition from the
+observed pose into the retained PARK entry, physical dynamics, installed or
+continuous collision clearance, device-effect verification, review, permit, or
+execution eligibility.
+The governed offline matrix passes 896 tests with ARM-149 included.
+
+ARM-150 now expands the authenticated observed joint state through the first
+retained route waypoint (PARK) as a deterministic bounded joint-space sample
+envelope. Every sample is ordered, content-addressed, and constrained by a
+sealed maximum-joint-step policy; the parser also binds the nested ARM-149 seed
+back to the same request, materialization, build, calibration, observed state,
+and controller session. This closes the previously missing *representation* of
+the observed-to-route-entry transition. It does not claim that the transition
+is collision-free or dynamically executable: installed geometry, continuous
+collision screening, physically qualified dynamics, independent effect
+verification, per-action review, permit, and execution remain closed. It emits
+no controller or wire commands and performs no hardware access.
+The governed offline matrix passes 899 tests with ARM-150 included.
+
+ARM-151 now adapts ARM-150's exact observed-to-PARK sample envelope into the
+existing FK-derived installed-collision boundary. It requires the same active
+build and calibration plus an installed collision profile, measured rigid
+attachment transforms, and profile-bound configuration geometry for every
+sample. The resulting report retains the complete FK collision evidence and
+distinguishes collision detection, incomplete evidence, and sample clearance.
+Sample clearance deliberately stops at the continuous-sweep gate: measured
+dynamics, independent effect verification, per-action review, permit, and
+execution remain closed. No controller or wire commands are generated and no
+hardware is accessed. Current passing evidence uses accepted-measured test
+fixtures only; it is not an installed-lab qualification.
+The governed offline matrix passes 902 tests with ARM-151 included.
+
+ARM-152 now evaluates conservative swept-volume envelopes between every
+adjacent ARM-150 entry sample without rerunning model interpretation or the
+ARM-151 discrete FK screen. Rigid-body bounds come from the pinned URDF,
+installed geometry, and exact adjacent joint deltas; every deformable or
+configuration-sampled body requires a measured, installed-profile-bound root
+frame envelope for each sample pair. The result distinguishes clear sweeps,
+envelope collisions, and incomplete evidence while preserving the exact
+observed request/session lineage. Clearance applies only to the supplied bound
+geometry. Global pair-exclusion acceptance, phase-local contact policy,
+installed physical qualification, measured dynamics, effect verification,
+review, permit, and execution remain closed. Current passing evidence is based
+on accepted-measured test fixtures, not lab-installed qualification.
+The governed offline matrix passes 905 tests with ARM-152 included.
+
+ARM-153 now time-scales the exact cached ARM-150 entry samples against a fresh,
+build- and controller-session-bound installed dynamics profile. The resulting
+cadence-aligned schedule deterministically screens planned joint velocity,
+acceleration, and jerk, binds the settling policy, and can be reproduced by the
+strict parser from the sealed samples and profile. This removes dynamics
+calculation from the eventual critical execution path without treating a
+planned schedule as observed behavior. Controller tracking, actual settling,
+continuous-collision proof beyond ARM-152's supplied bounds, effect
+verification, review, permit, and execution remain closed. Passing automated
+evidence uses a physically-qualified-class test fixture, not an installed-lab
+measurement, and produces no controller or wire commands.
+The governed offline matrix passes 908 tests with ARM-153 included.
+
+ARM-154 now binds retained, installed-policy-qualified joint observations to
+every exact ARM-153 scheduled entry sample and to a separate endpoint settling
+window. It checks controller-session/build identity, capture ordering, schedule
+timing error, per-joint tracking error, endpoint position and velocity, and the
+required settling dwell. The strict parser reconstructs the observation policy,
+all retained samples, and the complete analysis, so altered telemetry or timing
+cannot pass through hash resealing. A passing result establishes sampled
+schedule agreement and observed endpoint settling only; it does not establish
+continuous controller tracking, continuous collision clearance, device effect,
+review, permit, or execution eligibility. Current automated evidence uses
+physical-qualified-class fixtures rather than retained installed-lab telemetry,
+and the adapter has no transport or command surface.
+The governed offline matrix passes 911 tests with ARM-154 included.
+
+ARM-155 now qualifies a denser retained joint-telemetry stream across the full
+ARM-153 motion interval. The stream must include the exact scheduled start and
+end, remain strictly ordered, stay within a physically qualified maximum sample
+gap, and agree with linearly interpolated scheduled joint positions under
+per-joint bounds. The strict parser reconstructs every sample and the complete
+coverage analysis, rejecting missing intervals, excessive residuals, crossed
+sessions, and resealed changes. This closes the software contract for bounded
+telemetry coverage while explicitly retaining the continuous-tracking blocker:
+finite samples cannot prove behavior between samples. Collision, device effect,
+review, permit, and execution gates remain closed. Current automated evidence
+uses physical-qualified-class fixtures rather than installed retained exports.
+The governed offline matrix passes 914 tests with ARM-155 included.
+
+ARM-156 now joins the completed PC0-PC18 camera-arrival workflow to the
+ARM-149-ARM-155 observed-entry evidence chain. A machine-readable ten-stage
+registry names each synthetic or accepted-measured-class fixture, its exact
+physical replacement, native source contract, expected status, and prerequisite
+order. The companion camera-to-first-key runbook covers configuration freeze,
+15-slot arrival review, measured epoch and localization, installed collision
+geometry, read-only observed pose, offline entry qualification, one separately
+authorized non-contact run, one independently verified key, expansion order,
+and stop conditions. Registry tests ensure all source boundaries exist,
+dependencies are ordered, and no stage grants camera, controller, movement, or
+physical authority. This is commissioning preparation, not physical evidence.
+The governed offline matrix passes 917 tests with ARM-156 included.
 
 ## How to interpret results
 

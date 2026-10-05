@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/actual_emitter_stability_campaign_v1.schema.json",
+  "title": "RoCell actual-emitter stability campaign v1",
+  "type": "object",
+  "required": ["schema", "campaign_id", "environment", "cycle_count", "samples_per_lane", "cycles", "cold_latency", "warm_latency", "campaign_sha256"],
+  "properties": {
+    "schema": {"const": "rocell.actual_emitter_stability_campaign.v1"},
+    "campaign_id": {"type": "string", "minLength": 1},
+    "environment": {"type": "object"},
+    "cycle_count": {"const": 20},
+    "samples_per_lane": {"const": 100},
+    "cycles": {"type": "array", "minItems": 20, "maxItems": 20},
+    "cold_latency": {"$ref": "#/$defs/latency"},
+    "warm_latency": {"$ref": "#/$defs/latency"},
+    "campaign_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "latency": {
+      "type": "object",
+      "required": ["p50_duration_ns", "p95_duration_ns", "p99_duration_ns", "max_duration_ns"],
+      "additionalProperties": false,
+      "properties": {
+        "p50_duration_ns": {"type": "integer", "minimum": 0},
+        "p95_duration_ns": {"type": "integer", "minimum": 0},
+        "p99_duration_ns": {"type": "integer", "minimum": 0},
+        "max_duration_ns": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
