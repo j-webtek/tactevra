@@ -181,7 +181,7 @@ def test_ws2_runtime_amendment_changes_only_stack_identity():
     assert not any(execution["counters"].values())
 
 
-def test_ws2_staged_runtime_binding_preserves_stage_a_population():
+def test_ws2_compliant_stage_a_expands_every_identity_before_gpu_execution():
     original = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
     original_execution = WS2_PROBE.load_execution_fixture(
         WS2_EXECUTION, workspace=ROOT, parent=original
@@ -200,10 +200,6 @@ def test_ws2_staged_runtime_binding_preserves_stage_a_population():
         execution=amended_execution,
     )
     for key in (
-        "reference_superset",
-        "stage_a_coarse",
-        "stage_b_refinement",
-        "stage_c_confirmation",
         "boundary_rule",
         "stop_and_fallback",
         "normalized_recipe_space",
@@ -211,10 +207,37 @@ def test_ws2_staged_runtime_binding_preserves_stage_a_population():
         "counters",
     ):
         assert amended_staged[key] == original_staged[key]
+    assert amended_staged["tool_compliance"]["combination_count"] == 6
+    assert amended_staged["tool_compliance"]["stiffness_n_per_mm"] == [
+        0.0715,
+        0.143,
+        0.286,
+    ]
+    assert amended_staged["tool_compliance"]["travel_mm"] == [3.0, 6.0]
+    assert amended_staged["reference_superset"]["contact_worlds"] == (
+        original_staged["reference_superset"]["contact_worlds"] * 6
+    )
+    assert amended_staged["reference_superset"]["scored_rows"] == (
+        original_staged["reference_superset"]["scored_rows"] * 6
+    )
+    assert amended_staged["stage_a_coarse"]["landing_sample_indices"] == (
+        original_staged["stage_a_coarse"]["landing_sample_indices"]
+    )
+    assert amended_staged["stage_a_coarse"]["recipe_selection"] == (
+        original_staged["stage_a_coarse"]["recipe_selection"]
+    )
+    assert amended_staged["stage_b_refinement"][
+        "maximum_new_recipe_indices_per_boundary"
+    ] == original_staged["stage_b_refinement"][
+        "maximum_new_recipe_indices_per_boundary"
+    ]
+    assert amended_staged["stage_c_confirmation"]["selection"] == (
+        original_staged["stage_c_confirmation"]["selection"]
+    )
     assert WS2_PROBE.coarse_recipe_indices(amended, amended_staged) == [
         0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
     ]
-    assert amended_staged["stage_a_coarse"]["expected_worlds"] == 4_465_152
+    assert amended_staged["stage_a_coarse"]["expected_worlds"] == 26_790_912
 
 
 def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):
