@@ -123,6 +123,52 @@ def load_execution_fixture(
     return fixture
 
 
+def load_positive_control_fixture(
+    path: Path,
+    *,
+    workspace: Path,
+    parent: dict[str, Any],
+    execution: dict[str, Any],
+) -> dict[str, Any]:
+    fixture = json.loads(path.read_text(encoding="utf-8"))
+    claimed = fixture.pop("fixture_sha256")
+    if _sha_value(fixture) != claimed:
+        raise ValueError("WS2 positive-control fixture self-hash mismatch")
+    fixture["fixture_sha256"] = claimed
+    if fixture.get("scope") != SCOPE or fixture.get("physical_authority") is not False:
+        raise ValueError("WS2 positive control is not zero-authority simulation")
+    if any(fixture.get("counters", {}).values()):
+        raise ValueError("WS2 positive control contains nonzero authority counters")
+    for name in ("campaign_fixture", "execution_fixture"):
+        binding = fixture["bindings"][name]
+        source = _resolve(workspace, binding["path"])
+        if _sha_file(source) != binding["sha256"]:
+            raise ValueError(f"positive-control binding changed: {name}")
+    if fixture["bindings"]["campaign_fixture"]["fixture_sha256"] != parent[
+        "fixture_sha256"
+    ]:
+        raise ValueError("positive-control campaign identity mismatch")
+    if fixture["bindings"]["execution_fixture"]["fixture_sha256"] != execution[
+        "fixture_sha256"
+    ]:
+        raise ValueError("positive-control execution identity mismatch")
+    control = fixture["control"]
+    profile = next(
+        row
+        for row in physical_profiles(parent)
+        if row["profile_id"] == control["profile_id"]
+    )
+    values = profile["values"]
+    actuation_mm = values["travel_mm"] * values["actuation_fraction"]
+    bottom_mm = values["travel_mm"] * values["bottom_out_fraction"]
+    depth_mm = float(control["recipe_override"]["press_depth_mm"])
+    if not actuation_mm < depth_mm < bottom_mm:
+        raise ValueError("positive-control depth must lie between actuation and bottom-out")
+    if control["landing_sample_indices"] != list(range(64)):
+        raise ValueError("positive-control landing population changed")
+    return fixture
+
+
 def load_staged_fixture(
     path: Path,
     *,
@@ -707,6 +753,7 @@ def run_smoke_worker(
     *,
     workspace: Path,
     device_name: str,
+    control: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run only the exact bounded smoke frozen by the execution fixture."""
     if device_name not in execution["smoke"]["devices"]:
@@ -716,7 +763,19 @@ def run_smoke_worker(
     import numpy as np
     import warp as wp
 
-    smoke = execution["smoke"]
+    smoke = (
+        execution["smoke"]
+        if control is None
+        else {
+            "target_id": control["control"]["target_id"],
+            "profile_id": control["control"]["profile_id"],
+            "tip_id": control["control"]["tip_id"],
+            "scenario_ids": [control["control"]["scenario_id"]],
+            "recipe_indices": [control["control"]["base_recipe_index"]],
+            "landing_sample_indices": control["control"]["landing_sample_indices"],
+            "expected_world_count": len(control["control"]["landing_sample_indices"]),
+        }
+    )
     catalog = json.loads(
         _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
         .read_text(encoding="utf-8")
@@ -731,6 +790,8 @@ def run_smoke_worker(
     if len(smoke["recipe_indices"]) != 1 or len(smoke["scenario_ids"]) != 1:
         raise ValueError("bounded smoke must contain one recipe and scenario")
     recipe = recipes[smoke["recipe_indices"][0]]
+    if control is not None:
+        recipe = {**recipe, **control["control"]["recipe_override"]}
     scenario_id = smoke["scenario_ids"][0]
     landing = json.loads(
         _resolve(workspace, execution["bindings"]["landing_prepass"]["path"])
@@ -908,6 +969,8 @@ def run_smoke_worker(
             "peak_required_force_n": float(peak_force[index]),
             "dwell_above_actuation_ms": float(active_ms[index]),
         }
+        if control is not None:
+            row["control_id"] = control["control"]["control_id"]
         row["admitted"] = bool(
             row["actuation_count"] == 1
             and row["auto_repeat_count"] == 0
@@ -950,6 +1013,24 @@ def run_smoke_worker(
         "transport_operations": [],
         "physical_authority": False,
     }
+    if control is not None:
+        receipt["positive_control_fixture_sha256"] = control["fixture_sha256"]
+        receipt["control_id"] = control["control"]["control_id"]
+        receipt["effective_recipe"] = recipe
+        positive_pass = bool(
+            all(row["actuation_count"] == 1 for row in rows)
+            and not any(row["partial_press"] for row in rows)
+            and not any(row["bottom_out_overflow"] for row in rows)
+            and settle_pass
+            and finite
+            and (overflow == 0).all()
+        )
+        receipt["positive_control_pass"] = positive_pass
+        receipt["status"] = (
+            "PASS_EXPLORATORY_POSITIVE_CONTROL"
+            if positive_pass
+            else "STOP_EXPLORATORY_POSITIVE_CONTROL"
+        )
     return receipt
 
 
@@ -1023,6 +1104,7 @@ def main() -> int:
             "landing-prepass",
             "phone",
             "smoke-worker",
+            "positive-control-worker",
             "compare",
         ),
     )
@@ -1033,6 +1115,7 @@ def main() -> int:
     parser.add_argument("--right", type=Path)
     parser.add_argument("--execution", type=Path)
     parser.add_argument("--device", choices=DEVICES)
+    parser.add_argument("--control", type=Path)
     args = parser.parse_args()
     workspace = args.workspace.resolve(strict=True)
     fixture = load_fixture(args.fixture.resolve(strict=True), workspace=workspace)
@@ -1042,14 +1125,28 @@ def main() -> int:
         result = cpu_contact_smoke(fixture, workspace=workspace)
     elif args.mode == "landing-prepass":
         result = landing_prepass(fixture, workspace=workspace)
-    elif args.mode == "smoke-worker":
+    elif args.mode in {"smoke-worker", "positive-control-worker"}:
         if args.execution is None or args.device is None:
-            parser.error("smoke-worker requires --execution and --device")
+            parser.error(f"{args.mode} requires --execution and --device")
         execution = load_execution_fixture(
             args.execution.resolve(strict=True), workspace=workspace, parent=fixture
         )
+        control = None
+        if args.mode == "positive-control-worker":
+            if args.control is None:
+                parser.error("positive-control-worker requires --control")
+            control = load_positive_control_fixture(
+                args.control.resolve(strict=True),
+                workspace=workspace,
+                parent=fixture,
+                execution=execution,
+            )
         result = run_smoke_worker(
-            fixture, execution, workspace=workspace, device_name=args.device
+            fixture,
+            execution,
+            workspace=workspace,
+            device_name=args.device,
+            control=control,
         )
     elif args.mode == "phone":
         rows = phone_cells(fixture)

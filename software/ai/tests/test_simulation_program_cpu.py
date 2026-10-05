@@ -178,6 +178,67 @@ def test_ws2_runtime_amendment_changes_only_stack_identity():
     assert not any(execution["counters"].values())
 
 
+def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=fixture
+    )
+    control = {
+        "schema": "tactevra.ws2_positive_control_fixture.v1",
+        "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+        "bindings": {
+            "campaign_fixture": {
+                "path": str(WS2_FIXTURE_V2),
+                "sha256": WS2_PROBE._sha_file(WS2_FIXTURE_V2),
+                "fixture_sha256": fixture["fixture_sha256"],
+            },
+            "execution_fixture": {
+                "path": str(WS2_EXECUTION_V2),
+                "sha256": WS2_PROBE._sha_file(WS2_EXECUTION_V2),
+                "fixture_sha256": execution["fixture_sha256"],
+            },
+        },
+        "control": {
+            "control_id": "ACTUATION_REFERENCE_2P4MM",
+            "target_id": "GRAVE",
+            "profile_id": "BASELINE",
+            "tip_id": "sphere-r1",
+            "scenario_id": "HIGH_SOURCE_LOW_RESIDUAL",
+            "base_recipe_index": 0,
+            "landing_sample_indices": list(range(64)),
+            "recipe_override": {"press_depth_mm": 2.4},
+        },
+        "counters": {
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "real_commands": 0,
+            "permits": 0,
+            "transport_operations": 0,
+        },
+        "physical_authority": False,
+    }
+    control["fixture_sha256"] = WS2_PROBE._sha_value(control)
+    path = tmp_path / "positive_control.json"
+    path.write_text(json.dumps(control), encoding="utf-8")
+    loaded = WS2_PROBE.load_positive_control_fixture(
+        path, workspace=ROOT, parent=fixture, execution=execution
+    )
+    assert loaded["control"]["recipe_override"]["press_depth_mm"] == 2.4
+
+    control.pop("fixture_sha256")
+    control["control"]["recipe_override"]["press_depth_mm"] = 3.0
+    control["fixture_sha256"] = WS2_PROBE._sha_value(control)
+    path.write_text(json.dumps(control), encoding="utf-8")
+    try:
+        WS2_PROBE.load_positive_control_fixture(
+            path, workspace=ROOT, parent=fixture, execution=execution
+        )
+    except ValueError as exc:
+        assert "between actuation and bottom-out" in str(exc)
+    else:
+        raise AssertionError("bottom-out positive control was admitted")
+
+
 def test_ws2_tampering_and_cross_gpu_drift_stop():
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
     left = {
