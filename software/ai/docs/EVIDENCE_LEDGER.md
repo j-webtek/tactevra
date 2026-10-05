@@ -12099,3 +12099,11 @@ rewriting history. New entries must use a unique evidence ID.
 - Frozen configuration: 110 mm tool, 3 mm tip, passive stylus with no moving cable, `halton-0573`, rise/transit/descend with 100 mm transit and 30 mm hover, controlled station CAD, Stage D tray replacement, and own-target-only E/F semantics across exactly 51 targets. Every stage must bind the exact configuration section hash or stop.
 - Frozen rules: Stage C requires all 51 continuous GJK key sweeps plus the hash-bound real-station-CAD proof; D requires the exact tray-replacement clear result; E/F require all 408 exact contact rows; independent observers require zero undetected consequential wrong-model cases. Installed geometry, real plant accuracy, and physical observers remain blocked.
 - Authority: CPU only; result executions 0; GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
+
+
+### E-20261005-INT-FIRST-MOTION-CONSOLIDATED-IMPLEMENTATION-001 - converged CPU harness implemented
+
+- Frozen fixture canonical SHA-256 `fa89978aa66124e29d8551381c46050ea6166ed6b680afc4a5d36cbbbd0ed21e`. Implementation `software/ai/rocell_ai/first_motion_consolidated.py` SHA-256 `32e940ec4cf3d96c358819173b6cb0c3019e55c161c906b7f7904588af87dd71`; focused test SHA-256 `b7d5784df5ac597f73ea4e2a1df4d47669d98b593a6e9a67da2c6f26e020d090`.
+- The harness verifies every fixture/source/CAD hash, requires the same configuration hash at A-F, recomputes 51-target Stage C rise/transit/descend key sweeps with continuous convex-hull GJK, reruns the 408-row exact E/F screen, binds the real-station-CAD and tray-replacement results, generates six strict in-memory T102 telemetry envelopes, and reruns the unchanged wrong-model plus independent-observer drills.
+- Pre-result validation: `$env:PYTHONPATH='software/src;software/ai'; python -m pytest -q software/ai/tests/test_first_motion_consolidated.py` -> `3 passed in 0.62s`; Ruff and `py_compile` pass. Tests prove the converged identity, zero authority, fixture-tamper rejection, and A-F configuration-mismatch rejection.
+- Authority and next dependency: consolidated result executions 0; CPU only; GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Next commit the implementation, then run and preserve the frozen result.
