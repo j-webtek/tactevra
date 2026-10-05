@@ -292,8 +292,11 @@ unqualified Lee Spring candidate rate is sampled at 0.5x, 1x, and 2x rather
 than treated as measured. Contact events drive a simulated OS repeat model;
 they never create real host input.
 
-The phone surface models effective contact area and contact duration only. It
-does not claim electrostatic touchscreen accuracy.
+Stage A reports keyboard results separately for every tool geometry and
+compliant-plunger sample. The phone surface models effective contact area and
+contact duration only, and its capacitive-tap results are reported separately
+so pooling cannot hide a keyboard-versus-phone tip conflict. It does not claim
+electrostatic touchscreen accuracy.
 
 Output is a per-key press-recipe envelope over depth, dwell, approach, release,
 and fingertip radius, with highlighted limiting results for `GRAVE`, `EQUAL`,
@@ -321,8 +324,13 @@ the declared bottom-out tolerance, or cross-GPU disagreement stops the run.
 ### Dependencies and compute estimate
 
 WS1 actuation/event interfaces, MW2UC landing model, and a frozen contact asset
-are required. A power smoke determines shard count. Expected compute is 1â€“4 GPU
-hours across both RTX 3090s, plus 30â€“90 minutes for admission and summarization.
+are required. A power smoke determines shard count. Before physical use, measure
+the assembled compliant body's force-versus-travel curve, free travel, return
+hysteresis, and effective axial stiffness for every selected tool route. Measure
+the selected landing sensor's repeatability and noise near the start of physical
+commissioning because WS5 found landing-observation noise drives calibration
+effort. Expected compute is 1-4 GPU hours across both RTX 3090s, plus 30-90
+minutes for admission and summarization.
 
 ## Workstream 3: continuous typing motion policy
 
