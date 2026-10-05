@@ -16,10 +16,10 @@ requires-python = ">=3.10"
 dependencies = ["Pillow>=10,<13", "packaging>=24,<27"]
 
 [project.optional-dependencies]
-serial = ["pyserial>=3.5,<4", "cryptography>=41,<47"]
+serial = ["pyserial>=3.5,<4", "cryptography>=41,<51"]
 vision = ["numpy>=2,<2.3", "opencv-contrib-python>=4.12,<5"]
 calibration = ["numpy>=2,<2.3"]
-test = ["pytest>=8,<10", "jsonschema>=4.23,<5", "cryptography>=41,<47"]
+test = ["pytest>=8,<10", "jsonschema>=4.23,<5", "cryptography>=41,<51"]
 
 [project.scripts]
 rocell = "rocell.cli:main"
