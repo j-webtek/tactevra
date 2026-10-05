@@ -175,6 +175,9 @@ def _pad_screen(fixture: dict[str, Any], workspace: Path, world: _World,
                       for mode in modes}
     removed = {"workcell:station:keyboard_left", "workcell:station:keyboard_right"}
     pads = _pad_variants(pad_spec)
+    fixed_top_z = fixture["pad_contact"].get("fixed_top_board_z_mm")
+    if fixed_top_z is not None:
+        pads = [{**pad, "top_z_mm": fixed_top_z} for pad in pads]
     for pad_index, pad in enumerate(pads):
         if variant_indexes is not None and pad_index not in variant_indexes:
             continue

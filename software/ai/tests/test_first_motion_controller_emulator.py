@@ -297,3 +297,21 @@ def test_phase10_remedy_fixture_is_frozen_and_zero_authority() -> None:
     assert fixture["pad_contact"]["semantic_phase"] == "PRESS_CONTACT_ACTIVE"
     assert fixture["stage_c_wrist"]["absolute_final_tool_error_bands_mm"] == [1.0, 3.0, 5.0]
     assert "BASELINE" in fixture["stage_c_wrist"]["modes"]
+
+
+def test_phase10_keycap_height_pad_fixture_uses_pose_bundle_height() -> None:
+    from rocell_ai.first_motion_phase10_remedies import load_remedy_fixture
+
+    fixture = load_remedy_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_keycap_height_pad_v1.json")
+    pose_bundle = json.loads(Path(
+        fixture["bindings"]["target_pose_bundle"]["path"]
+    ).read_text(encoding="utf-8"))
+    heights = {
+        row["contact_target_board_mm"]["z"] for row in pose_bundle["poses"]
+    }
+    assert len(pose_bundle["poses"]) == 46
+    assert heights == {20.0}
+    assert fixture["pad_contact"]["fixed_top_board_z_mm"] == heights.pop()
+    assert fixture["pad_contact"]["run_all_13_frozen_pad_variants"]
+    assert not any(fixture["counters"].values())
