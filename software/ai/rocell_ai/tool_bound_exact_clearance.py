@@ -231,6 +231,7 @@ def _component_shapes(
 
 def run_continuous_key_clearance(
     fixture: dict[str, Any], pose_family: dict[str, Any], *, workspace: Path,
+    profile_hashes: set[str] | None = None,
 ) -> dict[str, Any]:
     """Screen every reachable profile with continuous fixed-orientation sweeps."""
 
@@ -261,7 +262,16 @@ def run_continuous_key_clearance(
 
     profiles = []
     global_minimum = float("inf")
-    for profile in pose_family["profiles"]:
+    selected_profiles = [profile for profile in pose_family["profiles"]
+                         if profile_hashes is None or profile[
+                             "tool_configuration_sha256"] in profile_hashes]
+    if not selected_profiles:
+        raise ValueError("continuous clearance profile selection is empty")
+    if profile_hashes is not None and {
+            row["tool_configuration_sha256"] for row in selected_profiles
+    } != profile_hashes:
+        raise ValueError("continuous clearance profile selection is incomplete")
+    for profile in selected_profiles:
         bundle = profile["pose_bundle"]
         config = bundle["tool_configuration"]
         validate_pose_bundle_tool_configuration(bundle, config)
@@ -378,6 +388,7 @@ def run_continuous_key_clearance(
         "method": fixture["continuous_geometry"]["distance_method"],
         "profiles": profiles,
         "profile_count": len(profiles),
+        "profile_hashes": [row["tool_configuration_sha256"] for row in profiles],
         "global_minimum_non_target_clearance_mm": (
             global_minimum if math.isfinite(global_minimum) else None),
         "decision": ("PASS_EXPLORATORY_CONTINUOUS_KEY_CLEARANCE" if all(
@@ -402,8 +413,71 @@ def run_continuous_key_clearance(
     return result
 
 
+def merge_continuous_key_clearance_results(
+    fixture: dict[str, Any], pose_family: dict[str, Any],
+    partial_results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Merge disjoint exact-profile results in frozen pose-family order."""
+
+    expected = [row["tool_configuration_sha256"]
+                for row in pose_family["profiles"]]
+    by_hash: dict[str, dict[str, Any]] = {}
+    for partial in partial_results:
+        unsigned = dict(partial)
+        claimed = unsigned.pop("receipt_sha256", None)
+        if claimed != _sha(unsigned):
+            raise ValueError("partial continuous-clearance receipt mismatch")
+        if partial["fixture_sha256"] != fixture["fixture_sha256"]:
+            raise ValueError("partial result fixture mismatch")
+        if partial["pose_family_receipt_sha256"] != pose_family["receipt_sha256"]:
+            raise ValueError("partial result pose-family mismatch")
+        if any(partial.get(name) for name in (
+            "hardware_write_count", "physical_movement_count", "real_command_count",
+            "permit_count", "transport_count",
+        )) or partial.get("physical_authority") is not False:
+            raise ValueError("partial result carries authority")
+        for row in partial["profiles"]:
+            key = row["tool_configuration_sha256"]
+            if key in by_hash:
+                raise ValueError("duplicate continuous-clearance profile")
+            by_hash[key] = row
+    if set(by_hash) != set(expected):
+        raise ValueError("partial results do not cover the frozen profile set")
+    profiles = [by_hash[key] for key in expected]
+    minima = [row["minimum_non_target_clearance_mm"] for row in profiles
+              if row["minimum_non_target_clearance_mm"] is not None]
+    result = {
+        "schema": "tactevra.tool_bound_continuous_key_clearance_result.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "pose_family_receipt_sha256": pose_family["receipt_sha256"],
+        "method": fixture["continuous_geometry"]["distance_method"],
+        "profiles": profiles,
+        "profile_count": len(profiles),
+        "profile_hashes": expected,
+        "global_minimum_non_target_clearance_mm": min(minima) if minima else None,
+        "decision": ("PASS_EXPLORATORY_CONTINUOUS_KEY_CLEARANCE" if all(
+            row["decision"] == "PASS_ALL_CLEARANCE_THRESHOLDS" for row in profiles)
+            else "STOP_REACH_OR_CONTINUOUS_CLEARANCE"),
+        "evaluation_opened": False,
+        "gpu_job_count": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+        "limitations": partial_results[0]["limitations"],
+        "partial_receipt_sha256": sorted(
+            row["receipt_sha256"] for row in partial_results),
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
 __all__ = [
     "convex_sweep_box_distance_mm",
     "load_pose_family_result",
+    "merge_continuous_key_clearance_results",
     "run_continuous_key_clearance",
 ]

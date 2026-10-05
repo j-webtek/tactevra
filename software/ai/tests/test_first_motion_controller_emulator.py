@@ -541,3 +541,60 @@ def test_continuous_convex_sweep_reports_margin_and_rejects_rotation() -> None:
         convex_sweep_box_distance_mm(
             local, start, rotated, box_center_mm=(0.0, 0.0, 0.0),
             box_size_mm=(1.0, 1.0, 1.0))
+
+
+def test_continuous_result_merge_requires_exact_disjoint_profiles() -> None:
+    from rocell_ai.tool_bound_exact_clearance import (
+        _sha,
+        merge_continuous_key_clearance_results,
+    )
+
+    fixture = {
+        "fixture_sha256": "fixture",
+        "continuous_geometry": {"distance_method": "exact"},
+    }
+    pose_family = {
+        "receipt_sha256": "poses",
+        "profiles": [
+            {"tool_configuration_sha256": "a"},
+            {"tool_configuration_sha256": "b"},
+        ],
+    }
+
+    def partial(key: str, minimum: float) -> dict:
+        value = {
+            "schema": "tactevra.tool_bound_continuous_key_clearance_result.v1",
+            "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+            "fixture_sha256": "fixture",
+            "pose_family_receipt_sha256": "poses",
+            "method": "exact",
+            "profiles": [{
+                "tool_configuration_sha256": key,
+                "minimum_non_target_clearance_mm": minimum,
+                "decision": "PASS_ALL_CLEARANCE_THRESHOLDS",
+            }],
+            "profile_count": 1,
+            "profile_hashes": [key],
+            "global_minimum_non_target_clearance_mm": minimum,
+            "decision": "PASS_EXPLORATORY_CONTINUOUS_KEY_CLEARANCE",
+            "evaluation_opened": False,
+            "gpu_job_count": 0,
+            "hardware_write_count": 0,
+            "physical_movement_count": 0,
+            "real_command_count": 0,
+            "permit_count": 0,
+            "transport_count": 0,
+            "physical_authority": False,
+            "limitations": ["test"],
+        }
+        value["receipt_sha256"] = _sha(value)
+        return value
+
+    first, second = partial("a", 2.0), partial("b", 1.0)
+    merged = merge_continuous_key_clearance_results(
+        fixture, pose_family, [second, first])
+    assert merged["profile_hashes"] == ["a", "b"]
+    assert merged["global_minimum_non_target_clearance_mm"] == 1.0
+    with pytest.raises(ValueError, match="duplicate"):
+        merge_continuous_key_clearance_results(
+            fixture, pose_family, [first, first, second])
