@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -136,3 +137,74 @@ def test_resume_reconciles_missing_backup_and_rejects_conflict(tmp_path):
     destination.write_text("altered", encoding="utf-8")
     with pytest.raises(ValueError, match="existing backup hash mismatch"):
         supervisor.reconcile_resume_backups(results, backups, {shard_id})
+
+
+def _cross_row(value=1.0, *, admitted=False):
+    fixture = ops.load_fixture(FIXTURE_PATH)
+    row = {
+        field: value
+        for field in fixture["integrity"]["cross_gpu_comparison"][
+            "continuous_fields"
+        ]
+    }
+    row.update({"row_id": "row-1", "admitted": admitted, "actuation_count": 0})
+    return row
+
+
+def _cross_result(row):
+    return {
+        "schema": "tactevra.ws2_stage_a_shard.v1",
+        "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+        "throughput_fixture_sha256": "bound",
+        "shard": {"shard_id": "a" * 64},
+        "status": "PASS",
+        "failure_class": None,
+        "world_count": 1,
+        "rows": [row],
+        "primary_failure_counts": {"PARTIAL_PRESS": 1},
+        "settle_pass": True,
+        "finite": True,
+        "overflow_zero": True,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "physical_authority": False,
+    }
+
+
+def test_cross_gpu_comparison_bounds_only_continuous_measurements():
+    fixture = ops.load_fixture(FIXTURE_PATH)
+    tolerance = fixture["integrity"]["cross_gpu_comparison"][
+        "continuous_absolute_tolerance"
+    ]
+    left = _cross_result(_cross_row())
+    right = _cross_result(_cross_row(1.0 + tolerance * 0.99))
+    assert supervisor.compare_cross_gpu_results(fixture, left, right)["status"] == "AGREE"
+    right["rows"][0]["peak_penetration_mm"] += tolerance / 100
+    mismatch = supervisor.compare_cross_gpu_results(fixture, left, right)
+    assert mismatch["status"] == "DISAGREE"
+    assert mismatch["reason"].endswith("peak_penetration_mm")
+
+
+@pytest.mark.parametrize(
+    ("mutation", "reason"),
+    [
+        (lambda result: result["rows"][0].update(admitted=True), "row_exact"),
+        (lambda result: result["rows"][0].pop("peak_tool_force_n"), "row_fields"),
+        (
+            lambda result: result["rows"][0].update(peak_tool_force_n=math.inf),
+            "row_nonfinite",
+        ),
+        (
+            lambda result: result.update(primary_failure_counts={"ADMITTED": 1}),
+            "top:primary_failure_counts",
+        ),
+    ],
+)
+def test_cross_gpu_comparison_rejects_safety_or_integrity_drift(mutation, reason):
+    fixture = ops.load_fixture(FIXTURE_PATH)
+    left = _cross_result(_cross_row())
+    right = _cross_result(_cross_row())
+    mutation(right)
+    result = supervisor.compare_cross_gpu_results(fixture, left, right)
+    assert result["status"] == "DISAGREE"
+    assert result["reason"].startswith(reason)

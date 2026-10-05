@@ -10,6 +10,7 @@ import argparse
 from concurrent.futures import Future, ThreadPoolExecutor
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -196,7 +197,11 @@ def _failure_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
-def load_valid_shard_result(path: Path, expected_shard_id: str) -> dict[str, Any]:
+def load_valid_shard_result(
+    path: Path,
+    expected_shard_id: str,
+    accepted_fixture_sha256: set[str] | None = None,
+) -> dict[str, Any]:
     result = json.loads(path.read_text(encoding="utf-8"))
     core = dict(result)
     claimed = core.pop("receipt_sha256")
@@ -206,19 +211,133 @@ def load_valid_shard_result(path: Path, expected_shard_id: str) -> dict[str, Any
         raise ValueError("shard identity mismatch")
     if result["rows_sha256"] != _result_rows_sha(result["rows"]):
         raise ValueError("shard row hash mismatch")
+    if (
+        accepted_fixture_sha256 is not None
+        and result.get("fixture_sha256") not in accepted_fixture_sha256
+    ):
+        raise ValueError("shard fixture mismatch")
     if result["status"] != "PASS" or result.get("failure_class") is not None:
         raise ValueError("only passing shard results may resume")
     return result
 
 
+def compare_cross_gpu_results(
+    fixture: dict[str, Any],
+    primary: dict[str, Any],
+    cross: dict[str, Any],
+) -> dict[str, Any]:
+    """Compare safety decisions exactly and named continuous values by tolerance."""
+    contract = fixture["integrity"]["cross_gpu_comparison"]
+    continuous = set(contract["continuous_fields"])
+    tolerance = float(contract["continuous_absolute_tolerance"])
+    if not math.isfinite(tolerance) or tolerance < 0:
+        raise ValueError("invalid cross-GPU continuous tolerance")
+    exact_top = (
+        "schema",
+        "scope",
+        "fixture_sha256",
+        "throughput_fixture_sha256",
+        "shard",
+        "status",
+        "failure_class",
+        "world_count",
+        "primary_failure_counts",
+        "settle_pass",
+        "finite",
+        "overflow_zero",
+        "hardware_write_count",
+        "physical_movement_count",
+        "physical_authority",
+    )
+    for field in exact_top:
+        if primary.get(field) != cross.get(field):
+            return {"status": "DISAGREE", "reason": f"top:{field}"}
+    left_rows = primary.get("rows", [])
+    right_rows = cross.get("rows", [])
+    if len(left_rows) != len(right_rows):
+        return {"status": "DISAGREE", "reason": "row_count"}
+    maxima = {field: 0.0 for field in sorted(continuous)}
+    for index, (left, right) in enumerate(zip(left_rows, right_rows, strict=True)):
+        if set(left) != set(right):
+            return {"status": "DISAGREE", "reason": f"row_fields:{index}"}
+        if not continuous.issubset(left):
+            return {"status": "DISAGREE", "reason": f"continuous_fields:{index}"}
+        for field in left:
+            if field not in continuous:
+                if left[field] != right[field]:
+                    return {
+                        "status": "DISAGREE",
+                        "reason": f"row_exact:{index}:{field}",
+                    }
+                continue
+            left_value = left[field]
+            right_value = right[field]
+            if isinstance(left_value, bool) or isinstance(right_value, bool):
+                return {"status": "DISAGREE", "reason": f"row_type:{index}:{field}"}
+            if not isinstance(left_value, (int, float)) or not isinstance(
+                right_value, (int, float)
+            ):
+                return {"status": "DISAGREE", "reason": f"row_type:{index}:{field}"}
+            left_float = float(left_value)
+            right_float = float(right_value)
+            if not math.isfinite(left_float) or not math.isfinite(right_float):
+                return {
+                    "status": "DISAGREE",
+                    "reason": f"row_nonfinite:{index}:{field}",
+                }
+            delta = abs(left_float - right_float)
+            maxima[field] = max(maxima[field], delta)
+            if delta > tolerance:
+                return {
+                    "status": "DISAGREE",
+                    "reason": f"row_tolerance:{index}:{field}",
+                    "delta": delta,
+                    "tolerance": tolerance,
+                }
+    return {
+        "status": "AGREE",
+        "continuous_absolute_tolerance": tolerance,
+        "maximum_absolute_deltas": maxima,
+    }
+
+
 def reconcile_resume_backups(
-    results_root: Path, backup_root: Path, shard_ids: set[str]
+    results_root: Path,
+    backup_root: Path,
+    shard_ids: set[str],
+    fixture: dict[str, Any] | None = None,
 ) -> set[str]:
     completed: set[str] = set()
+    accepted_fixture_sha256 = None
+    cross_modulus = None
+    if fixture is not None:
+        accepted_fixture_sha256 = {
+            fixture["fixture_sha256"],
+            *fixture["integrity"].get("resume_compatible_fixture_sha256", []),
+        }
+        cross_modulus = int(fixture["integrity"]["cross_gpu_sample_modulus"])
     for path in results_root.glob("*.json"):
         if path.stem not in shard_ids:
             continue
-        load_valid_shard_result(path, path.stem)
+        result = load_valid_shard_result(
+            path, path.stem, accepted_fixture_sha256=accepted_fixture_sha256
+        )
+        cross = path.with_suffix(".cross.json")
+        if cross_modulus is not None and int(path.stem[:8], 16) % cross_modulus == 0:
+            if not cross.exists():
+                raise ValueError("required cross-GPU result missing")
+            other = load_valid_shard_result(
+                cross, path.stem, accepted_fixture_sha256=accepted_fixture_sha256
+            )
+            comparison = compare_cross_gpu_results(fixture, result, other)
+            if comparison["status"] != "AGREE":
+                raise ValueError(f"cross-GPU disagreement: {comparison['reason']}")
+            cross_destination = backup_root / cross.name
+            if cross_destination.exists():
+                if _file_sha(cross) != _file_sha(cross_destination):
+                    raise ValueError("existing cross-GPU backup hash mismatch")
+            else:
+                copy_verified(cross, cross_destination)
         destination = backup_root / path.name
         if destination.exists():
             if _file_sha(path) != _file_sha(destination):
@@ -436,7 +555,9 @@ def run_campaign(
     results_root.mkdir(parents=True, exist_ok=True)
     backup_results.mkdir(parents=True, exist_ok=True)
     shard_ids = {row["shard_id"] for row in shards}
-    completed = reconcile_resume_backups(results_root, backup_results, shard_ids)
+    completed = reconcile_resume_backups(
+        results_root, backup_results, shard_ids, fixture=fixture
+    )
     started = time.time()
     failures: list[str] = []
     latest_temperatures = [row["temperature_c"] for row in gpu_snapshot()]
@@ -591,8 +712,20 @@ def run_campaign(
                             _worker_command(fixture_path, shard, alternate, cross),
                             shard_timeout,
                         )
-                        other = json.loads(cross.read_text(encoding="utf-8"))
-                        if cross_code != 0 or other["rows_sha256"] != result["rows_sha256"]:
+                        comparison = {"status": "DISAGREE"}
+                        if cross_code == 0 and cross.exists():
+                            try:
+                                other = load_valid_shard_result(
+                                    cross,
+                                    shard["shard_id"],
+                                    accepted_fixture_sha256={fixture["fixture_sha256"]},
+                                )
+                                comparison = compare_cross_gpu_results(
+                                    fixture, result, other
+                                )
+                            except (KeyError, TypeError, ValueError):
+                                pass
+                        if comparison["status"] != "AGREE":
                             failures.append(f"{shard['shard_id']}:CROSS_GPU_DISAGREEMENT")
                             _atomic_json(
                                 status_path,
@@ -609,6 +742,7 @@ def run_campaign(
                                 "status": "STOP_DETERMINISTIC",
                                 "shards_done": len(completed),
                             }
+                        copy_verified(cross, backup_results / cross.name)
                     completed.add(shard["shard_id"])
                     backup_batch.append(output)
                     if shard["shard_id"] in sample_sets[half_index]:
