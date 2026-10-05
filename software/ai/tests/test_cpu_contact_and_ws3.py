@@ -1,0 +1,113 @@
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import math
+from pathlib import Path
+
+import pytest
+
+from rocell_ai.cpu_contact_and_ws3 import (
+    _sha,
+    load_cpu_contact_fixture,
+    prepare_ws3_transition_harness,
+    run_phone_capacitive_matrix,
+    validate_ws2_recipe_binding,
+)
+
+ROOT = Path(__file__).resolve().parents[3]
+FIXTURE = ROOT / "software/ai/sim/evidence/cpu_contact_and_ws3_v1.json"
+
+
+def _load():
+    return load_cpu_contact_fixture(FIXTURE, workspace=ROOT)
+
+
+def _rehash_fixture(value):
+    value = copy.deepcopy(value)
+    value.pop("fixture_sha256", None)
+    for section in value["sections"].values():
+        section_copy = dict(section)
+        section_copy.pop("section_sha256", None)
+        section["section_sha256"] = _sha(section_copy)
+    value["fixture_sha256"] = _sha(value)
+    return value
+
+
+def test_fixture_and_110mm_pose_bindings_load():
+    fixture = _load()
+    assert fixture["physical_authority"] is False
+    assert fixture["runtime_manifest"]["execution_device"] == "CPU_ONLY"
+    assert fixture["sections"]["stage_ef_contact"]["tool_length_mm"] == 110.0
+    assert len(fixture["sections"]["stage_ef_contact"][
+        "tool_configuration_sha256"
+    ]) == 2
+
+
+def test_fixture_tamper_fails(tmp_path):
+    document = json.loads(FIXTURE.read_text())
+    document["sections"]["phone_capacitive"]["contact_radius_mm"].append(9.0)
+    path = tmp_path / "tampered.json"
+    path.write_text(json.dumps(document))
+    with pytest.raises(ValueError, match="fixture hash mismatch"):
+        load_cpu_contact_fixture(path, workspace=ROOT)
+
+
+def test_phone_matrix_covers_area_and_timing_ranges():
+    result = run_phone_capacitive_matrix(_load())
+    assert result["row_count"] == 3 * 3 * 5 * 4 * 3 * 3
+    assert result["decision"] == "UNRESOLVED_PHYSICAL_MEASUREMENT_REQUIRED"
+    assert result["by_radius"]["1.0"]["any_admitted"] is True
+    assert result["by_radius"]["7.0"]["maximum_effective_area_mm2"] == pytest.approx(
+        math.pi * 49.0
+    )
+    assert result["long_press_count"] > 0
+    assert result["physical_authority"] is False
+
+
+def test_ws3_preparation_enumerates_all_pairs_and_stops_without_recipe():
+    result = prepare_ws3_transition_harness(_load(), workspace=ROOT)
+    assert result["target_count"] == 46
+    assert result["ordered_pair_count"] == 46 * 46
+    assert result["includes_repeat_pairs"] is True
+    assert result["transition_scenario_count"] == 46 * 46 * 2 * 2 * 3
+    assert result["decision"] == "READY_COLLISION_HARNESS_BLOCKED_WS2_PRESS_RECIPE"
+    assert result["policy_recommendation"] is None
+    assert "not bound" in result["blocked_reason"]
+
+
+def test_ws3_rejects_wrong_recipe_hash(tmp_path):
+    fixture = _load()
+    recipe_path = tmp_path / "recipe.json"
+    recipe_path.write_text("{}")
+    fixture["sections"]["workstream_3"]["press_recipe_binding"] = {
+        "path": str(recipe_path),
+        "sha256": "0" * 64,
+    }
+    fixture = _rehash_fixture(fixture)
+    with pytest.raises(ValueError, match="file hash mismatch"):
+        validate_ws2_recipe_binding(fixture, workspace=ROOT)
+
+
+def test_ws3_rejects_nonpassing_recipe(tmp_path):
+    fixture = _load()
+    recipe = {
+        "schema": "tactevra.ws2_press_recipe_envelope.v1",
+        "decision": "STOP",
+        "physical_authority": False,
+        **{name: 0 for name in (
+            "hardware_write_count", "physical_movement_count", "real_command_count",
+            "permit_count", "transport_count")},
+    }
+    recipe["receipt_sha256"] = _sha(recipe)
+    recipe_path = tmp_path / "recipe.json"
+    recipe_path.write_text(json.dumps(recipe))
+    fixture["sections"]["workstream_3"]["press_recipe_binding"] = {
+        "path": str(recipe_path),
+        "sha256": hashlib.sha256(recipe_path.read_bytes()).hexdigest(),
+    }
+    fixture = _rehash_fixture(fixture)
+    with pytest.raises(ValueError, match="not admitted"):
+        validate_ws2_recipe_binding(fixture, workspace=ROOT)
+

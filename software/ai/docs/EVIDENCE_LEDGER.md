@@ -11865,6 +11865,14 @@ rewriting history. New entries must use a unique evidence ID.
 - Exact validation: `python -c` recomputation of every binding, section, and fixture SHA-256 passes; `git diff --check` passes. Runtime identity is recorded as CPU-only Python 3.12, with retained installed-stack identities for driver 595.97, Isaac Sim 5.1.0, and Warp 1.18.0; none was executed.
 - Authority: new metrics opened 0; GPU jobs 0; physics steps 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Next dependencies are the three claimed CPU implementations and results; WS2 Stage A remains owned elsewhere.
 
+### E-20261005-INT-CPU-CONTACT-WS3-IMPLEMENTATION-001 — CPU contact and WS3 harness implemented
+
+- Stage/lane and frozen input: S3-S4 AI/model plus simulation; fixture canonical SHA-256 `f293109f3da2125cb1a7b32486618bc2777c55287c5c86178a0bfb353ee14074`. No Stage E/F or phone result was opened before this implementation.
+- Implementation: `software/ai/rocell_ai/cpu_contact_and_ws3.py`, SHA-256 `a5bba13ae5db2e51dd58550ef2764ab79af57060fa37eccdd929f2992d3c7ec7`. It revalidates the compact fixture, every bound byte, both 110 mm x 3 mm pose/configuration hashes, and all zero-authority counters. Stage E/F uses the retained exact convex-sweep GJK primitives, verifies own-key distal contact, and reports every target, stage, hover, exposure, limiting key/component, and clearance threshold. Phone contact expands the entire frozen area/timing matrix. WS3 enumerates all ordered pairs but keeps policy output null while the recipe binding is absent.
+- Fail-closed WS3 dependency: a future recipe must match its file hash, canonical receipt, `tactevra.ws2_press_recipe_envelope.v1` schema, passing decision, and zero-authority counters. Missing, altered, nonpassing, or authority-bearing recipes are rejected before transition execution.
+- Tests: `software/ai/tests/test_cpu_contact_and_ws3.py`, SHA-256 `77103bde1459e2941b81b22331055b3edda6d7647e7d3d24e2ce4ad06a2b7e2c`. Exact command `$env:PYTHONPATH='software/src;software/ai'; python -m pytest -q software/ai/tests/test_cpu_contact_and_ws3.py` -> `6 passed in 0.74s`; Ruff, `py_compile`, `git diff --check`, append-only ledger policy, evidence-ID policy, and generated-evidence scope policy pass.
+- Authority and next dependency: GPU jobs 0; physics steps 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Next run the frozen Stage E/F and phone CPU matrices, preserve their results externally with a second copy, and emit WS3 readiness without bypassing its recipe block. WS2 Stage A remains outside this lane.
+
 
 ### E-20261005-INT-WS2-STAGE-A-THROUGHPUT-ATTEMPT-001 - healthy numerical smoke stopped by status-mapping defect
 
