@@ -548,6 +548,7 @@ def build_contact_mjcf(
     tip: dict[str, Any],
     half_extent_mm: list[float],
     pitch_mm: float,
+    tool_compliance: dict[str, float] | None = None,
 ) -> str:
     values = profile["values"]
     width = values["keycap_width_height_mm"] * half_extent_mm[0] / half_extent_mm[1]
@@ -583,6 +584,26 @@ def build_contact_mjcf(
             f'<geom name="tip" type="capsule" size="{tip["radius_mm"] / 1000:.9f} '
             f'{tip["half_length_mm"] / 1000:.9f}"/>'
         )
+    if tool_compliance is None:
+        tip_body = f'<body name="tip_mocap" mocap="true" pos="0 0 0.02">{tip_geom}</body>'
+    else:
+        required = {"stiffness_n_per_mm", "damping_n_s_per_mm", "travel_mm"}
+        if set(tool_compliance) != required:
+            raise ValueError("tool compliance requires exact stiffness, damping, and travel")
+        stiffness = float(tool_compliance["stiffness_n_per_mm"])
+        tool_damping = float(tool_compliance["damping_n_s_per_mm"])
+        tool_travel = float(tool_compliance["travel_mm"])
+        if not (stiffness > 0.0 and tool_damping >= 0.0 and tool_travel > 0.0):
+            raise ValueError("tool compliance values are outside the physical domain")
+        tip_body = (
+            '<body name="tip_mocap" mocap="true" pos="0 0 0.02">'
+            '<body name="tip_compliant">'
+            '<joint name="tool_compliance" type="slide" axis="0 0 1" '
+            f'range="0 {tool_travel / 1000:.9f}" '
+            f'stiffness="{stiffness * 1000.0:.9f}" '
+            f'damping="{tool_damping * 1000.0:.9f}"/>'
+            f'{tip_geom}</body></body>'
+        )
     return (
         '<mujoco model="tactevra_ws2"><compiler angle="radian"/>'
         f'<option timestep="{fixture["contact_model"]["timestep_seconds"]}" '
@@ -590,8 +611,8 @@ def build_contact_mjcf(
         '<size nconmax="128" njmax="512"/><worldbody>'
         '<geom name="bottom_stop" type="plane" pos="0 0 -0.020" size="0 0 0.1"/>'
         + "".join(bodies)
-        + f'<body name="tip_mocap" mocap="true" pos="0 0 0.02">{tip_geom}</body>'
-        '</worldbody></mujoco>'
+        + tip_body
+        + '</worldbody></mujoco>'
     )
 
 
@@ -854,12 +875,16 @@ def run_smoke_worker(
     if nworld != smoke["expected_world_count"]:
         raise ValueError("bounded smoke world count changed")
 
+    tool_compliance = (
+        None if control is None else control["control"].get("tool_compliance")
+    )
     xml = build_contact_mjcf(
         fixture,
         profile,
         tip,
         target["half_extent_mm"],
         float(catalog["keyboard"]["pitch_mm"]),
+        tool_compliance,
     )
     overall_started = time.perf_counter()
     model = mujoco.MjModel.from_xml_string(xml)
@@ -922,6 +947,8 @@ def run_smoke_worker(
     maximum_active_run = np.zeros(nworld, dtype=np.int64)
     peak_mm = np.zeros(nworld, dtype=np.float64)
     peak_force = np.zeros(nworld, dtype=np.float64)
+    peak_tool_compression_mm = np.zeros(nworld, dtype=np.float64)
+    peak_tool_force_n = np.zeros(nworld, dtype=np.float64)
     bottom_overflow = np.zeros(nworld, dtype=bool)
     started = time.perf_counter()
     if settle_pass:
@@ -955,7 +982,7 @@ def run_smoke_worker(
             active_run = np.where(now_active, active_run + 1, 0)
             maximum_active_run = np.maximum(maximum_active_run, active_run)
             active = now_active
-            neighbor_contact |= np.max(np.delete(relative_mm, center_joint, axis=1), axis=1) > execution[
+            neighbor_contact |= np.max(np.delete(relative_mm[:, :9], center_joint, axis=1), axis=1) > execution[
                 "numerical_protocol"
             ]["neighbor_contact_displacement_mm"]
             peak_mm = np.maximum(peak_mm, center_mm)
@@ -965,6 +992,17 @@ def run_smoke_worker(
                 * np.maximum(qvel[:, center_joint] * 1000.0, 0.0)
             )
             peak_force = np.maximum(peak_force, required)
+            if tool_compliance is not None:
+                compression_mm = np.maximum(relative_mm[:, 9], 0.0)
+                tool_force = (
+                    tool_compliance["stiffness_n_per_mm"] * compression_mm
+                    + tool_compliance["damping_n_s_per_mm"]
+                    * np.maximum(qvel[:, 9] * 1000.0, 0.0)
+                )
+                peak_tool_compression_mm = np.maximum(
+                    peak_tool_compression_mm, compression_mm
+                )
+                peak_tool_force_n = np.maximum(peak_tool_force_n, tool_force)
             bottom_overflow |= qpos[:, center_joint] * 1000.0 > (
                 bottom_mm
                 + execution["numerical_protocol"]["bottom_out_numerical_tolerance_mm"]
@@ -1025,6 +1063,11 @@ def run_smoke_worker(
         }
         if control is not None:
             row["control_id"] = control["control"]["control_id"]
+        if tool_compliance is not None:
+            row["peak_tool_compression_mm"] = float(
+                peak_tool_compression_mm[index]
+            )
+            row["peak_tool_force_n"] = float(peak_tool_force_n[index])
         row["admitted"] = bool(
             row["actuation_count"] == 1
             and row["auto_repeat_count"] == 0
@@ -1093,6 +1136,8 @@ def run_smoke_worker(
         receipt["control_kind"] = control_kind
         receipt["effective_recipe"] = recipe
         receipt["effective_release_protocol"] = release
+        if tool_compliance is not None:
+            receipt["tool_compliance"] = tool_compliance
         positive_pass = bool(
             all(row["actuation_count"] == 1 for row in rows)
             and not any(row["partial_press"] for row in rows)

@@ -314,6 +314,48 @@ def test_ws2_release_control_requires_long_settle_and_scores_both_depth_margins(
         )
 
 
+def test_ws2_compliant_tool_topology_and_validation():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    catalog = json.loads(
+        (ROOT / fixture["bindings"]["candidate_catalog"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    profile = WS2_PROBE.physical_profiles(fixture)[0]
+    tip = WS2_PROBE.tip_geometries(fixture)[0]
+    target = next(
+        row for row in WS2_PROBE._target_records(catalog) if row["target_id"] == "GRAVE"
+    )
+    compliance = {
+        "stiffness_n_per_mm": 0.143,
+        "damping_n_s_per_mm": 0.01,
+        "travel_mm": 6.0,
+    }
+    xml = WS2_PROBE.build_contact_mjcf(
+        fixture,
+        profile,
+        tip,
+        target["half_extent_mm"],
+        float(catalog["keyboard"]["pitch_mm"]),
+        compliance,
+    )
+    assert 'joint name="tool_compliance"' in xml
+    mujoco = pytest.importorskip("mujoco")
+    model = mujoco.MjModel.from_xml_string(xml)
+    assert model.nq == 10
+    assert model.nmocap == 1
+    assert model.joint("tool_compliance").qposadr[0] == 9
+    with pytest.raises(ValueError, match="exact stiffness"):
+        WS2_PROBE.build_contact_mjcf(
+            fixture,
+            profile,
+            tip,
+            target["half_extent_mm"],
+            float(catalog["keyboard"]["pitch_mm"]),
+            {"stiffness_n_per_mm": 0.143},
+        )
+
+
 def test_ws2_tampering_and_cross_gpu_drift_stop():
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
     left = {
