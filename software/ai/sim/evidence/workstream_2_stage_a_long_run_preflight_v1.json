@@ -1,0 +1,197 @@
+{
+  "bindings": {
+    "full_smoke_cuda0": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/full_compliance_smoke_v1/cuda0.json",
+      "sha256": "33695bef2acdedb7caa39b40e11fa678de9b65c97235d0557acc0e23610c0751"
+    },
+    "full_smoke_cuda1": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/full_compliance_smoke_v1/cuda1.json",
+      "sha256": "dcc32165670f00e61c71d0fb57445c869ba61049f4461ae7f614a42073ec0a09"
+    },
+    "full_smoke_runner": {
+      "path": "C:/Users/WebTek/Desktop/tactevra-issue-190/software/ai/sim/run_ws2_stage_a_full_compliance_smoke.py",
+      "sha256": "9a594e17014760db1627f140e2ca82e06bbdd508e104ade13ca5ac8458ad9821"
+    },
+    "ops": {
+      "path": "C:/Users/WebTek/Desktop/tactevra-issue-190/software/ai/sim/stage_a_long_run_ops.py",
+      "sha256": "6a0684adb5646406b4414b5495e287aea088e38a56aa900310a0efdfaf44000b"
+    },
+    "physical_neighborhoods": {
+      "path": "C:/Users/WebTek/Desktop/tactevra-issue-190/software/ai/sim/evidence/workstream_2_keyboard_physical_neighborhoods_v1.json",
+      "sha256": "ecc53a067bc0d965a483a54e3d26639e08492bf94bf41ea8e0a081ba83815012"
+    },
+    "throughput_fixture": {
+      "path": "C:/Users/WebTek/Desktop/tactevra-issue-190/software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2.json",
+      "sha256": "05f7c9f00bf540f8388844708828c4a8ded0d98ab9233bcf27cb3b73190b8949"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "early_abort": {
+    "action": "STOP_AND_PRESERVE",
+    "condition": "EVERY_RECIPE_FAILS_WITH_ONE_IDENTICAL_PRIMARY_REASON_ACROSS_SAMPLE",
+    "deterministic_sample_shards": 32,
+    "sample_rule": "lowest 32 shard_id values in each half"
+  },
+  "failure_policy": {
+    "deterministic_stop": [
+      "NONFINITE_STATE",
+      "OVERFLOW",
+      "IDENTITY_MISMATCH",
+      "CROSS_GPU_DISAGREEMENT",
+      "HASH_MISMATCH"
+    ],
+    "transient": [
+      "DRIVER_RESET",
+      "OUT_OF_MEMORY_AT_LAUNCH"
+    ],
+    "transient_retry_limit": 1
+  },
+  "fixture_sha256": "7f1f21c8568b5e4b74fd5759c8f39e4ab61779173c4116c59b5f38c0da63eea3",
+  "integrity": {
+    "bindings": [
+      "fixture",
+      "source",
+      "catalog",
+      "neighborhood"
+    ],
+    "cross_gpu_sample_modulus": 97,
+    "cross_gpu_sample_rule": "int(shard_id[:8],16) % 97 == 0",
+    "verify_before_every_shard": true
+  },
+  "physical_authority": false,
+  "population": {
+    "compliance_count": 6,
+    "landing_count": 8,
+    "physical_profile_count": 19,
+    "recipe_count": 12,
+    "scenario_count": 4,
+    "shard_count": 11628,
+    "target_count": 51,
+    "tip_geometry_count": 12,
+    "world_count": 26790912,
+    "worlds_per_shard": 2304
+  },
+  "progress": {
+    "fields": [
+      "shards_done",
+      "eta_seconds",
+      "failures",
+      "temperatures"
+    ],
+    "status_path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/stage_a_campaign_v1/status.json"
+  },
+  "schedule": {
+    "amendment": "PRELAUNCH_DETERMINISTIC_TWO_HALVES_SELECTED_AFTER_22_906_HOUR_FOUR_COMPLIANCE_PROJECTION",
+    "execution": "HALF_0_THEN_HALF_1_BACK_TO_BACK",
+    "half_shard_count": 5814,
+    "reason": "full six-compliance exact shape projects 19.315 hours per half on slower GPU; coverage and gates remain unchanged",
+    "sort_key": [
+      "neighborhood_signature_sha256",
+      "target_id",
+      "profile_id",
+      "tip_id"
+    ],
+    "worlds_per_half": 13395456
+  },
+  "schema": "tactevra.ws2_stage_a_long_run_preflight.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "storage": {
+    "backup_every_completed_shards": 25,
+    "backup_root": "D:/TactevraEvidence/issue190/stage_a_campaign_v1",
+    "clean_stop_floor_bytes": 64424509440,
+    "output_root": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/stage_a_campaign_v1",
+    "projected_bytes_per_world": 1024,
+    "projected_output_bytes": 27433893888,
+    "require_distinct_physical_volume": true,
+    "require_hash_verified_copy": true
+  },
+  "target_order": [
+    "A",
+    "S",
+    "D",
+    "F",
+    "G",
+    "H",
+    "J",
+    "K",
+    "L",
+    "SEMICOLON",
+    "APOSTROPHE",
+    "Z",
+    "X",
+    "C",
+    "V",
+    "B",
+    "N",
+    "M",
+    "COMMA",
+    "PERIOD",
+    "SLASH",
+    "TAB",
+    "ENTER",
+    "SPACE",
+    "1",
+    "Q",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "0",
+    "MINUS",
+    "EQUAL",
+    "W",
+    "E",
+    "R",
+    "T",
+    "Y",
+    "U",
+    "I",
+    "O",
+    "P",
+    "SHIFT",
+    "BACKSLASH",
+    "GRAVE",
+    "LEFT_BRACKET",
+    "RIGHT_BRACKET"
+  ],
+  "thermals": {
+    "fields": [
+      "temperature.gpu",
+      "power.draw",
+      "power.limit",
+      "clocks.sm",
+      "clocks.mem",
+      "pstate",
+      "clocks_throttle_reasons.active"
+    ],
+    "pause_ceiling_c": 83,
+    "pause_only_at_shard_boundary": true,
+    "sample_interval_seconds": 60
+  },
+  "visualization": {
+    "critical_path": false,
+    "post_campaign_only": true,
+    "record_during_campaign": false
+  },
+  "watchdog": {
+    "action": "STOP_WORKER_AND_ALERT_NO_AUTOMATIC_PROGRESS",
+    "heartbeat_every_seconds": 60,
+    "stale_seconds": 300
+  },
+  "windows": {
+    "require_ac_hibernate_seconds": 0,
+    "require_ac_sleep_seconds": 0,
+    "require_no_auto_reboot_with_logged_on_users": 1,
+    "tdr_evidence": "exact 2304-world shard shape must pass both GPUs"
+  }
+}
