@@ -109,3 +109,30 @@ def test_real_shard_control_derives_half_extent_from_physical_size():
     _, _, _, control = supervisor.build_control(fixture, shard)
     assert control["control"]["physical_keycap_half_extent_mm"] == [7.0, 7.0]
     assert len(control["control"]["batch_rows"]) == 2_304
+
+
+def test_resume_reconciles_missing_backup_and_rejects_conflict(tmp_path):
+    results = tmp_path / "results"
+    backups = tmp_path / "backups"
+    results.mkdir()
+    shard_id = "b" * 64
+    rows = [{"row": 1}]
+    result = {
+        "schema": "tactevra.ws2_stage_a_shard.v1",
+        "status": "PASS",
+        "failure_class": None,
+        "shard": {"shard_id": shard_id},
+        "rows": rows,
+        "rows_sha256": supervisor._result_rows_sha(rows),
+    }
+    result["receipt_sha256"] = ops.value_sha(result)
+    source = results / f"{shard_id}.json"
+    source.write_text(json.dumps(result), encoding="utf-8")
+    assert supervisor.reconcile_resume_backups(results, backups, {shard_id}) == {
+        shard_id
+    }
+    destination = backups / source.name
+    assert destination.read_bytes() == source.read_bytes()
+    destination.write_text("altered", encoding="utf-8")
+    with pytest.raises(ValueError, match="existing backup hash mismatch"):
+        supervisor.reconcile_resume_backups(results, backups, {shard_id})

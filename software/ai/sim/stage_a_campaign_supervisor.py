@@ -211,6 +211,24 @@ def load_valid_shard_result(path: Path, expected_shard_id: str) -> dict[str, Any
     return result
 
 
+def reconcile_resume_backups(
+    results_root: Path, backup_root: Path, shard_ids: set[str]
+) -> set[str]:
+    completed: set[str] = set()
+    for path in results_root.glob("*.json"):
+        if path.stem not in shard_ids:
+            continue
+        load_valid_shard_result(path, path.stem)
+        destination = backup_root / path.name
+        if destination.exists():
+            if _file_sha(path) != _file_sha(destination):
+                raise ValueError("existing backup hash mismatch")
+        else:
+            copy_verified(path, destination)
+        completed.add(path.stem)
+    return completed
+
+
 def _gpu_snapshot() -> list[dict[str, Any]]:
     ok, rows, detail = ops._gpu_snapshot()
     if not ok:
@@ -418,12 +436,7 @@ def run_campaign(
     results_root.mkdir(parents=True, exist_ok=True)
     backup_results.mkdir(parents=True, exist_ok=True)
     shard_ids = {row["shard_id"] for row in shards}
-    completed: set[str] = set()
-    for path in results_root.glob("*.json"):
-        if path.stem not in shard_ids:
-            continue
-        load_valid_shard_result(path, path.stem)
-        completed.add(path.stem)
+    completed = reconcile_resume_backups(results_root, backup_results, shard_ids)
     started = time.time()
     failures: list[str] = []
     latest_temperatures = [row["temperature_c"] for row in gpu_snapshot()]
