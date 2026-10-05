@@ -11948,3 +11948,11 @@ rewriting history. New entries must use a unique evidence ID.
 ### E-20261005-INT-WS2-STAGE-A-NATIVE-BATCH-RESULT-CORRECTION-001 - implementation SHA corrected
 
 - Correction: E-20261005-INT-WS2-STAGE-A-NATIVE-BATCH-RESULT-001 recorded an incorrect expanded implementation SHA after citing the correct short commit. The exact implementation commit is full Git SHA `e0c429d09d5a45f235360deb778964ce7bd41efa`. All fixture, artifact, receipt, metric, STOP, authority, and next-dependency statements in the original result entry remain unchanged. The original bytes are preserved.
+
+
+### E-20261005-INT-CPU-CONTACT-51-CORRECTION-CLAIM-001 - 51-target and 3 mm phone correction claimed
+
+- Stage/lane and base: S3-S4 AI/model plus simulation on `issue/190-isaac-sim-host`; base full Git SHA `8efb3fb9db1e7e129d2baf1c08f71e6e3e972173`.
+- Correction scope: preserve the 46-target Stage E/F receipt and 2,116-pair WS3 receipt as limited evidence; bind the exact 51-target candidate catalog and its retained 120 mm pose seeds; independently solve both 110 mm x 3 mm exposure profiles for all 51 targets; rerun Stage E/F and require 51-target coverage; rebuild WS3 to exactly 2,601 ordered pairs including repeats.
+- Phone correction: preserve every prior 1/4/7 mm cell and add the actual 3 mm keyboard candidate under an otherwise unchanged area/timing matrix. The result must report the 3 mm row separately and may not infer physical registration.
+- Boundaries: CPU-only simulation; WS2 Stage A runner excluded; GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Arm-lane and integration-gate status are unchanged.
