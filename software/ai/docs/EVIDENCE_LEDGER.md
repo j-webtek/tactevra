@@ -11763,7 +11763,7 @@ rewriting history. New entries must use a unique evidence ID.
 - Throughput intent: preserve the complete six-compliance population as the reference. Before Stage A, measure the exact runner's dual-GPU throughput. If projected two-GPU wall time is at most 12 hours, execute all six compliance identities in Stage A. Otherwise execute four predeclared corner combinations in Stage A and add the two omitted nominal-stiffness combinations in Stage B; no safety gate changes and no post-result choice is allowed.
 - Authority: planning only. GPU jobs 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. Next dependency: commit this claim, implement/hash the successor fixture and scoring helper, validate exact populations, then freeze a debounce-positive-control matrix before any large GPU launch.
 
-### E-20261005-INT-WS2-STAGE-A-DEBOUNCE-CLAIM-001 - claim pre-result closure and throughput amendment
+### E-20261005-INT-WS2-STAGE-A-DEBOUNCE-CLAIM-002 - concurrent duplicate claim retained under unique identity
 
 - Stage/lane and base: S3 AI/model plus simulation on `issue/190-isaac-sim-host`; base `6b985f19`. No Stage A result exists. Preserve v2 and create a successor before runner implementation.
 - Claimed amendment: add minimum switch-closure duration as an unmeasured 5-30 ms range; require realized closure to meet the sampled minimum and remain below the existing auto-repeat ceiling; report realized closure per recipe. Apply the existing two-GPU 12-hour throughput rule to compliance sampling: full six combinations only inside budget, otherwise four range-endpoint combinations in Stage A and the two midpoint-stiffness combinations through a frozen Stage B rule.
