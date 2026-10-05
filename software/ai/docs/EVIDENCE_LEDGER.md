@@ -11895,3 +11895,17 @@ rewriting history. New entries must use a unique evidence ID.
 - Frozen decision: `FOUR_CORNERS`. Stage A uses compliance `(0.0715,3)`, `(0.0715,6)`, `(0.286,3)`, and `(0.286,6)` for 17,860,608 worlds. Stage B adds `(0.143,3)` and `(0.143,6)` for every frozen boundary identity. No threshold or safety gate changed. The Stage A result must report actuation, bottom-out, two-sided depth margin, and failures by compliance, ranking worst-case minimum depth margin first so any soft-compliance depth-buffer effect is visible.
 - Receipt and retention: comparison receipt SHA-256 `53faf8b3869fc9e598e702ec1c4b8d104e1ae8f2c5146c19ac7ed2a7f21ec043`; result receipt canonical/file SHA-256 `cabd2bd3bbec3a799ded979f74997e2e361a41375b3cc749ee7c7bbb37d4fd2e` / `39236beeb7ec1b721a05e6c89e63728261eb6c435e36f76397db22c598318510`. Complete bytes exist in both external evidence roots.
 - Limitations and authority: the projection uses one representative profile/tip/landing family and estimates later scheduling overhead. Compliance remains synthetic and unmeasured. Corrected GPU jobs 2 and worlds 14,336; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Next dependency: freeze the full chunk/shard runner against the four-corner population, including per-compliance depth-margin summaries and exact restart/admission manifests, then execute Stage A.
+
+
+### E-20261005-INT-CPU-CONTACT-LEDGER-FAILURE-001 - preserved concurrent append-policy failure
+
+- Preserved process failure: while another conversation appended WS2 throughput evidence, the CPU harness implementation entry was inserted after its earlier freeze anchor instead of at the then-current file end. `python scripts/ci/check_evidence_ledger_append_only.py` correctly failed with first mismatch at byte 1556888. The pushed implementation commit `562a3a55` therefore contains a non-tail ledger insertion. Existing bytes were not deleted or rewritten, but placement violated the append-only process.
+- Correction: this and every successor entry are appended by opening the current ledger in binary append mode. No historical entry is moved or rewritten. The implementation code and six passing tests are unaffected; the earlier sentence claiming the append-only check passed is superseded by this preserved correction.
+- Authority: hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
+
+### E-20261005-INT-EF-110MM-CONTACT-ATTEMPT-001 - deterministic tie-sort failure before result
+
+- Exact failed command: `$env:PYTHONPATH='software/src;software/ai'; python -m rocell_ai.cpu_contact_and_ws3 stage-ef --fixture software/ai/sim/evidence/cpu_contact_and_ws3_v1.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\cpu_contact_ws3_v1\stage_ef_result.json`.
+- Failure: equal analytic AABB lower bounds caused Python tuple sorting to compare key dictionaries and raise `TypeError`. The process stopped before writing an output, receipt, per-key metric, or decision. The frozen population, geometry, thresholds, and rules remain unchanged.
+- Equivalent correction: sort candidates by `(lower_bound, target_id)` so equal geometric bounds have a deterministic order without changing any distance calculation. Next rerun the exact frozen Stage E/F population after focused validation.
+- Authority: CPU process only; GPU jobs 0; physics steps 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.

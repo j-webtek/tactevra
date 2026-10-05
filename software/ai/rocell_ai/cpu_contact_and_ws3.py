@@ -133,7 +133,7 @@ def _nearest_key_distance(
     component: str,
 ) -> tuple[float, str | None]:
     candidates = sorted(
-        (
+        ((
             _aabb_box_lower_bound_mm(
                 swept_aabb,
                 box_center_mm=key["center"],
@@ -141,10 +141,11 @@ def _nearest_key_distance(
             ),
             key,
         )
-        for key in keys
-        if not (
-            component == "DISTAL_TIP" and key["target_id"] == requested_target_id
-        )
+         for key in keys
+         if not (
+             component == "DISTAL_TIP" and key["target_id"] == requested_target_id
+         )),
+        key=lambda item: (item[0], item[1]["target_id"]),
     )
     minimum = float("inf")
     limiting_key = None
@@ -494,4 +495,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
