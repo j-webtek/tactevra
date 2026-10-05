@@ -306,6 +306,34 @@ def test_ws2_debounce_successor_freezes_hold_and_throughput_populations():
     assert not any(staged["counters"].values())
 
 
+def test_ws2_stage_a_batches_are_homogeneous_and_exact():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=fixture
+    )
+    staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED_V3, workspace=ROOT, parent=fixture, execution=execution
+    )
+    batches = WS2_PROBE.stage_a_homogeneous_batches(
+        fixture, staged, workspace=ROOT
+    )
+    assert len(batches) == 65_664
+    assert sum(row["world_count"] for row in batches) == 17_860_608
+    assert sorted({row["world_count"] for row in batches}) == [32, 672, 832]
+    assert {row["tool_compliance"]["compliance_id"] for row in batches} == {
+        "k0.0715_t3", "k0.0715_t6", "k0.286_t3", "k0.286_t6"
+    }
+    assert all(
+        len({tuple(row["half_extent_mm"])}) == 1
+        and row["world_count"] == len(row["rows"])
+        for row in batches
+    )
+    assert abs(
+        sum(row["world_count"] for row in batches if row["device"] == "cuda:0")
+        - sum(row["world_count"] for row in batches if row["device"] == "cuda:1")
+    ) <= 832
+
+
 def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
     execution = WS2_PROBE.load_execution_fixture(

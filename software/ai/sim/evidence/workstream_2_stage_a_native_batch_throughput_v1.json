@@ -1,0 +1,80 @@
+{
+  "amendment": "PRE_RESULT_CORRECTION_REPLACES_UNIFORM_4096_WORLD_PROJECTION_WITH_EXACT_HOMOGENEOUS_MODEL_BATCHES",
+  "bindings": {
+    "campaign": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json",
+      "sha256": "ecab1ba591cec89f010afb2a577a7bf90188206663fc52bdee090550fdb3ec04"
+    },
+    "execution": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json",
+      "sha256": "4896afad4902f7ba9ddf9f7094ceb78ded846bbc0b3c77326ad1ab96bc909b1b"
+    },
+    "probe": {
+      "path": "software/integrations/mujoco_warp/key_press_physics_probe.py",
+      "sha256": "7d13a4eb504626b1d64e5ebd1b5ad65b1fb98a19c9c57fcd443d79126406cf22"
+    },
+    "runner": {
+      "path": "software/ai/sim/run_ws2_stage_a_native_batch_throughput.py",
+      "sha256": "cb10039c36cf302656a0bdf173172bef0644dc8d2bee0e68fbd2ecbee371d574"
+    },
+    "staged": {
+      "path": "software/ai/sim/evidence/workstream_2_staged_search_v3.json",
+      "sha256": "6261a20e8aeaa0e2c9beb36501fd4f31e84665aedab8eb426757243902c10e5a"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision": {
+    "launch_only_if_both_devices_pass_every_geometry_and_projected_hours_lte": 12.0,
+    "maximum_two_gpu_hours": 12.0,
+    "no_gate_change": true,
+    "otherwise": "STOP_AND_REDESIGN_BATCHING_OR_CAMPAIGN_ALLOCATION",
+    "prior_4096_clone_projection_status": "RETAINED_INVALID_FOR_FULL_RUNNER_SCHEDULING",
+    "projection": "FOR_EACH_DEVICE_SUM_ASSIGNED_BATCH_COUNT_BY_GEOMETRY_CLASS_TIMES_THAT_DEVICE_EXACT_BATCH_WALL_SECONDS"
+  },
+  "fixture_sha256": "5f2eac631d403c04ba399cbb28b4d4ba503d54ec3cd9cace019f63f3b8a748b8",
+  "limitations": [
+    "representative smoke uses the longest coarse recipe and one profile/tip/compliance",
+    "compile and execution time can vary across model parameters",
+    "all physics and compliance values remain synthetic and unmeasured"
+  ],
+  "physical_authority": false,
+  "population": {
+    "batch_world_counts": [
+      32,
+      672,
+      832
+    ],
+    "compliance": [
+      "k0.0715_t3",
+      "k0.0715_t6",
+      "k0.286_t3",
+      "k0.286_t6"
+    ],
+    "geometry_class_count": 6,
+    "homogeneous_batch_count": 65664,
+    "world_count": 17860608
+  },
+  "schema": "tactevra.ws2_stage_a_native_batch_throughput_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "smoke": {
+    "compliance_id": "k0.0715_t3",
+    "devices": [
+      "cuda:0",
+      "cuda:1"
+    ],
+    "one_exact_batch_per_geometry_class_per_device": true,
+    "profile_id": "BASELINE",
+    "recipe_index": 17,
+    "switch_closure_window_ms": {
+      "maximum": 150.0,
+      "minimum": 30.0
+    },
+    "tip_id": "sphere-r1"
+  }
+}

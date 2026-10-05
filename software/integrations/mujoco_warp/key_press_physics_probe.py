@@ -13,6 +13,7 @@ import json
 import math
 from pathlib import Path
 import platform
+import re
 import subprocess
 import time
 from typing import Any
@@ -418,6 +419,93 @@ def coarse_recipe_indices(
             )
         )
     return selected
+
+
+def stage_a_homogeneous_batches(
+    fixture: dict[str, Any],
+    staged: dict[str, Any],
+    *,
+    workspace: Path,
+) -> list[dict[str, Any]]:
+    """Enumerate exact Stage A batches that can share one MuJoCo model.
+
+    MuJoCo Warp replicates one compiled model across worlds.  A batch may span
+    targets and landing scenarios only when key geometry, physical profile,
+    tip, recipe, and tool compliance are identical.
+    """
+    catalog = json.loads(
+        _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
+        .read_text(encoding="utf-8")
+    )
+    classes: dict[tuple[float, float], list[str]] = {}
+    for target in _target_records(catalog):
+        key = tuple(float(value) for value in target["half_extent_mm"])
+        classes.setdefault(key, []).append(target["target_id"])
+    profiles = physical_profiles(fixture)
+    tips = tip_geometries(fixture)
+    scenarios = [row["id"] for row in fixture["landing_model"]["scenarios"]]
+    recipes = coarse_recipe_indices(fixture, staged)
+    landings = list(staged["stage_a_coarse"]["landing_sample_indices"])
+    selected = staged["stage_a_coarse"]["throughput_selected_compliance"][
+        "over_budget"
+    ]
+    compliance = []
+    for identity in selected:
+        match = re.fullmatch(r"k([0-9.]+)_t([0-9.]+)", identity)
+        if match is None:
+            raise ValueError(f"invalid compliance identity: {identity}")
+        compliance.append(
+            {
+                "compliance_id": identity,
+                "stiffness_n_per_mm": float(match.group(1)),
+                "travel_mm": float(match.group(2)),
+            }
+        )
+    batches = []
+    for half_extent, target_ids in sorted(classes.items()):
+        geometry_id = f"hx{half_extent[0]:g}-hy{half_extent[1]:g}"
+        rows = [
+            {
+                "target_id": target_id,
+                "scenario_id": scenario_id,
+                "landing_sample_index": landing_index,
+            }
+            for target_id in target_ids
+            for scenario_id in scenarios
+            for landing_index in landings
+        ]
+        for profile in profiles:
+            for tip in tips:
+                for recipe_index in recipes:
+                    for tool in compliance:
+                        identity = (
+                            f"{geometry_id}__{profile['profile_id']}__{tip['tip_id']}"
+                            f"__r{recipe_index:03d}__{tool['compliance_id']}"
+                        )
+                        batches.append(
+                            {
+                                "batch_id": identity,
+                                "device": None,
+                                "half_extent_mm": list(half_extent),
+                                "target_ids": list(target_ids),
+                                "profile_id": profile["profile_id"],
+                                "tip_id": tip["tip_id"],
+                                "recipe_index": recipe_index,
+                                "tool_compliance": tool,
+                                "rows": rows,
+                                "world_count": len(rows),
+                            }
+                        )
+    device_worlds = {"cuda:0": 0, "cuda:1": 0}
+    for batch in batches:
+        device = min(device_worlds, key=lambda name: (device_worlds[name], name))
+        batch["device"] = device
+        device_worlds[device] += batch["world_count"]
+    expected = staged["stage_a_coarse"]["coarse_compliance_expected_worlds"]
+    actual = sum(row["world_count"] for row in batches)
+    if actual != expected:
+        raise ValueError(f"Stage A population changed: {actual} != {expected}")
+    return batches
 
 
 def primary_failure(row: dict[str, Any]) -> str:
@@ -889,12 +977,39 @@ def run_smoke_worker(
             "expected_world_count": len(control["control"]["landing_sample_indices"]),
         }
     )
+    batch_rows = (
+        None if control is None else control["control"].get("batch_rows")
+    )
+    if batch_rows is not None:
+        if not batch_rows:
+            raise ValueError("Stage A batch rows cannot be empty")
+        required = {"target_id", "scenario_id", "landing_sample_index"}
+        if any(set(row) != required for row in batch_rows):
+            raise ValueError("Stage A batch row identity changed")
+        smoke["target_id"] = batch_rows[0]["target_id"]
+        smoke["expected_world_count"] = len(batch_rows)
     catalog = json.loads(
         _resolve(workspace, fixture["bindings"]["candidate_catalog"]["path"])
         .read_text(encoding="utf-8")
     )
     targets = _target_records(catalog)
     target = next(row for row in targets if row["target_id"] == smoke["target_id"])
+    if batch_rows is not None:
+        batch_targets = {
+            row["target_id"]: next(
+                target_row
+                for target_row in targets
+                if target_row["target_id"] == row["target_id"]
+            )
+            for row in batch_rows
+        }
+        expected_extent = tuple(float(value) for value in target["half_extent_mm"])
+        if any(
+            tuple(float(value) for value in row["half_extent_mm"])
+            != expected_extent
+            for row in batch_targets.values()
+        ):
+            raise ValueError("Stage A batch mixes key geometry classes")
     profile = next(
         row for row in physical_profiles(fixture) if row["profile_id"] == smoke["profile_id"]
     )
@@ -905,19 +1020,33 @@ def run_smoke_worker(
     recipe = recipes[smoke["recipe_indices"][0]]
     if control is not None:
         recipe = {**recipe, **control["control"]["recipe_override"]}
-    scenario_id = smoke["scenario_ids"][0]
     landing = json.loads(
         _resolve(workspace, execution["bindings"]["landing_prepass"]["path"])
         .read_text(encoding="utf-8")
     )
-    landing_row = next(
-        row
+    landing_lookup = {
+        (row["target_id"], row["scenario_id"]): row["offset_xy_mm"]
         for row in landing["rows"]
-        if row["target_id"] == target["target_id"]
-        and row["scenario_id"] == scenario_id
-    )
+    }
+    if batch_rows is None:
+        scenario_id = smoke["scenario_ids"][0]
+        row_identities = [
+            {
+                "target_id": target["target_id"],
+                "scenario_id": scenario_id,
+                "landing_sample_index": index,
+            }
+            for index in smoke["landing_sample_indices"]
+        ]
+    else:
+        row_identities = batch_rows
     offsets = np.asarray(
-        [landing_row["offset_xy_mm"][index] for index in smoke["landing_sample_indices"]],
+        [
+            landing_lookup[(row["target_id"], row["scenario_id"])][
+                row["landing_sample_index"]
+            ]
+            for row in row_identities
+        ],
         dtype=np.float64,
     )
     nworld = len(offsets)
@@ -930,6 +1059,15 @@ def run_smoke_worker(
     tool_compliance_model = (
         None if control is None else control["control"].get("tool_compliance_model")
     )
+    switch_window = (
+        None if control is None else control["control"].get("switch_closure_window_ms")
+    )
+    if switch_window is not None:
+        if set(switch_window) != {"minimum", "maximum"} or not (
+            0.0 <= float(switch_window["minimum"])
+            <= float(switch_window["maximum"])
+        ):
+            raise ValueError("invalid switch closure window")
     if tool_compliance_model not in {None, "NESTED_MOCAP_JOINT", "SERIES_QUASISTATIC"}:
         raise ValueError("unknown tool compliance model")
     if tool_compliance_model == "SERIES_QUASISTATIC":
@@ -1119,18 +1257,20 @@ def run_smoke_worker(
     )
     rows = []
     for index in range(nworld):
+        identity = row_identities[index]
         margins = depth_margin_metrics(
             float(peak_mm[index]), float(actuation_mm), float(bottom_mm)
         )
         row = {
             "row_id": (
-                f"{target['target_id']}__{scenario_id}__r{recipe['recipe_index']:03d}"
-                f"__l{smoke['landing_sample_indices'][index]:03d}"
+                f"{identity['target_id']}__{identity['scenario_id']}"
+                f"__r{recipe['recipe_index']:03d}"
+                f"__l{identity['landing_sample_index']:03d}"
             ),
-            "target_id": target["target_id"],
-            "scenario_id": scenario_id,
+            "target_id": identity["target_id"],
+            "scenario_id": identity["scenario_id"],
             "recipe_index": recipe["recipe_index"],
-            "landing_sample_index": smoke["landing_sample_indices"][index],
+            "landing_sample_index": identity["landing_sample_index"],
             "actuation_count": int(actuation_count[index]),
             "auto_repeat_count": int(repeats[index]),
             "neighbor_contact": bool(neighbor_contact[index]),
@@ -1148,6 +1288,12 @@ def run_smoke_worker(
             "final_position_error_mm": float(final_position_error_mm[index]),
             "final_velocity_mm_s": float(final_velocity_mm_s[index]),
         }
+        if switch_window is not None:
+            row["debounce_hold_complete"] = keyboard_hold_window_admitted(
+                row["dwell_above_actuation_ms"],
+                debounce_samples_ms=[float(switch_window["minimum"])],
+                maximum_hold_ms=float(switch_window["maximum"]),
+            )
         if control is not None:
             row["control_id"] = control["control"]["control_id"]
         if tool_compliance is not None:
@@ -1162,6 +1308,7 @@ def run_smoke_worker(
             and not row["bottom_out_overflow"]
             and row["release_complete"]
             and row["force_within_available"]
+            and row.get("debounce_hold_complete", True)
         )
         rows.append(row)
     stack = _stack()
