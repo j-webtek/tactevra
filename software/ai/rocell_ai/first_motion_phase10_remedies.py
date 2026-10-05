@@ -159,10 +159,12 @@ def _pad_screen(fixture: dict[str, Any], workspace: Path, world: _World,
     expected = set(load_collision_attribution_fixture(attribution_path)[
         "contact_classes"]["DECLARED_EXPECTED_BUT_UNREVIEWED"])
     cable = design["cable_design"]
+    include_moving_cable = fixture.get("attachment_configuration", {}).get(
+        "moving_cable_present", True)
     cables = list(product(cable["anchor_board_x_mm_range"],
                           cable["anchor_height_board_z_mm_range"],
                           cable["maximum_sag_fraction_range"],
-                          cable["cable_radius_mm_range"]))
+                          cable["cable_radius_mm_range"])) if include_moving_cable else [None]
     tools = list(product(world.section["tool"]["length_mm_range"],
                          world.section["tool"]["radius_mm_range"]))
     spec = waypoint["waypoint_study"]
@@ -183,7 +185,8 @@ def _pad_screen(fixture: dict[str, Any], workspace: Path, world: _World,
             continue
         for tool_length, tool_radius in tools:
             contract = _pad_contract(world, tool_length=tool_length,
-                                     tool_radius=tool_radius, pad=pad, spec=pad_spec)
+                                     tool_radius=tool_radius, pad=pad, spec=pad_spec,
+                                     include_moving_cable=include_moving_cable)
             center = pad_spec["center_board_xy_mm"]
             for hover, approach, depth in product(
                     pad_spec["hover_mm_range"], pad_spec["approach_mm_range"],

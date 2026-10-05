@@ -185,7 +185,8 @@ class _World:
         return result
 
     def contract(self, *, tool_length: float, tool_radius: float,
-                 pad: dict[str, float] | None) -> CollisionGeometryContract:
+                 pad: dict[str, float] | None,
+                 include_moving_cable: bool = True) -> CollisionGeometryContract:
         clamp_spec = self.section["installed_base_clamp"]
         half = Vec3(*(clamp_spec["half_extents_mm_ranges"][axis][0]
                       for axis in ("x", "y", "z")))
@@ -202,12 +203,14 @@ class _World:
             (CapsuleMm(Vec3.zero(), Vec3(0, 0, -tool_length), tool_radius),),
             CollisionBindingMode.RIGID_FRAME, "candidate ranged tool",
         )
-        cable = CollisionBody(
-            "attachment:moving_cable", "board", CollisionBodyRole.CABLE,
-            CollisionEvidenceState.SYNTHETIC_TEST_ONLY, (),
-            CollisionBindingMode.CONFIGURATION_SAMPLED, "candidate managed cable",
-        )
-        bodies = self.robot + [clamp, tool, cable] + self.workcell + self._camera_bodies()
+        attachments = [clamp, tool]
+        if include_moving_cable:
+            attachments.append(CollisionBody(
+                "attachment:moving_cable", "board", CollisionBodyRole.CABLE,
+                CollisionEvidenceState.SYNTHETIC_TEST_ONLY, (),
+                CollisionBindingMode.CONFIGURATION_SAMPLED, "candidate managed cable",
+            ))
+        bodies = self.robot + attachments + self.workcell + self._camera_bodies()
         if pad is not None:
             half_pad = Vec3(pad["width_mm"] / 2, pad["depth_mm"] / 2,
                             pad["thickness_mm"] / 2)
@@ -226,7 +229,7 @@ class _World:
             "TACTEVRA-COLLISION-DESIGN", "board", requirements, tuple(bodies), ())
 
     def evaluate(self, contract: CollisionGeometryContract, joints: tuple[float, ...],
-                 cable: tuple[float, float, float, float]) -> set[str]:
+                 cable: tuple[float, float, float, float] | None) -> set[str]:
         positions = {name: JointPosition.radians(value) for name, value in zip(
             self.pose_bundle["joint_order"], joints, strict=True)}
         positions["link5_to_gripper_link"] = self.context.scenario.fixed_gripper_position
@@ -234,21 +237,22 @@ class _World:
         transforms = {name: self.board_t_world.compose(transform)
                       for name, transform in fk.items()}
         transforms["board"] = RigidTransform.identity("board")
-        gripper = transforms["gripper_link"].translation_mm
-        anchor_x, anchor_z, sag, radius = cable
-        cable_spec = self.section["moving_cable"]
-        anchor = Vec3(anchor_x,
-                      cable_spec["route_family"]["fixed_anchor_board_y_mm"], anchor_z)
-        midpoint = ((gripper + anchor).scaled(0.5)
-                    + Vec3(0, 0, -sag * cable_spec["swept_offset_mm_range"][1]))
-        sampled = SampledCollisionGeometry(
-            (CapsuleMm(gripper, midpoint, radius), CapsuleMm(midpoint, anchor, radius)),
-            CollisionEvidenceState.SYNTHETIC_TEST_ONLY, "managed cable endpoint",
-        )
+        sampled_geometry = {}
+        if cable is not None:
+            gripper = transforms["gripper_link"].translation_mm
+            anchor_x, anchor_z, sag, radius = cable
+            cable_spec = self.section["moving_cable"]
+            anchor = Vec3(anchor_x,
+                          cable_spec["route_family"]["fixed_anchor_board_y_mm"], anchor_z)
+            midpoint = ((gripper + anchor).scaled(0.5)
+                        + Vec3(0, 0, -sag * cable_spec["swept_offset_mm_range"][1]))
+            sampled_geometry["attachment:moving_cable"] = SampledCollisionGeometry(
+                (CapsuleMm(gripper, midpoint, radius), CapsuleMm(midpoint, anchor, radius)),
+                CollisionEvidenceState.SYNTHETIC_TEST_ONLY, "managed cable endpoint",
+            )
         evaluation = evaluate_collision_pose(
             contract,
-            CollisionPose("collision-design", "board", transforms,
-                          {"attachment:moving_cable": sampled}),
+            CollisionPose("collision-design", "board", transforms, sampled_geometry),
             CollisionEvaluationPolicy(clearance_policy=CollisionClearancePolicy(
                 self.section["clearance_margin_mm_range"][1], 0, 0,
                 CollisionClearanceEvidenceState.SYNTHETIC_TEST_ONLY,

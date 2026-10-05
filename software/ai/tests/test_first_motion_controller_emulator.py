@@ -23,6 +23,7 @@ from rocell_ai.first_motion_controller_emulator import (
     run_staged_bringup_rehearsal,
 )
 from rocell_ai.first_motion_collision_design import (
+    _World,
     _pad_variants,
     load_collision_design_fixture,
 )
@@ -315,3 +316,33 @@ def test_phase10_keycap_height_pad_fixture_uses_pose_bundle_height() -> None:
     assert fixture["pad_contact"]["fixed_top_board_z_mm"] == heights.pop()
     assert fixture["pad_contact"]["run_all_13_frozen_pad_variants"]
     assert not any(fixture["counters"].values())
+
+
+def test_selected_passive_stylus_fixture_omits_moving_cable() -> None:
+    from rocell_ai.first_motion_phase10_remedies import load_remedy_fixture
+
+    fixture = load_remedy_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_selected_attachment_pad_v1.json")
+    assert fixture["attachment_configuration"] == {
+        "phase": "SELECTED_PHASE_1",
+        "contact_tool": (
+            "PASSIVE_CAPACITIVE_STYLUS_IN_PRINTED_COLLAR_AND_SHARED_COMPLIANT_BODY"
+        ),
+        "camera": "STATIC_OVERHEAD_B0477",
+        "moving_cable_present": False,
+        "fixed_workcell_cables_modeled_by_this_fixture": False,
+        "optional_arm_camera_route_changed": False,
+        "reason": fixture["attachment_configuration"]["reason"],
+    }
+    design = load_collision_design_fixture(COLLISION_DESIGN_FIXTURE)
+    contract = _World(design, ROOT).contract(
+        tool_length=80.0,
+        tool_radius=1.0,
+        pad=None,
+        include_moving_cable=False,
+    )
+    body_ids = {body.body_id for body in contract.bodies}
+    requirement_ids = {row.body_id for row in contract.requirements}
+    assert "attachment:contact_tool" in body_ids
+    assert "attachment:moving_cable" not in body_ids
+    assert "attachment:moving_cable" not in requirement_ids

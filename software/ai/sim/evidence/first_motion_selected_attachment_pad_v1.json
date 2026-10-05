@@ -1,0 +1,131 @@
+{
+  "attachment_configuration": {
+    "camera": "STATIC_OVERHEAD_B0477",
+    "contact_tool": "PASSIVE_CAPACITIVE_STYLUS_IN_PRINTED_COLLAR_AND_SHARED_COMPLIANT_BODY",
+    "fixed_workcell_cables_modeled_by_this_fixture": false,
+    "moving_cable_present": false,
+    "optional_arm_camera_route_changed": false,
+    "phase": "SELECTED_PHASE_1",
+    "reason": "The selected passive stylus is mechanically retained and has no electrical cable; the selected overhead camera is static. The prior moving attachment cable belongs only to a separate optional arm-camera architecture."
+  },
+  "bindings": {
+    "assembly_manual": {
+      "path": "active-project/RoCell_v0_3/ASSEMBLY_MANUAL.md",
+      "sha256": "5c77cf9c49e7afcf51eaaf26cf58dc78081eec860b006acebee91a1f11046c07"
+    },
+    "build_alignment_freeze": {
+      "path": "BUILD_ALIGNMENT_FREEZE.md",
+      "sha256": "6aeda84aa20ef9ef61ce13e8546b4c4aace9cb3b549db8f7170f3245c0311842"
+    },
+    "camera_family": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\camera_family\\nadir_camera_family_v1.json",
+      "sha256": "151b9fb0352660089823fa8b821f0d7a73072689a3ad0b0217d70886dd1219ee"
+    },
+    "clearance_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_clearance_waypoint_v1.json",
+      "sha256": "29f9fb1e436bd3e3b82184710b888d58aa21229de1e9d2359cc503daa2f8e7a0"
+    },
+    "clearance_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\phase10\\clearance_waypoint_study_v1.json",
+      "sha256": "645319b8b73222f398e9fe2734344fa3bef06cb24f479e9606238c289d4619b5"
+    },
+    "compliant_tool_body_step": {
+      "path": "active-project/RoCell_v0_3/cad/step/compliant_tool_body.step",
+      "sha256": "a734ff981947886e932f45745f92235d1dc34be5a87c4d585d3e5d06bedb6c93"
+    },
+    "height_fixture": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\camera_family\\nadir_height_admission_v1_4.json",
+      "sha256": "29a0fa99601652302f32653e557cbbab959d57dd24104e5de4630616ac3a1e87"
+    },
+    "park_screen": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\joint_park_camera_screen_v1.json",
+      "sha256": "9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed"
+    },
+    "prehardware_configuration": {
+      "path": "active-project/RoCell_v0_3/config/v1_prehardware_configuration.json",
+      "sha256": "04c4e394e8ded36106811a1626b9e2265d7e652869b03c5c0cf76770932b3f63"
+    },
+    "prior_keycap_height_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_keycap_height_pad_v1.json",
+      "sha256": "b9342e6d6a543b6a31c9d5eaa6f8f3be01b511e58b24251578e16cd890d9270e"
+    },
+    "prior_remedy_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_phase10_remedy_v1.json",
+      "sha256": "38bd9e6594d4d8310da7638f638986fd9a955626719f2a7bd177f753a935bc90"
+    },
+    "projection_implementation": {
+      "path": "software/integrations/isaac_sim/isaac_fixed_overview_mesh_render_probe.py",
+      "sha256": "010352fb487f9c8cc124cf1a9ae7683cf9061157fdd87f6a9912d44d6ebe1b78"
+    },
+    "stylus_collar_step": {
+      "path": "active-project/RoCell_v0_3/cad/step/stylus_collar_9mm.step",
+      "sha256": "ac7292d53d8a6a1d7d916c411d7c98dcb27d694b7606d71934eb10092cfdf265"
+    },
+    "target_catalog": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "target_pose_bundle": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2u\\nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+    }
+  },
+  "camera_screen": {
+    "pose_id": "halton-0573",
+    "require_all_80_safe_regions_and_48_mm_crops_in_frame": true,
+    "require_positive_capsule_clearance_every_height_and_distortion": true,
+    "screening_heights_board_mm": [
+      700.0,
+      850.0,
+      1000.0
+    ]
+  },
+  "claim_commit": "496ea6d528c9a1945aedf221d53f9b95cd5a13fc",
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "The selected Phase-1 collision contract must omit attachment:moving_cable entirely.",
+    "The passive stylus, printed collar, compliant body, rigid robot links, pad, board, stations, and static camera bodies remain screened.",
+    "The prior moving-cable result remains preserved and is not rescored; this is a new configuration result.",
+    "Any remaining non-expected body pair keeps STOP. Fixed phone or keyboard cables require separate measured static workcell geometry and are not invented here.",
+    "This fixture does not change or qualify the optional future arm-mounted camera route."
+  ],
+  "fixture_sha256": "065270d6ee8248f3ed50e972ad41f52b4ef6095bbb7fc53a1cc2b75daa1cd698",
+  "pad_contact": {
+    "decision": "report both station modes; never claim clear while any concerning pair remains",
+    "fixed_top_board_z_mm": 20.0,
+    "height_derivation": "EXACT_COMMON_CONTACT_TARGET_BOARD_Z_ACROSS_ALL_46_KEYBOARD_POSES",
+    "keyboard_pose_count": 46,
+    "modes": [
+      "STATIONS_PRESENT",
+      "TRAY_REPLACES_KEYBOARD_AND_NEIGHBOR_STATIONS"
+    ],
+    "retain_all_other_phase10_pad_ranges": true,
+    "run_all_13_frozen_pad_variants": true,
+    "semantic_phase": "PRESS_CONTACT_ACTIVE"
+  },
+  "schema": "tactevra.first_motion_selected_attachment_pad_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "stage_c_wrist": {
+    "absolute_final_tool_error_bands_mm": [
+      1.0,
+      3.0,
+      5.0
+    ],
+    "modes": [
+      "BASELINE",
+      "FIX_WRIST_PITCH",
+      "FIX_WRIST_ROLL",
+      "FIX_BOTH_WRIST_JOINTS"
+    ],
+    "screen_all_16_cable_and_4_tool_endpoints": true,
+    "target_id": "G"
+  },
+  "status": "FROZEN_BEFORE_EXECUTION"
+}

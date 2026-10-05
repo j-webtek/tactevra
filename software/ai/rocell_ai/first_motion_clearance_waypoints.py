@@ -123,8 +123,11 @@ def _pad_variants(spec: dict[str, Any]) -> list[dict[str, float]]:
 
 
 def _pad_contract(world: _World, *, tool_length: float, tool_radius: float,
-                  pad: dict[str, float], spec: dict[str, Any]):
-    contract = world.contract(tool_length=tool_length, tool_radius=tool_radius, pad=None)
+                  pad: dict[str, float], spec: dict[str, Any],
+                  include_moving_cable: bool = True):
+    contract = world.contract(
+        tool_length=tool_length, tool_radius=tool_radius, pad=None,
+        include_moving_cable=include_moving_cable)
     kept = tuple(body for body in contract.bodies if body.body_id != "workcell:keyboard")
     center = spec["center_board_xy_mm"]
     half = Vec3(pad["width_mm"] / 2, pad["depth_mm"] / 2, pad["thickness_mm"] / 2)

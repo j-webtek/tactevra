@@ -506,3 +506,5 @@ pad fixture. The fixture derives its 20 mm simulated pad surface from all 46
 keyboard contact targets and adds no generated corpus or runtime asset. Its camera, contact-phase, pad, and wrist screens reuse the existing
 focused test module; all generated partitions and result evidence stay external
 and hash-bound.
+
+The tracked-file ceiling is 6,374 after freezing the selected passive-tool/static-camera attachment fixture. Generated collision receipts remain external and hash-bound.
