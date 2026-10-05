@@ -5,6 +5,7 @@ import inspect
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from rocell.arm.all_joint_command import all_joint_command
@@ -341,6 +342,32 @@ def test_target_contact_cad_fixture_rejects_tampering(tmp_path: Path) -> None:
     changed.write_text(json.dumps(value), encoding="utf-8")
     with pytest.raises(ValueError, match="fixture hash mismatch"):
         load_target_contact_cad_fixture(changed)
+
+
+def test_vectorized_keycap_contacts_match_exact_box_distances() -> None:
+    from rocell_ai.first_motion_clearance_waypoints import (
+        _keycap_contacts,
+        _keycap_geometry,
+        _point_box_min_distance,
+    )
+
+    targets = {
+        "A": {"contact_target_board_mm": {"x": 0.0, "y": 0.0, "z": 20.0}},
+        "B": {"contact_target_board_mm": {"x": 19.0, "y": 0.0, "z": 20.0}},
+    }
+    geometry = _keycap_geometry(targets, width_mm=11.0, thickness_mm=2.0)
+    points = np.asarray(((0.0, 0.0, 20.0), (0.0, 0.0, 30.0)))
+    rows = _keycap_contacts(
+        points, component="DISTAL_TIP", radius_mm=1.0, spacing_mm=1.0,
+        geometry=geometry)
+    assert [row["target_id"] for row in rows] == ["A"]
+    scalar = _point_box_min_distance(
+        points, (0.0, 0.0, 19.0), (5.5, 5.5, 1.0)) - 1.5
+    assert rows[0]["conservative_clearance_mm"] == pytest.approx(scalar)
+    far = np.asarray(((0.0, 0.0, 50.0),))
+    assert _keycap_contacts(
+        far, component="BODY", radius_mm=2.0, spacing_mm=1.0,
+        geometry=geometry) == []
 
 
 def test_phase10_remedy_fixture_is_frozen_and_zero_authority() -> None:

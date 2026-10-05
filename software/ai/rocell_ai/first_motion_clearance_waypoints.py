@@ -232,21 +232,40 @@ def _station_contacts(
     return rows
 
 
+def _keycap_geometry(
+    targets: dict[str, dict[str, Any]], *, width_mm: float, thickness_mm: float,
+):
+    import numpy as np
+
+    ids = tuple(targets)
+    centers = []
+    for target_id in ids:
+        xyz = targets[target_id]["contact_target_board_mm"]
+        centers.append((xyz["x"], xyz["y"], xyz["z"] - thickness_mm / 2.0))
+    return ids, np.asarray(centers, dtype=float), np.asarray(
+        (width_mm / 2.0, width_mm / 2.0, thickness_mm / 2.0), dtype=float)
+
+
 def _keycap_contacts(
     points: Any, *, component: str, radius_mm: float, spacing_mm: float,
-    targets: dict[str, dict[str, Any]], width_mm: float, thickness_mm: float,
+    geometry: tuple[Any, Any, Any],
 ) -> list[dict[str, Any]]:
-    rows = []
+    import numpy as np
+
+    ids, centers, half = geometry
     inflated_radius = radius_mm + spacing_mm / 2.0
-    for target_id, target in targets.items():
-        xyz = target["contact_target_board_mm"]
-        center = (xyz["x"], xyz["y"], xyz["z"] - thickness_mm / 2.0)
-        half = (width_mm / 2.0, width_mm / 2.0, thickness_mm / 2.0)
-        clearance = _point_box_min_distance(points, center, half) - inflated_radius
-        if clearance <= 0.0:
-            rows.append({"target_id": target_id, "component": component,
-                         "conservative_clearance_mm": clearance})
-    return rows
+    top = float((centers[:, 2] + half[2]).max())
+    bottom = float((centers[:, 2] - half[2]).min())
+    if (float(points[:, 2].min()) - inflated_radius > top
+            or float(points[:, 2].max()) + inflated_radius < bottom):
+        return []
+    delta = np.maximum(
+        np.abs(points[:, None, :] - centers[None, :, :]) - half[None, None, :],
+        0.0)
+    clearances = np.sqrt(np.sum(delta * delta, axis=2)).min(axis=0) - inflated_radius
+    return [{"target_id": ids[index], "component": component,
+             "conservative_clearance_mm": float(clearances[index])}
+            for index in np.flatnonzero(clearances <= 0.0)]
 
 
 def _solve_seeded(world: _World, solver: Any, xyz: tuple[float, float, float],
@@ -767,6 +786,10 @@ def run_target_contact_cad_refinement(
     ))
     key_shapes = list(product(
         key_spec["keycap_width_height_mm"], key_spec["keycap_thickness_mm"]))
+    key_geometries = {
+        (float(width), float(thickness)): _keycap_geometry(
+            targets, width_mm=width, thickness_mm=thickness)
+        for width, thickness in key_shapes}
 
     stage_c_counts: dict[tuple[Any, ...], int] = {}
     press_counts: dict[tuple[Any, ...], int] = {}
@@ -827,8 +850,8 @@ def run_target_contact_cad_refinement(
                                 for key in _keycap_contacts(
                                     points, component=component["component"],
                                     radius_mm=component["radius_mm"],
-                                    spacing_mm=spacing, targets=targets,
-                                    width_mm=width, thickness_mm=thickness):
+                                    spacing_mm=spacing,
+                                    geometry=key_geometries[(float(width), float(thickness))]):
                                     identity = (
                                         target_id, phase, sample_index, tool_length,
                                         exposed_length, tip_radius, transit_z, hover,
@@ -871,7 +894,7 @@ def run_target_contact_cad_refinement(
                         contacts = _keycap_contacts(
                             points, component=component_name,
                             radius_mm=component["radius_mm"], spacing_mm=spacing,
-                            targets=targets, width_mm=width, thickness_mm=thickness)
+                            geometry=key_geometries[(float(width), float(thickness))])
                         for contact in contacts:
                             admitted = (component_name == "DISTAL_TIP"
                                         and contact["target_id"] == requested_id)
