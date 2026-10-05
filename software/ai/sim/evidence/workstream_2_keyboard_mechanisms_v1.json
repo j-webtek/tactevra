@@ -1,0 +1,102 @@
+{
+  "bindings": {
+    "candidate_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "measurement_session": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/keyboard_physical_measurement_session_v1.json",
+      "sha256": "e500d2a2e629a8bd6c04d15a358528267c6a2b2c5f2cd0454a7b5434d551f847"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "fixture_sha256": "1ba4b2681a9b187aaff50e79ea4bc754226a9c16337f5b9ca7d934f26146aaf3",
+  "geometry_semantics": {
+    "catalog_half_extent": "PRESS_SAFE_REGION_ONLY_NOT_KEYCAP_COLLISION_GEOMETRY",
+    "physical_keycap_top": "SEPARATE_MEASURED_OR_EXPLICITLY_UNMEASURED_INPUT",
+    "prohibition": "SAFE_REGION_EXTENTS_MUST_NOT_SIZE_CONTACT_OR_NEIGHBOR_COLLISION_GEOMETRY"
+  },
+  "known_physical_keycap_top_mm": {
+    "BACKSPACE": {
+      "physical_status": "NOT_IN_CURRENT_51_TARGET_SET_UNMEASURED",
+      "value": null
+    },
+    "ENTER": {
+      "physical_status": "UNMEASURED",
+      "value": null
+    },
+    "SHIFT": {
+      "physical_status": "MEASURED_SINGLE_READING_SIMULATION_ONLY",
+      "source_measurement_ids": [
+        "shift_top_width_x",
+        "shift_top_height_y"
+      ],
+      "value": [
+        37.76,
+        14.8
+      ]
+    },
+    "SPACE": {
+      "physical_status": "UNMEASURED",
+      "value": null
+    },
+    "TAB": {
+      "physical_status": "UNMEASURED",
+      "value": null
+    }
+  },
+  "mechanism_classes": {
+    "ORDINARY_SINGLE_SLIDER_EXPLORATORY": {
+      "physical_keycap_top_mm": [
+        14.0,
+        14.0
+      ],
+      "physical_status": "UNCOMMISSIONED_SINGLE_READING",
+      "source": "MEASUREMENT_SESSION_STANDARD_KEY_TOP_SINGLE_READING",
+      "target_rule": "SUPPORTED_TARGET_NOT_LISTED_IN_SPECIAL_CLASSES"
+    },
+    "STABILIZED_UNMEASURED": {
+      "admission": "REPORT_SEPARATELY_NO_ORDINARY_KEY_MECHANISM_INHERITANCE",
+      "prospective_target_ids": [
+        "BACKSPACE"
+      ],
+      "required_model_inputs": [
+        "full_keycap_top_width_height_mm",
+        "stabilizer_span_mm",
+        "stabilizer_stiffness_range",
+        "stabilizer_friction_range",
+        "off_center_press_response",
+        "return_hysteresis"
+      ],
+      "target_ids": [
+        "SHIFT",
+        "ENTER",
+        "SPACE"
+      ]
+    },
+    "WIDE_UNSTABILIZED_GEOMETRY_UNMEASURED": {
+      "admission": "STOP_TARGET_SPECIFIC_CONTACT_UNTIL_GEOMETRY_BOUND",
+      "required_model_inputs": [
+        "full_keycap_top_width_height_mm"
+      ],
+      "target_ids": [
+        "TAB"
+      ]
+    }
+  },
+  "physical_authority": false,
+  "schema": "tactevra.ws2_keyboard_mechanism_contract.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "stage_a_partition": {
+    "missing_physical_geometry": "STOP",
+    "no_post_result_reclassification": true,
+    "ordinary_targets_may_enter_vectorized_successor": true,
+    "stabilized_targets_require_separate_mechanism_result": true
+  }
+}

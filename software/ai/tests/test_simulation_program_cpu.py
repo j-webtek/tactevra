@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -32,6 +33,7 @@ WS2_EXECUTION_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execu
 WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json"
 WS2_STAGED_V2 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v2.json"
 WS2_STAGED_V3 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v3.json"
+WS2_MECHANISMS = ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
     ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
@@ -332,6 +334,34 @@ def test_ws2_stage_a_batches_are_homogeneous_and_exact():
         sum(row["world_count"] for row in batches if row["device"] == "cuda:0")
         - sum(row["world_count"] for row in batches if row["device"] == "cuda:1")
     ) <= 832
+
+
+def test_ws2_key_mechanisms_separate_safe_regions_from_physical_geometry():
+    fixture = json.loads(WS2_MECHANISMS.read_text(encoding="utf-8"))
+    claimed = fixture.pop("fixture_sha256")
+    assert WS2_PROBE._sha_value(fixture) == claimed
+    fixture["fixture_sha256"] = claimed
+    for binding in fixture["bindings"].values():
+        path = Path(binding["path"])
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == binding["sha256"]
+    semantics = fixture["geometry_semantics"]
+    assert semantics["catalog_half_extent"] == (
+        "PRESS_SAFE_REGION_ONLY_NOT_KEYCAP_COLLISION_GEOMETRY"
+    )
+    stabilized = fixture["mechanism_classes"]["STABILIZED_UNMEASURED"]
+    assert stabilized["target_ids"] == ["SHIFT", "ENTER", "SPACE"]
+    assert stabilized["prospective_target_ids"] == ["BACKSPACE"]
+    assert fixture["known_physical_keycap_top_mm"]["SHIFT"]["value"] == [
+        37.76, 14.8
+    ]
+    assert fixture["known_physical_keycap_top_mm"]["ENTER"]["value"] is None
+    assert fixture["known_physical_keycap_top_mm"]["SPACE"]["value"] is None
+    assert fixture["mechanism_classes"][
+        "WIDE_UNSTABILIZED_GEOMETRY_UNMEASURED"
+    ]["target_ids"] == ["TAB"]
+    assert fixture["stage_a_partition"]["missing_physical_geometry"] == "STOP"
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
 
 
 def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):
