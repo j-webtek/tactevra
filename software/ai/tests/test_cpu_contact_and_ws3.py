@@ -69,6 +69,35 @@ def test_candidate51_pose_successor_solves_every_target():
         }
 
 
+def test_corrected_contact_phone_and_ws3_counts():
+    fixture = _load_v2()
+    contact = run_stage_ef_contact_screen(fixture, workspace=ROOT)
+    assert contact["target_count"] == 51
+    assert contact["row_count"] == 2 * 51 * 2 * 2
+    assert contact["pass_row_count"] == contact["row_count"]
+    grave = [row for row in contact["rows"] if row["target_id"] == "GRAVE"]
+    assert len(grave) == 8
+    assert min(row["minimum_non_target_clearance_mm"] for row in grave) == pytest.approx(
+        8.37
+    )
+
+    phone = run_phone_capacitive_matrix(fixture)
+    assert phone["row_count"] == 4 * 3 * 5 * 4 * 3 * 3
+    assert phone["by_radius"]["3.0"]["admitted_cell_count"] == 162
+    assert phone["by_radius"]["3.0"]["minimum_effective_area_mm2"] == pytest.approx(
+        math.pi * 9.0 * 0.25
+    )
+    assert phone["by_radius"]["3.0"]["maximum_effective_area_mm2"] == pytest.approx(
+        math.pi * 9.0
+    )
+
+    ws3 = prepare_ws3_transition_harness(fixture, workspace=ROOT)
+    assert ws3["target_count"] == 51
+    assert ws3["ordered_pair_count"] == 51 * 51
+    assert ws3["transition_scenario_count"] == 51 * 51 * 2 * 2 * 3
+    assert ws3["policy_recommendation"] is None
+
+
 def test_fixture_tamper_fails(tmp_path):
     document = json.loads(FIXTURE.read_text())
     document["sections"]["phone_capacitive"]["contact_radius_mm"].append(9.0)
