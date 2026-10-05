@@ -56,16 +56,46 @@
     ],
     "transient_retry_limit": 1
   },
-  "fixture_sha256": "a53c0e87fbd0db07a7dd8790354e038bf7cdb8c11557406effe15c1b3255e163",
+  "fixture_sha256": "3eceec938a5b0504af7f3508d325dba36a63fdc1a56c20d84b3d6f933b518085",
   "integrity": {
+    "amendment": {
+      "date": "2026-10-05",
+      "parent_fixture_sha256": "a53c0e87fbd0db07a7dd8790354e038bf7cdb8c11557406effe15c1b3255e163",
+      "population_and_physics_unchanged": true,
+      "reason": "FIRST_SAMPLED_CONTINUOUS_ONLY_GPU_DELTA_PRESERVED; REPLACE_BYTE_EXACT_FLOAT_HASH_WITH_EXACT_DECISIONS_AND_BOUNDED_CONTINUOUS_COMPARISON"
+    },
     "bindings": [
       "fixture",
       "source",
       "catalog",
       "neighborhood"
     ],
+    "cross_gpu_comparison": {
+      "continuous_absolute_tolerance": 1e-05,
+      "continuous_fields": [
+        "actuation_margin_mm",
+        "bottom_out_margin_mm",
+        "dwell_above_actuation_ms",
+        "final_position_error_mm",
+        "final_velocity_mm_s",
+        "midpoint_error_mm",
+        "minimum_depth_margin_mm",
+        "peak_penetration_mm",
+        "peak_required_force_n",
+        "peak_tool_compression_mm",
+        "peak_tool_force_n"
+      ],
+      "exact_noncontinuous_fields": true,
+      "exact_primary_failure_counts": true,
+      "exact_row_order": true,
+      "mode": "EXACT_DISCRETE_BOUNDED_CONTINUOUS",
+      "on_violation": "STOP_CROSS_GPU_DISAGREEMENT_AND_PRESERVE"
+    },
     "cross_gpu_sample_modulus": 97,
     "cross_gpu_sample_rule": "int(shard_id[:8],16) % 97 == 0",
+    "resume_compatible_fixture_sha256": [
+      "a53c0e87fbd0db07a7dd8790354e038bf7cdb8c11557406effe15c1b3255e163"
+    ],
     "verify_before_every_shard": true
   },
   "physical_authority": false,
