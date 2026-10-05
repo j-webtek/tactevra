@@ -1,0 +1,119 @@
+{
+  "bindings": {
+    "cpu_contact_fixture": {
+      "path": "software/ai/sim/evidence/cpu_contact_and_ws3_v2.json",
+      "sha256": "622ee874b31b3b35cc906fb26bb5b2cbd8074574546d3a6c1271863d3d10894f"
+    },
+    "emulator_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
+      "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
+    },
+    "exact_clearance_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_tool_bound_exact_clearance_v1.json",
+      "sha256": "6bc7084ef4dedc18394e234e97e16f29302bf34dba1d39ca4808b3245d64289f"
+    },
+    "observation_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_independent_observation_v1.json",
+      "sha256": "d83d0f7428ed516d8b9c2d843f0027a6dd388038fe255ecd1eab8f09ba73eb17"
+    },
+    "park_screen": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\joint_park_camera_screen_v1.json",
+      "sha256": "9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed"
+    },
+    "passive_stage_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\passive_tool_rerun\\passive_tool_first_motion_rerun_v1.json",
+      "sha256": "491420aa001477f3865dc944d2ab4371e514724bca3c38cba8db3b9b79d95c3d"
+    },
+    "pose_family": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\cpu_contact_ws3_v2\\candidate51_tool_pose_family.json",
+      "sha256": "abfad469a53e282457811dc3a62c765e80c9e3cf878d446a6695470d1327b1dc"
+    },
+    "readiness_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_readiness_v1.json",
+      "sha256": "6bcfa546d39c5fb11b6231ee3fe79078fe5eaf34ff78e74bf7105d0005faf780"
+    },
+    "station_left_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_left.stl",
+      "sha256": "a19b4288b9d6c3fae66f3baa3aa7726fc4acaa440bdb3f16ad3a7ea7791e9a1f"
+    },
+    "station_right_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_right.stl",
+      "sha256": "bc9cc0d252da8d1702c56bbd0afaf6ed79e5dd9891d121dd54372e4692675cf0"
+    },
+    "target_cad_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\target_contact_cad\\target_contact_cad_result_v1.json",
+      "sha256": "24cfebe7141939a3011a63832abfb5937686f756b3c5ac4c00fb0dace9f7e15e"
+    },
+    "tray_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\selected_attachment_pad\\selected_attachment_pad_result_v1.json",
+      "sha256": "7d9901a7c3ac809ea4988cbba9db16aa0c2850b28093fb94113cdf6c886d8e95"
+    }
+  },
+  "claim_commit": "c8504243",
+  "configuration": {
+    "configuration_id": "FIRST_MOTION_110MM_3MM_PASSIVE_HALTON0573_V1",
+    "exact_swept_distance_method": "CONVEX_HULL_GJK_FIXED_ORIENTATION",
+    "hover_height_mm": 30.0,
+    "moving_cable_present": false,
+    "park_pose_id": "halton-0573",
+    "path_pattern": [
+      "RISE",
+      "TRANSIT",
+      "DESCEND"
+    ],
+    "section_sha256": "9e02b723b40637d04aa4c069216a031965416357b9ac358bb1468847f046d7fc",
+    "stage_d_mode": "TRAY_REPLACES_KEYBOARD_AND_NEIGHBOR_STATIONS",
+    "stage_ef_contact": "DISTAL_TIP_OWN_TARGET_ONLY_DURING_PRESS",
+    "stage_ef_target_count": 51,
+    "station_geometry": "CONTROLLED_REAL_STATION_CAD",
+    "tip_radius_mm": 3.0,
+    "tool_length_mm": 110.0,
+    "transit_height_board_z_mm": 100.0
+  },
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": {
+    "a_source": "BOUND_PASSIVE_STAGE_A_CLEAR",
+    "b_source": "BOUND_PASSIVE_HALTON0573_WAYPOINT_CLEAR",
+    "c_rule": "ALL_51_EXACT_KEY_SWEEPS_AND_BOUND_REAL_STATION_CAD_CLEAR",
+    "d_rule": "BOUND_TRAY_REPLACEMENT_CLEAR",
+    "e_f_rule": "ALL_408_EXACT_CONTACT_ROWS_PASS",
+    "every_stage_requires_configuration_sha256": true,
+    "mismatch": "STOP",
+    "official_readiness_remains": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+    "section_sha256": "9da561641a5d401ef92e4b1eb3fecfa328bf746d455d163b0a0bb40c0f8ef086",
+    "wrong_model_rule": "ZERO_UNDETECTED_CONSEQUENTIAL_WITH_SILHOUETTE_OR_TOUCH"
+  },
+  "emulator": {
+    "predicted_only": true,
+    "real_transport_forbidden": true,
+    "samples_per_stage": 33,
+    "section_sha256": "cabed583b60a5e3f29c8457141a58ec0d602b90df29d2d5d70f3cac623050aa4",
+    "stages": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ],
+    "strict_runtime_required": true
+  },
+  "fixture_sha256": "fa89978aa66124e29d8551381c46050ea6166ed6b680afc4a5d36cbbbd0ed21e",
+  "limitations": [
+    "Candidate collision geometry is uninstalled.",
+    "The real station CAD proof is inherited and hash-bound; key and tool path clearance is recomputed with continuous GJK.",
+    "Telemetry uses an unmeasured synthetic plant.",
+    "Silhouette and touch observer thresholds remain synthetic ranges.",
+    "No result authorizes physical motion."
+  ],
+  "physical_authority": false,
+  "schema": "tactevra.first_motion_consolidated_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}
