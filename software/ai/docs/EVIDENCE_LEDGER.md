@@ -11531,3 +11531,8 @@ rewriting history. New entries must use a unique evidence ID.
 - Depth result: peak penetration is `1.8477268459 mm`; actuation margin is only `0.0477268459 mm`, bottom-out margin is `1.1522731541 mm`, minimum two-sided margin is `0.0477268459 mm`, and midpoint error is `0.5522731541 mm`. The command depth itself is centered at 2.4 mm, but modeled contact compliance prevents the key from following it. Stage C must therefore use realized worst-case margins, not commanded depth, when ranking later recipes.
 - Interpretation and next dependency: the release model is functional; the earlier 0.25-second result indicates the search must preserve release as a real gate and distinguish recipes that reset within the frozen episode. Proceed to the already frozen staged search without changing its contact gates. Synthetic mechanics, key profiles, tool contact, and timing remain unmeasured and cannot qualify hardware.
 - Validation: 15 focused tests pass; Ruff, `py_compile`, maintained-doc, evidence-prefix/ID, source-footprint at 6,382 files, and diff checks pass. Hardware-write count 0; physical-movement count 0; real commands 0; permits 0; transports 0; physical authority false.
+
+
+### E-20261005-INT-WS2-RELEASE-CONTROL-BINDING-001 — release-control result commit binding
+
+- Full result commit `f0d8400f9c96f5a6b9b6b8553e0cb01c5f562fad` records the release-control receipts, realized two-sided depth margins, shared-stage update, limitations, exact commands, zero-authority counters, and next dependency. This binding changes no metric or gate.
