@@ -1,0 +1,155 @@
+{
+  "schema": "tactevra.first_motion_tool_bound_exact_clearance_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "claim_commit": "5f245eec9f8fd2ae71703988bc7f27cafa83006d",
+  "bindings": {
+    "prior_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_target_contact_cad_v1.json",
+      "sha256": "864bd6f21719d2ce1f753a06b43f511fb20725e808cce714fd501054657ee273"
+    },
+    "prior_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\target_contact_cad\\target_contact_cad_result_v1.json",
+      "sha256": "24cfebe7141939a3011a63832abfb5937686f756b3c5ac4c00fb0dace9f7e15e"
+    },
+    "legacy_pose_bundle": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2u\\nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385",
+      "declared_tool_length_mm": 120.0
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "virtual_profile": {
+      "path": "software/config/virtual_commissioning_profile.json",
+      "sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+    },
+    "mjcf": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw1\\roarm_m3_kinematic.mjcf",
+      "sha256": "448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0"
+    },
+    "mw2uc_cuda0": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2uc\\calibrated_cuda0.json",
+      "sha256": "78574e805961769d69579f63d3b7e9027173a219680dda12327134596363437f"
+    },
+    "mw2uc_cuda1": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2uc\\calibrated_cuda1.json",
+      "sha256": "aa90e5ace60b01faf51d4f6f270f4a4f3fae8fd0a22898e2efb4b0e7a5d98afc"
+    },
+    "keyboard_tip_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_tip_TPU_6mm.stl",
+      "sha256": "22ba42201e769ff4ed146b125d69d585b7188b7f274a1b3430b741ad62931d37"
+    },
+    "stylus_collar_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/stylus_collar_9mm.stl",
+      "sha256": "abc908bcd256e8836d13c94cf58320654f78d972e0eb1923f50a6575233f2c8e"
+    },
+    "tool_body_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/compliant_tool_body.stl",
+      "sha256": "18c8d7ff2d57c0785b324c58e93b3c6558db7c56c339270ab183307b991225ba"
+    }
+  },
+  "tool_configuration_contract": {
+    "canonical_fields": [
+      "total_hand_tcp_to_tip_length_mm",
+      "distal_tip_exposed_length_mm",
+      "distal_tip_radius_mm",
+      "keyboard_tip_mesh_sha256",
+      "stylus_collar_mesh_sha256",
+      "tool_body_mesh_sha256",
+      "solver_model_sha256",
+      "target_catalog_sha256",
+      "board_transform_sha256"
+    ],
+    "bundle_required_fields": [
+      "tool_configuration",
+      "tool_configuration_sha256"
+    ],
+    "decision": "Reject before screening when the canonical tool configuration does not reproduce the pose bundle tool_configuration_sha256 or the requested screening configuration hash differs.",
+    "section_sha256": "79cb26748688fd9d71e8ac73c1b5e5669c7b49288abf097c474f2cd4b3a4212c"
+  },
+  "length_sweep": {
+    "total_hand_tcp_to_tip_length_mm": [
+      80.0,
+      90.0,
+      100.0,
+      110.0,
+      120.0
+    ],
+    "distal_tip_exposed_length_mm": [
+      10.0,
+      30.0
+    ],
+    "distal_tip_radius_mm": [
+      1.0,
+      4.0
+    ],
+    "target_ids": "ALL_46_BOUND_TARGETS",
+    "selection": "For each predeclared clearance/residual cell report the shortest length that reaches every target and has nonnegative landing and collision margin. Select none when no length clears. This is exploratory and does not select a physical build length.",
+    "section_sha256": "eed1b8a7e931d29909dcd36f08a53872076e8876680fda7f88a84905c88ef6a1"
+  },
+  "continuous_geometry": {
+    "path_family": "PIECEWISE_LINEAR_TCP_WITH_FIXED_FINAL_APPROACH_ORIENTATION",
+    "target_geometry": "KEYCAP_AXIS_ALIGNED_BOX_FROM_BOUND_CENTER_AND_FROZEN_11_15_MM_WIDTH_HEIGHT_PLUS_2_8_MM_THICKNESS_RANGE",
+    "tool_geometry": "DISTAL_CAPSULE_PLUS_CONSERVATIVE_CONVEX_HULLS_OF_BOUND_COLLAR_AND_BODY_MESHES",
+    "distance_method": "CONVEX_SET_DISTANCE_ALONG_LINEAR_TRANSLATION_WITH_BOUNDED_SCALAR_MINIMIZATION_AND_ENDPOINT_CONTACT_ROOTS",
+    "numeric_absolute_tolerance_mm": 1e-06,
+    "minimum_clearance_mm_range": [
+      0.0,
+      1.0,
+      2.0
+    ],
+    "decision": "Every non-target pair must meet each reported clearance threshold continuously. Target top contact is allowed only inside PRESS. Nonconvergence, nonfinite distance, negative neighbor margin, phase leakage, or altered mesh binding is STOP.",
+    "section_sha256": "0e00e9a256b39bae16320294e7954117a8e5a1f148ac698955b0b53a10988268"
+  },
+  "calibrated_residual": {
+    "random_joint_sigma_rad": [
+      0.001,
+      0.0015,
+      0.002
+    ],
+    "fixed_source_magnitude_rad": [
+      0.002,
+      0.004,
+      0.008
+    ],
+    "residual_fraction": [
+      0.0,
+      0.1,
+      0.25
+    ],
+    "effective_safe_half_width_mm": [
+      3.0,
+      4.0
+    ],
+    "worlds_per_target": 4096,
+    "seed": 2026100304,
+    "decision": "Reuse the frozen MW2UC composition and absolute-target scoring for every newly solved length-specific bundle. A cell clears only with zero misses across all targets on both GPUs and exact cross-GPU count agreement.",
+    "section_sha256": "c608dcc6a945f95ba6dc0fa27469476b4288537104b0825d5ed2eb5dd80b1906"
+  },
+  "decision_rules": [
+    "Preserve the prior STOP without rescoring.",
+    "Reject a pose/tool hash mismatch before geometry or residual scoring.",
+    "Do not replace continuous distance with a finer sampled proxy.",
+    "Require all 46 targets reachable and all declared margins nonnegative before reporting a shortest feasible length for a cell.",
+    "Any cross-GPU count disagreement, nonfinite result, solver failure, or hash mismatch is STOP.",
+    "No simulation result qualifies installed geometry or authorizes physical use."
+  ],
+  "runtime_stack": {
+    "python": "3.12.0",
+    "numpy": "1.26.3",
+    "scipy": "1.14.1",
+    "trimesh": "5.1.1",
+    "warp": "1.17.0"
+  },
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "permits": 0,
+    "transports": 0
+  },
+  "physical_authority": false,
+  "fixture_sha256": "62079ce48eba04b9ca82c53a4f34dc4b74ebc9dc87a4d536b0df1bd7e04d48ae"
+}

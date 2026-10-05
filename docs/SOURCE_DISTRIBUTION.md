@@ -513,3 +513,11 @@ The tracked-file ceiling is 6,376 after the passive-tool rerun fixture and the
 target/contact CAD successor fixture. The successor binds controlled station and
 tool meshes by hash, keeps result evidence external, and adds no generated
 geometry or corpus to Git.
+
+The tracked-file ceiling is 6,378 after the Workstream 2 runtime-only amendment
+adds one versioned physics fixture and one matching execution fixture. The pair
+preserves the failed older runtime binding while making the reviewed successor
+stack reproducible. GPU receipts, logs, caches, and environments remain external
+and hash-bound; all byte, blob, duplicate, and reduction limits are unchanged.
+
+The tracked-file ceiling is 6,378 after the concurrent two-file WS2 v2 fixture increment and the single compact, hash-bound tool-configuration, exact-clearance, and tool-length successor fixture. The increase does not add generated results, pose bundles, GPU outputs, or physical evidence to the source archive.
