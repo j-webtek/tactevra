@@ -1,0 +1,110 @@
+{
+  "attachment_configuration": {
+    "camera": "STATIC_OVERHEAD_B0477",
+    "contact_tool": "PASSIVE_CAPACITIVE_STYLUS_IN_PRINTED_COLLAR_AND_SHARED_COMPLIANT_BODY",
+    "moving_cable_present": false,
+    "optional_arm_camera_route_changed": false
+  },
+  "bindings": {
+    "attribution_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_candidate_collision_attribution_v1.json",
+      "sha256": "43198f50210c514b794d1d2b39963d607aa76d939f4f63a79bebdec22966ad5f"
+    },
+    "clearance_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_clearance_waypoint_v1.json",
+      "sha256": "29f9fb1e436bd3e3b82184710b888d58aa21229de1e9d2359cc503daa2f8e7a0"
+    },
+    "clearance_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\phase10\\clearance_waypoint_study_v1.json",
+      "sha256": "645319b8b73222f398e9fe2734344fa3bef06cb24f479e9606238c289d4619b5"
+    },
+    "collision_design_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_collision_design_v1.json",
+      "sha256": "ac85a5debd5609f2660baa923effa1a3220cb7c883c3c5ff52469cff74f16dc8"
+    },
+    "emulator_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
+      "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
+    },
+    "park_screen": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\joint_park_camera_screen_v1.json",
+      "sha256": "9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed"
+    },
+    "passive_pad_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_selected_attachment_pad_v1.json",
+      "sha256": "71bebf353691712dc4d440f77e9930bf333a33df2f8a504ecd16ea418fecd4db"
+    },
+    "passive_pad_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\selected_attachment_pad\\selected_attachment_pad_result_v1.json",
+      "sha256": "7d9901a7c3ac809ea4988cbba9db16aa0c2850b28093fb94113cdf6c886d8e95"
+    },
+    "pose_bundle": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2u\\nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+    },
+    "readiness_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_readiness_v1.json",
+      "sha256": "6bcfa546d39c5fb11b6231ee3fe79078fe5eaf34ff78e74bf7105d0005faf780"
+    }
+  },
+  "claim_commit": "6c70651769a7d2767805457d25603834c9a7e6a6",
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "The selected Phase-1 contract omits attachment:moving_cable and supplies no sampled cable geometry.",
+    "Stages A, B, C, E, and F clear only when every frozen discrete sample across every tool, transit, hover, and target endpoint contains no potentially consequential pair after retaining only the already declared expected-but-unreviewed structural contacts.",
+    "Stage D clears shadow coverage only when the exact bound passive-tool tray-replacement result remains CLEAR_EXPLORATORY_DISCRETE with zero concerning samples.",
+    "Missing IK, altered binding, absent stage, nonfinite result, or any remaining consequential pair stops the applicable stage.",
+    "The old cable-bearing results remain preserved and are not rescored.",
+    "No result changes official readiness, installs collision geometry or exclusions, or creates a production motion policy."
+  ],
+  "fixture_sha256": "b420749f476eb447076ee23974b95c15fc83581fed6ab7ff7da5487b2f233ea3",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "shadow_rehearsal": {
+    "official_readiness_must_remain": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+    "section_sha256": "620a54599b4f483b3ee9aeb33c33c60c156b92b2d4ea50724f925c56824c2c00",
+    "stage_d_mode": "TRAY_REPLACES_KEYBOARD_AND_NEIGHBOR_STATIONS",
+    "stages": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ],
+    "target_scope_e_f": "ALL_46_BOUND_KEYBOARD_TARGET_POSES"
+  },
+  "waypoint_rerun": {
+    "park_pose_id": "halton-0573",
+    "samples_per_cartesian_leg": 9,
+    "section_sha256": "db4179016199226c6a527ecfd82eabcd8ae8833e4bc61d79795007d2db10d8d2",
+    "stage_a_base_delta_rad": [
+      0.005,
+      0.02
+    ],
+    "stage_c_hover_height_above_contact_mm_range": [
+      5.0,
+      30.0
+    ],
+    "stage_c_target_id": "G",
+    "tool_length_mm_range": [
+      80.0,
+      120.0
+    ],
+    "tool_radius_mm_range": [
+      1.0,
+      4.0
+    ],
+    "transit_height_board_z_mm_range": [
+      60.0,
+      100.0,
+      140.0
+    ]
+  }
+}

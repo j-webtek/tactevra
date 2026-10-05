@@ -287,6 +287,22 @@ def test_clearance_waypoint_fixture_is_bounded_and_arm_runtime_owned() -> None:
     assert fixture["waypoint_study"]["stage_b_route"] == ["ASCEND", "TRANSIT", "DESCEND"]
 
 
+def test_passive_tool_first_motion_fixture_is_frozen_and_cable_free() -> None:
+    from rocell_ai.first_motion_clearance_waypoints import (
+        load_passive_tool_rerun_fixture,
+    )
+
+    fixture = load_passive_tool_rerun_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_passive_tool_rerun_v1.json")
+    assert fixture["scope"] == "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+    assert not any(fixture["counters"].values())
+    assert fixture["attachment_configuration"]["moving_cable_present"] is False
+    assert fixture["waypoint_rerun"]["park_pose_id"] == "halton-0573"
+    assert fixture["shadow_rehearsal"]["stages"] == list("ABCDEF")
+    assert fixture["shadow_rehearsal"]["stage_d_mode"] == (
+        "TRAY_REPLACES_KEYBOARD_AND_NEIGHBOR_STATIONS")
+
+
 def test_phase10_remedy_fixture_is_frozen_and_zero_authority() -> None:
     from rocell_ai.first_motion_phase10_remedies import load_remedy_fixture
 

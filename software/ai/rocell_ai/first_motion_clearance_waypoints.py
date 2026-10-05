@@ -9,6 +9,7 @@ from dataclasses import replace
 import hashlib
 from itertools import product
 import json
+import math
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -54,6 +55,32 @@ def load_waypoint_fixture(path: Path) -> dict[str, Any]:
             source = root / source
         if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
             raise ValueError(f"bound waypoint input changed: {source}")
+    return value
+
+
+def load_passive_tool_rerun_fixture(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    claimed = value.pop("fixture_sha256")
+    if _sha(value) != claimed:
+        raise ValueError("passive-tool rerun fixture hash mismatch")
+    value["fixture_sha256"] = claimed
+    for name in ("waypoint_rerun", "shadow_rehearsal"):
+        section = value[name]
+        section_claimed = section.pop("section_sha256")
+        if _sha(section) != section_claimed:
+            raise ValueError(f"{name} section hash mismatch")
+        section["section_sha256"] = section_claimed
+    if value["scope"] != SCOPE or any(value["counters"].values()):
+        raise ValueError("passive-tool rerun changed zero-authority scope")
+    if value["attachment_configuration"]["moving_cable_present"] is not False:
+        raise ValueError("passive-tool rerun requires no moving cable")
+    root = path.resolve().parents[4]
+    for binding in value["bindings"].values():
+        source = Path(binding["path"])
+        if not source.is_absolute():
+            source = root / source
+        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError(f"bound passive-tool rerun input changed: {source}")
     return value
 
 
@@ -352,4 +379,208 @@ def run_clearance_waypoint_study(fixture: dict[str, Any], *, workspace: Path) ->
     return result
 
 
-__all__ = ["load_waypoint_fixture", "run_clearance_waypoint_study"]
+def run_passive_tool_first_motion_rerun(
+    fixture: dict[str, Any], *, workspace: Path,
+) -> dict[str, Any]:
+    """Screen the selected passive-tool A-F shadow without cable geometry."""
+
+    design_path = Path(fixture["bindings"]["collision_design_fixture"]["path"])
+    if not design_path.is_absolute():
+        design_path = workspace / design_path
+    design = json.loads(design_path.read_text(encoding="utf-8"))
+    world = _World(design, workspace)
+
+    emulator_path = Path(fixture["bindings"]["emulator_fixture"]["path"])
+    if not emulator_path.is_absolute():
+        emulator_path = workspace / emulator_path
+    baseline = tuple(_baseline_joints(load_emulator_fixture(emulator_path))[:5])
+
+    park_report = json.loads(Path(fixture["bindings"]["park_screen"]["path"]).read_text())
+    spec = fixture["waypoint_rerun"]
+    park_row = next(
+        row for row in park_report["top_candidates"]
+        if row["pose_id"] == spec["park_pose_id"]
+    )
+    park = tuple(
+        park_row["joint_positions_rad"][name]
+        for name in world.pose_bundle["joint_order"]
+    )
+
+    attribution_path = Path(fixture["bindings"]["attribution_fixture"]["path"])
+    if not attribution_path.is_absolute():
+        attribution_path = workspace / attribution_path
+    attribution = load_collision_attribution_fixture(attribution_path)
+    expected = set(attribution["contact_classes"]["DECLARED_EXPECTED_BUT_UNREVIEWED"])
+    tools = list(product(spec["tool_length_mm_range"], spec["tool_radius_mm_range"]))
+    targets = {row["target_id"]: row for row in world.pose_bundle["poses"]}
+
+    stage_rows = {
+        stage: {
+            "stage": stage,
+            "evaluations": 0,
+            "concerning": 0,
+            "phase_pairs": {},
+            "ik_failures": [],
+        }
+        for stage in "ABCEF"
+    }
+
+    def record(stage: str, phase: str, pairs: Iterable[str]) -> None:
+        remaining = _concerning(pairs, expected, phase=phase)
+        row = stage_rows[stage]
+        row["evaluations"] += 1
+        row["concerning"] += int(bool(remaining))
+        by_phase = row["phase_pairs"].setdefault(phase, {})
+        for pair in remaining:
+            by_phase[pair] = by_phase.get(pair, 0) + 1
+
+    # A: the previously frozen small base-joint range, now screened with no cable.
+    for tool_length, tool_radius in tools:
+        contract = world.contract(
+            tool_length=tool_length, tool_radius=tool_radius, pad=None,
+            include_moving_cable=False,
+        )
+        for delta in spec["stage_a_base_delta_rad"]:
+            end = list(baseline)
+            end[0] += delta
+            for joints in _interpolate(baseline, tuple(end), 33):
+                record("A", "SMALL_JOINT_MOVE", world.evaluate(contract, joints, None))
+
+    # B: baseline to the route-aware park through rise, transit, and descend.
+    for tool_length, tool_radius in tools:
+        contract = world.contract(
+            tool_length=tool_length, tool_radius=tool_radius, pad=None,
+            include_moving_cable=False,
+        )
+        park_xyz = _tip_xyz(world, park, tool_length)
+        for transit_z in spec["transit_height_board_z_mm_range"]:
+            route, failure = _clearance_route(
+                world, start=baseline, end=park, end_xyz=park_xyz,
+                tool_length=tool_length, transit_z=transit_z,
+                samples=spec["samples_per_cartesian_leg"],
+            )
+            if failure:
+                stage_rows["B"]["ik_failures"].append(
+                    f"{tool_length}:{tool_radius}:{transit_z}:{failure}")
+            for phase, joints in route:
+                record("B", phase, world.evaluate(contract, joints, None))
+
+    # C: park to G hover across every frozen tool, transit, and hover endpoint.
+    target = targets[spec["stage_c_target_id"]]
+    xyz = target["contact_target_board_mm"]
+    for tool_length, tool_radius in tools:
+        contract = world.contract(
+            tool_length=tool_length, tool_radius=tool_radius, pad=None,
+            include_moving_cable=False,
+        )
+        solver = world.solver(tool_length)
+        for transit_z, hover in product(
+            spec["transit_height_board_z_mm_range"],
+            spec["stage_c_hover_height_above_contact_mm_range"],
+        ):
+            end_xyz = (xyz["x"], xyz["y"], xyz["z"] + hover)
+            end = _solve_seeded(world, solver, end_xyz, park)
+            if end is None:
+                stage_rows["C"]["ik_failures"].append(
+                    f"{tool_length}:{tool_radius}:{transit_z}:{hover}:DESTINATION_IK")
+                continue
+            route, failure = _clearance_route(
+                world, start=park, end=end, end_xyz=end_xyz,
+                tool_length=tool_length, transit_z=transit_z,
+                samples=spec["samples_per_cartesian_leg"],
+            )
+            if failure:
+                stage_rows["C"]["ik_failures"].append(
+                    f"{tool_length}:{tool_radius}:{transit_z}:{hover}:{failure}")
+            for phase, joints in route:
+                record("C", phase, world.evaluate(contract, joints, None))
+
+    # E/F: exact bound keyboard target poses under the same passive-tool inventory.
+    for tool_length, tool_radius in tools:
+        contract = world.contract(
+            tool_length=tool_length, tool_radius=tool_radius, pad=None,
+            include_moving_cable=False,
+        )
+        for target_id, target_row in targets.items():
+            joints = tuple(target_row["joint_positions_rad"])
+            pairs = world.evaluate(contract, joints, None)
+            record("E", target_id, pairs)
+            record("F", target_id, pairs)
+
+    for row in stage_rows.values():
+        if not all(math.isfinite(value) for value in (
+            row["evaluations"], row["concerning"],
+        )):
+            raise ValueError("nonfinite stage counter")
+        row["clear"] = row["concerning"] == 0 and not row["ik_failures"]
+        row["status"] = (
+            "CLEAR_EXPLORATORY_DISCRETE" if row["clear"] else "STOP"
+        )
+
+    pad_result = json.loads(
+        Path(fixture["bindings"]["passive_pad_result"]["path"]).read_text())
+    pad_mode = fixture["shadow_rehearsal"]["stage_d_mode"]
+    pad_row = next(row for row in pad_result["pad_contact_screen"] if row["mode"] == pad_mode)
+    stage_d = {
+        "stage": "D",
+        "source_receipt_sha256": pad_result["receipt_sha256"],
+        "mode": pad_mode,
+        "evaluations": pad_row["evaluations"],
+        "concerning": pad_row["concerning"],
+        "tool_pad_contacts": pad_row["tool_pad_contacts"],
+        "noncontiguous_contact_sequences": pad_row["noncontiguous_contact_sequences"],
+        "pairs": pad_row["pairs"],
+        "clear": pad_row["status"] == "CLEAR_EXPLORATORY_DISCRETE",
+        "status": pad_row["status"],
+    }
+
+    ordered = [stage_rows[stage] if stage != "D" else stage_d for stage in "ABCDEF"]
+    all_clear = all(row["clear"] for row in ordered)
+    result = {
+        "schema": "tactevra.first_motion_passive_tool_rerun_result.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "attachment_configuration": fixture["attachment_configuration"],
+        "selected_park_pose_id": spec["park_pose_id"],
+        "clearance_waypoint_results": {
+            "B": stage_rows["B"],
+            "C": stage_rows["C"],
+        },
+        "stage_results": ordered,
+        "stages_exercised": list("ABCDEF"),
+        "decision": (
+            "PASS_A_TO_F_SHADOW_COVERAGE_PASSIVE_TOOL_SIMULATION_ONLY"
+            if all_clear else "STOP_PASSIVE_TOOL_STAGE_BLOCKER_RETAINED"
+        ),
+        "official_readiness": fixture["shadow_rehearsal"][
+            "official_readiness_must_remain"],
+        "official_readiness_changed": False,
+        "installed_collision_geometry_changed": False,
+        "installed_exclusions_created": 0,
+        "production_motion_policy_created": False,
+        "optional_arm_camera_route_changed": False,
+        "staged_motion_executions": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+        "limitations": [
+            "All geometry and route endpoints remain exploratory simulation inputs.",
+            "Discrete samples do not prove continuous swept-volume clearance.",
+            "The corrected tray result is bound evidence rather than a second pad rescore.",
+            "Fixed workcell cables are unmodeled pending physical measurement.",
+            "No installed collision profile or physical plant bound is qualified.",
+        ],
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
+__all__ = [
+    "load_passive_tool_rerun_fixture",
+    "load_waypoint_fixture",
+    "run_clearance_waypoint_study",
+    "run_passive_tool_first_motion_rerun",
+]
