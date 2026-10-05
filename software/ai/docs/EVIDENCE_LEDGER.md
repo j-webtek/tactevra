@@ -11925,3 +11925,10 @@ rewriting history. New entries must use a unique evidence ID.
 
 - The complete Stage E/F result documentation, phone matrix result documentation, WS3 readiness result, future recipe-gated exact transition-screen implementation, and eight-test validation are committed at full Git SHA `6ba5f4bb15506c3c9b13b7163b75744488a8a1ea` on `issue/190-isaac-sim-host`. Final implementation SHA-256 is `f5c59a50d61f845b811c60d96763f68b4520c31e1147013c20456aebaada25f7`; final focused-test SHA-256 is `6e9d32a9ebd6d43b80aa1fb5217643569072d0d6b31f5a27b3f8e72f7d5419f3`.
 - This binding adds no new metric or decision. WS3 exact transition execution remains blocked on an admitted WS2 recipe and a successor fixture that covers orientation change plus full workcell collision screening. Hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
+
+
+### E-20261005-INT-CPU-CONTACT-LEDGER-RACE-002 - preserved concurrent tail normalization
+
+- Preserved process failure: during the final binding append, the concurrently staged WS2 work corrected its frozen fixture file hash and normalized a literal escaped-newline tail into Markdown lines. Commit `c9ae42ae` therefore changed two pre-existing tail lines as well as appending the CPU binding, and the append-only check correctly failed at byte 1567526.
+- Current disposition: both byte changes are visible in Git history; no evidence result or threshold was deleted. This record is appended to the exact current tail, and the append-only checker must pass against `c9ae42ae` before commit. Future shared-ledger writes require taking the current tail immediately before the single append operation.
+- Authority: this is evidence-custody metadata only. Hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
