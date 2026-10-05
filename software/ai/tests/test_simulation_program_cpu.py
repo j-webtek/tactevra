@@ -279,6 +279,9 @@ def test_ws2_debounce_successor_freezes_hold_and_throughput_populations():
         "force_within_available": True,
     }
     assert WS2_PROBE.primary_failure(row) == "DEBOUNCE_TOO_SHORT"
+    row["actuation_count"] = 0
+    row["partial_press"] = True
+    assert WS2_PROBE.primary_failure(row) == "PARTIAL_PRESS"
     throughput = staged["throughput_decision"]
     assert throughput["full_grid_if"][
         "projected_two_gpu_wall_hours_at_median_smoke_rate_lte"
