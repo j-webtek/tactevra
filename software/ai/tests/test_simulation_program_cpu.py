@@ -356,6 +356,36 @@ def test_ws2_compliant_tool_topology_and_validation():
         )
 
 
+def test_ws2_series_compliance_partitions_command_and_caps_travel():
+    effective, compression, force = WS2_PROBE.series_compliance_displacement(
+        2.4,
+        key_stiffness_n_per_mm=1.3,
+        tool_stiffness_n_per_mm=0.143,
+        tool_travel_mm=6.0,
+    )
+    assert effective + compression == pytest.approx(2.4)
+    assert force == pytest.approx(0.143 * compression)
+    assert effective < compression
+
+    effective, compression, force = WS2_PROBE.series_compliance_displacement(
+        7.0,
+        key_stiffness_n_per_mm=1.3,
+        tool_stiffness_n_per_mm=0.143,
+        tool_travel_mm=3.0,
+    )
+    assert compression == pytest.approx(3.0)
+    assert effective == pytest.approx(4.0)
+    assert force == pytest.approx(0.429)
+
+    with pytest.raises(ValueError, match="physical domain"):
+        WS2_PROBE.series_compliance_displacement(
+            2.4,
+            key_stiffness_n_per_mm=1.3,
+            tool_stiffness_n_per_mm=0.0,
+            tool_travel_mm=6.0,
+        )
+
+
 def test_ws2_tampering_and_cross_gpu_drift_stop():
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
     left = {

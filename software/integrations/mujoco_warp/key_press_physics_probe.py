@@ -212,6 +212,35 @@ def depth_margin_metrics(
     }
 
 
+def series_compliance_displacement(
+    commanded_mm: float,
+    *,
+    key_stiffness_n_per_mm: float,
+    tool_stiffness_n_per_mm: float,
+    tool_travel_mm: float,
+) -> tuple[float, float, float]:
+    """Partition a commanded press between a key and a series compliant tool."""
+    values = (
+        commanded_mm,
+        key_stiffness_n_per_mm,
+        tool_stiffness_n_per_mm,
+        tool_travel_mm,
+    )
+    if not all(math.isfinite(float(value)) for value in values):
+        raise ValueError("series-compliance inputs must be finite")
+    if commanded_mm < 0.0 or min(
+        key_stiffness_n_per_mm, tool_stiffness_n_per_mm, tool_travel_mm
+    ) <= 0.0:
+        raise ValueError("series-compliance inputs are outside the physical domain")
+    unconstrained_compression = commanded_mm * key_stiffness_n_per_mm / (
+        key_stiffness_n_per_mm + tool_stiffness_n_per_mm
+    )
+    compression_mm = min(unconstrained_compression, tool_travel_mm)
+    effective_key_command_mm = commanded_mm - compression_mm
+    tool_force_n = tool_stiffness_n_per_mm * compression_mm
+    return effective_key_command_mm, compression_mm, tool_force_n
+
+
 def load_staged_fixture(
     path: Path,
     *,
@@ -878,13 +907,28 @@ def run_smoke_worker(
     tool_compliance = (
         None if control is None else control["control"].get("tool_compliance")
     )
+    tool_compliance_model = (
+        None if control is None else control["control"].get("tool_compliance_model")
+    )
+    if tool_compliance_model not in {None, "NESTED_MOCAP_JOINT", "SERIES_QUASISTATIC"}:
+        raise ValueError("unknown tool compliance model")
+    if tool_compliance_model == "SERIES_QUASISTATIC":
+        if set(tool_compliance or {}) != {"stiffness_n_per_mm", "travel_mm"}:
+            raise ValueError(
+                "quasistatic compliance requires exact stiffness and travel"
+            )
+        if (
+            float(tool_compliance["stiffness_n_per_mm"]) <= 0.0
+            or float(tool_compliance["travel_mm"]) <= 0.0
+        ):
+            raise ValueError("quasistatic compliance values must be positive")
     xml = build_contact_mjcf(
         fixture,
         profile,
         tip,
         target["half_extent_mm"],
         float(catalog["keyboard"]["pitch_mm"]),
-        tool_compliance,
+        tool_compliance if tool_compliance_model == "NESTED_MOCAP_JOINT" else None,
     )
     overall_started = time.perf_counter()
     model = mujoco.MjModel.from_xml_string(xml)
@@ -964,8 +1008,24 @@ def run_smoke_worker(
                 )
             else:
                 displacement = 0.0
+            effective_displacement = displacement
+            modeled_compression_mm = 0.0
+            modeled_tool_force_n = 0.0
+            if tool_compliance_model == "SERIES_QUASISTATIC":
+                (
+                    effective_displacement,
+                    modeled_compression_mm,
+                    modeled_tool_force_n,
+                ) = series_compliance_displacement(
+                    displacement,
+                    key_stiffness_n_per_mm=values["spring_n_per_mm"],
+                    tool_stiffness_n_per_mm=tool_compliance["stiffness_n_per_mm"],
+                    tool_travel_mm=tool_compliance["travel_mm"],
+                )
             z_m = (
-                tip_extent_mm - rest_qpos[:, center_joint] * 1000.0 - displacement
+                tip_extent_mm
+                - rest_qpos[:, center_joint] * 1000.0
+                - effective_displacement
             ) / 1000.0
             data.mocap_pos.assign(
                 _mocap_positions(
@@ -992,7 +1052,7 @@ def run_smoke_worker(
                 * np.maximum(qvel[:, center_joint] * 1000.0, 0.0)
             )
             peak_force = np.maximum(peak_force, required)
-            if tool_compliance is not None:
+            if tool_compliance_model == "NESTED_MOCAP_JOINT":
                 compression_mm = np.maximum(relative_mm[:, 9], 0.0)
                 tool_force = (
                     tool_compliance["stiffness_n_per_mm"] * compression_mm
@@ -1003,6 +1063,13 @@ def run_smoke_worker(
                     peak_tool_compression_mm, compression_mm
                 )
                 peak_tool_force_n = np.maximum(peak_tool_force_n, tool_force)
+            elif tool_compliance_model == "SERIES_QUASISTATIC":
+                peak_tool_compression_mm = np.maximum(
+                    peak_tool_compression_mm, modeled_compression_mm
+                )
+                peak_tool_force_n = np.maximum(
+                    peak_tool_force_n, modeled_tool_force_n
+                )
             bottom_overflow |= qpos[:, center_joint] * 1000.0 > (
                 bottom_mm
                 + execution["numerical_protocol"]["bottom_out_numerical_tolerance_mm"]
@@ -1138,6 +1205,7 @@ def run_smoke_worker(
         receipt["effective_release_protocol"] = release
         if tool_compliance is not None:
             receipt["tool_compliance"] = tool_compliance
+            receipt["tool_compliance_model"] = tool_compliance_model
         positive_pass = bool(
             all(row["actuation_count"] == 1 for row in rows)
             and not any(row["partial_press"] for row in rows)
