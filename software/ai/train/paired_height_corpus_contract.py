@@ -972,3 +972,82 @@ def admit_shard_manifest(
         "manifest_file_sha256": sha256_bytes(manifest_raw),
     }
 
+
+def admit_v1_4_development_scoring_inputs(
+    *,
+    development_root: Path,
+    shard_roots: tuple[Path, Path],
+    expected_manifest_sha256: tuple[str, str],
+    admission_result_path: Path,
+    expected_admission_sha256: str,
+) -> dict[str, Any]:
+    """Fail closed before development scoring can read any model input.
+
+    This is deliberately separate from shard admission: shard admission proves
+    corpus integrity, while this guard proves that a scoring process is wired to
+    those exact admitted v1.4 shards and cannot traverse into a retired corpus.
+    """
+    root = development_root.resolve(strict=True)
+    if root.name != "paired_height_v1_4_development":
+        raise ValueError("development root is not the admitted v1.4 corpus")
+    admission_path = admission_result_path.resolve(strict=True)
+    if not admission_path.is_relative_to(root):
+        raise ValueError("development admission receipt resolves outside v1.4")
+    admission_raw = admission_path.read_bytes()
+    if sha256_bytes(admission_raw) != expected_admission_sha256:
+        raise ValueError("v1.4 development admission hash mismatch")
+    admission = json.loads(admission_raw)
+    if (
+        admission.get("status") != "PASS_EXACT_FULL_DEVELOPMENT_ADMISSION"
+        or admission.get("schema")
+        != "tactevra.ai_paired_height_v1_4_full_development_admission_result.v1"
+        or admission.get("evaluation_rows_opened") != 0
+    ):
+        raise ValueError("v1.4 development admission is not eligible for scoring")
+    expected_names = ("development_worker_0", "development_worker_1")
+    manifest_rows = []
+    total = 0
+    for index, (shard_root, expected_hash, expected_name) in enumerate(zip(
+        shard_roots, expected_manifest_sha256, expected_names, strict=True
+    )):
+        shard = shard_root.resolve(strict=True)
+        if shard.parent != root or shard.name != expected_name:
+            raise ValueError("development shard resolves outside the exact v1.4 root")
+        manifest_path = (shard / "manifest.json").resolve(strict=True)
+        if not manifest_path.is_relative_to(root):
+            raise ValueError("development manifest resolves outside v1.4")
+        raw = manifest_path.read_bytes()
+        digest = sha256_bytes(raw)
+        if digest != expected_hash:
+            raise ValueError("v1.4 development manifest hash mismatch")
+        manifest = json.loads(raw)
+        if manifest.get("split") != "development":
+            raise ValueError("scoring input is not a development manifest")
+        observations = manifest.get("observations")
+        if not isinstance(observations, list):
+            raise ValueError("development observations are missing")
+        for row in observations:
+            relative = row.get("native_crop", {}).get("path")
+            if not isinstance(relative, str):
+                raise ValueError("development model input path is missing")
+            resolved = (shard / relative).resolve(strict=True)
+            if not resolved.is_relative_to(shard):
+                raise ValueError("development model input resolves outside v1.4 shard")
+        manifest_rows.append({"worker_index": index, "manifest_sha256": digest,
+                              "row_count": len(observations)})
+        total += len(observations)
+    admitted = admission.get("worker_receipts")
+    if not isinstance(admitted, list) or [
+        row.get("manifest_sha256") for row in admitted
+    ] != list(expected_manifest_sha256):
+        raise ValueError("admission receipt does not bind the scoring manifests")
+    if total != admission.get("source_row_count"):
+        raise ValueError("scoring manifest row count differs from admission")
+    return {
+        "status": "PASS_EXACT_V1_4_DEVELOPMENT_SCORING_INPUTS",
+        "development_root": str(root),
+        "admission_sha256": expected_admission_sha256,
+        "manifests": manifest_rows,
+        "source_row_count": total,
+        "evaluation_rows_opened": 0,
+    }

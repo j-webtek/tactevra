@@ -13,6 +13,7 @@ sys.path.insert(0, str(AI_ROOT))
 sys.path.insert(0, str(AI_ROOT / "train"))
 
 from train.paired_height_corpus_contract import (  # noqa: E402
+    admit_v1_4_development_scoring_inputs,
     SHARD_SCHEMA,
     admit_shard_manifest,
     apply_camera_model_native,
@@ -45,6 +46,108 @@ from train import paired_height_corpus_contract as paired_height_contract  # noq
 ROOT = AI_ROOT
 FIXTURE = ROOT / "sim/evidence/residual_obstruction_paired_height_v1_4.json"
 RESOLUTION_EXPERIMENT = ROOT / "sim/evidence/paired_height_resolution_noise_experiment_v1.json"
+
+
+def _development_scoring_fixture(tmp_path: Path) -> dict[str, object]:
+    root = tmp_path / "paired_height_v1_4_development"
+    roots = (root / "development_worker_0", root / "development_worker_1")
+    manifest_hashes = []
+    for index, shard in enumerate(roots):
+        shard.mkdir(parents=True)
+        crop = shard / f"crop-{index}.png"
+        crop.write_bytes(b"fixture")
+        manifest = {
+            "split": "development",
+            "observations": [{"native_crop": {"path": crop.name}}],
+        }
+        raw = canonical(manifest)
+        (shard / "manifest.json").write_bytes(raw)
+        manifest_hashes.append(sha256_bytes(raw))
+    admission = {
+        "schema": "tactevra.ai_paired_height_v1_4_full_development_admission_result.v1",
+        "status": "PASS_EXACT_FULL_DEVELOPMENT_ADMISSION",
+        "evaluation_rows_opened": 0,
+        "source_row_count": 2,
+        "worker_receipts": [
+            {"worker_index": index, "manifest_sha256": digest}
+            for index, digest in enumerate(manifest_hashes)
+        ],
+    }
+    admission_path = root / "full_development_admission_result.json"
+    admission_raw = canonical(admission)
+    admission_path.write_bytes(admission_raw)
+    return {
+        "development_root": root,
+        "shard_roots": roots,
+        "expected_manifest_sha256": tuple(manifest_hashes),
+        "admission_result_path": admission_path,
+        "expected_admission_sha256": sha256_bytes(admission_raw),
+    }
+
+
+def test_v1_4_development_scoring_guard_accepts_exact_admitted_inputs(
+        tmp_path: Path) -> None:
+    inputs = _development_scoring_fixture(tmp_path)
+    result = admit_v1_4_development_scoring_inputs(**inputs)
+    assert result["status"] == "PASS_EXACT_V1_4_DEVELOPMENT_SCORING_INPUTS"
+    assert result["source_row_count"] == 2
+    assert result["evaluation_rows_opened"] == 0
+
+
+def test_v1_4_development_scoring_guard_rejects_retired_root(tmp_path: Path) -> None:
+    inputs = _development_scoring_fixture(tmp_path)
+    root = inputs["development_root"]
+    retired = tmp_path / "paired_height_v1_3_development"
+    root.rename(retired)
+    inputs["development_root"] = retired
+    inputs["shard_roots"] = (
+        retired / "development_worker_0", retired / "development_worker_1")
+    inputs["admission_result_path"] = retired / "full_development_admission_result.json"
+    with pytest.raises(ValueError, match="not the admitted v1.4 corpus"):
+        admit_v1_4_development_scoring_inputs(**inputs)
+
+
+def test_v1_4_development_scoring_guard_rejects_altered_manifest(tmp_path: Path) -> None:
+    inputs = _development_scoring_fixture(tmp_path)
+    manifest = inputs["shard_roots"][0] / "manifest.json"
+    manifest.write_bytes(manifest.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="manifest hash mismatch"):
+        admit_v1_4_development_scoring_inputs(**inputs)
+
+
+def test_v1_4_development_scoring_guard_rejects_path_escape(tmp_path: Path) -> None:
+    inputs = _development_scoring_fixture(tmp_path)
+    shard = inputs["shard_roots"][0]
+    escaped = inputs["development_root"] / "escaped.png"
+    escaped.write_bytes(b"fixture")
+    manifest = {
+        "split": "development",
+        "observations": [{"native_crop": {"path": "../escaped.png"}}],
+    }
+    raw = canonical(manifest)
+    (shard / "manifest.json").write_bytes(raw)
+    hashes = list(inputs["expected_manifest_sha256"])
+    hashes[0] = sha256_bytes(raw)
+    inputs["expected_manifest_sha256"] = tuple(hashes)
+    admission = json.loads(inputs["admission_result_path"].read_bytes())
+    admission["worker_receipts"][0]["manifest_sha256"] = hashes[0]
+    admission_raw = canonical(admission)
+    inputs["admission_result_path"].write_bytes(admission_raw)
+    inputs["expected_admission_sha256"] = sha256_bytes(admission_raw)
+    with pytest.raises(ValueError, match="outside v1.4 shard"):
+        admit_v1_4_development_scoring_inputs(**inputs)
+
+
+def test_v1_4_development_scoring_guard_rejects_unbound_manifest(
+        tmp_path: Path) -> None:
+    inputs = _development_scoring_fixture(tmp_path)
+    admission = json.loads(inputs["admission_result_path"].read_bytes())
+    admission["worker_receipts"][0]["manifest_sha256"] = "0" * 64
+    admission_raw = canonical(admission)
+    inputs["admission_result_path"].write_bytes(admission_raw)
+    inputs["expected_admission_sha256"] = sha256_bytes(admission_raw)
+    with pytest.raises(ValueError, match="does not bind"):
+        admit_v1_4_development_scoring_inputs(**inputs)
 
 
 def test_frozen_resolution_noise_experiment_and_decision_rules() -> None:
