@@ -1,0 +1,154 @@
+{
+  "bindings": {
+    "keyboard_tip_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_tip_TPU_6mm.stl",
+      "sha256": "22ba42201e769ff4ed146b125d69d585b7188b7f274a1b3430b741ad62931d37"
+    },
+    "park_screen": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\joint_park_camera_screen_v1.json",
+      "sha256": "9210391a359ceea01ec3a50d76096d08138ae9e90bfa14b5e5352996ad31c8ed"
+    },
+    "pose_bundle": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw2u\\nominal_target_pose_bundle.json",
+      "sha256": "388ca38f7d86569381c1e1c4abd25b129a571310f8fc9712529a61006a2f7385"
+    },
+    "prior_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_passive_tool_rerun_v1.json",
+      "sha256": "1a4f9ce6e92617c26edc42160d545b1e0c9245baaf44b8db6d8ea81e138e79db"
+    },
+    "prior_result": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\first_motion_readiness\\passive_tool_rerun\\passive_tool_first_motion_rerun_v1.json",
+      "sha256": "491420aa001477f3865dc944d2ab4371e514724bca3c38cba8db3b9b79d95c3d"
+    },
+    "station_left_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_left.stl",
+      "sha256": "a19b4288b9d6c3fae66f3baa3aa7726fc4acaa440bdb3f16ad3a7ea7791e9a1f"
+    },
+    "station_right_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_right.stl",
+      "sha256": "bc9cc0d252da8d1702c56bbd0afaf6ed79e5dd9891d121dd54372e4692675cf0"
+    },
+    "stylus_collar_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/stylus_collar_9mm.stl",
+      "sha256": "abc908bcd256e8836d13c94cf58320654f78d972e0eb1923f50a6575233f2c8e"
+    },
+    "tool_body_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/compliant_tool_body.stl",
+      "sha256": "18c8d7ff2d57c0785b324c58e93b3c6558db7c56c339270ab183307b991225ba"
+    },
+    "workcell_layout": {
+      "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+      "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+    },
+    "ws2_fixture": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_physics_v1.json",
+      "sha256": "318e9939dd664171a07af0d5fcc3683169cedd96a9e01f48b845d9bef10e5771"
+    }
+  },
+  "claim_commit": "95c34b9352f56b1adc380f0bcdfc3c37d9fb011b",
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision_rules": [
+    "Preserve the prior G-only STOP unchanged; this successor opens all 46 bound target identities.",
+    "Any IK failure, altered binding, missing target, nonfinite value, CAD endpoint disagreement, neighbor contact, or collar/body contact is STOP.",
+    "CAD-derived geometry remains PINNED_DIGITAL exploratory input and does not become installed collision geometry.",
+    "The exact passive stylus and assembly transforms remain unmeasured ranges; no physical qualification is claimed."
+  ],
+  "fixture_sha256": "9d23023a3dca331dc3c295b1ad898fe9c35ec239fa5078ef1cd8778988de3109",
+  "keycap_contact": {
+    "contact_phase": "PRESS",
+    "decision": "Only distal-tip contact with the requested target keycap top is admitted during PRESS. Missing target contact, any neighbor-keycap contact, or any collar/body keycap contact is STOP. Both keycap-size/thickness endpoints must clear.",
+    "keycap_thickness_mm": [
+      2.0,
+      8.0
+    ],
+    "keycap_width_height_mm": [
+      11.0,
+      15.0
+    ],
+    "section_sha256": "49c0bd7690b96d467a438dec792a7d4e809f33feef3fd02f6a087805a252878f",
+    "target_ids": "ALL_46_POSE_BUNDLE_TARGETS"
+  },
+  "physical_authority": false,
+  "runtime_stack": {
+    "numpy": "1.26.3",
+    "python": "3.12.0",
+    "scipy": "1.14.1",
+    "trimesh": "5.1.1"
+  },
+  "schema": "tactevra.first_motion_target_contact_cad_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "stage_c": {
+    "hover_height_above_contact_mm": [
+      5.0,
+      30.0
+    ],
+    "park_pose_id": "halton-0573",
+    "report_by": [
+      "target_id",
+      "phase",
+      "tool_length_mm",
+      "tip_exposed_length_mm",
+      "tip_radius_mm",
+      "cad_discretization",
+      "contact_component",
+      "station_id"
+    ],
+    "samples_per_cartesian_leg": 9,
+    "section_sha256": "4a4491c1a8b4fb314f18a10541187042982751193aff375a2d3597c0cdc1c1b6",
+    "target_ids": "ALL_46_POSE_BUNDLE_TARGETS",
+    "transit_height_board_z_mm": [
+      60.0,
+      100.0,
+      140.0
+    ]
+  },
+  "station_cad": {
+    "decision": "CAD station contact clears only when both pitch/spacing endpoint screens are clear; disagreement is retained as uncertain STOP.",
+    "placement_source": "CONTROLLED_WORKCELL_LAYOUT",
+    "section_sha256": "faab50d7aa4517356cd3983c909ece3ead4e8e2f721040ec53ea003e40f4fd2b",
+    "tool_axis_sample_spacing_mm": [
+      1.0,
+      2.0
+    ],
+    "voxel_pitch_mm": [
+      1.0,
+      2.0
+    ]
+  },
+  "tool_component_model": {
+    "assembly_rule": "Anchor the unmeasured distal tip at the commanded TCP; place the controlled collar immediately proximal to each exposed-length endpoint; extend the controlled body envelope proximally from the collar, clipped at hand_tcp. Every endpoint is exploratory.",
+    "body_axial_length_mm": [
+      66.19999694824219
+    ],
+    "body_conservative_radial_envelope_mm": [
+      18.439088914585774
+    ],
+    "collar_axial_length_mm": [
+      5.5
+    ],
+    "collar_radius_mm": [
+      6.8
+    ],
+    "configuration": "STATIC_OVERHEAD_B0477_WITH_PASSIVE_STYLUS_COLLAR_AND_SHARED_COMPLIANT_BODY",
+    "distal_tip_exposed_length_mm": [
+      10.0,
+      30.0
+    ],
+    "distal_tip_radius_mm": [
+      1.0,
+      4.0
+    ],
+    "section_sha256": "fff365d1e5ba251252ea07ac7506e5291943d9af4281da8b9cd9d2c06f52b9cc",
+    "total_hand_tcp_to_tip_length_mm": [
+      80.0,
+      120.0
+    ]
+  }
+}

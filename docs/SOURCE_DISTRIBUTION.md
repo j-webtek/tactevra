@@ -508,3 +508,8 @@ focused test module; all generated partitions and result evidence stay external
 and hash-bound.
 
 The tracked-file ceiling is 6,374 after freezing the selected passive-tool/static-camera attachment fixture. Generated collision receipts remain external and hash-bound.
+
+The tracked-file ceiling is 6,376 after the passive-tool rerun fixture and the
+target/contact CAD successor fixture. The successor binds controlled station and
+tool meshes by hash, keeps result evidence external, and adds no generated
+geometry or corpus to Git.
