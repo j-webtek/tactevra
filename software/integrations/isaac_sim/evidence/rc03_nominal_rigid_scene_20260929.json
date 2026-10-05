@@ -1,0 +1,527 @@
+{
+  "blockers": [
+    "ARM_LINK_COLLISION_GEOMETRY_MISSING",
+    "ARM_INERTIAL_PROPERTIES_INVALID",
+    "CAMERA_SUPPORT_COLLISION_GEOMETRY_MISSING",
+    "FIXTURE_SOLID_HEIGHTS_REPLACED_BY_35MM_PROXIES",
+    "ROBOT_PLACEMENT_NOMINAL_UNMEASURED",
+    "TOOL_COLLISION_GEOMETRY_MISSING",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "collision_query_admissible": false,
+  "design_revision": "RC03-INT-R1",
+  "evidence_class": "RIGID_SCENE_COMPOSITION_ONLY",
+  "external_files": [
+    {
+      "path": "rc03_nominal_rigid_scene.usda",
+      "sha256": "77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35",
+      "size_bytes": 6847
+    }
+  ],
+  "external_files_manifest_sha256": "fcd219cab737e48ccffd464360705a9de931ab46a23640f4336bc4223b662664",
+  "fiducials": [
+    {
+      "name": "T0",
+      "prim_path": "/RC03/BoardFrame/Fiducials/T0",
+      "tag_id": 0
+    },
+    {
+      "name": "T1",
+      "prim_path": "/RC03/BoardFrame/Fiducials/T1",
+      "tag_id": 1
+    },
+    {
+      "name": "T2",
+      "prim_path": "/RC03/BoardFrame/Fiducials/T2",
+      "tag_id": 2
+    },
+    {
+      "name": "T3",
+      "prim_path": "/RC03/BoardFrame/Fiducials/T3",
+      "tag_id": 3
+    },
+    {
+      "name": "K0",
+      "prim_path": "/RC03/BoardFrame/Fiducials/K0",
+      "tag_id": 4
+    },
+    {
+      "name": "P0",
+      "prim_path": "/RC03/BoardFrame/Fiducials/P0",
+      "tag_id": 5
+    }
+  ],
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "hover_replay_admissible": false,
+  "limitations": [
+    "nominal_unmeasured_rc03_geometry",
+    "static_rigid_envelopes_only",
+    "no_arm_link_or_tool_collision_shapes",
+    "no_dynamics_or_trajectory_replay",
+    "no_clearance_contact_render_or_physical_qualification"
+  ],
+  "nominal_h_target": {
+    "center_board_mm": [
+      216.55,
+      154.0,
+      21.0
+    ],
+    "prim_path": "/RC03/BoardFrame/Targets/H"
+  },
+  "obstacles": [
+    {
+      "conservative_proxy": false,
+      "maximum_board_mm": [
+        610.0,
+        457.0,
+        0.0
+      ],
+      "minimum_board_mm": [
+        0.0,
+        0.0,
+        -18.0
+      ],
+      "obstacle_id": "board_solid",
+      "prim_path": "/RC03/BoardFrame/Obstacles/board_solid",
+      "source": "config/workcell_layout.json:board"
+    },
+    {
+      "conservative_proxy": true,
+      "maximum_board_mm": [
+        400.0,
+        232.0,
+        21.0
+      ],
+      "minimum_board_mm": [
+        85.0,
+        85.0,
+        0.0
+      ],
+      "obstacle_id": "keyboard",
+      "prim_path": "/RC03/BoardFrame/Obstacles/keyboard",
+      "source": "config/workcell_layout.json:devices"
+    },
+    {
+      "conservative_proxy": true,
+      "maximum_board_mm": [
+        577.1,
+        248.60000000000002,
+        11.9
+      ],
+      "minimum_board_mm": [
+        499.2,
+        84.2,
+        4.0
+      ],
+      "obstacle_id": "phone",
+      "prim_path": "/RC03/BoardFrame/Obstacles/phone",
+      "source": "config/workcell_layout.json:devices"
+    },
+    {
+      "conservative_proxy": true,
+      "maximum_board_mm": [
+        264.5,
+        264.0,
+        35.0
+      ],
+      "minimum_board_mm": [
+        80.0,
+        72.0,
+        0.0
+      ],
+      "obstacle_id": "station:keyboard_left",
+      "prim_path": "/RC03/BoardFrame/Obstacles/station_keyboard_left",
+      "source": "config/workcell_layout.json:stations"
+    },
+    {
+      "conservative_proxy": true,
+      "maximum_board_mm": [
+        405.0,
+        264.0,
+        35.0
+      ],
+      "minimum_board_mm": [
+        242.5,
+        72.0,
+        0.0
+      ],
+      "obstacle_id": "station:keyboard_right",
+      "prim_path": "/RC03/BoardFrame/Obstacles/station_keyboard_right",
+      "source": "config/workcell_layout.json:stations"
+    },
+    {
+      "conservative_proxy": true,
+      "maximum_board_mm": [
+        597.3,
+        252.8,
+        35.0
+      ],
+      "minimum_board_mm": [
+        411.0,
+        80.0,
+        0.0
+      ],
+      "obstacle_id": "station:phone_tcp",
+      "prim_path": "/RC03/BoardFrame/Obstacles/station_phone_tcp",
+      "source": "config/workcell_layout.json:stations"
+    }
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "0d080880e6c7915cae43d04771c9a17748060c4d682a1de86003d54021067bcd",
+  "robot_placement": {
+    "from_frame": "world",
+    "interpretation": "Robot +X points toward board front (-board Y), robot +Y points toward board right (+board X), and +Z agrees. Base Z and clamp-axis offsets remain unknown.",
+    "rotation_row_major": [
+      0.0,
+      1.0,
+      0.0,
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "state": "NOMINAL_ONLY_FROM_RC03_REACH_SCREENING",
+    "to_frame": "board",
+    "translation_mm": [
+      305.0,
+      457.0,
+      0.0
+    ]
+  },
+  "robot_reference_prim": "/RC03/Robot",
+  "schema": "tactevra.isaac_sim_rc03_scene.v1",
+  "source_bindings": {
+    "nominal_target_profiles_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2",
+    "robot_import_receipt_file_sha256": "f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde",
+    "robot_import_receipt_sha256": "ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85",
+    "robot_usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2",
+    "simulation_hardware_profile_sha256": "6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190"
+  },
+  "source_scene": {
+    "arm_clamp_rear_edge_x_range_mm": [
+      225.0,
+      385.0
+    ],
+    "assumptions": [
+      "All imported RC03 board, station, device, and fiducial values are nominal simulation geometry, not measured installation evidence.",
+      "Station outer envelopes are conservatively extruded to 35 mm because controlled solid heights are not available to this proxy model.",
+      "Keyboard and phone AABBs are nominal device envelopes; their surfaces are not calibrated contact coordinates.",
+      "AABB checks omit robot-link meshes, fasteners, cables, flexible tools, and dynamic uncertainty unless modeled separately.",
+      "Null direct-tag plane Z values are represented as 0.3 mm for simulation only."
+    ],
+    "board": {
+      "conservative_proxy": false,
+      "frame": "board",
+      "kind": "controlled_board_geometry",
+      "maximum_mm": [
+        610.0,
+        457.0,
+        0.0
+      ],
+      "minimum_mm": [
+        0.0,
+        0.0,
+        -18.0
+      ],
+      "obstacle_id": "board_solid",
+      "source": "config/workcell_layout.json:board"
+    },
+    "board_frame": "board",
+    "can_release_physical_gates": false,
+    "design_revision": "RC03-INT-R1",
+    "devices": {
+      "keyboard": {
+        "device_id": "keyboard",
+        "envelope": {
+          "conservative_proxy": true,
+          "frame": "board",
+          "kind": "device_nominal_envelope",
+          "maximum_mm": [
+            400.0,
+            232.0,
+            21.0
+          ],
+          "minimum_mm": [
+            85.0,
+            85.0,
+            0.0
+          ],
+          "obstacle_id": "keyboard",
+          "source": "config/workcell_layout.json:devices"
+        },
+        "interaction_plane_state": "NOMINAL_ENVELOPE_TOP_NOT_MEASURED_KEY_CONTACT_COORDINATE",
+        "interaction_plane_z_mm": 21.0,
+        "physical_contact_coordinate": false
+      },
+      "phone": {
+        "device_id": "phone",
+        "envelope": {
+          "conservative_proxy": true,
+          "frame": "board",
+          "kind": "device_nominal_envelope",
+          "maximum_mm": [
+            577.1,
+            248.60000000000002,
+            11.9
+          ],
+          "minimum_mm": [
+            499.2,
+            84.2,
+            4.0
+          ],
+          "obstacle_id": "phone",
+          "source": "config/workcell_layout.json:devices"
+        },
+        "interaction_plane_state": "NOMINAL_SCREEN_PLANE_NOT_MEASURED_CONTACT_COORDINATE",
+        "interaction_plane_z_mm": 11.9,
+        "physical_contact_coordinate": false
+      }
+    },
+    "fiducials": [
+      {
+        "center_board_mm": [
+          47.0,
+          40.0,
+          0.3
+        ],
+        "coordinate_source": "nominal_layout",
+        "detection_edge_mm": 40.0,
+        "family": "tag36h11",
+        "name": "T0",
+        "role": "world",
+        "tag_id": 0,
+        "tile_edge_mm": 55.0,
+        "yaw_rad": 0.0
+      },
+      {
+        "center_board_mm": [
+          440.0,
+          40.0,
+          0.3
+        ],
+        "coordinate_source": "nominal_layout",
+        "detection_edge_mm": 40.0,
+        "family": "tag36h11",
+        "name": "T1",
+        "role": "world",
+        "tag_id": 1,
+        "tile_edge_mm": 55.0,
+        "yaw_rad": 0.0
+      },
+      {
+        "center_board_mm": [
+          47.0,
+          410.0,
+          0.3
+        ],
+        "coordinate_source": "nominal_layout",
+        "detection_edge_mm": 40.0,
+        "family": "tag36h11",
+        "name": "T2",
+        "role": "world",
+        "tag_id": 2,
+        "tile_edge_mm": 55.0,
+        "yaw_rad": 0.0
+      },
+      {
+        "center_board_mm": [
+          563.0,
+          410.0,
+          0.3
+        ],
+        "coordinate_source": "nominal_layout",
+        "detection_edge_mm": 40.0,
+        "family": "tag36h11",
+        "name": "T3",
+        "role": "world",
+        "tag_id": 3,
+        "tile_edge_mm": 55.0,
+        "yaw_rad": 0.0
+      },
+      {
+        "center_board_mm": [
+          324.0,
+          309.0,
+          0.3
+        ],
+        "coordinate_source": "nominal_layout",
+        "detection_edge_mm": 40.0,
+        "family": "tag36h11",
+        "name": "K0",
+        "role": "station_check",
+        "tag_id": 4,
+        "tile_edge_mm": 55.0,
+        "yaw_rad": 0.0
+      },
+      {
+        "center_board_mm": [
+          459.0,
+          309.0,
+          0.3
+        ],
+        "coordinate_source": "nominal_layout",
+        "detection_edge_mm": 40.0,
+        "family": "tag36h11",
+        "name": "P0",
+        "role": "station_check",
+        "tag_id": 5,
+        "tile_edge_mm": 55.0,
+        "yaw_rad": 0.0
+      }
+    ],
+    "obstacles": [
+      {
+        "conservative_proxy": false,
+        "frame": "board",
+        "kind": "controlled_board_geometry",
+        "maximum_mm": [
+          610.0,
+          457.0,
+          0.0
+        ],
+        "minimum_mm": [
+          0.0,
+          0.0,
+          -18.0
+        ],
+        "obstacle_id": "board_solid",
+        "source": "config/workcell_layout.json:board"
+      },
+      {
+        "conservative_proxy": true,
+        "frame": "board",
+        "kind": "device_nominal_envelope",
+        "maximum_mm": [
+          400.0,
+          232.0,
+          21.0
+        ],
+        "minimum_mm": [
+          85.0,
+          85.0,
+          0.0
+        ],
+        "obstacle_id": "keyboard",
+        "source": "config/workcell_layout.json:devices"
+      },
+      {
+        "conservative_proxy": true,
+        "frame": "board",
+        "kind": "device_nominal_envelope",
+        "maximum_mm": [
+          577.1,
+          248.60000000000002,
+          11.9
+        ],
+        "minimum_mm": [
+          499.2,
+          84.2,
+          4.0
+        ],
+        "obstacle_id": "phone",
+        "source": "config/workcell_layout.json:devices"
+      },
+      {
+        "conservative_proxy": true,
+        "frame": "board",
+        "kind": "station_outer_envelope_height_proxy",
+        "maximum_mm": [
+          264.5,
+          264.0,
+          35.0
+        ],
+        "minimum_mm": [
+          80.0,
+          72.0,
+          0.0
+        ],
+        "obstacle_id": "station:keyboard_left",
+        "source": "config/workcell_layout.json:stations"
+      },
+      {
+        "conservative_proxy": true,
+        "frame": "board",
+        "kind": "station_outer_envelope_height_proxy",
+        "maximum_mm": [
+          405.0,
+          264.0,
+          35.0
+        ],
+        "minimum_mm": [
+          242.5,
+          72.0,
+          0.0
+        ],
+        "obstacle_id": "station:keyboard_right",
+        "source": "config/workcell_layout.json:stations"
+      },
+      {
+        "conservative_proxy": true,
+        "frame": "board",
+        "kind": "station_outer_envelope_height_proxy",
+        "maximum_mm": [
+          597.3,
+          252.8,
+          35.0
+        ],
+        "minimum_mm": [
+          411.0,
+          80.0,
+          0.0
+        ],
+        "obstacle_id": "station:phone_tcp",
+        "source": "config/workcell_layout.json:stations"
+      }
+    ],
+    "schema": "rocell.nominal_workcell_scene.v1",
+    "simulation_only": true,
+    "source_hashes": {
+      "config/workcell_layout.json": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1",
+      "fiducials/apriltag_map.json": "81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700"
+    },
+    "status": "ASSUMED_GOOD_FOR_SIMULATION_ONLY",
+    "tcp_calibration_target": {
+      "center_mm": [
+        441.0,
+        180.0,
+        10.5
+      ],
+      "coordinate_state": "nominal_simulation_geometry",
+      "frame": "board",
+      "physical_contact_coordinate": false,
+      "replaceable_part": "calibration_puck",
+      "target_id": "tcp_target"
+    }
+  },
+  "stage": {
+    "default_prim": "/RC03",
+    "meters_per_unit": 1.0,
+    "up_axis": "Z"
+  },
+  "stage_validation": {
+    "collision_prim_paths": [
+      "/RC03/BoardFrame/Obstacles/board_solid",
+      "/RC03/BoardFrame/Obstacles/keyboard",
+      "/RC03/BoardFrame/Obstacles/phone",
+      "/RC03/BoardFrame/Obstacles/station_keyboard_left",
+      "/RC03/BoardFrame/Obstacles/station_keyboard_right",
+      "/RC03/BoardFrame/Obstacles/station_phone_tcp"
+    ],
+    "composed_robot_joint_count": 6,
+    "composed_robot_joint_paths": [
+      "/RC03/Robot/Physics/base_link_to_link1",
+      "/RC03/Robot/Physics/link1_to_link2",
+      "/RC03/Robot/Physics/link2_to_link3",
+      "/RC03/Robot/Physics/link3_to_link4",
+      "/RC03/Robot/Physics/link4_to_link5",
+      "/RC03/Robot/Physics/link5_to_gripper_link"
+    ],
+    "h_target_prim_valid": true,
+    "physics_scene_prim": "/RC03/PhysicsScene"
+  },
+  "wire_commands": []
+}

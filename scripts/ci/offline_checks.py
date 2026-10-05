@@ -146,6 +146,10 @@ TESTS = (
     "software/ai/tests/test_actual_output_compatibility_v1.py",
     "software/ai/tests/test_profiled_service_ingress_v2.py",
     "software/ai/tests/test_confidence_metrics.py",
+    "software/tests/unit/test_isaac_sim_upstream_link_mesh_binding_evidence.py",
+    "software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py",
+    "software/tests/unit/test_isaac_sim_collision_differential_evidence.py",
+    "software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py",
 )
 
 

@@ -1412,6 +1412,65 @@ different evidence or promote fixtures. The companion runbook preserves the
 AI/arm ownership split and requires exact build, epoch, session, and evidence
 lineage. It remains a zero-authority pre-commissioning record.
 The governed offline matrix passes 917 tests with ARM-156 included.
+The process-alignment overlay in `E-20260929-INT-450` binds an AI-produced
+`ModelMotionBatchV2` carrying ordered `H, H, 1, PERIOD` proposals to the
+governed RC03 Isaac scene. Target centers share one rigid synthetic placement
+within numerical precision, but the 14.400834977 mm localization disk exceeds
+each 7 mm key-edge margin. The replay therefore stops before a joint schedule.
+Its next simulation input is the exact zero-write schedule from the arm typing
+pipeline after the source batch passes the safe-region uncertainty gate.
+
+`E-20261004-INT-453` separately makes an older retained simulator result usable
+without weakening that gate. It binds the actual-emitter schedule bundle to its
+full-route Isaac receipt and derives the contiguous `0..34` prefix ending at
+the first noncontact `H` hover. The prefix contains no contact sample and is
+conservatively bounded by the passing full-route maximum of 0.07684843 mm.
+This satisfies the issue's kinematic replay evidence milestone only. Its
+synthetic observations, unmeasured layout/tool geometry, zero physics steps,
+and unsafe 14.400834977 mm localization bound remain explicit blockers; the
+derived proof cannot authorize deployment or physical motion.
+
+`E-20261004-INT-454` begins the next WP2 collision-foundation increment by
+binding the official Waveshare `roarm_ws` Xacro and seven per-link STL blobs to
+one immutable upstream commit and tree. The Xacro uses identical visual and
+collision references with zero local origins and a declared `0.001` scale. The
+source meshes contain 38,344 triangles across 19 connected bodies; `link1` and
+`link5` are not watertight, and one left-gripper mesh is unreferenced. This is
+source provenance only. It deliberately does not prove robot-frame alignment,
+install reduced collision geometry, choose self-collision pairs, run clearance
+replay, or grant simulator, controller, hardware, or physical authority.
+
+`E-20261004-INT-455` derives 14 deterministic link-local box candidates from
+those exact source meshes. All 19,030 processed source vertices remain inside
+their serialized candidate boxes. `link5` exceeds the runtime contract's
+64-primitives-per-body limit with 114 processed fragments and therefore uses a
+declared whole-link envelope. The largest box/source volume ratio among
+watertight components is 21.140797, so these shapes are intentionally retained
+as conservative candidates only. They are not installed, and false-positive
+collision behavior, self-collision pair policy, clearance replay, tool/camera
+support geometry, controller access, and physical authority remain blocked.
+
+`E-20261004-INT-456` compares those candidates with the exact source-bound
+meshes for every one of the 21 unordered link pairs at the governed zero,
+home, and ready poses. Across 63 pair-pose cases it retains 48 free-space
+agreements, three collision agreements, 12 conservative-candidate false
+positives, and zero observed candidate false negatives. All 12 false positives
+are kinematically adjacent pairs, but the probe does not silently exclude them.
+Three poses are not continuous workspace coverage, so self-collision policy,
+candidate installation, collision admission, clearance replay, tool/camera
+support geometry, controller access, and physical authority remain blocked.
+
+`E-20261004-INT-457` expands that differential to 49 deterministic governed
+joint-space poses: the three existing anchors, lower/upper/midpoint limit
+anchors, 12 single-joint limit poses, and 32 Halton interior samples. Across
+1,029 pair-pose cases it retains 780 free-space agreements, 57 collision
+agreements, 192 conservative-candidate false positives, and zero observed
+candidate false negatives. Of the false positives, 191 are adjacent-link cases
+and one is the nonadjacent `link2/gripper_link` pair. The corpus therefore
+identifies a concrete refinement target without selecting exclusions or
+installing a profile. Finite samples are not continuous coverage; collision
+admission, clearance replay, tool/camera/support/environment geometry,
+controller access, and physical authority remain blocked.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

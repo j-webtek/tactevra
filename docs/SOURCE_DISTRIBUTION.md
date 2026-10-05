@@ -62,6 +62,38 @@ policy baseline now points to this merged commit so future checks have a stable,
 post-reduction reference. Containment ceilings remain deliberately above the
 baseline to detect material growth without making normal small changes brittle.
 
+The issue #190 first-hover extraction adds ten net governed paths beyond the
+preceding merged snapshot: three replay/verifier modules, three tests, and four
+retained or derived evidence records. The reviewed tracked-file ceiling
+therefore moves only from 6,253 to the exact observed 6,263 files. The measured
+tree remains 649,432,899 logical
+bytes with 4,890,152 governed duplicate bytes; the logical-byte, single-blob,
+duplicate-byte, and reduction limits are unchanged.
+
+The official per-link mesh-binding increment adds three net governed paths: one
+read-only probe, one compact retained receipt, and one evidence test. The
+reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
+observed 6,266 files. The measured tree is 649,454,909 logical bytes with
+4,890,152 governed duplicate bytes. No mesh blob was copied into the repository,
+and the logical-byte, single-blob, duplicate-byte, and reduction limits remain
+unchanged.
+
+The conservative per-link box-candidate increment adds three more governed
+paths: one deterministic reducer, one retained candidate receipt, and one
+evidence test. The reviewed tracked-file ceiling moves from 6,266 to the exact
+observed 6,269 files. The measured tree is 649,495,261 logical bytes with
+4,890,152 governed duplicate bytes. The candidate receipt references upstream
+mesh hashes rather than copying mesh blobs, so all byte and reduction limits
+remain unchanged.
+
+The three-pose collision-differential increment adds three governed paths: one
+offline comparison probe, one compact retained receipt, and one evidence test.
+The reviewed tracked-file ceiling therefore moves from 6,269 to the exact
+observed 6,272 files. The measured tree is 649,538,065 logical bytes with
+4,890,152 governed duplicate bytes. The comparison binds external source meshes
+and the exact collision-backend wheel by hash without copying either artifact
+into the repository, so all byte and reduction limits remain unchanged.
+
 The preferred order is:
 
 1. replace repeated instructional STL copies with one canonical tracked object
@@ -270,3 +302,17 @@ totaling 9,833,904 bytes. Against the preceding `main` snapshot, the governed
 large-blob duplicate metric falls from 56,671,848 to 46,837,944 bytes. Source
 CAD, grounded-saddle revision evidence, the active 3MF queue, profiles, and HOLD
 or superseded records remain tracked; Git history is not rewritten.
+
+The governed joint-space collision differential adds three tracked source
+paths: one offline probe, one compact retained receipt, and one receipt test.
+At this change the repository contains 6,275 tracked files, 649,591,121 logical
+bytes, and 4,890,152 governed duplicate bytes. The file-count ceiling advances
+from 6,272 to 6,275 for those reviewed paths only; the logical-byte and
+duplicate-byte ceilings do not change.
+
+The stage-two pre-camera runtime reconciliation retains the reviewed runtime,
+session, shadow-evidence, permit-readiness, and observed-entry qualification
+sources alongside the later release and Isaac Sim evidence already on `main`.
+The reconciled tree contains 6,362 tracked files and 651,290,447 logical bytes;
+the reviewed file-count ceiling advances to 6,365 while the logical-byte and
+duplicate-byte ceilings remain unchanged.

@@ -23,6 +23,313 @@ It does **not** import Isaac Sim, load a USD scene, use a GPU, run physics, or
 produce clearance/contact evidence. A fake-adapter `PASS` has evidence class
 `CONTRACT_TEST_ONLY` and expressly establishes only contract behavior.
 
+## Initial Windows runner candidate installed 2026-09-29
+
+The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
+containing CPython 3.12, `torch==2.11.0+cu130`, and
+`isaacsim[all,extscache]==6.1.0.0`. Torch enumerates both installed NVIDIA
+GeForce RTX 3090 GPUs. The compact
+[`host probe`](evidence/windows_dual_rtx3090_candidate_20260929.json) binds 26
+Isaac/Torch distributions through their installed `METADATA` and `RECORD`
+hashes and records zero hardware writes and zero physical movements.
+
+This is a blocked candidate, not a selected runner. Isaac Sim has not been
+launched, no NVIDIA terms were accepted by automation, and the settings
+profile remains unavailable. NVIDIA documents driver 595.97 as tested for
+Isaac Sim 6.1.0 on Windows; the host currently reports 591.86. The RTX 3090 is
+also outside NVIDIA's documented minimum GPU set for 6.1.0 even though each
+card has 24 GiB VRAM and RT capability. Compatibility must therefore be
+measured after a reviewed driver and license decision.
+
+The initial candidate report is retained as historical prelaunch evidence. The
+driver and launch blockers in that report were subsequently addressed as
+described below. The exact package installation commands were:
+
+```powershell
+py -3.12 -m venv C:\IsaacSim\env_6_1_0
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install --upgrade pip
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m pip install "isaacsim[all,extscache]==6.1.0.0" --extra-index-url https://pypi.nvidia.com
+```
+
+Reproduce the non-launching probe from the repository root:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path 'software/src').Path
+C:\IsaacSim\env_6_1_0\Scripts\python.exe -m rocell.integrations.isaac_sim.host_probe `
+  --output software/integrations/isaac_sim/evidence/windows_dual_rtx3090_candidate_20260929.json
+```
+
+The probe imports neither Isaac Sim nor Torch. It cannot accept a license,
+start a simulator, open robot transport, or generate wire commands.
+
+## Driver-qualified compatibility launch
+
+The project owner authorized NVIDIA's terms for internal use and installation
+of the tested Windows driver. The signed NVIDIA 595.97 installer has SHA-256
+`979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`.
+The outer self-extractor failed once with Windows access denied; extracting the
+same signed archive and running its signed `setup.exe -s -n Display.Driver`
+succeeded. Both GPUs then reported driver 595.97 and Torch retained CUDA access.
+
+[`first_launch_probe.py`](first_launch_probe.py) subsequently started Isaac Sim
+headlessly and shut it down without creating a scene. The retained
+[`launch receipt`](evidence/windows_dual_rtx3090_first_launch_20260929.json)
+binds:
+
+- Isaac Sim distribution 6.1.0.0 and Kit application 6.1.0;
+- the exact 26-distribution installation digest;
+- driver 595.97 and both 24 GiB RTX 3090 identities;
+- 303 live enabled extensions and their canonical digest;
+- the five-field headless launch profile and its canonical digest; and
+- zero hardware writes, movements, wire commands, or physical authority.
+
+Reproduce the compatibility launch only in the installed external environment:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_launch_probe.py `
+  --output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.json `
+  --status-output C:\IsaacSim\evidence\first_launch_receipt_6_1_0.status.json `
+  --installation-sha256 ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258 `
+  --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122
+```
+
+The compatibility launch passes, but the repository toolchain lock remains
+`UNSELECTED`. The RTX 3090 remains outside NVIDIA's documented 6.1.0 minimum
+GPU set. The launch also reported PCIe device 0 at width x4 versus its x16
+maximum, no CUDA peer access between the GPUs, a stale localhost Omniverse
+proxy setting, and an OpenUSD asset-converter build warning. WP1 must resolve
+or explicitly isolate the OpenUSD importer warning and prove import/FK parity
+before a runner-selection change can be reviewed.
+
+## Governed RoArm URDF import
+
+[`urdf_import_probe.py`](urdf_import_probe.py) imports the pinned, meshless
+RoArm-M3 kinematic URDF into a caller-supplied external directory. The compact
+[`import receipt`](evidence/roarm_m3_urdf_import_20260929.json) binds the exact
+source URDF, importer configuration, generated USD manifest, all nine source
+links, six movable USD Physics joints, and the two source fixed joints that the
+Isaac importer represents as nested transforms.
+
+The generated USD is deliberately retained outside Git at
+`C:\IsaacSim\artifacts\issue190\wp1-import-003`. Its manifest is committed,
+but the stage itself is not. The receipt is kinematic import evidence only: it
+contains no trajectory, wire command, hardware access, physical authority,
+dynamics qualification, or FK parity claim.
+
+Reproduce the bounded import on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\urdf_import_probe.py `
+  --urdf software\models\roarm_m3\roarm_m3_kinematic_40dbd84.urdf `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp1-import-003 `
+  --receipt C:\IsaacSim\evidence\urdf_import_003.json `
+  --status-output C:\IsaacSim\evidence\urdf_import_003.status.json
+```
+
+The importer promotes `base_link` to the USD articulation root after Isaac's
+fixed-joint collapse. This preserves all six source movable joints in the live
+articulation DOF view. The original unnormalized import and its missing-base-DOF
+diagnostic remain retained evidence.
+
+[`fk_parity_probe.py`](fk_parity_probe.py) teleports only the live in-memory
+articulation through the governed zero, home, and ready corpus and reads the
+`link5` physics transform plus the imported fixed `hand_tcp` transform. The
+retained [`FK receipt`](evidence/roarm_m3_fk_parity_20260929.json) exposes the
+complete six-DOF order and passes all three cases at a worst translation error
+below 0.00013 mm. This is kinematic parity only. The imported model has invalid
+mass and inertia placeholders, and no dynamics, collision, contact, rendering,
+hardware, or physical qualification follows from this result.
+
+## Nominal RC03 rigid scene
+
+[`rc03_scene_probe.py`](rc03_scene_probe.py) consumes the existing strict RC03
+scene loader and composes an external metre-based USD stage containing the
+governed board, keyboard and phone envelopes, three conservative station
+proxies, six nominal fiducials, the nominal `H` target marker, and a reference
+to the normalized robot USD at the frozen nominal board transform. The compact
+[`scene receipt`](evidence/rc03_nominal_rigid_scene_20260929.json) binds every
+source file, the external stage, six static collision prims, and the six
+composed robot joints.
+
+This is scene-composition evidence only. Collision queries and hover replay
+remain explicitly inadmissible because robot-link and tool collision geometry,
+valid inertial properties, camera-support solids, controlled fixture heights,
+measured robot placement, and a selected Isaac toolchain lock are unavailable.
+The probe does not accept or derive a trajectory.
+
+Reproduce it on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\rc03_scene_probe.py `
+  --workspace . `
+  --rc03-root active-project\RoCell_v0_3 `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --robot-import-receipt software\integrations\isaac_sim\evidence\roarm_m3_urdf_import_20260929.json `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp2-scene-002 `
+  --receipt C:\IsaacSim\evidence\rc03_scene_002.json `
+  --status-output C:\IsaacSim\evidence\rc03_scene_002.status.json
+```
+
+## Model-motion command overlay
+
+[`model_motion_scene_overlay_probe.py`](model_motion_scene_overlay_probe.py)
+strictly decodes an actual AI-produced `ModelMotionBatchV2`, binds it to the
+retained RC03 scene and nominal target source, preserves requested order and
+repeated targets, and authors proposal centers, inferred placed key regions,
+and uncertainty disks into an external Isaac USD. The retained
+[`overlay receipt`](evidence/model_motion_scene_overlay_20260929.json) evaluates
+`H, H, 1, PERIOD`. All proposal centers share one synthetic rigid placement to
+numerical precision, but the 14.400834977 mm localization disk exceeds every
+7 mm key-edge margin. The rehearsal therefore stops at
+`BLOCKED_UNCERTAINTY_CROSSES_INFERRED_SAFE_REGIONS` before any joint schedule.
+
+The inferred placement is a visualization transform reconstructed from the
+synthetic batch; it is not runtime calibration. The probe changes zero
+articulation positions, takes zero physics steps, emits no controller or wire
+commands, and grants no hardware or physical authority. Its next input must be
+a source-bound joint schedule from the arm typing pipeline. That later replay
+must compare the simulated TCP at each contact sample with the same ordered
+batch targets rather than using separately invented points.
+
+Reproduce the overlay on the designated runner from the repository root:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\model_motion_scene_overlay_probe.py `
+  --workspace . `
+  --scene-usd C:\IsaacSim\artifacts\issue190\wp2-scene-002\rc03_nominal_rigid_scene.usda `
+  --scene-receipt software\integrations\isaac_sim\evidence\rc03_nominal_rigid_scene_20260929.json `
+  --batch software\ai\eval\precision_adapter_batch_v2_contract_fixture.json `
+  --batch-metadata software\ai\eval\precision_adapter_batch_v2_contract_fixture_metadata.json `
+  --output-dir C:\IsaacSim\artifacts\issue190\wp2-command-overlay-001 `
+  --receipt C:\IsaacSim\evidence\model_motion_overlay_001.json `
+  --status-output C:\IsaacSim\evidence\model_motion_overlay_001.status.json
+```
+
+## Official per-link mesh binding
+
+[`upstream_link_mesh_binding_probe.py`](upstream_link_mesh_binding_probe.py)
+reads immutable blobs from the pinned Waveshare `roarm_ws` commit. The retained
+[`binding receipt`](evidence/roarm_m3_upstream_link_mesh_binding_20261004.json)
+proves that seven named Xacro links use seven exact STL blobs, with identical
+visual and collision references, zero local origin offsets, and the declared
+`0.001` scale. It records 38,344 triangles across 19 connected bodies; `link1`
+and `link5` are not watertight, and one left-gripper mesh is not referenced by
+the Xacro.
+
+This is source-provenance evidence, not collision qualification. It does not
+prove mesh-to-robot-frame alignment, install collision shapes, select a
+self-collision pair policy, run Isaac, or admit a clearance result. Raw mesh,
+reduced geometry, and clearance replay remain explicitly inadmissible.
+
+Reproduce the inspection from a local checkout containing the pinned commit:
+
+```powershell
+python software\integrations\isaac_sim\upstream_link_mesh_binding_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --output C:\IsaacSim\evidence\upstream_link_mesh_binding_001.json `
+  --status-output C:\IsaacSim\evidence\upstream_link_mesh_binding_001.status.json
+```
+
+## Conservative link-local box candidates
+
+[`link_mesh_reduction_probe.py`](link_mesh_reduction_probe.py) derives one
+deterministic, link-local identity-oriented box per processed connected mesh
+component. `link5` has 114 processed fragments, so the generator applies its
+declared 64-primitives-per-body limit and emits one whole-link envelope instead.
+The retained
+[`reduction receipt`](evidence/roarm_m3_link_mesh_reduction_20261004.json)
+contains 14 candidate boxes across seven links and proves zero source-vertex
+overflow after serialization.
+
+These boxes are conservative candidates, not an installed collision profile.
+The largest box/source volume ratio among watertight components is 21.141, two
+source components are not watertight, and false-positive collision behavior and
+self-collision pair policy remain unqualified. The receipt therefore denies
+candidate installation, collision admission, and clearance replay.
+
+Reproduce the candidate reduction without installing a profile:
+
+```powershell
+$env:PYTHONUTF8='1'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\link_mesh_reduction_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --output C:\IsaacSim\evidence\link_mesh_reduction_003.json `
+  --status-output C:\IsaacSim\evidence\link_mesh_reduction_003.status.json
+```
+
+## Three-pose link-collision differential
+
+[`collision_differential_probe.py`](collision_differential_probe.py) compares
+the 14 conservative box candidates with the exact source-bound meshes for all
+21 unordered link pairs at the governed zero, home, and ready poses. The
+retained
+[`differential receipt`](evidence/roarm_m3_collision_differential_20261004.json)
+records 63 pair-pose cases: 48 free-space agreements, three collision
+agreements, 12 candidate false positives, and zero observed candidate false
+negatives. Every observed false positive is between kinematically adjacent
+links, but adjacent pairs are deliberately measured rather than filtered.
+
+This small corpus does not establish workspace coverage or authorize an
+exclusion policy. The probe pins the exact `python-fcl 0.7.0.11` CPython 3.12
+wheel by SHA-256 and remains offline, zero-write, and non-installing. Candidate
+installation, collision admission, and clearance replay remain denied until
+the self-collision pair policy is reviewed.
+
+Reproduce the comparison from an isolated Python 3.12 environment containing
+the exact pinned wheel and `trimesh 4.11.1`:
+
+```powershell
+python software\integrations\isaac_sim\collision_differential_probe.py `
+  --workspace . `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20261004.json `
+  --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl `
+  --output C:\IsaacSim\evidence\collision_differential_004.json `
+  --status-output C:\IsaacSim\evidence\collision_differential_004.status.json
+```
+
+## Governed joint-space collision differential
+
+[`collision_joint_space_probe.py`](collision_joint_space_probe.py) expands the
+same source-mesh-versus-box comparison to a deterministic 49-pose corpus. The
+corpus contains the three governed anchors, lower/upper/midpoint limit anchors,
+12 single-joint limit poses, and 32 Halton interior samples derived from the
+governed URDF limits. The retained
+[`joint-space receipt`](evidence/roarm_m3_collision_joint_space_20261004.json)
+records 1,029 pair-pose cases: 780 free-space agreements, 57 collision
+agreements, 192 candidate false positives, and zero observed candidate false
+negatives.
+
+The result isolates 191 false positives to adjacent links and one to the
+nonadjacent `link2/gripper_link` pair. That makes the larger corpus useful for
+targeted refinement, but it does not justify installing the candidates or
+silently excluding any pair. Finite sampling is not continuous workspace
+coverage, the source includes non-watertight meshes, and tool, camera, support,
+and environment geometry are still absent. Collision admission and clearance
+replay therefore remain denied.
+
+Reproduce the summary from the same isolated Python 3.12 environment used by
+the three-pose comparison:
+
+```powershell
+python software\integrations\isaac_sim\collision_joint_space_probe.py `
+  --workspace . `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --reduction-receipt software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20261004.json `
+  --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl `
+  --output C:\IsaacSim\evidence\collision_joint_space_detailed_005.json `
+  --summary-output C:\IsaacSim\evidence\collision_joint_space_summary_005.json `
+  --status-output C:\IsaacSim\evidence\collision_joint_space_005.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
@@ -73,3 +380,35 @@ operation is asset import and kinematic parity (WP1), not trajectory execution:
 See the full [integration plan](../../docs/ISAAC_SIM_INTEGRATION_PLAN.md) for
 work packages, acceptance gates, ownership, evidence, and limitations.
 
+## Retained first noncontact H hover
+
+The retained actual-emitter schedule and Isaac receipt are intentionally kept
+as evidence rather than regenerated from unavailable external artifacts:
+
+- [`actual_emitter_joint_schedule_bundle_9e5c878_20260929.json`](evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json)
+  binds 133 ordered arm samples to the actual shared-emitter payload from arm
+  commit `9e5c878852da6a6e8509598bce9ce43f218efc70`;
+- [`actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json`](evidence/actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json)
+  binds that exact bundle to the governed robot USD and records a passing
+  zero-physics-step kinematic replay; and
+- [`first_noncontact_h_hover_proof_20261004.json`](evidence/first_noncontact_h_hover_proof_20261004.json)
+  derives the contiguous samples `0..34`, ending at the first `H` hover at
+  board `[216.55, 154.0, 26.0]` mm, and proves that no contact sample occurs in
+  that prefix.
+
+Reproduce the derived proof with ordinary Python; Isaac is not started:
+
+```powershell
+python software/integrations/isaac_sim/first_noncontact_hover_proof.py `
+  --bundle software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --replay software/integrations/isaac_sim/evidence/actual_emitter_joint_schedule_isaac_replay_9e5c878_20260929.json `
+  --output software/integrations/isaac_sim/evidence/first_noncontact_h_hover_proof_20261004.json
+```
+
+`PASS_KINEMATIC_HOVER_WITH_BLOCKERS` means only that the retained Isaac run
+included the hash-bound noncontact prefix and that the full-route maximums
+conservatively bound every prefix sample. The schedule used synthetic
+observations, the joints were teleported without dynamics, and the retained
+14.400834977 mm localization uncertainty still exceeds the 7 mm safe-region
+margin. This evidence grants no camera, collision, controller, hardware, or
+physical authority.

@@ -1,0 +1,61 @@
+{
+  "conservative_replay_bounds": {
+    "derivation": "bounded_by_passing_full_route_maximum",
+    "maximum_prefix_joint_tracking_error_rad": 5.923525581152944e-08,
+    "maximum_prefix_tool_tip_error_mm": 0.07684842940066568
+  },
+  "controller_commands": [],
+  "evidence_class": "DERIVED_FROM_HASH_BOUND_FULL_ROUTE_ISAAC_REPLAY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "The proof is derived from a retained full-route Isaac receipt; the per-hover error is conservatively bounded by the passing full-route maximum.",
+    "The schedule source uses synthetic observations and explicitly denies deployment qualification.",
+    "The replay teleports joints with zero physics steps and does not test dynamics, clearance, contact, or controller tracking.",
+    "This proof cannot promote any camera, collision, controller, hardware, or physical gate."
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_steps": 0,
+  "prefix": {
+    "contact_sample_count": 0,
+    "endpoint": {
+      "action_index": 0,
+      "expected_tool_tip_board_mm": [
+        216.55,
+        154.0,
+        26.0
+      ],
+      "phase": "HOVER",
+      "phase_endpoint": true,
+      "target_id": "H",
+      "time_from_start_ns": 7853052914
+    },
+    "first_sequence": 0,
+    "last_sequence": 34,
+    "sample_count": 35
+  },
+  "producer_scope": {
+    "deployment_qualification_claimed": false,
+    "synthetic_observations": true
+  },
+  "proof_sha256": "8a109db4798a3e54febc55bb9b285dbe705cdbc7bb8811f7f8e907e1739305a7",
+  "remaining_blockers": [
+    "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION",
+    "INSTALLED_GEOMETRY_COLLISION_SCREENING_REQUIRED",
+    "MEASURED_INSTALLED_DYNAMICS_REQUIRED",
+    "NO_DYNAMIC_OR_CONTACT_QUALIFICATION",
+    "SAFE_REGION_FITTING_LOCALIZATION_REQUIRED",
+    "SIMULATION_ONLY_LAYOUT_AND_TOOL_GEOMETRY"
+  ],
+  "schema": "tactevra.isaac_first_noncontact_hover_proof.v1",
+  "source_bindings": {
+    "arm_commit": "9e5c878852da6a6e8509598bce9ce43f218efc70",
+    "bundle_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42",
+    "bundle_sha256": "52e8e1977cc88bc4d80b1664ccaaec5b4a2d4286c744bf74655f3d683577d71a",
+    "replay_file_sha256": "b66993bab6aba1a5ab592f2fabb85bf4bca98658fe1bec4e997ea8b5a31b3fc6",
+    "replay_receipt_sha256": "5ac28fd35d62f0cf27d1c9c86c092ecfb74fa9cd36e93eb99dcc0f47dcf90e8c",
+    "robot_usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
+  },
+  "status": "PASS_KINEMATIC_HOVER_WITH_BLOCKERS"
+}

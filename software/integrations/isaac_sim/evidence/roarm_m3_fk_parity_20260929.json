@@ -1,0 +1,159 @@
+{
+  "cases": [
+    {
+      "actual_translation_mm": [
+        45.14768262709788,
+        -0.00020472392514691285,
+        672.5412302276119
+      ],
+      "expected_translation_mm": [
+        45.147706138707804,
+        -0.00016584265453271446,
+        672.541110201123
+      ],
+      "name": "zero",
+      "observed_articulation_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass": true,
+      "rotation_error_deg": 0.0,
+      "source_joint_positions_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "translation_component_error_mm": [
+        -2.351160992475343e-05,
+        -3.888127061419839e-05,
+        0.0001200264888439051
+      ],
+      "translation_error_mm": 0.00012833903159220256
+    },
+    {
+      "actual_translation_mm": [
+        343.6680796067907,
+        -0.0013293743733784637,
+        343.72757506115187
+      ],
+      "expected_translation_mm": [
+        343.66813012663386,
+        -0.0012623649628823055,
+        343.72753419262057
+      ],
+      "name": "home",
+      "observed_articulation_positions_rad": [
+        0.0,
+        0.0,
+        1.5707963705062866,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass": true,
+      "rotation_error_deg": 0.0,
+      "source_joint_positions_rad": [
+        0.0,
+        0.0,
+        1.5707963267948966,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "translation_component_error_mm": [
+        -5.051984317105962e-05,
+        -6.700941049615815e-05,
+        4.08685313004753e-05
+      ],
+      "translation_error_mm": 9.334212607247072e-05
+    },
+    {
+      "actual_translation_mm": [
+        271.37423982906176,
+        -0.0009946696074679836,
+        218.51128567981556
+      ],
+      "expected_translation_mm": [
+        271.3743079199385,
+        -0.0009968132367405402,
+        218.51132151593941
+      ],
+      "name": "ready",
+      "observed_articulation_positions_rad": [
+        0.0,
+        0.0,
+        2.618000030517578,
+        -1.0471999645233154,
+        0.0,
+        0.0
+      ],
+      "pass": true,
+      "rotation_error_deg": 0.0,
+      "source_joint_positions_rad": [
+        0.0,
+        0.0,
+        2.618,
+        -1.0472,
+        0.0,
+        0.0
+      ],
+      "translation_component_error_mm": [
+        -6.809087670944791e-05,
+        2.143629272556612e-06,
+        -3.5836123856825e-05
+      ],
+      "translation_error_mm": 7.697525843153175e-05
+    }
+  ],
+  "driver_version": "595.97",
+  "evidence_class": "KINEMATIC_PARITY_DIAGNOSTIC_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "import_receipt_file_sha256": "e4ffd2baa6383ca1543eb9f836d34ab72f7af85f4ce87a5ee318203f46e6b282",
+  "import_receipt_sha256": "ab9bdc8de92f71d23f465ab54233d9819a3a177edb42e347032f35b417f0fc85",
+  "limitations": [
+    "meshless_kinematic_projection",
+    "teleport_without_dynamic_step",
+    "invalid_imported_mass_and_inertia_placeholders",
+    "no_dynamics_collision_contact_or_render_qualification",
+    "no_physical_qualification"
+  ],
+  "mapping_complete": true,
+  "missing_articulation_dofs": [],
+  "observed_articulation_dof_order": [
+    "base_link_to_link1",
+    "link1_to_link2",
+    "link2_to_link3",
+    "link3_to_link4",
+    "link4_to_link5",
+    "link5_to_gripper_link"
+  ],
+  "parity_pass": true,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "qualification_status": "PARITY_ONLY",
+  "receipt_sha256": "baa6fd635e3004f75426234cc3ff72da240dae8c0b69074e7882dfbdbea2287e",
+  "schema": "tactevra.isaac_sim_fk_parity.v1",
+  "source_movable_joint_order": [
+    "base_link_to_link1",
+    "link1_to_link2",
+    "link2_to_link3",
+    "link3_to_link4",
+    "link4_to_link5",
+    "link5_to_gripper_link"
+  ],
+  "source_urdf_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+  "thresholds": {
+    "rotation_error_deg": 0.05,
+    "translation_error_mm": 0.1
+  },
+  "usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2",
+  "wire_commands": []
+}
