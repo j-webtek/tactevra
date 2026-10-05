@@ -284,3 +284,16 @@ def test_clearance_waypoint_fixture_is_bounded_and_arm_runtime_owned() -> None:
     assert fixture["swappable_pad"]["keyboard_present_in_pad_mode"] is False
     assert fixture["swappable_pad"]["expected_contact_phase"] == "PRESS"
     assert fixture["waypoint_study"]["stage_b_route"] == ["ASCEND", "TRANSIT", "DESCEND"]
+
+
+def test_phase10_remedy_fixture_is_frozen_and_zero_authority() -> None:
+    from rocell_ai.first_motion_phase10_remedies import load_remedy_fixture
+
+    fixture = load_remedy_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_phase10_remedy_v1.json")
+    assert fixture["scope"] == "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+    assert not any(fixture["counters"].values())
+    assert fixture["camera_screen"]["pose_id"] == "halton-0573"
+    assert fixture["pad_contact"]["semantic_phase"] == "PRESS_CONTACT_ACTIVE"
+    assert fixture["stage_c_wrist"]["absolute_final_tool_error_bands_mm"] == [1.0, 3.0, 5.0]
+    assert "BASELINE" in fixture["stage_c_wrist"]["modes"]

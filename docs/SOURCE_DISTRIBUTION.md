@@ -500,3 +500,8 @@ and receipts remain external and hash-bound.
 The tracked-file ceiling is 6,370 after adding the simulation-only clearance
 waypoint and swappable-pad runner. It reuses the existing focused test module;
 generated route and collision evidence stays external.
+
+The tracked-file ceiling is 6,371 after adding the compact Phase 10 remedy
+runner. Its camera, contact-phase, pad, and wrist screens reuse the existing
+focused test module; all generated partitions and result evidence stay external
+and hash-bound.
