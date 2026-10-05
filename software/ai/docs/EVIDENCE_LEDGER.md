@@ -11340,3 +11340,10 @@ rewriting history. New entries must use a unique evidence ID.
 - Repair: this successor restores the complete ledger and workplan prefix from `96b6ef2bb3bed22149a26e972a050b5d37fb04ed` byte-for-byte, then appends both workers' records as separate valid Markdown entries. The target/contact readiness update remains a separate bounded file edit.
 - Evidence integrity: neither result was recomputed or rescored. The resolution decision hashes and metrics, target/contact result hashes and metrics, frozen fixtures, thresholds, evaluation state, and official readiness are unchanged.
 - Authority: hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. Arm-lane status and integration gates remain unchanged.
+
+### E-20261005-INT-664 — target/contact CAD result commit identity
+
+- Result commit: `fe16979426441a77f961dbfc5fb14dfece8517d7` records E-663, repairs the concurrent escaped-newline document failure without discarding the independent resolution evidence, completes the shared-stage row, and updates the first-motion readiness checklist.
+- Evidence identity remains unchanged: result and backup file SHA-256 `24cfebe7141939a3011a63832abfb5937686f756b3c5ac4c00fb0dace9f7e15e`; canonical receipt SHA-256 `8c92b479f53b6048650d369b698a5676b10521d396c7030149353caf8ab7e1ad`; frozen fixture commit `f05b16315f3331e39bb0f6a6328437f92b1aa760`; implementation commits `382ba7dc`, `afdda661`, and `96b6ef2b`.
+- Decision remains `STOP_TARGET_CONTACT_OR_CAD_REFINEMENT_REQUIRED`; next dependency is a separately frozen length-specific E/F IK and contact successor. Official readiness remains `NOT_READY_FOR_FIRST_POWERED_MOTION`.
+- Authority remains unchanged: hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
