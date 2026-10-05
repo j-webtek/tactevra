@@ -1,0 +1,166 @@
+{
+  "bindings": {
+    "exact_clearance_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_tool_bound_exact_clearance_v1.json",
+      "sha256": "6bc7084ef4dedc18394e234e97e16f29302bf34dba1d39ca4808b3245d64289f"
+    },
+    "tool_110mm_pose_family": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/tool_radius_3mm_v1/pose_family.json",
+      "sha256": "27d3566636253684e36ff723a54d614ee09aa4d1462464b6a5c5b4ea2844b068"
+    },
+    "tool_110mm_prior_result": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/tool_radius_3mm_v1/result.json",
+      "sha256": "a08a6532465633750844add66bffd8ef6e90cae38136e68e00c376cafd59d824"
+    },
+    "ws2_physics_fixture": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json",
+      "sha256": "ecab1ba591cec89f010afb2a577a7bf90188206663fc52bdee090550fdb3ec04"
+    }
+  },
+  "claim_commit": "585e375d",
+  "counters": {
+    "hardware_write_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "real_command_count": 0,
+    "transport_count": 0
+  },
+  "fixture_sha256": "f293109f3da2125cb1a7b32486618bc2777c55287c5c86178a0bfb353ee14074",
+  "limitations": [
+    "All contact, key, phone, and tool parameters are synthetic or declared ranges.",
+    "Exact distance proves only the bound candidate geometry and fixed-orientation path family.",
+    "Phone disk area is an analytic upper bound and cannot establish capacitive registration.",
+    "WS3 cannot select or recommend a policy before an admitted WS2 press recipe exists."
+  ],
+  "physical_authority": false,
+  "runtime_manifest": {
+    "driver_record": "595.97_RETAINED_HOST_IDENTITY_NO_GPU_USE",
+    "execution_device": "CPU_ONLY",
+    "gpu_jobs_authorized": false,
+    "isaac_execution": false,
+    "isaac_version": "5.1.0_RETAINED_INSTALL_IDENTITY_NO_ISAAC_USE",
+    "python": "3.12.0",
+    "warp_execution": false,
+    "warp_version": "1.18.0_RETAINED_ENV_IDENTITY_NO_WARP_USE"
+  },
+  "schema": "tactevra.cpu_contact_and_ws3_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "sections": {
+    "phone_capacitive": {
+      "area_model": "effective_contact_area_mm2 = pi * radius_mm^2 * area_fraction; analytic upper-bound disk only",
+      "cell_rule": "REGISTERED_TAP iff effective area >= minimum registration area, duration >= minimum tap duration, and duration < long-press threshold.",
+      "contact_radius_mm": [
+        1.0,
+        4.0,
+        7.0
+      ],
+      "decision": "ONE_TIP_SUPPORTED only if at least one radius at or below the keyboard ceiling has a duration that passes every declared phone range endpoint. TWO_TIPS_REQUIRED only if no at-or-below-ceiling radius passes any declared phone cell while some larger radius does. Otherwise UNRESOLVED_PHYSICAL_MEASUREMENT_REQUIRED.",
+      "duration_ms": [
+        20.0,
+        100.0,
+        260.0,
+        500.0
+      ],
+      "effective_contact_area_fraction": [
+        0.25,
+        0.5,
+        1.0
+      ],
+      "keyboard_shared_tip_radius_ceiling_mm": 3.0,
+      "long_press_threshold_ms": [
+        250.0,
+        725.0,
+        1200.0
+      ],
+      "minimum_registration_area_mm2": [
+        1.0,
+        10.0,
+        25.0,
+        50.0,
+        100.0
+      ],
+      "minimum_tap_duration_ms": [
+        10.0,
+        20.0,
+        50.0
+      ],
+      "section_sha256": "8c152f3c62f1906b03b73427475bedf6694c9d99083b48d437146d85ee79ef68"
+    },
+    "stage_ef_contact": {
+      "contact_rule": "Only DISTAL_TIP contact with requested key is admitted from first contact through release. Every neighbor, COLLAR, or BODY contact is STOP.",
+      "decision": "PASS only if every target, exposure endpoint, hover endpoint, key size endpoint, stage, and non-admitted component/key pair meets every clearance threshold.",
+      "distance_method": "GJK_CONVEX_SWEPT_VOLUME_FIXED_ORIENTATION_LINEAR_TRANSLATION",
+      "hover_height_above_contact_mm": [
+        5.0,
+        30.0
+      ],
+      "keycap_thickness_mm": [
+        2.0,
+        8.0
+      ],
+      "keycap_width_height_mm": [
+        11.0,
+        15.0
+      ],
+      "minimum_non_target_clearance_mm": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "section_sha256": "80a93e8d8b2aaa4a953c57be64ba4da79bbec557136a7dd7362bec3de32d394d",
+      "stages": [
+        "E_PRESS",
+        "F_RELEASE"
+      ],
+      "target_ids": "EXACT_46_BOUND_POSE_TARGETS",
+      "tip_radius_mm": 3.0,
+      "tool_configuration_sha256": [
+        "411bb0f08b3014c40d33132a3ef729e48985b7cc71cf6efb53bc06f134d28298",
+        "9fe5aa4aa3c6803e29a172d33d28ee061e76922f0d4cc6def775788bfe895551"
+      ],
+      "tool_length_mm": 110.0
+    },
+    "workstream_3": {
+      "admitted_decision": "READY_FOR_CPU_TRANSITION_SCREEN_NO_POLICY_RECOMMENDATION",
+      "approach_direction_board": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "blocked_decision": "READY_COLLISION_HARNESS_BLOCKED_WS2_PRESS_RECIPE",
+      "distance_method": "GJK_CONVEX_SWEPT_VOLUME_FIXED_ORIENTATION_LINEAR_TRANSLATION",
+      "hover_height_above_contact_mm": [
+        5.0,
+        30.0
+      ],
+      "minimum_clearance_mm": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "ordered_pairs": "ALL_SOURCE_X_DESTINATION_INCLUDING_REPEATS",
+      "path_phases": [
+        "SOURCE_RELEASE",
+        "SOURCE_RISE",
+        "TRANSIT",
+        "DESTINATION_DESCENT"
+      ],
+      "policy_decision": "A policy may be compared only after an exact admitted WS2 recipe is hash-bound; missing or altered recipe is STOP.",
+      "press_recipe_binding": null,
+      "required_press_recipe_schema": "tactevra.ws2_press_recipe_envelope.v1",
+      "required_press_recipe_status": "PASS_EXPLORATORY_WS2_RECIPE_ENVELOPE",
+      "section_sha256": "78b618fe15dd8dd6b1bb06d854e40e281479157937d98ebf42f45554225c60c7",
+      "target_ids": "EXACT_46_BOUND_POSE_TARGETS",
+      "tool_configuration_sha256": [
+        "411bb0f08b3014c40d33132a3ef729e48985b7cc71cf6efb53bc06f134d28298",
+        "9fe5aa4aa3c6803e29a172d33d28ee061e76922f0d4cc6def775788bfe895551"
+      ],
+      "tool_length_mm": 110.0,
+      "transit_height_board_z_mm": [
+        60.0,
+        100.0,
+        140.0
+      ]
+    }
+  }
+}
