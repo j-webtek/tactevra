@@ -15,6 +15,77 @@ preserved. A measured artifact replaces a simulation range only after its
 method, instrument identity, units, timestamps, configuration identity, raw
 data hashes, and uncertainty calculation are recorded.
 
+## Session 0 — measurements with arm power disconnected
+
+This session precedes every powered stage. Disconnect and verify absence of
+actuator power, mechanically support the arm against sag, and keep every arm
+controller transport closed. Photograph the isolation state and record the
+meter, operator, observer, tool, fixtures, and configuration hashes.
+
+### 0.1 Landing-sensor noise and bias
+
+1. Fasten the touch surface in the commissioning tray and mark a reproducible
+   center plus edge/corner check points.
+2. Clamp the passive stylus in a separate rigid bench fixture so the arm carries
+   no load and cannot move it. Set the stylus vertically on the marked point.
+3. Log a static coordinate burst without moving the stylus. Preserve missing,
+   duplicated, and outlier reports.
+4. Lift and replace the stylus with the bench fixture, then collect repeated
+   manual taps at every marked point using a controlled stop. Do not use the arm.
+5. Estimate random noise, spatial bias, repeatability, dropout rate, and drift
+   separately. Keep at least one marked-point set untouched for confirmation.
+
+Instrument: commissioning touch surface or phone coordinate readback, rigid
+stylus fixture, marked dimensional overlay, synchronized host clock. This
+replaces the WS5 landing-observation-noise range and sets the touch-observer
+threshold; it does not qualify arm landing.
+
+### 0.2 Fingertip dimensions and compliant-tool behavior
+
+1. Measure tip radius/diameter at multiple orientations and tool length from the
+   controlled mounting reference.
+2. Measure collar/body dimensions and the installed axial transform.
+3. In a separate load fixture, apply recorded forces across the intended range
+   and measure displacement during loading and unloading.
+4. Report stiffness, hysteresis, permanent set, and measurement uncertainty as
+   ranges. Retain every trial.
+
+Instrument: calibrated calipers or micrometer, force gauge, displacement
+indicator, rigid load fixture. This replaces the nominal 110 mm/3 mm geometry
+and synthetic series-compliance range.
+
+### 0.3 Key travel, actuation, force, and return
+
+1. Keep the keyboard disconnected from the arm and fixed in its station.
+2. Use a manual instrumented stand to lower the measured tip onto representative
+   ordinary and stabilized keys.
+3. Record displacement and force at first contact, switch closure, bottom-out,
+   release, and reset. Record hysteresis and off-center behavior.
+4. With the keyboard connected only to the logging host, measure debounce,
+   minimum reliable closure, and auto-repeat timing without arm motion.
+
+Instrument: manual displacement stand, force gauge, logic analyzer or host event
+logger. This replaces WS2 key travel, spring/force, debounce, bottom-out, return,
+and repeat-delay ranges.
+
+### 0.4 Keycap, board, and fixture geometry
+
+1. Measure the board outline and fixed reference features.
+2. Measure each keycap top size, height, pitch, row offset, and center relative
+   to the board references, including `GRAVE`, `EQUAL`, `Z`, and `SHIFT`.
+3. Measure station, tray, touch-surface, and locating-feature geometry and their
+   repeatable installed transforms.
+4. Produce a candidate installed catalog and collision-profile amendment; do
+   not install either until independent review.
+
+Instrument: calipers, steel rule, height gauge, gauge blocks, and the controlled
+CAD revisions. This replaces nominal key boxes, safe-region assumptions, station
+placement, tray placement, and candidate board transforms.
+
+Session 0 passes only when all four raw datasets and manifests are hash-bound,
+the arm remained unpowered, hardware writes and physical movements are zero,
+and no unexplained discrepancy was discarded. A failure blocks Stage A.
+
 | Priority | Measurement | Method | Instrument or evidence source | Simulation result or range replaced |
 |---:|---|---|---|---|
 | 1 | Landing-sensor noise and bias | Record repeated static landings and no-contact observations across the sensor area; estimate repeatability, spatial bias, missing reports, and drift without fitting on the held-out check positions. | Commissioning touch pad or phone touchscreen with raw ADB-style coordinate/readback log; rigid placement fixture; dimensional reference. | WS5 landing-observation noise range, touch-surface observer threshold, per-key correction sample count, and commissioning-time spread. |
