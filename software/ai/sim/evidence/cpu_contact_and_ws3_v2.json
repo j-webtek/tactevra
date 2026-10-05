@@ -1,0 +1,193 @@
+{
+  "bindings": {
+    "candidate51_pose_source": {
+      "path": "C:/MuJoCoWarp/evidence/mw2uc51/candidate51_pose_bundle.json",
+      "sha256": "267534d7247b43732be15d54e4036738e179829ba0f4bf1ba8b3807b71f7861f"
+    },
+    "candidate_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "exact_clearance_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_tool_bound_exact_clearance_v1.json",
+      "sha256": "6bc7084ef4dedc18394e234e97e16f29302bf34dba1d39ca4808b3245d64289f"
+    },
+    "ws2_physics_fixture": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json",
+      "sha256": "ecab1ba591cec89f010afb2a577a7bf90188206663fc52bdee090550fdb3ec04"
+    }
+  },
+  "claim_commit": "c6b6145a",
+  "counters": {
+    "hardware_write_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "real_command_count": 0,
+    "transport_count": 0
+  },
+  "fixture_sha256": "24c4d84d613948b33fad6c4049ae39eaf49bbeb6ff229d72394ff690359212fd",
+  "limitations": [
+    "The 51-target catalog is an uninstalled simulation candidate.",
+    "Added-key coordinates carry the provenance already frozen in the candidate catalog.",
+    "Exact distance proves only the bound candidate geometry and fixed-orientation path family.",
+    "Phone disk area is an analytic upper bound and cannot establish capacitive registration.",
+    "WS3 cannot select or recommend a policy before an admitted WS2 press recipe exists."
+  ],
+  "physical_authority": false,
+  "runtime_manifest": {
+    "driver_record": "595.97_RETAINED_HOST_IDENTITY_NO_GPU_USE",
+    "execution_device": "CPU_ONLY",
+    "gpu_jobs_authorized": false,
+    "isaac_execution": false,
+    "isaac_version": "5.1.0_RETAINED_INSTALL_IDENTITY_NO_ISAAC_USE",
+    "python": "3.12.0",
+    "warp_execution": false,
+    "warp_version": "1.18.0_RETAINED_ENV_IDENTITY_NO_WARP_USE"
+  },
+  "schema": "tactevra.cpu_contact_and_ws3_fixture.v2",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "sections": {
+    "phone_capacitive": {
+      "added_keyboard_candidate_radius_mm": 3.0,
+      "area_model": "effective_contact_area_mm2 = pi * radius_mm^2 * area_fraction; analytic upper-bound disk only",
+      "cell_rule": "REGISTERED_TAP iff effective area >= minimum registration area, duration >= minimum tap duration, and duration < long-press threshold.",
+      "contact_radius_mm": [
+        1.0,
+        3.0,
+        4.0,
+        7.0
+      ],
+      "decision": "Report 3 mm separately. ONE_TIP_SUPPORTED only if 3 mm has a duration that passes every declared phone range endpoint. TWO_TIPS_REQUIRED only if 3 mm passes no declared phone cell while a larger radius does. Otherwise UNRESOLVED_PHYSICAL_MEASUREMENT_REQUIRED.",
+      "duration_ms": [
+        20.0,
+        100.0,
+        260.0,
+        500.0
+      ],
+      "effective_contact_area_fraction": [
+        0.25,
+        0.5,
+        1.0
+      ],
+      "keyboard_shared_tip_radius_ceiling_mm": 3.0,
+      "long_press_threshold_ms": [
+        250.0,
+        725.0,
+        1200.0
+      ],
+      "minimum_registration_area_mm2": [
+        1.0,
+        10.0,
+        25.0,
+        50.0,
+        100.0
+      ],
+      "minimum_tap_duration_ms": [
+        10.0,
+        20.0,
+        50.0
+      ],
+      "section_sha256": "d9d531434052a4d914fdc2086336dcd4dc484e19d768ea06953e8d3c2fb2b5ca"
+    },
+    "pose_generation": {
+      "decision": "PASS only when all 51 targets solve for both configuration identities, every receipt binds the candidate catalog and 110 mm tool, and no target is dropped.",
+      "distal_tip_exposed_length_mm": [
+        10.0,
+        30.0
+      ],
+      "external_output_path": "C:/MuJoCoWarp/evidence/issue190/cpu_contact_ws3_v2/candidate51_tool_pose_family.json",
+      "maximum_ik_position_error_mm": 0.01,
+      "output_tool_length_mm": 110.0,
+      "required_added_target_ids": [
+        "SHIFT",
+        "BACKSLASH",
+        "GRAVE",
+        "LEFT_BRACKET",
+        "RIGHT_BRACKET"
+      ],
+      "section_sha256": "3e98d583fce0bdb21b5b8f219729bef46cb1329683620d18a5d98a07d0a07dc8",
+      "solver": "SAME_ROARM_M3_IK_MODEL_INDEPENDENTLY_SOLVED_FROM_CANDIDATE51_SEEDS",
+      "source_tool_length_mm": 120.0,
+      "target_count": 51,
+      "tip_radius_mm": 3.0
+    },
+    "stage_ef_contact": {
+      "contact_rule": "Only DISTAL_TIP contact with requested key is admitted from first contact through release. Every neighbor, COLLAR, or BODY contact is STOP.",
+      "decision": "PASS only if all 51 targets, both exposure endpoints, both hover endpoints, both stages, and every geometry endpoint meet every threshold.",
+      "distal_tip_exposed_length_mm": [
+        10.0,
+        30.0
+      ],
+      "distance_method": "GJK_CONVEX_SWEPT_VOLUME_FIXED_ORIENTATION_LINEAR_TRANSLATION",
+      "hover_height_above_contact_mm": [
+        5.0,
+        30.0
+      ],
+      "keycap_thickness_mm": [
+        2.0,
+        8.0
+      ],
+      "keycap_width_height_mm": [
+        11.0,
+        15.0
+      ],
+      "minimum_non_target_clearance_mm": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "section_sha256": "b232173b502b28afbfcedd7936166cbe0527bdfc55bb3e367a543bfa409db286",
+      "stages": [
+        "E_PRESS",
+        "F_RELEASE"
+      ],
+      "target_count": 51,
+      "tip_radius_mm": 3.0,
+      "tool_length_mm": 110.0
+    },
+    "workstream_3": {
+      "admitted_decision": "READY_FOR_CPU_TRANSITION_SCREEN_NO_POLICY_RECOMMENDATION",
+      "approach_direction_board": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "blocked_decision": "READY_COLLISION_HARNESS_BLOCKED_WS2_PRESS_RECIPE",
+      "distal_tip_exposed_length_mm": [
+        10.0,
+        30.0
+      ],
+      "distance_method": "GJK_CONVEX_SWEPT_VOLUME_FIXED_ORIENTATION_LINEAR_TRANSLATION",
+      "hover_height_above_contact_mm": [
+        5.0,
+        30.0
+      ],
+      "includes_repeats": true,
+      "minimum_clearance_mm": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "ordered_pair_count": 2601,
+      "path_phases": [
+        "SOURCE_RELEASE",
+        "SOURCE_RISE",
+        "TRANSIT",
+        "DESTINATION_DESCENT"
+      ],
+      "policy_decision": "No policy comparison or recommendation before an exact admitted WS2 recipe is hash-bound.",
+      "press_recipe_binding": null,
+      "required_press_recipe_schema": "tactevra.ws2_press_recipe_envelope.v1",
+      "required_press_recipe_status": "PASS_EXPLORATORY_WS2_RECIPE_ENVELOPE",
+      "section_sha256": "8a1c68199d1c15331dc476b3e94a04a929b1fd72f71f0cb418b0178894bbb278",
+      "target_count": 51,
+      "tip_radius_mm": 3.0,
+      "tool_length_mm": 110.0,
+      "transit_height_board_z_mm": [
+        60.0,
+        100.0,
+        140.0
+      ]
+    }
+  }
+}
