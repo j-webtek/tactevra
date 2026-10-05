@@ -533,3 +533,9 @@ and governed ceiling are therefore 6,418. Full campaign shards, simulator
 trajectories, rendered media, model weights, environments, and hardware-session
 records remain external and hash-governed. The logical-byte, single-blob,
 duplicate-byte, and reduction limits are unchanged.
+
+The Workstream 4 recovery-state-machine freeze adds one compact, hash-bound
+fixture. Implementation and tests extend existing Workstream 1 files, and all
+generated scenario traces and receipts remain external. The exact tracked-file
+count and governed ceiling are therefore 6,419; every byte, blob, duplicate,
+and reduction limit remains unchanged.

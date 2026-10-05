@@ -1,0 +1,180 @@
+{
+  "bindings": {
+    "implementation_target": {
+      "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
+      "preimplementation_sha256": "50f83bc49765fcce32aa41b67e7a972680e33f15af622f10d053f0cc542e7442",
+      "result_must_record_final_sha256": true
+    },
+    "program_plan": {
+      "path": "software/docs/SIMULATION_PROGRAM_PLAN.md",
+      "sha256": "ea95ae1203baaa5390800b0b23cf1b4330f4cfe27e33689a6b476345bba238fb"
+    },
+    "workstream_1_fixture": {
+      "fixture_sha256": "105df64d3c3878bed97caddb2623c9c577a820144909cc94105b529508233bac",
+      "path": "software/ai/sim/evidence/end_to_end_typing_twin_v1.json",
+      "sha256": "bef5bd761805bfaf7beb67bd3070af740cb0b528deb637a8b3ab6d07ca7f8e00"
+    }
+  },
+  "counters": {
+    "commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transports": 0
+  },
+  "decision_rules": {
+    "abort_correctness_rate_minimum": 1.0,
+    "ambiguous_continuation_count_maximum": 0,
+    "authority_bearing_output_count_maximum": 0,
+    "deterministic_fault_detection_rate_minimum": 1.0,
+    "deterministic_replay_required": true,
+    "false_recovery_count_maximum": 0,
+    "maximum_press_retries": 1,
+    "maximum_wrong_characters_before_detection": 1,
+    "recoverable_fault_success_rate_minimum": 0.99
+  },
+  "devices": [
+    "KEYBOARD",
+    "PHONE"
+  ],
+  "drift": {
+    "onsets": [
+      "BEFORE_PLANNING",
+      "DURING_TRAVEL",
+      "IMMEDIATELY_BEFORE_CONTACT",
+      "AFTER_EFFECT_VERIFICATION"
+    ],
+    "relocalization_rotation_capability_deg": [
+      0.5,
+      2.5,
+      5.0
+    ],
+    "relocalization_translation_capability_mm": [
+      2.0,
+      5.0,
+      10.0
+    ],
+    "rotation_deg": [
+      -5.0,
+      -2.5,
+      -1.0,
+      -0.25,
+      0.25,
+      1.0,
+      2.5,
+      5.0
+    ],
+    "translation_axes": [
+      "X",
+      "Y"
+    ],
+    "translation_mm": [
+      -10.0,
+      -5.0,
+      -2.0,
+      -1.0,
+      1.0,
+      2.0,
+      5.0,
+      10.0
+    ]
+  },
+  "effect_faults": [
+    "SINGLE_MISSED_PRESS",
+    "SINGLE_WRONG_PRESS",
+    "SINGLE_DOUBLE_PRESS",
+    "BURST_MISSED_PRESS",
+    "BURST_WRONG_PRESS",
+    "BURST_DOUBLE_PRESS"
+  ],
+  "fixture_sha256": "3ad1ae85ee3403a27fc7e3e02532cc5ed971fe5e0c981e7920075a16d0bee9b6",
+  "latency_profiles_ms": {
+    "HIGH": {
+      "correction": 150,
+      "observe": 100,
+      "plan": 50,
+      "press": 150,
+      "relocalize": 100,
+      "reobserve": 100,
+      "travel": 400,
+      "verify": 100
+    },
+    "LOW": {
+      "correction": 30,
+      "observe": 20,
+      "plan": 5,
+      "press": 30,
+      "relocalize": 10,
+      "reobserve": 20,
+      "travel": 40,
+      "verify": 20
+    }
+  },
+  "limitations": [
+    "Drift and timing values are sensitivity ranges, not measured plant limits.",
+    "Relocalization outcomes test state-machine behavior and do not qualify camera localization.",
+    "Backspace and readback are virtual device effects only.",
+    "WS2 physical press recipes are unavailable; contact is represented by WS1 fault hooks.",
+    "No result grants hardware or physical authority."
+  ],
+  "physical_authority": false,
+  "readback": {
+    "ambiguous_states": [
+      "UNKNOWN_COMMITTED_TEXT",
+      "DIVERGENT_DEVICE_LAYER"
+    ],
+    "delay_ms": [
+      0,
+      100,
+      500,
+      1000,
+      2000
+    ],
+    "timeout_ms": [
+      250,
+      500,
+      1000
+    ]
+  },
+  "reporting": {
+    "backup_required": true,
+    "external_result_root": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_4/recovery_v1",
+    "metrics": [
+      "DETECTION_LATENCY_MS",
+      "WRONG_CHARACTERS_BEFORE_DETECTION",
+      "RELOCALIZATION_SUCCESS",
+      "CORRECTION_SUCCESS",
+      "ABORT_CORRECTNESS",
+      "ATTEMPTS",
+      "TOTAL_RECOVERY_TIME_MS"
+    ],
+    "synthetic_tolerance_claim_prohibited": true
+  },
+  "schema": "tactevra.simulation_program_workstream_4_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "seeds": {
+    "scenario_order": 1904001
+  },
+  "source_claim_base_commit": "808e8fe12fc5d879d361b3cea55558d6e5e973dd",
+  "state_machine": {
+    "ambiguous_state_decision": "ABORT",
+    "backspace_requires_exact_wrong_effect": true,
+    "correction_requires_independent_verification": true,
+    "maximum_press_retries": 1,
+    "out_of_capability_drift_decision": "ABORT",
+    "states": [
+      "OBSERVE",
+      "PLAN",
+      "SIMULATE_PRESS",
+      "VERIFY",
+      "STOP",
+      "REOBSERVE",
+      "RELOCALIZE",
+      "BACKSPACE_CORRECT",
+      "RETRY_ONCE",
+      "ABORT",
+      "COMPLETE"
+    ]
+  }
+}
