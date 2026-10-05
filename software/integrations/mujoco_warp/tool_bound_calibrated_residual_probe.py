@@ -36,7 +36,7 @@ def _file_sha(path: Path) -> str:
 
 def _load_sources(
     workspace: Path, fixture_path: Path, pose_family_path: Path,
-    tool_length_mm: float,
+    tool_length_mm: float, tool_configuration_sha256: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     sys.path[:0] = [str(workspace / "software/ai"), str(workspace / "software/src")]
     from rocell_ai.first_motion_clearance_waypoints import (
@@ -49,8 +49,13 @@ def _load_sources(
     family = load_pose_family_result(pose_family_path, fixture)
     profiles = [row for row in family["profiles"] if float(row["pose_bundle"][
         "tool_configuration"]["total_hand_tcp_to_tip_length_mm"]) == tool_length_mm]
-    if len(profiles) != 4:
-        raise ValueError("expected four exposure/radius profiles for tool length")
+    if tool_configuration_sha256 is not None:
+        profiles = [row for row in profiles if row[
+            "tool_configuration_sha256"] == tool_configuration_sha256]
+        if len(profiles) != 1:
+            raise ValueError("expected exactly one requested tool configuration")
+    elif not profiles:
+        raise ValueError("tool length has no pose profile")
     bundles = [row["pose_bundle"] for row in profiles]
     for bundle in bundles:
         validate_pose_bundle_tool_configuration(bundle, bundle["tool_configuration"])
@@ -103,7 +108,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     workspace = args.workspace.resolve()
     fixture, family, profile = _load_sources(
         workspace, args.fixture.resolve(), args.pose_family.resolve(),
-        float(args.tool_length_mm))
+        float(args.tool_length_mm), getattr(args, "tool_configuration_sha256", None))
     bundle = profile["pose_bundle"]
     configuration = bundle["tool_configuration"]
     legacy = _legacy_bundle(bundle)
@@ -176,6 +181,7 @@ def main() -> int:
     parser.add_argument("--mjcf", type=Path, required=True)
     parser.add_argument("--tool-length-mm", type=float, choices=(110.0, 120.0),
                         required=True)
+    parser.add_argument("--tool-configuration-sha256")
     parser.add_argument("--device", choices=("cuda:0", "cuda:1"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
