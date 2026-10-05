@@ -13,6 +13,27 @@ from pathlib import Path
 from change_classifier import classify_paths, load_policy
 
 
+DEPENDENCY_MANIFEST_NAMES = frozenset(
+    {
+        "Cargo.lock",
+        "Cargo.toml",
+        "Gemfile",
+        "Gemfile.lock",
+        "Pipfile",
+        "Pipfile.lock",
+        "go.mod",
+        "go.sum",
+        "package-lock.json",
+        "package.json",
+        "pnpm-lock.yaml",
+        "poetry.lock",
+        "pyproject.toml",
+        "uv.lock",
+        "yarn.lock",
+    }
+)
+
+
 def api_json(url: str, token: str, *, method: str = "GET", payload=None):
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(url, data=data, method=method)
@@ -36,11 +57,36 @@ def pull_paths(api_url: str, token: str) -> list[str]:
         page += 1
 
 
-def completeness_findings(body: str, result: dict[str, object]) -> list[str]:
+def is_dependency_manifest_path(path: str) -> bool:
+    name = Path(path).name
+    return (
+        name in DEPENDENCY_MANIFEST_NAMES
+        or (name.startswith("requirements") and Path(name).suffix in {".in", ".txt"})
+    )
+
+
+def is_trusted_dependabot_update(
+    body: str, result: dict[str, object], author_login: str
+) -> bool:
+    paths = result["paths"]
+    normalized = body.lower()
+    return (
+        author_login == "dependabot[bot]"
+        and bool(paths)
+        and all(is_dependency_manifest_path(path) for path in paths)
+        and "updated-dependencies:" in normalized
+        and "dependency-name:" in normalized
+    )
+
+
+def completeness_findings(
+    body: str, result: dict[str, object], *, author_login: str = ""
+) -> list[str]:
     findings: list[str] = []
     normalized = body.lower()
     tiny_docs = bool(result["docs_only"]) and len(result["paths"]) <= 3
-    if not tiny_docs:
+    trusted_dependabot = is_trusted_dependabot_update(body, result, author_login)
+    if not tiny_docs and not trusted_dependabot:
         for heading in ("## what changes for the user?", "## ownership and handoff", "## evidence"):
             if heading not in normalized:
                 findings.append(f"missing PR section: {heading}")
@@ -91,7 +137,10 @@ def main() -> int:
     paths = pull_paths(pull["url"], token)
     policy = load_policy()
     result = classify_paths(paths, policy)
-    findings = completeness_findings(pull.get("body") or "", result)
+    body = pull.get("body") or ""
+    author_login = (pull.get("user") or {}).get("login", "")
+    trusted_dependabot = is_trusted_dependabot_update(body, result, author_login)
+    findings = completeness_findings(body, result, author_login=author_login)
     labels = result["labels"]
     if args.apply_labels:
         labels = update_labels(pull["issue_url"], token, result, set(policy["managed_labels"]))
@@ -102,6 +151,7 @@ def main() -> int:
         f"- Routed labels: `{', '.join(labels) or 'none'}`",
         f"- Full portable CI: `{str(result['portable_full']).lower()}`",
         f"- Shared contract touched: `{str(result['contract']).lower()}`",
+        f"- Trusted manifest-only Dependabot update: `{str(trusted_dependabot).lower()}`",
         f"- Completeness: `{'pass' if not findings else 'needs attention'}`",
     ]
     if findings:
