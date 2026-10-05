@@ -8,6 +8,7 @@ import pytest
 from rocell_ai.first_motion_consolidated import (
     _require_configuration,
     load_consolidated_fixture,
+    run_consolidated_rehearsal,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -48,3 +49,23 @@ def test_every_stage_rejects_a_configuration_mismatch() -> None:
         with pytest.raises(ValueError, match="stage configuration mismatch"):
             _require_configuration(
                 {"stage": stage, "configuration_sha256": "0" * 64}, expected)
+
+
+def test_consolidated_rehearsal_covers_a_to_f_and_retains_physical_block() -> None:
+    result = run_consolidated_rehearsal(
+        load_consolidated_fixture(FIXTURE, workspace=ROOT), workspace=ROOT)
+    assert result["decision"] == "PASS_ALL_STAGES_SIMULATION_ONLY_PHYSICAL_BLOCKED"
+    assert result["stages_satisfied_simulation_only"] == list("ABCDEF")
+    assert result["first_stop_stage"] is None
+    assert result["stage_c_exact_sweep"]["target_count"] == 51
+    assert result["stage_c_exact_sweep"]["row_count"] == 102
+    assert result["stage_c_exact_sweep"]["stop_count"] == 0
+    assert result["stage_ef"]["row_count"] == 408
+    assert result["stage_ef"]["pass_row_count"] == 408
+    assert result["station_cad_contact_count"] == 0
+    assert result["predicted_telemetry_sample_count"] == 198
+    assert result["independent_observers"]["undetected_consequential_count"] == 0
+    assert result["official_readiness"] == "NOT_READY_FOR_FIRST_POWERED_MOTION"
+    assert result["hardware_write_count"] == result["physical_movement_count"] == 0
+    assert result["real_command_count"] == result["transport_count"] == 0
+    assert result["physical_authority"] is False

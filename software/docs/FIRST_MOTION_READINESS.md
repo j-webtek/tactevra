@@ -24,6 +24,7 @@
 | Phase 10 remedy audit | `5306615285e504afb2bb5c3e8fd7378eaac2c4ca902a851bb82c0cb522678306` | `cdb48413c1a4dc4cb2880d1e13700090812901e64121bd1563454a193023d1fd` | `halton-0573` clears all 80 targets across the frozen nadir family and retains 46/46 routes. Dynamic first-contact labeling is contiguous but both pad modes still stop. Fixed wrist pitch removes cable-link4 contact only by introducing 168-216 mm landing error; cable routing remains the remedy dependency. |
 | Passive-tool first-motion rerun | `491420aa001477f3865dc944d2ab4371e514724bca3c38cba8db3b9b79d95c3d` | `d4c414ad25b64b80def169beaf195939202f2105fa652ef628edb5e5415781f9` | Under the selected passive stylus and static camera, A and the waypoint route to `halton-0573` clear every sample; the tray-replacement D result remains clear. C stops on 24/648 descent samples from tool contact with the keyboard/left station. E/F stop because coarse whole-keyboard/station geometry cannot admit target-specific contact. No cable finding remains. |
 | Target/contact and station-CAD refinement | `24cfebe7141939a3011a63832abfb5937686f756b3c5ac4c00fb0dace9f7e15e` | `8c92b479f53b6048650d369b698a5676b10521d396c7030149353caf8ab7e1ad` | Controlled station CAD removes every old station collision. C retains distal-tip/own-key DESCEND boundary disagreements and four short-tool low-hover IK failures. E/F reveal that the existing target pose bundle is bound to the 120 mm tool and cannot validly score the 80 mm endpoint; length-specific IK remains required. |
+| Converged first-motion rehearsal | `cc27d011101a62df2df5f0c0351f8db6770185cdbf29b70670b853b957620642` | `80a5d6ccb6af3555dc55f74473d5b8992b71bf6d056316a9559b6bb0e1f22041` | One configuration hash binds the 110 mm x 3 mm cable-free passive stylus, `halton-0573`, waypoint paths, station CAD, tray-replacement D mode, and all 51 E/F targets. A-F are satisfied in exploratory simulation; installed geometry, measured plant behavior, and physical observers remain blocked. |
 
 The governing fixture is
 [`first_motion_readiness_v1.json`](../ai/sim/evidence/first_motion_readiness_v1.json),
@@ -78,7 +79,7 @@ that procedure.
 
 ## Stage A — one joint, small move, low speed
 
-**Current state: CANDIDATE SIMULATION CORRIDOR CLEAR; BLOCKED ON PHYSICAL MEASUREMENT AND OFFICIAL ACCEPTANCE.**
+**Current state: SATISFIED IN THE CONVERGED SIMULATION; BLOCKED ON PHYSICAL MEASUREMENT AND OFFICIAL ACCEPTANCE.**
 
 Required simulation evidence:
 
@@ -88,6 +89,8 @@ Required simulation evidence:
   range cases in Phase 3.
 - [x] Candidate passive-tool Stage A corridor clears all 264 frozen discrete
   samples. This is not an installed-geometry or continuous-clearance result.
+- [x] The consolidated strict controller-emulator envelope is bound to the
+  converged configuration and closes terminally without transport or retry.
 - [ ] Phase 5 CI with zero false acceptance. Current result is 6/7.
 
 Required physical evidence:
@@ -104,7 +107,7 @@ explicitly approve Stage A after reviewing the completed physical rows.
 
 ## Stage B — all joints to the parked pose
 
-**Current state: BLOCKED BY STAGE A AND PHYSICAL PARK IDENTITY.**
+**Current state: SATISFIED IN THE CONVERGED SIMULATION; BLOCKED BY STAGE A AND PHYSICAL PARK IDENTITY.**
 
 Required simulation evidence:
 
@@ -113,6 +116,8 @@ Required simulation evidence:
   frozen tool endpoint and 60/100/140 mm transit height.
 - [x] Candidate waypoint route to `halton-0573` clears 324/324 samples with no
   IK failure. Installed-geometry and physical park identity remain open.
+- [x] The consolidated Stage B emulator envelope uses `halton-0573` under the
+  same configuration hash as A and C-F.
 
 Required physical evidence:
 
@@ -127,18 +132,17 @@ is commissioned.
 
 ## Stage C — hover above the keyboard with no contact
 
-**Current state: BLOCKED BY STAGES A-B, COLLISION, AND CALIBRATION.**
+**Current state: SATISFIED IN THE CONVERGED SIMULATION; BLOCKED BY STAGES A-B AND PHYSICAL CALIBRATION.**
 
 Required simulation evidence:
 
 - [ ] Accepted Stages A-B from the same configuration epoch.
 - [x] Candidate numeric Stage C envelope covers 648 samples across the frozen
   `5-30 mm` hover range, four tool endpoints, and three transit heights.
-- [ ] Collision-clear path and hover pose with the selected passive tool. Controlled
-  station CAD removes all prior station contacts. The successor retains 1,176
-  distal-tip/own-key DESCEND identities, all as 1/2 mm boundary disagreements,
-  plus 12 IK failures for the 80 mm tool at 5 mm hover on `0`, `9`, `EQUAL`,
-  and `MINUS`. No collar, body, station, or cable contact remains.
+- [x] The converged 110 mm x 3 mm configuration clears 102/102 continuous
+  fixed-orientation GJK path rows across all 51 targets and both exposure
+  profiles. Minimum key clearance is 27.0 mm; the bound real-station-CAD proof
+  has zero station contacts. This remains candidate geometry.
 - [ ] Qualified fixture relocalization and tool/link-pose mismatch detection.
 
 Required physical evidence:
@@ -156,7 +160,7 @@ accepted.
 
 ## Stage D — single press on a test pad
 
-**Current state: BLOCKED BY STAGES A-C, WS2, AND CONTACT MEASUREMENTS.**
+**Current state: SATISFIED IN THE CONVERGED SIMULATION; BLOCKED BY STAGES A-C, WS2, AND CONTACT MEASUREMENTS.**
 
 Required simulation evidence:
 
@@ -168,6 +172,8 @@ Required simulation evidence:
 - [x] Candidate tray-replacement geometry clears all 22,464 discrete samples
   with 9,360 contiguous intended tool-pad contacts. It does not select the WS2
   press recipe or qualify physical contact.
+- [x] The tray-replacement result and Stage D telemetry envelope are bound to
+  the same converged configuration used by A-C and E-F.
 
 Required physical evidence:
 
@@ -183,7 +189,7 @@ accepted.
 
 ## Stage E — type one character
 
-**Current state: BLOCKED BY STAGES A-D, TARGET COMMISSIONING, AND VERIFICATION.**
+**Current state: SATISFIED IN THE CONVERGED SIMULATION; BLOCKED BY STAGES A-D, TARGET COMMISSIONING, AND VERIFICATION.**
 
 Required simulation evidence:
 
@@ -191,11 +197,9 @@ Required simulation evidence:
   modifiers, and fail-closed unsupported targets.
 - [ ] Accepted Stages A-D and a zero-false-acceptance scenario regression.
 - [ ] Numeric Stage E approach, press, retract, and verification envelope.
-- [ ] Length-specific target press poses and target/neighbor contact proof. The
-  CAD successor clears both stations but exposes 2,944 missing-target observations
-  and 2,128 body-key contacts because the existing exact pose bundle is calibrated
-  for a 120 mm tool while the matrix also evaluates an 80 mm tool. The STOP is
-  retained; neighbor clearance is not established.
+- [x] The independently solved 110 mm pose family covers all 51 targets. All
+  408 exact E/F rows pass own-target and neighbor-contact semantics; global
+  minimum non-target clearance is 6.0 mm.
 
 Required physical evidence:
 
@@ -210,7 +214,7 @@ after one-pad contact evidence is accepted.
 
 ## Stage F — type a short string
 
-**Current state: BLOCKED BY STAGES A-E AND RECOVERY QUALIFICATION.**
+**Current state: SATISFIED IN THE CONVERGED SIMULATION; BLOCKED BY STAGES A-E AND PHYSICAL RECOVERY QUALIFICATION.**
 
 Required simulation evidence:
 
@@ -219,8 +223,8 @@ Required simulation evidence:
 - [x] WS4 defines stop, re-observe, relocalize, backspace-correct, or abort paths.
 - [ ] Accepted Stages A-E and a zero-false-acceptance scenario regression.
 - [ ] Numeric multi-key Stage F telemetry and verification envelope.
-- [ ] Length-specific target press poses and target/neighbor contact proof; the
-  same pose/tool binding mismatch retained by Stage E stops the Stage F shadow.
+- [x] The Stage F emulator envelope and all 51 per-key contact identities share
+  the converged configuration hash. The semantic replay evidence remains valid.
 
 Required physical evidence:
 
@@ -238,12 +242,12 @@ Jack must explicitly approve Stage F after Stage E completes.
 
 `NOT_READY_FOR_FIRST_POWERED_MOTION`
 
-The closest stage, A, now has a strict-runtime prediction envelope and a clear
-candidate passive-tool discrete corridor, but no accepted installed collision
-profile or measured physical plant bounds. Stage B's waypoint route to
-`halton-0573` also clears its full candidate matrix. Stage C no longer has a station blocker, but retains short-tool low-hover IK
-failures and distal-tip/own-key descent boundary disagreement. The tray-replacement
-D configuration clears, while E/F require length-specific IK before target and
-neighbor contact can be scored. The scenario regression and all
-physical prerequisites remain blocking. No stage may advance from this document
-alone.
+All A-F stages are now satisfied together in exploratory simulation under the
+same configuration identity. The rehearsal covers the strict in-memory
+controller path, 51-target continuous key clearance, tray-replacement contact,
+per-key E/F semantics, six telemetry envelopes, and independent simulated
+observers. This does not convert candidate geometry into an installed collision
+profile or synthetic plant ranges into measured behavior. The physical rows,
+the WS2 press recipe, emergency procedures, human approvals, and the existing
+official scenario-regression requirements remain blocking. No stage may advance
+from this document alone.
