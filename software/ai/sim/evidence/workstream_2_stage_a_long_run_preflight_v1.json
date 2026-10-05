@@ -52,7 +52,7 @@
     ],
     "transient_retry_limit": 1
   },
-  "fixture_sha256": "7f1f21c8568b5e4b74fd5759c8f39e4ab61779173c4116c59b5f38c0da63eea3",
+  "fixture_sha256": "4199f2e5e138bf07968fb9f3bb17334c72201890094ced3b17a261378b058b39",
   "integrity": {
     "bindings": [
       "fixture",
@@ -102,8 +102,16 @@
   "schema": "tactevra.ws2_stage_a_long_run_preflight.v1",
   "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
   "storage": {
+    "amendment": {
+      "date": "2026-10-05",
+      "destination_kind": "SMB_NETWORK_SHARE",
+      "prior_backup_root": "D:/TactevraEvidence/issue190/stage_a_campaign_v1",
+      "reason": "OPERATOR_DIRECTED_F_DRIVE_STORAGE_REPLACES_UNAVAILABLE_SANDISK_BEFORE_LAUNCH",
+      "replacement_backup_root": "F:/TactevraEvidence/issue190/stage_a_campaign_v1",
+      "resolved_share": "//192.168.100.100/adb_models"
+    },
     "backup_every_completed_shards": 25,
-    "backup_root": "D:/TactevraEvidence/issue190/stage_a_campaign_v1",
+    "backup_root": "F:/TactevraEvidence/issue190/stage_a_campaign_v1",
     "clean_stop_floor_bytes": 64424509440,
     "output_root": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/stage_a_campaign_v1",
     "projected_bytes_per_world": 1024,
