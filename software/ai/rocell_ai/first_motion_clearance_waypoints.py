@@ -112,6 +112,106 @@ def load_target_contact_cad_fixture(path: Path) -> dict[str, Any]:
     return value
 
 
+def load_tool_bound_exact_clearance_fixture(path: Path) -> dict[str, Any]:
+    """Load the frozen tool-bound successor and verify every source binding."""
+
+    value = json.loads(path.read_text(encoding="utf-8"))
+    claimed = value.pop("fixture_sha256")
+    if _sha(value) != claimed:
+        raise ValueError("tool-bound exact-clearance fixture hash mismatch")
+    value["fixture_sha256"] = claimed
+    for name in (
+        "tool_configuration_contract", "length_sweep", "continuous_geometry",
+        "calibrated_residual",
+    ):
+        section = value[name]
+        section_claimed = section.pop("section_sha256")
+        if _sha(section) != section_claimed:
+            raise ValueError(f"{name} section hash mismatch")
+        section["section_sha256"] = section_claimed
+    if value["scope"] != SCOPE or any(value["counters"].values()):
+        raise ValueError("tool-bound fixture changed zero-authority scope")
+    if value["physical_authority"] is not False:
+        raise ValueError("tool-bound fixture claims physical authority")
+    root = path.resolve().parents[4]
+    for binding in value["bindings"].values():
+        source = Path(binding["path"])
+        if not source.is_absolute():
+            source = root / source
+        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError(f"bound tool-clearance input changed: {source}")
+    return value
+
+
+def tool_configuration(
+    fixture: dict[str, Any], legacy_pose_bundle: dict[str, Any], *,
+    total_length_mm: float, exposed_length_mm: float, tip_radius_mm: float,
+) -> dict[str, Any]:
+    """Build the only canonical configuration identity accepted by pose bundles."""
+
+    bindings = fixture["bindings"]
+    board_transform = legacy_pose_bundle["layout_overlay"][
+        "board_T_vendor_world_matrix_row_major"
+    ]
+    return {
+        "total_hand_tcp_to_tip_length_mm": float(total_length_mm),
+        "distal_tip_exposed_length_mm": float(exposed_length_mm),
+        "distal_tip_radius_mm": float(tip_radius_mm),
+        "keyboard_tip_mesh_sha256": bindings["keyboard_tip_mesh"]["sha256"],
+        "stylus_collar_mesh_sha256": bindings["stylus_collar_mesh"]["sha256"],
+        "tool_body_mesh_sha256": bindings["tool_body_mesh"]["sha256"],
+        "solver_model_sha256": bindings["mjcf"]["sha256"],
+        "target_catalog_sha256": bindings["target_catalog"]["sha256"],
+        "board_transform_sha256": _sha(board_transform),
+    }
+
+
+def bind_pose_bundle_tool_configuration(
+    pose_bundle: dict[str, Any], configuration: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a zero-authority pose bundle cryptographically bound to one tool."""
+
+    result = json.loads(json.dumps(pose_bundle))
+    result["schema"] = "tactevra.tool_bound_pose_bundle.v1"
+    result["tool_configuration"] = configuration
+    result["tool_configuration_sha256"] = _sha(configuration)
+    result["hardware_access"] = False
+    result["hardware_write_count"] = 0
+    result["physical_movement_count"] = 0
+    result["physical_authority"] = False
+    result["controller_commands"] = []
+    result.pop("receipt_sha256", None)
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
+def validate_pose_bundle_tool_configuration(
+    pose_bundle: dict[str, Any], configuration: dict[str, Any],
+) -> None:
+    """Fail before screening if bundle bytes and requested tool do not agree."""
+
+    unsigned = dict(pose_bundle)
+    claimed_receipt = unsigned.pop("receipt_sha256", None)
+    if claimed_receipt != _sha(unsigned):
+        raise ValueError("tool-bound pose bundle receipt mismatch")
+    if pose_bundle.get("schema") != "tactevra.tool_bound_pose_bundle.v1":
+        raise ValueError("unsupported tool-bound pose bundle schema")
+    claimed_config = pose_bundle.get("tool_configuration")
+    claimed_hash = pose_bundle.get("tool_configuration_sha256")
+    if claimed_hash != _sha(claimed_config):
+        raise ValueError("pose bundle tool configuration hash mismatch")
+    if claimed_hash != _sha(configuration) or claimed_config != configuration:
+        raise ValueError("pose bundle does not match requested tool configuration")
+    if (
+        pose_bundle.get("hardware_access") is not False
+        or pose_bundle.get("hardware_write_count") != 0
+        or pose_bundle.get("physical_movement_count") != 0
+        or pose_bundle.get("physical_authority") is not False
+        or pose_bundle.get("controller_commands") != []
+    ):
+        raise ValueError("tool-bound pose bundle carries physical authority")
+
+
 def _joint_map(world: _World, joints: tuple[float, ...]) -> dict[str, JointPosition]:
     values = {name: JointPosition.radians(value) for name, value in zip(
         world.pose_bundle["joint_order"], joints, strict=True)}
@@ -1016,10 +1116,14 @@ def run_target_contact_cad_refinement(
 
 
 __all__ = [
+    "bind_pose_bundle_tool_configuration",
     "load_passive_tool_rerun_fixture",
     "load_target_contact_cad_fixture",
+    "load_tool_bound_exact_clearance_fixture",
     "load_waypoint_fixture",
     "run_clearance_waypoint_study",
     "run_passive_tool_first_motion_rerun",
     "run_target_contact_cad_refinement",
+    "tool_configuration",
+    "validate_pose_bundle_tool_configuration",
 ]

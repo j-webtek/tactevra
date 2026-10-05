@@ -344,6 +344,75 @@ def test_target_contact_cad_fixture_rejects_tampering(tmp_path: Path) -> None:
         load_target_contact_cad_fixture(changed)
 
 
+def test_tool_bound_pose_bundle_rejects_every_configuration_mismatch() -> None:
+    from rocell_ai.first_motion_clearance_waypoints import (
+        bind_pose_bundle_tool_configuration,
+        load_tool_bound_exact_clearance_fixture,
+        tool_configuration,
+        validate_pose_bundle_tool_configuration,
+    )
+
+    fixture = load_tool_bound_exact_clearance_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_tool_bound_exact_clearance_v1.json"
+    )
+    legacy = json.loads(Path(
+        fixture["bindings"]["legacy_pose_bundle"]["path"]
+    ).read_text(encoding="utf-8"))
+    config = tool_configuration(
+        fixture, legacy, total_length_mm=120.0,
+        exposed_length_mm=30.0, tip_radius_mm=4.0,
+    )
+    bundle = bind_pose_bundle_tool_configuration(legacy, config)
+    validate_pose_bundle_tool_configuration(bundle, config)
+    assert bundle["tool_configuration_sha256"]
+    assert bundle["physical_authority"] is False
+
+    for field, changed_value in (
+        ("total_hand_tcp_to_tip_length_mm", 110.0),
+        ("distal_tip_exposed_length_mm", 10.0),
+        ("distal_tip_radius_mm", 1.0),
+        ("target_catalog_sha256", "0" * 64),
+        ("board_transform_sha256", "f" * 64),
+    ):
+        changed = dict(config)
+        changed[field] = changed_value
+        with pytest.raises(ValueError, match="requested tool configuration"):
+            validate_pose_bundle_tool_configuration(bundle, changed)
+
+
+def test_tool_bound_pose_bundle_rejects_tampering_and_authority() -> None:
+    from rocell_ai.first_motion_clearance_waypoints import (
+        _sha,
+        bind_pose_bundle_tool_configuration,
+        load_tool_bound_exact_clearance_fixture,
+        tool_configuration,
+        validate_pose_bundle_tool_configuration,
+    )
+
+    fixture = load_tool_bound_exact_clearance_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_tool_bound_exact_clearance_v1.json"
+    )
+    legacy = json.loads(Path(
+        fixture["bindings"]["legacy_pose_bundle"]["path"]
+    ).read_text(encoding="utf-8"))
+    config = tool_configuration(
+        fixture, legacy, total_length_mm=120.0,
+        exposed_length_mm=30.0, tip_radius_mm=4.0,
+    )
+    bundle = bind_pose_bundle_tool_configuration(legacy, config)
+    tampered = json.loads(json.dumps(bundle))
+    tampered["poses"][0]["joint_positions_rad"][0] += 0.1
+    with pytest.raises(ValueError, match="receipt mismatch"):
+        validate_pose_bundle_tool_configuration(tampered, config)
+    authority = bind_pose_bundle_tool_configuration(legacy, config)
+    authority["physical_authority"] = True
+    unsigned = {key: value for key, value in authority.items()
+                if key != "receipt_sha256"}
+    authority["receipt_sha256"] = _sha(unsigned)
+    with pytest.raises(ValueError, match="physical authority"):
+        validate_pose_bundle_tool_configuration(authority, config)
+
+
 def test_vectorized_keycap_contacts_match_exact_box_distances() -> None:
     from rocell_ai.first_motion_clearance_waypoints import (
         _keycap_contacts,
