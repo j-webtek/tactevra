@@ -11248,8 +11248,6 @@ rewriting history. New entries must use a unique evidence ID.
 - Planned frozen questions: identify which Stage C endpoint identities and tool axial zones produce each contact; compare conservative boxes with controlled station meshes without promoting either to installed geometry; and screen E/F using WS2's frozen 11-15 mm keycap width/height range so only target-key top contact during PRESS is admitted and every neighbor contact remains a stop.
 - Authority: execution has not started. GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Official readiness and evaluation status are unchanged.
 
-Claim addendum (2026-10-04): the claim entered Git in full commit `95c34b9352f56b1adc380f0bcdfc3c37d9fb011b`. The prior passive-tool Stage C evidence exercised only target `G`; the successor must broaden Stage C to all 46 bound keyboard targets before making any per-target inference.
-
 ### E-20261004-INT-656 — low-noise shortcut and dark-cable boundary audit
 
 - Stage/lane: S2 AI/model diagnostics under the exact v1.4 scoring claim `296671f1dc4f8a4fce352f0235f649e8ddad24af` and guard implementation `61e1af209cf7660221571d2427ab2067324dde51`. Only the completed low-noise development report and the already-produced training-free baseline were read; moderate/high scoring and evaluation were not opened by this audit.
@@ -11259,3 +11257,18 @@ Claim addendum (2026-10-04): the claim entered Git in full commit `95c34b9352f56
 - Hard cases at the unchanged selected threshold `0.05`: each variant has 5,760 rows. The 96 model has one 30% dark-cable miss (`keyboard:F`, scene 04, 700 mm, light 01; probability `0.0151356878`) and three 10% false stops. The 192 model has zero 30%/60% misses and fourteen 10% false stops. The 10%-to-30% q05/q95 margin is strongly positive (`0.9994061` at 96 and `0.9992542` at 192), while the negative extreme margins preserve the isolated outliers. Every failing row and score is retained in the report.
 - Boundary limitation and decision: represented dark-cable fractions are 10%, 30%, and 60%; the 20% label boundary has zero exact rows. This audit cannot qualify boundary behavior. Decision `LIMITATION_RECORDED_NO_GATE_THRESHOLD_OR_SELECTION_CHANGE`: retain the failures, wait for moderate/high paired results, and require future separately frozen lighting-mismatch and exact-boundary evidence before any physical claim.
 - Authority: development rows opened by the existing low-noise run 69,120; evaluation rows opened 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
+
+### E-20261004-INT-657 — E-656 disambiguation and qualifying-evaluation requirement
+
+- Identifier correction: concurrent workers appended two distinct entries headed `E-20261004-INT-656`. Append-only custody forbids renumbering either historical entry. The target/contact and station-CAD claim is identified by title and claim `12849a71386a97a83992db891c08e9004b0461f`; the low-noise shortcut audit is identified by title, result file SHA-256 `86a134a6d63a00f1583b50a0bd93eb032f66a9d3e71d4bd6756cbbef2daddfb3`, and canonical report SHA-256 `4781c69a3a55e7bc64addd489b6f63d95e753723d55714279913543160737e3a`. Future references must use these identities or E-657 rather than bare `E-656`.
+- Named v1.4 limitation: reference and observation always share the same frozen lighting identity. Consequently, v1.4 false-stop rates do not measure tolerance to commissioned-reference lighting drift. The completed v1.4 development results remain applicable to the frozen exploratory resolution comparison only.
+- Qualifying-evaluation requirement: any successor evaluation used for qualification must restore reference/observation lighting mismatch, with its admitted mismatch range derived from the measured locked-setting B0477 operating envelope. The range must be frozen before evaluation pixels or results are opened. Synthetic guessed lighting ranges cannot support the qualifying claim.
+- Boundary requirement: v1.4 contains 10%, 30%, and 60% dark-cable coverage but no exact 20% rows. A successor qualifying fixture must explicitly probe the 20% decision boundary and predeclare its ambiguity-band scoring; v1.4 may still complete the unchanged 96-versus-192 comparison without that evidence.
+- Decision and authority: the frozen cross-profile decision rule, gates, thresholds, model outputs, and open scoring processes are unchanged. Evaluation remains unopened. Hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
+
+### E-20261004-INT-657 — target/contact refinement claim binding correction
+
+- Claim binding: the target/contact and station-CAD refinement claim entered Git in full commit `95c34b9352f56b1adc380f0bcdfc3c37d9fb011b`; workplan binding correction commit `24ba0d58`.
+- Preserved process failure: the first binding attempt inserted its addendum beside E-656, so `python scripts/ci/check_evidence_ledger_append_only.py` failed at byte 1402741. This correction restores the prior ledger prefix byte-for-byte and appends this record at the ledger tail; the failed check and pushed commit remain in history.
+- Scope correction: prior passive-tool Stage C evidence exercised only target `G`. The successor must broaden Stage C to all 46 bound keyboard targets before making any per-target inference.
+- Authority: GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. No result has run.
