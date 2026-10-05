@@ -520,4 +520,4 @@ preserves the failed older runtime binding while making the reviewed successor
 stack reproducible. GPU receipts, logs, caches, and environments remain external
 and hash-bound; all byte, blob, duplicate, and reduction limits are unchanged.
 
-The tracked-file ceiling is 6,378 after the concurrent two-file WS2 v2 fixture increment and the single compact, hash-bound tool-configuration, exact-clearance, and tool-length successor fixture. The increase does not add generated results, pose bundles, GPU outputs, or physical evidence to the source archive.
+The tracked-file ceiling is 6,379 after the concurrent two-file WS2 v2 fixture increment and the single compact, hash-bound tool-configuration, exact-clearance, and tool-length successor fixture. The increase does not add generated results, pose bundles, GPU outputs, or physical evidence to the source archive.
