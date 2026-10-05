@@ -148,7 +148,9 @@ def main() -> int:
         "### Pull-request automation",
         "",
         f"- Changed paths: `{len(paths)}`",
-        f"- Routed labels: `{', '.join(labels) or 'none'}`",
+        # Do not echo label text returned by an authenticated API response.  The
+        # count is sufficient for the summary and cannot disclose response data.
+        f"- Routed label count: `{len(labels)}`",
         f"- Full portable CI: `{str(result['portable_full']).lower()}`",
         f"- Shared contract touched: `{str(result['contract']).lower()}`",
         f"- Trusted manifest-only Dependabot update: `{str(trusted_dependabot).lower()}`",
