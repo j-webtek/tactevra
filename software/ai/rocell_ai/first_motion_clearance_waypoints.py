@@ -84,6 +84,34 @@ def load_passive_tool_rerun_fixture(path: Path) -> dict[str, Any]:
     return value
 
 
+def load_target_contact_cad_fixture(path: Path) -> dict[str, Any]:
+    """Load the frozen CAD/keycap successor without opening result evidence."""
+
+    value = json.loads(path.read_text(encoding="utf-8"))
+    claimed = value.pop("fixture_sha256")
+    if _sha(value) != claimed:
+        raise ValueError("target/contact CAD fixture hash mismatch")
+    value["fixture_sha256"] = claimed
+    for name in ("station_cad", "tool_component_model", "stage_c", "keycap_contact"):
+        section = value[name]
+        section_claimed = section.pop("section_sha256")
+        if _sha(section) != section_claimed:
+            raise ValueError(f"{name} section hash mismatch")
+        section["section_sha256"] = section_claimed
+    if value["scope"] != SCOPE or any(value["counters"].values()):
+        raise ValueError("target/contact CAD fixture changed zero-authority scope")
+    if value["physical_authority"] is not False:
+        raise ValueError("target/contact CAD fixture claims physical authority")
+    root = path.resolve().parents[4]
+    for binding in value["bindings"].values():
+        source = Path(binding["path"])
+        if not source.is_absolute():
+            source = root / source
+        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError(f"bound target/contact CAD input changed: {source}")
+    return value
+
+
 def _joint_map(world: _World, joints: tuple[float, ...]) -> dict[str, JointPosition]:
     values = {name: JointPosition.radians(value) for name, value in zip(
         world.pose_bundle["joint_order"], joints, strict=True)}
@@ -96,6 +124,129 @@ def _tip_xyz(world: _World, joints: tuple[float, ...], tool_length: float) -> tu
     board_hand = world.board_t_world.compose(fk["hand_tcp"])
     tip = board_hand.translation_mm + board_hand.rotation.apply(Vec3(0, 0, -tool_length))
     return (tip.x, tip.y, tip.z)
+
+
+def _hand_board_transform(world: _World, joints: tuple[float, ...]):
+    fk = world.model.forward_kinematics(_joint_map(world, joints))
+    return world.board_t_world.compose(fk["hand_tcp"])
+
+
+def _component_profiles(
+    spec: dict[str, Any], *, tool_length: float, exposed_length: float,
+    tip_radius: float,
+) -> tuple[dict[str, float], ...]:
+    """Return distal-to-proximal axial envelopes in hand-TCP coordinates."""
+
+    collar_length = spec["collar_axial_length_mm"][0]
+    body_length = spec["body_axial_length_mm"][0]
+    collar_top = max(0.0, tool_length - exposed_length - collar_length)
+    collar_bottom = max(0.0, tool_length - exposed_length)
+    body_top = max(0.0, collar_top - body_length)
+    return (
+        {"component": "DISTAL_TIP", "start_mm": collar_bottom,
+         "end_mm": tool_length, "radius_mm": tip_radius},
+        {"component": "COLLAR", "start_mm": collar_top,
+         "end_mm": collar_bottom, "radius_mm": spec["collar_radius_mm"][0]},
+        {"component": "BODY", "start_mm": body_top,
+         "end_mm": collar_top,
+         "radius_mm": spec["body_conservative_radial_envelope_mm"][0]},
+    )
+
+
+def _component_axis_points(
+    transform: Any, component: dict[str, float], spacing_mm: float,
+):
+    import numpy as np
+
+    length = component["end_mm"] - component["start_mm"]
+    count = max(2, int(math.ceil(length / spacing_mm)) + 1)
+    distances = np.linspace(component["start_mm"], component["end_mm"], count)
+    rows = []
+    for distance in distances:
+        point = transform.translation_mm + transform.rotation.apply(
+            Vec3(0.0, 0.0, -float(distance)))
+        rows.append((point.x, point.y, point.z))
+    return np.asarray(rows, dtype=float)
+
+
+def _point_box_min_distance(points: Any, center: tuple[float, float, float],
+                            half: tuple[float, float, float]) -> float:
+    import numpy as np
+
+    delta = np.maximum(np.abs(points - np.asarray(center)) - np.asarray(half), 0.0)
+    return float(np.sqrt(np.sum(delta * delta, axis=1)).min())
+
+
+def _station_voxel_trees(fixture: dict[str, Any], workspace: Path):
+    """Build two frozen-resolution CAD-derived occupancy screens."""
+
+    import numpy as np
+    from scipy.spatial import cKDTree
+    import trimesh
+
+    layout_path = Path(fixture["bindings"]["workcell_layout"]["path"])
+    if not layout_path.is_absolute():
+        layout_path = workspace / layout_path
+    layout = json.loads(layout_path.read_text(encoding="utf-8"))
+    result = {}
+    for pitch in fixture["station_cad"]["voxel_pitch_mm"]:
+        by_station = {}
+        for side in ("left", "right"):
+            binding = fixture["bindings"][f"station_{side}_mesh"]
+            path = Path(binding["path"])
+            if not path.is_absolute():
+                path = workspace / path
+            mesh = trimesh.load_mesh(path, process=False)
+            points = np.asarray(mesh.voxelized(float(pitch)).fill().points, dtype=float)
+            placement = layout["stations"][f"keyboard_{side}"]
+            points += np.asarray((*placement["origin_xy"], placement["installed_z"]),
+                                 dtype=float)
+            by_station[f"keyboard_{side}"] = {
+                "tree": cKDTree(points),
+                "bounds": (points.min(axis=0), points.max(axis=0)),
+                "point_count": int(points.shape[0]),
+            }
+        result[float(pitch)] = by_station
+    return result
+
+
+def _station_contacts(
+    points: Any, *, radius_mm: float, spacing_mm: float, pitch_mm: float,
+    station_trees: dict[str, Any],
+) -> list[dict[str, Any]]:
+    import numpy as np
+
+    inflation = math.sqrt(3.0) * pitch_mm / 2.0 + spacing_mm / 2.0
+    rows = []
+    low = points.min(axis=0) - radius_mm - inflation
+    high = points.max(axis=0) + radius_mm + inflation
+    for station_id, data in station_trees.items():
+        bounds_low, bounds_high = data["bounds"]
+        if np.any(high < bounds_low) or np.any(low > bounds_high):
+            continue
+        distance = float(data["tree"].query(points, k=1, workers=1)[0].min())
+        clearance = distance - radius_mm - inflation
+        if clearance <= 0.0:
+            rows.append({"station_id": station_id,
+                         "conservative_clearance_mm": clearance})
+    return rows
+
+
+def _keycap_contacts(
+    points: Any, *, component: str, radius_mm: float, spacing_mm: float,
+    targets: dict[str, dict[str, Any]], width_mm: float, thickness_mm: float,
+) -> list[dict[str, Any]]:
+    rows = []
+    inflated_radius = radius_mm + spacing_mm / 2.0
+    for target_id, target in targets.items():
+        xyz = target["contact_target_board_mm"]
+        center = (xyz["x"], xyz["y"], xyz["z"] - thickness_mm / 2.0)
+        half = (width_mm / 2.0, width_mm / 2.0, thickness_mm / 2.0)
+        clearance = _point_box_min_distance(points, center, half) - inflated_radius
+        if clearance <= 0.0:
+            rows.append({"target_id": target_id, "component": component,
+                         "conservative_clearance_mm": clearance})
+    return rows
 
 
 def _solve_seeded(world: _World, solver: Any, xyz: tuple[float, float, float],
@@ -578,9 +729,247 @@ def run_passive_tool_first_motion_rerun(
     return result
 
 
+def run_target_contact_cad_refinement(
+    fixture: dict[str, Any], *, workspace: Path,
+) -> dict[str, Any]:
+    """Resolve C/E/F tool contacts with controlled CAD and per-key geometry."""
+
+    prior_fixture_path = Path(fixture["bindings"]["prior_fixture"]["path"])
+    if not prior_fixture_path.is_absolute():
+        prior_fixture_path = workspace / prior_fixture_path
+    prior_fixture = load_passive_tool_rerun_fixture(prior_fixture_path)
+    design_path = Path(prior_fixture["bindings"]["collision_design_fixture"]["path"])
+    if not design_path.is_absolute():
+        design_path = workspace / design_path
+    world = _World(json.loads(design_path.read_text(encoding="utf-8")), workspace)
+
+    park_report = json.loads(Path(fixture["bindings"]["park_screen"]["path"]).read_text())
+    stage_c = fixture["stage_c"]
+    park_row = next(row for row in park_report["top_candidates"]
+                    if row["pose_id"] == stage_c["park_pose_id"])
+    park = tuple(park_row["joint_positions_rad"][name]
+                 for name in world.pose_bundle["joint_order"])
+    targets = {row["target_id"]: row for row in world.pose_bundle["poses"]}
+    if len(targets) != 46:
+        raise ValueError("successor requires the exact 46-target pose bundle")
+
+    station_trees = _station_voxel_trees(fixture, workspace)
+    tool_spec = fixture["tool_component_model"]
+    key_spec = fixture["keycap_contact"]
+    profiles = list(product(
+        tool_spec["total_hand_tcp_to_tip_length_mm"],
+        tool_spec["distal_tip_exposed_length_mm"],
+        tool_spec["distal_tip_radius_mm"],
+    ))
+    discretizations = list(product(
+        fixture["station_cad"]["voxel_pitch_mm"],
+        fixture["station_cad"]["tool_axis_sample_spacing_mm"],
+    ))
+    key_shapes = list(product(
+        key_spec["keycap_width_height_mm"], key_spec["keycap_thickness_mm"]))
+
+    stage_c_counts: dict[tuple[Any, ...], int] = {}
+    press_counts: dict[tuple[Any, ...], int] = {}
+    ik_failures: list[str] = []
+    c_contact_sets: dict[tuple[float, float], set[tuple[Any, ...]]] = {
+        tuple(map(float, row)): set() for row in discretizations}
+    press_contact_sets: dict[tuple[float, float], set[tuple[Any, ...]]] = {
+        tuple(map(float, row)): set() for row in discretizations}
+
+    def count(store: dict[tuple[Any, ...], int], key: tuple[Any, ...]) -> None:
+        store[key] = store.get(key, 0) + 1
+
+    # Stage C: all targets, not the prior G-only route.
+    for target_id, target in targets.items():
+        xyz = target["contact_target_board_mm"]
+        for tool_length, exposed_length, tip_radius in profiles:
+            solver = world.solver(tool_length)
+            components = _component_profiles(
+                tool_spec, tool_length=tool_length,
+                exposed_length=exposed_length, tip_radius=tip_radius)
+            for transit_z, hover in product(
+                stage_c["transit_height_board_z_mm"],
+                stage_c["hover_height_above_contact_mm"],
+            ):
+                end_xyz = (xyz["x"], xyz["y"], xyz["z"] + hover)
+                end = _solve_seeded(world, solver, end_xyz, park)
+                if end is None:
+                    ik_failures.append(
+                        f"C:{target_id}:{tool_length}:{exposed_length}:"
+                        f"{tip_radius}:{transit_z}:{hover}:DESTINATION_IK")
+                    continue
+                route, failure = _clearance_route(
+                    world, start=park, end=end, end_xyz=end_xyz,
+                    tool_length=tool_length, transit_z=transit_z,
+                    samples=stage_c["samples_per_cartesian_leg"])
+                if failure:
+                    ik_failures.append(
+                        f"C:{target_id}:{tool_length}:{exposed_length}:"
+                        f"{tip_radius}:{transit_z}:{hover}:{failure}")
+                for sample_index, (phase, joints) in enumerate(route):
+                    transform = _hand_board_transform(world, joints)
+                    for pitch, spacing in discretizations:
+                        disc = (float(pitch), float(spacing))
+                        for component in components:
+                            points = _component_axis_points(transform, component, spacing)
+                            for station in _station_contacts(
+                                points, radius_mm=component["radius_mm"],
+                                spacing_mm=spacing, pitch_mm=pitch,
+                                station_trees=station_trees[float(pitch)]):
+                                identity = (
+                                    target_id, phase, sample_index, tool_length,
+                                    exposed_length, tip_radius, transit_z, hover,
+                                    component["component"], "STATION",
+                                    station["station_id"], None, None)
+                                c_contact_sets[disc].add(identity)
+                                count(stage_c_counts, identity[:2] + identity[8:11])
+                            for width, thickness in key_shapes:
+                                for key in _keycap_contacts(
+                                    points, component=component["component"],
+                                    radius_mm=component["radius_mm"],
+                                    spacing_mm=spacing, targets=targets,
+                                    width_mm=width, thickness_mm=thickness):
+                                    identity = (
+                                        target_id, phase, sample_index, tool_length,
+                                        exposed_length, tip_radius, transit_z, hover,
+                                        component["component"], "KEYCAP",
+                                        key["target_id"], width, thickness)
+                                    c_contact_sets[disc].add(identity)
+                                    count(stage_c_counts, identity[:2] + identity[8:11]
+                                          + (width, thickness))
+
+    # E/F: exact press poses. Only target-tip contact is admitted.
+    missing_target_contacts = 0
+    for requested_id, target in targets.items():
+        joints = tuple(target["joint_positions_rad"])
+        transform = _hand_board_transform(world, joints)
+        for tool_length, exposed_length, tip_radius in profiles:
+            components = _component_profiles(
+                tool_spec, tool_length=tool_length,
+                exposed_length=exposed_length, tip_radius=tip_radius)
+            for pitch, spacing in discretizations:
+                disc = (float(pitch), float(spacing))
+                component_points = {
+                    row["component"]: _component_axis_points(transform, row, spacing)
+                    for row in components}
+                by_component = {row["component"]: row for row in components}
+                for component_name, points in component_points.items():
+                    component = by_component[component_name]
+                    for station in _station_contacts(
+                        points, radius_mm=component["radius_mm"],
+                        spacing_mm=spacing, pitch_mm=pitch,
+                        station_trees=station_trees[float(pitch)]):
+                        identity = (requested_id, tool_length, exposed_length,
+                                    tip_radius, component_name, "STATION",
+                                    station["station_id"], None, None)
+                        press_contact_sets[disc].add(identity)
+                        count(press_counts, identity[:1] + identity[4:7])
+                for width, thickness in key_shapes:
+                    tip_touched_target = False
+                    for component_name, points in component_points.items():
+                        component = by_component[component_name]
+                        contacts = _keycap_contacts(
+                            points, component=component_name,
+                            radius_mm=component["radius_mm"], spacing_mm=spacing,
+                            targets=targets, width_mm=width, thickness_mm=thickness)
+                        for contact in contacts:
+                            admitted = (component_name == "DISTAL_TIP"
+                                        and contact["target_id"] == requested_id)
+                            tip_touched_target |= admitted
+                            if admitted:
+                                continue
+                            identity = (requested_id, tool_length, exposed_length,
+                                        tip_radius, component_name, "KEYCAP",
+                                        contact["target_id"], width, thickness)
+                            press_contact_sets[disc].add(identity)
+                            count(press_counts, identity[:1] + identity[4:])
+                    if not tip_touched_target:
+                        missing_target_contacts += 1
+                        identity = (requested_id, tool_length, exposed_length,
+                                    tip_radius, "DISTAL_TIP", "MISSING_TARGET",
+                                    requested_id, width, thickness)
+                        press_contact_sets[disc].add(identity)
+                        count(press_counts, identity[:1] + identity[4:])
+
+    def disagreements(sets: dict[tuple[float, float], set[tuple[Any, ...]]]):
+        union = set().union(*sets.values())
+        common = set.intersection(*sets.values())
+        return sorted(union - common, key=repr)
+
+    c_disagreements = disagreements(c_contact_sets)
+    press_disagreements = disagreements(press_contact_sets)
+    c_union = set().union(*c_contact_sets.values())
+    press_union = set().union(*press_contact_sets.values())
+
+    def compact_counts(values: dict[tuple[Any, ...], int]) -> list[dict[str, Any]]:
+        return [{"identity": list(key), "count": value}
+                for key, value in sorted(values.items(), key=lambda item: repr(item[0]))]
+
+    prior_result = json.loads(Path(fixture["bindings"]["prior_result"]["path"])
+                              .read_text(encoding="utf-8"))
+    result = {
+        "schema": "tactevra.first_motion_target_contact_cad_result.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "prior_result_receipt_sha256": prior_result["receipt_sha256"],
+        "selected_park_pose_id": stage_c["park_pose_id"],
+        "target_count": len(targets),
+        "target_ids": sorted(targets),
+        "station_voxel_point_counts": {
+            str(pitch): {name: row["point_count"] for name, row in stations.items()}
+            for pitch, stations in station_trees.items()},
+        "stage_c": {
+            "contact_identity_count": len(c_union),
+            "discretization_disagreement_count": len(c_disagreements),
+            "ik_failures": sorted(ik_failures),
+            "counts_by_target_phase_component_surface": compact_counts(stage_c_counts),
+            "clear": not c_union and not c_disagreements and not ik_failures,
+        },
+        "stage_e_f": {
+            "contact_identity_count": len(press_union),
+            "discretization_disagreement_count": len(press_disagreements),
+            "missing_target_contact_observations": missing_target_contacts,
+            "counts_by_target_component_surface": compact_counts(press_counts),
+            "clear": not press_union and not press_disagreements,
+        },
+        "discretization_disagreements": {
+            "stage_c": [list(row) for row in c_disagreements],
+            "stage_e_f": [list(row) for row in press_disagreements],
+        },
+        "decision": "PASS_EXPLORATORY_TARGET_CONTACT_SCREEN" if (
+            not c_union and not c_disagreements and not ik_failures
+            and not press_union and not press_disagreements
+        ) else "STOP_TARGET_CONTACT_OR_CAD_REFINEMENT_REQUIRED",
+        "official_readiness": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+        "official_readiness_changed": False,
+        "installed_collision_geometry_changed": False,
+        "production_motion_policy_created": False,
+        "evaluation_opened": False,
+        "gpu_job_count": 0,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+        "runtime_stack": fixture["runtime_stack"],
+        "limitations": [
+            "Station occupancy is derived from non-watertight controlled STL at two frozen voxel pitches.",
+            "Passive stylus exposure and exact assembly transform remain unmeasured ranges.",
+            "Keycaps remain ranged WS2 boxes rather than measured installed key geometry.",
+            "Discrete route samples do not prove continuous swept-volume clearance.",
+            "Consistency with shared CAD does not qualify physical dimensional accuracy.",
+        ],
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
 __all__ = [
     "load_passive_tool_rerun_fixture",
+    "load_target_contact_cad_fixture",
     "load_waypoint_fixture",
     "run_clearance_waypoint_study",
     "run_passive_tool_first_motion_rerun",
+    "run_target_contact_cad_refinement",
 ]

@@ -303,6 +303,46 @@ def test_passive_tool_first_motion_fixture_is_frozen_and_cable_free() -> None:
         "TRAY_REPLACES_KEYBOARD_AND_NEIGHBOR_STATIONS")
 
 
+def test_target_contact_cad_fixture_expands_targets_and_keeps_ranges() -> None:
+    from rocell_ai.first_motion_clearance_waypoints import (
+        _component_profiles,
+        load_target_contact_cad_fixture,
+    )
+
+    fixture = load_target_contact_cad_fixture(
+        ROOT / "software/ai/sim/evidence/first_motion_target_contact_cad_v1.json")
+    assert fixture["scope"] == "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+    assert not any(fixture["counters"].values())
+    assert fixture["physical_authority"] is False
+    assert fixture["stage_c"]["target_ids"] == "ALL_46_POSE_BUNDLE_TARGETS"
+    assert fixture["station_cad"]["voxel_pitch_mm"] == [1.0, 2.0]
+    assert fixture["keycap_contact"]["keycap_width_height_mm"] == [11.0, 15.0]
+    assert fixture["keycap_contact"]["keycap_thickness_mm"] == [2.0, 8.0]
+    profiles = _component_profiles(
+        fixture["tool_component_model"], tool_length=80.0,
+        exposed_length=30.0, tip_radius=4.0)
+    assert [row["component"] for row in profiles] == [
+        "DISTAL_TIP", "COLLAR", "BODY"]
+    assert profiles[0]["end_mm"] == 80.0
+    assert profiles[0]["start_mm"] == 50.0
+    assert profiles[1]["start_mm"] == 44.5
+    assert profiles[2]["start_mm"] == 0.0
+
+
+def test_target_contact_cad_fixture_rejects_tampering(tmp_path: Path) -> None:
+    from rocell_ai.first_motion_clearance_waypoints import (
+        load_target_contact_cad_fixture,
+    )
+
+    source = ROOT / "software/ai/sim/evidence/first_motion_target_contact_cad_v1.json"
+    value = json.loads(source.read_text(encoding="utf-8"))
+    value["stage_c"]["samples_per_cartesian_leg"] = 3
+    changed = tmp_path / "changed.json"
+    changed.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(ValueError, match="fixture hash mismatch"):
+        load_target_contact_cad_fixture(changed)
+
+
 def test_phase10_remedy_fixture_is_frozen_and_zero_authority() -> None:
     from rocell_ai.first_motion_phase10_remedies import load_remedy_fixture
 
