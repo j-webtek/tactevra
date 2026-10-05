@@ -521,3 +521,5 @@ stack reproducible. GPU receipts, logs, caches, and environments remain external
 and hash-bound; all byte, blob, duplicate, and reduction limits are unchanged.
 
 The tracked-file ceiling is 6,379 after the concurrent two-file WS2 v2 fixture increment and the single compact, hash-bound tool-configuration, exact-clearance, and tool-length successor fixture. The increase does not add generated results, pose bundles, GPU outputs, or physical evidence to the source archive.
+
+The corrected tracked-file ceiling is 6,382. The prior 6,379 arithmetic counted the compact successor fixture but omitted its two reviewed runtime modules; this increment adds one deterministic tradeoff finalizer while keeping all generated matrices and GPU receipts external and hash-bound. No generated result, pose bundle, model, image, cache, or simulator environment enters the source archive; every byte and duplicate ceiling remains unchanged.
