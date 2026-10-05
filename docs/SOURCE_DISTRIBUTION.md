@@ -501,7 +501,7 @@ The tracked-file ceiling is 6,370 after adding the simulation-only clearance
 waypoint and swappable-pad runner. It reuses the existing focused test module;
 generated route and collision evidence stays external.
 
-The tracked-file ceiling is 6,372 after adding the compact keycap-height
+The tracked-file ceiling is 6,373 after adding the compact keycap-height
 pad fixture. The fixture derives its 20 mm simulated pad surface from all 46
 keyboard contact targets and adds no generated corpus or runtime asset. Its camera, contact-phase, pad, and wrist screens reuse the existing
 focused test module; all generated partitions and result evidence stay external
