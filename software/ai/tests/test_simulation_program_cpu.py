@@ -35,7 +35,8 @@ WS2_STAGED_V2 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v2.j
 WS2_STAGED_V3 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v3.json"
 WS2_MECHANISMS = ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
 WS2_VECTOR_FIXTURE = (
-    ROOT / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v1.json"
+    ROOT
+    / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v1_1.json"
 )
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",

@@ -1160,7 +1160,7 @@ def run_smoke_worker(
             raise ValueError("invalid switch closure window")
     if tool_compliance_model not in {None, "NESTED_MOCAP_JOINT", "SERIES_QUASISTATIC"}:
         raise ValueError("unknown tool compliance model")
-    if tool_compliance_model == "SERIES_QUASISTATIC":
+    if tool_compliance_model == "SERIES_QUASISTATIC" and not vectorized_world_controls:
         if set(tool_compliance or {}) != {"stiffness_n_per_mm", "travel_mm"}:
             raise ValueError(
                 "quasistatic compliance requires exact stiffness and travel"
