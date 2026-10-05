@@ -30,6 +30,7 @@ WS2_EXECUTION = ROOT / "software/ai/sim/evidence/workstream_2_key_press_executio
 WS2_FIXTURE_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json"
 WS2_EXECUTION_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json"
 WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json"
+WS2_STAGED_V2 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v2.json"
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
     ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
@@ -178,6 +179,42 @@ def test_ws2_runtime_amendment_changes_only_stack_identity():
     assert execution["smoke"]["expected_world_count"] == 64
     assert execution["physical_authority"] is False
     assert not any(execution["counters"].values())
+
+
+def test_ws2_staged_runtime_binding_preserves_stage_a_population():
+    original = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
+    original_execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION, workspace=ROOT, parent=original
+    )
+    original_staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED, workspace=ROOT, parent=original, execution=original_execution
+    )
+    amended = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    amended_execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=amended
+    )
+    amended_staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED_V2,
+        workspace=ROOT,
+        parent=amended,
+        execution=amended_execution,
+    )
+    for key in (
+        "reference_superset",
+        "stage_a_coarse",
+        "stage_b_refinement",
+        "stage_c_confirmation",
+        "boundary_rule",
+        "stop_and_fallback",
+        "normalized_recipe_space",
+        "throughput_decision",
+        "counters",
+    ):
+        assert amended_staged[key] == original_staged[key]
+    assert WS2_PROBE.coarse_recipe_indices(amended, amended_staged) == [
+        0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
+    ]
+    assert amended_staged["stage_a_coarse"]["expected_worlds"] == 4_465_152
 
 
 def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):
