@@ -10,6 +10,7 @@ import pytest
 
 from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
+    build_candidate51_pose_family,
     load_cpu_contact_fixture,
     prepare_ws3_transition_harness,
     run_stage_ef_contact_screen,
@@ -20,10 +21,15 @@ from rocell_ai.cpu_contact_and_ws3 import (
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/cpu_contact_and_ws3_v1.json"
+FIXTURE_V2 = ROOT / "software/ai/sim/evidence/cpu_contact_and_ws3_v2.json"
 
 
 def _load():
     return load_cpu_contact_fixture(FIXTURE, workspace=ROOT)
+
+
+def _load_v2():
+    return load_cpu_contact_fixture(FIXTURE_V2, workspace=ROOT)
 
 
 def _rehash_fixture(value):
@@ -45,6 +51,22 @@ def test_fixture_and_110mm_pose_bindings_load():
     assert len(fixture["sections"]["stage_ef_contact"][
         "tool_configuration_sha256"
     ]) == 2
+
+
+def test_candidate51_pose_successor_solves_every_target():
+    result = build_candidate51_pose_family(_load_v2(), workspace=ROOT)
+    assert result["decision"] == "PASS_EXPLORATORY_CANDIDATE51_110MM_POSES"
+    assert result["reach_by_length_mm"]["110.0"]["solved_target_count"] == 51
+    assert result["reach_by_length_mm"]["110.0"]["failed_target_ids"] == []
+    for profile in result["profiles"]:
+        bundle = profile["pose_bundle"]
+        assert len(bundle["poses"]) == 51
+        assert bundle["tool_configuration"]["target_catalog_sha256"] == (
+            _load_v2()["bindings"]["candidate_catalog"]["sha256"]
+        )
+        assert {"SHIFT", "BACKSLASH", "GRAVE", "LEFT_BRACKET", "RIGHT_BRACKET"} <= {
+            row["target_id"] for row in bundle["poses"]
+        }
 
 
 def test_fixture_tamper_fails(tmp_path):

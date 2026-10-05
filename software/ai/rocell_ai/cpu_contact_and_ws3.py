@@ -17,7 +17,11 @@ from typing import Any
 from rocell_ai.first_motion_clearance_waypoints import (
     _World,
     _hand_board_transform,
+    _solve_seeded,
+    _tip_xyz,
+    bind_pose_bundle_tool_configuration,
     load_passive_tool_rerun_fixture,
+    tool_configuration,
     validate_pose_bundle_tool_configuration,
 )
 from rocell_ai.tool_bound_exact_clearance import (
@@ -65,7 +69,10 @@ def load_cpu_contact_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
     if claimed != _sha(document):
         raise ValueError("CPU contact/WS3 fixture hash mismatch")
     document["fixture_sha256"] = claimed
-    if document.get("schema") != "tactevra.cpu_contact_and_ws3_fixture.v1":
+    if document.get("schema") not in {
+        "tactevra.cpu_contact_and_ws3_fixture.v1",
+        "tactevra.cpu_contact_and_ws3_fixture.v2",
+    }:
         raise ValueError("unexpected CPU contact/WS3 fixture schema")
     if document.get("scope") != SCOPE or document.get("physical_authority") is not False:
         raise ValueError("fixture is not zero-authority simulation")
@@ -85,6 +92,166 @@ def load_cpu_contact_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
     return document
 
 
+def _world_from_exact_fixture(
+    exact_fixture: dict[str, Any], *, workspace: Path
+) -> _World:
+    """Construct the retained exploratory world without opening hardware."""
+
+    prior_path = _resolve(
+        workspace, exact_fixture["bindings"]["prior_fixture"]["path"]
+    )
+    prior = json.loads(prior_path.read_text(encoding="utf-8"))
+    passive_path = _resolve(workspace, prior["bindings"]["prior_fixture"]["path"])
+    passive = load_passive_tool_rerun_fixture(passive_path)
+    design_path = _resolve(
+        workspace, passive["bindings"]["collision_design_fixture"]["path"]
+    )
+    return _World(json.loads(design_path.read_text(encoding="utf-8")), workspace)
+
+
+def _validate_pose_family(
+    result: dict[str, Any], fixture: dict[str, Any]
+) -> dict[str, Any]:
+    unsigned = dict(result)
+    claimed = unsigned.pop("receipt_sha256", None)
+    if claimed != _sha(unsigned):
+        raise ValueError("pose-family result receipt mismatch")
+    if result.get("schema") != "tactevra.tool_bound_pose_family_result.v1":
+        raise ValueError("unexpected tool-bound pose-family schema")
+    if result.get("fixture_sha256") != fixture["fixture_sha256"]:
+        raise ValueError("pose-family result is bound to another fixture")
+    for profile in result["profiles"]:
+        bundle = profile["pose_bundle"]
+        validate_pose_bundle_tool_configuration(bundle, bundle["tool_configuration"])
+        if profile["tool_configuration_sha256"] != bundle[
+            "tool_configuration_sha256"
+        ]:
+            raise ValueError("profile and pose-bundle tool hashes differ")
+    if any(result.get(name) for name in COUNTER_NAMES):
+        raise ValueError("pose-family result carries authority")
+    if result.get("physical_authority") is not False:
+        raise ValueError("pose-family result carries physical authority")
+    return result
+
+
+def build_candidate51_pose_family(
+    fixture: dict[str, Any], *, workspace: Path
+) -> dict[str, Any]:
+    """Independently solve the frozen 51 targets for both 110 mm profiles."""
+
+    if fixture["schema"] != "tactevra.cpu_contact_and_ws3_fixture.v2":
+        raise ValueError("candidate51 pose generation requires the v2 fixture")
+    section = fixture["sections"]["pose_generation"]
+    exact_path = _resolve(
+        workspace, fixture["bindings"]["exact_clearance_fixture"]["path"]
+    )
+    exact_fixture = json.loads(exact_path.read_text(encoding="utf-8"))
+    source_path = _resolve(
+        workspace, fixture["bindings"]["candidate51_pose_source"]["path"]
+    )
+    source = json.loads(source_path.read_text(encoding="utf-8"))
+    if source.get("target_count") != 51 or len(source.get("poses", [])) != 51:
+        raise ValueError("candidate51 source does not contain exactly 51 targets")
+    target_ids = tuple(row["target_id"] for row in source["poses"])
+    required = set(section["required_added_target_ids"])
+    if not required.issubset(target_ids) or len(set(target_ids)) != 51:
+        raise ValueError("candidate51 source target identities are incomplete")
+    world = _world_from_exact_fixture(exact_fixture, workspace=workspace)
+    length = float(section["output_tool_length_mm"])
+    solver = world.solver(length)
+    poses = []
+    failures = []
+    for row in source["poses"]:
+        target_document = row["contact_target_board_mm"]
+        target = (
+            float(target_document["x"]),
+            float(target_document["y"]),
+            float(target_document["z"]),
+        )
+        seed = tuple(float(value) for value in row["joint_positions_rad"])
+        solved = _solve_seeded(world, solver, target, seed)
+        if solved is None:
+            failures.append(row["target_id"])
+            continue
+        achieved = _tip_xyz(world, solved, length)
+        error = math.sqrt(sum(
+            (actual - expected) ** 2
+            for actual, expected in zip(achieved, target, strict=True)
+        ))
+        pose = {
+            "target_id": row["target_id"],
+            "contact_target_board_mm": dict(target_document),
+            "joint_positions_rad": list(solved),
+            "achieved_tip_board_mm": list(achieved),
+            "ik_position_error_mm": error,
+        }
+        for optional in ("center_board_mm", "candidate_safe_half_extent_mm"):
+            if optional in row:
+                pose[optional] = row[optional]
+        poses.append(pose)
+    maximum_error = max((row["ik_position_error_mm"] for row in poses), default=None)
+    if failures or len(poses) != 51:
+        decision = "STOP_CANDIDATE51_UNREACHABLE_TARGET"
+    elif maximum_error is None or maximum_error > float(
+        section["maximum_ik_position_error_mm"]
+    ):
+        decision = "STOP_CANDIDATE51_IK_ERROR"
+    else:
+        decision = "PASS_EXPLORATORY_CANDIDATE51_110MM_POSES"
+
+    profiles = []
+    catalog_sha = fixture["bindings"]["candidate_catalog"]["sha256"]
+    for exposed in section["distal_tip_exposed_length_mm"]:
+        config = tool_configuration(
+            exact_fixture,
+            source,
+            total_length_mm=length,
+            exposed_length_mm=float(exposed),
+            tip_radius_mm=float(section["tip_radius_mm"]),
+        )
+        config["target_catalog_sha256"] = catalog_sha
+        base = {
+            "scope": SCOPE,
+            "status": decision,
+            "fixture_sha256": fixture["fixture_sha256"],
+            "joint_order": source["joint_order"],
+            "layout_overlay": source["layout_overlay"],
+            "target_count": 51,
+            "solved_target_count": len(poses),
+            "failed_target_ids": failures,
+            "poses": poses,
+            "limitations": fixture["limitations"],
+        }
+        bundle = bind_pose_bundle_tool_configuration(base, config)
+        validate_pose_bundle_tool_configuration(bundle, config)
+        profiles.append({
+            "tool_configuration_sha256": bundle["tool_configuration_sha256"],
+            "pose_bundle": bundle,
+        })
+    result = {
+        "schema": "tactevra.tool_bound_pose_family_result.v1",
+        "scope": SCOPE,
+        "fixture_sha256": fixture["fixture_sha256"],
+        "reach_by_length_mm": {
+            "110.0": {
+                "solved_target_count": len(poses),
+                "failed_target_ids": failures,
+                "all_targets_reached": not failures and len(poses) == 51,
+                "maximum_ik_position_error_mm": maximum_error,
+            }
+        },
+        "profiles": profiles,
+        "profile_count": len(profiles),
+        "decision": decision,
+        "evaluation_opened": False,
+        "gpu_job_count": 0,
+        **{name: 0 for name in COUNTER_NAMES},
+        "physical_authority": False,
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
 def _load_geometry(
     fixture: dict[str, Any], *, workspace: Path
 ) -> tuple[dict[str, Any], dict[str, Any], _World]:
@@ -92,13 +259,26 @@ def _load_geometry(
         workspace, fixture["bindings"]["exact_clearance_fixture"]["path"]
     )
     exact_fixture = json.loads(exact_path.read_text(encoding="utf-8"))
-    pose_path = _resolve(
-        workspace, fixture["bindings"]["tool_110mm_pose_family"]["path"]
-    )
-    pose_family = load_pose_family_result(pose_path, exact_fixture)
-    expected = set(fixture["sections"]["stage_ef_contact"][
-        "tool_configuration_sha256"
-    ])
+    if fixture["schema"] == "tactevra.cpu_contact_and_ws3_fixture.v1":
+        pose_path = _resolve(
+            workspace, fixture["bindings"]["tool_110mm_pose_family"]["path"]
+        )
+        pose_family = load_pose_family_result(pose_path, exact_fixture)
+        expected = set(fixture["sections"]["stage_ef_contact"][
+            "tool_configuration_sha256"
+        ])
+    else:
+        pose_path = _resolve(
+            workspace, fixture["sections"]["pose_generation"][
+                "external_output_path"
+            ]
+        )
+        pose_family = _validate_pose_family(
+            json.loads(pose_path.read_text(encoding="utf-8")), fixture
+        )
+        expected = {
+            row["tool_configuration_sha256"] for row in pose_family["profiles"]
+        }
     observed = {row["tool_configuration_sha256"] for row in pose_family["profiles"]}
     if observed != expected:
         raise ValueError("110 mm pose family profile identity mismatch")
@@ -111,16 +291,7 @@ def _load_geometry(
         if float(config["distal_tip_radius_mm"]) != 3.0:
             raise ValueError("pose bundle is not bound to the 3 mm tip")
 
-    prior_path = _resolve(
-        workspace, exact_fixture["bindings"]["prior_fixture"]["path"]
-    )
-    prior = json.loads(prior_path.read_text(encoding="utf-8"))
-    passive_path = _resolve(workspace, prior["bindings"]["prior_fixture"]["path"])
-    passive = load_passive_tool_rerun_fixture(passive_path)
-    design_path = _resolve(
-        workspace, passive["bindings"]["collision_design_fixture"]["path"]
-    )
-    world = _World(json.loads(design_path.read_text(encoding="utf-8")), workspace)
+    world = _world_from_exact_fixture(exact_fixture, workspace=workspace)
     return exact_fixture, pose_family, world
 
 
@@ -645,16 +816,18 @@ def run_ws3_transition_screen(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "mode", choices=("stage-ef", "phone", "ws3-prepare", "ws3-screen")
-    )
+    parser.add_argument("mode", choices=(
+        "pose-family", "stage-ef", "phone", "ws3-prepare", "ws3-screen"
+    ))
     parser.add_argument("--fixture", required=True, type=Path)
     parser.add_argument("--workspace", default=Path("."), type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     workspace = args.workspace.resolve()
     fixture = load_cpu_contact_fixture(args.fixture, workspace=workspace)
-    if args.mode == "stage-ef":
+    if args.mode == "pose-family":
+        result = build_candidate51_pose_family(fixture, workspace=workspace)
+    elif args.mode == "stage-ef":
         result = run_stage_ef_contact_screen(fixture, workspace=workspace)
     elif args.mode == "phone":
         result = run_phone_capacitive_matrix(fixture)
