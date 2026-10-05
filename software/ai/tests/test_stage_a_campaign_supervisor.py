@@ -101,3 +101,11 @@ def test_watchdog_boundary_is_strictly_past_timeout():
         )
         == "STOP_HUNG_WORKER_ALERT"
     )
+
+
+def test_real_shard_control_derives_half_extent_from_physical_size():
+    fixture = ops.load_fixture(FIXTURE_PATH)
+    shard = ops.build_shards(fixture)[0]
+    _, _, _, control = supervisor.build_control(fixture, shard)
+    assert control["control"]["physical_keycap_half_extent_mm"] == [7.0, 7.0]
+    assert len(control["control"]["batch_rows"]) == 2_304

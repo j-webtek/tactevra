@@ -96,7 +96,9 @@ def build_control(fixture: dict[str, Any], shard: dict[str, Any]) -> tuple[Any, 
             "recipe_override": {},
             "tool_compliance_model": "SERIES_QUASISTATIC",
             "tool_compliance_options": compliance,
-            "physical_keycap_half_extent_mm": target_member["half_extent_mm"],
+            "physical_keycap_half_extent_mm": [
+                float(value) / 2.0 for value in target_member["size_xy_mm"]
+            ],
             "physical_neighborhood": neighborhood["members"],
             "target_joint_index": neighborhood["target_joint_index"],
             "switch_closure_window_ms": throughput_fixture["smoke"][
@@ -112,9 +114,9 @@ def execute_shard(
 ) -> dict[str, Any]:
     fixture = ops.load_fixture(fixture_path)
     shard = next(row for row in ops.build_shards(fixture) if row["shard_id"] == shard_id)
-    throughput_fixture, campaign, execution, control = build_control(fixture, shard)
     started = time.time()
     try:
+        throughput_fixture, campaign, execution, control = build_control(fixture, shard)
         receipt = probe.run_smoke_worker(
             campaign,
             execution,
