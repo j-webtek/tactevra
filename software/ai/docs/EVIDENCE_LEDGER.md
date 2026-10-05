@@ -11202,3 +11202,9 @@ rewriting history. New entries must use a unique evidence ID.
 - Result: `STATIONS_PRESENT` remains `STOP`: 11,284/22,464 samples contain tool contact with both keyboard-station envelopes. `TRAY_REPLACES_KEYBOARD_AND_NEIGHBOR_STATIONS` is `CLEAR_EXPLORATORY_DISCRETE`: 0/22,464 concerning samples, zero noncontiguous contact sequences, and 9,360 intended tool-pad contact samples. No cable-related pair exists because the selected passive stylus and static overhead camera have no moving attachment cable.
 - Interpretation and limitations: this corrects the selected Phase-1 attachment inventory and shows that the swappable tray must replace or clear both neighboring stations in this analytic candidate model. It does not qualify installed geometry, physical tolerances, fixed keyboard/phone cable placement, or continuous swept-volume clearance. The optional future arm-mounted-camera cable model is unchanged. The guarded v1.4 development queue remained active and evaluation remained unopened.
 - Authority: GPU jobs launched by this increment 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
+
+### E-20261004-INT-651 — selected passive-tool result commit identity
+
+- Result commit: `3b1bfad4727cd7ec8b702bd7b7748c56c4246f0c` contains E-650 and the shared-stage result update. Frozen implementation commit remains `78a35324182ed63cd9388dfe40224347e7d596e9`; claim commit remains `496ea6d528c9a1945aedf221d53f9b95cd5a13fc`.
+- Evidence identity remains unchanged: selected-attachment result file SHA-256 `7d9901a7c3ac809ea4988cbba9db16aa0c2850b28093fb94113cdf6c886d8e95`; canonical receipt SHA-256 `cba51e27b57b305289e4d5bcab08e7cedc185886f18960773e4a8606165db9ad`.
+- Authority remains unchanged: hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false. Guarded development scoring remains active and evaluation remains unopened.
