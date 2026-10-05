@@ -427,14 +427,14 @@ def primary_failure(row: dict[str, Any]) -> str:
         return "NEIGHBOR_CONTACT"
     if row.get("bottom_out_overflow"):
         return "BOTTOM_OUT"
+    if row.get("debounce_hold_complete") is False:
+        return "DEBOUNCE_TOO_SHORT"
     if row.get("auto_repeat_count", 0):
         return "AUTO_REPEAT"
     if row.get("double_actuation") or row.get("actuation_count", 0) > 1:
         return "DOUBLE_ACTUATION"
     if row.get("partial_press") or row.get("actuation_count", 0) == 0:
         return "PARTIAL_PRESS"
-    if row.get("debounce_hold_complete") is False:
-        return "DEBOUNCE_TOO_SHORT"
     if not row.get("release_complete"):
         return "RELEASE_INCOMPLETE"
     if not row.get("force_within_available"):

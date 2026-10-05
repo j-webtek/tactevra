@@ -272,6 +272,7 @@ All values are exploratory until measured:
 | release speed | 2â€“160 mm/s |
 | OS repeat delay | 200â€“1,200 ms |
 | OS repeat period | 20â€“250 ms |
+| keyboard switch-closure/debounce minimum | 5-30 ms |
 | phone effective contact radius | 1â€“7 mm |
 | phone accepted contact duration | 20â€“500 ms |
 | phone long-press threshold | 250â€“1,200 ms |
@@ -308,18 +309,22 @@ and fingertip radius, with highlighted limiting results for `GRAVE`, `EQUAL`,
 - partial-press, double-actuation, neighbor-contact, bottom-out, and auto-repeat
   rates;
 - peak penetration, peak contact force, compliant-plunger compression, effective
-  key travel, dwell above actuation, and release completion;
+  key travel, dwell above actuation, realized switch-closure duration, debounce
+  margin, and release completion;
 - phone tap, no-tap, multiple-tap, and long-press rates; and
 - per-key robust-envelope volume across the declared physical range.
 
 ### Pass and stop rules
 
-The exploratory envelope admits a cell only when every sampled landing has one
-actuation, zero neighbor contact, zero double actuation, zero repeat, successful
-release, finite state, and no solver overflow. Phone cells require exactly one
-tap and no long press. A key with no admitted recipe is reported infeasible; its
-range is not widened after results. Nonfinite contact state, penetration beyond
-the declared bottom-out tolerance, or cross-GPU disagreement stops the run.
+The exploratory envelope admits a keyboard cell only when every sampled landing
+has one actuation, zero neighbor contact, zero double actuation, zero repeat,
+successful release, finite state, no solver overflow, and realized switch
+closure of at least every sampled debounce minimum (therefore at least 30 ms)
+while remaining at or below the frozen 150 ms hold ceiling. Each recipe reports
+realized switch-closure duration. Phone cells require exactly one tap and no long
+press. A key with no admitted recipe is reported infeasible; its range is not
+widened after results. Nonfinite contact state, penetration beyond the declared
+bottom-out tolerance, or cross-GPU disagreement stops the run.
 
 ### Dependencies and compute estimate
 
@@ -741,8 +746,16 @@ distort Stage A. The existing failed short-release evidence remains unchanged.
 The priority physical measurement queue is: servo repeatability/backlash; chosen
 landing-sensor noise from the ADB touchscreen or tray touch pad; compliant tool
 spring rate/force-travel behavior together with fingertip radius and compliance;
+keyboard switch/controller debounce and received USB-event latency;
 key travel/actuation force; phone minimum conductive contact area; and B0477
 intrinsics, delivered-frame noise, lighting, and board/arm calibration.
+
+The 26,790,912-world compliant Stage A applies the existing frozen throughput
+rule. If projected two-GPU wall time is at most 12 hours, Stage A uses all six
+stiffness/travel combinations. Otherwise Stage A uses the four range corners
+(17,860,608 worlds), and Stage B deterministically adds both omitted nominal
+stiffness combinations for every detected boundary identity using all 64
+landings. Throughput cannot change safety gates or select favorable outcomes.
 
 ## Program execution and reporting protocol
 
