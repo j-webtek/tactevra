@@ -11564,3 +11564,13 @@ rewriting history. New entries must use a unique evidence ID.
 
 - Result record commit: `752e796d8c6775e05f53635632b6d488cd162028` records E-681 and completes the AI-lane attribution row. External result file SHA-256 remains `57d12067490439ef5ee9029fba3001a9d8a73f34829e7566e388e64a370d50b5`; canonical receipt remains `4002a9e6a5c816415c1302479a3a73cbe4c9c06ed22f3effbd9172102158e65a`.
 - Result and authority remain unchanged: 108 geometry-clearance failures, 230 replicated residual failures, a derived 3 mm keyboard radius ceiling at the 2 mm buffer, unresolved physical phone registration, hardware writes 0, physical movements 0, commands 0, permits 0, transports 0, physical authority false.
+
+
+### E-20261005-INT-683 — explicit 3 mm profile and ordered WS2 successor claimed
+
+- Stage/lane: S3 AI/model plus simulation on `issue/190-isaac-sim-host`; pre-result head `ab2062783eae20149a1e066a9ea6ccc11895c262`. The completed 648-cell tradeoff, attribution, positive controls, and failed short-release rows remain unchanged.
+- External 3 mm predeclaration: `C:\MuJoCoWarp\evidence\issue190\tool_radius_3mm_v1\predeclaration.json`, file SHA-256 `451fd0d2f9731150d22bed9dbe27da1218a1106e4271ef8754b2606dd9cf1935`, canonical predeclaration SHA-256 `bb5ef39d397711937db280ee959c1b6f7e59e72a0bc2f14bf87ebb1f2cc02e57`, generator SHA-256 `16736fcb17fed107d6f94eb172c5ad02845bbc8d9b8e69452e67a2d1aa72fce4`. Byte-identical files exist in the Isaac evidence backup.
+- Frozen profile: 110 mm total length, 3 mm radius, both 10 and 30 mm exposed-tip endpoints, all 46 targets, and the existing 2 mm clearance threshold. Rebind the independently solved 110 mm poses to exact configuration hashes; run continuous GJK; rerun the unchanged 4,096-world residual grid for each exposure on both GPUs. Geometry passes only if both profiles reach all targets and retain at least 2 mm continuous clearance using the already frozen `1e-6 mm` numerical tolerance. Residual failures remain visible.
+- Ordered program amendment: explicit 3 mm profile, bounded release-timing matrix with an auto-repeat dwell ceiling, WS2 Stage A with series tool compliance, separate phone results, WS3, then recovery. The compliant plunger uses an exploratory `0.5x-2x` sensitivity around the unqualified published 0.143 N/mm candidate spring rate, or 0.0715-0.286 N/mm; this is not a measurement.
+- Physical queue amendment: landing-sensor noise and compliant-tool force/travel stiffness are required alongside servo repeatability, fingertip geometry, key mechanics, phone contact area, and camera measurements.
+- Authority before execution: GPU jobs 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.

@@ -263,6 +263,7 @@ All values are exploratory until measured:
 | bottom-out depth | 90â€“110% of declared travel |
 | key spring rate | 0.1â€“2.5 N/mm |
 | key damping | 0.001â€“0.2 NÂ·s/mm |
+| compliant-plunger spring rate | 0.0715â€“0.286 N/mm, derived as 0.5xâ€“2x the unqualified published 0.143 N/mm candidate rate |
 | actuation force | 0.2â€“3.0 N |
 | fingertip sphere/capsule radius | 1â€“6 mm |
 | commanded press depth | 0.5â€“7 mm |
@@ -284,8 +285,12 @@ Broader failure controls retain residual `0.5â€“1.0`.
 
 Each keycap is a prismatic joint with explicit travel, spring, damping,
 actuation surface, actuation threshold, and bottom-out. The fingertip is a
-sphere and a capsule in separate frozen families. Contact events drive a
-simulated OS repeat model; they never create real host input.
+sphere and a capsule in separate frozen families. The shared compliant tool is
+a spring-loaded plunger in series with the key: commanded depth is partitioned
+between plunger compression and key travel under force equilibrium. The
+unqualified Lee Spring candidate rate is sampled at 0.5x, 1x, and 2x rather
+than treated as measured. Contact events drive a simulated OS repeat model;
+they never create real host input.
 
 The phone surface models effective contact area and contact duration only. It
 does not claim electrostatic touchscreen accuracy.
@@ -299,8 +304,8 @@ and fingertip radius, with highlighted limiting results for `GRAVE`, `EQUAL`,
 - single-actuation probability and confidence bound;
 - partial-press, double-actuation, neighbor-contact, bottom-out, and auto-repeat
   rates;
-- peak penetration, peak contact force, dwell above actuation, and release
-  completion;
+- peak penetration, peak contact force, compliant-plunger compression, effective
+  key travel, dwell above actuation, and release completion;
 - phone tap, no-tap, multiple-tap, and long-press rates; and
 - per-key robust-envelope volume across the declared physical range.
 
@@ -706,6 +711,30 @@ all preceding evidence. WS2's later nominal tool selection triggers a bounded
 artifact revision. Estimated CPU time is 1-3 hours for emulator implementation
 and tests, 1-4 hours for staged and wrong-model sweeps, and under 1 hour for
 catalog regression and checklist generation. No GPU allocation is required.
+
+## Ordered successor amendment — 2026-10-05
+
+Before any successor results, the immediate sequence is frozen as:
+
+1. execute the explicit 110 mm total-length, 3 mm-radius keyboard profile;
+2. run a bounded release-timing matrix with complete reset and an upper dwell
+   limit below every sampled OS auto-repeat delay;
+3. run WS2 Stage A and later refinement with compliant-plunger stiffness as a
+   declared range, reporting keyboard outcomes by tool geometry;
+4. report phone capacitive tap/long-press outcomes separately and use them only
+   to decide whether one simulated contact geometry remains plausible;
+5. continue to WS3 continuous typing; and
+6. execute WS4 recovery tests.
+
+The release matrix precedes the large search so an episode that is too short to
+observe reset, or a dwell long enough to create OS repeat, cannot silently
+distort Stage A. The existing failed short-release evidence remains unchanged.
+
+The priority physical measurement queue is: servo repeatability/backlash; chosen
+landing-sensor noise from the ADB touchscreen or tray touch pad; compliant tool
+spring rate/force-travel behavior together with fingertip radius and compliance;
+key travel/actuation force; phone minimum conductive contact area; and B0477
+intrinsics, delivered-frame noise, lighting, and board/arm calibration.
 
 ## Program execution and reporting protocol
 
