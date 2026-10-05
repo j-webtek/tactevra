@@ -11834,3 +11834,23 @@ rewriting history. New entries must use a unique evidence ID.
 - Frozen smoke: each GPU runs 1,024, 2,048, and 4,096 worlds through `run_smoke_worker`, the exact contact, trajectory, compliance, landing, depth-margin, and numerical scoring path used by WS2. The representative is frozen to the 1,499-motion-step longest coarse recipe, baseline `EQUAL`, `sphere-r1`, high-source/low-residual landing, and soft 0.0715 N/mm by 6 mm compliance. Both devices must pass; the largest chunk with measured memory fraction at most 0.70 is selected.
 - Projection and decision: exact Stage A has 26,790,912 worlds and 14,846,630,400 motion world-steps. The combined two-GPU rate at the selected chunk projects wall time. At most 12 hours selects all six compliance combinations. Greater than 12 hours selects the predeclared four corners, 17,860,608 worlds and 9,897,753,600 motion world-steps, with both nominal-stiffness combinations deferred to Stage B. Throughput cannot change physics, debounce, collision, release, repeat, force, landing, or depth-margin gates.
 - Validation and authority: runner passes Ruff format/check and `py_compile`; the MuJoCo 3.14 environment loads the hash-bound fixture and verifies the exact world-step count. GPU jobs 0; worlds executed 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Limitations: projection includes compile/settle overhead for each smoke but future scheduling remains estimated; one representative model cannot prove every profile's throughput. Next dependency: commit this freeze, run both device smokes unchanged, compare, preserve results, and apply the frozen population choice.
+### E-20261005-INT-EF-110MM-CONTACT-CLAIM-001 — 110 mm Stage E/F exact-contact claim
+
+- Stage/lane: S3-S4 AI/model plus simulation on `issue/190-isaac-sim-host`; claim base full Git SHA `573b03abe67c10fee4dbd7854a62c5918331f0fa`.
+- Claimed increment: bind Stage E/F per-key contact screening to the selected 110 mm tool configuration and its exact pose/configuration hashes; use continuous swept-distance geometry for target, neighbor, collar, and body checks; preserve every failure and reject mismatched tool lengths or identities.
+- Existing evidence retained: E-672 through E-676 established the continuous GJK method and its prior general tool-family result. This claim creates a dedicated Stage E/F contract and does not rescore those results.
+- Boundaries: CPU simulation only; WS2 Stage A runner excluded; GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Arm-lane status and integration gates are unchanged.
+
+### E-20261005-INT-PHONE-CAPACITIVE-CLAIM-001 — phone capacitive-contact claim
+
+- Stage/lane: S3 AI/model plus simulation on `issue/190-isaac-sim-host`; claim base full Git SHA `573b03abe67c10fee4dbd7854a62c5918331f0fa`.
+- Claimed increment: freeze a CPU analytic matrix over 1/4/7 mm tip radii, a declared range of minimum conductive contact areas, tap durations, and long-press thresholds. Report keyboard and phone feasibility separately and decide only whether the simulated ranges support a shared tip, require two contact surfaces, or remain unresolved.
+- Decision discipline: every unmeasured physical value remains a range. No physical tool is selected, and no result can establish real capacitive registration.
+- Boundaries: CPU simulation only; WS2 Stage A runner excluded; GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
+
+### E-20261005-INT-WS3-TRANSITION-CLAIM-001 — Workstream 3 transition-preparation claim
+
+- Stage/lane: S3 AI/model plus simulation on `issue/190-isaac-sim-host`; claim base full Git SHA `573b03abe67c10fee4dbd7854a62c5918331f0fa`.
+- Claimed increment: freeze a 110 mm tool-bound continuous-typing fixture, implement all ordered target-pair transition construction and exact swept-distance collision screening, and require a hash-bound admitted WS2 press-recipe artifact before any speed/accuracy policy can run or be recommended.
+- Stop rule: while the WS2 recipe dependency is absent, the harness may prove readiness and enumerate blocked work but must emit no motion-policy recommendation.
+- Boundaries: CPU preparation only; WS2 Stage A runner excluded; GPU jobs 0; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. Arm-lane status and integration gates are unchanged.
