@@ -802,14 +802,14 @@ def run_target_contact_cad_refinement(
     def count(store: dict[tuple[Any, ...], int], key: tuple[Any, ...]) -> None:
         store[key] = store.get(key, 0) + 1
 
-    # Stage C: all targets, not the prior G-only route.
+    # Stage C: all targets, not the prior G-only route. Kinematic routes are
+    # reused across appearance-only tip/collar endpoints without changing the
+    # frozen population.
     for target_id, target in targets.items():
         xyz = target["contact_target_board_mm"]
-        for tool_length, exposed_length, tip_radius in profiles:
+        for tool_length in tool_spec["total_hand_tcp_to_tip_length_mm"]:
             solver = world.solver(tool_length)
-            components = _component_profiles(
-                tool_spec, tool_length=tool_length,
-                exposed_length=exposed_length, tip_radius=tip_radius)
+            route_rows = {}
             for transit_z, hover in product(
                 stage_c["transit_height_board_z_mm"],
                 stage_c["hover_height_above_contact_mm"],
@@ -818,8 +818,8 @@ def run_target_contact_cad_refinement(
                 end = _solve_seeded(world, solver, end_xyz, park)
                 if end is None:
                     ik_failures.append(
-                        f"C:{target_id}:{tool_length}:{exposed_length}:"
-                        f"{tip_radius}:{transit_z}:{hover}:DESTINATION_IK")
+                        f"C:{target_id}:{tool_length}:{transit_z}:"
+                        f"{hover}:DESTINATION_IK")
                     continue
                 route, failure = _clearance_route(
                     world, start=park, end=end, end_xyz=end_xyz,
@@ -827,39 +827,66 @@ def run_target_contact_cad_refinement(
                     samples=stage_c["samples_per_cartesian_leg"])
                 if failure:
                     ik_failures.append(
-                        f"C:{target_id}:{tool_length}:{exposed_length}:"
-                        f"{tip_radius}:{transit_z}:{hover}:{failure}")
-                for sample_index, (phase, joints) in enumerate(route):
-                    transform = _hand_board_transform(world, joints)
-                    for pitch, spacing in discretizations:
-                        disc = (float(pitch), float(spacing))
-                        for component in components:
-                            points = _component_axis_points(transform, component, spacing)
-                            for station in _station_contacts(
-                                points, radius_mm=component["radius_mm"],
-                                spacing_mm=spacing, pitch_mm=pitch,
-                                station_trees=station_trees[float(pitch)]):
-                                identity = (
-                                    target_id, phase, sample_index, tool_length,
-                                    exposed_length, tip_radius, transit_z, hover,
-                                    component["component"], "STATION",
-                                    station["station_id"], None, None)
-                                c_contact_sets[disc].add(identity)
-                                count(stage_c_counts, identity[:2] + identity[8:11])
-                            for width, thickness in key_shapes:
-                                for key in _keycap_contacts(
-                                    points, component=component["component"],
-                                    radius_mm=component["radius_mm"],
-                                    spacing_mm=spacing,
-                                    geometry=key_geometries[(float(width), float(thickness))]):
-                                    identity = (
-                                        target_id, phase, sample_index, tool_length,
-                                        exposed_length, tip_radius, transit_z, hover,
-                                        component["component"], "KEYCAP",
-                                        key["target_id"], width, thickness)
-                                    c_contact_sets[disc].add(identity)
-                                    count(stage_c_counts, identity[:2] + identity[8:11]
-                                          + (width, thickness))
+                        f"C:{target_id}:{tool_length}:{transit_z}:"
+                        f"{hover}:{failure}")
+                route_rows[(transit_z, hover)] = [
+                    (sample_index, phase, _hand_board_transform(world, joints))
+                    for sample_index, (phase, joints) in enumerate(route)]
+            for exposed_length, tip_radius in product(
+                tool_spec["distal_tip_exposed_length_mm"],
+                tool_spec["distal_tip_radius_mm"],
+            ):
+                components = _component_profiles(
+                    tool_spec, tool_length=tool_length,
+                    exposed_length=exposed_length, tip_radius=tip_radius)
+                for (transit_z, hover), route in route_rows.items():
+                    for sample_index, phase, transform in route:
+                        for spacing in fixture["station_cad"][
+                                "tool_axis_sample_spacing_mm"]:
+                            points_by_component = {
+                                component["component"]: _component_axis_points(
+                                    transform, component, spacing)
+                                for component in components}
+                            key_contacts = {}
+                            for component in components:
+                                points = points_by_component[component["component"]]
+                                for width, thickness in key_shapes:
+                                    key_contacts[(
+                                        component["component"], width, thickness
+                                    )] = _keycap_contacts(
+                                        points, component=component["component"],
+                                        radius_mm=component["radius_mm"],
+                                        spacing_mm=spacing,
+                                        geometry=key_geometries[
+                                            (float(width), float(thickness))])
+                            for pitch in fixture["station_cad"]["voxel_pitch_mm"]:
+                                disc = (float(pitch), float(spacing))
+                                for component in components:
+                                    points = points_by_component[component["component"]]
+                                    for station in _station_contacts(
+                                        points, radius_mm=component["radius_mm"],
+                                        spacing_mm=spacing, pitch_mm=pitch,
+                                        station_trees=station_trees[float(pitch)]):
+                                        identity = (
+                                            target_id, phase, sample_index, tool_length,
+                                            exposed_length, tip_radius, transit_z, hover,
+                                            component["component"], "STATION",
+                                            station["station_id"], None, None)
+                                        c_contact_sets[disc].add(identity)
+                                        count(stage_c_counts,
+                                              identity[:2] + identity[8:11])
+                                    for width, thickness in key_shapes:
+                                        for key in key_contacts[(
+                                                component["component"], width, thickness)]:
+                                            identity = (
+                                                target_id, phase, sample_index, tool_length,
+                                                exposed_length, tip_radius, transit_z, hover,
+                                                component["component"], "KEYCAP",
+                                                key["target_id"], width, thickness)
+                                            c_contact_sets[disc].add(identity)
+                                            count(stage_c_counts,
+                                                  identity[:2] + identity[8:11]
+                                                  + (width, thickness))
 
     # E/F: exact press poses. Only target-tip contact is admitted.
     missing_target_contacts = 0
