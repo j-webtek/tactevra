@@ -1,7 +1,7 @@
 import unittest
 
 from change_classifier import classify_paths, load_policy
-from pr_automation import completeness_findings
+from pr_automation import completeness_findings, is_dependency_manifest_path
 
 
 COMPLETE_BODY = """## What changes for the user?
@@ -10,6 +10,13 @@ Outcome.
 Compatibility: additive; migration documented and rollback is available.
 ## Evidence
 Tests pass.
+"""
+
+DEPENDABOT_BODY = """Updates a dependency.
+---
+updated-dependencies:
+- dependency-name: cryptography
+  dependency-version: 50.0.2
 """
 
 
@@ -49,6 +56,54 @@ class PullRequestAutomationTests(unittest.TestCase):
             self.policy,
         )
         self.assertEqual(completeness_findings(COMPLETE_BODY, result), [])
+
+    def test_trusted_manifest_only_dependabot_update_uses_bot_metadata(self):
+        result = classify_paths(["software/pyproject.toml"], self.policy)
+        self.assertEqual(
+            completeness_findings(
+                DEPENDABOT_BODY, result, author_login="dependabot[bot]"
+            ),
+            [],
+        )
+
+    def test_dependabot_supports_named_requirements_manifests(self):
+        self.assertTrue(is_dependency_manifest_path("software/ai/requirements-test.txt"))
+        self.assertTrue(
+            is_dependency_manifest_path("active-project/RoCell_v0_3/requirements-cad.txt")
+        )
+
+    def test_non_bot_cannot_claim_dependabot_body_exemption(self):
+        result = classify_paths(["software/pyproject.toml"], self.policy)
+        self.assertEqual(
+            len(
+                completeness_findings(
+                    DEPENDABOT_BODY, result, author_login="untrusted-user"
+                )
+            ),
+            3,
+        )
+
+    def test_dependabot_source_change_still_requires_template(self):
+        result = classify_paths(["software/src/rocell/arm/protocol.py"], self.policy)
+        self.assertEqual(
+            len(
+                completeness_findings(
+                    DEPENDABOT_BODY, result, author_login="dependabot[bot]"
+                )
+            ),
+            3,
+        )
+
+    def test_dependabot_manifest_without_machine_metadata_is_not_exempt(self):
+        result = classify_paths(["software/pyproject.toml"], self.policy)
+        self.assertEqual(
+            len(
+                completeness_findings(
+                    "Updates cryptography.", result, author_login="dependabot[bot]"
+                )
+            ),
+            3,
+        )
 
 
 if __name__ == "__main__":
