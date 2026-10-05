@@ -118,19 +118,40 @@ def convex_sweep_box_distance_mm(
     which represents the distal capsule without polygonal sampling.
     """
 
-    from distance3d import colliders, gjk
-
     start_rotation = np.asarray(
         start_transform.rotation.matrix, dtype=float).reshape(3, 3)
     end_rotation = np.asarray(
         end_transform.rotation.matrix, dtype=float).reshape(3, 3)
     if not np.allclose(start_rotation, end_rotation, atol=1e-12, rtol=0.0):
         raise ValueError("continuous sweep requires fixed orientation")
-    swept = colliders.ConvexHullVertices(
-        np.ascontiguousarray(_swept_vertices(
-            local_vertices, start_transform, end_transform)))
+    swept, _ = _swept_collider_and_aabb(
+        local_vertices, start_transform, end_transform, margin_mm=margin_mm)
+    return _collider_box_distance_mm(
+        swept, box_center_mm=box_center_mm, box_size_mm=box_size_mm)
+
+
+def _swept_collider_and_aabb(
+    local_vertices: np.ndarray, start_transform: Any, end_transform: Any,
+    *, margin_mm: float,
+):
+    from distance3d import colliders
+
+    vertices = np.ascontiguousarray(_swept_vertices(
+        local_vertices, start_transform, end_transform))
+    swept = colliders.ConvexHullVertices(vertices)
     if margin_mm:
         swept = colliders.Margin(swept, float(margin_mm))
+    low = vertices.min(axis=0) - margin_mm
+    high = vertices.max(axis=0) + margin_mm
+    return swept, (low, high)
+
+
+def _collider_box_distance_mm(
+    swept: Any, *, box_center_mm: tuple[float, float, float],
+    box_size_mm: tuple[float, float, float],
+) -> float:
+    from distance3d import colliders, gjk
+
     pose = np.eye(4)
     pose[:3, 3] = np.asarray(box_center_mm, dtype=float)
     box = colliders.Box(pose, np.asarray(box_size_mm, dtype=float))
@@ -140,6 +161,19 @@ def convex_sweep_box_distance_mm(
     if not math.isfinite(float(distance)):
         raise ValueError("nonfinite GJK distance")
     return float(distance)
+
+
+def _aabb_box_lower_bound_mm(
+    swept_aabb: tuple[np.ndarray, np.ndarray], *,
+    box_center_mm: tuple[float, float, float],
+    box_size_mm: tuple[float, float, float],
+) -> float:
+    low, high = swept_aabb
+    center = np.asarray(box_center_mm, dtype=float)
+    half = np.asarray(box_size_mm, dtype=float) / 2.0
+    box_low, box_high = center - half, center + half
+    delta = np.maximum(np.maximum(box_low - high, low - box_high), 0.0)
+    return float(np.linalg.norm(delta))
 
 
 def _translated_transform(transform: Any, tip_xyz: tuple[float, float, float],
@@ -287,19 +321,34 @@ def run_continuous_key_clearance(
                         end_transform = transforms[segment_index + 1]
                         for width in widths:
                             for thickness in thicknesses:
-                                for key in boxes_by_shape[(width, thickness)]:
-                                    for component in components:
+                                keys = boxes_by_shape[(width, thickness)]
+                                for component in components:
+                                    swept, swept_aabb = _swept_collider_and_aabb(
+                                        component["vertices"], start_transform,
+                                        end_transform,
+                                        margin_mm=component["margin_mm"])
+                                    candidates = sorted(
+                                        ((_aabb_box_lower_bound_mm(
+                                            swept_aabb,
+                                            box_center_mm=key["center"],
+                                            box_size_mm=key["size"]), key)
+                                         for key in keys),
+                                        key=lambda item: item[0])
+                                    component_minimum = float("inf")
+                                    for lower_bound, key in candidates:
                                         admitted = (
                                             phase == "PRESS"
                                             and key["target_id"] == target_id
                                             and component["component"] == "DISTAL_TIP")
                                         if admitted:
                                             continue
-                                        distance = convex_sweep_box_distance_mm(
-                                            component["vertices"], start_transform,
-                                            end_transform, box_center_mm=key["center"],
-                                            box_size_mm=key["size"],
-                                            margin_mm=component["margin_mm"])
+                                        if lower_bound >= component_minimum - 1e-12:
+                                            break
+                                        distance = _collider_box_distance_mm(
+                                            swept, box_center_mm=key["center"],
+                                            box_size_mm=key["size"])
+                                        component_minimum = min(
+                                            component_minimum, distance)
                                         if distance < minimum:
                                             minimum = distance
                                             limiting = {
