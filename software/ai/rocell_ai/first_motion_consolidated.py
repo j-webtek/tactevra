@@ -231,10 +231,16 @@ def _telemetry_envelopes(
                  for name in pose_family["profiles"][0]["pose_bundle"]["joint_order"])
     poses = {row["target_id"]: tuple(row["joint_positions_rad"])
              for row in pose_family["profiles"][0]["pose_bundle"]["poses"]}
+    def six(values: tuple[float, ...]) -> tuple[float, ...]:
+        if len(values) == 5:
+            return (*values, baseline[5])
+        if len(values) != 6:
+            raise ValueError("stage target must contain five arm joints or six T102 joints")
+        return values
     targets = {
         "A": tuple([baseline[0] + 0.005, *baseline[1:]]),
-        "B": park, "C": poses["G"], "D": poses["G"],
-        "E": poses["G"], "F": poses["GRAVE"],
+        "B": six(park), "C": six(poses["G"]), "D": six(poses["G"]),
+        "E": six(poses["G"]), "F": six(poses["GRAVE"]),
     }
     envelopes = []
     for stage_index, stage in enumerate("ABCDEF"):
