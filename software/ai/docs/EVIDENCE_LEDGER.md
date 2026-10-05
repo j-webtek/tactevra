@@ -11536,3 +11536,12 @@ rewriting history. New entries must use a unique evidence ID.
 ### E-20261005-INT-WS2-RELEASE-CONTROL-BINDING-001 — release-control result commit binding
 
 - Full result commit `f0d8400f9c96f5a6b9b6b8553e0cb01c5f562fad` records the release-control receipts, realized two-sided depth margins, shared-stage update, limitations, exact commands, zero-authority counters, and next dependency. This binding changes no metric or gate.
+
+
+### E-20261005-INT-680 — tool tradeoff factor attribution claimed and frozen
+
+- Stage/lane: S3-S4 AI/model plus simulation on `issue/190-isaac-sim-host`; pre-result head `4624f5748056d29b9753f41ef8a86392c87cbf0f`. The 648-cell tradeoff result, 338 failed cells, thresholds, and WS2 release-control result remain unchanged.
+- External predeclaration: `C:\MuJoCoWarp\evidence\issue190\tool_bound_exact_clearance\tradeoff_attribution_v1\predeclaration.json`, file SHA-256 `203d2a1a02718ab158758a1f5a4702f3cbacbe530dfe1ba80f5b13ca449f5132`, canonical predeclaration SHA-256 `8f946833670591fb0e23d204080c366ac2a663607959c0ae4efabd84d65c9d3b`. Freeze generator SHA-256 `d967ed5c0c4b503716190d490418948769ab6aa2f975e82a6ead532f326a7038`. Byte-identical copies exist under the Isaac evidence backup.
+- Frozen attribution: classify an infeasible cell first as geometry clearance when neither reachable length clears the exact radius/buffer pair; otherwise classify it as calibrated residual when no reachable and clear length has zero misses plus nonnegative landing margin. Report marginal pass/fail counts across the 54 unique residual cells and one-factor rescues at frozen favorable endpoints without changing the original cells. Derive a radius limit only from a distal-tip limiting case and compare it with frozen phone radius samples without claiming capacitive registration.
+- Decision boundary: this analysis may produce a simulated keyboard radius ceiling and a conditional trigger for separate keyboard/phone contacts. It cannot select a physical tip, infer a phone minimum contact area, rescore a failed cell, qualify hardware, or alter the completed release-control result.
+- Authority before execution: GPU jobs 0; hardware writes 0; physical movements 0; commands 0; permits 0; transports 0; physical authority false.
