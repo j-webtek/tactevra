@@ -523,3 +523,13 @@ and hash-bound; all byte, blob, duplicate, and reduction limits are unchanged.
 The tracked-file ceiling is 6,379 after the concurrent two-file WS2 v2 fixture increment and the single compact, hash-bound tool-configuration, exact-clearance, and tool-length successor fixture. The increase does not add generated results, pose bundles, GPU outputs, or physical evidence to the source archive.
 
 The corrected tracked-file ceiling is 6,382. The prior 6,379 arithmetic counted the compact successor fixture but omitted its two reviewed runtime modules; this increment adds one deterministic tradeoff finalizer while keeping all generated matrices and GPU receipts external and hash-bound. No generated result, pose bundle, model, image, cache, or simulator environment enters the source archive; every byte and duplicate ceiling remains unchanged.
+
+The first-motion CPU rehearsal, compliant key-press preparation, supervised
+Stage A campaign controls, and attended-session procedure increments add 36
+reviewed text files after that baseline: two AI runtime modules, twelve compact
+hash-bound fixtures, eight simulation/operations modules, five focused test
+modules, and nine procedure or measurement documents. The exact observed count
+and governed ceiling are therefore 6,418. Full campaign shards, simulator
+trajectories, rendered media, model weights, environments, and hardware-session
+records remain external and hash-governed. The logical-byte, single-blob,
+duplicate-byte, and reduction limits are unchanged.

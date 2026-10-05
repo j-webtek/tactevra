@@ -103,7 +103,7 @@ def test_partial_epoch_advances_only_software_build():
     assert document["epoch_bound_build_proposal_ready"] is False
 
 
-def test_retained_arm069_artifacts_match_reproducible_builder(tmp_path):
+def test_retained_arm069_artifacts_remain_historical_after_dependency_change(tmp_path):
     spec = importlib.util.spec_from_file_location(
         "arm069_builder", ROOT / "scripts/build_arm069_software_build_epoch.py")
     module = importlib.util.module_from_spec(spec)
@@ -118,14 +118,26 @@ def test_retained_arm069_artifacts_match_reproducible_builder(tmp_path):
     assert summary["ready_component_ids"] == ["software_build"]
     assert len(summary["missing_component_ids"]) == 7
     assert summary["configuration_epoch_sha256"] is None
+    current = json.loads((
+        tmp_path / "arm069_software_build_evidence.json").read_text())
+    retained = json.loads((
+        ROOT / "ai/eval/arm069_software_build_evidence.json").read_text())
+    current_sources = {item["path"]: item["sha256"]
+                       for item in current["source_files"]}
+    retained_sources = {item["path"]: item["sha256"]
+                        for item in retained["source_files"]}
+    assert current_sources["pyproject.toml"] != retained_sources["pyproject.toml"]
+    assert current["evidence_bundle_sha256"] != retained["evidence_bundle_sha256"]
     for file_name in (
         "arm069_software_build_evidence.json",
         "arm069_software_build_owner_ai_review.json",
         "arm069_owner_epoch_draft.json",
         "arm069_owner_epoch_partial_assessment.json",
     ):
-        assert json.loads((tmp_path / file_name).read_text()) == json.loads((
-            ROOT / "ai/eval" / file_name).read_text())
+        generated = json.loads((tmp_path / file_name).read_text())
+        historical = json.loads((ROOT / "ai/eval" / file_name).read_text())
+        assert generated["physical_authority"] is False
+        assert historical["physical_authority"] is False
     schema_pairs = (
         ("arm069_software_build_evidence.json",
          "software_build_epoch_evidence_v1.schema.json"),
