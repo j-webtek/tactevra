@@ -241,6 +241,24 @@ def series_compliance_displacement(
     return effective_key_command_mm, compression_mm, tool_force_n
 
 
+def keyboard_hold_window_admitted(
+    hold_ms: float,
+    *,
+    debounce_samples_ms: list[float],
+    maximum_hold_ms: float,
+) -> bool:
+    """Apply the conservative sampled keyboard-registration window."""
+    values = [float(hold_ms), float(maximum_hold_ms), *map(float, debounce_samples_ms)]
+    if not all(math.isfinite(value) for value in values):
+        raise ValueError("keyboard hold-window inputs must be finite")
+    if not debounce_samples_ms or min(debounce_samples_ms) <= 0.0:
+        raise ValueError("keyboard debounce samples must be nonempty and positive")
+    minimum_hold_ms = max(float(value) for value in debounce_samples_ms)
+    if maximum_hold_ms < minimum_hold_ms:
+        raise ValueError("keyboard hold window is empty")
+    return minimum_hold_ms <= hold_ms <= maximum_hold_ms
+
+
 def load_staged_fixture(
     path: Path,
     *,
@@ -415,6 +433,8 @@ def primary_failure(row: dict[str, Any]) -> str:
         return "DOUBLE_ACTUATION"
     if row.get("partial_press") or row.get("actuation_count", 0) == 0:
         return "PARTIAL_PRESS"
+    if row.get("debounce_hold_complete") is False:
+        return "DEBOUNCE_TOO_SHORT"
     if not row.get("release_complete"):
         return "RELEASE_INCOMPLETE"
     if not row.get("force_within_available"):

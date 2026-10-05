@@ -1,0 +1,251 @@
+{
+  "amendment": "PRE_RESULT_SWITCH_CLOSURE_AND_THROUGHPUT_CONDITIONAL_COMPLIANCE_SAMPLING; V2_PRESERVED_UNEXECUTED",
+  "bindings": {
+    "campaign_fixture": {
+      "fixture_sha256": "806b61b9c0007406effaa94aefc879a274ba087060725f6dbc41d8ebebb7a7a6",
+      "path": "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json",
+      "sha256": "ecab1ba591cec89f010afb2a577a7bf90188206663fc52bdee090550fdb3ec04"
+    },
+    "execution_fixture": {
+      "fixture_sha256": "da69bbb627170165f9121cbae8bbee72a24e746c121359f975f190dbf354fda8",
+      "path": "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json",
+      "sha256": "4896afad4902f7ba9ddf9f7094ceb78ded846bbc0b3c77326ad1ab96bc909b1b"
+    }
+  },
+  "boundary_rule": {
+    "binary_boundary": [
+      "MIXED_ADMISSION_ACROSS_EIGHT_LANDINGS",
+      "ANY_OF_THREE_NEAREST_COARSE_RECIPES_HAS_DIFFERENT_ADMISSION_FOR_SAME_TARGET_PROFILE_TIP_SCENARIO"
+    ],
+    "failure_boundary": "ANY_OF_THREE_NEAREST_COARSE_RECIPES_HAS_DIFFERENT_PRIMARY_FAILURE_CLASS_FOR_SAME_TARGET_PROFILE_TIP_SCENARIO",
+    "nearest_tie_break": "RECIPE_INDEX",
+    "primary_failure_priority": [
+      "NONFINITE_OR_OVERFLOW",
+      "NEIGHBOR_CONTACT",
+      "BOTTOM_OUT",
+      "AUTO_REPEAT",
+      "DOUBLE_ACTUATION",
+      "PARTIAL_PRESS",
+      "DEBOUNCE_TOO_SHORT",
+      "RELEASE_INCOMPLETE",
+      "FORCE_EXCEEDED",
+      "ADMITTED"
+    ]
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transport_operations": 0
+  },
+  "fixture_sha256": "28ecf286e4453f49f4d4babeaef959ce678f7eed09375ea2f724ba464e2626c9",
+  "gpu_execution_authorized": false,
+  "limitations": [
+    "adaptive allocation reduces compute but does not prove unexecuted cells",
+    "only final confirmation recipes support sampled-range robustness",
+    "all physics and landing inputs remain synthetic or unmeasured",
+    "throughput decides full versus staged compute only and cannot change safety gates",
+    "sixfold compliance expansion is exploratory and increases Stage A from 4,465,152 to 26,790,912 worlds",
+    "debounce and USB polling remain unmeasured; 5-30 ms is an exploratory range"
+  ],
+  "metrics": [
+    "worlds_and_rows_by_stage",
+    "projected_and_actual_gpu_hours",
+    "boundary_count_by_failure_class",
+    "refinement_fraction_of_reference_superset",
+    "stage_c_robust_recipe_count",
+    "realized_switch_closure_ms_per_recipe",
+    "all_original_contact_metrics"
+  ],
+  "normalized_recipe_space": {
+    "dimensions": [
+      "press_depth_mm",
+      "dwell_ms",
+      "approach_mm_s",
+      "release_mm_s",
+      "available_press_force_n"
+    ],
+    "distance": "EUCLIDEAN",
+    "normalization": "FROZEN_RANGE_TO_UNIT_INTERVAL"
+  },
+  "physical_authority": false,
+  "reference_superset": {
+    "contact_worlds": 1714618368,
+    "scored_rows": 26790912,
+    "status": "PRESERVED_EXACT_REFERENCE_POPULATION"
+  },
+  "schema": "tactevra.ws2_staged_search_fixture.v3",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "stage_a_coarse": {
+    "coarse_compliance_expected_worlds": 17860608,
+    "coverage": "EVERY_TARGET_X_EVERY_19_PROFILE_X_EVERY_12_TIP_X_EVERY_4_SCENARIO_X_EVERY_6_TOOL_COMPLIANCE_X_12_RECIPE_X_8_LANDING",
+    "expected_worlds": 26790912,
+    "full_compliance_expected_worlds": 26790912,
+    "landing_sample_indices": [
+      0,
+      9,
+      18,
+      27,
+      36,
+      45,
+      54,
+      63
+    ],
+    "recipe_selection": {
+      "algorithm": "DETERMINISTIC_GREEDY_MAXIMIN",
+      "count": 12,
+      "first": "MINIMUM_RECIPE_INDEX",
+      "tie_break": "MINIMUM_RECIPE_INDEX"
+    },
+    "throughput_selected_compliance": {
+      "inside_budget": [
+        "k0.0715_t3",
+        "k0.0715_t6",
+        "k0.143_t3",
+        "k0.143_t6",
+        "k0.286_t3",
+        "k0.286_t6"
+      ],
+      "over_budget": [
+        "k0.0715_t3",
+        "k0.0715_t6",
+        "k0.286_t3",
+        "k0.286_t6"
+      ],
+      "selection_made_only_from_frozen_smoke_throughput": true
+    }
+  },
+  "stage_b_refinement": {
+    "candidate_rule": "FOR_EACH_BOUNDARY_COARSE_RECIPE_SELECT_FOUR_NEAREST_UNRUN_RECIPES_IN_NORMALIZED_SPACE_FOR_THE_SAME_TARGET_PROFILE_TIP_SCENARIO; UNION_IDENTITIES; RETAIN SAME TOOL_COMPLIANCE IDENTITY",
+    "compliance_refinement_if_stage_a_over_budget": {
+      "no_post_result_selection": true,
+      "omitted_stage_a_combinations": [
+        "k0.143_t3",
+        "k0.143_t6"
+      ],
+      "rule": "ADD_BOTH_OMITTED_MIDPOINT_STIFFNESS_COMBINATIONS_FOR_EVERY_STAGE_A_BOUNDARY_TARGET_PROFILE_TIP_SCENARIO_RECIPE_IDENTITY_USING_ALL_64_LANDINGS"
+    },
+    "landing_samples": "ALL_64_FROZEN_SAMPLES",
+    "maximum_new_recipe_indices_per_boundary": 4,
+    "no_post_result_radius_or_cap": true
+  },
+  "stage_c_confirmation": {
+    "claim_limit": "ONLY_STAGE_C_RECIPES_MAY_BE_CALLED ROBUST_OVER_THE_SAMPLED_RANGE; COARSE_BOUNDARIES ARE DIAGNOSTIC",
+    "coverage": "EACH_SELECTED_RECIPE_X_EVERY_TARGET_X_EVERY_PROFILE_X_EVERY_TIP_X_EVERY_SCENARIO_X_EVERY_6_TOOL_COMPLIANCE_X_ALL_64_LANDINGS",
+    "eligible_pool": "RECIPES_WITH_ZERO_FAILURES_ACROSS_ALL_STAGE_A_AND_STAGE_B IDENTITIES PLUS THE ADMITTED RECIPE NEAREST EACH DETECTED BOUNDARY",
+    "selection": {
+      "algorithm": "HIGHEST_MINIMUM_NORMALIZED_SAFETY_MARGIN_THEN_GREEDY_MAXIMIN_DIVERSITY",
+      "maximum_recipes": 8,
+      "tie_break": "MINIMUM_RECIPE_INDEX"
+    }
+  },
+  "stop_and_fallback": {
+    "cross_gpu_disagreement": "STOP",
+    "fewer_than_eight_candidates": "CONFIRM_ALL",
+    "full_grid_fallback": "ONLY_WHEN_FROZEN_THROUGHPUT_DECISION_SELECTS_FULL_GRID",
+    "missing_identity": "STOP",
+    "more_than_eight_candidates": "APPLY_FROZEN_SELECTION",
+    "no_coarse_admitted_recipe": "REPORT_INFEASIBLE_NO_RANGE_CHANGE"
+  },
+  "switch_closure": {
+    "maximum_duration_ms": 150.0,
+    "maximum_source": "EXISTING_FROZEN_REALIZED_HOLD_CAP_BELOW_200_MS_MINIMUM_SAMPLED_AUTO_REPEAT_DELAY",
+    "minimum_duration_ms_range": [
+      5.0,
+      30.0
+    ],
+    "minimum_duration_ms_samples": [
+      5.0,
+      15.0,
+      30.0
+    ],
+    "per_recipe_metric": "realized_switch_closure_ms",
+    "physical_status": "UNMEASURED",
+    "robust_admission": "REALIZED_CLOSURE_MS_GTE_EVERY_SAMPLED_MINIMUM; EQUIVALENT_TO_GTE_30_MS"
+  },
+  "throughput_decision": {
+    "compliance_stage_a_if_inside_budget": "ALL_SIX_COMBINATIONS_26_790_912_WORLDS",
+    "compliance_stage_a_if_over_budget": "FOUR_RANGE_CORNERS_17_860_608_WORLDS_THEN_FIXED_STAGE_B_MIDPOINT_REFINEMENT",
+    "full_grid_if": {
+      "both_gpu_smokes_pass": true,
+      "peak_device_memory_fraction_lte": 0.7,
+      "projected_two_gpu_wall_hours_at_median_smoke_rate_lte": 12.0
+    },
+    "no_gate_change": true,
+    "otherwise": "STAGED_SEARCH",
+    "reference_compliance_population": [
+      [
+        0.0715,
+        3.0
+      ],
+      [
+        0.0715,
+        6.0
+      ],
+      [
+        0.143,
+        3.0
+      ],
+      [
+        0.143,
+        6.0
+      ],
+      [
+        0.286,
+        3.0
+      ],
+      [
+        0.286,
+        6.0
+      ]
+    ],
+    "selected_stage_a_population": null,
+    "source": "BOUNDED_DUAL_GPU_SMOKE_MEASURED_ELAPSED_COMPILE_STEP_AND_PEAK_MEMORY_ONLY",
+    "stage_a_full_population_expected_worlds": 26790912,
+    "stage_a_over_budget_expected_worlds": 17860608,
+    "stage_a_over_budget_population": [
+      [
+        0.0715,
+        3.0
+      ],
+      [
+        0.0715,
+        6.0
+      ],
+      [
+        0.286,
+        3.0
+      ],
+      [
+        0.286,
+        6.0
+      ]
+    ],
+    "stage_b_over_budget_deferred_population": [
+      [
+        0.143,
+        3.0
+      ],
+      [
+        0.143,
+        6.0
+      ]
+    ]
+  },
+  "tool_compliance": {
+    "combination_count": 6,
+    "model": "SERIES_QUASISTATIC_FORCE_EQUILIBRIUM_WITH_FINITE_TOOL_TRAVEL",
+    "source": "FROZEN_EXPLORATORY_RANGE; UNMEASURED",
+    "stiffness_n_per_mm": [
+      0.0715,
+      0.143,
+      0.286
+    ],
+    "travel_mm": [
+      3.0,
+      6.0
+    ]
+  },
+  "workstream": "WS2_KEY_PRESS_STAGED_SEARCH"
+}

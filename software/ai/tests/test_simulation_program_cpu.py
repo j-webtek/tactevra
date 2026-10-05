@@ -31,6 +31,7 @@ WS2_FIXTURE_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_physics
 WS2_EXECUTION_V2 = ROOT / "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json"
 WS2_STAGED = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v1.json"
 WS2_STAGED_V2 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v2.json"
+WS2_STAGED_V3 = ROOT / "software/ai/sim/evidence/workstream_2_staged_search_v3.json"
 WS2_SPEC = importlib.util.spec_from_file_location(
     "mujoco_warp_key_press_physics_probe",
     ROOT / "software/integrations/mujoco_warp/key_press_physics_probe.py",
@@ -238,6 +239,68 @@ def test_ws2_compliant_stage_a_expands_every_identity_before_gpu_execution():
         0, 17, 90, 47, 82, 89, 6, 33, 34, 71, 41, 49
     ]
     assert amended_staged["stage_a_coarse"]["expected_worlds"] == 26_790_912
+
+
+def test_ws2_debounce_successor_freezes_hold_and_throughput_populations():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=fixture
+    )
+    staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED_V3, workspace=ROOT, parent=fixture, execution=execution
+    )
+    registration = staged["switch_closure"]
+    assert registration["minimum_duration_ms_samples"] == [5.0, 15.0, 30.0]
+    samples = registration["minimum_duration_ms_samples"]
+    maximum = registration["maximum_duration_ms"]
+    assert not WS2_PROBE.keyboard_hold_window_admitted(
+        29.999, debounce_samples_ms=samples, maximum_hold_ms=maximum
+    )
+    assert WS2_PROBE.keyboard_hold_window_admitted(
+        30.0, debounce_samples_ms=samples, maximum_hold_ms=maximum
+    )
+    assert WS2_PROBE.keyboard_hold_window_admitted(
+        150.0, debounce_samples_ms=samples, maximum_hold_ms=maximum
+    )
+    assert not WS2_PROBE.keyboard_hold_window_admitted(
+        150.001, debounce_samples_ms=samples, maximum_hold_ms=maximum
+    )
+    row = {
+        "finite": True,
+        "overflow_zero": True,
+        "neighbor_contact": False,
+        "bottom_out_overflow": False,
+        "auto_repeat_count": 0,
+        "double_actuation": False,
+        "actuation_count": 1,
+        "partial_press": False,
+        "debounce_hold_complete": False,
+        "release_complete": True,
+        "force_within_available": True,
+    }
+    assert WS2_PROBE.primary_failure(row) == "DEBOUNCE_TOO_SHORT"
+    throughput = staged["throughput_decision"]
+    assert throughput["full_grid_if"][
+        "projected_two_gpu_wall_hours_at_median_smoke_rate_lte"
+    ] == 12.0
+    population = staged["stage_a_coarse"]["throughput_selected_compliance"]
+    assert population["inside_budget"] == [
+        "k0.0715_t3", "k0.0715_t6", "k0.143_t3",
+        "k0.143_t6", "k0.286_t3", "k0.286_t6",
+    ]
+    assert staged["stage_a_coarse"]["full_compliance_expected_worlds"] == 26_790_912
+    assert population["over_budget"] == [
+        "k0.0715_t3", "k0.0715_t6", "k0.286_t3", "k0.286_t6"
+    ]
+    assert staged["stage_a_coarse"]["coarse_compliance_expected_worlds"] == 17_860_608
+    assert staged["stage_b_refinement"][
+        "compliance_refinement_if_stage_a_over_budget"
+    ]["omitted_stage_a_combinations"] == [
+        "k0.143_t3", "k0.143_t6"
+    ]
+    assert population["selection_made_only_from_frozen_smoke_throughput"] is True
+    assert staged["physical_authority"] is False
+    assert not any(staged["counters"].values())
 
 
 def test_ws2_positive_control_is_hash_bound_and_between_key_events(tmp_path: Path):
