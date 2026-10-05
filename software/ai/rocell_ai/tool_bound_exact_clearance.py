@@ -319,14 +319,14 @@ def run_continuous_key_clearance(
                     for segment_index, phase in enumerate(phase_names):
                         start_transform = transforms[segment_index]
                         end_transform = transforms[segment_index + 1]
-                        for width in widths:
-                            for thickness in thicknesses:
-                                keys = boxes_by_shape[(width, thickness)]
-                                for component in components:
-                                    swept, swept_aabb = _swept_collider_and_aabb(
-                                        component["vertices"], start_transform,
-                                        end_transform,
-                                        margin_mm=component["margin_mm"])
+                        for component in components:
+                            swept, swept_aabb = _swept_collider_and_aabb(
+                                component["vertices"], start_transform,
+                                end_transform,
+                                margin_mm=component["margin_mm"])
+                            for width in widths:
+                                for thickness in thicknesses:
+                                    keys = boxes_by_shape[(width, thickness)]
                                     candidates = sorted(
                                         ((_aabb_box_lower_bound_mm(
                                             swept_aabb,
