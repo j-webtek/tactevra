@@ -1134,6 +1134,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
+| ARM | S2 exploratory full-route reconstruction | 110 mm candidate-tool / 25 mm hover route reconstruction, unchanged IK and continuity gates, candidate continuous-collision diagnostic, frozen CPU-only fixture, tests, and append-only evidence | `feature/sim-110mm-full-route` / claim commit | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
