@@ -27,6 +27,7 @@ from collision_differential_probe import (
 
 HALTON_BASES = (2, 3, 5, 7, 11, 13)
 HALTON_SAMPLE_COUNT = 32
+MAX_HALTON_SAMPLE_COUNT = 1024
 EXPECTED_URDF_SHA256 = "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
 OUTCOMES = (
     "AGREEMENT_COLLISION", "AGREEMENT_FREE",
@@ -44,7 +45,19 @@ def _halton(index: int, base: int) -> float:
     return result
 
 
-def _pose_corpus(urdf_path: Path) -> tuple[list[dict], list[dict]]:
+def _pose_corpus(
+    urdf_path: Path,
+    *,
+    halton_start: int = 1,
+    halton_count: int = HALTON_SAMPLE_COUNT,
+    include_anchors: bool = True,
+) -> tuple[list[dict], list[dict]]:
+    if halton_start < 1:
+        raise ValueError("halton_start must be positive")
+    if not 1 <= halton_count <= MAX_HALTON_SAMPLE_COUNT:
+        raise ValueError(
+            f"halton_count must be between 1 and {MAX_HALTON_SAMPLE_COUNT}"
+        )
     root = ET.fromstring(urdf_path.read_bytes())
     limits = []
     for name in JOINT_ORDER:
@@ -62,19 +75,20 @@ def _pose_corpus(urdf_path: Path) -> tuple[list[dict], list[dict]]:
             seen.add(key)
             rows.append({"pose_name": name, "family": family, "joint_positions_rad": list(key)})
 
-    for name, values in POSES.items():
-        add(name, values, "GOVERNED_ANCHOR")
-    add("all_lower", [item[0] for item in limits], "LIMIT_ANCHOR")
-    add("all_upper", [item[1] for item in limits], "LIMIT_ANCHOR")
-    add("all_midpoint", [(item[0] + item[1]) / 2.0 for item in limits], "LIMIT_ANCHOR")
-    for index, (lower, upper) in enumerate(limits):
-        lower_values = [0.0] * len(limits)
-        upper_values = [0.0] * len(limits)
-        lower_values[index] = lower
-        upper_values[index] = upper
-        add(f"joint_{index + 1}_lower", lower_values, "SINGLE_JOINT_LIMIT")
-        add(f"joint_{index + 1}_upper", upper_values, "SINGLE_JOINT_LIMIT")
-    for sample in range(1, HALTON_SAMPLE_COUNT + 1):
+    if include_anchors:
+        for name, values in POSES.items():
+            add(name, values, "GOVERNED_ANCHOR")
+        add("all_lower", [item[0] for item in limits], "LIMIT_ANCHOR")
+        add("all_upper", [item[1] for item in limits], "LIMIT_ANCHOR")
+        add("all_midpoint", [(item[0] + item[1]) / 2.0 for item in limits], "LIMIT_ANCHOR")
+        for index, (lower, upper) in enumerate(limits):
+            lower_values = [0.0] * len(limits)
+            upper_values = [0.0] * len(limits)
+            lower_values[index] = lower
+            upper_values[index] = upper
+            add(f"joint_{index + 1}_lower", lower_values, "SINGLE_JOINT_LIMIT")
+            add(f"joint_{index + 1}_upper", upper_values, "SINGLE_JOINT_LIMIT")
+    for sample in range(halton_start, halton_start + halton_count):
         values = [
             lower + _halton(sample, base) * (upper - lower)
             for base, (lower, upper) in zip(HALTON_BASES, limits)
@@ -93,6 +107,13 @@ def main() -> int:
     parser.add_argument("--upstream-repo", type=Path, required=True)
     parser.add_argument("--mesh-receipt", type=Path, required=True)
     parser.add_argument("--reduction-receipt", type=Path, required=True)
+    parser.add_argument(
+        "--expected-reduction-sha256",
+        default=EXPECTED_REDUCTION_RECEIPT_SHA256,
+    )
+    parser.add_argument("--halton-start", type=int, default=1)
+    parser.add_argument("--halton-count", type=int, default=HALTON_SAMPLE_COUNT)
+    parser.add_argument("--halton-only", action="store_true")
     parser.add_argument("--fcl-wheel", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--summary-output", type=Path, required=True)
@@ -118,12 +139,17 @@ def main() -> int:
         reduction = json.loads(reduction_path.read_text(encoding="utf-8"))
         if mesh_receipt["receipt_sha256"] != EXPECTED_MESH_RECEIPT_SHA256:
             raise ValueError("mesh receipt identity mismatch")
-        if reduction["receipt_sha256"] != EXPECTED_REDUCTION_RECEIPT_SHA256:
+        if reduction["receipt_sha256"] != args.expected_reduction_sha256:
             raise ValueError("reduction receipt identity mismatch")
         urdf_path = workspace / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
         if digest_bytes(urdf_path.read_bytes()) != EXPECTED_URDF_SHA256:
             raise ValueError("governed URDF hash mismatch")
-        corpus, limits = _pose_corpus(urdf_path)
+        corpus, limits = _pose_corpus(
+            urdf_path,
+            halton_start=args.halton_start,
+            halton_count=args.halton_count,
+            include_anchors=not args.halton_only,
+        )
 
         sys.path.insert(0, str(workspace / "software/src"))
         from rocell.geometry.urdf import JointPosition, UrdfModel
@@ -165,6 +191,9 @@ def main() -> int:
                 for index, component in enumerate(box_rows[link_name]):
                     primitive = component["candidate_primitive"]
                     local = np.eye(4)
+                    local[:3, :3] = np.asarray(
+                        primitive["rotation_row_major"], dtype=float
+                    ).reshape(3, 3)
                     local[:3, 3] = primitive["center_mm"]
                     box = trimesh.creation.box(
                         extents=2.0 * np.asarray(primitive["half_extents_mm"]),
@@ -247,6 +276,19 @@ def main() -> int:
             "halton_sample_count": HALTON_SAMPLE_COUNT,
             "adjacent_pairs_are_measured_not_excluded": True,
         }
+        if (
+            args.halton_start != 1
+            or args.halton_count != HALTON_SAMPLE_COUNT
+            or args.halton_only
+        ):
+            method["halton_start_index"] = args.halton_start
+            method["halton_sample_count"] = args.halton_count
+            method["anchors_included"] = not args.halton_only
+            method["pose_families"] = (
+                ["HALTON_INTERIOR"]
+                if args.halton_only
+                else method["pose_families"]
+            )
         detailed: dict[str, object] = {
             "schema": "tactevra.isaac_sim_collision_joint_space_detailed.v1",
             "source_bindings": source_bindings,
@@ -257,15 +299,18 @@ def main() -> int:
         detailed["receipt_sha256"] = canonical_sha256(detailed)
         detailed_bytes = (json.dumps(detailed, indent=2, sort_keys=True) + "\n").encode("utf-8")
         args.output.write_bytes(detailed_bytes)
-        blockers = [
-            "CANDIDATE_FALSE_POSITIVE_COLLISIONS_OBSERVED",
-            "NONADJACENT_FALSE_POSITIVE_OBSERVED",
+        blockers = []
+        if totals["CANDIDATE_FALSE_POSITIVE"]:
+            blockers.append("CANDIDATE_FALSE_POSITIVE_COLLISIONS_OBSERVED")
+        if scope_summary["NONADJACENT"]["CANDIDATE_FALSE_POSITIVE"]:
+            blockers.append("NONADJACENT_FALSE_POSITIVE_OBSERVED")
+        blockers.extend([
             "FINITE_CORPUS_IS_NOT_CONTINUOUS_WORKSPACE_COVERAGE",
             "SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED",
             "NON_WATERTIGHT_RAW_MESHES",
             "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING",
             "ISAAC_TOOLCHAIN_LOCK_UNSELECTED",
-        ]
+        ])
         summary: dict[str, object] = {
             "schema": "tactevra.isaac_sim_collision_joint_space_summary.v1",
             "evidence_class": "OFFLINE_GOVERNED_LIMIT_COLLISION_DIFFERENTIAL_ONLY",
@@ -308,9 +353,9 @@ def main() -> int:
             "blockers": blockers,
         }, sort_keys=True) + "\n").encode("utf-8"))
     except BaseException as exc:
-        args.status_output.write_text(json.dumps({
+        args.status_output.write_bytes((json.dumps({
             "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
-        }, sort_keys=True) + "\n", encoding="utf-8")
+        }, sort_keys=True) + "\n").encode("utf-8"))
         raise
     return 0
 

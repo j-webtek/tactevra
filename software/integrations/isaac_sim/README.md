@@ -330,6 +330,63 @@ python software\integrations\isaac_sim\collision_joint_space_probe.py `
   --status-output C:\IsaacSim\evidence\collision_joint_space_005.status.json
 ```
 
+## Targeted `link2` refinement and pair-policy stress
+
+The original 49-pose differential contained one nonadjacent false positive for
+`link2` against `gripper_link`. An oriented-box attempt is retained as failed
+evidence: its exact replay remains at 192 false positives, including that same
+nonadjacent witness. The successor
+[`triangle_partition_refinement_probe.py`](triangle_partition_refinement_probe.py)
+partitions the implicated `link2` component into 16 complete-triangle groups.
+Its [candidate](evidence/roarm_m3_triangle_partition_link2_20261005.json) has
+zero serialized vertex overflow and remains below the 64-primitive body limit.
+
+The corresponding
+[49-pose replay](evidence/roarm_m3_collision_joint_space_triangle_partition_20261005.json)
+preserves 57 collision agreements, introduces zero observed false negatives,
+reduces false positives from 192 to 165, and removes the sole nonadjacent false
+positive. All remaining false positives occur on four directly connected link
+pairs.
+
+[`self_collision_policy_review_probe.py`](self_collision_policy_review_probe.py)
+shows that the upstream SRDF's six `Adjacent` entries exactly match the six
+governed direct-joint pairs. The separate
+[`srdf_never_pair_review_probe.py`](srdf_never_pair_review_probe.py) records
+free-space agreement for all six `Never` pairs across the same finite corpus.
+Neither review installs or authorizes an exclusion.
+
+A held-out replay covers 256 Halton poses at indices 1001 through 1256. Its
+[assessment](evidence/roarm_m3_collision_policy_stress_assessment_20261005.json)
+finds zero observed false negatives and no contradiction of the six `Never`
+pairs, while preserving 13 false positives across six retained pairs. The
+candidate remains counterfactual: effective exclusions stay empty, every pair
+defaults to `CHECK_COLLISION`, and collision and clearance admission remain
+false. Finite samples do not establish continuous workspace safety, and the
+installed tool, camera support, and measured environment geometry remain open.
+
+Reproduce the candidate and selected replay with the pinned CPU geometry stack:
+
+```powershell
+$env:PYTHONUTF8='1'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\triangle_partition_refinement_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --base-reduction software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20261004.json `
+  --band-count 16 --strategy recursive-longest-centroid-axis `
+  --output C:\IsaacSim\evidence\triangle_partition_link2.json `
+  --status-output C:\IsaacSim\evidence\triangle_partition_link2.status.json
+
+C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\collision_joint_space_probe.py `
+  --workspace . --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --reduction-receipt C:\IsaacSim\evidence\triangle_partition_link2.json `
+  --expected-reduction-sha256 cf887206e9afdadb46a20263db56406eabfe90a78c3f9d1e5ad0e8dc3fbc6469 `
+  --fcl-wheel C:\IsaacSim\sources\python-fcl-0.7.0.11\python_fcl-0.7.0.11-cp312-cp312-win_amd64.whl `
+  --output C:\IsaacSim\evidence\triangle_replay.detailed.json `
+  --summary-output C:\IsaacSim\evidence\triangle_replay.summary.json `
+  --status-output C:\IsaacSim\evidence\triangle_replay.status.json
+```
+
 ## Verify WP0
 
 From `software/`:
