@@ -1,0 +1,87 @@
+{
+  "claim_commit": "2ba27363a4248223e50fd25356ff3bd506f10d75",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "camera_clearance_claim_allowed": false,
+    "candidate_count_exact": 27,
+    "candidate_remains_uninstalled": true,
+    "collision_clearance_claim_allowed": false,
+    "ik_threshold_change_count_maximum": 0,
+    "pass_requires_every_candidate_trajectory_sample_accepted": true,
+    "selection": "MAXIMUM_ROUTE_MINIMUM_NORMALIZED_MARGIN_THEN_MINIMUM_MAXIMUM_JOINT_DELTA_THEN_CANDIDATE_ID",
+    "target_coordinate_change_count_maximum": 0,
+    "target_order_difference_count_maximum": 0
+  },
+  "fixture_sha256": "a08672e3f05246b0bc65efdf6cfdc8311f1bef75d7ac3c4a498a6509e2da7f9e",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_route_geometry_study_v1.py",
+      "sha256": "a284aa9c75be9a753a967c2d08752527f862370907e4087045091f4abdadc366"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "seed_study_dependency": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_route_study_v1.py",
+      "sha256": "606cf9a93bf49f57869783a5460177a2b004636f9407455203def010428c54a2"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "Candidate park points are a declared synthetic design grid, not measured installed poses.",
+    "A passing route changes only the start reference; semantic targets and target coordinates remain unchanged.",
+    "Camera visibility, collision clearance, and continuous swept distance are not evaluated by this study.",
+    "A selected candidate remains uninstalled until arm-lane review and later measured commissioning.",
+    "No command, permit, transport, controller access, hardware write, movement, or physical authority exists."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+    "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_candidates": 27,
+    "maximum_ik_samples_per_candidate": 512
+  },
+  "schema": "tactevra.typing_twin_ik_route_geometry_study_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "reference": "FIRST_TARGET_HOVER_POINT",
+    "x_offset_from_first_hover_mm": [
+      -20.0,
+      0.0,
+      20.0
+    ],
+    "y_offset_from_first_hover_mm": [
+      -20.0,
+      0.0,
+      20.0
+    ],
+    "z_above_first_hover_mm": [
+      40.0,
+      60.0,
+      80.0
+    ]
+  }
+}

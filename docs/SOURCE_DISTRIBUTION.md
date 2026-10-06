@@ -361,3 +361,9 @@ failed-result receipt. The file-count ceiling advances from 6,396 to 6,400 for
 those exact reviewed additions. The retained result replaces neither external
 simulation data nor installed measurements, and no dependency tree or GPU
 artifact enters the source archive.
+
+The candidate-park route-geometry attribution adds three pre-result governed
+paths: one CPU-only study module, one hash-bound fixture, and one focused test
+module. The file-count ceiling advances from 6,400 to 6,403 for those exact
+reviewed additions. No simulator corpus, GPU artifact, or dependency tree enters
+the source archive.
