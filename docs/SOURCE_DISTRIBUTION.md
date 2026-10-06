@@ -330,3 +330,10 @@ module, one frozen portability fixture, one compact result receipt, and one
 focused test module. The resulting tree contains 6,380 tracked files. The
 million-row-scale replay remains external and hash-governed. The file-count
 ceiling advances to 6,380 while all byte and reduction limits remain unchanged.
+
+The focused Workstream 1 main extraction adds six governed paths: one semantic
+and device-state implementation, one focused test module, two frozen fixtures,
+one preserved failed-attempt record, and one compact result summary. The
+resulting tree contains 6,386 tracked files. Full simulation outputs remain
+external and hash-bound. The file-count ceiling advances to 6,386 while all
+byte and reduction limits remain unchanged.

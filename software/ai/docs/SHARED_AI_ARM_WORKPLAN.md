@@ -1031,7 +1031,6 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| AI/model + simulation | S2-S4 Workstream 1 main extraction | `software/ai/rocell_ai/end_to_end_typing_twin.py`, focused AI tests and compact fixture/evidence, AI-lane workplan and ledger entries; self-contained virtual keyboard/phone semantics plus actual verification-fault handoff to the portable recovery kernel; no catalog, arm-runtime, transport, command, permit, or authority changes | `feature/sim-ws1-typing-twin` | ACTIVE — dependency audit found the branch implementation imported unmerged planner history, so this increment will reconstruct the smallest main-bound semantic/device-state twin and preserve the original workbench result as predecessor evidence rather than cherry-picking unrelated history. |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
@@ -1492,6 +1491,18 @@ portability reproduction, preserves the predecessor ranges and rules, and does
 not claim a new selection result. The kernel still lacks a main-bound
 Workstream 1 twin, measured perception and landing-sensor behavior, real device
 effects, controller transport, hardware qualification, and physical authority.
+
+`E-20261006-INT-460` restores the smallest main-bound Workstream 1 semantic and
+device-state twin without importing the research branch's unrelated planner or
+catalog history. The preserved first execution failed before metrics because of
+a full-mode seed lookup bug; v1.1 fixes only that lookup and retains the same
+ranges, populations, fault cases, metrics, and rules. Two full runs each replay
+10,010 strings and 318,884 characters per device with zero text failures and the
+same core receipt. Eight independently classified virtual readback effects feed
+the portable recovery kernel with zero classification or terminal mismatches.
+This composes virtual verification and recovery only. Perception, IK, collision,
+contact physics, real host/ADB evidence, transport, hardware, and physical
+authority remain outside the result.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

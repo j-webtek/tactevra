@@ -1,0 +1,88 @@
+{
+  "authority": {
+    "controller_commands": [],
+    "gpu_jobs": 0,
+    "hardware_access": false,
+    "hardware_commands_generated": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_authority": false,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "backup": {
+    "destination": "F:/TactevraEvidence/issue190/main-extraction/workstream_1/typing_twin_main_v1_1",
+    "file_hash_matches": 4,
+    "file_total": 4,
+    "first_attempt_failure": "PowerShell -LiteralPath did not expand the wildcard; no source evidence was changed.",
+    "source": "C:/MuJoCoWarp/evidence/issue190/main-extraction/workstream_1/typing_twin_main_v1_1"
+  },
+  "commands": [
+    "python -m pytest software/ai/tests/test_end_to_end_typing_twin.py software/ai/tests/test_recovery_state_machine.py -q",
+    "cd software/ai; python -m rocell_ai.end_to_end_typing_twin sim/evidence/end_to_end_typing_twin_main_v1_1.json --mode full --output <external>/semantic_full_a.json",
+    "cd software/ai; python -m rocell_ai.end_to_end_typing_twin sim/evidence/end_to_end_typing_twin_main_v1_1.json --mode full --output <external>/semantic_full_b.json",
+    "python -c <import run_recovery_handoff; run frozen twin and portable recovery fixtures with repository root; write handoff_a.json>",
+    "python -c <repeat identical handoff as handoff_b.json>"
+  ],
+  "environment": {
+    "operating_system": "Windows",
+    "python": "3.12.0"
+  },
+  "failed_attempt": {
+    "decision": "FAILED_BEFORE_RESULT",
+    "fixture_sha256": "c1e633fdc190cca53e18b0da2341ccc9935939f088c4219cff81d51b2d225fc0",
+    "preserved_path": "software/ai/sim/evidence/end_to_end_typing_twin_main_v1_failure.json",
+    "reason": "The full-mode seed lookup requested keys absent from the frozen fixture; the first handoff command also supplied the wrong workspace root.",
+    "source_commit": "ff163f478e93f44ec58faab90456072fb69d3efc"
+  },
+  "identities": {
+    "base_commit": "237992f1f45ed4e9d3f496cc6fdfbd9a3485d0b9",
+    "claim_commit": "4a1fdbbd",
+    "implementation_amendment_commit": "1befab06a0311034a01fe94493708a4a7d3bb8c1",
+    "implementation_sha256": "aac410772d6a158ae366944a35a5ded46fae6a0edc4e21505be1930d86285324",
+    "predecessor_fixture_sha256": "105df64d3c3878bed97caddb2623c9c577a820144909cc94105b529508233bac",
+    "predecessor_result_commit": "7988cfbaa6343f3f38614acfee5244506f8ceb73",
+    "result_fixture_commit": "e8f83e4294d5e439153f702df0e2494dd625aa91",
+    "result_fixture_sha256": "d1f42a38f0bf190311976c65b6b9964ae45b948b0a5d38003c63b436d32e8a1c"
+  },
+  "limitations": [
+    "This proves virtual semantic and device-state replay in simulation only.",
+    "Recovery composition uses simulated independent readback effects, not physical host or ADB evidence.",
+    "Perception, IK, collision, contact physics, controller transport, and hardware are not composed here.",
+    "The installed catalog and physical commissioning status are unchanged.",
+    "Descriptive latency values vary by host and are excluded from the deterministic core receipt."
+  ],
+  "metrics": {
+    "classification_mismatch_count": 0,
+    "fault_detection_rate": 1.0,
+    "handoff_case_count": 8,
+    "handoff_receipt_sha256": "925f232ff2f406103a5897ad284c232d87a3886c0f53edd682cab2a11d2cdec5",
+    "keyboard": {
+      "characters": 318884,
+      "exact_text_failures": 0,
+      "modifier_transitions": 157186,
+      "semantic_targets": 476070,
+      "strings": 10010
+    },
+    "phone": {
+      "characters": 318884,
+      "exact_text_failures": 0,
+      "layer_transitions": 285301,
+      "semantic_targets": 604185,
+      "strings": 10010
+    },
+    "semantic_core_receipt_repeat_match": true,
+    "semantic_core_receipt_sha256": "aef15e4570ac5e0f6a377247bbdfd34c3a1695ddb9d4cb9a5bbf0dad66dffc58",
+    "semantic_exact_text_success_rate": 1.0,
+    "terminal_mismatch_count": 0
+  },
+  "output_files": {
+    "handoff_a.json": "13a34d0d7f1d6f0d7f241b0b8653ccdb2c564c455973752ed8d1d7681685533c",
+    "handoff_b.json": "13a34d0d7f1d6f0d7f241b0b8653ccdb2c564c455973752ed8d1d7681685533c",
+    "semantic_full_a.json": "e98c1e630dff43fada5bff464a66e8733bfef7206767b8830c94d6b74195731c",
+    "semantic_full_b.json": "73b9e4a5d1b1a16f296018ce95e39e9b73b00a73c0f22213ec5aa978479217c"
+  },
+  "result_sha256": "b46306c1482e626bbffc042b2c4346d18bca619816e9f48381e4612981aec2a5",
+  "schema": "tactevra.end_to_end_typing_twin_main_summary.v1",
+  "status": "PASS_MAIN_BOUND_SEMANTIC_AND_RECOVERY_HANDOFF"
+}
