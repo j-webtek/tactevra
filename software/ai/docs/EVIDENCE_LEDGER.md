@@ -7532,3 +7532,101 @@ rewriting history. New entries must use a unique evidence ID.
   changes only the first park-to-`H` transit corridor, preserves semantic target
   order and all safety thresholds, and sends any passing route through the full
   canonical IK and later collision gates.
+
+
+### E-20261006-INT-466 — first-H Cartesian corridor family rejected
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned planning evidence recorded under the cross-lane `INT` sequence.
+  No integration gate or physical readiness status changed.
+- Claim commit: `62938e0f9d3c40404492f544d9ea69f4c2e65183`.
+- Initial implementation commit:
+  `59480f2a37de75f50881dcd1de3df857def08796`.
+- Initial fixture commit: `6494b73f216094a3e94df93be759383f05dc49a3`.
+- Preserved failed-attempt commit:
+  `1bc339d44f60569d08e693dd4e261c916e7dffbc`.
+- Evaluation-boundary correction commit:
+  `e72994d35f4ae2f98c69428052005bd93030f64c`.
+- Amended fixture commit: `2ddddc1bdbe380288335bfb752ac03e0f34847e2`.
+- Result commit: `ed7e19bcec35c3eaca072c7400c81c272c0867c8`.
+- Objective: test whether a small, explicitly frozen Cartesian waypoint family
+  can avoid the wrist-limit corridor exposed by INT-462 through INT-465 without
+  changing targets, coordinates, solver policy, post-IK thresholds, or authority.
+- Candidate family: transit heights `0`, `20`, and `40` mm above the synthetic
+  ready point crossed with planar orders `DIAGONAL`, `X_THEN_Y`, and
+  `Y_THEN_X`. Each route rejoins the exact parent trajectory at the first `H`
+  hover point and preserves every later phase waypoint.
+- Fixtures: original
+  `software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1.json`,
+  canonical SHA-256
+  `f73192bdb8d692a75ef2abd45c95e5bb2325b9896573462eb0135542038d9f57`
+  and file SHA-256
+  `8efe214a8904305299b71cbc5942de296745e558dafa94ad5642cd3bc535b321`;
+  amended
+  `software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1_1.json`,
+  canonical SHA-256
+  `010b016a9b21be868ef7b9c5568660ceb0e984f3aa7e2330345cefadf4ee5a16`
+  and file SHA-256
+  `d4fa7c6de3607318ea790a09e2d70f574f24815512d55f2bb4988fc0e6385546`.
+- Exact first command: with `PYTHONPATH=software/src;software/ai`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`, run
+  `python -m rocell_ai.typing_twin_ik_cartesian_corridor_study_v1
+  software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_result_v1.json`.
+  It failed closed before writing a result with
+  `TypingTrajectoryIkScreenV1Error: trajectory plan does not replay from the
+  exact T1 source plan`. Failed-attempt file SHA-256:
+  `03b461ad37e288e1401485a7540d4bf028fe0c554885584777754322d02ebd75`.
+- Pre-result amendment: the T1 wrapper permits only byte-identical compiler
+  replay. Before any candidate result was observed, the amended fixture retained
+  all nine routes, selection rules, resource limits, 5 mm sample spacing,
+  canonical solver, controller bounds, normalized-margin gate, Jacobian-rank
+  gate, adjacent-joint-delta gate, target order, coordinates, and zero-authority
+  scope. It routes exploratory samples through the shared canonical post-IK
+  waypoint evaluator already used by correction planning.
+- Exact amended command: with the same environment bindings and below-normal
+  process priority, run `python -m
+  rocell_ai.typing_twin_ik_cartesian_corridor_study_v1
+  software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1_1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_result_v1_1.json`.
+- Result: `BLOCKED_NO_FULL_ROUTE_CARTESIAN_CORRIDOR`; passing candidates `0/9`;
+  receipt SHA-256
+  `feffec8fbe1e65261067b65cdb0f31624929f0b32e674df8b95d0fc619389a3b`;
+  result-file SHA-256
+  `71985952e5649404e4af83fdfb470da49ace3df9eef7fa720d9d171c03f32af1`.
+- Metrics: the direct-height candidates accepted 33 samples for diagonal and 39
+  for each axis-ordered path before sample 34 or 40 failed. The +20 mm candidates
+  accepted 41 or 47 samples before sample 42 or 48 failed. The +40 mm candidates
+  accepted 49 or 55 samples before sample 50 or 56 failed. All nine stopped for
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`. Minimum accepted-prefix margin
+  rose from `0.01300057062745829` at zero added height to
+  `0.013609411179171865` at +40 mm, but no descent completed. Candidate route
+  sizes ranged from 271 to 293 samples; the semantic target order remained
+  `H,E,L,L,O,SPACE,2,0,2,6`.
+- Interpretation: rising and translating before descent moves the failure later
+  but does not remove the common wrist-margin blocker. This rejects the frozen
+  manual height/axis-order family without weakening the `0.01` gate. Further
+  hand-authored height grids are not justified by this result.
+- Validation: 9 focused fixture, amendment, route-structure, result, and
+  zero-authority tests passed; Ruff and `git diff --check` passed. Broader shared
+  and repository checks are recorded by exact-head pull-request validation.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate Stage A supervisor, PID 42724, remained running
+  throughout; its status after the result was 6,448/11,628 shards with zero
+  failures, zero hardware writes, and zero physical movements.
+- Failures preserved: the original fixture and T1-wrapper rejection remain
+  tracked. The amended result is a new artifact and does not rewrite the failed
+  attempt or any earlier route evidence.
+- Limitations: calibration, ready state, and corridor points are synthetic.
+  Collision, camera clearance, dynamics, contact, installed geometry, and
+  physical repeatability remain unevaluated. No candidate is installed. No
+  command, permit, transport, controller access, or physical authority exists.
+- Supersedes: none. This narrows the blockers retained by
+  `E-20261006-INT-462` through `E-20261006-INT-465`.
+- Next dependency: the arm lane should predeclare a bounded margin-aware planner
+  that searches joint-space or constrained Cartesian paths while preserving the
+  exact semantic endpoints and canonical safety gates. Any passing candidate
+  must then undergo full collision, camera-clearance, and measured-state review.

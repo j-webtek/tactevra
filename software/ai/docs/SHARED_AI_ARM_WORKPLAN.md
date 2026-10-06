@@ -1077,12 +1077,25 @@ beam policy is installed. The next bounded arm question is explicit Cartesian
 waypoint geometry that avoids the wrist-limit corridor while preserving target
 order and every existing safety gate.
 
+Evidence `E-20261006-INT-466` also rejects the first bounded Cartesian-corridor
+family. Nine predeclared routes combined transit heights of 0, 20, and 40 mm
+above the synthetic ready point with diagonal, X-then-Y, and Y-then-X planar
+travel before descending to the exact first-`H` hover. Every candidate cleared
+more samples than the direct parent route, then stopped during the common
+descent for `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`; zero candidates
+accepted the full 260-waypoint semantic route. The original T1-wrapper rejection
+is preserved separately: it occurred before candidate results because that
+boundary correctly permits only byte-replayable compiler output. A pre-result
+amendment retained all nine candidates and safety thresholds while using the
+shared canonical post-IK waypoint evaluator. The study changes no installed
+planner. The next arm-owned design question is a bounded margin-aware motion
+planner rather than another manually enumerated height or axis-order grid.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM Cartesian-corridor lane | S2 | first park-to-`H` waypoint-geometry study, frozen fixture, focused tests, and retained evidence | `feature/sim-cartesian-waypoint-geometry` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
