@@ -7013,3 +7013,58 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: engineering review of the candidate reduction and pair
   semantics, followed by installed measured geometry and continuous swept-path
   clearance evidence before any profile can be installed or admitted.
+
+### E-20261006-INT-459 — portable Workstream 4 recovery reproduction
+
+- Stage: S2/S3 exploratory simulation recovery.
+- Lane: INTEGRATION.
+- Base commit: `4e2a051a2dff444e94c0227d5f6a65efde676f87`.
+- Predeclaration commit: `5a33921d4a8c4bb076817a793170df0d54dfa8ef`.
+- Result commit: `de9cf914854a66c59d9e455a65d88c03f376ff45`.
+- Change: extracted the branch-only Workstream 4 recovery state machine as a
+  standalone CPU-only kernel. The portability amendment preserves every
+  predecessor scenario range and decision rule, labels the replay as
+  post-result reproduction, and does not claim integration with a main-bound
+  Workstream 1 twin.
+- Inputs/fixtures: portable fixture canonical SHA-256
+  `51e2a8c2706c2b4907719d0391f926fa511c94d702f8af9c27ecd79431b05d78`;
+  predecessor fixture/receipt/file SHA-256
+  `3a580ad2d7f333b8dfdee71b6cad4e644dce19032f0aba270cbfc289d47eb3aa` /
+  `f8c06d599a62ca6525b4cfc6a34502680354e6b5da1f484f47249064f20f327a` /
+  `6efc167ead23cd7aa3d1f0de0c2d1236a91d61299b83d2d986f8c124aa28a88d`;
+  reproduced full receipt/file SHA-256
+  `8d1f3ff619a3ff09d113e5331ffee3dbd209b8a320599076c962f4427f334c98` /
+  `de2dd12fe671a5232cb537dd60a04719c4b70208cf6fa7188429e9eba9f8128e`;
+  retained compact receipt/file SHA-256
+  `901082e71e7ecb96c4af246c02d282f6e0085dab6d9295750bc4bd6fc30ee61e` /
+  `ccfc678f200c8f424b3375bfb3240c71abafdbe9ee74de216527d932b26d33a3`.
+- Command: `$env:PYTHONPATH=(Resolve-Path software\ai).Path; python -m
+  rocell_ai.recovery_state_machine
+  software\ai\sim\evidence\workstream_4_recovery_portable_v1.json --output
+  C:\MuJoCoWarp\evidence\issue190\main-extraction\workstream_4\recovery_portable_v1\result.json`;
+  the same command produced `replay.json`; `python -m pytest
+  software/ai/tests/test_recovery_state_machine.py -q`; `python -m ruff check
+  software/ai/rocell_ai/recovery_state_machine.py
+  software/ai/tests/test_recovery_state_machine.py`; `python
+  scripts/maintain_repository.py verify`; `git diff --check`.
+- Result: `PASS_EXPLORATORY_RECOVERY`. Both full outputs are byte-identical.
+  All 1,244 scenarios were detected; 880/880 declared recoverable cases
+  completed; 364/364 expected aborts occurred; false recoveries and ambiguous
+  continuations were zero; at most one wrong character occurred before
+  detection; at most two total attempts were used. Detection latency spans
+  20–1,100 ms and total recovery time spans 50–1,900 ms across declared
+  exploratory profiles. Five focused tests passed. Both full outputs were
+  backed up to
+  `F:\TactevraEvidence\issue190\main-extraction\workstream_4\recovery_portable_v1`
+  with zero hash mismatches.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: this is deterministic state-machine evidence over declared
+  synthetic drift, delay, capability, and fault ranges. It is informed by the
+  predecessor result and is not independent selection evidence. It does not
+  qualify camera relocalization, landing sensing, physical press effects,
+  backspace/readback behavior, controller transport, hardware, or motion. The
+  main-bound kernel is not connected to a main-bound Workstream 1 typing twin.
+- Next dependency: extract or implement the main-bound typing twin, connect its
+  actual verification faults to this recovery kernel, and rerun the same rules
+  before claiming end-to-end recovery coverage.
