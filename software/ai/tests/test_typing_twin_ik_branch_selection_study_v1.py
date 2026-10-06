@@ -13,7 +13,13 @@ from rocell_ai.typing_twin_ik_branch_selection_study_v1 import (
 
 
 ROOT = Path(__file__).resolve().parents[3]
-FIXTURE = ROOT / "software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1.json"
+FIXTURE = ROOT / "software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1_1.json"
+PRESERVED_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1.json"
+)
+PRESERVED_RESULT = (
+    ROOT / "software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1.json"
+)
 
 
 def test_frozen_fixture_is_hash_bound_and_zero_authority() -> None:
@@ -41,3 +47,13 @@ def test_bound_inputs_match_exact_bytes() -> None:
     for binding in document["input_bindings"].values():
         source = ROOT / binding["path"]
         assert hashlib.sha256(source.read_bytes()).hexdigest() == binding["sha256"]
+
+
+def test_compatibility_reproduction_preserves_original_evidence() -> None:
+    document = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    correction = document["compatibility_reproduction"]
+
+    assert correction["results_seen_before_correction"] is True
+    assert correction["rules_changed"] is False
+    assert PRESERVED_FIXTURE.is_file()
+    assert PRESERVED_RESULT.is_file()

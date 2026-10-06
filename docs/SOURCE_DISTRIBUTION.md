@@ -384,3 +384,9 @@ or physical authority.
 The rejected IK branch-selection run adds one compact generated result receipt.
 The file-count ceiling advances from 6,409 to 6,410 for that reviewed path only.
 All byte, duplicate, and reduction limits remain unchanged.
+
+The branch-selection compatibility reproduction adds one amended fixture that
+binds study-local candidate enumeration while preserving the canonical IK bytes
+required by earlier frozen evidence. The file-count ceiling advances from 6,410
+to 6,411 for that reviewed path only. The original fixture and rejected result
+remain intact; all byte, duplicate, and reduction limits remain unchanged.
