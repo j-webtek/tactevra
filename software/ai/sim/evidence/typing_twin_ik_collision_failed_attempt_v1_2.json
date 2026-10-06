@@ -1,0 +1,65 @@
+{
+  "accepted_prefix_sample_count": 15,
+  "attempt": 3,
+  "conclusion": "Finer Cartesian spacing did not correct the normalized-margin rejection; no further spacing tuning is allowed in this increment.",
+  "evaluated_sample_count": 16,
+  "failure": "IK_ROUTE_REJECTED:MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+  "fixture_sha256": "bf2a6f1212eca07e5ba1cb5e0c9e1dceed32c629c0995ca89857843d8ac0267e",
+  "gpu_jobs": 0,
+  "hardware_writes": 0,
+  "implementation_commit": "f7d6ac15",
+  "last_joint_result": {
+    "accepted": false,
+    "achieved_hand_tcp_z_axis_board": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "achieved_tip_position_board_mm": [
+      253.970985,
+      167.380266,
+      68.025987
+    ],
+    "action_index": 0,
+    "adjacent_joint_delta_passed": true,
+    "alignment_error_rad": 0.0,
+    "arm_margin_passed": false,
+    "attempt_count": 4,
+    "controller_intersection_passed": true,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "hardware_commands_generated": 0,
+    "ik_status": "CONVERGED",
+    "joint_deltas_rad": {
+      "base_link_to_link1": 0.010739,
+      "link1_to_link2": 0.027134,
+      "link2_to_link3": 0.000466,
+      "link3_to_link4": 0.026668,
+      "link4_to_link5": 0.0
+    },
+    "maximum_joint_delta_rad": 0.027134,
+    "minimum_arm_joint_margin_rad": 0.026288,
+    "minimum_normalized_arm_joint_margin": 0.008368,
+    "phase": "TRANSIT",
+    "position_error_mm": 0.001989,
+    "previous_solution_seed_supplied": true,
+    "selected_attempt_index": 3,
+    "semantic_target": "H",
+    "solution_arm_joint_positions_rad": {
+      "base_link_to_link1": -0.174399,
+      "link1_to_link2": 0.406537,
+      "link2_to_link3": 2.708771,
+      "link3_to_link4": -1.544508,
+      "link4_to_link5": 0.0
+    },
+    "solver_weighted_task_jacobian": null,
+    "solver_weighted_task_jacobian_numerical_rank_passed": null,
+    "waypoint_sequence": 15
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "record_sha256": "8f678aaafc5748ca879254fd102d3a3830cea01a991ef9668e6221016c43970a",
+  "sample_count": 260,
+  "schema": "tactevra.typing_twin_ik_collision_failed_attempt.v1",
+  "status": "FAILED_BEFORE_CANDIDATE_COLLISION_METRICS",
+  "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 7, in <module>\n  File \"C:\\Users\\WebTek\\Desktop\\tactevra-ws1-ik-collision\\software\\ai\\rocell_ai\\typing_twin_ik_collision_v1.py\", line 381, in run_typing_ik_collision\n    raise ValueError(f\"canonical IK did not admit the frozen route: {ik['blockers']}\")\nValueError: canonical IK did not admit the frozen route: ['IK_ROUTE_REJECTED:MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED']\n"
+}

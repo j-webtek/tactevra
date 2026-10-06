@@ -377,13 +377,40 @@ def run_typing_ik_collision(fixture_path: Path, *, workspace: Path) -> dict[str,
             maximum_waypoints_per_round=fixture["resource_limits"]["maximum_ik_samples"],
             maximum_total_ik_solves=fixture["resource_limits"]["maximum_ik_samples"],
             maximum_route_targets=len(targets)))
-    if ik["status"] != IK_READY_STATUS:
-        raise ValueError(f"canonical IK did not admit the frozen route: {ik['blockers']}")
-    intake = prepare_typing_collision_intake_v1(
-        execution, trajectory, ik, context, snapshot, installed_profile=None)
-    if intake["status"] != PROFILE_REQUIRED_STATUS:
-        raise ValueError("installed collision intake did not remain fail closed")
-    diagnostic = _candidate_diagnostic(fixture, context, snapshot, ik)
+    ik_ready = ik["status"] == IK_READY_STATUS
+    if ik_ready:
+        intake = prepare_typing_collision_intake_v1(
+            execution, trajectory, ik, context, snapshot, installed_profile=None)
+        if intake["status"] != PROFILE_REQUIRED_STATUS:
+            raise ValueError("installed collision intake did not remain fail closed")
+        diagnostic_input = ik
+        decision = "PASS_IK_RETAIN_INSTALLED_COLLISION_BLOCKER"
+    else:
+        accepted_prefix = []
+        for result in ik["joint_results"]:
+            if result["accepted"] is not True:
+                break
+            accepted_prefix.append(result)
+        if not accepted_prefix:
+            raise ValueError("canonical IK blocked before any candidate prefix existed")
+        intake = {
+            "status": "NOT_REACHED_CANONICAL_IK_BLOCKED",
+            "blockers": [
+                *ik["blockers"],
+                "INSTALLED_COLLISION_PROFILE_REQUIRED_DOWNSTREAM",
+                "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION",
+            ],
+            "installed_geometry_collision_screening_executed": False,
+            "continuous_collision_proven": False,
+            "physical_authority": False,
+        }
+        diagnostic_input = {**ik, "joint_results": accepted_prefix}
+        decision = "BLOCKED_CANONICAL_IK_PREFIX_DIAGNOSTIC_ONLY"
+    diagnostic = _candidate_diagnostic(
+        fixture, context, snapshot, diagnostic_input)
+    if diagnostic["profile_count"] != fixture["resource_limits"][
+            "expected_candidate_profile_count"]:
+        raise ValueError("candidate diagnostic profile count differs from fixture")
     core = {
         "schema": SCHEMA, "scope": SCOPE,
         "fixture_sha256": fixture["fixture_sha256"],
@@ -397,11 +424,14 @@ def run_typing_ik_collision(fixture_path: Path, *, workspace: Path) -> dict[str,
         "ik_screen": ik,
         "installed_collision_intake": intake,
         "candidate_collision_diagnostic": diagnostic,
+        "canonical_ik_route_accepted": ik_ready,
+        "candidate_diagnostic_sample_scope": (
+            "FULL_ROUTE" if ik_ready else "ACCEPTED_PREFIX_ONLY"),
         "installed_collision_gate_cleared": False,
         "controller_commands": [], "hardware_commands_generated": 0,
         "hardware_access": False, "hardware_writes": 0,
         "physical_movements": 0, "physical_authority": False,
-        "decision": "PASS_IK_RETAIN_INSTALLED_COLLISION_BLOCKER",
+        "decision": decision,
     }
     return {**core, "receipt_sha256": _sha(core)}
 
