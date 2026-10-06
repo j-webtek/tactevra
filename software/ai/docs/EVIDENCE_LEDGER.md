@@ -7132,3 +7132,71 @@ rewriting history. New entries must use a unique evidence ID.
   strict ModelMotionBatchV2 and arm planning boundary as a separate focused
   increment; keep collision installation and physical use blocked. Independently,
   qualify or reject the unchanged Stage A GPU campaign when it finishes.
+
+### E-20261006-INT-461 — main-bound semantic targets through the strict v2 trajectory boundary
+
+- Stage: S2 exploratory zero-authority integration.
+- Lane: AI/MODEL plus INTEGRATION; no arm-lane status or integration gate changed.
+- Base commit: `dccfdb107f9abac700e92388d632ef7070228e82`.
+- Claim commit: `095f8fc6f9bbbcc90a4191bc29efea732dd56433`.
+- Fixture/implementation freeze commit: `bd5da380`.
+- Evidence-producing commit: `c059e6bae35fad2d4ba41c785b146de1a2f9d2d4`.
+- Frozen fixture: `software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1.json`;
+  canonical fixture SHA-256
+  `ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac`;
+  file SHA-256
+  `1d1b027894e7dc9b7bf54454c32c7fec6d3849721cd1e2029e36b6032138bdc6`.
+  It binds implementation SHA-256
+  `b65086d21fedd4bba9d5f9c8cbd02982541122d1336853b5109cc9817ee1a0a4`,
+  the installed catalog, and the system manifest.
+- Commands: with `PYTHONPATH=software/ai;software/src`, twice run `python -m
+  rocell_ai.typing_twin_boundary_v1
+  software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1.json
+  --workspace . --output <external-result>`; `python -m pytest
+  software/ai/tests/test_typing_twin_boundary_v1.py
+  software/ai/tests/test_end_to_end_typing_twin.py
+  software/ai/tests/test_actual_output_compatibility_v1.py
+  software/tests/unit/test_model_motion_ingress_v2.py
+  software/tests/unit/test_typing_execution_plan_v1.py
+  software/tests/unit/test_typing_trajectory_plan_v1.py -q`; `python -m ruff
+  check software/ai/rocell_ai/typing_twin_boundary_v1.py
+  software/ai/tests/test_typing_twin_boundary_v1.py`; `python
+  scripts/ci/check_source_archive_footprint.py --json`; `python
+  scripts/maintain_repository.py verify`; `git diff --check`.
+- Result: `PASS_STRICT_BOUNDARY_AND_TRAJECTORY_PARTIAL_WORKSTREAM`. All 81
+  frozen combinations passed strict v2 decode, trusted registry ingress, and
+  deterministic Cartesian trajectory construction. The exact order
+  `H,E,L,L,O,SPACE,2,0,2,6` survived with zero differences. `Hello 2026!`
+  stopped before batch creation because `SHIFT` is absent from the installed
+  catalog. Both full outputs were byte-identical: receipt SHA-256
+  `f9a965a7ee1a099a75d1c72cfae6c3949298d504dc624df196a4e234ebe2433b`;
+  file SHA-256
+  `5a96b76b01b7a6fb8d7d2b24ff6f324c3daf960b38c92477a6281d571584208d`.
+  The compact summary file SHA-256 is
+  `bb05ac8deabf4d529c679f33e7e752512117283fea1ea634aeb6ccb403a36221`.
+  Sixty-six focused/shared boundary tests passed.
+- Preserved failure: the first focused test run had 1 failure and 4 passes
+  because the test read top-level keyboard profile fields as target IDs. The
+  test was corrected to use the same validated simulation-context catalog as
+  production; no fixture, range, gate, or observed sweep result changed.
+- External evidence: both outputs are retained under
+  `C:\MuJoCoWarp\evidence\issue190\main-extraction\workstream_1\typing_boundary_main_v1`
+  and backed up to
+  `F:\TactevraEvidence\issue190\main-extraction\workstream_1\typing_boundary_main_v1`;
+  2/2 hashes match.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: analytic nominal target centers and synthetic identities were
+  used. No IK, collision/swept-clearance admission, MuJoCo, Isaac, measured
+  calibration, real host/ADB effect, controller command, transport, permit,
+  hardware qualification, or physical authority was produced. The installed
+  catalog remains unchanged and collision installation remains blocked.
+- Supersedes: none; predecessor research boundary commit `8a2e9e1b` and fixture
+  SHA-256 `f96c686b640c8c993667760cd7bbac7eb57fef539fbcb4dae450289965b62ffa`
+  remain recorded.
+- Next dependency: bind this exact admitted trajectory to the separately
+  reviewed main-bound IK/collision screen only with an applicable installed or
+  explicitly exploratory candidate collision profile; continue to block
+  physical use and independently qualify or reject the running Stage A GPU
+  campaign when it completes.

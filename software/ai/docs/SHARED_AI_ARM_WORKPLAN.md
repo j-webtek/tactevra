@@ -1026,12 +1026,19 @@ from calibration only, scores held-out coverage and unsafe-scene acceptance,
 and checks a conservatively composed bound against the frozen target map. It
 emits only an offline review recommendation and installs no qualification.
 
+The main-bound Workstream 1 semantic stream now reaches the strict v2 batch,
+trusted registry ingress, deterministic execution-plan, and Cartesian
+trajectory-preparation boundary at evidence `E-20261006-INT-461`. The repeated
+targets in `hello 2026` remain ordered across 81 frozen range combinations,
+while the installed-catalog `SHIFT` gap stops before batch creation. This is a
+simulation-only zero-authority S2 increment; IK, collision admission, measured
+configuration, controller transport, and physical use remain outside its claim.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| AI/MODEL | S2 | main-bound typing-twin semantic targets through strict `ModelMotionBatchV2`, trusted ingress, execution-plan, and Cartesian trajectory preparation; compact simulation evidence and tests only | `feature/sim-ws1-boundary` | IN_PROGRESS |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
