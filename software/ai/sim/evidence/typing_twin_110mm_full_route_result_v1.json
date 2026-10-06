@@ -1,0 +1,2936 @@
+{
+  "batch_sha256": "82462b4bf8555b1a8c52170446c0b768b6bc538370fab8d880ad54f66fd92bd9",
+  "calibration_snapshot_sha256": "40fb8e71e018f6ab543ce2b6446fd3d2263c738d29f912040b7e5454d45244d8",
+  "candidate_collision_diagnostic": {
+    "can_clear_installed_collision_gate": false,
+    "classification": "EXPLORATORY_INCOMPLETE_CANDIDATE_DIAGNOSTIC",
+    "modeled_body_scope": "URDF link-origin spheres, passive stylus capsule, and pinned nominal workcell AABBs only",
+    "moving_cable_present": false,
+    "profile_count": 16,
+    "profiles": [
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "c6a8a9f5f3516228355dfbc8cf395dfa6acc166c94e69ef2d57b15a248093842",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "75dd84b6430acf11e7427c463b119e639dd9df5e5e219c8eaf419d53e881a06e",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "30cfcf123bc1e95b42b3d29904f3f71c123fb50e807c8cd0a59cda71280692ad",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "6e7b6591d2051d25d9cc87b418584a2c60649c86fa1d8583c70eb3be4f638f6a",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "e24fb1a21331a52b226b20fe8bb07b54fcbfd48f39770c03fa68d474d27d0a4f",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "692660fe17f557635b5f72f414658830177acb12f0dcd728199002ac5862c887",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {},
+        "collision_sample_count": 0,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "9b469184bb5e9106a895c8941f569a2db5921acf15a17630783fffb32faae84c",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "attachment:contact_tool/workcell:station:keyboard_left": 1
+        },
+        "collision_sample_count": 1,
+        "contract_sha256": "463c882603860af01ca2d9547b63a2405fc5340e157b073341e036d5aebd01e3",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 10.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "be62856c9881b0fece94379a3aa569ae15a9b02eb0969d16b5a43e80711bbdb3",
+        "sample_count": 24,
+        "status_counts": {
+          "CLEAR_AT_SAMPLED_POSE": 23,
+          "COLLISION_DETECTED": 1
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "a1c93a948674426b081f71eb96086d422530988a1824b9db44c1b3fd18080ffb",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "3ed714493be9dfdb854f4ea344e3915b1362dee11c8e3b6751a8a30d6dc812c9",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "b3892d29234eb3ffa269985082d9ec8ceeb147d34db169bcda852922ba272d28",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 0.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "307939dd6b67bd7eff01dfbb2e1b8b873e3b955cbda9af2121580804d1a742db",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "2509cb0ea5402831c54a2dc55fd0c1e813a68295cf6ac03b44fd4f07fb57e4c2",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 0.25,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "93ab63c48dd524725c0a4c7af05cce073e540b52bfbf97aa0aee9380a7f4bf8c",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 0.25,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "92295837d3378fc5964d0face6d31bfa372bfeb71b2a436e24702e9329fca47b",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      },
+      {
+        "collision_pair_counts": {
+          "attachment:contact_tool/workcell:station:keyboard_left": 1,
+          "robot:base_link/robot:link2": 24
+        },
+        "collision_sample_count": 24,
+        "contract_sha256": "a4742859c5a73be9589242720936bb07ac46016ff311c85f01fa90c353e46fb4",
+        "diagnostic_ready": true,
+        "parameters": {
+          "geometry_uncertainty_mm_per_body": 1.0,
+          "link_origin_sphere_radius_mm": 30.0,
+          "minimum_separation_mm": 5.0,
+          "pose_uncertainty_mm_per_body": 1.0,
+          "tip_radius_mm": 3.0,
+          "tool_length_mm": 110.0
+        },
+        "physical_geometry_complete": false,
+        "profile_receipt_sha256": "a61d4f40c811d3eb5238b17c77062c8b3a28a71bdae1230f4013ed45e71008ef",
+        "sample_count": 24,
+        "status_counts": {
+          "COLLISION_DETECTED": 24
+        }
+      }
+    ],
+    "unmodeled_installed_bodies": [
+      "base_and_factory_clamp",
+      "camera_holder",
+      "camera_module",
+      "camera_connector"
+    ]
+  },
+  "candidate_collision_sample_scope": "ACCEPTED_PREFIX_ONLY",
+  "candidate_continuous_collision_proven": false,
+  "canonical_ik_route_accepted": false,
+  "canonical_joint_continuity_accepted": false,
+  "controller_commands": [],
+  "decision": "BLOCKED_CANONICAL_IK_OR_CONTINUITY",
+  "execution_plan_sha256": "3cd7212f9cc6fcf26a3a365d2e423ab81caf991a9c66d40d80041f9d9fe06064",
+  "fixture_sha256": "6fdc49b8f87ed8b3767572079cd5ae3273dbc9697db2975ae0d2a34ee1b2ca3c",
+  "freshness_sha256": "ae48677891787496ab0e0bd7da8bd06d43da9007787e9116df37cf701e61376b",
+  "hardware_access": false,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "ik_accepted_sample_count": 24,
+  "ik_screen": {
+    "blockers": [
+      "IK_ROUTE_REJECTED:MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED"
+    ],
+    "build_snapshot_sha256": "c69e5e9881c5a36516b665255ffebc6da5bc5480eb41d773ed226c5e653b2c1b",
+    "calibration_snapshot_sha256": "40fb8e71e018f6ab543ce2b6446fd3d2263c738d29f912040b7e5454d45244d8",
+    "collision_screening_executed": false,
+    "continuous_collision_proven": false,
+    "controller_commands": [],
+    "evaluated_sample_count": 25,
+    "hardware_access": false,
+    "hardware_commands_generated": 0,
+    "ik_all_samples_accepted": false,
+    "ik_policy": {
+      "derived_maximum_plan_actions": 21,
+      "hard_implementation_caps": {
+        "ik_attempts_per_solve": 8,
+        "ik_iterations_per_attempt": 200,
+        "implementation_source_bytes": 20000000,
+        "implementation_source_files": 2048,
+        "individual_implementation_file_bytes": 5000000,
+        "kinematic_model_bytes": 1000000,
+        "plan_actions": 33,
+        "refinement_rounds": 3,
+        "route_targets": 16,
+        "task_jacobian_fk_evaluations_per_evaluated_waypoint": 11,
+        "total_ik_solves": 1024,
+        "waypoints_per_round": 512
+      },
+      "maximum_cartesian_step_mm": 5.0,
+      "maximum_joint_step_rad": 0.35,
+      "maximum_refinement_rounds": 0,
+      "maximum_route_targets": 10,
+      "maximum_total_ik_solves": 512,
+      "maximum_waypoints_per_round": 512,
+      "minimum_normalized_arm_joint_margin": 0.01,
+      "park_xy_board_mm": null,
+      "policy_hash": "982a7147b0051df0401ee8b604ac6565a65e67c37fcef980581884715112b5d6",
+      "policy_id": "BOUNDED_SEQUENTIAL_IK_REFINEMENT_V2"
+    },
+    "ik_screening_executed": true,
+    "joint_continuity_checked": true,
+    "joint_results": [
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          304.999003,
+          185.625692,
+          108.511322
+        ],
+        "action_index": null,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.0,
+          "link1_to_link2": 0.0,
+          "link2_to_link3": 0.0,
+          "link3_to_link4": 0.0,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.0,
+        "minimum_arm_joint_margin_rad": 0.332,
+        "minimum_normalized_arm_joint_margin": 0.112542,
+        "phase": "PARK",
+        "position_error_mm": 0.0,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 0,
+        "semantic_target": null,
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": 0.0,
+          "link1_to_link2": 0.0,
+          "link2_to_link3": 2.618,
+          "link3_to_link4": -1.0472,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": 0.0,
+            "link1_to_link2": 0.0,
+            "link2_to_link3": 2.618,
+            "link3_to_link4": -1.0472,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 22.094664,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.04526,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.254133,
+            294.462729,
+            158.66576,
+            73.727309,
+            21.826724
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 304.999003,
+            "y": 185.625692,
+            "z": 108.511322
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 0
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          301.153397,
+          184.250704,
+          105.793458
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.014098,
+          "link1_to_link2": 0.021274,
+          "link2_to_link3": 0.007471,
+          "link3_to_link4": 0.028746,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.028746,
+        "minimum_arm_joint_margin_rad": 0.324529,
+        "minimum_normalized_arm_joint_margin": 0.11001,
+        "phase": "TRANSIT",
+        "position_error_mm": 4.6e-05,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 2,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.014098,
+          "link1_to_link2": 0.021274,
+          "link2_to_link3": 2.625471,
+          "link3_to_link4": -1.075946,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.014098,
+            "link1_to_link2": 0.021274,
+            "link2_to_link3": 2.625471,
+            "link3_to_link4": -1.075946,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 22.394044,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.044655,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.197883,
+            295.74024,
+            159.266516,
+            73.78811,
+            21.532417
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 301.153394,
+            "y": 184.250662,
+            "z": 105.793438
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 1
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          297.30786,
+          182.875664,
+          103.07548
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013951,
+          "link1_to_link2": 0.021665,
+          "link2_to_link3": 0.006815,
+          "link3_to_link4": 0.02848,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.02848,
+        "minimum_arm_joint_margin_rad": 0.317714,
+        "minimum_normalized_arm_joint_margin": 0.1077,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.00011,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 2,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.02805,
+          "link1_to_link2": 0.042939,
+          "link2_to_link3": 2.632286,
+          "link3_to_link4": -1.104426,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.02805,
+            "link1_to_link2": 0.042939,
+            "link2_to_link3": 2.632286,
+            "link3_to_link4": -1.104426,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 22.684508,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.044083,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.14065,
+            297.068087,
+            159.896366,
+            73.850335,
+            21.254182
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 297.307786,
+            "y": 182.875632,
+            "z": 103.075554
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 2
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          293.462179,
+          181.500644,
+          100.357595
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013802,
+          "link1_to_link2": 0.022003,
+          "link2_to_link3": 0.006132,
+          "link3_to_link4": 0.028136,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.028136,
+        "minimum_arm_joint_margin_rad": 0.311581,
+        "minimum_normalized_arm_joint_margin": 0.105621,
+        "phase": "TRANSIT",
+        "position_error_mm": 8.7e-05,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.041852,
+          "link1_to_link2": 0.064943,
+          "link2_to_link3": 2.638419,
+          "link3_to_link4": -1.132562,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.041852,
+            "link1_to_link2": 0.064943,
+            "link2_to_link3": 2.638419,
+            "link3_to_link4": -1.132562,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 22.963489,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.043547,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.088984,
+            298.445568,
+            160.547909,
+            73.913867,
+            20.993717
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 293.462177,
+            "y": 181.500602,
+            "z": 100.357671
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 3
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          289.616576,
+          180.125712,
+          97.639659
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013649,
+          "link1_to_link2": 0.022289,
+          "link2_to_link3": 0.005427,
+          "link3_to_link4": 0.027717,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.027717,
+        "minimum_arm_joint_margin_rad": 0.306154,
+        "minimum_normalized_arm_joint_margin": 0.103781,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.00019,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.0555,
+          "link1_to_link2": 0.087232,
+          "link2_to_link3": 2.643846,
+          "link3_to_link4": -1.160278,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.0555,
+            "link1_to_link2": 0.087232,
+            "link2_to_link3": 2.643846,
+            "link3_to_link4": -1.160278,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 23.228499,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.043051,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.049877,
+            299.871958,
+            161.21363,
+            73.978579,
+            20.752519
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 289.616568,
+            "y": 180.125572,
+            "z": 97.639787
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 4
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          1e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          285.770984,
+          178.750904,
+          94.921857
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 1e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013494,
+          "link1_to_link2": 0.022519,
+          "link2_to_link3": 0.004698,
+          "link3_to_link4": 0.027217,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.027217,
+        "minimum_arm_joint_margin_rad": 0.301457,
+        "minimum_normalized_arm_joint_margin": 0.102189,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000366,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.068994,
+          "link1_to_link2": 0.109751,
+          "link2_to_link3": 2.648543,
+          "link3_to_link4": -1.187496,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.068994,
+            "link1_to_link2": 0.109751,
+            "link2_to_link3": 2.648543,
+            "link3_to_link4": -1.187496,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 23.477059,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.042595,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.030971,
+            301.346558,
+            161.885966,
+            74.044355,
+            20.532
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 285.770959,
+            "y": 178.750542,
+            "z": 94.921904
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 5
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          1e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          281.925415,
+          177.376303,
+          92.204479
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 1e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013336,
+          "link1_to_link2": 0.022691,
+          "link2_to_link3": 0.003945,
+          "link3_to_link4": 0.026637,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.026637,
+        "minimum_arm_joint_margin_rad": 0.297511,
+        "minimum_normalized_arm_joint_margin": 0.100851,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000917,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.08233,
+          "link1_to_link2": 0.132443,
+          "link2_to_link3": 2.652489,
+          "link3_to_link4": -1.214133,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.08233,
+            "link1_to_link2": 0.132443,
+            "link2_to_link3": 2.652489,
+            "link3_to_link4": -1.214133,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 23.706809,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.042182,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.04031,
+            302.868612,
+            162.557419,
+            74.111078,
+            20.333412
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 281.92535,
+            "y": 177.375512,
+            "z": 92.20402
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 6
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          2e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          278.079887,
+          176.00201,
+          89.488034
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 2e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013177,
+          "link1_to_link2": 0.022803,
+          "link2_to_link3": 0.003172,
+          "link3_to_link4": 0.025976,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.025976,
+        "minimum_arm_joint_margin_rad": 0.294339,
+        "minimum_normalized_arm_joint_margin": 0.099776,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.00244,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.095507,
+          "link1_to_link2": 0.155246,
+          "link2_to_link3": 2.655661,
+          "link3_to_link4": -1.240109,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.095507,
+            "link1_to_link2": 0.155246,
+            "link2_to_link3": 2.655661,
+            "link3_to_link4": -1.240109,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 23.915549,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041814,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.086274,
+            304.437339,
+            163.220673,
+            74.178633,
+            20.157859
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 278.079741,
+            "y": 176.000481,
+            "z": 89.486137
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 7
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          3e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          274.234425,
+          174.628136,
+          86.773311
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 3e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.013016,
+          "link1_to_link2": 0.022854,
+          "link2_to_link3": 0.002377,
+          "link3_to_link4": 0.025232,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.025232,
+        "minimum_arm_joint_margin_rad": 0.291962,
+        "minimum_normalized_arm_joint_margin": 0.097229,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.005734,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.108522,
+          "link1_to_link2": 0.1781,
+          "link2_to_link3": 2.658038,
+          "link3_to_link4": -1.265341,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.108522,
+            "link1_to_link2": 0.1781,
+            "link2_to_link3": 2.658038,
+            "link3_to_link4": -1.265341,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.101297,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041492,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.177467,
+            306.051935,
+            163.868712,
+            74.246907,
+            20.006287
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 274.234133,
+            "y": 174.625451,
+            "z": 86.768253
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 8
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          4e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          270.389057,
+          173.254794,
+          84.061455
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 4e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.012853,
+          "link1_to_link2": 0.022842,
+          "link2_to_link3": 0.001564,
+          "link3_to_link4": 0.024407,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.024407,
+        "minimum_arm_joint_margin_rad": 0.281049,
+        "minimum_normalized_arm_joint_margin": 0.089461,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.011929,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.121376,
+          "link1_to_link2": 0.200942,
+          "link2_to_link3": 2.659602,
+          "link3_to_link4": -1.289748,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.121376,
+            "link1_to_link2": 0.200942,
+            "link2_to_link3": 2.659602,
+            "link3_to_link4": -1.289748,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.262331,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041216,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.322605,
+            307.71159,
+            164.494926,
+            74.315792,
+            19.879483
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 270.388524,
+            "y": 173.250421,
+            "z": 84.05037
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 9
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          1e-06,
+          5e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          266.543816,
+          171.882079,
+          81.354024
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 5e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.01269,
+          "link1_to_link2": 0.022766,
+          "link2_to_link3": 0.000732,
+          "link3_to_link4": 0.023499,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.023499,
+        "minimum_arm_joint_margin_rad": 0.257549,
+        "minimum_normalized_arm_joint_margin": 0.08198,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.022571,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.134065,
+          "link1_to_link2": 0.223708,
+          "link2_to_link3": 2.660334,
+          "link3_to_link4": -1.313247,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.134065,
+            "link1_to_link2": 0.223708,
+            "link2_to_link3": 2.660334,
+            "link3_to_link4": -1.313247,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.397241,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040988,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.530384,
+            309.4155,
+            165.09322,
+            74.385181,
+            19.778071
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 266.542915,
+            "y": 171.875391,
+            "z": 81.332486
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 10
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          1e-06,
+          3e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          262.69881,
+          170.510547,
+          78.601543
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 3e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.012525,
+          "link1_to_link2": 0.022989,
+          "link2_to_link3": 9.6e-05,
+          "link3_to_link4": 0.023083,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.023083,
+        "minimum_arm_joint_margin_rad": 0.234466,
+        "minimum_normalized_arm_joint_margin": 0.074633,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.01663,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.146591,
+          "link1_to_link2": 0.246696,
+          "link2_to_link3": 2.66043,
+          "link3_to_link4": -1.33633,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.146591,
+            "link1_to_link2": 0.246696,
+            "link2_to_link3": 2.66043,
+            "link3_to_link4": -1.33633,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.511139,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040798,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            482.788951,
+            311.162403,
+            165.663354,
+            74.455061,
+            19.696716
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 262.697306,
+            "y": 170.500361,
+            "z": 78.614603
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 11
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          258.851812,
+          169.125717,
+          75.897366
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.01236,
+          "link1_to_link2": 0.022524,
+          "link2_to_link3": 0.001028,
+          "link3_to_link4": 0.021493,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.022524,
+        "minimum_arm_joint_margin_rad": 0.212973,
+        "minimum_normalized_arm_joint_margin": 0.067791,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000762,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 2,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.158951,
+          "link1_to_link2": 0.269221,
+          "link2_to_link3": 2.659402,
+          "link3_to_link4": -1.357824,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.158951,
+            "link1_to_link2": 0.269221,
+            "link2_to_link3": 2.659402,
+            "link3_to_link4": -1.357824,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.590213,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040667,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            483.153568,
+            312.965114,
+            166.192513,
+            74.525805,
+            19.648206
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 258.851697,
+            "y": 169.125331,
+            "z": 75.896719
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 12
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          255.006155,
+          167.750687,
+          73.179606
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.012195,
+          "link1_to_link2": 0.022424,
+          "link2_to_link3": 0.001747,
+          "link3_to_link4": 0.020676,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.022424,
+        "minimum_arm_joint_margin_rad": 0.192296,
+        "minimum_normalized_arm_joint_margin": 0.06121,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000865,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.171145,
+          "link1_to_link2": 0.291644,
+          "link2_to_link3": 2.657655,
+          "link3_to_link4": -1.3785,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.171145,
+            "link1_to_link2": 0.291644,
+            "link2_to_link3": 2.657655,
+            "link3_to_link4": -1.3785,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.645003,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040576,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            483.588641,
+            314.801421,
+            166.680239,
+            74.596345,
+            19.622178
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 255.006088,
+            "y": 167.750301,
+            "z": 73.178835
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 13
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          1e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          251.160676,
+          166.376332,
+          70.463438
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 1e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.012029,
+          "link1_to_link2": 0.022189,
+          "link2_to_link3": 0.00259,
+          "link3_to_link4": 0.019599,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.022189,
+        "minimum_arm_joint_margin_rad": 0.172698,
+        "minimum_normalized_arm_joint_margin": 0.054971,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.00271,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.183174,
+          "link1_to_link2": 0.313833,
+          "link2_to_link3": 2.655065,
+          "link3_to_link4": -1.398099,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.183174,
+            "link1_to_link2": 0.313833,
+            "link2_to_link3": 2.655065,
+            "link3_to_link4": -1.398099,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.672736,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040531,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            484.113413,
+            316.679058,
+            167.122866,
+            74.667018,
+            19.621391
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 251.16048,
+            "y": 166.375271,
+            "z": 70.460952
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 14
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          1e-06,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          247.315324,
+          165.002534,
+          67.749166
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 1e-06,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.011863,
+          "link1_to_link2": 0.021917,
+          "link2_to_link3": 0.003433,
+          "link3_to_link4": 0.018485,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.021917,
+        "minimum_arm_joint_margin_rad": 0.154213,
+        "minimum_normalized_arm_joint_margin": 0.049087,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.006531,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.195037,
+          "link1_to_link2": 0.335751,
+          "link2_to_link3": 2.651632,
+          "link3_to_link4": -1.416583,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.195037,
+            "link1_to_link2": 0.335751,
+            "link2_to_link3": 2.651632,
+            "link3_to_link4": -1.416583,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.674037,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040528,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            484.73345,
+            318.597412,
+            167.517814,
+            74.737752,
+            19.645486
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 247.314871,
+            "y": 165.000241,
+            "z": 67.743068
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 15
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          243.469291,
+          163.625303,
+          65.02552
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.011697,
+          "link1_to_link2": 0.0217,
+          "link2_to_link3": 0.00426,
+          "link3_to_link4": 0.017438,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.0217,
+        "minimum_arm_joint_margin_rad": 0.136774,
+        "minimum_normalized_arm_joint_margin": 0.043537,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000349,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 3,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.206734,
+          "link1_to_link2": 0.35745,
+          "link2_to_link3": 2.647372,
+          "link3_to_link4": -1.434022,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.206734,
+            "link1_to_link2": 0.35745,
+            "link2_to_link3": 2.647372,
+            "link3_to_link4": -1.434022,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.650347,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040567,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            485.452684,
+            320.559522,
+            167.864177,
+            74.808647,
+            19.693544
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 243.469262,
+            "y": 163.625211,
+            "z": 65.025185
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 16
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          239.623707,
+          162.250316,
+          62.307932
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.011532,
+          "link1_to_link2": 0.021342,
+          "link2_to_link3": 0.005093,
+          "link3_to_link4": 0.016249,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.021342,
+        "minimum_arm_joint_margin_rad": 0.120525,
+        "minimum_normalized_arm_joint_margin": 0.038364,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000647,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 3,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.218266,
+          "link1_to_link2": 0.378793,
+          "link2_to_link3": 2.642278,
+          "link3_to_link4": -1.450271,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.218266,
+            "link1_to_link2": 0.378793,
+            "link2_to_link3": 2.642278,
+            "link3_to_link4": -1.450271,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.602329,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040647,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            486.275619,
+            322.559323,
+            168.159097,
+            74.879364,
+            19.76543
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 239.623653,
+            "y": 162.250181,
+            "z": 62.307301
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 17
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          235.778136,
+          160.875336,
+          59.590493
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.011367,
+          "link1_to_link2": 0.021009,
+          "link2_to_link3": 0.005912,
+          "link3_to_link4": 0.015097,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.021009,
+        "minimum_arm_joint_margin_rad": 0.105428,
+        "minimum_normalized_arm_joint_margin": 0.033559,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.001095,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 3,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.229632,
+          "link1_to_link2": 0.399802,
+          "link2_to_link3": 2.636367,
+          "link3_to_link4": -1.465368,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.229632,
+            "link1_to_link2": 0.399802,
+            "link2_to_link3": 2.636367,
+            "link3_to_link4": -1.465368,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.531756,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040763,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            487.204932,
+            324.598198,
+            168.402429,
+            74.949937,
+            19.860174
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 235.778044,
+            "y": 160.87515,
+            "z": 59.589418
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 18
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          231.932583,
+          159.500364,
+          56.87325
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.011202,
+          "link1_to_link2": 0.020659,
+          "link2_to_link3": 0.006717,
+          "link3_to_link4": 0.013942,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.020659,
+        "minimum_arm_joint_margin_rad": 0.091486,
+        "minimum_normalized_arm_joint_margin": 0.029121,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.00174,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 3,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.240834,
+          "link1_to_link2": 0.420461,
+          "link2_to_link3": 2.629649,
+          "link3_to_link4": -1.47931,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.240834,
+            "link1_to_link2": 0.420461,
+            "link2_to_link3": 2.629649,
+            "link3_to_link4": -1.47931,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.440366,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.040916,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            488.242718,
+            326.675428,
+            168.59394,
+            75.020302,
+            19.976899
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 231.932435,
+            "y": 159.50012,
+            "z": 56.871534
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 19
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          228.086884,
+          158.125351,
+          54.153644
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.011039,
+          "link1_to_link2": 0.020316,
+          "link2_to_link3": 0.007502,
+          "link3_to_link4": 0.012814,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.020316,
+        "minimum_arm_joint_margin_rad": 0.078672,
+        "minimum_normalized_arm_joint_margin": 0.025042,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000267,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 2,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.251873,
+          "link1_to_link2": 0.440777,
+          "link2_to_link3": 2.622147,
+          "link3_to_link4": -1.492124,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.251873,
+            "link1_to_link2": 0.440777,
+            "link2_to_link3": 2.622147,
+            "link3_to_link4": -1.492124,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.330191,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041101,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            489.389551,
+            328.790381,
+            168.73389,
+            75.090401,
+            20.114497
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 228.086827,
+            "y": 158.12509,
+            "z": 54.153651
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 20
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          224.241348,
+          156.750629,
+          51.435735
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.010876,
+          "link1_to_link2": 0.019938,
+          "link2_to_link3": 0.008279,
+          "link3_to_link4": 0.011658,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.019938,
+        "minimum_arm_joint_margin_rad": 0.067014,
+        "minimum_normalized_arm_joint_margin": 0.021331,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000584,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 2,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.26275,
+          "link1_to_link2": 0.460714,
+          "link2_to_link3": 2.613868,
+          "link3_to_link4": -1.503783,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.26275,
+            "link1_to_link2": 0.460714,
+            "link2_to_link3": 2.613868,
+            "link3_to_link4": -1.503783,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.203002,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041317,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            490.646966,
+            330.941981,
+            168.822746,
+            75.160161,
+            20.272154
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 224.241218,
+            "y": 156.75006,
+            "z": 51.435767
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 21
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          220.395651,
+          155.37518,
+          48.71787
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.010715,
+          "link1_to_link2": 0.019568,
+          "link2_to_link3": 0.009041,
+          "link3_to_link4": 0.010527,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.019568,
+        "minimum_arm_joint_margin_rad": 0.056486,
+        "minimum_normalized_arm_joint_margin": 0.01798,
+        "phase": "TRANSIT",
+        "position_error_mm": 0.000156,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.273464,
+          "link1_to_link2": 0.480282,
+          "link2_to_link3": 2.604828,
+          "link3_to_link4": -1.51431,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.273464,
+            "link1_to_link2": 0.480282,
+            "link2_to_link3": 2.604828,
+            "link3_to_link4": -1.51431,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 24.060817,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041561,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            492.015257,
+            333.130518,
+            168.861461,
+            75.229554,
+            20.448818
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 220.395609,
+            "y": 155.37503,
+            "z": 48.717884
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 22
+      },
+      {
+        "accepted": true,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          216.550102,
+          154.000349,
+          45.99988
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": true,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": null,
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.010554,
+          "link1_to_link2": 0.019199,
+          "link2_to_link3": 0.009774,
+          "link3_to_link4": 0.009425,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.019199,
+        "minimum_arm_joint_margin_rad": 0.047062,
+        "minimum_normalized_arm_joint_margin": 0.01498,
+        "phase": "HOVER",
+        "position_error_mm": 0.000383,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.284019,
+          "link1_to_link2": 0.499481,
+          "link2_to_link3": 2.595054,
+          "link3_to_link4": -1.523735,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": {
+          "arm_joint_positions_rad": {
+            "base_link_to_link1": -0.284019,
+            "link1_to_link2": 0.499481,
+            "link2_to_link3": 2.595054,
+            "link3_to_link4": -1.523735,
+            "link4_to_link5": 0.0
+          },
+          "collision_evaluated": false,
+          "condition_number": 23.905835,
+          "finite_difference_fk_evaluations": 11,
+          "finite_difference_step_rad": 1e-05,
+          "full_column_rank": true,
+          "hardware_commands_generated": 0,
+          "jacobi_eigen_solver": {
+            "algorithm": "BOUNDED_CYCLIC_SYMMETRIC_JACOBI_V1",
+            "maximum_sweeps": 32,
+            "relative_tolerance": 0.0,
+            "sweeps": 5
+          },
+          "limitations": [
+            "Residual-row scaling follows the pinned IK orientation weight.",
+            "The metric is local to one nominal joint state and tool length.",
+            "It is not a full 6D geometric manipulability, force, dynamics, or physical singularity certificate."
+          ],
+          "live_motion_authorized": false,
+          "metric_scope": "LOCAL_SOLVER_WEIGHTED_FIVE_CONSTRAINT_TASK_ONLY",
+          "normalized_minimum_singular_value": 0.041831,
+          "numerical_rank": 5,
+          "orientation_weight_mm_per_rad": 80.0,
+          "physical_singularity_acceptance": false,
+          "rank_cutoff_interpretation": "CONSERVATIVE_NUMERICAL_FLOOR_AFTER_GRAM_EIGENDECOMPOSITION",
+          "rank_relative_tolerance": 0.0,
+          "schema": "rocell.simulation.solver_weighted_task_jacobian.v1",
+          "simulation_only": true,
+          "singular_values_solver_weighted_mm_per_rad": [
+            493.492434,
+            335.354006,
+            168.851126,
+            75.298496,
+            20.643179
+          ],
+          "target_tip_position_board_mm": {
+            "frame": "board",
+            "x": 216.55,
+            "y": 154.0,
+            "z": 46.0
+          },
+          "task_shape": {
+            "arm_joint_columns": 5,
+            "residual_rows": 6
+          },
+          "tool_yaw_about_aligned_z_constrained": false
+        },
+        "solver_weighted_task_jacobian_numerical_rank_passed": true,
+        "waypoint_sequence": 23
+      },
+      {
+        "accepted": false,
+        "achieved_hand_tcp_z_axis_board": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "achieved_tip_position_board_mm": [
+          216.550286,
+          154.000981,
+          40.999267
+        ],
+        "action_index": 0,
+        "adjacent_joint_delta_passed": true,
+        "alignment_error_rad": 0.0,
+        "arm_margin_passed": false,
+        "attempt_count": 4,
+        "controller_intersection_passed": true,
+        "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+        "hardware_commands_generated": 0,
+        "ik_status": "CONVERGED",
+        "joint_deltas_rad": {
+          "base_link_to_link1": 0.0,
+          "link1_to_link2": 0.03385,
+          "link2_to_link3": 0.010914,
+          "link3_to_link4": 0.044764,
+          "link4_to_link5": 0.0
+        },
+        "maximum_joint_delta_rad": 0.044764,
+        "minimum_arm_joint_margin_rad": 0.002297,
+        "minimum_normalized_arm_joint_margin": 0.000731,
+        "phase": "APPROACH",
+        "position_error_mm": 0.001257,
+        "previous_solution_seed_supplied": true,
+        "selected_attempt_index": 1,
+        "semantic_target": "H",
+        "solution_arm_joint_positions_rad": {
+          "base_link_to_link1": -0.284019,
+          "link1_to_link2": 0.533331,
+          "link2_to_link3": 2.605968,
+          "link3_to_link4": -1.568499,
+          "link4_to_link5": 0.0
+        },
+        "solver_weighted_task_jacobian": null,
+        "solver_weighted_task_jacobian_numerical_rank_passed": null,
+        "waypoint_sequence": 24
+      }
+    ],
+    "kinematic_model_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "next_required_stage": "CORRECT_IK_COMPATIBILITY_OR_ROUTE_CONTINUITY",
+    "physical_authority": false,
+    "sample_count": 314,
+    "schema": "rocell.typing_trajectory_ik_screen.v1",
+    "seed": {
+      "build_snapshot_sha256": "c69e5e9881c5a36516b665255ffebc6da5bc5480eb41d773ed226c5e653b2c1b",
+      "calibration_snapshot_sha256": "40fb8e71e018f6ab543ce2b6446fd3d2263c738d29f912040b7e5454d45244d8",
+      "controller_feedback_claimed": false,
+      "joint_positions_rad": {
+        "base_link_to_link1": 0.0,
+        "link1_to_link2": 0.0,
+        "link2_to_link3": 2.618,
+        "link3_to_link4": -1.0472,
+        "link4_to_link5": 0.0
+      },
+      "physical_measurement_claimed": false,
+      "schema": "rocell.typing_trajectory_ik_seed.v1",
+      "seed_id": "typing-twin-110mm-synthetic-ready-v1",
+      "seed_sha256": "1895a8b3db0852bdbb658488e26c0d131e56d35c3d0b5bd058d2df0a07529a89",
+      "source_kind": "SYNTHETIC_OFFLINE"
+    },
+    "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+    "trajectory_policy_sha256": "066f87462773bdc5b953d5aa7b21657ca6d1f43992aaaa48402119150437e833",
+    "typing_execution_plan_sha256": "3cd7212f9cc6fcf26a3a365d2e423ab81caf991a9c66d40d80041f9d9fe06064",
+    "typing_trajectory_ik_screen_sha256": "cf2ef551deabef0310e62c7f73b6bfb4fc794ead784bb4f58ea8d8ffb0559719",
+    "typing_trajectory_plan_sha256": "1c73034dbece0c0c434b1c579de6269352397e130bbb5344f9fd1a96a0cc8c3f"
+  },
+  "ingress_sha256": "0634fe4bebd620b7cc48a55231817cbf1c6ac4f1299e8d9b279bd83d7ee020ae",
+  "installed_collision_gate_cleared": false,
+  "installed_collision_intake": {
+    "blockers": [
+      "IK_ROUTE_REJECTED:MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED"
+    ],
+    "continuous_collision_proven": false,
+    "installed_geometry_collision_screening_executed": false,
+    "physical_authority": false,
+    "status": "NOT_REACHED_CANONICAL_IK_BLOCKED"
+  },
+  "limitations": [
+    "Synthetic calibration and ready-state seed are not physical observations.",
+    "The full frozen route is the parent ten-action Hello 2026 route; this increment does not expand it to every commissioned target.",
+    "Candidate collision geometry uses URDF link-origin spheres, a passive-stylus capsule, and pinned nominal workcell AABBs rather than installed measured geometry.",
+    "Candidate collision evaluation is performed at canonical trajectory samples and is not continuous swept-volume proof.",
+    "The installed collision profile remains absent, so no collision result can authorize motion.",
+    "The 110 mm tool and 25 mm hover are exploratory values and are not installed physical measurements."
+  ],
+  "maximum_adjacent_joint_delta_rad": 0.028746,
+  "minimum_normalized_arm_joint_margin": 0.01498,
+  "ordered_targets": [
+    "H",
+    "E",
+    "L",
+    "L",
+    "O",
+    "SPACE",
+    "2",
+    "0",
+    "2",
+    "6"
+  ],
+  "parent_fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "725d8ad47a1578f37bcd3de4e973b85c452d882a9fe62bcc8478f929af4d6926",
+  "reconstruction": {
+    "hover_clearance_mm": 25.0,
+    "tool_length_mm": 110.0
+  },
+  "schema": "tactevra.typing_twin_110mm_full_route_receipt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "trajectory_plan_sha256": "1c73034dbece0c0c434b1c579de6269352397e130bbb5344f9fd1a96a0cc8c3f",
+  "trajectory_sample_count": 314
+}

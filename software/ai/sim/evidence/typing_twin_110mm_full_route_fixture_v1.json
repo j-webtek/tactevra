@@ -1,0 +1,105 @@
+{
+  "candidate_collision_ranges": {
+    "geometry_uncertainty_mm_per_body": [
+      0.25,
+      1.0
+    ],
+    "link_origin_sphere_radius_mm": [
+      10.0,
+      30.0
+    ],
+    "minimum_separation_mm": [
+      0.0,
+      5.0
+    ],
+    "pose_uncertainty_mm_per_body": [
+      0.25,
+      1.0
+    ],
+    "tip_radius_mm": [
+      3.0
+    ],
+    "tool_length_mm": [
+      110.0
+    ]
+  },
+  "claim_commit": "174c67e4d0eb9322a0d983f10271051cb4674737",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "candidate_collision": "REPORT_EVERY_FROZEN_PROFILE_AND_SAMPLE;NEVER_CLEAR_INSTALLED_GATE",
+    "candidate_continuous_collision_proven_must_be": false,
+    "continuity": "EVERY_CANONICAL_ADJACENT_JOINT_STEP_ACCEPTED",
+    "continuity_threshold_change_count_maximum": 0,
+    "ik": "EVERY_EXACT_TRAJECTORY_SAMPLE_ACCEPTED",
+    "ik_threshold_change_count_maximum": 0,
+    "installed_collision_gate_must_remain_blocked": true,
+    "semantic_target_order_change_count_maximum": 0,
+    "target_coordinate_change_count_maximum": 0
+  },
+  "fixture_sha256": "6fdc49b8f87ed8b3767572079cd5ae3273dbc9697db2975ae0d2a34ee1b2ca3c",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    },
+    "collision_engine": {
+      "path": "software/src/rocell/simulation/collision.py",
+      "sha256": "7c6aaad9f5b97de14464b9c114b58aed900350163e388996daf0624a110d0fa9"
+    },
+    "collision_intake": {
+      "path": "software/src/rocell/application/typing_collision_intake_v1.py",
+      "sha256": "2a17e23b927f32bddd4e12e89a7c9acc7b6ccea727d46b1d1715ac6f086d7aa9"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_110mm_full_route_v1.py",
+      "sha256": "d185f02361aa2a6dc592f724fe75497e8c4e48962c0f90eabc502aa49583589a"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "Synthetic calibration and ready-state seed are not physical observations.",
+    "The full frozen route is the parent ten-action Hello 2026 route; this increment does not expand it to every commissioned target.",
+    "Candidate collision geometry uses URDF link-origin spheres, a passive-stylus capsule, and pinned nominal workcell AABBs rather than installed measured geometry.",
+    "Candidate collision evaluation is performed at canonical trajectory samples and is not continuous swept-volume proof.",
+    "The installed collision profile remains absent, so no collision result can authorize motion.",
+    "The 110 mm tool and 25 mm hover are exploratory values and are not installed physical measurements."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "reconstruction": {
+    "hover_clearance_mm": 25.0,
+    "tool_length_mm": 110.0
+  },
+  "resource_limits": {
+    "expected_candidate_profile_count": 16,
+    "maximum_ik_samples": 512
+  },
+  "route": {
+    "config_id": "typing-twin-110mm-25mm-full-route-v1",
+    "tool_profile_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "trajectory_policy_id": "typing-twin-110mm-25mm-quintic-v1"
+  },
+  "schema": "tactevra.typing_twin_110mm_full_route_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}
