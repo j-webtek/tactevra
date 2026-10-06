@@ -35,8 +35,19 @@ from rocell.application.typing_trajectory_plan_v1 import (
 )
 from rocell.application.trajectory_simulation import TrajectorySimulationPolicy
 from rocell.calibration import PlannerCalibrationSnapshot, required_planner_artifact_ids
-from rocell.geometry import JointPosition, RigidTransform, Rotation3, Vec3
-from rocell.kinematics import ARM_JOINT_NAMES
+from rocell.geometry import (
+    JointPosition,
+    Point3Mm as GeometryPoint3Mm,
+    RigidTransform,
+    Rotation3,
+    Vec3,
+)
+from rocell.kinematics import (
+    ARM_JOINT_NAMES,
+    BoardToolTipTarget,
+    IkOptions,
+    RoArmM3NumericalIk,
+)
 from rocell.models import Point3Mm, SpeedClass, decode_model_motion_batch_v2_json
 from rocell.simulation.collision import (
     CapsuleMm,
@@ -133,6 +144,31 @@ def _synthetic_snapshot(context: Any) -> PlannerCalibrationSnapshot:
         controller_correlation={"model": "synthetic-offline-test"},
         target_map_sha256=context.targets.content_sha256,
     )
+
+
+def _synthetic_ready_tip(context: Any,
+                         snapshot: PlannerCalibrationSnapshot) -> GeometryPoint3Mm:
+    """Derive the route origin from the exact seed and pinned kinematic model."""
+    model = load_pinned_urdf(
+        context.scenario.model_path, context.scenario.model_sha256).model
+    bounds = {name: context.scenario.controller_joint_intersection_rad[name]
+              for name in ARM_JOINT_NAMES}
+    solver = RoArmM3NumericalIk(
+        model=model,
+        board_T_world=RigidTransform(
+            "board", "world", snapshot.board_T_vendor_world.rotation,
+            snapshot.board_T_vendor_world.translation_mm),
+        hand_tcp_to_tip_z_mm=snapshot.hand_T_tool.translation_mm.z,
+        fixed_gripper_position=context.scenario.fixed_gripper_position,
+        ready_arm_joint_positions=context.scenario.ready_arm_joint_positions_rad,
+        gripper_bounds_rad=context.scenario.controller_gripper_intersection_rad,
+        options=IkOptions(), joint_bounds_rad=bounds)
+    seed = {name: JointPosition.radians(
+        context.scenario.ready_arm_joint_positions_rad[name].value)
+        for name in ARM_JOINT_NAMES}
+    return solver.evaluate(
+        BoardToolTipTarget(GeometryPoint3Mm("board", 0.0, 0.0, 0.0)),
+        seed).tip_position_board_mm
 
 
 def _candidate_contract(context: Any, model: Any, *, link_radius_mm: float,
@@ -298,6 +334,13 @@ def run_typing_ik_collision(fixture_path: Path, *, workspace: Path) -> dict[str,
         ingress, registry=registry, current_monotonic_ns=10_000_000_000)
     snapshot = _synthetic_snapshot(context)
     route = fixture["route"]
+    if route.get("route_reference_point_mode") == "SYNTHETIC_READY_TIP":
+        ready_tip = _synthetic_ready_tip(context, snapshot)
+        route_reference = Point3Mm("board", ready_tip.x, ready_tip.y, ready_tip.z)
+    elif route.get("route_reference_point_mode") == "FIXED_BOARD_POINT":
+        route_reference = Point3Mm("board", *route["route_reference_point_mm"])
+    else:
+        raise ValueError("unsupported route_reference_point_mode")
     execution = compile_typing_execution_plan_v1(
         batch, ingress,
         config=TypingExecutionConfigV1(
@@ -305,7 +348,7 @@ def run_typing_ik_collision(fixture_path: Path, *, workspace: Path) -> dict[str,
             calibration_snapshot_sha256=snapshot.snapshot_sha256,
             tool_profile_sha256=route["tool_profile_sha256"],
             dynamics_profile_sha256=route["dynamics_profile_sha256"],
-            route_reference_point=Point3Mm("board", *route["route_reference_point_mm"]),
+            route_reference_point=route_reference,
             hover_clearance_mm=route["hover_clearance_mm"],
             settle_position_tolerance_mm=route["settle_position_tolerance_mm"],
             settle_velocity_tolerance_mm_s=route["settle_velocity_tolerance_mm_s"],

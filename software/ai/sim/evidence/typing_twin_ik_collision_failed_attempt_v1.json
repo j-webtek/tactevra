@@ -12,7 +12,8 @@
   "log_sha256": "4c4c73effc3f368ca5184cd18061df953d798716af26d1d68869f4ffef832c55",
   "physical_authority": false,
   "physical_movements": 0,
-  "record_sha256": "b414c1497212e3400be5be2ca2b115eb7b2ebc286f47de6f1b443a27d09991fa",
+  "record_sha256": "b542dad7aa6501ebf52728e01fb478e8c23edb10402eeb73d07294880ce69a22",
   "schema": "tactevra.typing_twin_ik_collision_failed_attempt.v1",
-  "status": "FAILED_BEFORE_CANDIDATE_COLLISION_METRICS"
+  "status": "FAILED_BEFORE_CANDIDATE_COLLISION_METRICS",
+  "traceback": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\WebTek\\Desktop\\tactevra-ws1-ik-collision\\software\\ai\\rocell_ai\\typing_twin_ik_collision_v1.py\", line 382, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"C:\\Users\\WebTek\\Desktop\\tactevra-ws1-ik-collision\\software\\ai\\rocell_ai\\typing_twin_ik_collision_v1.py\", line 372, in main\n    result = run_typing_ik_collision(args.fixture, workspace=args.workspace)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\WebTek\\Desktop\\tactevra-ws1-ik-collision\\software\\ai\\rocell_ai\\typing_twin_ik_collision_v1.py\", line 338, in run_typing_ik_collision\n    raise ValueError(f\"canonical IK did not admit the frozen route: {ik['blockers']}\")\nValueError: canonical IK did not admit the frozen route: ['IK_ROUTE_REJECTED:MAXIMUM_ADJACENT_JOINT_DELTA_EXCEEDED']\n"
 }
