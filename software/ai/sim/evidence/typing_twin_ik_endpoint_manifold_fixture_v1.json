@@ -1,0 +1,91 @@
+{
+  "baseline_control": {
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "unchanged_minimum_normalized_joint_margin": 0.01
+  },
+  "claim_commit": "79ff5d44ea5588ff884feb7fe87dbea406446315",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "closest_approach_uses_only_margin_and_rank_admissible_points": true,
+    "collision_gate_must_remain_blocked": true,
+    "diagnostic_remains_uninstalled": true,
+    "exact_hover_feasible_requires_at_least_one_canonical_candidate_to_pass_all_post_ik_gates": true,
+    "ik_threshold_change_count_maximum": 0,
+    "point_count_exact": 729,
+    "target_coordinate_change_count_maximum": 0,
+    "target_order_difference_count_maximum": 0,
+    "unchanged_minimum_normalized_arm_joint_margin": 0.01
+  },
+  "fixture_sha256": "d6e44bf19b9966043b5d9dc253ff4ae1e9cb92557571a6d4a323cd5d42a657d8",
+  "implementation_commit": "e8d54d25646f8c889fa43e156ff0e7ec6fe0ee92",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/kinematics/ik.py",
+      "sha256": "4feb5adb8c33d7b3017f29c17130dc934269ae159bed88b06d8aa63d8474569a"
+    },
+    "canonical_trajectory_evaluator": {
+      "path": "software/src/rocell/application/trajectory_simulation.py",
+      "sha256": "0177c218d1fbb3cbb3160189469081435fa6b17946e3602bd80313f1c0a46f78"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_endpoint_manifold_study_v1.py",
+      "sha256": "ab6999b5d70c2403130e4bab6b63bb94855202c08495755f093db5425fe23179"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "All calibration, ready state, exact hover, and nearby sample points are synthetic offline evidence.",
+    "The 40 mm cube and 5 mm spacing are bounded diagnostics and cannot prove global endpoint infeasibility.",
+    "Pointwise IK feasibility does not prove a continuous route between configurations.",
+    "Collision, camera clearance, dynamics, contact, swept-volume safety, installed geometry, and physical repeatability are not evaluated.",
+    "No diagnostic result installs a planner or grants command, permit, transport, controller, hardware-write, movement, or physical authority."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_candidate_evaluations": 23328,
+    "maximum_points": 729,
+    "maximum_route_samples": 512
+  },
+  "schema": "tactevra.typing_twin_ik_endpoint_manifold_study_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "axis_offsets_mm": [
+      -20.0,
+      -15.0,
+      -10.0,
+      -5.0,
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0
+    ],
+    "exact_hover_must_be_included": true,
+    "reference": "EXACT_FIRST_H_HOVER",
+    "spacing_mm": 5.0
+  }
+}
