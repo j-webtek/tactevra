@@ -1046,12 +1046,20 @@ hash-bound route or start-state correction that passes the existing margin gate,
 followed by full-route collision evidence using reviewed candidate or installed
 geometry.
 
+Evidence `E-20261006-INT-463` rejects a seed-only correction. Sixty-four frozen
+Halton interior seeds reproduced the same ready-tip point and replayed the exact
+parent trajectory, but every candidate stopped at sample 15 with the same
+normalized-arm-joint-margin rejection. Target order, target coordinates, the
+260 Cartesian samples, and the `0.01` margin gate were unchanged. The next
+bounded question is therefore route geometry or canonical branch-selection
+policy, not additional start-seed sampling; no route correction is installed.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| AI/MODEL + INTEGRATION | S2 | `software/ai/rocell_ai/typing_twin_ik_route_study_v1.py`, focused tests, one frozen fixture/result manifest, and shared evidence docs | `feature/sim-ws1-ik-route-correction` | ACTIVE — CPU-only route/start-state study; unchanged 0.01 IK margin, target order, and coordinates; zero authority |
+| AI/MODEL + INTEGRATION | S2 | `software/ai/rocell_ai/typing_twin_ik_route_study_v1.py`, focused tests, one frozen fixture/result manifest, and shared evidence docs | `feature/sim-ws1-ik-route-correction` | ACTIVE — seed-only correction rejected and preserved; CPU-only route-geometry attribution next; unchanged 0.01 IK margin, target order, and coordinates; zero authority |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 

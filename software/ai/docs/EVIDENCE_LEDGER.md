@@ -7297,3 +7297,68 @@ rewriting history. New entries must use a unique evidence ID.
   use reviewed reduced-link candidate geometry for simulation, followed by an
   installed measured collision profile and fresh observed start state before
   any operational gate can advance.
+
+### E-20261006-INT-463 — deterministic seed-only route correction rejected
+
+- Stage: S2 exploratory zero-authority integration.
+- Lane: AI/MODEL plus INTEGRATION; no arm-lane status or integration gate changed.
+- Base commit: `cfcbb4b17cbeb6a6f990b6fe0e81e6ec0095fb85`.
+- Claim commit: `fb5747fd45b2228ebbcddc9af310423718df1f8a`.
+- Frozen implementation/fixture commit:
+  `b9e5a9165faa89fce52f1818453db78b3a5e38a8`.
+- Failed-result commit: `0c09f91d1ec92cfe9729b3625a41d46de8d55728`.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_ik_route_study_fixture_v1.json`;
+  canonical fixture SHA-256
+  `4ae930aef76fabbdf0bdd0c0932943c7e788e042cffd8e10f6a2f1f728c9ca07`;
+  file SHA-256
+  `a43ce6a6ad0610e891c0963fff8c3b575d32d72ac59f429f27c40e0d58d66b07`.
+  The fixture binds implementation SHA-256
+  `606cf9a93bf49f57869783a5460177a2b004636f9407455203def010428c54a2`,
+  the parent fixture, canonical IK screen, kinematic solver, system manifest,
+  and target catalog.
+- Exact result command: with `PYTHONPATH=software/src;software/ai`, run `python
+  -m rocell_ai.typing_twin_ik_route_study_v1
+  software/ai/sim/evidence/typing_twin_ik_route_study_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_route_study_result_v1.json`.
+- Frozen search: 64 Halton interior seeds at indices 1 through 64, bases
+  `(2,3,5,7,11)`, and normalized controller-bound fractions `[0.05,0.95]`.
+  Every seed first reproduced the exact parent synthetic ready-tip point. The
+  selection rule, frozen before execution, required every exact route sample to
+  pass and then maximized minimum normalized margin, minimized maximum adjacent
+  delta, and used candidate ID as the final tie break.
+- Result: `BLOCKED_NO_FULL_ROUTE_SEED_CANDIDATE`; receipt SHA-256
+  `84045da315e7b1eddd2313a51eab58b0a3c55da47dbc8a2a6e5cf897fd14d233`;
+  result file SHA-256
+  `3baa36c2f742a6fa73a7b64f5c274c099cfc40ec333e6f33b08b1c67c2838048`.
+  All 64 candidates generated and reached canonical screening. All 64 evaluated
+  16 samples, accepted the first 15, and rejected sample 15 with
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`. The baseline control reproduced
+  the same sample count and reason. Every accepted prefix had minimum normalized
+  margin `0.016856`; candidate maximum adjacent deltas ranged narrowly around
+  `0.0364` radians. No candidate passed the 260-sample route.
+- Interpretation: seed diversity at the same Cartesian ready-tip point does not
+  remove the first-`H` wrist-margin failure. The next bounded study must attribute
+  the failure to Cartesian route geometry or a separately reviewed canonical IK
+  branch-selection policy. This failed result remains retained and will not be
+  rescored after a successor is defined.
+- Validation: `python -m pytest
+  software/ai/tests/test_typing_twin_ik_route_study_v1.py -q` reported 4 passed;
+  Ruff and `git diff --check` passed. The smoke test used one candidate and
+  reproduced the baseline rejection before the 64-candidate run.
+- Fixtures: exact parent `hello 2026` target sequence
+  `H,E,L,L,O,SPACE,2,0,2,6`, parent 260-sample trajectory, the fixture above,
+  and the retained result above.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The pre-existing Stage A process (PID 42724) was not used,
+  modified, or interrupted.
+- Limitations: calibration, the ready-tip point, and every seed are synthetic.
+  Collision geometry was not evaluated. A passing simulation seed would remain
+  uninstalled and would not replace a fresh observed physical state. No command,
+  permit, transport, controller access, or physical authority was created.
+- Next dependency: freeze a CPU-only route-geometry attribution that varies only
+  declared transit geometry while retaining target order, coordinates, and the
+  `0.01` margin. Any canonical solver-policy change remains arm-owned and must be
+  proposed separately rather than silently introduced here.
