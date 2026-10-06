@@ -374,3 +374,24 @@ amendment after a preserved no-solution exception, one focused test module, and
 one compact result receipt. The file-count ceiling advances from 6,401 to 6,406
 for those exact reviewed additions. No simulator corpus, GPU artifact, or
 dependency tree enters the source archive.
+
+The bounded IK branch-selection preparation adds three governed paths: one
+CPU-only study module, one focused test module, and one frozen hash-bound
+fixture. The file-count ceiling advances from 6,406 to 6,409 for those reviewed
+paths only. It adds no simulator corpus, dependency tree, controller artifact,
+or physical authority.
+
+The rejected IK branch-selection run adds one compact generated result receipt.
+The file-count ceiling advances from 6,409 to 6,410 for that reviewed path only.
+All byte, duplicate, and reduction limits remain unchanged.
+
+The branch-selection compatibility reproduction adds one amended fixture that
+binds study-local candidate enumeration while preserving the canonical IK bytes
+required by earlier frozen evidence. The file-count ceiling advances from 6,410
+to 6,411 for that reviewed path only. The original fixture and rejected result
+remain intact; all byte, duplicate, and reduction limits remain unchanged.
+
+The completed compatibility reproduction adds one compact generated result.
+The file-count ceiling advances from 6,411 to 6,412 for that reviewed path
+only. It reproduced the original rejected metrics without changing the
+canonical IK solver; all byte, duplicate, and reduction limits remain unchanged.

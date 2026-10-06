@@ -1,0 +1,77 @@
+{
+  "baseline_control": {
+    "accepted_sample_count": 15,
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED"
+  },
+  "claim_commit": "3768467e",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "all_existing_post_ik_gates_must_pass": true,
+    "authority_bearing_output_count_maximum": 0,
+    "blocked_if_no_width_accepts_full_route": true,
+    "collision_gate_must_remain_blocked": true,
+    "existing_solver_result_compatibility_required": true,
+    "route_waypoint_count_exact": 260,
+    "selected_width_rule": "LOWEST_PREDECLARED_BEAM_WIDTH_THAT_ACCEPTS_ALL_260_WAYPOINTS",
+    "target_order_difference_count_maximum": 0
+  },
+  "fixture_sha256": "2728bc790646988b23084a4e9c63fa7aae4c529c4847eb150c6dc09870b90216",
+  "implementation_commit": "41010102d51c631edb2c84b3281e37b2ee817179",
+  "input_bindings": {
+    "canonical_ik_solver": {
+      "path": "software/src/rocell/kinematics/ik.py",
+      "sha256": "92bae661b0ff43817137c9bd26b3cd26dd5d4e486a5a61b6d2c6803a7f5c676d"
+    },
+    "canonical_post_ik_gates": {
+      "path": "software/src/rocell/application/trajectory_simulation.py",
+      "sha256": "0177c218d1fbb3cbb3160189469081435fa6b17946e3602bd80313f1c0a46f78"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_branch_selection_study_v1.py",
+      "sha256": "3d924323a3bc1885fd15ee82756e59184fce5995c28d2f89ef8d1808574bb8d9"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "typing_ik_boundary": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    }
+  },
+  "limitations": [
+    "The study uses the synthetic calibration and synthetic ready-state seed retained by the parent fixture.",
+    "Candidate enumeration and beam selection are offline diagnostics and are not installed planner policy.",
+    "A full IK route pass would still lack installed collision, measured dynamics, fresh observed state, effect verification, permit, and physical authority.",
+    "The study preserves the parent Cartesian route and does not search new waypoint geometry."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "resource_limits": {
+    "maximum_candidate_evaluations_per_beam": 21000,
+    "maximum_route_waypoints": 260,
+    "maximum_solver_calls_per_beam": 2100
+  },
+  "schema": "tactevra.typing_twin_ik_branch_selection_study_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "beam_widths": [
+      2,
+      4,
+      8
+    ],
+    "candidate_order": "MAXIMIZE_ROUTE_MINIMUM_NORMALIZED_MARGIN_THEN_MINIMIZE_MAXIMUM_ADJACENT_DELTA_THEN_RESIDUAL_SUM_THEN_LEXICAL_JOINT_STATE",
+    "candidate_source": "ALL_DISTINCT_CONVERGED_CANONICAL_SOLVER_ATTEMPTS",
+    "deduplication_round_decimal_places": 9
+  }
+}

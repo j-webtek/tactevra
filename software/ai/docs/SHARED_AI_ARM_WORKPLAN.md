@@ -1063,6 +1063,20 @@ the parent route. Further AI-side seed or park-grid sampling is not justified;
 the dependency returns to an arm-owned waypoint-planner or canonical solver-
 selection review, followed by a fresh frozen full-route study.
 
+Evidence `E-20261006-INT-465` rejects canonical IK branch selection as the
+missing route correction. Beam widths `2`, `4`, and `8` retained every distinct
+converged solver attempt under the unchanged post-IK gates, but all three beams
+again stopped at first-`H` transit waypoint 15. The width-8 beam evaluated 464
+candidates through 116 bounded solver calls; all 32 candidates at the failing
+waypoint violated the unchanged `0.01` normalized joint-margin gate. A first
+result that temporarily extended the canonical solver is preserved. A second,
+hash-bound compatibility reproduction moved enumeration into the exploratory
+study, restored the canonical solver bytes required by older fixtures, and
+reproduced every decision metric exactly. Neither candidate enumeration nor the
+beam policy is installed. The next bounded arm question is explicit Cartesian
+waypoint geometry that avoids the wrist-limit corridor while preserving target
+order and every existing safety gate.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

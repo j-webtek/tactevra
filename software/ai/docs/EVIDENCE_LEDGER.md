@@ -7438,3 +7438,97 @@ rewriting history. New entries must use a unique evidence ID.
   branch-selection behavior. Any accepted design then requires a newly frozen
   full-route IK study, followed by collision, camera-clearance, and measured-
   state evidence before operational readiness can change.
+
+
+### E-20261006-INT-465 — canonical IK branch selection rejected and reproduced
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned planning evidence recorded under the cross-lane `INT` sequence.
+  No integration gate or physical readiness status changed.
+- Claim commit: `3768467ea91c31221c244605cc34f3e97792c03b`.
+- Initial implementation commit:
+  `41010102d51c631edb2c84b3281e37b2ee817179`.
+- Initial frozen-fixture commit:
+  `201ca6bffb13979c2be380e3c2878f7015723c55`.
+- Preserved initial-result commit:
+  `993ed6d54f19e40e2a6daa3f9b2e7b052f867cf3`.
+- Compatibility-correction commit:
+  `d1232be948c9c2b69dcc4abfe66752fe7739f46e`.
+- Reproduction-fixture commit:
+  `60efde139e199891ccd796ef33f32c8da362fbdb`.
+- Reproduced-result commit:
+  `0b1eb7484d2ace89ce5614d7b9ca97d1c305593d`.
+- Change: the bounded study enumerates every distinct converged attempt from the
+  existing numerical solver and applies the existing controller-bound, margin,
+  Jacobian-rank, and adjacent-joint-continuity gates to each candidate. The first
+  implementation exposed enumeration on the canonical solver and completed its
+  frozen run. That changed the canonical file hash required by older immutable
+  route fixtures, so the original fixture and result remain preserved while a
+  compatibility reproduction moved enumeration into the exploratory study and
+  restored the canonical solver bytes. No metric, threshold, target, beam width,
+  resource limit, or decision rule changed.
+- Fixtures: original
+  `software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1.json`,
+  canonical SHA-256
+  `2728bc790646988b23084a4e9c63fa7aae4c529c4847eb150c6dc09870b90216`;
+  reproduction
+  `software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1_1.json`,
+  canonical SHA-256
+  `9034fa4306de2b86326dd49d5d244b5ce695037f6027372eed9f2ae0e4e09618`
+  and file SHA-256
+  `e58fa458abbb47c3a3ee25c9b63be7ddb1eb719a86d5cfe03635bfcd4f981110`.
+  Both bind parent fixture
+  `typing_twin_ik_collision_fixture_v1_4.json` and exact target order
+  `H,E,L,L,O,SPACE,2,0,2,6`.
+- Exact original command: with `PYTHONPATH=software/src;software/ai`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`, run
+  `python -m rocell_ai.typing_twin_ik_branch_selection_study_v1
+  software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1.json`.
+- Exact reproduction command: with the same four environment bindings, run
+  `python -m rocell_ai.typing_twin_ik_branch_selection_study_v1
+  software/ai/sim/evidence/typing_twin_ik_branch_selection_fixture_v1_1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1_1.json`.
+  Both executions used below-normal process priority and no GPU.
+- Result: both runs returned `BLOCKED_NO_BRANCH_SELECTION_FULL_ROUTE`. Original
+  receipt SHA-256:
+  `4461acbd7ed461d20dbd752181697906ece0c156c45af3027f857de68771f50c`;
+  reproduced receipt SHA-256:
+  `16e680d5cc5adf6687bae05cd5c55f6bedbae9feb022732358a3a892fa9b4c7c`.
+  Original result-file SHA-256:
+  `0104bb6e1222a462149b798e5d95bfa6b43fb1fb67b0365d70ab06a496213b88`;
+  reproduced result-file SHA-256:
+  `a0ea81dc099ba845a4bf5c65075960d1e58e5577c6682040630a4793b3cf7530`.
+- Metrics: beam widths `2`, `4`, and `8` each accepted 15 of 260 route
+  waypoints and stopped at waypoint 15 during first-`H` transit. They performed
+  respectively 31/124, 61/244, and 116/464 solver-call/candidate evaluations.
+  At the failed waypoint they rejected 8, 16, and 32 candidates, all for
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`. The best retained prefix had
+  minimum normalized margin `0.017022120297054286`; no candidate for the next
+  waypoint cleared the unchanged `0.01` gate. Every listed decision metric is
+  exactly identical between the original and compatibility reproduction.
+- Validation: 20 focused fixture, reproduction, and canonical-IK tests passed;
+  Ruff passed; `git diff --check` passed. Broader shared and repository checks
+  are recorded by the exact-head pull-request validation.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The pre-existing Stage A supervisor, PID 42724, remained
+  running throughout and was neither modified nor interrupted.
+- Failures preserved: the original rejected result remains tracked. Its
+  integration defect is also recorded: placing a diagnostic enumeration API in
+  the canonical solver invalidated historical fixture byte bindings. The v1.1
+  run corrects packaging and reproduces the conclusion; it does not rewrite or
+  rescore v1.
+- Limitations: calibration, ready state, and every pose are synthetic. Collision,
+  installed geometry, dynamics, camera clearance, physical repeatability, and
+  device effect are not cleared. Candidate enumeration and beam selection are
+  uninstalled diagnostics. No command, permit, transport, controller access, or
+  physical authority was created.
+- Supersedes: none. This narrows the blockers retained by
+  `E-20261006-INT-462`, `E-20261006-INT-463`, and `E-20261006-INT-464`.
+- Next dependency: freeze an arm-owned Cartesian waypoint-geometry study that
+  changes only the first park-to-`H` transit corridor, preserves semantic target
+  order and all safety thresholds, and sends any passing route through the full
+  canonical IK and later collision gates.
