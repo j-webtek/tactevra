@@ -354,3 +354,10 @@ fixture and failed attempt from this workstream. The resulting tree contains
 those reviewed paths only; all byte, duplicate, and reduction limits remain
 unchanged. The history was consolidated after execution, and the original
 standalone paths remain recoverable from their recorded commits.
+
+The canonical IK route-correction study adds three pre-result governed paths:
+one CPU-only study module, one hash-bound fixture, and one focused test module.
+The file-count ceiling advances from 6,396 to 6,399 for those exact reviewed
+additions. The retained result will replace neither external simulation data nor
+installed measurements, and no dependency tree or GPU artifact enters the
+source archive.

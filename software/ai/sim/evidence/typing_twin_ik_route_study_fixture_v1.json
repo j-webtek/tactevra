@@ -1,0 +1,89 @@
+{
+  "baseline_control": {
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "unchanged_minimum_normalized_joint_margin": 0.01
+  },
+  "claim_commit": "fb5747fd45b2228ebbcddc9af310423718df1f8a",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "candidate_count_exact": 64,
+    "candidate_remains_uninstalled": true,
+    "ik_threshold_change_count_maximum": 0,
+    "pass_requires_every_exact_trajectory_sample_accepted": true,
+    "selection": "MAXIMUM_ROUTE_MINIMUM_NORMALIZED_MARGIN_THEN_MINIMUM_MAXIMUM_JOINT_DELTA_THEN_CANDIDATE_ID",
+    "target_coordinate_change_count_maximum": 0,
+    "target_order_difference_count_maximum": 0,
+    "trajectory_plan_change_count_maximum": 0
+  },
+  "fixture_sha256": "4ae930aef76fabbdf0bdd0c0932943c7e788e042cffd8e10f6a2f1f728c9ca07",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_route_study_v1.py",
+      "sha256": "606cf9a93bf49f57869783a5460177a2b004636f9407455203def010428c54a2"
+    },
+    "kinematic_solver": {
+      "path": "software/src/rocell/kinematics/ik.py",
+      "sha256": "4feb5adb8c33d7b3017f29c17130dc934269ae159bed88b06d8aa63d8474569a"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "All calibration, start states, and candidate branches are synthetic offline evidence.",
+    "A passing branch is not installed and cannot replace a fresh observed physical start state.",
+    "This study screens canonical IK and continuity only; installed or candidate collision geometry is not evaluated.",
+    "The parent semantic targets, coordinates, Cartesian route, and safety thresholds remain unchanged.",
+    "No controller command, permit, transport, hardware access, or physical authority is created."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+    "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_candidates": 64,
+    "maximum_ik_samples_per_candidate": 512
+  },
+  "schema": "tactevra.typing_twin_ik_route_study_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "candidate_kind": "SAME_READY_TIP_DETERMINISTIC_INTERIOR_JOINT_BRANCH",
+    "halton_bases": [
+      2,
+      3,
+      5,
+      7,
+      11
+    ],
+    "halton_candidate_count": 64,
+    "halton_start_index": 1,
+    "normalized_joint_fraction_range": [
+      0.05,
+      0.95
+    ]
+  }
+}
