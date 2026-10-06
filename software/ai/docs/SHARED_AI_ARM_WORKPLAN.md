@@ -1105,12 +1105,22 @@ The next bounded question is a joint-specific endpoint/manifold diagnostic that
 identifies the limiting joint and the closest admitted approach to the exact
 hover before more planner volume is spent.
 
+Evidence `E-20261006-INT-468` resolves that diagnostic question inside the
+frozen synthetic model. The exact first-`H` hover produced zero converged
+canonical IK candidates. Across a predeclared 729-point cube at 5 mm spacing,
+69 nearby points passed the unchanged controller, `0.01` margin, and Jacobian-
+rank gates. The closest admitted point was 18.71 mm from the exact hover at
+offset `(-5, -10, +15)` mm. `link3_to_link4` was the limiting joint in all 138
+margin-rejected candidate solutions. Planning cannot correct an endpoint with
+no converged IK candidate; the next arm-owned task is to audit the synthetic
+tool length, board transform, hover construction, and target geometry bindings
+before changing any planner or target coordinate.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 exploratory planning | first-`H` endpoint and solution-manifold diagnostic, frozen fixture, CPU-only tests, and append-only evidence | `feature/sim-endpoint-manifold` / `79ff5d44ea5588ff884feb7fe87dbea406446315` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
