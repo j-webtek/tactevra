@@ -7279,7 +7279,7 @@ rewriting history. New entries must use a unique evidence ID.
 - Tests and repository checks: 17 focused/shared tests passed; Ruff passed;
   133 repository-policy tests and every documentation, evidence-scope,
   artifact, archive, release-integrity, and readiness-sync check passed. The
-  reviewed archive contains 6,396 files, 652,087,990 logical bytes, and
+  reviewed archive contains 6,396 files, 652,088,337 logical bytes, and
   4,890,152 governed duplicate bytes.
 - Hardware-write count: 0.
 - Physical-movement count: 0.
