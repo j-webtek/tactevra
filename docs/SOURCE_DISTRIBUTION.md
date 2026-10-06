@@ -415,3 +415,8 @@ The pre-result Cartesian-corridor amendment adds one replacement fixture that
 retains the original fixture and failed wrapper attempt. The file-count ceiling
 advances from 6,416 to 6,417 for that reviewed path only. Search candidates and
 safety gates remain unchanged; all byte and reduction limits remain unchanged.
+
+The completed Cartesian-corridor run adds one compact generated result receipt.
+The file-count ceiling advances from 6,417 to 6,418 for that reviewed path only.
+No simulator corpus, dependency tree, or authority-bearing artifact enters the
+archive; all byte, duplicate, and reduction limits remain unchanged.

@@ -30,6 +30,9 @@ PRESERVED_FAILURE = (
     ROOT
     / "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_failed_attempt_v1.json"
 )
+RESULT = (
+    ROOT / "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_result_v1_1.json"
+)
 
 
 def test_frozen_fixture_is_hash_bound_and_zero_authority() -> None:
@@ -70,6 +73,20 @@ def test_amendment_preserves_pre_result_failure() -> None:
     assert amendment["results_seen_before_amendment"] is False
     assert PRESERVED_FIXTURE.is_file()
     assert PRESERVED_FAILURE.is_file()
+
+
+def test_result_preserves_rejected_candidate_family_and_zero_authority() -> None:
+    result = json.loads(RESULT.read_text(encoding="utf-8"))
+
+    assert result["decision"] == "BLOCKED_NO_FULL_ROUTE_CARTESIAN_CORRIDOR"
+    assert result["passing_candidate_count"] == 0
+    assert len(result["candidate_summaries"]) == 9
+    assert {item["failure_reason"] for item in result["candidate_summaries"]} == {
+        "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED"
+    }
+    assert result["hardware_writes"] == 0
+    assert result["physical_movements"] == 0
+    assert result["physical_authority"] is False
 
 
 def test_corridor_families_preserve_endpoints() -> None:
