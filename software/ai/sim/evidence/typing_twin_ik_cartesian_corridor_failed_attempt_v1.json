@@ -1,0 +1,25 @@
+{
+  "attempt": "typing_twin_ik_cartesian_corridor_v1",
+  "command": "python -m rocell_ai.typing_twin_ik_cartesian_corridor_study_v1 software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1.json --workspace . --output software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_result_v1.json",
+  "environment": {
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONPATH": "software/src;software/ai",
+    "process_priority": "BelowNormal"
+  },
+  "error": "trajectory plan does not replay from the exact T1 source plan",
+  "error_type": "TypingTrajectoryIkScreenV1Error",
+  "fixture_file_sha256": "8efe214a8904305299b71cbc5942de296745e558dafa94ad5642cd3bc535b321",
+  "fixture_path": "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1.json",
+  "fixture_sha256": "f73192bdb8d692a75ef2abd45c95e5bb2325b9896573462eb0135542038d9f57",
+  "gpu_jobs": 0,
+  "hardware_writes": 0,
+  "interpretation": "The canonical T1 wrapper correctly rejects custom route bytes. The unchanged lower-level canonical waypoint evaluator is required for an exploratory route-geometry study.",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "results_seen": false,
+  "schema": "tactevra.simulation_failed_attempt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "status": "FAILED_CLOSED_NO_RESULT_WRITTEN"
+}

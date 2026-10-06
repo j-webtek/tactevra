@@ -12,3 +12,5 @@ software/ai/sim/evidence/typing_twin_ik_route_study_result_v1.json linguist-gene
 software/ai/sim/evidence/typing_twin_ik_route_geometry_result_v1_1.json linguist-generated=true
 software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1.json linguist-generated=true
 software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1_1.json linguist-generated=true
+software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_failed_attempt_v1.json linguist-generated=true
+software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_result_v1_1.json linguist-generated=true

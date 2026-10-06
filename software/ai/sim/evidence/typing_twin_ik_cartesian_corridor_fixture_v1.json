@@ -1,0 +1,93 @@
+{
+  "baseline_control": {
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "unchanged_minimum_normalized_joint_margin": 0.01
+  },
+  "claim_commit": "62938e0f9d3c40404492f544d9ea69f4c2e65183",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "candidate_count_exact": 9,
+    "candidate_remains_uninstalled": true,
+    "collision_gate_must_remain_blocked": true,
+    "ik_threshold_change_count_maximum": 0,
+    "later_phase_waypoint_change_count_maximum": 0,
+    "only_start_to_first_H_hover_may_change": true,
+    "pass_requires_every_exact_trajectory_sample_accepted": true,
+    "selection": "MAXIMUM_ROUTE_MINIMUM_NORMALIZED_MARGIN_THEN_MINIMUM_MAXIMUM_JOINT_DELTA_THEN_MINIMUM_SAMPLE_COUNT_THEN_CANDIDATE_ID",
+    "target_coordinate_change_count_maximum": 0,
+    "target_order_difference_count_maximum": 0
+  },
+  "fixture_sha256": "f73192bdb8d692a75ef2abd45c95e5bb2325b9896573462eb0135542038d9f57",
+  "implementation_commit": "59480f2a37de75f50881dcd1de3df857def08796",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/kinematics/ik.py",
+      "sha256": "4feb5adb8c33d7b3017f29c17130dc934269ae159bed88b06d8aa63d8474569a"
+    },
+    "canonical_ik_boundary": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    },
+    "canonical_trajectory": {
+      "path": "software/src/rocell/application/typing_trajectory_plan_v1.py",
+      "sha256": "948e27492cccbafcee08df1e2a0f26a7b061eb50b2975ad241c251febab0de34"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_cartesian_corridor_study_v1.py",
+      "sha256": "4185ec279736380d73fbc450dd705fb9d299a2a02366d73a5121947c0e8f3096"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "All calibration, ready state, route points, and candidate corridors are synthetic offline evidence.",
+    "The study varies only the first ready-to-H-hover corridor and rejoins the exact parent route at the first H hover point.",
+    "Collision, camera clearance, dynamics, contact, and physical repeatability are not evaluated.",
+    "A passing corridor remains uninstalled and requires later arm-lane collision and measured-state evidence.",
+    "No command, permit, transport, controller access, hardware write, movement, or physical authority exists."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_candidates": 9,
+    "maximum_ik_samples_per_candidate": 512
+  },
+  "schema": "tactevra.typing_twin_ik_cartesian_corridor_study_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "height_above_start_mm": [
+      0.0,
+      20.0,
+      40.0
+    ],
+    "maximum_cartesian_step_mm_unchanged": 5.0,
+    "planar_orders": [
+      "DIAGONAL",
+      "X_THEN_Y",
+      "Y_THEN_X"
+    ],
+    "reference": "SYNTHETIC_READY_POINT_TO_FIRST_H_HOVER_ONLY"
+  }
+}

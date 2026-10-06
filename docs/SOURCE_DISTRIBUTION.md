@@ -395,3 +395,28 @@ The completed compatibility reproduction adds one compact generated result.
 The file-count ceiling advances from 6,411 to 6,412 for that reviewed path
 only. It reproduced the original rejected metrics without changing the
 canonical IK solver; all byte, duplicate, and reduction limits remain unchanged.
+
+The first-target Cartesian-corridor preparation adds two governed paths: one
+CPU-only study module and one focused test module. The file-count ceiling
+advances from 6,412 to 6,414 for those reviewed paths only. No simulator corpus,
+dependency tree, controller artifact, or physical authority enters the archive.
+
+The frozen Cartesian-corridor fixture adds one governed path binding the exact
+nine-candidate search and unchanged route-safety gates. The file-count ceiling
+advances from 6,414 to 6,415 for that reviewed path only; all byte, duplicate,
+and reduction limits remain unchanged.
+
+The first Cartesian-corridor execution adds one compact failed-attempt record.
+The file-count ceiling advances from 6,415 to 6,416 for that reviewed path only.
+No result was written, and all byte, duplicate, and reduction limits remain
+unchanged.
+
+The pre-result Cartesian-corridor amendment adds one replacement fixture that
+retains the original fixture and failed wrapper attempt. The file-count ceiling
+advances from 6,416 to 6,417 for that reviewed path only. Search candidates and
+safety gates remain unchanged; all byte and reduction limits remain unchanged.
+
+The completed Cartesian-corridor run adds one compact generated result receipt.
+The file-count ceiling advances from 6,417 to 6,418 for that reviewed path only.
+No simulator corpus, dependency tree, or authority-bearing artifact enters the
+archive; all byte, duplicate, and reduction limits remain unchanged.
