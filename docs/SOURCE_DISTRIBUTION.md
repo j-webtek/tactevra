@@ -354,3 +354,9 @@ fixture and failed attempt from this workstream. The resulting tree contains
 those reviewed paths only; all byte, duplicate, and reduction limits remain
 unchanged. The history was consolidated after execution, and the original
 standalone paths remain recoverable from their recorded commits.
+
+The public simulation overview adds one maintained Markdown path that explains
+the deterministic, Isaac Sim, and proposed MuJoCo Warp lanes without adding
+generated simulator assets. The resulting tree contains 6,397 tracked files.
+The file-count ceiling advances from 6,396 to 6,397 for that reviewed path
+only; all byte, duplicate, and reduction limits remain unchanged.
