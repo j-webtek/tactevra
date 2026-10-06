@@ -439,3 +439,12 @@ contains the frozen 729-point diagnostic table and is marked generated for
 review presentation; no simulator corpus, dependency tree, controller artifact,
 GPU artifact, or authority-bearing output enters the archive. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The first-hover binding audit adds four governed paths: one CPU-only audit
+module, one focused test module, one frozen fixture, and one generated result
+bound by its receipt hash. The file-count ceiling advances from 6,428 to the
+exact observed 6,432 for those reviewed paths only. The result contains 25
+predeclared tool-length and hover-policy cells and is marked generated for
+review presentation; no simulator corpus, dependency tree, controller artifact,
+GPU artifact, or authority-bearing output enters the archive. All byte,
+duplicate, and reduction limits remain unchanged.
