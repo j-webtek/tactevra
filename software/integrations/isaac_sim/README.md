@@ -10,7 +10,9 @@ packaged contracts live in
 `software/src/rocell/integrations/isaac_sim/`; versioned JSON schemas live in
 `software/schemas/`.
 
-The current WP0 implementation provides:
+The implementation began with WP0 contracts and now also retains bounded
+runner, asset, kinematic, scene, schedule-replay, and collision-development
+evidence. The portable contract foundation provides:
 
 - canonical v1 request and receipt envelopes;
 - exact-field, unit, frame, joint-order, timing, digest, and zero-authority
@@ -19,9 +21,15 @@ The current WP0 implementation provides:
 - a fail-closed external toolchain lock; and
 - compact valid and invalid fixtures.
 
-It does **not** import Isaac Sim, load a USD scene, use a GPU, run physics, or
-produce clearance/contact evidence. A fake-adapter `PASS` has evidence class
-`CONTRACT_TEST_ONLY` and expressly establishes only contract behavior.
+The fake adapter itself does **not** import Isaac Sim, load a USD scene, use a
+GPU, run physics, or produce clearance/contact evidence. A fake-adapter `PASS`
+has evidence class `CONTRACT_TEST_ONLY` and expressly establishes only contract
+behavior. Later sections distinguish that portable layer from the retained
+external Isaac runs; none grants hardware authority.
+
+For a reader-oriented explanation of how Isaac Sim relates to Tactevra's
+deterministic simulators and the proposed MuJoCo Warp lane, see the
+[simulation overview](../../../docs/SIMULATION.md).
 
 ## Initial Windows runner candidate installed 2026-09-29
 

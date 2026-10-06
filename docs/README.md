@@ -13,6 +13,7 @@ implementation details or evidence for a specific part of the system.
 | Plan the parts and materials needed to replicate the workcell | [Workcell replication guide](WORKCELL_REPLICATION.md) |
 | Understand the complete request-to-result flow | [System overview](SYSTEM_OVERVIEW.md) |
 | Understand capabilities and limitations | [Project status](../PROJECT_STATUS.md) |
+| Understand the simulation and digital-twin stack | [Simulation overview](SIMULATION.md) |
 | Follow delivery stages and completion evidence | [Roadmap](../ROADMAP.md) |
 | Get help or report unclear guidance | [Support](../SUPPORT.md) |
 | Contribute code or documentation | [Contributing](../CONTRIBUTING.md) |
@@ -124,12 +125,15 @@ distinguishes these kinds of evidence.
 
 ## Simulation, provenance, and deeper history
 
+- [Simulation overview](SIMULATION.md): public explanation of the portable
+  simulation layer, implemented Isaac Sim evidence, the proposed MuJoCo Warp
+  lane, and the no-hardware-authority boundary.
 - [Isaac Sim integration plan](../software/docs/ISAAC_SIM_INTEGRATION_PLAN.md):
   active plan for a pinned, zero-authority, higher-fidelity simulation oracle,
   synthetic-camera campaigns, and external GPU-runner evidence.
 - [Isaac Sim integration boundary](../software/integrations/isaac_sim/README.md):
-  implemented WP0 contracts, verification command, and exact runner-selection
-  handoff.
+  implemented contracts, runner/asset evidence, FK parity, RC03 scene,
+  trajectory replay, collision investigations, and exact limitations.
 - [Virtual commissioning](../software/docs/VIRTUAL_COMMISSIONING.md): simulated
   keyboard/phone sessions and replay.
 - [Trajectory simulation](../software/docs/TRAJECTORY_SIMULATION.md) and
