@@ -1051,6 +1051,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
+| AI/MODEL + INTEGRATION | S2 | `software/ai/rocell_ai/typing_twin_ik_route_study_v1.py`, focused tests, one frozen fixture/result manifest, and shared evidence docs | `feature/sim-ws1-ik-route-correction` | ACTIVE — CPU-only route/start-state study; unchanged 0.01 IK margin, target order, and coordinates; zero authority |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
