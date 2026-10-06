@@ -19,7 +19,7 @@ DOCS = (
     'CODE_OF_CONDUCT.md',
     'docs/README.md', 'docs/GETTING_STARTED.md', 'docs/RELEASING.md',
     'docs/releases/README.md', 'docs/releases/READINESS.md',
-    'docs/SYSTEM_OVERVIEW.md', 'docs/GLOSSARY.md',
+    'docs/SYSTEM_OVERVIEW.md', 'docs/SIMULATION.md', 'docs/GLOSSARY.md',
     'docs/HARDWARE_BUILD_GUIDE.md',
     'docs/DOCUMENTATION_STANDARD.md',
     'docs/EVIDENCE_RETENTION.md',
@@ -66,6 +66,7 @@ PUBLIC_TITLES = {
     'docs/README.md': 'Tactevra documentation',
     'docs/GETTING_STARTED.md': 'Getting started with Tactevra',
     'docs/SYSTEM_OVERVIEW.md': 'Tactevra system overview',
+    'docs/SIMULATION.md': 'Tactevra simulation',
     'docs/GLOSSARY.md': 'Tactevra glossary',
     'docs/HARDWARE_BUILD_GUIDE.md': 'Building the Tactevra RC03 workcell',
     'docs/decisions/README.md': 'Tactevra decision records',
@@ -106,6 +107,11 @@ REQUIRED_PHRASES = {
     'docs/SYSTEM_OVERVIEW.md': (
         '**Document status:** Current overview',
         '**Authority:** Explanatory; it does not authorize hardware operation',
+    ),
+    'docs/SIMULATION.md': (
+        '**Document status:** Current public overview',
+        '**Authority:** Explanatory and software-test evidence only;',
+        'No MJWarp physics replay is merged on `main`.',
     ),
     'docs/GLOSSARY.md': ('**Document status:** Current reference',),
     'docs/HARDWARE_BUILD_GUIDE.md': (
@@ -208,6 +214,7 @@ PUBLIC_ROUTES = {
     'README.md': (
         ('docs/GETTING_STARTED.md#install-the-software', 'Install the software'),
         ('docs/SYSTEM_OVERVIEW.md', None),
+        ('docs/SIMULATION.md', None),
         ('docs/HARDWARE_BUILD_GUIDE.md', None),
         ('PROJECT_STATUS.md', None), ('ROADMAP.md', None), ('docs/README.md', None),
         ('SUPPORT.md', None), ('SECURITY.md', None),
@@ -218,6 +225,7 @@ PUBLIC_ROUTES = {
         ('GETTING_STARTED.md', None), ('../PROJECT_STATUS.md', None),
         ('../ROADMAP.md', None),
         ('SYSTEM_OVERVIEW.md', None), ('GLOSSARY.md', None),
+        ('SIMULATION.md', None),
         ('HARDWARE_BUILD_GUIDE.md', None),
         ('releases/READINESS.md', None), ('releases/README.md', None),
         ('../SUPPORT.md', None), ('../CONTRIBUTING.md', None),

@@ -355,9 +355,15 @@ those reviewed paths only; all byte, duplicate, and reduction limits remain
 unchanged. The history was consolidated after execution, and the original
 standalone paths remain recoverable from their recorded commits.
 
+The public simulation overview adds one maintained Markdown path that explains
+the deterministic, Isaac Sim, and proposed MuJoCo Warp lanes without adding
+generated simulator assets. The resulting tree contains 6,397 tracked files.
+The file-count ceiling advances from 6,396 to 6,397 for that reviewed path
+only; all byte, duplicate, and reduction limits remain unchanged.
+
 The canonical IK route-correction study adds four governed paths: one CPU-only
 study module, one hash-bound fixture, one focused test module, and one compact
-failed-result receipt. The file-count ceiling advances from 6,396 to 6,400 for
+failed-result receipt. The file-count ceiling advances from 6,397 to 6,401 for
 those exact reviewed additions. The retained result replaces neither external
 simulation data nor installed measurements, and no dependency tree or GPU
 artifact enters the source archive.
@@ -365,6 +371,6 @@ artifact enters the source archive.
 The candidate-park route-geometry attribution adds five governed paths: one
 CPU-only study module, the original frozen fixture, its hash-bound pre-result
 amendment after a preserved no-solution exception, one focused test module, and
-one compact result receipt. The file-count ceiling advances from 6,400 to 6,405
+one compact result receipt. The file-count ceiling advances from 6,401 to 6,406
 for those exact reviewed additions. No simulator corpus, GPU artifact, or
 dependency tree enters the source archive.

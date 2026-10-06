@@ -95,6 +95,7 @@ evidence and exact limitations.
 | Review evidence, readiness, and limitations | [Project status](PROJECT_STATUS.md) |
 | Explore the local setup and diagnostic interface | [Tactevra Studio workbench](software/docs/WIZARD_WORKBENCH.md) |
 | Integrate AI output with the arm runtime | [Shared AI/arm workplan](software/ai/docs/SHARED_AI_ARM_WORKPLAN.md) |
+| Understand simulation and digital-twin work | [Simulation overview](docs/SIMULATION.md) |
 | Develop the runtime | [Software reference](software/README.md) |
 | Plan or source a workcell | [Workcell replication guide](docs/WORKCELL_REPLICATION.md) |
 | Build the workcell | [Hardware build guide](docs/HARDWARE_BUILD_GUIDE.md) |
@@ -214,6 +215,29 @@ Shared contracts keep these workstreams compatible without collapsing their
 responsibilities. A plausible model result remains only a proposal until the
 runtime admits it.
 
+## Simulation as a proving ground
+
+Tactevra does not use simulation as a substitute for the world. It uses a
+layered simulation stack to find mismatched frames, unsafe uncertainty,
+unreachable routes, collision-model disagreements, and recovery defects before
+they can reach a controller.
+
+| Simulation lane | Project role | Current standing |
+| --- | --- | --- |
+| **Deterministic Tactevra simulation** | Portable contract, trajectory, controller-lifecycle, camera, fault, and replay testing | Runs in ordinary hardware-free development and CI |
+| **NVIDIA Isaac Sim** | Higher-fidelity USD workcell, articulation/FK comparison, model-target overlays, source-bound schedule replay, and collision-geometry investigation | Isaac Sim 6.1 has run headlessly; governed import/FK, RC03 scene, first H-hover prefix, and finite collision studies are retained |
+| **MuJoCo Warp (Google DeepMind + NVIDIA)** | Proposed high-throughput physics lane for parallel contact, mechanics, and recovery populations | Evaluation direction only; no MJWarp physics replay is merged on `main` |
+
+Isaac currently acts as an **advisory oracle** downstream of Tactevra's strict
+admission boundary. Its retained evidence can expose disagreement or block a
+route, but it cannot emit arm commands or promote a physical safety gate. The
+authoritative Isaac runner lock is still unselected, and installed geometry,
+continuous clearance, contact mechanics, and measured calibration remain open.
+
+The [simulation overview](docs/SIMULATION.md) explains what has actually run,
+how MuJoCo Warp fits without being overclaimed, and where to inspect the
+receipts and integration work.
+
 ## Capability and evidence surface
 
 | Capability | Current standing | Next requirement |
@@ -223,6 +247,7 @@ runtime admits it.
 | Keyboard targets | Mixed sequences and all 46 named targets compile offline in exact order | Real-camera coordinate qualification |
 | Perception | Scene-quality, precision-adapter, saved-image, and abstention paths exist | Final-camera evaluation and a bound that fits applicable key-safe regions |
 | Motion planning | Ordered smooth trajectories and lifecycle records compile offline | Installed transforms, IK, cable, and collision qualification |
+| Higher-fidelity simulation | Isaac import/FK parity, RC03 scene composition, target overlays, a retained noncontact hover prefix, and finite collision differentials have merged evidence | Select the governed runner, bind installed geometry, add dynamics/contact/camera campaigns, and qualify disagreements |
 | Controller runtime | Ownership, encoding, feedback matching, deadlines, and no-ambiguous-retry behavior are rehearsed | Installed-controller qualification and measured timing |
 | Physical interaction | Earlier supervised movement and feedback experiments provide development evidence | One measured non-contact hover, then one independently verified keypress |
 | Phone operation | Contracts and planning concepts exist | Qualified screen perception, state transitions, and verified taps |
