@@ -1059,7 +1059,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| AI/MODEL + INTEGRATION | S2 | `software/ai/rocell_ai/typing_twin_ik_route_study_v1.py`, focused tests, one frozen fixture/result manifest, and shared evidence docs | `feature/sim-ws1-ik-route-correction` | ACTIVE — seed-only correction rejected and preserved; CPU-only route-geometry attribution next; unchanged 0.01 IK margin, target order, and coordinates; zero authority |
+| AI/MODEL + INTEGRATION | S2 | retained seed study plus `software/ai/rocell_ai/typing_twin_ik_route_geometry_study_v1.py`, focused tests, frozen fixture/result manifests, and shared evidence docs | `feature/sim-ws1-ik-route-correction` | ACTIVE — seed-only correction rejected and preserved; CPU-only candidate-park geometry attribution; unchanged 0.01 IK margin, target order, and target coordinates; zero authority |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
