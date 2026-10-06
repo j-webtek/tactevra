@@ -7804,3 +7804,78 @@ rewriting history. New entries must use a unique evidence ID.
   hover-clearance construction, and target geometry against their authoritative
   sources. Any corrective study must freeze ranges before results and must not
   move target coordinates merely to make the solver pass.
+
+### E-20261006-INT-469 — synthetic tool and hover binding explain first-H blocker
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned binding evidence recorded under the cross-lane `INT`
+  sequence. No integration gate or physical readiness status changed.
+- Claim commit: `16893828c612ec7d3ac0191cffee7745aae2c437`.
+- Implementation commit: `0925579eebe8af7f8edab58987ea0c1c70f497f4`.
+- Fixture commit: `eecb3a1717e08903ce1fb0e7d9f0ed6b0b500238`.
+- Result commit: `18e0173135c252119115482f115a38b572c2cb42`.
+- Objective: trace the board, target, tool, and hover inputs that construct the
+  exact first-`H` endpoint, then test a frozen bounded tool/hover sensitivity
+  matrix without changing target X/Y, contact height, board transform, IK
+  thresholds, or authority boundaries.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_hover_binding_fixture_v1.json`;
+  canonical SHA-256
+  `6115aa94a7c29c3a833764dad6a6852e8d121517162ad72b185f9b8911d1d935`;
+  file SHA-256
+  `53336b1cc4ed180fc93a4fe61e2ecca7d46a325a4e90a532f1587c957637e6d8`.
+- Frozen sample: 25 exact first-`H` hover cells from tool lengths `80`, `90`,
+  `100`, `110`, and `120` mm crossed with hover clearances `5`, `10`, `15`,
+  `20`, and `25` mm. The tool values interpolate only within the repository's
+  unmeasured 80/100/120 mm sensitivity family. The hover values are an
+  exploratory policy range spanning the parent 10 mm and previously exercised
+  25 mm offline settings. Neither range is a physical measurement.
+- Exact command: with `PYTHONPATH=software/src;software/ai`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`, run
+  `python -m rocell_ai.typing_twin_hover_binding_audit_v1
+  software/ai/sim/evidence/typing_twin_hover_binding_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_hover_binding_result_v1.json`.
+- Result:
+  `EXPLORATORY_BINDING_MATRIX_CONTAINS_MARGIN_ADMISSIBLE_EXACT_HOVER`.
+  Receipt SHA-256:
+  `d834b17df8f014e93725f61f4ff3e49350bd3846d8bd16d68e7023022a46f4f2`;
+  result-file SHA-256
+  `61e2a737578a276e45db6bc14155638609b7e7e1994bf59c5f0165f0d9cfdbe1`.
+- Metrics: source catalog, runtime catalog, and execution plan all resolved `H`
+  to `(216.55, 154.0, 21.0)` mm. The nominal board transform matched the
+  planner snapshot exactly. Nineteen cells produced no converged candidate,
+  two produced candidates rejected by the unchanged `0.01` normalized joint
+  margin, and four were admitted. The admitted cells were 110 mm tool / 25 mm
+  hover with margin `0.015001156703450213`, and 120 mm tool / 15, 20, and 25 mm
+  hover with margins `0.01534639263460749`, `0.029716888335493543`, and
+  `0.044000293627891644` respectively. The parent 100 mm / 10 mm cell produced
+  no converged candidate.
+- Interpretation: the prior exact-hover blocker is explained by the parent
+  synthetic tool/hover combination rather than an internal target-coordinate or
+  board-transform mismatch. The result supports a fresh full-route study using
+  the separately converged 110 mm candidate configuration and a 25 mm
+  exploratory hover policy. It does not select a physical dimension.
+- Validation: 9 focused binding, fixture-integrity, endpoint, result, and
+  zero-authority tests passed; Ruff and `git diff --check` passed. Broader
+  repository and exact-head checks follow on the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate Stage A campaign remained running and reached
+  7,013/11,628 shards after this result with zero failures, zero hardware
+  writes, zero physical movements, and GPU temperatures of 60/60 C.
+- Failures preserved: all 19 no-convergence cells and both margin-rejected
+  cells remain in the generated result. The blocked parent result in
+  `E-20261006-INT-468` remains unchanged.
+- Limitations: all dimensions, transforms, targets, and hover policies remain
+  synthetic or nominal. Pointwise feasibility cannot prove a continuous route,
+  collision clearance, camera clearance, dynamics, contact behavior, or
+  physical accuracy. No tool, hover policy, diagnostic, or planner is installed,
+  and no authority-bearing output exists.
+- Supersedes: none. This explains, but does not rewrite, the blocker recorded in
+  `E-20261006-INT-468`.
+- Next dependency: freeze and evaluate the full 51-key route under the 110 mm
+  candidate tool and 25 mm exploratory hover, retaining all unchanged IK,
+  continuous-collision, target-order, and zero-authority gates. Physical use
+  remains blocked on measured tool geometry, board registration, key geometry,
+  joint state, and commissioning evidence.

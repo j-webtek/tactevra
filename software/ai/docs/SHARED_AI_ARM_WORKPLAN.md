@@ -1116,6 +1116,19 @@ no converged IK candidate; the next arm-owned task is to audit the synthetic
 tool length, board transform, hover construction, and target geometry bindings
 before changing any planner or target coordinate.
 
+Evidence `E-20261006-INT-469` completes that binding audit without changing the
+board transform or target coordinates. The target source, runtime catalog, and
+execution plan all agree on `H` at `(216.55, 154.0, 21.0)` mm, and the nominal
+board transform is propagated without alteration. The parent route is bound to
+the unmeasured 100 mm tool and 10 mm hover combination, which again produced no
+converged candidate. Four of 25 predeclared sensitivity cells were margin
+admissible: 110 mm with 25 mm hover, and 120 mm with 15, 20, or 25 mm hover.
+This localizes the synthetic blocker to the tool/hover combination. It does not
+select a physical tool or install a route. The next bounded dependency is to
+rebuild the full route from the converged 110 mm candidate configuration using
+the 25 mm exploratory hover, then apply unchanged continuous collision and
+route gates; physical use remains blocked on measurement and commissioning.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

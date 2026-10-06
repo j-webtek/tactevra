@@ -1,0 +1,556 @@
+{
+  "batch_sha256": "82462b4bf8555b1a8c52170446c0b768b6bc538370fab8d880ad54f66fd92bd9",
+  "binding_audit": {
+    "board_transform": {
+      "exact_match": true,
+      "rotation_row_major": [
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "state": "NOMINAL_ONLY_FROM_RC03_REACH_SCREENING",
+      "translation_mm": [
+        305.0,
+        457.0,
+        0.0
+      ]
+    },
+    "parent_hover_clearance_mm": 10.0,
+    "parent_tool_length_mm": 100.0,
+    "target": {
+      "derived_center_board_mm": [
+        216.55,
+        154.0,
+        21.0
+      ],
+      "device_origin_board_xy_mm": [
+        85.0,
+        85.0
+      ],
+      "exact_match": true,
+      "key_index": 5,
+      "local_center_xy_mm": [
+        131.55,
+        69.0
+      ],
+      "planned_contact_board_mm": [
+        216.55,
+        154.0,
+        21.0
+      ],
+      "row_index": 2,
+      "runtime_center_board_mm": [
+        216.55,
+        154.0,
+        21.0
+      ],
+      "source_state": "SYNTHETIC_ANSI_LAYOUT_SEED_NOT_PRODUCT_DRAWING",
+      "target_id": "H"
+    }
+  },
+  "board_transform_change_count": 0,
+  "combination_count": 25,
+  "combinations": [
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        26.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 5.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 80.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        31.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 10.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 80.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        36.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 15.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 80.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        41.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 20.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 80.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        46.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 25.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 80.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        26.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 5.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 90.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        31.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 10.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 90.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        36.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 15.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 90.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        41.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 20.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 90.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        46.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 25.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 90.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        26.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 5.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 100.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        31.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 10.0,
+      "is_parent_binding": true,
+      "tool_length_mm": 100.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        36.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 15.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 100.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        41.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 20.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 100.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        46.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 25.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 100.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        26.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 5.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 110.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        31.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 10.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 110.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        36.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 15.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 110.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": {
+        "accepted": false,
+        "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+        "limiting_joints": [
+          "link3_to_link4"
+        ],
+        "minimum_normalized_arm_joint_margin": 0.0007855756733086906,
+        "normalized_margin_by_joint": {
+          "base_link_to_link1": 0.4547977163683635,
+          "link1_to_link2": 0.33030303895160185,
+          "link2_to_link3": 0.11660694459240353,
+          "link3_to_link4": 0.0007855756733086906,
+          "link4_to_link5": 0.49999859241797695
+        },
+        "position_error_mm": 0.03463387413790657,
+        "selected_attempt_index": 2,
+        "solver_weighted_task_jacobian_numerical_rank_passed": null
+      },
+      "converged_candidate_count": 5,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        41.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 20.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 110.0
+    },
+    {
+      "accepted_candidate_count": 5,
+      "best_candidate": {
+        "accepted": true,
+        "failure_reason": null,
+        "limiting_joints": [
+          "link3_to_link4"
+        ],
+        "minimum_normalized_arm_joint_margin": 0.015001156703450213,
+        "normalized_margin_by_joint": {
+          "base_link_to_link1": 0.454797278295228,
+          "link1_to_link2": 0.3410265486390006,
+          "link2_to_link3": 0.12032579097529889,
+          "link3_to_link4": 0.015001156703450213,
+          "link4_to_link5": 0.4999999963288175
+        },
+        "position_error_mm": 0.007592042708182363,
+        "selected_attempt_index": 2,
+        "solver_weighted_task_jacobian_numerical_rank_passed": true
+      },
+      "converged_candidate_count": 5,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        46.0
+      ],
+      "exact_hover_margin_admissible": true,
+      "hover_clearance_mm": 25.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 110.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": null,
+      "converged_candidate_count": 0,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        26.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 5.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 120.0
+    },
+    {
+      "accepted_candidate_count": 0,
+      "best_candidate": {
+        "accepted": false,
+        "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+        "limiting_joints": [
+          "link3_to_link4"
+        ],
+        "minimum_normalized_arm_joint_margin": 0.0007883048476789561,
+        "normalized_margin_by_joint": {
+          "base_link_to_link1": 0.4547977160416226,
+          "link1_to_link2": 0.3303051014840018,
+          "link2_to_link3": 0.11660765462119109,
+          "link3_to_link4": 0.0007883048476789561,
+          "link4_to_link5": 0.49999859334541935
+        },
+        "position_error_mm": 0.03546906728105053,
+        "selected_attempt_index": 2,
+        "solver_weighted_task_jacobian_numerical_rank_passed": null
+      },
+      "converged_candidate_count": 5,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        31.0
+      ],
+      "exact_hover_margin_admissible": false,
+      "hover_clearance_mm": 10.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 120.0
+    },
+    {
+      "accepted_candidate_count": 5,
+      "best_candidate": {
+        "accepted": true,
+        "failure_reason": null,
+        "limiting_joints": [
+          "link3_to_link4"
+        ],
+        "minimum_normalized_arm_joint_margin": 0.01534639263460749,
+        "normalized_margin_by_joint": {
+          "base_link_to_link1": 0.45479533868379585,
+          "link1_to_link2": 0.3413012834418457,
+          "link2_to_link3": 0.1204067505874428,
+          "link3_to_link4": 0.01534639263460749,
+          "link4_to_link5": 0.4999994041725514
+        },
+        "position_error_mm": 0.13879165545494834,
+        "selected_attempt_index": 4,
+        "solver_weighted_task_jacobian_numerical_rank_passed": true
+      },
+      "converged_candidate_count": 5,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        36.0
+      ],
+      "exact_hover_margin_admissible": true,
+      "hover_clearance_mm": 15.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 120.0
+    },
+    {
+      "accepted_candidate_count": 5,
+      "best_candidate": {
+        "accepted": true,
+        "failure_reason": null,
+        "limiting_joints": [
+          "link3_to_link4"
+        ],
+        "minimum_normalized_arm_joint_margin": 0.029716888335493543,
+        "normalized_margin_by_joint": {
+          "base_link_to_link1": 0.45479704526519943,
+          "link1_to_link2": 0.3519383141875728,
+          "link2_to_link3": 0.12437850664914521,
+          "link3_to_link4": 0.029716888335493543,
+          "link4_to_link5": 0.49999999999671585
+        },
+        "position_error_mm": 0.16067585282030875,
+        "selected_attempt_index": 1,
+        "solver_weighted_task_jacobian_numerical_rank_passed": true
+      },
+      "converged_candidate_count": 5,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        41.0
+      ],
+      "exact_hover_margin_admissible": true,
+      "hover_clearance_mm": 20.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 120.0
+    },
+    {
+      "accepted_candidate_count": 4,
+      "best_candidate": {
+        "accepted": true,
+        "failure_reason": null,
+        "limiting_joints": [
+          "link3_to_link4"
+        ],
+        "minimum_normalized_arm_joint_margin": 0.044000293627891644,
+        "normalized_margin_by_joint": {
+          "base_link_to_link1": 0.45479704538527965,
+          "link1_to_link2": 0.36214692717825864,
+          "link2_to_link3": 0.1287173579261714,
+          "link3_to_link4": 0.044000293627891644,
+          "link4_to_link5": 0.49999999999725525
+        },
+        "position_error_mm": 0.07226695685314484,
+        "selected_attempt_index": 1,
+        "solver_weighted_task_jacobian_numerical_rank_passed": true
+      },
+      "converged_candidate_count": 4,
+      "exact_hover_board_mm": [
+        216.55,
+        154.0,
+        46.0
+      ],
+      "exact_hover_margin_admissible": true,
+      "hover_clearance_mm": 25.0,
+      "is_parent_binding": false,
+      "tool_length_mm": 120.0
+    }
+  ],
+  "controller_commands": [],
+  "decision": "EXPLORATORY_BINDING_MATRIX_CONTAINS_MARGIN_ADMISSIBLE_EXACT_HOVER",
+  "diagnostic_installed": false,
+  "failure_reason_counts": {
+    "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED": 2,
+    "NO_CONVERGED_CANDIDATE": 19
+  },
+  "fixture_sha256": "6115aa94a7c29c3a833764dad6a6852e8d121517162ad72b185f9b8911d1d935",
+  "freshness_sha256": "ae48677891787496ab0e0bd7da8bd06d43da9007787e9116df37cf701e61376b",
+  "hardware_access": false,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "ik_threshold_change_count": 0,
+  "ingress_sha256": "0634fe4bebd620b7cc48a55231817cbf1c6ac4f1299e8d9b279bd83d7ee020ae",
+  "limitations": [
+    "Every tool length and hover clearance is an exploratory simulation value; none is a measured or installed configuration.",
+    "The board transform is retained exactly at its NOMINAL_ONLY_FROM_RC03_REACH_SCREENING value and is not varied because no authoritative uncertainty range is installed.",
+    "The keyboard H geometry is a SYNTHETIC_ANSI_LAYOUT_SEED_NOT_PRODUCT_DRAWING value and is audited for internal consistency only.",
+    "Pointwise IK feasibility cannot establish a continuous collision-free route, camera clearance, contact behavior, dynamics, or physical accuracy.",
+    "No result selects a tool, changes a target, installs a planner, or grants command, permit, transport, controller, hardware-write, movement, or physical authority."
+  ],
+  "margin_admissible_combination_count": 4,
+  "ordered_targets": [
+    "H",
+    "E",
+    "L",
+    "L",
+    "O",
+    "SPACE",
+    "2",
+    "0",
+    "2",
+    "6"
+  ],
+  "parent_fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "planner_installed": false,
+  "receipt_sha256": "d834b17df8f014e93725f61f4ff3e49350bd3846d8bd16d68e7023022a46f4f2",
+  "schema": "tactevra.typing_twin_hover_binding_audit_receipt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "target_coordinate_change_count": 0,
+  "trajectory_plan_sha256": "30b8bd0213223f463169649b768c9bbae5d76385bb3d57213329d9b471e01d97"
+}
