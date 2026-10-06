@@ -20,7 +20,15 @@ from rocell_ai.typing_twin_ik_route_study_v1 import _build_pipeline
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = (
+    ROOT
+    / "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1_1.json"
+)
+PRESERVED_FIXTURE = (
     ROOT / "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1.json"
+)
+PRESERVED_FAILURE = (
+    ROOT
+    / "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_failed_attempt_v1.json"
 )
 
 
@@ -53,6 +61,15 @@ def test_bound_inputs_match_exact_bytes() -> None:
     for binding in document["input_bindings"].values():
         source = ROOT / binding["path"]
         assert hashlib.sha256(source.read_bytes()).hexdigest() == binding["sha256"]
+
+
+def test_amendment_preserves_pre_result_failure() -> None:
+    document = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    amendment = document["preexecution_amendment"]
+
+    assert amendment["results_seen_before_amendment"] is False
+    assert PRESERVED_FIXTURE.is_file()
+    assert PRESERVED_FAILURE.is_file()
 
 
 def test_corridor_families_preserve_endpoints() -> None:

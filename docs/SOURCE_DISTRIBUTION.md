@@ -410,3 +410,8 @@ The first Cartesian-corridor execution adds one compact failed-attempt record.
 The file-count ceiling advances from 6,415 to 6,416 for that reviewed path only.
 No result was written, and all byte, duplicate, and reduction limits remain
 unchanged.
+
+The pre-result Cartesian-corridor amendment adds one replacement fixture that
+retains the original fixture and failed wrapper attempt. The file-count ceiling
+advances from 6,416 to 6,417 for that reviewed path only. Search candidates and
+safety gates remain unchanged; all byte and reduction limits remain unchanged.
