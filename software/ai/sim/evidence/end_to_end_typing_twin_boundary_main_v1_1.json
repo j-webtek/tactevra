@@ -1,0 +1,193 @@
+{
+  "cases": {
+    "admitted_installed_subset": {
+      "expected_targets": [
+        "H",
+        "E",
+        "L",
+        "L",
+        "O",
+        "SPACE",
+        "2",
+        "0",
+        "2",
+        "6"
+      ],
+      "text": "hello 2026"
+    },
+    "blocked_missing_target": {
+      "decision": "BLOCK_BEFORE_BATCH",
+      "expected_missing_target": "SHIFT",
+      "text": "Hello 2026!"
+    }
+  },
+  "counters": {
+    "arm_commands": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "evidence": {
+    "captured_at_epoch_ms": 1800000000000,
+    "evaluated_offset_ms_range": [
+      1000,
+      2000
+    ],
+    "expires_offset_ms_range": [
+      8000,
+      10000
+    ],
+    "observation_confidence_range": [
+      0.95,
+      1.0
+    ],
+    "scene_age_ms_range": [
+      1000,
+      3000
+    ]
+  },
+  "expected_combination_count": 81,
+  "fixture_sha256": "44d504496063ccfc6103429dd56ad2dce5eb97fbf99eac0cb1c36b20ca54a964",
+  "gates": {
+    "authority_bearing_output_count_maximum": 0,
+    "blocked_missing_shift_false_acceptance_maximum": 0,
+    "ordered_target_difference_count_maximum": 0,
+    "repeat_target_L_and_2_must_remain_in_order": true,
+    "strict_decode_pass_rate_minimum": 1.0,
+    "trajectory_build_pass_rate_minimum": 1.0,
+    "trusted_registry_ingress_pass_rate_minimum": 1.0
+  },
+  "input_bindings": {
+    "boundary_implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_boundary_v1.py",
+      "sha256": "f7a78cca8dcc1d414a5a798043384424028bc9a2b978b0608cef799265a4fb90"
+    },
+    "installed_target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "semantic_implementation": {
+      "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
+      "sha256": "aac410772d6a158ae366944a35a5ded46fae6a0edc4e21505be1930d86285324"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    }
+  },
+  "installed_target_catalog_sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2",
+  "limitations": [
+    "This increment proves strict batch decoding, trusted registry admission, deterministic execution planning, and Cartesian trajectory preparation only.",
+    "IK, collision, MuJoCo, Isaac, physical calibration, controller transport, hardware, and physical authority remain absent."
+  ],
+  "limits": {
+    "collision_screening_in_this_increment": false,
+    "ik_screening_in_this_increment": false,
+    "maximum_batch_proposals": 64,
+    "mujoco_replay_in_this_increment": false
+  },
+  "paired_sweep_rule": "MATCH_VALUES_BY_INDEX_FOR_VELOCITY_ACCELERATION_JERK_SETTLE_DWELL;CROSS_WITH_UNCERTAINTY_HOVER_AND_CARTESIAN_STEP",
+  "parent_fixture_sha256": "d1f42a38f0bf190311976c65b6b9964ae45b948b0a5d38003c63b436d32e8a1c",
+  "predecessor_boundary_commit": "8a2e9e1b",
+  "predecessor_boundary_fixture_sha256": "f96c686b640c8c993667760cd7bbac7eb57fef539fbcb4dae450289965b62ffa",
+  "preexecution_amendment": {
+    "predecessor_fixture_file_sha256_after_lf_normalization": "16cd10b94bd6651382e628f3e5df18b61b596fc0492015c2b2ca4f694b003736",
+    "predecessor_fixture_sha256": "ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac",
+    "reason": "Normalize newly added source and JSON files to repository LF policy after git diff --check rejected CRLF bytes. No case, parameter range, gate, expected count, or algorithm changed."
+  },
+  "schema": "tactevra.end_to_end_typing_twin_boundary_fixture.v1.1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "semantic_core_result_commit": "eab12ce91d2bc21180fe6ae855a725252fd61b08",
+  "source_claim_commit": "095f8fc6f9bbbcc90a4191bc29efea732dd56433",
+  "sweeps": {
+    "contact_dwell_ms": {
+      "range": [
+        30,
+        120
+      ],
+      "values": [
+        30,
+        60,
+        120
+      ]
+    },
+    "hover_clearance_mm": {
+      "range": [
+        5.0,
+        30.0
+      ],
+      "values": [
+        5.0,
+        15.0,
+        25.0
+      ]
+    },
+    "hover_settle_ms": {
+      "range": [
+        50,
+        200
+      ],
+      "values": [
+        50,
+        100,
+        200
+      ]
+    },
+    "maximum_acceleration_mm_s2": {
+      "range": [
+        40.0,
+        160.0
+      ],
+      "values": [
+        40.0,
+        100.0,
+        160.0
+      ]
+    },
+    "maximum_cartesian_step_mm": {
+      "range": [
+        1.0,
+        5.0
+      ],
+      "values": [
+        1.0,
+        3.0,
+        5.0
+      ]
+    },
+    "maximum_jerk_mm_s3": {
+      "range": [
+        200.0,
+        800.0
+      ],
+      "values": [
+        200.0,
+        500.0,
+        800.0
+      ]
+    },
+    "maximum_velocity_mm_s": {
+      "range": [
+        20.0,
+        80.0
+      ],
+      "values": [
+        20.0,
+        50.0,
+        80.0
+      ]
+    },
+    "planar_uncertainty_bound_mm": {
+      "range": [
+        0.5,
+        2.0
+      ],
+      "values": [
+        0.5,
+        1.0,
+        2.0
+      ]
+    }
+  }
+}
