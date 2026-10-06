@@ -1054,12 +1054,20 @@ normalized-arm-joint-margin rejection. Target order, target coordinates, the
 bounded question is therefore route geometry or canonical branch-selection
 policy, not additional start-seed sampling; no route correction is installed.
 
+Evidence `E-20261006-INT-464` also rejects the frozen candidate-park grid. The
+27 points covered offsets of `-20/0/20` mm in board X and Y around the first
+target hover and `40/60/80` mm above it. Twenty-four candidates stopped on the
+unchanged normalized-margin gate and three retained the canonical no-solution
+condition as blocked. The best candidates accepted 13 samples, versus 15 for
+the parent route. Further AI-side seed or park-grid sampling is not justified;
+the dependency returns to an arm-owned waypoint-planner or canonical solver-
+selection review, followed by a fresh frozen full-route study.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| AI/MODEL + INTEGRATION | S2 | retained seed study plus `software/ai/rocell_ai/typing_twin_ik_route_geometry_study_v1.py`, focused tests, frozen fixture/result manifests, and shared evidence docs | `feature/sim-ws1-ik-route-correction` | ACTIVE — seed-only correction rejected and preserved; CPU-only candidate-park geometry attribution; unchanged 0.01 IK margin, target order, and target coordinates; zero authority |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
