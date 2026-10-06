@@ -640,12 +640,7 @@ class RoArmM3NumericalIk:
         not depend on an early-success shortcut.
         """
 
-        self._validate_target(target)
-        seeds = self._build_seeds(seed_joint_positions, target)
-        attempt_states: list[tuple[IkAttemptReport, tuple[float, ...]]] = []
-        for seed_index, seed in enumerate(seeds):
-            report, final_values = self._solve_attempt(target, seed_index, seed)
-            attempt_states.append((report, final_values))
+        attempt_states = self._attempt_states(target, seed_joint_positions)
 
         selected_index = min(
             range(len(attempt_states)),
@@ -669,6 +664,65 @@ class RoArmM3NumericalIk:
             residual=selected_report.residual,
             attempts=tuple(report for report, _ in attempt_states),
             selected_attempt_index=selected_index,
+        )
+
+    def solve_candidates(
+        self,
+        target: BoardToolTipTarget,
+        *,
+        seed_joint_positions: Sequence[Mapping[str, JointPosition]] = (),
+    ) -> tuple[IkResult, ...]:
+        """Return every distinct converged branch from one bounded solve.
+
+        Candidates retain the exact configured attempt set and are ordered by
+        residual then attempt index.  The method does not choose a route,
+        evaluate joint margin or continuity, screen collision, or authorize
+        motion.  Callers must apply the canonical post-IK gates independently.
+        """
+
+        attempt_states = self._attempt_states(target, seed_joint_positions)
+        attempts = tuple(report for report, _ in attempt_states)
+        ordered = sorted(
+            (
+                (index, report, values)
+                for index, (report, values) in enumerate(attempt_states)
+                if report.converged
+            ),
+            key=lambda item: (item[1].residual.weighted_residual_norm_mm, item[0]),
+        )
+        candidates: list[IkResult] = []
+        seen: set[tuple[float, ...]] = set()
+        for index, report, values in ordered:
+            identity = tuple(round(value, 12) for value in values)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            candidates.append(
+                IkResult(
+                    status=IkStatus.CONVERGED,
+                    target=target,
+                    solution_arm_joint_positions=self._named_positions(values),
+                    fixed_gripper_position=NamedJointPosition(
+                        GRIPPER_JOINT_NAME,
+                        self.fixed_gripper_position,
+                    ),
+                    residual=report.residual,
+                    attempts=attempts,
+                    selected_attempt_index=index,
+                )
+            )
+        return tuple(candidates)
+
+    def _attempt_states(
+        self,
+        target: BoardToolTipTarget,
+        seed_joint_positions: Sequence[Mapping[str, JointPosition]],
+    ) -> tuple[tuple[IkAttemptReport, tuple[float, ...]], ...]:
+        self._validate_target(target)
+        seeds = self._build_seeds(seed_joint_positions, target)
+        return tuple(
+            self._solve_attempt(target, seed_index, seed)
+            for seed_index, seed in enumerate(seeds)
         )
 
     def evaluate(
