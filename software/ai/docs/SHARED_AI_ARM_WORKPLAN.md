@@ -1492,6 +1492,18 @@ not claim a new selection result. The kernel still lacks a main-bound
 Workstream 1 twin, measured perception and landing-sensor behavior, real device
 effects, controller transport, hardware qualification, and physical authority.
 
+`E-20261006-INT-460` restores the smallest main-bound Workstream 1 semantic and
+device-state twin without importing the research branch's unrelated planner or
+catalog history. The preserved first execution failed before metrics because of
+a full-mode seed lookup bug; v1.1 fixes only that lookup and retains the same
+ranges, populations, fault cases, metrics, and rules. Two full runs each replay
+10,010 strings and 318,884 characters per device with zero text failures and the
+same core receipt. Eight independently classified virtual readback effects feed
+the portable recovery kernel with zero classification or terminal mismatches.
+This composes virtual verification and recovery only. Perception, IK, collision,
+contact physics, real host/ADB evidence, transport, hardware, and physical
+authority remain outside the result.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

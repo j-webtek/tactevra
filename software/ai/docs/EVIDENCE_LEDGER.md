@@ -7068,3 +7068,67 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: extract or implement the main-bound typing twin, connect its
   actual verification faults to this recovery kernel, and rerun the same rules
   before claiming end-to-end recovery coverage.
+
+### E-20261006-INT-460 — main-bound Workstream 1 semantic twin and recovery handoff
+
+- Stage: S2-S4 exploratory simulation, Workstreams 1 and 4 composition.
+- Lane: AI/MODEL plus INTEGRATION; no arm-lane status or gate changed.
+- Base commit: `237992f1f45ed4e9d3f496cc6fdfbd9a3485d0b9`.
+- Claim commit: `4a1fdbbd`.
+- Initial implementation commit: `ff163f478e93f44ec58faab90456072fb69d3efc`.
+- Preserved failed-attempt/fix commit: `1befab06a0311034a01fe94493708a4a7d3bb8c1`.
+- Amended fixture-freeze commit: `e8f83e4294d5e439153f702df0e2494dd625aa91`.
+- Result commit: `eab12ce91d2bc21180fe6ae855a725252fd61b08`.
+- Change: reconstructed the smallest self-contained keyboard/phone semantic twin
+  from the research branch without importing its unrelated planner/catalog
+  history, then classified virtual independent readback effects and used those
+  classifications to select the corresponding main-bound recovery behaviors.
+- Preserved failure: fixture v1 SHA-256
+  `c1e633fdc190cca53e18b0da2341ccc9935939f088c4219cff81d51b2d225fc0`
+  failed before metrics because the implementation requested nonexistent
+  `full_keyboard_seed`/`full_phone_seed` fields; the first handoff command also
+  passed `software/` instead of the repository root. The immutable failure record
+  is `software/ai/sim/evidence/end_to_end_typing_twin_main_v1_failure.json`.
+- Amended fixture: v1.1 SHA-256
+  `d1f42a38f0bf190311976c65b6b9964ae45b948b0a5d38003c63b436d32e8a1c`;
+  the amendment changes only the seed-key lookup binding and invocation-root
+  correction. All populations, ranges, fault cases, metrics, and decision rules
+  remain unchanged. Implementation SHA-256 is
+  `aac410772d6a158ae366944a35a5ded46fae6a0edc4e21505be1930d86285324`.
+- Commands: `python -m pytest software/ai/tests/test_end_to_end_typing_twin.py
+  software/ai/tests/test_recovery_state_machine.py -q`; from `software/ai`,
+  `python -m rocell_ai.end_to_end_typing_twin
+  sim/evidence/end_to_end_typing_twin_main_v1_1.json --mode full --output
+  C:\MuJoCoWarp\evidence\issue190\main-extraction\workstream_1\typing_twin_main_v1_1\semantic_full_a.json`
+  and the identical command for `semantic_full_b.json`; two Python invocations
+  imported `run_recovery_handoff`, supplied the repository root plus the frozen
+  twin and portable recovery fixtures, and wrote `handoff_a.json` and
+  `handoff_b.json`; `python -m ruff check` covered the implementation and test;
+  `python scripts/maintain_repository.py verify`; `git diff --check`.
+- Result: `PASS_MAIN_BOUND_SEMANTIC_AND_RECOVERY_HANDOFF`. Each device replayed
+  10,010 strings and 318,884 characters. Keyboard emitted 476,070 semantic
+  targets and 157,186 modifier transitions; phone emitted 604,185 targets and
+  285,301 layer transitions. Exact-text failures were zero and the repeated
+  semantic core receipt is
+  `aef15e4570ac5e0f6a377247bbdfd34c3a1695ddb9d4cb9a5bbf0dad66dffc58`.
+  The eight keyboard/phone readback cases have zero classification and terminal
+  mismatches; handoff outputs are byte-identical with receipt
+  `925f232ff2f406103a5897ad284c232d87a3886c0f53edd682cab2a11d2cdec5`.
+  Twenty-two focused tests passed. Compact summary SHA-256 is
+  `b46306c1482e626bbffc042b2c4346d18bca619816e9f48381e4612981aec2a5`.
+- External outputs: `C:\MuJoCoWarp\evidence\issue190\main-extraction\workstream_1\typing_twin_main_v1_1`.
+  The first backup command failed because `-LiteralPath` did not expand `*`;
+  the enumerated-file retry copied all four outputs to
+  `F:\TactevraEvidence\issue190\main-extraction\workstream_1\typing_twin_main_v1_1`
+  with 4/4 matching hashes.
+- Hardware-write count: 0. Physical-movement count: 0. GPU-job count: 0.
+- Limitations: this is virtual semantic, device-state, readback-classification,
+  and recovery-composition evidence. It does not provide measured perception,
+  installed-key commissioning, IK, collision or swept clearance, contact
+  physics, real host/ADB effects, controller transport, hardware qualification,
+  or physical authority. Descriptive timings are excluded from deterministic
+  receipt identity and the installed catalog is unchanged.
+- Next dependency: connect the same semantic target stream to the already merged
+  strict ModelMotionBatchV2 and arm planning boundary as a separate focused
+  increment; keep collision installation and physical use blocked. Independently,
+  qualify or reject the unchanged Stage A GPU campaign when it finishes.
