@@ -1,0 +1,43 @@
+{
+  "blocked_missing_target": {
+    "expected_missing_target": "SHIFT",
+    "message_sha256": "70efcc30cfffa3f2e6249e4bd6e70d053adbf9589b8426c77dd44ded5610ab51",
+    "status": "BLOCK_BEFORE_BATCH"
+  },
+  "collision_screening_executed": false,
+  "combination_count": 81,
+  "controller_commands": [],
+  "decision": "PASS_STRICT_BOUNDARY_AND_TRAJECTORY_PARTIAL_WORKSTREAM",
+  "external_result_file_sha256": "5a96b76b01b7a6fb8d7d2b24ff6f324c3daf960b38c92477a6281d571584208d",
+  "fixture_sha256": "ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac",
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "ik_screening_executed": false,
+  "limitations": [
+    "The result is simulation-only and uses analytic nominal target centers plus synthetic evidence identities.",
+    "No IK, collision, MuJoCo, Isaac, measured calibration, controller transport, hardware, or physical qualification was executed.",
+    "Collision installation remains blocked and this result cannot authorize motion."
+  ],
+  "mujoco_replay_executed": false,
+  "ordered_targets": [
+    "H",
+    "E",
+    "L",
+    "L",
+    "O",
+    "SPACE",
+    "2",
+    "0",
+    "2",
+    "6"
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "f9a965a7ee1a099a75d1c72cfae6c3949298d504dc624df196a4e234ebe2433b",
+  "schema": "tactevra.typing_twin_boundary_main_summary.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "strict_decode_pass_count": 81,
+  "target_order_difference_count": 0,
+  "trajectory_build_pass_count": 81,
+  "trusted_registry_ingress_pass_count": 81
+}
