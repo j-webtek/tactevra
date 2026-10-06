@@ -17,6 +17,7 @@ from rocell.application.typing_trajectory_plan_v1 import (
     TypingTrajectoryPolicyV1,
     compile_typing_trajectory_plan_v1,
 )
+from rocell.application.trajectory_simulation import TrajectorySimulationError
 from rocell.geometry import JointPosition, Point3Mm as GeometryPoint3Mm
 from rocell.kinematics import ARM_JOINT_NAMES, BoardToolTipTarget, IkStatus
 from rocell.models import Point3Mm, SpeedClass
@@ -164,11 +165,27 @@ def run_route_geometry_study(fixture_path: Path, *, workspace: Path) -> dict[str
             for position in solved.solution_arm_joint_positions
         }
         execution, trajectory = _candidate_plan(parent, batch, ingress, snapshot, park)
-        summary, report = _screen_candidate(
-            candidate_id, seed_values, context=context, snapshot=snapshot,
-            execution=execution, trajectory=trajectory,
-            maximum_samples=maximum_samples,
-        )
+        try:
+            summary, report = _screen_candidate(
+                candidate_id, seed_values, context=context, snapshot=snapshot,
+                execution=execution, trajectory=trajectory,
+                maximum_samples=maximum_samples,
+            )
+        except TrajectorySimulationError as error:
+            if str(error) != "IK solution must use the exact canonical arm-joint order":
+                raise
+            summary = {
+                "candidate_id": candidate_id,
+                "seed_sha256": _sha(seed_values),
+                "status": "BLOCKED_CANONICAL_IK_NO_SOLUTION_EXCEPTION",
+                "evaluated_sample_count": None,
+                "accepted_sample_count": None,
+                "failure_reason": "CANONICAL_IK_RETURNED_NO_ORDERED_SOLUTION",
+                "minimum_normalized_arm_joint_margin": None,
+                "maximum_joint_delta_rad": None,
+                "screen_sha256": None,
+            }
+            report = None
         summary["trajectory_sample_count"] = len(trajectory.screening_samples)
         summary["trajectory_plan_sha256"] = trajectory.trajectory_plan_sha256
         summary["candidate_summary_sha256"] = _sha({
@@ -181,7 +198,7 @@ def run_route_geometry_study(fixture_path: Path, *, workspace: Path) -> dict[str
         generation.append(item)
         summaries.append(summary)
         candidate_points[candidate_id] = item["park_point_board_mm"]
-        if report["status"] == READY_STATUS:
+        if report is not None and report["status"] == READY_STATUS:
             passing_reports[candidate_id] = report
 
     passing = [item for item in summaries if item["status"] == READY_STATUS]

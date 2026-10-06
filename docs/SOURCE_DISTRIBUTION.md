@@ -362,8 +362,9 @@ those exact reviewed additions. The retained result replaces neither external
 simulation data nor installed measurements, and no dependency tree or GPU
 artifact enters the source archive.
 
-The candidate-park route-geometry attribution adds three pre-result governed
-paths: one CPU-only study module, one hash-bound fixture, and one focused test
-module. The file-count ceiling advances from 6,400 to 6,403 for those exact
+The candidate-park route-geometry attribution adds four pre-result governed
+paths: one CPU-only study module, the original frozen fixture, its hash-bound
+pre-result amendment after a preserved no-solution exception, and one focused
+test module. The file-count ceiling advances from 6,400 to 6,404 for those exact
 reviewed additions. No simulator corpus, GPU artifact, or dependency tree enters
 the source archive.

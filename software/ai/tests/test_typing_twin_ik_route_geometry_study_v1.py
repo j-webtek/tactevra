@@ -13,7 +13,7 @@ from rocell_ai.typing_twin_ik_route_geometry_study_v1 import (
 
 
 ROOT = Path(__file__).resolve().parents[3]
-FIXTURE = ROOT / "software/ai/sim/evidence/typing_twin_ik_route_geometry_fixture_v1.json"
+FIXTURE = ROOT / "software/ai/sim/evidence/typing_twin_ik_route_geometry_fixture_v1_1.json"
 
 
 def _canonical(value: object) -> bytes:
@@ -68,3 +68,21 @@ def test_rehashed_candidate_count_mismatch_fails_closed(tmp_path: Path) -> None:
     _write_rehashed(mismatched, document)
     with pytest.raises(ValueError, match="grid differs"):
         run_route_geometry_study(mismatched, workspace=ROOT)
+
+
+def test_no_solution_candidate_is_retained_as_blocked(tmp_path: Path) -> None:
+    document = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    document["search"]["x_offset_from_first_hover_mm"] = [-20.0]
+    document["search"]["y_offset_from_first_hover_mm"] = [-20.0]
+    document["search"]["z_above_first_hover_mm"] = [40.0]
+    document["decision_rules"]["candidate_count_exact"] = 1
+    document["resource_limits"]["maximum_candidates"] = 1
+    candidate = tmp_path / "no-solution.json"
+    _write_rehashed(candidate, document)
+
+    result = run_route_geometry_study(candidate, workspace=ROOT)
+
+    assert result["candidate_summaries"][0]["status"] == (
+        "BLOCKED_CANONICAL_IK_NO_SOLUTION_EXCEPTION"
+    )
+    assert result["passing_candidate_count"] == 0
