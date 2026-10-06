@@ -1,0 +1,121 @@
+{
+  "baseline_control": {
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "unchanged_minimum_normalized_joint_margin": 0.01
+  },
+  "claim_commit": "74f9502c496cb8f4b7860d233ea514e14fe93f13",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "candidate_count_exact": 3,
+    "candidate_remains_uninstalled": true,
+    "collision_gate_must_remain_blocked": true,
+    "ik_threshold_change_count_maximum": 0,
+    "later_phase_waypoint_change_count_maximum": 0,
+    "only_start_to_first_H_hover_may_change": true,
+    "pass_requires_every_exact_trajectory_sample_accepted": true,
+    "selection": "MAXIMUM_ROUTE_MINIMUM_NORMALIZED_MARGIN_THEN_MINIMUM_MAXIMUM_JOINT_DELTA_THEN_MINIMUM_SAMPLE_COUNT_THEN_CANDIDATE_ID",
+    "target_coordinate_change_count_maximum": 0,
+    "target_order_difference_count_maximum": 0
+  },
+  "fixture_sha256": "3b2ceb784205f37cc028a06f7894fbf849e7dca5c62de3e7de28c879f8cd5a9b",
+  "implementation_commit": "8485eb7dc17456061674b3e68665fba2a4fbb6b1",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/kinematics/ik.py",
+      "sha256": "4feb5adb8c33d7b3017f29c17130dc934269ae159bed88b06d8aa63d8474569a"
+    },
+    "canonical_trajectory": {
+      "path": "software/src/rocell/application/typing_trajectory_plan_v1.py",
+      "sha256": "948e27492cccbafcee08df1e2a0f26a7b061eb50b2975ad241c251febab0de34"
+    },
+    "canonical_trajectory_evaluator": {
+      "path": "software/src/rocell/application/trajectory_simulation.py",
+      "sha256": "0177c218d1fbb3cbb3160189469081435fa6b17946e3602bd80313f1c0a46f78"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_ik_margin_aware_planner_study_v1.py",
+      "sha256": "5723f308a6f6ad4508a718cba37ced04e7074adc291a640a4753be6227271fb9"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "All calibration, ready state, route points, and planner samples are synthetic offline evidence.",
+    "The search varies only the first ready-to-H-hover route and rejoins the exact semantic route at the first H hover point.",
+    "The deterministic Cartesian RRT is an exploratory planner study and is not installed motion policy.",
+    "Collision, camera clearance, dynamics, contact, continuous swept-volume safety, and physical repeatability are not evaluated.",
+    "A passing route remains blocked on later arm-lane collision and measured-state evidence.",
+    "No command, permit, transport, controller access, hardware write, movement, or physical authority exists."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "preexecution_amendment": {
+    "candidate_results_seen_before_amendment": false,
+    "change": "Set maximum_full_route_samples to the canonical policy maximum of 512.",
+    "failed_attempt": "software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_failed_attempt_v1.json",
+    "failed_attempt_file_sha256": "17b7fdac7becffd7ef635f12bff92bb9b6c8e6ea860e7292033b43a5134ca72a",
+    "reason": "The shared trajectory policy rejected the originally requested 4096 full-route sample cap before any candidate result was evaluated.",
+    "unchanged": [
+      "three goal-bias schedules",
+      "Halton sequence and bounds",
+      "4096 planner iterations",
+      "2048 tree-node cap",
+      "5 mm extension step",
+      "target order",
+      "target coordinates",
+      "IK solver and post-IK gates",
+      "selection rule",
+      "zero-authority scope"
+    ]
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_candidates": 3,
+    "maximum_full_route_samples": 512,
+    "maximum_solver_calls_per_candidate": 4096,
+    "maximum_tree_nodes_per_candidate": 2048
+  },
+  "schema": "tactevra.typing_twin_ik_margin_aware_planner_study_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "algorithm": "DETERMINISTIC_CARTESIAN_RRT_WITH_CANONICAL_MARGIN_AWARE_NODE_ADMISSION",
+    "extension_step_mm": 5.0,
+    "goal_bias_periods": [
+      5,
+      11,
+      23
+    ],
+    "halton_bases": [
+      2,
+      3,
+      5
+    ],
+    "lower_z_padding_mm": 20.0,
+    "maximum_iterations": 4096,
+    "maximum_nodes": 2048,
+    "reference": "SYNTHETIC_READY_POINT_TO_EXACT_FIRST_H_HOVER_ONLY",
+    "upper_z_padding_mm": 80.0,
+    "xy_padding_mm": 60.0
+  }
+}

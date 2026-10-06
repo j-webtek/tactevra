@@ -420,3 +420,13 @@ The completed Cartesian-corridor run adds one compact generated result receipt.
 The file-count ceiling advances from 6,417 to 6,418 for that reviewed path only.
 No simulator corpus, dependency tree, or authority-bearing artifact enters the
 archive; all byte, duplicate, and reduction limits remain unchanged.
+
+The bounded margin-aware planner study adds six governed paths: one CPU-only
+study module, one focused test module, the original frozen fixture, one compact
+failed-attempt record, its pre-result amended fixture, and one compact result
+receipt. The file-count ceiling advances from 6,418 to the exact observed 6,424
+for those reviewed paths only. The failed attempt is retained because it
+records the canonical route-policy cap discovered before candidate evaluation.
+No simulator corpus, dependency tree, controller artifact, GPU artifact, or
+authority-bearing output enters the archive; all byte, duplicate, and reduction
+limits remain unchanged.
