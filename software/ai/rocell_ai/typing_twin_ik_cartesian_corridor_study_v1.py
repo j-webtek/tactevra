@@ -19,12 +19,22 @@ from rocell.application.typing_trajectory_plan_v1 import (
     _timings_for_endpoints,
 )
 from rocell.application.typing_trajectory_ik_screen_v1 import READY_STATUS
-from rocell.kinematics import ARM_JOINT_NAMES
+from rocell.application.trajectory_simulation import (
+    TrajectorySimulationPolicy,
+    evaluate_joint_trajectory_solution,
+)
+from rocell.geometry import JointPosition
+from rocell.kinematics import ARM_JOINT_NAMES, BoardToolTipTarget
 from rocell.models import Point3Mm
 from rocell.motion.primitives import MotionPhase
 
 from .typing_twin_ik_collision_v1 import SCOPE, _load_fixture as _load_parent_fixture
-from .typing_twin_ik_route_study_v1 import _build_pipeline, _screen_candidate
+from .typing_twin_ik_branch_selection_study_v1 import _waypoints
+from .typing_twin_ik_route_study_v1 import (
+    _build_pipeline,
+    _screen_candidate,
+    _solver_for_seed,
+)
 
 
 SCHEMA = "tactevra.typing_twin_ik_cartesian_corridor_study_receipt.v1"
@@ -164,6 +174,92 @@ def _candidate_trajectory(
     )
 
 
+def _screen_corridor_candidate(
+    candidate_id: str,
+    candidate_seed: dict[str, float],
+    *,
+    context: Any,
+    snapshot: Any,
+    trajectory: TypingTrajectoryPlanV1,
+    maximum_samples: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    waypoints = _waypoints(trajectory)
+    if len(waypoints) > maximum_samples:
+        raise ValueError("candidate route exceeds frozen sample bound")
+    policy = TrajectorySimulationPolicy(
+        maximum_cartesian_step_mm=trajectory.policy.maximum_cartesian_step_mm,
+        maximum_refinement_rounds=0,
+        maximum_waypoints_per_round=maximum_samples,
+        maximum_total_ik_solves=maximum_samples,
+        maximum_route_targets=16,
+    )
+    solver = _solver_for_seed(context, snapshot, candidate_seed)
+    bounds = context.scenario.controller_joint_intersection_rad
+    previous = dict(candidate_seed)
+    results = []
+    for waypoint in waypoints:
+        solved = solver.solve(
+            BoardToolTipTarget(waypoint.point_board),
+            seed_joint_positions=(
+                {
+                    name: JointPosition.radians(previous[name])
+                    for name in ARM_JOINT_NAMES
+                },
+            ),
+        )
+        result = evaluate_joint_trajectory_solution(
+            waypoint,
+            solved,
+            solver,
+            bounds,
+            previous,
+            policy,
+        )
+        results.append(result)
+        if not result.accepted:
+            break
+        previous = dict(result.solution_arm_joint_positions_rad)
+    accepted = [item for item in results if item.accepted]
+    all_accepted = len(results) == len(waypoints) and len(accepted) == len(waypoints)
+    status = READY_STATUS if all_accepted else "BLOCKED_CARTESIAN_CORRIDOR_IK"
+    report_core = {
+        "schema": "tactevra.typing_twin_cartesian_corridor_ik_screen.v1",
+        "scope": SCOPE,
+        "candidate_id": candidate_id,
+        "trajectory_plan_sha256": trajectory.trajectory_plan_sha256,
+        "status": status,
+        "ik_all_samples_accepted": all_accepted,
+        "evaluated_sample_count": len(results),
+        "route_sample_count": len(waypoints),
+        "joint_results": [item.to_dict() for item in results],
+        "collision_evaluated": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    report = {**report_core, "screen_sha256": _sha(report_core)}
+    summary = {
+        "candidate_id": candidate_id,
+        "seed_sha256": _sha(candidate_seed),
+        "status": status,
+        "evaluated_sample_count": len(results),
+        "accepted_sample_count": len(accepted),
+        "failure_reason": (None if all_accepted else results[-1].failure_reason),
+        "minimum_normalized_arm_joint_margin": (
+            min(item.minimum_normalized_arm_joint_margin for item in accepted)
+            if accepted
+            else None
+        ),
+        "maximum_joint_delta_rad": (
+            max(item.maximum_joint_delta_rad for item in accepted) if accepted else None
+        ),
+        "screen_sha256": report["screen_sha256"],
+    }
+    return summary, report
+
+
 def run_cartesian_corridor_study(
     fixture_path: Path,
     *,
@@ -223,12 +319,11 @@ def run_cartesian_corridor_study(
             height_above_start_mm=height,
             planar_order=order,
         )
-        summary, report = _screen_candidate(
+        summary, report = _screen_corridor_candidate(
             candidate_id,
             ready_values,
             context=context,
             snapshot=snapshot,
-            execution=execution,
             trajectory=trajectory,
             maximum_samples=maximum_samples,
         )
