@@ -104,6 +104,70 @@ User request
   -> next action, completion, or explicit stop
 ```
 
+## Current completion dependency spine
+
+This is the concise execution order for reaching the product objective. It
+summarizes the detailed stage board and simulation workstreams; it does not
+replace their gates or authorize hardware.
+
+1. **Compile exact intent and targets.** Ground a supported request, preserve
+   literal text, compile it deterministically into ordered semantic targets,
+   and emit only an evidence-bound `ModelMotionBatch`. Repeated targets and
+   modifier/layer state must remain explicit.
+2. **Establish reliable target contact (WS2, current critical path).** Complete
+   the running 26,790,912-world Stage A key-press campaign, finalize its
+   retained results, and either produce a hash-bound exploratory press-recipe
+   envelope or record that the sampled tool/compliance design is infeasible.
+   Refine only predeclared Stage A boundaries in Stage B. A passing simulation
+   recipe is still not physical qualification.
+3. **Establish safe key-to-key motion (WS3).** Bind the admitted WS2 recipe to
+   the prepared 51-target, 2,601-ordered-pair transition harness. Screen source
+   release, rise, transit, destination descent, reorientation, IK, joint
+   limits, and full robot/tool/workcell swept clearance. WS3 must remain
+   fail-closed while the recipe or installed geometry is absent.
+4. **Prove complete simulated strings and recovery (WS1/WS4).** Compose intent,
+   exact target order, `ModelMotionBatch`, deterministic planning, contact,
+   readback, and verification for repeated keys, punctuation, modifiers, and
+   short strings. Require fresh achieved state between actions. Exercise
+   reobserve, relocalize, bounded correction, abort, and ambiguous-outcome
+   behavior without automatic physical retry.
+5. **Qualify perception and measured geometry.** Freeze the installed camera,
+   board, keyboard, arm base, tool, cables, and lighting as one configuration
+   epoch. Measure transforms, tool/contact geometry, arm repeatability, camera
+   response/noise, lighting drift, obstruction behavior, and landing-sensor
+   noise. Qualify localization and abstention on disjoint real captures. No
+   synthetic result substitutes for this step.
+6. **Run the full zero-write integration gate.** Replay supported requests
+   through perception, semantic compilation, batch ingress, fresh state,
+   calibration, IK, collision screening, controller encoding/emulation, and
+   independent result verification. Require exact lineage and zero hardware
+   writes before physical review.
+7. **Advance physical capability one gate at a time.** Under the attended
+   safety procedures and separate human authorization, qualify one sparse
+   noncontact hover, one independently verified key action (S5), ordered short
+   keyboard missions (S6), and finally performance and operational readiness
+   (S7). A failed or ambiguous stage stops successor stages.
+
+The immediate dependency is therefore unambiguous:
+
+```text
+running WS2 Stage A
+  -> finalized press-recipe result or retained infeasibility
+  -> WS2 Stage B boundary refinement when required
+  -> recipe-bound WS3 all-pairs motion and collision screen
+  -> end-to-end simulated strings plus recovery
+  -> measured-camera and installed-geometry qualification
+  -> zero-write integration
+  -> separately authorized single physical key
+  -> short strings
+  -> operational qualification
+```
+
+Completion means satisfying the S5-S7 physical and operational gates plus the
+held-out real-camera criteria below. Finishing a render, training run, physics
+campaign, or simulator stage alone is progress evidence, not project
+completion.
+
 ## Non-negotiable shared invariants
 
 These rules apply to both lanes and may not be weakened to improve benchmark
