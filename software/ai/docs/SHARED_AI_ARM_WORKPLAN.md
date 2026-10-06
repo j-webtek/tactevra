@@ -1031,6 +1031,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
+| AI/model + simulation | S2-S4 Workstream 1 main extraction | `software/ai/rocell_ai/end_to_end_typing_twin.py`, focused AI tests and compact fixture/evidence, AI-lane workplan and ledger entries; self-contained virtual keyboard/phone semantics plus actual verification-fault handoff to the portable recovery kernel; no catalog, arm-runtime, transport, command, permit, or authority changes | `feature/sim-ws1-typing-twin` | ACTIVE — dependency audit found the branch implementation imported unmerged planner history, so this increment will reconstruct the smallest main-bound semantic/device-state twin and preserve the original workbench result as predecessor evidence rather than cherry-picking unrelated history. |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
