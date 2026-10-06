@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import sys
 
@@ -16,6 +17,7 @@ from rocell_ai.recovery_state_machine import (  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "ai/sim/evidence/workstream_4_recovery_portable_v1.json"
+SUMMARY = ROOT / "ai/sim/evidence/workstream_4_recovery_portable_summary_v1.json"
 
 
 def test_fixture_is_frozen_portable_and_zero_authority():
@@ -81,3 +83,23 @@ def test_rows_correct_single_errors_and_abort_ambiguity():
     assert outside["terminal_state"] == "ABORT"
     assert outside["relocalization_success"] is False
     assert rows["PHONE:UNKNOWN_COMMITTED_TEXT:HIGH"]["state_trace"][-1] == "ABORT"
+
+
+def test_compact_summary_binds_external_replay_and_denies_authority():
+    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    claimed = summary.pop("receipt_sha256")
+    canonical = json.dumps(
+        summary,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("utf-8")
+    assert hashlib.sha256(canonical).hexdigest() == claimed
+    assert claimed == "901082e71e7ecb96c4af246c02d282f6e0085dab6d9295750bc4bd6fc30ee61e"
+    assert summary["byte_identical_replay"] is True
+    assert summary["metrics"]["scenario_count"] == 1244
+    assert summary["controller_commands"] == []
+    assert summary["gpu_jobs"] == 0
+    assert summary["hardware_writes"] == summary["physical_movements"] == 0
+    assert summary["physical_authority"] is False

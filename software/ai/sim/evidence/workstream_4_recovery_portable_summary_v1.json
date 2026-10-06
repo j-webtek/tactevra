@@ -1,0 +1,56 @@
+{
+  "byte_identical_replay": true,
+  "commands": [
+    "python -m rocell_ai.recovery_state_machine software/ai/sim/evidence/workstream_4_recovery_portable_v1.json --output <external>/result.json",
+    "python -m rocell_ai.recovery_state_machine software/ai/sim/evidence/workstream_4_recovery_portable_v1.json --output <external>/replay.json"
+  ],
+  "commands_generated": 0,
+  "controller_commands": [],
+  "decision": "PASS_EXPLORATORY_RECOVERY",
+  "fixture_file_sha256": "f311606b23b7d8f3af565bf5d27fcc847ac7756b22b5013b2f7c7a63875882ed",
+  "fixture_sha256": "51e2a8c2706c2b4907719d0391f926fa511c94d702f8af9c27ecd79431b05d78",
+  "full_receipt_sha256": "8d1f3ff619a3ff09d113e5331ffee3dbd209b8a320599076c962f4427f334c98",
+  "full_replay_file_sha256": "de2dd12fe671a5232cb537dd60a04719c4b70208cf6fa7188429e9eba9f8128e",
+  "full_result_file_sha256": "de2dd12fe671a5232cb537dd60a04719c4b70208cf6fa7188429e9eba9f8128e",
+  "gpu_jobs": 0,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "implementation_file_sha256": "91061bdeccb3e46e94aa7fa230540e8b7d02ec935e2df0580f551014850f4e23",
+  "limitations": [
+    "Drift and timing values are sensitivity ranges, not measured plant limits.",
+    "Relocalization outcomes test state-machine behavior and do not qualify camera localization.",
+    "Backspace and readback are virtual device effects only.",
+    "WS2 physical press recipes are unavailable; contact is represented by WS1 fault hooks.",
+    "No result grants hardware or physical authority.",
+    "This portable reproduction is informed by the predecessor result and is not new selection evidence.",
+    "The main-bound recovery kernel is not yet connected to a main-bound Workstream 1 typing twin."
+  ],
+  "metrics": {
+    "abort_correctness_rate": 1.0,
+    "abort_expected_count": 364,
+    "ambiguous_continuation_count": 0,
+    "detection_latency_ms_range": [
+      20,
+      1100
+    ],
+    "false_recovery_count": 0,
+    "fault_detection_rate": 1.0,
+    "maximum_attempts": 2,
+    "maximum_wrong_characters_before_detection": 1,
+    "recoverable_fault_count": 880,
+    "recoverable_fault_success_rate": 1.0,
+    "scenario_count": 1244,
+    "total_recovery_time_ms_range": [
+      50,
+      1900
+    ]
+  },
+  "permits": 0,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "predeclaration_commit": "5a33921d4a8c4bb076817a793170df0d54dfa8ef",
+  "receipt_sha256": "901082e71e7ecb96c4af246c02d282f6e0085dab6d9295750bc4bd6fc30ee61e",
+  "schema": "tactevra.simulation_program_workstream_4_portable_summary.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "transports": 0
+}
