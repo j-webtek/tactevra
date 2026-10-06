@@ -395,3 +395,8 @@ The completed compatibility reproduction adds one compact generated result.
 The file-count ceiling advances from 6,411 to 6,412 for that reviewed path
 only. It reproduced the original rejected metrics without changing the
 canonical IK solver; all byte, duplicate, and reduction limits remain unchanged.
+
+The first-target Cartesian-corridor preparation adds two governed paths: one
+CPU-only study module and one focused test module. The file-count ceiling
+advances from 6,412 to 6,414 for those reviewed paths only. No simulator corpus,
+dependency tree, controller artifact, or physical authority enters the archive.
