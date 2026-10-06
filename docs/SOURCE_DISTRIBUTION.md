@@ -374,3 +374,9 @@ amendment after a preserved no-solution exception, one focused test module, and
 one compact result receipt. The file-count ceiling advances from 6,401 to 6,406
 for those exact reviewed additions. No simulator corpus, GPU artifact, or
 dependency tree enters the source archive.
+
+The bounded IK branch-selection preparation adds three governed paths: one
+CPU-only study module, one focused test module, and one frozen hash-bound
+fixture. The file-count ceiling advances from 6,406 to 6,409 for those reviewed
+paths only. It adds no simulator corpus, dependency tree, controller artifact,
+or physical authority.
