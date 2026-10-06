@@ -1046,6 +1046,23 @@ hash-bound route or start-state correction that passes the existing margin gate,
 followed by full-route collision evidence using reviewed candidate or installed
 geometry.
 
+Evidence `E-20261006-INT-463` rejects a seed-only correction. Sixty-four frozen
+Halton interior seeds reproduced the same ready-tip point and replayed the exact
+parent trajectory, but every candidate stopped at sample 15 with the same
+normalized-arm-joint-margin rejection. Target order, target coordinates, the
+260 Cartesian samples, and the `0.01` margin gate were unchanged. The next
+bounded question is therefore route geometry or canonical branch-selection
+policy, not additional start-seed sampling; no route correction is installed.
+
+Evidence `E-20261006-INT-464` also rejects the frozen candidate-park grid. The
+27 points covered offsets of `-20/0/20` mm in board X and Y around the first
+target hover and `40/60/80` mm above it. Twenty-four candidates stopped on the
+unchanged normalized-margin gate and three retained the canonical no-solution
+condition as blocked. The best candidates accepted 13 samples, versus 15 for
+the parent route. Further AI-side seed or park-grid sampling is not justified;
+the dependency returns to an arm-owned waypoint-planner or canonical solver-
+selection review, followed by a fresh frozen full-route study.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

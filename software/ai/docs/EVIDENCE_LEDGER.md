@@ -7297,3 +7297,144 @@ rewriting history. New entries must use a unique evidence ID.
   use reviewed reduced-link candidate geometry for simulation, followed by an
   installed measured collision profile and fresh observed start state before
   any operational gate can advance.
+
+### E-20261006-INT-463 — deterministic seed-only route correction rejected
+
+- Stage: S2 exploratory zero-authority integration.
+- Lane: AI/MODEL plus INTEGRATION; no arm-lane status or integration gate changed.
+- Base commit: `cfcbb4b17cbeb6a6f990b6fe0e81e6ec0095fb85`.
+- Claim commit: `fb5747fd45b2228ebbcddc9af310423718df1f8a`.
+- Frozen implementation/fixture commit:
+  `b9e5a9165faa89fce52f1818453db78b3a5e38a8`.
+- Failed-result commit: `0c09f91d1ec92cfe9729b3625a41d46de8d55728`.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_ik_route_study_fixture_v1.json`;
+  canonical fixture SHA-256
+  `4ae930aef76fabbdf0bdd0c0932943c7e788e042cffd8e10f6a2f1f728c9ca07`;
+  file SHA-256
+  `a43ce6a6ad0610e891c0963fff8c3b575d32d72ac59f429f27c40e0d58d66b07`.
+  The fixture binds implementation SHA-256
+  `606cf9a93bf49f57869783a5460177a2b004636f9407455203def010428c54a2`,
+  the parent fixture, canonical IK screen, kinematic solver, system manifest,
+  and target catalog.
+- Exact result command: with `PYTHONPATH=software/src;software/ai`, run `python
+  -m rocell_ai.typing_twin_ik_route_study_v1
+  software/ai/sim/evidence/typing_twin_ik_route_study_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_route_study_result_v1.json`.
+- Frozen search: 64 Halton interior seeds at indices 1 through 64, bases
+  `(2,3,5,7,11)`, and normalized controller-bound fractions `[0.05,0.95]`.
+  Every seed first reproduced the exact parent synthetic ready-tip point. The
+  selection rule, frozen before execution, required every exact route sample to
+  pass and then maximized minimum normalized margin, minimized maximum adjacent
+  delta, and used candidate ID as the final tie break.
+- Result: `BLOCKED_NO_FULL_ROUTE_SEED_CANDIDATE`; receipt SHA-256
+  `84045da315e7b1eddd2313a51eab58b0a3c55da47dbc8a2a6e5cf897fd14d233`;
+  result file SHA-256
+  `3baa36c2f742a6fa73a7b64f5c274c099cfc40ec333e6f33b08b1c67c2838048`.
+  All 64 candidates generated and reached canonical screening. All 64 evaluated
+  16 samples, accepted the first 15, and rejected sample 15 with
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`. The baseline control reproduced
+  the same sample count and reason. Every accepted prefix had minimum normalized
+  margin `0.016856`; candidate maximum adjacent deltas ranged narrowly around
+  `0.0364` radians. No candidate passed the 260-sample route.
+- Interpretation: seed diversity at the same Cartesian ready-tip point does not
+  remove the first-`H` wrist-margin failure. The next bounded study must attribute
+  the failure to Cartesian route geometry or a separately reviewed canonical IK
+  branch-selection policy. This failed result remains retained and will not be
+  rescored after a successor is defined.
+- Validation: `python -m pytest
+  software/ai/tests/test_typing_twin_ik_route_study_v1.py -q` reported 4 passed;
+  Ruff and `git diff --check` passed. The smoke test used one candidate and
+  reproduced the baseline rejection before the 64-candidate run.
+- Fixtures: exact parent `hello 2026` target sequence
+  `H,E,L,L,O,SPACE,2,0,2,6`, parent 260-sample trajectory, the fixture above,
+  and the retained result above.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The pre-existing Stage A process (PID 42724) was not used,
+  modified, or interrupted.
+- Limitations: calibration, the ready-tip point, and every seed are synthetic.
+  Collision geometry was not evaluated. A passing simulation seed would remain
+  uninstalled and would not replace a fresh observed physical state. No command,
+  permit, transport, controller access, or physical authority was created.
+- Next dependency: freeze a CPU-only route-geometry attribution that varies only
+  declared transit geometry while retaining target order, coordinates, and the
+  `0.01` margin. Any canonical solver-policy change remains arm-owned and must be
+  proposed separately rather than silently introduced here.
+
+### E-20261006-INT-464 — candidate-park geometry grid rejected
+
+- Stage: S2 exploratory zero-authority integration.
+- Lane: AI/MODEL plus INTEGRATION; no arm-lane status or integration gate changed.
+- Base evidence: `E-20261006-INT-462` and rejected seed study
+  `E-20261006-INT-463`.
+- Claim update commit: `2ba27363a4248223e50fd25356ff3bd506f10d75`.
+- Original frozen implementation/fixture commit:
+  `e9724c2874cabf2b87f990f157f611e5aa80a4ea`.
+- Preserved failed execution: the original full command stopped without writing
+  a result when a candidate returned no IK solution and the unchanged canonical
+  evaluator raised `TrajectorySimulationError: IK solution must use the exact
+  canonical arm-joint order`. The original fixture remains at
+  `software/ai/sim/evidence/typing_twin_ik_route_geometry_fixture_v1.json`;
+  canonical SHA-256
+  `a08672e3f05246b0bc65efdf6cfdc8311f1bef75d7ac3c4a498a6509e2da7f9e`;
+  file SHA-256
+  `4939890bbe237ca55fbe0c75e6bc7b92007bb3d5d13b5a00d3327067a801ab68`.
+- Pre-result amendment commit:
+  `6fabce7b790ce3f6b5f50e1ca20f9e07f7406687`. It catches only that exact
+  existing no-ordered-solution exception per candidate and retains the candidate
+  as blocked. It does not alter canonical IK, its thresholds, target data, the
+  search grid, or the selection rule. Amended fixture:
+  `software/ai/sim/evidence/typing_twin_ik_route_geometry_fixture_v1_1.json`;
+  canonical SHA-256
+  `ff985269fbf370fa12fb084f898995f940b9e8dbab5dd6aee2cffdc0ba9ded42`;
+  file SHA-256
+  `854a12cd2aa3f7a7f13544d679a63adbadc6758669c96be1973e5ddd805ee0f7`.
+- Result commit: `0266d832223945b1041f2bf0cbf37a81e643610b`.
+- Exact final command: with `PYTHONPATH=software/src;software/ai`, run `python
+  -m rocell_ai.typing_twin_ik_route_geometry_study_v1
+  software/ai/sim/evidence/typing_twin_ik_route_geometry_fixture_v1_1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_route_geometry_result_v1_1.json`.
+- Implementation SHA-256:
+  `a398c4b64171e3eef7d81bfc06be28d056a6cf9e5c321fd3b9723bda5c2cf43f`.
+  Result: `BLOCKED_NO_FULL_ROUTE_CANDIDATE_PARK`; receipt SHA-256
+  `c73f20a06be8353a1c88ff0093170c2215ec926b7607cb7fb58d552eedebb25c`;
+  result file SHA-256
+  `d9164005a7c00ca72430a0619b0bc6982585303caa21fd5f929ba68fb1110a9a`.
+- Frozen grid: 27 park points around the unchanged first-target hover, using
+  board-X offsets `[-20,0,20]` mm, board-Y offsets `[-20,0,20]` mm, and heights
+  `[40,60,80]` mm above hover. The target sequence and every target coordinate
+  remained unchanged. Each candidate compiled its own canonically replayable
+  start-reference trajectory under the parent velocity, acceleration, jerk,
+  spacing, dwell, and `0.01` normalized-margin requirements.
+- Result details: all 27 park points generated and were assessed. Twenty-four
+  candidates stopped with `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`; three
+  retained `CANONICAL_IK_RETURNED_NO_ORDERED_SOLUTION`. No candidate completed
+  the route. The best three accepted 13 samples before rejection, while the
+  unchanged parent control accepts 15. Candidate trajectory sizes ranged around
+  234 to 245 samples because only the start-reference leg changed.
+- Interpretation: this declared park grid does not fix the route and performs
+  worse than the parent start. Together with `E-20261006-INT-463`, the evidence
+  rejects further AI-side seed or local park-grid sampling as the next step.
+  The remaining design question is an arm-owned waypoint planner or separately
+  reviewed canonical solver branch-selection policy.
+- Validation: 4 focused geometry-study tests passed after the amendment,
+  including the exact no-solution candidate; the first smoke failure is retained
+  above. Ruff and `git diff --check` passed. Shared regression and repository
+  policy checks are recorded in the result branch validation.
+- Fixtures: the two frozen fixtures above, the exact parent `hello 2026` batch,
+  target order `H,E,L,L,O,SPACE,2,0,2,6`, and compact result receipt above.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The pre-existing Stage A process (PID 42724) was not used,
+  modified, or interrupted.
+- Limitations: every park point, calibration value, and start state is synthetic.
+  Camera visibility, collision clearance, swept distance, and physical park
+  repeatability were not evaluated. No candidate is installed. No command,
+  permit, transport, controller access, or physical authority was created.
+- Next dependency: the arm lane must review waypoint-planner support or canonical
+  branch-selection behavior. Any accepted design then requires a newly frozen
+  full-route IK study, followed by collision, camera-clearance, and measured-
+  state evidence before operational readiness can change.
