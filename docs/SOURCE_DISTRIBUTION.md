@@ -345,3 +345,12 @@ one preserved failed-attempt record, and one compact result summary. The
 resulting tree contains 6,386 tracked files. Full simulation outputs remain
 external and hash-bound. The file-count ceiling advances to 6,386 while all
 byte and reduction limits remain unchanged.
+
+The main-bound typing IK and collision diagnostic adds five governed paths: one
+CPU-only composition module, one focused test module, one active frozen fixture,
+one compact result, and one hash-bound history manifest containing every earlier
+fixture and failed attempt from this workstream. The resulting tree contains
+6,396 tracked files. The file-count ceiling advances from 6,391 to 6,396 for
+those reviewed paths only; all byte, duplicate, and reduction limits remain
+unchanged. The history was consolidated after execution, and the original
+standalone paths remain recoverable from their recorded commits.

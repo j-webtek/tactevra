@@ -18,7 +18,7 @@ from rocell_ai.typing_twin_ik_collision_v1 import (  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
-FIXTURE = ROOT / "ai/sim/evidence/typing_twin_ik_collision_fixture_v1_3.json"
+FIXTURE = ROOT / "ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
 
 
 def _canonical(value: object) -> bytes:
@@ -29,7 +29,7 @@ def _canonical(value: object) -> bytes:
 def test_fixture_is_frozen_ranged_and_zero_authority() -> None:
     fixture = _load_fixture(FIXTURE, WORKSPACE)
     assert fixture["fixture_sha256"] == (
-        "2466b67d7a7ba5815c443826ae61e6de94b7232f076f25e723a804116d1dedc5"
+        "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308"
     )
     assert not any(fixture["counters"].values())
     assert fixture["resource_limits"]["expected_candidate_profile_count"] == 64
@@ -43,7 +43,7 @@ def test_blocked_route_and_prefix_diagnostic_are_repeatable() -> None:
     second = run_typing_ik_collision(FIXTURE, workspace=WORKSPACE)
     assert first == second
     assert first["receipt_sha256"] == (
-        "829ac42ef1e9d521e6b60d7ab5a31063bffb9a7b94741c6d113fef08bb5b1e00"
+        "e45cc5c652cc8ae1bdc2ee74e9beee0de13c763ebc7fba9a5bebfe9f358734c1"
     )
     assert first["decision"] == "BLOCKED_CANONICAL_IK_PREFIX_DIAGNOSTIC_ONLY"
     assert first["ordered_targets"] == [
