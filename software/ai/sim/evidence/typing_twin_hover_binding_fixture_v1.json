@@ -1,0 +1,96 @@
+{
+  "claim_commit": "16893828c612ec7d3ac0191cffee7745aae2c437",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "board_transform_change_count_maximum": 0,
+    "combination_count_exact": 25,
+    "diagnostic_remains_uninstalled": true,
+    "feasible_combination_requires_at_least_one_candidate_to_pass_all_unchanged_post_ik_gates": true,
+    "ik_threshold_change_count_maximum": 0,
+    "require_exact_board_binding_match": true,
+    "require_exact_target_binding_match": true,
+    "target_coordinate_change_count_maximum": 0
+  },
+  "fixture_sha256": "6115aa94a7c29c3a833764dad6a6852e8d121517162ad72b185f9b8911d1d935",
+  "implementation_commit": "0925579eebe8af7f8edab58987ea0c1c70f497f4",
+  "input_bindings": {
+    "canonical_ik": {
+      "path": "software/src/rocell/kinematics/ik.py",
+      "sha256": "4feb5adb8c33d7b3017f29c17130dc934269ae159bed88b06d8aa63d8474569a"
+    },
+    "execution_plan": {
+      "path": "software/src/rocell/application/typing_execution_plan_v1.py",
+      "sha256": "29ad549612f44afd35e57673bdd0cb9b76fe0db5acf45c47c34dd73de7f6af2d"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_hover_binding_audit_v1.py",
+      "sha256": "af0b40f983ed65b4ca0047a01e1e420b83e496abea39ece20fe7a7f84208ed86"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "simulation_hardware_profile": {
+      "path": "software/config/simulation_hardware_profile.json",
+      "sha256": "6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "Every tool length and hover clearance is an exploratory simulation value; none is a measured or installed configuration.",
+    "The board transform is retained exactly at its NOMINAL_ONLY_FROM_RC03_REACH_SCREENING value and is not varied because no authoritative uncertainty range is installed.",
+    "The keyboard H geometry is a SYNTHETIC_ANSI_LAYOUT_SEED_NOT_PRODUCT_DRAWING value and is audited for internal consistency only.",
+    "Pointwise IK feasibility cannot establish a continuous collision-free route, camera clearance, contact behavior, dynamics, or physical accuracy.",
+    "No result selects a tool, changes a target, installs a planner, or grants command, permit, transport, controller, hardware-write, movement, or physical authority."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_combinations": 25,
+    "maximum_ik_solves": 512
+  },
+  "schema": "tactevra.typing_twin_hover_binding_audit_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "sweep": {
+    "hover_clearance_mm": [
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0
+    ],
+    "hover_range_basis": "Bounded policy sensitivity spanning the parent 10 mm clearance and the previously exercised 25 mm offline clearance; this is not a measured physical range.",
+    "tool_length_mm": [
+      80.0,
+      90.0,
+      100.0,
+      110.0,
+      120.0
+    ],
+    "tool_range_basis": "Bounded interpolation across the existing 80/100/120 mm unmeasured virtual-tool sensitivity family; no length is installed or selected."
+  },
+  "target": {
+    "device": "keyboard",
+    "preserve_contact_z": true,
+    "preserve_xy": true,
+    "target_id": "H"
+  }
+}
