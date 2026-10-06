@@ -48,7 +48,7 @@
     ]
   },
   "expected_combination_count": 81,
-  "fixture_sha256": "ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac",
+  "fixture_sha256": "44d504496063ccfc6103429dd56ad2dce5eb97fbf99eac0cb1c36b20ca54a964",
   "gates": {
     "authority_bearing_output_count_maximum": 0,
     "blocked_missing_shift_false_acceptance_maximum": 0,
@@ -61,7 +61,7 @@
   "input_bindings": {
     "boundary_implementation": {
       "path": "software/ai/rocell_ai/typing_twin_boundary_v1.py",
-      "sha256": "b65086d21fedd4bba9d5f9c8cbd02982541122d1336853b5109cc9817ee1a0a4"
+      "sha256": "f7a78cca8dcc1d414a5a798043384424028bc9a2b978b0608cef799265a4fb90"
     },
     "installed_target_catalog": {
       "path": "software/config/nominal_target_profiles.json",
@@ -91,7 +91,12 @@
   "parent_fixture_sha256": "d1f42a38f0bf190311976c65b6b9964ae45b948b0a5d38003c63b436d32e8a1c",
   "predecessor_boundary_commit": "8a2e9e1b",
   "predecessor_boundary_fixture_sha256": "f96c686b640c8c993667760cd7bbac7eb57fef539fbcb4dae450289965b62ffa",
-  "schema": "tactevra.end_to_end_typing_twin_boundary_fixture.v1",
+  "preexecution_amendment": {
+    "predecessor_fixture_file_sha256_after_lf_normalization": "16cd10b94bd6651382e628f3e5df18b61b596fc0492015c2b2ca4f694b003736",
+    "predecessor_fixture_sha256": "ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac",
+    "reason": "Normalize newly added source and JSON files to repository LF policy after git diff --check rejected CRLF bytes. No case, parameter range, gate, expected count, or algorithm changed."
+  },
+  "schema": "tactevra.end_to_end_typing_twin_boundary_fixture.v1.1",
   "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
   "semantic_core_result_commit": "eab12ce91d2bc21180fe6ae855a725252fd61b08",
   "source_claim_commit": "095f8fc6f9bbbcc90a4191bc29efea732dd56433",

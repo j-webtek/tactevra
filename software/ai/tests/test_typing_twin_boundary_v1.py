@@ -25,7 +25,7 @@ from rocell_ai.typing_twin_boundary_v1 import (  # noqa: E402
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURE = ROOT / "ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1.json"
+FIXTURE = ROOT / "ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1_1.json"
 
 
 def _canonical(value: object) -> bytes:
@@ -38,7 +38,7 @@ def _canonical(value: object) -> bytes:
 def test_fixture_is_frozen_and_zero_authority() -> None:
     fixture = _load_boundary_fixture(FIXTURE)
     assert fixture["fixture_sha256"] == (
-        "ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac"
+        "44d504496063ccfc6103429dd56ad2dce5eb97fbf99eac0cb1c36b20ca54a964"
     )
     assert not any(fixture["counters"].values())
     assert fixture["limits"]["collision_screening_in_this_increment"] is False
