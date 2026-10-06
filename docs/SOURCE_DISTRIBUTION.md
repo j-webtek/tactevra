@@ -405,3 +405,8 @@ The frozen Cartesian-corridor fixture adds one governed path binding the exact
 nine-candidate search and unchanged route-safety gates. The file-count ceiling
 advances from 6,414 to 6,415 for that reviewed path only; all byte, duplicate,
 and reduction limits remain unchanged.
+
+The first Cartesian-corridor execution adds one compact failed-attempt record.
+The file-count ceiling advances from 6,415 to 6,416 for that reviewed path only.
+No result was written, and all byte, duplicate, and reduction limits remain
+unchanged.
