@@ -535,7 +535,15 @@ records remain external and hash-governed. The logical-byte, single-blob,
 duplicate-byte, and reduction limits are unchanged.
 
 The Workstream 4 recovery-state-machine freeze adds one compact, hash-bound
-fixture. Implementation and tests extend existing Workstream 1 files, and all
-generated scenario traces and receipts remain external. The exact tracked-file
-count and governed ceiling are therefore 6,419; every byte, blob, duplicate,
-and reduction limit remains unchanged.
+fixture. At that freeze point, implementation and tests were expected to extend
+existing Workstream 1 files, and all generated scenario traces and receipts
+were to remain external. The exact tracked-file count and governed ceiling at
+that point were therefore 6,419; every byte, blob, duplicate, and reduction
+limit remained unchanged.
+
+The Workstream 4 implementation audit found that the frozen Workstream 1 twin
+is itself hash-bound by the Isaac subset. Recovery logic therefore lives in one
+separate runtime module so the earlier twin remains byte-identical. This raises
+the exact tracked-file count and governed ceiling to 6,420. The fixture records
+the binding-only amendment and preserves the superseded fixture identity; its
+metrics, ranges, and decision rules are unchanged.

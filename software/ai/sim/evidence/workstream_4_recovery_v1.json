@@ -1,8 +1,14 @@
 {
+  "binding_amendment": {
+    "reason": "Isaac subset hash-binds the Workstream 1 typing twin; isolate recovery implementation so that frozen source remains byte-identical.",
+    "scope": "BINDING_ONLY_NO_METRIC_RANGE_OR_DECISION_RULE_CHANGE",
+    "superseded_fixture_sha256": "3ad1ae85ee3403a27fc7e3e02532cc5ed971fe5e0c981e7920075a16d0bee9b6",
+    "timing": "AFTER_IMPLEMENTATION_UNIT_TEST_BEFORE_EXTERNAL_CAMPAIGN_RESULT"
+  },
   "bindings": {
     "implementation_target": {
-      "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
-      "preimplementation_sha256": "50f83bc49765fcce32aa41b67e7a972680e33f15af622f10d053f0cc542e7442",
+      "path": "software/ai/rocell_ai/recovery_state_machine.py",
+      "preimplementation_sha256": "e8b824b92d10b9afb4556bf454bb5a168171c55a50f8e6fde5a76f588411da6a",
       "result_must_record_final_sha256": true
     },
     "program_plan": {
@@ -88,7 +94,7 @@
     "BURST_WRONG_PRESS",
     "BURST_DOUBLE_PRESS"
   ],
-  "fixture_sha256": "3ad1ae85ee3403a27fc7e3e02532cc5ed971fe5e0c981e7920075a16d0bee9b6",
+  "fixture_sha256": "3a580ad2d7f333b8dfdee71b6cad4e644dce19032f0aba270cbfc289d47eb3aa",
   "latency_profiles_ms": {
     "HIGH": {
       "correction": 150,

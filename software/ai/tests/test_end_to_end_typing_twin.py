@@ -18,9 +18,14 @@ from rocell_ai.end_to_end_typing_twin import (  # noqa: E402
     run_boundary_sweep,
     run_semantic_twin,
 )
+from rocell_ai.recovery_state_machine import (  # noqa: E402
+    load_recovery_fixture,
+    run_recovery_campaign,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "ai/sim/evidence/end_to_end_typing_twin_v1.json"
+RECOVERY_FIXTURE = ROOT / "ai/sim/evidence/workstream_4_recovery_v1.json"
 
 
 def test_fixture_is_hash_bound_zero_authority_and_source_bound():
@@ -95,3 +100,61 @@ def test_actual_v2_boundary_sweep_preserves_order_and_zero_authority():
     assert first["controller_commands"] == []
     assert first["hardware_writes"] == first["physical_movements"] == 0
     assert first["physical_authority"] is False
+
+
+def test_recovery_fixture_is_frozen_bound_and_zero_authority():
+    fixture = load_recovery_fixture(RECOVERY_FIXTURE, workspace=ROOT.parent)
+    assert fixture["fixture_sha256"] == (
+        "3a580ad2d7f333b8dfdee71b6cad4e644dce19032f0aba270cbfc289d47eb3aa")
+    assert fixture["state_machine"]["maximum_press_retries"] == 1
+    assert not any(fixture["counters"].values())
+    assert fixture["physical_authority"] is False
+
+
+def test_recovery_fixture_rejects_tampering(tmp_path: Path):
+    fixture = json.loads(RECOVERY_FIXTURE.read_text())
+    fixture["drift"]["translation_mm"][-1] = 11.0
+    changed = tmp_path / "changed.json"
+    changed.write_text(json.dumps(fixture))
+    with pytest.raises(ValueError, match="fixture hash"):
+        load_recovery_fixture(changed, workspace=ROOT.parent)
+
+
+def test_recovery_campaign_is_deterministic_complete_and_zero_authority():
+    first = run_recovery_campaign(RECOVERY_FIXTURE, workspace=ROOT.parent)
+    second = run_recovery_campaign(RECOVERY_FIXTURE, workspace=ROOT.parent)
+    assert first == second
+    assert first["decision"] == "PASS_EXPLORATORY_RECOVERY"
+    assert first["metrics"] == {
+        "scenario_count": 1244,
+        "fault_detection_rate": 1.0,
+        "maximum_wrong_characters_before_detection": 1,
+        "recoverable_fault_count": 880,
+        "recoverable_fault_success_rate": 1.0,
+        "abort_expected_count": 364,
+        "abort_correctness_rate": 1.0,
+        "false_recovery_count": 0,
+        "ambiguous_continuation_count": 0,
+        "maximum_attempts": 2,
+        "detection_latency_ms_range": [20, 1100],
+        "total_recovery_time_ms_range": [50, 1900],
+    }
+    assert first["controller_commands"] == []
+    assert first["hardware_writes"] == first["physical_movements"] == 0
+    assert first["gpu_jobs"] == 0 and first["physical_authority"] is False
+
+
+def test_recovery_rows_backspace_exact_errors_and_abort_ambiguity():
+    result = run_recovery_campaign(RECOVERY_FIXTURE, workspace=ROOT.parent)
+    rows = {row["scenario_id"]: row for row in result["rows"]}
+    wrong = rows["KEYBOARD:SINGLE_WRONG_PRESS:LOW"]
+    assert wrong["state_trace"][-4:] == [
+        "BACKSPACE_CORRECT", "RETRY_ONCE", "VERIFY", "COMPLETE"]
+    assert wrong["wrong_characters_before_detection"] == 1
+    assert wrong["correction_success"] is True
+    outside = rows[
+        "PHONE:DRIFT_TRANSLATION_X:+10:CAP_2:IMMEDIATELY_BEFORE_CONTACT:HIGH"]
+    assert outside["terminal_state"] == "ABORT"
+    assert outside["relocalization_success"] is False
+    ambiguous = rows["PHONE:UNKNOWN_COMMITTED_TEXT:HIGH"]
+    assert ambiguous["state_trace"][-1] == "ABORT"
