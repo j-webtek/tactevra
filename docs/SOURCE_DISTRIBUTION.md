@@ -390,3 +390,8 @@ binds study-local candidate enumeration while preserving the canonical IK bytes
 required by earlier frozen evidence. The file-count ceiling advances from 6,410
 to 6,411 for that reviewed path only. The original fixture and rejected result
 remain intact; all byte, duplicate, and reduction limits remain unchanged.
+
+The completed compatibility reproduction adds one compact generated result.
+The file-count ceiling advances from 6,411 to 6,412 for that reviewed path
+only. It reproduced the original rejected metrics without changing the
+canonical IK solver; all byte, duplicate, and reduction limits remain unchanged.

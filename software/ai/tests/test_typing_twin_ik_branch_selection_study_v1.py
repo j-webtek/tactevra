@@ -20,6 +20,9 @@ PRESERVED_FIXTURE = (
 PRESERVED_RESULT = (
     ROOT / "software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1.json"
 )
+REPRODUCED_RESULT = (
+    ROOT / "software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1_1.json"
+)
 
 
 def test_frozen_fixture_is_hash_bound_and_zero_authority() -> None:
@@ -57,3 +60,28 @@ def test_compatibility_reproduction_preserves_original_evidence() -> None:
     assert correction["rules_changed"] is False
     assert PRESERVED_FIXTURE.is_file()
     assert PRESERVED_RESULT.is_file()
+
+
+def test_compatibility_reproduction_retains_decision_and_beam_metrics() -> None:
+    original = json.loads(PRESERVED_RESULT.read_text(encoding="utf-8"))
+    reproduced = json.loads(REPRODUCED_RESULT.read_text(encoding="utf-8"))
+    metric_fields = (
+        "beam_width",
+        "accepted_waypoint_count",
+        "solver_call_count",
+        "candidate_evaluation_count",
+        "first_failure",
+        "selected_minimum_normalized_arm_joint_margin",
+    )
+
+    assert reproduced["decision"] == original["decision"]
+    assert [
+        {field: beam[field] for field in metric_fields}
+        for beam in reproduced["beam_results"]
+    ] == [
+        {field: beam[field] for field in metric_fields}
+        for beam in original["beam_results"]
+    ]
+    assert reproduced["hardware_writes"] == 0
+    assert reproduced["physical_movements"] == 0
+    assert reproduced["physical_authority"] is False
