@@ -1483,6 +1483,15 @@ non-watertight source meshes, missing installed measured tool/support/workcell
 geometry, continuous clearance, engineering acceptance, controller access, and
 physical qualification remain explicit blockers.
 
+`E-20261006-INT-459` ports the branch-only recovery state machine to a focused
+CPU-only kernel on current `main`. Two byte-identical runs reproduce all 1,244
+declared keyboard/phone recovery scenarios with zero false recoveries or
+ambiguous continuations. The amendment explicitly labels this as post-result
+portability reproduction, preserves the predecessor ranges and rules, and does
+not claim a new selection result. The kernel still lacks a main-bound
+Workstream 1 twin, measured perception and landing-sensor behavior, real device
+effects, controller transport, hardware qualification, and physical authority.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.

@@ -324,3 +324,9 @@ existing joint-space probe and integration guide. The resulting tree contains
 retained summaries bind their hashes. The file-count ceiling advances to 6,376
 while the logical-byte, single-blob, duplicate-byte, and reduction limits stay
 unchanged.
+
+The portable Workstream 4 recovery extraction adds one CPU-only state-machine
+module, one frozen portability fixture, one compact result receipt, and one
+focused test module. The resulting tree contains 6,380 tracked files. The
+million-row-scale replay remains external and hash-governed. The file-count
+ceiling advances to 6,380 while all byte and reduction limits remain unchanged.

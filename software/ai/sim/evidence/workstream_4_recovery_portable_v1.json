@@ -1,0 +1,194 @@
+{
+  "bindings": {
+    "implementation_target": {
+      "path": "software/ai/rocell_ai/recovery_state_machine.py",
+      "result_must_record_final_sha256": true
+    },
+    "predecessor_evidence": {
+      "fixture_sha256": "3a580ad2d7f333b8dfdee71b6cad4e644dce19032f0aba270cbfc289d47eb3aa",
+      "implementation_commit": "e709e7020684a103f67944c5bcb52c8d8613b580",
+      "receipt_sha256": "f8c06d599a62ca6525b4cfc6a34502680354e6b5da1f484f47249064f20f327a",
+      "result_commit": "2b6f7bff0740d193ea4508dcde170e72afc0f8e7",
+      "result_file_sha256": "6efc167ead23cd7aa3d1f0de0c2d1236a91d61299b83d2d986f8c124aa28a88d",
+      "workstream_1_fixture_sha256": "105df64d3c3878bed97caddb2623c9c577a820144909cc94105b529508233bac"
+    }
+  },
+  "counters": {
+    "commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transports": 0
+  },
+  "decision_rules": {
+    "abort_correctness_rate_minimum": 1.0,
+    "ambiguous_continuation_count_maximum": 0,
+    "authority_bearing_output_count_maximum": 0,
+    "deterministic_fault_detection_rate_minimum": 1.0,
+    "deterministic_replay_required": true,
+    "false_recovery_count_maximum": 0,
+    "maximum_press_retries": 1,
+    "maximum_wrong_characters_before_detection": 1,
+    "recoverable_fault_success_rate_minimum": 0.99
+  },
+  "devices": [
+    "KEYBOARD",
+    "PHONE"
+  ],
+  "drift": {
+    "onsets": [
+      "BEFORE_PLANNING",
+      "DURING_TRAVEL",
+      "IMMEDIATELY_BEFORE_CONTACT",
+      "AFTER_EFFECT_VERIFICATION"
+    ],
+    "relocalization_rotation_capability_deg": [
+      0.5,
+      2.5,
+      5.0
+    ],
+    "relocalization_translation_capability_mm": [
+      2.0,
+      5.0,
+      10.0
+    ],
+    "rotation_deg": [
+      -5.0,
+      -2.5,
+      -1.0,
+      -0.25,
+      0.25,
+      1.0,
+      2.5,
+      5.0
+    ],
+    "translation_axes": [
+      "X",
+      "Y"
+    ],
+    "translation_mm": [
+      -10.0,
+      -5.0,
+      -2.0,
+      -1.0,
+      1.0,
+      2.0,
+      5.0,
+      10.0
+    ]
+  },
+  "effect_faults": [
+    "SINGLE_MISSED_PRESS",
+    "SINGLE_WRONG_PRESS",
+    "SINGLE_DOUBLE_PRESS",
+    "BURST_MISSED_PRESS",
+    "BURST_WRONG_PRESS",
+    "BURST_DOUBLE_PRESS"
+  ],
+  "fixture_sha256": "51e2a8c2706c2b4907719d0391f926fa511c94d702f8af9c27ecd79431b05d78",
+  "latency_profiles_ms": {
+    "HIGH": {
+      "correction": 150,
+      "observe": 100,
+      "plan": 50,
+      "press": 150,
+      "relocalize": 100,
+      "reobserve": 100,
+      "travel": 400,
+      "verify": 100
+    },
+    "LOW": {
+      "correction": 30,
+      "observe": 20,
+      "plan": 5,
+      "press": 30,
+      "relocalize": 10,
+      "reobserve": 20,
+      "travel": 40,
+      "verify": 20
+    }
+  },
+  "limitations": [
+    "Drift and timing values are sensitivity ranges, not measured plant limits.",
+    "Relocalization outcomes test state-machine behavior and do not qualify camera localization.",
+    "Backspace and readback are virtual device effects only.",
+    "WS2 physical press recipes are unavailable; contact is represented by WS1 fault hooks.",
+    "No result grants hardware or physical authority.",
+    "This portable reproduction is informed by the predecessor result and is not new selection evidence.",
+    "The main-bound recovery kernel is not yet connected to a main-bound Workstream 1 typing twin."
+  ],
+  "physical_authority": false,
+  "portability_amendment": {
+    "reason": "Main does not contain the branch-only Workstream 1 twin bound by the predecessor fixture; preserve the recovery kernel and rules without claiming end-to-end integration.",
+    "selection_claim": "POST_RESULT_REPRODUCTION_ONLY",
+    "timing": "AFTER_ORIGINAL_WORKBENCH_RESULT_BEFORE_MAIN_PORTABILITY_REPLAY",
+    "unchanged_fields": [
+      "decision_rules",
+      "devices",
+      "drift",
+      "effect_faults",
+      "latency_profiles_ms",
+      "readback",
+      "state_machine"
+    ]
+  },
+  "readback": {
+    "ambiguous_states": [
+      "UNKNOWN_COMMITTED_TEXT",
+      "DIVERGENT_DEVICE_LAYER"
+    ],
+    "delay_ms": [
+      0,
+      100,
+      500,
+      1000,
+      2000
+    ],
+    "timeout_ms": [
+      250,
+      500,
+      1000
+    ]
+  },
+  "reporting": {
+    "backup_required": true,
+    "external_result_root": "C:/MuJoCoWarp/evidence/issue190/main-extraction/workstream_4/recovery_portable_v1",
+    "metrics": [
+      "DETECTION_LATENCY_MS",
+      "WRONG_CHARACTERS_BEFORE_DETECTION",
+      "RELOCALIZATION_SUCCESS",
+      "CORRECTION_SUCCESS",
+      "ABORT_CORRECTNESS",
+      "ATTEMPTS",
+      "TOTAL_RECOVERY_TIME_MS"
+    ],
+    "synthetic_tolerance_claim_prohibited": true
+  },
+  "schema": "tactevra.simulation_program_workstream_4_portable_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "seeds": {
+    "scenario_order": 1904001
+  },
+  "source_claim_base_commit": "4e2a051a2dff444e94c0227d5f6a65efde676f87",
+  "state_machine": {
+    "ambiguous_state_decision": "ABORT",
+    "backspace_requires_exact_wrong_effect": true,
+    "correction_requires_independent_verification": true,
+    "maximum_press_retries": 1,
+    "out_of_capability_drift_decision": "ABORT",
+    "states": [
+      "OBSERVE",
+      "PLAN",
+      "SIMULATE_PRESS",
+      "VERIFY",
+      "STOP",
+      "REOBSERVE",
+      "RELOCALIZE",
+      "BACKSPACE_CORRECT",
+      "RETRY_ONCE",
+      "ABORT",
+      "COMPLETE"
+    ]
+  }
+}
