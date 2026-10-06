@@ -7728,3 +7728,79 @@ rewriting history. New entries must use a unique evidence ID.
   reports the limiting joint, exact-hover feasibility under the unchanged
   margin, and closest admitted approach distance before allocating more search
   volume or changing any route policy.
+
+
+### E-20261006-INT-468 — exact first-H hover has no converged canonical IK candidate
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned diagnostic evidence recorded under the cross-lane `INT`
+  sequence. No integration gate or physical readiness status changed.
+- Claim commit: `79ff5d44ea5588ff884feb7fe87dbea406446315`.
+- Implementation and claim-binding commit:
+  `e8d54d25646f8c889fa43e156ff0e7ec6fe0ee92`.
+- Fixture commit: `3ced065298b48fb821dfcc526b2dd203f8a07445`.
+- Result commit: `c511a618e55f7cfee0d85184f52e9783080e852c`.
+- Objective: determine whether the exact synthetic first-`H` hover has any
+  canonical IK candidate that passes unchanged post-IK gates, identify the
+  limiting joint, and measure the closest admitted point in a bounded nearby
+  solution-manifold sample.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_ik_endpoint_manifold_fixture_v1.json`;
+  canonical SHA-256
+  `d6e44bf19b9966043b5d9dc253ff4ae1e9cb92557571a6d4a323cd5d42a657d8`;
+  file SHA-256
+  `77191476471a4b1879390954502ff7044bc13741e482ab2093fecd2ed333df4e`.
+- Frozen sample: the Cartesian product of offsets `-20`, `-15`, `-10`, `-5`,
+  `0`, `5`, `10`, `15`, and `20` mm on board X, Y, and Z, for exactly 729
+  points including the exact hover. Each point uses canonical candidate
+  enumeration and the unchanged controller-intersection, `0.01` normalized
+  margin, and weighted-task-Jacobian rank gates.
+- Exact command: with `PYTHONPATH=software/src;software/ai`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, and
+  below-normal process priority, run `python -m
+  rocell_ai.typing_twin_ik_endpoint_manifold_study_v1
+  software/ai/sim/evidence/typing_twin_ik_endpoint_manifold_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_endpoint_manifold_result_v1.json`.
+- Result: `BLOCKED_EXACT_HOVER_HAS_NO_MARGIN_ADMISSIBLE_IK`; the exact hover
+  produced zero converged canonical candidates and therefore zero admitted
+  candidates. Receipt SHA-256:
+  `22ebb1498d1fbebcb7bec868eb90e13b28cc25cdf4db665478dda633376008a6`;
+  result-file SHA-256
+  `41d4d25a60865ab08af2489c05e970caad1b3a8db96648d56af4733014197d38`.
+- Metrics: 614/729 points produced no converged candidate; 115 produced at
+  least one; 69 passed every pointwise gate; and 46 had converged candidates
+  but no admitted candidate. The run evaluated 345 converged candidates. The
+  closest admitted point was `18.7082869338697` mm from the exact hover at
+  board offset `[-5, -10, 15]` mm, with best normalized margin
+  `0.011048076548388`. All 138 candidate rejections were
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`, and `link3_to_link4` was the
+  limiting joint in all 138.
+- Interpretation: the current synthetic exact endpoint is not solvable by the
+  canonical bounded IK configuration, so a route planner cannot complete that
+  endpoint. Nearby admissible points and uniform link-3-to-link-4 attribution
+  localize the next question to geometry/endpoint bindings rather than search
+  volume. This is consistency evidence for the frozen model, not physical arm
+  accuracy.
+- Validation: 5 focused grid, margin-attribution, fixture-integrity, result,
+  and zero-authority tests passed; Ruff and `git diff --check` passed. Broader
+  repository and exact-head checks follow on the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate Stage A campaign remained running and reached
+  6,854/11,628 shards after this result with zero failures, zero hardware
+  writes, zero physical movements, and GPU temperatures of 60/61 C.
+- Failures preserved: no execution failure occurred. The blocked exact endpoint
+  and every sampled point remain in the generated result table.
+- Limitations: calibration, ready state, hover, target, and all nearby points
+  are synthetic. The 40 mm cube cannot prove global endpoint infeasibility.
+  Pointwise feasibility cannot prove a continuous route. Collision, camera
+  clearance, dynamics, contact, swept-volume safety, installed geometry, and
+  physical repeatability remain unevaluated. No planner or diagnostic is
+  installed, and no authority-bearing output exists.
+- Supersedes: none. This explains the endpoint blocker observed in
+  `E-20261006-INT-462` through `E-20261006-INT-467`.
+- Next dependency: audit the bound synthetic tool length, board transform,
+  hover-clearance construction, and target geometry against their authoritative
+  sources. Any corrective study must freeze ranges before results and must not
+  move target coordinates merely to make the solver pass.
