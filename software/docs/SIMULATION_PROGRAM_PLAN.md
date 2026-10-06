@@ -757,6 +757,140 @@ stiffness/travel combinations. Otherwise Stage A uses the four range corners
 stiffness combinations for every detected boundary identity using all 64
 landings. Throughput cannot change safety gates or select favorable outcomes.
 
+## Long-term intent-to-typing campaign ladder — 2026-10-06
+
+This ladder turns the workstreams above into an ordered collection program. It
+exists so a successful local experiment cannot be mistaken for end-to-end
+readiness and so every retained result has an explicit consumer. It is a
+planning amendment, not a fixture amendment: exact populations, thresholds,
+seeds, split identities, and compute budgets are frozen in each campaign's own
+pre-result manifest after its predecessors finish.
+
+The ladder has one end condition:
+
+```text
+supported user request
+  -> exact grounded intent
+  -> deterministic ordered targets
+  -> qualified observations and ModelMotionBatch
+  -> fresh-state deterministic motion planning
+  -> collision-screened transition and admitted contact
+  -> independently observed device effect
+  -> verified next action or fail-closed stop
+```
+
+The learned components may interpret intent, locate targets, assess the scene,
+and abstain. They never create joints, PWM, serial or controller JSON, permits,
+transport fields, or physical authority. Motion, contact policy, verification,
+and retry decisions remain deterministic runtime responsibilities.
+
+### Campaign sequence
+
+| Campaign | Purpose and retained population | Entry condition | Exit evidence and failure branch |
+|---|---|---|---|
+| `C00-contract-baseline` | Bind the closed intent schema, exact-text guard, 51-key semantic catalog, phone layer machine, `ModelMotionBatchV2`, frame and calibration identities, zero-authority counters, and independent-effect interface. Retain punctuation, numbers, repeated targets, capitals, shifted symbols, ambiguity, unsupported characters, and stale-evidence negatives. | Current shared schemas and compiler are available. | Schema validity and exact target replay are deterministic. Any altered quoted text, inferred unsupported key, target reordering, or authority-bearing field stops downstream campaigns. This baseline exists; successors bind its current hashes rather than copying assumptions. |
+| `C01-contact-search` | The active WS2 Stage A population: 51 targets, mechanism profiles, tool tips, landing scenarios, recipes, landing samples, and compliance combinations, totaling 26,790,912 simulated presses. Collect actuation, hold, repeat, bottom-out, neighbor contact, force, release, and two-sided depth margin for every row. | Positive press and release controls, debounce contract, target-specific neighborhoods, dual-GPU smoke, operational preflight, supervisor fault matrix, and independent backup pass. | Produce either an admitted exploratory recipe envelope or a retained infeasibility result. No aggregate can hide a failing target or mechanism. The current run is this campaign. |
+| `C02-contact-boundary-refinement` | WS2 Stage B reruns only the predeclared boundary identities from C01 at denser depth, timing, landing, compliance, and mechanism samples. Stabilized keys remain their own class. Phone capacitive contact remains a separate campaign family. | C01 completes and its immutable summary identifies the boundary set. | Freeze a smallest robust simulated keyboard recipe family, or show which target/tool/mechanism has no sampled solution. A failed family drives tool or mechanism redesign; it does not relax a gate. |
+| `C03-all-pairs-motion` | Bind the C02 recipe and tool identity to all 51 x 51 ordered transitions, including same-key repeats. Evaluate source release, rise, transit, destination descent, reorientation, IK, limits, swept robot/tool/workcell collision, landing envelope, and expected timing. | A C02 recipe is hash-bound and the exact workcell/collision candidate is selected for simulation. | Produce a per-pair policy of direct, higher-hover, parked, or infeasible, with no hidden failing pair. Any missing recipe, geometry mismatch, collision, joint-limit violation, or landing-envelope breach remains a stop. |
+| `C04-semantic-and-intent-robustness` | Expand the held-out language campaign around exact `TYPE_TEXT`, `PRESS_KEY`, `CLARIFY`, and `REFUSE` behavior. Keep literal user payloads separate from paraphrase templates. Include ambiguity, negation, corrections, multiple clauses, unsupported devices or characters, prompt-injection-shaped text, and long strings. Compare the deterministic grounded parser with any small offline language-model candidate. | C00 remains stable; this CPU/model campaign may prepare while C01-C03 run but cannot claim motion readiness. | Require 100% schema validity, zero altered accepted text, zero false executable intent on the frozen safety set, exact deterministic compilation, and explicit abstention on unresolved requests. A language model may improve coverage only if the same hard rules remain satisfied. |
+| `C05-closed-loop-string-simulation` | Re-run WS1 using actual C02 contact and C03 transition policies. Cover every printable supported character, repeated keys, Sticky Keys state, phone layers, seeded strings across frozen length bands, and deliberate wrong, missed, or double events. Retain the semantic trace, target sequence, `ModelMotionBatch`, planned transition class, contact result, simulated device log, and verifier decision. | C02, C03, and C04 outputs are bound; the actual batch and ingress contracts pass their shared boundary tests. | Supported no-fault strings must reproduce exactly and every deterministic injected fault must be detected at the declared stage. A sent or simulated command is never scored as a successful character without independent effect evidence. |
+| `C06-recovery-and-drift` | Re-run WS4 with the C02/C03 policies and C05 string missions. Inject fixture translation or rotation, stale observations, readback delay, missed, wrong, or double effects, ambiguous outcome, and changing phone state. | C05 produces exact closed-loop traces. | Show bounded `STOP`, `REOBSERVE`, `RELOCALIZE`, verified correction, or `ABORT` behavior. Automatic physical retry remains forbidden after ambiguous dispatch or outcome. Existing exploratory recovery evidence supplies the design; this campaign proves the bound policy composition. |
+| `C07-vision-and-obstruction-simulation` | Bind parked-camera geometry, projected robot silhouette, reference-difference residual observer, target-safe regions, camera-height family, obstruction assets, lighting mismatch, crop convention, and simulated delivered camera format. Include held-out targets, obstruction assets, lighting appearances, intermediate camera heights, and positive robot-mask overlap. | Camera-independent simulator contracts are frozen; measured B0477 parameters are not yet required for exploratory execution. | Report localization, uncertainty, abstention, covered-target false clears, residual obstruction misses or false stops, and hard-case families. The result remains simulation only. Missing real noise, tone, lighting, and calibration are blockers rather than guessed deployment constants. |
+| `C08-physical-measurement-and-camera-qualification` | Freeze one installed configuration epoch and collect ChArUco intrinsics, distortion, camera-to-board and board-to-robot transforms, delivered frame mode, tone response, brightness-dependent and spatially correlated noise, locked exposure, gain and focus, lighting drift, fixture repeatability, tool force/travel, key travel/force/debounce, servo backlash/repeatability, landing-sensor noise, and real clear/obstructed references. Escrow a disjoint real evaluation subset before tuning. | The final camera, arm base, board, keyboard, tool, cables, and lighting are fixed. Physical procedures and custody manifests pass; the arm remains de-energized for capture work unless a later separately authorized procedure says otherwise. | Install only measurement profiles with complete identities and uncertainty. Held-out real localization and obstruction results may qualify the AI observation lane; a small sanity set cannot estimate operational error rates. Any configuration change starts a new epoch. |
+| `C09-sim-to-real-correlation` | Replace unmeasured ranges with C08 profiles and compare predicted versus observed camera, landing, tool-compliance, and key-effect behavior. Preserve original synthetic results and produce correction factors or narrower measured domains without rewriting them. | C08 measurement and escrow rules are complete. | Determine which simulator findings transfer, which need a successor model or corpus, and which require a physical workcell rule. A simulator mismatch blocks affected physical capability and creates a newly versioned campaign. |
+| `C10-full-zero-write-integration` | Replay held-out supported requests through intent, vision, precision observation, `ModelMotionBatch`, strict ingress, fresh state, calibration, IK, collision screening, controller encoding/emulation, device model, recovery, and independent verification. Exercise wrong model, stale state, obstruction, unreachable targets, identity drift, and ambiguous outcome. | C04-C09 produce bound artifacts. The controller transport is hardware-incapable and hardware-write count remains zero. | Require exact lineage, zero unsafe acceptance in the frozen set, correct stage attribution, deterministic stop behavior, and zero hardware writes, movements, permits, or real transports. This is the final software rehearsal, not physical qualification. |
+| `C11-S5-single-action` | Under the existing attended procedure and separate human approval, progress from one sparse noncontact hover to one independently verified key action. Start with the target having the best measured margin; separately prioritize `GRAVE` landing accuracy and `EQUAL` joint-range evidence during calibration. | C10 passes, installed geometry and safety checks are current, the exact attempt package is reviewed, and explicit per-attempt physical authorization exists. | One verified effect with complete telemetry and independent host input evidence advances only the tested capability. Any ambiguity, unexpected contact, stale evidence, or envelope breach stops the session and preserves evidence. |
+| `C12-S6-short-missions` | Execute a predeclared ladder: repeated same key, two-key transition, lowercase word, mixed case, digits, punctuation, and a short quoted phrase. Each action requires fresh achieved state; each observed effect must match before the next action. | C11 passes for the same configuration epoch and every required target and transition has measured qualification. | Produce exact requested text with no unverified continuation. Failed or ambiguous missions do not silently retrain, alter thresholds, or auto-retry. |
+| `C13-S7-operational-qualification` | Measure held-out mission success, unsafe acceptance, abstention, verified characters per minute, recovery, latency, thermal behavior, drift, recalibration interval, and evidence durability across independent sessions and declared operating conditions. | C12 passes and the evaluation population, confidence method, and operational limits are frozen before results. | Operational readiness requires every shared S7 gate and explicit review. Passing this campaign does not expand capability beyond its declared device, targets, environment, and configuration epoch. |
+
+The phone path shares C00, C04, C06-C10, and the observation contracts. Its
+contact, layer-state, ADB verification, and physical qualification populations
+remain separate from keyboard results. A keyboard recipe cannot qualify a
+phone tap, and a phone screen-state result cannot qualify a keyboard press.
+
+### What every campaign collects
+
+Every scenario row or compact aggregate must remain traceable to these groups:
+
+1. **Request identity:** original request bytes or a privacy-safe content hash,
+   quoted payload, parsed intent, clarification or refusal reason, compiler
+   profile, and exact ordered semantic targets.
+2. **Observation identity:** frame and reference hashes, capture time, camera and
+   domain IDs, target catalog, calibration/configuration epoch, scene/precision
+   observations, uncertainty, visibility, obstruction, and abstention reason.
+3. **Planning identity:** `ModelMotionBatch` and plan hashes, target/frame units,
+   fresh observed start state, tool/TCP, geometry, IK, transition class,
+   collision screen, and deterministic admission or rejection reason.
+4. **Dynamics identity:** simulator and asset versions, seed, world/scenario ID,
+   recipe, tool/compliance/mechanism parameters, trajectory samples, contacts,
+   forces, key travel, hold/release timing, and failure classification.
+5. **Outcome identity:** requested effect, simulated or observed device effect,
+   independent verifier evidence, recovery decision, completion state, and any
+   committed wrong effects before detection.
+6. **Custody identity:** full Git SHA, source and fixture hashes, model/checkpoint
+   SHA-256, exact command, environment, device or GPU identity, split and seed,
+   output manifest, backup receipt, limitations, and next dependency.
+7. **Authority counters:** hardware writes, physical movements, real commands,
+   permits, transports, and physical authority. Simulation and zero-write
+   campaigns require all six to remain zero.
+
+Videos and rendered mosaics are illustrative derivatives. They bind sampled
+world IDs and result hashes but never replace numeric receipts, independent
+effect evidence, or campaign admission.
+
+### Dataset and model-use discipline
+
+- Training, development, evaluation, and physical-qualification identities are
+  disjoint and declared before use. A consumed evaluation set is never reopened
+  for model or threshold selection.
+- Synthetic and physical scope remain separate fields. Synthetic data may train
+  a candidate and locate hard cases; only held-out physical evidence can qualify
+  an installed camera or workcell.
+- Failed campaigns remain available as negative and diagnostic evidence. They
+  may inform a successor predeclaration but are never relabeled as passing.
+- Simulation rows may train perception or abstention models only when their
+  rendered inputs match the declared runtime representation. Ground-truth masks,
+  poses, or physics state unavailable at runtime are labels, never model inputs.
+- Motion recipes, collision policy, retry policy, and execution authority are
+  not learned targets. The deterministic runtime consumes learned observations
+  and decides whether a motion can proceed.
+- Any new model is compared with a deterministic baseline and the last admitted
+  candidate. Promotion requires the campaign's safety gates, not merely a better
+  pooled score.
+
+### Concrete end-to-end mission example
+
+For a request such as `type "Hi!" on the keyboard`, the completed system must
+retain and verify this chain:
+
+1. The intent layer emits `TYPE_TEXT` with literal payload `Hi!` and device
+   `keyboard`, or abstains. It cannot rewrite the text.
+2. The deterministic compiler expands the exact Sticky Keys sequence using only
+   commissioned catalog targets; it preserves target order and repetitions.
+3. The vision lane binds fresh scene and precision observations to exact frame,
+   reference, camera, catalog, calibration, and configuration identities.
+4. The AI lane emits one ordered `ModelMotionBatch` proposal per movement action
+   at named target coordinates with uncertainty. It emits no joints or commands.
+5. The runtime admits one action at a time from fresh achieved state, selects an
+   allowed C03 transition, screens IK, limits, and collision, and applies the
+   admitted C02 contact recipe.
+6. The keyboard host independently reports the received effect. Only the exact
+   expected effect advances the next action; mismatch enters C06 recovery or
+   stops.
+7. Completion means the independently observed text is exactly `Hi!`, with the
+   full request-to-outcome lineage retained. A generated trajectory, controller
+   receipt, or key-down prediction alone is not completion.
+
+### Scheduling rule
+
+Prepare code and pre-result fixtures for a successor while a long campaign runs
+only when doing so cannot change or compete with the active campaign. Launches
+remain dependency ordered. At the current checkpoint, C01 is the critical path;
+C03 cannot execute without a C02 recipe, while C04 fixture preparation and
+documentation may proceed on CPU without using C01 outputs. C07 exploratory
+preparation may continue, but C08-C13 remain blocked on installed physical
+measurements and their respective predecessor gates.
+
 ## Program execution and reporting protocol
 
 For each workstream:
