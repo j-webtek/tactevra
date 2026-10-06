@@ -1,5 +1,10 @@
 # Preserve exact bytes: hardware manifests and firmware reviews use hashes.
 * -text
 
+# Machine-generated simulation evidence remains tracked and hash-checked, but
+# GitHub should collapse it so review focuses on implementation and contracts.
+software/ai/sim/evidence/typing_twin_ik_collision_attempt_history_v1.json linguist-generated=true
+software/ai/sim/evidence/typing_twin_ik_collision_result_v1_4.json linguist-generated=true
+
 # CAD/print packages use ordinary Git in this initial baseline because the
 # account's Git LFS budget is unavailable. Review size before adding binaries.

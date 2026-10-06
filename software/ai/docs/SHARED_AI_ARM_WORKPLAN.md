@@ -1034,6 +1034,18 @@ while the installed-catalog `SHIFT` gap stops before batch creation. This is a
 simulation-only zero-authority S2 increment; IK, collision admission, measured
 configuration, controller transport, and physical use remain outside its claim.
 
+Evidence `E-20261006-INT-462` advances that exact installed-subset stream into
+the canonical IK boundary. The 5 mm route retains all 10 ordered targets and
+260 Cartesian samples, but stops during the first `H` transit after 15 accepted
+samples because normalized joint margin is `0.008368`, below the unchanged
+`0.01` gate. A separately labelled 64-profile origin-sphere collision study ran
+only on that accepted prefix; it cannot clear installed collision intake. The
+full route, installed geometry, fresh observed start state, controller access,
+and physical use remain blocked. The next shared dependency is an arm-owned,
+hash-bound route or start-state correction that passes the existing margin gate,
+followed by full-route collision evidence using reviewed candidate or installed
+geometry.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

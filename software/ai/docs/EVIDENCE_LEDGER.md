@@ -7207,3 +7207,93 @@ rewriting history. New entries must use a unique evidence ID.
   explicitly exploratory candidate collision profile; continue to block
   physical use and independently qualify or reject the running Stage A GPU
   campaign when it completes.
+
+### E-20261006-INT-462 — canonical IK rejection with accepted-prefix collision diagnostic
+
+- Stage: S2 exploratory zero-authority integration.
+- Lane: AI/MODEL plus INTEGRATION; no arm-lane status or integration gate changed.
+- Base commit: `64d78ddb81f6c09688514235e33365e4cc13b19f`.
+- Claim commit: `b5ef0d29bb1be7749a04e4d8403ddc35edf776cc`.
+- Initial fixture/implementation freeze commit:
+  `ed4c17d3cefb12470f4bac72242eb013df22d5d6`.
+- Preserved-attempt commits: `3a92b4145365e3630eab7a7359b25931bbc193f8`,
+  `80fdb4d4a102901ab5121e135ac492ae7226e452`,
+  `f7d6ac15c793d4e5c1ecdd725a042e2047a12140`, and
+  `c87e8a101cf209109577440061aaf78ef65b8624`.
+- First result commit: `e57f49443113116f98770e2649931fe080dd833f`.
+  Evidence-consolidation/refreeze commit:
+  `4b8dc1c6e095ea022d7f26933833d1038bba0b12`.
+  Final evidence-producing commit:
+  `91c701a29c48b49b982496fac92f4315505aa5b0`.
+- Active fixture:
+  `software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json`;
+  canonical fixture SHA-256
+  `da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308`;
+  file SHA-256
+  `6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f`.
+  It binds implementation SHA-256
+  `cc4bed6e839c7e776b4d8a0102871f9dea44d9f73bdb292345f7e4a5f619d2b6`,
+  the system manifest, target catalog, actual emitter, canonical IK, collision
+  intake, collision engine, and predecessor fixture.
+- Exact result command: with `PYTHONPATH=software/src;software/ai`, run `python
+  -m rocell_ai.typing_twin_ik_collision_v1
+  software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_collision_result_v1_4.json`.
+- Validation commands: `python -m pytest
+  software/ai/tests/test_typing_twin_ik_collision_v1.py
+  software/ai/tests/test_typing_twin_boundary_v1.py
+  software/tests/unit/test_typing_trajectory_ik_screen_v1.py -q`; `python -m
+  ruff check software/ai/rocell_ai/typing_twin_ik_collision_v1.py
+  software/ai/tests/test_typing_twin_ik_collision_v1.py`; `python
+  scripts/ci/check_source_archive_footprint.py --json`; `python
+  scripts/maintain_repository.py verify`; `git diff --check`.
+- Result: `BLOCKED_CANONICAL_IK_PREFIX_DIAGNOSTIC_ONLY`; receipt SHA-256
+  `e45cc5c652cc8ae1bdc2ee74e9beee0de13c763ebc7fba9a5bebfe9f358734c1`;
+  compact result file SHA-256
+  `02d3f4192474b4aa88b8faf780b6f1efff8e763e16329483e68000827dcc78ee`.
+  The exact ordered targets remain `H,E,L,L,O,SPACE,2,0,2,6` across 260
+  Cartesian samples. Canonical IK evaluated 16 samples and accepted the first
+  15. Sample 15, during the first `H` transit, converged to 0.001989 mm position
+  error and passed controller bounds and adjacent-joint continuity, but its
+  `0.008368` normalized joint margin missed the unchanged `0.01` minimum.
+- Candidate diagnostic: 64 endpoint profiles cover declared ranges for link-
+  origin sphere radius, passive-stylus length/radius, separation, geometry
+  uncertainty, and pose uncertainty. Each profile evaluated the 15-sample
+  accepted prefix. Thirty-two profiles reported collision at all 15 samples;
+  all 480 observations were the coarse synthetic `base_link/link2` sphere pair.
+  This is sensitivity evidence about the intentionally incomplete proxy, not a
+  claim about the installed arm. The other 32 profiles had no sampled collision
+  in the same limited model. Installed collision intake was not reached.
+- Preserved failures: attempt 1 used a fixed synthetic route origin and stopped
+  on maximum adjacent-joint delta. Attempt 2 derived the exact ready-state tip
+  but the 10 mm route stopped at sample 8 on normalized margin `0.000316`.
+  Attempt 3 refined spacing to 5 mm without changing any safety threshold and
+  stopped at sample 15 on normalized margin `0.008368`; no further spacing
+  tuning was performed. All exact historical fixture and failure documents,
+  plus the first completed receipt, are retained in
+  `typing_twin_ik_collision_attempt_history_v1.json`; manifest SHA-256
+  `63d4025e7be745be0fa454ba5f3bcdf05941547f71f7465df800b638c6d3a8e0`;
+  file SHA-256
+  `b3998da1887b085d91813a2de2570e51a8b147e06be1852f42593063d5b82c84`.
+- Tests and repository checks: 17 focused/shared tests passed; Ruff passed;
+  133 repository-policy tests and every documentation, evidence-scope,
+  artifact, archive, release-integrity, and readiness-sync check passed. The
+  reviewed archive contains 6,396 files, 652,088,337 logical bytes, and
+  4,890,152 governed duplicate bytes.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The pre-existing Stage A process (PID 42724) was not
+  interrupted or used.
+- Limitations: calibration and the start state are synthetic. The candidate
+  robot bodies are origin spheres, not link envelopes; nominal workcell AABBs
+  omit installed base/clamp and camera bodies. The moving cable is absent under
+  the passive-stylus assumption. Queries cover discrete accepted-prefix poses,
+  not continuous sweeps. No controller command, transport, permit, hardware
+  qualification, installed collision clearance, or physical authority exists.
+- Next dependency: the arm lane must review and bind a route or start-state
+  correction that satisfies the existing normalized-margin gate, without the
+  AI lane changing target order or coordinates. Then rerun all 260 samples and
+  use reviewed reduced-link candidate geometry for simulation, followed by an
+  installed measured collision profile and fresh observed start state before
+  any operational gate can advance.
