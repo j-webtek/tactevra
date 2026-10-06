@@ -1091,12 +1091,25 @@ shared canonical post-IK waypoint evaluator. The study changes no installed
 planner. The next arm-owned design question is a bounded margin-aware motion
 planner rather than another manually enumerated height or axis-order grid.
 
+Evidence `E-20261006-INT-467` rejects the first bounded margin-aware planner
+family without changing the canonical `0.01` normalized joint-margin gate.
+Three deterministic Cartesian RRT searches used the same Halton samples and
+5 mm extension step with goal-bias periods `5`, `11`, and `23`. Each search
+admitted the maximum 2,048 nodes, but none connected the synthetic ready point
+to the exact first-`H` hover. All rejected expansions were rejected by the
+unchanged normalized joint-margin gate. An invalid initial full-route sample
+cap failed before candidate evaluation and remains preserved; the pre-result
+amendment changed only that cap to the canonical maximum of 512. The result
+does not prove global infeasibility, install a planner, or clear collision.
+The next bounded question is a joint-specific endpoint/manifold diagnostic that
+identifies the limiting joint and the closest admitted approach to the exact
+hover before more planner volume is spent.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 exploratory planning | bounded margin-aware first-H planner study, frozen fixture, CPU-only tests, and append-only evidence | `feature/sim-margin-aware-planner` / `74f9502c496cb8f4b7860d233ea514e14fe93f13` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 

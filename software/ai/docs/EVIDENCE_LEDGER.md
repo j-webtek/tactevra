@@ -7630,3 +7630,101 @@ rewriting history. New entries must use a unique evidence ID.
   that searches joint-space or constrained Cartesian paths while preserving the
   exact semantic endpoints and canonical safety gates. Any passing candidate
   must then undergo full collision, camera-clearance, and measured-state review.
+
+
+### E-20261006-INT-467 — bounded margin-aware planner family rejected
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned planning evidence recorded under the cross-lane `INT` sequence.
+  No integration gate or physical readiness status changed.
+- Claim commit: `74f9502c496cb8f4b7860d233ea514e14fe93f13`.
+- Claim-binding commit: `065a1996`.
+- Implementation commit: `8485eb7dc17456061674b3e68665fba2a4fbb6b1`.
+- Initial fixture commit: `492a0c0ebfaafa50df8395d6acf96d136909b06a`.
+- Preserved failed-attempt commit:
+  `359f8fa655fa332ed3afff0e0bb7a1311160add7`.
+- Amended fixture commit: `b0b414b367dac665977abb6f991c4edf146d72eb`.
+- Result commit: `c23f57bed212a995d26b2d53cb60619c05c71b13`.
+- Objective: determine whether a deterministic, bounded, margin-aware Cartesian
+  RRT can connect the synthetic ready point to the exact first-`H` hover while
+  preserving target order, coordinates, canonical IK, controller bounds, and
+  every existing post-IK gate.
+- Candidate family: identical Halton bases `(2, 3, 5)`, 5 mm extensions, 60 mm
+  board-X/Y padding, 20 mm lower-Z padding, 80 mm upper-Z padding, 4,096 maximum
+  iterations, and 2,048 maximum admitted nodes, with goal-bias periods `5`,
+  `11`, and `23`.
+- Initial fixture:
+  `software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1.json`;
+  canonical SHA-256
+  `4c31a94165c17b3e7060b58f7119e5defb16a0a2d9b511938cbe32bf60d2cfbe`;
+  file SHA-256
+  `2adcc05a6316f0d934eaa36a561596a49d74031be68e8c77a1b3b26b3f729085`.
+- Exact first command: with `PYTHONPATH=software/src;software/ai`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, and
+  below-normal process priority, run `python -m
+  rocell_ai.typing_twin_ik_margin_aware_planner_study_v1
+  software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_result_v1.json`.
+  It failed before candidate evaluation with `TrajectorySimulationError:
+  maximum_waypoints_per_round must be an integer in [8, 512]` and wrote no
+  result. Preserved failed-attempt record SHA-256:
+  `773ef57a889e5379ce49d7ef8e58e64d6a1135a3f87d6a54436e2df1c5286ca9`;
+  file SHA-256
+  `17b7fdac7becffd7ef635f12bff92bb9b6c8e6ea860e7292033b43a5134ca72a`.
+- Pre-result amendment: set only `maximum_full_route_samples` from the invalid
+  4,096 value to the canonical policy maximum of 512. No candidate result had
+  been observed. Search schedules, volume, iteration and node budgets, 5 mm
+  step, target semantics, IK policy, safety thresholds, selection rule, and
+  zero-authority scope remained unchanged.
+- Amended fixture:
+  `software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1_1.json`;
+  canonical SHA-256
+  `3b2ceb784205f37cc028a06f7894fbf849e7dca5c62de3e7de28c879f8cd5a9b`;
+  file SHA-256
+  `e52577b799e7f60cbfa644253e1fba79b36ac8649eca8901e871a6a9abf94900`.
+- Exact amended command: use the same environment and process priority with
+  `python -m rocell_ai.typing_twin_ik_margin_aware_planner_study_v1
+  software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1_1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_result_v1_1.json`.
+- Result: `BLOCKED_NO_MARGIN_AWARE_FULL_ROUTE`; passing candidates `0/3`;
+  receipt SHA-256
+  `944fe82f2647702524c54684dc2bef570cf611778b77d24a789765c7a43e755e`;
+  result-file SHA-256
+  `08d1c6a52fba71367c3704d05215cbf14a09a9c6c35f82d978a6ef18dd17fe59`.
+- Metrics: goal-bias `5` evaluated 2,797 iterations, admitted 2,048 nodes,
+  made 2,797 solver calls and 10,791 candidate evaluations, with 2,607
+  margin rejections. Goal-bias `11` evaluated 2,867 iterations, admitted 2,048
+  nodes, made 2,867 calls and 9,271 evaluations, with 1,088 margin rejections.
+  Goal-bias `23` evaluated 2,723 iterations, admitted 2,048 nodes, made 2,723
+  calls and 9,658 evaluations, with 1,476 margin rejections. None reached the
+  exact first-`H` hover. Every rejected expansion had reason
+  `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED`.
+- Interpretation: bounded margin-aware exploration expands a large admitted
+  region but does not connect it to the exact first hover under the current
+  synthetic geometry and unchanged margin. This rejects the frozen search
+  family; it does not prove global infeasibility.
+- Validation: 8 focused deterministic-sampling, fixture-integrity,
+  failure-preservation, result, and zero-authority tests passed; Ruff and
+  `git diff --check` passed. Broader repository checks follow on the exact PR
+  head.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate Stage A campaign remained running and reached
+  6,678/11,628 shards after this result, with zero failures, zero hardware
+  writes, zero physical movements, and GPU temperatures of 60/61 C.
+- Failures preserved: the invalid-cap fixture and its pre-result failure remain
+  tracked. The amended fixture and result are additive artifacts.
+- Limitations: calibration, ready state, search volume, and route points are
+  synthetic. Collision, camera clearance, dynamics, contact, continuous swept
+  safety, installed geometry, and physical repeatability remain unevaluated.
+  The bounded search cannot establish global infeasibility. No planner is
+  installed, and no command, permit, transport, controller access, hardware
+  write, movement, or physical authority exists.
+- Supersedes: none. This narrows the route blocker retained by
+  `E-20261006-INT-462` through `E-20261006-INT-466`.
+- Next dependency: freeze a joint-specific endpoint/manifold diagnostic that
+  reports the limiting joint, exact-hover feasibility under the unchanged
+  margin, and closest admitted approach distance before allocating more search
+  volume or changing any route policy.
