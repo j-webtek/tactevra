@@ -10,7 +10,6 @@ import argparse
 import hashlib
 import itertools
 import json
-import math
 from pathlib import Path
 from typing import Any, Mapping
 

@@ -53,13 +53,17 @@
   },
   "decision_rules": {
     "authority_bearing_output_count_maximum": 0,
+    "blocked_route_candidate_scope": "CONTIGUOUS_ACCEPTED_PREFIX_ONLY",
+    "blocked_route_must_not_reach_installed_collision_intake": true,
     "candidate_collision": "REPORT_EVERY_PROFILE_AND_PAIR;NEVER_CLEAR_INSTALLED_GATE",
+    "candidate_profile_count_exact": 64,
     "candidate_zero_collision_result": "LIMITED_MODEL_OBSERVATION_ONLY",
+    "full_route_expected_disposition": "BLOCK_IF_ANY_CANONICAL_IK_SAMPLE_REJECTS",
     "ik": "EVERY_EXACT_TRAJECTORY_SAMPLE_ACCEPTED",
     "installed_collision": "MUST_REMAIN_BLOCKED_WITHOUT_INSTALLED_PROFILE",
     "target_order_difference_count_maximum": 0
   },
-  "fixture_sha256": "9cc3dafe34d3d7969ce9278b3d6857eaf46f44db96a8e8dac0aa47f4f165548a",
+  "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
   "input_bindings": {
     "actual_emitter": {
       "path": "software/ai/rocell_ai/actual_output_compatibility_v1.py",
@@ -79,7 +83,7 @@
     },
     "implementation": {
       "path": "software/ai/rocell_ai/typing_twin_ik_collision_v1.py",
-      "sha256": "591e2ff076a0e8d67bfa1e5fbae5b4ffb5a2042c07eb45d96c24fdae1e031786"
+      "sha256": "cc4bed6e839c7e776b4d8a0102871f9dea44d9f73bdb292345f7e4a5f619d2b6"
     },
     "parent_fixture": {
       "path": "software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1_1.json",
@@ -102,15 +106,15 @@
     "Discrete sampled-pose queries are not continuous collision proof.",
     "No candidate result can satisfy the installed collision profile gate or authorize motion."
   ],
-  "parent_fixture_sha256": "42262020958dd558ac59e302b52f8fb270077de1a7581745eacb3544801e1a9c",
+  "parent_fixture_sha256": "2466b67d7a7ba5815c443826ae61e6de94b7232f076f25e723a804116d1dedc5",
   "preexecution_amendment": {
-    "change": "Replace FIXED_BOARD_POINT route origin with SYNTHETIC_READY_TIP derived from the exact pinned seed and kinematic model.",
-    "failed_attempt_record_sha256": "b542dad7aa6501ebf52728e01fb478e8c23edb10402eeb73d07294880ce69a22",
-    "failed_attempt_status": "FAILED_BEFORE_CANDIDATE_COLLISION_METRICS",
+    "change": "Remove one unused Python import and bind the normalized implementation bytes after evidence-history consolidation.",
+    "prior_completed_receipt_sha256": "829ac42ef1e9d521e6b60d7ab5a31063bffb9a7b94741c6d113fef08bb5b1e00",
     "unchanged": [
       "case",
       "target order",
-      "IK joint-continuity threshold",
+      "route",
+      "all IK thresholds",
       "candidate ranges",
       "resource limits",
       "decision rules",
@@ -128,7 +132,7 @@
     "hover_clearance_mm": 10.0,
     "hover_settle_ms": 100,
     "maximum_acceleration_mm_s2": 80.0,
-    "maximum_cartesian_step_mm": 10.0,
+    "maximum_cartesian_step_mm": 5.0,
     "maximum_jerk_mm_s3": 400.0,
     "maximum_velocity_mm_s": 40.0,
     "route_reference_point_mode": "SYNTHETIC_READY_TIP",
