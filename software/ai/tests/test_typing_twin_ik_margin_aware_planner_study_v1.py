@@ -19,7 +19,15 @@ from rocell_ai.typing_twin_ik_margin_aware_planner_study_v1 import (
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = (
     ROOT
-    / "software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1.json"
+    / "software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1_1.json"
+)
+RESULT = (
+    ROOT
+    / "software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_result_v1_1.json"
+)
+PRESERVED_FAILURE = (
+    ROOT
+    / "software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_failed_attempt_v1.json"
 )
 
 
@@ -87,3 +95,29 @@ def test_fixture_rejects_mutation(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="fixture hash changed"):
         _load_fixture(altered, ROOT)
+
+
+def test_amendment_preserves_pre_result_failure() -> None:
+    document = json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+    assert document["preexecution_amendment"][
+        "candidate_results_seen_before_amendment"
+    ] is False
+    assert document["resource_limits"]["maximum_full_route_samples"] == 512
+    assert PRESERVED_FAILURE.is_file()
+
+
+def test_result_rejects_all_frozen_searches_with_zero_authority() -> None:
+    result = json.loads(RESULT.read_text(encoding="utf-8"))
+
+    assert result["decision"] == "BLOCKED_NO_MARGIN_AWARE_FULL_ROUTE"
+    assert result["passing_candidate_count"] == 0
+    assert len(result["candidate_summaries"]) == 3
+    assert all(
+        item["planner"]["accepted_node_count"] == 2048
+        and item["planner"]["route_found"] is False
+        for item in result["candidate_summaries"]
+    )
+    assert result["hardware_writes"] == 0
+    assert result["physical_movements"] == 0
+    assert result["physical_authority"] is False

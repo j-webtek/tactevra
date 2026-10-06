@@ -1,0 +1,116 @@
+{
+  "baseline_control": {
+    "accepted_sample_count": 15,
+    "candidate_id": "baseline-synthetic-ready",
+    "candidate_summary_sha256": "bce880ae865ece43c043e45953d6ef6da6f404fa32fe0cab8d718e268e696a2a",
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "maximum_joint_delta_rad": 0.03645,
+    "minimum_normalized_arm_joint_margin": 0.016856,
+    "screen_sha256": "acb0ad109e51ce5a162af1a56e664989835c715cffa69f47d4ce852ccf847463",
+    "seed_sha256": "6cdc8b2d7902d38a0a5fa4ab85ace9aa951d9dc32d98f5675068a2f155449868",
+    "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY"
+  },
+  "batch_sha256": "82462b4bf8555b1a8c52170446c0b768b6bc538370fab8d880ad54f66fd92bd9",
+  "candidate_summaries": [
+    {
+      "candidate_id": "margin-aware-goal-bias-005",
+      "candidate_summary_sha256": "9757e3da10f73e0ebe876d63f1815881288d7045297d9f79667202e864c3ca22",
+      "full_route_accepted": false,
+      "planner": {
+        "accepted_node_count": 2048,
+        "candidate_evaluation_count": 10791,
+        "goal_bias_period": 5,
+        "iterations_evaluated": 2797,
+        "rejected_by_reason": {
+          "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED": 2607
+        },
+        "route_found": false,
+        "route_point_count": 0,
+        "solver_call_count": 2797,
+        "tree_maximum_joint_delta_rad": null,
+        "tree_minimum_normalized_margin": null
+      },
+      "status": "BLOCKED_NO_MARGIN_AWARE_PREFIX"
+    },
+    {
+      "candidate_id": "margin-aware-goal-bias-011",
+      "candidate_summary_sha256": "196b3460d8a98465aa700eeefda89a2c4ff2e021518be05837a5139769efd279",
+      "full_route_accepted": false,
+      "planner": {
+        "accepted_node_count": 2048,
+        "candidate_evaluation_count": 9271,
+        "goal_bias_period": 11,
+        "iterations_evaluated": 2867,
+        "rejected_by_reason": {
+          "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED": 1088
+        },
+        "route_found": false,
+        "route_point_count": 0,
+        "solver_call_count": 2867,
+        "tree_maximum_joint_delta_rad": null,
+        "tree_minimum_normalized_margin": null
+      },
+      "status": "BLOCKED_NO_MARGIN_AWARE_PREFIX"
+    },
+    {
+      "candidate_id": "margin-aware-goal-bias-023",
+      "candidate_summary_sha256": "ace76ba1225a6b467f1e293c6e7f4dc9bf141961f69b6a58ef5afa89c04f2045",
+      "full_route_accepted": false,
+      "planner": {
+        "accepted_node_count": 2048,
+        "candidate_evaluation_count": 9658,
+        "goal_bias_period": 23,
+        "iterations_evaluated": 2723,
+        "rejected_by_reason": {
+          "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED": 1476
+        },
+        "route_found": false,
+        "route_point_count": 0,
+        "solver_call_count": 2723,
+        "tree_maximum_joint_delta_rad": null,
+        "tree_minimum_normalized_margin": null
+      },
+      "status": "BLOCKED_NO_MARGIN_AWARE_PREFIX"
+    }
+  ],
+  "collision_gate_cleared": false,
+  "controller_commands": [],
+  "decision": "BLOCKED_NO_MARGIN_AWARE_FULL_ROUTE",
+  "fixture_sha256": "3b2ceb784205f37cc028a06f7894fbf849e7dca5c62de3e7de28c879f8cd5a9b",
+  "freshness_sha256": "ae48677891787496ab0e0bd7da8bd06d43da9007787e9116df37cf701e61376b",
+  "hardware_access": false,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "ingress_sha256": "0634fe4bebd620b7cc48a55231817cbf1c6ac4f1299e8d9b279bd83d7ee020ae",
+  "limitations": [
+    "All calibration, ready state, route points, and planner samples are synthetic offline evidence.",
+    "The search varies only the first ready-to-H-hover route and rejoins the exact semantic route at the first H hover point.",
+    "The deterministic Cartesian RRT is an exploratory planner study and is not installed motion policy.",
+    "Collision, camera clearance, dynamics, contact, continuous swept-volume safety, and physical repeatability are not evaluated.",
+    "A passing route remains blocked on later arm-lane collision and measured-state evidence.",
+    "No command, permit, transport, controller access, hardware write, movement, or physical authority exists."
+  ],
+  "ordered_targets": [
+    "H",
+    "E",
+    "L",
+    "L",
+    "O",
+    "SPACE",
+    "2",
+    "0",
+    "2",
+    "6"
+  ],
+  "parent_fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+  "passing_candidate_count": 0,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "planner_installed": false,
+  "receipt_sha256": "944fe82f2647702524c54684dc2bef570cf611778b77d24a789765c7a43e755e",
+  "schema": "tactevra.typing_twin_ik_margin_aware_planner_study_receipt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "selected_candidate": null,
+  "selected_full_ik_screen": null
+}
