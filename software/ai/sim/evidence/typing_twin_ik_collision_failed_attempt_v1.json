@@ -1,0 +1,18 @@
+{
+  "attempt": 1,
+  "cause": "Fixed route reference point differs from the pinned synthetic ready-state tip, making the initial segment violate unchanged joint-continuity policy.",
+  "command": "PYTHONPATH=software/src;software/ai python -m rocell_ai.typing_twin_ik_collision_v1 software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1.json --workspace . --output software/ai/sim/evidence/typing_twin_ik_collision_result_v1.json",
+  "correction": "Create a successor fixture whose route reference is deterministically derived from the exact pinned ready state; do not change the continuity limit.",
+  "failure": "IK_ROUTE_REJECTED:MAXIMUM_ADJACENT_JOINT_DELTA_EXCEEDED",
+  "fixture_sha256": "42262020958dd558ac59e302b52f8fb270077de1a7581745eacb3544801e1a9c",
+  "gpu_jobs": 0,
+  "hardware_writes": 0,
+  "implementation_commit": "ed4c17d3",
+  "log_path": "software/ai/sim/evidence/typing_twin_ik_collision_first_attempt.log",
+  "log_sha256": "4c4c73effc3f368ca5184cd18061df953d798716af26d1d68869f4ffef832c55",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "record_sha256": "b414c1497212e3400be5be2ca2b115eb7b2ebc286f47de6f1b443a27d09991fa",
+  "schema": "tactevra.typing_twin_ik_collision_failed_attempt.v1",
+  "status": "FAILED_BEFORE_CANDIDATE_COLLISION_METRICS"
+}
