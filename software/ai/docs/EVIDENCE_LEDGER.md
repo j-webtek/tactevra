@@ -7297,4 +7297,3 @@ rewriting history. New entries must use a unique evidence ID.
   use reviewed reduced-link candidate geometry for simulation, followed by an
   installed measured collision profile and fresh observed start state before
   any operational gate can advance.
-
