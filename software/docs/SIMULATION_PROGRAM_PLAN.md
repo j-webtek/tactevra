@@ -786,6 +786,34 @@ and retry decisions remain deterministic runtime responsibilities.
 
 ### Campaign sequence
 
+The formal title is the stable human-facing name. The subtitle states the one
+question the campaign exists to answer. Use the ID in filenames, manifests,
+evidence headings, backup paths, and status reports; do not shorten or renumber
+it after evidence exists.
+
+| ID | Formal title | Tracking subtitle | Current planning state |
+|---|---|---|---|
+| `C00` | Contract and Semantic Baseline | Define exactly what the AI may propose and what the deterministic runtime may accept. | `BASELINE_AVAILABLE_REVISION_CONTROLLED` |
+| `C01` | Key Contact Search | Find a one-press mechanical envelope across every supported keyboard target. | `RUNNING` as WS2 Stage A |
+| `C02` | Contact Boundary Refinement | Turn the broad contact search into robust recipe windows around every observed boundary. | `BLOCKED_ON_C01_RESULT` |
+| `C03` | All-Pairs Motion Qualification | Move safely between every ordered key pair while preserving the admitted contact envelope. | `IMPLEMENTATION_PREPARED_BLOCKED_ON_C02` |
+| `C04` | Intent Robustness and Exact-Text Assurance | Understand varied offline instructions without changing, inventing, or prematurely executing requested text. | `READY_FOR_PREIMPLEMENTATION_FIXTURE` |
+| `C05` | Closed-Loop String Simulation | Compose intent, observation, motion, contact, device effect, and verification into exact strings. | `BLOCKED_ON_C02_C03_C04` |
+| `C06` | Drift, Fault, and Recovery Qualification | Detect divergence, correct only independently known effects, and stop on ambiguity. | `DESIGN_PROVEN_EXPLORATORY_BLOCKED_ON_C05` |
+| `C07` | Vision and Obstruction Simulation | See targets conservatively across camera height, lighting, robot overlap, and unexpected obstruction. | `EXPLORATORY_COMPONENTS_AVAILABLE` |
+| `C08` | Physical Measurement and Camera Qualification | Replace simulated assumptions with one measured and held-out installed-workcell evidence epoch. | `BLOCKED_ON_INSTALLED_HARDWARE` |
+| `C09` | Simulation-to-Reality Correlation | Measure where the digital twin predicts the installed workcell and where it does not. | `BLOCKED_ON_C08` |
+| `C10` | Full Zero-Write Integration | Prove the complete request-to-verification software chain without producing hardware effects. | `BLOCKED_ON_C04_THROUGH_C09` |
+| `C11` | S5 Single-Action Physical Qualification | Perform one separately authorized and independently verified physical key action. | `BLOCKED_ON_C10_AND_PHYSICAL_APPROVAL` |
+| `C12` | S6 Short Typing Missions | Build from repeated keys and two-key transitions to exact mixed short phrases. | `BLOCKED_ON_C11` |
+| `C13` | S7 Operational Qualification | Establish bounded real-world performance, drift, recovery, and readiness across independent sessions. | `BLOCKED_ON_C12` |
+
+These campaign states are planning labels, separate from the shared stage-board
+status vocabulary. A state update records scheduling and dependencies; it does
+not advance an AI lane, arm lane, integration gate, or physical authority.
+
+#### Campaign definitions
+
 | Campaign | Purpose and retained population | Entry condition | Exit evidence and failure branch |
 |---|---|---|---|
 | `C00-contract-baseline` | Bind the closed intent schema, exact-text guard, 51-key semantic catalog, phone layer machine, `ModelMotionBatchV2`, frame and calibration identities, zero-authority counters, and independent-effect interface. Retain punctuation, numbers, repeated targets, capitals, shifted symbols, ambiguity, unsupported characters, and stale-evidence negatives. | Current shared schemas and compiler are available. | Schema validity and exact target replay are deterministic. Any altered quoted text, inferred unsupported key, target reordering, or authority-bearing field stops downstream campaigns. This baseline exists; successors bind its current hashes rather than copying assumptions. |
@@ -890,6 +918,169 @@ C03 cannot execute without a C02 recipe, while C04 fixture preparation and
 documentation may proceed on CPU without using C01 outputs. C07 exploratory
 preparation may continue, but C08-C13 remain blocked on installed physical
 measurements and their respective predecessor gates.
+
+### Required implementation packet for every campaign
+
+A campaign moves from a planning state to implementation only when one
+pre-result packet answers all of the following. Unknown physical values remain
+explicit dependencies or sampled sensitivity ranges.
+
+1. **Charter:** stable ID, title, subtitle, owner, objective, decision the result
+   will support, non-goals, authority boundary, and predecessor evidence.
+2. **Lineage lock:** full Git SHA and exact hashes for schemas, catalogs,
+   calibration/configuration epoch, models, simulator assets, runtime sources,
+   and every predecessor receipt consumed.
+3. **Population design:** row identity, factor axes, units, ranges, controls,
+   failure injections, split construction, seeds, sample or power rationale,
+   and rules preventing train/development/evaluation leakage.
+4. **Implementation inventory:** modules to add or change, fixture and schema
+   paths, focused tests, command entry points, external run root, backup root,
+   expected compact repository artifacts, and paths explicitly out of scope.
+5. **Decision contract:** primary safety quantities, diagnostics, confidence or
+   uncertainty method, per-family reporting, pass, fail, block, early-abort,
+   amendment, and successor-trigger rules frozen before results.
+6. **Controls and smoke:** positive and negative controls, deterministic replay,
+   cross-device comparison where applicable, visual/numeric audit sample,
+   known-bad fixture, and proof that a deliberately clear success can pass.
+7. **Operations:** throughput smoke, projected time and storage, resume proof,
+   disk floor, thermal ceiling, watchdog, classified retry policy, backup
+   cadence, status file, interruption behavior, and cleanup or retention plan.
+8. **Admission:** exact allowlist, count and identity checks, source and fixture
+   hash verification, finite-value rules, duplicate/missing output detection,
+   backup hash reconciliation, and explicit rejection of stale artifacts.
+9. **Result package:** exact command, environment, artifacts and SHA-256 values,
+   population counts, metrics, failures and abstentions, limitations, authority
+   counters, evidence-ledger entry, workplan update, and next dependency.
+10. **Review boundary:** what a pass proves, what remains unproven, which result
+    can be used for training or selection, and which held-out evidence becomes
+    consumed and unavailable for later tuning.
+
+The implementation packet is intentionally reusable. Later iterations should
+normally change code, fixtures, assets, or measured inputs inside this planned
+shape. A material change to the objective, population, safety metric, or
+authority boundary creates a named successor campaign instead of silently
+changing the active one.
+
+### Near-term implementation packets
+
+The following work is defined far enough to begin implementation as soon as its
+named dependency clears. Exact successor thresholds are still frozen in the
+campaign fixture before results.
+
+#### C01 — Key Contact Search
+
+**Subtitle:** Find a one-press mechanical envelope across every supported
+keyboard target.
+
+- Finish the existing supervisor population without modifying its fixture or
+  bound source.
+- Finalize only after every expected shard is present, admitted by exact
+  identity, reconciled to the F backup, and covered by scheduled cross-GPU
+  comparisons.
+- Aggregate by target, mechanism class, tool tip, landing scenario, recipe,
+  landing sample, and compliance point. Report actuation, debounce hold,
+  release, repeat, bottom-out, force, neighbor contact, and both depth margins.
+- Preserve every failed recipe. Select nothing if any required target or
+  mechanism lacks an admitted family.
+- Produce post-run deterministic replay videos only from sampled result IDs;
+  verify replay outcomes before rendering and keep video illustrative.
+
+#### C02 — Contact Boundary Refinement
+
+**Subtitle:** Turn the broad contact search into robust recipe windows around
+every observed boundary.
+
+- Input is the immutable C01 manifest and summary, never a hand-selected list.
+  A deterministic extractor identifies pass/fail boundaries and limiting
+  target/mechanism families.
+- Freeze denser samples around depth, dwell, approach/release speed, compliance,
+  tool tip, and landing error only where C01 predeclared Stage B refinement.
+- Retain positive controls, release controls, stabilized-key classes, debounce
+  limits, two-sided depth margin, and all original failure conditions.
+- Implement a compact fixture generator, shard runner, admission/finalizer,
+  boundary visualization, and focused tests for identity drift, omitted failures,
+  unsafe post-result widening, and deterministic replay.
+- Exit with a versioned exploratory recipe family plus its valid target and
+  mechanism domain, or a named design blocker. Phone contact stays separate.
+
+#### C03 — All-Pairs Motion Qualification
+
+**Subtitle:** Move safely between every ordered key pair while preserving the
+admitted contact envelope.
+
+- Bind the exact C02 recipe/tool identity into the prepared 51-target,
+  2,601-ordered-pair harness. Missing or mismatched recipe identity stops.
+- For every pair, evaluate source release, safe rise, transit, reorientation,
+  destination descent, contact, retract, IK, joint limits, and continuous swept
+  clearance against robot, tool, keyboard, stations, and declared workcell CAD.
+- Test direct, higher-hover, and parked policies without allowing aggregate
+  success to hide one failing pair. Same-key transitions remain explicit.
+- Add timing and smoothness diagnostics only after collision and landing
+  admission; speed cannot rescue an unsafe route.
+- Emit a deterministic per-pair table and route lineage consumed verbatim by
+  C05. Infeasible pairs remain unsupported or parked; they are not interpolated.
+
+#### C04 — Intent Robustness and Exact-Text Assurance
+
+**Subtitle:** Understand varied offline instructions without changing,
+inventing, or prematurely executing requested text.
+
+- Freeze independently reviewed train, development, and held-out evaluation
+  families for literal typing, direct key press, ambiguity, negation,
+  correction, multiple clauses, unsupported characters/devices, and adversarial
+  text that resembles instructions to the parser.
+- Run the grounded deterministic parser first. Any small offline language model
+  is a coverage candidate behind the same schema, exact-text guard, capability
+  lookup, and compiler rejection path.
+- Preserve original request bytes or a privacy-safe bound hash separately from
+  normalized language features. Accepted quoted payload bytes must be exact.
+- Implement schema validation, compiler replay, virtual-keyboard effect replay,
+  per-family metrics, false-executable-intent accounting, latency/memory
+  reporting, and malformed-output/timeout abstention tests.
+- Promote only a candidate with zero false executable intent on the frozen
+  safety set, zero altered accepted text, full schema validity, and demonstrably
+  better supported-request coverage than the deterministic baseline.
+
+#### C05 — Closed-Loop String Simulation
+
+**Subtitle:** Compose intent, observation, motion, contact, device effect, and
+verification into exact strings.
+
+- Bind C02 recipes, C03 pair policies, C04 intent outputs, current observation
+  contracts, actual `ModelMotionBatch` producer/ingress, fresh state, recovery
+  hooks, and independent simulated keyboard or phone effect logs.
+- Use fixed hand-authored edge missions plus seeded strings spanning supported
+  lengths, repeats, capitals, punctuation, numbers, Sticky Keys transitions, and
+  phone layer changes. Hold out mission families for final scoring.
+- Advance one semantic action only after the preceding achieved state and exact
+  device effect are independently verified. No lookahead or ambiguous retry.
+- Inject stale evidence, obstruction, missing target, collision, missed/wrong or
+  duplicate effect, delayed readback, and state divergence at their declared
+  boundaries, with exact expected stop or recovery stages.
+- Exit with request-to-outcome traces suitable for C06 and C10, or a specific
+  component blocker. A trajectory or controller receipt alone never counts as
+  typed text.
+
+### Campaign status and amendment rules
+
+Campaign status reports use only:
+
+- `PLANNED`: dependency graph and purpose exist;
+- `SPECIFIED`: pre-result implementation packet and fixture are committed;
+- `IMPLEMENTED`: runner, admission, tests, and controls exist;
+- `PREFLIGHT_PASS`: operational and evidence protections pass;
+- `RUNNING`: the immutable population is executing;
+- `COMPLETE_PASS`: every frozen completion gate passes;
+- `COMPLETE_FAIL`: execution completed and one or more frozen gates fail;
+- `BLOCKED`: a named external or predecessor dependency prevents execution;
+- `SUPERSEDED`: a separately named successor replaces future use while the
+  original evidence remains immutable.
+
+During execution, only operational actions already authorized by the frozen
+supervisor are allowed. A source, fixture, threshold, population, metric, or
+split correction stops the campaign, preserves its evidence, and requires a
+committed successor or pre-result amendment. Result interpretation may add a
+diagnostic, but cannot rescore the frozen decision or erase a failure.
 
 ## Program execution and reporting protocol
 
