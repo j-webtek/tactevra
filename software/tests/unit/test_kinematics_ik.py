@@ -173,41 +173,6 @@ def test_solver_is_repeatable_for_same_model_transform_target_and_seeds() -> Non
     assert first.to_dict() == second.to_dict()
 
 
-def test_candidate_enumeration_preserves_canonical_solve_and_zero_authority() -> None:
-    solver = _solver(options=IkOptions(max_attempts=6, max_iterations_per_attempt=100))
-    target = _reachable_target(solver.model)
-
-    canonical = solver.solve(target)
-    first = solver.solve_candidates(target)
-    second = solver.solve_candidates(target)
-
-    assert first
-    assert tuple(item.to_dict() for item in first) == tuple(
-        item.to_dict() for item in second
-    )
-    assert first[0].to_dict() == canonical.to_dict()
-    assert all(item.status is IkStatus.CONVERGED for item in first)
-    assert all(item.simulation_only is True for item in first)
-    assert all(item.live_motion_authorized is False for item in first)
-    assert all(item.hardware_commands_generated == 0 for item in first)
-    assert all(len(item.attempts) == solver.options.max_attempts for item in first)
-    assert [item.residual.weighted_residual_norm_mm for item in first] == sorted(
-        item.residual.weighted_residual_norm_mm for item in first
-    )
-    identities = {
-        tuple(position.position.value for position in item.solution_arm_joint_positions)
-        for item in first
-    }
-    assert len(identities) == len(first)
-
-
-def test_candidate_enumeration_returns_no_solution_for_unreachable_target() -> None:
-    solver = _solver(options=IkOptions(max_attempts=4, max_iterations_per_attempt=45))
-    target = BoardToolTipTarget(Point3Mm("board", 5000, -5000, 5000))
-
-    assert solver.solve_candidates(target) == ()
-
-
 def test_evaluate_and_seed_inputs_require_complete_typed_radian_arm_state() -> None:
     solver = _solver()
     target = _reachable_target(solver.model)

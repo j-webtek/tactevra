@@ -7,7 +7,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from rocell.application.trajectory_simulation import (
     CartesianRouteWaypoint,
@@ -16,7 +16,14 @@ from rocell.application.trajectory_simulation import (
     evaluate_joint_trajectory_solution,
 )
 from rocell.geometry import JointPosition
-from rocell.kinematics import ARM_JOINT_NAMES, BoardToolTipTarget
+from rocell.kinematics import (
+    ARM_JOINT_NAMES,
+    GRIPPER_JOINT_NAME,
+    BoardToolTipTarget,
+    IkResult,
+    IkStatus,
+    NamedJointPosition,
+)
 
 from .typing_twin_ik_collision_v1 import SCOPE, _load_fixture as _load_parent_fixture
 from .typing_twin_ik_route_study_v1 import (
@@ -113,6 +120,57 @@ class _Branch:
         )
 
 
+def _solve_candidates(
+    solver: Any,
+    target: BoardToolTipTarget,
+    seed_joint_positions: Sequence[Mapping[str, JointPosition]] = (),
+) -> tuple[IkResult, ...]:
+    """Enumerate converged attempts without changing the canonical IK API.
+
+    This exploratory study intentionally uses the solver's existing bounded
+    attempt machinery.  Keeping enumeration here preserves the byte identity
+    of the canonical solver used by earlier frozen fixtures.
+    """
+
+    solver._validate_target(target)
+    seeds = solver._build_seeds(seed_joint_positions, target)
+    attempt_states = tuple(
+        solver._solve_attempt(target, seed_index, seed)
+        for seed_index, seed in enumerate(seeds)
+    )
+    attempts = tuple(report for report, _ in attempt_states)
+    ordered = sorted(
+        (
+            (index, report, values)
+            for index, (report, values) in enumerate(attempt_states)
+            if report.converged
+        ),
+        key=lambda item: (item[1].residual.weighted_residual_norm_mm, item[0]),
+    )
+    candidates: list[IkResult] = []
+    seen: set[tuple[float, ...]] = set()
+    for index, report, values in ordered:
+        identity = tuple(round(value, 12) for value in values)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        candidates.append(
+            IkResult(
+                status=IkStatus.CONVERGED,
+                target=target,
+                solution_arm_joint_positions=solver._named_positions(values),
+                fixed_gripper_position=NamedJointPosition(
+                    GRIPPER_JOINT_NAME,
+                    solver.fixed_gripper_position,
+                ),
+                residual=report.residual,
+                attempts=attempts,
+                selected_attempt_index=index,
+            )
+        )
+    return tuple(candidates)
+
+
 def _run_beam(
     *,
     beam_width: int,
@@ -148,9 +206,10 @@ def _run_beam(
                     },
                 )
             )
-            candidates = solver.solve_candidates(
+            candidates = _solve_candidates(
+                solver,
                 BoardToolTipTarget(waypoint.point_board),
-                seed_joint_positions=seeds,
+                seeds,
             )
             solver_calls += 1
             for solved in candidates:
