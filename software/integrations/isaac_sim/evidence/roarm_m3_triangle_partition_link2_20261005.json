@@ -1,0 +1,1552 @@
+{
+  "blockers": [
+    "JOINT_SPACE_REPLAY_REQUIRED",
+    "SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED",
+    "NON_WATERTIGHT_PARTITION_BANDS",
+    "TOOL_CAMERA_SUPPORT_AND_ENVIRONMENT_GEOMETRY_MISSING",
+    "ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
+  ],
+  "candidate_profile_installable": false,
+  "clearance_replay_admissible": false,
+  "collision_query_admissible": false,
+  "evidence_class": "TRIANGLE_PRESERVING_PARTITION_CANDIDATE_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "triangle_preservation_does_not_prove_collision_equivalence",
+    "partition_bands_are_open_surface_groups_without_volume_ratios",
+    "finite_replay_does_not_cover_continuous_joint_space",
+    "no_pair_exclusions_profile_installation_or_collision_authority"
+  ],
+  "links": [
+    {
+      "component_count": 2,
+      "components": [
+        {
+          "box_to_source_volume_ratio": 1.742659,
+          "candidate_box_volume_mm3": 533761.971304,
+          "candidate_primitive": {
+            "center_mm": [
+              -10.0,
+              0.0,
+              -35.549999
+            ],
+            "half_extents_mm": [
+              46.000002,
+              40.800001,
+              35.550001
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 306291.770986,
+          "source_bounds_mm": [
+            [
+              -56.0,
+              -40.799999,
+              -71.099998
+            ],
+            [
+              36.0,
+              40.799999,
+              0.0
+            ]
+          ],
+          "source_triangle_count": 44,
+          "source_vertex_count": 24,
+          "source_watertight": true
+        },
+        {
+          "box_to_source_volume_ratio": 1.035422,
+          "candidate_box_volume_mm3": 4001.878783,
+          "candidate_primitive": {
+            "center_mm": [
+              10.760853,
+              0.0,
+              0.75
+            ],
+            "half_extents_mm": [
+              31.760855,
+              21.000002,
+              0.750002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 1,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 3864.97356,
+          "source_bounds_mm": [
+            [
+              -21.0,
+              -21.0,
+              0.0
+            ],
+            [
+              42.521706,
+              21.0,
+              1.5
+            ]
+          ],
+          "source_triangle_count": 20,
+          "source_vertex_count": 12,
+          "source_watertight": true
+        }
+      ],
+      "link_name": "base_link",
+      "maximum_watertight_volume_ratio": 1.742659,
+      "mesh_sha256": "55cbfcc2cfb995ab11d8a6ce7c2132283721b9c69cd05b4c7b9d6404e9d8fded",
+      "partition_mode": "ONE_BOX_PER_PROCESSED_CONNECTED_COMPONENT",
+      "processed_connected_component_count": 2,
+      "watertight_component_count": 2
+    },
+    {
+      "component_count": 2,
+      "components": [
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 196948.75496,
+          "candidate_primitive": {
+            "center_mm": [
+              0.0,
+              0.0,
+              37.323341
+            ],
+            "half_extents_mm": [
+              27.388891,
+              36.210001,
+              24.823343
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              -27.388889,
+              -36.209999,
+              12.5
+            ],
+            [
+              27.388889,
+              36.209999,
+              62.146683
+            ]
+          ],
+          "source_triangle_count": 226,
+          "source_vertex_count": 105,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": 1.195123,
+          "candidate_box_volume_mm3": 19404.010752,
+          "candidate_primitive": {
+            "center_mm": [
+              -1.7e-05,
+              -4e-06,
+              7.0
+            ],
+            "half_extents_mm": [
+              21.000002,
+              21.000002,
+              5.500002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 1,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 16236.0,
+          "source_bounds_mm": [
+            [
+              -21.000017,
+              -21.000004,
+              1.5
+            ],
+            [
+              20.999983,
+              20.999996,
+              12.5
+            ]
+          ],
+          "source_triangle_count": 28,
+          "source_vertex_count": 16,
+          "source_watertight": true
+        }
+      ],
+      "link_name": "link1",
+      "maximum_watertight_volume_ratio": 1.195123,
+      "mesh_sha256": "022fdd2df4fa57748f56337fb1b3b3cce81dd116e0f608ccab51d6f1eacb552c",
+      "partition_mode": "ONE_BOX_PER_PROCESSED_CONNECTED_COMPONENT",
+      "processed_connected_component_count": 2,
+      "watertight_component_count": 1
+    },
+    {
+      "component_count": 17,
+      "components": [
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 4.925717,
+          "candidate_primitive": {
+            "center_mm": [
+              22.856202,
+              1.5,
+              -0.1
+            ],
+            "half_extents_mm": [
+              0.001296,
+              12.500002,
+              38.007073
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 0,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.854908,
+              -11.0,
+              -38.107071
+            ],
+            [
+              22.857496,
+              14.0,
+              37.90707
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 2304,
+          "source_vertex_count": 2370,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 1.907851,
+          "candidate_primitive": {
+            "center_mm": [
+              22.856997,
+              1.5,
+              -0.1
+            ],
+            "half_extents_mm": [
+              0.000502,
+              12.500002,
+              38.005001
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 1,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 1,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.856497,
+              -11.0,
+              -38.105
+            ],
+            [
+              22.857496,
+              14.0,
+              37.904999
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 1152,
+          "source_vertex_count": 1782,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 2.553855,
+          "candidate_primitive": {
+            "center_mm": [
+              22.857167,
+              1.5,
+              -0.098795
+            ],
+            "half_extents_mm": [
+              0.000672,
+              12.500002,
+              38.003796
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 2,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 2,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.856497,
+              -11.0,
+              -38.102589
+            ],
+            [
+              22.857838,
+              14.0,
+              37.904999
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 576,
+          "source_vertex_count": 652,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 2.2e-05,
+          "candidate_primitive": {
+            "center_mm": [
+              22.857667,
+              1.5,
+              37.901295
+            ],
+            "half_extents_mm": [
+              0.000173,
+              12.500002,
+              0.001295
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 3,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 3,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.857496,
+              -11.0,
+              37.900002
+            ],
+            [
+              22.857838,
+              14.0,
+              37.902588
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 288,
+          "source_vertex_count": 375,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 326950.991892,
+          "candidate_primitive": {
+            "center_mm": [
+              123.608041,
+              -2.7538,
+              -0.099999
+            ],
+            "half_extents_mm": [
+              100.749795,
+              12.756201,
+              31.800002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 4,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 4,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.858248,
+              -15.509999,
+              -31.9
+            ],
+            [
+              224.357834,
+              10.002399,
+              31.700001
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 36,
+          "source_vertex_count": 38,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 151200.04624,
+          "candidate_primitive": {
+            "center_mm": [
+              124.357836,
+              0.002399,
+              -0.1
+            ],
+            "half_extents_mm": [
+              100.0,
+              10.000002,
+              18.900002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 5,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 5,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              24.357838,
+              -9.997601,
+              -19.0
+            ],
+            [
+              224.357834,
+              10.002399,
+              18.799999
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 18,
+          "source_vertex_count": 32,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 151200.04624,
+          "candidate_primitive": {
+            "center_mm": [
+              124.357836,
+              0.002399,
+              -0.1
+            ],
+            "half_extents_mm": [
+              100.0,
+              10.000002,
+              18.900002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 6,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 6,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              24.357838,
+              -9.997601,
+              -19.0
+            ],
+            [
+              224.357834,
+              10.002399,
+              18.799999
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 18,
+          "source_vertex_count": 22,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 1236.22078,
+          "candidate_primitive": {
+            "center_mm": [
+              6.428384,
+              1.5,
+              -38.8575
+            ],
+            "half_extents_mm": [
+              16.428115,
+              12.500002,
+              0.752503
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 7,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 7,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              -9.999729,
+              -11.0,
+              -39.610001
+            ],
+            [
+              22.856497,
+              14.0,
+              -38.105
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 2304,
+          "source_vertex_count": 1394,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 55.06042,
+          "candidate_primitive": {
+            "center_mm": [
+              23.577111,
+              1.5,
+              38.655001
+            ],
+            "half_extents_mm": [
+              0.729276,
+              12.500002,
+              0.755001
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 8,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 8,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.847837,
+              -11.0,
+              37.900002
+            ],
+            [
+              24.306385,
+              14.0,
+              39.41
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 72,
+          "source_vertex_count": 116,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 3251.881824,
+          "candidate_primitive": {
+            "center_mm": [
+              23.607372,
+              -0.005,
+              -0.753849
+            ],
+            "half_extents_mm": [
+              0.750877,
+              14.005002,
+              38.653853
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 9,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 9,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.856497,
+              -14.009999,
+              -39.4077
+            ],
+            [
+              24.358248,
+              14.0,
+              37.900002
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 36,
+          "source_vertex_count": 34,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 3251.881656,
+          "candidate_primitive": {
+            "center_mm": [
+              23.607372,
+              -0.005,
+              0.55385
+            ],
+            "half_extents_mm": [
+              0.750877,
+              14.005002,
+              38.653851
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 10,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 10,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.856497,
+              -14.009999,
+              -38.099998
+            ],
+            [
+              24.358248,
+              14.0,
+              39.207699
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 36,
+          "source_vertex_count": 34,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 1233.073776,
+          "candidate_primitive": {
+            "center_mm": [
+              6.426554,
+              1.5,
+              38.65933
+            ],
+            "half_extents_mm": [
+              16.426285,
+              12.500002,
+              0.750671
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 11,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 11,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              -9.999729,
+              -11.0,
+              37.908661
+            ],
+            [
+              22.852837,
+              14.0,
+              39.41
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 1152,
+          "source_vertex_count": 915,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 343.65279,
+          "candidate_primitive": {
+            "center_mm": [
+              23.603043,
+              -0.755,
+              -35.755
+            ],
+            "half_extents_mm": [
+              0.755207,
+              14.755002,
+              3.855002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 12,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 12,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.847837,
+              -15.509999,
+              -39.610001
+            ],
+            [
+              24.358248,
+              14.0,
+              -31.9
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 36,
+          "source_vertex_count": 38,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 3365.950687,
+          "candidate_primitive": {
+            "center_mm": [
+              23.607872,
+              -0.755,
+              -0.098705
+            ],
+            "half_extents_mm": [
+              0.750378,
+              14.755002,
+              38.001295
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 13,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 13,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.857496,
+              -15.509999,
+              -38.099998
+            ],
+            [
+              24.358248,
+              14.0,
+              37.902588
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 36,
+          "source_vertex_count": 63,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 6.963043,
+          "candidate_primitive": {
+            "center_mm": [
+              22.854667,
+              1.5,
+              -0.099205
+            ],
+            "half_extents_mm": [
+              0.001832,
+              12.500002,
+              38.007868
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 14,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 14,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.852837,
+              -11.0,
+              -38.107071
+            ],
+            [
+              22.856497,
+              14.0,
+              37.908661
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 576,
+          "source_vertex_count": 981,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 0.000291,
+          "candidate_primitive": {
+            "center_mm": [
+              22.852667,
+              1.5,
+              37.908365
+            ],
+            "half_extents_mm": [
+              0.002243,
+              12.500002,
+              0.001297
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 15,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "partition_band_index": 15,
+          "refinement": "TRIANGLE_RECURSIVE_LONGEST_CENTROID_AXIS_AABB",
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              22.850426,
+              -11.0,
+              37.90707
+            ],
+            [
+              22.854908,
+              14.0,
+              37.90966
+            ]
+          ],
+          "source_component_index": 0,
+          "source_triangle_count": 576,
+          "source_vertex_count": 1022,
+          "source_watertight": false
+        },
+        {
+          "box_to_source_volume_ratio": 16.019228,
+          "candidate_box_volume_mm3": 79657.835906,
+          "candidate_primitive": {
+            "center_mm": [
+              228.607834,
+              12.942788,
+              -0.099936
+            ],
+            "half_extents_mm": [
+              18.207567,
+              27.059614,
+              20.209939
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 16,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 4972.639026,
+          "source_bounds_mm": [
+            [
+              210.400269,
+              -14.116824,
+              -20.309874
+            ],
+            [
+              246.815399,
+              40.002399,
+              20.110001
+            ]
+          ],
+          "source_triangle_count": 148,
+          "source_vertex_count": 72,
+          "source_watertight": true
+        }
+      ],
+      "link_name": "link2",
+      "maximum_watertight_volume_ratio": 16.019228,
+      "mesh_sha256": "5acd32a9f662221deb58ea2ca338c5d6726cbcd7664e7dcdb93bac722820b025",
+      "partition_mode": "TRIANGLE_PARTITION_RECURSIVE_LONGEST_CENTROID_AXIS_FOR_COMPONENT_0",
+      "processed_connected_component_count": 2,
+      "watertight_component_count": 2
+    },
+    {
+      "component_count": 4,
+      "components": [
+        {
+          "box_to_source_volume_ratio": 4.619705,
+          "candidate_box_volume_mm3": 13635.74305,
+          "candidate_primitive": {
+            "center_mm": [
+              -11.278384,
+              -28.098488,
+              0.24
+            ],
+            "half_extents_mm": [
+              4.228785,
+              22.695001,
+              17.760002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 2951.647931,
+          "source_bounds_mm": [
+            [
+              -15.507167,
+              -50.793488,
+              -17.52
+            ],
+            [
+              -7.049601,
+              -5.403489,
+              18.0
+            ]
+          ],
+          "source_triangle_count": 116,
+          "source_vertex_count": 60,
+          "source_watertight": true
+        },
+        {
+          "box_to_source_volume_ratio": 1.903048,
+          "candidate_box_volume_mm3": 42200.217492,
+          "candidate_primitive": {
+            "center_mm": [
+              -3.257167,
+              -72.293489,
+              0.24
+            ],
+            "half_extents_mm": [
+              10.750002,
+              35.050003,
+              14.000002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 1,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 22175.063726,
+          "source_bounds_mm": [
+            [
+              -14.007167,
+              -107.343491,
+              -13.76
+            ],
+            [
+              7.492833,
+              -37.243488,
+              14.24
+            ]
+          ],
+          "source_triangle_count": 508,
+          "source_vertex_count": 256,
+          "source_watertight": true
+        },
+        {
+          "box_to_source_volume_ratio": 1.014522,
+          "candidate_box_volume_mm3": 38006.521264,
+          "candidate_primitive": {
+            "center_mm": [
+              0.0004,
+              -132.086578,
+              0.48
+            ],
+            "half_extents_mm": [
+              12.360002,
+              22.610003,
+              17.000002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 2,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 37462.50557,
+          "source_bounds_mm": [
+            [
+              -12.3596,
+              -154.696579,
+              -16.52
+            ],
+            [
+              12.360399,
+              -109.476578,
+              17.48
+            ]
+          ],
+          "source_triangle_count": 32,
+          "source_vertex_count": 16,
+          "source_watertight": true
+        },
+        {
+          "box_to_source_volume_ratio": 1.014522,
+          "candidate_box_volume_mm3": 38006.521264,
+          "candidate_primitive": {
+            "center_mm": [
+              0.0004,
+              -12.500404,
+              0.0
+            ],
+            "half_extents_mm": [
+              12.360002,
+              22.610003,
+              17.000002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 3,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 37462.505554,
+          "source_bounds_mm": [
+            [
+              -12.3596,
+              -35.110405,
+              -17.0
+            ],
+            [
+              12.360399,
+              10.109596,
+              17.0
+            ]
+          ],
+          "source_triangle_count": 32,
+          "source_vertex_count": 16,
+          "source_watertight": true
+        }
+      ],
+      "link_name": "link3",
+      "maximum_watertight_volume_ratio": 4.619705,
+      "mesh_sha256": "80c4e9b1084bf1c7d975398eb11e7ba4e7dc69e62ff4adefcac38a0e0f5a4069",
+      "partition_mode": "ONE_BOX_PER_PROCESSED_CONNECTED_COMPONENT",
+      "processed_connected_component_count": 4,
+      "watertight_component_count": 4
+    },
+    {
+      "component_count": 2,
+      "components": [
+        {
+          "box_to_source_volume_ratio": 19.631133,
+          "candidate_box_volume_mm3": 96548.19132,
+          "candidate_primitive": {
+            "center_mm": [
+              -9.3346,
+              -21.399575,
+              0.000199
+            ],
+            "half_extents_mm": [
+              19.335002,
+              30.900003,
+              20.200002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 4918.116207,
+          "source_bounds_mm": [
+            [
+              -28.6696,
+              -52.299576,
+              -20.1998
+            ],
+            [
+              10.0004,
+              9.500426,
+              20.200199
+            ]
+          ],
+          "source_triangle_count": 152,
+          "source_vertex_count": 74,
+          "source_watertight": true
+        },
+        {
+          "box_to_source_volume_ratio": 1.014522,
+          "candidate_box_volume_mm3": 38006.517348,
+          "candidate_primitive": {
+            "center_mm": [
+              2.647475,
+              -32.832498,
+              0.0002
+            ],
+            "half_extents_mm": [
+              22.610002,
+              17.000001,
+              12.360002
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 1,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 37462.503202,
+          "source_bounds_mm": [
+            [
+              -19.962524,
+              -49.832497,
+              -12.3598
+            ],
+            [
+              25.257475,
+              -15.832499,
+              12.3602
+            ]
+          ],
+          "source_triangle_count": 32,
+          "source_vertex_count": 16,
+          "source_watertight": true
+        }
+      ],
+      "link_name": "link4",
+      "maximum_watertight_volume_ratio": 19.631133,
+      "mesh_sha256": "bb334cafafa5f5adeedb4d430b325b436eafa833fa851ea782d9c785698f8c09",
+      "partition_mode": "ONE_BOX_PER_PROCESSED_CONNECTED_COMPONENT",
+      "processed_connected_component_count": 2,
+      "watertight_component_count": 2
+    },
+    {
+      "component_count": 1,
+      "components": [
+        {
+          "box_to_source_volume_ratio": null,
+          "candidate_box_volume_mm3": 199233.598506,
+          "candidate_primitive": {
+            "center_mm": [
+              -7.750073,
+              0.013654,
+              59.568054
+            ],
+            "half_extents_mm": [
+              23.24801,
+              17.760001,
+              60.317568
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": null,
+          "source_bounds_mm": [
+            [
+              -30.998081,
+              -17.746346,
+              -0.749511
+            ],
+            [
+              15.497934,
+              17.773653,
+              119.88562
+            ]
+          ],
+          "source_triangle_count": 14092,
+          "source_vertex_count": 6926,
+          "source_watertight": false
+        }
+      ],
+      "link_name": "link5",
+      "maximum_watertight_volume_ratio": null,
+      "mesh_sha256": "1d63f374a78c1419b21eec63fa8efeef40d0d42ca89c5de3ceb0d86476d9c7eb",
+      "partition_mode": "WHOLE_LINK_ENVELOPE_COMPONENT_LIMIT_FALLBACK",
+      "processed_connected_component_count": 114,
+      "watertight_component_count": 0
+    },
+    {
+      "component_count": 1,
+      "components": [
+        {
+          "box_to_source_volume_ratio": 21.140797,
+          "candidate_box_volume_mm3": 77354.686894,
+          "candidate_primitive": {
+            "center_mm": [
+              28.157603,
+              2.620368,
+              -18.933561
+            ],
+            "half_extents_mm": [
+              38.925002,
+              12.620001,
+              19.683785
+            ],
+            "kind": "oriented_box",
+            "rotation_row_major": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "component_index": 0,
+          "maximum_vertex_overflow_mm": 0.0,
+          "minimum_half_extent_floor_applied": false,
+          "source_absolute_volume_mm3": 3659.024076,
+          "source_bounds_mm": [
+            [
+              -10.767397,
+              -9.999632,
+              -38.617344
+            ],
+            [
+              67.082603,
+              15.240367,
+              0.750222
+            ]
+          ],
+          "source_triangle_count": 13698,
+          "source_vertex_count": 6831,
+          "source_watertight": true
+        }
+      ],
+      "link_name": "gripper_link",
+      "maximum_watertight_volume_ratio": 21.140797,
+      "mesh_sha256": "7946a374e24a2f467a0581b4946e0ec41b1b86a92f070bc00aa9bced1bf65a56",
+      "partition_mode": "ONE_BOX_PER_PROCESSED_CONNECTED_COMPONENT",
+      "processed_connected_component_count": 1,
+      "watertight_component_count": 1
+    }
+  ],
+  "method": {
+    "assignment": "RECURSIVE_LONGEST_CENTROID_AXIS",
+    "containment": "ALL_VERTICES_OF_EVERY_ASSIGNED_TRIANGLE",
+    "initial_longest_axis_index": 0,
+    "initial_longest_axis_name": "x",
+    "maximum_primitives_per_body": 64,
+    "produced_band_count": 16,
+    "recursive_split_rule": "SPLIT_GROUP_WITH_LARGEST_CENTROID_SPAN_AT_STABLE_MEDIAN",
+    "requested_band_count": 16,
+    "serialization_containment_padding_mm": 2e-06,
+    "target_component_index": 0,
+    "target_link": "link2"
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "cf887206e9afdadb46a20263db56406eabfe90a78c3f9d1e5ad0e8dc3fbc6469",
+  "schema": "tactevra.isaac_sim_triangle_partition_refinement.v1",
+  "source_bindings": {
+    "base_reduction_file_sha256": "d9d49bbb97a207a56db2a15cb55b12dc63f6ce89e35998a139ccd112f2061714",
+    "base_reduction_sha256": "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178",
+    "mesh_receipt_file_sha256": "8408214ddc9bec69ffb65a4928e22bbdd83f99c6590576ff6a4ef61599c3703d",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
+    "target_mesh_sha256": "5acd32a9f662221deb58ea2ca338c5d6726cbcd7664e7dcdb93bac722820b025",
+    "trimesh_version": "4.11.1",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
+  },
+  "summary": {
+    "candidate_primitive_count": 29,
+    "link_count": 7,
+    "maximum_vertex_overflow_mm": 0.0,
+    "maximum_watertight_volume_ratio": 21.140797,
+    "median_watertight_volume_ratio": 1.742659,
+    "partition_primitive_count": 16
+  },
+  "target_metrics": {
+    "assigned_triangle_count": 9216,
+    "maximum_vertex_overflow_mm": 0.0,
+    "source_triangle_count": 9216,
+    "unique_assigned_triangle_count": 9216
+  },
+  "wire_commands": []
+}

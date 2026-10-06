@@ -6940,3 +6940,76 @@ rewriting history. New entries must use a unique evidence ID.
   qualification remain absent. No physical or deployment gate changes.
 - Next dependency: safe-region-fitting final-camera output and accepted
   installed collision geometry, followed by a source-bound dynamic replay.
+
+### E-20261005-INT-458 — link2 refinement and counterfactual pair-policy stress
+
+- Stage: S2/S3 simulation process alignment, WP2.
+- Lane: INTEGRATION.
+- Base commit: `bbd3fabf32cb4016f76d871eaf7d72dc5483a77b`.
+- Result commit: `a1e233ab231652e7eeed2b5d344ef38871b72144`.
+- Change: retained a failed targeted-OBB refinement, added a complete-triangle
+  partition successor for `link2`, expanded the governed CPU collision replay,
+  reviewed upstream SRDF `Adjacent` and `Never` proposals without installing
+  them, and ran a disjoint 256-pose Halton stress replay. All JSON writers use
+  explicit UTF-8/LF bytes so file hashes remain stable across platforms.
+- Inputs/fixtures: upstream `roarm_ws` commit
+  `40dbd84b553695212fab713e8465f817ba95454d`; governed URDF SHA-256
+  `a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190`;
+  `python-fcl` 0.7.0.11 wheel SHA-256
+  `63c662c8ff30eeb78913624a4ac56209a6061248ed97066c3b744255d943299f`;
+  trimesh 4.11.1; triangle candidate receipt SHA-256
+  `cf887206e9afdadb46a20263db56406eabfe90a78c3f9d1e5ad0e8dc3fbc6469`;
+  49-pose replay receipt SHA-256
+  `f511d844f2b66c4cd6054c5c1c73425108f15815eeca6c2726bd819896fd3ee5`;
+  held-out replay receipt SHA-256
+  `b0c2e12b10d2607dc7aaed92322ddf0101d6b7377dea6203b1207f9f0785e838`;
+  policy/never-review receipt SHA-256 values
+  `f80f6ac8e72414686489eb3757acb3746f03ea34b1136f68edfddfb68f4451d4` /
+  `83eb284513215976364792a8859c1cacb8b4ad0dd15288e4a391071f717dade1`;
+  final assessment receipt/file SHA-256
+  `e7426e9481a20b2d807657d971c9e79844f468bf5babe146e929a55b6f4620b3` /
+  `2c0dbec1fecb1da6306ccec3e77b6afaa22e57e68ac0ec2703c445511db10413`.
+- Command: `C:\IsaacSim\env_6_1_0\Scripts\python.exe
+  software\integrations\isaac_sim\triangle_partition_refinement_probe.py
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 --mesh-receipt
+  software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json
+  --base-reduction software\integrations\isaac_sim\evidence\roarm_m3_link_mesh_reduction_20261004.json
+  --band-count 16 --strategy recursive-longest-centroid-axis --output
+  C:\IsaacSim\evidence\issue190\main-extraction\wp2-collision-policy\triangle_partition_link2.json
+  --status-output C:\IsaacSim\evidence\issue190\main-extraction\wp2-collision-policy\triangle_partition_link2.status.json`;
+  the same pinned interpreter then ran `collision_joint_space_probe.py` once
+  with its default 49-pose corpus and once with `--halton-start 1001
+  --halton-count 256 --halton-only`, followed by
+  `self_collision_policy_review_probe.py`, `srdf_never_pair_review_probe.py`,
+  and `collision_policy_stress_probe.py`; `python -m pytest
+  software/tests/unit/test_isaac_sim_collision_policy_successor.py
+  software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py
+  software/tests/unit/test_isaac_sim_collision_differential_evidence.py
+  software/tests/unit/test_isaac_sim_link_mesh_reduction_evidence.py
+  software/tests/unit/test_isaac_sim_upstream_link_mesh_binding_evidence.py -q`;
+  `python -m ruff check` on the six probes and focused test;
+  `python scripts/maintain_repository.py verify`; `git diff --check`.
+- Result: `PASS_WITH_BLOCKERS`. The failed OBB attempt preserves 192 false
+  positives, including one nonadjacent witness. The triangle partition replay
+  has 57 collision agreements, 807 free agreements, 165 false positives, zero
+  observed false negatives, and no nonadjacent false positives across 1,029
+  pair-pose cases. The held-out replay covers 256 disjoint poses and 5,376
+  pair-pose cases. Six `Never` proposals remain uncontradicted; after removing
+  all twelve proposals counterfactually, the nine retained pairs contain 36
+  collision agreements, 2,255 free agreements, 13 false positives, and zero
+  observed false negatives. Effective exclusions remain empty. Twenty-five
+  focused tests and 133 repository-maintenance tests passed. Nineteen external
+  files were copied to
+  `F:\TactevraEvidence\issue190\main-extraction\wp2-collision-policy` with
+  zero hash mismatches.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Limitations: finite synthetic CPU collision samples do not prove continuous
+  workspace safety. Source meshes include non-watertight bodies. No installed
+  or measured tool, camera support, fixture, or environment geometry was used.
+  Pair proposals are counterfactual, uninstalled, and confer no collision,
+  controller, permit, transport, hardware, or physical authority. No GPU,
+  Warp, or Isaac application process was used in this increment.
+- Next dependency: engineering review of the candidate reduction and pair
+  semantics, followed by installed measured geometry and continuous swept-path
+  clearance evidence before any profile can be installed or admitted.

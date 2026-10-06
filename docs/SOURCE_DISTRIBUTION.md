@@ -316,3 +316,11 @@ sources alongside the later release and Isaac Sim evidence already on `main`.
 The reconciled tree contains 6,362 tracked files and 651,290,447 logical bytes;
 the reviewed file-count ceiling advances to 6,365 while the logical-byte and
 duplicate-byte ceilings remain unchanged.
+
+The focused WP2 collision-policy successor adds five CPU-only probes, eight
+compact hash-bound receipts, and one focused test module while extending the
+existing joint-space probe and integration guide. The resulting tree contains
+6,376 tracked files. Detailed per-pose collision ledgers remain external; the
+retained summaries bind their hashes. The file-count ceiling advances to 6,376
+while the logical-byte, single-blob, duplicate-byte, and reduction limits stay
+unchanged.
