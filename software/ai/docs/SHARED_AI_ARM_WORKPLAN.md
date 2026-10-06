@@ -1031,6 +1031,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
+| INTEGRATION | S2/S3 simulation recovery | `software/ai/rocell_ai/recovery_state_machine.py`, portable fixture/evidence, focused tests and documentation | `feature/sim-ws4-recovery` | ACTIVE_CPU_ONLY |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
