@@ -7139,19 +7139,21 @@ rewriting history. New entries must use a unique evidence ID.
 - Lane: AI/MODEL plus INTEGRATION; no arm-lane status or integration gate changed.
 - Base commit: `dccfdb107f9abac700e92388d632ef7070228e82`.
 - Claim commit: `095f8fc6f9bbbcc90a4191bc29efea732dd56433`.
-- Fixture/implementation freeze commit: `bd5da380`.
-- Evidence-producing commit: `c059e6bae35fad2d4ba41c785b146de1a2f9d2d4`.
-- Frozen fixture: `software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1.json`;
+- Original fixture/implementation freeze commit: `bd5da380`.
+- Original evidence-producing commit: `c059e6bae35fad2d4ba41c785b146de1a2f9d2d4`.
+- LF-policy amendment commit: `e5b36b45`.
+- Final evidence-producing commit: `f7cd03c6bf89eaa5ae99c09fbacb895278d116bb`.
+- Final frozen fixture: `software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1_1.json`;
   canonical fixture SHA-256
-  `ba65b6f36c8164d4a386fe9fd97f0b325976a53dfc972b3b82bd7f258e2c91ac`;
+  `44d504496063ccfc6103429dd56ad2dce5eb97fbf99eac0cb1c36b20ca54a964`;
   file SHA-256
-  `1d1b027894e7dc9b7bf54454c32c7fec6d3849721cd1e2029e36b6032138bdc6`.
+  `fc780a8d4ff5f8335b3281addeedf65ded2496c2e6f20e197f6ab10dcfab7c99`.
   It binds implementation SHA-256
-  `b65086d21fedd4bba9d5f9c8cbd02982541122d1336853b5109cc9817ee1a0a4`,
+  `f7a78cca8dcc1d414a5a798043384424028bc9a2b978b0608cef799265a4fb90`,
   the installed catalog, and the system manifest.
 - Commands: with `PYTHONPATH=software/ai;software/src`, twice run `python -m
   rocell_ai.typing_twin_boundary_v1
-  software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1.json
+  software/ai/sim/evidence/end_to_end_typing_twin_boundary_main_v1_1.json
   --workspace . --output <external-result>`; `python -m pytest
   software/ai/tests/test_typing_twin_boundary_v1.py
   software/ai/tests/test_end_to_end_typing_twin.py
@@ -7169,20 +7171,25 @@ rewriting history. New entries must use a unique evidence ID.
   `H,E,L,L,O,SPACE,2,0,2,6` survived with zero differences. `Hello 2026!`
   stopped before batch creation because `SHIFT` is absent from the installed
   catalog. Both full outputs were byte-identical: receipt SHA-256
-  `f9a965a7ee1a099a75d1c72cfae6c3949298d504dc624df196a4e234ebe2433b`;
+  `aadc4fe08aed5283f162057b7685a4fcdbd71b5b93388d92bddf870a4abb3844`;
   file SHA-256
-  `5a96b76b01b7a6fb8d7d2b24ff6f324c3daf960b38c92477a6281d571584208d`.
+  `e1a7962fa07a5015127ef943ba4c1ea32f934949083a5f3c886f1e0116fdb769`.
   The compact summary file SHA-256 is
-  `bb05ac8deabf4d529c679f33e7e752512117283fea1ea634aeb6ccb403a36221`.
+  `9b7938553b73ffface309ea71330700dfd46af536bd3afc93ad767d693f023f9`.
   Sixty-six focused/shared boundary tests passed.
 - Preserved failure: the first focused test run had 1 failure and 4 passes
   because the test read top-level keyboard profile fields as target IDs. The
   test was corrected to use the same validated simulation-context catalog as
   production; no fixture, range, gate, or observed sweep result changed.
+- Preserved representation failure: the first complete repository check found
+  CRLF bytes in the newly added Python and JSON files. The original fixture and
+  output remain recorded. Fixture v1.1 was frozen before rerun and changes only
+  LF byte normalization plus the resulting source hash; cases, ranges, gates,
+  algorithms, and expected counts are unchanged.
 - External evidence: both outputs are retained under
-  `C:\MuJoCoWarp\evidence\issue190\main-extraction\workstream_1\typing_boundary_main_v1`
+  `C:\MuJoCoWarp\evidence\issue190\main-extraction\workstream_1\typing_boundary_main_v1_1`
   and backed up to
-  `F:\TactevraEvidence\issue190\main-extraction\workstream_1\typing_boundary_main_v1`;
+  `F:\TactevraEvidence\issue190\main-extraction\workstream_1\typing_boundary_main_v1_1`;
   2/2 hashes match.
 - Hardware-write count: 0.
 - Physical-movement count: 0.
