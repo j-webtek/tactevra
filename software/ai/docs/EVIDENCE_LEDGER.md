@@ -7879,3 +7879,90 @@ rewriting history. New entries must use a unique evidence ID.
   continuous-collision, target-order, and zero-authority gates. Physical use
   remains blocked on measured tool geometry, board registration, key geometry,
   joint state, and commissioning evidence.
+
+### E-20261006-INT-470 — 110 mm / 25 mm route improves prefix but fails descent margin
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned route evidence recorded under the cross-lane `INT` sequence.
+  No integration gate or physical readiness status changed.
+- Claim commit: `174c67e4d0eb9322a0d983f10271051cb4674737`.
+- Frozen implementation and fixture commit:
+  `8a9aa2ea7de8025e6df3092f94bbe3ab8494d6e4`.
+- Result commit: `0fc3e917bd3a04d7c80e2cab3d656bbbbd6a67f6`.
+- Objective: reconstruct the parent ordered `hello 2026` route with the
+  exploratory 110 mm tool transform and 25 mm hover, then apply the unchanged
+  canonical IK, joint-continuity, installed-collision, and zero-authority
+  gates. The run does not expand the parent semantic route to all catalog keys.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_110mm_full_route_fixture_v1.json`;
+  canonical SHA-256
+  `6fdc49b8f87ed8b3767572079cd5ae3273dbc9697db2975ae0d2a34ee1b2ca3c`;
+  file SHA-256
+  `32051e769af5eb9225b7bad0d76a86ea394b381d5eaf050aacb854ea7b59b582`.
+- Frozen inputs: exact ordered targets `H,E,L,L,O,SPACE,2,0,2,6`; 110 mm
+  passive stylus; 25 mm hover; parent 5 mm Cartesian sampling, velocity,
+  acceleration, jerk, settle, and dwell settings; unchanged canonical IK and
+  continuity thresholds; and 16 candidate collision profiles crossing the
+  two retained link-radius, separation, geometry-uncertainty, and
+  pose-uncertainty endpoints at fixed 110 mm tool length and 3 mm tip radius.
+- Exact command: with `PYTHONPATH=software/ai;software/src`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`, run
+  `python -m rocell_ai.typing_twin_110mm_full_route_v1
+  software/ai/sim/evidence/typing_twin_110mm_full_route_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_110mm_full_route_result_v1.json`.
+- Result: `BLOCKED_CANONICAL_IK_OR_CONTINUITY`. Receipt SHA-256:
+  `725d8ad47a1578f37bcd3de4e973b85c452d882a9fe62bcc8478f929af4d6926`;
+  result-file SHA-256
+  `99b1f710e19e5f052aef33cffe1be2b19b86e159ae8f5ed6a06b91b470908dbf`.
+- Metrics: the rebuilt route contains 314 Cartesian samples. Canonical IK and
+  continuity accepted the first 24 samples, improving the retained parent
+  prefix of 15, then rejected sample 24 during the first-`H` `APPROACH` at
+  achieved tip `(216.550286, 154.000981, 40.999267)` mm. The solution
+  converged with 0.001257 mm position error and passed adjacent-joint
+  continuity at 0.044764 rad, but failed the unchanged normalized joint-margin
+  gate at `0.000731`; `link3_to_link4` remained the limiting joint. The minimum
+  normalized margin among accepted samples was `0.01498`, and the maximum
+  accepted adjacent delta was `0.028746` rad.
+- Collision result: installed collision intake was not reached because the
+  canonical route was blocked. The 16 frozen candidate profiles evaluated the
+  24-sample accepted prefix only; nine profiles observed at least one
+  collision, with 193 collision-marked profile-samples. Aggregated pair hits
+  were 192 for `robot:base_link/robot:link2` and two for
+  `attachment:contact_tool/workcell:station:keyboard_left`. This diagnostic
+  uses incomplete origin-sphere/AABB geometry and discrete samples; it does
+  not prove continuous clearance and cannot clear installed collision intake.
+- Interpretation: the 110 mm / 25 mm combination fixes the exact-hover
+  feasibility question from `E-20261006-INT-469`, but the straight sampled
+  descent reaches the wrist-margin corridor before contact. Pointwise endpoint
+  feasibility therefore does not establish route feasibility. The frozen
+  candidate is rejected without loosening or rescoring any gate.
+- Validation: 3 focused fixture-integrity, deterministic reproduction,
+  blocked-result, and zero-authority tests passed; Ruff and `git diff --check`
+  passed. Broader repository and exact-head checks follow on the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate Stage A campaign was not interrupted and
+  remained `RUNNING` at 7,159/11,628 shards after this result, with zero
+  failures, zero hardware writes, zero physical movements, and GPU
+  temperatures of 60/60 C.
+- Failures preserved: the complete blocked result, including all 25 evaluated
+  IK samples and all candidate-prefix collision outcomes, remains tracked. The
+  parent blocker and binding audit remain unchanged.
+- Limitations: calibration, ready state, tool length, hover, target geometry,
+  and candidate collision shapes are synthetic or nominal. The result covers
+  the ten-action parent route rather than every catalog target. Candidate
+  collision is sampled rather than continuous and omits installed measured
+  geometry. Camera clearance, dynamics, contact, physical accuracy, controller
+  transport, and physical repeatability remain unevaluated. No route, tool,
+  planner, command, permit, transport operation, hardware access, movement, or
+  physical authority is installed.
+- Supersedes: none. This answers the immediate full-route reconstruction
+  question created by `E-20261006-INT-469` while retaining its physical and
+  collision blockers.
+- Next dependency: freeze an arm-owned first-`H` descent-route reconstruction
+  that preserves the exact contact point and every existing IK/continuity gate,
+  or predeclare another previously admitted tool/hover candidate. Only after a
+  full canonical route passes should installed-profile bounded sampling and
+  conservative continuous sweep qualification run. A separate all-catalog-key
+  route remains required after the candidate catalog is available on main.

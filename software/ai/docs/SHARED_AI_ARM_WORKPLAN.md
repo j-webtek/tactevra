@@ -1129,12 +1129,24 @@ rebuild the full route from the converged 110 mm candidate configuration using
 the 25 mm exploratory hover, then apply unchanged continuous collision and
 route gates; physical use remains blocked on measurement and commissioning.
 
+Evidence `E-20261006-INT-470` preserves the requested frozen 110 mm / 25 mm
+reconstruction as a blocked full-route result. The exact first-`H` hover is
+reachable, but the unchanged canonical screen rejects descent waypoint 24 at
+`z=40.999267` mm because normalized joint margin falls to `0.000731`, below
+the existing `0.01` gate. The reconstructed route accepted 24 samples versus
+15 in the parent and contains 314 samples in total, but pointwise hover
+feasibility did not imply a valid approach path. Candidate collision checks ran
+only on the accepted prefix and remain sampled, incomplete geometry evidence;
+the missing installed profile and continuous sweep proof remain blocked. The
+next bounded dependency is an arm-owned descent-route reconstruction or a new
+predeclared tool/hover candidate, with every existing margin and collision gate
+retained.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 exploratory full-route reconstruction | 110 mm candidate-tool / 25 mm hover route reconstruction, unchanged IK and continuity gates, candidate continuous-collision diagnostic, frozen CPU-only fixture, tests, and append-only evidence | `feature/sim-110mm-full-route` / claim commit | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
