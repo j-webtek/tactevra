@@ -1,0 +1,814 @@
+{
+  "baseline_control": {
+    "accepted_sample_count": 15,
+    "candidate_id": "baseline-synthetic-ready",
+    "candidate_summary_sha256": "bce880ae865ece43c043e45953d6ef6da6f404fa32fe0cab8d718e268e696a2a",
+    "evaluated_sample_count": 16,
+    "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+    "maximum_joint_delta_rad": 0.03645,
+    "minimum_normalized_arm_joint_margin": 0.016856,
+    "screen_sha256": "acb0ad109e51ce5a162af1a56e664989835c715cffa69f47d4ce852ccf847463",
+    "seed_sha256": "6cdc8b2d7902d38a0a5fa4ab85ace9aa951d9dc32d98f5675068a2f155449868",
+    "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY"
+  },
+  "batch_sha256": "82462b4bf8555b1a8c52170446c0b768b6bc538370fab8d880ad54f66fd92bd9",
+  "camera_clearance_evaluated": false,
+  "candidate_generation": [
+    {
+      "candidate_id": "park-grid-001",
+      "generation_sha256": "39c13adb6ca99af1b0c2aba5cc4692dad806bfb089a81b4ccd947c382bab5cb8",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 134.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "c6bf9a61bd4c11c48e5d0b76f47822dfe7989efb1c89f3b51ee71a5fbb7bde17",
+      "park_selected_attempt_index": 2,
+      "resolved_seed_sha256": "995fd1c7f70b1de32eb05957add83108f51b860118253f56079ffd0a2e33ba4b",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-002",
+      "generation_sha256": "02916521f86e72f8445748478767bd8aeaab7f280c41fac9a9aca5feb91da7ca",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 134.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "7b60b0dcaa6b0e1a5ff6f60e34291bbf2e35ac7e8c2e9832036325945f06d63d",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "6bc29527bee5f68a1f9cd54c317265522b42a674caf6b46bf6f8a0e6b046dc07",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-003",
+      "generation_sha256": "6cfbf465b1b4384981169623eef7652563ef4b5098d1c868176c78ffee0d80b3",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 134.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "b85fafedf6cd72d3c38b87b2d3ca141323ee572bf0786f265714a9cd53ac4293",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "c2d0ebe36eccc50c1722acfdbffc28f564570f0719ffed95383125954d0cfeba",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-004",
+      "generation_sha256": "f15c97b8321ab91f8fbdb90296de61ff9d9e57f6692938622f51dc25c1762d46",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 154.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "dee8287056d9c21ed67338b9a1e03b6c7be9384eb60c0851a092b8fff054639e",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "3496201cad98988e1a4a8162d2dc3f5cbba99cece7ef829cdbfcda44b3a1228a",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-005",
+      "generation_sha256": "4920437c9d9937fe339a6558b0c599f5337f435d6a518761f3521bd9c482b4d8",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 154.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "20e0a0060ac83d699efad0825ac47d80895232fcfbcec74ce3a67fd72710777b",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "5fd99f773ae14d0343903ef9ffcd509c4f6962ea9bfe18d3b1fb83706915dcbf",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-006",
+      "generation_sha256": "d40cbbb7dbd346d378cbf7db55a8855207cde446b32219d0b59bdd16334e84d6",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 154.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "50072a15db1eee6caf81111bd0e1c08b11707334de64bcf91dd1acd5bae271a6",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "7adc0f69b1730dc172bc189d9b9578b3f8c62fb0ba76cac6b1ef9f386e6b3268",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-007",
+      "generation_sha256": "0eedaeda2a402e41eaebbc6955f9b71b592cbaf6fa73590eed0e4efd4a971ecb",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 174.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "1ca8938b76ec4c3b7a56abf965d52c51954ff255fa2cfb72da9157770c844457",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "de519741f4b33bcb3cbb09751d09ed9a7328b07677155d050f013e2c87520200",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-008",
+      "generation_sha256": "d6eaf4b86c326c1d39b8ad1ea46dfecfab7446ce1fbd67a69002afdd3ee98057",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 174.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "d5ef22627fb1a17a91ea324416bebce5da39acf0454193350eec926ba4e32b80",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "eebdefb836d2dc579e03a157de60d7ae9873c9b048a430e6ee61f627b854c5ba",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-009",
+      "generation_sha256": "320d03c27664f54d352ab5b6e252784a4cedde267bed890f80681ab6b0beae52",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 196.55,
+        "y": 174.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "a60477e4f23c61315dd1b3149f7da1a13a2281b3eb6ad21d502627db8932c144",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "96dfb44d6c1c8b3c299d6c328aadf77d6a2cf91046ca0fadcb6ac02bf0788063",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-010",
+      "generation_sha256": "cb735c7a2c17c88ed56e2394defd852e21a551b1b72e14485bc010f07783ee05",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 134.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "97497b683a3c0f7805de95d475ddb86a1544308b6228061dbce26597b9109608",
+      "park_selected_attempt_index": 2,
+      "resolved_seed_sha256": "0cf8264ccfbc2f893d16f170dc293256295261334c659fcaffcdd20fa67d1940",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-011",
+      "generation_sha256": "7ac49b358a27d62232a5779999268b1835a9ee60eed35af3b5c99a39a775495d",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 134.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "9ab11a72110971852031eb8ebe61fd1dcba381640492f4f34520d8ef142a4884",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "056ac95af759056e0c585b0fa4b25acf0b483f078eb968c9c554123f09abb31b",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-012",
+      "generation_sha256": "16e66175531181fa96f88042e3fd2b086b2198b9f5d974ff0e535b902663af2e",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 134.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "d76cfb8a16f26ecf07da8e19369eb8a7e5670d91c844d88c74f70650b59332b1",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "3fa6d2210af3d5621c1d4dd025d69b2f90fc249a937062d9020b46395abb10bb",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-013",
+      "generation_sha256": "fe5c799ed6b807e66b5c278eeee3ae2b0c147c0994c70985dc57d09865fbf8c5",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 154.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "74b491e0adfb5a6b168ad3646151b8300e62a07da5b3b059a54dd541002948e5",
+      "park_selected_attempt_index": 2,
+      "resolved_seed_sha256": "9c069fcffd8c79d7e255d69a0808c2fa43bb07e59b6857b1e8a35cfe84b0acb9",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-014",
+      "generation_sha256": "b9e16ed1d44132a28c1f6de1ca122170541916b6da60d0d7c3a40787b6e682c5",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 154.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "27818f234b957bb5b4400a9a4648aa8dd7fbea0a794e9ff9693ac410163b756e",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "81444d2d3bd60704e5b1b49e477dbba213c4a79f350142bea6c5a568f3573a8c",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-015",
+      "generation_sha256": "37d137d2733928607007bf490809c8c4596ab96f834bb5eadd47e590d8e41e0d",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 154.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "5354aaf8d7977795cf77d943a78271ff7600211963898fcbf19323e16378f733",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "af5c0b894e2e009716e0ac5b8b248d58ec8012756edc055673c0d6c1e385c567",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-016",
+      "generation_sha256": "273386cb0843260ddbb1e96e0c9cb6d7bc9d1b31592de905828c6d7823b07d35",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 174.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "569cc868eadc55cd566bcf99474db77bd43d8fc4d8af30513e37bd1bb17115f1",
+      "park_selected_attempt_index": 2,
+      "resolved_seed_sha256": "760dbb5d3ead6a951403f23a7fb6791a4f0053b3f5092693aed439751828f24a",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-017",
+      "generation_sha256": "402389dab66191eedbe1f9cb6d7a8a1ce4643e23c6b9bc2da0cf4be936c04af0",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 174.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "285254f662795c0c266243112ecdff4de3142e42d30740b3a303d6a1b5389774",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "6e65362fd962f123cead795eb63de5360d8fe0c323c1e5d1b0c4b6ab9c071810",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-018",
+      "generation_sha256": "414cf23d8ecf19df08eb33e96fb09e7fc24edc95d87e7ff3c9b8369b82b61c97",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 216.55,
+        "y": 174.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "af85b3be9a279baf8f7cac37981d79d7712d3e0dc241a9a90acf0725b33733da",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "6c5be0261231014db7779c9c0e036a21d054ecc89b3bfd820e74671984b8af95",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-019",
+      "generation_sha256": "d941f7b28d041ef85da8feb212d99cb2f47d9c6e90083035335d0261df17205a",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 134.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "5433dbf8fb1d0c267d7dab56d89a2bb8557c112f1704abfb8403c5fdedc63eff",
+      "park_selected_attempt_index": 2,
+      "resolved_seed_sha256": "a675078ee198c738ab60ad3ceac779ae36cc5762aa4da38abfce709378dc8d0b",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-020",
+      "generation_sha256": "247df3e32d90bbfb1ab8f87cab773700dc54bb33f40268cfb862e28d69830913",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 134.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "b57714e716da8db5ef3f7cdc65f448d263f694e2914e87f3a6433337d038aa6c",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "a107672995f49db3a0bf65b19175e002f34c85ec5de32955bcaa53782a82a350",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-021",
+      "generation_sha256": "311f1f4a117d9a78c07f332b081b0e9a4e94dbf1547a05bff8d39c68e773a036",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 134.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "536e8b2f6a0a307a7b2a1639c44f214935db2ef1b45e14ec51759f972240198a",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "f86bc153c417fe7d658a49b26e832f4431b0385164069d646dca9ef87b6bedc4",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-022",
+      "generation_sha256": "e319eaf9129e862b7b64a0075bf6937dad4afcaed12a5e51fd62a8822a851007",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 154.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "4f5df568c326366851fb9f12a60e5df40842f43767c53916ee391f51e3fb248d",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "c44c34443e3be6efefa101248528a3700cd42f8d535ac516ca464097bda6d217",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-023",
+      "generation_sha256": "e39b15f2a43216cc66b1571655d46ac8241b473a3e2d6146dab0e6025baa5eba",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 154.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "6d2e68f8e635a60a5ff6728932d6219b1b14640ac4c368c046a2704532829deb",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "10fcdc6f6da4c3d31f843ee43b0945d81c07073c4677be001f441aaf89164937",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-024",
+      "generation_sha256": "656a0c79aad70214cf44aa5565bf75032eb7f123d15dcf17c4385f226dd291fe",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 154.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "8eb0846b58984421ab1c6a85b5dccad22c0b3ca222df22f2c32eca1d872c82c8",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "3c3c2940bb0c232704ef65c038e6e2f523e71836f7478a7c531735d30adedec1",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-025",
+      "generation_sha256": "c0507bc1fc31316a3c5b96558203679ffcd024a7930b89f5d539d469f40dfa7f",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 174.0,
+        "z": 71.0
+      },
+      "park_point_sha256": "af7abc22dd0647e5625d7570a68cf75f67b4f88b8448435ec41ef9b2137266c5",
+      "park_selected_attempt_index": 2,
+      "resolved_seed_sha256": "a8ade4cdbc080a392dc931668ea7745e2e44bf8ba07a4ee56c9a43da43a1bbbb",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-026",
+      "generation_sha256": "e46bc18a23d522f754a557cd57c8184b40abaf54037226edaa50b04dbcaab101",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 174.0,
+        "z": 91.0
+      },
+      "park_point_sha256": "8e5d558c38ab7c321d496c9b25f975e85b1bf2ab3578f38a996bb223ed3d29c6",
+      "park_selected_attempt_index": 0,
+      "resolved_seed_sha256": "2315463193d022a38b31da6caab76e4a3e36d81d32537507743e664680e8527d",
+      "route_screen_executed": true
+    },
+    {
+      "candidate_id": "park-grid-027",
+      "generation_sha256": "5e5c14fade34026a2eb94fcc1a00f0f7c779764e90e573569263408aba2422b2",
+      "park_ik_status": "CONVERGED",
+      "park_point_board_mm": {
+        "x": 236.55,
+        "y": 174.0,
+        "z": 111.0
+      },
+      "park_point_sha256": "fc7a76eb63e72aeacf55220195ce703689c52fc1f908958942dec5e39cc1fdb0",
+      "park_selected_attempt_index": 1,
+      "resolved_seed_sha256": "a3ca39f2021c85c2aee2178568e86e4164e89a913489996dea8d4d26b310b97e",
+      "route_screen_executed": true
+    }
+  ],
+  "candidate_park_installed": false,
+  "candidate_summaries": [
+    {
+      "accepted_sample_count": null,
+      "candidate_id": "park-grid-001",
+      "candidate_summary_sha256": "fa95050d28aee69a82f1dead73d18064c6446267915e955c0294a1b2dada5b88",
+      "evaluated_sample_count": null,
+      "failure_reason": "CANONICAL_IK_RETURNED_NO_ORDERED_SOLUTION",
+      "maximum_joint_delta_rad": null,
+      "minimum_normalized_arm_joint_margin": null,
+      "screen_sha256": null,
+      "seed_sha256": "995fd1c7f70b1de32eb05957add83108f51b860118253f56079ffd0a2e33ba4b",
+      "status": "BLOCKED_CANONICAL_IK_NO_SOLUTION_EXCEPTION",
+      "trajectory_plan_sha256": "f81fac3700ac6774b061df665943d8691c24d7c336abc51e1d97976dfe8c5923",
+      "trajectory_sample_count": 231
+    },
+    {
+      "accepted_sample_count": 10,
+      "candidate_id": "park-grid-002",
+      "candidate_summary_sha256": "ada70306a27d194f2afd1693168bea749de531f3c0970f69d85be93d58a9e24e",
+      "evaluated_sample_count": 11,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.046433,
+      "minimum_normalized_arm_joint_margin": 0.023317,
+      "screen_sha256": "482184842cc529220020be0ad61144c0e4ea98d1654ebc36e0fe80692e8c67ed",
+      "seed_sha256": "338371ff6c1e8fbc9b1065101a3912fb5bf43ea0affe0c8ef5b8d1b641a7ea7c",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "36a058f4f92c49fc0dd71684558b0a5e9595518fb2a74da105810bfa03577abc",
+      "trajectory_sample_count": 238
+    },
+    {
+      "accepted_sample_count": null,
+      "candidate_id": "park-grid-003",
+      "candidate_summary_sha256": "9f7cabb6551d7287f27666582879b474be7181f40134a2b440eca6fba5a1e400",
+      "evaluated_sample_count": null,
+      "failure_reason": "CANONICAL_IK_RETURNED_NO_ORDERED_SOLUTION",
+      "maximum_joint_delta_rad": null,
+      "minimum_normalized_arm_joint_margin": null,
+      "screen_sha256": null,
+      "seed_sha256": "c2d0ebe36eccc50c1722acfdbffc28f564570f0719ffed95383125954d0cfeba",
+      "status": "BLOCKED_CANONICAL_IK_NO_SOLUTION_EXCEPTION",
+      "trajectory_plan_sha256": "d778f86afb7915546aba9a10ec3433ec3d77cca351ac9e583304737a693c5823",
+      "trajectory_sample_count": 244
+    },
+    {
+      "accepted_sample_count": 5,
+      "candidate_id": "park-grid-004",
+      "candidate_summary_sha256": "3d3f8fe51f6d17daf1c0ca137fd9da5ca77c022a69232b952e6cacbab1e2261b",
+      "evaluated_sample_count": 6,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.043214,
+      "minimum_normalized_arm_joint_margin": 0.013974,
+      "screen_sha256": "e7617c2fba197df560d55fb61bf4b8d090665aba7202c4f1baf70a49136cfeef",
+      "seed_sha256": "4f9a57ebdea8c2cd1b161e3a922295f29e5020b80067e93d9ccf4eadf563b014",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "fcadae4417aa4e5a20a87cf87ea762a7596cc4f08a05c9bb44dc158b54080068",
+      "trajectory_sample_count": 227
+    },
+    {
+      "accepted_sample_count": 9,
+      "candidate_id": "park-grid-005",
+      "candidate_summary_sha256": "9951ad95bcee5f707f467b24256962565afe7e335fb7eaa6c3c41dfd58934970",
+      "evaluated_sample_count": 10,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.04368,
+      "minimum_normalized_arm_joint_margin": 0.014186,
+      "screen_sha256": "6c170c838a88e73145e8d49da4b00a3ee5606055ac2904640a8d8fb5470f3997",
+      "seed_sha256": "172a00cb4691710ed1d32b98b2c21d5910c5ec155c2edf02286588e5770fcf8d",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "b078d1b432af0e3ee9a86f6e1e0dfa9e489055ed479da6cb6726cfa167291ce7",
+      "trajectory_sample_count": 234
+    },
+    {
+      "accepted_sample_count": 13,
+      "candidate_id": "park-grid-006",
+      "candidate_summary_sha256": "18a78baa84be67b1bd5ac5ca2d851c460e2cc06f6a8c80bd622c0a3aab884ac9",
+      "evaluated_sample_count": 14,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.044077,
+      "minimum_normalized_arm_joint_margin": 0.01431,
+      "screen_sha256": "2c56c16c8747b54c68534cbe3570f15d934f434f70f68a43a894559427497207",
+      "seed_sha256": "48ff6597f540609a85137656ef9a8e815c155e236a049bf383b684c7402fcd4e",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "7b7e97a9d29748347a076f9407841caa963b3e493fbe933b4953725c33fa1dd0",
+      "trajectory_sample_count": 242
+    },
+    {
+      "accepted_sample_count": 3,
+      "candidate_id": "park-grid-007",
+      "candidate_summary_sha256": "7282b34b20284120bf19d2b0e0446489fbcce184e6f7cac540ef1d812a769497",
+      "evaluated_sample_count": 4,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.033747,
+      "minimum_normalized_arm_joint_margin": 0.015007,
+      "screen_sha256": "5d11994c5e3a7f2b4b89873b9b082b1e70cf85f2b8e0c63956a75f9c411520a0",
+      "seed_sha256": "7c14abf20f252f42ad94c46d2ffea37d16b49fbc343f478798ef7f8ece7b3726",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "d7d2b5e32a35b6cb07bd9dfb0285abfc5e042e0e049c0abd9dd0ef09818f9898",
+      "trajectory_sample_count": 226
+    },
+    {
+      "accepted_sample_count": 8,
+      "candidate_id": "park-grid-008",
+      "candidate_summary_sha256": "840090543e8d9bd9be5c4e00dcd0c22538424d1d3af52ce8c2d78f4dc42abbf2",
+      "evaluated_sample_count": 9,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.039421,
+      "minimum_normalized_arm_joint_margin": 0.016294,
+      "screen_sha256": "1bd23052c5c9b0c20479353900b5627034ccd43d57db79faef4ec2c8b7eb5a07",
+      "seed_sha256": "85c4c8c494af3545c0817373795d8ef4e8a9e84c6c26f552f131c37f950d15ba",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "1f9494b8ad1d649f9f36dd28a5645ddfa20a55146bfe140c2f67a774efc57e89",
+      "trajectory_sample_count": 233
+    },
+    {
+      "accepted_sample_count": 12,
+      "candidate_id": "park-grid-009",
+      "candidate_summary_sha256": "f7d249ce2b1f86db4545fc127ea8033b372d316010569e40cae2d369c0a9229f",
+      "evaluated_sample_count": 13,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.043176,
+      "minimum_normalized_arm_joint_margin": 0.014834,
+      "screen_sha256": "b02a48d076ee1b90987b325a47359d408727cdabb7aa1fefc9730e53d0f7870f",
+      "seed_sha256": "5a92d5e612262b74067a9dac3bf7169c759ae6143bc61e0f9304dc3c3d8a1c03",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "5fe32b61e639f86ac826e1acaeb29eb17acf1f87675e74165f4ded59cb774716",
+      "trajectory_sample_count": 240
+    },
+    {
+      "accepted_sample_count": null,
+      "candidate_id": "park-grid-010",
+      "candidate_summary_sha256": "ce61819cd318c23f14bb4cf57815e0d9eafd01539f1edbe5855b1ab05c6d27be",
+      "evaluated_sample_count": null,
+      "failure_reason": "CANONICAL_IK_RETURNED_NO_ORDERED_SOLUTION",
+      "maximum_joint_delta_rad": null,
+      "minimum_normalized_arm_joint_margin": null,
+      "screen_sha256": null,
+      "seed_sha256": "0cf8264ccfbc2f893d16f170dc293256295261334c659fcaffcdd20fa67d1940",
+      "status": "BLOCKED_CANONICAL_IK_NO_SOLUTION_EXCEPTION",
+      "trajectory_plan_sha256": "9359ebdf1344c4a717da3f6d6dffef5046acdba2b1a5de3faa491db37ee3d0e0",
+      "trajectory_sample_count": 231
+    },
+    {
+      "accepted_sample_count": 9,
+      "candidate_id": "park-grid-011",
+      "candidate_summary_sha256": "d01d12ec06ba9b7d5d73e4e3ddc506a627b7734dae0c397ea94fb73ac7d4179a",
+      "evaluated_sample_count": 10,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.04785,
+      "minimum_normalized_arm_joint_margin": 0.024683,
+      "screen_sha256": "805868dc2be183dd364d51d712d5d8678d0c3a7bcabea443b54c31e7b8dfccdd",
+      "seed_sha256": "641499dd65473e06b02c5d2a3e1c93cda113668090f037dcf7e99a5be751d208",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "0a74e93582a67c682b86c6364a55b05e023114d9444fdcdf4944e774d0daa2f7",
+      "trajectory_sample_count": 237
+    },
+    {
+      "accepted_sample_count": 13,
+      "candidate_id": "park-grid-012",
+      "candidate_summary_sha256": "11622974502783057830e83edea559100dbac5bfee4622afd2098a815f00bd77",
+      "evaluated_sample_count": 14,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.047168,
+      "minimum_normalized_arm_joint_margin": 0.022421,
+      "screen_sha256": "eb56ba9589cfd44c665cccc340c380d78dd5cb1ae93ee8d52993ba59147c6ed1",
+      "seed_sha256": "97f6070d26432ff303b1216c2e22cd374622414c3737c0e571852a403b41aeff",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "5b6f00f9fd20651e9e18f68fbbb2874d0cb26b0048977e49dd5af7f05721b5e8",
+      "trajectory_sample_count": 244
+    },
+    {
+      "accepted_sample_count": 4,
+      "candidate_id": "park-grid-013",
+      "candidate_summary_sha256": "56db0b59fb6aa3780628bafc8b2eea8f58a93c98ca6c5151ee38fe0bb919b81b",
+      "evaluated_sample_count": 5,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.045574,
+      "minimum_normalized_arm_joint_margin": 0.014976,
+      "screen_sha256": "8b6ee4bc4499aaa08be6666dd8990cd9012f1afeaa3ba7670211fafc023afb4b",
+      "seed_sha256": "1f5c39f3d58ba4378110776b6239d1d1e0f49c09200be64887f92b629872ff92",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "ec8afb011b97b584be7e500f9f46e1370d8163c9972283281fe11717b4409051",
+      "trajectory_sample_count": 226
+    },
+    {
+      "accepted_sample_count": 8,
+      "candidate_id": "park-grid-014",
+      "candidate_summary_sha256": "9b9b8ea93cad305fb7dccc87eff3bfe01b0f959d1697869fb7c1d502c3fbb5f1",
+      "evaluated_sample_count": 9,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.045852,
+      "minimum_normalized_arm_joint_margin": 0.015001,
+      "screen_sha256": "b2508b77eddeb8967011908af20a7ff9a533c7631c0ac11937edaf2de1a78657",
+      "seed_sha256": "06b34f0a6476643ba5f85f637f6bc37a8893b9096cd71bce6c12ec57844feda2",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "9c1eb3968cc27f26fbf77fe5e36b94feb038a4ff6046890d07c93b8ae9083396",
+      "trajectory_sample_count": 233
+    },
+    {
+      "accepted_sample_count": 12,
+      "candidate_id": "park-grid-015",
+      "candidate_summary_sha256": "21351d037e67e51a32cd1602c5f57eba21606e385c2fafa5f7e6301be991bdae",
+      "evaluated_sample_count": 13,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.045836,
+      "minimum_normalized_arm_joint_margin": 0.014983,
+      "screen_sha256": "78143393fd1acd651c3e6e20855d60ba82b8de7a670d8685c44cca57907ca910",
+      "seed_sha256": "6c0c1f48a65b33de0d5d0cc048e9ed5172deb4cf52953122ace86369d2c3954f",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "f710451ab4b3513ffaa51950a2201590f7c41bacd05393ac2bf8e9749788ec52",
+      "trajectory_sample_count": 241
+    },
+    {
+      "accepted_sample_count": 2,
+      "candidate_id": "park-grid-016",
+      "candidate_summary_sha256": "936b956d5295c9c51927be2315d1020a19fe136f8b6a8e4492f9d6736e498ad3",
+      "evaluated_sample_count": 3,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.03468,
+      "minimum_normalized_arm_joint_margin": 0.012729,
+      "screen_sha256": "8ff46766a431660e5141801d7922afaff0c762857e95627a0ee29812902cbdcf",
+      "seed_sha256": "f28994b5a3b12c202e82f8a73010a8a0823dcdea8a39fc13af051c23df71da64",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "b9d5c059ce98c30829a03beba48b9b47893527172a5b955fb38bb38959b0ad59",
+      "trajectory_sample_count": 225
+    },
+    {
+      "accepted_sample_count": 7,
+      "candidate_id": "park-grid-017",
+      "candidate_summary_sha256": "086c15816ef231dba03ead0c5e703bda810f56e469537c43a7cf3ce4358a39dc",
+      "evaluated_sample_count": 8,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.042594,
+      "minimum_normalized_arm_joint_margin": 0.015813,
+      "screen_sha256": "0675ced1a48821cef47e2091cd069357517b0920c66fec572747f93b22412900",
+      "seed_sha256": "048c5cb660926f0b9e19949e28711f6800d625a8f50713590a3596a56784fe4b",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "b71f6ff1bd6dec3cce759b14d46ae9f7753ad83b92298227fdf373953d234078",
+      "trajectory_sample_count": 233
+    },
+    {
+      "accepted_sample_count": 12,
+      "candidate_id": "park-grid-018",
+      "candidate_summary_sha256": "7668c7a48ae05d091e4efa31a45437b87e7ebde90c63fba5cb431dfa745f78cd",
+      "evaluated_sample_count": 13,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.043887,
+      "minimum_normalized_arm_joint_margin": 0.010474,
+      "screen_sha256": "17531ce122132169c5b086eec75ac7601075a6d08904c12c22289413a4141761",
+      "seed_sha256": "0a3134159bfa300a49bedda94fd1845af5921d4f8c1f21b369d83ea9f7cc5748",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "3e7adb8c53e1116049ea8716f45e7a2d0c665261b5b7e7f503cce65b0eaa564e",
+      "trajectory_sample_count": 240
+    },
+    {
+      "accepted_sample_count": 6,
+      "candidate_id": "park-grid-019",
+      "candidate_summary_sha256": "48d5c0cf61960e56de74598c0ad31ade26dfb6ef0c910f7b9f37f31ed49b1746",
+      "evaluated_sample_count": 7,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.042724,
+      "minimum_normalized_arm_joint_margin": 0.015746,
+      "screen_sha256": "d97591947b34449ba94dec883a98f5a39918afb718dab85cd9d175846ade16a4",
+      "seed_sha256": "4018fb57d8f96af20d845481584dbf92947cb285e1b7f688a93a91b8164c6417",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "28969a628d64eb445417cda4e16adf373e6746d1d80eb22828b28fca4f11550e",
+      "trajectory_sample_count": 233
+    },
+    {
+      "accepted_sample_count": 10,
+      "candidate_id": "park-grid-020",
+      "candidate_summary_sha256": "46dad9dd0de49aea97b34ba287ee0a6896a789f8d841123e7e9e5b2ec5edd94a",
+      "evaluated_sample_count": 11,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.043192,
+      "minimum_normalized_arm_joint_margin": 0.015316,
+      "screen_sha256": "b475eb8e7a8e6a55fd5d1a298933778a26d10f1d5552bba3bbfe3247f2a28d64",
+      "seed_sha256": "cee46bdc73e5ad0387baf6912f6566816f21d5335cff0d4e132fc52563eaae6d",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "4094a7a3c05ef46c5d283a0248ede75489f0c31ca1315a2938faf482c08277cd",
+      "trajectory_sample_count": 239
+    },
+    {
+      "accepted_sample_count": 13,
+      "candidate_id": "park-grid-021",
+      "candidate_summary_sha256": "203210a3e4bc8c1dc77be6a537910164629becfdec1833d3dc8b940f2e0d2a75",
+      "evaluated_sample_count": 14,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.045986,
+      "minimum_normalized_arm_joint_margin": 0.019243,
+      "screen_sha256": "a86c24d3d04906b7ca96b0af6dc876d45b69acfc533db03595eb87f99b69c4f8",
+      "seed_sha256": "e88a84b83faaa15ab4e743e1b591ee66d5df1491ceca17f35e01f582d4da35a4",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "3e1f1750fcbc8da68e859b6f628d0f7468f165c3e1aacf451dd67d1f15e56aff",
+      "trajectory_sample_count": 245
+    },
+    {
+      "accepted_sample_count": 4,
+      "candidate_id": "park-grid-022",
+      "candidate_summary_sha256": "67e4601f6907b1d3aa98ec3e6ef5dd3839aa321fa93b06672baf5305c55b4cfb",
+      "evaluated_sample_count": 5,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.03969,
+      "minimum_normalized_arm_joint_margin": 0.012621,
+      "screen_sha256": "44fc327722fc8497d4dc4a141997505860b14f47ec62f73ba324ee0b3f93d5fd",
+      "seed_sha256": "85813f01ef7d47b591fe18b41e761e91e690be3143d201b70928befaa63eea15",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "a0390aeefa1099d73768e43ad73b2f0d449bb1748ec04fe18e96a63761eb84b4",
+      "trajectory_sample_count": 229
+    },
+    {
+      "accepted_sample_count": 8,
+      "candidate_id": "park-grid-023",
+      "candidate_summary_sha256": "63a64d7f4d1d8df265caa8d53fa9174fc80ca2d1eac10611ae47a56265290cac",
+      "evaluated_sample_count": 9,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.042116,
+      "minimum_normalized_arm_joint_margin": 0.017753,
+      "screen_sha256": "adc847c344f37a1107578b7183d56d39dfbadc2e0dfdd6e2fe4e16efc4e4bd43",
+      "seed_sha256": "fa3b85eda7e49c46ee8c7ee9a420518672ba0482513378d07ffbcb119b79d135",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "c14b1efdd7627682b9360e7cd9d84c7a9760706b41e98a204a15b038df401162",
+      "trajectory_sample_count": 236
+    },
+    {
+      "accepted_sample_count": 12,
+      "candidate_id": "park-grid-024",
+      "candidate_summary_sha256": "0e89f61740fb290282becc429df282d3b640949d518137d3d65917e0b41e30e2",
+      "evaluated_sample_count": 13,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.042906,
+      "minimum_normalized_arm_joint_margin": 0.020473,
+      "screen_sha256": "cd967d5181d5c60514222d2f89436372569a7b3a17a94d55df54dfcb355244f0",
+      "seed_sha256": "c5ff05bb9ad0be231dd4538b0eab4e19a7537166fe53c0d41d0628b20e758ee3",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "8e596b1516765404c49673dab30e5e5a732812fcbcd8d6153bd4c3ccc444d2b0",
+      "trajectory_sample_count": 243
+    },
+    {
+      "accepted_sample_count": 1,
+      "candidate_id": "park-grid-025",
+      "candidate_summary_sha256": "5be7ca2629b61ab77a131d771db8c58ebd11d685bf8ac79077f617a784b85e6f",
+      "evaluated_sample_count": 2,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.0,
+      "minimum_normalized_arm_joint_margin": 0.013096,
+      "screen_sha256": "bf1e1a236494e0e694759a654857b8d9fe3217fe83668ee8daffe5449bb43fd9",
+      "seed_sha256": "e9160435c210d9ec6c6357ed2b578934a5b3d86ccfec4bba9640a58cec19800a",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "feacd386df4cc472dad91b58bd796f2dbc90f862e44b998b7b44a332df4a62a8",
+      "trajectory_sample_count": 228
+    },
+    {
+      "accepted_sample_count": 7,
+      "candidate_id": "park-grid-026",
+      "candidate_summary_sha256": "aa6277267fbd74e75935b5541c02813934c3e54bf6f556510f366dcc70ce8564",
+      "evaluated_sample_count": 8,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.040219,
+      "minimum_normalized_arm_joint_margin": 0.014541,
+      "screen_sha256": "665e41699924df622f528ad6032a5ff8580529ab61352d112a5951d3bdab3bdd",
+      "seed_sha256": "52c0cc7a56e3e6f8b7eb616bf22686bfc11591d79be6397ffbf57d4b0524c55e",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "a81d278cb74b3ed1f4116b6f3425a1ff88f483494d4105f2086993fc8762c351",
+      "trajectory_sample_count": 235
+    },
+    {
+      "accepted_sample_count": 11,
+      "candidate_id": "park-grid-027",
+      "candidate_summary_sha256": "f30a6d977c572eb9c35bec822ce1e3e9fac4b100ba6abe68c705b86caef1ebaa",
+      "evaluated_sample_count": 12,
+      "failure_reason": "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED",
+      "maximum_joint_delta_rad": 0.044863,
+      "minimum_normalized_arm_joint_margin": 0.018152,
+      "screen_sha256": "fe1a858610db15baa2d459d4874f99fc9834d667b0f1a22d426efe6b70948612",
+      "seed_sha256": "2b4add847463825b46c83464e5885eae547893f46d6350c41ecfa7f1296e30a7",
+      "status": "BLOCKED_DETERMINISTIC_IK_OR_CONTINUITY",
+      "trajectory_plan_sha256": "59e41215065d23afa23f5866114283ca252bdfc5967c5884890563ab2fe621cf",
+      "trajectory_sample_count": 241
+    }
+  ],
+  "collision_gate_cleared": false,
+  "controller_commands": [],
+  "decision": "BLOCKED_NO_FULL_ROUTE_CANDIDATE_PARK",
+  "fixture_sha256": "ff985269fbf370fa12fb084f898995f940b9e8dbab5dd6aee2cffdc0ba9ded42",
+  "freshness_sha256": "ae48677891787496ab0e0bd7da8bd06d43da9007787e9116df37cf701e61376b",
+  "hardware_access": false,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "ingress_sha256": "0634fe4bebd620b7cc48a55231817cbf1c6ac4f1299e8d9b279bd83d7ee020ae",
+  "limitations": [
+    "Candidate park points are a declared synthetic design grid, not measured installed poses.",
+    "A passing route changes only the start reference; semantic targets and target coordinates remain unchanged.",
+    "Camera visibility, collision clearance, and continuous swept distance are not evaluated by this study.",
+    "A selected candidate remains uninstalled until arm-lane review and later measured commissioning.",
+    "No command, permit, transport, controller access, hardware write, movement, or physical authority exists."
+  ],
+  "ordered_targets": [
+    "H",
+    "E",
+    "L",
+    "L",
+    "O",
+    "SPACE",
+    "2",
+    "0",
+    "2",
+    "6"
+  ],
+  "parent_fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+  "passing_candidate_count": 0,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "c73f20a06be8353a1c88ff0093170c2215ec926b7607cb7fb58d552eedebb25c",
+  "schema": "tactevra.typing_twin_ik_route_geometry_study_receipt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "selected_candidate": null,
+  "selected_full_ik_screen": null
+}
