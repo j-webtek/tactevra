@@ -10,3 +10,4 @@ software/ai/sim/evidence/typing_twin_ik_collision_result_v1_4.json linguist-gene
 # account's Git LFS budget is unavailable. Review size before adding binaries.
 software/ai/sim/evidence/typing_twin_ik_route_study_result_v1.json linguist-generated=true
 software/ai/sim/evidence/typing_twin_ik_route_geometry_result_v1_1.json linguist-generated=true
+software/ai/sim/evidence/typing_twin_ik_branch_selection_result_v1.json linguist-generated=true
