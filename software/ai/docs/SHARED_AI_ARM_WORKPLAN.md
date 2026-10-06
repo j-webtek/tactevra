@@ -1142,12 +1142,21 @@ next bounded dependency is an arm-owned descent-route reconstruction or a new
 predeclared tool/hover candidate, with every existing margin and collision gate
 retained.
 
+Evidence `E-20261006-INT-471` rejects further bounded descent routing for the
+110 mm tool. One direct control and 48 predeclared lateral/precontact corridors
+all stopped on the unchanged normalized joint-margin gate. The best corridor
+extended the accepted prefix to 29 samples, but an independent endpoint check
+found zero converged IK candidates for the exact required `H` contact point at
+`(216.55, 154.0, 21.0)` mm. Since every valid route must end there, additional
+110 mm path search is not justified by this model. The next bounded candidate
+is the previously hover-admitted 120 mm tool, beginning with exact-contact and
+depth-profile checks before another full-route campaign.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 exploratory first-H descent reconstruction | Frozen 110 mm / 25 mm first-H descent endpoint profile and bounded offset-corridor candidates, unchanged IK/continuity gates, CPU-only tests, failed-attempt retention, and append-only evidence | `feature/sim-first-h-descent` / claim commit | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
