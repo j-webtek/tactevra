@@ -1,0 +1,17 @@
+{
+  "candidate_results_observed": 0,
+  "command": "python -m rocell_ai.typing_twin_ik_margin_aware_planner_study_v1 software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1.json --workspace . --output software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_result_v1.json",
+  "exit_code": 1,
+  "failure_message": "maximum_waypoints_per_round must be an integer in [8, 512]",
+  "failure_type": "TrajectorySimulationError",
+  "fixture_file_sha256": "2adcc05a6316f0d934eaa36a561596a49d74031be68e8c77a1b3b26b3f729085",
+  "fixture_path": "software/ai/sim/evidence/typing_twin_ik_margin_aware_planner_fixture_v1.json",
+  "fixture_sha256": "4c31a94165c17b3e7060b58f7119e5defb16a0a2d9b511938cbe32bf60d2cfbe",
+  "hardware_writes": 0,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "record_sha256": "773ef57a889e5379ce49d7ef8e58e64d6a1135a3f87d6a54436e2df1c5286ca9",
+  "result_file_written": false,
+  "schema": "tactevra.typing_twin_ik_margin_aware_planner_failed_attempt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}
