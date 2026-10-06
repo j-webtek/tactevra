@@ -1472,6 +1472,17 @@ installing a profile. Finite samples are not continuous coverage; collision
 admission, clearance replay, tool/camera/support/environment geometry,
 controller access, and physical authority remain blocked.
 
+`E-20261005-INT-458` refines the sole nonadjacent witness with a 16-group
+complete-triangle partition of `link2`. Its 49-pose replay removes the
+nonadjacent false positive and retains zero observed false negatives; all 165
+remaining false positives occur on directly connected pairs. A disjoint
+256-pose stress replay supports all six upstream `Never` proposals without
+contradiction, but the proposals remain counterfactual and effective exclusions
+remain empty. The result advances review evidence only. Finite samples,
+non-watertight source meshes, missing installed measured tool/support/workcell
+geometry, continuous clearance, engineering acceptance, controller access, and
+physical qualification remain explicit blockers.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
