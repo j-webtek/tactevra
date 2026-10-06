@@ -400,3 +400,8 @@ The first-target Cartesian-corridor preparation adds two governed paths: one
 CPU-only study module and one focused test module. The file-count ceiling
 advances from 6,412 to 6,414 for those reviewed paths only. No simulator corpus,
 dependency tree, controller artifact, or physical authority enters the archive.
+
+The frozen Cartesian-corridor fixture adds one governed path binding the exact
+nine-candidate search and unchanged route-safety gates. The file-count ceiling
+advances from 6,414 to 6,415 for that reviewed path only; all byte, duplicate,
+and reduction limits remain unchanged.

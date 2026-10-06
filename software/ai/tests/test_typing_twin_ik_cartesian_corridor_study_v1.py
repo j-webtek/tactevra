@@ -1,18 +1,58 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
+import json
+
+import pytest
 
 from rocell.models import Point3Mm
 
-from rocell_ai.typing_twin_ik_cartesian_corridor_study_v1 import _corridor_points
 from rocell_ai.typing_twin_ik_cartesian_corridor_study_v1 import (
+    FIXTURE_SCHEMA,
     _candidate_trajectory,
+    _corridor_points,
+    _load_fixture,
 )
 from rocell_ai.typing_twin_ik_collision_v1 import _load_fixture as _load_parent_fixture
 from rocell_ai.typing_twin_ik_route_study_v1 import _build_pipeline
 
 
 ROOT = Path(__file__).resolve().parents[3]
+FIXTURE = (
+    ROOT / "software/ai/sim/evidence/typing_twin_ik_cartesian_corridor_fixture_v1.json"
+)
+
+
+def test_frozen_fixture_is_hash_bound_and_zero_authority() -> None:
+    document = _load_fixture(FIXTURE, ROOT)
+
+    assert document["schema"] == FIXTURE_SCHEMA
+    assert document["search"]["height_above_start_mm"] == [0.0, 20.0, 40.0]
+    assert document["search"]["planar_orders"] == [
+        "DIAGONAL",
+        "X_THEN_Y",
+        "Y_THEN_X",
+    ]
+    assert document["decision_rules"]["candidate_count_exact"] == 9
+    assert all(value == 0 for value in document["counters"].values())
+
+
+def test_fixture_rejects_mutation(tmp_path: Path) -> None:
+    document = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    document["search"]["height_above_start_mm"] = [0.0]
+    altered = tmp_path / "altered.json"
+    altered.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="fixture hash changed"):
+        _load_fixture(altered, ROOT)
+
+
+def test_bound_inputs_match_exact_bytes() -> None:
+    document = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    for binding in document["input_bindings"].values():
+        source = ROOT / binding["path"]
+        assert hashlib.sha256(source.read_bytes()).hexdigest() == binding["sha256"]
 
 
 def test_corridor_families_preserve_endpoints() -> None:
