@@ -457,3 +457,12 @@ The result preserves the unchanged canonical margin rejection and cannot clear
 installed or continuous collision gates; no simulator corpus, dependency tree,
 controller artifact, GPU artifact, or authority-bearing output enters the
 archive. All byte, duplicate, and reduction limits remain unchanged.
+
+The first-H descent-corridor study adds four governed paths: one CPU-only
+study module, one focused test module, one pre-result fixture, and one compact
+generated blocked result. The file-count ceiling advances from 6,436 to the
+exact observed 6,440 for those reviewed paths only. The result preserves all
+49 rejected candidates and the unreachable exact-contact diagnostic; no
+simulator corpus, dependency tree, controller artifact, GPU artifact, or
+authority-bearing output enters the archive. All byte, duplicate, and
+reduction limits remain unchanged.

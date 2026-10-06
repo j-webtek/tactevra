@@ -10,12 +10,16 @@ import pytest
 AI_DIR = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(AI_DIR), str(AI_DIR.parent / "src")]
 
-from rocell_ai.typing_twin_first_h_descent_v1 import _load_fixture  # noqa: E402
+from rocell_ai.typing_twin_first_h_descent_v1 import (  # noqa: E402
+    _load_fixture,
+    run_descent_study,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
 FIXTURE = ROOT / "ai/sim/evidence/typing_twin_first_h_descent_fixture_v1.json"
+RESULT = ROOT / "ai/sim/evidence/typing_twin_first_h_descent_result_v1.json"
 
 
 def _canonical(value: object) -> bytes:
@@ -52,3 +56,21 @@ def test_fixture_tampering_fails_closed(tmp_path: Path) -> None:
     rebound.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="bound source hash changed"):
         _load_fixture(rebound, WORKSPACE)
+
+
+def test_frozen_descent_study_reproduces_the_retained_blocker() -> None:
+    retained = json.loads(RESULT.read_text(encoding="utf-8"))
+    replayed = run_descent_study(FIXTURE, workspace=WORKSPACE)
+    assert replayed == retained
+    assert replayed["decision"] == "BLOCKED_NO_BOUNDED_DESCENT_CORRIDOR"
+    assert replayed["candidate_count"] == 49
+    assert replayed["passing_candidate_count"] == 0
+    assert replayed["exact_contact_point"]["converged_candidate_count"] == 0
+    assert replayed["best_candidate"]["accepted_sample_count"] == 29
+    assert replayed["best_candidate"]["failure_reason"] == (
+        "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED"
+    )
+    assert replayed["installed_collision_gate_cleared"] is False
+    assert replayed["continuous_collision_proven"] is False
+    assert replayed["hardware_writes"] == replayed["physical_movements"] == 0
+    assert replayed["physical_authority"] is False
