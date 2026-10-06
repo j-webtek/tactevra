@@ -1,0 +1,135 @@
+{
+  "counters": {
+    "arm_commands": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "deterministic_fault_detection_rate_minimum": 1.0,
+    "exact_text_success_rate_minimum": 1.0,
+    "recovery_classification_mismatch_count_maximum": 0,
+    "recovery_terminal_mismatch_count_maximum": 0,
+    "repeat_receipts_must_be_byte_identical": true
+  },
+  "fault_registry": [
+    "STALE_FRAME",
+    "STALE_TELEMETRY",
+    "MISSING_TARGET",
+    "TARGET_DISPLACEMENT",
+    "PERCEPTION_ABSTENTION",
+    "FUSION_REJECTION",
+    "UNREACHABLE_IK",
+    "COLLISION_REJECTION",
+    "DROPPED_PRESS",
+    "DUPLICATE_PRESS",
+    "WRONG_PRESS",
+    "DELAYED_PRESS",
+    "STICKY_KEYS_STATE_DIVERGENCE",
+    "PHONE_LAYER_DIVERGENCE",
+    "AUTOCORRECT",
+    "PREDICTIVE_REPLACEMENT",
+    "READBACK_DELAY",
+    "VERIFICATION_MISMATCH"
+  ],
+  "fixture_sha256": "c1e633fdc190cca53e18b0da2341ccc9935939f088c4219cff81d51b2d225fc0",
+  "input_bindings": {
+    "installed_target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "portable_recovery_fixture": {
+      "path": "software/ai/sim/evidence/workstream_4_recovery_portable_v1.json",
+      "sha256": "f311606b23b7d8f3af565bf5d27fcc847ac7756b22b5013b2f7c7a63875882ed"
+    },
+    "portable_recovery_implementation": {
+      "path": "software/ai/rocell_ai/recovery_state_machine.py",
+      "sha256": "91061bdeccb3e46e94aa7fa230540e8b7d02ec935e2df0580f551014850f4e23"
+    },
+    "typing_twin_implementation": {
+      "path": "software/ai/rocell_ai/end_to_end_typing_twin.py",
+      "sha256": "21cec68e19e94972e611ed62980aa39a1f26defa32ab2064738ba82ef2f38e22"
+    }
+  },
+  "limitations": [
+    "The keyboard and phone are virtual state machines, not observed physical devices.",
+    "The installed target catalog remains unchanged and does not commission missing keys.",
+    "Recovery handoff proves deterministic interface composition using simulated readback effects.",
+    "Perception, IK, collision, contact dynamics, controller transport, and hardware are outside this increment.",
+    "No result grants physical authority."
+  ],
+  "motion": {
+    "controller_commands": [],
+    "hardware_access": false,
+    "hardware_commands_generated": 0,
+    "physical_authority": false
+  },
+  "predecessor_evidence": {
+    "original_fixture_commit": "6eb25f0f9f471c40dcad3cb591c23b7dc85bac33",
+    "original_fixture_sha256": "105df64d3c3878bed97caddb2623c9c577a820144909cc94105b529508233bac",
+    "original_semantic_result_commit": "7988cfbaa6343f3f38614acfee5244506f8ceb73",
+    "portable_recovery_merge_commit": "237992f1f45ed4e9d3f496cc6fdfbd9a3485d0b9"
+  },
+  "recovery_handoff": {
+    "cases": [
+      {
+        "faults": [
+          "SINGLE_MISSED_PRESS",
+          "SINGLE_WRONG_PRESS",
+          "SINGLE_DOUBLE_PRESS",
+          "UNKNOWN_COMMITTED_TEXT"
+        ],
+        "text": "Hello 2026!"
+      }
+    ],
+    "devices": [
+      "KEYBOARD",
+      "PHONE"
+    ],
+    "expected_terminal_by_fault": {
+      "SINGLE_DOUBLE_PRESS": "COMPLETE",
+      "SINGLE_MISSED_PRESS": "COMPLETE",
+      "SINGLE_WRONG_PRESS": "COMPLETE",
+      "UNKNOWN_COMMITTED_TEXT": "ABORT"
+    }
+  },
+  "scenario_generation": {
+    "ci_count_per_length_per_device": 16,
+    "ci_keyboard_seed": 1901101,
+    "ci_phone_seed": 1901102,
+    "ci_random_count_per_device": 128,
+    "fixed_texts": [
+      "Hello 2026!",
+      " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+      "AAAA",
+      "!!!!",
+      "aA",
+      "A A",
+      "A",
+      "  ",
+      "1111",
+      "[]{}\\|`~"
+    ],
+    "full_count_per_length_per_device": 1250,
+    "full_random_count_per_device": 10000,
+    "keyboard_seed": 1901001,
+    "lengths": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "phone_seed": 1901002,
+    "printable_ascii_alphabet": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+  },
+  "schema": "tactevra.end_to_end_typing_twin_main_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_claim_commit": "4a1fdbbd",
+  "source_implementation_commit": "ff163f478e93f44ec58faab90456072fb69d3efc"
+}
