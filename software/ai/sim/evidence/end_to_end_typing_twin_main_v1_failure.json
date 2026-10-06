@@ -1,0 +1,17 @@
+{
+  "attempted_fixture_sha256": "c1e633fdc190cca53e18b0da2341ccc9935939f088c4219cff81d51b2d225fc0",
+  "attempted_implementation_commit": "ff163f478e93f44ec58faab90456072fb69d3efc",
+  "attempted_implementation_sha256": "21cec68e19e94972e611ed62980aa39a1f26defa32ab2064738ba82ef2f38e22",
+  "decision": "FAILED_BEFORE_RESULT",
+  "errors": [
+    "Full semantic execution requested nonexistent full_keyboard_seed/full_phone_seed keys instead of the frozen keyboard_seed/phone_seed keys.",
+    "The first handoff invocation passed the software directory as workspace instead of the repository root."
+  ],
+  "fixture_or_decision_rule_changed_after_failure": false,
+  "gpu_jobs": 0,
+  "hardware_writes": 0,
+  "physical_movements": 0,
+  "physical_authority": false,
+  "result_metrics_available": false,
+  "schema": "tactevra.end_to_end_typing_twin_failed_attempt.v1"
+}

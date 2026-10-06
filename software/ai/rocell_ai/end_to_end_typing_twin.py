@@ -177,7 +177,7 @@ def generate_random_cases(fixture: dict[str, Any], device: str, mode: str) -> tu
     per_length = generation[f"{prefix}count_per_length_per_device"]
     if count != per_length * len(generation["lengths"]):
         raise ValueError("random allocation does not match frozen length allocation")
-    seed = generation[f"{prefix}{device}_seed"]
+    seed = generation[f"ci_{device}_seed"] if mode == "ci" else generation[f"{device}_seed"]
     rng = random.Random(seed)
     alphabet = generation["printable_ascii_alphabet"]
     return tuple(
