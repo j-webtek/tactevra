@@ -8039,3 +8039,92 @@ rewriting history. New entries must use a unique evidence ID.
   hover-admitted 120 mm tool, then reconstruct a full route only if the exact
   contact passes every unchanged pointwise gate. Physical selection still
   requires measured tool geometry and commissioning evidence.
+
+### E-20261006-INT-472 — 120 mm exact H contact is infeasible under the pinned model
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned endpoint evidence recorded under the cross-lane `INT`
+  sequence. No integration gate or physical readiness status changed.
+- Claim commit: `526e25d984d63c8dde5d6d02c389cc275cc796c6`.
+- Original frozen implementation and fixture commit:
+  `0f9de05f86c791bf2db4fc2b9550207ce65d1269`.
+- Preserved failed-bootstrap commit:
+  `0c17a9ee124b5106574ea52ed5328784e328008f`.
+- Corrected pre-result fixture commit:
+  `64fafc1d8a683fa546a0877a60cc5b03135e64f2`.
+- Result commit: `75defc88f9f91556ef81b93c7b4e652ae4f6dd2d`.
+- Objective: determine whether the previously hover-admitted 120 mm
+  exploratory tool can pass the unchanged exact `H` contact gate and a fixed
+  1 mm vertical profile from 25 mm hover to contact before another full-route
+  reconstruction consumes work.
+- Original fixture:
+  `software/ai/sim/evidence/typing_twin_120mm_exact_contact_fixture_v1.json`;
+  canonical SHA-256
+  `fbff98ecd87eae82ae75825d064a58421cc5267dc9abe850a8a613bdf3a6549e`;
+  file SHA-256
+  `8e162da8c27c620fc8a1b1097270facff5f3f458be8018da6739fb2924a5060d`.
+- Preserved failed attempt:
+  `software/ai/sim/evidence/typing_twin_120mm_exact_contact_attempt1_result_v1.json`;
+  receipt SHA-256
+  `6bf03114321e06912448a488f19ded7ad3deca27248f05cfb6d4ee3de7a4c0af`;
+  file SHA-256
+  `3bb5963b8e11ff78aa9e26020cd725c3f2e0081ac8fbd8bf8ccd249bc9dadcb7`.
+  It correctly retained the zero-candidate exact-contact result, but its
+  sequential profile compared the admitted hover against the unrelated ready
+  state and stopped immediately on adjacent-joint continuity. It was not
+  overwritten or rescored.
+- Corrected fixture:
+  `software/ai/sim/evidence/typing_twin_120mm_exact_contact_fixture_v1_1.json`;
+  canonical SHA-256
+  `3131c75bad972a96d86b69a6c8dde4609ef3b166ea61da7a88576a5b91407acd`;
+  file SHA-256
+  `ffe9a2c1f62dc4ee3f6ff9ce829e650cbcfbc2d5017f766b242404564be021e5`.
+  The pre-result correction changes only the profile bootstrap to use its
+  admitted hover solution as the continuity origin. The 26 profile points,
+  120 mm tool, target, decision rule, and every threshold are unchanged.
+- Exact command: with `PYTHONPATH=software/ai;software/src`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`, run
+  `python -m rocell_ai.typing_twin_120mm_exact_contact_v1
+  software/ai/sim/evidence/typing_twin_120mm_exact_contact_fixture_v1_1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_120mm_exact_contact_result_v1.json`.
+- Result: `BLOCKED_120MM_EXACT_CONTACT`. Receipt SHA-256:
+  `a1f6ea66e89a26316ea51f5d0a89592f84a524cad4615596d2a7ab3c9fc86b3e`;
+  result-file SHA-256
+  `c8b59311c51b80323f495e2d5121e52d3e8dd3f7b5c065c8f1af3ef0dcf34e45`.
+- Metrics: the corrected sequential descent accepted 12 of 26 points from
+  clearances 25 through 14 mm. It stopped at 13 mm above contact with normalized
+  joint margin `0.00926425735418724`, below the unchanged `0.01` gate. The
+  accepted prefix had minimum margin `0.0121199512381546` and maximum adjacent
+  delta `0.00912402834285952` rad. Independent point checks were accepted down
+  through 7 mm. At 6 and 5 mm, five candidates converged but all failed the
+  unchanged joint-margin gate. At 4, 3, 2, 1, and 0 mm clearance, zero IK
+  candidates converged. Exact contact remained `(216.55,154.0,21.0)` mm.
+- Decision rule outcome: exact contact did not pass, so the predeclared full
+  route and collision stages were not run. No result is promoted or installed.
+- Validation: five focused fixture-integrity, tamper, deterministic
+  reproduction, failed-attempt-retention, blocked-result, and zero-authority
+  tests passed in 115.91 seconds. Ruff, `git diff --check`, 133 repository
+  maintenance tests, documentation checks, evidence-scope checks, source-
+  archive checks, and release-integrity policy checks passed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate WS2 Stage A campaign was not interrupted.
+- Failures preserved: the original bootstrap failure and the corrected blocked
+  result are separate generated artifacts. The corrected profile also preserves
+  every rejected margin cell and all zero-candidate points. No result was
+  deleted, rescored, or rewritten after observation.
+- Limitations: all tool, target, board, ready-state, and calibration inputs are
+  synthetic or nominal. The study tests one straight vertical profile and
+  pointwise IK; it cannot establish global geometric infeasibility. It does not
+  test a longer unmeasured tool, an alternate target transform, collision,
+  contact, dynamics, camera clearance, transport, or physical accuracy.
+  Installed collision and continuous sweep proof remain blocked. No physical
+  authority exists.
+- Supersedes: none. This closes the specific 120 mm follow-up requested by
+  `E-20261006-INT-471` while retaining both results.
+- Next dependency: stop route reconstruction for the 110 and 120 mm candidates.
+  Freeze an arm-owned geometry/configuration design study that tests only
+  explicitly ranged alternatives and preserves the exact target plus unchanged
+  safety gates. Physical selection still requires measured tool geometry,
+  board pose, key geometry, and commissioning evidence.
