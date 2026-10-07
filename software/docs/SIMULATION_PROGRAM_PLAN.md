@@ -1003,6 +1003,17 @@ every observed boundary.
 - Exit with a versioned exploratory recipe family plus its valid target and
   mechanism domain, or a named design blocker. Phone contact stays separate.
 
+##### C02.1 — Exact 3 mm Contact Bridge
+
+The first frozen bridge attempt remains failed evidence. Its dual-GPU smoke
+stopped before physics because adding a new explicit-capsule parser changed the
+hash-bound contact probe. The separate pre-result `v1_1` amendment restores the
+probe byte for byte and expresses the same 3 mm-radius, 5/15 mm-half-length
+capsules through the probe's existing radius/multiplier contract. Population,
+recipes, landing scenarios, all contact gates, and zero-authority scope are
+unchanged. Only a dual-GPU smoke is authorized; a complete 39,168-world run
+still requires a separate passing preflight and authorization record.
+
 #### C03 — All-Pairs Motion Qualification
 
 **Subtitle:** Move safely between every ordered key pair while preserving the
