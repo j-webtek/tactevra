@@ -18,8 +18,8 @@ from rocell_ai.typing_twin_promoted_full_route_v1 import (  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
-FIXTURE = ROOT / "ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1.json"
-RESULT = ROOT / "ai/sim/evidence/typing_twin_promoted_full_route_result_v1.json"
+FIXTURE = ROOT / "ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1_1.json"
+RESULT = ROOT / "ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json"
 
 
 def _canonical(value: object) -> bytes:

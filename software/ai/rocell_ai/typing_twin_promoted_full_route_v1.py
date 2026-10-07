@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any
 
 from rocell.application.context import load_simulation_context
+from rocell.application.bounded_segment_collision_qualification import (
+    BoundedSegmentCollisionQualificationError,
+)
 from rocell.application.model_motion_registry_v2 import (
     ingest_with_trusted_registry_v2,
     revalidate_with_trusted_registry_v2,
@@ -217,11 +220,26 @@ def run_promoted_full_route(
     )
     route_accepted = ik["status"] == READY_STATUS
     if route_accepted:
-        intake = prepare_typing_collision_intake_v1(
-            execution, trajectory, ik, context, snapshot, installed_profile=None
-        )
-        if intake["status"] != PROFILE_REQUIRED_STATUS:
-            raise ValueError("installed collision intake did not remain fail closed")
+        try:
+            intake = prepare_typing_collision_intake_v1(
+                execution, trajectory, ik, context, snapshot, installed_profile=None
+            )
+        except BoundedSegmentCollisionQualificationError as exc:
+            intake = {
+                "status": "BOUNDED_SAMPLE_POLICY_REJECTED",
+                "blockers": [
+                    "INSTALLED_COLLISION_PROFILE_REQUIRED",
+                    "BOUNDED_COLLISION_SAMPLE_POLICY_REJECTED",
+                ],
+                "failure_type": type(exc).__name__,
+                "failure_message": str(exc),
+                "installed_geometry_collision_screening_executed": False,
+                "continuous_collision_proven": False,
+                "physical_authority": False,
+            }
+        else:
+            if intake["status"] != PROFILE_REQUIRED_STATUS:
+                raise ValueError("installed collision intake did not remain fail closed")
         diagnostic_input = ik
         decision = "PASS_IK_CONTINUITY_RETAIN_INSTALLED_COLLISION_BLOCKER"
     else:
