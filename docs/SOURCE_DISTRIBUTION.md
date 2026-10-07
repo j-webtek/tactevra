@@ -615,3 +615,12 @@ promoted-profile source hash to the already derived profile bytes. Profile ID,
 study-input ID, numerical policies, authority, and historical repository
 artifacts remain unchanged. All byte, duplicate, and reduction limits remain
 unchanged.
+
+The inherited-route-policy C03 route successor adds two governed paths: one
+thin derived-fixture runner and one pre-result fixture. The resulting tree
+contains 6,496 tracked files. The ceiling advances from 6,496 to 6,498,
+retaining two reviewed-file slots. The runner copies ten missing route fields
+byte-for-byte from the promoted fixture's existing hash-bound IK/collision
+parent. It does not tune or invent a numerical value. Authority and historical
+repository artifacts remain unchanged. All byte, duplicate, and reduction
+limits remain unchanged.

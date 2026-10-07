@@ -1840,6 +1840,13 @@ gates passed, then route compilation exposed that the promoted fixture's route
 view omits numerical fields retained in its hash-bound IK/collision parent.
 The next successor must predeclare the exact inherited field set and copy those
 values byte-for-byte from that parent. It may not tune or invent a value.
+The inherited-route-policy successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_8.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_8.json),
+canonical SHA-256
+`7a00f32fbea183abce7a44a64a5516b4b8c81b964dca748758c1604f46ea5a25`.
+It enumerates all ten missing fields and copies them byte-for-byte from the
+promoted fixture's existing hash-bound IK/collision parent. No value is tuned
+or invented; numerical policy change count remains zero.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

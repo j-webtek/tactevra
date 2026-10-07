@@ -40,6 +40,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_6 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_7 import (  # noqa: E402
     load_fixture as load_promoted_profile_source_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_8 import (  # noqa: E402
+    load_fixture as load_inherited_route_policy_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -72,6 +75,9 @@ LOCKED_CATALOG_PATH_ROUTE_FIXTURE = (
 )
 PROMOTED_PROFILE_SOURCE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_7.json"
+)
+INHERITED_ROUTE_POLICY_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_8.json"
 )
 
 
@@ -292,5 +298,29 @@ def test_promoted_profile_source_successor_adds_only_source_hash() -> None:
     )
     assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["virtual_profile_rebinding"]["numerical_policy_change_count"] == 0
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_inherited_route_policy_fields_are_explicit_and_untuned() -> None:
+    fixture = load_inherited_route_policy_fixture(
+        INHERITED_ROUTE_POLICY_FIXTURE, WORKSPACE
+    )
+    fields = fixture["fixture_rebinding"]["inherited_route_fields"]
+    assert fields == [
+        "dynamics_profile_sha256",
+        "settle_position_tolerance_mm",
+        "settle_velocity_tolerance_mm_s",
+        "settle_hold_ms",
+        "maximum_cartesian_step_mm",
+        "maximum_velocity_mm_s",
+        "maximum_acceleration_mm_s2",
+        "maximum_jerk_mm_s3",
+        "hover_settle_ms",
+        "contact_dwell_ms",
+    ]
+    allowlist = fixture["fixture_rebinding"]["allowed_semantic_changes"]
+    assert all(f"parent.route.{name}" in allowlist for name in fields)
+    assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())
