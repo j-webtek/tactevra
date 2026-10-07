@@ -1,0 +1,5086 @@
+{
+  "continuous_collision_proven": false,
+  "controller_commands": [],
+  "decision": "PASS_PARTITIONED_INTAKE_RETAIN_PROFILE_AND_COLLISION_BLOCKERS",
+  "fixture_sha256": "e40a7b9ceef2ceec250553cdb34c6dae9e947bf485f5d5818f6092e1db75837f",
+  "hardware_access": false,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "installed_collision_gate_cleared": false,
+  "installed_collision_profile_supplied": false,
+  "installed_geometry_collision_screening_executed": false,
+  "limitations": [
+    "The route, transform, 120 mm tool, 25 mm hover, calibration, and start state remain synthetic and unmeasured.",
+    "This intake enumerates required evidence slots but supplies no measured installed collision profile or collision evidence.",
+    "A shared boundary configuration is rechecked exactly; it does not create an extra zero-length sweep-envelope requirement.",
+    "No sampled-pose collision screen or conservative continuous sweep evaluation is executed.",
+    "The result grants no controller, transport, permit, hardware, or physical authority."
+  ],
+  "partitioned_collision_intake": {
+    "accepted_profile_source_sha256_values": [],
+    "blockers": [
+      "INSTALLED_COLLISION_PROFILE_REQUIRED",
+      "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION"
+    ],
+    "boundary_lineage": [
+      {
+        "boundary_lineage_sha256": "d5c1966555f587c832e16ac4e0898c9ceaa310291c764d4c4f269266f405ca05",
+        "boundary_recheck_required": true,
+        "extra_zero_length_sweep_envelope_required": false,
+        "first_successor_route_segment_owned_by_partition": 1,
+        "maximum_joint_difference_rad": 0.0,
+        "predecessor_partition_index": 0,
+        "predecessor_terminal_sample_sha256": "367c96b610d98a8c5907f2f59837b6e2058a097910af1e82c855ad42bada6c62",
+        "source_boundary_result_index": 254,
+        "successor_boundary_recheck_sample_sha256": "5b2c5e0907242cd432c23a61b9ca407fe4b0dfed5f4f04e7e9fc4ec8c18ec960",
+        "successor_partition_index": 1
+      }
+    ],
+    "build_snapshot_sha256": "c69e5e9881c5a36516b665255ffebc6da5bc5480eb41d773ed226c5e653b2c1b",
+    "calibration_snapshot_sha256": "380ece3c6f2a1de3790f94b234137b3d37f37fdede9ab8220c8277054b005e5c",
+    "collision_contract_sha256": "d3238c0c95a1d2e7ff74fcb8dccc3eb0aadb0f897b2ea041319bbcd6442af5c3",
+    "continuous_collision_proven": false,
+    "controller_commands": [],
+    "hardware_access": false,
+    "hardware_commands_generated": 0,
+    "installed_collision_gate_cleared": false,
+    "installed_collision_profile_sha256": null,
+    "installed_geometry_collision_screening_executed": false,
+    "kinematic_model_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190",
+    "next_required_stage": "LOAD_EXACT_MEASURED_INSTALLED_COLLISION_PROFILE",
+    "partitioned_typing_collision_intake_sha256": "714278c68a039e1704b8f8ade2b2aba50748cace7e97d355aaea38a4b60e1d93",
+    "partitions": [
+      {
+        "bounded_joint_sample_plan": [
+          {
+            "interpolation_ratio": 0.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": 0.0,
+              "link1_to_link2": 0.0,
+              "link2_to_link3": 2.618,
+              "link3_to_link4": -1.0472,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0000-sample-0000",
+            "sample_sequence": 0,
+            "source_segment_index": 0,
+            "subdivision_count": 1,
+            "subdivision_index": 0
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": 0.0,
+              "link1_to_link2": 0.0,
+              "link2_to_link3": 2.618,
+              "link3_to_link4": -1.0472,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0000-sample-0001",
+            "sample_sequence": 1,
+            "source_segment_index": 0,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.007135,
+              "link1_to_link2": 0.023976,
+              "link2_to_link3": 2.60607,
+              "link3_to_link4": -1.059242,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0001-sample-0001",
+            "sample_sequence": 2,
+            "source_segment_index": 1,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.014056,
+              "link1_to_link2": 0.046811,
+              "link2_to_link3": 2.592601,
+              "link3_to_link4": -1.068612,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0002-sample-0001",
+            "sample_sequence": 3,
+            "source_segment_index": 2,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.020774,
+              "link1_to_link2": 0.069409,
+              "link2_to_link3": 2.578731,
+              "link3_to_link4": -1.077341,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0003-sample-0001",
+            "sample_sequence": 4,
+            "source_segment_index": 3,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.027295,
+              "link1_to_link2": 0.091487,
+              "link2_to_link3": 2.564123,
+              "link3_to_link4": -1.084813,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0004-sample-0001",
+            "sample_sequence": 5,
+            "source_segment_index": 4,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.033629,
+              "link1_to_link2": 0.113057,
+              "link2_to_link3": 2.54881,
+              "link3_to_link4": -1.091071,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0005-sample-0001",
+            "sample_sequence": 6,
+            "source_segment_index": 5,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.039782,
+              "link1_to_link2": 0.134129,
+              "link2_to_link3": 2.532826,
+              "link3_to_link4": -1.09616,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0006-sample-0001",
+            "sample_sequence": 7,
+            "source_segment_index": 6,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045762,
+              "link1_to_link2": 0.154714,
+              "link2_to_link3": 2.516201,
+              "link3_to_link4": -1.100122,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0007-sample-0001",
+            "sample_sequence": 8,
+            "source_segment_index": 7,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.051658,
+              "link1_to_link2": 0.175555,
+              "link2_to_link3": 2.499199,
+              "link3_to_link4": -1.103954,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0008-sample-0001",
+            "sample_sequence": 9,
+            "source_segment_index": 8,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.057306,
+              "link1_to_link2": 0.195465,
+              "link2_to_link3": 2.481303,
+              "link3_to_link4": -1.105969,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0009-sample-0001",
+            "sample_sequence": 10,
+            "source_segment_index": 9,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.062728,
+              "link1_to_link2": 0.214848,
+              "link2_to_link3": 2.462567,
+              "link3_to_link4": -1.106615,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0010-sample-0001",
+            "sample_sequence": 11,
+            "source_segment_index": 10,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.068079,
+              "link1_to_link2": 0.23408,
+              "link2_to_link3": 2.443569,
+              "link3_to_link4": -1.106848,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0011-sample-0001",
+            "sample_sequence": 12,
+            "source_segment_index": 11,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.073288,
+              "link1_to_link2": 0.252998,
+              "link2_to_link3": 2.424037,
+              "link3_to_link4": -1.106235,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0012-sample-0001",
+            "sample_sequence": 13,
+            "source_segment_index": 12,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.07836,
+              "link1_to_link2": 0.271624,
+              "link2_to_link3": 2.403991,
+              "link3_to_link4": -1.104815,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0013-sample-0001",
+            "sample_sequence": 14,
+            "source_segment_index": 13,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.0833,
+              "link1_to_link2": 0.28998,
+              "link2_to_link3": 2.383446,
+              "link3_to_link4": -1.102625,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0014-sample-0001",
+            "sample_sequence": 15,
+            "source_segment_index": 14,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.088113,
+              "link1_to_link2": 0.308088,
+              "link2_to_link3": 2.362415,
+              "link3_to_link4": -1.099703,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0015-sample-0001",
+            "sample_sequence": 16,
+            "source_segment_index": 15,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.092803,
+              "link1_to_link2": 0.325971,
+              "link2_to_link3": 2.340911,
+              "link3_to_link4": -1.096081,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0016-sample-0001",
+            "sample_sequence": 17,
+            "source_segment_index": 16,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.097375,
+              "link1_to_link2": 0.343646,
+              "link2_to_link3": 2.318946,
+              "link3_to_link4": -1.091792,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0017-sample-0001",
+            "sample_sequence": 18,
+            "source_segment_index": 17,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.101834,
+              "link1_to_link2": 0.361131,
+              "link2_to_link3": 2.29653,
+              "link3_to_link4": -1.086861,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0018-sample-0001",
+            "sample_sequence": 19,
+            "source_segment_index": 18,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.106183,
+              "link1_to_link2": 0.378443,
+              "link2_to_link3": 2.273671,
+              "link3_to_link4": -1.081315,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0019-sample-0001",
+            "sample_sequence": 20,
+            "source_segment_index": 19,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.110425,
+              "link1_to_link2": 0.395597,
+              "link2_to_link3": 2.250378,
+              "link3_to_link4": -1.075175,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0020-sample-0001",
+            "sample_sequence": 21,
+            "source_segment_index": 20,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.114566,
+              "link1_to_link2": 0.412607,
+              "link2_to_link3": 2.226657,
+              "link3_to_link4": -1.068464,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0021-sample-0001",
+            "sample_sequence": 22,
+            "source_segment_index": 21,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.118608,
+              "link1_to_link2": 0.429485,
+              "link2_to_link3": 2.202513,
+              "link3_to_link4": -1.061199,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0022-sample-0001",
+            "sample_sequence": 23,
+            "source_segment_index": 22,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.122554,
+              "link1_to_link2": 0.446245,
+              "link2_to_link3": 2.177952,
+              "link3_to_link4": -1.053398,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0023-sample-0001",
+            "sample_sequence": 24,
+            "source_segment_index": 23,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.126408,
+              "link1_to_link2": 0.462897,
+              "link2_to_link3": 2.152977,
+              "link3_to_link4": -1.045075,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0024-sample-0001",
+            "sample_sequence": 25,
+            "source_segment_index": 24,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.130217,
+              "link1_to_link2": 0.479711,
+              "link2_to_link3": 2.127738,
+              "link3_to_link4": -1.036656,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0025-sample-0001",
+            "sample_sequence": 26,
+            "source_segment_index": 25,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.133894,
+              "link1_to_link2": 0.496275,
+              "link2_to_link3": 2.101889,
+              "link3_to_link4": -1.027372,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0026-sample-0001",
+            "sample_sequence": 27,
+            "source_segment_index": 26,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.137447,
+              "link1_to_link2": 0.512776,
+              "link2_to_link3": 2.075387,
+              "link3_to_link4": -1.017363,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0027-sample-0001",
+            "sample_sequence": 28,
+            "source_segment_index": 27,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.140962,
+              "link1_to_link2": 0.529274,
+              "link2_to_link3": 2.048676,
+              "link3_to_link4": -1.007149,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0028-sample-0001",
+            "sample_sequence": 29,
+            "source_segment_index": 28,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.144399,
+              "link1_to_link2": 0.545753,
+              "link2_to_link3": 2.021524,
+              "link3_to_link4": -0.996477,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0029-sample-0001",
+            "sample_sequence": 30,
+            "source_segment_index": 29,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.147761,
+              "link1_to_link2": 0.562227,
+              "link2_to_link3": 1.993923,
+              "link3_to_link4": -0.985351,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0030-sample-0001",
+            "sample_sequence": 31,
+            "source_segment_index": 30,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.151049,
+              "link1_to_link2": 0.57871,
+              "link2_to_link3": 1.965865,
+              "link3_to_link4": -0.973775,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0031-sample-0001",
+            "sample_sequence": 32,
+            "source_segment_index": 31,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.154266,
+              "link1_to_link2": 0.595214,
+              "link2_to_link3": 1.937338,
+              "link3_to_link4": -0.961753,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0032-sample-0001",
+            "sample_sequence": 33,
+            "source_segment_index": 32,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.611752,
+              "link2_to_link3": 1.908331,
+              "link3_to_link4": -0.949284,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0033-sample-0001",
+            "sample_sequence": 34,
+            "source_segment_index": 33,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.629348,
+              "link2_to_link3": 1.916726,
+              "link3_to_link4": -0.975273,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0034-sample-0001",
+            "sample_sequence": 35,
+            "source_segment_index": 34,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.647286,
+              "link2_to_link3": 1.924393,
+              "link3_to_link4": -1.00088,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0035-sample-0001",
+            "sample_sequence": 36,
+            "source_segment_index": 35,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.665554,
+              "link2_to_link3": 1.9313,
+              "link3_to_link4": -1.026055,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0036-sample-0001",
+            "sample_sequence": 37,
+            "source_segment_index": 36,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.684124,
+              "link2_to_link3": 1.9375,
+              "link3_to_link4": -1.050824,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0037-sample-0001",
+            "sample_sequence": 38,
+            "source_segment_index": 37,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.702983,
+              "link2_to_link3": 1.942961,
+              "link3_to_link4": -1.075144,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0038-sample-0001",
+            "sample_sequence": 39,
+            "source_segment_index": 38,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.684124,
+              "link2_to_link3": 1.9375,
+              "link3_to_link4": -1.050824,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0039-sample-0001",
+            "sample_sequence": 40,
+            "source_segment_index": 39,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.665554,
+              "link2_to_link3": 1.9313,
+              "link3_to_link4": -1.026055,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0040-sample-0001",
+            "sample_sequence": 41,
+            "source_segment_index": 40,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.647286,
+              "link2_to_link3": 1.924393,
+              "link3_to_link4": -1.00088,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0041-sample-0001",
+            "sample_sequence": 42,
+            "source_segment_index": 41,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.629348,
+              "link2_to_link3": 1.916726,
+              "link3_to_link4": -0.975273,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0042-sample-0001",
+            "sample_sequence": 43,
+            "source_segment_index": 42,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157415,
+              "link1_to_link2": 0.611752,
+              "link2_to_link3": 1.908331,
+              "link3_to_link4": -0.949284,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0043-sample-0001",
+            "sample_sequence": 44,
+            "source_segment_index": 43,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.168645,
+              "link1_to_link2": 0.612893,
+              "link2_to_link3": 1.905014,
+              "link3_to_link4": -0.947108,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0044-sample-0001",
+            "sample_sequence": 45,
+            "source_segment_index": 44,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.179849,
+              "link1_to_link2": 0.614168,
+              "link2_to_link3": 1.901314,
+              "link3_to_link4": -0.944683,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0045-sample-0001",
+            "sample_sequence": 46,
+            "source_segment_index": 45,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.191024,
+              "link1_to_link2": 0.615576,
+              "link2_to_link3": 1.897232,
+              "link3_to_link4": -0.942008,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0046-sample-0001",
+            "sample_sequence": 47,
+            "source_segment_index": 46,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.202167,
+              "link1_to_link2": 0.617118,
+              "link2_to_link3": 1.892767,
+              "link3_to_link4": -0.939085,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0047-sample-0001",
+            "sample_sequence": 48,
+            "source_segment_index": 47,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.213276,
+              "link1_to_link2": 0.618796,
+              "link2_to_link3": 1.887918,
+              "link3_to_link4": -0.935914,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0048-sample-0001",
+            "sample_sequence": 49,
+            "source_segment_index": 48,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.224349,
+              "link1_to_link2": 0.620609,
+              "link2_to_link3": 1.882687,
+              "link3_to_link4": -0.932495,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0049-sample-0001",
+            "sample_sequence": 50,
+            "source_segment_index": 49,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.235382,
+              "link1_to_link2": 0.622558,
+              "link2_to_link3": 1.877071,
+              "link3_to_link4": -0.928829,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0050-sample-0001",
+            "sample_sequence": 51,
+            "source_segment_index": 50,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.246374,
+              "link1_to_link2": 0.624644,
+              "link2_to_link3": 1.871072,
+              "link3_to_link4": -0.924917,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0051-sample-0001",
+            "sample_sequence": 52,
+            "source_segment_index": 51,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.257321,
+              "link1_to_link2": 0.626869,
+              "link2_to_link3": 1.864689,
+              "link3_to_link4": -0.920758,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0052-sample-0001",
+            "sample_sequence": 53,
+            "source_segment_index": 52,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.268222,
+              "link1_to_link2": 0.629232,
+              "link2_to_link3": 1.85792,
+              "link3_to_link4": -0.916353,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0053-sample-0001",
+            "sample_sequence": 54,
+            "source_segment_index": 53,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.279074,
+              "link1_to_link2": 0.631735,
+              "link2_to_link3": 1.850767,
+              "link3_to_link4": -0.911702,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0054-sample-0001",
+            "sample_sequence": 55,
+            "source_segment_index": 54,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.289875,
+              "link1_to_link2": 0.634379,
+              "link2_to_link3": 1.843227,
+              "link3_to_link4": -0.906806,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0055-sample-0001",
+            "sample_sequence": 56,
+            "source_segment_index": 55,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.300623,
+              "link1_to_link2": 0.637165,
+              "link2_to_link3": 1.835301,
+              "link3_to_link4": -0.901666,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0056-sample-0001",
+            "sample_sequence": 57,
+            "source_segment_index": 56,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.640071,
+              "link2_to_link3": 1.827033,
+              "link3_to_link4": -0.896305,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0057-sample-0001",
+            "sample_sequence": 58,
+            "source_segment_index": 57,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.656711,
+              "link2_to_link3": 1.835377,
+              "link3_to_link4": -0.921289,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0058-sample-0001",
+            "sample_sequence": 59,
+            "source_segment_index": 58,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.673683,
+              "link2_to_link3": 1.843014,
+              "link3_to_link4": -0.945897,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0059-sample-0001",
+            "sample_sequence": 60,
+            "source_segment_index": 59,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.691139,
+              "link2_to_link3": 1.84957,
+              "link3_to_link4": -0.969908,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0060-sample-0001",
+            "sample_sequence": 61,
+            "source_segment_index": 60,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.708769,
+              "link2_to_link3": 1.85567,
+              "link3_to_link4": -0.993638,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0061-sample-0001",
+            "sample_sequence": 62,
+            "source_segment_index": 61,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.726687,
+              "link2_to_link3": 1.861039,
+              "link3_to_link4": -1.016926,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0062-sample-0001",
+            "sample_sequence": 63,
+            "source_segment_index": 62,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.708769,
+              "link2_to_link3": 1.85567,
+              "link3_to_link4": -0.993638,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0063-sample-0001",
+            "sample_sequence": 64,
+            "source_segment_index": 63,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.691139,
+              "link2_to_link3": 1.84957,
+              "link3_to_link4": -0.969908,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0064-sample-0001",
+            "sample_sequence": 65,
+            "source_segment_index": 64,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.673683,
+              "link2_to_link3": 1.843014,
+              "link3_to_link4": -0.945897,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0065-sample-0001",
+            "sample_sequence": 66,
+            "source_segment_index": 65,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.656711,
+              "link2_to_link3": 1.835377,
+              "link3_to_link4": -0.921289,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0066-sample-0001",
+            "sample_sequence": 67,
+            "source_segment_index": 66,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.311316,
+              "link1_to_link2": 0.640071,
+              "link2_to_link3": 1.827033,
+              "link3_to_link4": -0.896305,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0067-sample-0001",
+            "sample_sequence": 68,
+            "source_segment_index": 67,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.300777,
+              "link1_to_link2": 0.635232,
+              "link2_to_link3": 1.840798,
+              "link3_to_link4": -0.90523,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0068-sample-0001",
+            "sample_sequence": 69,
+            "source_segment_index": 68,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.290147,
+              "link1_to_link2": 0.630537,
+              "link2_to_link3": 1.854187,
+              "link3_to_link4": -0.913925,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0069-sample-0001",
+            "sample_sequence": 70,
+            "source_segment_index": 69,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.279426,
+              "link1_to_link2": 0.626008,
+              "link2_to_link3": 1.867157,
+              "link3_to_link4": -0.922365,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0070-sample-0001",
+            "sample_sequence": 71,
+            "source_segment_index": 70,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.268616,
+              "link1_to_link2": 0.621642,
+              "link2_to_link3": 1.87971,
+              "link3_to_link4": -0.930552,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0071-sample-0001",
+            "sample_sequence": 72,
+            "source_segment_index": 71,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.257719,
+              "link1_to_link2": 0.617436,
+              "link2_to_link3": 1.891847,
+              "link3_to_link4": -0.938484,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0072-sample-0001",
+            "sample_sequence": 73,
+            "source_segment_index": 72,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.246735,
+              "link1_to_link2": 0.61339,
+              "link2_to_link3": 1.903572,
+              "link3_to_link4": -0.946162,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0073-sample-0001",
+            "sample_sequence": 74,
+            "source_segment_index": 73,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.235667,
+              "link1_to_link2": 0.609502,
+              "link2_to_link3": 1.914884,
+              "link3_to_link4": -0.953586,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0074-sample-0001",
+            "sample_sequence": 75,
+            "source_segment_index": 74,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.224517,
+              "link1_to_link2": 0.605769,
+              "link2_to_link3": 1.925785,
+              "link3_to_link4": -0.960755,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0075-sample-0001",
+            "sample_sequence": 76,
+            "source_segment_index": 75,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.213286,
+              "link1_to_link2": 0.602191,
+              "link2_to_link3": 1.936277,
+              "link3_to_link4": -0.967668,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0076-sample-0001",
+            "sample_sequence": 77,
+            "source_segment_index": 76,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.201976,
+              "link1_to_link2": 0.598766,
+              "link2_to_link3": 1.946359,
+              "link3_to_link4": -0.974325,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0077-sample-0001",
+            "sample_sequence": 78,
+            "source_segment_index": 77,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.190589,
+              "link1_to_link2": 0.595491,
+              "link2_to_link3": 1.956033,
+              "link3_to_link4": -0.980725,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0078-sample-0001",
+            "sample_sequence": 79,
+            "source_segment_index": 78,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.179128,
+              "link1_to_link2": 0.592367,
+              "link2_to_link3": 1.965299,
+              "link3_to_link4": -0.986866,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0079-sample-0001",
+            "sample_sequence": 80,
+            "source_segment_index": 79,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.167595,
+              "link1_to_link2": 0.589391,
+              "link2_to_link3": 1.974157,
+              "link3_to_link4": -0.992749,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0080-sample-0001",
+            "sample_sequence": 81,
+            "source_segment_index": 80,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.155992,
+              "link1_to_link2": 0.586563,
+              "link2_to_link3": 1.982608,
+              "link3_to_link4": -0.998371,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0081-sample-0001",
+            "sample_sequence": 82,
+            "source_segment_index": 81,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.144322,
+              "link1_to_link2": 0.58388,
+              "link2_to_link3": 1.990651,
+              "link3_to_link4": -1.003731,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0082-sample-0001",
+            "sample_sequence": 83,
+            "source_segment_index": 82,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.132588,
+              "link1_to_link2": 0.581342,
+              "link2_to_link3": 1.998286,
+              "link3_to_link4": -1.008828,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0083-sample-0001",
+            "sample_sequence": 84,
+            "source_segment_index": 83,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.120791,
+              "link1_to_link2": 0.578947,
+              "link2_to_link3": 2.005514,
+              "link3_to_link4": -1.013661,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0084-sample-0001",
+            "sample_sequence": 85,
+            "source_segment_index": 84,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.108936,
+              "link1_to_link2": 0.576695,
+              "link2_to_link3": 2.012333,
+              "link3_to_link4": -1.018228,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0085-sample-0001",
+            "sample_sequence": 86,
+            "source_segment_index": 85,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.097024,
+              "link1_to_link2": 0.574585,
+              "link2_to_link3": 2.018744,
+              "link3_to_link4": -1.022529,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0086-sample-0001",
+            "sample_sequence": 87,
+            "source_segment_index": 86,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.085059,
+              "link1_to_link2": 0.572614,
+              "link2_to_link3": 2.024747,
+              "link3_to_link4": -1.026561,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0087-sample-0001",
+            "sample_sequence": 88,
+            "source_segment_index": 87,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.073044,
+              "link1_to_link2": 0.570783,
+              "link2_to_link3": 2.03034,
+              "link3_to_link4": -1.030323,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0088-sample-0001",
+            "sample_sequence": 89,
+            "source_segment_index": 88,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.060983,
+              "link1_to_link2": 0.569091,
+              "link2_to_link3": 2.035524,
+              "link3_to_link4": -1.033815,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0089-sample-0001",
+            "sample_sequence": 90,
+            "source_segment_index": 89,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.048877,
+              "link1_to_link2": 0.567536,
+              "link2_to_link3": 2.040299,
+              "link3_to_link4": -1.037035,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0090-sample-0001",
+            "sample_sequence": 91,
+            "source_segment_index": 90,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.036732,
+              "link1_to_link2": 0.566118,
+              "link2_to_link3": 2.044663,
+              "link3_to_link4": -1.039981,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0091-sample-0001",
+            "sample_sequence": 92,
+            "source_segment_index": 91,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.564836,
+              "link2_to_link3": 2.048616,
+              "link3_to_link4": -1.042652,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0092-sample-0001",
+            "sample_sequence": 93,
+            "source_segment_index": 92,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.584297,
+              "link2_to_link3": 2.057366,
+              "link3_to_link4": -1.070863,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0093-sample-0001",
+            "sample_sequence": 94,
+            "source_segment_index": 93,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.604119,
+              "link2_to_link3": 2.065359,
+              "link3_to_link4": -1.098679,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0094-sample-0001",
+            "sample_sequence": 95,
+            "source_segment_index": 94,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.624284,
+              "link2_to_link3": 2.072605,
+              "link3_to_link4": -1.126089,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0095-sample-0001",
+            "sample_sequence": 96,
+            "source_segment_index": 95,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.64477,
+              "link2_to_link3": 2.079113,
+              "link3_to_link4": -1.153083,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0096-sample-0001",
+            "sample_sequence": 97,
+            "source_segment_index": 96,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.665536,
+              "link2_to_link3": 2.084813,
+              "link3_to_link4": -1.179549,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0097-sample-0001",
+            "sample_sequence": 98,
+            "source_segment_index": 97,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.64477,
+              "link2_to_link3": 2.079113,
+              "link3_to_link4": -1.153083,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0098-sample-0001",
+            "sample_sequence": 99,
+            "source_segment_index": 98,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.624284,
+              "link2_to_link3": 2.072605,
+              "link3_to_link4": -1.126089,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0099-sample-0001",
+            "sample_sequence": 100,
+            "source_segment_index": 99,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.604119,
+              "link2_to_link3": 2.065359,
+              "link3_to_link4": -1.098679,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0100-sample-0001",
+            "sample_sequence": 101,
+            "source_segment_index": 100,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.584297,
+              "link2_to_link3": 2.057366,
+              "link3_to_link4": -1.070863,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0101-sample-0001",
+            "sample_sequence": 102,
+            "source_segment_index": 101,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.564836,
+              "link2_to_link3": 2.048616,
+              "link3_to_link4": -1.042652,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0102-sample-0001",
+            "sample_sequence": 103,
+            "source_segment_index": 102,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.564836,
+              "link2_to_link3": 2.048616,
+              "link3_to_link4": -1.042652,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0103-sample-0001",
+            "sample_sequence": 104,
+            "source_segment_index": 103,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.584297,
+              "link2_to_link3": 2.057366,
+              "link3_to_link4": -1.070863,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0104-sample-0001",
+            "sample_sequence": 105,
+            "source_segment_index": 104,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.604119,
+              "link2_to_link3": 2.065359,
+              "link3_to_link4": -1.098679,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0105-sample-0001",
+            "sample_sequence": 106,
+            "source_segment_index": 105,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.624284,
+              "link2_to_link3": 2.072605,
+              "link3_to_link4": -1.126089,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0106-sample-0001",
+            "sample_sequence": 107,
+            "source_segment_index": 106,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.64477,
+              "link2_to_link3": 2.079113,
+              "link3_to_link4": -1.153083,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0107-sample-0001",
+            "sample_sequence": 108,
+            "source_segment_index": 107,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.665536,
+              "link2_to_link3": 2.084813,
+              "link3_to_link4": -1.179549,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0108-sample-0001",
+            "sample_sequence": 109,
+            "source_segment_index": 108,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.64477,
+              "link2_to_link3": 2.079113,
+              "link3_to_link4": -1.153083,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0109-sample-0001",
+            "sample_sequence": 110,
+            "source_segment_index": 109,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.624284,
+              "link2_to_link3": 2.072605,
+              "link3_to_link4": -1.126089,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0110-sample-0001",
+            "sample_sequence": 111,
+            "source_segment_index": 110,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.604119,
+              "link2_to_link3": 2.065359,
+              "link3_to_link4": -1.098679,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0111-sample-0001",
+            "sample_sequence": 112,
+            "source_segment_index": 111,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.584297,
+              "link2_to_link3": 2.057366,
+              "link3_to_link4": -1.070863,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0112-sample-0001",
+            "sample_sequence": 113,
+            "source_segment_index": 112,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.024549,
+              "link1_to_link2": 0.564836,
+              "link2_to_link3": 2.048616,
+              "link3_to_link4": -1.042652,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0113-sample-0001",
+            "sample_sequence": 114,
+            "source_segment_index": 113,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.029948,
+              "link1_to_link2": 0.556485,
+              "link2_to_link3": 2.074577,
+              "link3_to_link4": -1.060262,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0114-sample-0001",
+            "sample_sequence": 115,
+            "source_segment_index": 114,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.035452,
+              "link1_to_link2": 0.548334,
+              "link2_to_link3": 2.100286,
+              "link3_to_link4": -1.07782,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0115-sample-0001",
+            "sample_sequence": 116,
+            "source_segment_index": 115,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.041063,
+              "link1_to_link2": 0.540384,
+              "link2_to_link3": 2.125752,
+              "link3_to_link4": -1.095336,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0116-sample-0001",
+            "sample_sequence": 117,
+            "source_segment_index": 116,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.046784,
+              "link1_to_link2": 0.532635,
+              "link2_to_link3": 2.150988,
+              "link3_to_link4": -1.112823,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0117-sample-0001",
+            "sample_sequence": 118,
+            "source_segment_index": 117,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.525091,
+              "link2_to_link3": 2.176002,
+              "link3_to_link4": -1.130292,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0118-sample-0001",
+            "sample_sequence": 119,
+            "source_segment_index": 118,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.546647,
+              "link2_to_link3": 2.185264,
+              "link3_to_link4": -1.161111,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0119-sample-0001",
+            "sample_sequence": 120,
+            "source_segment_index": 119,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.568596,
+              "link2_to_link3": 2.193748,
+              "link3_to_link4": -1.191544,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0120-sample-0001",
+            "sample_sequence": 121,
+            "source_segment_index": 120,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.590907,
+              "link2_to_link3": 2.201448,
+              "link3_to_link4": -1.221555,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0121-sample-0001",
+            "sample_sequence": 122,
+            "source_segment_index": 121,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.613553,
+              "link2_to_link3": 2.208349,
+              "link3_to_link4": -1.251102,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0122-sample-0001",
+            "sample_sequence": 123,
+            "source_segment_index": 122,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.636506,
+              "link2_to_link3": 2.21444,
+              "link3_to_link4": -1.280145,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0123-sample-0001",
+            "sample_sequence": 124,
+            "source_segment_index": 123,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.613553,
+              "link2_to_link3": 2.208349,
+              "link3_to_link4": -1.251102,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0124-sample-0001",
+            "sample_sequence": 125,
+            "source_segment_index": 124,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.590907,
+              "link2_to_link3": 2.201448,
+              "link3_to_link4": -1.221555,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0125-sample-0001",
+            "sample_sequence": 126,
+            "source_segment_index": 125,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.568596,
+              "link2_to_link3": 2.193748,
+              "link3_to_link4": -1.191544,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0126-sample-0001",
+            "sample_sequence": 127,
+            "source_segment_index": 126,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.546647,
+              "link2_to_link3": 2.185264,
+              "link3_to_link4": -1.161111,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0127-sample-0001",
+            "sample_sequence": 128,
+            "source_segment_index": 127,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.052619,
+              "link1_to_link2": 0.525091,
+              "link2_to_link3": 2.176002,
+              "link3_to_link4": -1.130292,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0128-sample-0001",
+            "sample_sequence": 129,
+            "source_segment_index": 128,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.056437,
+              "link1_to_link2": 0.534519,
+              "link2_to_link3": 2.144811,
+              "link3_to_link4": -1.108531,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0129-sample-0001",
+            "sample_sequence": 130,
+            "source_segment_index": 129,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.060163,
+              "link1_to_link2": 0.544233,
+              "link2_to_link3": 2.11337,
+              "link3_to_link4": -1.086803,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0130-sample-0001",
+            "sample_sequence": 131,
+            "source_segment_index": 130,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.063801,
+              "link1_to_link2": 0.554228,
+              "link2_to_link3": 2.081657,
+              "link3_to_link4": -1.065085,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0131-sample-0001",
+            "sample_sequence": 132,
+            "source_segment_index": 131,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.067354,
+              "link1_to_link2": 0.564501,
+              "link2_to_link3": 2.049651,
+              "link3_to_link4": -1.043352,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0132-sample-0001",
+            "sample_sequence": 133,
+            "source_segment_index": 132,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.070823,
+              "link1_to_link2": 0.57505,
+              "link2_to_link3": 2.01733,
+              "link3_to_link4": -1.02158,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0133-sample-0001",
+            "sample_sequence": 134,
+            "source_segment_index": 133,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.074213,
+              "link1_to_link2": 0.585874,
+              "link2_to_link3": 1.984671,
+              "link3_to_link4": -0.999744,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0134-sample-0001",
+            "sample_sequence": 135,
+            "source_segment_index": 134,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.077526,
+              "link1_to_link2": 0.596974,
+              "link2_to_link3": 1.951649,
+              "link3_to_link4": -0.977823,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0135-sample-0001",
+            "sample_sequence": 136,
+            "source_segment_index": 135,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.080764,
+              "link1_to_link2": 0.608351,
+              "link2_to_link3": 1.918239,
+              "link3_to_link4": -0.955791,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0136-sample-0001",
+            "sample_sequence": 137,
+            "source_segment_index": 136,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.08393,
+              "link1_to_link2": 0.620009,
+              "link2_to_link3": 1.884415,
+              "link3_to_link4": -0.933625,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0137-sample-0001",
+            "sample_sequence": 138,
+            "source_segment_index": 137,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.087026,
+              "link1_to_link2": 0.631951,
+              "link2_to_link3": 1.850148,
+              "link3_to_link4": -0.9113,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0138-sample-0001",
+            "sample_sequence": 139,
+            "source_segment_index": 138,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.090053,
+              "link1_to_link2": 0.644149,
+              "link2_to_link3": 1.815403,
+              "link3_to_link4": -0.888752,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0139-sample-0001",
+            "sample_sequence": 140,
+            "source_segment_index": 139,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.093017,
+              "link1_to_link2": 0.656739,
+              "link2_to_link3": 1.780093,
+              "link3_to_link4": -0.866032,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0140-sample-0001",
+            "sample_sequence": 141,
+            "source_segment_index": 140,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.095917,
+              "link1_to_link2": 0.669657,
+              "link2_to_link3": 1.74421,
+              "link3_to_link4": -0.843067,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0141-sample-0001",
+            "sample_sequence": 142,
+            "source_segment_index": 141,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.098755,
+              "link1_to_link2": 0.682851,
+              "link2_to_link3": 1.707772,
+              "link3_to_link4": -0.819824,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0142-sample-0001",
+            "sample_sequence": 143,
+            "source_segment_index": 142,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.101533,
+              "link1_to_link2": 0.696384,
+              "link2_to_link3": 1.670692,
+              "link3_to_link4": -0.796276,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0143-sample-0001",
+            "sample_sequence": 144,
+            "source_segment_index": 143,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.710269,
+              "link2_to_link3": 1.632919,
+              "link3_to_link4": -0.772388,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0144-sample-0001",
+            "sample_sequence": 145,
+            "source_segment_index": 144,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.725084,
+              "link2_to_link3": 1.641133,
+              "link3_to_link4": -0.795417,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0145-sample-0001",
+            "sample_sequence": 146,
+            "source_segment_index": 145,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.740227,
+              "link2_to_link3": 1.648619,
+              "link3_to_link4": -0.818046,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0146-sample-0001",
+            "sample_sequence": 147,
+            "source_segment_index": 146,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.755687,
+              "link2_to_link3": 1.655377,
+              "link3_to_link4": -0.840263,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0147-sample-0001",
+            "sample_sequence": 148,
+            "source_segment_index": 147,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.77145,
+              "link2_to_link3": 1.661408,
+              "link3_to_link4": -0.862058,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0148-sample-0001",
+            "sample_sequence": 149,
+            "source_segment_index": 148,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.787504,
+              "link2_to_link3": 1.666714,
+              "link3_to_link4": -0.883418,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0149-sample-0001",
+            "sample_sequence": 150,
+            "source_segment_index": 149,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.77145,
+              "link2_to_link3": 1.661408,
+              "link3_to_link4": -0.862058,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0150-sample-0001",
+            "sample_sequence": 151,
+            "source_segment_index": 150,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.755687,
+              "link2_to_link3": 1.655377,
+              "link3_to_link4": -0.840263,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0151-sample-0001",
+            "sample_sequence": 152,
+            "source_segment_index": 151,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.740227,
+              "link2_to_link3": 1.648619,
+              "link3_to_link4": -0.818046,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0152-sample-0001",
+            "sample_sequence": 153,
+            "source_segment_index": 152,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.725084,
+              "link2_to_link3": 1.641133,
+              "link3_to_link4": -0.795417,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0153-sample-0001",
+            "sample_sequence": 154,
+            "source_segment_index": 153,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.104253,
+              "link1_to_link2": 0.710269,
+              "link2_to_link3": 1.632919,
+              "link3_to_link4": -0.772388,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0154-sample-0001",
+            "sample_sequence": 155,
+            "source_segment_index": 154,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.114683,
+              "link1_to_link2": 0.705351,
+              "link2_to_link3": 1.646268,
+              "link3_to_link4": -0.780819,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0155-sample-0001",
+            "sample_sequence": 156,
+            "source_segment_index": 155,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.125189,
+              "link1_to_link2": 0.700622,
+              "link2_to_link3": 1.659135,
+              "link3_to_link4": -0.788957,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0156-sample-0001",
+            "sample_sequence": 157,
+            "source_segment_index": 156,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.135768,
+              "link1_to_link2": 0.696078,
+              "link2_to_link3": 1.671527,
+              "link3_to_link4": -0.796805,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0157-sample-0001",
+            "sample_sequence": 158,
+            "source_segment_index": 157,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.14642,
+              "link1_to_link2": 0.691717,
+              "link2_to_link3": 1.683447,
+              "link3_to_link4": -0.804364,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0158-sample-0001",
+            "sample_sequence": 159,
+            "source_segment_index": 158,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157143,
+              "link1_to_link2": 0.687537,
+              "link2_to_link3": 1.6949,
+              "link3_to_link4": -0.811638,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0159-sample-0001",
+            "sample_sequence": 160,
+            "source_segment_index": 159,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.167935,
+              "link1_to_link2": 0.683536,
+              "link2_to_link3": 1.705891,
+              "link3_to_link4": -0.818626,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0160-sample-0001",
+            "sample_sequence": 161,
+            "source_segment_index": 160,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.178795,
+              "link1_to_link2": 0.67971,
+              "link2_to_link3": 1.716422,
+              "link3_to_link4": -0.825332,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0161-sample-0001",
+            "sample_sequence": 162,
+            "source_segment_index": 161,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.189719,
+              "link1_to_link2": 0.676058,
+              "link2_to_link3": 1.726497,
+              "link3_to_link4": -0.831755,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0162-sample-0001",
+            "sample_sequence": 163,
+            "source_segment_index": 162,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.200707,
+              "link1_to_link2": 0.672578,
+              "link2_to_link3": 1.736119,
+              "link3_to_link4": -0.837897,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0163-sample-0001",
+            "sample_sequence": 164,
+            "source_segment_index": 163,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.211755,
+              "link1_to_link2": 0.669268,
+              "link2_to_link3": 1.74529,
+              "link3_to_link4": -0.843758,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0164-sample-0001",
+            "sample_sequence": 165,
+            "source_segment_index": 164,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.222863,
+              "link1_to_link2": 0.666126,
+              "link2_to_link3": 1.754013,
+              "link3_to_link4": -0.849339,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0165-sample-0001",
+            "sample_sequence": 166,
+            "source_segment_index": 165,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.234027,
+              "link1_to_link2": 0.663151,
+              "link2_to_link3": 1.76229,
+              "link3_to_link4": -0.854641,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0166-sample-0001",
+            "sample_sequence": 167,
+            "source_segment_index": 166,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.245245,
+              "link1_to_link2": 0.660341,
+              "link2_to_link3": 1.770123,
+              "link3_to_link4": -0.859664,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0167-sample-0001",
+            "sample_sequence": 168,
+            "source_segment_index": 167,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.256511,
+              "link1_to_link2": 0.657605,
+              "link2_to_link3": 1.777593,
+              "link3_to_link4": -0.864398,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0168-sample-0001",
+            "sample_sequence": 169,
+            "source_segment_index": 168,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.267829,
+              "link1_to_link2": 0.655106,
+              "link2_to_link3": 1.784555,
+              "link3_to_link4": -0.868861,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0169-sample-0001",
+            "sample_sequence": 170,
+            "source_segment_index": 169,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.279194,
+              "link1_to_link2": 0.652767,
+              "link2_to_link3": 1.791077,
+              "link3_to_link4": -0.873044,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0170-sample-0001",
+            "sample_sequence": 171,
+            "source_segment_index": 170,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.290588,
+              "link1_to_link2": 0.650648,
+              "link2_to_link3": 1.797253,
+              "link3_to_link4": -0.877098,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0171-sample-0001",
+            "sample_sequence": 172,
+            "source_segment_index": 171,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.302041,
+              "link1_to_link2": 0.648646,
+              "link2_to_link3": 1.802885,
+              "link3_to_link4": -0.880728,
+              "link4_to_link5": -1e-06
+            },
+            "sample_id": "segment-0172-sample-0001",
+            "sample_sequence": 173,
+            "source_segment_index": 172,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.313532,
+              "link1_to_link2": 0.646801,
+              "link2_to_link3": 1.80808,
+              "link3_to_link4": -0.884079,
+              "link4_to_link5": -1e-06
+            },
+            "sample_id": "segment-0173-sample-0001",
+            "sample_sequence": 174,
+            "source_segment_index": 173,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.325058,
+              "link1_to_link2": 0.645114,
+              "link2_to_link3": 1.812838,
+              "link3_to_link4": -0.88715,
+              "link4_to_link5": -1e-06
+            },
+            "sample_id": "segment-0174-sample-0001",
+            "sample_sequence": 175,
+            "source_segment_index": 174,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.336617,
+              "link1_to_link2": 0.643584,
+              "link2_to_link3": 1.81716,
+              "link3_to_link4": -0.889942,
+              "link4_to_link5": -1e-06
+            },
+            "sample_id": "segment-0175-sample-0001",
+            "sample_sequence": 176,
+            "source_segment_index": 175,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.34822,
+              "link1_to_link2": 0.642195,
+              "link2_to_link3": 1.821002,
+              "link3_to_link4": -0.892398,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0176-sample-0001",
+            "sample_sequence": 177,
+            "source_segment_index": 176,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.359834,
+              "link1_to_link2": 0.640991,
+              "link2_to_link3": 1.824421,
+              "link3_to_link4": -0.894612,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0177-sample-0001",
+            "sample_sequence": 178,
+            "source_segment_index": 177,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.371471,
+              "link1_to_link2": 0.639938,
+              "link2_to_link3": 1.827413,
+              "link3_to_link4": -0.896551,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0178-sample-0001",
+            "sample_sequence": 179,
+            "source_segment_index": 178,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.38313,
+              "link1_to_link2": 0.639036,
+              "link2_to_link3": 1.829978,
+              "link3_to_link4": -0.898214,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0179-sample-0001",
+            "sample_sequence": 180,
+            "source_segment_index": 179,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.638285,
+              "link2_to_link3": 1.832113,
+              "link3_to_link4": -0.899599,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0180-sample-0001",
+            "sample_sequence": 181,
+            "source_segment_index": 180,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.654984,
+              "link2_to_link3": 1.840452,
+              "link3_to_link4": -0.924636,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0181-sample-0001",
+            "sample_sequence": 182,
+            "source_segment_index": 181,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.672118,
+              "link2_to_link3": 1.847875,
+              "link3_to_link4": -0.949193,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0182-sample-0001",
+            "sample_sequence": 183,
+            "source_segment_index": 182,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.689499,
+              "link2_to_link3": 1.854707,
+              "link3_to_link4": -0.973407,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0183-sample-0001",
+            "sample_sequence": 184,
+            "source_segment_index": 183,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.707185,
+              "link2_to_link3": 1.860809,
+              "link3_to_link4": -0.997194,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0184-sample-0001",
+            "sample_sequence": 185,
+            "source_segment_index": 184,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.72516,
+              "link2_to_link3": 1.866184,
+              "link3_to_link4": -1.020543,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0185-sample-0001",
+            "sample_sequence": 186,
+            "source_segment_index": 185,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.707185,
+              "link2_to_link3": 1.860809,
+              "link3_to_link4": -0.997194,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0186-sample-0001",
+            "sample_sequence": 187,
+            "source_segment_index": 186,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.689499,
+              "link2_to_link3": 1.854707,
+              "link3_to_link4": -0.973407,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0187-sample-0001",
+            "sample_sequence": 188,
+            "source_segment_index": 187,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.672118,
+              "link2_to_link3": 1.847875,
+              "link3_to_link4": -0.949193,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0188-sample-0001",
+            "sample_sequence": 189,
+            "source_segment_index": 188,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.654984,
+              "link2_to_link3": 1.840452,
+              "link3_to_link4": -0.924636,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0189-sample-0001",
+            "sample_sequence": 190,
+            "source_segment_index": 189,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.638285,
+              "link2_to_link3": 1.832113,
+              "link3_to_link4": -0.899599,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0190-sample-0001",
+            "sample_sequence": 191,
+            "source_segment_index": 190,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.385561,
+              "link1_to_link2": 0.630517,
+              "link2_to_link3": 1.854245,
+              "link3_to_link4": -0.913962,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0191-sample-0001",
+            "sample_sequence": 192,
+            "source_segment_index": 191,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.376185,
+              "link1_to_link2": 0.622951,
+              "link2_to_link3": 1.87594,
+              "link3_to_link4": -0.928091,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0192-sample-0001",
+            "sample_sequence": 193,
+            "source_segment_index": 192,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.366678,
+              "link1_to_link2": 0.615589,
+              "link2_to_link3": 1.897195,
+              "link3_to_link4": -0.941984,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0193-sample-0001",
+            "sample_sequence": 194,
+            "source_segment_index": 193,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.357037,
+              "link1_to_link2": 0.608427,
+              "link2_to_link3": 1.918019,
+              "link3_to_link4": -0.955646,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0194-sample-0001",
+            "sample_sequence": 195,
+            "source_segment_index": 194,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.347262,
+              "link1_to_link2": 0.601463,
+              "link2_to_link3": 1.938417,
+              "link3_to_link4": -0.96908,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0195-sample-0001",
+            "sample_sequence": 196,
+            "source_segment_index": 195,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.337352,
+              "link1_to_link2": 0.594694,
+              "link2_to_link3": 1.958395,
+              "link3_to_link4": -0.982289,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0196-sample-0001",
+            "sample_sequence": 197,
+            "source_segment_index": 196,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.327305,
+              "link1_to_link2": 0.588117,
+              "link2_to_link3": 1.97796,
+              "link3_to_link4": -0.995277,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0197-sample-0001",
+            "sample_sequence": 198,
+            "source_segment_index": 197,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.317122,
+              "link1_to_link2": 0.58173,
+              "link2_to_link3": 1.997116,
+              "link3_to_link4": -1.008046,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0198-sample-0001",
+            "sample_sequence": 199,
+            "source_segment_index": 198,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.306802,
+              "link1_to_link2": 0.575531,
+              "link2_to_link3": 2.015867,
+              "link3_to_link4": -1.020598,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0199-sample-0001",
+            "sample_sequence": 200,
+            "source_segment_index": 199,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.296344,
+              "link1_to_link2": 0.569517,
+              "link2_to_link3": 2.034216,
+              "link3_to_link4": -1.032933,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0200-sample-0001",
+            "sample_sequence": 201,
+            "source_segment_index": 200,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.285747,
+              "link1_to_link2": 0.563687,
+              "link2_to_link3": 2.052167,
+              "link3_to_link4": -1.045054,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0201-sample-0001",
+            "sample_sequence": 202,
+            "source_segment_index": 201,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.275012,
+              "link1_to_link2": 0.558038,
+              "link2_to_link3": 2.069722,
+              "link3_to_link4": -1.05696,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0202-sample-0001",
+            "sample_sequence": 203,
+            "source_segment_index": 202,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.264138,
+              "link1_to_link2": 0.552568,
+              "link2_to_link3": 2.086883,
+              "link3_to_link4": -1.068651,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0203-sample-0001",
+            "sample_sequence": 204,
+            "source_segment_index": 203,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.253124,
+              "link1_to_link2": 0.547276,
+              "link2_to_link3": 2.103651,
+              "link3_to_link4": -1.080127,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0204-sample-0001",
+            "sample_sequence": 205,
+            "source_segment_index": 204,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.241972,
+              "link1_to_link2": 0.542159,
+              "link2_to_link3": 2.120029,
+              "link3_to_link4": -1.091388,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0205-sample-0001",
+            "sample_sequence": 206,
+            "source_segment_index": 205,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.230681,
+              "link1_to_link2": 0.537216,
+              "link2_to_link3": 2.136016,
+              "link3_to_link4": -1.102432,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0206-sample-0001",
+            "sample_sequence": 207,
+            "source_segment_index": 206,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.219251,
+              "link1_to_link2": 0.532445,
+              "link2_to_link3": 2.151613,
+              "link3_to_link4": -1.113258,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0207-sample-0001",
+            "sample_sequence": 208,
+            "source_segment_index": 207,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.207684,
+              "link1_to_link2": 0.527844,
+              "link2_to_link3": 2.166819,
+              "link3_to_link4": -1.123863,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0208-sample-0001",
+            "sample_sequence": 209,
+            "source_segment_index": 208,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.195979,
+              "link1_to_link2": 0.523411,
+              "link2_to_link3": 2.181636,
+              "link3_to_link4": -1.134247,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0209-sample-0001",
+            "sample_sequence": 210,
+            "source_segment_index": 209,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.184137,
+              "link1_to_link2": 0.519144,
+              "link2_to_link3": 2.196061,
+              "link3_to_link4": -1.144405,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0210-sample-0001",
+            "sample_sequence": 211,
+            "source_segment_index": 210,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.17216,
+              "link1_to_link2": 0.515041,
+              "link2_to_link3": 2.210093,
+              "link3_to_link4": -1.154334,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0211-sample-0001",
+            "sample_sequence": 212,
+            "source_segment_index": 211,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.160116,
+              "link1_to_link2": 0.511017,
+              "link2_to_link3": 2.223919,
+              "link3_to_link4": -1.164129,
+              "link4_to_link5": 1e-06
+            },
+            "sample_id": "segment-0212-sample-0001",
+            "sample_sequence": 213,
+            "source_segment_index": 212,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.147804,
+              "link1_to_link2": 0.507319,
+              "link2_to_link3": 2.236975,
+              "link3_to_link4": -1.173494,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0213-sample-0001",
+            "sample_sequence": 214,
+            "source_segment_index": 213,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.135427,
+              "link1_to_link2": 0.503696,
+              "link2_to_link3": 2.249821,
+              "link3_to_link4": -1.182717,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0214-sample-0001",
+            "sample_sequence": 215,
+            "source_segment_index": 214,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.122921,
+              "link1_to_link2": 0.500229,
+              "link2_to_link3": 2.262268,
+              "link3_to_link4": -1.191697,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0215-sample-0001",
+            "sample_sequence": 216,
+            "source_segment_index": 215,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.110287,
+              "link1_to_link2": 0.496915,
+              "link2_to_link3": 2.274313,
+              "link3_to_link4": -1.200428,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0216-sample-0001",
+            "sample_sequence": 217,
+            "source_segment_index": 216,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.097527,
+              "link1_to_link2": 0.493753,
+              "link2_to_link3": 2.285953,
+              "link3_to_link4": -1.208907,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0217-sample-0001",
+            "sample_sequence": 218,
+            "source_segment_index": 217,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.084644,
+              "link1_to_link2": 0.49074,
+              "link2_to_link3": 2.297187,
+              "link3_to_link4": -1.217127,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0218-sample-0001",
+            "sample_sequence": 219,
+            "source_segment_index": 218,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.071639,
+              "link1_to_link2": 0.487875,
+              "link2_to_link3": 2.30801,
+              "link3_to_link4": -1.225084,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0219-sample-0001",
+            "sample_sequence": 220,
+            "source_segment_index": 219,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.058517,
+              "link1_to_link2": 0.485154,
+              "link2_to_link3": 2.318419,
+              "link3_to_link4": -1.232773,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0220-sample-0001",
+            "sample_sequence": 221,
+            "source_segment_index": 220,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.482575,
+              "link2_to_link3": 2.328413,
+              "link3_to_link4": -1.240188,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0221-sample-0001",
+            "sample_sequence": 222,
+            "source_segment_index": 221,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045278,
+              "link1_to_link2": 0.507319,
+              "link2_to_link3": 2.338608,
+              "link3_to_link4": -1.275127,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0222-sample-0001",
+            "sample_sequence": 223,
+            "source_segment_index": 222,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.532619,
+              "link2_to_link3": 2.34797,
+              "link3_to_link4": -1.30979,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0223-sample-0001",
+            "sample_sequence": 224,
+            "source_segment_index": 223,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.558259,
+              "link2_to_link3": 2.356486,
+              "link3_to_link4": -1.343945,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0224-sample-0001",
+            "sample_sequence": 225,
+            "source_segment_index": 224,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.584261,
+              "link2_to_link3": 2.364137,
+              "link3_to_link4": -1.377598,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0225-sample-0001",
+            "sample_sequence": 226,
+            "source_segment_index": 225,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.610583,
+              "link2_to_link3": 2.370904,
+              "link3_to_link4": -1.410687,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0226-sample-0001",
+            "sample_sequence": 227,
+            "source_segment_index": 226,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.584261,
+              "link2_to_link3": 2.364137,
+              "link3_to_link4": -1.377598,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0227-sample-0001",
+            "sample_sequence": 228,
+            "source_segment_index": 227,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.558259,
+              "link2_to_link3": 2.356486,
+              "link3_to_link4": -1.343945,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0228-sample-0001",
+            "sample_sequence": 229,
+            "source_segment_index": 228,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.532619,
+              "link2_to_link3": 2.34797,
+              "link3_to_link4": -1.30979,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0229-sample-0001",
+            "sample_sequence": 230,
+            "source_segment_index": 229,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045278,
+              "link1_to_link2": 0.507319,
+              "link2_to_link3": 2.338608,
+              "link3_to_link4": -1.275127,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0230-sample-0001",
+            "sample_sequence": 231,
+            "source_segment_index": 230,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.045279,
+              "link1_to_link2": 0.482575,
+              "link2_to_link3": 2.328413,
+              "link3_to_link4": -1.240188,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0231-sample-0001",
+            "sample_sequence": 232,
+            "source_segment_index": 231,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.058517,
+              "link1_to_link2": 0.485154,
+              "link2_to_link3": 2.318419,
+              "link3_to_link4": -1.232773,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0232-sample-0001",
+            "sample_sequence": 233,
+            "source_segment_index": 232,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.071639,
+              "link1_to_link2": 0.487875,
+              "link2_to_link3": 2.30801,
+              "link3_to_link4": -1.225084,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0233-sample-0001",
+            "sample_sequence": 234,
+            "source_segment_index": 233,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.084644,
+              "link1_to_link2": 0.49074,
+              "link2_to_link3": 2.297187,
+              "link3_to_link4": -1.217127,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0234-sample-0001",
+            "sample_sequence": 235,
+            "source_segment_index": 234,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.097527,
+              "link1_to_link2": 0.493753,
+              "link2_to_link3": 2.285953,
+              "link3_to_link4": -1.208907,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0235-sample-0001",
+            "sample_sequence": 236,
+            "source_segment_index": 235,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.110287,
+              "link1_to_link2": 0.496915,
+              "link2_to_link3": 2.274313,
+              "link3_to_link4": -1.200428,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0236-sample-0001",
+            "sample_sequence": 237,
+            "source_segment_index": 236,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.122921,
+              "link1_to_link2": 0.500229,
+              "link2_to_link3": 2.262268,
+              "link3_to_link4": -1.191697,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0237-sample-0001",
+            "sample_sequence": 238,
+            "source_segment_index": 237,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.135427,
+              "link1_to_link2": 0.503696,
+              "link2_to_link3": 2.249821,
+              "link3_to_link4": -1.182717,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0238-sample-0001",
+            "sample_sequence": 239,
+            "source_segment_index": 238,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.147804,
+              "link1_to_link2": 0.507319,
+              "link2_to_link3": 2.236975,
+              "link3_to_link4": -1.173494,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0239-sample-0001",
+            "sample_sequence": 240,
+            "source_segment_index": 239,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.160114,
+              "link1_to_link2": 0.511024,
+              "link2_to_link3": 2.223938,
+              "link3_to_link4": -1.164169,
+              "link4_to_link5": -1e-06
+            },
+            "sample_id": "segment-0240-sample-0001",
+            "sample_sequence": 241,
+            "source_segment_index": 240,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.17216,
+              "link1_to_link2": 0.515041,
+              "link2_to_link3": 2.210093,
+              "link3_to_link4": -1.154334,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0241-sample-0001",
+            "sample_sequence": 242,
+            "source_segment_index": 241,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.184137,
+              "link1_to_link2": 0.519144,
+              "link2_to_link3": 2.196061,
+              "link3_to_link4": -1.144405,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0242-sample-0001",
+            "sample_sequence": 243,
+            "source_segment_index": 242,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.195979,
+              "link1_to_link2": 0.523411,
+              "link2_to_link3": 2.181636,
+              "link3_to_link4": -1.134247,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0243-sample-0001",
+            "sample_sequence": 244,
+            "source_segment_index": 243,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.207684,
+              "link1_to_link2": 0.527844,
+              "link2_to_link3": 2.166819,
+              "link3_to_link4": -1.123863,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0244-sample-0001",
+            "sample_sequence": 245,
+            "source_segment_index": 244,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.219251,
+              "link1_to_link2": 0.532445,
+              "link2_to_link3": 2.151613,
+              "link3_to_link4": -1.113258,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0245-sample-0001",
+            "sample_sequence": 246,
+            "source_segment_index": 245,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.230681,
+              "link1_to_link2": 0.537216,
+              "link2_to_link3": 2.136016,
+              "link3_to_link4": -1.102432,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0246-sample-0001",
+            "sample_sequence": 247,
+            "source_segment_index": 246,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.241972,
+              "link1_to_link2": 0.542159,
+              "link2_to_link3": 2.120029,
+              "link3_to_link4": -1.091388,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0247-sample-0001",
+            "sample_sequence": 248,
+            "source_segment_index": 247,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.253124,
+              "link1_to_link2": 0.547276,
+              "link2_to_link3": 2.103651,
+              "link3_to_link4": -1.080127,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0248-sample-0001",
+            "sample_sequence": 249,
+            "source_segment_index": 248,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.264138,
+              "link1_to_link2": 0.552568,
+              "link2_to_link3": 2.086883,
+              "link3_to_link4": -1.068651,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0249-sample-0001",
+            "sample_sequence": 250,
+            "source_segment_index": 249,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.275012,
+              "link1_to_link2": 0.558038,
+              "link2_to_link3": 2.069722,
+              "link3_to_link4": -1.05696,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0250-sample-0001",
+            "sample_sequence": 251,
+            "source_segment_index": 250,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.285747,
+              "link1_to_link2": 0.563687,
+              "link2_to_link3": 2.052167,
+              "link3_to_link4": -1.045054,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0251-sample-0001",
+            "sample_sequence": 252,
+            "source_segment_index": 251,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.296344,
+              "link1_to_link2": 0.569517,
+              "link2_to_link3": 2.034216,
+              "link3_to_link4": -1.032933,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0252-sample-0001",
+            "sample_sequence": 253,
+            "source_segment_index": 252,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.306802,
+              "link1_to_link2": 0.575531,
+              "link2_to_link3": 2.015867,
+              "link3_to_link4": -1.020598,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0253-sample-0001",
+            "sample_sequence": 254,
+            "source_segment_index": 253,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.317122,
+              "link1_to_link2": 0.58173,
+              "link2_to_link3": 1.997116,
+              "link3_to_link4": -1.008046,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0254-sample-0001",
+            "sample_sequence": 255,
+            "source_segment_index": 254,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          }
+        ],
+        "bounded_sample_count": 256,
+        "collision_contract_sha256": "d3238c0c95a1d2e7ff74fcb8dccc3eb0aadb0f897b2ea041319bbcd6442af5c3",
+        "first_sample_sha256": "7e653dc7d150ccb631f05d3513aec78562f5e9045204e5e4bda9430236cf5a19",
+        "installed_collision_profile_sha256": null,
+        "partition_index": 0,
+        "partition_intake_sha256": "0c346b7def6960dfbbcf22a09de308d5a284386e1e7a03b53f63de44366c2fe9",
+        "partition_sha256": "84c3a85b9c0c2eeca0bbba4e4058fb75584383343e0b92ce2ad5011a002d4940",
+        "required_evidence_slots": {
+          "adjacent_sample_segment_count": 255,
+          "configuration_body_count_per_sample": 1,
+          "configuration_geometry_binding_count": 256,
+          "configuration_sample_count": 256,
+          "configuration_sweep_envelope_count": 255
+        },
+        "source_result_count": 255,
+        "source_result_end_index_exclusive": 255,
+        "source_result_start_index": 0,
+        "terminal_sample_sha256": "367c96b610d98a8c5907f2f59837b6e2058a097910af1e82c855ad42bada6c62"
+      },
+      {
+        "bounded_joint_sample_plan": [
+          {
+            "interpolation_ratio": 0.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.317122,
+              "link1_to_link2": 0.58173,
+              "link2_to_link3": 1.997116,
+              "link3_to_link4": -1.008046,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0255-sample-0000",
+            "sample_sequence": 0,
+            "source_segment_index": 255,
+            "subdivision_count": 1,
+            "subdivision_index": 0
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.327305,
+              "link1_to_link2": 0.588117,
+              "link2_to_link3": 1.97796,
+              "link3_to_link4": -0.995277,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0255-sample-0001",
+            "sample_sequence": 1,
+            "source_segment_index": 255,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.337352,
+              "link1_to_link2": 0.594694,
+              "link2_to_link3": 1.958395,
+              "link3_to_link4": -0.982289,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0256-sample-0001",
+            "sample_sequence": 2,
+            "source_segment_index": 256,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.347262,
+              "link1_to_link2": 0.601463,
+              "link2_to_link3": 1.938417,
+              "link3_to_link4": -0.96908,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0257-sample-0001",
+            "sample_sequence": 3,
+            "source_segment_index": 257,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.357037,
+              "link1_to_link2": 0.608427,
+              "link2_to_link3": 1.918019,
+              "link3_to_link4": -0.955646,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0258-sample-0001",
+            "sample_sequence": 4,
+            "source_segment_index": 258,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.366678,
+              "link1_to_link2": 0.615589,
+              "link2_to_link3": 1.897195,
+              "link3_to_link4": -0.941984,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0259-sample-0001",
+            "sample_sequence": 5,
+            "source_segment_index": 259,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.376185,
+              "link1_to_link2": 0.622951,
+              "link2_to_link3": 1.87594,
+              "link3_to_link4": -0.928091,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0260-sample-0001",
+            "sample_sequence": 6,
+            "source_segment_index": 260,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.385561,
+              "link1_to_link2": 0.630517,
+              "link2_to_link3": 1.854245,
+              "link3_to_link4": -0.913962,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0261-sample-0001",
+            "sample_sequence": 7,
+            "source_segment_index": 261,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.638285,
+              "link2_to_link3": 1.832113,
+              "link3_to_link4": -0.899599,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0262-sample-0001",
+            "sample_sequence": 8,
+            "source_segment_index": 262,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.654984,
+              "link2_to_link3": 1.840452,
+              "link3_to_link4": -0.924636,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0263-sample-0001",
+            "sample_sequence": 9,
+            "source_segment_index": 263,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.672118,
+              "link2_to_link3": 1.847875,
+              "link3_to_link4": -0.949193,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0264-sample-0001",
+            "sample_sequence": 10,
+            "source_segment_index": 264,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.689499,
+              "link2_to_link3": 1.854707,
+              "link3_to_link4": -0.973407,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0265-sample-0001",
+            "sample_sequence": 11,
+            "source_segment_index": 265,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.707185,
+              "link2_to_link3": 1.860809,
+              "link3_to_link4": -0.997194,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0266-sample-0001",
+            "sample_sequence": 12,
+            "source_segment_index": 266,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.72516,
+              "link2_to_link3": 1.866184,
+              "link3_to_link4": -1.020543,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0267-sample-0001",
+            "sample_sequence": 13,
+            "source_segment_index": 267,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.707185,
+              "link2_to_link3": 1.860809,
+              "link3_to_link4": -0.997194,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0268-sample-0001",
+            "sample_sequence": 14,
+            "source_segment_index": 268,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.689499,
+              "link2_to_link3": 1.854707,
+              "link3_to_link4": -0.973407,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0269-sample-0001",
+            "sample_sequence": 15,
+            "source_segment_index": 269,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.672118,
+              "link2_to_link3": 1.847875,
+              "link3_to_link4": -0.949193,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0270-sample-0001",
+            "sample_sequence": 16,
+            "source_segment_index": 270,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.654984,
+              "link2_to_link3": 1.840452,
+              "link3_to_link4": -0.924636,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0271-sample-0001",
+            "sample_sequence": 17,
+            "source_segment_index": 271,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.394805,
+              "link1_to_link2": 0.638285,
+              "link2_to_link3": 1.832113,
+              "link3_to_link4": -0.899599,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0272-sample-0001",
+            "sample_sequence": 18,
+            "source_segment_index": 272,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.385852,
+              "link1_to_link2": 0.630757,
+              "link2_to_link3": 1.85356,
+              "link3_to_link4": -0.913517,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0273-sample-0001",
+            "sample_sequence": 19,
+            "source_segment_index": 273,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.376775,
+              "link1_to_link2": 0.623418,
+              "link2_to_link3": 1.874597,
+              "link3_to_link4": -0.927215,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0274-sample-0001",
+            "sample_sequence": 20,
+            "source_segment_index": 274,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.367575,
+              "link1_to_link2": 0.61627,
+              "link2_to_link3": 1.895221,
+              "link3_to_link4": -0.940692,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0275-sample-0001",
+            "sample_sequence": 21,
+            "source_segment_index": 275,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.358249,
+              "link1_to_link2": 0.609311,
+              "link2_to_link3": 1.915439,
+              "link3_to_link4": -0.953951,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0276-sample-0001",
+            "sample_sequence": 22,
+            "source_segment_index": 276,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.348798,
+              "link1_to_link2": 0.602538,
+              "link2_to_link3": 1.935257,
+              "link3_to_link4": -0.966995,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0277-sample-0001",
+            "sample_sequence": 23,
+            "source_segment_index": 277,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.33922,
+              "link1_to_link2": 0.595948,
+              "link2_to_link3": 1.954681,
+              "link3_to_link4": -0.979829,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0278-sample-0001",
+            "sample_sequence": 24,
+            "source_segment_index": 278,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.329515,
+              "link1_to_link2": 0.589539,
+              "link2_to_link3": 1.973715,
+              "link3_to_link4": -0.992455,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0279-sample-0001",
+            "sample_sequence": 25,
+            "source_segment_index": 279,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.319681,
+              "link1_to_link2": 0.583309,
+              "link2_to_link3": 1.992365,
+              "link3_to_link4": -1.004874,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0280-sample-0001",
+            "sample_sequence": 26,
+            "source_segment_index": 280,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.309719,
+              "link1_to_link2": 0.577256,
+              "link2_to_link3": 2.010634,
+              "link3_to_link4": -1.01709,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0281-sample-0001",
+            "sample_sequence": 27,
+            "source_segment_index": 281,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.299627,
+              "link1_to_link2": 0.571377,
+              "link2_to_link3": 2.028525,
+              "link3_to_link4": -1.029102,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0282-sample-0001",
+            "sample_sequence": 28,
+            "source_segment_index": 282,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.289406,
+              "link1_to_link2": 0.565671,
+              "link2_to_link3": 2.046041,
+              "link3_to_link4": -1.040912,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0283-sample-0001",
+            "sample_sequence": 29,
+            "source_segment_index": 283,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.279054,
+              "link1_to_link2": 0.560135,
+              "link2_to_link3": 2.063185,
+              "link3_to_link4": -1.05252,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0284-sample-0001",
+            "sample_sequence": 30,
+            "source_segment_index": 284,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.268572,
+              "link1_to_link2": 0.554769,
+              "link2_to_link3": 2.079958,
+              "link3_to_link4": -1.063927,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0285-sample-0001",
+            "sample_sequence": 31,
+            "source_segment_index": 285,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.25796,
+              "link1_to_link2": 0.54957,
+              "link2_to_link3": 2.096363,
+              "link3_to_link4": -1.075133,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0286-sample-0001",
+            "sample_sequence": 32,
+            "source_segment_index": 286,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.247217,
+              "link1_to_link2": 0.544536,
+              "link2_to_link3": 2.112401,
+              "link3_to_link4": -1.086136,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0287-sample-0001",
+            "sample_sequence": 33,
+            "source_segment_index": 287,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.539666,
+              "link2_to_link3": 2.128071,
+              "link3_to_link4": -1.096937,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0288-sample-0001",
+            "sample_sequence": 34,
+            "source_segment_index": 288,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.560381,
+              "link2_to_link3": 2.137113,
+              "link3_to_link4": -1.126694,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0289-sample-0001",
+            "sample_sequence": 35,
+            "source_segment_index": 289,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.581474,
+              "link2_to_link3": 2.145391,
+              "link3_to_link4": -1.156064,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0290-sample-0001",
+            "sample_sequence": 36,
+            "source_segment_index": 290,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.602923,
+              "link2_to_link3": 2.152906,
+              "link3_to_link4": -1.185029,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0291-sample-0001",
+            "sample_sequence": 37,
+            "source_segment_index": 291,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.624699,
+              "link2_to_link3": 2.159634,
+              "link3_to_link4": -1.213533,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0292-sample-0001",
+            "sample_sequence": 38,
+            "source_segment_index": 292,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.646777,
+              "link2_to_link3": 2.165568,
+              "link3_to_link4": -1.241545,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0293-sample-0001",
+            "sample_sequence": 39,
+            "source_segment_index": 293,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.624699,
+              "link2_to_link3": 2.159634,
+              "link3_to_link4": -1.213533,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0294-sample-0001",
+            "sample_sequence": 40,
+            "source_segment_index": 294,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.602923,
+              "link2_to_link3": 2.152906,
+              "link3_to_link4": -1.185029,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0295-sample-0001",
+            "sample_sequence": 41,
+            "source_segment_index": 295,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.581474,
+              "link2_to_link3": 2.145391,
+              "link3_to_link4": -1.156064,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0296-sample-0001",
+            "sample_sequence": 42,
+            "source_segment_index": 296,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.560381,
+              "link2_to_link3": 2.137113,
+              "link3_to_link4": -1.126694,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0297-sample-0001",
+            "sample_sequence": 43,
+            "source_segment_index": 297,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.236344,
+              "link1_to_link2": 0.539666,
+              "link2_to_link3": 2.128071,
+              "link3_to_link4": -1.096937,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0298-sample-0001",
+            "sample_sequence": 44,
+            "source_segment_index": 298,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.230553,
+              "link1_to_link2": 0.523602,
+              "link2_to_link3": 2.152281,
+              "link3_to_link4": -1.105083,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0299-sample-0001",
+            "sample_sequence": 45,
+            "source_segment_index": 299,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.224637,
+              "link1_to_link2": 0.50748,
+              "link2_to_link3": 2.176044,
+              "link3_to_link4": -1.112723,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0300-sample-0001",
+            "sample_sequence": 46,
+            "source_segment_index": 300,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.218656,
+              "link1_to_link2": 0.491322,
+              "link2_to_link3": 2.199572,
+              "link3_to_link4": -1.120087,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0301-sample-0001",
+            "sample_sequence": 47,
+            "source_segment_index": 301,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.212478,
+              "link1_to_link2": 0.475054,
+              "link2_to_link3": 2.222438,
+              "link3_to_link4": -1.126686,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0302-sample-0001",
+            "sample_sequence": 48,
+            "source_segment_index": 302,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.206091,
+              "link1_to_link2": 0.458441,
+              "link2_to_link3": 2.244702,
+              "link3_to_link4": -1.132345,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0303-sample-0001",
+            "sample_sequence": 49,
+            "source_segment_index": 303,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.199631,
+              "link1_to_link2": 0.442033,
+              "link2_to_link3": 2.266622,
+              "link3_to_link4": -1.137856,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0304-sample-0001",
+            "sample_sequence": 50,
+            "source_segment_index": 304,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.193025,
+              "link1_to_link2": 0.425478,
+              "link2_to_link3": 2.288092,
+              "link3_to_link4": -1.142771,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0305-sample-0001",
+            "sample_sequence": 51,
+            "source_segment_index": 305,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.186268,
+              "link1_to_link2": 0.408768,
+              "link2_to_link3": 2.309101,
+              "link3_to_link4": -1.147069,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0306-sample-0001",
+            "sample_sequence": 52,
+            "source_segment_index": 306,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.179355,
+              "link1_to_link2": 0.39189,
+              "link2_to_link3": 2.329638,
+              "link3_to_link4": -1.150729,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0307-sample-0001",
+            "sample_sequence": 53,
+            "source_segment_index": 307,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.172283,
+              "link1_to_link2": 0.374836,
+              "link2_to_link3": 2.349693,
+              "link3_to_link4": -1.153729,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0308-sample-0001",
+            "sample_sequence": 54,
+            "source_segment_index": 308,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.165046,
+              "link1_to_link2": 0.357592,
+              "link2_to_link3": 2.369252,
+              "link3_to_link4": -1.156044,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0309-sample-0001",
+            "sample_sequence": 55,
+            "source_segment_index": 309,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.157639,
+              "link1_to_link2": 0.340147,
+              "link2_to_link3": 2.388303,
+              "link3_to_link4": -1.15765,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0310-sample-0001",
+            "sample_sequence": 56,
+            "source_segment_index": 310,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.150057,
+              "link1_to_link2": 0.322488,
+              "link2_to_link3": 2.406832,
+              "link3_to_link4": -1.15852,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0311-sample-0001",
+            "sample_sequence": 57,
+            "source_segment_index": 311,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.142295,
+              "link1_to_link2": 0.304601,
+              "link2_to_link3": 2.42482,
+              "link3_to_link4": -1.158621,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0312-sample-0001",
+            "sample_sequence": 58,
+            "source_segment_index": 312,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.134346,
+              "link1_to_link2": 0.286471,
+              "link2_to_link3": 2.44226,
+              "link3_to_link4": -1.157931,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0313-sample-0001",
+            "sample_sequence": 59,
+            "source_segment_index": 313,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.126206,
+              "link1_to_link2": 0.268082,
+              "link2_to_link3": 2.459132,
+              "link3_to_link4": -1.156414,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0314-sample-0001",
+            "sample_sequence": 60,
+            "source_segment_index": 314,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.117868,
+              "link1_to_link2": 0.249419,
+              "link2_to_link3": 2.475419,
+              "link3_to_link4": -1.154039,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0315-sample-0001",
+            "sample_sequence": 61,
+            "source_segment_index": 315,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.109326,
+              "link1_to_link2": 0.230471,
+              "link2_to_link3": 2.491104,
+              "link3_to_link4": -1.150775,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0316-sample-0001",
+            "sample_sequence": 62,
+            "source_segment_index": 316,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.100575,
+              "link1_to_link2": 0.211217,
+              "link2_to_link3": 2.506165,
+              "link3_to_link4": -1.146581,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0317-sample-0001",
+            "sample_sequence": 63,
+            "source_segment_index": 317,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.091607,
+              "link1_to_link2": 0.191646,
+              "link2_to_link3": 2.520581,
+              "link3_to_link4": -1.141427,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0318-sample-0001",
+            "sample_sequence": 64,
+            "source_segment_index": 318,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.082415,
+              "link1_to_link2": 0.171749,
+              "link2_to_link3": 2.534335,
+              "link3_to_link4": -1.135284,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0319-sample-0001",
+            "sample_sequence": 65,
+            "source_segment_index": 319,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.072994,
+              "link1_to_link2": 0.151514,
+              "link2_to_link3": 2.547405,
+              "link3_to_link4": -1.128119,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0320-sample-0001",
+            "sample_sequence": 66,
+            "source_segment_index": 320,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.063336,
+              "link1_to_link2": 0.130932,
+              "link2_to_link3": 2.559769,
+              "link3_to_link4": -1.119901,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0321-sample-0001",
+            "sample_sequence": 67,
+            "source_segment_index": 321,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.053434,
+              "link1_to_link2": 0.109931,
+              "link2_to_link3": 2.571411,
+              "link3_to_link4": -1.110545,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0322-sample-0001",
+            "sample_sequence": 68,
+            "source_segment_index": 322,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.043281,
+              "link1_to_link2": 0.088678,
+              "link2_to_link3": 2.582299,
+              "link3_to_link4": -1.10018,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0323-sample-0001",
+            "sample_sequence": 69,
+            "source_segment_index": 323,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.032869,
+              "link1_to_link2": 0.067047,
+              "link2_to_link3": 2.592421,
+              "link3_to_link4": -1.088669,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0324-sample-0001",
+            "sample_sequence": 70,
+            "source_segment_index": 324,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.02219,
+              "link1_to_link2": 0.045048,
+              "link2_to_link3": 2.601757,
+              "link3_to_link4": -1.076005,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0325-sample-0001",
+            "sample_sequence": 71,
+            "source_segment_index": 325,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": -0.011236,
+              "link1_to_link2": 0.022912,
+              "link2_to_link3": 2.610605,
+              "link3_to_link4": -1.062709,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0326-sample-0001",
+            "sample_sequence": 72,
+            "source_segment_index": 326,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          },
+          {
+            "interpolation_ratio": 1.0,
+            "joint_positions_rad": {
+              "base_link_to_link1": 0.0,
+              "link1_to_link2": 0.0,
+              "link2_to_link3": 2.618,
+              "link3_to_link4": -1.0472,
+              "link4_to_link5": 0.0
+            },
+            "sample_id": "segment-0327-sample-0001",
+            "sample_sequence": 73,
+            "source_segment_index": 327,
+            "subdivision_count": 1,
+            "subdivision_index": 1
+          }
+        ],
+        "bounded_sample_count": 74,
+        "collision_contract_sha256": "d3238c0c95a1d2e7ff74fcb8dccc3eb0aadb0f897b2ea041319bbcd6442af5c3",
+        "first_sample_sha256": "5b2c5e0907242cd432c23a61b9ca407fe4b0dfed5f4f04e7e9fc4ec8c18ec960",
+        "installed_collision_profile_sha256": null,
+        "partition_index": 1,
+        "partition_intake_sha256": "aa51c069dc34235652672e486dfee3800378c779a898efd0226ad3aa85f5cee9",
+        "partition_sha256": "65f8fdb318a31b67b30c3f459db5b41c445c7d56052e5a53af9a7a9fd9f93a75",
+        "required_evidence_slots": {
+          "adjacent_sample_segment_count": 73,
+          "configuration_body_count_per_sample": 1,
+          "configuration_geometry_binding_count": 74,
+          "configuration_sample_count": 74,
+          "configuration_sweep_envelope_count": 73
+        },
+        "source_result_count": 73,
+        "source_result_end_index_exclusive": 328,
+        "source_result_start_index": 255,
+        "terminal_sample_sha256": "c24aea8ec6dcccf2b74869ce0d3a70e500205263163ea5bb43ba0356b2e8a032"
+      }
+    ],
+    "physical_authority": false,
+    "required_configuration_body_ids": [
+      "attachment:moving_camera_cable"
+    ],
+    "required_evidence_slots": {
+      "configuration_geometry_binding_count": 330,
+      "configuration_sweep_envelope_count": 328,
+      "conservative_boundary_recheck_count": 1,
+      "partition_count": 2,
+      "partition_owned_adjacent_sample_segment_count": 328,
+      "partition_sample_count_including_boundary_rechecks": 330,
+      "route_segment_count": 328,
+      "unique_route_configuration_count": 329
+    },
+    "required_rigid_attachment_frames": [
+      "camera_module",
+      "holder"
+    ],
+    "sampling_policy": {
+      "maximum_joint_step_rad": 0.05,
+      "maximum_samples": 256,
+      "sampling_policy_sha256": "4552062f99ec6ba104978470e66d243b9026fa23f84f4b440699e271799530d7"
+    },
+    "schema": "rocell.partitioned_typing_collision_intake.v1",
+    "start_state_execution_eligible": false,
+    "start_state_source_kind": "SYNTHETIC_OFFLINE",
+    "status": "BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED",
+    "typing_execution_plan_sha256": "4c4fc9c44184cd8414aff4ebd2881f65a6336d079547368944d630bb2cf7820d",
+    "typing_trajectory_ik_screen_sha256": "1e021d501d11b4720020a152689393f0af748e5a3b9fd5ed7e9bfed92d80b4a7",
+    "typing_trajectory_plan_sha256": "b97865de7d33c40138baaba26bece276a9ce2f2044e2f385ce7bf432d1ef6fab"
+  },
+  "partitioned_collision_intake_sha256": "714278c68a039e1704b8f8ade2b2aba50748cace7e97d355aaea38a4b60e1d93",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "965d79f06e3ddcae326d8b870f271c64ab3039f48b88b24f47ef29fef847f654",
+  "schema": "tactevra.typing_twin_partitioned_collision_intake_receipt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_result_receipt_sha256": "56d1c275ab529edc283a18d8569fc7d581bb047f1385094f6762a1f88c224aa5"
+}

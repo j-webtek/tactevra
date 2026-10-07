@@ -13,6 +13,10 @@ FIXTURE = WORKSPACE / (
     "software/ai/sim/evidence/"
     "typing_twin_partitioned_collision_intake_fixture_v1.json"
 )
+RESULT = WORKSPACE / (
+    "software/ai/sim/evidence/"
+    "typing_twin_partitioned_collision_intake_result_v1.json"
+)
 
 
 def test_frozen_partitioned_collision_intake_is_deterministic_and_zero_authority():
@@ -43,3 +47,11 @@ def test_frozen_partitioned_collision_intake_is_deterministic_and_zero_authority
     assert first["controller_commands"] == []
     assert first["hardware_writes"] == first["physical_movements"] == 0
     json.dumps(first, sort_keys=True, allow_nan=False)
+
+
+def test_committed_result_is_exact_frozen_replay():
+    expected = json.loads(RESULT.read_text(encoding="utf-8"))
+    assert run_partitioned_collision_intake(FIXTURE, workspace=WORKSPACE) == expected
+    assert expected["receipt_sha256"] == (
+        "965d79f06e3ddcae326d8b870f271c64ab3039f48b88b24f47ef29fef847f654"
+    )
