@@ -8762,3 +8762,42 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: add the parent fixture's promoted-profile hash to the frozen
   derived-fixture allowlist, recompute the parent and predecessor fixture
   hashes, and rerun without changing numerical policies or repository fixtures.
+
+### E-20261007-AI-485 — route reaches ingress and exposes catalog source identity
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `868274652a9d637aa4d1fd75bc1697b17c1565d7`.
+- Change: added only the derived virtual-profile hash to the promoted parent
+  fixture's identity bindings, then recomputed the parent and predecessor
+  fixture hashes. Both rebinding contracts retained zero numerical changes.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_5.json`;
+  canonical fixture SHA-256
+  `feef5909cd4ff82b7835eea8bbc654ace9c39830b6462fe6b6c3e1913190dc3b`;
+  file SHA-256
+  `3f3350a563a3c46ea861e960e08f3b917bb59b03f2e89d506b34399c994d443c`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_5 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_5.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_5.json`.
+- Result: `FAIL` during strict batch ingress. The coherent context and parent
+  fixture loaded, then context revalidation raised `SimulationContextError:
+  Simulation context coherence check failed: targets differ from their locked
+  source`. Exit code was 1 and no result file was written.
+- Metrics: the route reached batch assembly and strict ingress. Zero trajectory
+  samples and zero IK samples were evaluated.
+- Validation: the focused fixture suite passed 13 tests before execution. Ruff,
+  `git diff --check`, and source-archive policy passed at 6,490 files and
+  661,909,618 logical bytes.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the candidate catalog bytes match the locked bundle, but the
+  immutable predecessor loads them through its external evidence path and then
+  replaces the context targets. Revalidation compares that source identity to
+  the internal bundle path and fails. No route feasibility, IK, continuity, or
+  collision conclusion exists.
+- Supersedes: none. This is the first attempt to reach strict batch ingress.
+- Next dependency: derive the predecessor fixture so its candidate catalog path
+  names `software/config/nominal_target_profiles.json`, already hash-bound to the
+  same candidate bytes inside the coherent bundle. Preserve its hash, all
+  numerical policies, and zero authority.

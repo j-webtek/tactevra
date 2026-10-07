@@ -1809,6 +1809,13 @@ canonical SHA-256
 It adds only `parent.input_bindings.promoted_profile.sha256` to the prior
 derived-fixture allowlist. Both rebinding contracts retain zero numerical
 policy changes and zero authority.
+Evidence `E-20261007-AI-485` preserves the result. The run loaded the coherent
+bundle and parent fixture and reached strict batch ingress. Revalidation then
+rejected the candidate targets because the immutable predecessor loaded them
+through the external evidence path rather than the bundle's internal locked
+path. A successor may change only that predecessor binding path to
+`software/config/nominal_target_profiles.json`; the candidate hash, numerical
+policies, and authority remain unchanged.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
