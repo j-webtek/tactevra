@@ -8413,3 +8413,63 @@ rewriting history. New entries must use a unique evidence ID.
   configuration geometry plus conservative sweep-envelope evidence for every
   enumerated slot. Only then may per-partition discrete and continuous collision
   evaluation run; a fresh observed start state remains independently required.
+
+### E-20261007-AI-477 — C03 and promoted arm route stop on exact tool identity mismatch
+
+- Stage: S2/S3 exploratory zero-authority AI-to-arm evidence reconciliation.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `343642d3a692b4ec81f72ecfb87ba344a6670615`.
+- Change: added a strict reconciliation contract that binds the admitted C03
+  recipe envelope and key-only clearance result to the current promoted route
+  and partitioned collision intake. It rejects duplicate JSON fields, changed
+  file or receipt hashes, changed schemas, altered tool identities, changed
+  blockers, and any nonzero authority counter.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_arm_route_reconciliation_fixture_v1.json`;
+  canonical fixture SHA-256
+  `73bfa179c410ff83747b09c63272a999b2e627e0b66faed8bbe0688ed6b2562c`;
+  file SHA-256
+  `a5332e6f2fd37b36900ee6c81a98bfc90da77a413bd6aeb89c841337949d4d56`.
+  The fixture binds the C03 recipe-envelope file SHA-256
+  `26c3cc81bb7a1c5ba205779e5b6e4bf4186a357317857c2e11a8fed61caccbd9`,
+  C03 exact-key-clearance file SHA-256
+  `930416ec924e64c29d2dea34314ff866ab8d8b551b00afb886387b34098345d2`,
+  promoted-route file SHA-256
+  `f6d37eb758f2fc8ba0d2ea462b1512a7aa404e120fcb5c2421c1fa79043ce023`,
+  and partitioned-intake file SHA-256
+  `73f93b79060c32d29c75e170cf034c73b854814549ba39288c818133299e1738`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai`, then run
+  `python -m rocell_ai.c03_arm_route_reconciliation_v1 software/ai/sim/evidence/c03_arm_route_reconciliation_fixture_v1.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_arm_route_reconciliation_v1\c03_arm_route_reconciliation_result_v1.json`.
+- Result: `BLOCKED` with decision
+  `STOP_C03_PROMOTED_ROUTE_TOOL_IDENTITY_MISMATCH`. Result receipt SHA-256
+  `310e1bb6197f92067e39ae48de8280ea8cd28f61457bafb8c3bcea6cf8b62ad1`;
+  result-file SHA-256
+  `f1cb56827bba78fab699e61fab0777af455cdbe87d735ad7c29f50a4ca0dfd77`.
+  A byte-identical, hash-verified backup is stored under
+  `F:\MuJoCoWarp\evidence\issue190\c03_arm_route_reconciliation_v1`.
+- Metrics: C03 binds a 110 mm total tool with a 3 mm radius, 15 mm
+  half-length, 30 mm exposed capsule and recipe 80. Its fixed-orientation
+  key-only screen passed all 15,606 rows over 2,601 ordered target pairs, with
+  minimum reported clearance `1.9999999999999853` mm. The promoted arm route
+  contains 328 trajectory samples and is bound to a 120 mm tool. The exact
+  length difference is 10 mm, so the artifacts cannot be composed.
+- Validation: `python -m pytest software/ai/tests/test_c03_arm_route_reconciliation_v1.py software/tests/unit/test_installed_collision_profile_builder_v1.py software/tests/unit/test_partitioned_typing_collision_intake_v1.py -q`
+  passed the focused reconciliation and current arm-intake suites: 15 tests in
+  6.76 seconds. Ruff passed on the implementation and test, `git diff --check`
+  passed, and the source-archive footprint and duplicate-inventory checks passed
+  under the recorded 6,480-file ceiling.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is an identity reconciliation, not a collision simulation.
+  C03 omits source-to-destination orientation changes and full robot/tool/
+  workcell continuous collision. The installed measured collision profile and
+  fresh observed start state remain absent. The near-2 mm C03 clearance has
+  essentially no surplus above the frozen 2 mm threshold. No controller,
+  transport, permit, hardware, or physical authority is granted.
+- Supersedes: none. Both source results remain immutable and valid within their
+  original scopes.
+- Next dependency: reconstruct the promoted full route with the exact admitted
+  110 mm C03 tool identity and screen orientation transitions plus full
+  robot/tool/workcell collision. After that, arm-owned installed measured
+  profile evidence and a fresh observed start state are still required.

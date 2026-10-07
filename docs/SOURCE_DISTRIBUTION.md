@@ -545,3 +545,13 @@ existing strict profile consumer, and emits no collision result, controller
 artifact, hardware operation, or physical authority. Synthetic fixtures are
 test inputs only and do not qualify installed geometry. All byte, duplicate,
 and reduction limits remain unchanged.
+
+The C03-to-promoted-route reconciliation adds three governed paths: one strict
+zero-authority identity checker, one focused test module, and one pre-result
+fixture. The resulting tree contains 6,476 tracked files. The file-count
+ceiling advances from 6,473 to 6,480, leaving four reviewed-file slots so a
+small correction or evidence index does not immediately fail policy. The
+result remains external and hash-bound. This increment adds no simulator
+corpus, dependency tree, installed geometry, collision result, controller
+artifact, GPU artifact, or authority-bearing output. All byte, duplicate, and
+reduction limits remain unchanged.

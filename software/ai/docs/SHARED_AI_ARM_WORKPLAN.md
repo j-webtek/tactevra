@@ -1705,6 +1705,12 @@ key-only result as full robot/workcell evidence. The pre-result fixture is
 [`c03_arm_route_reconciliation_fixture_v1.json`](../sim/evidence/c03_arm_route_reconciliation_fixture_v1.json),
 canonical SHA-256
 `73bfa179c410ff83747b09c63272a999b2e627e0b66faed8bbe0688ed6b2562c`.
+Evidence `E-20261007-AI-477` now preserves the resulting fail-closed decision:
+the admitted C03 tool is 110 mm while the promoted route is bound to 120 mm.
+No collision run was attempted across that mismatch. The next bounded AI-lane
+dependency is a new full-route reconstruction for the exact admitted 110 mm
+tool, including orientation transitions; installed collision profile and fresh
+observed-state requirements remain arm-owned blockers.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
