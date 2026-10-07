@@ -10,6 +10,7 @@ import pytest
 
 from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
+    assess_c02_ws3_recipe_compatibility,
     build_candidate51_pose_family,
     load_cpu_contact_fixture,
     prepare_ws3_transition_harness,
@@ -41,6 +42,71 @@ def _rehash_fixture(value):
         section["section_sha256"] = _sha(section_copy)
     value["fixture_sha256"] = _sha(value)
     return value
+
+
+def _write_c02_binding_inputs(tmp_path: Path, *, tip_id: str = "capsule-r6-m2"):
+    final = {
+        "schema": "tactevra.ws2_c02_final_admission.v1",
+        "decision": "COMPLETE_ROBUST_UNIVERSAL_SIMULATION_ONLY",
+        "campaign_receipt_sha256": "a" * 64,
+        "summary": {
+            "universal_families": [{
+                "profile_id": "travel_mm__LOW",
+                "tip_id": tip_id,
+                "compliance_id": "k0.286_t6",
+                "recipe_index": 80,
+                "target_count": 51,
+                "minimum_depth_margin_mm": 0.0408,
+                "minimum_force_margin_n": 0.261,
+                "motion_time_ms": 397.0,
+                "recipe": {"recipe_index": 80},
+            }],
+        },
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "physical_authority": False,
+    }
+    final["result_sha256"] = _sha(final)
+    final_path = tmp_path / "c02-final.json"
+    final_path.write_text(json.dumps(final), encoding="utf-8")
+    physics = {
+        "contact_model": {"tip_families": {"capsule": {
+            "radius_samples_mm": [1, 3.5, 6],
+            "half_length_radius_multiple_samples": [0.5, 1.25, 2],
+        }}},
+    }
+    physics_path = tmp_path / "physics.json"
+    physics_path.write_text(json.dumps(physics), encoding="utf-8")
+    return final_path, physics_path
+
+
+def test_c02_c03_binding_stops_on_six_vs_three_mm_tip(tmp_path):
+    final_path, physics_path = _write_c02_binding_inputs(tmp_path)
+    result = assess_c02_ws3_recipe_compatibility(
+        c02_final_path=final_path,
+        c02_final_sha256=hashlib.sha256(final_path.read_bytes()).hexdigest(),
+        ws2_physics_path=physics_path,
+        ws2_physics_sha256=hashlib.sha256(physics_path.read_bytes()).hexdigest(),
+        c03_fixture=_load_v2(),
+    )
+    assert result["decision"] == "STOP_C02_C03_TOOL_IDENTITY_MISMATCH"
+    assert result["c02_tip_geometry"]["radius_mm"] == 6.0
+    assert result["c03_expected_tip_geometry"]["radius_mm"] == 3.0
+    assert result["recipe_envelope_emitted"] is False
+    assert result["all_pairs_screen_executed"] is False
+    assert result["physical_authority"] is False
+
+
+def test_c02_c03_binding_rejects_changed_final_bytes(tmp_path):
+    final_path, physics_path = _write_c02_binding_inputs(tmp_path)
+    with pytest.raises(ValueError, match="final-admission file hash mismatch"):
+        assess_c02_ws3_recipe_compatibility(
+            c02_final_path=final_path,
+            c02_final_sha256="0" * 64,
+            ws2_physics_path=physics_path,
+            ws2_physics_sha256=hashlib.sha256(physics_path.read_bytes()).hexdigest(),
+            c03_fixture=_load_v2(),
+        )
 
 
 def test_fixture_and_110mm_pose_bindings_load():

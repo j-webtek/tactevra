@@ -12,6 +12,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 from typing import Any
 
 from rocell_ai.first_motion_clearance_waypoints import (
@@ -579,6 +580,112 @@ def validate_ws2_recipe_binding(
     if recipe.get("physical_authority") is not False:
         raise ValueError("WS2 press recipe carries physical authority")
     return recipe
+
+
+def assess_c02_ws3_recipe_compatibility(
+    *,
+    c02_final_path: Path,
+    c02_final_sha256: str,
+    ws2_physics_path: Path,
+    ws2_physics_sha256: str,
+    c03_fixture: dict[str, Any],
+) -> dict[str, Any]:
+    """Fail closed unless C02's selected tip matches the C03 tool geometry.
+
+    This assessment deliberately does not create a WS2 recipe envelope.  It is
+    the identity gate before the existing 2,601-pair screen can be opened.
+    """
+
+    if hashlib.sha256(c02_final_path.read_bytes()).hexdigest() != c02_final_sha256:
+        raise ValueError("C02 final-admission file hash mismatch")
+    if hashlib.sha256(ws2_physics_path.read_bytes()).hexdigest() != ws2_physics_sha256:
+        raise ValueError("WS2 physics fixture file hash mismatch")
+    final = json.loads(c02_final_path.read_text(encoding="utf-8"))
+    claimed = final.get("result_sha256")
+    unsigned = dict(final)
+    unsigned.pop("result_sha256", None)
+    if claimed != _sha(unsigned):
+        raise ValueError("C02 final-admission result hash mismatch")
+    if final.get("decision") != "COMPLETE_ROBUST_UNIVERSAL_SIMULATION_ONLY":
+        raise ValueError("C02 final admission is not a robust simulation result")
+    if final.get("physical_authority") is not False:
+        raise ValueError("C02 final admission carries physical authority")
+    if int(final.get("hardware_write_count", 0)) or int(
+        final.get("physical_movement_count", 0)
+    ):
+        raise ValueError("C02 final admission carries nonzero physical counters")
+
+    universal = final.get("summary", {}).get("universal_families", [])
+    if not universal:
+        raise ValueError("C02 final admission has no universal recipe")
+    selected = universal[0]
+    tip_id = str(selected["tip_id"])
+    match = re.fullmatch(r"capsule-r(?P<radius>[0-9.]+)-m(?P<multiple>[0-9.]+)", tip_id)
+    if match is None:
+        raise ValueError("C02 selected tip identity is not a supported capsule")
+    radius_mm = float(match.group("radius"))
+    multiple = float(match.group("multiple"))
+    physics = json.loads(ws2_physics_path.read_text(encoding="utf-8"))
+    capsule = physics["contact_model"]["tip_families"]["capsule"]
+    if radius_mm not in [float(v) for v in capsule["radius_samples_mm"]]:
+        raise ValueError("C02 selected capsule radius is absent from physics fixture")
+    if multiple not in [
+        float(v) for v in capsule["half_length_radius_multiple_samples"]
+    ]:
+        raise ValueError("C02 selected capsule multiplier is absent from physics fixture")
+
+    section = c03_fixture["sections"]["workstream_3"]
+    c03_radius_mm = float(section["tip_radius_mm"])
+    geometry_matches = math.isclose(radius_mm, c03_radius_mm, abs_tol=1e-12)
+    decision = (
+        "READY_TO_BUILD_ZERO_AUTHORITY_RECIPE_ENVELOPE"
+        if geometry_matches
+        else "STOP_C02_C03_TOOL_IDENTITY_MISMATCH"
+    )
+    result = {
+        "schema": "tactevra.c02_c03_recipe_binding_assessment.v1",
+        "scope": SCOPE,
+        "decision": decision,
+        "c02_final_file_sha256": c02_final_sha256,
+        "c02_result_sha256": claimed,
+        "c02_campaign_receipt_sha256": final["campaign_receipt_sha256"],
+        "c02_selected_universal_recipe": selected,
+        "c02_tip_geometry": {
+            "tip_id": tip_id,
+            "shape": "capsule",
+            "radius_mm": radius_mm,
+            "half_length_mm": radius_mm * multiple,
+        },
+        "c03_fixture_sha256": c03_fixture["fixture_sha256"],
+        "c03_expected_tip_geometry": {
+            "shape": "capsule",
+            "radius_mm": c03_radius_mm,
+            "tool_length_mm": float(section["tool_length_mm"]),
+        },
+        "target_count": int(selected["target_count"]),
+        "ordered_pair_count": int(section["ordered_pair_count"]),
+        "recipe_envelope_emitted": False,
+        "all_pairs_screen_executed": False,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "real_command_count": 0,
+        "permit_count": 0,
+        "transport_count": 0,
+        "physical_authority": False,
+        "limitations": [
+            "C02 qualifies contact only inside its synthetic sampled ranges.",
+            "C03 is frozen around a 110 mm tool with a 3 mm distal-tip radius.",
+            "A 6 mm C02 tip cannot be silently substituted into the 3 mm C03 geometry.",
+            "Reorientation and full robot/tool/workcell continuous collision remain outside the prepared key-only screen.",
+            "No arm-lane or integration gate is changed by this assessment.",
+        ],
+        "next_dependency": (
+            "PREDECLARE_AND_RUN_51_TARGET_6MM_C03_GEOMETRY_FEASIBILITY_OR_"
+            "OBTAIN_A_C02_UNIVERSAL_RECIPE_FOR_THE_3MM_TIP"
+        ),
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
 
 
 def prepare_ws3_transition_harness(
