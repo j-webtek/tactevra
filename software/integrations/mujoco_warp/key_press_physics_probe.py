@@ -390,6 +390,22 @@ def tip_geometries(fixture: dict[str, Any]) -> list[dict[str, Any]]:
                     "half_length_mm": radius * multiple,
                 }
             )
+    for row in families.get("exact_capsules", []):
+        if set(row) != {"tip_id", "radius_mm", "half_length_mm"}:
+            raise ValueError("exact capsule geometry fields changed")
+        radius = float(row["radius_mm"])
+        half_length = float(row["half_length_mm"])
+        if radius <= 0.0 or half_length <= 0.0:
+            raise ValueError("exact capsule geometry must be positive")
+        tips.append({
+            "tip_id": str(row["tip_id"]),
+            "shape": "capsule",
+            "radius_mm": radius,
+            "half_length_mm": half_length,
+        })
+    identities = [row["tip_id"] for row in tips]
+    if len(identities) != len(set(identities)):
+        raise ValueError("duplicate tip geometry identity")
     return tips
 
 

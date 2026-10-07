@@ -57,6 +57,122 @@ def load_candidate_plan(fixture: dict[str, Any]) -> dict[str, Any]:
     return plan
 
 
+def load_bridge_campaign_override(
+    fixture: dict[str, Any], parent: dict[str, Any]
+) -> dict[str, Any]:
+    """Load a bridge physics fixture that changes only frozen tip geometry."""
+
+    binding = fixture["bindings"].get("physics_fixture_override")
+    if binding is None:
+        return parent
+    path = Path(binding["path"])
+    if _file_sha(path) != binding["sha256"]:
+        raise ValueError("bridge physics fixture file hash mismatch")
+    override = probe.load_fixture(path, workspace=ROOT)
+    if override["fixture_sha256"] != binding["fixture_sha256"]:
+        raise ValueError("bridge physics fixture value hash mismatch")
+    if override.get("bridge_parent_fixture_sha256") != parent["fixture_sha256"]:
+        raise ValueError("bridge physics fixture parent mismatch")
+    left = dict(parent)
+    right = dict(override)
+    for document in (left, right):
+        document.pop("fixture_sha256", None)
+        document.pop("bridge_parent_fixture_sha256", None)
+        document.pop("bridge_amendment", None)
+    left["contact_model"] = dict(left["contact_model"])
+    right["contact_model"] = dict(right["contact_model"])
+    left["contact_model"].pop("tip_families", None)
+    right["contact_model"].pop("tip_families", None)
+    if left != right:
+        raise ValueError("bridge physics fixture changed more than tip geometry")
+    return override
+
+
+def build_c03_bridge_plan(
+    c02_final: dict[str, Any],
+    bridge_campaign: dict[str, Any],
+    *,
+    recipe_indices: tuple[int, ...] = (80, 75),
+    tip_ids: tuple[str, ...] = ("capsule-r3-e10", "capsule-r3-e30"),
+    compliance_id: str = "k0.286_t6",
+    profile_id: str = "travel_mm__LOW",
+) -> dict[str, Any]:
+    """Build the bounded 3 mm bridge population without opening results."""
+
+    core = dict(c02_final)
+    claimed = core.pop("result_sha256", None)
+    if claimed != _value_sha(core):
+        raise ValueError("C02 final result hash mismatch")
+    if c02_final.get("decision") != "COMPLETE_ROBUST_UNIVERSAL_SIMULATION_ONLY":
+        raise ValueError("C02 final result is not admitted")
+    universal = c02_final["summary"]["universal_families"]
+    by_recipe = {int(row["recipe_index"]): row for row in universal}
+    if set(recipe_indices) - set(by_recipe):
+        raise ValueError("bridge recipe is not a C02 universal recipe")
+    targets = sorted(
+        str(row["target_id"])
+        for row in c02_final["summary"]["target_summaries"]
+    )
+    if len(targets) != 51 or len(set(targets)) != 51:
+        raise ValueError("bridge requires the exact 51-target C02 population")
+    tips = {row["tip_id"]: row for row in probe.tip_geometries(bridge_campaign)}
+    if set(tip_ids) - set(tips):
+        raise ValueError("bridge campaign is missing an exact C03 tip")
+    if any(float(tips[tip_id]["radius_mm"]) != 3.0 for tip_id in tip_ids):
+        raise ValueError("bridge tips must retain the 3 mm C03 radius")
+    scenarios = tuple(
+        str(row["id"])
+        for row in bridge_campaign["landing_model"]["scenarios"]
+        if row["id"] != "FAILURE_CONTROL"
+    )
+    if scenarios != (
+        "LOW_SOURCE_HIGH_RESIDUAL",
+        "MID_SOURCE_MID_RESIDUAL",
+        "HIGH_SOURCE_LOW_RESIDUAL",
+    ):
+        raise ValueError("bridge landing scenarios changed")
+    seeds = [
+        {
+            "target_id": target_id,
+            "profile_id": profile_id,
+            "tip_id": tip_id,
+            "compliance_id": compliance_id,
+            "recipe_index": recipe_index,
+            "scenario_id": scenario_id,
+            "source_recipe_index": recipe_index,
+            "selected_for_failure_classes": ["C03_EXACT_TOOL_IDENTITY_BRIDGE"],
+        }
+        for target_id in targets
+        for tip_id in tip_ids
+        for recipe_index in recipe_indices
+        for scenario_id in scenarios
+    ]
+    result = {
+        "schema": "tactevra.ws2_c03_exact_tip_bridge_plan.v1",
+        "scope": SCOPE,
+        "population_status": "CANDIDATE_SEEDS_REQUIRES_SEPARATE_C02_FIXTURE",
+        "c02_result_sha256": claimed,
+        "bridge_campaign_fixture_sha256": bridge_campaign["fixture_sha256"],
+        "target_count": len(targets),
+        "targets_seen": targets,
+        "recipe_indices": list(recipe_indices),
+        "tip_ids": list(tip_ids),
+        "compliance_id": compliance_id,
+        "profile_id": profile_id,
+        "required_scenario_ids": list(scenarios),
+        "stage_b_landing_count": 64,
+        "candidate_seed_count": len(seeds),
+        "recipe_family_count": len(targets) * len(tip_ids) * len(recipe_indices),
+        "projected_world_count": len(seeds) * 64,
+        "candidate_seeds": seeds,
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "physical_authority": False,
+    }
+    result["plan_sha256"] = _value_sha(result)
+    return result
+
+
 def build_manifest(fixture: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
     landing_count = int(fixture["population"]["landing_count"])
     if landing_count != int(plan["stage_b_landing_count"]):
@@ -145,6 +261,7 @@ def build_control(
     campaign, execution, staged, _, physical = throughput.load_bound(
         throughput_fixture
     )
+    campaign = load_bridge_campaign_override(fixture, campaign)
     seeds = [
         row
         for row in plan["candidate_seeds"]

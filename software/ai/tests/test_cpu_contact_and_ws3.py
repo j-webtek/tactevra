@@ -8,6 +8,8 @@ from pathlib import Path
 
 import pytest
 
+from ai.sim.run_ws2_c02_boundary_campaign import build_c03_bridge_plan
+from integrations.mujoco_warp.key_press_physics_probe import tip_geometries
 from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
     assess_c02_ws3_recipe_compatibility,
@@ -107,6 +109,68 @@ def test_c02_c03_binding_rejects_changed_final_bytes(tmp_path):
             ws2_physics_sha256=hashlib.sha256(physics_path.read_bytes()).hexdigest(),
             c03_fixture=_load_v2(),
         )
+
+
+def test_exact_c03_capsules_preserve_radius_and_exposed_lengths():
+    fixture = {
+        "contact_model": {"tip_families": {
+            "sphere": {"radius_samples_mm": []},
+            "capsule": {
+                "radius_samples_mm": [],
+                "half_length_radius_multiple_samples": [],
+            },
+            "exact_capsules": [
+                {"tip_id": "capsule-r3-e10", "radius_mm": 3, "half_length_mm": 5},
+                {"tip_id": "capsule-r3-e30", "radius_mm": 3, "half_length_mm": 15},
+            ],
+        }},
+    }
+    tips = tip_geometries(fixture)
+    assert [(row["radius_mm"], 2 * row["half_length_mm"]) for row in tips] == [
+        (3.0, 10.0),
+        (3.0, 30.0),
+    ]
+
+
+def test_c03_bridge_plan_is_exactly_39168_worlds():
+    targets = [f"K{index:02d}" for index in range(51)]
+    final = {
+        "decision": "COMPLETE_ROBUST_UNIVERSAL_SIMULATION_ONLY",
+        "summary": {
+            "universal_families": [
+                {"recipe_index": 80},
+                {"recipe_index": 75},
+            ],
+            "target_summaries": [{"target_id": target} for target in targets],
+        },
+    }
+    final["result_sha256"] = _sha(final)
+    campaign = {
+        "fixture_sha256": "b" * 64,
+        "contact_model": {"tip_families": {
+            "sphere": {"radius_samples_mm": []},
+            "capsule": {
+                "radius_samples_mm": [],
+                "half_length_radius_multiple_samples": [],
+            },
+            "exact_capsules": [
+                {"tip_id": "capsule-r3-e10", "radius_mm": 3, "half_length_mm": 5},
+                {"tip_id": "capsule-r3-e30", "radius_mm": 3, "half_length_mm": 15},
+            ],
+        }},
+        "landing_model": {"scenarios": [
+            {"id": "LOW_SOURCE_HIGH_RESIDUAL"},
+            {"id": "MID_SOURCE_MID_RESIDUAL"},
+            {"id": "HIGH_SOURCE_LOW_RESIDUAL"},
+            {"id": "FAILURE_CONTROL"},
+        ]},
+    }
+    plan = build_c03_bridge_plan(final, campaign)
+    assert plan["candidate_seed_count"] == 51 * 2 * 2 * 3
+    assert plan["recipe_family_count"] == 51 * 2 * 2
+    assert plan["projected_world_count"] == 39_168
+    assert len(plan["candidate_seeds"]) == 612
+    assert plan["physical_authority"] is False
 
 
 def test_fixture_and_110mm_pose_bindings_load():
