@@ -8834,3 +8834,37 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: add `parent.promoted_profile.source_sha256` to the derived
   fixture allowlist and bind it to the derived profile hash, preserving profile
   ID, study-input ID, all numerical policies, and zero authority.
+
+### E-20261007-AI-487 — route compilation exposes incomplete promoted policy view
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `15f0e89bea8b459fb9e5c9879adf55cd1b55a323`.
+- Change: bound the parent fixture's promoted-profile source hash to the derived
+  profile bytes while retaining profile ID, study-input ID, candidate catalog,
+  numerical policies, and zero authority.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_7.json`;
+  canonical fixture SHA-256
+  `9c2fcd728716fc6d7b703ce72a92875ba4b499fcd1064805e9ca1093655c8870`;
+  file SHA-256
+  `f5034d350baffc107192f4b91605a147a5baa82449d4772fb0428e05bb61b3cf`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_7 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_7.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_7.json`.
+- Result: `FAIL` at route compilation with `KeyError:
+  dynamics_profile_sha256`. Coherence, strict ingress, fresh-registry
+  revalidation, and promoted placement validation all passed. Exit code was 1
+  and no result file was written.
+- Metrics: zero trajectory and IK samples were evaluated.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the promoted full-route fixture exposes only its configuration
+  ID, tool-profile hash, and trajectory-policy ID. The immutable C03 runner
+  expects the numerical route fields retained in that fixture's hash-bound
+  `typing_twin_ik_collision_fixture_v1_4.json` parent. This is an interface-view
+  gap, not evidence that any numerical value failed.
+- Supersedes: none.
+- Next dependency: predeclare exact inheritance of the missing route fields from
+  the promoted fixture's already hash-bound parent fixture. Values must be copied
+  byte-for-byte, with zero numerical modifications and no authority.

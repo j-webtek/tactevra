@@ -1835,6 +1835,11 @@ canonical SHA-256
 It adds only `parent.promoted_profile.source_sha256` to the derived-fixture
 allowlist. Profile ID, study-input ID, candidate catalog, numerical policies,
 and authority remain unchanged.
+Evidence `E-20261007-AI-487` preserves the result. All identity and ingress
+gates passed, then route compilation exposed that the promoted fixture's route
+view omits numerical fields retained in its hash-bound IK/collision parent.
+The next successor must predeclare the exact inherited field set and copy those
+values byte-for-byte from that parent. It may not tune or invent a value.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
