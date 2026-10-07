@@ -18,7 +18,7 @@ from rocell_ai.typing_twin_120mm_exact_contact_v1 import (  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
-FIXTURE = ROOT / "ai/sim/evidence/typing_twin_120mm_exact_contact_fixture_v1.json"
+FIXTURE = ROOT / "ai/sim/evidence/typing_twin_120mm_exact_contact_fixture_v1_1.json"
 
 
 def _canonical(value: object) -> bytes:

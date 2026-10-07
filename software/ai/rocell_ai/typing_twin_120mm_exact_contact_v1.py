@@ -81,7 +81,39 @@ def _sequential_profile(
     policy: TrajectorySimulationPolicy,
     source_check_id: str,
 ) -> dict[str, Any]:
-    previous = dict(ready_values)
+    hover_point = Point3Mm(
+        "board", contact.x, contact.y, contact.z + clearances[0]
+    )
+    hover_solution = solver.solve(
+        BoardToolTipTarget(hover_point),
+        seed_joint_positions=(
+            {
+                name: JointPosition.radians(ready_values[name])
+                for name in ARM_JOINT_NAMES
+            },
+        ),
+    )
+    if not hover_solution.converged:
+        return {
+            "bootstrap": {
+                "accepted": False,
+                "failure_reason": "NO_CONVERGED_HOVER_BOOTSTRAP",
+                "clearance_above_contact_mm": clearances[0],
+            },
+            "profile_point_count": len(clearances),
+            "evaluated_point_count": 0,
+            "accepted_point_count": 0,
+            "all_points_accepted": False,
+            "failure_reason": "NO_CONVERGED_HOVER_BOOTSTRAP",
+            "failure_waypoint": None,
+            "minimum_accepted_margin": None,
+            "maximum_accepted_joint_delta_rad": None,
+            "joint_results": [],
+        }
+    previous = {
+        item.name: item.position.value
+        for item in hover_solution.solution_arm_joint_positions
+    }
     results = []
     prior_point: Point3Mm | None = None
     for sequence, clearance in enumerate(clearances):
@@ -106,14 +138,18 @@ def _sequential_profile(
             inherited_collision_ids=(),
             phase_endpoint=sequence in (0, len(clearances) - 1),
         )
-        solved = solver.solve(
-            BoardToolTipTarget(point),
-            seed_joint_positions=(
-                {
-                    name: JointPosition.radians(previous[name])
-                    for name in ARM_JOINT_NAMES
-                },
-            ),
+        solved = (
+            hover_solution
+            if sequence == 0
+            else solver.solve(
+                BoardToolTipTarget(point),
+                seed_joint_positions=(
+                    {
+                        name: JointPosition.radians(previous[name])
+                        for name in ARM_JOINT_NAMES
+                    },
+                ),
+            )
         )
         evaluated = evaluate_joint_trajectory_solution(
             waypoint,
@@ -131,6 +167,14 @@ def _sequential_profile(
     accepted = [item for item in results if item.accepted]
     complete = len(accepted) == len(clearances)
     return {
+        "bootstrap": {
+            "accepted": bool(results and results[0].accepted),
+            "failure_reason": (
+                None if results and results[0].accepted else results[0].failure_reason
+            ),
+            "clearance_above_contact_mm": clearances[0],
+            "continuity_origin": "ACCEPTED_HOVER_SOLUTION_SELF_BASELINE",
+        },
         "profile_point_count": len(clearances),
         "evaluated_point_count": len(results),
         "accepted_point_count": len(accepted),
