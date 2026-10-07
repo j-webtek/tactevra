@@ -1,0 +1,89 @@
+{
+  "claim_commit": "88b6107afc23d935d6eca85c3462e3ab1e6d7750",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "continuity_threshold_change_count_maximum": 0,
+    "full_route_runs_only_after_promoted_pass": true,
+    "ik_threshold_change_count_maximum": 0,
+    "installed_collision_gate_must_remain_blocked": true,
+    "pass": "PROMOTED_EXACT_CONTACT_AND_EVERY_SEQUENTIAL_VERTICAL_PROFILE_POINT_PASS_UNCHANGED_POST_IK_GATES",
+    "profile_point_count_exact": 26,
+    "target_coordinate_change_count_maximum": 0,
+    "transform_case_count_exact": 2
+  },
+  "fixture_sha256": "d9eb820be18a4cf73bfa4c5fd7416e51656b63cdae081d12515240e6c9915042",
+  "input_bindings": {
+    "canonical_post_ik": {
+      "path": "software/src/rocell/application/trajectory_simulation.py",
+      "sha256": "0177c218d1fbb3cbb3160189469081435fa6b17946e3602bd80313f1c0a46f78"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_contact_transform_differential_v1.py",
+      "sha256": "1530161521777b7317fe40d249da1b51c0703d6c13641355da65501abe592861"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_hover_binding_fixture_v1.json",
+      "sha256": "53336b1cc4ed180fc93a4fe61e2ecca7d46a325a4e90a532f1587c957637e6d8"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "virtual_commissioning_profile": {
+      "path": "software/config/virtual_commissioning_profile.json",
+      "sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+    },
+    "virtual_profile_loader": {
+      "path": "software/src/rocell/simulation/virtual_profile.py",
+      "sha256": "d0baf91109579f81277bf57de548286bc1940bfbaae4612be34f11f4c3a41a48"
+    }
+  },
+  "limitations": [
+    "Both transforms, the 120 mm tool, the 25 mm hover, ready state, and target geometry are synthetic, nominal, or unmeasured and are not installed physical calibration.",
+    "The promoted virtual commissioning overlay is a source-bound simulation sensitivity result with permanently zero physical release effect.",
+    "Pointwise and sequential vertical IK feasibility cannot establish a full route, collision clearance, contact behavior, dynamics, or physical accuracy.",
+    "Installed collision geometry is absent; collision intake and continuous sweep qualification remain blocked.",
+    "No result selects a physical transform or tool and no command, permit, transport, controller, hardware-write, movement, or physical authority is granted."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "6115aa94a7c29c3a833764dad6a6852e8d121517162ad72b185f9b8911d1d935",
+    "path": "software/ai/sim/evidence/typing_twin_hover_binding_fixture_v1.json"
+  },
+  "promoted_profile": {
+    "profile_id": "ROCELL-VIRTUAL-COMMISSIONING-RANK1-001",
+    "source_sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634",
+    "study_input_id": "reach-944d7463f4c67905"
+  },
+  "reconstruction": {
+    "maximum_hover_clearance_mm": 25.0,
+    "tool_length_mm": 120.0,
+    "vertical_step_mm": 1.0
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_ik_solves_per_case": 512
+  },
+  "schema": "tactevra.typing_twin_contact_transform_differential_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "target": {
+    "device": "keyboard",
+    "preserve_contact_xyz": true,
+    "target_id": "H"
+  },
+  "transform_cases": [
+    "NOMINAL_SYSTEM_MANIFEST",
+    "PROMOTED_VIRTUAL_COMMISSIONING_OVERLAY"
+  ]
+}

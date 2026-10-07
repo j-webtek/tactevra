@@ -477,3 +477,14 @@ hover solution; the exact contact, vertical points, tool length, and every gate
 remain unchanged. No simulator corpus, dependency tree, controller artifact,
 GPU artifact, or authority-bearing output enters the archive. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The nominal-versus-promoted exact-contact differential adds four governed
+paths: one CPU-only study module, one focused test module, one pre-result
+fixture, and one generated result bound by its receipt hash. The file-count
+ceiling advances from 6,446 to the exact observed 6,450 for those reviewed
+paths only. The retained result compares two already source-bound transforms
+with the same target, tool, profile, and post-IK gates; no simulator corpus,
+dependency tree, controller artifact, GPU artifact, or authority-bearing output
+enters the archive. The measured tree is 660,152,165 logical bytes with
+4,890,152 governed duplicate bytes. All byte, duplicate, and reduction limits
+remain unchanged.
