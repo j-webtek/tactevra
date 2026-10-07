@@ -1718,6 +1718,12 @@ files. Its frozen canonical SHA-256 is
 `f3f225eaac375d4f8f325c7c841dcc8546019f6ea9c0466465e338753a307d5f`.
 This pre-result amendment checks whether target geometry can be composed; it
 does not alter the preserved v1 tool-length STOP result.
+Evidence `E-20261007-AI-478` preserves the successor result: the selected C03
+pose family also binds candidate target catalog SHA-256 `0fe3c013...`, while
+the promoted route binds main catalog file SHA-256 `6779213e...`. The next
+route reconstruction must therefore bind both the exact 110 mm C03 tool and
+the exact C03 candidate target geometry; changing only tool length would still
+mix incompatible evidence.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

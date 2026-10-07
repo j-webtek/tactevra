@@ -8473,3 +8473,58 @@ rewriting history. New entries must use a unique evidence ID.
   110 mm C03 tool identity and screen orientation transitions plus full
   robot/tool/workcell collision. After that, arm-owned installed measured
   profile evidence and a fresh observed start state are still required.
+
+### E-20261007-AI-478 — successor also stops on target-catalog identity mismatch
+
+- Stage: S2/S3 exploratory zero-authority AI-to-arm evidence reconciliation.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `76e2656cf6da3b7c209e9e9fd10cb63eadff5ee5`.
+- Change: extended the frozen reconciliation with the selected 30 mm-exposure
+  C03 pose family, its candidate target catalog, and the current main target
+  catalog. This successor preserves `E-20261007-AI-477` and checks the second
+  identity boundary before any new route reconstruction.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_arm_route_reconciliation_fixture_v1_1.json`;
+  canonical fixture SHA-256
+  `f3f225eaac375d4f8f325c7c841dcc8546019f6ea9c0466465e338753a307d5f`;
+  file SHA-256
+  `45b9a46087841e983eac0aa1f34c727e34401d6cff40a5c36b399a218b62a476`.
+  It additionally binds pose-family file SHA-256
+  `6c6d14cba87f56aa13370e2651bc2c832571eed3d3bddc47424ff5cb911c8ef7`,
+  C03 candidate catalog SHA-256
+  `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`,
+  and main target-catalog file SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`.
+- Command: from the repository root, set `PYTHONPATH=software/ai`, then run
+  `python -m rocell_ai.c03_arm_route_reconciliation_v1 software/ai/sim/evidence/c03_arm_route_reconciliation_fixture_v1_1.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_arm_route_reconciliation_v1\c03_arm_route_reconciliation_result_v1_1.json`.
+- Result: `BLOCKED` with decision
+  `STOP_C03_PROMOTED_ROUTE_TOOL_AND_TARGET_CATALOG_IDENTITY_MISMATCH`.
+  Result receipt SHA-256
+  `e39177bcb9b6680bdfa04b4ff19e922c11308a6629e9ee98e389ec81f3e25dd8`;
+  result-file SHA-256
+  `2e095b234cbceb6bac91229bc1ef74131c8cfe404c22eb6094e0e84d8a9f2403`.
+  A byte-identical, hash-verified backup is retained on `F:`.
+- Metrics: the selected C03 pose profile is the exact 110 mm tool with 3 mm
+  radius and 30 mm exposed distal tip, tool-configuration SHA-256
+  `ba538b48bb9c6bc80c01ad4ae792b9784440de4825c5dea5781f3277b8ee4109`.
+  Its target-catalog hash differs from the promoted route's catalog file hash.
+  Together with the 10 mm tool-length difference, two independent identity
+  mismatches prevent composition.
+- Validation: the focused reconciliation suite passed 6 tests, including the
+  preserved v1 result, successor catalog mismatch, changed hashes, wrong tool
+  length, duplicate fields, and zero-authority rejection. Ruff and
+  `git diff --check` passed. The source archive remains under its recorded
+  ceiling.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this successor compares hashes and bound metadata. It does not
+  claim that every target coordinate differs, quantify coordinate deltas,
+  execute IK, or run collision simulation. All orientation, full-workcell,
+  installed-profile, fresh-state, controller, transport, and physical blockers
+  from `E-20261007-AI-477` remain.
+- Supersedes: none. It appends a second blocker discovered after the preserved
+  v1 result; it does not rewrite that result.
+- Next dependency: construct a separately frozen route input using the exact
+  110 mm C03 tool and exact C03 candidate target catalog, then run canonical IK
+  and continuity before any collision work. Installed measured geometry and a
+  fresh observed start state remain later arm-owned requirements.
