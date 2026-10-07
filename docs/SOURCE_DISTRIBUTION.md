@@ -561,3 +561,9 @@ and fail-closed outcome policy. This raises the exact tracked-file count and
 governed ceiling to 6,422. The 26,790,912 source rows and every generated C02
 candidate remain external; all byte, blob, duplicate, and reduction limits
 remain unchanged.
+
+The exact C02 campaign fixture and its zero-authority manifest/smoke runner add
+two reviewed files. This raises the exact tracked-file count and governed
+ceiling to 6,424. The 1,645,056 planned physics rows, GPU receipts, logs,
+videos, and generated manifests remain external and hash-bound; all byte,
+blob, duplicate, and reduction limits remain unchanged.

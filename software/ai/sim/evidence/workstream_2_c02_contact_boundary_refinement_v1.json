@@ -1,0 +1,117 @@
+{
+  "bindings": {
+    "c01_final_result": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/stage_a_campaign_v1/c01_final_result_v1.json",
+      "result_sha256": "0bd19ed636f1aefc089079ec230daf30048d0964d8288c38af15db2a185714b9",
+      "sha256": "2ca1fd2577dc01bfeccfc37e0141a845f3b08032fc82d1bec8c78c22224d4daf"
+    },
+    "candidate_seed_plan": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/c02_boundary_extraction_v1/candidate_seed_plan.json",
+      "plan_sha256": "22c3a44545672627c575f906c2fbef99afd2c3252888fe2bd1ccc247eee2a7c1",
+      "sha256": "0be1666e3f8f4b5d2bfdae6134bd9249c97f4f9e61ba58baa772666b2ac4a328"
+    },
+    "extraction_fixture": {
+      "fixture_sha256": "21011bd738aa266bf28469944fa9e83059b2da1d0e336e1c02e01927846ccf26",
+      "path": "software/ai/sim/evidence/workstream_2_c02_boundary_extraction_v1.json",
+      "sha256": "dc5197b10823fd0849b3351620202fa6e9b8f410099dad4cb818d07fd387200b"
+    },
+    "runner": {
+      "path": "software/ai/sim/run_ws2_c02_boundary_campaign.py",
+      "sha256": "56f51f89b0040757e844119e3e441948455ec1fc66e4833f82710afc65776f4a"
+    },
+    "throughput_fixture": {
+      "fixture_sha256": "d8d01f6bcf2ad73e8c74b84d908952ac4bbf40d323c82014fbd57b34647abde0",
+      "path": "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2.json",
+      "sha256": "05f7c9f00bf540f8388844708828c4a8ded0d98ab9233bcf27cb3b73190b8949"
+    }
+  },
+  "campaign": {
+    "id": "C02-contact-boundary-refinement",
+    "subtitle": "Test the same bounded recipe family across 64 landings and all three required residual scenarios.",
+    "title": "Contact Boundary Refinement"
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "date": "2026-10-07",
+  "decision": {
+    "failure_branch": "RETAIN_FAILED_FAMILY_AND_REQUIRE_TOOL_COMPLIANCE_MECHANISM_OR_SAMPLED_RANGE_REDESIGN_WITHOUT_GATE_RELAXATION",
+    "family_identity_fields": [
+      "target_id",
+      "profile_id",
+      "tip_id",
+      "compliance_id",
+      "recipe_index"
+    ],
+    "hold_window_ms": {
+      "maximum": 150.0,
+      "minimum": 30.0
+    },
+    "pass_rule": "EVERY_64_LANDING_ROW_PASSES_IN_EACH_OF_THREE_REQUIRED_SCENARIOS",
+    "prohibited_failures": [
+      "PARTIAL_PRESS",
+      "HOLD_BELOW_MINIMUM",
+      "HOLD_ABOVE_MAXIMUM",
+      "AUTO_REPEAT",
+      "BOTTOM_OUT",
+      "FORCE_EXCEEDED",
+      "NEIGHBOR_CONTACT",
+      "DOUBLE_ACTUATION",
+      "RELEASE_INCOMPLETE",
+      "NONFINITE_OR_OVERFLOW"
+    ],
+    "ranking": [
+      "minimum_two_sided_depth_margin_desc",
+      "peak_force_margin_desc",
+      "total_motion_time_asc"
+    ],
+    "required_rows_per_family": 192
+  },
+  "fixture_sha256": "0ea055e5906be454fea60ac745fd422d51122a493319ff778c70a6313a8fd08a",
+  "limitations": [
+    "SIMULATION_ONLY",
+    "C01_REQUIRED_GROUPS_WITHOUT_OBSERVED_BOUNDARY_REMAIN_BLOCKED",
+    "FOUR_OF_SIX_COMPLIANCE_IDENTITIES_HAVE_BOUNDARY_SEEDS",
+    "KEY_AND_TOOL_PHYSICAL_PARAMETERS_UNQUALIFIED",
+    "NO_RECIPE_PROMOTION_BEFORE_COMPLETE_C02_ADMISSION"
+  ],
+  "operations": {
+    "backup_root": "F:/TactevraEvidence/issue190/c02_contact_boundary_refinement_v1",
+    "cross_gpu_smoke_required": true,
+    "full_campaign_authorized": false,
+    "full_campaign_requires_separate_supervised_preflight": true,
+    "smoke_authorized": true
+  },
+  "physical_authority": false,
+  "population": {
+    "candidate_seed_count": 25704,
+    "compliance_ids": [
+      "k0.0715_t3",
+      "k0.143_t3",
+      "k0.286_t3",
+      "k0.286_t6"
+    ],
+    "landing_count": 64,
+    "maximum_worlds_per_shard": 2304,
+    "recipe_family_count": 8568,
+    "required_scenario_ids": [
+      "LOW_SOURCE_HIGH_RESIDUAL",
+      "MID_SOURCE_MID_RESIDUAL",
+      "HIGH_SOURCE_LOW_RESIDUAL"
+    ],
+    "scenario_count": 3,
+    "shard_count": 1122,
+    "target_count": 51,
+    "world_count": 1645056
+  },
+  "schema": "tactevra.ws2_c02_contact_boundary_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "smoke": {
+    "manifest_shard_index": 0,
+    "require_exact_cross_gpu_discrete_agreement": true
+  }
+}

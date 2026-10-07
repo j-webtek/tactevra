@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from ai.sim import contact_boundary_refinement as C02_REFINEMENT
+from ai.sim import run_ws2_c02_boundary_campaign as C02_CAMPAIGN
 from rocell_ai.simulation_program_cpu import (
     CANDIDATE_MODE,
     calibration_budget,
@@ -48,6 +49,10 @@ WS2_VECTOR_FIXTURE = (
 )
 WS2_C02_EXTRACTION = (
     ROOT / "software/ai/sim/evidence/workstream_2_c02_boundary_extraction_v1.json"
+)
+WS2_C02_CAMPAIGN = (
+    ROOT
+    / "software/ai/sim/evidence/workstream_2_c02_contact_boundary_refinement_v1.json"
 )
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",
@@ -932,6 +937,36 @@ def test_ws2_c02_extraction_fixture_is_hash_bound_and_bounded(tmp_path: Path):
     path.write_text(json.dumps(fixture), encoding="utf-8")
     with pytest.raises(ValueError, match="source quota must be positive"):
         C02_REFINEMENT.load_c02_extraction_fixture(path)
+
+
+def test_ws2_c02_manifest_covers_exact_bounded_population():
+    fixture = C02_CAMPAIGN.load_fixture(WS2_C02_CAMPAIGN)
+    plan = C02_CAMPAIGN.load_candidate_plan(fixture)
+    manifest = C02_CAMPAIGN.build_manifest(fixture, plan)
+    assert manifest["population"] == {
+        "candidate_seed_count": 25_704,
+        "recipe_family_count": 8_568,
+        "shard_count": 1_122,
+        "world_count": 1_645_056,
+        "target_count": 51,
+        "maximum_worlds_per_shard": 2_304,
+    }
+    assert len(manifest["shards"]) == 1_122
+    assert all(row["world_count"] <= 2_304 for row in manifest["shards"])
+    assert manifest["hardware_write_count"] == 0
+    assert manifest["physical_movement_count"] == 0
+    assert manifest["physical_authority"] is False
+
+    shard, _, _, control = C02_CAMPAIGN.build_control(
+        fixture, plan, manifest["shards"][0]["shard_id"]
+    )
+    rows = control["control"]["batch_rows"]
+    assert len(rows) == shard["world_count"]
+    assert {row["landing_sample_index"] for row in rows} == set(range(64))
+    assert {row["scenario_id"] for row in rows} == set(
+        fixture["population"]["required_scenario_ids"]
+    )
+    assert len({C02_CAMPAIGN._value_sha(row) for row in rows}) == len(rows)
 
 
 def test_ws2_c01_summary_separates_scenario_and_required_robustness():
