@@ -1796,6 +1796,12 @@ It adds exactly two allowed semantic changes: the derived virtual profile's
 simulation-bundle ID and the bundle lock's hash for those derived profile
 bytes. Numerical policy change count remains zero. Study values, authority,
 route fixtures, historical repository files, and every route gate are retained.
+Evidence `E-20261007-AI-484` preserves its result: the coherent bundle loaded,
+then the promoted-parent fixture independently rejected the derived virtual
+profile's new file hash. The next successor must add that parent
+`promoted_profile` binding to the explicit derived-fixture allowlist and
+recompute the already allowed parent/predecessor identities. No numerical or
+authority change is permitted.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

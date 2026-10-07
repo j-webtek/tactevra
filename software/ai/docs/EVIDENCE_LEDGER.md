@@ -8723,3 +8723,42 @@ rewriting history. New entries must use a unique evidence ID.
   profile whose `simulation_bundle_id` matches the catalog-specific bundle and
   update its artifact hash in the bundle lock. Preserve every study value,
   authority field, route policy, and historical repository artifact.
+
+### E-20261007-AI-484 — coherent bundle reaches parent profile-file binding
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `e52d4eda67069e1ff3ac5962278c4868f0b69fb6`.
+- Change: derived a virtual commissioning profile whose bundle binding matches
+  the catalog-specific bundle, updated that profile's bundle-lock artifact hash,
+  and retained every study value, authority field, route policy, and historical
+  repository artifact.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_4.json`;
+  canonical fixture SHA-256
+  `7b5572298746451fed5e9ca773c60b708195a03cfed712dff72596726dfb39cb`;
+  file SHA-256
+  `2b5720a288858a769752cf149ca9df08309b7cc8af095b2ff2beadbdbda6c684`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_4 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_4.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_4.json`.
+- Result: `FAIL` after the coherent bundle loaded and before route construction.
+  The unchanged promoted-parent fixture loader raised `ValueError: bound source
+  hash changed: software/config/virtual_commissioning_profile.json`. Exit code
+  was 1 and no result file was written.
+- Metrics: the exact source tree, candidate catalog, bundle lock, derived
+  virtual profile, and route fixtures were materialized. Zero trajectory samples
+  and zero IK samples were evaluated.
+- Validation: the focused fixture suite passed 12 tests before execution. Ruff,
+  `git diff --check`, and the source-archive policy passed at 6,488 files and
+  661,890,672 logical bytes.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this result establishes coherent bundle admission only. The
+  parent route fixture independently binds the virtual-profile file and still
+  carries its historical hash. No route feasibility, IK, continuity, or
+  collision conclusion exists.
+- Supersedes: none. Every prior failed identity boundary remains preserved.
+- Next dependency: add the parent fixture's promoted-profile hash to the frozen
+  derived-fixture allowlist, recompute the parent and predecessor fixture
+  hashes, and rerun without changing numerical policies or repository fixtures.
