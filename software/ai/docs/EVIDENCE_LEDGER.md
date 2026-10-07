@@ -12510,3 +12510,11 @@ rewriting history. New entries must use a unique evidence ID.
 - Preserved result: incomplete-diagnostic C/F file SHA-256 `b876bd6b3b554cc2cfa48b6337ada24f13865031a84a42ea039323e0fedfdfe4`; internal receipt SHA-256 `7c2c65a3a576d3218612161f0750f5932f501b86002803bfe757cbf11ccb960a`. It binds both completed receipt hashes, the 768-world count, zero long-tip runs, and decision `STOP_INSUFFICIENT_ROW_EVIDENCE`.
 - Correction and next dependency: preserve C02.2 unchanged. Extend the external smoke receipt to retain its already computed row payload, bind the changed runner in a separately named C02.2.1 fixture before results, and rerun both tip shards on both GPUs. No threshold, settle duration, population, recipe, or contact rule changes.
 - Counts and authority: GPU worlds 768; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false. No recipe promotion, C03 execution, arm-lane status, or integration-gate change.
+
+
+### E-20261007-AI-C02-2-1-RELEASE-FREEZE-001 - corrected row-retaining diagnostic frozen before rerun
+
+- Implementation: commit `7af82a7065b048214dc7156242b46c395d2971a3` adds the computed row list to the external smoke receipt. It changes no probe, physics, geometry, timing, settle duration, tolerance, target, recipe, scenario, landing, or authority field.
+- Fixture and custody: C02.2.1 fixture C/F file SHA-256 `afe5274f22d7cbac49fb1e8b7a912005784811ca98af147b96255abd293cee77`, internal fixture SHA-256 `49026f1c354ec5035ddd2ae0f473b7daf0fdb2000c12119249b30eb6ebcd2d8d`; manifest C/F file SHA-256 `d780ae8693c8d703379d0dd3853dccf0b2d69a0971c1e07ecb26c9be39cc6910`, internal manifest SHA-256 `b3f0be329af06c5f56306e7d9387a2b767678211c46f58a05bfef0076765f870`.
+- Authorized rerun and decision: run shard indices 0 and 1 on both GPUs. Every row must pass the unchanged contact gates, and cross-GPU rows must agree under the existing exact-discrete/bounded-continuous rule. Full campaign execution and C03 remain unauthorized.
+- Counts and authority at freeze: GPU worlds 0 under C02.2.1; hardware writes 0; physical movements 0; real commands 0; permits 0; transports 0; physical authority false.
