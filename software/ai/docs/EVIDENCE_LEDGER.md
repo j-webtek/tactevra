@@ -8959,3 +8959,47 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a route successor that changes only the predecessor's
   C03 pose-family path, file hash, and receipt hash to this admitted result,
   then rerun the unchanged exact route and IK gates.
+
+### E-20261007-AI-490 — exact C03 route passes IK and joint continuity
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `d7977896bd2569f5ccde9d7842a5dc26d07efdf1`.
+- Change: rebound only the derived predecessor's C03 pose-family path, file
+  hash, and receipt hash to the exact-21-mm result in `E-20261007-AI-489`.
+  Catalog, ordered semantics, repeated targets, 110 mm tool, route policy, IK
+  gates, and authority remained unchanged.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_9.json`;
+  canonical fixture SHA-256
+  `cab208fea68adbfc89894b6030c9607b6624d03ada0b8d0691d3c1e6fdbb3467`;
+  file SHA-256
+  `c30cced8cb494444b2a61228e6b4d850a04812a4b7f7c655d51f7be573d0af71`;
+  runner SHA-256
+  `5614afd39e56ccdd2f742c12e13e54c1d789e7969eef53bd2163995e2c199be3`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_9 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_9.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json`.
+- Result: `PASS_C03_110MM_CANDIDATE_ROUTE_IK_CONTINUITY`; receipt SHA-256
+  `e8dcaa9b34e46ee5fb8ec4290c18f316c393894dc87c9ba8612a457f3ef2fd60`;
+  nested route receipt SHA-256
+  `f64b2c30099be8494bba052cfcb707562ece61a21694e81c9187d19ceae973e4`;
+  result-file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`.
+  A byte-identical, hash-verified backup is retained on `F:`.
+- Metrics: 321 trajectory samples and 321 accepted IK samples; IK status
+  `READY_FOR_INSTALLED_GEOMETRY_COLLISION_SCREENING`; minimum normalized arm
+  joint margin 0.0261; maximum adjacent joint delta 0.035543 rad. Canonical
+  route and joint-continuity acceptance are both true. Ordered targets remain
+  `H,E,L,L,O,SPACE,2,0,2,6`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: collision screening was not executed and the installed collision
+  gate remains blocked. The route uses fixed orientation and synthetic ready
+  state. Installed geometry, measured state, controller transport, device-effect
+  verification, hardware qualification, and physical authority remain absent.
+- Supersedes: none. Earlier failures remain preserved as the dependency chain
+  that led to this pass.
+- Next dependency: hand this exact result to the arm lane for installed-profile
+  collision screening with fresh observed state. The AI lane must not create a
+  collision permit, controller command, or physical authority.

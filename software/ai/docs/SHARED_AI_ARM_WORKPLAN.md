@@ -1879,6 +1879,14 @@ It changes only the derived predecessor's C03 pose-family path, file hash, and
 receipt hash to `E-20261007-AI-489`. Every inherited route value, IK gate,
 catalog binding, semantic action, repeated target, and authority rule remains
 unchanged.
+Evidence `E-20261007-AI-490` records
+`PASS_C03_110MM_CANDIDATE_ROUTE_IK_CONTINUITY`: all 321 trajectory samples
+passed canonical IK, minimum normalized arm-joint margin is 0.0261, and maximum
+adjacent joint delta is 0.035543 rad. The exact ordered route including repeated
+`L` and `2` is retained. This clears only the simulation IK and continuity
+question. Collision was not executed, the installed collision gate remains
+blocked, and the AI lane grants no controller or physical authority. The next
+dependency is arm-lane installed-profile collision screening with fresh state.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
