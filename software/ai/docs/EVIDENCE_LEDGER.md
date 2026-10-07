@@ -8648,3 +8648,34 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a successor with a shorter external destination path
   while retaining the exact source commit, tracked-file population, candidate
   catalog, bundle mutation, predecessor fixture, and all runtime gates.
+
+### E-20261007-AI-482 — short-path workspace reaches and stops at parent catalog binding
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `46fe258c5ab9d386cc07c395940eb5a2dffaabe0`.
+- Change: froze a short external materialization path while retaining the same
+  source commit, 6,480-file population, candidate catalog, bundle mutation,
+  predecessor fixture, route, tool, and gates from `E-20261007-AI-481`.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_2.json`;
+  canonical fixture SHA-256
+  `b9fff9ef175be1c049040861afbe5c16fad3a240262a576485398cbc0dc431c1`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_2 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_2.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_2.json`.
+- Result: `FAIL` after successful Git-tree extraction and before route
+  construction. The historical promoted parent fixture raised `ValueError:
+  bound source hash changed: software/config/nominal_target_profiles.json`.
+  Exit code was 1 and no result file was written.
+- Metrics: the exact source tree and candidate catalog were materialized; zero
+  trajectory and IK samples were evaluated.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this result proves the shorter path solved extraction only. It
+  does not assess route feasibility, IK, continuity, or collision.
+- Supersedes: none. Both materialization failures remain preserved.
+- Next dependency: derive successor copies of the route fixtures inside the
+  external workspace with their target-catalog binding and canonical fixture
+  hashes updated to the candidate catalog. Preserve all numerical policies and
+  leave historical repository fixtures unchanged.

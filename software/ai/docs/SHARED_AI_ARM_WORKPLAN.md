@@ -1769,6 +1769,11 @@ canonical SHA-256
 Only the external materialization root and derived bundle ID change. Source
 commit, tracked population, candidate catalog, predecessor fixture, route,
 tool, and every decision gate remain identical.
+The short-path run is preserved at evidence `E-20261007-AI-482`. Extraction
+completed, but the historical promoted parent fixture correctly rejected the
+candidate catalog because its input binding still pins the main catalog hash.
+A successor must derive new catalog-bound fixture hashes while retaining every
+numerical route and IK policy; historical fixtures remain immutable.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
