@@ -8801,3 +8801,36 @@ rewriting history. New entries must use a unique evidence ID.
   names `software/config/nominal_target_profiles.json`, already hash-bound to the
   same candidate bytes inside the coherent bundle. Preserve its hash, all
   numerical policies, and zero authority.
+
+### E-20261007-AI-486 — ingress passes and exposes promoted-profile source hash
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `17cc292223baaafccd9a0c9dbafeda028bbdfe09`.
+- Change: changed only the derived predecessor's candidate-catalog path to the
+  coherent bundle's internal locked path. Candidate bytes and hash remained
+  identical; numerical policy change count remained zero.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_6.json`;
+  canonical fixture SHA-256
+  `5facf1090988dc3add5373d3154fb585b8b320ceff9bc3a61d3f62e246ecee8d`;
+  file SHA-256
+  `18b2b565378bbe84abb0f7d7e0d2aae52071ba9f81bee834b724a0a80eaf6e62`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_6 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_6.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_6.json`.
+- Result: `FAIL` after strict batch ingress and fresh-registry revalidation.
+  Promoted placement validation raised `ValueError: promoted placement profile
+  changed`. Exit code was 1 and no result file was written.
+- Metrics: the coherent context admitted the exact ordered model batch. Zero
+  trajectory samples and zero IK samples were evaluated.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the parent fixture's `promoted_profile.source_sha256` still names
+  the historical virtual-profile bytes. The derived profile differs only in its
+  bundle identity, but its source hash must be rebound explicitly. No route,
+  IK, continuity, or collision conclusion exists.
+- Supersedes: none. This is the first attempt to pass strict ingress.
+- Next dependency: add `parent.promoted_profile.source_sha256` to the derived
+  fixture allowlist and bind it to the derived profile hash, preserving profile
+  ID, study-input ID, all numerical policies, and zero authority.

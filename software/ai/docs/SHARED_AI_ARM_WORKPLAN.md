@@ -1823,6 +1823,11 @@ canonical SHA-256
 It adds only the predecessor candidate-catalog path to the derived-fixture
 allowlist. The candidate hash remains identical and both rebinding contracts
 retain zero numerical policy changes and zero authority.
+Evidence `E-20261007-AI-486` preserves the result. Strict batch ingress and
+fresh-registry revalidation passed. Promoted placement validation then rejected
+the parent fixture's historical `promoted_profile.source_sha256`. The next
+successor may bind that field to the already derived profile hash while
+retaining profile ID, study-input ID, numerical policies, and zero authority.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
