@@ -1748,6 +1748,14 @@ It failed before IK because the runtime coherence guard correctly rejected an
 in-memory catalog replacement that differed from the locked bundle source.
 The successor must materialize and hash-bind a coherent simulation bundle; the
 guard and its comparison rules remain unchanged.
+The coherent successor fixture
+[`c03_exact_route_reconstruction_fixture_v1_1.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_1.json),
+canonical SHA-256
+`56f3fae5dcd48076dac619a3d49c12b1e0d58294007adb16af41fabdb180e107`,
+freezes source tree `fe80a94c26d564cd2e7233c6b85beef6909aab3c`, its 6,480
+tracked paths, the external derived-workspace root, and the catalog-specific
+bundle identity. It reruns the unchanged predecessor route only after the normal
+context loader and ingress coherence checks accept the relocked workspace.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

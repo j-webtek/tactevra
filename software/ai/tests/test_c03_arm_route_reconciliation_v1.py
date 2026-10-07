@@ -19,6 +19,9 @@ from rocell_ai.c03_arm_route_reconciliation_v1 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1 import (  # noqa: E402
     load_fixture as load_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_1 import (  # noqa: E402
+    load_fixture as load_coherent_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -30,6 +33,9 @@ FIXTURE_V1_2 = (
 )
 ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1.json"
+)
+COHERENT_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_1.json"
 )
 
 
@@ -129,5 +135,18 @@ def test_exact_route_fixture_is_frozen_and_zero_authority() -> None:
         "H", "E", "L", "L", "O", "SPACE", "2", "0", "2", "6",
     ]
     assert fixture["decision_rules"]["collision_screen_executed_must_be"] is False
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_coherent_route_successor_is_frozen_and_zero_authority() -> None:
+    fixture = load_coherent_route_fixture(COHERENT_ROUTE_FIXTURE, WORKSPACE)
+    assert fixture["coherent_workspace"]["source_tree_commit"] == (
+        "fe80a94c26d564cd2e7233c6b85beef6909aab3c"
+    )
+    assert fixture["coherent_workspace"]["expected_tracked_file_count"] == 6480
+    assert fixture["predecessor_fixture_path"].endswith(
+        "c03_exact_route_reconstruction_fixture_v1.json"
+    )
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

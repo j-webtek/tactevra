@@ -555,3 +555,11 @@ result remains external and hash-bound. This increment adds no simulator
 corpus, dependency tree, installed geometry, collision result, controller
 artifact, GPU artifact, or authority-bearing output. All byte, duplicate, and
 reduction limits remain unchanged.
+
+The coherent C03 route successor adds two governed paths: one external-workspace
+materializer and one pre-result fixture. The resulting tree contains 6,482
+tracked files. The ceiling advances from 6,480 to 6,484, leaving two reviewed
+file slots. The materializer extracts one exact Git tree outside the repository,
+replaces only the simulation target catalog, and updates that catalog's bundle
+lock hash. It cannot add collision evidence, controller output, hardware access,
+or authority. All byte, duplicate, and reduction limits remain unchanged.
