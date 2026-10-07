@@ -1756,6 +1756,12 @@ freezes source tree `fe80a94c26d564cd2e7233c6b85beef6909aab3c`, its 6,480
 tracked paths, the external derived-workspace root, and the catalog-specific
 bundle identity. It reruns the unchanged predecessor route only after the normal
 context loader and ingress coherence checks accept the relocked workspace.
+The first coherent-workspace attempt is preserved at evidence
+`E-20261007-AI-481`. It failed during Git-tree extraction because the frozen
+external destination made an existing tracked build-record path exceed the
+Windows path limit. No context, route, or IK evaluation occurred. A successor
+may shorten only the external destination while preserving all identities and
+gates.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

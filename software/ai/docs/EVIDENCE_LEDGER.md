@@ -8616,3 +8616,35 @@ rewriting history. New entries must use a unique evidence ID.
   in which the candidate catalog and simulation bundle lock agree, bind the
   derived bytes and construction procedure, then rerun without changing the
   runtime coherence guard or IK thresholds.
+
+### E-20261007-AI-481 — coherent workspace extraction hits Windows path limit
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `2c6a6424b7bc5bd54e1add5e39713753929e7018`.
+- Change: added a source-commit-pinned Git-tree materializer that replaces only
+  the simulation target catalog, updates its bundle-lock hash, and delegates to
+  the immutable exact-route predecessor after normal context validation.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_1.json`;
+  canonical fixture SHA-256
+  `56f3fae5dcd48076dac619a3d49c12b1e0d58294007adb16af41fabdb180e107`.
+  It freezes source tree `fe80a94c26d564cd2e7233c6b85beef6909aab3c`,
+  6,480 tracked paths, and bundle ID
+  `ROCELL-SIM-BUNDLE-RC03-C03-CANDIDATE-110MM-V1`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_1 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_1.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_1.json`.
+- Result: `FAIL` during archive extraction with `FileNotFoundError` on the
+  retained `Finish and Sign Off.md` build-record path beneath the long staging
+  root. Exit code was 1. No result file was written.
+- Metrics: zero contexts loaded, zero trajectory samples compiled, and zero IK
+  samples evaluated.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is a Windows path-length/materialization failure. It says
+  nothing about route feasibility, IK, continuity, or collision.
+- Supersedes: none. The failed result remains preserved.
+- Next dependency: freeze a successor with a shorter external destination path
+  while retaining the exact source commit, tracked-file population, candidate
+  catalog, bundle mutation, predecessor fixture, and all runtime gates.
