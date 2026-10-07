@@ -1,0 +1,59 @@
+{
+  "bindings": {
+    "c03_candidate_target_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/c03_exact_route_reconstruction_v1_3.py",
+      "sha256": "988d926312b2bee7543fc02dfca2009eb0abad82e598e68fe0739a65c3da0f30"
+    },
+    "materializer": {
+      "path": "software/ai/rocell_ai/c03_exact_route_reconstruction_v1_1.py",
+      "sha256": "d95143e2c76a0ab68c68647b5be197a8b2dd6da13b0103f79f310ebdaa7d26de"
+    },
+    "predecessor_fixture": {
+      "path": "software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1.json",
+      "sha256": "c75b2c83f45ae4d6a05cc63265e1222d246a3819984ab03964a384e1dabb5763"
+    }
+  },
+  "coherent_workspace": {
+    "allowed_root": "C:/MuJoCoWarp",
+    "bundle_id": "ROCELL-SIM-BUNDLE-RC03-C03-CANDIDATE-110MM-V1-3",
+    "expected_tracked_file_count": 6480,
+    "path": "C:/MuJoCoWarp/c03cw3",
+    "source_tree_commit": "fe80a94c26d564cd2e7233c6b85beef6909aab3c"
+  },
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "fixture_rebinding": {
+    "allowed_semantic_changes": [
+      "parent.input_bindings.target_catalog.sha256",
+      "predecessor.bindings.parent_route_fixture.sha256",
+      "predecessor.parent_fixture_sha256"
+    ],
+    "numerical_policy_change_count": 0,
+    "parent_route_fixture_path": "software/ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1_1.json",
+    "source_parent_fixture_sha256": "ee811e81ae69d36c3b7e19ec53cb6293fcbac510ce54c58a7d3f0e8ebcffdea0",
+    "source_predecessor_fixture_sha256": "f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197"
+  },
+  "fixture_sha256": "db7d824aef7d235b31f29848840e6c80aad5f4df327282562a8f42f73b6a6b02",
+  "limitations": [
+    "The materialized workspace is an external simulation-only derivative of one exact source commit.",
+    "Only the target catalog and its bundle-lock hash are replaced; all physical and deployment claims remain blocked.",
+    "The nested predecessor retains the exact C03 route fixture, canonical IK gates, and fixed-orientation limitation.",
+    "No collision screen, installed profile, controller operation, hardware write, or physical movement is permitted.",
+    "The shorter external path changes no source, catalog, route, tool, or gate identity.",
+    "Derived fixture hashes change only to bind the candidate catalog and derived parent identity."
+  ],
+  "physical_authority": false,
+  "predecessor_fixture_path": "software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1.json",
+  "schema": "tactevra.c03_exact_route_reconstruction_fixture.v1_3",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}

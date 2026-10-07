@@ -571,3 +571,11 @@ immutable materializer and predecessor route, changing only the external
 destination and derived bundle ID. No corpus, geometry, gate, or authority
 change is introduced. All byte, duplicate, and reduction limits remain
 unchanged.
+
+The catalog-rebound C03 route successor adds two governed paths: one thin
+fixture-rebinding runner and one pre-result fixture. The resulting tree contains
+6,486 tracked files. The ceiling advances from 6,484 to 6,488, retaining two
+reviewed-file slots. The runner changes exactly three source-identity fields in
+external derived fixtures and recomputes their hashes; every numerical route,
+IK, continuity, authority, and collision policy remains unchanged. All byte,
+duplicate, and reduction limits remain unchanged.

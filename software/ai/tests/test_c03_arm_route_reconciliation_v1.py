@@ -25,6 +25,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_1 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_2 import (  # noqa: E402
     load_fixture as load_short_path_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_3 import (  # noqa: E402
+    load_fixture as load_rebound_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -42,6 +45,9 @@ COHERENT_ROUTE_FIXTURE = (
 )
 SHORT_PATH_ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_2.json"
+)
+REBOUND_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_3.json"
 )
 
 
@@ -172,5 +178,24 @@ def test_short_path_successor_changes_only_external_materialization_identity() -
         prior["bindings"]["c03_candidate_target_catalog"]
     )
     assert fixture["predecessor_fixture_path"] == prior["predecessor_fixture_path"]
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_rebound_successor_freezes_only_catalog_identity_changes() -> None:
+    fixture = load_rebound_route_fixture(REBOUND_ROUTE_FIXTURE, WORKSPACE)
+    contract = fixture["fixture_rebinding"]
+    assert contract["allowed_semantic_changes"] == [
+        "parent.input_bindings.target_catalog.sha256",
+        "predecessor.bindings.parent_route_fixture.sha256",
+        "predecessor.parent_fixture_sha256",
+    ]
+    assert contract["numerical_policy_change_count"] == 0
+    assert contract["source_parent_fixture_sha256"] == (
+        "ee811e81ae69d36c3b7e19ec53cb6293fcbac510ce54c58a7d3f0e8ebcffdea0"
+    )
+    assert contract["source_predecessor_fixture_sha256"] == (
+        "f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197"
+    )
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

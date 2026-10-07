@@ -1774,6 +1774,13 @@ completed, but the historical promoted parent fixture correctly rejected the
 candidate catalog because its input binding still pins the main catalog hash.
 A successor must derive new catalog-bound fixture hashes while retaining every
 numerical route and IK policy; historical fixtures remain immutable.
+The catalog-rebound successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_3.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_3.json),
+canonical SHA-256
+`db7d824aef7d235b31f29848840e6c80aad5f4df327282562a8f42f73b6a6b02`.
+Its allowlist changes only the parent target-catalog hash and the predecessor's
+derived-parent file and canonical hashes. Its numerical policy change count is
+zero; historical repository fixtures are never rewritten.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
