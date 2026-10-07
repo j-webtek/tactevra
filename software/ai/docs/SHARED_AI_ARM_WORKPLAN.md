@@ -1157,7 +1157,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 | 120 mm exact-`H` contact and vertical-depth feasibility fixture, harness, tests, generated evidence, and `E-20261006-INT-472` documentation | `feature/sim-120mm-exact-contact` / claim pending | ACTIVE |
+| ARM | S2 | 120 mm exact-`H` contact and vertical-depth feasibility fixture, harness, tests, generated evidence, and `E-20261006-INT-472` documentation | `feature/sim-120mm-exact-contact` / `526e25d984d63c8dde5d6d02c389cc275cc796c6` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
