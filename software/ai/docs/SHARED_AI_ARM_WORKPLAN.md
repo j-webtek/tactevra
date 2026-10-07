@@ -1865,6 +1865,12 @@ and a 51-target seed source whose contact points were replaced by the exact
 candidate catalog centers. All 51 source contact targets are at 21.0 mm and
 match the catalog byte-for-byte by target. Recipe, 110 mm tool, route gates,
 IK gates, and authority remain unchanged. No pose result has been opened yet.
+Evidence `E-20261007-AI-489` records the result:
+`PASS_EXPLORATORY_CANDIDATE51_110MM_POSES`. All 51 targets solved for both
+110 mm profiles, every contact target is at 21.0 mm, and maximum IK position
+error is 0.006290654447909852 mm under the unchanged 0.01 mm gate. The result
+and seed source are hash-verified on `C:` and `F:`. This is simulation-only pose
+admission; the exact route and collision gates remain open.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

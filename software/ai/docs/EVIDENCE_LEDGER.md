@@ -8913,3 +8913,49 @@ rewriting history. New entries must use a unique evidence ID.
   the exact candidate catalog with contact target Z = 21.0 mm, retaining the
   110 mm tool and the frozen C03 recipe. Then rerun this route without changing
   route or IK gates.
+
+### E-20261007-AI-489 — exact 21 mm C03 pose family passes regeneration
+
+- Stage: S2/S3 exploratory zero-authority pose regeneration.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `bb82e4bd6cffefcae610789d41522639e781e383`.
+- Change: derived a 51-target seed source by replacing each historical contact
+  target with the exact frozen candidate-catalog center, then executed the
+  existing hash-bound CPU pose solver from simulation commit
+  `13c44aedd3dbd04054d88665332a56e6e7d31bc1`. Recipe, tool, route, and IK gates
+  were unchanged.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_pose_family_regeneration_fixture_v1.json`;
+  canonical fixture SHA-256
+  `1532890bde0bdabaa4a4b3bd21942edf24748399fc34754e1dbdeb49f9141325`;
+  file SHA-256
+  `c9a905dc4694336b1b0921107ed4dc90db6abace0ba73eae46ee0e6d8e7ec484`;
+  derived seed-source SHA-256
+  `bd68f7d3e3065f0cc90b05d2ec1aa1dd2078fe14c81521a08a9417277e078bf0`.
+- Command: from the `issue/190-isaac-sim-host` worktree, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.cpu_contact_and_ws3 pose-family --fixture C:\Users\WebTek\Desktop\tactevra-contact-boundary-repair\software\ai\sim\evidence\c03_pose_family_regeneration_fixture_v1.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_pose_regeneration_21mm_v1\candidate51_tool_pose_family_21mm_v1.json`.
+- Result: `PASS_EXPLORATORY_CANDIDATE51_110MM_POSES`; receipt SHA-256
+  `b34970482ce60590574216f30f3ca99e63e2cffd925c65db019b0e4cd659f668`;
+  result-file SHA-256
+  `125a7ba8b10cd72341d9be129741682c5191ec93ba4a3186a355d325c0b8e504`.
+  Seed and result have byte-identical hash-verified backups on `F:`.
+- Metrics: 51 of 51 targets solved for both profiles; two profile tool hashes
+  are `511f45c4...` for 10 mm exposure and `ba538b48...` for the selected 30 mm
+  exposure. Every contact target Z is exactly 21.0 mm. Maximum IK position error
+  is 0.006290654447909852 mm against the unchanged 0.01 mm limit.
+- Validation: the generator's strict fixture loader and pose-family validator
+  passed. The current branch's focused fixture suite passed 17 tests before
+  execution. The 51 derived contact targets were independently compared with
+  the strict candidate-catalog loader and all matched exactly.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this admits simulation poses only. It does not rerun exact key
+  clearance, full-route IK, collision screening, controller transport, or any
+  physical action. The candidate catalog remains uninstalled.
+- Supersedes: none. The stale pose family and failure `E-20261007-AI-488`
+  remain preserved.
+- Next dependency: freeze a route successor that changes only the predecessor's
+  C03 pose-family path, file hash, and receipt hash to this admitted result,
+  then rerun the unchanged exact route and IK gates.
