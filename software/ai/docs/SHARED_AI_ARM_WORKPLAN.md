@@ -1871,6 +1871,14 @@ Evidence `E-20261007-AI-489` records the result:
 error is 0.006290654447909852 mm under the unchanged 0.01 mm gate. The result
 and seed source are hash-verified on `C:` and `F:`. This is simulation-only pose
 admission; the exact route and collision gates remain open.
+The regenerated-pose route successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_9.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_9.json),
+canonical SHA-256
+`cab208fea68adbfc89894b6030c9607b6624d03ada0b8d0691d3c1e6fdbb3467`.
+It changes only the derived predecessor's C03 pose-family path, file hash, and
+receipt hash to `E-20261007-AI-489`. Every inherited route value, IK gate,
+catalog binding, semantic action, repeated target, and authority rule remains
+unchanged.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

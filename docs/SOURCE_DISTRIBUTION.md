@@ -632,3 +632,11 @@ branch; the generated 51-target seed source and pose result remain external
 hash-bound evidence. No dependency tree, corpus, hardware output, or authority
 enters the source archive. All byte, duplicate, and reduction limits remain
 unchanged.
+
+The regenerated-pose-bound route successor adds two governed paths: one thin
+derived-fixture runner and one pre-result fixture. The resulting tree contains
+6,499 tracked files. The ceiling advances from 6,498 to 6,501, retaining two
+reviewed-file slots. The runner changes only the derived predecessor's pose
+family path, file hash, and receipt hash to the externally admitted 21 mm
+result. Numerical policies, authority, and historical repository artifacts
+remain unchanged. All byte, duplicate, and reduction limits remain unchanged.

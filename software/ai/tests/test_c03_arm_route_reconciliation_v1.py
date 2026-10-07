@@ -43,6 +43,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_7 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_8 import (  # noqa: E402
     load_fixture as load_inherited_route_policy_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_9 import (  # noqa: E402
+    load_fixture as load_regenerated_pose_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -81,6 +84,9 @@ INHERITED_ROUTE_POLICY_FIXTURE = (
 )
 POSE_REGENERATION_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_pose_family_regeneration_fixture_v1.json"
+)
+REGENERATED_POSE_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_9.json"
 )
 
 
@@ -344,5 +350,25 @@ def test_pose_regeneration_fixture_binds_exact_21mm_source() -> None:
     )
     assert fixture["amendment"]["recipe_and_tool_unchanged"] is True
     assert fixture["amendment"]["route_and_ik_gates_unchanged"] is True
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_route_successor_binds_admitted_21mm_pose_family() -> None:
+    fixture = load_regenerated_pose_route_fixture(
+        REGENERATED_POSE_ROUTE_FIXTURE, WORKSPACE
+    )
+    binding = fixture["bindings"]["regenerated_c03_pose_family"]
+    assert binding["sha256"] == (
+        "125a7ba8b10cd72341d9be129741682c5191ec93ba4a3186a355d325c0b8e504"
+    )
+    assert binding["receipt_sha256"] == (
+        "b34970482ce60590574216f30f3ca99e63e2cffd925c65db019b0e4cd659f668"
+    )
+    allowlist = fixture["fixture_rebinding"]["allowed_semantic_changes"]
+    assert "predecessor.bindings.c03_pose_family.path" in allowlist
+    assert "predecessor.bindings.c03_pose_family.sha256" in allowlist
+    assert "predecessor.bindings.c03_pose_family.receipt_sha256" in allowlist
+    assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())
