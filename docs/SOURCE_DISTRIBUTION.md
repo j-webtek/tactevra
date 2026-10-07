@@ -534,3 +534,14 @@ creates an installed profile, collision result, controller artifact, hardware
 operation, or physical authority. No raw measurement capture, simulator corpus,
 dependency tree, GPU artifact, or generated geometry enters the archive. All
 byte, duplicate, and reduction limits remain unchanged.
+
+The ICQ-2 installed-profile builder increment adds two governed paths: one
+deterministic zero-authority builder and one focused unit-test module. The
+file-count ceiling advances from 6,471 to the exact expected 6,473 files for
+those reviewed paths only. The builder consumes the ICQ-1 parser, inflates
+static primitives by recorded per-body uncertainty, defers
+configuration-sampled cable geometry, audits its canonical bytes through the
+existing strict profile consumer, and emits no collision result, controller
+artifact, hardware operation, or physical authority. Synthetic fixtures are
+test inputs only and do not qualify installed geometry. All byte, duplicate,
+and reduction limits remain unchanged.

@@ -202,6 +202,58 @@ def test_rejects_static_geometry_for_configuration_sampled_cable(
         _load(tmp_path, document)
 
 
+def test_accepts_signed_local_coordinates_and_rotation_entries(tmp_path: Path) -> None:
+    document = _document()
+    body = next(
+        row
+        for row in document["body_measurements"]
+        if row["binding_mode"] != "CONFIGURATION_SAMPLED"
+    )
+    body["envelope_primitives"] = [{
+        "kind": "oriented_box",
+        "center_mm": [-1.0, 2.0, -3.0],
+        "half_extents_mm": [1.0, 2.0, 3.0],
+        "rotation_row_major": [
+            -1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, -1.0,
+        ],
+    }]
+    _rehash(document)
+
+    report = _load(tmp_path, document)
+    assert report["status"] == READY_STATUS
+
+
+def test_rejects_nonpositive_accepted_minimum_separation(tmp_path: Path) -> None:
+    document = _document()
+    document["clearance_measurement"]["minimum_separation_mm"] = 0.0
+    _rehash(document)
+
+    with pytest.raises(
+        InstalledCollisionMeasurementManifestV1Error,
+        match="incomplete or nonpositive",
+    ):
+        _load(tmp_path, document)
+
+
+def test_rejects_negative_geometry_uncertainty(tmp_path: Path) -> None:
+    document = _document()
+    measured = next(
+        row
+        for row in document["body_measurements"]
+        if row["status"] == "MEASURED"
+    )
+    measured["geometry_uncertainty_mm"] = -0.1
+    _rehash(document)
+
+    with pytest.raises(
+        InstalledCollisionMeasurementManifestV1Error,
+        match="geometry_uncertainty_mm is outside its finite range",
+    ):
+        _load(tmp_path, document)
+
+
 def test_rejects_crossed_context_and_content_tamper(tmp_path: Path) -> None:
     document = _document()
     document["manifest_sha256"] = "b" * 64
