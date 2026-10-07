@@ -1,0 +1,127 @@
+{
+  "admission_result": {
+    "path": "software/ai/sim/evidence/typing_twin_contact_transform_differential_result_v1.json",
+    "receipt_sha256": "cb921499b8bd3441cfd631a780bbe2346d17478d475b1c047fcf64839de5de67"
+  },
+  "candidate_collision_ranges": {
+    "geometry_uncertainty_mm_per_body": [
+      0.25,
+      1.0
+    ],
+    "link_origin_sphere_radius_mm": [
+      10.0,
+      30.0
+    ],
+    "minimum_separation_mm": [
+      0.0,
+      5.0
+    ],
+    "pose_uncertainty_mm_per_body": [
+      0.25,
+      1.0
+    ],
+    "tip_radius_mm": [
+      3.0
+    ],
+    "tool_length_mm": [
+      120.0
+    ]
+  },
+  "claim_commit": "1f6d8b38560e3fff57d91eca1e57e1f2f39a8df6",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "candidate_collision": "REPORT_EVERY_FROZEN_PROFILE_AND_SAMPLE;NEVER_CLEAR_INSTALLED_GATE",
+    "candidate_continuous_collision_proven_must_be": false,
+    "continuity": "EVERY_CANONICAL_ADJACENT_JOINT_STEP_ACCEPTED",
+    "continuity_threshold_change_count_maximum": 0,
+    "ik": "EVERY_EXACT_TRAJECTORY_SAMPLE_ACCEPTED",
+    "ik_threshold_change_count_maximum": 0,
+    "installed_collision_gate_must_remain_blocked": true,
+    "semantic_target_order_change_count_maximum": 0,
+    "target_coordinate_change_count_maximum": 0
+  },
+  "fixture_sha256": "e74244bcdbb4e7203b4859a3116756559b1285999a683b6612423ab7b78e6d3d",
+  "input_bindings": {
+    "admission_result": {
+      "path": "software/ai/sim/evidence/typing_twin_contact_transform_differential_result_v1.json",
+      "sha256": "cc1c0c76148f9112da39a093761d49848dda3f3a88dd00d470f4522a9fcef13e"
+    },
+    "canonical_ik": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    },
+    "collision_engine": {
+      "path": "software/src/rocell/simulation/collision.py",
+      "sha256": "7c6aaad9f5b97de14464b9c114b58aed900350163e388996daf0624a110d0fa9"
+    },
+    "collision_intake": {
+      "path": "software/src/rocell/application/typing_collision_intake_v1.py",
+      "sha256": "2a17e23b927f32bddd4e12e89a7c9acc7b6ccea727d46b1d1715ac6f086d7aa9"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_promoted_full_route_v1.py",
+      "sha256": "cd6d80c346375decd99aae57c63c46e156f24621db8bd961692c54508918a0ac"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json",
+      "sha256": "6c33aabd42236c6dc12be5dc418c53c337e2b19553855de7c2c7dec2ab0c210f"
+    },
+    "promoted_profile": {
+      "path": "software/config/virtual_commissioning_profile.json",
+      "sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "virtual_profile_loader": {
+      "path": "software/src/rocell/simulation/virtual_profile.py",
+      "sha256": "d0baf91109579f81277bf57de548286bc1940bfbaae4612be34f11f4c3a41a48"
+    }
+  },
+  "limitations": [
+    "The promoted transform, 120 mm keyboard tool, 25 mm hover, calibration snapshot, and ready-state joint seed are synthetic and are not physical observations.",
+    "The promoted profile supplies a board-frame park point but no source-bound park joint vector; this reconstruction retains the canonical ready-state joint seed rather than inventing one.",
+    "The full frozen route is the parent ten-action hello 2026 route; this increment does not expand it to every commissioned target.",
+    "Candidate collision geometry uses URDF link-origin spheres, a passive-stylus capsule, and pinned nominal workcell AABBs rather than installed measured geometry.",
+    "Candidate collision evaluation is performed at canonical trajectory samples and is not continuous swept-volume proof.",
+    "The installed collision profile remains absent, so no collision result can authorize motion.",
+    "The promoted virtual commissioning profile is an unmeasured sensitivity overlay with no physical release effect."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "da3dfb4c9eb580af81c3ff7dab95bb8d77b6d8b622bf32c3d8a111834c950308",
+    "path": "software/ai/sim/evidence/typing_twin_ik_collision_fixture_v1_4.json"
+  },
+  "promoted_profile": {
+    "profile_id": "ROCELL-VIRTUAL-COMMISSIONING-RANK1-001",
+    "source_sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634",
+    "study_input_id": "reach-944d7463f4c67905"
+  },
+  "reconstruction": {
+    "hover_clearance_mm": 25.0,
+    "tool_length_mm": 120.0
+  },
+  "resource_limits": {
+    "expected_candidate_profile_count": 16,
+    "maximum_ik_samples": 512
+  },
+  "route": {
+    "config_id": "typing-twin-promoted-profile-120mm-25mm-full-route-v1",
+    "tool_profile_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+    "trajectory_policy_id": "typing-twin-promoted-profile-120mm-25mm-quintic-v1"
+  },
+  "schema": "tactevra.typing_twin_promoted_full_route_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}

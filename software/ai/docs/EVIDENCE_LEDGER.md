@@ -8190,3 +8190,88 @@ rewriting history. New entries must use a unique evidence ID.
   promoted profile, then apply unchanged IK, continuity, and collision gates.
   Physical selection still requires measured placement, tool geometry, and
   commissioning evidence.
+
+### E-20261007-INT-474 — promoted-profile full route passes IK and continuity while collision remains blocked
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned route reconstruction recorded under the cross-lane `INT`
+  sequence. No integration gate or physical readiness status changed.
+- Claim commit: `1f6d8b38560e3fff57d91eca1e57e1f2f39a8df6`.
+- Original frozen implementation and fixture commit:
+  `1d48e835edfd17028d309885d792040d3edf0155`.
+- Pre-result successor fixture commit:
+  `06739b94af03d108b3aaf799495573496904f2b0`.
+- Result commit: `51baa0f57b29a021ccb94600e5e3bc7f1bffc72d`.
+- Objective: reconstruct the parent ten-action `hello 2026` route under the
+  exact source-bound promoted transform, 120 mm keyboard tool, and 25 mm hover,
+  then apply unchanged canonical IK, adjacent-joint continuity, installed
+  collision intake, and candidate collision diagnostics.
+- Original fixture:
+  `software/ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1.json`;
+  canonical SHA-256
+  `e74244bcdbb4e7203b4859a3116756559b1285999a683b6612423ab7b78e6d3d`;
+  file SHA-256
+  `bab1fb1df5a5c82d924c908d32f17c6d2ec95c1876ea4eea22c271ece5698958`.
+- Preserved failed run: with `PYTHONPATH=software/ai;software/src`, run
+  `python -m rocell_ai.typing_twin_promoted_full_route_v1
+  software/ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1.json`.
+  It exited 1 with `BoundedSegmentCollisionQualificationError: joint result
+  count exceeds policy maximum` after canonical IK and continuity reached the
+  installed collision intake. No result file was written and no gate was
+  cleared.
+- Successor fixture:
+  `software/ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1_1.json`;
+  canonical SHA-256
+  `ee811e81ae69d36c3b7e19ec53cb6293fcbac510ce54c58a7d3f0e8ebcffdea0`;
+  file SHA-256
+  `0aef44603d19938d2a2765050c9923747a648ca0e9310b6e3a6e2c5821b4f301`.
+  It changes no route input, target, threshold, or gate. It records the fixed
+  256-result intake refusal as a retained blocker so the nonauthoritative
+  candidate diagnostic can still run.
+- Exact successful command: with `PYTHONPATH=software/ai;software/src`, run
+  `python -m rocell_ai.typing_twin_promoted_full_route_v1
+  software/ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1_1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json`.
+- Result: `PASS_IK_CONTINUITY_RETAIN_INSTALLED_COLLISION_BLOCKER`. Receipt
+  SHA-256 `56d1c275ab529edc283a18d8569fc7d581bb047f1385094f6762a1f88c224aa5`;
+  result-file SHA-256
+  `f6d37eb758f2fc8ba0d2ea462b1512a7aa404e120fcb5c2421c1fa79043ce023`.
+- Metrics: all 328 trajectory samples passed unchanged canonical IK and
+  continuity. Minimum normalized arm-joint margin was `0.050964`; maximum
+  adjacent joint delta was `0.037773` rad. All 16 frozen candidate profiles
+  evaluated all 328 samples and reported 70 through 328 sampled collision
+  states, so none supplies a qualifying clearance claim.
+- Decision rule outcome: canonical IK and continuity pass. Installed collision
+  remains blocked by both `INSTALLED_COLLISION_PROFILE_REQUIRED` and
+  `BOUNDED_COLLISION_SAMPLE_POLICY_REJECTED`. Candidate geometry is incomplete,
+  sampled rather than continuous, and expressly cannot clear that gate.
+- Validation: three focused fixture-integrity, tamper, deterministic
+  reproduction, full-route, retained-blocker, and zero-authority tests passed
+  in 22.54 seconds; Ruff and `git diff --check` passed. Broader repository and
+  policy checks follow on the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate WS2 Stage A campaign was not interrupted.
+- Failures preserved: the original fixture is retained, and its exact command,
+  exit code, exception type, exception message, and interpretation are frozen
+  inside the successor fixture. The successful result also retains every
+  sampled candidate collision. Nothing was rescored or overwritten.
+- Limitations: the promoted transform, 120 mm tool, 25 mm hover, calibration,
+  and ready-state seed remain synthetic. The promoted profile carries a park
+  point but no source-bound park joint vector, so the reconstruction retains
+  the canonical ready seed rather than inventing one. It covers ten actions,
+  not every target. Candidate geometry uses coarse link-origin spheres and
+  nominal workcell AABBs, and checks sampled poses rather than continuous
+  sweeps. No installed geometry, physical accuracy, dynamics, contact,
+  controller transport, or physical authority is established.
+- Supersedes: none. It advances the explicitly allowed follow-up from
+  `E-20261007-INT-473` while retaining both the nominal blocked transform and
+  the first full-route intake failure.
+- Next dependency: define an arm-owned, frozen partitioning or streaming
+  contract that lets a 328-sample accepted route enter bounded installed
+  collision qualification without raising the fixed 256-result policy. Then
+  require measured installed geometry and continuous sweep evidence before any
+  physical selection or authority.

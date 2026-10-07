@@ -1177,6 +1177,22 @@ with zero physical release effect. The next bounded dependency is a frozen full
 route reconstruction under that exact profile, followed by unchanged continuity
 and collision gates; no physical transform, tool, or authority is installed.
 
+
+Evidence `E-20261007-INT-474` completes that promoted-profile reconstruction.
+All 328 route samples pass unchanged canonical IK and adjacent-joint
+continuity, with minimum normalized arm-joint margin `0.050964` and maximum
+adjacent delta `0.037773` rad. The first frozen run reached installed collision
+intake and correctly failed its fixed 256-result bounded-sampling policy; that
+attempt is retained in the successor fixture rather than rescored. The
+successor records this resource refusal as an additional installed-collision
+blocker and runs the already frozen candidate diagnostic over the full accepted
+route. Every candidate profile reports sampled collisions, while its coarse
+geometry and lack of continuous sweeps remain explicitly nonqualifying. The
+installed collision gate remains closed, and the promoted profile retains zero
+physical release effect. The next dependency is an arm-owned decision on how a
+full accepted route is partitioned for bounded installed collision intake,
+followed by measured installed geometry and continuous sweep evidence.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

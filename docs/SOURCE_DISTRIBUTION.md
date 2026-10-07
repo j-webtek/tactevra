@@ -488,3 +488,15 @@ dependency tree, controller artifact, GPU artifact, or authority-bearing output
 enters the archive. The measured tree is 660,152,165 logical bytes with
 4,890,152 governed duplicate bytes. All byte, duplicate, and reduction limits
 remain unchanged.
+
+The promoted-profile full-route reconstruction adds five governed paths: one
+CPU-only study module, one focused test module, the original frozen fixture,
+one pre-result successor fixture that preserves the original intake-policy
+failure, and one generated result bound by its receipt hash. The file-count
+ceiling advances from 6,450 to the exact observed 6,455 for those reviewed
+paths only. The retained result uses unchanged IK and continuity gates and
+keeps both installed and continuous collision gates closed; no simulator
+corpus, dependency tree, controller artifact, GPU artifact, or
+authority-bearing output enters the archive. The measured tree is 661,405,232
+logical bytes with 4,890,152 governed duplicate bytes. All byte, duplicate,
+and reduction limits remain unchanged.
