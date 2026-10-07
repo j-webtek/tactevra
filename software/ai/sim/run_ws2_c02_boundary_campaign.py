@@ -357,13 +357,24 @@ def build_control(
     return shard, campaign, execution, control
 
 
-def run_smoke(fixture_path: Path, device: str, output: Path) -> dict[str, Any]:
+def run_smoke(
+    fixture_path: Path,
+    device: str,
+    output: Path,
+    *,
+    shard_index: int | None = None,
+) -> dict[str, Any]:
     fixture = load_fixture(fixture_path)
     plan = load_candidate_plan(fixture)
     manifest = build_manifest(fixture, plan)
-    shard_id = manifest["shards"][int(fixture["smoke"]["manifest_shard_index"])][
-        "shard_id"
-    ]
+    selected_index = (
+        int(fixture["smoke"]["manifest_shard_index"])
+        if shard_index is None
+        else shard_index
+    )
+    if selected_index < 0 or selected_index >= len(manifest["shards"]):
+        raise ValueError("C02 smoke shard index is outside the frozen manifest")
+    shard_id = manifest["shards"][selected_index]["shard_id"]
     shard, campaign, execution, control = build_control(fixture, plan, shard_id)
     receipt = probe.run_smoke_worker(
         campaign,
@@ -404,6 +415,7 @@ def main() -> None:
     parser.add_argument("--fixture", type=Path, required=True)
     parser.add_argument("--device", choices=("cuda:0", "cuda:1"))
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--shard-index", type=int)
     args = parser.parse_args()
     fixture = load_fixture(args.fixture)
     plan = load_candidate_plan(fixture)
@@ -418,7 +430,12 @@ def main() -> None:
     else:
         if args.device is None or args.output is None:
             parser.error("smoke requires --device and --output")
-        result = run_smoke(args.fixture, args.device, args.output)
+        result = run_smoke(
+            args.fixture,
+            args.device,
+            args.output,
+            shard_index=args.shard_index,
+        )
     print(json.dumps(result, sort_keys=True, indent=2))
 
 
