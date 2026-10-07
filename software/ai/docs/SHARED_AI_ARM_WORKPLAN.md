@@ -1854,6 +1854,17 @@ C03 contact targets are at 20.0 mm. X and Y match. The route remains blocked;
 the equality check and catalog are unchanged. The next AI-lane dependency is a
 new C03 pose-family generation and admission run against the exact candidate
 catalog and 110 mm tool before any IK or collision claim can continue.
+The C03 pose-family regeneration is frozen in
+[`c03_pose_family_regeneration_fixture_v1.json`](../sim/evidence/c03_pose_family_regeneration_fixture_v1.json),
+canonical SHA-256
+`1532890bde0bdabaa4a4b3bd21942edf24748399fc34754e1dbdeb49f9141325`.
+It binds simulation implementation commit
+`13c44aedd3dbd04054d88665332a56e6e7d31bc1`, implementation SHA-256
+`4f73bfd7e980ef1554a8fa3972e4f3a9f226ba09bfa5f8f34305f77a68214f06`,
+and a 51-target seed source whose contact points were replaced by the exact
+candidate catalog centers. All 51 source contact targets are at 21.0 mm and
+match the catalog byte-for-byte by target. Recipe, 110 mm tool, route gates,
+IK gates, and authority remain unchanged. No pose result has been opened yet.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

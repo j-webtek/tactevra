@@ -79,6 +79,9 @@ PROMOTED_PROFILE_SOURCE_FIXTURE = (
 INHERITED_ROUTE_POLICY_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_8.json"
 )
+POSE_REGENERATION_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_pose_family_regeneration_fixture_v1.json"
+)
 
 
 def _write_fixture(tmp_path: Path, mutation) -> Path:
@@ -322,5 +325,24 @@ def test_inherited_route_policy_fields_are_explicit_and_untuned() -> None:
     allowlist = fixture["fixture_rebinding"]["allowed_semantic_changes"]
     assert all(f"parent.route.{name}" in allowlist for name in fields)
     assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_pose_regeneration_fixture_binds_exact_21mm_source() -> None:
+    fixture = json.loads(POSE_REGENERATION_FIXTURE.read_text(encoding="utf-8"))
+    claimed = fixture.pop("fixture_sha256")
+    assert claimed == canonical_hash(fixture)
+    assert fixture["claim_commit"] == (
+        "13c44aedd3dbd04054d88665332a56e6e7d31bc1"
+    )
+    assert fixture["bindings"]["candidate51_pose_source"]["sha256"] == (
+        "bd68f7d3e3065f0cc90b05d2ec1aa1dd2078fe14c81521a08a9417277e078bf0"
+    )
+    assert fixture["sections"]["pose_generation"]["contact_target_source"] == (
+        "EXACT_CANDIDATE_CATALOG_CENTERS_Z_21MM"
+    )
+    assert fixture["amendment"]["recipe_and_tool_unchanged"] is True
+    assert fixture["amendment"]["route_and_ik_gates_unchanged"] is True
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

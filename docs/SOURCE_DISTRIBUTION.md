@@ -624,3 +624,11 @@ byte-for-byte from the promoted fixture's existing hash-bound IK/collision
 parent. It does not tune or invent a numerical value. Authority and historical
 repository artifacts remain unchanged. All byte, duplicate, and reduction
 limits remain unchanged.
+
+The exact-21-mm C03 pose-family regeneration adds one governed pre-result
+fixture. The resulting tree contains 6,497 tracked files and remains below the
+existing 6,498-file ceiling. Solver code stays on its hash-bound simulation
+branch; the generated 51-target seed source and pose result remain external
+hash-bound evidence. No dependency tree, corpus, hardware output, or authority
+enters the source archive. All byte, duplicate, and reduction limits remain
+unchanged.
