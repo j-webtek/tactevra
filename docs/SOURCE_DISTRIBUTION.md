@@ -547,3 +547,10 @@ separate runtime module so the earlier twin remains byte-identical. This raises
 the exact tracked-file count and governed ceiling to 6,420. The fixture records
 the binding-only amendment and preserves the superseded fixture identity; its
 metrics, ranges, and decision rules are unchanged.
+
+The C02 contact-boundary repair keeps every C01 hash-bound source byte intact
+and adds one isolated successor module for directional hold-window reporting
+and compliance-preserving boundary extraction. This raises the exact tracked-
+file count and governed ceiling to 6,421. No generated campaign row, shard,
+model, video, or external result is added to the source archive; all byte,
+blob, duplicate, and reduction limits remain unchanged.

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from ai.sim import contact_boundary_refinement as C02_REFINEMENT
 from rocell_ai.simulation_program_cpu import (
     CANDIDATE_MODE,
     calibration_budget,
@@ -339,6 +340,27 @@ def test_ws2_debounce_successor_freezes_hold_and_throughput_populations():
         "force_within_available": True,
     }
     assert WS2_PROBE.primary_failure(row) == "DEBOUNCE_TOO_SHORT"
+    row["dwell_above_actuation_ms"] = 10.0
+    assert (
+        C02_REFINEMENT.primary_failure_v2(
+            row, minimum_hold_ms=30.0, maximum_hold_ms=150.0
+        )
+        == "HOLD_BELOW_MINIMUM"
+    )
+    row["dwell_above_actuation_ms"] = 156.0
+    assert (
+        C02_REFINEMENT.primary_failure_v2(
+            row, minimum_hold_ms=30.0, maximum_hold_ms=150.0
+        )
+        == "HOLD_ABOVE_MAXIMUM"
+    )
+    row["dwell_above_actuation_ms"] = 50.0
+    assert (
+        C02_REFINEMENT.primary_failure_v2(
+            row, minimum_hold_ms=30.0, maximum_hold_ms=150.0
+        )
+        == "HOLD_WINDOW_INCONSISTENT"
+    )
     row["actuation_count"] = 0
     row["partial_press"] = True
     assert WS2_PROBE.primary_failure(row) == "PARTIAL_PRESS"
@@ -773,3 +795,76 @@ def test_ws2_staged_refinement_is_deterministic_and_boundary_only():
         row["recipe_index"] not in coarse for row in first["refinement_identities"]
     )
     assert first["physical_authority"] is False
+
+
+def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
+    fixture = WS2_PROBE.load_fixture(WS2_FIXTURE_V2, workspace=ROOT)
+    execution = WS2_PROBE.load_execution_fixture(
+        WS2_EXECUTION_V2, workspace=ROOT, parent=fixture
+    )
+    staged = WS2_PROBE.load_staged_fixture(
+        WS2_STAGED_V3, workspace=ROOT, parent=fixture, execution=execution
+    )
+    coarse = WS2_PROBE.coarse_recipe_indices(fixture, staged)
+    landings = staged["stage_a_coarse"]["landing_sample_indices"]
+    rows = []
+    for compliance_id in ("k0.0715_t3", "k0.286_t6"):
+        for recipe_index in coarse:
+            for landing_index in landings:
+                admitted = not (
+                    compliance_id == "k0.0715_t3"
+                    and recipe_index == 0
+                    and landing_index == landings[0]
+                )
+                rows.append(
+                    {
+                        "target_id": "GRAVE",
+                        "profile_id": "BASELINE",
+                        "tip_id": "sphere-r1",
+                        "scenario_id": "HIGH_SOURCE_LOW_RESIDUAL",
+                        "compliance_id": compliance_id,
+                        "recipe_index": recipe_index,
+                        "landing_sample_index": landing_index,
+                        "admitted": admitted,
+                        "finite": True,
+                        "overflow_zero": True,
+                        "actuation_count": int(admitted),
+                        "partial_press": not admitted,
+                        "auto_repeat_count": 0,
+                        "double_actuation": False,
+                        "neighbor_contact": False,
+                        "bottom_out_overflow": False,
+                        "dwell_above_actuation_ms": 50.0 if admitted else 0.0,
+                        "debounce_hold_complete": admitted,
+                        "release_complete": True,
+                        "force_within_available": True,
+                    }
+                )
+    first = C02_REFINEMENT.refinement_plan_v2(
+        fixture, staged, rows, c01_result_sha256="0" * 64
+    )
+    assert first == C02_REFINEMENT.refinement_plan_v2(
+        fixture, staged, rows, c01_result_sha256="0" * 64
+    )
+    assert first["group_count"] == 2
+    assert first["hold_window_ms"] == {"minimum": 30.0, "maximum": 150.0}
+    assert first["boundary_count"] > 0
+    assert {
+        row["compliance_id"] for row in first["boundaries"]
+    } == {"k0.0715_t3"}
+    assert all(
+        row["compliance_id"] == "k0.0715_t3"
+        for row in first["refinement_identities"]
+    )
+    assert first["population_status"] == "SEEDS_ONLY_PENDING_COMPLETE_C01_FINALIZATION"
+    assert first["physical_authority"] is False
+
+    incomplete = rows[:-1]
+    try:
+        C02_REFINEMENT.refinement_plan_v2(
+            fixture, staged, incomplete, c01_result_sha256="0" * 64
+        )
+    except ValueError as exc:
+        assert "landing population incomplete" in str(exc)
+    else:
+        raise AssertionError("incomplete C01 landing population was admitted")
