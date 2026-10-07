@@ -1182,7 +1182,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 | promoted-profile full-route reconstruction at 120 mm / 25 mm; unchanged IK, continuity, installed-collision intake, candidate diagnostics, generated evidence, and `E-20261007-INT-474` documentation | `feature/sim-promoted-full-route` / claim pending | ACTIVE |
+| ARM | S2 | promoted-profile full-route reconstruction at 120 mm / 25 mm; unchanged IK, continuity, installed-collision intake, candidate diagnostics, generated evidence, and `E-20261007-INT-474` documentation | `feature/sim-promoted-full-route` / `1f6d8b38560e3fff57d91eca1e57e1f2f39a8df6` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
