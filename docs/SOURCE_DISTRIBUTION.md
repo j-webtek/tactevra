@@ -606,3 +606,12 @@ path from the external evidence location to the coherent bundle's internal
 locked path; the candidate bytes and hash remain identical. Numerical policies,
 authority, and historical repository artifacts remain unchanged. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The promoted-profile-source C03 route successor adds two governed paths: one
+thin derived-fixture runner and one pre-result fixture. The resulting tree
+contains 6,494 tracked files. The ceiling advances from 6,494 to 6,496,
+retaining two reviewed-file slots. The runner binds the parent fixture's
+promoted-profile source hash to the already derived profile bytes. Profile ID,
+study-input ID, numerical policies, authority, and historical repository
+artifacts remain unchanged. All byte, duplicate, and reduction limits remain
+unchanged.

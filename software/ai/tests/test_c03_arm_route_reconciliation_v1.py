@@ -37,6 +37,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_5 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_6 import (  # noqa: E402
     load_fixture as load_locked_catalog_path_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_7 import (  # noqa: E402
+    load_fixture as load_promoted_profile_source_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -66,6 +69,9 @@ PARENT_PROFILE_ROUTE_FIXTURE = (
 )
 LOCKED_CATALOG_PATH_ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_6.json"
+)
+PROMOTED_PROFILE_SOURCE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_7.json"
 )
 
 
@@ -273,5 +279,18 @@ def test_locked_catalog_path_successor_preserves_candidate_hash() -> None:
         prior["bindings"]["c03_candidate_target_catalog"]["sha256"]
     )
     assert contract["numerical_policy_change_count"] == 0
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_promoted_profile_source_successor_adds_only_source_hash() -> None:
+    fixture = load_promoted_profile_source_fixture(
+        PROMOTED_PROFILE_SOURCE_FIXTURE, WORKSPACE
+    )
+    assert "parent.promoted_profile.source_sha256" in (
+        fixture["fixture_rebinding"]["allowed_semantic_changes"]
+    )
+    assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
+    assert fixture["virtual_profile_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

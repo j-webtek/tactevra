@@ -1828,6 +1828,13 @@ fresh-registry revalidation passed. Promoted placement validation then rejected
 the parent fixture's historical `promoted_profile.source_sha256`. The next
 successor may bind that field to the already derived profile hash while
 retaining profile ID, study-input ID, numerical policies, and zero authority.
+The promoted-profile-source successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_7.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_7.json),
+canonical SHA-256
+`9c2fcd728716fc6d7b703ce72a92875ba4b499fcd1064805e9ca1093655c8870`.
+It adds only `parent.promoted_profile.source_sha256` to the derived-fixture
+allowlist. Profile ID, study-input ID, candidate catalog, numerical policies,
+and authority remain unchanged.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
