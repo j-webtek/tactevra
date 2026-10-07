@@ -1762,6 +1762,13 @@ external destination made an existing tracked build-record path exceed the
 Windows path limit. No context, route, or IK evaluation occurred. A successor
 may shorten only the external destination while preserving all identities and
 gates.
+The short-path correction is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_2.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_2.json),
+canonical SHA-256
+`b9fff9ef175be1c049040861afbe5c16fad3a240262a576485398cbc0dc431c1`.
+Only the external materialization root and derived bundle ID change. Source
+commit, tracked population, candidate catalog, predecessor fixture, route,
+tool, and every decision gate remain identical.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

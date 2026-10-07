@@ -22,6 +22,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_1 import (  # noqa: E402
     load_fixture as load_coherent_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_2 import (  # noqa: E402
+    load_fixture as load_short_path_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -36,6 +39,9 @@ ROUTE_FIXTURE = (
 )
 COHERENT_ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_1.json"
+)
+SHORT_PATH_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_2.json"
 )
 
 
@@ -148,5 +154,23 @@ def test_coherent_route_successor_is_frozen_and_zero_authority() -> None:
     assert fixture["predecessor_fixture_path"].endswith(
         "c03_exact_route_reconstruction_fixture_v1.json"
     )
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_short_path_successor_changes_only_external_materialization_identity() -> None:
+    prior = load_coherent_route_fixture(COHERENT_ROUTE_FIXTURE, WORKSPACE)
+    fixture = load_short_path_route_fixture(SHORT_PATH_ROUTE_FIXTURE, WORKSPACE)
+    assert fixture["coherent_workspace"]["path"] == "C:/MuJoCoWarp/c03cw1"
+    assert fixture["coherent_workspace"]["source_tree_commit"] == (
+        prior["coherent_workspace"]["source_tree_commit"]
+    )
+    assert fixture["coherent_workspace"]["expected_tracked_file_count"] == (
+        prior["coherent_workspace"]["expected_tracked_file_count"]
+    )
+    assert fixture["bindings"]["c03_candidate_target_catalog"] == (
+        prior["bindings"]["c03_candidate_target_catalog"]
+    )
+    assert fixture["predecessor_fixture_path"] == prior["predecessor_fixture_path"]
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

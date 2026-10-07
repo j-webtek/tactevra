@@ -563,3 +563,11 @@ file slots. The materializer extracts one exact Git tree outside the repository,
 replaces only the simulation target catalog, and updates that catalog's bundle
 lock hash. It cannot add collision evidence, controller output, hardware access,
 or authority. All byte, duplicate, and reduction limits remain unchanged.
+
+The Windows short-path correction adds two governed paths: one thin successor
+runner and one pre-result fixture. The resulting tree reaches the existing
+6,484-file ceiling without increasing it. The successor delegates to the
+immutable materializer and predecessor route, changing only the external
+destination and derived bundle ID. No corpus, geometry, gate, or authority
+change is introduced. All byte, duplicate, and reduction limits remain
+unchanged.
