@@ -46,6 +46,9 @@ WS2_MECHANISMS = (
 WS2_VECTOR_FIXTURE = (
     ROOT / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2.json"
 )
+WS2_C02_EXTRACTION = (
+    ROOT / "software/ai/sim/evidence/workstream_2_c02_boundary_extraction_v1.json"
+)
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",
     ROOT / "software/ai/sim/run_ws2_stage_a_vectorized_throughput.py",
@@ -834,9 +837,15 @@ def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
                         "double_actuation": False,
                         "neighbor_contact": False,
                         "bottom_out_overflow": False,
+                        "actuation_margin_mm": 0.5 if admitted else -0.1,
+                        "bottom_out_margin_mm": 1.0,
+                        "minimum_depth_margin_mm": 0.5 if admitted else -0.1,
+                        "peak_required_force_n": 0.1,
                         "dwell_above_actuation_ms": 50.0 if admitted else 0.0,
                         "debounce_hold_complete": admitted,
                         "release_complete": True,
+                        "final_position_error_mm": 0.0,
+                        "final_velocity_mm_s": 0.0,
                         "force_within_available": True,
                     }
                 )
@@ -859,6 +868,37 @@ def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
     assert first["population_status"] == "SEEDS_ONLY_PENDING_COMPLETE_C01_FINALIZATION"
     assert first["physical_authority"] is False
 
+    compact = C02_REFINEMENT.compact_c02_boundary_plan(
+        fixture,
+        staged,
+        [
+            {
+                "shard": {
+                    "shard_id": "a" * 64,
+                    "target_id": "GRAVE",
+                    "profile_id": "BASELINE",
+                    "tip_id": "sphere-r1",
+                },
+                "world_count": len(rows),
+                "rows": rows,
+            }
+        ],
+        c01_result_sha256="0" * 64,
+        maximum_boundary_sources_per_bucket=2,
+        maximum_new_recipes_per_source=4,
+    )
+    assert compact["source_shard_count"] == 1
+    assert compact["required_group_count"] == 2
+    assert compact["required_boundary_group_count"] == 1
+    assert compact["required_no_boundary_group_count"] == 1
+    assert compact["candidate_seed_count"] == 4
+    assert compact["projected_world_count"] == 4 * 64
+    assert compact["targets_with_seed"] == ["GRAVE"]
+    assert {
+        row["compliance_id"] for row in compact["candidate_seeds"]
+    } == {"k0.0715_t3"}
+    assert compact["physical_authority"] is False
+
     incomplete = rows[:-1]
     try:
         C02_REFINEMENT.refinement_plan_v2(
@@ -868,6 +908,26 @@ def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
         assert "landing population incomplete" in str(exc)
     else:
         raise AssertionError("incomplete C01 landing population was admitted")
+
+
+def test_ws2_c02_extraction_fixture_is_hash_bound_and_bounded(tmp_path: Path):
+    fixture = C02_REFINEMENT.load_c02_extraction_fixture(WS2_C02_EXTRACTION)
+    assert fixture["bindings"]["c01_final_result"]["decision"] == (
+        "COMPLETE_INFEASIBLE_NO_RANGE_CHANGE"
+    )
+    assert fixture["selection"]["maximum_boundary_sources_per_bucket"] == 2
+    assert fixture["selection"]["maximum_new_recipes_per_source"] == 4
+    assert fixture["selection"]["failure_control_eligible_for_seeding"] is False
+    assert set(fixture["counters"].values()) == {0}
+    assert fixture["physical_authority"] is False
+
+    fixture.pop("fixture_sha256")
+    fixture["selection"]["maximum_boundary_sources_per_bucket"] = 0
+    fixture["fixture_sha256"] = C02_REFINEMENT.ops.value_sha(fixture)
+    path = tmp_path / "invalid_c02_extraction.json"
+    path.write_text(json.dumps(fixture), encoding="utf-8")
+    with pytest.raises(ValueError, match="source quota must be positive"):
+        C02_REFINEMENT.load_c02_extraction_fixture(path)
 
 
 def test_ws2_c01_summary_separates_scenario_and_required_robustness():

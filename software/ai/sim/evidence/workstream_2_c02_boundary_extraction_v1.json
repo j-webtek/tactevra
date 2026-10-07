@@ -1,0 +1,76 @@
+{
+  "bindings": {
+    "c01_final_result": {
+      "decision": "COMPLETE_INFEASIBLE_NO_RANGE_CHANGE",
+      "manifest_sha256": "8341db25d78a1d16a00ba6e435987d5e6ba991fc5f311f96f4834fb583b419c4",
+      "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/stage_a_campaign_v1/c01_final_result_v1.json",
+      "result_sha256": "0bd19ed636f1aefc089079ec230daf30048d0964d8288c38af15db2a185714b9",
+      "sha256": "2ca1fd2577dc01bfeccfc37e0141a845f3b08032fc82d1bec8c78c22224d4daf"
+    },
+    "campaign_fixture": {
+      "fixture_sha256": "3651056b5f557adb7f66fdc357c57f830f28227471b801ce62d9f6c814e775e8",
+      "path": "C:/Users/WebTek/Desktop/tactevra-contact-boundary-repair/software/ai/sim/evidence/workstream_2_stage_a_long_run_preflight_v1.json",
+      "sha256": "903d45dad2e263a3a56f1cd7fba5a9bd7a27c008ab1080038e23a1775dbe9a3a"
+    },
+    "extractor_module": {
+      "path": "software/ai/sim/contact_boundary_refinement.py",
+      "sha256": "76f4796d2fef910c140e216d1e0eb553853ce0d6f86b395dade3cedc8941a536"
+    }
+  },
+  "campaign": {
+    "id": "C02-contact-boundary-refinement",
+    "subtitle": "Turn retained C01 failure transitions into a bounded successor population without weakening any gate.",
+    "title": "Contact Boundary Refinement"
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "date": "2026-10-07",
+  "fixture_sha256": "110aadb4d5809d48babeba6a2068ea095607602eb95e47c2954f580ac1a6ed14",
+  "limitations": [
+    "C01_IS_SIMULATION_ONLY",
+    "CANDIDATE_SEEDS_DO_NOT_QUALIFY_A_RECIPE",
+    "NO_THRESHOLD_OR_GATE_CHANGES",
+    "NO_C02_PHYSICS_EXECUTION_AUTHORIZED",
+    "PHYSICAL_KEY_AND_TOOL_PARAMETERS_REMAIN_UNQUALIFIED"
+  ],
+  "output": {
+    "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/c02_boundary_extraction_v1/candidate_seed_plan.json",
+    "status": "CANDIDATE_SEEDS_ONLY_REQUIRES_SEPARATE_C02_FIXTURE"
+  },
+  "physical_authority": false,
+  "schema": "tactevra.ws2_c02_boundary_extraction_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "selection": {
+    "bucket_fields": [
+      "target_id",
+      "scenario_id",
+      "compliance_id",
+      "failure_class"
+    ],
+    "failure_control_eligible_for_seeding": false,
+    "maximum_boundary_sources_per_bucket": 2,
+    "maximum_new_recipes_per_source": 4,
+    "no_observed_boundary_action": "RETAIN_BLOCKER_AND_REQUIRE_MECHANICAL_OR_SAMPLED_RANGE_REDESIGN",
+    "source_ranking": [
+      "passing_landing_count_desc",
+      "same_failure_distance_asc",
+      "maximum_depth_margin_desc",
+      "profile_id_asc",
+      "tip_id_asc",
+      "recipe_index_asc"
+    ],
+    "stage_b_landing_rule": "ALL_64_FROZEN_SAMPLES"
+  },
+  "source_expectations": {
+    "robust_cell_count": 0,
+    "scenario_cell_pass_count": 0,
+    "shard_count": 11628,
+    "targets_with_robust_cell": 0,
+    "world_count": 26790912
+  }
+}

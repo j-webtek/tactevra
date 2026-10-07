@@ -554,3 +554,10 @@ and compliance-preserving boundary extraction. This raises the exact tracked-
 file count and governed ceiling to 6,421. No generated campaign row, shard,
 model, video, or external result is added to the source archive; all byte,
 blob, duplicate, and reduction limits remain unchanged.
+
+The frozen C02 boundary-extraction fixture adds one compact tracked file and
+binds the external finalized C01 result, streaming extractor source, quotas,
+and fail-closed outcome policy. This raises the exact tracked-file count and
+governed ceiling to 6,422. The 26,790,912 source rows and every generated C02
+candidate remain external; all byte, blob, duplicate, and reduction limits
+remain unchanged.

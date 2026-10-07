@@ -78,12 +78,48 @@ def primary_failure_v2(
     return "ADMITTED"
 
 
+def _failure_distance(
+    row: dict[str, Any],
+    failure: str,
+    *,
+    minimum_hold_ms: float,
+    maximum_hold_ms: float,
+    available_press_force_n: float,
+) -> float:
+    """Return a same-failure-family distance to the violated C01 boundary."""
+    if failure == "PARTIAL_PRESS":
+        return max(0.0, -float(row["actuation_margin_mm"]))
+    if failure == "BOTTOM_OUT":
+        return max(0.0, -float(row["bottom_out_margin_mm"]))
+    if failure == "HOLD_BELOW_MINIMUM":
+        return max(0.0, minimum_hold_ms - float(row["dwell_above_actuation_ms"]))
+    if failure == "HOLD_ABOVE_MAXIMUM":
+        return max(0.0, float(row["dwell_above_actuation_ms"]) - maximum_hold_ms)
+    if failure == "FORCE_EXCEEDED":
+        return max(0.0, float(row["peak_required_force_n"]) - available_press_force_n)
+    if failure in {"AUTO_REPEAT", "DOUBLE_ACTUATION"}:
+        return float(max(1, int(row.get("auto_repeat_count", 0))))
+    if failure == "RELEASE_INCOMPLETE":
+        return abs(float(row["final_position_error_mm"])) + abs(
+            float(row["final_velocity_mm_s"])
+        )
+    if failure in {
+        "ADMITTED",
+        "NEIGHBOR_CONTACT",
+        "HOLD_WINDOW_INCONSISTENT",
+        "NONFINITE_OR_OVERFLOW",
+    }:
+        return 0.0
+    raise ValueError(f"unknown successor failure class: {failure}")
+
+
 def refinement_plan_v2(
     fixture: dict[str, Any],
     staged: dict[str, Any],
     rows: list[dict[str, Any]],
     *,
     c01_result_sha256: str,
+    emit_refinement_identities: bool = True,
 ) -> dict[str, Any]:
     """Build compliance-preserving C02 seeds from complete normalized C01 rows."""
     if len(c01_result_sha256) != 64 or any(
@@ -98,6 +134,7 @@ def refinement_plan_v2(
         float(value) for value in switch["minimum_duration_ms_samples"]
     )
     maximum_hold_ms = float(switch["maximum_duration_ms"])
+    recipe_rows = {int(row["recipe_index"]): row for row in probe.recipe_rows(fixture)}
     identity_fields = (
         "target_id",
         "profile_id",
@@ -157,8 +194,39 @@ def refinement_plan_v2(
                 "passing_landing_count": sum(
                     bool(row["admitted"]) for row in recipes[index]
                 ),
+                "minimum_depth_margin_mm": min(
+                    float(row["minimum_depth_margin_mm"])
+                    for row in recipes[index]
+                ),
+                "maximum_depth_margin_mm": max(
+                    float(row["minimum_depth_margin_mm"])
+                    for row in recipes[index]
+                ),
+                "failure_distances": {
+                    failure: min(
+                        _failure_distance(
+                            row,
+                            failure,
+                            minimum_hold_ms=minimum_hold_ms,
+                            maximum_hold_ms=maximum_hold_ms,
+                            available_press_force_n=float(
+                                recipe_rows[index]["available_press_force_n"]
+                            ),
+                        )
+                        for row in recipes[index]
+                        if primary_failure_v2(
+                            row,
+                            minimum_hold_ms=minimum_hold_ms,
+                            maximum_hold_ms=maximum_hold_ms,
+                        )
+                        == failure
+                    )
+                    for failure in sorted(failures[index])
+                },
             }
             boundaries.append(boundary_id)
+            if not emit_refinement_identities:
+                continue
             unrun = sorted(
                 (candidate for candidate in vectors if candidate not in coarse),
                 key=lambda candidate: (
@@ -354,6 +422,356 @@ def summarize_c01_results(
     }
 
 
+def load_c02_extraction_fixture(path: Path) -> dict[str, Any]:
+    fixture = json.loads(path.read_text(encoding="utf-8"))
+    claimed = fixture.pop("fixture_sha256")
+    if ops.value_sha(fixture) != claimed:
+        raise ValueError("C02 extraction fixture hash mismatch")
+    fixture["fixture_sha256"] = claimed
+    if fixture.get("scope") != SCOPE or fixture.get("physical_authority") is not False:
+        raise ValueError("C02 extraction fixture must remain zero-authority simulation")
+    if any(int(value) != 0 for value in fixture["counters"].values()):
+        raise ValueError("C02 extraction fixture counters must remain zero")
+    selection = fixture["selection"]
+    if int(selection["maximum_boundary_sources_per_bucket"]) <= 0:
+        raise ValueError("C02 extraction source quota must be positive")
+    if int(selection["maximum_new_recipes_per_source"]) <= 0:
+        raise ValueError("C02 extraction recipe quota must be positive")
+    if selection["bucket_fields"] != [
+        "target_id",
+        "scenario_id",
+        "compliance_id",
+        "failure_class",
+    ]:
+        raise ValueError("C02 extraction bucket fields changed")
+    return fixture
+
+
+def _validate_shard_bytes(
+    raw: bytes,
+    *,
+    expected_shard_id: str,
+    accepted_fixture_sha256: set[str],
+) -> dict[str, Any]:
+    result = json.loads(raw)
+    core = dict(result)
+    claimed = core.pop("receipt_sha256")
+    if ops.value_sha(core) != claimed:
+        raise ValueError("shard receipt hash mismatch")
+    if result["shard"]["shard_id"] != expected_shard_id:
+        raise ValueError("shard identity mismatch")
+    if result["rows_sha256"] != supervisor._result_rows_sha(result["rows"]):
+        raise ValueError("shard row hash mismatch")
+    if result.get("fixture_sha256") not in accepted_fixture_sha256:
+        raise ValueError("shard fixture mismatch")
+    if result["status"] != "PASS" or result.get("failure_class") is not None:
+        raise ValueError("only passing shard results may seed C02")
+    return result
+
+
+def compact_c02_boundary_plan(
+    fixture: dict[str, Any],
+    staged: dict[str, Any],
+    shard_results: Any,
+    *,
+    c01_result_sha256: str,
+    maximum_boundary_sources_per_bucket: int,
+    maximum_new_recipes_per_source: int,
+) -> dict[str, Any]:
+    """Stream C01 shards into bounded, identity-preserving C02 candidate seeds."""
+    if maximum_boundary_sources_per_bucket <= 0 or maximum_new_recipes_per_source <= 0:
+        raise ValueError("C02 extraction quotas must be positive")
+    vectors = probe._normalized_recipe_vectors(fixture)
+    coarse = set(probe.coarse_recipe_indices(fixture, staged))
+    buckets: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
+    failure_counts: Counter[str] = Counter()
+    group_count = 0
+    required_group_count = 0
+    boundary_group_count = 0
+    required_boundary_group_count = 0
+    shard_count = 0
+    world_count = 0
+    targets_seen: set[str] = set()
+
+    for result in shard_results:
+        shard_count += 1
+        world_count += int(result["world_count"])
+        target_id = str(result["shard"]["target_id"])
+        targets_seen.add(target_id)
+        shard_plan = refinement_plan_v2(
+            fixture,
+            staged,
+            result["rows"],
+            c01_result_sha256=c01_result_sha256,
+            emit_refinement_identities=False,
+        )
+        group_count += int(shard_plan["group_count"])
+        required_group_count += sum(
+            1
+            for scenario_id in {
+                str(row["scenario_id"]) for row in result["rows"]
+            }
+            if scenario_id != "FAILURE_CONTROL"
+        ) * len({str(row["compliance_id"]) for row in result["rows"]})
+        boundary_groups = {
+            (
+                row["target_id"],
+                row["profile_id"],
+                row["tip_id"],
+                row["scenario_id"],
+                row["compliance_id"],
+            )
+            for row in shard_plan["boundaries"]
+        }
+        boundary_group_count += len(boundary_groups)
+        required_boundary_group_count += sum(
+            identity[3] != "FAILURE_CONTROL" for identity in boundary_groups
+        )
+        for boundary in shard_plan["boundaries"]:
+            scenario_id = str(boundary["scenario_id"])
+            if scenario_id == "FAILURE_CONTROL":
+                continue
+            for failure in boundary["failure_classes"]:
+                if failure == "ADMITTED":
+                    continue
+                failure_counts[failure] += 1
+                bucket = (
+                    str(boundary["target_id"]),
+                    scenario_id,
+                    str(boundary["compliance_id"]),
+                    str(failure),
+                )
+                candidate = {
+                    **boundary,
+                    "selected_failure_class": failure,
+                    "failure_distance": float(
+                        boundary["failure_distances"][failure]
+                    ),
+                }
+                ranked = buckets.setdefault(bucket, [])
+                ranked.append(candidate)
+                ranked.sort(
+                    key=lambda row: (
+                        -int(row["passing_landing_count"]),
+                        float(row["failure_distance"]),
+                        -float(row["maximum_depth_margin_mm"]),
+                        str(row["profile_id"]),
+                        str(row["tip_id"]),
+                        int(row["recipe_index"]),
+                    )
+                )
+                del ranked[maximum_boundary_sources_per_bucket:]
+
+    selected_sources = [
+        source
+        for bucket in sorted(buckets)
+        for source in buckets[bucket]
+    ]
+    seeds: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for source in selected_sources:
+        source_index = int(source["recipe_index"])
+        nearest = sorted(
+            (index for index in vectors if index not in coarse),
+            key=lambda index: (
+                probe._distance(vectors[source_index], vectors[index]),
+                index,
+            ),
+        )[:maximum_new_recipes_per_source]
+        for recipe_index in nearest:
+            identity = (
+                source["target_id"],
+                source["profile_id"],
+                source["tip_id"],
+                source["scenario_id"],
+                source["compliance_id"],
+                source_index,
+                recipe_index,
+            )
+            seed = seeds.setdefault(
+                identity,
+                {
+                    "target_id": source["target_id"],
+                    "profile_id": source["profile_id"],
+                    "tip_id": source["tip_id"],
+                    "scenario_id": source["scenario_id"],
+                    "compliance_id": source["compliance_id"],
+                    "source_recipe_index": source_index,
+                    "recipe_index": recipe_index,
+                    "selected_for_failure_classes": [],
+                },
+            )
+            seed["selected_for_failure_classes"].append(
+                source["selected_failure_class"]
+            )
+    for seed in seeds.values():
+        seed["selected_for_failure_classes"] = sorted(
+            set(seed["selected_for_failure_classes"])
+        )
+    ordered_seeds = [seeds[key] for key in sorted(seeds)]
+    landing_count = int(fixture["landing_model"]["samples_per_target_scenario"])
+    targets_with_seed = sorted({row["target_id"] for row in ordered_seeds})
+    result = {
+        "schema": "tactevra.ws2_c02_candidate_seed_plan.v1",
+        "scope": SCOPE,
+        "c01_result_sha256": c01_result_sha256,
+        "campaign_fixture_sha256": fixture["fixture_sha256"],
+        "staged_fixture_sha256": staged["fixture_sha256"],
+        "selection": {
+            "bucket_fields": [
+                "target_id",
+                "scenario_id",
+                "compliance_id",
+                "failure_class",
+            ],
+            "maximum_boundary_sources_per_bucket": maximum_boundary_sources_per_bucket,
+            "maximum_new_recipes_per_source": maximum_new_recipes_per_source,
+            "failure_control_eligible_for_seeding": False,
+            "all_stage_b_landings_required": True,
+        },
+        "source_shard_count": shard_count,
+        "source_world_count": world_count,
+        "group_count": group_count,
+        "required_group_count": required_group_count,
+        "boundary_group_count": boundary_group_count,
+        "required_boundary_group_count": required_boundary_group_count,
+        "required_no_boundary_group_count": (
+            required_group_count - required_boundary_group_count
+        ),
+        "boundary_failure_counts": dict(sorted(failure_counts.items())),
+        "selected_boundary_source_count": len(selected_sources),
+        "candidate_seed_count": len(ordered_seeds),
+        "stage_b_landing_count": landing_count,
+        "projected_world_count": len(ordered_seeds) * landing_count,
+        "targets_seen": sorted(targets_seen),
+        "targets_with_seed": targets_with_seed,
+        "targets_without_seed": sorted(targets_seen - set(targets_with_seed)),
+        "candidate_seeds": ordered_seeds,
+        "population_status": "CANDIDATE_SEEDS_REQUIRES_SEPARATE_C02_FIXTURE",
+        "hardware_write_count": 0,
+        "physical_movement_count": 0,
+        "physical_authority": False,
+    }
+    result["plan_sha256"] = ops.value_sha(result)
+    return result
+
+
+def extract_c02_candidate_seeds(
+    *,
+    extraction_fixture_path: Path,
+    results_root: Path,
+    c01_final_result_path: Path,
+    output: Path,
+) -> dict[str, Any]:
+    extraction = load_c02_extraction_fixture(extraction_fixture_path)
+    campaign_binding = extraction["bindings"]["campaign_fixture"]
+    fixture_path = Path(campaign_binding["path"])
+    if _file_sha(fixture_path) != campaign_binding["sha256"]:
+        raise ValueError("C01 campaign fixture file hash mismatch")
+    fixture = ops.load_fixture(fixture_path)
+    if fixture["fixture_sha256"] != campaign_binding["fixture_sha256"]:
+        raise ValueError("C01 campaign fixture value hash mismatch")
+    c01_bytes = c01_final_result_path.read_bytes()
+    c01_file_sha256 = hashlib.sha256(c01_bytes).hexdigest()
+    expected = extraction["bindings"]["c01_final_result"]
+    if c01_file_sha256 != expected["sha256"]:
+        raise ValueError("C01 final artifact hash mismatch")
+    c01 = json.loads(c01_bytes)
+    core = dict(c01)
+    claimed_result = core.pop("result_sha256")
+    if ops.value_sha(core) != claimed_result:
+        raise ValueError("C01 final result hash mismatch")
+    if claimed_result != expected["result_sha256"]:
+        raise ValueError("C01 bound internal result hash mismatch")
+    if c01["manifest_sha256"] != expected["manifest_sha256"]:
+        raise ValueError("C01 bound manifest hash mismatch")
+    if c01["decision"] != "COMPLETE_INFEASIBLE_NO_RANGE_CHANGE":
+        raise ValueError("C02 bounded redesign requires the retained infeasible C01 result")
+    if c01["fixture_sha256"] != fixture["fixture_sha256"]:
+        raise ValueError("C01 final result fixture mismatch")
+    if c01["summary"]["robust_cell_count"] != 0:
+        raise ValueError("C01 robust cells changed")
+    source_expectations = extraction["source_expectations"]
+    observed_expectations = {
+        "shard_count": c01["summary"]["shard_count"],
+        "world_count": c01["summary"]["world_count"],
+        "robust_cell_count": c01["summary"]["robust_cell_count"],
+        "scenario_cell_pass_count": c01["summary"]["scenario_cell_pass_count"],
+        "targets_with_robust_cell": c01["summary"]["targets_with_robust_cell"],
+    }
+    if observed_expectations != source_expectations:
+        raise ValueError("C01 bound source expectations changed")
+    module_binding = extraction["bindings"]["extractor_module"]
+    module_path = ops.ROOT / module_binding["path"]
+    if _file_sha(module_path) != module_binding["sha256"]:
+        raise ValueError("C02 extractor module hash mismatch")
+
+    throughput_fixture = throughput.load_fixture(
+        ops.ROOT / fixture["bindings"]["throughput_fixture"]["path"]
+    )
+    campaign, _, staged, _, _ = throughput.load_bound(throughput_fixture)
+    shards = ops.build_shards(fixture)
+    accepted_fixture_sha256 = {
+        fixture["fixture_sha256"],
+        *fixture["integrity"].get("resume_compatible_fixture_sha256", []),
+    }
+    cross_modulus = int(fixture["integrity"]["cross_gpu_sample_modulus"])
+    manifest: list[dict[str, Any]] = []
+
+    def admitted_results() -> Any:
+        for shard in shards:
+            shard_id = shard["shard_id"]
+            path = results_root / "shards" / f"{shard_id}.json"
+            raw = path.read_bytes()
+            result = _validate_shard_bytes(
+                raw,
+                expected_shard_id=shard_id,
+                accepted_fixture_sha256=accepted_fixture_sha256,
+            )
+            cross_sha = None
+            if int(shard_id[:8], 16) % cross_modulus == 0:
+                cross = path.with_suffix(".cross.json")
+                if not cross.exists():
+                    raise ValueError(f"required C01 cross result missing for {shard_id}")
+                cross_sha = _file_sha(cross)
+            manifest.append(
+                {
+                    "shard_id": shard_id,
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                    "rows_sha256": result["rows_sha256"],
+                    "cross_sha256": cross_sha,
+                }
+            )
+            yield result
+
+    selection = extraction["selection"]
+    plan = compact_c02_boundary_plan(
+        campaign,
+        staged,
+        admitted_results(),
+        c01_result_sha256=c01_file_sha256,
+        maximum_boundary_sources_per_bucket=int(
+            selection["maximum_boundary_sources_per_bucket"]
+        ),
+        maximum_new_recipes_per_source=int(
+            selection["maximum_new_recipes_per_source"]
+        ),
+    )
+    manifest_sha256 = ops.value_sha(manifest)
+    if manifest_sha256 != c01["manifest_sha256"]:
+        raise ValueError("C01 admitted manifest changed after finalization")
+    if plan["source_shard_count"] != c01["summary"]["shard_count"]:
+        raise ValueError("C02 source shard count changed")
+    if plan["source_world_count"] != c01["summary"]["world_count"]:
+        raise ValueError("C02 source world count changed")
+    plan["extraction_fixture_sha256"] = extraction["fixture_sha256"]
+    plan["c01_internal_result_sha256"] = claimed_result
+    plan["c01_manifest_sha256"] = manifest_sha256
+    plan.pop("plan_sha256")
+    plan["plan_sha256"] = ops.value_sha(plan)
+    _atomic_json(output, plan)
+    return plan
+
+
 def finalize_c01(
     *,
     fixture_path: Path,
@@ -480,17 +898,35 @@ def finalize_c01(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fixture", type=Path, required=True)
+    parser.add_argument(
+        "--mode",
+        choices=("finalize-c01", "extract-c02"),
+        default="finalize-c01",
+    )
+    parser.add_argument("--fixture", type=Path)
     parser.add_argument("--results-root", type=Path, required=True)
-    parser.add_argument("--backup-root", type=Path, required=True)
+    parser.add_argument("--backup-root", type=Path)
+    parser.add_argument("--c01-final-result", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = finalize_c01(
-        fixture_path=args.fixture,
-        results_root=args.results_root,
-        backup_root=args.backup_root,
-        output=args.output,
-    )
+    if args.mode == "finalize-c01":
+        if args.fixture is None or args.backup_root is None:
+            parser.error("finalize-c01 requires --fixture and --backup-root")
+        result = finalize_c01(
+            fixture_path=args.fixture,
+            results_root=args.results_root,
+            backup_root=args.backup_root,
+            output=args.output,
+        )
+    else:
+        if args.fixture is None or args.c01_final_result is None:
+            parser.error("extract-c02 requires --fixture and --c01-final-result")
+        result = extract_c02_candidate_seeds(
+            extraction_fixture_path=args.fixture,
+            results_root=args.results_root,
+            c01_final_result_path=args.c01_final_result,
+            output=args.output,
+        )
     print(json.dumps(result, sort_keys=True, indent=2))
 
 
