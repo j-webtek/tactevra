@@ -391,6 +391,7 @@ def run_smoke(
         "device": device,
         "shard": shard,
         "world_count": len(receipt["rows"]),
+        "rows": receipt["rows"],
         "rows_sha256": _value_sha(receipt["rows"]),
         "settle_pass": receipt["settle_pass"],
         "finite": receipt["finite"],
