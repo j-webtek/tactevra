@@ -143,6 +143,7 @@ def _number(
     value: object,
     label: str,
     *,
+    nonnegative: bool = False,
     positive: bool = False,
     nullable: bool = False,
 ) -> float | None:
@@ -153,7 +154,11 @@ def _number(
             f"{label} must be numeric"
         )
     result = float(value)
-    if not math.isfinite(result) or result < 0.0 or (positive and result <= 0.0):
+    if (
+        not math.isfinite(result)
+        or (nonnegative and result < 0.0)
+        or (positive and result <= 0.0)
+    ):
         raise InstalledCollisionMeasurementManifestV1Error(
             f"{label} is outside its finite range"
         )
@@ -432,6 +437,7 @@ def validate_installed_collision_measurement_manifest_v1(
         uncertainty = _number(
             row["geometry_uncertainty_mm"],
             f"body {body_id}.geometry_uncertainty_mm",
+            nonnegative=True,
             nullable=True,
         )
         if status == "MEASURED":
@@ -492,16 +498,19 @@ def validate_installed_collision_measurement_manifest_v1(
     separation = _number(
         clearance["minimum_separation_mm"],
         "clearance_measurement.minimum_separation_mm",
+        nonnegative=True,
         nullable=True,
     )
     geometry_uncertainty = _number(
         clearance["geometry_uncertainty_mm_per_body"],
         "clearance_measurement.geometry_uncertainty_mm_per_body",
+        nonnegative=True,
         nullable=True,
     )
     pose_uncertainty = _number(
         clearance["pose_uncertainty_mm_per_body"],
         "clearance_measurement.pose_uncertainty_mm_per_body",
+        nonnegative=True,
         nullable=True,
     )
     clearance_numbers = (separation, geometry_uncertainty, pose_uncertainty)
@@ -509,10 +518,11 @@ def validate_installed_collision_measurement_manifest_v1(
         if (
             not clearance_sources
             or any(value is None for value in clearance_numbers)
-            or sum(float(value) for value in clearance_numbers if value is not None) <= 0.0
+            or separation is None
+            or separation <= 0.0
         ):
             raise InstalledCollisionMeasurementManifestV1Error(
-                "accepted clearance measurement is incomplete or all-zero"
+                "accepted clearance measurement is incomplete or nonpositive"
             )
     else:
         if clearance_sources or any(value is not None for value in clearance_numbers):
@@ -569,6 +579,27 @@ def load_and_validate_installed_collision_measurement_manifest_v1(
 ) -> dict[str, Any]:
     """Load one exact file and validate it against the active context."""
 
+    _, report = load_installed_collision_measurement_manifest_v1(
+        path,
+        expected_file_sha256,
+        context=context,
+    )
+    return report
+
+
+def load_installed_collision_measurement_manifest_v1(
+    path: str | Path,
+    expected_file_sha256: str,
+    *,
+    context: SimulationContext,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Load, strictly validate, and return one exact manifest plus its report.
+
+    The returned document is the same strictly parsed, content-addressed input
+    that produced the report.  This lets downstream zero-authority builders
+    consume one interpretation of the manifest instead of reparsing it.
+    """
+
     if not isinstance(context, SimulationContext):
         raise TypeError("context must be a SimulationContext")
     readiness = assess_current_collision_readiness(context)
@@ -577,7 +608,7 @@ def load_and_validate_installed_collision_measurement_manifest_v1(
             "active build id is unavailable"
         )
     document, file_hash = _load_json(Path(path), expected_file_sha256)
-    return validate_installed_collision_measurement_manifest_v1(
+    report = validate_installed_collision_measurement_manifest_v1(
         document,
         contract=readiness.contract,
         expected_manifest_id=readiness.manifest_id,
@@ -587,6 +618,7 @@ def load_and_validate_installed_collision_measurement_manifest_v1(
         expected_robot_model_sha256=readiness.urdf_sha256,
         file_sha256=file_hash,
     )
+    return document, report
 
 
 def render_installed_collision_measurement_worksheet_v1(
@@ -685,6 +717,7 @@ __all__ = [
     "SCHEMA",
     "InstalledCollisionMeasurementManifestV1Error",
     "load_and_validate_installed_collision_measurement_manifest_v1",
+    "load_installed_collision_measurement_manifest_v1",
     "main",
     "render_installed_collision_measurement_worksheet_v1",
     "validate_installed_collision_measurement_manifest_v1",

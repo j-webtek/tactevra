@@ -169,6 +169,11 @@ dependency.
 **Purpose:** Convert a complete, reviewed measurement manifest into the existing
 `rocell.installed_collision_geometry_profile.v1` contract.
 
+**Implementation status:** The deterministic, zero-authority builder and its
+strict-consumer audit are implemented with synthetic test fixtures. This is
+software readiness only: no installed measurement manifest exists yet, so no
+deployment profile or clearance qualification is claimed.
+
 **Deliverables:**
 
 - A deterministic profile builder using spheres, capsules, and oriented boxes.
