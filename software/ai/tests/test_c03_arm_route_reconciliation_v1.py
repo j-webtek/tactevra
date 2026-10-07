@@ -16,6 +16,9 @@ from rocell_ai.c03_arm_route_reconciliation_v1 import (  # noqa: E402
     load_fixture,
     reconcile,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1 import (  # noqa: E402
+    load_fixture as load_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -24,6 +27,9 @@ FIXTURE_V1_1 = (
 )
 FIXTURE_V1_2 = (
     AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1_2.json"
+)
+ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1.json"
 )
 
 
@@ -111,3 +117,17 @@ def test_route_coordinate_audit_preserves_order_and_repeats() -> None:
     assert audit["moved_unique_target_ids"] == ["0", "2", "6", "E", "O"]
     assert audit["maximum_planar_delta_mm"] == pytest.approx(15.113581329295517)
     assert [row["target_id"] for row in audit["rows"]] == audit["route_target_order"]
+
+
+def test_exact_route_fixture_is_frozen_and_zero_authority() -> None:
+    fixture = load_route_fixture(ROUTE_FIXTURE, WORKSPACE)
+    assert fixture["c03_tool"]["total_length_mm"] == 110.0
+    assert fixture["c03_tool"]["tool_configuration_sha256"] == (
+        "ba538b48bb9c6bc80c01ad4ae792b9784440de4825c5dea5781f3277b8ee4109"
+    )
+    assert fixture["route"]["ordered_targets"] == [
+        "H", "E", "L", "L", "O", "SPACE", "2", "0", "2", "6",
+    ]
+    assert fixture["decision_rules"]["collision_screen_executed_must_be"] is False
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())

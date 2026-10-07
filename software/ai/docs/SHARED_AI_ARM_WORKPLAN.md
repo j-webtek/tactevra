@@ -1735,6 +1735,14 @@ Evidence `E-20261007-AI-479` reports that six of the ten ordered route actions
 move under C03 geometry: `E`, `O`, `2`, `0`, repeated `2`, and `6`. The largest
 planar shift is 15.11357334572232 mm. A 110 mm successor must therefore rebuild
 the route from the C03 catalog rather than replace only the tool transform.
+The AI lane now freezes that successor in
+[`c03_exact_route_reconstruction_fixture_v1.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1.json),
+canonical SHA-256
+`f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197`.
+It assembles the unchanged ordered semantic batch against the exact C03 catalog,
+uses the admitted 110 mm/3 mm-radius/30 mm-exposure tool identity, and applies
+the unchanged canonical IK and continuity gates. Collision execution, installed
+profile admission, controller output, and all physical authority remain excluded.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

@@ -1,0 +1,107 @@
+{
+  "bindings": {
+    "c03_candidate_target_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "schema": "rocell.nominal_target_profiles.v1",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "c03_pose_family": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/cpu_contact_ws3_v3_exact_tip/candidate51_tool_pose_family_v3.json",
+      "receipt_sha256": "71484490220b29944f888a51e0e959b6599bc69fc5d5d1def2576e2522cd4a2d",
+      "schema": "tactevra.tool_bound_pose_family_result.v1",
+      "sha256": "6c6d14cba87f56aa13370e2651bc2c832571eed3d3bddc47424ff5cb911c8ef7"
+    },
+    "c03_recipe_envelope": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/cpu_contact_ws3_v3_exact_tip/ws2_press_recipe_envelope_v1.json",
+      "receipt_sha256": "e81ec89cf27c9f6c81a55b224b305287facc5ebec6e6ab383521271b08f90b3b",
+      "schema": "tactevra.ws2_press_recipe_envelope.v1",
+      "sha256": "26c3cc81bb7a1c5ba205779e5b6e4bf4186a357317857c2e11a8fed61caccbd9"
+    },
+    "canonical_ik": {
+      "path": "software/src/rocell/application/typing_trajectory_ik_screen_v1.py",
+      "sha256": "083836d95808c792072674e69690390dfa7b5107daad4524b0ca2d3003a9a024"
+    },
+    "execution_plan": {
+      "path": "software/src/rocell/application/typing_execution_plan_v1.py",
+      "sha256": "29ad549612f44afd35e57673bdd0cb9b76fe0db5acf45c47c34dd73de7f6af2d"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/c03_exact_route_reconstruction_v1.py",
+      "sha256": "bbe8092437b7ead08d70c9cedefa963290987b18b5e77656b1600dea222f7f70"
+    },
+    "parent_route_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_promoted_full_route_fixture_v1_1.json",
+      "sha256": "0aef44603d19938d2a2765050c9923747a648ca0e9310b6e3a6e2c5821b4f301"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "trajectory_plan": {
+      "path": "software/src/rocell/application/typing_trajectory_plan_v1.py",
+      "sha256": "948e27492cccbafcee08df1e2a0f26a7b061eb50b2975ad241c251febab0de34"
+    }
+  },
+  "c03_tool": {
+    "geometry": {
+      "exposed_length_mm": 30.0,
+      "half_length_mm": 15.0,
+      "radius_mm": 3.0,
+      "shape": "capsule",
+      "tip_id": "capsule-r3-m5"
+    },
+    "tool_configuration_sha256": "ba538b48bb9c6bc80c01ad4ae792b9784440de4825c5dea5781f3277b8ee4109",
+    "total_length_mm": 110.0
+  },
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "collision_screen_executed_must_be": false,
+    "continuity_threshold_change_count_maximum": 0,
+    "ik_threshold_change_count_maximum": 0,
+    "installed_collision_gate_must_remain_blocked": true,
+    "semantic_target_order_change_count_maximum": 0,
+    "target_coordinate_source": "EXACT_C03_CANDIDATE_TARGET_CATALOG"
+  },
+  "fixture_sha256": "f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197",
+  "limitations": [
+    "The candidate target catalog, promoted board transform, calibration snapshot, and ready-state seed are simulation-only and unmeasured.",
+    "The route covers the ten-action hello 2026 sequence rather than all 51 C03 keyboard targets.",
+    "The IK screen uses fixed tool orientation and does not establish arbitrary source-to-destination orientation transitions.",
+    "No robot, tool, cable, support, or workcell collision screening is executed.",
+    "No installed collision profile, fresh observed start state, controller operation, or physical authority is supplied."
+  ],
+  "parent_fixture_sha256": "ee811e81ae69d36c3b7e19ec53cb6293fcbac510ce54c58a7d3f0e8ebcffdea0",
+  "physical_authority": false,
+  "resource_limits": {
+    "maximum_ik_samples": 512
+  },
+  "route": {
+    "batch_id": "c03-110mm-candidate-route-batch-v1",
+    "config_id": "c03-110mm-candidate-route-config-v1",
+    "hover_clearance_mm": 25.0,
+    "ordered_targets": [
+      "H",
+      "E",
+      "L",
+      "L",
+      "O",
+      "SPACE",
+      "2",
+      "0",
+      "2",
+      "6"
+    ],
+    "request_id": "c03-110mm-candidate-route-request-v1",
+    "text": "hello 2026",
+    "trajectory_policy_id": "c03-110mm-candidate-route-quintic-v1"
+  },
+  "schema": "tactevra.c03_exact_route_reconstruction_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}
