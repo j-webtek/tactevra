@@ -9100,3 +9100,62 @@ rewriting history. New entries must use a unique evidence ID.
   configuration geometry for all 323 partition samples and conservative sweep
   evidence for all 321 route segments. Fresh observed state remains required
   before any execution review.
+
+### E-20261007-ARM-493 — C03 rigid attachment transforms gain a strict intake
+
+- Stage: S4 / ICQ-3 zero-authority rigid attachment binding.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Implementation commit: `0f4482302145b7529ace2cbd7169dcd1bde27e60`.
+- Change: added a bounded, duplicate-safe manifest loader and validator for the
+  exact non-robot rigid frames enumerated by the profile-bound C03 partition
+  intake. Each transform must be `root_T_required_frame`, right-handed and
+  orthonormal, millimetre-valued, source-bound, uncertainty-bearing, fresh, and
+  exact-profile bound. The validator recomputes an inverse round trip and
+  rejects missing, extra, duplicate, stale, crossed, reversed, reflected, or
+  mutated evidence.
+- Inputs/fixtures: schema
+  `software/ai/schemas/c03_rigid_attachment_binding_manifest_v1.schema.json`;
+  focused synthetic measurement-manifest file SHA-256
+  `a220c36cd79de2a0acd527c0df4892dbd6024e2ac9af766be0178146bf1e3a39`;
+  synthetic rigid-binding manifest file SHA-256
+  `22d720a270618900764aa450af9e617dedfbcc4ced4533f251eab2543ca5c908`;
+  manifest content SHA-256
+  `f664148561c8d5a84c4ec52c8a4534c4bf95781b20e972f668aefa6c12638ff5`.
+  These fixtures use identity-like test transforms and are explicitly not
+  installed measurements.
+- Command: from the branch root, set
+  `PYTHONPATH=software/src;software/ai;software/tests/unit`, construct the
+  existing synthetic complete ICQ-2 qualification, render the two required
+  synthetic bindings with the test fixture builder, and call
+  `load_c03_rigid_attachment_binding_v1(..., evaluated_at_utc='2026-10-07T20:30:00Z')`.
+- Result: `READY_FOR_PROFILE_BOUND_RIGID_COLLISION_EVIDENCE`; report receipt
+  SHA-256
+  `6a9e4641eb3b73969c839880c592b1d36a4ee4aa7a6353b91098af9739298841`;
+  report-file SHA-256
+  `f25ff5fad4283a1f7655c4bedfaa5b60a8eb0a26c7d25f9e941e4729edbb035f`.
+  All three synthetic artifacts have byte-identical, hash-verified backups on
+  `F:`.
+- Metrics: exact coverage of 2 required frames, `camera_module` and `holder`;
+  two deterministic transform-binding receipts; maximum manifest size 256 KiB;
+  no collision samples or segments evaluated.
+- Validation: exact command
+  `python -m pytest software/tests/unit/test_c03_rigid_attachment_binding_v1.py software/tests/unit/test_c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_route_collision_handoff_v1.py -q`
+  with `PYTHONPATH=software/src;software/ai` passed 19 tests. Exact command
+  `python -m ruff check software/src/rocell/application/c03_rigid_attachment_binding_v1.py software/tests/unit/test_c03_rigid_attachment_binding_v1.py`
+  passed. The schema passed `python -m json.tool`; `git diff --check` passed.
+  Exact command `python scripts/ci/check_source_archive_footprint.py` passed at
+  6,506 tracked files after the deliberate reviewed ceiling advanced from
+  6,503 to 6,508 with all byte and duplicate limits unchanged.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is synthetic software evidence. It does not provide the
+  missing physical measurement manifest, installed profile, measured
+  `Wv_T_camera_module` or `Wv_T_holder`, configuration-sampled cable geometry,
+  conservative sweeps, collision clearance, fresh observed state, controller
+  operation, or physical authority.
+- Supersedes: none. `E-20261007-ARM-492` remains the measured-profile boundary
+  predecessor and its real missing-manifest result remains authoritative.
+- Next dependency: implement ICQ-4's exact posture- and segment-bound moving
+  cable geometry coverage while physical measurement collection remains open.
+  A real ICQ-3 pass still requires measured transforms bound to the eventual
+  installed profile.

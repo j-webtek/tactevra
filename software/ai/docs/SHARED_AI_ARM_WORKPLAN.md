@@ -1912,6 +1912,14 @@ clearance. The next dependency is a real installed measurement manifest; the
 software must not substitute test geometry. Configuration-sampled cable
 geometry, conservative sweeps for all 321 segments, and fresh observed state
 remain subsequent blockers.
+Evidence `E-20261007-ARM-493` adds the ICQ-3 rigid attachment binding intake for
+that profile-bound route. It requires exact, fresh, source-bound
+`Wv_T_camera_module` and `Wv_T_holder` transforms, rejects reversed or reflected
+frames and crossed identities, and proves deterministic behavior with a
+synthetic-only rehearsal. No real transforms exist yet, so the physical
+measurement blocker remains unchanged. Configuration-sampled moving-cable
+geometry is the next software package and cannot be satisfied by these rigid
+bindings.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

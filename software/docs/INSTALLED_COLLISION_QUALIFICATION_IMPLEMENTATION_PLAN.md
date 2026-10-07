@@ -206,6 +206,13 @@ deployment profile or clearance qualification is claimed.
 
 **Purpose:** Bind non-robot rigid bodies to exact workcell frames for the route.
 
+**Implementation status:** The strict, zero-authority C03 intake is implemented
+for the two non-robot frames required by the current partitioned route:
+`camera_module` and `holder`. Synthetic fixtures prove exact coverage,
+direction, right-handed rotation, source chronology, freshness, lineage, and
+round-trip checks. No measured installed transform has been supplied, so this
+is software readiness only and does not satisfy the physical gate.
+
 **Deliverables:**
 
 - Measured bindings for gripper/tool attachments, camera support, keyboard,

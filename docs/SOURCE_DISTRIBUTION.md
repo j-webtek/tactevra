@@ -648,3 +648,11 @@ file slots. The adapter verifies the exact route and IK receipts and enumerates
 profile-bound collision partitions without running collision checks, producing
 controller output, or granting physical authority. All byte, duplicate, and
 reduction limits remain unchanged.
+
+The C03 rigid attachment binding intake adds three governed paths: one strict
+runtime validator, one public JSON Schema, and one focused unit-test module.
+The resulting tree contains 6,506 tracked files. The ceiling advances from
+6,503 to 6,508, retaining two reviewed file slots. The intake validates exact
+profile-bound transforms for required non-robot frames and cannot create
+measurements, screen collisions, emit controller output, or grant physical
+authority. All byte, duplicate, and reduction limits remain unchanged.
