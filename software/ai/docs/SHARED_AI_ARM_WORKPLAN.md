@@ -1743,6 +1743,11 @@ It assembles the unchanged ordered semantic batch against the exact C03 catalog,
 uses the admitted 110 mm/3 mm-radius/30 mm-exposure tool identity, and applies
 the unchanged canonical IK and continuity gates. Collision execution, installed
 profile admission, controller output, and all physical authority remain excluded.
+The first frozen route attempt is preserved at evidence `E-20261007-AI-480`.
+It failed before IK because the runtime coherence guard correctly rejected an
+in-memory catalog replacement that differed from the locked bundle source.
+The successor must materialize and hash-bind a coherent simulation bundle; the
+guard and its comparison rules remain unchanged.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

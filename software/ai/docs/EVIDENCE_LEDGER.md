@@ -8575,3 +8575,44 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a new zero-authority route reconstruction using the
   exact C03 candidate catalog and 110 mm tool, preserving semantic order and
   repeats. Run canonical IK and continuity before partition or collision work.
+
+### E-20261007-AI-480 — first exact C03 route attempt fails context coherence
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `6dd64fa15ee9db556ac6094a2ea3a97678d11182`.
+- Change: froze a route runner and fixture for the exact 110 mm C03 tool,
+  candidate target catalog, and ordered `H,E,L,L,O,SPACE,2,0,2,6` batch under
+  the unchanged canonical IK and continuity policies.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1.json`;
+  canonical fixture SHA-256
+  `f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197`.
+  It binds C03 recipe receipt
+  `e81ec89cf27c9f6c81a55b224b305287facc5ebec6e6ab383521271b08f90b3b`,
+  pose-family receipt
+  `71484490220b29944f888a51e0e959b6599bc69fc5d5d1def2576e2522cd4a2d`,
+  candidate catalog SHA-256
+  `0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8`,
+  and exact tool-configuration SHA-256
+  `ba538b48bb9c6bc80c01ad4ae792b9784440de4825c5dea5781f3277b8ee4109`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1.json`.
+- Result: `FAIL` before result emission and before IK. The unchanged runtime
+  raised `SimulationContextError: Simulation context coherence check failed:
+  targets differ from their locked source; alignment differs from a fresh
+  locked-source validation`. Exit code was 1 and no result file was written.
+- Metrics: zero trajectory or IK samples were evaluated. The failure occurred
+  when strict ingress revalidated the simulation context against its original
+  bundle lock.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: no route, IK, continuity, or collision conclusion exists from
+  this attempt. The candidate catalog cannot be substituted into an existing
+  context object even when its file hash is independently bound.
+- Supersedes: none. This failed evidence is preserved unchanged.
+- Next dependency: create a separately materialized simulation-only workspace
+  in which the candidate catalog and simulation bundle lock agree, bind the
+  derived bytes and construction procedure, then rerun without changing the
+  runtime coherence guard or IK thresholds.
