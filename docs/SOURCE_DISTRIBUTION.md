@@ -500,3 +500,14 @@ corpus, dependency tree, controller artifact, GPU artifact, or
 authority-bearing output enters the archive. The measured tree is 661,405,232
 logical bytes with 4,890,152 governed duplicate bytes. All byte, duplicate,
 and reduction limits remain unchanged.
+
+The bounded collision partition increment adds six governed paths: one reusable
+application contract, one unit-test module, one CPU-only evidence runner, one
+focused evidence test, one frozen fixture, and one compact generated result.
+The file-count ceiling advances from 6,455 to the exact observed 6,461 for
+those reviewed paths only. The partitioner retains the existing 256-sample
+limit and adds one conservative boundary-pose recheck; it does not add geometry,
+collision clearance, controller artifacts, simulator corpora, GPU artifacts,
+or authority-bearing output. The measured tree is 661,445,712 logical bytes
+with 4,890,152 governed duplicate bytes. All byte, duplicate, and reduction
+limits remain unchanged.

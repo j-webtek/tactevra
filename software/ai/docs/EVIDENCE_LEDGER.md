@@ -8275,3 +8275,70 @@ rewriting history. New entries must use a unique evidence ID.
   collision qualification without raising the fixed 256-result policy. Then
   require measured installed geometry and continuous sweep evidence before any
   physical selection or authority.
+
+### E-20261007-INT-475 — exact bounded partitions cover the promoted full route
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned collision-intake contract recorded under the cross-lane `INT`
+  sequence. No integration gate or physical readiness status changed.
+- Claim commit: `843e8c2c1247f5050a3ed82cc49bac26937277b6`.
+- Frozen implementation and fixture commit:
+  `dfe5d80defed8842f02c9d8c95efa9ad14f34910`.
+- Result commit: `d64e6b44b01ad2932e122dfe9a53bee48c413a77`.
+- Objective: retain the existing 256-sample bounded collision policy while
+  covering all 328 accepted IK endpoints from `E-20261007-INT-474`, with an
+  exact state handoff and conservative boundary recheck between partitions.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_collision_partition_fixture_v1.json`;
+  canonical SHA-256
+  `f7ce6683382e8fa5143a794fb72c89346e655962f1c0b0e810b9753e23400f6e`;
+  file SHA-256
+  `6e9f4a45c845c6e8fdf3eabdfd5487cd1c8e758f99f2bf8539cc3eb3154d40c6`.
+  It freezes the 0.05 rad maximum joint step, 256 samples per partition, at
+  most four partitions for this study, and the exact expected two-partition
+  shape before execution.
+- Exact command: with `PYTHONPATH=software/ai;software/src`, run
+  `python -m rocell_ai.typing_twin_collision_partition_v1
+  software/ai/sim/evidence/typing_twin_collision_partition_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_collision_partition_result_v1.json`.
+- Result: `PASS_EXACT_PARTITION_COVERAGE_RETAIN_COLLISION_BLOCKERS`. Receipt
+  SHA-256 `bc7a257e81f1660fd453711365c3e2be1452a8349863690a727d425db70d3e95`;
+  result-file SHA-256
+  `434aae6a6ba8e85a2f8fa18793a6dcdcc04a9222d81e33be46412cfb6dc02fc7`;
+  partition-plan SHA-256
+  `e0033809bb3fd06a51c925c39ad0b8c5b3834ddf5e837436792869aa6d003437`.
+- Metrics: partition 0 covers source results `[0,255)` with 255 endpoints and
+  256 bounded samples. Partition 1 covers `[255,328)` with 73 endpoints and 74
+  bounded samples. All 328 source endpoints appear once and in order. Total
+  bounded samples are 330: one route-seed sample plus one conservative shared
+  boundary recheck. Terminal-to-successor-start and successor-start-to-recheck
+  maximum joint differences are both exactly `0.0` rad.
+- Decision rule outcome: exact ordered endpoint coverage and boundary continuity
+  pass without increasing the per-partition resource limit. Installed collision
+  remains blocked by the absent installed profile and its existing intake
+  status; installed geometry screening was not executed and continuous
+  collision remains unproven.
+- Validation: four production contract tests and three focused fixture,
+  tamper, deterministic reproduction, coverage, boundary, blocker, and
+  zero-authority tests passed in 0.79 seconds; Ruff and `git diff --check`
+  passed. Broader repository and policy checks follow on the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. No simulator or training process was interrupted.
+- Failures preserved: the source result retains the original unpartitioned
+  intake-policy refusal. This increment does not rewrite that result; it binds
+  its receipt and creates a separately frozen successor contract.
+- Limitations: the source route, transform, tool, hover, calibration, and
+  ready-state seed remain synthetic. The partitioner prepares evidence slots
+  only. It supplies no installed collision profile, rigid attachment binding,
+  configuration-sampled body geometry, or conservative sweep envelope. Exact
+  partition coverage does not prove sampled-pose clearance, continuous
+  collision freedom, dynamics, contact behavior, controller transport, or
+  physical accuracy. No physical authority exists.
+- Supersedes: none. It resolves only the bounded intake-size dependency from
+  `E-20261007-INT-474` while retaining all of that evidence's blockers.
+- Next dependency: integrate the partition contract into a versioned collision
+  intake that emits profile-bound evidence slots per partition, then demonstrate
+  cross-partition conservative sweep-envelope lineage. Actual clearance still
+  requires measured installed geometry and configuration evidence.

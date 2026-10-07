@@ -1,0 +1,83 @@
+{
+  "claim_commit": "843e8c2c1247f5050a3ed82cc49bac26937277b6",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "boundary_maximum_joint_difference_rad": 0.0,
+    "conservative_boundary_recheck_count_must_equal": 1,
+    "continuous_collision_proven_must_be": false,
+    "installed_collision_gate_cleared_must_be": false,
+    "installed_geometry_collision_screening_executed_must_be": false,
+    "partition_sample_count_maximum": 256,
+    "source_endpoint_duplicated_count_maximum": 0,
+    "source_endpoint_omitted_count_maximum": 0,
+    "source_result_count_must_equal": 328
+  },
+  "expected_partition_shape": {
+    "sample_counts": [
+      256,
+      74
+    ],
+    "source_result_counts": [
+      255,
+      73
+    ],
+    "source_result_ranges": [
+      [
+        0,
+        255
+      ],
+      [
+        255,
+        328
+      ]
+    ]
+  },
+  "fixture_sha256": "f7ce6683382e8fa5143a794fb72c89346e655962f1c0b0e810b9753e23400f6e",
+  "input_bindings": {
+    "bounded_segment_contract": {
+      "path": "software/src/rocell/application/bounded_segment_collision_qualification.py",
+      "sha256": "b15636b5b98d322c19e2cd3ef3b319f7ae4b0c8075808c4c64361b80a31c9de4"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_collision_partition_v1.py",
+      "sha256": "8307c90456c971a0dbb6faac5f0a2c31bd54ac2d606070383008246283dcc595"
+    },
+    "partition_contract": {
+      "path": "software/src/rocell/application/partitioned_bounded_segment_collision_v1.py",
+      "sha256": "33de5a3d2cc464eb5a204e56eece78ed4cf03f06a231075298d4e57a2fd03348"
+    },
+    "source_result": {
+      "path": "software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json",
+      "sha256": "f6d37eb758f2fc8ba0d2ea462b1512a7aa404e120fcb5c2421c1fa79043ce023"
+    }
+  },
+  "limitations": [
+    "This study partitions already accepted synthetic IK results; it does not solve IK, change the route, or qualify collision geometry.",
+    "The promoted transform, 120 mm tool, 25 mm hover, calibration, and ready-state seed remain synthetic and unmeasured.",
+    "A successor partition deliberately rechecks the previous partition terminal pose, so total partition sample count includes one conservative boundary overlap.",
+    "No installed collision profile, configuration-sampled body geometry, rigid attachment evidence, or conservative inter-sample sweep envelope is supplied.",
+    "Exact partition coverage does not prove sampled-pose clearance or continuous collision freedom and grants no physical authority."
+  ],
+  "resource_limits": {
+    "maximum_partitions": 4,
+    "maximum_source_results": 4096
+  },
+  "sampling_policy": {
+    "maximum_joint_step_rad": 0.05,
+    "maximum_samples": 256
+  },
+  "schema": "tactevra.typing_twin_collision_partition_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_result": {
+    "path": "software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json",
+    "receipt_sha256": "56d1c275ab529edc283a18d8569fc7d581bb047f1385094f6762a1f88c224aa5"
+  }
+}

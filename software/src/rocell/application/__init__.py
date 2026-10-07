@@ -284,6 +284,14 @@ from .bounded_segment_collision_qualification import (
     build_bounded_joint_sample_plan_from_results,
     qualify_bounded_segment_collisions,
 )
+from .partitioned_bounded_segment_collision_v1 import (
+    MAX_BOUNDED_COLLISION_PARTITIONS,
+    MAX_PARTITIONED_ENDPOINT_RESULTS,
+    SCHEMA as PARTITIONED_BOUNDED_SEGMENT_COLLISION_SCHEMA,
+    BoundedCollisionPartitionV1,
+    PartitionedBoundedSegmentCollisionError,
+    build_partitioned_bounded_joint_sample_plans_from_results,
+)
 from .conservative_segment_sweep_qualification import (
     MAX_CONSERVATIVE_SEGMENT_ENVELOPES,
     SCHEMA as CONSERVATIVE_SEGMENT_SWEEP_QUALIFICATION_SCHEMA,
@@ -1466,6 +1474,12 @@ __all__ = [
     "build_bounded_joint_sample_plan",
     "build_bounded_joint_sample_plan_from_results",
     "qualify_bounded_segment_collisions",
+    "MAX_BOUNDED_COLLISION_PARTITIONS",
+    "MAX_PARTITIONED_ENDPOINT_RESULTS",
+    "PARTITIONED_BOUNDED_SEGMENT_COLLISION_SCHEMA",
+    "BoundedCollisionPartitionV1",
+    "PartitionedBoundedSegmentCollisionError",
+    "build_partitioned_bounded_joint_sample_plans_from_results",
     "MAX_CONSERVATIVE_SEGMENT_ENVELOPES",
     "CONSERVATIVE_SEGMENT_SWEEP_QUALIFICATION_SCHEMA",
     "ConservativeSegmentSweepQualificationError",
