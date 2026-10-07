@@ -1,0 +1,73 @@
+{
+  "claim_commit": "5d642bdb20d13bdd9cdd1fe9310c232158c08294",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "expected_result": {
+    "boundary_lineage_count": 1,
+    "partition_shapes": [
+      {
+        "bounded_sample_count": 256,
+        "source_result_end_index_exclusive": 255,
+        "source_result_start_index": 0
+      },
+      {
+        "bounded_sample_count": 74,
+        "source_result_end_index_exclusive": 328,
+        "source_result_start_index": 255
+      }
+    ],
+    "route_segment_count": 328
+  },
+  "fixture_sha256": "e40a7b9ceef2ceec250553cdb34c6dae9e947bf485f5d5818f6092e1db75837f",
+  "input_bindings": {
+    "intake_implementation": {
+      "path": "software/src/rocell/application/partitioned_typing_collision_intake_v1.py",
+      "sha256": "e548f6a9f27e65c6d8ce31975e20c70f3da40ea8aa289946cc0417ee08be3667"
+    },
+    "partition_contract": {
+      "path": "software/src/rocell/application/partitioned_bounded_segment_collision_v1.py",
+      "sha256": "33de5a3d2cc464eb5a204e56eece78ed4cf03f06a231075298d4e57a2fd03348"
+    },
+    "runner": {
+      "path": "software/ai/rocell_ai/typing_twin_partitioned_collision_intake_v1.py",
+      "sha256": "dcb1cd6d308b9858cd7130740ee69f84cf9c10e63c26f410fc2849af57eac7f6"
+    },
+    "source_result": {
+      "path": "software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json",
+      "sha256": "f6d37eb758f2fc8ba0d2ea462b1512a7aa404e120fcb5c2421c1fa79043ce023"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    }
+  },
+  "limitations": [
+    "The route, transform, 120 mm tool, 25 mm hover, calibration, and start state remain synthetic and unmeasured.",
+    "This intake enumerates required evidence slots but supplies no measured installed collision profile or collision evidence.",
+    "A shared boundary configuration is rechecked exactly; it does not create an extra zero-length sweep-envelope requirement.",
+    "No sampled-pose collision screen or conservative continuous sweep evaluation is executed.",
+    "The result grants no controller, transport, permit, hardware, or physical authority."
+  ],
+  "resource_limits": {
+    "maximum_partitions": 4
+  },
+  "sampling_policy": {
+    "maximum_joint_step_rad": 0.05,
+    "maximum_samples": 256
+  },
+  "schema": "tactevra.typing_twin_partitioned_collision_intake_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_result": {
+    "path": "software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json",
+    "receipt_sha256": "56d1c275ab529edc283a18d8569fc7d581bb047f1385094f6762a1f88c224aa5"
+  },
+  "system_manifest": {
+    "path": "software/config/system_manifest.json"
+  }
+}

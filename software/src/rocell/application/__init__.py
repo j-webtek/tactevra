@@ -292,6 +292,10 @@ from .partitioned_bounded_segment_collision_v1 import (
     PartitionedBoundedSegmentCollisionError,
     build_partitioned_bounded_joint_sample_plans_from_results,
 )
+from .partitioned_typing_collision_intake_v1 import (
+    PartitionedTypingCollisionIntakeV1Error,
+    prepare_partitioned_typing_collision_intake_v1,
+)
 from .conservative_segment_sweep_qualification import (
     MAX_CONSERVATIVE_SEGMENT_ENVELOPES,
     SCHEMA as CONSERVATIVE_SEGMENT_SWEEP_QUALIFICATION_SCHEMA,
@@ -1480,6 +1484,16 @@ __all__ = [
     "BoundedCollisionPartitionV1",
     "PartitionedBoundedSegmentCollisionError",
     "build_partitioned_bounded_joint_sample_plans_from_results",
+    "PartitionedTypingCollisionIntakeV1Error",
+    "prepare_partitioned_typing_collision_intake_v1",
+    "SimulationContextLifecycleBindingV1",
+    "SimulationContextLifecycleV1",
+    "PreparedTypingPlannerV1",
+    "prepare_typing_planner_v1",
+    "validate_prepared_typing_planner_v1",
+    "ObservedPlannerStartState",
+    "ObservedPlannerStartStateError",
+    "build_observed_planner_start_state",
     "MAX_CONSERVATIVE_SEGMENT_ENVELOPES",
     "CONSERVATIVE_SEGMENT_SWEEP_QUALIFICATION_SCHEMA",
     "ConservativeSegmentSweepQualificationError",

@@ -1211,7 +1211,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| Integration | S2/S3 | partition-aware collision intake, unit/evidence tests, evidence ledger, and this workplan | `feature/sim-partitioned-collision-intake-v1` / claim pending | ACTIVE |
+| Integration | S2/S3 | partition-aware collision intake, unit/evidence tests, evidence ledger, and this workplan | `feature/sim-partitioned-collision-intake-v1` / `5d642bdb20d13bdd9cdd1fe9310c232158c08294` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
