@@ -116,13 +116,9 @@ def test_exact_c03_capsules_preserve_radius_and_exposed_lengths():
         "contact_model": {"tip_families": {
             "sphere": {"radius_samples_mm": []},
             "capsule": {
-                "radius_samples_mm": [],
-                "half_length_radius_multiple_samples": [],
+                "radius_samples_mm": [3],
+                "half_length_radius_multiple_samples": [5 / 3, 5],
             },
-            "exact_capsules": [
-                {"tip_id": "capsule-r3-e10", "radius_mm": 3, "half_length_mm": 5},
-                {"tip_id": "capsule-r3-e30", "radius_mm": 3, "half_length_mm": 15},
-            ],
         }},
     }
     tips = tip_geometries(fixture)
@@ -150,13 +146,9 @@ def test_c03_bridge_plan_is_exactly_39168_worlds():
         "contact_model": {"tip_families": {
             "sphere": {"radius_samples_mm": []},
             "capsule": {
-                "radius_samples_mm": [],
-                "half_length_radius_multiple_samples": [],
+                "radius_samples_mm": [3],
+                "half_length_radius_multiple_samples": [5 / 3, 5],
             },
-            "exact_capsules": [
-                {"tip_id": "capsule-r3-e10", "radius_mm": 3, "half_length_mm": 5},
-                {"tip_id": "capsule-r3-e30", "radius_mm": 3, "half_length_mm": 15},
-            ],
         }},
         "landing_model": {"scenarios": [
             {"id": "LOW_SOURCE_HIGH_RESIDUAL"},

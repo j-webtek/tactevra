@@ -93,7 +93,7 @@ def build_c03_bridge_plan(
     bridge_campaign: dict[str, Any],
     *,
     recipe_indices: tuple[int, ...] = (80, 75),
-    tip_ids: tuple[str, ...] = ("capsule-r3-e10", "capsule-r3-e30"),
+    tip_ids: tuple[str, ...] = ("capsule-r3-m1.66667", "capsule-r3-m5"),
     compliance_id: str = "k0.286_t6",
     profile_id: str = "travel_mm__LOW",
 ) -> dict[str, Any]:
