@@ -795,7 +795,7 @@ it after evidence exists.
 |---|---|---|---|
 | `C00` | Contract and Semantic Baseline | Define exactly what the AI may propose and what the deterministic runtime may accept. | `BASELINE_AVAILABLE_REVISION_CONTROLLED` |
 | `C01` | Key Contact Search | Find a one-press mechanical envelope across every supported keyboard target. | `COMPLETE_FAIL_RETAINED` |
-| `C02` | Contact Boundary Refinement | Turn the broad contact search into robust recipe windows around every observed boundary. | `IMPLEMENTED_BLOCKED_ON_SUPERVISED_PREFLIGHT` |
+| `C02` | Contact Boundary Refinement | Turn the broad contact search into robust recipe windows around every observed boundary. | `RUNNING_SUPERVISED_SIMULATION_ONLY` |
 | `C03` | All-Pairs Motion Qualification | Move safely between every ordered key pair while preserving the admitted contact envelope. | `IMPLEMENTATION_PREPARED_BLOCKED_ON_C02` |
 | `C04` | Intent Robustness and Exact-Text Assurance | Understand varied offline instructions without changing, inventing, or prematurely executing requested text. | `READY_FOR_PREIMPLEMENTATION_FIXTURE` |
 | `C05` | Closed-Loop String Simulation | Compose intent, observation, motion, contact, device effect, and verification into exact strings. | `BLOCKED_ON_C02_C03_C04` |
