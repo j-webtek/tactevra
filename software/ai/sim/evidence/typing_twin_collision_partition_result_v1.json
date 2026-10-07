@@ -1,0 +1,76 @@
+{
+  "boundary_checks": [
+    {
+      "left_partition_index": 0,
+      "right_partition_index": 1,
+      "source_boundary_result_index": 254,
+      "successor_boundary_sample_sha256": "5b2c5e0907242cd432c23a61b9ca407fe4b0dfed5f4f04e7e9fc4ec8c18ec960",
+      "successor_start_to_recheck_maximum_difference_rad": 0.0,
+      "terminal_to_successor_start_maximum_difference_rad": 0.0
+    }
+  ],
+  "conservative_boundary_recheck_count": 1,
+  "continuous_collision_proven": false,
+  "controller_commands": [],
+  "decision": "PASS_EXACT_PARTITION_COVERAGE_RETAIN_COLLISION_BLOCKERS",
+  "fixture_sha256": "f7ce6683382e8fa5143a794fb72c89346e655962f1c0b0e810b9753e23400f6e",
+  "hardware_access": false,
+  "hardware_commands_generated": 0,
+  "hardware_writes": 0,
+  "installed_collision_blockers": [
+    "INSTALLED_COLLISION_PROFILE_REQUIRED",
+    "BOUNDED_COLLISION_SAMPLE_POLICY_REJECTED"
+  ],
+  "installed_collision_gate_cleared": false,
+  "installed_collision_intake_status": "BOUNDED_SAMPLE_POLICY_REJECTED",
+  "installed_geometry_collision_screening_executed": false,
+  "limitations": [
+    "This study partitions already accepted synthetic IK results; it does not solve IK, change the route, or qualify collision geometry.",
+    "The promoted transform, 120 mm tool, 25 mm hover, calibration, and ready-state seed remain synthetic and unmeasured.",
+    "A successor partition deliberately rechecks the previous partition terminal pose, so total partition sample count includes one conservative boundary overlap.",
+    "No installed collision profile, configuration-sampled body geometry, rigid attachment evidence, or conservative inter-sample sweep envelope is supplied.",
+    "Exact partition coverage does not prove sampled-pose clearance or continuous collision freedom and grants no physical authority."
+  ],
+  "partition_count": 2,
+  "partition_plan_sha256": "e0033809bb3fd06a51c925c39ad0b8c5b3834ddf5e837436792869aa6d003437",
+  "partition_summaries": [
+    {
+      "first_sample_sha256": "7e653dc7d150ccb631f05d3513aec78562f5e9045204e5e4bda9430236cf5a19",
+      "partition_index": 0,
+      "partition_sha256": "84c3a85b9c0c2eeca0bbba4e4058fb75584383343e0b92ce2ad5011a002d4940",
+      "sample_count": 256,
+      "source_result_count": 255,
+      "source_result_end_index_exclusive": 255,
+      "source_result_start_index": 0,
+      "terminal_sample_sha256": "367c96b610d98a8c5907f2f59837b6e2058a097910af1e82c855ad42bada6c62"
+    },
+    {
+      "first_sample_sha256": "5b2c5e0907242cd432c23a61b9ca407fe4b0dfed5f4f04e7e9fc4ec8c18ec960",
+      "partition_index": 1,
+      "partition_sha256": "65f8fdb318a31b67b30c3f459db5b41c445c7d56052e5a53af9a7a9fd9f93a75",
+      "sample_count": 74,
+      "source_result_count": 73,
+      "source_result_end_index_exclusive": 328,
+      "source_result_start_index": 255,
+      "terminal_sample_sha256": "c24aea8ec6dcccf2b74869ce0d3a70e500205263163ea5bb43ba0356b2e8a032"
+    }
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "bc7a257e81f1660fd453711365c3e2be1452a8349863690a727d425db70d3e95",
+  "sampling_policy": {
+    "maximum_joint_step_rad": 0.05,
+    "maximum_samples": 256,
+    "sampling_policy_sha256": "4552062f99ec6ba104978470e66d243b9026fa23f84f4b440699e271799530d7"
+  },
+  "schema": "tactevra.typing_twin_collision_partition_receipt.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_endpoint_duplicated_count": 0,
+  "source_endpoint_omitted_count": 0,
+  "source_ik_screen_sha256": "1e021d501d11b4720020a152689393f0af748e5a3b9fd5ed7e9bfed92d80b4a7",
+  "source_result_count": 328,
+  "source_result_coverage_count": 328,
+  "source_result_coverage_sha256": "4f2e814014c297f8a696acec9d852a601d928f2daab89c07e2504ac44fb4955b",
+  "source_result_receipt_sha256": "56d1c275ab529edc283a18d8569fc7d581bb047f1385094f6762a1f88c224aa5",
+  "total_partition_sample_count": 330
+}
