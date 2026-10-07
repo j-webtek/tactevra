@@ -1004,6 +1004,13 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
+The arm lane on `codex/c03-arm-collision-handoff` owns the bounded adapter from
+the exact C03 route receipt in `E-20261007-AI-490` to the existing partitioned
+installed-profile collision intake. It may verify lineage and enumerate
+required configuration and sweep evidence only. It must retain the installed
+profile, continuous collision, fresh observed-state, controller, and physical
+authority blockers until their independent evidence exists.
+
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
 [`POSE_KEYLOSS_EXTERNAL_ARTIFACT.md`](POSE_KEYLOSS_EXTERNAL_ARTIFACT.md) and
