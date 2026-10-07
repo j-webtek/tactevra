@@ -77,12 +77,25 @@ def _validate_campaign_result(path: Path, fixture: dict[str, Any]) -> dict[str, 
     return result
 
 
-def _recipe_table(campaign_fixture: dict[str, Any]) -> dict[int, dict[str, Any]]:
+def _recipe_and_hold_contract(
+    campaign_fixture: dict[str, Any],
+) -> tuple[dict[int, dict[str, Any]], float, float]:
     bound = throughput.load_fixture(
         ROOT / campaign_fixture["bindings"]["throughput_fixture"]["path"]
     )
-    physics, _, _, _, _ = throughput.load_bound(bound)
-    return {int(row["recipe_index"]): row for row in probe.recipe_rows(physics)}
+    physics, _, staged, _, _ = throughput.load_bound(bound)
+    switch = staged["switch_closure"]
+    minimum_hold_ms = max(
+        float(value) for value in switch["minimum_duration_ms_samples"]
+    )
+    maximum_hold_ms = float(switch["maximum_duration_ms"])
+    if minimum_hold_ms < 0.0 or maximum_hold_ms <= minimum_hold_ms:
+        raise ValueError("invalid bound C02 hold window")
+    return (
+        {int(row["recipe_index"]): row for row in probe.recipe_rows(physics)},
+        minimum_hold_ms,
+        maximum_hold_ms,
+    )
 
 
 def summarize_families(
@@ -370,14 +383,17 @@ def finalize(fixture_path: Path, output: Path) -> dict[str, Any]:
                     )
             yield result
 
+    recipe_table, minimum_hold_ms, maximum_hold_ms = _recipe_and_hold_contract(
+        campaign_fixture
+    )
     summary = summarize_families(
         admitted_results(),
         manifest=manifest,
-        recipe_table=_recipe_table(campaign_fixture),
+        recipe_table=recipe_table,
         required_scenarios=list(campaign_fixture["population"]["required_scenario_ids"]),
         landing_count=int(campaign_fixture["population"]["landing_count"]),
-        minimum_hold_ms=float(campaign_fixture["decision"]["hold_window_ms"]["minimum"]),
-        maximum_hold_ms=float(campaign_fixture["decision"]["hold_window_ms"]["maximum"]),
+        minimum_hold_ms=minimum_hold_ms,
+        maximum_hold_ms=maximum_hold_ms,
     )
     if summary["universal_family_count"]:
         decision = "COMPLETE_ROBUST_UNIVERSAL_SIMULATION_ONLY"

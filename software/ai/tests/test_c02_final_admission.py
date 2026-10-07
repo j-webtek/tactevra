@@ -25,6 +25,35 @@ def _row(target: str, scenario: str, landing: int, *, admitted: bool = True):
     }
 
 
+def test_recipe_and_hold_contract_uses_bound_staged_switch(monkeypatch):
+    staged = {
+        "switch_closure": {
+            "minimum_duration_ms_samples": [5.0, 30.0, 12.0],
+            "maximum_duration_ms": 150.0,
+        }
+    }
+    physics = {"physics": "fixture"}
+    monkeypatch.setattr(finalizer.throughput, "load_fixture", lambda _path: {})
+    monkeypatch.setattr(
+        finalizer.throughput,
+        "load_bound",
+        lambda _fixture: (physics, {}, staged, {}, {}),
+    )
+    monkeypatch.setattr(
+        finalizer.probe,
+        "recipe_rows",
+        lambda bound: [{"recipe_index": 80, "bound": bound}],
+    )
+
+    recipes, minimum, maximum = finalizer._recipe_and_hold_contract(
+        {"bindings": {"throughput_fixture": {"path": "bound.json"}}}
+    )
+
+    assert recipes == {80: {"recipe_index": 80, "bound": physics}}
+    assert minimum == 30.0
+    assert maximum == 150.0
+
+
 def test_summary_requires_all_scenarios_and_finds_universal_family():
     scenarios = ["LOW", "MID", "HIGH"]
     results = []
