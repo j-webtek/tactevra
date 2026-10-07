@@ -1,0 +1,165 @@
+{
+  "amendment": {
+    "date": "2026-10-07",
+    "parent_fixture_sha256": "fa08704a08f08685596e620b1c47f355798e8065a7d2553926c55d98003e31bd",
+    "population_thresholds_and_stop_policies_unchanged": true,
+    "reason": "SEPARATE_PRE_RESULT_OPERATIONS_FIXTURE_FOR_C02_1_EXACT_3MM_BRIDGE"
+  },
+  "base_campaign_full_execution_authorized": false,
+  "bindings": {
+    "campaign_fixture": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\campaign_fixture.json",
+      "sha256": "37581cdea041afd856ff4b09211fbb3e170831609b01ee07382af22f926d15db"
+    },
+    "campaign_manifest": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\manifest_preexecution.json",
+      "sha256": "99ec8b04ccc5aeb68e204f24ff9ee007f93eec88cd41cd8d7f5f4eeec64207a9"
+    },
+    "campaign_runner": {
+      "path": "software/ai/sim/run_ws2_c02_boundary_campaign.py",
+      "sha256": "8efead182a0c7f050aa8bffa1bf05e71ff7eec8d03d1fdbbbb2901a544406c7a"
+    },
+    "ops_helpers": {
+      "path": "software/ai/sim/stage_a_long_run_ops.py",
+      "sha256": "6a0684adb5646406b4414b5495e287aea088e38a56aa900310a0efdfaf44000b"
+    },
+    "policy_helpers": {
+      "path": "software/ai/sim/stage_a_campaign_supervisor.py",
+      "sha256": "b93f1c44ed2d09b1e4290db133b9ec2c8a991429f4b649c3d13ac2d73fe7e864"
+    },
+    "prior_smoke_cuda0": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\smoke_cuda0.json",
+      "sha256": "2074081a745da73fc6a63ba33d63990687c40e0ce2479d1c0c42de19163deaff"
+    },
+    "prior_smoke_cuda1": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\smoke_cuda1.json",
+      "sha256": "a365df9f82956ba8d885491732140ae7175a6fce1f1a5cd69c25b81d7b0d0c32"
+    },
+    "supervisor": {
+      "path": "software/ai/sim/c02_campaign_supervisor.py",
+      "sha256": "940c34183da7c2a22c458cc0226b4b01dece7fd3b1a0032253ae8c2e0ad935f6"
+    }
+  },
+  "campaign_fixture_sha256": "c3b0d25056268774c53222f46fed483a199290f66f89c8857ef4f909ded10e11",
+  "campaign_id": "C02.1-exact-3mm-contact-bridge-v1.1",
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "date": "2026-10-07",
+  "early_abort": {
+    "action": "STOP_AND_PRESERVE",
+    "condition": "EVERY_WORLD_IN_EVERY_SAMPLED_SHARD_HAS_ONE_IDENTICAL_PRIMARY_FAILURE",
+    "deterministic_sample_shards": 16
+  },
+  "failure_policy": {
+    "deterministic_stop": [
+      "NONFINITE_STATE",
+      "OVERFLOW",
+      "IDENTITY_MISMATCH",
+      "CROSS_GPU_DISAGREEMENT",
+      "HASH_MISMATCH"
+    ],
+    "transient": [
+      "DRIVER_RESET",
+      "OUT_OF_MEMORY_AT_LAUNCH"
+    ],
+    "transient_retry_limit": 1
+  },
+  "fixture_sha256": "f18cc9526437958e7100253ef1af939625d0b2866141a9417d1e0046e5b7a623",
+  "integrity": {
+    "cross_gpu_comparison": {
+      "continuous_absolute_tolerance": 1e-05,
+      "continuous_fields": [
+        "actuation_margin_mm",
+        "bottom_out_margin_mm",
+        "dwell_above_actuation_ms",
+        "final_position_error_mm",
+        "final_velocity_mm_s",
+        "midpoint_error_mm",
+        "minimum_depth_margin_mm",
+        "peak_penetration_mm",
+        "peak_required_force_n",
+        "peak_tool_compression_mm",
+        "peak_tool_force_n"
+      ],
+      "exact_noncontinuous_fields": true,
+      "exact_primary_failure_counts": true,
+      "exact_row_order": true,
+      "mode": "EXACT_DISCRETE_BOUNDED_CONTINUOUS",
+      "on_violation": "STOP_CROSS_GPU_DISAGREEMENT_AND_PRESERVE"
+    },
+    "cross_gpu_sample_modulus": 31,
+    "cross_gpu_sample_rule": "int(shard_id[:8],16) % 31 == 0",
+    "verify_before_every_shard": true
+  },
+  "limitations": [
+    "SIMULATION_ONLY",
+    "PHYSICAL_PARAMETERS_UNQUALIFIED",
+    "PREFLIGHT_PASS_DOES_NOT_AMEND_BASE_CAMPAIGN_AUTHORIZATION",
+    "NO_RECIPE_PROMOTION_BEFORE_COMPLETE_C02_ADMISSION"
+  ],
+  "manifest_sha256": "8166037d0beeb89f885937ae2fa30a895ef2881d616faabd68c7fd9d541ec44f",
+  "physical_authority": false,
+  "population": {
+    "candidate_seed_count": 612,
+    "maximum_worlds_per_shard": 384,
+    "recipe_family_count": 204,
+    "shard_count": 102,
+    "target_count": 51,
+    "world_count": 39168
+  },
+  "preflight_probes": {
+    "cuda0": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\preflight_v1\\max_shard_cuda0.json",
+    "cuda1": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\preflight_v1\\max_shard_cuda1.json",
+    "fault_matrix": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\preflight_v1\\fault_matrix.json",
+    "shard_id": "24e02f57442a1ec799ec86900f14d6f75cde0527855e115b4492373f7664a8ce",
+    "world_count": 384
+  },
+  "progress": {
+    "fields": [
+      "shards_done",
+      "eta_seconds",
+      "failures",
+      "temperatures"
+    ],
+    "status_path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\campaign_v1\\status.json"
+  },
+  "schedule": {
+    "execution": "DETERMINISTIC_TWO_HALVES",
+    "half_shard_count": 51,
+    "maximum_projected_wall_seconds": 1800,
+    "reason": "30-minute predeclared ceiling; exact maximum-shard dual-GPU throughput decides admission"
+  },
+  "schema": "tactevra.ws2_c02_supervised_preflight.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "storage": {
+    "backup_every_completed_shards": 25,
+    "backup_root": "F:\\TactevraEvidence\\issue190\\c02_1_exact_3mm_bridge_v1_1\\campaign_v1",
+    "clean_stop_floor_bytes": 68719476736,
+    "output_root": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\campaign_v1",
+    "projected_bytes_per_world": 1024,
+    "projected_output_bytes": 40108032,
+    "require_distinct_volume": true,
+    "require_hash_verified_copy": true,
+    "require_three_x_headroom": true
+  },
+  "thermals": {
+    "pause_ceiling_c": 83,
+    "pause_only_at_shard_boundary": true,
+    "sample_interval_seconds": 60
+  },
+  "watchdog": {
+    "action": "STOP_WORKER_AND_ALERT_NO_AUTOMATIC_PROGRESS",
+    "heartbeat_every_seconds": 60,
+    "stale_seconds": 300
+  },
+  "windows": {
+    "require_ac_hibernate_seconds": 0,
+    "require_ac_sleep_seconds": 0,
+    "require_no_auto_reboot_with_logged_on_users": 1
+  }
+}
