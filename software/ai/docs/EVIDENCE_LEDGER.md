@@ -8128,3 +8128,65 @@ rewriting history. New entries must use a unique evidence ID.
   explicitly ranged alternatives and preserves the exact target plus unchanged
   safety gates. Physical selection still requires measured tool geometry,
   board pose, key geometry, and commissioning evidence.
+
+### E-20261007-INT-473 — promoted transform admits 120 mm exact H contact profile
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned transform differential recorded under the cross-lane `INT`
+  sequence. No integration gate or physical readiness status changed.
+- Claim commit: `88b6107afc23d935d6eca85c3462e3ab1e6d7750`.
+- Frozen implementation and fixture commit:
+  `3619b34f21623cd47a9f4c1acdcfa5490a7f9e5e`.
+- Result commit: `87b55383adf1e1a501eec7b378b7cfe109cd6130`.
+- Objective: compare the blocked nominal system-manifest transform with the
+  existing governed promoted virtual commissioning overlay for the exact same
+  120 mm tool, `H` contact point, 25-to-0 mm one-millimetre profile, and
+  unchanged post-IK gates before allocating a full-route reconstruction.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_contact_transform_differential_fixture_v1.json`;
+  canonical SHA-256
+  `d9eb820be18a4cf73bfa4c5fd7416e51656b63cdae081d12515240e6c9915042`.
+  It binds exactly two source cases, profile
+  `ROCELL-VIRTUAL-COMMISSIONING-RANK1-001`, study input
+  `reach-944d7463f4c67905`, and profile-byte SHA-256
+  `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`.
+- Exact command: with `PYTHONPATH=software/ai;software/src`, run
+  `python -m rocell_ai.typing_twin_contact_transform_differential_v1
+  software/ai/sim/evidence/typing_twin_contact_transform_differential_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_contact_transform_differential_result_v1.json`.
+- Result: `PROMOTED_TRANSFORM_EXPLORATORY_PROFILE_ADMISSIBLE`. Receipt
+  SHA-256 `cb921499b8bd3441cfd631a780bbe2346d17478d475b1c047fcf64839de5de67`;
+  result-file SHA-256
+  `cc1c0c76148f9112da39a093761d49848dda3f3a88dd00d470f4522a9fcef13e`.
+- Metrics: the nominal transform reproduced zero converged exact-contact
+  candidates and stopped its sequential profile after 12 of 26 accepted points
+  on the unchanged normalized-margin gate. The promoted overlay admitted all 26
+  sequential points and all four converged exact-contact candidates. Its
+  sequential profile had minimum normalized joint margin
+  `0.15777113871560433` and maximum adjacent joint delta
+  `0.005227143047385141` rad. Exact contact remained
+  `(216.55, 154.0, 21.0)` mm.
+- Decision rule outcome: the promoted case passed exact contact and every
+  sequential profile point, so a separately frozen full-route reconstruction
+  using that exact source-bound profile is now allowed. No route or collision
+  claim was made in this increment.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate WS2 Stage A campaign was not interrupted.
+- Failures preserved: the nominal blocked case is retained in the same result.
+  One duplicate local CPU invocation was stopped before either invocation wrote
+  an artifact; the surviving frozen invocation completed unchanged. No result
+  was rescored or rewritten after observation.
+- Limitations: the promoted transform and tool remain unmeasured simulation
+  inputs with permanently zero physical release effect. Vertical IK feasibility
+  does not establish a full route, collision clearance, camera clearance,
+  contact behavior, dynamics, controller transport, or physical accuracy.
+  Installed collision and continuous sweep proof remain blocked. No physical
+  authority exists.
+- Supersedes: none. It explains the synthetic configuration sensitivity behind
+  `E-20261006-INT-472` while retaining that nominal blocked result.
+- Next dependency: freeze and run a full-route reconstruction under the exact
+  promoted profile, then apply unchanged IK, continuity, and collision gates.
+  Physical selection still requires measured placement, tool geometry, and
+  commissioning evidence.

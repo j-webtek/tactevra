@@ -1165,12 +1165,23 @@ contact, no full-route or collision claim was run. The next dependency is an
 arm-owned, predeclared synthetic geometry/configuration review; no margin,
 target, or authority boundary may be relaxed.
 
+Evidence `E-20261007-INT-473` compares that nominal transform with the already
+governed promoted virtual commissioning overlay while retaining the exact `H`
+contact, 120 mm tool, 25-to-0 mm profile, and unchanged post-IK gates. The
+nominal case reproduces the blocked exact contact. The promoted case admits all
+26 sequential profile points and four exact-contact candidates, with minimum
+normalized joint margin `0.157771` and maximum adjacent delta `0.005227` rad.
+This isolates the synthetic reach blocker to the source-bound transform choice.
+The promoted profile remains an unmeasured, simulation-only sensitivity overlay
+with zero physical release effect. The next bounded dependency is a frozen full
+route reconstruction under that exact profile, followed by unchanged continuity
+and collision gates; no physical transform, tool, or authority is installed.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 | nominal-versus-promoted transform differential for 120 mm exact `H` contact; fixture, harness, tests, generated evidence, and `E-20261007-INT-473` documentation | `feature/sim-contact-geometry-audit` / `88b6107afc23d935d6eca85c3462e3ab1e6d7750` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
