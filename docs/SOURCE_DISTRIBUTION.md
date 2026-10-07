@@ -590,3 +590,8 @@ The C02 result gate adds one strict final-admission module and one focused test
 module. This raises the exact tracked-file count and governed ceiling to 6,432.
 The full shard population, cross-GPU sentinels, compact final result, and F-drive
 custody copies remain external and hash-verified.
+
+The frozen C02 final-admission contract adds one compact fixture, raising the
+exact tracked-file count and governed ceiling to 6,433. It binds the completed
+campaign receipt and exact custody roots before any recipe-family result is
+computed; generated summaries remain external.
