@@ -78,7 +78,16 @@ def test_missing_manifest_retains_exact_route_and_all_authority_blockers(
     assert report["measurement_manifest_supplied"] is False
     assert report["profile_build"] is None
     assert report["c03_collision_handoff"]["ordered_targets"] == [
-        "H", "E", "L", "L", "O", "SPACE", "2", "0", "2", "6"
+        "H",
+        "E",
+        "L",
+        "L",
+        "O",
+        "SPACE",
+        "2",
+        "0",
+        "2",
+        "6",
     ]
     assert "INSTALLED_COLLISION_MEASUREMENT_MANIFEST_REQUIRED" in report["blockers"]
     assert report["continuous_collision_proven"] is False
@@ -103,9 +112,12 @@ def test_incomplete_measurement_manifest_fails_closed(
     assert report["status"] == BLOCKED_MEASUREMENTS_STATUS
     assert "PENDING:attachment:camera_holder" in report["blockers"]
     assert report["profile_file_sha256"] is None
-    assert report["c03_collision_handoff"]["collision_intake"][
-        "installed_collision_profile_sha256"
-    ] is None
+    assert (
+        report["c03_collision_handoff"]["collision_intake"][
+            "installed_collision_profile_sha256"
+        ]
+        is None
+    )
     assert report["installed_geometry_collision_screening_executed"] is False
 
 
@@ -130,12 +142,14 @@ def test_complete_synthetic_fixture_builds_profile_but_not_collision_clearance(
     assert first["status"] == READY_FOR_EVIDENCE_STATUS
     assert first["c03_collision_handoff"]["collision_intake"]["status"] == READY_STATUS
     assert first["profile_file_sha256"] is not None
-    assert "CONFIGURATION_GEOMETRY_REQUIRED_FOR_EVERY_PARTITION_SAMPLE" in first[
-        "blockers"
-    ]
-    assert "CONSERVATIVE_SWEEP_ENVELOPES_REQUIRED_FOR_EVERY_ROUTE_SEGMENT" in first[
-        "blockers"
-    ]
+    assert (
+        "CONFIGURATION_GEOMETRY_REQUIRED_FOR_EVERY_PARTITION_SAMPLE"
+        in first["blockers"]
+    )
+    assert (
+        "CONSERVATIVE_SWEEP_ENVELOPES_REQUIRED_FOR_EVERY_ROUTE_SEGMENT"
+        in first["blockers"]
+    )
     assert first["continuous_collision_proven"] is False
     assert first["installed_collision_gate_cleared"] is False
     assert first["controller_commands"] == []
@@ -164,4 +178,14 @@ def test_altered_manifest_hash_is_rejected(tmp_path, sim_context, synthetic_resu
             sim_context,
             measurement_manifest_path=path,
             expected_measurement_manifest_file_sha256=digest,
+        )
+
+
+def test_unqualified_route_is_rejected_before_manifest_access(sim_context):
+    with pytest.raises(ValueError, match="receipt identity"):
+        prepare_c03_installed_collision_qualification_v1(
+            _result(sim_context),
+            sim_context,
+            measurement_manifest_path="manifest-must-not-be-read.json",
+            expected_measurement_manifest_file_sha256="0" * 64,
         )

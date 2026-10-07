@@ -66,6 +66,15 @@ def prepare_c03_installed_collision_qualification_v1(
             "measurement manifest path and expected file SHA-256 must be supplied together"
         )
 
+    # Authenticate the exact admitted route before reading caller-selected
+    # measurement bytes. Reuse this profile-free handoff unless a complete
+    # manifest produces a profile that must be bound into a second handoff.
+    handoff = prepare_c03_route_collision_handoff_v1(
+        result,
+        context,
+        sampling_policy=sampling_policy,
+        maximum_partitions=maximum_partitions,
+    )
     profile_build = None
     installed_profile = None
     if supplied:
@@ -91,14 +100,13 @@ def prepare_c03_installed_collision_qualification_v1(
                     "source_bindings"
                 ],
             )
-
-    handoff = prepare_c03_route_collision_handoff_v1(
-        result,
-        context,
-        installed_profile=installed_profile,
-        sampling_policy=sampling_policy,
-        maximum_partitions=maximum_partitions,
-    )
+            handoff = prepare_c03_route_collision_handoff_v1(
+                result,
+                context,
+                installed_profile=installed_profile,
+                sampling_policy=sampling_policy,
+                maximum_partitions=maximum_partitions,
+            )
     intake = handoff["collision_intake"]
     if profile_build is None:
         status = MANIFEST_REQUIRED_STATUS
@@ -139,9 +147,7 @@ def prepare_c03_installed_collision_qualification_v1(
             if profile_build is None
             else profile_build.measurement_manifest_content_sha256
         ),
-        "profile_build": (
-            None if profile_build is None else profile_build.to_dict()
-        ),
+        "profile_build": (None if profile_build is None else profile_build.to_dict()),
         "profile_file_sha256": (
             None if profile_build is None else profile_build.profile_file_sha256
         ),
