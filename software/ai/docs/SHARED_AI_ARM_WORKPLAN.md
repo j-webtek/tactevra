@@ -1004,12 +1004,14 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-arm-collision-handoff` owns the bounded adapter from
-the exact C03 route receipt in `E-20261007-AI-490` to the existing partitioned
-installed-profile collision intake. It may verify lineage and enumerate
-required configuration and sweep evidence only. It must retain the installed
-profile, continuous collision, fresh observed-state, controller, and physical
-authority blockers until their independent evidence exists.
+The arm lane on `codex/c03-installed-collision-qualification` owns the bounded
+successor from the merged exact C03 route handoff in `E-20261007-ARM-491` to
+the deterministic installed-collision-profile builder and partitioned evidence
+intake. It may verify a supplied measurement manifest, build or reject its
+zero-authority profile, and enumerate the remaining configuration and sweep
+evidence only. It must not synthesize missing installed measurements or clear
+the continuous-collision, fresh observed-state, controller, or physical
+authority blockers.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
