@@ -523,3 +523,14 @@ geometry, sampled clearance, continuous sweep proof, controller artifact, GPU
 artifact, or authority-bearing output. All byte, duplicate, and reduction
 limits remain unchanged. The measured tree is 661,667,426 logical bytes with
 4,890,152 governed duplicate bytes.
+
+The installed-collision qualification planning and ICQ-1 measurement-manifest
+increment add four governed paths: one active implementation plan, one strict
+measurement-manifest schema, one read-only validator and worksheet generator,
+and one focused unit-test module. The file-count ceiling advances from 6,467 to
+the exact expected 6,471 files for those reviewed paths only. The manifest can
+retain incomplete measurements only as an explicit blocked result and never
+creates an installed profile, collision result, controller artifact, hardware
+operation, or physical authority. No raw measurement capture, simulator corpus,
+dependency tree, GPU artifact, or generated geometry enters the archive. All
+byte, duplicate, and reduction limits remain unchanged.

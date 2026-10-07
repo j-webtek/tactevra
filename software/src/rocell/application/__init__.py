@@ -225,6 +225,14 @@ from .installed_collision_geometry import (
     load_installed_collision_geometry_for_context,
     load_installed_collision_geometry_profile,
 )
+from .installed_collision_measurement_manifest_v1 import (
+    REPORT_SCHEMA as INSTALLED_COLLISION_MEASUREMENT_VALIDATION_SCHEMA,
+    SCHEMA as INSTALLED_COLLISION_MEASUREMENT_MANIFEST_SCHEMA,
+    InstalledCollisionMeasurementManifestV1Error,
+    load_and_validate_installed_collision_measurement_manifest_v1,
+    render_installed_collision_measurement_worksheet_v1,
+    validate_installed_collision_measurement_manifest_v1,
+)
 from .installed_cable_envelope_intake_v1 import (
     SCHEMA as INSTALLED_CABLE_ENVELOPE_INTAKE_SCHEMA,
     InstalledCableEnvelopeIntakeV1,
@@ -1435,6 +1443,9 @@ __all__ = [
     "INSTALLED_COLLISION_GEOMETRY_PROFILE_SCHEMA",
     "InstalledCollisionGeometryError",
     "InstalledCollisionGeometryProfile",
+    "InstalledCollisionMeasurementManifestV1Error",
+    "INSTALLED_COLLISION_MEASUREMENT_MANIFEST_SCHEMA",
+    "INSTALLED_COLLISION_MEASUREMENT_VALIDATION_SCHEMA",
     "INSTALLED_CABLE_ENVELOPE_INTAKE_SCHEMA",
     "InstalledCableEnvelopeIntakeV1",
     "InstalledCableEnvelopeIntakeV1Error",
@@ -1938,6 +1949,9 @@ __all__ = [
     "inspect_pinned_urdf_collision_evidence",
     "load_installed_collision_geometry_for_context",
     "load_installed_collision_geometry_profile",
+    "load_and_validate_installed_collision_measurement_manifest_v1",
+    "render_installed_collision_measurement_worksheet_v1",
+    "validate_installed_collision_measurement_manifest_v1",
     "build_synthetic_cable_envelope_intake_v1",
     "ingest_model_motion_batch",
     "run_simulation",

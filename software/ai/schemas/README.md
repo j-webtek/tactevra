@@ -104,6 +104,12 @@ The [installed collision-geometry profile schema](installed_collision_geometry_p
 defines the measured, content-addressed body envelopes, source bindings,
 engineering exclusions, and clearance policy required before route screening may
 rely on the installed arm rather than diagnostic placeholders.
+The prior
+[installed collision measurement manifest](installed_collision_measurement_manifest_v1.schema.json)
+inventories every body required by the active collision contract, binds methods,
+instruments, units, frames, source hashes, uncertainty, and clearance evidence,
+and allows incomplete worksheets to remain explicitly blocked. Its validator
+never creates an installed profile or grants collision or physical authority.
 
 The S4 zero-write controller boundary publishes five strict, closed schemas:
 the [T=102 encoding profile](zero_write_waveshare_t102_profile_v1.schema.json),
