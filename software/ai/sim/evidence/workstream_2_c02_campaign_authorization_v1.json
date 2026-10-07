@@ -1,0 +1,57 @@
+{
+  "authorization_basis": "EXPLICIT_USER_PROCEED_INSTRUCTION_PLUS_HASH_BOUND_PASSING_OPERATIONAL_PREFLIGHT",
+  "bindings": {
+    "campaign_manifest": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_contact_boundary_refinement_v1\\manifest.json",
+      "sha256": "71c650e5feeb0110ad60e3ccaf69e8a51c49f80d2873bf7fab375aa2ca484885"
+    },
+    "campaign_runner": {
+      "path": "software/ai/sim/run_ws2_c02_supervised_campaign.py",
+      "sha256": "a958d46beb4fdbf46c7f34051727aaee818da3bc77dabf87d0230c80247cf8d9"
+    },
+    "operations_fixture": {
+      "path": "software/ai/sim/evidence/workstream_2_c02_supervised_preflight_v1.json",
+      "sha256": "239fcd0622b2a76ee0f381b2a316199978d8242a2215c66f9a17f9a65785677c"
+    },
+    "preflight_result": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1_1\\preflight_result.json",
+      "receipt_sha256": "b2c327ded5e86332c2dc6714e174bf711b29dbd40ebc1452ac18db0d432cc18a",
+      "sha256": "dc8bf110fb075ee2d2e43ff961f25c9a2e387e4fce3cc4fa69d2b1bf137308d0"
+    },
+    "supervisor": {
+      "path": "software/ai/sim/c02_campaign_supervisor.py",
+      "sha256": "940c34183da7c2a22c458cc0226b4b01dece7fd3b1a0032253ae8c2e0ad935f6"
+    }
+  },
+  "campaign_id": "C02-contact-boundary-refinement",
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "date": "2026-10-07",
+  "fixture_sha256": "ee65933ae01538ecf2b9f32477e096b969b7a78c7b00e65c9e208db00060ec1d",
+  "full_campaign_authorized": true,
+  "limitations": [
+    "SIMULATION_ONLY",
+    "PHYSICAL_PARAMETERS_UNQUALIFIED",
+    "FULL_RESULT_REQUIRES_STRICT_FINAL_ADMISSION",
+    "NO_RECIPE_PROMOTION_FROM_RUNNER_COMPLETION_ALONE"
+  ],
+  "manifest_sha256": "9d53bf8ae5595361a0b9e1ddef9d13a37fa6b57f1d90e505741a62e81779b16f",
+  "physical_authority": false,
+  "population": {
+    "candidate_seed_count": 25704,
+    "maximum_worlds_per_shard": 2304,
+    "recipe_family_count": 8568,
+    "shard_count": 1122,
+    "target_count": 51,
+    "world_count": 1645056
+  },
+  "preflight_status": "PASS_READY_FOR_AUTHORIZATION_AMENDMENT",
+  "projected_wall_seconds": 3949.2801670149643,
+  "schema": "tactevra.ws2_c02_campaign_authorization.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}

@@ -580,3 +580,8 @@ one focused test module. This raises the exact tracked-file count and governed
 ceiling to 6,429. The authorization fixture is tracked only after it can bind a
 passing external preflight receipt; all campaign shards and custody copies
 remain external and hash-verified.
+
+The passing amended preflight adds one compact C02 authorization fixture that
+binds the exact manifest, preflight receipt, supervisor, and campaign runner.
+This raises the exact tracked-file count and governed ceiling to 6,430. It
+authorizes simulation execution only and grants no robot or hardware authority.
