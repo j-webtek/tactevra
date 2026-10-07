@@ -210,7 +210,6 @@ def compare_cross_gpu(
     for field in (
         "campaign_fixture_sha256",
         "manifest_sha256",
-        "rows_sha256",
     ):
         if left.get(field) != right.get(field):
             return {"status": "DISAGREE", "reason": f"binding:{field}"}

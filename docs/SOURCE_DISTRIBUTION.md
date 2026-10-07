@@ -574,3 +574,9 @@ tracked-file count and governed ceiling to 6,427. Maximum-shard probes, fault-
 injection receipts, campaign rows, status files, backups, and final results
 remain external and hash-verified; all byte, blob, duplicate, and reduction
 limits remain unchanged.
+
+The authorized C02 execution layer adds one zero-authority long-run runner and
+one focused test module. This raises the exact tracked-file count and governed
+ceiling to 6,429. The authorization fixture is tracked only after it can bind a
+passing external preflight receipt; all campaign shards and custody copies
+remain external and hash-verified.

@@ -68,6 +68,17 @@ def test_valid_result_rejects_tampering(tmp_path):
         supervisor.load_valid_result(path, shard_id=shard_id, fixture=fixture)
 
 
+def test_cross_gpu_allows_bounded_continuous_row_hash_difference(tmp_path):
+    fixture = _fixture(tmp_path)
+    shard_id = "c" * 64
+    left = _result(fixture, shard_id)
+    right = _result(fixture, shard_id)
+    right["rows"][0]["peak_penetration_mm"] += 5e-6
+    right["rows_sha256"] = ops.value_sha(right["rows"])
+    comparison = supervisor.compare_cross_gpu(fixture, left, right)
+    assert comparison["status"] == "AGREE"
+
+
 def test_resume_copies_and_rejects_conflicting_backup(tmp_path):
     fixture = _fixture(tmp_path)
     fixture["integrity"]["cross_gpu_sample_modulus"] = 10**20

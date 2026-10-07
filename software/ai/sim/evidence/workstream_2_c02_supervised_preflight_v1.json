@@ -1,4 +1,10 @@
 {
+  "amendment": {
+    "date": "2026-10-07",
+    "parent_fixture_sha256": "fa08704a08f08685596e620b1c47f355798e8065a7d2553926c55d98003e31bd",
+    "population_thresholds_and_stop_policies_unchanged": true,
+    "reason": "CROSS_GPU_WRAPPER_MUST_NOT_REQUIRE_BYTE_IDENTICAL_ROW_HASH_WHEN_THE_FROZEN_CONTRACT_EXPLICITLY_ALLOWS_BOUNDED_CONTINUOUS_DELTAS"
+  },
   "base_campaign_full_execution_authorized": false,
   "bindings": {
     "campaign_fixture": {
@@ -31,7 +37,7 @@
     },
     "supervisor": {
       "path": "software/ai/sim/c02_campaign_supervisor.py",
-      "sha256": "2bb4103cc1b1f1480a9923e5bc0472d0e25f9338b03c16b9d42a8af3cacad4fe"
+      "sha256": "940c34183da7c2a22c458cc0226b4b01dece7fd3b1a0032253ae8c2e0ad935f6"
     }
   },
   "campaign_fixture_sha256": "0ea055e5906be454fea60ac745fd422d51122a493319ff778c70a6313a8fd08a",
@@ -63,7 +69,7 @@
     ],
     "transient_retry_limit": 1
   },
-  "fixture_sha256": "fa08704a08f08685596e620b1c47f355798e8065a7d2553926c55d98003e31bd",
+  "fixture_sha256": "8042e1800203e8d9582b1a331d25325ba0a78b51f26c6f3ac47121e047596072",
   "integrity": {
     "cross_gpu_comparison": {
       "continuous_absolute_tolerance": 1e-05,
@@ -107,9 +113,9 @@
     "world_count": 1645056
   },
   "preflight_probes": {
-    "cuda0": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1\\max_shard_cuda0.json",
-    "cuda1": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1\\max_shard_cuda1.json",
-    "fault_matrix": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1\\fault_matrix.json",
+    "cuda0": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1_1\\max_shard_cuda0.json",
+    "cuda1": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1_1\\max_shard_cuda1.json",
+    "fault_matrix": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1_1\\fault_matrix.json",
     "shard_id": "23c1ae43c5df590515ad1c072d371394be13b2914e7f3f2a6226aac044bd1e0d",
     "world_count": 2304
   },
