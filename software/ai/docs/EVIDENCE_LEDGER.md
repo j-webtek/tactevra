@@ -9039,3 +9039,64 @@ rewriting history. New entries must use a unique evidence ID.
   from the installation measurement manifest, then supply configuration geometry
   for all 323 partition samples and conservative sweep evidence for all 321
   route segments. A fresh observed start state remains required afterward.
+
+### E-20261007-ARM-492 — exact C03 route reaches measured-profile qualification boundary
+
+- Stage: S4 zero-authority installed-collision qualification intake.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Implementation commit: `047d89c34272c41ee5edbaecc04bd0b8bb3b1ddf`.
+- Change: composed the strict `E-20261007-ARM-491` route handoff with the
+  deterministic installed-collision-profile builder. The boundary accepts a
+  measurement path and expected file SHA-256 atomically, rejects crossed bytes,
+  preserves incomplete body or clearance blockers, and loads a generated
+  profile through the existing strict consumer before exposing partitioned
+  evidence slots. It never substitutes synthetic measurements for the absent
+  installed manifest.
+- Input: external `E-20261007-AI-490` result-file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  coherent workspace `C:\MuJoCoWarp\c03cw9`; no installed measurement manifest
+  was supplied to the retained real-route run.
+- Command: from this branch, set `PYTHONPATH` to
+  `software/src;software/ai`, load the exact external result and the
+  `C:\MuJoCoWarp\c03cw9` simulation context, then call
+  `prepare_c03_installed_collision_qualification_v1(result, context)` with no
+  measurement manifest. The canonical output is retained at
+  `C:\MuJoCoWarp\evidence\issue190\c03_installed_collision_qualification_v1\c03_installed_collision_qualification_missing_manifest_v1.json`.
+- Result: `BLOCKED_MEASUREMENT_MANIFEST_REQUIRED`; qualification receipt
+  SHA-256
+  `2f7ed1a935c97e446801d735175ff7fdd388bda0b4f4038f8143eff5d8ffe4af`;
+  result-file SHA-256
+  `8a699b6e1f22647a3d9e26f50ee879eff5642925b0712aa121274b04a2d47a46`.
+  A byte-identical, hash-verified backup is retained on `F:`.
+- Metrics: 2 partitions, 321 route segments, and 323 bounded samples including
+  one conservative boundary recheck. The blockers are exactly
+  `INSTALLED_COLLISION_MEASUREMENT_MANIFEST_REQUIRED`,
+  `INSTALLED_COLLISION_PROFILE_REQUIRED`, and
+  `FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION`.
+- Validation: exact command
+  `python -m pytest software/tests/unit/test_c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_route_collision_handoff_v1.py software/tests/unit/test_installed_collision_profile_builder_v1.py -q`
+  with `PYTHONPATH=software/src;software/ai` passed 18 tests. Exact command
+  `python -m ruff check software/src/rocell/application/c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_installed_collision_qualification_v1.py`
+  passed. Exact command `python scripts/ci/check_source_archive_footprint.py`
+  passed at 6,503 files and 662,039,813 logical bytes.
+- Fixtures: the missing-manifest run uses the real retained C03 result. Focused
+  unit fixtures also cover a pending `attachment:camera_holder`, a complete
+  synthetic 19-body builder document, atomic path/hash admission, altered
+  manifest bytes, exact repeated target order, and zero-authority output. The
+  synthetic complete document is test evidence only and is not an installed
+  measurement or deployment qualification.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: no installed body geometry, clearance measurement,
+  configuration-sampled moving-cable geometry, conservative segment sweep,
+  fresh observed start state, controller operation, or physical qualification
+  exists in this increment. Continuous collision remains unproven and the
+  installed collision gate remains closed.
+- Supersedes: none. `E-20261007-ARM-491` remains the exact route-to-partition
+  handoff predecessor.
+- Next dependency: capture and independently retain the complete physical
+  installed-collision measurement manifest. Once its exact bytes and SHA-256
+  exist, rerun this same boundary to build the profile, then supply
+  configuration geometry for all 323 partition samples and conservative sweep
+  evidence for all 321 route segments. Fresh observed state remains required
+  before any execution review.

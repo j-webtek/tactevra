@@ -1903,6 +1903,15 @@ correctly at `BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED`; fresh observed
 state is also retained as a blocker. No collision check or authority was
 created. The next arm increment requires the measured installed collision
 profile and full configuration plus conservative sweep evidence.
+Evidence `E-20261007-ARM-492` composes that exact handoff with the deterministic
+installed-profile builder. The real retained route stops at
+`BLOCKED_MEASUREMENT_MANIFEST_REQUIRED`, while focused synthetic fixtures prove
+that incomplete measurements remain blocked and a complete hash-bound manifest
+can enter the profile-bound partition intake without claiming collision
+clearance. The next dependency is a real installed measurement manifest; the
+software must not substitute test geometry. Configuration-sampled cable
+geometry, conservative sweeps for all 321 segments, and fresh observed state
+remain subsequent blockers.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
