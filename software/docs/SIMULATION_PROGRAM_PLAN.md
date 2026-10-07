@@ -1014,6 +1014,15 @@ recipes, landing scenarios, all contact gates, and zero-authority scope are
 unchanged. Only a dual-GPU smoke is authorized; a complete 39,168-world run
 still requires a separate passing preflight and authorization record.
 
+C02.1 subsequently stopped under its frozen identical-failure rule because all
+19,200 admitted sample worlds retained residual release velocity above the
+unchanged reset limit. C02.2 therefore begins with a bounded release-settle
+diagnostic: exactly one second of additional post-release simulation, the same
+0.05 mm position and 0.05 mm/s velocity limits, both exact 3 mm tip lengths,
+both retained recipes, all three scenarios, and 64 landings. It may select a
+successor protocol only if both GPUs agree and every original contact gate still
+passes. C02.1 remains failed and is never rescored.
+
 #### C03 — All-Pairs Motion Qualification
 
 **Subtitle:** Move safely between every ordered key pair while preserving the
