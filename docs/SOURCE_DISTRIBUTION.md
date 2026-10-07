@@ -579,3 +579,12 @@ reviewed-file slots. The runner changes exactly three source-identity fields in
 external derived fixtures and recomputes their hashes; every numerical route,
 IK, continuity, authority, and collision policy remains unchanged. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The virtual-profile bundle-rebinding successor adds two governed paths: one
+thin identity-rebinding runner and one pre-result fixture. The resulting tree
+contains 6,488 tracked files. The ceiling advances from 6,488 to 6,490,
+retaining two reviewed-file slots. The runner derives a virtual commissioning
+profile with the candidate bundle ID and updates only that profile's bundle-lock
+hash before delegating to the unchanged route runner. Study values, numerical
+policies, authority, and historical repository artifacts remain unchanged. All
+byte, duplicate, and reduction limits remain unchanged.

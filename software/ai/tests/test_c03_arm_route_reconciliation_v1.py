@@ -28,6 +28,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_2 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_3 import (  # noqa: E402
     load_fixture as load_rebound_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_4 import (  # noqa: E402
+    load_fixture as load_bundle_rebound_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -48,6 +51,9 @@ SHORT_PATH_ROUTE_FIXTURE = (
 )
 REBOUND_ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_3.json"
+)
+BUNDLE_REBOUND_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_4.json"
 )
 
 
@@ -197,5 +203,23 @@ def test_rebound_successor_freezes_only_catalog_identity_changes() -> None:
     assert contract["source_predecessor_fixture_sha256"] == (
         "f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197"
     )
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_bundle_rebound_successor_freezes_only_identity_changes() -> None:
+    fixture = load_bundle_rebound_route_fixture(
+        BUNDLE_REBOUND_ROUTE_FIXTURE, WORKSPACE
+    )
+    contract = fixture["virtual_profile_rebinding"]
+    assert contract["allowed_semantic_changes"] == [
+        "virtual_profile.binding.simulation_bundle_id",
+        "bundle.artifacts.virtual_commissioning_profile.sha256",
+    ]
+    assert contract["numerical_policy_change_count"] == 0
+    assert contract["source_virtual_profile_sha256"] == (
+        "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+    )
+    assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

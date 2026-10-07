@@ -1788,6 +1788,14 @@ binds the historical bundle ID. A successor must derive that profile binding
 and its bundle-lock artifact hash as an explicit identity-only change while
 preserving all study values, authority fields, route policies, and repository
 artifacts.
+The bundle-identity successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_4.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_4.json),
+canonical SHA-256
+`7b5572298746451fed5e9ca773c60b708195a03cfed712dff72596726dfb39cb`.
+It adds exactly two allowed semantic changes: the derived virtual profile's
+simulation-bundle ID and the bundle lock's hash for those derived profile
+bytes. Numerical policy change count remains zero. Study values, authority,
+route fixtures, historical repository files, and every route gate are retained.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
