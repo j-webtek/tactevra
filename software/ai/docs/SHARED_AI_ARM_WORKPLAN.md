@@ -1142,6 +1142,16 @@ next bounded dependency is an arm-owned descent-route reconstruction or a new
 predeclared tool/hover candidate, with every existing margin and collision gate
 retained.
 
+Evidence `E-20261006-INT-471` rejects further bounded descent routing for the
+110 mm tool. One direct control and 48 predeclared lateral/precontact corridors
+all stopped on the unchanged normalized joint-margin gate. The best corridor
+extended the accepted prefix to 29 samples, but an independent endpoint check
+found zero converged IK candidates for the exact required `H` contact point at
+`(216.55, 154.0, 21.0)` mm. Since every valid route must end there, additional
+110 mm path search is not justified by this model. The next bounded candidate
+is the previously hover-admitted 120 mm tool, beginning with exact-contact and
+depth-profile checks before another full-route campaign.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

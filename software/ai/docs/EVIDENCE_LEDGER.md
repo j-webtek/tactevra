@@ -7966,3 +7966,76 @@ rewriting history. New entries must use a unique evidence ID.
   full canonical route passes should installed-profile bounded sampling and
   conservative continuous sweep qualification run. A separate all-catalog-key
   route remains required after the candidate catalog is available on main.
+
+### E-20261006-INT-471 — exact H contact rejects bounded 110 mm descent corridors
+
+- Stage: S2 exploratory zero-authority integration planning.
+- Lane: ARM-owned route evidence recorded under the cross-lane `INT` sequence.
+  No integration gate or physical readiness status changed.
+- Claim commit: `2eaa6df6033cc9c2f3f739e678082b444fe7028d`.
+- Frozen implementation and fixture commit:
+  `dd21adc494cacd6e71ae25bb4ac99f1db1017bcb`.
+- Result commit: `9e1184faf442a0c6611a63fcb78c5358e27fef1e`.
+- Objective: determine whether a bounded lateral descent corridor can connect
+  the admitted 110 mm / 25 mm first-`H` hover to the unchanged exact contact
+  point while preserving all canonical post-IK and continuity thresholds.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_first_h_descent_fixture_v1.json`;
+  canonical SHA-256
+  `194c6e8a21948939abe698845fe453b1a3c80454ac3b6f318e42dbc65115bddd`;
+  file SHA-256
+  `dc9ef1a666152c5d860c5b1c3239df562a3a2f55e844a62cbe7f929a79edf200`.
+- Frozen candidates: one unchanged direct-route control plus 48 corridors from
+  5 and 10 mm lateral radii, eight signed XY directions, and precontact heights
+  of 5, 10, and 15 mm. Every offset route begins at the exact hover, moves
+  laterally at hover height, descends to its offset precontact point, and then
+  returns to the exact `H` contact coordinate. All subsequent semantic targets
+  and endpoints remain unchanged.
+- Exact command: with `PYTHONPATH=software/ai;software/src`,
+  `OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, and `MKL_NUM_THREADS=1`, run
+  `python -m rocell_ai.typing_twin_first_h_descent_v1
+  software/ai/sim/evidence/typing_twin_first_h_descent_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_first_h_descent_result_v1.json`.
+- Result: `BLOCKED_NO_BOUNDED_DESCENT_CORRIDOR`. Receipt SHA-256:
+  `5766b146916d1d320219e135d12f83d3ff52d4103440f054fcfc3423efe4dfe2`;
+  result-file SHA-256
+  `8f8542686ba6f2e96f2930e420c42eb58a912ff72b5962296ee2ecca24db115c`.
+- Metrics: zero of 49 candidates accepted their complete route. All 49 stopped
+  on `MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED` while processing `H`;
+  seven failures were in `APPROACH` and 42 in `TRANSIT`. Accepted-prefix counts
+  ranged from 24 to 29: 13 candidates accepted 24, 15 accepted 25, nine
+  accepted 26, six accepted 27, three accepted 28, and three accepted 29.
+  The best candidate used offset `(-10,-10)` mm and a 5 mm precontact height;
+  it passed continuity with a largest accepted delta of `0.040385` rad and
+  failed at normalized margin `0.001633` after 29 accepted samples.
+- Endpoint finding: the independently scored exact contact point
+  `(216.55,154.0,21.0)` mm produced zero converged IK candidates. This is the
+  required unmodified endpoint, so changing only the Cartesian path cannot
+  produce a complete 110 mm route under this pinned model.
+- Validation: 3 focused fixture-integrity, deterministic reproduction,
+  blocked-result, and zero-authority tests passed in 89.80 seconds; Ruff and
+  `git diff --check` passed. Broader repository and exact-head checks follow on
+  the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. The separate Stage A campaign was not interrupted.
+- Failures preserved: all 49 candidate routes, their evaluated prefixes, the
+  direct control, and the zero-candidate exact-contact result remain in the
+  generated evidence artifact. No threshold or candidate was changed after
+  results.
+- Limitations: all geometry, calibration, and state inputs remain synthetic or
+  nominal. The bounded 49-candidate family cannot prove global path
+  infeasibility, although the exact required endpoint has no converged
+  candidate under this solver/model. The custom route study reuses canonical
+  post-IK gates but does not install production compiler output. Installed and
+  continuous collision, camera clearance, dynamics, contact, controller
+  transport, and physical accuracy remain blocked. No physical authority
+  exists.
+- Supersedes: none. This narrows the failed 110 mm route retained by
+  `E-20261006-INT-470`.
+- Next dependency: stop allocating path-search volume to the 110 mm candidate.
+  Freeze an exact-contact and vertical-depth profile for the previously
+  hover-admitted 120 mm tool, then reconstruct a full route only if the exact
+  contact passes every unchanged pointwise gate. Physical selection still
+  requires measured tool geometry and commissioning evidence.

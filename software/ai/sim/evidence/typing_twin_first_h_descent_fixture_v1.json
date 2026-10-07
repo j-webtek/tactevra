@@ -1,0 +1,124 @@
+{
+  "claim_commit": "2eaa6df6033cc9c2f3f739e678082b444fe7028d",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "candidate_count_exact": 49,
+    "collision": "NOT_REACHED_UNLESS_A_FULL_CANONICAL_POST_IK_ROUTE_PASSES",
+    "continuity_threshold_change_count_maximum": 0,
+    "exact_contact_point_change_count_maximum": 0,
+    "ik_threshold_change_count_maximum": 0,
+    "installed_collision_gate_must_remain_blocked": true,
+    "later_route_endpoint_change_count_maximum": 0,
+    "pass": "AT_LEAST_ONE_CANDIDATE_ACCEPTS_EVERY_FULL_ROUTE_SAMPLE",
+    "semantic_target_order_change_count_maximum": 0
+  },
+  "fixture_sha256": "194c6e8a21948939abe698845fe453b1a3c80454ac3b6f318e42dbc65115bddd",
+  "input_bindings": {
+    "canonical_post_ik": {
+      "path": "software/src/rocell/application/trajectory_simulation.py",
+      "sha256": "0177c218d1fbb3cbb3160189469081435fa6b17946e3602bd80313f1c0a46f78"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_first_h_descent_v1.py",
+      "sha256": "a7f44f2b6b23eb48dca73be180a6056e12d5dae853507e7ae672435755df9c05"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_110mm_full_route_fixture_v1.json",
+      "sha256": "32051e769af5eb9225b7bad0d76a86ea394b381d5eaf050aacb854ea7b59b582"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "trajectory_plan": {
+      "path": "software/src/rocell/application/typing_trajectory_plan_v1.py",
+      "sha256": "948e27492cccbafcee08df1e2a0f26a7b061eb50b2975ad241c251febab0de34"
+    }
+  },
+  "limitations": [
+    "All calibration, ready-state, tool, hover, and target inputs are synthetic or nominal.",
+    "The 49 candidates are a bounded deterministic corridor family and cannot prove global route infeasibility.",
+    "The study reuses the canonical post-IK gate implementation but custom trajectories are not installed production compiler output.",
+    "The result covers the parent ten-action route rather than every catalog target.",
+    "Installed collision geometry is absent; collision intake and continuous sweep qualification remain blocked.",
+    "No result can create commands, permits, transport, hardware access, movement, or physical authority."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "6fdc49b8f87ed8b3767572079cd5ae3273dbc9697db2975ae0d2a34ee1b2ca3c",
+    "path": "software/ai/sim/evidence/typing_twin_110mm_full_route_fixture_v1.json"
+  },
+  "reconstruction": {
+    "hover_clearance_mm": 25.0,
+    "tool_length_mm": 110.0
+  },
+  "resource_limits": {
+    "maximum_route_samples": 512
+  },
+  "schema": "tactevra.typing_twin_first_h_descent_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "search": {
+    "construction": "EXACT_HOVER_THEN_LATERAL_AT_HOVER_THEN_OFFSET_PRECONTACT_THEN_EXACT_CONTACT",
+    "control": {
+      "offset_xy_mm": [
+        0.0,
+        0.0
+      ],
+      "precontact_height_mm": 0.0
+    },
+    "directions": [
+      [
+        -1.0,
+        -1.0
+      ],
+      [
+        -1.0,
+        0.0
+      ],
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        0.0,
+        -1.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        1.0,
+        -1.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0
+      ]
+    ],
+    "offset_radius_mm": [
+      5.0,
+      10.0
+    ],
+    "precontact_height_mm": [
+      5.0,
+      10.0,
+      15.0
+    ]
+  }
+}
