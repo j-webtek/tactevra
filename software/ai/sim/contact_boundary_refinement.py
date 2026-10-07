@@ -496,12 +496,24 @@ def compact_c02_boundary_plan(
     for result in shard_results:
         shard_count += 1
         world_count += int(result["world_count"])
-        target_id = str(result["shard"]["target_id"])
+        shard = result["shard"]
+        target_id = str(shard["target_id"])
         targets_seen.add(target_id)
+        normalized_rows = []
+        for source_row in result["rows"]:
+            row = dict(source_row)
+            for field in ("target_id", "profile_id", "tip_id"):
+                shard_value = str(shard[field])
+                if field in row and str(row[field]) != shard_value:
+                    raise ValueError(
+                        f"row/shard {field} mismatch in {shard['shard_id']}"
+                    )
+                row[field] = shard_value
+            normalized_rows.append(row)
         shard_plan = refinement_plan_v2(
             fixture,
             staged,
-            result["rows"],
+            normalized_rows,
             c01_result_sha256=c01_result_sha256,
             emit_refinement_identities=False,
         )
@@ -509,10 +521,10 @@ def compact_c02_boundary_plan(
         required_group_count += sum(
             1
             for scenario_id in {
-                str(row["scenario_id"]) for row in result["rows"]
+                str(row["scenario_id"]) for row in normalized_rows
             }
             if scenario_id != "FAILURE_CONTROL"
-        ) * len({str(row["compliance_id"]) for row in result["rows"]})
+        ) * len({str(row["compliance_id"]) for row in normalized_rows})
         boundary_groups = {
             (
                 row["target_id"],

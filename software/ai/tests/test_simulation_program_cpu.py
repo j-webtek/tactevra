@@ -868,6 +868,10 @@ def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
     assert first["population_status"] == "SEEDS_ONLY_PENDING_COMPLETE_C01_FINALIZATION"
     assert first["physical_authority"] is False
 
+    shard_rows = [
+        {key: value for key, value in row.items() if key not in {"profile_id", "tip_id"}}
+        for row in rows
+    ]
     compact = C02_REFINEMENT.compact_c02_boundary_plan(
         fixture,
         staged,
@@ -879,8 +883,8 @@ def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
                     "profile_id": "BASELINE",
                     "tip_id": "sphere-r1",
                 },
-                "world_count": len(rows),
-                "rows": rows,
+                "world_count": len(shard_rows),
+                "rows": shard_rows,
             }
         ],
         c01_result_sha256="0" * 64,

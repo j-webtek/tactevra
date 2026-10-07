@@ -1,4 +1,11 @@
 {
+  "amendment": {
+    "date": "2026-10-07",
+    "failed_stderr_sha256": "9cea7b6f53090358a3c5a3199e2f34b0a420f7196e928b88814111a7a6e9dc44",
+    "parent_fixture_sha256": "110aadb4d5809d48babeba6a2068ea095607602eb95e47c2954f580ac1a6ed14",
+    "reason": "FIRST_EXTRACTION_FAILED_BEFORE_OUTPUT_BECAUSE_PROFILE_AND_TIP_IDENTITIES_ARE_SHARD_LEVEL_IN_C01; NORMALIZE_IMMUTABLE_SHARD_FIELDS_IN_STREAMING_ADAPTER",
+    "selection_and_quotas_unchanged": true
+  },
   "bindings": {
     "c01_final_result": {
       "decision": "COMPLETE_INFEASIBLE_NO_RANGE_CHANGE",
@@ -14,7 +21,7 @@
     },
     "extractor_module": {
       "path": "software/ai/sim/contact_boundary_refinement.py",
-      "sha256": "76f4796d2fef910c140e216d1e0eb553853ce0d6f86b395dade3cedc8941a536"
+      "sha256": "ca5d3dea4bc4fd0823f14c0c2994124473cb360ff697e49ac704688905e3feb1"
     }
   },
   "campaign": {
@@ -30,7 +37,7 @@
     "transports": 0
   },
   "date": "2026-10-07",
-  "fixture_sha256": "110aadb4d5809d48babeba6a2068ea095607602eb95e47c2954f580ac1a6ed14",
+  "fixture_sha256": "21011bd738aa266bf28469944fa9e83059b2da1d0e336e1c02e01927846ccf26",
   "limitations": [
     "C01_IS_SIMULATION_ONLY",
     "CANDIDATE_SEEDS_DO_NOT_QUALIFY_A_RECIPE",
