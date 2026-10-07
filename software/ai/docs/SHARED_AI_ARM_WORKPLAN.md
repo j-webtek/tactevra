@@ -1695,6 +1695,17 @@ This composes virtual verification and recovery only. Perception, IK, collision,
 contact physics, real host/ADB evidence, transport, hardware, and physical
 authority remain outside the result.
 
+The AI lane on `issue/190-c03-arm-reconciliation` owns the bounded C03-to-arm
+identity reconciliation. Its frozen fixture compares the admitted C03 recipe
+and exact key-clearance receipts with the current promoted full-route and
+partitioned collision-intake receipts. It may report only a zero-authority
+identity decision and retained blockers. It must not change arm-lane status,
+clear an integration gate, execute collision screening, or reinterpret the C03
+key-only result as full robot/workcell evidence. The pre-result fixture is
+[`c03_arm_route_reconciliation_fixture_v1.json`](../sim/evidence/c03_arm_route_reconciliation_fixture_v1.json),
+canonical SHA-256
+`73bfa179c410ff83747b09c63272a999b2e627e0b66faed8bbe0688ed6b2562c`.
+
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
    `H,H,I` ingress are covered by the shared conformance profile.
