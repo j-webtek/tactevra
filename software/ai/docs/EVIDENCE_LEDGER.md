@@ -8868,3 +8868,48 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: predeclare exact inheritance of the missing route fields from
   the promoted fixture's already hash-bound parent fixture. Values must be copied
   byte-for-byte, with zero numerical modifications and no authority.
+
+### E-20261007-AI-488 — exact route blocked by stale C03 contact-plane Z
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `4824ea95606e5cbc9a38dabef910ea4778877044`.
+- Change: copied the ten missing route-policy fields byte-for-byte from the
+  promoted fixture's existing hash-bound IK/collision parent. No numerical value
+  was tuned or invented; numerical policy change count remained zero.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_8.json`;
+  canonical fixture SHA-256
+  `7a00f32fbea183abce7a44a64a5516b4b8c81b964dca748758c1604f46ea5a25`;
+  file SHA-256
+  `5bd0e87945ab71e0f3411a9f510bcc57ba759f7248423d4a1af17380524bbe0f`;
+  runner SHA-256
+  `490273547a96af8527152429fc0c511fb4d7771dd6efec63e367757037f9fd7e`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_8 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_8.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_8.json`.
+- Result: `BLOCKED` before IK. Coherence, strict ingress, fresh-registry
+  revalidation, promoted placement validation, execution-plan compilation, and
+  trajectory compilation passed. The exact pose-to-target check raised
+  `ValueError: C03 pose and route target differ: H`. Exit code was 1 and no
+  result file was written.
+- Metrics: all eight unique route targets (`H`, `E`, `L`, `O`, `SPACE`, `2`,
+  `0`, `6`) have matching X and Y coordinates but a uniform Z mismatch: the
+  candidate catalog centers are at 21.0 mm and the admitted C03 pose bundle
+  contact targets are at 20.0 mm. All 10 ordered actions are therefore affected.
+  Zero IK samples were evaluated.
+- Validation: the focused fixture suite passed 16 tests before execution. Ruff,
+  `git diff --check`, and source-archive policy passed at 6,496 files and
+  661,970,472 logical bytes.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the pose family claims the candidate catalog hash but its stored
+  contact-plane Z is stale by 1.0 mm. Shifting the catalog, weakening equality,
+  or silently adding an offset would mix incompatible evidence. No IK,
+  continuity, collision, controller, or physical conclusion exists.
+- Supersedes: none. This is the first attempt to compile the exact route fully
+  enough to expose the pose/catalog geometric inconsistency.
+- Next dependency: regenerate and independently admit the C03 pose family from
+  the exact candidate catalog with contact target Z = 21.0 mm, retaining the
+  110 mm tool and the frozen C03 recipe. Then rerun this route without changing
+  route or IK gates.

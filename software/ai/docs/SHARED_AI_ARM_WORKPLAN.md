@@ -1847,6 +1847,13 @@ canonical SHA-256
 It enumerates all ten missing fields and copies them byte-for-byte from the
 promoted fixture's existing hash-bound IK/collision parent. No value is tuned
 or invented; numerical policy change count remains zero.
+Evidence `E-20261007-AI-488` preserves the result. The exact route compiled and
+reached pose-to-target validation, where every unique route target showed the
+same 1.0 mm Z mismatch: candidate catalog centers are at 21.0 mm and admitted
+C03 contact targets are at 20.0 mm. X and Y match. The route remains blocked;
+the equality check and catalog are unchanged. The next AI-lane dependency is a
+new C03 pose-family generation and admission run against the exact candidate
+catalog and 110 mm tool before any IK or collision claim can continue.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
