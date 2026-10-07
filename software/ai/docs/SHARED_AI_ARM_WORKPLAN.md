@@ -1816,6 +1816,13 @@ through the external evidence path rather than the bundle's internal locked
 path. A successor may change only that predecessor binding path to
 `software/config/nominal_target_profiles.json`; the candidate hash, numerical
 policies, and authority remain unchanged.
+The locked-catalog-path successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_6.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_6.json),
+canonical SHA-256
+`5facf1090988dc3add5373d3154fb585b8b320ceff9bc3a61d3f62e246ecee8d`.
+It adds only the predecessor candidate-catalog path to the derived-fixture
+allowlist. The candidate hash remains identical and both rebinding contracts
+retain zero numerical policy changes and zero authority.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

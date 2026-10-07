@@ -34,6 +34,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_4 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_5 import (  # noqa: E402
     load_fixture as load_parent_profile_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_6 import (  # noqa: E402
+    load_fixture as load_locked_catalog_path_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -60,6 +63,9 @@ BUNDLE_REBOUND_ROUTE_FIXTURE = (
 )
 PARENT_PROFILE_ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_5.json"
+)
+LOCKED_CATALOG_PATH_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_6.json"
 )
 
 
@@ -243,5 +249,29 @@ def test_parent_profile_successor_adds_only_parent_profile_binding() -> None:
     ]
     assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["virtual_profile_rebinding"]["numerical_policy_change_count"] == 0
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_locked_catalog_path_successor_preserves_candidate_hash() -> None:
+    prior = load_parent_profile_route_fixture(PARENT_PROFILE_ROUTE_FIXTURE, WORKSPACE)
+    fixture = load_locked_catalog_path_route_fixture(
+        LOCKED_CATALOG_PATH_ROUTE_FIXTURE, WORKSPACE
+    )
+    contract = fixture["fixture_rebinding"]
+    assert contract["derived_candidate_catalog_path"] == (
+        "software/config/nominal_target_profiles.json"
+    )
+    assert contract["allowed_semantic_changes"] == [
+        "parent.input_bindings.target_catalog.sha256",
+        "parent.input_bindings.promoted_profile.sha256",
+        "predecessor.bindings.c03_candidate_target_catalog.path",
+        "predecessor.bindings.parent_route_fixture.sha256",
+        "predecessor.parent_fixture_sha256",
+    ]
+    assert fixture["bindings"]["c03_candidate_target_catalog"]["sha256"] == (
+        prior["bindings"]["c03_candidate_target_catalog"]["sha256"]
+    )
+    assert contract["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

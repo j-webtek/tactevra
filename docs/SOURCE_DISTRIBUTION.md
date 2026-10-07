@@ -597,3 +597,12 @@ to the parent fixture's existing identity allowlist, then recomputes the parent
 and predecessor fixture hashes. Numerical policies, authority, and historical
 repository artifacts remain unchanged. All byte, duplicate, and reduction
 limits remain unchanged.
+
+The locked-catalog-path C03 route successor adds two governed paths: one thin
+derived-fixture runner and one pre-result fixture. The resulting tree contains
+6,492 tracked files. The ceiling advances from 6,492 to 6,494, retaining two
+reviewed-file slots. The runner changes only the derived predecessor's catalog
+path from the external evidence location to the coherent bundle's internal
+locked path; the candidate bytes and hash remain identical. Numerical policies,
+authority, and historical repository artifacts remain unchanged. All byte,
+duplicate, and reduction limits remain unchanged.
