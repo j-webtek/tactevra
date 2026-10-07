@@ -14,6 +14,7 @@ from integrations.mujoco_warp.key_press_physics_probe import tip_geometries
 from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
     assess_c02_ws3_recipe_compatibility,
+    build_ws2_recipe_envelope,
     build_candidate51_pose_family,
     load_cpu_contact_fixture,
     prepare_ws3_transition_harness,
@@ -74,8 +75,8 @@ def _write_c02_binding_inputs(tmp_path: Path, *, tip_id: str = "capsule-r6-m2"):
     final_path.write_text(json.dumps(final), encoding="utf-8")
     physics = {
         "contact_model": {"tip_families": {"capsule": {
-            "radius_samples_mm": [1, 3.5, 6],
-            "half_length_radius_multiple_samples": [0.5, 1.25, 2],
+            "radius_samples_mm": [1, 3, 3.5, 6],
+            "half_length_radius_multiple_samples": [0.5, 1.25, 2, 5],
         }}},
     }
     physics_path = tmp_path / "physics.json"
@@ -110,6 +111,33 @@ def test_c02_c03_binding_rejects_changed_final_bytes(tmp_path):
             ws2_physics_sha256=hashlib.sha256(physics_path.read_bytes()).hexdigest(),
             c03_fixture=_load_v2(),
         )
+
+
+def test_c02_c03_exact_tip_builds_zero_authority_recipe_envelope(tmp_path):
+    final_path, physics_path = _write_c02_binding_inputs(
+        tmp_path, tip_id="capsule-r3-m5"
+    )
+    assessment = assess_c02_ws3_recipe_compatibility(
+        c02_final_path=final_path,
+        c02_final_sha256=hashlib.sha256(final_path.read_bytes()).hexdigest(),
+        ws2_physics_path=physics_path,
+        ws2_physics_sha256=hashlib.sha256(physics_path.read_bytes()).hexdigest(),
+        c03_fixture=_load_v2(),
+    )
+
+    envelope = build_ws2_recipe_envelope(assessment)
+
+    assert assessment["decision"] == "READY_TO_BUILD_ZERO_AUTHORITY_RECIPE_ENVELOPE"
+    assert assessment["c02_tip_geometry"]["exposed_length_mm"] == 30.0
+    assert envelope["decision"] == "PASS_EXPLORATORY_WS2_RECIPE_ENVELOPE"
+    assert envelope["selected_universal_recipe"]["recipe_index"] == 80
+    assert envelope["tool_geometry"]["radius_mm"] == 3.0
+    assert envelope["tool_geometry"]["exposed_length_mm"] == 30.0
+    assert envelope["physical_authority"] is False
+    assert all(envelope[name] == 0 for name in (
+        "hardware_write_count", "physical_movement_count", "real_command_count",
+        "permit_count", "transport_count",
+    ))
 
 
 def test_exact_c03_capsules_preserve_radius_and_exposed_lengths():

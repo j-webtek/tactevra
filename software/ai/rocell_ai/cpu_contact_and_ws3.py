@@ -636,7 +636,17 @@ def assess_c02_ws3_recipe_compatibility(
 
     section = c03_fixture["sections"]["workstream_3"]
     c03_radius_mm = float(section["tip_radius_mm"])
-    geometry_matches = math.isclose(radius_mm, c03_radius_mm, abs_tol=1e-12)
+    half_length_mm = radius_mm * multiple
+    exposed_length_mm = 2.0 * half_length_mm
+    allowed_exposed_lengths = [
+        float(value) for value in section["distal_tip_exposed_length_mm"]
+    ]
+    geometry_matches = math.isclose(
+        radius_mm, c03_radius_mm, abs_tol=1e-12
+    ) and any(
+        math.isclose(exposed_length_mm, value, abs_tol=1e-12)
+        for value in allowed_exposed_lengths
+    )
     decision = (
         "READY_TO_BUILD_ZERO_AUTHORITY_RECIPE_ENVELOPE"
         if geometry_matches
@@ -654,12 +664,14 @@ def assess_c02_ws3_recipe_compatibility(
             "tip_id": tip_id,
             "shape": "capsule",
             "radius_mm": radius_mm,
-            "half_length_mm": radius_mm * multiple,
+            "half_length_mm": half_length_mm,
+            "exposed_length_mm": exposed_length_mm,
         },
         "c03_fixture_sha256": c03_fixture["fixture_sha256"],
         "c03_expected_tip_geometry": {
             "shape": "capsule",
             "radius_mm": c03_radius_mm,
+            "allowed_exposed_length_mm": allowed_exposed_lengths,
             "tool_length_mm": float(section["tool_length_mm"]),
         },
         "target_count": int(selected["target_count"]),
@@ -680,9 +692,71 @@ def assess_c02_ws3_recipe_compatibility(
             "No arm-lane or integration gate is changed by this assessment.",
         ],
         "next_dependency": (
-            "PREDECLARE_AND_RUN_51_TARGET_6MM_C03_GEOMETRY_FEASIBILITY_OR_"
-            "OBTAIN_A_C02_UNIVERSAL_RECIPE_FOR_THE_3MM_TIP"
+            "BUILD_HASH_BOUND_ZERO_AUTHORITY_RECIPE_ENVELOPE"
+            if geometry_matches
+            else (
+                "PREDECLARE_AND_RUN_51_TARGET_6MM_C03_GEOMETRY_FEASIBILITY_OR_"
+                "OBTAIN_A_C02_UNIVERSAL_RECIPE_FOR_THE_3MM_TIP"
+            )
         ),
+    }
+    result["receipt_sha256"] = _sha(result)
+    return result
+
+
+def build_ws2_recipe_envelope(
+    assessment: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind one admitted C02 contact identity for the CPU-only WS3 screen."""
+
+    if assessment.get("schema") != "tactevra.c02_c03_recipe_binding_assessment.v1":
+        raise ValueError("unexpected C02/C03 assessment schema")
+    unsigned = dict(assessment)
+    claimed = unsigned.pop("receipt_sha256", None)
+    if claimed != _sha(unsigned):
+        raise ValueError("C02/C03 assessment receipt mismatch")
+    if assessment.get("decision") != "READY_TO_BUILD_ZERO_AUTHORITY_RECIPE_ENVELOPE":
+        raise ValueError("C02/C03 assessment is not geometry compatible")
+    if assessment.get("physical_authority") is not False or any(
+        assessment.get(name, 0) for name in COUNTER_NAMES
+    ):
+        raise ValueError("C02/C03 assessment carries authority")
+    selected = assessment["c02_selected_universal_recipe"]
+    geometry = assessment["c02_tip_geometry"]
+    expected = assessment["c03_expected_tip_geometry"]
+    if int(selected["target_count"]) != int(assessment["target_count"]):
+        raise ValueError("selected C02 recipe does not cover the declared targets")
+    if not math.isclose(
+        float(geometry["radius_mm"]), float(expected["radius_mm"]), abs_tol=1e-12
+    ) or not any(
+        math.isclose(
+            float(geometry["exposed_length_mm"]), float(value), abs_tol=1e-12
+        )
+        for value in expected["allowed_exposed_length_mm"]
+    ):
+        raise ValueError("selected C02 tool geometry is not admitted by C03")
+    result = {
+        "schema": "tactevra.ws2_press_recipe_envelope.v1",
+        "scope": SCOPE,
+        "decision": "PASS_EXPLORATORY_WS2_RECIPE_ENVELOPE",
+        "assessment_receipt_sha256": claimed,
+        "c02_final_file_sha256": assessment["c02_final_file_sha256"],
+        "c02_result_sha256": assessment["c02_result_sha256"],
+        "c02_campaign_receipt_sha256": assessment[
+            "c02_campaign_receipt_sha256"
+        ],
+        "c03_fixture_sha256": assessment["c03_fixture_sha256"],
+        "selected_universal_recipe": selected,
+        "tool_geometry": geometry,
+        "tool_length_mm": float(expected["tool_length_mm"]),
+        "target_count": int(assessment["target_count"]),
+        "ordered_pair_count": int(assessment["ordered_pair_count"]),
+        "limitations": assessment["limitations"] + [
+            "This envelope binds a synthetic contact candidate for CPU geometry screening only.",
+            "It grants no motion policy, execution permit, controller command, or physical authority.",
+        ],
+        **{name: 0 for name in COUNTER_NAMES},
+        "physical_authority": False,
     }
     result["receipt_sha256"] = _sha(result)
     return result
