@@ -1177,12 +1177,27 @@ with zero physical release effect. The next bounded dependency is a frozen full
 route reconstruction under that exact profile, followed by unchanged continuity
 and collision gates; no physical transform, tool, or authority is installed.
 
+
+Evidence `E-20261007-INT-474` completes that promoted-profile reconstruction.
+All 328 route samples pass unchanged canonical IK and adjacent-joint
+continuity, with minimum normalized arm-joint margin `0.050964` and maximum
+adjacent delta `0.037773` rad. The first frozen run reached installed collision
+intake and correctly failed its fixed 256-result bounded-sampling policy; that
+attempt is retained in the successor fixture rather than rescored. The
+successor records this resource refusal as an additional installed-collision
+blocker and runs the already frozen candidate diagnostic over the full accepted
+route. Every candidate profile reports sampled collisions, while its coarse
+geometry and lack of continuous sweeps remain explicitly nonqualifying. The
+installed collision gate remains closed, and the promoted profile retains zero
+physical release effect. The next dependency is an arm-owned decision on how a
+full accepted route is partitioned for bounded installed collision intake,
+followed by measured installed geometry and continuous sweep evidence.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 | promoted-profile full-route reconstruction at 120 mm / 25 mm; unchanged IK, continuity, installed-collision intake, candidate diagnostics, generated evidence, and `E-20261007-INT-474` documentation | `feature/sim-promoted-full-route` / `1f6d8b38560e3fff57d91eca1e57e1f2f39a8df6` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
