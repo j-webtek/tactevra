@@ -9003,3 +9003,39 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: hand this exact result to the arm lane for installed-profile
   collision screening with fresh observed state. The AI lane must not create a
   collision permit, controller command, or physical authority.
+
+### E-20261007-ARM-491 — exact C03 route enters partitioned collision intake
+
+- Stage: S4 zero-authority arm collision handoff.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Commit: `98e4536930677518f8fda01bfabece1dd200fa7d`.
+- Change: added a strict adapter that verifies the outer C03 route receipt,
+  nested route receipt, exact semantic order, repeated targets, IK acceptance,
+  continuity acceptance, sample coverage, and zero authority before delegating
+  the accepted joint results to the existing partitioned collision intake.
+- Input: external `E-20261007-AI-490` result-file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`
+  and its coherent `C:\MuJoCoWarp\c03cw9` context.
+- Command: set `PYTHONPATH` to this branch's `software/src;software/ai`, load
+  the coherent context with `load_simulation_context`, load the exact v1.9
+  result, and call `prepare_c03_route_collision_handoff_v1(result, context)`
+  without an installed profile.
+- Result: `BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED`; handoff SHA-256
+  `ae01e88e91ad6da0ec0cfb484ed27552c6f7a55de019bb4dab81d572ff65fc23`.
+- Metrics: 321 route segments were assigned across two bounded partitions;
+  323 samples include one conservative boundary recheck. Blockers are exactly
+  `INSTALLED_COLLISION_PROFILE_REQUIRED` and
+  `FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION`.
+- Validation: 6 focused handoff and partitioned-intake tests passed. Ruff,
+  archive policy, and `git diff --check` passed. Mutation and authority-bearing
+  inputs fail closed.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this enumerates collision evidence slots only. It performs no
+  configuration geometry checks, conservative sweeps, controller operation, or
+  physical action and cannot clear the installed collision gate.
+- Supersedes: none.
+- Next dependency: build or load the exact measured installed collision profile
+  from the installation measurement manifest, then supply configuration geometry
+  for all 323 partition samples and conservative sweep evidence for all 321
+  route segments. A fresh observed start state remains required afterward.

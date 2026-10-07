@@ -1894,6 +1894,13 @@ adjacent joint delta is 0.035543 rad. The exact ordered route including repeated
 question. Collision was not executed, the installed collision gate remains
 blocked, and the AI lane grants no controller or physical authority. The next
 dependency is arm-lane installed-profile collision screening with fresh state.
+Evidence `E-20261007-ARM-491` completes the strict handoff into the existing
+partitioned collision intake. The exact route maps to 321 route segments across
+two bounded partitions and 323 samples including one boundary recheck. It stops
+correctly at `BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED`; fresh observed
+state is also retained as a blocker. No collision check or authority was
+created. The next arm increment requires the measured installed collision
+profile and full configuration plus conservative sweep evidence.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
