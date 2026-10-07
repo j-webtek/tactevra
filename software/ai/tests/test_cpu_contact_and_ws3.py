@@ -13,6 +13,7 @@ from ai.sim.run_ws2_c02_boundary_campaign import build_c03_bridge_plan, build_co
 from integrations.mujoco_warp.key_press_physics_probe import tip_geometries
 from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
+    _select_recipe_pose_family,
     assess_c02_ws3_recipe_compatibility,
     build_ws2_recipe_envelope,
     build_candidate51_pose_family,
@@ -138,6 +139,25 @@ def test_c02_c03_exact_tip_builds_zero_authority_recipe_envelope(tmp_path):
         "hardware_write_count", "physical_movement_count", "real_command_count",
         "permit_count", "transport_count",
     ))
+
+    pose_family = {
+        "profiles": [
+            {"id": "short", "pose_bundle": {"tool_configuration": {
+                "distal_tip_radius_mm": 3.0,
+                "distal_tip_exposed_length_mm": 10.0,
+                "total_hand_tcp_to_tip_length_mm": 110.0,
+            }}},
+            {"id": "long", "pose_bundle": {"tool_configuration": {
+                "distal_tip_radius_mm": 3.0,
+                "distal_tip_exposed_length_mm": 30.0,
+                "total_hand_tcp_to_tip_length_mm": 110.0,
+            }}},
+        ],
+        "profile_count": 2,
+    }
+    selected = _select_recipe_pose_family(pose_family, envelope)
+    assert selected["profile_count"] == 1
+    assert selected["profiles"][0]["id"] == "long"
 
 
 def test_exact_c03_capsules_preserve_radius_and_exposed_lengths():

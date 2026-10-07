@@ -762,6 +762,40 @@ def build_ws2_recipe_envelope(
     return result
 
 
+def _select_recipe_pose_family(
+    pose_family: dict[str, Any], recipe: dict[str, Any]
+) -> dict[str, Any]:
+    geometry = recipe["tool_geometry"]
+    tool_length_mm = float(recipe["tool_length_mm"])
+    selected = []
+    for profile in pose_family["profiles"]:
+        config = profile["pose_bundle"]["tool_configuration"]
+        if (
+            math.isclose(
+                float(config["distal_tip_radius_mm"]),
+                float(geometry["radius_mm"]),
+                abs_tol=1e-12,
+            )
+            and math.isclose(
+                float(config["distal_tip_exposed_length_mm"]),
+                float(geometry["exposed_length_mm"]),
+                abs_tol=1e-12,
+            )
+            and math.isclose(
+                float(config["total_hand_tcp_to_tip_length_mm"]),
+                tool_length_mm,
+                abs_tol=1e-12,
+            )
+        ):
+            selected.append(profile)
+    if len(selected) != 1:
+        raise ValueError("WS2 recipe must select exactly one C03 pose profile")
+    result = dict(pose_family)
+    result["profiles"] = selected
+    result["profile_count"] = 1
+    return result
+
+
 def prepare_ws3_transition_harness(
     fixture: dict[str, Any], *, workspace: Path
 ) -> dict[str, Any]:
@@ -789,6 +823,20 @@ def prepare_ws3_transition_harness(
     except ValueError as exc:
         recipe = None
         blocked_reason = str(exc)
+    if recipe is not None:
+        pose_family = _select_recipe_pose_family(pose_family, recipe)
+        target_orders = [
+            tuple(row["target_id"] for row in profile["pose_bundle"]["poses"])
+            for profile in pose_family["profiles"]
+        ]
+        target_ids = target_orders[0]
+        pair_count = len(target_ids) ** 2
+        scenario_count = (
+            pair_count
+            * len(pose_family["profiles"])
+            * len(section["hover_height_above_contact_mm"])
+            * len(section["transit_height_board_z_mm"])
+        )
     result = {
         "schema": "tactevra.ws3_transition_harness_readiness.v1",
         "scope": SCOPE,
@@ -835,6 +883,7 @@ def run_ws3_transition_screen(
 
     recipe = validate_ws2_recipe_binding(fixture, workspace=workspace)
     exact_fixture, pose_family, world = _load_geometry(fixture, workspace=workspace)
+    pose_family = _select_recipe_pose_family(pose_family, recipe)
     section = fixture["sections"]["workstream_3"]
     ef_section = fixture["sections"]["stage_ef_contact"]
     widths = tuple(float(value) for value in ef_section["keycap_width_height_mm"])
