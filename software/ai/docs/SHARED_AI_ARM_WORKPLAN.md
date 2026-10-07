@@ -1152,6 +1152,19 @@ found zero converged IK candidates for the exact required `H` contact point at
 is the previously hover-admitted 120 mm tool, beginning with exact-contact and
 depth-profile checks before another full-route campaign.
 
+Evidence `E-20261006-INT-472` rejects that 120 mm exact-contact candidate under
+the same pinned synthetic geometry and unchanged post-IK gates. The corrected
+vertical profile bootstrapped from the admitted 25 mm hover, accepted 12 of 26
+one-millimetre profile points, and then failed at 13 mm above contact because
+normalized joint margin was `0.009264`, below the unchanged `0.01` gate.
+Independent point checks remained admissible down to 7 mm; 6 and 5 mm failed
+margin, while 4 mm through the exact contact produced no converged candidate.
+The first attempt, which incorrectly compared the hover against the unrelated
+ready state, remains preserved. Since neither 110 mm nor 120 mm reaches exact
+contact, no full-route or collision claim was run. The next dependency is an
+arm-owned, predeclared synthetic geometry/configuration review; no margin,
+target, or authority boundary may be relaxed.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

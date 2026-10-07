@@ -1,0 +1,77 @@
+{
+  "claim_commit": "526e25d984d63c8dde5d6d02c389cc275cc796c6",
+  "counters": {
+    "arm_commands": 0,
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "transport_operations": 0
+  },
+  "decision_rules": {
+    "authority_bearing_output_count_maximum": 0,
+    "contact_point_change_count_maximum": 0,
+    "continuity_threshold_change_count_maximum": 0,
+    "full_route_runs_only_if_exact_contact_and_profile_pass": true,
+    "ik_threshold_change_count_maximum": 0,
+    "installed_collision_gate_must_remain_blocked": true,
+    "pass": "EXACT_CONTACT_AND_EVERY_SEQUENTIAL_VERTICAL_PROFILE_POINT_PASS_UNCHANGED_POST_IK_GATES",
+    "profile_point_count_exact": 26
+  },
+  "fixture_sha256": "3131c75bad972a96d86b69a6c8dde4609ef3b166ea61da7a88576a5b91407acd",
+  "input_bindings": {
+    "canonical_post_ik": {
+      "path": "software/src/rocell/application/trajectory_simulation.py",
+      "sha256": "0177c218d1fbb3cbb3160189469081435fa6b17946e3602bd80313f1c0a46f78"
+    },
+    "implementation": {
+      "path": "software/ai/rocell_ai/typing_twin_120mm_exact_contact_v1.py",
+      "sha256": "0a3380e2ffe75bb5f7954856b826d254c3655200c6f08f6f3e827f8eec8d56fa"
+    },
+    "parent_fixture": {
+      "path": "software/ai/sim/evidence/typing_twin_hover_binding_fixture_v1.json",
+      "sha256": "53336b1cc4ed180fc93a4fe61e2ecca7d46a325a4e90a532f1587c957637e6d8"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    }
+  },
+  "limitations": [
+    "The 120 mm tool, 25 mm hover, board transform, ready state, and target geometry are synthetic or nominal ranges and are not measured or installed.",
+    "Pointwise and sequential vertical IK feasibility cannot establish a full route, collision clearance, contact behavior, dynamics, or physical accuracy.",
+    "The vertical profile is a frozen 1 mm straight-line descent from the previously admitted 25 mm hover and cannot prove all possible approaches feasible or infeasible.",
+    "Installed collision geometry is absent; collision intake and continuous sweep qualification remain blocked.",
+    "No result selects a physical tool or grants command, permit, transport, controller, hardware-write, movement, or physical authority."
+  ],
+  "parent_fixture": {
+    "fixture_sha256": "6115aa94a7c29c3a833764dad6a6852e8d121517162ad72b185f9b8911d1d935",
+    "path": "software/ai/sim/evidence/typing_twin_hover_binding_fixture_v1.json"
+  },
+  "pre_result_amendment": {
+    "basis": "The preserved attempt-1 result applied adjacent-joint continuity between the unrelated synthetic ready state and the already pointwise-admitted 25 mm hover. This correction bootstraps the vertical profile from its admitted hover solution and changes no points, thresholds, tool length, or decision rule.",
+    "failed_attempt_result_path": "software/ai/sim/evidence/typing_twin_120mm_exact_contact_attempt1_result_v1.json",
+    "failed_attempt_result_sha256": "3bb5963b8e11ff78aa9e26020cd725c3f2e0081ac8fbd8bf8ccd249bc9dadcb7",
+    "scope": "HARNESS_BOOTSTRAP_CORRECTION_BEFORE_CORRECTED_RESULT"
+  },
+  "reconstruction": {
+    "maximum_hover_clearance_mm": 25.0,
+    "tool_length_mm": 120.0,
+    "vertical_step_mm": 1.0
+  },
+  "resource_limits": {
+    "gpu_jobs_maximum": 0,
+    "maximum_ik_solves": 512
+  },
+  "schema": "tactevra.typing_twin_120mm_exact_contact_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "target": {
+    "device": "keyboard",
+    "preserve_contact_xyz": true,
+    "target_id": "H"
+  }
+}

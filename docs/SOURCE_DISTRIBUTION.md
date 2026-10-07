@@ -466,3 +466,14 @@ exact observed 6,440 for those reviewed paths only. The result preserves all
 simulator corpus, dependency tree, controller artifact, GPU artifact, or
 authority-bearing output enters the archive. All byte, duplicate, and
 reduction limits remain unchanged.
+
+The 120 mm exact-contact and vertical-profile study adds six governed paths:
+one CPU-only study module, one focused test module, the original frozen fixture,
+its preserved failed-bootstrap result, one pre-result corrected fixture, and one
+generated blocked result. The file-count ceiling advances from 6,440 to the
+exact observed 6,446 for those reviewed paths only. The correction changes only
+the profile bootstrap from the unrelated ready state to the already admitted
+hover solution; the exact contact, vertical points, tool length, and every gate
+remain unchanged. No simulator corpus, dependency tree, controller artifact,
+GPU artifact, or authority-bearing output enters the archive. All byte,
+duplicate, and reduction limits remain unchanged.
