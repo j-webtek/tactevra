@@ -1781,6 +1781,13 @@ canonical SHA-256
 Its allowlist changes only the parent target-catalog hash and the predecessor's
 derived-parent file and canonical hashes. Its numerical policy change count is
 zero; historical repository fixtures are never rewritten.
+Evidence `E-20261007-AI-483` preserves the result. Source materialization and
+both route-fixture rebindings succeeded, then the unchanged context loader
+rejected the derived bundle because the virtual commissioning profile still
+binds the historical bundle ID. A successor must derive that profile binding
+and its bundle-lock artifact hash as an explicit identity-only change while
+preserving all study values, authority fields, route policies, and repository
+artifacts.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

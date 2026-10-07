@@ -8679,3 +8679,47 @@ rewriting history. New entries must use a unique evidence ID.
   external workspace with their target-catalog binding and canonical fixture
   hashes updated to the candidate catalog. Preserve all numerical policies and
   leave historical repository fixtures unchanged.
+
+### E-20261007-AI-483 — catalog rebound exposes virtual-profile bundle binding
+
+- Stage: S2/S3 exploratory zero-authority route reconstruction.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `d413d8d72d835d2cc5282dba9c0c9e15a99cbb65`.
+- Change: derived successor copies of the promoted parent and predecessor route
+  fixtures inside the external workspace. The allowlist changed only the parent
+  target-catalog hash and the predecessor's derived-parent file and canonical
+  hashes. Numerical policy change count remained zero; repository fixtures were
+  not rewritten.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_3.json`;
+  canonical fixture SHA-256
+  `db7d824aef7d235b31f29848840e6c80aad5f4df327282562a8f42f73b6a6b02`;
+  file SHA-256
+  `836170252cfeccf07114246ce4c07d6bd100bbebca3aedcdd9ea63c253bd52ea`;
+  runner SHA-256
+  `988d926312b2bee7543fc02dfca2009eb0abad82e598e68fe0739a65c3da0f30`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_exact_route_reconstruction_v1_3 software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_3.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_3.json`.
+- Result: `FAIL` after successful source-tree materialization and route-fixture
+  rebinding, before route construction. The unchanged bundle loader raised
+  `SimulationContextError: Could not load coherent simulation sources: Virtual
+  commissioning profile identity, binding, or authority changed`. Exit code was
+  1 and no result file was written.
+- Metrics: the exact 6,480-file source tree, candidate catalog, bundle lock, and
+  two derived route fixtures were materialized. Zero trajectory samples and
+  zero IK samples were evaluated.
+- Validation: the focused fixture suite passed 11 tests before execution. Ruff
+  and `git diff --check` passed. The source-archive policy passed at 6,486 files
+  and 661,871,703 logical bytes.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this result proves the parent route fixture was not the final
+  dependency bound to the bundle identity. It provides no route feasibility,
+  IK, continuity, or collision conclusion.
+- Supersedes: none. The failure remains preserved alongside `E-20261007-AI-480`
+  through `E-20261007-AI-482`.
+- Next dependency: freeze a successor that also derives a virtual commissioning
+  profile whose `simulation_bundle_id` matches the catalog-specific bundle and
+  update its artifact hash in the bundle lock. Preserve every study value,
+  authority field, route policy, and historical repository artifact.
