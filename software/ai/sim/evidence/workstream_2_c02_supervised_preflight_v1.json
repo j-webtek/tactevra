@@ -1,0 +1,159 @@
+{
+  "base_campaign_full_execution_authorized": false,
+  "bindings": {
+    "campaign_fixture": {
+      "path": "software/ai/sim/evidence/workstream_2_c02_contact_boundary_refinement_v1.json",
+      "sha256": "1c53f6bf8828f8e145fb67dc057fb93fa53efcdd4748fdbe1146df844a68f1d1"
+    },
+    "campaign_manifest": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_contact_boundary_refinement_v1\\manifest.json",
+      "sha256": "71c650e5feeb0110ad60e3ccaf69e8a51c49f80d2873bf7fab375aa2ca484885"
+    },
+    "campaign_runner": {
+      "path": "software/ai/sim/run_ws2_c02_boundary_campaign.py",
+      "sha256": "56f51f89b0040757e844119e3e441948455ec1fc66e4833f82710afc65776f4a"
+    },
+    "ops_helpers": {
+      "path": "software/ai/sim/stage_a_long_run_ops.py",
+      "sha256": "6a0684adb5646406b4414b5495e287aea088e38a56aa900310a0efdfaf44000b"
+    },
+    "policy_helpers": {
+      "path": "software/ai/sim/stage_a_campaign_supervisor.py",
+      "sha256": "b93f1c44ed2d09b1e4290db133b9ec2c8a991429f4b649c3d13ac2d73fe7e864"
+    },
+    "prior_smoke_cuda0": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_contact_boundary_refinement_v1\\smoke_cuda0.json",
+      "sha256": "91fb758ab7dac8067a8cabe3aec3c0ce3bccd10f8d9b93f03c47963a6660388e"
+    },
+    "prior_smoke_cuda1": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_contact_boundary_refinement_v1\\smoke_cuda1.json",
+      "sha256": "010fc912496aaf5838514f1420b4e302d4694f2989c473e6165fcdd66ede1ce9"
+    },
+    "supervisor": {
+      "path": "software/ai/sim/c02_campaign_supervisor.py",
+      "sha256": "2bb4103cc1b1f1480a9923e5bc0472d0e25f9338b03c16b9d42a8af3cacad4fe"
+    }
+  },
+  "campaign_fixture_sha256": "0ea055e5906be454fea60ac745fd422d51122a493319ff778c70a6313a8fd08a",
+  "campaign_id": "C02-contact-boundary-refinement",
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "date": "2026-10-07",
+  "early_abort": {
+    "action": "STOP_AND_PRESERVE",
+    "condition": "EVERY_WORLD_IN_EVERY_SAMPLED_SHARD_HAS_ONE_IDENTICAL_PRIMARY_FAILURE",
+    "deterministic_sample_shards": 16
+  },
+  "failure_policy": {
+    "deterministic_stop": [
+      "NONFINITE_STATE",
+      "OVERFLOW",
+      "IDENTITY_MISMATCH",
+      "CROSS_GPU_DISAGREEMENT",
+      "HASH_MISMATCH"
+    ],
+    "transient": [
+      "DRIVER_RESET",
+      "OUT_OF_MEMORY_AT_LAUNCH"
+    ],
+    "transient_retry_limit": 1
+  },
+  "fixture_sha256": "fa08704a08f08685596e620b1c47f355798e8065a7d2553926c55d98003e31bd",
+  "integrity": {
+    "cross_gpu_comparison": {
+      "continuous_absolute_tolerance": 1e-05,
+      "continuous_fields": [
+        "actuation_margin_mm",
+        "bottom_out_margin_mm",
+        "dwell_above_actuation_ms",
+        "final_position_error_mm",
+        "final_velocity_mm_s",
+        "midpoint_error_mm",
+        "minimum_depth_margin_mm",
+        "peak_penetration_mm",
+        "peak_required_force_n",
+        "peak_tool_compression_mm",
+        "peak_tool_force_n"
+      ],
+      "exact_noncontinuous_fields": true,
+      "exact_primary_failure_counts": true,
+      "exact_row_order": true,
+      "mode": "EXACT_DISCRETE_BOUNDED_CONTINUOUS",
+      "on_violation": "STOP_CROSS_GPU_DISAGREEMENT_AND_PRESERVE"
+    },
+    "cross_gpu_sample_modulus": 31,
+    "cross_gpu_sample_rule": "int(shard_id[:8],16) % 31 == 0",
+    "verify_before_every_shard": true
+  },
+  "limitations": [
+    "SIMULATION_ONLY",
+    "PHYSICAL_PARAMETERS_UNQUALIFIED",
+    "PREFLIGHT_PASS_DOES_NOT_AMEND_BASE_CAMPAIGN_AUTHORIZATION",
+    "NO_RECIPE_PROMOTION_BEFORE_COMPLETE_C02_ADMISSION"
+  ],
+  "manifest_sha256": "9d53bf8ae5595361a0b9e1ddef9d13a37fa6b57f1d90e505741a62e81779b16f",
+  "physical_authority": false,
+  "population": {
+    "candidate_seed_count": 25704,
+    "maximum_worlds_per_shard": 2304,
+    "recipe_family_count": 8568,
+    "shard_count": 1122,
+    "target_count": 51,
+    "world_count": 1645056
+  },
+  "preflight_probes": {
+    "cuda0": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1\\max_shard_cuda0.json",
+    "cuda1": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1\\max_shard_cuda1.json",
+    "fault_matrix": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_supervised_preflight_v1\\fault_matrix.json",
+    "shard_id": "23c1ae43c5df590515ad1c072d371394be13b2914e7f3f2a6226aac044bd1e0d",
+    "world_count": 2304
+  },
+  "progress": {
+    "fields": [
+      "shards_done",
+      "eta_seconds",
+      "failures",
+      "temperatures"
+    ],
+    "status_path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_campaign_v1\\status.json"
+  },
+  "schedule": {
+    "execution": "DETERMINISTIC_TWO_HALVES",
+    "half_shard_count": 561,
+    "maximum_projected_wall_seconds": 14400,
+    "reason": "four-hour predeclared ceiling; measured exact maximum-shard dual-GPU throughput decides admission"
+  },
+  "schema": "tactevra.ws2_c02_supervised_preflight.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "storage": {
+    "backup_every_completed_shards": 25,
+    "backup_root": "F:/TactevraEvidence/issue190/c02_campaign_v1",
+    "clean_stop_floor_bytes": 64424509440,
+    "output_root": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_campaign_v1",
+    "projected_bytes_per_world": 1024,
+    "projected_output_bytes": 1684537344,
+    "require_distinct_volume": true,
+    "require_hash_verified_copy": true,
+    "require_three_x_headroom": true
+  },
+  "thermals": {
+    "pause_ceiling_c": 83,
+    "pause_only_at_shard_boundary": true,
+    "sample_interval_seconds": 60
+  },
+  "watchdog": {
+    "action": "STOP_WORKER_AND_ALERT_NO_AUTOMATIC_PROGRESS",
+    "heartbeat_every_seconds": 60,
+    "stale_seconds": 300
+  },
+  "windows": {
+    "require_ac_hibernate_seconds": 0,
+    "require_ac_sleep_seconds": 0,
+    "require_no_auto_reboot_with_logged_on_users": 1
+  }
+}

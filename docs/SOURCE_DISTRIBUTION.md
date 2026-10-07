@@ -567,3 +567,10 @@ two reviewed files. This raises the exact tracked-file count and governed
 ceiling to 6,424. The 1,645,056 planned physics rows, GPU receipts, logs,
 videos, and generated manifests remain external and hash-bound; all byte,
 blob, duplicate, and reduction limits remain unchanged.
+
+The C02 operational gate adds one campaign-specific supervisor, one focused
+test module, and one hash-bound preflight fixture. This raises the exact
+tracked-file count and governed ceiling to 6,427. Maximum-shard probes, fault-
+injection receipts, campaign rows, status files, backups, and final results
+remain external and hash-verified; all byte, blob, duplicate, and reduction
+limits remain unchanged.
