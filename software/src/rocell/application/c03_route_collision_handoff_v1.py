@@ -15,6 +15,15 @@ from .partitioned_typing_collision_intake_v1 import (
 
 
 SCHEMA = "tactevra.c03_collision_handoff.v1"
+EXPECTED_RESULT_SCHEMA = "tactevra.c03_exact_route_reconstruction_result.v1_9"
+EXPECTED_ROUTE_SCHEMA = "tactevra.c03_exact_route_reconstruction_result.v1"
+EXPECTED_SCOPE = "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+EXPECTED_RESULT_RECEIPT_SHA256 = (
+    "e8dcaa9b34e46ee5fb8ec4290c18f316c393894dc87c9ba8612a457f3ef2fd60"
+)
+EXPECTED_ROUTE_RECEIPT_SHA256 = (
+    "f64b2c30099be8494bba052cfcb707562ece61a21694e81c9187d19ceae973e4"
+)
 EXPECTED_DECISION = "PASS_C03_110MM_CANDIDATE_ROUTE_IK_CONTINUITY"
 EXPECTED_TARGETS = ("H", "E", "L", "L", "O", "SPACE", "2", "0", "2", "6")
 
@@ -45,6 +54,23 @@ def _verified_receipt(value: Mapping[str, Any], field: str) -> dict[str, Any]:
     return dict(value)
 
 
+def _require_zero_authority(value: Mapping[str, Any], label: str) -> None:
+    zero_counts = (
+        value.get("hardware_commands_generated"),
+        value.get("hardware_writes"),
+        value.get("physical_movements"),
+    )
+    if (
+        value.get("controller_commands") != []
+        or value.get("hardware_access") is not False
+        or value.get("physical_authority") is not False
+        or any(type(count) is not int or count != 0 for count in zero_counts)
+    ):
+        raise C03RouteCollisionHandoffV1Error(
+            f"{label} carries or omits zero-authority evidence"
+        )
+
+
 def prepare_c03_route_collision_handoff_v1(
     result: Mapping[str, Any],
     context: SimulationContext,
@@ -61,7 +87,18 @@ def prepare_c03_route_collision_handoff_v1(
         raise C03RouteCollisionHandoffV1Error("route_result must be an object")
     route = _verified_receipt(route_value, "receipt_sha256")
     if (
-        outer.get("decision") != EXPECTED_DECISION
+        outer["receipt_sha256"] != EXPECTED_RESULT_RECEIPT_SHA256
+        or route["receipt_sha256"] != EXPECTED_ROUTE_RECEIPT_SHA256
+    ):
+        raise C03RouteCollisionHandoffV1Error(
+            "C03 source receipt identity differs from the qualified route"
+        )
+    if (
+        outer.get("schema") != EXPECTED_RESULT_SCHEMA
+        or route.get("schema") != EXPECTED_ROUTE_SCHEMA
+        or outer.get("scope") != EXPECTED_SCOPE
+        or route.get("scope") != EXPECTED_SCOPE
+        or outer.get("decision") != EXPECTED_DECISION
         or route.get("decision") != EXPECTED_DECISION
         or tuple(route.get("ordered_targets", ())) != EXPECTED_TARGETS
         or route.get("canonical_ik_route_accepted") is not True
@@ -72,13 +109,8 @@ def prepare_c03_route_collision_handoff_v1(
         or outer.get("installed_collision_gate_cleared") is not False
     ):
         raise C03RouteCollisionHandoffV1Error("C03 route admission contract differs")
-    forbidden = (
-        outer.get("hardware_writes"),
-        outer.get("physical_movements"),
-        outer.get("hardware_commands_generated"),
-    )
-    if outer.get("physical_authority") is not False or any(forbidden):
-        raise C03RouteCollisionHandoffV1Error("C03 route carries physical authority")
+    _require_zero_authority(outer, "C03 reconstruction result")
+    _require_zero_authority(route, "C03 route result")
 
     intake = prepare_partitioned_typing_collision_intake_v1(
         route["ik_screen"],
@@ -110,6 +142,8 @@ def prepare_c03_route_collision_handoff_v1(
 
 __all__ = [
     "SCHEMA",
+    "EXPECTED_RESULT_RECEIPT_SHA256",
+    "EXPECTED_ROUTE_RECEIPT_SHA256",
     "C03RouteCollisionHandoffV1Error",
     "prepare_c03_route_collision_handoff_v1",
 ]
