@@ -1198,6 +1198,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
+| ARM | S2 | bounded full-route collision partition contract, boundary-continuity proof, focused tests, generated evidence, and `E-20261007-INT-475` documentation | `feature/sim-bounded-collision-partition-v1` / claim pending | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
