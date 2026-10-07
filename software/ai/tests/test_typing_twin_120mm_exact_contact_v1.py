@@ -13,12 +13,17 @@ sys.path[:0] = [str(AI_DIR), str(AI_DIR.parent / "src")]
 from rocell_ai.typing_twin_120mm_exact_contact_v1 import (  # noqa: E402
     _load_fixture,
     _profile_clearances,
+    run_exact_contact_study,
 )
 
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
 FIXTURE = ROOT / "ai/sim/evidence/typing_twin_120mm_exact_contact_fixture_v1_1.json"
+RESULT = ROOT / "ai/sim/evidence/typing_twin_120mm_exact_contact_result_v1.json"
+ATTEMPT1 = (
+    ROOT / "ai/sim/evidence/typing_twin_120mm_exact_contact_attempt1_result_v1.json"
+)
 
 
 def _canonical(value: object) -> bytes:
@@ -69,3 +74,36 @@ def test_fixture_tampering_fails_closed(tmp_path: Path) -> None:
     rebound.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="bound source hash changed"):
         _load_fixture(rebound, WORKSPACE)
+
+
+def test_corrected_study_reproduces_blocked_exact_contact() -> None:
+    retained = json.loads(RESULT.read_text(encoding="utf-8"))
+    replayed = run_exact_contact_study(FIXTURE, workspace=WORKSPACE)
+    assert replayed == retained
+    assert replayed["decision"] == "BLOCKED_120MM_EXACT_CONTACT"
+    assert replayed["exact_contact"]["converged_candidate_count"] == 0
+    assert replayed["exact_contact"]["accepted_candidate_count"] == 0
+    sequential = replayed["sequential_vertical_profile"]
+    assert sequential["bootstrap"]["accepted"] is True
+    assert sequential["accepted_point_count"] == 12
+    assert sequential["failure_waypoint"]["waypoint_sequence"] == 12
+    assert sequential["failure_reason"] == (
+        "MINIMUM_NORMALIZED_ARM_JOINT_MARGIN_REJECTED"
+    )
+    assert replayed["full_route_reconstruction_run"] is False
+    assert replayed["installed_collision_gate_cleared"] is False
+    assert replayed["continuous_collision_proven"] is False
+    assert replayed["hardware_writes"] == replayed["physical_movements"] == 0
+    assert replayed["physical_authority"] is False
+
+
+def test_failed_bootstrap_attempt_remains_preserved() -> None:
+    attempt = json.loads(ATTEMPT1.read_text(encoding="utf-8"))
+    assert attempt["decision"] == "BLOCKED_120MM_EXACT_CONTACT"
+    assert attempt["sequential_vertical_profile"]["accepted_point_count"] == 0
+    assert attempt["sequential_vertical_profile"]["failure_reason"] == (
+        "MAXIMUM_ADJACENT_JOINT_DELTA_EXCEEDED"
+    )
+    assert attempt["receipt_sha256"] == (
+        "6bf03114321e06912448a488f19ded7ad3deca27248f05cfb6d4ee3de7a4c0af"
+    )
