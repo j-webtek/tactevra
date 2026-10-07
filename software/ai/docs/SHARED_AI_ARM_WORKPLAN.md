@@ -1711,6 +1711,13 @@ No collision run was attempted across that mismatch. The next bounded AI-lane
 dependency is a new full-route reconstruction for the exact admitted 110 mm
 tool, including orientation transitions; installed collision profile and fresh
 observed-state requirements remain arm-owned blockers.
+Before route reconstruction, successor fixture
+[`c03_arm_route_reconciliation_fixture_v1_1.json`](../sim/evidence/c03_arm_route_reconciliation_fixture_v1_1.json)
+also binds the selected 30 mm-exposure C03 pose profile and both target-catalog
+files. Its frozen canonical SHA-256 is
+`f3f225eaac375d4f8f325c7c841dcc8546019f6ea9c0466465e338753a307d5f`.
+This pre-result amendment checks whether target geometry can be composed; it
+does not alter the preserved v1 tool-length STOP result.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

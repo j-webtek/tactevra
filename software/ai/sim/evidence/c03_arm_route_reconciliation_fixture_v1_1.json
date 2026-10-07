@@ -1,0 +1,81 @@
+{
+  "bindings": {
+    "c03_candidate_target_catalog": {
+      "path": "C:/IsaacSim/evidence/issue190/planner/nominal_target_profiles_80_measured_candidate.json",
+      "schema": "rocell.nominal_target_profiles.v1",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "c03_key_clearance": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/cpu_contact_ws3_v3_exact_tip/ws3_exact_key_clearance_v1.json",
+      "receipt_sha256": "0afd9af6bb9a5ec3b3af1e1d2269380a4227cb7bba9c23c68f16cda2f1677b2e",
+      "schema": "tactevra.ws3_exact_key_clearance_result.v1",
+      "sha256": "930416ec924e64c29d2dea34314ff866ab8d8b551b00afb886387b34098345d2"
+    },
+    "c03_pose_family": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/cpu_contact_ws3_v3_exact_tip/candidate51_tool_pose_family_v3.json",
+      "receipt_sha256": "71484490220b29944f888a51e0e959b6599bc69fc5d5d1def2576e2522cd4a2d",
+      "schema": "tactevra.tool_bound_pose_family_result.v1",
+      "sha256": "6c6d14cba87f56aa13370e2651bc2c832571eed3d3bddc47424ff5cb911c8ef7"
+    },
+    "c03_recipe_envelope": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/cpu_contact_ws3_v3_exact_tip/ws2_press_recipe_envelope_v1.json",
+      "receipt_sha256": "e81ec89cf27c9f6c81a55b224b305287facc5ebec6e6ab383521271b08f90b3b",
+      "schema": "tactevra.ws2_press_recipe_envelope.v1",
+      "sha256": "26c3cc81bb7a1c5ba205779e5b6e4bf4186a357317857c2e11a8fed61caccbd9"
+    },
+    "main_target_catalog": {
+      "path": "software/config/nominal_target_profiles.json",
+      "schema": "rocell.nominal_target_profiles.v1",
+      "sha256": "6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    },
+    "partitioned_collision_intake": {
+      "path": "software/ai/sim/evidence/typing_twin_partitioned_collision_intake_result_v1.json",
+      "receipt_sha256": "965d79f06e3ddcae326d8b870f271c64ab3039f48b88b24f47ef29fef847f654",
+      "schema": "tactevra.typing_twin_partitioned_collision_intake_receipt.v1",
+      "sha256": "73f93b79060c32d29c75e170cf034c73b854814549ba39288c818133299e1738"
+    },
+    "promoted_full_route": {
+      "path": "software/ai/sim/evidence/typing_twin_promoted_full_route_result_v1_1.json",
+      "receipt_sha256": "56d1c275ab529edc283a18d8569fc7d581bb047f1385094f6762a1f88c224aa5",
+      "schema": "tactevra.typing_twin_promoted_full_route_receipt.v1",
+      "sha256": "f6d37eb758f2fc8ba0d2ea462b1512a7aa404e120fcb5c2421c1fa79043ce023"
+    }
+  },
+  "counters": {
+    "hardware_write_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "real_command_count": 0,
+    "transport_count": 0
+  },
+  "expected": {
+    "c03_tool": {
+      "geometry": {
+        "exposed_length_mm": 30.0,
+        "half_length_mm": 15.0,
+        "radius_mm": 3.0,
+        "shape": "capsule",
+        "tip_id": "capsule-r3-m5"
+      },
+      "tool_configuration_sha256": "ba538b48bb9c6bc80c01ad4ae792b9784440de4825c5dea5781f3277b8ee4109",
+      "total_length_mm": 110.0
+    },
+    "intake_blockers": [
+      "INSTALLED_COLLISION_PROFILE_REQUIRED",
+      "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION"
+    ],
+    "promoted_route_sample_count": 328,
+    "promoted_route_tool_length_mm": 120.0
+  },
+  "fixture_sha256": "f3f225eaac375d4f8f325c7c841dcc8546019f6ea9c0466465e338753a307d5f",
+  "limitations": [
+    "This fixture compares immutable identities and blockers only; it does not execute collision simulation.",
+    "C03 is key-only fixed-orientation evidence for a 110 mm tool.",
+    "The promoted route is simulation-only evidence reconstructed for a 120 mm tool.",
+    "Installed collision geometry and fresh observed state remain absent.",
+    "The C03 pose family and promoted route use different target-catalog identities."
+  ],
+  "physical_authority": false,
+  "schema": "tactevra.c03_arm_route_reconciliation_fixture.v1_1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}

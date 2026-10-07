@@ -53,7 +53,10 @@ def _verify_canonical_field(document: Mapping[str, Any], field: str) -> None:
 def load_fixture(path: Path) -> dict[str, Any]:
     fixture = load_strict_json(path)
     _verify_canonical_field(fixture, "fixture_sha256")
-    if fixture.get("schema") != "tactevra.c03_arm_route_reconciliation_fixture.v1":
+    if fixture.get("schema") not in {
+        "tactevra.c03_arm_route_reconciliation_fixture.v1",
+        "tactevra.c03_arm_route_reconciliation_fixture.v1_1",
+    }:
         raise ValueError("unexpected reconciliation fixture schema")
     if fixture.get("physical_authority") is not False:
         raise ValueError("fixture must retain zero physical authority")
@@ -83,6 +86,19 @@ def _load_binding(fixture: Mapping[str, Any], name: str, workspace: Path) -> dic
     _verify_canonical_field(document, "receipt_sha256")
     if document["receipt_sha256"] != binding["receipt_sha256"]:
         raise ValueError(f"bound artifact receipt mismatch: {name}")
+    if document.get("schema") != binding["schema"]:
+        raise ValueError(f"bound artifact schema mismatch: {name}")
+    return document
+
+
+def _load_file_binding(
+    fixture: Mapping[str, Any], name: str, workspace: Path
+) -> dict[str, Any]:
+    binding = fixture["bindings"][name]
+    path = _resolve(binding["path"], workspace)
+    if not path.is_file() or file_hash(path) != binding["sha256"]:
+        raise ValueError(f"bound artifact hash mismatch: {name}")
+    document = load_strict_json(path)
     if document.get("schema") != binding["schema"]:
         raise ValueError(f"bound artifact schema mismatch: {name}")
     return document
@@ -147,10 +163,42 @@ def reconcile(fixture_path: Path, workspace: Path) -> dict[str, Any]:
         "FULL_ROBOT_AND_WORKCELL_CONTINUOUS_COLLISION_UNPROVEN",
         *intake_blockers,
     ]
+    catalog_reconciliation: dict[str, Any] | None = None
+    result_schema = "tactevra.c03_arm_route_reconciliation_result.v1"
+    decision = "STOP_C03_PROMOTED_ROUTE_TOOL_IDENTITY_MISMATCH"
+    if fixture["schema"].endswith(".v1_1"):
+        pose_family = _load_binding(fixture, "c03_pose_family", workspace)
+        _load_file_binding(fixture, "main_target_catalog", workspace)
+        _load_file_binding(
+            fixture, "c03_candidate_target_catalog", workspace
+        )
+        selected_hash = expected["c03_tool"]["tool_configuration_sha256"]
+        selected = [
+            profile for profile in pose_family.get("profiles", [])
+            if profile.get("tool_configuration_sha256") == selected_hash
+        ]
+        if len(selected) != 1:
+            raise ValueError("C03 selected pose profile identity is not unique")
+        configuration = selected[0]["pose_bundle"]["tool_configuration"]
+        c03_catalog_hash = configuration.get("target_catalog_sha256")
+        if c03_catalog_hash != fixture["bindings"]["c03_candidate_target_catalog"]["sha256"]:
+            raise ValueError("C03 pose family target catalog binding changed")
+        main_catalog_hash = fixture["bindings"]["main_target_catalog"]["sha256"]
+        if main_catalog_hash == c03_catalog_hash:
+            raise ValueError("fixture expected a target catalog mismatch but hashes match")
+        blockers.insert(1, "C03_PROMOTED_ROUTE_TARGET_CATALOG_IDENTITY_MISMATCH")
+        catalog_reconciliation = {
+            "c03_candidate_target_catalog_sha256": c03_catalog_hash,
+            "promoted_route_target_catalog_sha256": main_catalog_hash,
+            "identical": False,
+        }
+        result_schema = "tactevra.c03_arm_route_reconciliation_result.v1_1"
+        decision = "STOP_C03_PROMOTED_ROUTE_TOOL_AND_TARGET_CATALOG_IDENTITY_MISMATCH"
+
     core = {
-        "schema": "tactevra.c03_arm_route_reconciliation_result.v1",
+        "schema": result_schema,
         "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
-        "decision": "STOP_C03_PROMOTED_ROUTE_TOOL_IDENTITY_MISMATCH",
+        "decision": decision,
         "fixture_sha256": fixture["fixture_sha256"],
         "source_receipts": {
             "c03_recipe_envelope": envelope["receipt_sha256"],
@@ -195,6 +243,8 @@ def reconcile(fixture_path: Path, workspace: Path) -> dict[str, Any]:
             "No controller, transport, permit, hardware, or physical authority is granted.",
         ],
     }
+    if catalog_reconciliation is not None:
+        core["target_catalog_reconciliation"] = catalog_reconciliation
     return {**core, "receipt_sha256": canonical_hash(core)}
 
 

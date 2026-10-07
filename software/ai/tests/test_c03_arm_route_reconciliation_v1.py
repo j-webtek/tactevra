@@ -19,6 +19,9 @@ from rocell_ai.c03_arm_route_reconciliation_v1 import (  # noqa: E402
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
+FIXTURE_V1_1 = (
+    AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1_1.json"
+)
 
 
 def _write_fixture(tmp_path: Path, mutation) -> Path:
@@ -81,3 +84,15 @@ def test_duplicate_json_field_is_rejected(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="duplicate JSON field"):
         load_strict_json(path)
+
+
+def test_successor_also_stops_on_target_catalog_identity_mismatch() -> None:
+    result = reconcile(FIXTURE_V1_1, WORKSPACE)
+    assert result["decision"] == (
+        "STOP_C03_PROMOTED_ROUTE_TOOL_AND_TARGET_CATALOG_IDENTITY_MISMATCH"
+    )
+    catalogs = result["target_catalog_reconciliation"]
+    assert catalogs["identical"] is False
+    assert catalogs["c03_candidate_target_catalog_sha256"] == "0fe3c013" + "a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    assert catalogs["promoted_route_target_catalog_sha256"] == "6779213e" + "832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2"
+    assert result["hardware_writes"] == result["physical_movements"] == 0
