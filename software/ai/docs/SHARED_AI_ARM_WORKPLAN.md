@@ -1724,6 +1724,13 @@ the promoted route binds main catalog file SHA-256 `6779213e...`. The next
 route reconstruction must therefore bind both the exact 110 mm C03 tool and
 the exact C03 candidate target geometry; changing only tool length would still
 mix incompatible evidence.
+The pre-result coordinate-audit fixture
+[`c03_arm_route_reconciliation_fixture_v1_2.json`](../sim/evidence/c03_arm_route_reconciliation_fixture_v1_2.json),
+canonical SHA-256
+`1c7fccfb40b57a7633b752e03abfff2bd82fd38da425f9d08e4c6862fccc183c`,
+freezes the ordered `H,E,L,L,O,SPACE,2,0,2,6` route. It will report every
+main-versus-C03 center delta while preserving repeats; it cannot install the
+candidate catalog, alter semantic order, run IK, or clear collision blockers.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

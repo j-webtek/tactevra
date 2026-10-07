@@ -56,6 +56,7 @@ def load_fixture(path: Path) -> dict[str, Any]:
     if fixture.get("schema") not in {
         "tactevra.c03_arm_route_reconciliation_fixture.v1",
         "tactevra.c03_arm_route_reconciliation_fixture.v1_1",
+        "tactevra.c03_arm_route_reconciliation_fixture.v1_2",
     }:
         raise ValueError("unexpected reconciliation fixture schema")
     if fixture.get("physical_authority") is not False:
@@ -166,7 +167,8 @@ def reconcile(fixture_path: Path, workspace: Path) -> dict[str, Any]:
     catalog_reconciliation: dict[str, Any] | None = None
     result_schema = "tactevra.c03_arm_route_reconciliation_result.v1"
     decision = "STOP_C03_PROMOTED_ROUTE_TOOL_IDENTITY_MISMATCH"
-    if fixture["schema"].endswith(".v1_1"):
+    fixture_schema = fixture["schema"]
+    if fixture_schema.endswith((".v1_1", ".v1_2")):
         pose_family = _load_binding(fixture, "c03_pose_family", workspace)
         _load_file_binding(fixture, "main_target_catalog", workspace)
         _load_file_binding(
@@ -194,6 +196,61 @@ def reconcile(fixture_path: Path, workspace: Path) -> dict[str, Any]:
         }
         result_schema = "tactevra.c03_arm_route_reconciliation_result.v1_1"
         decision = "STOP_C03_PROMOTED_ROUTE_TOOL_AND_TARGET_CATALOG_IDENTITY_MISMATCH"
+
+        if fixture_schema.endswith(".v1_2"):
+            from rocell.targets.nominal import load_nominal_target_catalog
+
+            main_path = _resolve(
+                fixture["bindings"]["main_target_catalog"]["path"], workspace
+            )
+            candidate_path = _resolve(
+                fixture["bindings"]["c03_candidate_target_catalog"]["path"],
+                workspace,
+            )
+            main_targets = load_nominal_target_catalog(workspace, main_path)
+            candidate_targets = load_nominal_target_catalog(workspace, candidate_path)
+            route_rows = []
+            for action_index, target_id in enumerate(expected["route_target_order"]):
+                main_region = main_targets.resolve("keyboard", target_id)
+                candidate_region = candidate_targets.resolve("keyboard", target_id)
+                delta = [
+                    candidate_region.center.x - main_region.center.x,
+                    candidate_region.center.y - main_region.center.y,
+                    candidate_region.center.z - main_region.center.z,
+                ]
+                route_rows.append({
+                    "action_index": action_index,
+                    "target_id": target_id,
+                    "main_center_board_mm": [
+                        main_region.center.x,
+                        main_region.center.y,
+                        main_region.center.z,
+                    ],
+                    "c03_center_board_mm": [
+                        candidate_region.center.x,
+                        candidate_region.center.y,
+                        candidate_region.center.z,
+                    ],
+                    "c03_minus_main_delta_mm": delta,
+                    "planar_delta_mm": (delta[0] ** 2 + delta[1] ** 2) ** 0.5,
+                    "center_identical": all(abs(value) <= 1e-12 for value in delta),
+                })
+            moved_rows = [row for row in route_rows if not row["center_identical"]]
+            if not moved_rows:
+                raise ValueError("fixture expected moved route targets but found none")
+            catalog_reconciliation["route_coordinate_audit"] = {
+                "route_target_order": list(expected["route_target_order"]),
+                "route_action_count": len(route_rows),
+                "moved_action_count": len(moved_rows),
+                "moved_unique_target_ids": sorted({row["target_id"] for row in moved_rows}),
+                "maximum_planar_delta_mm": max(row["planar_delta_mm"] for row in moved_rows),
+                "rows": route_rows,
+            }
+            blockers.insert(
+                2, "PROMOTED_ROUTE_WAYPOINTS_DO_NOT_MATCH_C03_TARGET_GEOMETRY"
+            )
+            result_schema = "tactevra.c03_arm_route_reconciliation_result.v1_2"
+            decision = "STOP_PROMOTED_ROUTE_COORDINATES_REQUIRE_C03_RECONSTRUCTION"
 
     core = {
         "schema": result_schema,
@@ -224,8 +281,9 @@ def reconcile(fixture_path: Path, workspace: Path) -> dict[str, Any]:
         "blockers": blockers,
         "next_dependency": (
             "Reconstruct and screen the promoted full arm route with the exact admitted "
-            "110 mm C03 tool identity, including orientation transitions, then bind an "
-            "installed measured collision profile and fresh observed start state."
+            "110 mm C03 tool identity and C03 candidate target geometry, including "
+            "orientation transitions, then bind an installed measured collision profile "
+            "and fresh observed start state."
         ),
         "collision_screen_executed": False,
         "controller_commands": [],
