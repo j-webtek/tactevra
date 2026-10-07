@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/installed_collision_measurement_manifest_v1.schema.json",
+  "title": "Installed collision measurement manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "measurement_manifest_id", "captured_at_utc", "manifest_id",
+    "manifest_sha256", "active_build_id", "build_snapshot_sha256",
+    "robot_model_sha256", "base_contract_sha256", "root_frame", "sources",
+    "body_measurements", "clearance_measurement", "content_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.installed_collision_measurement_manifest.v1"},
+    "measurement_manifest_id": {"type": "string", "minLength": 1},
+    "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "manifest_id": {"type": "string", "minLength": 1},
+    "manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "active_build_id": {"type": "string", "minLength": 1},
+    "build_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "robot_model_sha256": {"$ref": "#/$defs/sha256"},
+    "base_contract_sha256": {"$ref": "#/$defs/sha256"},
+    "root_frame": {"type": "string", "minLength": 1},
+    "sources": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/source"}},
+    "body_measurements": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/body"}},
+    "clearance_measurement": {"$ref": "#/$defs/clearance"},
+    "content_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "vec3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+    "primitive": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "center_mm", "radius_mm"],
+          "properties": {"kind": {"const": "sphere"}, "center_mm": {"$ref": "#/$defs/vec3"}, "radius_mm": {"type": "number", "exclusiveMinimum": 0}}
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "start_mm", "end_mm", "radius_mm"],
+          "properties": {"kind": {"const": "capsule"}, "start_mm": {"$ref": "#/$defs/vec3"}, "end_mm": {"$ref": "#/$defs/vec3"}, "radius_mm": {"type": "number", "exclusiveMinimum": 0}}
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "center_mm", "half_extents_mm", "rotation_row_major"],
+          "properties": {
+            "kind": {"const": "oriented_box"}, "center_mm": {"$ref": "#/$defs/vec3"},
+            "half_extents_mm": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "exclusiveMinimum": 0}},
+            "rotation_row_major": {"type": "array", "minItems": 9, "maxItems": 9, "items": {"type": "number"}}
+          }
+        }
+      ]
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "sha256", "measurement_method", "captured_at_utc", "instrument_id", "instrument_resolution_mm", "notes"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"},
+        "measurement_method": {"enum": ["CALIPER", "TAPE_MEASURE", "FIXTURE_GAUGE", "PHOTOGRAMMETRY", "CAD_DERIVED_AND_PHYSICALLY_VERIFIED", "OTHER_REVIEWED"]},
+        "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+        "instrument_id": {"type": "string", "minLength": 1},
+        "instrument_resolution_mm": {"type": "number", "exclusiveMinimum": 0},
+        "notes": {"type": "string"}
+      }
+    },
+    "body": {
+      "type": "object", "additionalProperties": false,
+      "required": ["body_id", "parent_frame", "role", "binding_mode", "status", "source_ids", "coordinate_frame", "units", "geometry_uncertainty_mm", "envelope_primitives", "notes"],
+      "properties": {
+        "body_id": {"type": "string", "minLength": 1}, "parent_frame": {"type": "string", "minLength": 1},
+        "role": {"enum": ["ROBOT_LINK", "BASE_CLAMP", "ATTACHMENT", "CAMERA", "CONNECTOR", "CABLE", "TOOL", "STATIC_ENVIRONMENT"]},
+        "binding_mode": {"enum": ["RIGID_FRAME", "STATIC_ROOT", "CONFIGURATION_SAMPLED"]},
+        "status": {"enum": ["MEASURED", "PENDING", "DECLARED_ABSENT"]},
+        "source_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "coordinate_frame": {"type": "string", "minLength": 1}, "units": {"const": "mm"},
+        "geometry_uncertainty_mm": {"oneOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "envelope_primitives": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/primitive"}},
+        "notes": {"type": "string"}
+      }
+    },
+    "clearance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "source_ids", "minimum_separation_mm", "geometry_uncertainty_mm_per_body", "pose_uncertainty_mm_per_body", "notes"],
+      "properties": {
+        "status": {"enum": ["PENDING", "ACCEPTED_MEASURED"]},
+        "source_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "minimum_separation_mm": {"oneOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "geometry_uncertainty_mm_per_body": {"oneOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "pose_uncertainty_mm_per_body": {"oneOf": [{"type": "number", "minimum": 0}, {"type": "null"}]},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}
