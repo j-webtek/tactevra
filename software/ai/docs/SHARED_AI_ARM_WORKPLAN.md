@@ -1731,6 +1731,10 @@ canonical SHA-256
 freezes the ordered `H,E,L,L,O,SPACE,2,0,2,6` route. It will report every
 main-versus-C03 center delta while preserving repeats; it cannot install the
 candidate catalog, alter semantic order, run IK, or clear collision blockers.
+Evidence `E-20261007-AI-479` reports that six of the ten ordered route actions
+move under C03 geometry: `E`, `O`, `2`, `0`, repeated `2`, and `6`. The largest
+planar shift is 15.11357334572232 mm. A 110 mm successor must therefore rebuild
+the route from the C03 catalog rather than replace only the tool transform.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

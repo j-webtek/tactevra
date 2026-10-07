@@ -8528,3 +8528,50 @@ rewriting history. New entries must use a unique evidence ID.
   110 mm C03 tool and exact C03 candidate target catalog, then run canonical IK
   and continuity before any collision work. Installed measured geometry and a
   fresh observed start state remain later arm-owned requirements.
+
+### E-20261007-AI-479 — ordered route audit requires C03 coordinate reconstruction
+
+- Stage: S2/S3 exploratory zero-authority AI-to-arm evidence reconciliation.
+- Lane: AI. Arm-lane status and every integration gate remain unchanged.
+- Commit: `e319d6e5a82788fa995076e461442f95f6d6d1fa`.
+- Change: added a deterministic coordinate audit using the runtime's strict
+  nominal-target loader for both hash-bound catalogs. It preserves semantic
+  action order and repeated targets while comparing board-frame centers.
+- Inputs/fixtures:
+  `software/ai/sim/evidence/c03_arm_route_reconciliation_fixture_v1_2.json`;
+  canonical fixture SHA-256
+  `1c7fccfb40b57a7633b752e03abfff2bd82fd38da425f9d08e4c6862fccc183c`;
+  file SHA-256
+  `ed37e08c3eefb2c77d8c21eaba0dbd7ec885d4e58af839595d5bb98cb3f42228`.
+  It retains every binding from `E-20261007-AI-478` and freezes ordered route
+  targets `H,E,L,L,O,SPACE,2,0,2,6`.
+- Command: from the repository root, set
+  `PYTHONPATH=software/ai;software/src`, then run
+  `python -m rocell_ai.c03_arm_route_reconciliation_v1 software/ai/sim/evidence/c03_arm_route_reconciliation_fixture_v1_2.json --workspace . --output C:\MuJoCoWarp\evidence\issue190\c03_arm_route_reconciliation_v1\c03_arm_route_reconciliation_result_v1_2.json`.
+- Result: `BLOCKED` with decision
+  `STOP_PROMOTED_ROUTE_COORDINATES_REQUIRE_C03_RECONSTRUCTION`. Result receipt
+  SHA-256 `7b19af6a8526f8b28279b57532c48815feb39ca15ab814264452cb5faa9f8b4d`;
+  result-file SHA-256
+  `a1a91c6a08fdd959db0d36cd353edc7ac8fa7e3e1c10cb90f2023621429affaa`.
+  A byte-identical, hash-verified backup is retained on `F:`.
+- Metrics: all 10 ordered actions were compared. Four actions retain identical
+  centers (`H`, both `L` actions, and `SPACE`). Six actions move: `E` by about
+  13.28 mm, `O` by about 13.78 mm, both `2` actions by about 14.45 mm, `0` by
+  15.11357334572232 mm, and `6` by about 14.78 mm. The five unique moved
+  targets are `0`, `2`, `6`, `E`, and `O`. Target-plane Z remains unchanged.
+- Validation: the focused reconciliation suite passed 7 tests, including exact
+  route order, repeated `L` and `2`, moved-action count, unique moved targets,
+  maximum delta, preserved predecessor results, tampering, and zero-authority
+  rejection. Ruff and `git diff --check` passed.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is a coordinate audit. It does not install the candidate
+  catalog, compile a replacement route, run IK, evaluate orientation changes,
+  or perform collision screening. Catalog provenance remains simulation-only.
+  Installed geometry, fresh state, controller, transport, and physical use
+  remain blocked.
+- Supersedes: none. It adds coordinate consequences to the immutable mismatch
+  results in `E-20261007-AI-477` and `E-20261007-AI-478`.
+- Next dependency: freeze a new zero-authority route reconstruction using the
+  exact C03 candidate catalog and 110 mm tool, preserving semantic order and
+  repeats. Run canonical IK and continuity before partition or collision work.
