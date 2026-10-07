@@ -585,3 +585,8 @@ The passing amended preflight adds one compact C02 authorization fixture that
 binds the exact manifest, preflight receipt, supervisor, and campaign runner.
 This raises the exact tracked-file count and governed ceiling to 6,430. It
 authorizes simulation execution only and grants no robot or hardware authority.
+
+The C02 result gate adds one strict final-admission module and one focused test
+module. This raises the exact tracked-file count and governed ceiling to 6,432.
+The full shard population, cross-GPU sentinels, compact final result, and F-drive
+custody copies remain external and hash-verified.
