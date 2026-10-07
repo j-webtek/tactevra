@@ -1004,12 +1004,14 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-arm-collision-handoff` owns the bounded adapter from
-the exact C03 route receipt in `E-20261007-AI-490` to the existing partitioned
-installed-profile collision intake. It may verify lineage and enumerate
-required configuration and sweep evidence only. It must retain the installed
-profile, continuous collision, fresh observed-state, controller, and physical
-authority blockers until their independent evidence exists.
+The arm lane on `codex/c03-installed-collision-qualification` owns the bounded
+successor from the merged exact C03 route handoff in `E-20261007-ARM-491` to
+the deterministic installed-collision-profile builder and partitioned evidence
+intake. It may verify a supplied measurement manifest, build or reject its
+zero-authority profile, and enumerate the remaining configuration and sweep
+evidence only. It must not synthesize missing installed measurements or clear
+the continuous-collision, fresh observed-state, controller, or physical
+authority blockers.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
@@ -1901,6 +1903,15 @@ correctly at `BLOCKED_INSTALLED_COLLISION_PROFILE_REQUIRED`; fresh observed
 state is also retained as a blocker. No collision check or authority was
 created. The next arm increment requires the measured installed collision
 profile and full configuration plus conservative sweep evidence.
+Evidence `E-20261007-ARM-492` composes that exact handoff with the deterministic
+installed-profile builder. The real retained route stops at
+`BLOCKED_MEASUREMENT_MANIFEST_REQUIRED`, while focused synthetic fixtures prove
+that incomplete measurements remain blocked and a complete hash-bound manifest
+can enter the profile-bound partition intake without claiming collision
+clearance. The next dependency is a real installed measurement manifest; the
+software must not substitute test geometry. Configuration-sampled cable
+geometry, conservative sweeps for all 321 segments, and fresh observed state
+remain subsequent blockers.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
