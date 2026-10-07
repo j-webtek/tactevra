@@ -1170,7 +1170,7 @@ remove it only in the same commit that appends the resulting evidence row.
 
 | Worker/lane | Stage | Paths expected to change | Branch/commit | State |
 |---|---|---|---|---|
-| ARM | S2 | nominal-versus-promoted transform differential for 120 mm exact `H` contact; fixture, harness, tests, generated evidence, and `E-20261007-INT-473` documentation | `feature/sim-contact-geometry-audit` / claim pending | ACTIVE |
+| ARM | S2 | nominal-versus-promoted transform differential for 120 mm exact `H` contact; fixture, harness, tests, generated evidence, and `E-20261007-INT-473` documentation | `feature/sim-contact-geometry-audit` / `88b6107afc23d935d6eca85c3462e3ab1e6d7750` | ACTIVE |
 | Unclaimed | S2/S3 | physical-camera deployment qualification and safe-region-fit precision evidence | — | AVAILABLE |
 | ARM | S4 | collect four physical-original `camera_support_optics` bindings through onboarding, then run the ARM-070 intake; no synthetic promotion | ARM-071 | WAITING_FOR_ORIGINALS |
 
