@@ -1206,6 +1206,17 @@ continuous collision qualification. Those gates remain closed pending measured
 profile-bound geometry, per-sample configuration evidence, and conservative
 inter-sample sweep envelopes.
 
+Evidence `E-20261007-INT-476` integrates those exact partitions into a
+versioned collision-evidence intake. Each partition carries the same collision
+contract identity, its bounded sample plan, and exact configuration and sweep
+evidence-slot counts. All 328 route segments are owned exactly once across the
+two partitions; the shared boundary is rechecked at zero joint-state difference
+and requires no invented zero-length sweep envelope. The frozen run correctly
+retains the missing installed-profile blocker and performs no collision screen.
+Installed geometry, configuration evidence, conservative sweep envelopes, and
+a fresh observed start state remain required before any collision or physical
+gate can advance.
+
 Workers add a short row before beginning a potentially overlapping change and
 remove it only in the same commit that appends the resulting evidence row.
 

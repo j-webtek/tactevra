@@ -511,3 +511,15 @@ collision clearance, controller artifacts, simulator corpora, GPU artifacts,
 or authority-bearing output. The measured tree is 661,445,712 logical bytes
 with 4,890,152 governed duplicate bytes. All byte, duplicate, and reduction
 limits remain unchanged.
+
+The partition-aware collision intake increment adds six governed paths: one
+versioned application intake, one unit-test module, one CPU-only evidence
+runner, one focused evidence test, one frozen fixture, and one generated result
+bound by its receipt hash. The file-count ceiling advances from 6,461 to the
+exact observed 6,467 for those reviewed paths only. The intake binds every
+partition to one collision contract, assigns all 328 route segments exactly
+once, and records the shared boundary recheck. It supplies no installed profile,
+geometry, sampled clearance, continuous sweep proof, controller artifact, GPU
+artifact, or authority-bearing output. All byte, duplicate, and reduction
+limits remain unchanged. The measured tree is 661,667,426 logical bytes with
+4,890,152 governed duplicate bytes.

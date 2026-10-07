@@ -8342,3 +8342,74 @@ rewriting history. New entries must use a unique evidence ID.
   intake that emits profile-bound evidence slots per partition, then demonstrate
   cross-partition conservative sweep-envelope lineage. Actual clearance still
   requires measured installed geometry and configuration evidence.
+
+### E-20261007-INT-476 — partition-aware collision intake preserves exact sweep lineage
+
+- Stage: S2/S3 exploratory zero-authority integration planning.
+- Lane: integration contract over the ARM-owned collision boundary. No
+  integration gate or physical readiness status changed.
+- Claim commit: `5d642bdb20d13bdd9cdd1fe9310c232158c08294`.
+- Frozen implementation and fixture commit:
+  `dbb5e5c06a52bbfddb17ce8bba9c7fca9cb3c603`.
+- Result commit: `8532b3d161c187dc48ff1479369fb2cfd4d2b639`.
+- Objective: convert the exact bounded partitions from `E-20261007-INT-475`
+  into a versioned collision intake that binds each partition to one collision
+  contract, enumerates its evidence slots, and preserves conservative sweep
+  ownership across the shared boundary.
+- Fixture:
+  `software/ai/sim/evidence/typing_twin_partitioned_collision_intake_fixture_v1.json`;
+  canonical SHA-256
+  `e40a7b9ceef2ceec250553cdb34c6dae9e947bf485f5d5818f6092e1db75837f`;
+  file SHA-256
+  `d56205b790d2a1277583ea00e15e91e771c44c891b23971f10ca1f71beb53a11`.
+  It freezes the admitted full-route receipt, 0.05 rad maximum joint step,
+  256-sample partition ceiling, at most four partitions, exact two-partition
+  shape, 328 route segments, and one boundary-lineage record before execution.
+- Exact command: with `PYTHONPATH=software/ai;software/src`, run
+  `python -m rocell_ai.typing_twin_partitioned_collision_intake_v1
+  software/ai/sim/evidence/typing_twin_partitioned_collision_intake_fixture_v1.json
+  --workspace . --output
+  software/ai/sim/evidence/typing_twin_partitioned_collision_intake_result_v1.json`.
+- Result:
+  `PASS_PARTITIONED_INTAKE_RETAIN_PROFILE_AND_COLLISION_BLOCKERS`. Receipt
+  SHA-256 `965d79f06e3ddcae326d8b870f271c64ab3039f48b88b24f47ef29fef847f654`;
+  result-file SHA-256
+  `73f93b79060c32d29c75e170cf034c73b854814549ba39288c818133299e1738`;
+  partitioned-intake SHA-256
+  `714278c68a039e1704b8f8ade2b2aba50748cace7e97d355aaea38a4b60e1d93`.
+- Metrics: two partitions retain 256 and 74 bounded samples, for 330 stored
+  samples including one route seed and one boundary recheck. They represent 329
+  unique route configurations. Exactly 328 adjacent route segments are assigned
+  to partition-local sweep slots, matching all 328 accepted IK endpoints. The
+  single predecessor-terminal to successor-recheck joint difference is `0.0`
+  rad. No extra zero-length sweep envelope is requested at that boundary.
+- Decision rule outcome: exact partition identity, collision-contract identity,
+  ordered segment ownership, and boundary lineage pass. The missing installed
+  collision profile remains an explicit blocker. Installed geometry screening
+  was not executed, continuous collision is unproven, and the installed gate is
+  closed.
+- Validation: 21 focused partition, intake, trajectory-boundary, deterministic
+  replay, tamper,
+  blocker, sweep-ownership, and zero-authority tests passed in 4.63 seconds;
+  Ruff and `git diff --check` passed. Broader repository and policy checks
+  follow on the pull request.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0. No simulator or training process was interrupted.
+- Failures preserved: the source full-route result retains the original
+  unpartitioned resource refusal, and `E-20261007-INT-475` remains the immutable
+  partition proof. This result consumes those artifacts without rewriting or
+  rescoring either one.
+- Limitations: the route, promoted transform, 120 mm tool, 25 mm hover,
+  calibration, collision contract, and ready-state seed remain synthetic or
+  unmeasured. The implementation supports exact installed-profile binding, but
+  the frozen evidence supplies no measured installed profile, rigid attachment,
+  configuration-sampled geometry, collision result, or sweep envelope. It does
+  not establish physical accuracy, clearance, dynamics, contact behavior,
+  controller transport, permits, or authority.
+- Supersedes: none. It fulfills the software-intake dependency from
+  `E-20261007-INT-475` while retaining every collision and physical blocker.
+- Next dependency: supply an exact measured installed profile and profile-bound
+  configuration geometry plus conservative sweep-envelope evidence for every
+  enumerated slot. Only then may per-partition discrete and continuous collision
+  evaluation run; a fresh observed start state remains independently required.
