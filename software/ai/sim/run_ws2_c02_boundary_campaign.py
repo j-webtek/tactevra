@@ -333,6 +333,27 @@ def build_control(
             ],
         },
     }
+    release_override = fixture.get("release_protocol_override")
+    if release_override is not None:
+        expected_fields = {
+            "additional_settle_seconds",
+            "position_error_limit_mm",
+            "velocity_limit_mm_s",
+        }
+        if set(release_override) != expected_fields:
+            raise ValueError("C02 release override fields changed")
+        parent_release = execution["numerical_protocol"]["release"]
+        if (
+            float(release_override["position_error_limit_mm"])
+            != float(parent_release["position_error_limit_mm"])
+            or float(release_override["velocity_limit_mm_s"])
+            != float(parent_release["velocity_limit_mm_s"])
+        ):
+            raise ValueError("C02 release override may not change reset tolerances")
+        if float(release_override["additional_settle_seconds"]) != 1.0:
+            raise ValueError("C02 release diagnostic requires exactly one second")
+        control["control"]["control_kind"] = "RELEASE"
+        control["control"]["release_protocol_override"] = dict(release_override)
     return shard, campaign, execution, control
 
 

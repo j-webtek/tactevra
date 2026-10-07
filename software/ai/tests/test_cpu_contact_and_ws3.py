@@ -8,7 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from ai.sim.run_ws2_c02_boundary_campaign import build_c03_bridge_plan
+from ai.sim import run_ws2_c02_boundary_campaign as campaign_module
+from ai.sim.run_ws2_c02_boundary_campaign import build_c03_bridge_plan, build_control
 from integrations.mujoco_warp.key_press_physics_probe import tip_geometries
 from rocell_ai.cpu_contact_and_ws3 import (
     _sha,
@@ -163,6 +164,62 @@ def test_c03_bridge_plan_is_exactly_39168_worlds():
     assert plan["projected_world_count"] == 39_168
     assert len(plan["candidate_seeds"]) == 612
     assert plan["physical_authority"] is False
+
+
+def test_c02_release_diagnostic_preserves_reset_tolerances(monkeypatch):
+    fixture = {
+        "population": {"landing_count": 1},
+        "release_protocol_override": {
+            "additional_settle_seconds": 1.0,
+            "position_error_limit_mm": 0.05,
+            "velocity_limit_mm_s": 0.05,
+        },
+        "bindings": {"throughput_fixture": {"path": "unused"}},
+    }
+    plan = {"candidate_seeds": [{
+        "target_id": "A", "profile_id": "p", "tip_id": "t",
+        "compliance_id": "c", "recipe_index": 80, "scenario_id": "s",
+    }]}
+    manifest = {"shards": [{
+        "shard_id": "x", "target_id": "A", "profile_id": "p", "tip_id": "t",
+        "world_count": 1,
+        "candidate_identity_sha256": campaign_module._value_sha(plan["candidate_seeds"]),
+    }]}
+    execution = {"numerical_protocol": {"release": {
+        "additional_settle_seconds": 0.25,
+        "position_error_limit_mm": 0.05,
+        "velocity_limit_mm_s": 0.05,
+    }}}
+    campaign = {"landing_model": {"scenarios": [{"id": "s"}]}}
+    staged = {}
+    physical = {"neighborhoods": [{
+        "target_id": "A", "target_joint_index": 0,
+        "members": [{"size_xy_mm": [14.0, 14.0]}],
+    }]}
+    monkeypatch.setattr(campaign_module, "build_manifest", lambda *_: manifest)
+    monkeypatch.setattr(campaign_module.throughput, "load_fixture", lambda *_: {
+        "fixture_sha256": "throughput", "smoke": {"switch_closure_window_ms": [30, 150]},
+    })
+    monkeypatch.setattr(
+        campaign_module.throughput, "load_bound",
+        lambda *_: (campaign, execution, staged, None, physical),
+    )
+    monkeypatch.setattr(
+        campaign_module, "load_bridge_campaign_override", lambda *_: campaign,
+    )
+    monkeypatch.setattr(
+        campaign_module.full_smoke, "full_compliance",
+        lambda *_: [{"compliance_id": "c"}],
+    )
+    _, _, _, control = build_control(fixture, plan, "x")
+    assert control["control"]["control_kind"] == "RELEASE"
+    assert control["control"]["release_protocol_override"] == fixture[
+        "release_protocol_override"
+    ]
+
+    fixture["release_protocol_override"]["velocity_limit_mm_s"] = 0.06
+    with pytest.raises(ValueError, match="may not change reset tolerances"):
+        build_control(fixture, plan, "x")
 
 
 def test_fixture_and_110mm_pose_bindings_load():
