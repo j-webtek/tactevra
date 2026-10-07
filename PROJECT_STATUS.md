@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed October 7, 2026 through the ARM-491 exact C03 route collision handoff,
+Reviewed October 7, 2026 through the ARM-492 C03 measured-profile qualification boundary,
 the ARM-132 shadow-service reuse campaign,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
