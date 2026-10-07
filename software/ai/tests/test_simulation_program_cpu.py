@@ -868,3 +868,103 @@ def test_ws2_successor_refinement_preserves_compliance_and_complete_landings():
         assert "landing population incomplete" in str(exc)
     else:
         raise AssertionError("incomplete C01 landing population was admitted")
+
+
+def test_ws2_c01_summary_separates_scenario_and_required_robustness():
+    scenarios = [
+        "LOW_SOURCE_HIGH_RESIDUAL",
+        "MID_SOURCE_MID_RESIDUAL",
+        "HIGH_SOURCE_LOW_RESIDUAL",
+        "FAILURE_CONTROL",
+    ]
+    landings = [0, 9]
+    rows = []
+    for recipe_index in (7, 8):
+        for scenario_id in scenarios:
+            for landing_index in landings:
+                admitted = scenario_id != "FAILURE_CONTROL"
+                if recipe_index == 8 and scenario_id == scenarios[0] and landing_index == 0:
+                    admitted = False
+                hold_ms = 50.0 if admitted else 0.0
+                if scenario_id == "FAILURE_CONTROL":
+                    hold_ms = 156.0
+                row = {
+                    "row_id": (
+                        f"GRAVE__{scenario_id}__r{recipe_index:03d}"
+                        f"__l{landing_index:03d}__k0.286_t6"
+                    ),
+                    "target_id": "GRAVE",
+                    "scenario_id": scenario_id,
+                    "recipe_index": recipe_index,
+                    "landing_sample_index": landing_index,
+                    "compliance_id": "k0.286_t6",
+                    "admitted": admitted,
+                    "finite": True,
+                    "overflow_zero": True,
+                    "actuation_count": 1 if admitted or scenario_id == "FAILURE_CONTROL" else 0,
+                    "auto_repeat_count": 0,
+                    "partial_press": not admitted and scenario_id != "FAILURE_CONTROL",
+                    "double_actuation": False,
+                    "neighbor_contact": False,
+                    "bottom_out_overflow": False,
+                    "dwell_above_actuation_ms": hold_ms,
+                    "debounce_hold_complete": admitted,
+                    "release_complete": True,
+                    "force_within_available": True,
+                    "minimum_depth_margin_mm": 0.1 if admitted else -0.1,
+                }
+                rows.append(row)
+    historical = {}
+    for row in rows:
+        failure = WS2_PROBE.primary_failure(row)
+        historical[failure] = historical.get(failure, 0) + 1
+    result = {
+        "shard": {
+            "shard_id": "a" * 64,
+            "target_id": "GRAVE",
+            "profile_id": "BASELINE",
+            "tip_id": "capsule-r6-m0.5",
+        },
+        "world_count": len(rows),
+        "rows": rows,
+        "primary_failure_counts": dict(sorted(historical.items())),
+    }
+    summary = C02_REFINEMENT.summarize_c01_results(
+        [result],
+        scenario_ids=scenarios,
+        landing_sample_indices=landings,
+        minimum_hold_ms=30.0,
+        maximum_hold_ms=150.0,
+    )
+    assert summary["shard_count"] == 1
+    assert summary["world_count"] == 16
+    assert summary["scenario_cell_count"] == 8
+    assert summary["scenario_cell_pass_count"] == 5
+    assert summary["robust_cell_count"] == 1
+    assert summary["targets_with_robust_cell"] == 1
+    assert summary["directional_primary_failure_counts"] == {
+        "ADMITTED": 11,
+        "HOLD_ABOVE_MAXIMUM": 4,
+        "PARTIAL_PRESS": 1,
+    }
+    target = summary["target_summaries"][0]
+    assert target["required_rows_per_cell"] == 6
+    assert target["best_required_pass_count"] == 6
+    assert target["best_candidate"]["recipe_index"] == 7
+
+    broken = deepcopy(result)
+    broken["rows"] = broken["rows"][:-1]
+    broken["world_count"] -= 1
+    historical = {}
+    for row in broken["rows"]:
+        failure = WS2_PROBE.primary_failure(row)
+        historical[failure] = historical.get(failure, 0) + 1
+    broken["primary_failure_counts"] = dict(sorted(historical.items()))
+    with pytest.raises(ValueError, match="incomplete scenario/landing cell"):
+        C02_REFINEMENT.summarize_c01_results(
+            [broken],
+            scenario_ids=scenarios,
+            landing_sample_indices=landings,
+            minimum_hold_ms=30.0,
+            maximum_hold_ms=150.0,
+        )
