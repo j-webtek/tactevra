@@ -31,6 +31,9 @@ from rocell_ai.c03_exact_route_reconstruction_v1_3 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_4 import (  # noqa: E402
     load_fixture as load_bundle_rebound_route_fixture,
 )
+from rocell_ai.c03_exact_route_reconstruction_v1_5 import (  # noqa: E402
+    load_fixture as load_parent_profile_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -54,6 +57,9 @@ REBOUND_ROUTE_FIXTURE = (
 )
 BUNDLE_REBOUND_ROUTE_FIXTURE = (
     AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_4.json"
+)
+PARENT_PROFILE_ROUTE_FIXTURE = (
+    AI_ROOT / "sim" / "evidence" / "c03_exact_route_reconstruction_fixture_v1_5.json"
 )
 
 
@@ -221,5 +227,21 @@ def test_bundle_rebound_successor_freezes_only_identity_changes() -> None:
         "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
     )
     assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
+    assert fixture["physical_authority"] is False
+    assert not any(fixture["counters"].values())
+
+
+def test_parent_profile_successor_adds_only_parent_profile_binding() -> None:
+    fixture = load_parent_profile_route_fixture(
+        PARENT_PROFILE_ROUTE_FIXTURE, WORKSPACE
+    )
+    assert fixture["fixture_rebinding"]["allowed_semantic_changes"] == [
+        "parent.input_bindings.target_catalog.sha256",
+        "parent.input_bindings.promoted_profile.sha256",
+        "predecessor.bindings.parent_route_fixture.sha256",
+        "predecessor.parent_fixture_sha256",
+    ]
+    assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
+    assert fixture["virtual_profile_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())

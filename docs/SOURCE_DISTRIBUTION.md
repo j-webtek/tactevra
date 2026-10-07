@@ -588,3 +588,12 @@ profile with the candidate bundle ID and updates only that profile's bundle-lock
 hash before delegating to the unchanged route runner. Study values, numerical
 policies, authority, and historical repository artifacts remain unchanged. All
 byte, duplicate, and reduction limits remain unchanged.
+
+The parent-profile-bound C03 route successor adds two governed paths: one thin
+derived-fixture runner and one pre-result fixture. The resulting tree contains
+6,490 tracked files. The ceiling advances from 6,490 to 6,492, retaining two
+reviewed-file slots. The runner adds only the derived virtual-profile file hash
+to the parent fixture's existing identity allowlist, then recomputes the parent
+and predecessor fixture hashes. Numerical policies, authority, and historical
+repository artifacts remain unchanged. All byte, duplicate, and reduction
+limits remain unchanged.

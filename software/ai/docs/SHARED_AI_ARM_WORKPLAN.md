@@ -1802,6 +1802,13 @@ profile's new file hash. The next successor must add that parent
 `promoted_profile` binding to the explicit derived-fixture allowlist and
 recompute the already allowed parent/predecessor identities. No numerical or
 authority change is permitted.
+The parent-profile-bound successor is frozen in
+[`c03_exact_route_reconstruction_fixture_v1_5.json`](../sim/evidence/c03_exact_route_reconstruction_fixture_v1_5.json),
+canonical SHA-256
+`feef5909cd4ff82b7835eea8bbc654ace9c39830b6462fe6b6c3e1913190dc3b`.
+It adds only `parent.input_bindings.promoted_profile.sha256` to the prior
+derived-fixture allowlist. Both rebinding contracts retain zero numerical
+policy changes and zero authority.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
