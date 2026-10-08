@@ -31,6 +31,9 @@ from .context import SimulationContext, load_simulation_context
 
 SCHEMA = "rocell.installed_collision_measurement_manifest.v1"
 REPORT_SCHEMA = "rocell.installed_collision_measurement_validation.v1"
+NOMINAL_SOURCE_INVENTORY_SCHEMA = (
+    "rocell.installed_collision_nominal_source_inventory.v1"
+)
 READY_STATUS = "READY_FOR_INSTALLED_PROFILE_BUILD"
 BLOCKED_STATUS = "BLOCKED_INCOMPLETE_INSTALLED_MEASUREMENTS"
 MAX_MANIFEST_BYTES = 1_048_576
@@ -64,6 +67,39 @@ _CLEARANCE_FIELDS = {
     "status", "source_ids", "minimum_separation_mm",
     "geometry_uncertainty_mm_per_body", "pose_uncertainty_mm_per_body",
     "notes",
+}
+
+_NOMINAL_SOURCE_PATHS = {
+    "robot": ("software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",),
+    "layout": ("active-project/RoCell_v0_3/config/workcell_layout.json",),
+    "board": (
+        "active-project/RoCell_v0_3/config/workcell_layout.json",
+        "active-project/RoCell_v0_3/cad/step/board_610x457x18_RC03.step",
+    ),
+    "keyboard_station_left": (
+        "active-project/RoCell_v0_3/config/workcell_layout.json",
+        "active-project/RoCell_v0_3/stl/keyboard_station_left.stl",
+    ),
+    "keyboard_station_right": (
+        "active-project/RoCell_v0_3/config/workcell_layout.json",
+        "active-project/RoCell_v0_3/stl/keyboard_station_right.stl",
+    ),
+    "phone_tcp_station": (
+        "active-project/RoCell_v0_3/config/workcell_layout.json",
+        "active-project/RoCell_v0_3/stl/phone_tcp_station.stl",
+    ),
+    "contact_tool": (
+        "active-project/RoCell_v0_3/stl/compliant_tool_body.stl",
+        "active-project/RoCell_v0_3/stl/compliant_tool_top_cap.stl",
+    ),
+    "camera_support": (
+        "hardware/static_overhead_camera/config/support_design.json",
+        "active-project/RoCell_v0_3/stl/camera_plate_universal.stl",
+    ),
+    "camera_module": (
+        "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+        "hardware/static_overhead_camera/config/support_design.json",
+    ),
 }
 
 
@@ -621,6 +657,157 @@ def load_installed_collision_measurement_manifest_v1(
     return document, report
 
 
+def build_installed_collision_nominal_source_inventory_v1(
+    context: SimulationContext,
+) -> dict[str, Any]:
+    """Inventory nominal geometry without promoting it to measured evidence."""
+
+    if not isinstance(context, SimulationContext):
+        raise TypeError("context must be a SimulationContext")
+    readiness = assess_current_collision_readiness(context)
+    layout_path = context.scenario.workcell_layout_path
+    try:
+        layout = json.loads(layout_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "cannot read nominal workcell layout"
+        ) from exc
+    board = layout["board"]
+    devices = layout["devices"]
+    stations = layout["stations"]
+
+    body_plan = {
+        **{
+            f"robot:{name}": (
+                "NOMINAL_GEOMETRY_AVAILABLE", "robot",
+                "Verify received arm identity, installed base transform, and link envelopes.",
+                None,
+            )
+            for name in ("base_link", "link1", "link2", "link3", "link4", "link5", "gripper")
+        },
+        "installation:base_and_factory_clamp": (
+            "PARTIAL_NOMINAL_GEOMETRY", "layout",
+            "Capture installed clamp/base extents and board-relative transform.", None,
+        ),
+        "attachment:camera_holder": (
+            "PARTIAL_NOMINAL_GEOMETRY", "camera_support",
+            "After the tower is built, capture holder extents and its rigid transform.", None,
+        ),
+        "attachment:camera_module": (
+            "PUBLISHED_AND_CONCEPT_GEOMETRY_ONLY", "camera_module",
+            "After installation, verify the received case, lens, pose, and conservative envelope.", None,
+        ),
+        "attachment:camera_connector": (
+            "PARTIAL_NOMINAL_GEOMETRY", "camera_module",
+            "After installation, capture connector, strain relief, and rigid transform.", None,
+        ),
+        "attachment:moving_camera_cable": (
+            "CONFIGURATION_MODEL_PENDING", "camera_module",
+            "Capture cable diameter, routing, slack, anchors, and configuration samples for ICQ-4.", None,
+        ),
+        "attachment:contact_tool": (
+            "NOMINAL_GEOMETRY_AVAILABLE", "contact_tool",
+            "Measure the assembled printed tool envelope, tip, compression range, and hand-TCP transform.", None,
+        ),
+        "workcell:board_solid": (
+            "NOMINAL_GEOMETRY_AVAILABLE", "board",
+            "Measure the installed board size, thickness, flatness, and root-frame realization.", {
+                "size_mm": [board["width"], board["depth"], board["thickness"]],
+                "top_surface_z_mm": board["top_surface_z"],
+            },
+        ),
+        "workcell:keyboard": (
+            "NOMINAL_ENVELOPE_AVAILABLE", "layout",
+            "Top-down datum image can verify XY and yaw; measure support/top Z and conservative exterior envelope.", {
+                "origin_xy_mm": devices["keyboard"]["nominal_origin_xy"],
+                "size_mm": devices["keyboard"]["nominal_size"],
+                "support_plane_z_mm": devices["keyboard"]["support_plane_z"],
+            },
+        ),
+        "workcell:phone": (
+            "NOMINAL_ENVELOPE_AVAILABLE", "layout",
+            "Top-down datum image can verify XY and yaw; measure case/camera-bump envelope and screen Z.", {
+                "origin_xy_mm": devices["phone"]["nominal_origin_xy"],
+                "size_mm": devices["phone"]["configured_size"],
+                "support_plane_z_mm": devices["phone"]["support_plane_z"],
+                "screen_plane_z_mm": devices["phone"]["nominal_screen_plane_z"],
+            },
+        ),
+        "workcell:station:keyboard_left": (
+            "NOMINAL_GEOMETRY_AVAILABLE", "keyboard_station_left",
+            "Top-down datum image can verify XY and yaw; measure printed first-article and installed Z deviations.", stations["keyboard_left"],
+        ),
+        "workcell:station:keyboard_right": (
+            "NOMINAL_GEOMETRY_AVAILABLE", "keyboard_station_right",
+            "Top-down datum image can verify XY and yaw; measure seam, printed first-article, and installed Z deviations.", stations["keyboard_right"],
+        ),
+        "workcell:station:phone_tcp": (
+            "NOMINAL_GEOMETRY_AVAILABLE", "phone_tcp_station",
+            "Top-down datum image can verify XY and yaw; measure printed first-article and installed Z deviations.", stations["phone_tcp"],
+        ),
+    }
+    source_paths = sorted({path for paths in _NOMINAL_SOURCE_PATHS.values() for path in paths})
+    sources = []
+    for relative in source_paths:
+        path = context.workspace / relative
+        try:
+            payload = path.read_bytes()
+        except OSError as exc:
+            raise InstalledCollisionMeasurementManifestV1Error(
+                f"cannot read nominal source {relative}"
+            ) from exc
+        sources.append({
+            "path": relative,
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "physical_measurement": False,
+        })
+    source_hashes = {row["path"]: row["sha256"] for row in sources}
+    bodies = []
+    for requirement in readiness.contract.requirements:
+        state, source_key, residual, placement = body_plan[requirement.body_id]
+        bodies.append({
+            "body_id": requirement.body_id,
+            "parent_frame": requirement.parent_frame,
+            "binding_mode": requirement.binding_mode.value,
+            "nominal_state": state,
+            "nominal_sources": [
+                {"path": path, "sha256": source_hashes[path]}
+                for path in _NOMINAL_SOURCE_PATHS[source_key]
+            ],
+            "nominal_placement": placement,
+            "remaining_physical_check": residual,
+            "top_down_image_useful": requirement.body_id in {
+                "installation:base_and_factory_clamp", "workcell:keyboard",
+                "workcell:phone", "workcell:station:keyboard_left",
+                "workcell:station:keyboard_right", "workcell:station:phone_tcp",
+            },
+            "measured": False,
+        })
+    core: dict[str, Any] = {
+        "schema": NOMINAL_SOURCE_INVENTORY_SCHEMA,
+        "status": "NOMINAL_SIMULATION_INPUTS_AVAILABLE_PHYSICAL_VERIFICATION_PENDING",
+        "base_contract_sha256": readiness.contract.content_hash,
+        "robot_model_sha256": readiness.urdf_sha256,
+        "source_count": len(sources),
+        "sources": sources,
+        "body_count": len(bodies),
+        "bodies": bodies,
+        "top_down_capture_requirements": [
+            "Keep the camera approximately perpendicular to the board.",
+            "Include all four board edges and the installed keyboard, phone, and stations.",
+            "Include at least two board datum or scale references in both X and Y.",
+            "Do not use the image to infer height, hidden geometry, or uncertainty.",
+        ],
+        "simulation_use_allowed": True,
+        "installed_measurement_status": "PENDING",
+        "collision_qualification": False,
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
+
+
 def render_installed_collision_measurement_worksheet_v1(
     contract: CollisionGeometryContract,
 ) -> str:
@@ -752,6 +939,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--write-pending-draft", type=Path)
     parser.add_argument("--draft-manifest-id")
     parser.add_argument("--draft-captured-at-utc")
+    parser.add_argument("--nominal-source-inventory", action="store_true")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args(argv)
     system_manifest = args.system_manifest or (
@@ -760,6 +948,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         context = load_simulation_context(args.workspace, system_manifest)
         readiness = assess_current_collision_readiness(context)
+        if args.nominal_source_inventory:
+            if any((args.measurement_manifest, args.write_pending_draft)):
+                raise InstalledCollisionMeasurementManifestV1Error(
+                    "nominal source inventory cannot be combined with manifest modes"
+                )
+            print(json.dumps(
+                build_installed_collision_nominal_source_inventory_v1(context),
+                indent=2,
+                sort_keys=True,
+            ))
+            return 0
         draft_values = (
             args.write_pending_draft,
             args.draft_manifest_id,
@@ -839,6 +1038,8 @@ __all__ = [
     "REPORT_SCHEMA",
     "SCHEMA",
     "InstalledCollisionMeasurementManifestV1Error",
+    "NOMINAL_SOURCE_INVENTORY_SCHEMA",
+    "build_installed_collision_nominal_source_inventory_v1",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "build_pending_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",

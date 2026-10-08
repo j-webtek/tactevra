@@ -226,9 +226,11 @@ from .installed_collision_geometry import (
     load_installed_collision_geometry_profile,
 )
 from .installed_collision_measurement_manifest_v1 import (
+    NOMINAL_SOURCE_INVENTORY_SCHEMA,
     REPORT_SCHEMA as INSTALLED_COLLISION_MEASUREMENT_VALIDATION_SCHEMA,
     SCHEMA as INSTALLED_COLLISION_MEASUREMENT_MANIFEST_SCHEMA,
     InstalledCollisionMeasurementManifestV1Error,
+    build_installed_collision_nominal_source_inventory_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
     load_installed_collision_measurement_manifest_v1,
     render_installed_collision_measurement_worksheet_v1,
@@ -1960,6 +1962,8 @@ __all__ = [
     "inspect_pinned_urdf_collision_evidence",
     "load_installed_collision_geometry_for_context",
     "load_installed_collision_geometry_profile",
+    "NOMINAL_SOURCE_INVENTORY_SCHEMA",
+    "build_installed_collision_nominal_source_inventory_v1",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",
     "render_installed_collision_measurement_worksheet_v1",
