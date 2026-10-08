@@ -46,6 +46,8 @@ def _model_digest(model: str) -> str:
 
 
 def _expected(case: dict[str, Any]) -> dict[str, Any]:
+    if "target" in case:
+        return parse_offline_typing_intent_v1(case["target"])
     old = case["expected"]
     if old["decision"] == "type_text":
         return {
@@ -102,7 +104,7 @@ def score_intent_model(
         )
         altered_text += int(changed)
         rows.append({
-            "case_id": case["case_id"],
+            "case_id": case["case_id"] if "case_id" in case else case["id"],
             "expected": expected,
             "actual": actual,
             "exact": matches,

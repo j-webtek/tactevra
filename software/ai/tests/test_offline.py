@@ -30,6 +30,7 @@ from rocell_ai.model_eval import PROMPT_SHA256  # noqa: E402
 from rocell_ai.offline_intent_model_eval_v1 import score_intent_model  # noqa: E402
 from rocell_ai.offline_intent_schema_decode_eval_v1 import (  # noqa: E402
     build_schema_constrained_payload,
+    load_schema_intent_cases,
 )
 from build_sft_data import build as build_sft_data  # noqa: E402
 from build_sft_v1_data import build as build_sft_v1_data  # noqa: E402
@@ -48,6 +49,27 @@ class OfflineContractTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "unsupported data version"):
             _data_configuration("v5")
+
+    def test_schema_intent_v4_validation_loader_is_hash_bound(self) -> None:
+        cases, digest = load_schema_intent_cases(
+            AI_DIR / "data" / "schema_intent_sft_v4_validation.jsonl",
+            AI_DIR / "data" / "schema_intent_sft_v4.manifest.json",
+            "validation",
+        )
+        self.assertEqual(len(cases), 105)
+        self.assertEqual(digest, "216c5d08c591eeafaf2c011f43a661d16d949c68a3b91b5bce0c90d188ef5700")
+        with tempfile.TemporaryDirectory() as folder:
+            altered = Path(folder) / "validation.jsonl"
+            altered.write_bytes(
+                (AI_DIR / "data" / "schema_intent_sft_v4_validation.jsonl").read_bytes()
+                + b"\n"
+            )
+            with self.assertRaisesRegex(ValueError, "validation data hash mismatch"):
+                load_schema_intent_cases(
+                    altered,
+                    AI_DIR / "data" / "schema_intent_sft_v4.manifest.json",
+                    "validation",
+                )
 
     def test_schema_intent_v4_splits_are_disjoint_and_contract_valid(self) -> None:
         train, validation, evaluation, manifest = build_schema_intent_sft_v4_data()
