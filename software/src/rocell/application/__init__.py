@@ -226,10 +226,12 @@ from .installed_collision_geometry import (
     load_installed_collision_geometry_profile,
 )
 from .installed_collision_measurement_manifest_v1 import (
+    NOMINAL_ENVELOPE_AUDIT_SCHEMA,
     NOMINAL_SOURCE_INVENTORY_SCHEMA,
     REPORT_SCHEMA as INSTALLED_COLLISION_MEASUREMENT_VALIDATION_SCHEMA,
     SCHEMA as INSTALLED_COLLISION_MEASUREMENT_MANIFEST_SCHEMA,
     InstalledCollisionMeasurementManifestV1Error,
+    build_installed_collision_nominal_envelope_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
     load_installed_collision_measurement_manifest_v1,
@@ -1963,6 +1965,8 @@ __all__ = [
     "load_installed_collision_geometry_for_context",
     "load_installed_collision_geometry_profile",
     "NOMINAL_SOURCE_INVENTORY_SCHEMA",
+    "NOMINAL_ENVELOPE_AUDIT_SCHEMA",
+    "build_installed_collision_nominal_envelope_audit_v1",
     "build_installed_collision_nominal_source_inventory_v1",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",
