@@ -11156,3 +11156,81 @@ rewriting history. New entries must use a unique evidence ID.
   consumed and must never be used as a fresh selection set. Any successor still
   requires zero altered text, zero false actionable output, and exact schema
   validity before it can be considered for disconnected shadow composition.
+
+### E-20261008-AI-527 — punctuation-stress successor rejected on development
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: fresh offline corpus, one-epoch training, and development evaluation
+  with zero authority. Frozen v11 evaluation remains unopened.
+- Base commit: `f0a4932d00faecb4d37667aa2fac6b1b421c4d6e`.
+- Claim commit: `fc6c2172a55ecf200c823839e052d099d2234832`.
+- Corpus and trainer commit: `4ea212e41e80ff2cd2f36add90cf643ee98304a4`.
+- Fixtures: 480 training, 160 development, and 200 unopened v11 evaluation
+  cases across eight equally represented families. A dedicated
+  `type_punctuation` family covers repeated `?`, `!`, `.`, `;`, `:`, `-`, `_`,
+  `+`, `@`, `#`, `%`, `&`, `*`, `,`, `/`, backslash, and paired delimiters.
+  Wording, payload stems, numeric IDs, and observation IDs are disjoint across
+  splits. Train SHA-256 is
+  `e40956b53c7466d07b1cb39c6113e5ea7e3e17622b07c68a4a8a57074c19e1b7`;
+  development SHA-256 is
+  `4f2c8d51894c34b7780394b5f1d2a34e78f5ed59d10cf55909ba16a733567750`;
+  unopened evaluation SHA-256 is
+  `63ec96fedbfb36b880bfa4e2a40e2bd0253c7c917b5b2b95cd1f52b2d7bc4386`.
+  Data-manifest file SHA-256 is
+  `2955ed50a61fea7326e33a828daa0c5a18de07abbf0adcb7f0fbe5203f8dc4a4`;
+  v11 manifest file SHA-256 is
+  `c095f256f9e1df8f72bca253c35835db15225ac789fefe33dcd10c9fe8bc459e`;
+  generator SHA-256 is
+  `93cc4cbf79ea7036d2c3e5500740c28801168a04d03178b5824fcbdfdba47da8`.
+  The source-archive ceiling was deliberately raised by exactly six files, from
+  6,532 to 6,538, for the generator and five frozen data/manifest artifacts.
+- Exact training command: `python software/ai/train/fit_sft.py --data-version
+  v5 --epochs 1 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v5\pilot_1e`.
+  Result: training loss `0.156479`, development loss `0.010193`, 30 optimizer
+  updates, adapter SHA-256
+  `62453f3e4feae070f8b94f15aee4f2f5fa652167c5d0efe980f2ab28deb1ac33`.
+  Run-manifest file SHA-256 is
+  `f7e3b39e31b7b392555f7780885bb704504e5efd84a481facd219cd70221a4f6`.
+- Ollama import: base digest
+  `6319184583b7d9d76f7506bfe9cdba1832f147486129527a33c157c62845d046`,
+  candidate tag `llama32-1b-rocell-intent-v5-1e:latest`, candidate digest
+  `61769bd2f329779e15544e3db1c8f42a6716dfa9245e253a6bdb43f19460c0ba`.
+  Import-manifest file SHA-256 is
+  `0cf3063e8b0f6ae2c651b09724a8a38c45110d02b2b2a1a2f18ce9c46d406c06`.
+- Exact development command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_schema_decode_eval_v1 --cases
+  software\ai\data\schema_intent_sft_v5_validation.jsonl --manifest
+  software\ai\data\schema_intent_sft_v5.manifest.json --native-split validation
+  --model llama32-1b-rocell-intent-v5-1e:latest --schema
+  software\ai\schemas\offline_typing_intent_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v5\pilot_1e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact 141/160 (`0.88125`), schema-invalid 0,
+  false-actionable 3, and altered `TYPE_TEXT` payload 3. The failures comprise
+  one `type_quoted`, two `type_punctuation`, twelve `clarify_text`, and four
+  `refuse_stale` cases. The three actionable errors add or remove repeated
+  punctuation; ambiguity errors choose `device_ambiguous` instead of
+  `text_ambiguous`; stale errors choose `operation_not_available` instead of
+  `stale_observation`. Scorecard SHA-256 is
+  `b3728f52b67e5c6ded27b52d8d54a7d7da23dc4b21e26d6ad67562b8f054509c`.
+- Exact focused checks before training: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 34 passed in 0.72 seconds. Exact Ruff
+  command over the changed generator, trainer, evaluator, and tests passed.
+  `python scripts/ci/check_source_archive_footprint.py` also passed.
+- External artifacts: nine files under
+  `C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v5\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\schema_intent_sft_v5\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 1 offline training job.
+- Limitations: all data are synthetic and agent-authored. This result consumes
+  the development split, which cannot be reused for clean successor selection.
+  No second epoch was attempted because that would tune against the observed
+  development failures. Frozen v11 remains unopened. The model is unpromoted
+  and disconnected from the intent-to-motion adapter.
+- Next dependency: predeclare a new independent corpus or change the method
+  before training again. The observed failure pattern suggests that exact text
+  preservation should move toward deterministic extraction/copy validation,
+  leaving the small model to classify the closed intent and reason, rather than
+  asking a generative decoder to reproduce safety-critical payload bytes.
