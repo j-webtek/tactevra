@@ -19,6 +19,9 @@ from .c03_observed_route_entry_qualification_v1 import (
     INDETERMINATE_STATUS as ENTRY_INDETERMINATE,
     parse_c03_observed_route_entry_qualification_v1,
 )
+from .c03_observed_entry_clearance_supplement_v1 import (
+    parse_c03_observed_entry_clearance_supplement_v1,
+)
 from .c03_partition_collision_evaluator_v1 import (
     CONTINUOUS_CLEAR_STATUS,
     CONTINUOUS_COLLISION_STATUS,
@@ -172,6 +175,7 @@ def build_c03_aggregate_qualification_receipt_v1(
     collision_handoff: Mapping[str, Any],
     cable_intake_report: Mapping[str, Any],
     continuous_receipt: Mapping[str, Any],
+    entry_clearance_supplement: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Reconstruct exact entry plus continuous route evidence."""
 
@@ -181,6 +185,24 @@ def build_c03_aggregate_qualification_receipt_v1(
         raise C03AggregateQualificationReceiptV1Error(
             f"observed entry receipt differs: {exc}"
         ) from exc
+    supplement: dict[str, Any] | None = None
+    if entry_clearance_supplement is not None:
+        try:
+            supplement = parse_c03_observed_entry_clearance_supplement_v1(
+                entry_clearance_supplement
+            )
+        except ValueError as exc:
+            raise C03AggregateQualificationReceiptV1Error(
+                f"observed entry clearance supplement differs: {exc}"
+            ) from exc
+        if (
+            supplement["source_entry_qualification_sha256"]
+            != entry["c03_observed_route_entry_qualification_sha256"]
+            or supplement["entry_segment_count"] != entry["segment_count"]
+        ):
+            raise C03AggregateQualificationReceiptV1Error(
+                "observed entry clearance lineage differs"
+            )
     handoff = _sealed(
         collision_handoff, _HANDOFF_FIELDS, "c03_collision_handoff_sha256",
         "collision handoff",
@@ -331,6 +353,17 @@ def build_c03_aggregate_qualification_receipt_v1(
     entry_pair = _collision_pair(entry)
     if entry["status"] == ENTRY_COLLISION:
         aggregate_minimum, limiting_pair = 0.0, entry_pair
+    elif supplement is not None:
+        entry_minimum = float(supplement["minimum_clearance_lower_bound_mm"])
+        route_limiting = min(clearances, key=lambda item: (
+            item["minimum_clearance_lower_bound_mm"], item["limiting_body_pair"]
+        ))
+        if entry_minimum <= route_limiting["minimum_clearance_lower_bound_mm"]:
+            aggregate_minimum = entry_minimum
+            limiting_pair = list(supplement["limiting_body_pair"])
+        else:
+            aggregate_minimum = route_limiting["minimum_clearance_lower_bound_mm"]
+            limiting_pair = route_limiting["limiting_body_pair"]
     else:
         limiting = min(clearances, key=lambda item: (
             item["minimum_clearance_lower_bound_mm"], item["limiting_body_pair"]
@@ -346,7 +379,11 @@ def build_c03_aggregate_qualification_receipt_v1(
         entry["status"] == ENTRY_INDETERMINATE
         or continuous["status"] == CONTINUOUS_INDETERMINATE_STATUS
         or not coverage_ok or not boundary_ok or not fresh
-        or entry["status"] == ENTRY_CLEAR
+        or entry["status"] == ENTRY_CLEAR and supplement is None
+        or (
+            supplement is not None
+            and float(supplement["minimum_clearance_lower_bound_mm"]) <= 0.0
+        )
     )
     if collision:
         disposition, reason = REJECT, "collision exists in entry or route evidence"
@@ -392,15 +429,28 @@ def build_c03_aggregate_qualification_receipt_v1(
             "minimum_clearance_lower_bound_mm": aggregate_minimum,
             "limiting_body_pair": limiting_pair,
             "route_segment_clearances": clearances,
-            "entry_numeric_clearance_available": entry["status"] == ENTRY_COLLISION,
+            "entry_segment_clearances": (
+                [] if supplement is None else supplement["segment_clearances"]
+            ),
+            "entry_clearance_supplement_sha256": (
+                None if supplement is None else supplement[
+                    "c03_observed_entry_clearance_supplement_sha256"
+                ]
+            ),
+            "entry_numeric_clearance_available": (
+                entry["status"] == ENTRY_COLLISION or supplement is not None
+            ),
             "entry_clearance_rule": (
-                "collision implies zero lower bound; clear ICQ-7 v1 evidence supplies "
-                "collision status but no numeric entry margin"
+                "collision implies zero lower bound; otherwise every clear entry "
+                "segment requires an exact sealed numeric-clearance supplement"
             ),
         },
         "limitations": [
             "SIMULATION_ONLY_UNLESS_ALL_SOURCE_EVIDENCE_IS_PHYSICALLY_QUALIFIED",
-            "ICQ7_V1_CLEAR_ENTRY_HAS_NO_NUMERIC_CLEARANCE_MARGIN",
+            *(
+                ["ICQ7_V1_CLEAR_ENTRY_HAS_NO_NUMERIC_CLEARANCE_MARGIN"]
+                if supplement is None and entry["status"] == ENTRY_CLEAR else []
+            ),
             "QUALIFICATION_RECEIPT_HAS_NO_EXECUTION_AUTHORITY",
         ],
         "required_next_evidence": [

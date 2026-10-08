@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-500 C03 aggregate qualification receipt,
+Reviewed October 8, 2026 through the ARM-501 numeric observed-entry clearance,
 the ARM-132 shadow-service reuse campaign,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
