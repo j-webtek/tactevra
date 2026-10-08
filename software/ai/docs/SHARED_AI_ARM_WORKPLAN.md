@@ -998,6 +998,17 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-schema-sft-v5` claims AI-527 from merged
+AI-526 base `f0a4932d00faecb4d37667aa2fac6b1b421c4d6e`. It may freeze
+new split-exclusive train/development data and an unopened v11 evaluation
+family, with repeated-punctuation and exact-text stress added before any model
+result. It may train one epoch from the same cached 1B base and apply the
+unchanged exact-schema gates. The consumed v10 set may be referenced only as
+historical evidence and may not select or tune this successor. Evaluation v11
+must remain unopened until the training and development decision is committed.
+It may not promote a model, invoke motion planning, change arm-lane status, or
+emit commands, hardware writes, movement, or physical authority.
+
 The AI/model lane on `codex/intent-schema-sft-data` claims AI-525 from merged
 AI-524 base `d81a2e6f46a09387a34b2366d1a693218fc8e854`. It may freeze
 schema-specific train/development data and an unopened v10 evaluation family,
