@@ -1004,14 +1004,14 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-rigid-binding-intake` owns the ICQ-3 successor to
-the merged measured-profile boundary in `E-20261007-ARM-492`. It may define and
-strictly validate hash-bound measured transforms for the non-robot rigid frames
-required by the exact C03 partition intake, including transform direction,
-orthonormal rotation, source identity, freshness, and round-trip checks. It
-must not create missing measurements, populate configuration-sampled cable
-geometry, execute collision screening, or clear any controller or physical
-authority gate.
+The arm lane on `codex/c03-cable-envelope-intake` owns ICQ-4 after the merged
+rigid-binding boundary in `E-20261007-ARM-493`. It may define a strict import
+adapter that binds measured, uncertainty-inflated cable capsule chains to every
+exact C03 partition sample and every partition-owned adjacent segment, including
+the shared-boundary recheck and complete posture/segment/profile/route lineage.
+It must reject endpoint-only interpolation and crossed or incomplete evidence.
+It must not invent installed cable measurements, execute collision screening,
+alter the accepted route, or clear any controller or physical-authority gate.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
