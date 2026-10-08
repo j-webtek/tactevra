@@ -12,6 +12,7 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     BLOCKED_STATUS,
     READY_STATUS,
     InstalledCollisionMeasurementManifestV1Error,
+    build_installed_collision_nominal_envelope_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
     build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
@@ -225,6 +226,45 @@ def test_cli_emits_nominal_source_inventory_without_hardware(capsys) -> None:
     assert report["body_count"] == 19
     assert report["installed_measurement_status"] == "PENDING"
     assert report["physical_authority"] is False
+
+
+def test_nominal_envelope_audit_matches_station_cad_and_reports_tool_bounds() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    audit = build_installed_collision_nominal_envelope_audit_v1(context)
+
+    assert audit["all_station_envelopes_match_within_binary_stl_tolerance"] is True
+    assert all(
+        row["matches_within_binary_stl_tolerance"]
+        for row in audit["station_comparisons"]
+    )
+    phone = next(
+        row for row in audit["station_comparisons"]
+        if row["station_id"] == "phone_tcp"
+    )
+    assert phone["absolute_difference_xy_mm"] == [0.000003, 0.000003]
+    assert phone["binary_stl_comparison_tolerance_mm"] == 0.001
+    assert audit["mesh_bounds"]["keyboard_station_left"]["extents_mm"] == [
+        184.5, 192.0, 7.0,
+    ]
+    assert audit["mesh_bounds"]["phone_tcp_station"]["extents_mm"] == [
+        186.300003, 172.800003, 10.5,
+    ]
+    assert audit["mesh_bounds"]["compliant_tool_body"]["extents_mm"] == [
+        28.0, 24.0, 66.199997,
+    ]
+    assert audit["installed_measurement_status"] == "PENDING"
+    assert audit["collision_qualification"] is False
+    assert audit["physical_authority"] is False
+
+
+def test_cli_emits_nominal_envelope_audit_without_hardware(capsys) -> None:
+    assert main([
+        "--workspace", str(WORKSPACE), "--nominal-envelope-audit",
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["all_station_envelopes_match_within_binary_stl_tolerance"] is True
+    assert report["evidence_class"] == "NOMINAL_DIGITAL_ONLY"
+    assert report["physical_movements"] == 0
 
 
 def test_pending_draft_validates_only_as_blocked(tmp_path: Path) -> None:

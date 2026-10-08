@@ -16,6 +16,7 @@ import json
 import math
 from pathlib import Path
 import re
+import struct
 from typing import Any, Mapping, Sequence
 
 from rocell.simulation.collision import (
@@ -34,6 +35,8 @@ REPORT_SCHEMA = "rocell.installed_collision_measurement_validation.v1"
 NOMINAL_SOURCE_INVENTORY_SCHEMA = (
     "rocell.installed_collision_nominal_source_inventory.v1"
 )
+NOMINAL_ENVELOPE_AUDIT_SCHEMA = "rocell.installed_collision_nominal_envelope_audit.v1"
+_BINARY_STL_COMPARISON_TOLERANCE_MM = 0.001
 READY_STATUS = "READY_FOR_INSTALLED_PROFILE_BUILD"
 BLOCKED_STATUS = "BLOCKED_INCOMPLETE_INSTALLED_MEASUREMENTS"
 MAX_MANIFEST_BYTES = 1_048_576
@@ -808,6 +811,101 @@ def build_installed_collision_nominal_source_inventory_v1(
     return {**core, "content_sha256": _sha(core)}
 
 
+def _binary_stl_bounds_mm(path: Path) -> dict[str, list[float]]:
+    try:
+        payload = path.read_bytes()
+    except OSError as exc:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            f"cannot read nominal mesh {path}"
+        ) from exc
+    if len(payload) < 84:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            f"nominal mesh {path} is not a binary STL"
+        )
+    triangle_count = struct.unpack_from("<I", payload, 80)[0]
+    if len(payload) != 84 + triangle_count * 50 or triangle_count == 0:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            f"nominal mesh {path} has an invalid binary STL length"
+        )
+    minimum = [math.inf, math.inf, math.inf]
+    maximum = [-math.inf, -math.inf, -math.inf]
+    for triangle in range(triangle_count):
+        vertices = struct.unpack_from("<9f", payload, 84 + triangle * 50 + 12)
+        for index, value in enumerate(vertices):
+            axis = index % 3
+            minimum[axis] = min(minimum[axis], value)
+            maximum[axis] = max(maximum[axis], value)
+    return {
+        "minimum_mm": [round(value, 6) for value in minimum],
+        "maximum_mm": [round(value, 6) for value in maximum],
+        "extents_mm": [
+            round(maximum[index] - minimum[index], 6) for index in range(3)
+        ],
+    }
+
+
+def build_installed_collision_nominal_envelope_audit_v1(
+    context: SimulationContext,
+) -> dict[str, Any]:
+    """Compare nominal STL bounds with the declared station envelopes."""
+
+    inventory = build_installed_collision_nominal_source_inventory_v1(context)
+    layout = json.loads(context.scenario.workcell_layout_path.read_text(encoding="utf-8"))
+    meshes = {
+        name: _binary_stl_bounds_mm(
+            context.rc03_root / "stl" / f"{name}.stl"
+        )
+        for name in (
+            "keyboard_station_left", "keyboard_station_right",
+            "phone_tcp_station", "compliant_tool_body",
+            "compliant_tool_top_cap", "camera_plate_universal",
+        )
+    }
+    station_pairs = {
+        "keyboard_left": "keyboard_station_left",
+        "keyboard_right": "keyboard_station_right",
+        "phone_tcp": "phone_tcp_station",
+    }
+    comparisons = []
+    for station_id, mesh_id in station_pairs.items():
+        declared = [float(value) for value in layout["stations"][station_id]["outer_envelope"]]
+        observed = meshes[mesh_id]["extents_mm"][:2]
+        difference = [
+            round(abs(declared[index] - observed[index]), 6)
+            for index in range(2)
+        ]
+        comparisons.append({
+            "station_id": station_id,
+            "mesh_id": mesh_id,
+            "declared_outer_envelope_xy_mm": declared,
+            "mesh_extents_xy_mm": observed,
+            "absolute_difference_xy_mm": difference,
+            "binary_stl_comparison_tolerance_mm": (
+                _BINARY_STL_COMPARISON_TOLERANCE_MM
+            ),
+            "matches_within_binary_stl_tolerance": all(
+                value <= _BINARY_STL_COMPARISON_TOLERANCE_MM
+                for value in difference
+            ),
+        })
+    core: dict[str, Any] = {
+        "schema": NOMINAL_ENVELOPE_AUDIT_SCHEMA,
+        "source_inventory_sha256": inventory["content_sha256"],
+        "mesh_bounds": meshes,
+        "station_comparisons": comparisons,
+        "all_station_envelopes_match_within_binary_stl_tolerance": all(
+            row["matches_within_binary_stl_tolerance"] for row in comparisons
+        ),
+        "evidence_class": "NOMINAL_DIGITAL_ONLY",
+        "installed_measurement_status": "PENDING",
+        "collision_qualification": False,
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
+
+
 def render_installed_collision_measurement_worksheet_v1(
     contract: CollisionGeometryContract,
 ) -> str:
@@ -940,6 +1038,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--draft-manifest-id")
     parser.add_argument("--draft-captured-at-utc")
     parser.add_argument("--nominal-source-inventory", action="store_true")
+    parser.add_argument("--nominal-envelope-audit", action="store_true")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args(argv)
     system_manifest = args.system_manifest or (
@@ -948,6 +1047,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         context = load_simulation_context(args.workspace, system_manifest)
         readiness = assess_current_collision_readiness(context)
+        if args.nominal_envelope_audit:
+            if any((
+                args.measurement_manifest, args.write_pending_draft,
+                args.nominal_source_inventory,
+            )):
+                raise InstalledCollisionMeasurementManifestV1Error(
+                    "nominal envelope audit cannot be combined with manifest modes"
+                )
+            print(json.dumps(
+                build_installed_collision_nominal_envelope_audit_v1(context),
+                indent=2,
+                sort_keys=True,
+            ))
+            return 0
         if args.nominal_source_inventory:
             if any((args.measurement_manifest, args.write_pending_draft)):
                 raise InstalledCollisionMeasurementManifestV1Error(
@@ -1039,6 +1152,8 @@ __all__ = [
     "SCHEMA",
     "InstalledCollisionMeasurementManifestV1Error",
     "NOMINAL_SOURCE_INVENTORY_SCHEMA",
+    "NOMINAL_ENVELOPE_AUDIT_SCHEMA",
+    "build_installed_collision_nominal_envelope_audit_v1",
     "build_installed_collision_nominal_source_inventory_v1",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "build_pending_installed_collision_measurement_manifest_v1",
