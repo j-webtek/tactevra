@@ -11218,6 +11218,10 @@ rewriting history. New entries must use a unique evidence ID.
   software/ai/tests/test_offline.py -q`; 34 passed in 0.72 seconds. Exact Ruff
   command over the changed generator, trainer, evaluator, and tests passed.
   `python scripts/ci/check_source_archive_footprint.py` also passed.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 477.47 seconds.
+  Source-archive policy passed at the deliberate 6,538-file ceiling.
 - External artifacts: nine files under
   `C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v5\pilot_1e` were copied
   to `F:\robot-arm-evidence\issue190\schema_intent_sft_v5\pilot_1e`; every
