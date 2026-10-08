@@ -1920,6 +1920,16 @@ synthetic-only rehearsal. No real transforms exist yet, so the physical
 measurement blocker remains unchanged. Configuration-sampled moving-cable
 geometry is the next software package and cannot be satisfied by these rigid
 bindings.
+Evidence `E-20261007-ARM-494` preserves the first ICQ-4 full-route rehearsal
+failure: the retained synthetic rigid manifest referred to a different
+qualification receipt, so the unchanged strict ICQ-3 boundary rejected it
+before cable admission. Evidence `E-20261007-ARM-495` then adds the strict ICQ-4
+adapter and a newly derived synthetic rigid manifest bound to the exact rebuilt
+qualification. The synthetic-only rehearsal covers 323 partition samples, 321
+owned adjacent segments, and one exact boundary recheck. It rejects
+endpoint-only interpolation and inflates each cable radius by capture and
+unobserved-deformation uncertainty. No installed cable capture exists and no
+collision screening, command, hardware write, movement, or authority occurred.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
