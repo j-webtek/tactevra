@@ -998,6 +998,18 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v1` claims AI-529 from merged
+AI-528 base `038e7bd28b643f965ae7587634b8717d2011b5c0`. It may define
+an internal classification-only JSON schema with no payload text, freeze fresh
+split-exclusive train/development data and an unopened v12 evaluation family,
+train one epoch from the same cached 1B base, and compose admitted classifier
+outputs with AI-528 deterministic text extraction. The consumed v5 development
+and v10 evidence may be used only as historical diagnostics; frozen v11 must
+remain unopened. Evaluation v12 must remain unopened until a development
+decision is committed. The increment may not change the public closed intent
+schema, invoke motion planning, promote a model, change arm-lane status, or emit
+commands, hardware writes, movement, or physical authority.
+
 The AI/model lane on `codex/deterministic-intent-payload` claims AI-528 from
 merged AI-527 base `69f2e92479f85f3a905ace3fda21465991f5362b`. It may
 add a fail-closed deterministic text extractor and diagnostic composer that
