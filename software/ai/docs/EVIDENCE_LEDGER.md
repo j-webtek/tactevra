@@ -10948,3 +10948,42 @@ rewriting history. New entries must use a unique evidence ID.
   model, physical qualification, collision evidence, or execution authority.
 - Next dependency: resume the separately evaluated offline intent-model work
   after this corrective PR passes the shared-contract automation.
+
+### E-20261008-AI-523 — installed 1B model rejected on closed intent schema
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: offline local intent-model evaluation with zero authority.
+- Base commit: `e20f9aec993aaab6558db33180ebe204556072f7`.
+- Claim commit: `324cb30cfd3f104f321d5684997b3fb2175d70a7`.
+- Implementation commit: `618f60ff2a2ccb03bb5fb15cb7ddbd1d2a2860d7`.
+- Model: installed Ollama `llama32-1b-rocell-decision-v1-e2:latest`, exact
+  digest `22f80c2c3a5ace8b575863c0e37a6119029a98bc5e39829dd691b0f71ca0329d`.
+- Fixture: frozen v9 benchmark, 30 cases, case-byte SHA-256
+  `63282678c202594d61ead9ffb95fabe3cc105dc543650dc91bc4ccd943ecac44`;
+  prompt SHA-256
+  `e2cf3afdbbe44a878710518c930402e7d84e718e0f536616cb042b91fb61c87e`;
+  evaluator SHA-256
+  `768e44f557a5b58e2a0e47419953cbb165ca3873f358514e2f193c19454b098e`.
+- Exact command: with `PYTHONPATH=software/ai;software/src`, run `py -3.12 -m
+  rocell_ai.offline_intent_model_eval_v1 --cases
+  software/ai/eval/benchmark_v9.jsonl --manifest
+  software/ai/eval/benchmark_v9.manifest.json --model
+  llama32-1b-rocell-decision-v1-e2:latest --output
+  C:/MuJoCoWarp/evidence/issue190/offline_intent_model_eval_v1/decision_v1_e2_v9.json`.
+- Result: `REJECT_CANDIDATE`; exact 0/30, schema-invalid 30/30, altered accepted
+  text 0, and false actionable 0 because every output failed closed before the
+  adapter. Eighteen outputs used the legacy or absent schema, three used wrong
+  fields, and nine were malformed or concatenated JSON.
+- Artifact: primary and `F:` backup are byte-identical at SHA-256
+  `3805fe2bb1c1ea8c08cd7a8be9111ecee75c764ff67701b83d281db130acbf1d`.
+- Exact tests: `py -3.12 -m pytest software/ai/tests/test_offline.py -q`;
+  29 passed in 0.97 seconds. Ruff passed for evaluator and test modules.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU job count: 0.
+- Limitations: v9 is a 30-case agent-authored semantic benchmark and not a
+  powered language-understanding qualification. The model was previously tuned
+  for a legacy proposal shape, so this result measures migration compatibility,
+  not the upper limit of the 1B base architecture.
+- Next dependency: predeclare a successor that supplies the exact JSON Schema
+  to Ollama's constrained decoder, preserving this failed result. Only if that
+  still fails should schema-specific SFT be considered.

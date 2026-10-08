@@ -1007,6 +1007,11 @@ and false actionable output. It may not train or promote a model, alter the
 benchmark after results, invoke the motion adapter, change either lane's stage
 status, or emit motion, controller, transport, hardware-write, movement, or
 physical authority.
+Evidence `E-20261008-AI-523` rejects the installed 1B decision model on the
+closed intent boundary: zero of 30 frozen v9 cases matched exactly and all 30
+outputs were invalid under the new schema. No invalid output reached the motion
+adapter. Prompt-only migration is therefore insufficient; schema-constrained
+decoding or schema-specific tuning is the next dependency.
 
 The AI/integration lane completed ARM-522 from merged ARM-521 base
 `711affb7e4d74d818701d8d8be543f9d3b966a77`. It adds the public compatibility,
