@@ -11034,3 +11034,79 @@ rewriting history. New entries must use a unique evidence ID.
   freezing a new held-out evaluation family before training. Preserve exact
   quoted text and oversample ambiguity/refusal cases; require zero false
   actionable and zero altered text before considering coverage.
+
+### E-20261008-AI-525 — closed-schema SFT pilot passes development only
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: offline schema-specific training and development selection with zero
+  authority.
+- Base commit: `d81a2e6f46a09387a34b2366d1a693218fc8e854`.
+- Corpus commit: `fadc52d0c54ef7037587917d69f2f7ca5dd82692`.
+- Claim commit: `44a65f04a5ca87aa221b4047dbb4975da758175f`.
+- Trainer commit: `6b41aba597b1d860705d08ea33308944eaf81187`.
+- Development-scorer commit: `1f121ad113f30102140c7a6b9325880848183d84`.
+- Process note: the corpus bytes and unopened evaluation family were committed
+  immediately before the active claim. No model training, development scoring,
+  or evaluation access occurred before the claim commit. This ordering is
+  retained rather than rewritten.
+- Fixtures: 350 training and 105 development rows, plus an unopened 140-row v10
+  evaluation split. Train SHA-256 is
+  `8228c3563b78a9ec3fd57be5809c76bc315a54fa7d599da873a82f30f6b288e2`;
+  development SHA-256 is
+  `216c5d08c591eeafaf2c011f43a661d16d949c68a3b91b5bce0c90d188ef5700`;
+  unopened evaluation SHA-256 is
+  `16d969e6b64e2a3ee991912ea30034ff37d755a28744a8e30e0ea1420ba9ad23`;
+  data-manifest file SHA-256 is
+  `1bb603a1d0032e2c709e64f2263f20c29b3904a0b04bb57494069cb62f414acb`.
+  All seven families are balanced, wording and payload IDs are split-exclusive,
+  and five families require a non-actionable answer.
+- Exact training command: `python software/ai/train/fit_sft.py --data-version
+  v4 --epochs 1 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v4\pilot_1e`.
+  Result: training loss `0.224307`, development loss `0.004635`, 22 optimizer
+  updates, adapter SHA-256
+  `ec077ae506dcc85341ae88763a20fc25d5ff68cda59d878392bfd596c4b638c8`.
+  Run-manifest file SHA-256 is
+  `62ee3d28268af448e2704d9f152e6f38b519c34f3f588d4ffd6bb9604a27007b`.
+- Ollama import: base tag `llama32-1b-meta-92131767:latest`, exact base digest
+  `6319184583b7d9d76f7506bfe9cdba1832f147486129527a33c157c62845d046`,
+  candidate tag `llama32-1b-rocell-intent-v4-1e:latest`, exact candidate digest
+  `32591df3360e8602c99298cf3d6896822603c046b76a501ebdb563de6e0c0123`.
+  Import-manifest file SHA-256 is
+  `1c926bd4a397c7dea886282c0d76889d33ca2d1630e08a20adbde8cb599194cf`.
+- Preserved failed command: from `software/ai`, the first module invocation
+  omitted `software/src` from `PYTHONPATH` and failed with
+  `ModuleNotFoundError: No module named 'rocell'` before loading a case or
+  making a model call. It produced no scorecard and was not rescored as a pass.
+- Exact successful development command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_schema_decode_eval_v1 --cases
+  software\ai\data\schema_intent_sft_v4_validation.jsonl --manifest
+  software\ai\data\schema_intent_sft_v4.manifest.json --native-split validation
+  --model llama32-1b-rocell-intent-v4-1e:latest --schema
+  software\ai\schemas\offline_typing_intent_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v4\pilot_1e\validation_scorecard.json`.
+- Development result: `PASS_CANDIDATE`; exact 105/105, schema-invalid 0,
+  false-actionable 0, altered `TYPE_TEXT` payload 0. Scorecard SHA-256 is
+  `ecd5a5ba04946edd9f964d0f4a401df9c081c44f3a6e2593ea396cff381cb997`.
+  This records the required development decision: select the one-epoch
+  candidate to open v10 evaluation without changing any gate or dataset.
+- Exact focused checks before training/scoring: `python -m pytest
+  software/ai/tests/test_offline.py -q` returned 32 passed before training and
+  33 passed after the guarded native-split loader; exact Ruff commands over the
+  changed trainer, evaluator, and test modules passed.
+- External artifacts: nine files under
+  `C:\MuJoCoWarp\evidence\issue190\schema_intent_sft_v4\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\schema_intent_sft_v4\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 1 offline training job.
+- Limitations: all data are synthetic and agent-authored. Development wording
+  is held out from training but comes from the same generator design. A perfect
+  development score does not establish broad language understanding, physical
+  qualification, deployment safety, or motion authority. The candidate remains
+  disconnected from the intent-to-motion adapter.
+- Next dependency: run the selected, unchanged candidate once on the frozen v10
+  evaluation and preserve pass or failure. Only that held-out result can decide
+  whether this narrow offline intent candidate is retained for further testing;
+  it cannot grant arm or physical authority.

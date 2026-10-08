@@ -1007,6 +1007,13 @@ pilot on the cached 1B base. The evaluation split must remain unopened until
 the training and development decision is recorded. It may not promote a model,
 change motion or arm status, invoke motion planning, or emit commands, hardware
 writes, movement, or physical authority.
+Evidence `E-20261008-AI-525` records the frozen corpus, one-epoch pilot, and
+development decision. The cached 1B base reached training loss `0.224307` and
+development loss `0.004635`; its exact-schema Ollama import then matched all
+105 hash-bound development cases with zero invalid, false-actionable, or
+altered-text outputs. The candidate is selected only to open the already frozen
+140-case v10 evaluation next. It remains synthetic, offline, disconnected from
+motion, and unpromoted.
 
 The AI/model lane on `codex/offline-intent-schema-decoding` claims AI-524 from
 merged AI-523 base `043e8e813929b218b4f52b55d2787da69c09f319`. It may
