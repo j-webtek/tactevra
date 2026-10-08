@@ -11298,3 +11298,88 @@ rewriting history. New entries must use a unique evidence ID.
   independently tested boundary. Train and select only the classification
   fields; then compose the existing closed intent object and require exact
   zero-false-actionable gates on a new unopened evaluation family.
+
+### E-20261008-AI-529 — perfect classification exposes corpus composition gap
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: fresh classification-only corpus, one-epoch offline training, and
+  development evaluation with zero authority. Frozen v12 evaluation remains
+  unopened.
+- Base commit: `038e7bd28b643f965ae7587634b8717d2011b5c0`.
+- Claim commit: `328fc3c8afffeb8de10ae70a3b96b3d5f4217609`.
+- Corpus, schema, evaluator, and trainer commit:
+  `f069e7c43ec3c2c45c939d80ef0f081b797672da`.
+- Fixtures: 640 training, 200 development, and 240 unopened v12 evaluation
+  cases. Train SHA-256 is
+  `1f48601b0449c98577c9700186b657273974c6ca57b6bf9804f3fc201cc1b8d5`;
+  development SHA-256 is
+  `866fea3237ecacd12bc65ad7d185edc389878df667c2e39a8f5c5873163923d0`;
+  unopened evaluation SHA-256 is
+  `8bac7ed909ceb6794a219510a21d4ac925a4346226c3cb1143f2dcc1167a2a8b`.
+  Data-manifest file SHA-256 is
+  `a83b595b9b8fa9a34484aeea1da1a198785b767c1e324f0f67354516e96fae46`;
+  v12-manifest file SHA-256 is
+  `44ed39558b75d785d0f64a761a165bb9a7b1937b7232a923cd023d7d4b1eeceb`;
+  generator SHA-256 is
+  `22f586a117f31f60dccd400b4816e232d9fd6ac66634dffdd5cf60dded05a6fd`;
+  classification-schema SHA-256 is
+  `545c54c88ad7e71046791285c4b9fe62f05f0bbae2be5c9a29b2a940d60fa9fe`.
+  The previously frozen v11 family was explicitly excluded and remained
+  unopened. Source-archive policy passed at the deliberate 6,546-file ceiling.
+- Exact training command: `python software/ai/train/fit_sft.py --data-version
+  classifier-v1 --epochs 1 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v1\pilot_1e`.
+  Result: training loss `0.124301`, development loss `0.00103`, 40 optimizer
+  updates, adapter SHA-256
+  `ca1fb98849756b03728f944c0a81fa841a4dad982ddcf75b9adb8f5aa5d15cfe`.
+  Run-manifest file SHA-256 is
+  `efa1a6ead3bce46756c42165f572b3691d23042df691596fb6ba58c70c0d2275`.
+- Ollama import: base tag `llama32-1b-meta-92131767:latest`, exact base digest
+  `6319184583b7d9d76f7506bfe9cdba1832f147486129527a33c157c62845d046`,
+  candidate tag `llama32-1b-rocell-intent-classifier-v1:latest`, exact candidate
+  digest
+  `aef48acf275e0c48b81a97fb2a7612d0dbfb997e2974bc9ed092c164265dba23`.
+  Import-manifest file SHA-256 is
+  `275e32dc74464f35d8d9b30a8703dbb2e20b9461c7ff8b9431d3341401b4a97f`.
+- Exact development command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v1_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v1.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v1:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v1\pilot_1e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`. Classification is exact on 200/200 cases with
+  schema-invalid 0, false-actionable 0, and altered composed text 0.
+  Deterministic composition is exact on 175/200 cases. All 25 failures are the
+  `type_unquoted` family: the fresh wording `The physical keys should produce
+  {word}.` is outside the frozen extractor's closed grammar, so correct
+  `TYPE_TEXT` classifications fail closed to `CLARIFY(text_ambiguous)`.
+  Scorecard SHA-256 is
+  `d03004f0df73e7c65c75a1a2bbdddadd23cb10766fa2963da1b59bc540a3e1dc`.
+- Exact focused checks before training: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 39 passed. Exact Ruff checks over the
+  changed generator, trainer, evaluator, and tests passed.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 474.23 seconds.
+  Source-archive policy passed at the deliberate 6,546-file ceiling.
+- External artifacts: nine files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v1\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\intent_classifier_v1\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 1 offline training job.
+- Limitations: all data are synthetic and agent-authored. Perfect development
+  classification does not establish broad language understanding, physical
+  qualification, deployment safety, or motion authority. The composition
+  failure is a generator/admission defect rather than evidence that the learned
+  classifier failed these cases. The consumed development split will not be
+  patched and rescored, the candidate is not promoted, and v12 remains
+  unopened.
+- Next dependency: freeze a fresh corrected campaign with new train,
+  development, and evaluation identities. Before training, generation must
+  fail unless every expected public intent round-trips exactly through the
+  deterministic composer. Only a clean development decision may open that new
+  evaluation family; no result may call the intent-to-motion adapter or grant
+  command, execution, or physical authority.

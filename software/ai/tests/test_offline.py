@@ -42,11 +42,78 @@ from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
 from build_schema_intent_sft_v4_data import build as build_schema_intent_sft_v4_data  # noqa: E402
 from build_schema_intent_sft_v5_data import build as build_schema_intent_sft_v5_data  # noqa: E402
 from build_schema_intent_sft_v5_data import PUNCTUATION  # noqa: E402
+from build_intent_classifier_v1_data import build as build_intent_classifier_v1_data  # noqa: E402
+from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
+    compose_public_intent_v1,
+    parse_classification_v1,
+    score_classifier,
+)
 from fit_sft import _data_configuration  # noqa: E402
 from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v1_data_excludes_model_generated_text(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v1_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (640, 200, 240))
+        self.assertEqual(
+            _data_configuration("classifier-v1"),
+            (2126, "intent_classifier_v1", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        rows = train + validation + evaluation
+        self.assertEqual(len(rows), len({row["request"].casefold() for row in rows}))
+        self.assertTrue(all("text" not in row["target"] for row in rows))
+        self.assertEqual(manifest["promotion_gates"]["altered_type_text_count_maximum"], 0)
+
+    def test_classifier_composition_uses_request_bytes_and_fails_closed(self) -> None:
+        classification = parse_classification_v1({
+            "schema": "rocell.offline_intent_classification.v1",
+            "intent_type": "TYPE_TEXT",
+            "device": "KEYBOARD",
+        })
+        self.assertEqual(
+            compose_public_intent_v1(classification, 'Keyboard-copy "x9001;;y;;" without changing its marks.'),
+            {
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+                "text": "x9001;;y;;",
+            },
+        )
+        self.assertEqual(
+            compose_public_intent_v1(classification, 'Choose "x" or "y".'),
+            {
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "CLARIFY",
+                "question": "text_ambiguous",
+            },
+        )
+
+    def test_classifier_score_requires_exact_class_and_composition(self) -> None:
+        case = {
+            "id": "fixture",
+            "request": 'Keyboard-copy "x9001??y??" without changing its marks.',
+            "target": {
+                "schema": "rocell.offline_intent_classification.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+            },
+            "composed_target": {
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+                "text": "x9001??y??",
+            },
+        }
+        result = score_classifier(
+            [case], "a" * 64, model="fixture", model_digest="b" * 64,
+            generate=lambda _case: json.dumps(case["target"]),
+        )
+        self.assertEqual(result["decision"], "PASS_CANDIDATE")
+        self.assertEqual(result["classification_exact_count"], 1)
+        self.assertEqual(result["composed_exact_count"], 1)
+        self.assertEqual(result["altered_type_text_count"], 0)
+
     def test_deterministic_text_extractor_preserves_bytes_and_fails_closed(self) -> None:
         self.assertEqual(
             extract_requested_text_v1('The keyboard must receive verbatim "p5101;;q;;".'),

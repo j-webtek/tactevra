@@ -9,6 +9,15 @@ The current motion adapter accepts only `TYPE_TEXT` with `device` set to
 keystroke compiler. `PHONE`, `PRESS_KEY`, `CLARIFY`, and `REFUSE` stop before
 motion workspace creation.
 
+The optional local classifier uses the internal
+`rocell.offline_intent_classification.v1` schema to choose only the intent type,
+device, or closed reason. It does not generate the `TYPE_TEXT` payload. The
+public intent composer extracts exact text from the request with a closed,
+fail-safe grammar and rejects any actionable classification it cannot compose.
+The first classifier campaign remains rejected because its fresh unquoted-text
+template was not admitted by that grammar, even though classification itself
+was exact on its development cases. No classifier is promoted by that result.
+
 ## Compatibility
 
 Compatibility: additive. Existing `ModelMotionBatchV2`, proposal, ingress,
@@ -27,6 +36,11 @@ dynamic planner's explicit text argument. No stored batch, arm-runtime schema,
 controller configuration, or physical state needs conversion. The installed
 collision profile and fresh observed start state remain required in either
 configuration.
+
+The internal classification schema requires no migration because its rejected
+candidate is disconnected from the runtime. Removing the classifier and its
+offline evaluator restores the earlier deterministic composition path without
+converting any public intent or motion artifact.
 
 ## Current evidence boundary
 
