@@ -10,6 +10,7 @@ from rocell.application.c03_route_collision_handoff_v1 import (
     C03FullBodyGeometryAuditV1Error,
     C03RouteCollisionHandoffV1Error,
     assess_c03_base_camera_geometry_readiness_v1,
+    assess_c03_static_base_camera_geometry_readiness_v2,
     assess_c03_full_body_geometry_readiness_v1,
     assess_c03_nominal_tool_binding_readiness_v1,
     assess_c03_station_height_route_sensitivity_v1,
@@ -215,6 +216,33 @@ def test_base_camera_audit_rejects_moving_contract_for_static_support(
     assert len(report["base_missing_inputs"]) == 4
     assert report["support_topology"] == "front_portal_on_common_metal_u_frame"
     assert report["camera_architecture_compatible"] is False
+    assert len(report["camera_missing_inputs"]) == 4
+    assert report["installed_base_geometry_ready"] is False
+    assert report["installed_camera_geometry_ready"] is False
+    assert report["collision_screen_executed"] is False
+    assert report["physical_authority"] is False
+
+
+def test_static_base_camera_audit_accepts_architecture_but_keeps_geometry_blocked(
+    sim_context, synthetic_result
+):
+    report = assess_c03_static_base_camera_geometry_readiness_v2(
+        synthetic_result,
+        sim_context,
+        support_design=_json(SUPPORT_DESIGN),
+        support_design_file_sha256=(
+            "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+        ),
+    )
+    ids = {row["body_id"] for row in report["static_camera_collision_requirements"]}
+
+    assert report["camera_architecture_compatible"] is True
+    assert report["camera_architecture_mismatch"] is None
+    assert "cable:fixed_usb_route" in ids
+    assert "attachment:moving_camera_cable" not in ids
+    assert len(ids) == 12
+    assert report["base_requirement_id"] == "installation:base_clamp"
+    assert len(report["base_missing_inputs"]) == 4
     assert len(report["camera_missing_inputs"]) == 4
     assert report["installed_base_geometry_ready"] is False
     assert report["installed_camera_geometry_ready"] is False

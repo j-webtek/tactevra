@@ -10348,3 +10348,63 @@ rewriting history. New entries must use a unique evidence ID.
   readiness consumer to the v2 body IDs, binding nominal sources without
   promoting them to installed evidence; then collect installed portal/camera,
   fixed USB route, base/clamp, and tool measurements.
+
+### E-20261008-ARM-514 — static-camera nominal-source consumer migration
+
+- Lane: arm.
+- Stage: ICQ-1 v2 nominal-source and architecture consumer migration.
+- Commit: `3532c2aa0b16f8e0211a2edb898d7a12c9f7785d`.
+- Change: added additive v2 consumers that map every static B0477 contract body
+  to existing hash-bound nominal sources and compare the selected support
+  design with the exact v2 requirement set. All v1 functions and retained
+  results remain unchanged. The v2 audit recognizes the selected static
+  architecture while refusing to treat nominal geometry as installed evidence.
+- Inputs/fixtures: exact route file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  static support design SHA-256
+  `2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b`;
+  runtime-source SHA-256 values
+  `4362ee0bb2356140f34111480883c5bfbc0559aecc6941381fd3c6c58dc8bd62`
+  and `ffbe7dafcbf13c6229266590fc128590a397e45859f1a76ae43dabb0607c0c29`;
+  focused-test SHA-256 values
+  `0192f89445e8652297b398d71864e5bbf186b207b3ab23c60375fd65f083c40c`
+  and `f48284582d151ff011267134a3040d6b72feb34f62b9cf99604c6acb4679543e`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_static_camera_source_migration_v2.json`,
+  file SHA-256
+  `88de1a4591c3c6527c18431a9ee440edbd0cd23a453d7448151f99c6d24f3c67`,
+  inventory SHA-256
+  `2509a9dc7fe1f6cff17fa79de5d9b7e7bd63ff0e7986f95d47450512fd3644cd`,
+  and readiness SHA-256
+  `e1ef73e00c1c489d7fe6ab53be239436403e2fa73b61a69fc1d8b6fd97c154c9`.
+- Commands: exact evidence generation used `py -3.12` with
+  `load_simulation_context`,
+  `build_static_b0477_collision_nominal_source_inventory_v2`, and
+  `assess_c03_static_base_camera_geometry_readiness_v2`. Focused/predecessor
+  command: `py -3.12 -m pytest
+  software/tests/unit/test_collision_foundation.py
+  software/tests/unit/test_static_route_collision.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py
+  software/tests/unit/test_rehearsal_noncontact_stage.py
+  software/tests/unit/test_rehearsal_noncontact_binding.py -q` with
+  `PYTHONPATH=software/src;software/ai`; followed by Ruff and
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`. All 166 focused/predecessor tests passed in 32.01
+  seconds, Ruff passed, and all 133 policy tests passed. The inventory covers
+  32 bodies, reports zero measured rows, keeps the fixed USB route
+  `STATIC_ROOT`, and keeps the arm harness `CONFIGURATION_SAMPLED`. The static
+  support matches all 12 support/camera/cable/lighting IDs.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the architecture match removes the stale moving-camera mismatch;
+  it does not supply installed geometry. Base/clamp still lacks four physical
+  inputs. Portal/camera/cable/lighting still lacks four grouped installed
+  evidence inputs. No collision query ran and ICQ-1/ICQ-9 remain blocked.
+- Supersedes: none. ARM-512 remains the historical v1 mismatch result and
+  ARM-513 remains the v2 contract definition.
+- Next dependency: bind nominal portal/support component envelopes to their v2
+  bodies for diagnostic route sensitivity while retaining missing installed
+  transforms; then collect physical measurements after fabrication/installation.

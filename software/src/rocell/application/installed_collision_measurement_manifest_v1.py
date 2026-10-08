@@ -26,7 +26,10 @@ from rocell.simulation.collision import (
     CollisionGeometryContract,
 )
 
-from .collision_readiness import assess_current_collision_readiness
+from .collision_readiness import (
+    assess_current_collision_readiness,
+    assess_static_b0477_collision_readiness,
+)
 from .context import SimulationContext, load_simulation_context
 
 
@@ -34,6 +37,9 @@ SCHEMA = "rocell.installed_collision_measurement_manifest.v1"
 REPORT_SCHEMA = "rocell.installed_collision_measurement_validation.v1"
 NOMINAL_SOURCE_INVENTORY_SCHEMA = (
     "rocell.installed_collision_nominal_source_inventory.v1"
+)
+STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA = (
+    "rocell.static_b0477_collision_nominal_source_inventory.v2"
 )
 NOMINAL_ENVELOPE_AUDIT_SCHEMA = "rocell.installed_collision_nominal_envelope_audit.v1"
 NOMINAL_PROXY_AUDIT_SCHEMA = "rocell.installed_collision_nominal_proxy_audit.v1"
@@ -104,6 +110,7 @@ _NOMINAL_SOURCE_PATHS = {
         "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
         "hardware/static_overhead_camera/config/support_design.json",
     ),
+    "arm_harness": ("software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",),
 }
 
 
@@ -812,6 +819,165 @@ def build_installed_collision_nominal_source_inventory_v1(
     return {**core, "content_sha256": _sha(core)}
 
 
+def build_static_b0477_collision_nominal_source_inventory_v2(
+    context: SimulationContext,
+) -> dict[str, Any]:
+    """Map v2 static-camera bodies to existing nominal, unmeasured sources."""
+
+    if not isinstance(context, SimulationContext):
+        raise TypeError("context must be a SimulationContext")
+    readiness = assess_static_b0477_collision_readiness(context)
+    legacy = build_installed_collision_nominal_source_inventory_v1(context)
+    legacy_rows = {row["body_id"]: row for row in legacy["bodies"]}
+    source_hashes = {row["path"]: row["sha256"] for row in legacy["sources"]}
+
+    def plan(
+        state: str,
+        source_key: str,
+        residual: str,
+        placement: object = None,
+        *,
+        image_useful: bool = False,
+    ) -> tuple[str, str, str, object, bool]:
+        return state, source_key, residual, placement, image_useful
+
+    body_plan: dict[str, tuple[str, str, str, object, bool]] = {
+        **{
+            f"robot:{name}": plan(
+                "NOMINAL_GEOMETRY_AVAILABLE",
+                "robot",
+                "Verify received arm identity, installed base transform, and link envelopes.",
+            )
+            for name in (
+                "base_link", "link1", "link2", "link3", "link4", "link5", "gripper"
+            )
+        },
+        "robot:contact_tool": plan(
+            "NOMINAL_GEOMETRY_AVAILABLE", "contact_tool",
+            "Measure the assembled tool envelope, compliance range, and rigid transform.",
+        ),
+        "robot:tool_tip": plan(
+            "PLANNING_POINT_ONLY", "contact_tool",
+            "Measure the mounted jaw-reference-to-tip transform and tip envelope.",
+        ),
+        "attachment:arm_harness": plan(
+            "CONFIGURATION_MODEL_PENDING", "arm_harness",
+            "Capture harness diameter, anchors, slack, and configuration samples.",
+        ),
+        "installation:base_clamp": plan(
+            "PARTIAL_NOMINAL_GEOMETRY", "layout",
+            "Capture installed clamp/base extents and board-relative transform.",
+            image_useful=True,
+        ),
+        "workcell:board": plan(
+            "NOMINAL_GEOMETRY_AVAILABLE", "board",
+            "Measure installed size, thickness, flatness, and root-frame realization.",
+            legacy_rows["workcell:board_solid"]["nominal_placement"],
+            image_useful=True,
+        ),
+        "workcell:keyboard": plan(
+            "NOMINAL_ENVELOPE_AVAILABLE", "layout",
+            "Verify XY/yaw and measure support/top Z and exterior envelope.",
+            legacy_rows["workcell:keyboard"]["nominal_placement"],
+            image_useful=True,
+        ),
+        "workcell:phone": plan(
+            "NOMINAL_ENVELOPE_AVAILABLE", "layout",
+            "Verify XY/yaw and measure case, camera bump, and screen Z.",
+            legacy_rows["workcell:phone"]["nominal_placement"],
+            image_useful=True,
+        ),
+        "cable:fixed_usb_route": plan(
+            "FIXED_ROUTE_DESIGN_PENDING", "camera_module",
+            "Capture fixed USB route, diameter, anchors, strain relief, and sag envelope.",
+        ),
+        "camera:b0477_enclosure": plan(
+            "PUBLISHED_AND_CONCEPT_GEOMETRY_ONLY", "camera_module",
+            "Verify the received enclosure and installed board-relative envelope.",
+        ),
+        "camera:b0477_lens": plan(
+            "PUBLISHED_AND_CONCEPT_GEOMETRY_ONLY", "camera_module",
+            "Measure the installed lens barrel and entrance-pupil transform.",
+        ),
+        "camera:b0477_connector": plan(
+            "PARTIAL_NOMINAL_GEOMETRY", "camera_module",
+            "Capture connector and strain-relief envelope and transform.",
+        ),
+    }
+    for body_id in (
+        "support:portal_left_post", "support:portal_right_post",
+        "support:portal_crossbar", "support:camera_boom",
+        "support:lighting_boom_left", "support:lighting_boom_right",
+        "lighting:key_light_left", "lighting:key_light_right",
+    ):
+        body_plan[body_id] = plan(
+            "PARTIAL_NOMINAL_GEOMETRY", "camera_support",
+            "Capture installed envelope and board-relative transform.",
+            image_useful=True,
+        )
+    diagnostic_legacy = {
+        "diagnostic_proxy:board_solid": "workcell:board_solid",
+        "diagnostic_proxy:keyboard": "workcell:keyboard",
+        "diagnostic_proxy:phone": "workcell:phone",
+        "diagnostic_proxy:station:keyboard_left": "workcell:station:keyboard_left",
+        "diagnostic_proxy:station:keyboard_right": "workcell:station:keyboard_right",
+        "diagnostic_proxy:station:phone_tcp": "workcell:station:phone_tcp",
+    }
+    for body_id, legacy_id in diagnostic_legacy.items():
+        row = legacy_rows[legacy_id]
+        source_key = {
+            "workcell:board_solid": "board",
+            "workcell:keyboard": "layout",
+            "workcell:phone": "layout",
+            "workcell:station:keyboard_left": "keyboard_station_left",
+            "workcell:station:keyboard_right": "keyboard_station_right",
+            "workcell:station:phone_tcp": "phone_tcp_station",
+        }[legacy_id]
+        body_plan[body_id] = plan(
+            row["nominal_state"], source_key,
+            "Diagnostic proxy only; does not satisfy its installed-body counterpart.",
+            row["nominal_placement"], image_useful=row["top_down_image_useful"],
+        )
+
+    bodies = []
+    for requirement in readiness.contract.requirements:
+        state, source_key, residual, placement, image_useful = body_plan[
+            requirement.body_id
+        ]
+        bodies.append({
+            "body_id": requirement.body_id,
+            "parent_frame": requirement.parent_frame,
+            "binding_mode": requirement.binding_mode.value,
+            "nominal_state": state,
+            "nominal_sources": [
+                {"path": path, "sha256": source_hashes[path]}
+                for path in _NOMINAL_SOURCE_PATHS[source_key]
+            ],
+            "nominal_placement": placement,
+            "remaining_physical_check": residual,
+            "top_down_image_useful": image_useful,
+            "measured": False,
+        })
+    core: dict[str, Any] = {
+        "schema": STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA,
+        "status": "NOMINAL_SIMULATION_INPUTS_AVAILABLE_PHYSICAL_VERIFICATION_PENDING",
+        "base_contract_sha256": readiness.contract.content_hash,
+        "robot_model_sha256": readiness.urdf_sha256,
+        "source_count": len(legacy["sources"]),
+        "sources": legacy["sources"],
+        "body_count": len(bodies),
+        "bodies": bodies,
+        "legacy_v1_inventory_sha256": legacy["content_sha256"],
+        "simulation_use_allowed": True,
+        "installed_measurement_status": "PENDING",
+        "collision_qualification": False,
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
+
+
 def _binary_stl_bounds_mm(path: Path) -> dict[str, list[float]]:
     try:
         payload = path.read_bytes()
@@ -1288,11 +1454,13 @@ __all__ = [
     "SCHEMA",
     "InstalledCollisionMeasurementManifestV1Error",
     "NOMINAL_SOURCE_INVENTORY_SCHEMA",
+    "STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA",
     "NOMINAL_ENVELOPE_AUDIT_SCHEMA",
     "NOMINAL_PROXY_AUDIT_SCHEMA",
     "build_installed_collision_nominal_envelope_audit_v1",
     "build_installed_collision_nominal_proxy_audit_v1",
     "build_installed_collision_nominal_source_inventory_v1",
+    "build_static_b0477_collision_nominal_source_inventory_v2",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "build_pending_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",

@@ -15,6 +15,7 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     build_installed_collision_nominal_envelope_audit_v1,
     build_installed_collision_nominal_proxy_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
+    build_static_b0477_collision_nominal_source_inventory_v2,
     build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
     main,
@@ -217,6 +218,28 @@ def test_nominal_source_inventory_exposes_expected_placements_and_photo_scope() 
     assert bodies["attachment:moving_camera_cable"]["nominal_state"] == (
         "CONFIGURATION_MODEL_PENDING"
     )
+
+
+def test_static_b0477_nominal_inventory_covers_v2_without_measurement() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    inventory = build_static_b0477_collision_nominal_source_inventory_v2(context)
+    bodies = {row["body_id"]: row for row in inventory["bodies"]}
+
+    assert inventory["schema"] == (
+        "rocell.static_b0477_collision_nominal_source_inventory.v2"
+    )
+    assert inventory["body_count"] == 32
+    assert all(not row["measured"] for row in inventory["bodies"])
+    assert bodies["cable:fixed_usb_route"]["binding_mode"] == "STATIC_ROOT"
+    assert bodies["attachment:arm_harness"]["binding_mode"] == (
+        "CONFIGURATION_SAMPLED"
+    )
+    assert bodies["workcell:board"]["nominal_placement"]["size_mm"] == [
+        610.0, 457.0, 18.0,
+    ]
+    assert bodies["diagnostic_proxy:keyboard"]["measured"] is False
+    assert inventory["collision_qualification"] is False
+    assert inventory["physical_authority"] is False
 
 
 def test_cli_emits_nominal_source_inventory_without_hardware(capsys) -> None:

@@ -11,11 +11,15 @@ from typing import Any, Mapping
 from rocell.models.frames import Point3Mm
 
 from .bounded_segment_collision_qualification import BoundedSegmentSamplingPolicy
-from .collision_readiness import assess_current_collision_readiness
+from .collision_readiness import (
+    assess_current_collision_readiness,
+    assess_static_b0477_collision_readiness,
+)
 from .context import SimulationContext
 from .installed_collision_measurement_manifest_v1 import (
     build_installed_collision_nominal_envelope_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
+    build_static_b0477_collision_nominal_source_inventory_v2,
     build_installed_collision_nominal_proxy_audit_v1,
 )
 from .installed_collision_geometry import InstalledCollisionGeometryProfile
@@ -301,6 +305,9 @@ def assess_c03_station_height_route_sensitivity_v1(
 FULL_BODY_GEOMETRY_SCHEMA = "tactevra.c03_full_body_geometry_audit.v1"
 NOMINAL_TOOL_BINDING_SCHEMA = "tactevra.c03_nominal_tool_binding_readiness.v1"
 BASE_CAMERA_GEOMETRY_SCHEMA = "tactevra.c03_base_camera_geometry_readiness.v1"
+STATIC_BASE_CAMERA_GEOMETRY_SCHEMA = (
+    "tactevra.c03_static_base_camera_geometry_readiness.v2"
+)
 EXPECTED_STATIC_SUPPORT_SHA256 = (
     "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
 )
@@ -656,18 +663,115 @@ def assess_c03_base_camera_geometry_readiness_v1(
     }
     return {**core, "base_camera_geometry_sha256": _sha256(core)}
 
+
+def assess_c03_static_base_camera_geometry_readiness_v2(
+    result: Mapping[str, Any],
+    context: SimulationContext,
+    *,
+    support_design: Mapping[str, Any],
+    support_design_file_sha256: str,
+) -> dict[str, Any]:
+    """Bind the selected static support to the additive v2 body contract."""
+
+    legacy = assess_c03_base_camera_geometry_readiness_v1(
+        result,
+        context,
+        support_design=support_design,
+        support_design_file_sha256=support_design_file_sha256,
+    )
+    readiness = assess_static_b0477_collision_readiness(context)
+    inventory = build_static_b0477_collision_nominal_source_inventory_v2(context)
+    static_prefixes = ("support:", "camera:", "cable:", "lighting:")
+    static_requirements = [
+        {
+            "body_id": item.body_id,
+            "parent_frame": item.parent_frame,
+            "binding_mode": item.binding_mode.value,
+        }
+        for item in readiness.contract.requirements
+        if item.body_id.startswith(static_prefixes)
+    ]
+    expected_ids = {
+        "support:portal_left_post",
+        "support:portal_right_post",
+        "support:portal_crossbar",
+        "support:camera_boom",
+        "support:lighting_boom_left",
+        "support:lighting_boom_right",
+        "camera:b0477_enclosure",
+        "camera:b0477_lens",
+        "camera:b0477_connector",
+        "cable:fixed_usb_route",
+        "lighting:key_light_left",
+        "lighting:key_light_right",
+    }
+    if {row["body_id"] for row in static_requirements} != expected_ids:
+        raise C03FullBodyGeometryAuditV1Error(
+            "static B0477 collision requirements differ"
+        )
+    source_rows = {row["body_id"]: row for row in inventory["bodies"]}
+    if any(source_rows[body_id]["measured"] for body_id in expected_ids):
+        raise C03FullBodyGeometryAuditV1Error(
+            "static B0477 source inventory unexpectedly claims measurement"
+        )
+    if (
+        source_rows["cable:fixed_usb_route"]["binding_mode"] != "STATIC_ROOT"
+        or source_rows["attachment:arm_harness"]["binding_mode"]
+        != "CONFIGURATION_SAMPLED"
+    ):
+        raise C03FullBodyGeometryAuditV1Error("v2 cable binding semantics differ")
+    core = {
+        "schema": STATIC_BASE_CAMERA_GEOMETRY_SCHEMA,
+        "source_result_receipt_sha256": result["receipt_sha256"],
+        "source_legacy_readiness_sha256": legacy["base_camera_geometry_sha256"],
+        "source_inventory_sha256": inventory["content_sha256"],
+        "static_collision_contract_sha256": readiness.contract.content_hash,
+        "support_design_file_sha256": support_design_file_sha256,
+        "nominal_base_axis_xy_mm": legacy["nominal_base_axis_xy_mm"],
+        "nominal_base_axis_state": legacy["nominal_base_axis_state"],
+        "base_requirement_id": "installation:base_clamp",
+        "base_missing_inputs": legacy["base_missing_inputs"],
+        "support_topology": legacy["support_topology"],
+        "nominal_camera_axis_xy_mm": legacy["nominal_camera_axis_xy_mm"],
+        "nominal_camera_entrance_pupil_z_mm": legacy[
+            "nominal_camera_entrance_pupil_z_mm"
+        ],
+        "static_camera_collision_requirements": static_requirements,
+        "camera_architecture_compatible": True,
+        "camera_architecture_mismatch": None,
+        "camera_missing_inputs": [
+            "INSTALLED_PORTAL_BOOM_AND_HOLDER_TRANSFORMS",
+            "RECEIVED_CAMERA_CASE_LENS_CONNECTOR_ENVELOPE",
+            "STATIC_USB_CABLE_ROUTE_AND_STRAIN_RELIEF_ENVELOPE",
+            "INSTALLED_LIGHTING_BOOMS_LIGHTS_AND_CABLE_ENVELOPE",
+        ],
+        "installed_base_geometry_ready": False,
+        "installed_camera_geometry_ready": False,
+        "collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "static_base_camera_geometry_sha256": _sha256(core)}
+
 __all__ = [
     "SCHEMA",
     "EXPECTED_RESULT_RECEIPT_SHA256",
     "EXPECTED_ROUTE_RECEIPT_SHA256",
     "C03FullBodyGeometryAuditV1Error",
     "BASE_CAMERA_GEOMETRY_SCHEMA",
+    "STATIC_BASE_CAMERA_GEOMETRY_SCHEMA",
     "C03RouteCollisionHandoffV1Error",
     "FULL_BODY_GEOMETRY_SCHEMA",
     "NOMINAL_TOOL_BINDING_SCHEMA",
     "STATION_HEIGHT_SENSITIVITY_SCHEMA",
     "assess_c03_full_body_geometry_readiness_v1",
     "assess_c03_base_camera_geometry_readiness_v1",
+    "assess_c03_static_base_camera_geometry_readiness_v2",
     "assess_c03_nominal_tool_binding_readiness_v1",
     "assess_c03_station_height_route_sensitivity_v1",
     "prepare_c03_route_collision_handoff_v1",
