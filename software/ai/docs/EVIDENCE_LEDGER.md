@@ -11458,6 +11458,10 @@ rewriting history. New entries must use a unique evidence ID.
 - Exact focused verification: `python -m pytest
   software/ai/tests/test_offline.py -q`; 41 passed. Exact Ruff checks over the
   changed extractor, generator, trainer, and tests passed.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 474.25 seconds.
+  Source-archive policy passed at the deliberate 6,552-file ceiling.
 - External artifacts: nine files under
   `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v2\pilot_1e` were copied
   to `F:\robot-arm-evidence\issue190\intent_classifier_v2\pilot_1e`; every
