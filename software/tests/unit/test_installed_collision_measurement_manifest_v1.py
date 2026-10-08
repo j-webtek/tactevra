@@ -13,6 +13,7 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     READY_STATUS,
     InstalledCollisionMeasurementManifestV1Error,
     build_installed_collision_nominal_envelope_audit_v1,
+    build_installed_collision_nominal_proxy_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
     build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
@@ -265,6 +266,41 @@ def test_cli_emits_nominal_envelope_audit_without_hardware(capsys) -> None:
     assert report["all_station_envelopes_match_within_binary_stl_tolerance"] is True
     assert report["evidence_class"] == "NOMINAL_DIGITAL_ONLY"
     assert report["physical_movements"] == 0
+
+
+def test_nominal_proxy_audit_contains_every_nominal_workcell_solid() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    audit = build_installed_collision_nominal_proxy_audit_v1(context)
+    comparisons = {row["obstacle_id"]: row for row in audit["comparisons"]}
+
+    assert audit["comparison_count"] == 6
+    assert audit["all_nominal_solids_contained"] is True
+    assert audit["underbounded_obstacle_ids"] == []
+    assert audit["conservative_height_proxy_ids"] == [
+        "station:keyboard_left", "station:keyboard_right", "station:phone_tcp",
+    ]
+    assert comparisons["station:keyboard_left"]["overbound_high_mm_by_axis"] == [
+        0.0, 0.0, 28.0,
+    ]
+    assert comparisons["station:keyboard_right"]["overbound_high_mm_by_axis"] == [
+        0.0, 0.0, 28.0,
+    ]
+    assert comparisons["station:phone_tcp"]["overbound_high_mm_by_axis"] == [
+        0.0, 0.0, 24.5,
+    ]
+    assert audit["proxy_change_authorized"] is False
+    assert audit["collision_qualification"] is False
+    assert audit["physical_authority"] is False
+
+
+def test_cli_emits_nominal_proxy_audit_without_hardware(capsys) -> None:
+    assert main([
+        "--workspace", str(WORKSPACE), "--nominal-proxy-audit",
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["all_nominal_solids_contained"] is True
+    assert report["proxy_change_authorized"] is False
+    assert report["hardware_access"] is False
 
 
 def test_pending_draft_validates_only_as_blocked(tmp_path: Path) -> None:
