@@ -6,6 +6,10 @@ from pathlib import Path
 import pytest
 
 import rocell.application.c03_route_collision_handoff_v1 as handoff_module
+from rocell.application.c03_full_body_geometry_audit_v1 import (
+    C03FullBodyGeometryAuditV1Error,
+    assess_c03_full_body_geometry_readiness_v1,
+)
 from rocell.application.c03_route_collision_handoff_v1 import (
     C03RouteCollisionHandoffV1Error,
     assess_c03_station_height_route_sensitivity_v1,
@@ -23,6 +27,14 @@ from test_typing_trajectory_ik_screen_v1 import _installed_profile
 
 WORKSPACE = Path(__file__).resolve().parents[3]
 MANIFEST = WORKSPACE / "software/config/system_manifest.json"
+MESH_BINDING = WORKSPACE / (
+    "software/integrations/isaac_sim/evidence/"
+    "roarm_m3_upstream_link_mesh_binding_20261004.json"
+)
+MESH_REDUCTION = WORKSPACE / (
+    "software/integrations/isaac_sim/evidence/"
+    "roarm_m3_link_mesh_reduction_20261004.json"
+)
 
 
 @pytest.fixture(scope="module")
@@ -90,6 +102,12 @@ def _rehash(document):
     document["receipt_sha256"] = handoff_module._sha256(content)
 
 
+def _json(path):
+    import json
+
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 @pytest.fixture
 def synthetic_result(sim_context, monkeypatch):
     result = _result(sim_context)
@@ -116,6 +134,43 @@ def test_handoff_partitions_exact_route_and_retains_profile_blocker(
     )
     assert report["installed_collision_gate_cleared"] is False
     assert report["physical_authority"] is False
+
+
+def test_full_body_geometry_audit_binds_candidates_and_fails_closed(
+    sim_context, synthetic_result
+):
+    report = assess_c03_full_body_geometry_readiness_v1(
+        synthetic_result,
+        sim_context,
+        mesh_binding=_json(MESH_BINDING),
+        mesh_reduction=_json(MESH_REDUCTION),
+    )
+    assert report["required_body_count"] == 19
+    assert report["candidate_robot_body_count"] == 7
+    assert report["candidate_robot_primitive_count"] == 14
+    assert len(report["nominal_static_proxy_body_ids"]) == 6
+    assert report["configuration_sampled_missing_body_ids"] == [
+        "attachment:moving_camera_cable"
+    ]
+    assert "attachment:contact_tool" in report["source_only_body_ids"]
+    assert report["full_body_geometry_complete"] is False
+    assert report["candidate_profile_installable"] is False
+    assert report["collision_screen_executed"] is False
+    assert report["physical_authority"] is False
+
+
+def test_full_body_geometry_audit_rejects_altered_candidate_receipt(
+    sim_context, synthetic_result
+):
+    reduction = _json(MESH_REDUCTION)
+    reduction["summary"]["candidate_primitive_count"] = 15
+    with pytest.raises(C03FullBodyGeometryAuditV1Error, match="identity differs"):
+        assess_c03_full_body_geometry_readiness_v1(
+            synthetic_result,
+            sim_context,
+            mesh_binding=_json(MESH_BINDING),
+            mesh_reduction=reduction,
+        )
 
 
 def test_handoff_accepts_matching_profile_but_does_not_clear_collision(
