@@ -9,6 +9,7 @@ import math
 from typing import Any, Mapping
 
 from rocell.models.frames import Point3Mm
+from rocell.simulation.scene import AabbMm
 
 from .bounded_segment_collision_qualification import BoundedSegmentSamplingPolicy
 from .collision_readiness import (
@@ -312,6 +313,9 @@ STATIC_BASE_CAMERA_GEOMETRY_SCHEMA = (
 )
 AMBIENT_LIGHT_STATIC_BASE_CAMERA_GEOMETRY_SCHEMA = (
     "tactevra.c03_ambient_light_static_base_camera_geometry_readiness.v3"
+)
+AMBIENT_NOMINAL_SUPPORT_ROUTE_SENSITIVITY_SCHEMA = (
+    "tactevra.c03_ambient_nominal_support_route_sensitivity.v1"
 )
 STATIC_SUPPORT_SOURCE_RECONCILIATION_SCHEMA = (
     "tactevra.c03_static_support_source_reconciliation.v1"
@@ -868,6 +872,166 @@ def assess_c03_ambient_light_static_base_camera_geometry_readiness_v3(
     return {**core, "static_base_camera_geometry_sha256": _sha256(core)}
 
 
+def assess_c03_ambient_nominal_support_route_sensitivity_v1(
+    result: Mapping[str, Any],
+    context: SimulationContext,
+    *,
+    printable_frame_design: Mapping[str, Any],
+    printable_frame_design_file_sha256: str,
+) -> dict[str, Any]:
+    """Screen the exact tool-tip route against selected nominal support boxes."""
+
+    handoff = prepare_c03_route_collision_handoff_v1(result, context)
+    if (
+        printable_frame_design_file_sha256 != EXPECTED_PRINTABLE_FRAME_SHA256
+        or printable_frame_design.get("schema")
+        != "rocell.static_overhead_camera.printable_frame.v1"
+        or printable_frame_design.get("design_id")
+        != "ROCELL-PRINTABLE-CAMERA-PORTAL-PROTOTYPE-003"
+    ):
+        raise C03FullBodyGeometryAuditV1Error(
+            "printable camera portal identity differs"
+        )
+    layout = printable_frame_design.get("layout")
+    truss = printable_frame_design.get("truss")
+    camera = printable_frame_design.get("camera")
+    if not all(isinstance(value, Mapping) for value in (layout, truss, camera)):
+        raise C03FullBodyGeometryAuditV1Error(
+            "printable camera portal geometry is malformed"
+        )
+    width = float(truss["width_mm"])
+    height = float(truss["height_mm"])
+    half_width = width / 2.0
+    post_bottom_z = 50.0
+    crossbar_bottom_z = float(layout["crossbar_bottom_z_mm"])
+    source = "printable_frame_design.json_ARM_518_nominal_diagnostic"
+    envelopes: list[AabbMm] = []
+    for side, axis in (
+        ("left", layout["left_tower_axis_xy_mm"]),
+        ("right", layout["right_tower_axis_xy_mm"]),
+    ):
+        x, y = (float(value) for value in axis)
+        envelopes.append(AabbMm.from_bounds(
+            f"support:portal_{side}_post",
+            "board",
+            (x - half_width, y - half_width, post_bottom_z),
+            (x + half_width, y + half_width, crossbar_bottom_z),
+            kind="nominal_printable_support",
+            source=source,
+        ))
+    left_x = float(layout["left_tower_axis_xy_mm"][0])
+    right_x = float(layout["right_tower_axis_xy_mm"][0])
+    crossbar_y = float(layout["left_tower_axis_xy_mm"][1])
+    envelopes.append(AabbMm.from_bounds(
+        "support:portal_crossbar",
+        "board",
+        (left_x - half_width, crossbar_y - half_width, crossbar_bottom_z),
+        (right_x + half_width, crossbar_y + half_width, crossbar_bottom_z + height),
+        kind="nominal_printable_support",
+        source=source,
+    ))
+    boom_bottom_z = float(layout["boom_bottom_z_mm"])
+    boom_root_y = float(layout["boom_root_y_mm"])
+    boom_end_y = float(layout["boom_end_y_mm"])
+    for index, axis_x in enumerate(layout["boom_axis_x_mm"]):
+        x = float(axis_x)
+        envelopes.append(AabbMm.from_bounds(
+            f"support:camera_boom:{index}",
+            "board",
+            (x - half_width, boom_root_y, boom_bottom_z),
+            (x + half_width, boom_end_y, boom_bottom_z + height),
+            kind="nominal_printable_support",
+            source=source,
+        ))
+    camera_x, camera_y = (
+        float(value) for value in layout["camera_axis_xy_mm"]
+    )
+    case_x, case_y, case_z = (
+        float(value) for value in camera["nominal_case_xyz_mm"]
+    )
+    pupil_z = float(layout["camera_entrance_pupil_target_z_mm"])
+    envelopes.append(AabbMm.from_bounds(
+        "camera:b0477_enclosure",
+        "board",
+        (camera_x - case_x / 2.0, camera_y - case_y / 2.0, pupil_z),
+        (camera_x + case_x / 2.0, camera_y + case_y / 2.0, pupil_z + case_z),
+        kind="nominal_camera_case_proxy",
+        source=source,
+    ))
+
+    joint_results = result["route_result"]["ik_screen"].get("joint_results")
+    if not isinstance(joint_results, list) or len(joint_results) < 2:
+        raise C03FullBodyGeometryAuditV1Error("C03 route waypoints are missing")
+    points: list[Point3Mm] = []
+    for index, row in enumerate(joint_results):
+        if not isinstance(row, Mapping) or row.get("waypoint_sequence") != index:
+            raise C03FullBodyGeometryAuditV1Error(
+                "C03 route waypoint sequence differs"
+            )
+        position = row.get("achieved_tip_position_board_mm")
+        if not isinstance(position, list) or len(position) != 3:
+            raise C03FullBodyGeometryAuditV1Error(
+                "C03 achieved tool-tip position differs"
+            )
+        points.append(Point3Mm("board", *(float(value) for value in position)))
+
+    screens = []
+    for clearance in (0.0, 5.0, 10.0, 20.0):
+        collisions = []
+        for segment_index, (start, end) in enumerate(zip(points, points[1:])):
+            hit_ids = [
+                envelope.obstacle_id
+                for envelope in envelopes
+                if envelope.intersects_segment(
+                    start, end, clearance_mm=clearance
+                )
+            ]
+            if hit_ids:
+                collisions.append({
+                    "segment_index": segment_index,
+                    "start_waypoint_sequence": segment_index,
+                    "end_waypoint_sequence": segment_index + 1,
+                    "collision_envelope_ids": hit_ids,
+                })
+        screens.append({
+            "clearance_mm": clearance,
+            "collision_segment_count": len(collisions),
+            "collision_segments": collisions,
+        })
+    core = {
+        "schema": AMBIENT_NOMINAL_SUPPORT_ROUTE_SENSITIVITY_SCHEMA,
+        "source_result_receipt_sha256": result["receipt_sha256"],
+        "source_handoff_sha256": handoff["c03_collision_handoff_sha256"],
+        "printable_frame_design_file_sha256": (
+            printable_frame_design_file_sha256
+        ),
+        "scope": "TOOL_TIP_CENTRELINE_NOMINAL_SUPPORT_DIAGNOSTIC_ONLY",
+        "waypoint_count": len(points),
+        "segment_count": len(points) - 1,
+        "nominal_envelope_count": len(envelopes),
+        "nominal_envelopes": [item.to_dict() for item in envelopes],
+        "clearance_screens": screens,
+        "unbound_required_body_ids": [
+            "installation:base_clamp",
+            "camera:b0477_lens",
+            "camera:b0477_connector",
+            "cable:fixed_usb_route",
+            "attachment:arm_harness",
+            "robot:contact_tool",
+        ],
+        "diagnostic_route_screen_executed": True,
+        "full_body_collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "route_sensitivity_sha256": _sha256(core)}
+
+
 def assess_c03_static_support_source_reconciliation_v1(
     result: Mapping[str, Any], context: SimulationContext, *,
     support_design: Mapping[str, Any], support_design_file_sha256: str,
@@ -980,6 +1144,7 @@ def assess_c03_static_support_source_reconciliation_v1(
     return {**core, "source_reconciliation_sha256": _sha256(core)}
 
 __all__ = [
+    "AMBIENT_NOMINAL_SUPPORT_ROUTE_SENSITIVITY_SCHEMA",
     "AMBIENT_LIGHT_STATIC_BASE_CAMERA_GEOMETRY_SCHEMA",
     "SCHEMA",
     "EXPECTED_RESULT_RECEIPT_SHA256",
@@ -996,6 +1161,7 @@ __all__ = [
     "assess_c03_base_camera_geometry_readiness_v1",
     "assess_c03_static_base_camera_geometry_readiness_v2",
     "assess_c03_ambient_light_static_base_camera_geometry_readiness_v3",
+    "assess_c03_ambient_nominal_support_route_sensitivity_v1",
     "assess_c03_static_support_source_reconciliation_v1",
     "assess_c03_nominal_tool_binding_readiness_v1",
     "assess_c03_station_height_route_sensitivity_v1",

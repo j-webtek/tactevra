@@ -11,6 +11,7 @@ from rocell.application.c03_route_collision_handoff_v1 import (
     C03RouteCollisionHandoffV1Error,
     assess_c03_base_camera_geometry_readiness_v1,
     assess_c03_ambient_light_static_base_camera_geometry_readiness_v3,
+    assess_c03_ambient_nominal_support_route_sensitivity_v1,
     assess_c03_static_base_camera_geometry_readiness_v2,
     assess_c03_static_support_source_reconciliation_v1,
     assess_c03_full_body_geometry_readiness_v1,
@@ -277,6 +278,37 @@ def test_ambient_light_audit_uses_factory_clamp_and_no_fixed_lights(
     assert report["base_requirement_id"] == "installation:base_clamp"
     assert len(report["base_missing_inputs"]) == 4
     assert len(report["camera_missing_inputs"]) == 3
+    assert report["installed_collision_gate_cleared"] is False
+    assert report["hardware_writes"] == 0
+    assert report["physical_movements"] == 0
+    assert report["physical_authority"] is False
+
+
+def test_ambient_nominal_support_route_is_clear_but_remains_diagnostic(
+    sim_context, synthetic_result
+):
+    report = assess_c03_ambient_nominal_support_route_sensitivity_v1(
+        synthetic_result,
+        sim_context,
+        printable_frame_design=_json(PRINTABLE_FRAME_DESIGN),
+        printable_frame_design_file_sha256=(
+            "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
+        ),
+    )
+
+    assert report["nominal_envelope_count"] == 6
+    assert report["segment_count"] == report["waypoint_count"] - 1
+    assert [row["clearance_mm"] for row in report["clearance_screens"]] == [
+        0.0, 5.0, 10.0, 20.0,
+    ]
+    assert all(
+        row["collision_segment_count"] == 0
+        for row in report["clearance_screens"]
+    )
+    assert "installation:base_clamp" in report["unbound_required_body_ids"]
+    assert "cable:fixed_usb_route" in report["unbound_required_body_ids"]
+    assert report["diagnostic_route_screen_executed"] is True
+    assert report["full_body_collision_screen_executed"] is False
     assert report["installed_collision_gate_cleared"] is False
     assert report["hardware_writes"] == 0
     assert report["physical_movements"] == 0
