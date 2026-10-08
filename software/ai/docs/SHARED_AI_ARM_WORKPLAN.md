@@ -1004,7 +1004,7 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-physical-evidence-cli` claims the bounded operator
+The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading
 of the exact C03 route result and a command-line interface that emits the
@@ -1013,6 +1013,9 @@ must be caller hash-bound, duplicate JSON fields and changed bytes must fail
 closed, and blocked readiness must return a nonzero status. It must not invent
 measurements, change AI-lane status, clear ICQ-9, or emit controller, wire,
 joint, PWM, serial, transport, retry, permit, or movement authority.
+Evidence `E-20261008-ARM-503` records the strict route loader, operator CLI,
+blocked exit semantics, and full offline regression result. Physical evidence
+is still absent, so ICQ-9 remains blocked.
 
 The arm lane on `codex/c03-physical-evidence-packet` completed the bounded ICQ
 physical-evidence readiness increment from merged base
