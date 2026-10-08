@@ -10978,6 +10978,9 @@ rewriting history. New entries must use a unique evidence ID.
   `3805fe2bb1c1ea8c08cd7a8be9111ecee75c764ff67701b83d281db130acbf1d`.
 - Exact tests: `py -3.12 -m pytest software/ai/tests/test_offline.py -q`;
   29 passed in 0.97 seconds. Ruff passed for evaluator and test modules.
+  Exact full verification command: `py -3.12
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 474.89 seconds.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. GPU job count: 0.
 - Limitations: v9 is a 30-case agent-authored semantic benchmark and not a
