@@ -47,3 +47,10 @@ converting any public intent or motion artifact.
 ARM-521 proves one structured keyboard intent reaches a fresh simulated v2
 batch and complete canonical IK route. It does not prove language-model intent
 accuracy, collision safety, key registration, transport, or physical movement.
+
+Classifier corpus generation now admits every expected result through the
+production deterministic composer before training. The first campaign with
+this check remains rejected: 18 of 200 development classifications failed, and
+a provenance audit found request wording reused from its predecessor. Future
+campaigns must also prove zero historical request overlap before writing data.
+These campaign checks do not alter the public intent or motion contracts.
