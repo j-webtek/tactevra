@@ -32,6 +32,10 @@ from rocell.simulation.collision import (
     OrientedBoxMm,
     SampledCollisionGeometry,
     SphereMm,
+    _candidate_body_pairs,
+    _inflate_world_primitive,
+    _pose_body_primitives,
+    _primitive_bounds,
     evaluate_collision_pose,
 )
 
@@ -65,6 +69,70 @@ def _canonical(value: object) -> bytes:
 
 def _sha256(value: object) -> str:
     return hashlib.sha256(_canonical(value)).hexdigest()
+
+
+def _bounds_gap_mm(left: Any, right: Any) -> float:
+    left_min = (left.minimum_mm.x, left.minimum_mm.y, left.minimum_mm.z)
+    left_max = (left.maximum_mm.x, left.maximum_mm.y, left.maximum_mm.z)
+    right_min = (right.minimum_mm.x, right.minimum_mm.y, right.minimum_mm.z)
+    right_max = (right.maximum_mm.x, right.maximum_mm.y, right.maximum_mm.z)
+    return math.sqrt(sum(
+        max(
+            left_min[axis] - right_max[axis],
+            right_min[axis] - left_max[axis],
+            0.0,
+        ) ** 2
+        for axis in range(3)
+    ))
+
+
+def _clearance_summary(
+    contract: CollisionGeometryContract,
+    pose: CollisionPose,
+    policy: CollisionEvaluationPolicy,
+) -> dict[str, Any]:
+    """Return a conservative numeric AABB separation for the evaluated pose."""
+
+    world, blockers = _pose_body_primitives(contract, pose)
+    if blockers or policy.clearance_policy is None:
+        raise ConservativeSegmentSweepQualificationError(
+            "conservative sweep cannot produce numeric clearance evidence"
+        )
+    inflation = policy.clearance_policy.per_body_inflation_mm
+    inflated = {
+        body_id: tuple(_inflate_world_primitive(item, inflation) for item in items)
+        for body_id, items in world.items()
+    }
+    bounds = {
+        body_id: tuple(_primitive_bounds(item) for item in items)
+        for body_id, items in inflated.items()
+    }
+    rows: list[dict[str, Any]] = []
+    for left_id, right_id in _candidate_body_pairs(contract, inflated):
+        rows.append({
+            "body_pair": [left_id, right_id],
+            "minimum_clearance_lower_bound_mm": min(
+                _bounds_gap_mm(left, right)
+                for left in bounds[left_id]
+                for right in bounds[right_id]
+            ),
+        })
+    rows.sort(key=lambda item: (
+        item["minimum_clearance_lower_bound_mm"], item["body_pair"]
+    ))
+    limiting = rows[0] if rows else None
+    return {
+        "minimum_clearance_lower_bound_mm": (
+            None if limiting is None
+            else limiting["minimum_clearance_lower_bound_mm"]
+        ),
+        "limiting_body_pair": None if limiting is None else limiting["body_pair"],
+        "clearance_measurement": (
+            "minimum Euclidean separation between uncertainty-inflated world "
+            "AABBs; zero is conservative and may mean overlapping bounds "
+            "without primitive collision"
+        ),
+    }
 
 
 def _digest(value: object, label: str) -> str:
@@ -437,16 +505,19 @@ def evaluate_conservative_segment_sweeps_from_plan(
             tuple(bodies),
             installed_profile.contract.pair_exclusions,
         )
+        envelope_pose = CollisionPose(
+            f"conservative-segment-{segment_sequence:04d}",
+            installed_profile.contract.root_frame,
+            {},
+        )
+        evaluation_policy = CollisionEvaluationPolicy(
+            clearance_policy=installed_profile.clearance_policy
+        )
         evaluation = evaluate_collision_pose(
-            envelope_contract,
-            CollisionPose(
-                f"conservative-segment-{segment_sequence:04d}",
-                installed_profile.contract.root_frame,
-                {},
-            ),
-            CollisionEvaluationPolicy(
-                clearance_policy=installed_profile.clearance_policy
-            ),
+            envelope_contract, envelope_pose, evaluation_policy
+        )
+        clearance = _clearance_summary(
+            envelope_contract, envelope_pose, evaluation_policy
         )
         clear = evaluation.collision_free_diagnostic
         all_clear = all_clear and clear
@@ -472,6 +543,7 @@ def evaluate_conservative_segment_sweeps_from_plan(
                 "pose_blockers": [
                     item.to_dict() for item in evaluation.pose_blockers
                 ],
+                **clearance,
             }
         )
 
