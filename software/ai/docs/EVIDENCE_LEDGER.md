@@ -10408,3 +10408,67 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: bind nominal portal/support component envelopes to their v2
   bodies for diagnostic route sensitivity while retaining missing installed
   transforms; then collect physical measurements after fabrication/installation.
+
+### E-20261008-ARM-515 — static-support source reconciliation
+
+- Lane: arm.
+- Stage: ICQ-1 nominal static-support source reconciliation.
+- Commit: `d8640b039d4ac3dcce7316ba131177ddf25ce477`.
+- Change: added a strict additive audit over the retained 4040-aluminum support
+  concept and the newer printable portal prototype. The audit verifies their
+  shared board-frame tower axes, camera axis, and 1000 mm entrance-pupil target;
+  derives four printable candidate support envelopes; and refuses to combine or
+  select the structurally different implementations.
+- Inputs/fixtures: exact route file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  support-design SHA-256
+  `2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b`;
+  printable-frame-design SHA-256
+  `74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3`;
+  implementation SHA-256
+  `5d0c7efd061ca1216ddb04b58e98498932d23ee234627215cc2a52e44f3ea76b`;
+  focused-test SHA-256
+  `6c7e8591b18f6b486b1e2ec6bdcf6ea04b5681eb59e669ddb36638a92b5054fa`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_static_support_source_reconciliation_v1.json`,
+  file SHA-256
+  `ab1223f1d7608603f27af00a14f1c05f2d274af42e70204867778e5f4adbfb35`,
+  audit SHA-256
+  `213478b236d7aa336bab4580b633ffcc000a1f8db76c80d0fbf03c209027183c`.
+- Exact evidence command: with
+  `PYTHONPATH=software/src;software/ai;software/tests/unit`, run `py -3.12 -`
+  with the recorded inline Python program that loads the exact simulation
+  context and retained route fixture, calls
+  `assess_c03_static_support_source_reconciliation_v1`, and writes the retained
+  JSON path above using sorted keys.
+- Exact validation command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -m pytest software/tests/unit/test_collision_foundation.py
+  software/tests/unit/test_static_route_collision.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py
+  software/tests/unit/test_rehearsal_noncontact_stage.py
+  software/tests/unit/test_rehearsal_noncontact_binding.py -q`; then run
+  `py -3.12 -m ruff check software/src/rocell/application/c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py` and
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`. All 168 focused/predecessor tests passed in 34.53
+  seconds and Ruff passed. Four portal/camera-boom bodies have candidate
+  printable nominal envelopes. Eight camera, fixed-cable, lighting-support, and
+  lighting bodies remain unbound. Nominal collision binding remains forbidden.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Failures preserved: none rewritten. ARM-514 remains valid as a semantic v2
+  architecture match; ARM-515 narrows its selected-source assumption by
+  recording that two incompatible structural implementations coexist.
+- Limitations: neither source is installed evidence. The printable design is
+  explicitly not released for fabrication or robot operation, and no controlled
+  supersession record selects it over the 4040 concept. No installed transform,
+  lighting geometry, collision query, command, transport, permit, or physical
+  authority was created. ICQ-1 and ICQ-9 remain blocked.
+- Next dependency: add a controlled architecture-selection record naming the
+  actual support being built. If the printable portal is selected, migrate the
+  v2 nominal inventory to its exact component sources and only then run
+  diagnostic route sensitivity; installed qualification still requires the
+  completed portal and physical measurements.
