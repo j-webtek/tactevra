@@ -10,6 +10,7 @@ from rocell.application.c03_route_collision_handoff_v1 import (
     C03FullBodyGeometryAuditV1Error,
     C03RouteCollisionHandoffV1Error,
     assess_c03_full_body_geometry_readiness_v1,
+    assess_c03_nominal_tool_binding_readiness_v1,
     assess_c03_station_height_route_sensitivity_v1,
     prepare_c03_route_collision_handoff_v1,
 )
@@ -169,6 +170,30 @@ def test_full_body_geometry_audit_rejects_altered_candidate_receipt(
             mesh_binding=_json(MESH_BINDING),
             mesh_reduction=reduction,
         )
+
+
+def test_nominal_tool_binding_keeps_planning_tip_separate_from_volume(
+    sim_context, synthetic_result
+):
+    synthetic_result["route_result"]["tool_total_length_mm"] = 110.0
+    synthetic_result["route_result"]["tool_configuration_sha256"] = "a" * 64
+    _rehash(synthetic_result["route_result"])
+    _rehash(synthetic_result)
+    handoff_module.EXPECTED_ROUTE_RECEIPT_SHA256 = synthetic_result["route_result"][
+        "receipt_sha256"
+    ]
+    handoff_module.EXPECTED_RESULT_RECEIPT_SHA256 = synthetic_result["receipt_sha256"]
+    report = assess_c03_nominal_tool_binding_readiness_v1(
+        synthetic_result, sim_context
+    )
+    assert report["planning_tip_transform"]["translation_mm"] == [0.0, 0.0, -110.0]
+    assert report["nominal_mesh_envelopes"]["compliant_tool_body"][
+        "extents_mm"
+    ] == [28.0, 24.0, 66.199997]
+    assert len(report["missing_binding_inputs"]) == 6
+    assert report["single_collision_envelope_defined"] is False
+    assert report["collision_screen_executed"] is False
+    assert report["physical_authority"] is False
 
 
 def test_handoff_accepts_matching_profile_but_does_not_clear_collision(
