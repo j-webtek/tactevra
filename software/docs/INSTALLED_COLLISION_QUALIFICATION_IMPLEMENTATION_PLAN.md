@@ -331,6 +331,19 @@ segment.
 
 ### ICQ-7 — Fresh observed start and entry qualification
 
+**Implementation status (2026-10-07):** the bounded zero-authority adapter is
+implemented on `codex/c03-observed-entry`. It authenticates the exact retained
+C03 route, consumes the existing T=1051 read-only observed-planner state,
+requires freshness at evaluation, interpolates only from those observed joints
+to exact C03 waypoint zero, and reuses the reviewed FK collision and
+conservative sweep engines. Its sealed receipt binds controller session,
+feedback, calibration, build, kinematic model, route, target catalog, tool,
+installed profile, rigid attachment, configuration-sampled cable, and cable
+sweep identities. It reports clear bound geometry, collision, or indeterminate
+replan-required evidence while retaining zero execution authority. The retained
+C03 route remains simulation-only; real installed profile and entry-specific
+physical cable evidence are still required before any physical claim.
+
 **Purpose:** Prove the arm can enter the qualified route from its actual current
 state without assuming the synthetic route seed.
 

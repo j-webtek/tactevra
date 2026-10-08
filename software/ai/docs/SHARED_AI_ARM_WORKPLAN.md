@@ -1004,19 +1004,21 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-continuous-collision-proof` owns ICQ-6 from the exact
-merged ICQ-5 base `ad5fad789dcb1ae0858a599c455fb714d46b47c5`. It may define a
-strict, profile-bound continuous-segment receipt over the existing reviewed
-path-radius swept-envelope method, consume every partition-owned segment exactly
-once, reproduce partition continuity and the shared-boundary recheck, and report
-`CLEAR`, `COLLISION`, or `INDETERMINATE` without relying on endpoint clearance.
-Before implementation it must reconcile the historical 328-segment acceptance
-text with the retained C03 route's current 323 samples and 321 adjacent segments;
-the discrepancy must remain visible and no route identity or count may be
-silently rewritten. It must add adversarial between-sample collision controls,
-preserve uncertainty and limiting-pair evidence, and remain zero authority. It
-must not invent installed measurements, alter the accepted route, emit commands,
-or clear any controller, integration, or physical-authority gate.
+The arm lane on `codex/c03-observed-entry` owns ICQ-7 from the exact merged
+ICQ-6 base `d17e9b5c73a08a088315b3135d56a9b405829240`. It may bind the
+existing observed-state seed, deterministic IK, bounded entry sampling,
+configuration collision, and continuous-sweep chain to the exact retained C03
+route and installed-profile identities. The receipt must require one fresh,
+authenticated, read-only joint observation bound to the controller session,
+build, calibration, route, installed profile, rigid placement, tool, and cable
+identities. It must distinguish a qualified entry, a collision, and an
+indeterminate or mismatch result that requires replanning; it may not silently
+snap an observed state to the nominal route start. Synthetic observations and
+profiles remain execution-ineligible, and any identity change invalidates reuse.
+The increment must preserve the exact C03 route, remain zero authority, and emit
+no controller, wire, joint, PWM, serial, transport, retry, permit, or movement
+command. It must not change AI-lane status or clear an integration or physical-
+authority gate.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
@@ -1956,6 +1958,19 @@ The retained full-route synthetic rehearsal remains `COLLISION` on all 321
 segments. This is software and negative synthetic evidence only: real installed
 geometry, fresh observed entry, command generation, and physical authority
 remain blocked.
+Evidence `E-20261007-ARM-499` implements ICQ-7 over the exact retained C03
+route. It authenticates one read-only observed joint state and its controller
+session, enforces monotonic freshness, interpolates from the observed joints to
+exact C03 waypoint zero, and reuses the reviewed FK collision and conservative
+sweep engines. Its receipt binds route, target catalog, tool, calibration,
+build, model, installed profile, rigid placement, cable sample, and cable sweep
+identities; stale or mismatched state requires replanning and no nominal-start
+snap is permitted. The retained synthetic rehearsal evaluates two coincident
+entry samples and one continuous entry segment and returns
+`COLLISION_REPLAN_REQUIRED`, consistent with the already colliding synthetic
+ICQ-5/6 profile. This is zero-authority contract evidence: the observation,
+profile, placement, cables, and route remain synthetic and execution-ineligible.
+ICQ-8 reconstruction and physical installed evidence remain open.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

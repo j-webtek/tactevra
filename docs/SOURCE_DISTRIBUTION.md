@@ -666,3 +666,13 @@ conservative sweeps to every owned adjacent segment. It rejects endpoint-only
 interpolation and cannot create measurements, screen collisions, emit
 controller output, or grant physical authority. All byte, duplicate, and
 reduction limits remain unchanged.
+
+The ICQ-7 observed-entry qualification adds two governed paths: one strict
+zero-authority runtime adapter and one focused unit-test module. The resulting
+tree contains 6,513 tracked files. The ceiling advances from 6,511 to 6,515,
+retaining two reviewed file slots. The adapter authenticates the exact retained
+C03 route, freshness-bounds one read-only joint observation, and reuses existing
+bounded sampling, FK collision, and conservative sweep engines for the path to
+route entry. It cannot generate commands, retry movement, create a permit, or
+grant physical authority. All byte, duplicate, and reduction limits remain
+unchanged.
