@@ -233,6 +233,14 @@ is software readiness only and does not satisfy the physical gate.
 **Purpose:** Represent moving cables conservatively at every required route
 configuration and between adjacent configurations.
 
+**Implementation status:** The strict C03 import adapter is implemented. It
+binds uncertainty-inflated capsule chains to every exact partition sample and
+independently conservative envelopes to every partition-owned adjacent segment,
+including an exact shared-boundary geometry recheck. Synthetic far-field
+fixtures prove complete 323-sample and 321-segment software coverage. No
+installed cable capture exists, so this does not satisfy the physical gate or
+execute collision screening.
+
 **Deliverables:**
 
 - A capture/import adapter for capsule-chain cable envelopes at each bounded

@@ -656,3 +656,13 @@ The resulting tree contains 6,506 tracked files. The ceiling advances from
 profile-bound transforms for required non-robot frames and cannot create
 measurements, screen collisions, emit controller output, or grant physical
 authority. All byte, duplicate, and reduction limits remain unchanged.
+
+The C03 cable-envelope intake adds three governed paths: one strict runtime
+adapter, one public JSON Schema, and one focused unit-test module. The resulting
+tree contains 6,509 tracked files. The ceiling advances from 6,508 to 6,511,
+retaining two reviewed file slots. The adapter binds uncertainty-inflated
+capsule chains to exact partition samples and independently captured
+conservative sweeps to every owned adjacent segment. It rejects endpoint-only
+interpolation and cannot create measurements, screen collisions, emit
+controller output, or grant physical authority. All byte, duplicate, and
+reduction limits remain unchanged.

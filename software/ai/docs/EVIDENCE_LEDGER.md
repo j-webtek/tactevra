@@ -9159,3 +9159,118 @@ rewriting history. New entries must use a unique evidence ID.
   cable geometry coverage while physical measurement collection remains open.
   A real ICQ-3 pass still requires measured transforms bound to the eventual
   installed profile.
+
+### E-20261007-ARM-494 — retained rigid lineage fails the first ICQ-4 route rehearsal
+
+- Stage: S4 / ICQ-4 zero-authority cable-envelope intake.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Implementation commit: `f02eadd60774779eb3482a15458aae55fe550e7b`.
+- Change: attempted to compose the retained 321-segment C03 result, synthetic
+  measurement manifest, and retained ICQ-3 synthetic rigid manifest with the
+  new cable intake. The unchanged rigid-binding validator rejected the attempt
+  before any cable row was admitted because the retained rigid manifest bound
+  qualification receipt
+  `e358138ac7b61ff48e737ee74fa707cae4308bd120e8b31da119dde45b7a7947`
+  while the exact merged-base rebuild produced
+  `894360da500c91480c371ecdbff37116bacec1dd0f0cf626429dde17d9ec0634`.
+- Inputs/fixtures: route file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  measurement file SHA-256
+  `a220c36cd79de2a0acd527c0df4892dbd6024e2ac9af766be0178146bf1e3a39`;
+  rejected rigid-manifest file SHA-256
+  `22d720a270618900764aa450af9e617dedfbcc4ced4533f251eab2543ca5c908`.
+- Command: exact command
+  `python C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\generate_synthetic_rehearsal_v1.py --workspace C:\Users\WebTek\Desktop\tactevra-c03-cables --route C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json --measurements C:\MuJoCoWarp\evidence\issue190\c03_rigid_attachment_binding_v1\synthetic_installed_measurements_v1.json --rigid-manifest C:\MuJoCoWarp\evidence\issue190\c03_rigid_attachment_binding_v1\synthetic_rigid_binding_manifest_v1.json --output C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1`.
+- Result: FAIL before cable admission with
+  `C03RigidAttachmentBindingV1Error: binding lineage differs: c03_installed_collision_qualification_sha256`.
+  Failure-record file SHA-256
+  `c7c162cd85351b03d69908dc5be33d3d0db2b36f8c81a26a29b7dff07cdf55b9`;
+  receipt SHA-256
+  `a1de4cc9b2cecab371e20613aeed00c2ba3dc55467996ddcbbd25d27930b6069`.
+  The failure record has a hash-verified backup on `F:`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the pre-correction external generator bytes were not retained;
+  exact inputs, command, exception, and terminal output remain retained. This is
+  synthetic software evidence and supplies no installed measurement.
+- Supersedes: none; failed evidence is preserved.
+- Next dependency: derive a new synthetic rigid manifest from the same source
+  measurements and bind it to the exact rebuilt qualification without changing
+  the retained ICQ-3 artifact.
+
+### E-20261007-ARM-495 — exact C03 cable samples and sweeps gain a strict intake
+
+- Stage: S4 / ICQ-4 zero-authority cable-envelope intake.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Implementation commit: `f02eadd60774779eb3482a15458aae55fe550e7b`.
+- Change: added a duplicate-safe, bounded manifest loader and adapter for every
+  configuration-sampled body required by the exact C03 partition intake. It
+  binds each row to its partition-local sample or segment and to a global owned
+  segment sequence; requires fresh profile-bound sources; inflates measured
+  cable radius by capture and unobserved-deformation uncertainty; requires at
+  least one intermediate observation for every conservative sweep; and proves
+  the predecessor terminal and successor recheck use identical inflated cable
+  geometry. It returns the existing typed sample and sweep bindings for ICQ-5
+  without executing collision evaluation.
+- Inputs/fixtures: public schema
+  `software/ai/schemas/c03_cable_envelope_manifest_v1.schema.json`, SHA-256
+  `636b1270c257fc34c1e851786db5ec03c8924a04d305180e8a0a1d80962093de`;
+  exact route file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  measurement file SHA-256
+  `a220c36cd79de2a0acd527c0df4892dbd6024e2ac9af766be0178146bf1e3a39`;
+  newly derived synthetic rigid-manifest file SHA-256
+  `1a34f33b7f223e03a665befafd162f9dcc7dec09ff8c8d2f76a5eb373c5b5ae9`;
+  cable-manifest file SHA-256
+  `d45c642b00c0f4327bc2453a10d6644479baea13f34606685fb6a7e814f9ec71`;
+  cable-manifest content SHA-256
+  `37348b1e26f29ea313001abe6bf29950d584039969f177f2c73e96d3f621cc3e`.
+- Command: reran the exact ARM-494 command after deriving a new, separately
+  named rigid manifest from the unchanged synthetic sources and binding it to
+  the rebuilt qualification. External generator file SHA-256
+  `7e54c7574d28d878885abdeca144a600f4162daa2a4cc8ec16e871d3cac99b07`.
+- Result: PASS with report receipt SHA-256
+  `b9e57f1ba59e9444c97caa609aec0f46bb6cebdabe9b76ef7cb3120f8d4ab93a`,
+  report-file SHA-256
+  `4c454363d85738681cd5e4b03a3b26e32b31363b07b1d4b4cdf01b4367df1eec`,
+  and rehearsal receipt SHA-256
+  `257f05e7bb85c0c3c4c4db777451fe8fb0d1f837dbce69e2bc4f77bee10f0762`.
+  All retained success artifacts have hash-verified backups on `F:`.
+- Metrics: 2 exact partitions; 323 configuration sample rows including one
+  boundary recheck; 321 globally ordered, partition-owned adjacent sweeps;
+  one required body per row; one capsule per body in the synthetic fixture;
+  inflated radius 3.75 mm from 2.0 mm measured radius, 0.5 mm capture
+  uncertainty, and 1.25 mm unobserved-deformation allowance. Collision samples
+  evaluated: 0; collision segments evaluated: 0; GPU jobs: 0.
+- Validation: exact command
+  `python -m pytest -q tests/unit/test_c03_installed_collision_qualification_v1.py tests/unit/test_c03_rigid_attachment_binding_v1.py tests/unit/test_c03_cable_envelope_intake_v1.py tests/unit/test_partitioned_bounded_segment_collision_v1.py tests/unit/test_installed_geometry_cable_rehearsal_v1.py`
+  from `software/` passed 36 tests. Exact command
+  `python -m ruff check src/rocell/application/c03_cable_envelope_intake_v1.py tests/unit/test_c03_cable_envelope_intake_v1.py`
+  passed. `python scripts/ci/check_docs.py` passed, and
+  `python scripts/ci/check_source_archive_footprint.py` passed at 6,509 tracked
+  files after the reviewed ceiling moved from 6,508 to 6,511. The first attempt
+  to run the two maintenance commands concurrently failed because their
+  `compileall` processes raced on the same Windows `__pycache__`; no product
+  test ran in that attempt. Sequential
+  `python scripts/maintain_repository.py verify` then passed 133 policy tests.
+  The first sequential `python scripts/maintain_repository.py verify --full`
+  reached the offline stage and stopped because the fresh worktree lacked the
+  ignored `.venv-ci`. Exact commands `python -m venv .venv-ci` and
+  `python scripts/ci/offline_checks.py install-tests` provisioned it; the
+  unchanged full command then passed 945 tests with 5 expected Windows symlink
+  skips in 456.03 seconds. Both failed validation attempts are retained here;
+  neither changed tracked product source or evidence results.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: all cable and rigid geometry in this rehearsal is synthetic and
+  placed far from the workcell. This proves import completeness, lineage,
+  inflation, and fail-closed behavior only. It does not supply installed cable
+  captures, prove collision clearance, validate pair exclusions, prove
+  continuous motion, provide fresh observed state, operate a controller, or
+  grant physical authority.
+- Supersedes: none. ARM-494 remains the preserved failed attempt; ARM-493
+  remains the ICQ-3 predecessor.
+- Next dependency: ICQ-5 must consume each partition's typed rigid, sample, and
+  sweep evidence exactly once and emit distinct clear, collision, incomplete,
+  or evaluator-error results. Physical qualification still requires the final
+  installed cable capture bound to the real profile.
