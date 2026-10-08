@@ -676,3 +676,12 @@ bounded sampling, FK collision, and conservative sweep engines for the path to
 route entry. It cannot generate commands, retry movement, create a permit, or
 grant physical authority. All byte, duplicate, and reduction limits remain
 unchanged.
+
+The ICQ-7.1 numeric entry-clearance increment adds two governed paths: one
+strict zero-authority supplement validator and one focused unit-test module.
+The resulting tree contains 6,517 tracked files. The ceiling advances from
+6,515 to 6,519, retaining two reviewed file slots. The supplement derives every
+numeric margin from the exact uncertainty-inflated sweep evidence already
+sealed inside ICQ-7; it rejects caller-asserted values, missing or reordered
+segments, crossed lineage, changed hashes, collisions, and authority fields.
+All byte, duplicate, and reduction limits remain unchanged.
