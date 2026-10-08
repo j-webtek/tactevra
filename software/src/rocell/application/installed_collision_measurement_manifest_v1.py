@@ -41,6 +41,12 @@ NOMINAL_SOURCE_INVENTORY_SCHEMA = (
 STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA = (
     "rocell.static_b0477_collision_nominal_source_inventory.v2"
 )
+PRINTABLE_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA = (
+    "rocell.printable_static_b0477_collision_nominal_source_inventory.v3"
+)
+SELECTED_PRINTABLE_FRAME_SHA256 = (
+    "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
+)
 NOMINAL_ENVELOPE_AUDIT_SCHEMA = "rocell.installed_collision_nominal_envelope_audit.v1"
 NOMINAL_PROXY_AUDIT_SCHEMA = "rocell.installed_collision_nominal_proxy_audit.v1"
 _BINARY_STL_COMPARISON_TOLERANCE_MM = 0.001
@@ -978,6 +984,163 @@ def build_static_b0477_collision_nominal_source_inventory_v2(
     return {**core, "content_sha256": _sha(core)}
 
 
+def build_printable_static_b0477_collision_nominal_source_inventory_v3(
+    context: SimulationContext,
+) -> dict[str, Any]:
+    """Select the printable portal as nominal while retaining every blocker."""
+
+    legacy = build_static_b0477_collision_nominal_source_inventory_v2(context)
+    design_path = "hardware/static_overhead_camera/config/printable_frame_design.json"
+    manifest_path = "hardware/static_overhead_camera/cad/output/manifest.json"
+    assembly_path = (
+        "hardware/static_overhead_camera/cad/output/assembly/"
+        "printable_camera_portal_printed_parts_only.stl"
+    )
+    cage_path = "hardware/static_overhead_camera/cad/output/stl/camera_cage_body.stl"
+    keeper_path = "hardware/static_overhead_camera/cad/output/stl/camera_cage_keeper.stl"
+    carriage_path = "hardware/static_overhead_camera/cad/output/stl/camera_xy_carriage.stl"
+    camera_profile_path = (
+        "software/config/camera_profiles/arducam_b0477_imx283_16mm.json"
+    )
+    selected_paths = {
+        design_path, manifest_path, assembly_path, cage_path, keeper_path,
+        carriage_path, camera_profile_path,
+    }
+    selected_sources = []
+    for relative in sorted(selected_paths):
+        try:
+            payload = (context.workspace / relative).read_bytes()
+        except OSError as exc:
+            raise InstalledCollisionMeasurementManifestV1Error(
+                f"cannot read selected printable source {relative}"
+            ) from exc
+        selected_sources.append({
+            "path": relative,
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "physical_measurement": False,
+        })
+    source_hashes = {row["path"]: row["sha256"] for row in selected_sources}
+    if source_hashes[design_path] != SELECTED_PRINTABLE_FRAME_SHA256:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "selected printable frame identity differs"
+        )
+    try:
+        design = json.loads((context.workspace / design_path).read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "cannot read selected printable frame design"
+        ) from exc
+    if (
+        design.get("schema") != "rocell.static_overhead_camera.printable_frame.v1"
+        or design.get("design_id")
+        != "ROCELL-PRINTABLE-CAMERA-PORTAL-PROTOTYPE-003"
+        or design.get("state")
+        != "PARAMETRIC_PROTOTYPE_NOT_RELEASED_FOR_FABRICATION_OR_ROBOT_OPERATION"
+    ):
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "selected printable frame contract differs"
+        )
+    def hashes(paths: Sequence[str]) -> list[dict[str, str]]:
+        return [{"path": path, "sha256": source_hashes[path]} for path in paths]
+    layout = design["layout"]
+    truss = design["truss"]
+    support_sources = hashes((design_path, manifest_path, assembly_path))
+    body_rows = []
+    for original in legacy["bodies"]:
+        row = dict(original)
+        body_id = row["body_id"]
+        if body_id in {
+            "support:portal_left_post", "support:portal_right_post",
+            "support:portal_crossbar", "support:camera_boom",
+        }:
+            row["nominal_sources"] = support_sources
+            row["nominal_state"] = "SELECTED_PRINTABLE_PROTOTYPE_GEOMETRY"
+            row["remaining_physical_check"] = (
+                "Verify printed first articles, assembled transform, fasteners, "
+                "deflection, and installed envelope."
+            )
+        if body_id == "support:portal_left_post":
+            row["nominal_placement"] = {
+                "axis_xy_mm": layout["left_tower_axis_xy_mm"],
+                "section_mm": [truss["width_mm"], truss["height_mm"]],
+            }
+        elif body_id == "support:portal_right_post":
+            row["nominal_placement"] = {
+                "axis_xy_mm": layout["right_tower_axis_xy_mm"],
+                "section_mm": [truss["width_mm"], truss["height_mm"]],
+            }
+        elif body_id == "support:portal_crossbar":
+            row["nominal_placement"] = {
+                "axis_x_range_mm": [
+                    layout["left_tower_axis_xy_mm"][0],
+                    layout["right_tower_axis_xy_mm"][0],
+                ],
+                "bottom_z_mm": layout["crossbar_bottom_z_mm"],
+                "section_mm": [truss["width_mm"], truss["height_mm"]],
+            }
+        elif body_id == "support:camera_boom":
+            row["nominal_placement"] = {
+                "axis_x_mm": layout["boom_axis_x_mm"],
+                "y_range_mm": [layout["boom_root_y_mm"], layout["boom_end_y_mm"]],
+                "bottom_z_mm": layout["boom_bottom_z_mm"],
+                "section_mm": [truss["width_mm"], truss["height_mm"]],
+            }
+        elif body_id == "camera:b0477_enclosure":
+            row["nominal_sources"] = hashes((
+                camera_profile_path, design_path, cage_path, keeper_path, carriage_path,
+            ))
+            row["nominal_state"] = "SELECTED_PRINTABLE_CAGE_NOMINAL_CAMERA_PENDING"
+        elif body_id in {"camera:b0477_lens", "camera:b0477_connector"}:
+            row["nominal_sources"] = hashes((camera_profile_path, design_path, cage_path))
+            row["nominal_state"] = "PARTIAL_SELECTED_PRINTABLE_GEOMETRY"
+        elif body_id == "cable:fixed_usb_route":
+            row["nominal_sources"] = hashes((design_path, manifest_path))
+            row["nominal_state"] = "SELECTED_ROUTE_DESIGN_PHYSICAL_CAPTURE_PENDING"
+        elif body_id.startswith("support:lighting_") or body_id.startswith("lighting:"):
+            row["nominal_sources"] = []
+            row["nominal_placement"] = None
+            row["nominal_state"] = "UNDEFINED_IN_SELECTED_PRINTABLE_ARCHITECTURE"
+            row["remaining_physical_check"] = (
+                "Select lighting hardware and support geometry before simulation binding."
+            )
+        body_rows.append(row)
+    used_paths = sorted({
+        source["path"] for row in body_rows for source in row["nominal_sources"]
+    })
+    legacy_sources = {row["path"]: row for row in legacy["sources"]}
+    selected_by_path = {row["path"]: row for row in selected_sources}
+    sources = [
+        (selected_by_path.get(path) or legacy_sources[path]) for path in used_paths
+    ]
+    core = {
+        "schema": PRINTABLE_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA,
+        "status": "SELECTED_PRINTABLE_NOMINAL_PHYSICAL_VERIFICATION_PENDING",
+        "base_contract_sha256": legacy["base_contract_sha256"],
+        "robot_model_sha256": legacy["robot_model_sha256"],
+        "selected_support_implementation": {
+            "design_id": design["design_id"],
+            "design_file_sha256": source_hashes[design_path],
+            "selection_basis": "USER_CONFIRMED_PRINTABLE_CAMERA_TOWER_IN_FABRICATION",
+            "fabrication_authority": False,
+            "physical_installation_authority": False,
+            "robot_motion_authority": False,
+        },
+        "source_count": len(sources),
+        "sources": sources,
+        "body_count": len(body_rows),
+        "bodies": body_rows,
+        "legacy_v2_inventory_sha256": legacy["content_sha256"],
+        "lighting_geometry_complete": False,
+        "simulation_use_allowed": True,
+        "installed_measurement_status": "PENDING",
+        "collision_qualification": False,
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
+
+
 def _binary_stl_bounds_mm(path: Path) -> dict[str, list[float]]:
     try:
         payload = path.read_bytes()
@@ -1455,12 +1618,14 @@ __all__ = [
     "InstalledCollisionMeasurementManifestV1Error",
     "NOMINAL_SOURCE_INVENTORY_SCHEMA",
     "STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA",
+    "PRINTABLE_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA",
     "NOMINAL_ENVELOPE_AUDIT_SCHEMA",
     "NOMINAL_PROXY_AUDIT_SCHEMA",
     "build_installed_collision_nominal_envelope_audit_v1",
     "build_installed_collision_nominal_proxy_audit_v1",
     "build_installed_collision_nominal_source_inventory_v1",
     "build_static_b0477_collision_nominal_source_inventory_v2",
+    "build_printable_static_b0477_collision_nominal_source_inventory_v3",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "build_pending_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",
