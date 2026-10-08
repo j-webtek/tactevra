@@ -1009,6 +1009,17 @@ remain unopened. Evaluation v12 must remain unopened until a development
 decision is committed. The increment may not change the public closed intent
 schema, invoke motion planning, promote a model, change arm-lane status, or emit
 commands, hardware writes, movement, or physical authority.
+Evidence `E-20261008-AI-529` rejects the first classification-only campaign on
+development while preserving its useful learned result. The one-epoch 1B
+candidate classified all 200 cases exactly with zero invalid or false
+actionable outputs, but deterministic composition matched only 175/200 because
+all 25 fresh `type_unquoted` requests used wording outside the extractor's
+closed grammar. This is a campaign-design failure: the generator admitted
+actionable cases that the independently frozen deterministic boundary could not
+compose. The consumed development split will not be rescored after a grammar
+patch, and frozen v12 remains unopened. The next campaign must use fresh split
+identities and must reject its generated corpus unless every expected intent
+round-trips exactly through deterministic composition before any training.
 
 The AI/model lane on `codex/deterministic-intent-payload` claims AI-528 from
 merged AI-527 base `69f2e92479f85f3a905ace3fda21465991f5362b`. It may
