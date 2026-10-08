@@ -12,11 +12,13 @@ from rocell.models.frames import Point3Mm
 
 from .bounded_segment_collision_qualification import BoundedSegmentSamplingPolicy
 from .collision_readiness import (
+    assess_ambient_light_b0477_collision_readiness,
     assess_current_collision_readiness,
     assess_static_b0477_collision_readiness,
 )
 from .context import SimulationContext
 from .installed_collision_measurement_manifest_v1 import (
+    build_ambient_light_static_b0477_collision_nominal_source_inventory_v4,
     build_installed_collision_nominal_envelope_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
     build_static_b0477_collision_nominal_source_inventory_v2,
@@ -307,6 +309,9 @@ NOMINAL_TOOL_BINDING_SCHEMA = "tactevra.c03_nominal_tool_binding_readiness.v1"
 BASE_CAMERA_GEOMETRY_SCHEMA = "tactevra.c03_base_camera_geometry_readiness.v1"
 STATIC_BASE_CAMERA_GEOMETRY_SCHEMA = (
     "tactevra.c03_static_base_camera_geometry_readiness.v2"
+)
+AMBIENT_LIGHT_STATIC_BASE_CAMERA_GEOMETRY_SCHEMA = (
+    "tactevra.c03_ambient_light_static_base_camera_geometry_readiness.v3"
 )
 STATIC_SUPPORT_SOURCE_RECONCILIATION_SCHEMA = (
     "tactevra.c03_static_support_source_reconciliation.v1"
@@ -765,6 +770,104 @@ def assess_c03_static_base_camera_geometry_readiness_v2(
     return {**core, "static_base_camera_geometry_sha256": _sha256(core)}
 
 
+def assess_c03_ambient_light_static_base_camera_geometry_readiness_v3(
+    result: Mapping[str, Any],
+    context: SimulationContext,
+    *,
+    support_design: Mapping[str, Any],
+    support_design_file_sha256: str,
+) -> dict[str, Any]:
+    """Bind variable ambient illumination to the additive v3 body contract."""
+
+    legacy = assess_c03_base_camera_geometry_readiness_v1(
+        result,
+        context,
+        support_design=support_design,
+        support_design_file_sha256=support_design_file_sha256,
+    )
+    readiness = assess_ambient_light_b0477_collision_readiness(context)
+    inventory = (
+        build_ambient_light_static_b0477_collision_nominal_source_inventory_v4(
+            context
+        )
+    )
+    static_prefixes = ("support:", "camera:", "cable:")
+    static_requirements = [
+        {
+            "body_id": item.body_id,
+            "parent_frame": item.parent_frame,
+            "binding_mode": item.binding_mode.value,
+        }
+        for item in readiness.contract.requirements
+        if item.body_id.startswith(static_prefixes)
+    ]
+    expected_ids = {
+        "support:portal_left_post",
+        "support:portal_right_post",
+        "support:portal_crossbar",
+        "support:camera_boom",
+        "camera:b0477_enclosure",
+        "camera:b0477_lens",
+        "camera:b0477_connector",
+        "cable:fixed_usb_route",
+    }
+    if {row["body_id"] for row in static_requirements} != expected_ids:
+        raise C03FullBodyGeometryAuditV1Error(
+            "ambient-light B0477 collision requirements differ"
+        )
+    requirement_ids = {item.body_id for item in readiness.contract.requirements}
+    if "installation:base_clamp" not in requirement_ids:
+        raise C03FullBodyGeometryAuditV1Error(
+            "ambient-light contract omitted the factory base clamp"
+        )
+    source_rows = {row["body_id"]: row for row in inventory["bodies"]}
+    if any(source_rows[body_id]["measured"] for body_id in expected_ids):
+        raise C03FullBodyGeometryAuditV1Error(
+            "ambient-light inventory unexpectedly claims measurement"
+        )
+    core = {
+        "schema": AMBIENT_LIGHT_STATIC_BASE_CAMERA_GEOMETRY_SCHEMA,
+        "source_result_receipt_sha256": result["receipt_sha256"],
+        "source_legacy_readiness_sha256": legacy["base_camera_geometry_sha256"],
+        "source_inventory_sha256": inventory["content_sha256"],
+        "static_collision_contract_sha256": readiness.contract.content_hash,
+        "support_design_file_sha256": support_design_file_sha256,
+        "nominal_base_axis_xy_mm": legacy["nominal_base_axis_xy_mm"],
+        "nominal_base_axis_state": legacy["nominal_base_axis_state"],
+        "base_requirement_id": "installation:base_clamp",
+        "base_missing_inputs": legacy["base_missing_inputs"],
+        "arm_clamp_nominal_zone": inventory["arm_clamp_nominal_zone"],
+        "support_topology": legacy["support_topology"],
+        "nominal_camera_axis_xy_mm": legacy["nominal_camera_axis_xy_mm"],
+        "nominal_camera_entrance_pupil_z_mm": legacy[
+            "nominal_camera_entrance_pupil_z_mm"
+        ],
+        "static_camera_collision_requirements": static_requirements,
+        "declared_absent_physical_body_ids": inventory[
+            "declared_absent_physical_body_ids"
+        ],
+        "illumination_contract": inventory["illumination_contract"],
+        "camera_architecture_compatible": True,
+        "camera_architecture_mismatch": None,
+        "camera_missing_inputs": [
+            "INSTALLED_PORTAL_BOOM_AND_HOLDER_TRANSFORMS",
+            "RECEIVED_CAMERA_CASE_LENS_CONNECTOR_ENVELOPE",
+            "STATIC_USB_CABLE_ROUTE_AND_STRAIN_RELIEF_ENVELOPE",
+        ],
+        "installed_base_geometry_ready": False,
+        "installed_camera_geometry_ready": False,
+        "collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "static_base_camera_geometry_sha256": _sha256(core)}
+
+
 def assess_c03_static_support_source_reconciliation_v1(
     result: Mapping[str, Any], context: SimulationContext, *,
     support_design: Mapping[str, Any], support_design_file_sha256: str,
@@ -877,6 +980,7 @@ def assess_c03_static_support_source_reconciliation_v1(
     return {**core, "source_reconciliation_sha256": _sha256(core)}
 
 __all__ = [
+    "AMBIENT_LIGHT_STATIC_BASE_CAMERA_GEOMETRY_SCHEMA",
     "SCHEMA",
     "EXPECTED_RESULT_RECEIPT_SHA256",
     "EXPECTED_ROUTE_RECEIPT_SHA256",
@@ -891,6 +995,7 @@ __all__ = [
     "assess_c03_full_body_geometry_readiness_v1",
     "assess_c03_base_camera_geometry_readiness_v1",
     "assess_c03_static_base_camera_geometry_readiness_v2",
+    "assess_c03_ambient_light_static_base_camera_geometry_readiness_v3",
     "assess_c03_static_support_source_reconciliation_v1",
     "assess_c03_nominal_tool_binding_readiness_v1",
     "assess_c03_station_height_route_sensitivity_v1",

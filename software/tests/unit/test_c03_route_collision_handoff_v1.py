@@ -10,6 +10,7 @@ from rocell.application.c03_route_collision_handoff_v1 import (
     C03FullBodyGeometryAuditV1Error,
     C03RouteCollisionHandoffV1Error,
     assess_c03_base_camera_geometry_readiness_v1,
+    assess_c03_ambient_light_static_base_camera_geometry_readiness_v3,
     assess_c03_static_base_camera_geometry_readiness_v2,
     assess_c03_static_support_source_reconciliation_v1,
     assess_c03_full_body_geometry_readiness_v1,
@@ -251,6 +252,34 @@ def test_static_base_camera_audit_accepts_architecture_but_keeps_geometry_blocke
     assert report["installed_base_geometry_ready"] is False
     assert report["installed_camera_geometry_ready"] is False
     assert report["collision_screen_executed"] is False
+    assert report["physical_authority"] is False
+
+
+def test_ambient_light_audit_uses_factory_clamp_and_no_fixed_lights(
+    sim_context, synthetic_result
+):
+    report = assess_c03_ambient_light_static_base_camera_geometry_readiness_v3(
+        synthetic_result,
+        sim_context,
+        support_design=_json(SUPPORT_DESIGN),
+        support_design_file_sha256=(
+            "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+        ),
+    )
+    ids = {row["body_id"] for row in report["static_camera_collision_requirements"]}
+
+    assert len(ids) == 8
+    assert all("lighting" not in body_id for body_id in ids)
+    assert report["illumination_contract"]["mode"] == "VARIABLE_AMBIENT"
+    assert report["arm_clamp_nominal_zone"]["rear_edge_x_range_mm"] == [
+        225.0, 385.0,
+    ]
+    assert report["base_requirement_id"] == "installation:base_clamp"
+    assert len(report["base_missing_inputs"]) == 4
+    assert len(report["camera_missing_inputs"]) == 3
+    assert report["installed_collision_gate_cleared"] is False
+    assert report["hardware_writes"] == 0
+    assert report["physical_movements"] == 0
     assert report["physical_authority"] is False
 
 

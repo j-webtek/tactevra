@@ -27,6 +27,7 @@ from rocell.simulation.collision import (
     build_roarm_m3_prehardware_collision_contract,
 )
 from rocell.simulation.static_route_collision import (
+    build_ambient_light_b0477_prehardware_collision_contract,
     build_static_b0477_prehardware_collision_contract,
 )
 
@@ -41,6 +42,9 @@ from .context import SimulationContext, revalidate_simulation_context
 CURRENT_COLLISION_READINESS_SCHEMA = "rocell.current_collision_readiness.v1"
 STATIC_B0477_COLLISION_READINESS_SCHEMA = (
     "rocell.static_b0477_collision_readiness.v2"
+)
+AMBIENT_LIGHT_B0477_COLLISION_READINESS_SCHEMA = (
+    "rocell.ambient_light_b0477_collision_readiness.v3"
 )
 
 
@@ -211,7 +215,15 @@ class CurrentCollisionReadinessReport:
         ).hexdigest()
 
     def to_dict(self) -> dict[str, Any]:
-        if self.contract.contract_id.endswith("STATIC-B0477-PREHARDWARE-COLLISION-V2"):
+        if self.contract.contract_id.endswith(
+            "AMBIENT-LIGHT-B0477-PREHARDWARE-COLLISION-V3"
+        ):
+            architecture_limitations = [
+                "The selected static-overhead architecture separately requires its portal, camera boom, B0477 enclosure/lens/connector, fixed USB route, arm harness, clamp, and tool bodies.",
+                "No dedicated light or light-support hardware exists in this architecture; variable ambient illumination remains a perception-domain condition.",
+                "No default dimensions are invented for any absent installed body.",
+            ]
+        elif self.contract.contract_id.endswith("STATIC-B0477-PREHARDWARE-COLLISION-V2"):
             architecture_limitations = [
                 "The selected static-overhead architecture separately requires its portal, booms, lighting, B0477 enclosure/lens/connector, fixed USB route, arm harness, clamp, and tool bodies.",
                 "No default dimensions are invented for any absent installed body.",
@@ -280,14 +292,20 @@ def _build_report(
     context: SimulationContext,
     urdf_evidence: PinnedUrdfCollisionEvidence,
     *,
-    static_b0477: bool = False,
+    architecture: str = "legacy",
 ) -> CurrentCollisionReadinessReport:
     loaded_model = urdf_evidence.loaded_model
-    builder = (
-        build_static_b0477_prehardware_collision_contract
-        if static_b0477
-        else build_roarm_m3_prehardware_collision_contract
-    )
+    if architecture == "ambient_light_b0477":
+        builder = build_ambient_light_b0477_prehardware_collision_contract
+        schema = AMBIENT_LIGHT_B0477_COLLISION_READINESS_SCHEMA
+    elif architecture == "static_b0477":
+        builder = build_static_b0477_prehardware_collision_contract
+        schema = STATIC_B0477_COLLISION_READINESS_SCHEMA
+    elif architecture == "legacy":
+        builder = build_roarm_m3_prehardware_collision_contract
+        schema = CURRENT_COLLISION_READINESS_SCHEMA
+    else:
+        raise ValueError(f"unknown collision architecture {architecture!r}")
     contract = builder(loaded_model.model, context.scene)
     audit = audit_collision_geometry(contract)
     return CurrentCollisionReadinessReport(
@@ -319,11 +337,7 @@ def _build_report(
         alignment_report_hash=context.alignment.report_hash,
         contract=contract,
         geometry_audit=audit,
-        schema=(
-            STATIC_B0477_COLLISION_READINESS_SCHEMA
-            if static_b0477
-            else CURRENT_COLLISION_READINESS_SCHEMA
-        ),
+        schema=schema,
     )
 
 
@@ -358,15 +372,36 @@ def assess_static_b0477_collision_readiness(
         context.scenario.model_path,
         context.scenario.model_sha256,
     )
-    return _build_report(context, urdf_evidence, static_b0477=True)
+    return _build_report(context, urdf_evidence, architecture="static_b0477")
+
+
+def assess_ambient_light_b0477_collision_readiness(
+    context: SimulationContext,
+) -> CurrentCollisionReadinessReport:
+    """Produce the additive v3 audit for the ambient-light architecture."""
+
+    if not isinstance(context, SimulationContext):
+        raise TypeError("context must be SimulationContext")
+    revalidate_simulation_context(context)
+    urdf_evidence = inspect_pinned_urdf_collision_evidence(
+        context.scenario.model_path,
+        context.scenario.model_sha256,
+    )
+    return _build_report(
+        context,
+        urdf_evidence,
+        architecture="ambient_light_b0477",
+    )
 
 
 __all__ = [
+    "AMBIENT_LIGHT_B0477_COLLISION_READINESS_SCHEMA",
     "CURRENT_COLLISION_READINESS_SCHEMA",
     "STATIC_B0477_COLLISION_READINESS_SCHEMA",
     "CurrentCollisionReadinessReport",
     "PinnedUrdfCollisionEvidence",
     "assess_current_collision_readiness",
+    "assess_ambient_light_b0477_collision_readiness",
     "assess_static_b0477_collision_readiness",
     "inspect_pinned_urdf_collision_evidence",
 ]

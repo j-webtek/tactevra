@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 from rocell.application.collision_readiness import (
+    assess_ambient_light_b0477_collision_readiness,
     assess_current_collision_readiness,
     assess_static_b0477_collision_readiness,
     inspect_pinned_urdf_collision_evidence,
@@ -45,6 +46,8 @@ from rocell.simulation.collision import (
     evaluate_collision_sweep,
 )
 from rocell.simulation.static_route_collision import (
+    AMBIENT_LIGHT_ABSENT_BODY_IDS,
+    AMBIENT_LIGHT_STATIC_ROUTE_BODY_REQUIREMENTS,
     STATIC_B0477_LEGACY_BODY_MIGRATION,
     STATIC_ROUTE_BODY_REQUIREMENTS,
 )
@@ -251,6 +254,35 @@ def test_static_b0477_contract_migration_is_explicit_and_drops_moving_camera() -
         for body_id in replacements
     }
     assert migrated_ids <= catalog_ids
+
+
+def test_ambient_light_v3_removes_only_nonexistent_fixed_light_hardware() -> None:
+    context = load_simulation_context(WORKSPACE, MANIFEST)
+    retained = assess_static_b0477_collision_readiness(context)
+    report = assess_ambient_light_b0477_collision_readiness(context)
+    required = {item.body_id for item in report.contract.requirements}
+    catalog_ids = {
+        item.body_id for item in AMBIENT_LIGHT_STATIC_ROUTE_BODY_REQUIREMENTS
+    }
+
+    assert report.contract.contract_id.endswith(
+        "AMBIENT-LIGHT-B0477-PREHARDWARE-COLLISION-V3"
+    )
+    assert report.to_dict()["schema"] == (
+        "rocell.ambient_light_b0477_collision_readiness.v3"
+    )
+    assert len(report.contract.requirements) == 28
+    assert catalog_ids <= required
+    assert not (set(AMBIENT_LIGHT_ABSENT_BODY_IDS) & required)
+    assert {item.body_id for item in retained.contract.requirements} - required == set(
+        AMBIENT_LIGHT_ABSENT_BODY_IDS
+    )
+    assert "installation:base_clamp" in required
+    assert any(
+        "variable ambient illumination" in limitation
+        for limitation in report.to_dict()["limitations"]
+    )
+    assert report.to_dict()["authority"]["hardware_commands_generated"] == 0
 
 
 def test_exact_pinned_urdf_snapshot_inventories_collision_tags(tmp_path: Path) -> None:

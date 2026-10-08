@@ -17,6 +17,7 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     build_installed_collision_nominal_source_inventory_v1,
     build_static_b0477_collision_nominal_source_inventory_v2,
     build_printable_static_b0477_collision_nominal_source_inventory_v3,
+    build_ambient_light_static_b0477_collision_nominal_source_inventory_v4,
     build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
     main,
@@ -275,6 +276,41 @@ def test_printable_v3_selects_exact_portal_without_inventing_lighting() -> None:
     )
     assert inventory["lighting_geometry_complete"] is False
     assert inventory["collision_qualification"] is False
+    assert inventory["physical_authority"] is False
+
+
+def test_ambient_light_v4_removes_fixed_lights_and_keeps_nominal_clamp() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    inventory = (
+        build_ambient_light_static_b0477_collision_nominal_source_inventory_v4(
+            context
+        )
+    )
+    ids = {row["body_id"] for row in inventory["bodies"]}
+
+    assert inventory["schema"] == (
+        "rocell.ambient_light_static_b0477_collision_nominal_source_inventory.v4"
+    )
+    assert inventory["body_count"] == 28
+    assert set(inventory["declared_absent_physical_body_ids"]) == {
+        "support:lighting_boom_left",
+        "support:lighting_boom_right",
+        "lighting:key_light_left",
+        "lighting:key_light_right",
+    }
+    assert not set(inventory["declared_absent_physical_body_ids"]) & ids
+    assert inventory["illumination_contract"] == {
+        "mode": "VARIABLE_AMBIENT",
+        "collision_bodies": [],
+        "vision_domain_variation_required": True,
+        "fixed_lighting_assumed": False,
+    }
+    assert inventory["arm_clamp_nominal_zone"]["rear_edge_x_range_mm"] == [
+        225.0, 385.0,
+    ]
+    assert inventory["arm_clamp_nominal_zone"]["factory_table_edge_clamp"] is True
+    assert inventory["arm_clamp_nominal_zone"]["installed_footprint_measured"] is False
+    assert all(not row["measured"] for row in inventory["bodies"])
     assert inventory["physical_authority"] is False
 
 

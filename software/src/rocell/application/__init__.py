@@ -212,10 +212,12 @@ from .mission_route_coverage import (
     run_mission_route_coverage,
 )
 from .collision_readiness import (
+    AMBIENT_LIGHT_B0477_COLLISION_READINESS_SCHEMA,
     CURRENT_COLLISION_READINESS_SCHEMA,
     STATIC_B0477_COLLISION_READINESS_SCHEMA,
     CurrentCollisionReadinessReport,
     PinnedUrdfCollisionEvidence,
+    assess_ambient_light_b0477_collision_readiness,
     assess_current_collision_readiness,
     assess_static_b0477_collision_readiness,
     inspect_pinned_urdf_collision_evidence,
@@ -1458,6 +1460,7 @@ __all__ = [
     "StaticPhase1DeviceClosure",
     "StaticPhase1StalenessProbe",
     "StaticPhase1SyntheticClosure",
+    "AMBIENT_LIGHT_B0477_COLLISION_READINESS_SCHEMA",
     "CURRENT_COLLISION_READINESS_SCHEMA",
     "STATIC_B0477_COLLISION_READINESS_SCHEMA",
     "CurrentCollisionReadinessReport",
@@ -1966,6 +1969,7 @@ __all__ = [
     "build_static_phase1_synthetic_closure",
     "run_static_phase1_calibration_rehearsal",
     "static_phase1_context_hashes",
+    "assess_ambient_light_b0477_collision_readiness",
     "assess_current_collision_readiness",
     "assess_static_b0477_collision_readiness",
     "bootstrap_virtual_workcell",
