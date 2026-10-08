@@ -998,6 +998,19 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/integration lane on `codex/intent-to-motion-offline-pipeline` claims
+ARM-519 from merged ARM-518 base
+`497be7ff23459be08be90087da4a1051e2639419`. It may add one strict offline
+operator path that accepts exact keyboard text, compiles it through the existing
+Sticky Keys semantic compiler, binds the resulting ordered targets to the
+retained C03 `ModelMotionBatchV2`/ingress/trajectory/IK result, and emits one
+canonical zero-authority receipt. It must fail closed on text or target-order
+differences, changed fixture or result bytes, invalid receipt lineage, incomplete
+IK, collision claims, or nonzero authority counters. It may not add model-side
+joint, PWM, serial, Waveshare, permit, transport, controller, or execution
+fields; change arm-lane status; clear installed collision or physical gates; or
+claim that a simulated joint plan moved hardware.
+
 The current zero-authority integration baseline is
 [`model_arm_conformance_profile_v1.json`](../../config/model_arm_conformance_profile_v1.json),
 SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
