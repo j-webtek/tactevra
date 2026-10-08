@@ -11281,6 +11281,10 @@ rewriting history. New entries must use a unique evidence ID.
 - Exact focused checks before the diagnostic: `python -m pytest
   software/ai/tests/test_offline.py -q`; 36 passed in 0.76 seconds. Exact Ruff
   command over both changed evaluators and the test module passed.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 475.20 seconds.
+  Source-archive policy passed at 6,538 tracked files.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. GPU-job count: 0; local Ollama inference only.
 - Limitations: extraction recognizes a deliberately closed request grammar and
