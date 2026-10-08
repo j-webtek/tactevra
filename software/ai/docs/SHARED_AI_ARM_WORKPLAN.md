@@ -1011,6 +1011,17 @@ v12 must remain unopened. Evaluation v13 must remain unopened until a clean
 development decision is committed. The increment may not change the public
 closed intent schema, invoke motion planning, promote a model, change arm-lane
 status, or emit commands, hardware writes, movement, or physical authority.
+Evidence `E-20261008-AI-530` rejects and invalidates this campaign before v13.
+Generation-time composition admission succeeded for all 1,080 rows, closing
+AI-529's grammar gap, but development reached only 182/200 exact classifications:
+seventeen punctuation cases became `operation_not_available` refusals and one
+became `CLARIFY(text_ambiguous)`. A post-result provenance audit also found that
+the generator reused 560/640 training, 175/200 development, and 210/240
+evaluation request strings from classifier-v1, contrary to the claim's fresh-
+identity requirement. These results are retained as invalid/rejected evidence;
+v13 remains unopened. The next generator must enforce both exact composition
+and zero request-string overlap with every prior classifier campaign before it
+writes corpus bytes.
 
 The AI/model lane on `codex/intent-classifier-v1` claims AI-529 from merged
 AI-528 base `038e7bd28b643f965ae7587634b8717d2011b5c0`. It may define

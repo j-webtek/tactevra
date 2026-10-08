@@ -11383,3 +11383,94 @@ rewriting history. New entries must use a unique evidence ID.
   deterministic composer. Only a clean development decision may open that new
   evaluation family; no result may call the intent-to-motion adapter or grant
   command, execution, or physical authority.
+
+### E-20261008-AI-530 — admitted composer, reused requests invalidate successor
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: composition-admitted classification-only corpus, one-epoch offline
+  training, and development evaluation with zero authority. Frozen v13 remains
+  unopened.
+- Base commit: `d757695152f37bbf992f4ddbe8458440b287bca8`.
+- Claim commit: `8ffb7f03016e455a34297ee9fb768b99a1205d9a`.
+- Corpus, admission, and trainer commit:
+  `02d6d2711a9583050a8d80e490730cef946c407e`.
+- Fixtures: 640 training, 200 development, and 240 unopened v13 evaluation
+  cases. Train SHA-256 is
+  `86d617e5b5f152149db3bdd35f38056ed29621f551350638376165b78f9d86f4`;
+  development SHA-256 is
+  `6c57e948c7453a68472b9af1ffcaa80dca3dc3d7ddf0813b3fdd574ada6c8d1d`;
+  unopened evaluation SHA-256 is
+  `b650957b7e1367b121f9b87242f7fcd20686e169b6e5ee59ad22dc6465d929c0`.
+  Data-manifest file SHA-256 is
+  `d621d1f0316ee173768afcf7e625d6569bba8be27c96c1b1293d7661e08602a4`;
+  v13-manifest file SHA-256 is
+  `ae3e3f20b9d089d92b8019988caa4eb6f6738f6954e2c06e9830ed4541c588d6`;
+  generator SHA-256 is
+  `c51e7a0947718fd57b23b9dd2da93cd7e7338f4cf888ef0221825f9844271912`;
+  deterministic-extractor module SHA-256 is
+  `be37470c8276d4aad179a15d3f9b00aadce5648ffb3c124ad64997d76ea79f71`.
+  All 1,080 rows passed exact production composition before corpus bytes were
+  written. The negative test reproduces AI-529's unrecognized actionable
+  template and confirms generation fails closed. Source-archive policy passed
+  at the deliberate 6,552-file ceiling.
+- Preserved failed generator command: the first standalone `python
+  software/ai/train/build_intent_classifier_v2_data.py` invocation failed with
+  `ModuleNotFoundError: No module named 'rocell'` before writing the new corpus
+  because the generator had not bootstrapped `software/src`. Tests happened to
+  mask this because their harness already added that path. The generator was
+  corrected before the corpus commit or any training. A mechanical rename also
+  briefly produced untracked `intent_classifier_v23` filenames; those untracked
+  bytes were deleted and the intended v13 files were generated before freeze.
+- Exact training command: `python software/ai/train/fit_sft.py --data-version
+  classifier-v2 --epochs 1 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v2\pilot_1e`.
+  Result: training loss `0.122112`, development loss `0.001327`, 40 optimizer
+  updates, adapter SHA-256
+  `89069f695d5f2745678e68260fa55d71579b96870b1d678799b1a01d1018ab35`.
+  Run-manifest file SHA-256 is
+  `7034d6b6aa38541c00655995367d7cf4aa5b855983388e4f253d0da25752e598`.
+- Ollama import: base tag `llama32-1b-meta-92131767:latest`, exact base digest
+  `6319184583b7d9d76f7506bfe9cdba1832f147486129527a33c157c62845d046`,
+  candidate tag `llama32-1b-rocell-intent-classifier-v2:latest`, exact candidate
+  digest
+  `fef59f8704aa99b33c600bd6bbf5ada466a8594d27b17009adc06880d699b283`.
+  Import-manifest file SHA-256 is
+  `4ee63b2fa5ccb3fbdb4f9545e3828e16c4d969dcc61507b507e92ee66a560cf8`.
+- Exact development command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v2_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v2.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v2:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v2\pilot_1e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; classification and deterministic composition are
+  exact on 182/200 cases, with schema-invalid 0, false-actionable 0, and altered
+  composed text 0. All 18 errors are `type_punctuation`: seventeen become
+  `REFUSE(operation_not_available)` and one becomes
+  `CLARIFY(text_ambiguous)`. Scorecard SHA-256 is
+  `345a64b7e610afc9ad7c291b2b0aacc2add830364c03d4774e113906097d14f5`.
+- Post-result provenance audit: exact request-string overlap with classifier-v1
+  is 560/640 training, 175/200 development, and 210/240 evaluation. Renaming
+  case IDs did not create fresh language identities. This violates the active
+  claim independently of the failed development gate, so the campaign is
+  invalid as well as rejected. No patch or rescore is permitted.
+- Exact focused verification: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 41 passed. Exact Ruff checks over the
+  changed extractor, generator, trainer, and tests passed.
+- External artifacts: nine files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v2\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\intent_classifier_v2\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 1 offline training job.
+- Limitations: all data are synthetic and agent-authored. Reused request strings
+  invalidate any fresh-campaign claim, and the observed punctuation failures
+  reject the checkpoint even as a same-distribution candidate. v13 remains
+  unopened; the checkpoint is unpromoted and disconnected from motion.
+- Next dependency: a separately claimed successor must use new wording, payload
+  stems, IDs, and observations and must compare every generated request string
+  against the hash-bound classifier-v1 and classifier-v2 corpora before writing
+  bytes. Generation must require both zero historical overlap and exact
+  production composition. Only a clean development result may open its new
+  evaluation family.
