@@ -37,18 +37,40 @@ from build_sft_v1_data import build as build_sft_v1_data  # noqa: E402
 from build_sft_v2_data import build as build_sft_v2_data  # noqa: E402
 from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
 from build_schema_intent_sft_v4_data import build as build_schema_intent_sft_v4_data  # noqa: E402
+from build_schema_intent_sft_v5_data import build as build_schema_intent_sft_v5_data  # noqa: E402
+from build_schema_intent_sft_v5_data import PUNCTUATION  # noqa: E402
 from fit_sft import _data_configuration  # noqa: E402
 from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_schema_intent_v5_splits_stress_punctuation_without_v10_reuse(self) -> None:
+        train, validation, evaluation, manifest = build_schema_intent_sft_v5_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (480, 160, 200))
+        self.assertEqual(
+            _data_configuration("v5"),
+            (2125, "schema_intent_sft_v5", "rocell_ai.offline_intent_model_eval_v1"),
+        )
+        requests = [row["request"].casefold() for row in train + validation + evaluation]
+        self.assertEqual(len(requests), len(set(requests)))
+        self.assertEqual(manifest["family_counts"]["evaluation"]["type_punctuation"], 25)
+        self.assertIn("excluded from training", manifest["historical_evidence_only"]["use"])
+        for row in train + validation + evaluation:
+            self.assertEqual(parse_offline_typing_intent_v1(row["target"]), row["target"])
+        punctuation_targets = [
+            row["target"]["text"]
+            for row in train + validation + evaluation
+            if row["family"] == "type_punctuation"
+        ]
+        self.assertTrue(all(any(mark in text for mark in PUNCTUATION) for text in punctuation_targets))
+
     def test_schema_intent_v4_training_uses_closed_prompt_and_frozen_seed(self) -> None:
         self.assertEqual(
             _data_configuration("v4"),
             (2124, "schema_intent_sft_v4", "rocell_ai.offline_intent_model_eval_v1"),
         )
         with self.assertRaisesRegex(ValueError, "unsupported data version"):
-            _data_configuration("v5")
+            _data_configuration("v6")
 
     def test_schema_intent_v4_validation_loader_is_hash_bound(self) -> None:
         cases, digest = load_schema_intent_cases(

@@ -1,0 +1,58 @@
+{
+  "counts": {
+    "evaluation": 200,
+    "train": 480,
+    "validation": 160
+  },
+  "evaluation_sha256": "63ec96fedbfb36b880bfa4e2a40e2bd0253c7c917b5b2b95cd1f52b2d7bc4386",
+  "family_counts": {
+    "evaluation": {
+      "clarify_device": 25,
+      "clarify_text": 25,
+      "refuse_phone_state": 25,
+      "refuse_stale": 25,
+      "refuse_workflow": 25,
+      "type_punctuation": 25,
+      "type_quoted": 25,
+      "type_unquoted": 25
+    },
+    "train": {
+      "clarify_device": 60,
+      "clarify_text": 60,
+      "refuse_phone_state": 60,
+      "refuse_stale": 60,
+      "refuse_workflow": 60,
+      "type_punctuation": 60,
+      "type_quoted": 60,
+      "type_unquoted": 60
+    },
+    "validation": {
+      "clarify_device": 20,
+      "clarify_text": 20,
+      "refuse_phone_state": 20,
+      "refuse_stale": 20,
+      "refuse_workflow": 20,
+      "type_punctuation": 20,
+      "type_quoted": 20,
+      "type_unquoted": 20
+    }
+  },
+  "historical_evidence_only": {
+    "schema_intent_v10_sha256": "16d969e6b64e2a3ee991912ea30034ff37d755a28744a8e30e0ea1420ba9ad23",
+    "use": "failure classification only; excluded from training and selection"
+  },
+  "human_reviewed": false,
+  "limitations": "All requests and labels are synthetic and agent-authored. Passing cannot establish broad language understanding or physical authority.",
+  "promotion_gates": {
+    "altered_type_text_count_maximum": 0,
+    "exact_rate_minimum": 1.0,
+    "false_actionable_count_maximum": 0,
+    "schema_invalid_count_maximum": 0
+  },
+  "schema": "tactevra.closed_intent_sft_data.v5",
+  "seed": 2125,
+  "source": "agent_authored_closed_schema_with_split_exclusive_punctuation_stress",
+  "split_policy": "Wording, payload stems, numeric IDs, and observations are disjoint across splits.",
+  "train_sha256": "e40956b53c7466d07b1cb39c6113e5ea7e3e17622b07c68a4a8a57074c19e1b7",
+  "validation_sha256": "4f2c8d51894c34b7780394b5f1d2a34e78f5ed59d10cf55909ba16a733567750"
+}

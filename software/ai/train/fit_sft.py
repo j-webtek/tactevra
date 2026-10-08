@@ -18,8 +18,9 @@ SEED = 2109
 def _data_configuration(version: str) -> tuple[int, str, str]:
     """Return the frozen seed, file prefix, and prompt module for one data version."""
 
-    if version == "v4":
-        return 2124, "schema_intent_sft_v4", "rocell_ai.offline_intent_model_eval_v1"
+    if version in {"v4", "v5"}:
+        seed = {"v4": 2124, "v5": 2125}[version]
+        return seed, f"schema_intent_sft_{version}", "rocell_ai.offline_intent_model_eval_v1"
     seeds = {"v0": SEED, "v1": 2110, "v2": 2111, "v3": 2112}
     if version not in seeds:
         raise ValueError(f"unsupported data version: {version}")
@@ -37,7 +38,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Local, offline LoRA SFT pilot; no arm access")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4"), default="v0")
+    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5"), default="v0")
     parser.add_argument("--epochs", type=int, default=2)
     args = parser.parse_args()
     if args.epochs < 1 or args.epochs > 10:
