@@ -9799,3 +9799,33 @@ rewriting history. New entries must use a unique evidence ID.
   captures as they become available, resolve each reported blocker in order,
   and rerun ICQ-5 through ICQ-8. ICQ-9 still requires an exact physically
   applicable ICQ-8 `PASS`.
+
+### E-20261008-ARM-504 — executable C03 evidence CLI entrypoint
+
+- Lane: arm.
+- Stage: ICQ physical-evidence operator intake follow-up.
+- Commit: `0a3a9b227ce6c07f6f359fd636875370fc7624be`.
+- Change: added the executable module guard for ARM-503 and a subprocess smoke
+  proving `python -m rocell.application.c03_physical_evidence_packet_v1 --help`
+  reaches the operator CLI and exposes the exact route and measurement hash
+  arguments.
+- Inputs/fixtures: combined runtime-source SHA-256
+  `01dc32e30fa0f6c544bf66cf0ccf4a5ece727612600a34762310dbe965b19431`;
+  combined focused-test SHA-256
+  `4e63912ba913c4098968e2f2b7760e37150cca2c1d9e4770401deb6f639d86a`.
+- Command: `py -3.12 -m pytest software/tests/unit/test_c03_physical_evidence_packet_v1.py -q`
+  with `PYTHONPATH=software/src;software/ai`.
+- Result: `PASS`; 10 tests passed in 15.41 seconds, including the subprocess
+  module-entry smoke.
+- Validation: exact Ruff command over the runtime and focused test passed;
+  `py -3.12 scripts/maintain_repository.py verify` passed all 133 policy tests.
+  The 945-test offline suite was not repeated for this entrypoint-only follow-up;
+  ARM-503 retains the full-suite result on the unchanged packet and CLI logic.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: no real physical artifact was supplied and no qualification or
+  authority status changed.
+- Supersedes: none; ARM-503 remains the CLI implementation evidence.
+- Next dependency: run the executable CLI against the retained route and then
+  add real installed, rigid, cable, and fresh observed-state evidence in order.

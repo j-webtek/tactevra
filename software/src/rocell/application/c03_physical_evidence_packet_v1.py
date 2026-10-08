@@ -408,3 +408,7 @@ __all__ = [
     "main",
     "render_c03_physical_evidence_packet_markdown_v1",
 ]
+
+
+if __name__ == "__main__":  # pragma: no cover - exercised by subprocess smoke
+    raise SystemExit(main())

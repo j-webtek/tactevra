@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -245,3 +248,26 @@ def test_cli_emits_read_only_blocked_worksheet_and_nonzero_status(
     assert result == 2
     assert "BLOCKED_INSTALLED_MEASUREMENTS_REQUIRED" in captured.out
     assert "zero commands, writes, or physical movement" in captured.out
+
+
+def test_module_entrypoint_exposes_cli_help():
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = str(WORKSPACE / "software/src")
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "rocell.application.c03_physical_evidence_packet_v1",
+            "--help",
+        ],
+        cwd=WORKSPACE,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+
+    assert completed.returncode == 0
+    assert "--route-result-sha256" in completed.stdout
+    assert "--measurement-manifest-sha256" in completed.stdout
