@@ -10990,3 +10990,47 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: predeclare a successor that supplies the exact JSON Schema
   to Ollama's constrained decoder, preserving this failed result. Only if that
   still fails should schema-specific SFT be considered.
+
+### E-20261008-AI-524 — exact-schema decoding fixes structure, candidate rejected
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: offline schema-constrained local intent-model evaluation.
+- Base commit: `043e8e813929b218b4f52b55d2787da69c09f319`.
+- Claim commit: `819c5f827279f9984edcfe34b5a45aa67aa1e6c7`.
+- Implementation commit: `1e6b3789b9da3a0a10f7b46234439e880e857b52`.
+- Controlled change: retained AI-523 model, prompt, 30-case v9 benchmark, seed,
+  token/context limits, and gates; changed only Ollama `format` from generic
+  JSON to the exact hash-bound closed intent schema.
+- Model digest:
+  `22f80c2c3a5ace8b575863c0e37a6119029a98bc5e39829dd691b0f71ca0329d`;
+  Ollama version `0.34.0`; decoder-schema SHA-256
+  `be0abaef676510691cb9b85e142c5e2c85dc6ccb8a68f7690df7775fe6419c0c`;
+  evaluator SHA-256
+  `e60e0cfea8f32ee647f4cf36761a0a2f155f71452d4d56554df30f73711f1f48`.
+- Exact command: with `PYTHONPATH=software/ai;software/src`, run `py -3.12 -m
+  rocell_ai.offline_intent_schema_decode_eval_v1 --cases
+  software/ai/eval/benchmark_v9.jsonl --manifest
+  software/ai/eval/benchmark_v9.manifest.json --model
+  llama32-1b-rocell-decision-v1-e2:latest --schema
+  software/ai/schemas/offline_typing_intent_v1.schema.json --output
+  C:/MuJoCoWarp/evidence/issue190/offline_intent_schema_decode_eval_v1/decision_v1_e2_v9.json`.
+- Result: `REJECT_CANDIDATE`. Schema validity improved from AI-523's 0/30 to
+  30/30. Exact semantics were 7/30 (0.2333), with 21 false actionable outputs
+  and four altered `TYPE_TEXT` payloads (`v9_s01`, `v9_s06`, `v9_s07`, and
+  `v9_s12`). No output was passed to motion planning.
+- Artifact: primary and `F:` backup are byte-identical at SHA-256
+  `b082ca79a46570c58766924bf48097b3747cd30f3b909800a0044c05ad5e36d7`.
+- Exact focused test command: `py -3.12 -m pytest
+  software/ai/tests/test_offline.py -q`; 30 passed in 0.73 seconds. Ruff passed.
+  Exact full verification command: `py -3.12
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 473.93 seconds.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU job count: 0.
+- Limitations: v9 remains a small agent-authored benchmark. Constrained decoding
+  guarantees shape, not correct intent, literal-text preservation, or safe
+  abstention. This candidate has no motion or deployment authority.
+- Next dependency: build schema-specific SFT train/development data while
+  freezing a new held-out evaluation family before training. Preserve exact
+  quoted text and oversample ambiguity/refusal cases; require zero false
+  actionable and zero altered text before considering coverage.

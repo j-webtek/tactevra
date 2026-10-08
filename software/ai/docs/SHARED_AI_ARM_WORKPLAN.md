@@ -998,6 +998,21 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/offline-intent-schema-decoding` claims AI-524 from
+merged AI-523 base `043e8e813929b218b4f52b55d2787da69c09f319`. It may
+rerun the exact installed 1B model, frozen v9 benchmark, prompt, seed, and hard
+promotion gates while changing only Ollama's response format from generic JSON
+to the hash-bound closed intent v1 JSON Schema. It must preserve AI-523's failed
+evidence, report structural and semantic results separately, and remain read-
+only and zero-authority. It may not tune the prompt or model, alter the
+benchmark, invoke motion planning, change lane status, or emit commands,
+hardware writes, movement, or physical authority.
+Evidence `E-20261008-AI-524` rejects the same model after exact-schema decoding.
+Structural validity improves from 0/30 to 30/30, proving the decoder correction,
+but exact semantics reach only 7/30, with 21 false actionable outputs and four
+altered typing payloads. The model remains disconnected from motion. The next
+dependency is schema-specific training data and a newly frozen evaluation set.
+
 The AI/model lane on `codex/offline-intent-model-eval` claims AI-523 from
 merged ARM-522 base `e20f9aec993aaab6558db33180ebe204556072f7`. It may add
 a read-only Ollama evaluator that constrains one already-installed 1B local
