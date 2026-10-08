@@ -11140,6 +11140,10 @@ rewriting history. New entries must use a unique evidence ID.
   `fee436179a8d7546a5189d7dc877bdbefb74fdf3aca32ad77448e5fa6684dc85`.
 - Artifact: primary and `F:` backup scorecards are byte-identical at SHA-256
   `853c3490b9b87a1d709fea0ad1d8086ba12065dafd733fb675066e5be0f41bfd`.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 476.47 seconds.
+  The source archive policy passed at its frozen 6,532-file ceiling.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. GPU-job count: 0 for evaluation; local Ollama inference only.
 - Limitations: v10 is synthetic and agent-authored, so even a pass would not
