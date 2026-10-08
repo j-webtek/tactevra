@@ -262,6 +262,12 @@ execute collision screening.
 
 ### ICQ-5 — Partition collision evaluator
 
+**Implementation status (2026-10-07):** implemented for the zero-authority
+software boundary at `E-20261007-ARM-497`. Synthetic clear, collision,
+incomplete-evidence, evaluator-error, resource-limit, and deterministic replay
+fixtures pass. The retained full C03 rehearsal reports collisions in both
+partitions; it does not qualify the installed route or complete ICQ-6.
+
 **Purpose:** Execute full-body collision checks over every bounded partition
 without losing global route lineage.
 
