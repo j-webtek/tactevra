@@ -998,6 +998,16 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/offline-intent-model-eval` claims AI-523 from
+merged ARM-522 base `e20f9aec993aaab6558db33180ebe204556072f7`. It may add
+a read-only Ollama evaluator that constrains one already-installed 1B local
+model to the closed offline intent v1 schema and scores the frozen v9 benchmark
+for schema validity, exact decision match, exact `TYPE_TEXT` payload retention,
+and false actionable output. It may not train or promote a model, alter the
+benchmark after results, invoke the motion adapter, change either lane's stage
+status, or emit motion, controller, transport, hardware-write, movement, or
+physical authority.
+
 The AI/integration lane completed ARM-522 from merged ARM-521 base
 `711affb7e4d74d818701d8d8be543f9d3b966a77`. It adds the public compatibility,
 migration, and rollback note required for the new additive upstream intent
