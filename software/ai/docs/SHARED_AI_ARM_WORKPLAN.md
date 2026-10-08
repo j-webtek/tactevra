@@ -1159,6 +1159,22 @@ references for support/camera/fixed-cable bodies, and leaves all four lighting
 bodies explicitly undefined. All 32 bodies remain unmeasured and the prototype
 retains zero fabrication, installation, motion, and physical authority.
 
+The arm lane on `codex/c03-ambient-light-static-contract` completed ARM-517
+from merged ARM-516 base `e1a7a14120f13b37286363d08a97085de4f56346`.
+It adds an ambient-light v3 collision contract and v4 nominal inventory for the
+actual workcell architecture: variable ambient illumination with no dedicated
+light or light-support hardware. It must preserve the earlier v2/v3 evidence,
+retain ambient-light variation as a vision-domain condition, keep the factory
+clamp collision requirement, and distinguish the nominal rear clamp zone from
+the still-unmeasured installed clamp footprint and base transform. It may not
+clear ICQ-1/ICQ-9, change AI-lane status, run hardware, or grant controller,
+wire, joint, PWM, serial, transport, retry, permit, movement, or physical
+authority.
+Evidence `E-20261008-ARM-517` removes exactly four nonexistent fixed-light
+bodies from new consumers, retains 28 ambient-architecture inventory rows, and
+binds the factory clamp to the nominal 225–385 mm rear-edge zone. All 28 rows
+remain unmeasured; installed collision qualification remains blocked.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading

@@ -10535,3 +10535,78 @@ rewriting history. New entries must use a unique evidence ID.
   bind the selected printable component envelopes into a diagnostic-only route
   sensitivity model. After assembly, replace nominal transforms with measured
   installed evidence before any collision qualification.
+
+### E-20261008-ARM-517 — ambient-light static workcell contract
+
+- Lane: arm.
+- Stage: ICQ-1 architecture correction and nominal clamp binding.
+- Commit: `63a2946a87ba13746b43cde30897a7ef7646f888`.
+- Change: added an additive ambient-light v3 collision-readiness contract, v4
+  nominal-source inventory, and C03 v3 base/camera readiness consumer. The new
+  path declares the two fixed key lights and two lighting booms absent because
+  the actual workcell uses variable ambient illumination. It keeps illumination
+  variability as a required vision-domain condition, retains the factory clamp
+  as collision geometry, and binds only its existing nominal 225–385 mm rear
+  board-edge zone. Retained v2/v3 consumers and evidence are unchanged.
+- Inputs/fixtures: system-manifest SHA-256
+  `0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d`;
+  workcell-layout SHA-256
+  `e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1`;
+  printable-frame-design SHA-256
+  `74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3`;
+  implementation SHA-256 values
+  `e05081c4bb54152509746b8f34c9fcbbdf92fe92fdbe86ed26f058e9735ae342`,
+  `f67a5b983ccffa547cda5f1f23c5d5c3e99c1d0705f08e6612ea4886ed5a4915`,
+  `30e1f9cfc0180ef2da044f22bc2b2885ac63800f822394f4208242501123bb43`,
+  and `3e21ad99c087e6b84c4ab5cb6d864153d0da771381330c473f53d6c844a31b8d`;
+  focused-test SHA-256 values
+  `707f681968bd6579abb2d391f7ab0bb1e123ee16286f8ee1f11e132c6385385f`,
+  `be927815924492c9c80410a4e888e227fe49d73c05dfbde4782f78b390ec083b`,
+  and `c8c1d65b46c6c835a361f1dcd6d61087c724daadf19986887b65c3f08e93b7e2`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_ambient_light_static_contract_v3.json`,
+  file SHA-256
+  `ff15d83eb0d55c25859786405cd2f28b74540b97f82b64f5e582bb0a30439c60`,
+  readiness SHA-256
+  `d8b1c9019c871d80bffeb3da048f1372ac8494a3010fe9ebd9ae8db18f61e398`,
+  contract SHA-256
+  `ae9cd32cc20dcbc5eedd86b93b9bf38f75b171481103755f396c62fc45a553ff`,
+  and inventory SHA-256
+  `9241e93ac6db52eae2822f5d4ce289f832048e3e89892fc0960674c96c79741e`.
+- Exact evidence command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -` with the recorded inline Python program that loads the exact
+  simulation context, calls
+  `assess_ambient_light_b0477_collision_readiness` and
+  `build_ambient_light_static_b0477_collision_nominal_source_inventory_v4`,
+  and writes the retained sorted-key JSON path above.
+- Exact validation command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -m pytest software/tests/unit/test_collision_foundation.py
+  software/tests/unit/test_static_route_collision.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py
+  software/tests/unit/test_rehearsal_noncontact_stage.py
+  software/tests/unit/test_rehearsal_noncontact_binding.py -q`; then run Ruff
+  over the changed Python files and
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`. All 172 focused/predecessor tests passed in 35.84
+  seconds, Ruff passed, and all 133 policy tests passed. The ambient inventory
+  has 28 bodies, zero measured rows, and four explicitly absent fixed-light
+  bodies. The retained v2 readiness report SHA-256 remains
+  `9c3654de23d5784d7cd10471021f6a9100c39655dbf15190a55acd5da1ce2d8e`,
+  proving its serialization was not rewritten.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Failures preserved: ARM-516 remains the historical result under the earlier
+  fixed-light assumption; no earlier evidence file was edited or rescored.
+- Limitations: this increment does not qualify changing illumination for
+  perception. The clamp contact zone is nominal only; installed clamp
+  footprint, base transform, deflection, and clearance remain unmeasured. No
+  collision route, controller command, transport, permit, hardware write, or
+  physical movement occurred. ICQ-1 and ICQ-9 remain blocked.
+- Next dependency: bind the selected printable support/camera/fixed-cable
+  nominal envelopes to the ambient contract and run diagnostic route
+  sensitivity. In parallel, continue lighting-domain vision robustness work;
+  after installation, measure the clamp footprint and full board-to-base
+  transform before physical collision qualification.
