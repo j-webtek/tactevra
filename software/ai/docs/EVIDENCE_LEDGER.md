@@ -10043,3 +10043,57 @@ rewriting history. New entries must use a unique evidence ID.
   sensitivity comparison using the unchanged 35 mm proxies and CAD-solid-only
   station heights. Any differing collision decisions remain diagnostic until
   assembled station and service-part heights are physically measured.
+
+### E-20261008-ARM-509 — exact-route station-height sensitivity
+
+- Lane: arm.
+- Stage: ICQ-1 nominal route-sensitivity diagnostic.
+- Commit: `1e2cb10f379bd9daee99eef9adae76d11db7bbd3`.
+- Change: added a strict zero-authority sensitivity evaluator that first admits
+  the exact C03 route through the existing handoff, then checks every adjacent
+  achieved tool-tip segment against the unchanged 35 mm station proxies and a
+  derived bare-CAD-height scene. It retains target-local keyboard ignore
+  semantics, fixes clearance at 5 mm for this diagnostic, and lists every
+  decision difference without authorizing a proxy change.
+- Inputs/fixtures: exact route
+  `C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json`,
+  file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  runtime-source SHA-256
+  `2e6b08e9f042f369ffe1f407b5be9a4dcc69af03cfa626de912d284f1e347d41`;
+  focused-test SHA-256
+  `559659d785fd90bcc303411b96c28ab61ca1b585df70a9f5c9ec8fda45a3591c`.
+  The retained result is
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_station_height_route_sensitivity_v1.json`,
+  file SHA-256
+  `431b1378f59b2a2c665ce269ba0aeb8d62cde810d4d10f3b79401891749a5d36`,
+  content SHA-256
+  `93f304e3b8d41bff798e6d380fd36d33fedb4c4b8fb0cf17ab0322342f98f1c9`.
+- Commands: exact evaluation command used `py -3.12 -c` with
+  `load_c03_route_result_v1`, `load_simulation_context`, and
+  `assess_c03_station_height_route_sensitivity_v1`, binding the exact route
+  file and SHA-256 above and `segment_clearance_mm=5.0`. Exact focused command:
+  `py -3.12 -m pytest
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; followed by
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS`; the exact route contains 321 waypoints and 320 adjacent
+  segments. The current 35 mm scene reports 0 colliding segments, the bare-CAD
+  scene reports 0 colliding segments, and the decision difference count is 0.
+  All 41 focused and predecessor tests passed in 22.07 seconds, Ruff passed,
+  and all 133 repository policy tests passed.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this result checks the achieved tool-tip centreline against
+  nominal workcell AABBs. It does not evaluate robot links, self-collision,
+  gripper/tool volume, base/clamp, camera tower, connector, moving cable,
+  continuous between-sample joint motion, dynamics, installed deviations, or
+  uncertainty. It is not an installed collision screen and clears no gate.
+- Supersedes: none. ARM-508 remains the active-proxy containment audit.
+- Next dependency: preserve the 35 mm conservative proxies and advance the
+  offline full-body lane by binding robot-link, gripper/tool, base/clamp, and
+  rigid camera attachment geometry to each of the 321 route configurations;
+  moving-cable samples and physical installed geometry remain separate inputs.

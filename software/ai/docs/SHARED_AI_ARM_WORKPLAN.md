@@ -1054,7 +1054,7 @@ Evidence `E-20261008-ARM-508` records containment of all six nominal solids,
 the three deliberate 35 mm station-height proxies, the retained audit, and the
 decision to measure route sensitivity before changing any proxy.
 
-The arm lane on `codex/c03-station-height-route-sensitivity` owns the bounded
+The arm lane on `codex/c03-station-height-route-sensitivity` completed the bounded
 ICQ-1 exact-route sensitivity increment from merged ARM-508 base
 `b22a40e2a70f7ddc09d9adf69098849515e32d81`. It may admit the retained exact
 321-waypoint C03 route, compare tool-tip-centreline segment decisions under the
@@ -1063,6 +1063,9 @@ unchanged 35 mm station proxies and bare station CAD heights at the existing
 must preserve target-local ignore semantics, remain diagnostic, and must not
 alter a proxy, claim full-body collision evaluation, clear ICQ-1 or ICQ-9, or
 grant physical authority.
+Evidence `E-20261008-ARM-509` records zero collision segments and zero decision
+differences across all 320 adjacent exact-route segments under both station
+height models, while retaining the full-body and installed-evidence blockers.
 
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
