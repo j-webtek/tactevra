@@ -9478,3 +9478,93 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: ICQ-7 must bind a fresh observed start and continuously
   qualify entry into the retained route. Physical installation measurements
   must replace all synthetic rehearsal artifacts before any clearance claim.
+
+### E-20261007-ARM-499 — ICQ-7 binds fresh observed entry and retains the synthetic collision
+
+- Stage: S4 / ICQ-7 zero-authority fresh observed-start and route-entry
+  qualification.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Implementation commit: `353302c8e112ca3fd884be7ab625f0cf0ce20de3`;
+  active-claim commit: `538d3b192609582501971c4a221cb70c19e91507`;
+  exact merged ICQ-6 base:
+  `d17e9b5c73a08a088315b3135d56a9b405829240`.
+- Change: added a strict C03 observed-entry adapter that authenticates the exact
+  retained route, consumes the existing read-only T=1051 observed-planner-state
+  contract, requires freshness at evaluation time, and uses the shared bounded
+  sampler to interpolate only from the observed joints to exact C03 waypoint
+  zero. The adapter reuses the established FK-derived collision evaluator and
+  conservative continuous-sweep evaluator. Its sealed receipt binds the
+  controller session, feedback receipt, calibration, build, kinematic model,
+  route receipts, target catalog, tool configuration, installed profile,
+  collision contract, rigid attachment transforms, configuration-sampled cable
+  geometry, and cable sweep envelopes. Stale or mismatched evidence returns
+  `INDETERMINATE_REPLAN_REQUIRED`; it is never snapped to the nominal start.
+- Inputs/fixtures: adapter source SHA-256
+  `26dff3367e913d1f22d17ea76b4c6c0dc1b123cbfcd0a6c9d38ff827fff8ee52`;
+  focused test SHA-256
+  `b2d93eba0d3d3f08deb2e2cc49894449b4ef3d89bcfc90738672cda0bd280632`;
+  implementation-plan SHA-256
+  `48490e2399eaef45f99a3c505024ddbf2f7cba1a63323863bfdc067eda844ec0`;
+  external generator SHA-256
+  `49024871898eccb18b371fe4052fde05f2c7de56941d8d70106b2e5f33ec8b77`.
+  The exact route, measurement, rigid, and cable file SHA-256 values are
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`,
+  `a220c36cd79de2a0acd527c0df4892dbd6024e2ac9af766be0178146bf1e3a39`,
+  `1a34f33b7f223e03a665befafd162f9dcc7dec09ff8c8d2f76a5eb373c5b5ae9`,
+  and `d45c642b00c0f4327bc2453a10d6644479baea13f34606685fb6a7e814f9ec71`.
+- Command: exact rehearsal command
+  `py -3.12 C:\MuJoCoWarp\evidence\issue190\c03_observed_route_entry_v1\generate_synthetic_rehearsal_v1.py --workspace C:\Users\WebTek\Desktop\tactevra-c03-observed-entry --route-workspace C:\MuJoCoWarp\c03cw9 --route C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json --measurements C:\MuJoCoWarp\evidence\issue190\c03_rigid_attachment_binding_v1\synthetic_installed_measurements_v1.json --rigid-manifest C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\synthetic_rigid_binding_for_cable_rehearsal_v1.json --cable-manifest C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\synthetic_c03_cable_manifest_v1.json --output C:\MuJoCoWarp\evidence\issue190\c03_observed_route_entry_v1`.
+- Result: the retained synthetic rehearsal returned
+  `COLLISION_REPLAN_REQUIRED` for 2 bounded samples and 1 continuous entry
+  segment. The observed start equals exact C03 waypoint zero in this contract
+  rehearsal, so the result proves the entry boundary does not bypass the
+  already colliding synthetic installed profile. Report content SHA-256 is
+  `ce095bc96652d9067a072a686f411d54235a77292c6a88025708253736fb228b`;
+  report file SHA-256 is
+  `b33551b13292965a47971194f29e3f4ce465a2d51389b54e0a84a82537430e5f`;
+  rehearsal receipt SHA-256 is
+  `0c91ef411f14141e42fa41171a15bf4098dee5a464914dc9a5d16b70e74ff9db`;
+  receipt file SHA-256 is
+  `5dd442fd5759ec99a223d2449295810c1b9751f13b3354049978c813b3393323`.
+- Validation: the first focused command
+  `py -3.12 -m pytest -q software/tests/unit/test_c03_observed_route_entry_qualification_v1.py`
+  failed all 4 tests because the draft fixture changed only the outer route's
+  calibration hash while leaving the sealed nested IK identity unchanged. The
+  production boundary correctly rejected the crossed lineage; the fixture was
+  corrected to reuse the route's exact snapshot, and the unchanged command then
+  passed 4 tests. Exact related-boundary command
+  `py -3.12 -m pytest -q software/tests/unit/test_observed_planner_start_state.py software/tests/unit/test_typing_observed_ik_seed_v1.py software/tests/unit/test_typing_observed_trajectory_ik_v1.py software/tests/unit/test_typing_observed_route_entry_v1.py software/tests/unit/test_typing_observed_route_entry_collision_v1.py software/tests/unit/test_typing_observed_route_entry_sweep_v1.py software/tests/unit/test_c03_route_collision_handoff_v1.py software/tests/unit/test_c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_rigid_attachment_binding_v1.py software/tests/unit/test_c03_cable_envelope_intake_v1.py software/tests/unit/test_c03_partition_collision_evaluator_v1.py software/tests/unit/test_c03_observed_route_entry_qualification_v1.py`
+  with `PYTHONPATH=software/src` passed 65 tests in 132.64 seconds. Exact Ruff
+  command `py -3.12 -m ruff check software/src/rocell/application/c03_observed_route_entry_qualification_v1.py software/tests/unit/test_c03_observed_route_entry_qualification_v1.py`
+  passed. The first retained rehearsal stopped because the generic FK adapter
+  requires attachment provenance from the installed profile while the C03
+  rigid manifest separately names its metrology source; the generator retained
+  the exact C03 transform and report identity while using the accepted installed-
+  profile source required by the FK boundary, then the unchanged command passed.
+  The first full verification stopped at 6,513 files against the reviewed 6,511
+  ceiling. The ceiling was deliberately raised to 6,515 with two slots of
+  headroom and documented without changing any byte or duplicate limit. The
+  second full verification stopped because the fresh worktree lacked its ignored
+  `.venv-ci` junction. After linking the same isolated environment used by
+  ICQ-5/6, exact command `py -3.12 scripts/maintain_repository.py verify --full`
+  passed all 133 policy tests and 945 offline tests with 5 expected Windows
+  symlink skips in 456.21 seconds. All three external artifacts were copied to
+  `F:\robot-arm-build-backups\issue190\c03_observed_route_entry_v1` and
+  verified byte-for-byte by SHA-256.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the observed start, controller session, installed profile, rigid
+  placements, cable samples, cable sweep, and exact C03 route are synthetic
+  offline contract fixtures. The collision result is an honest negative result,
+  not a deployment failure. The adapter consumes caller-supplied entry-specific
+  measured cable evidence; the retained rehearsal conservatively rebinds the
+  existing first-route cable sample and sweep geometry to a zero-length entry.
+  No real feedback was read, no installed clearance was proved, and no command,
+  retry, permit, transport access, hardware write, movement, or physical
+  authority was created.
+- Supersedes: none. ARM-498 remains the ICQ-6 continuous-route predecessor.
+- Next dependency: ICQ-8 must reconstruct one exact route receipt from ICQ-7
+  entry evidence plus ICQ-6 route evidence. Real installed geometry, cable
+  sweeps, and a fresh physical T=1051 observation must replace every synthetic
+  fixture before any physical clearance or execution claim can be considered.

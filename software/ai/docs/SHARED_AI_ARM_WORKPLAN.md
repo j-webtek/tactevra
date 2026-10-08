@@ -1958,6 +1958,19 @@ The retained full-route synthetic rehearsal remains `COLLISION` on all 321
 segments. This is software and negative synthetic evidence only: real installed
 geometry, fresh observed entry, command generation, and physical authority
 remain blocked.
+Evidence `E-20261007-ARM-499` implements ICQ-7 over the exact retained C03
+route. It authenticates one read-only observed joint state and its controller
+session, enforces monotonic freshness, interpolates from the observed joints to
+exact C03 waypoint zero, and reuses the reviewed FK collision and conservative
+sweep engines. Its receipt binds route, target catalog, tool, calibration,
+build, model, installed profile, rigid placement, cable sample, and cable sweep
+identities; stale or mismatched state requires replanning and no nominal-start
+snap is permitted. The retained synthetic rehearsal evaluates two coincident
+entry samples and one continuous entry segment and returns
+`COLLISION_REPLAN_REQUIRED`, consistent with the already colliding synthetic
+ICQ-5/6 profile. This is zero-authority contract evidence: the observation,
+profile, placement, cables, and route remain synthetic and execution-ineligible.
+ICQ-8 reconstruction and physical installed evidence remain open.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
