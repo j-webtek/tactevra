@@ -6,12 +6,10 @@ from pathlib import Path
 import pytest
 
 import rocell.application.c03_route_collision_handoff_v1 as handoff_module
-from rocell.application.c03_full_body_geometry_audit_v1 import (
-    C03FullBodyGeometryAuditV1Error,
-    assess_c03_full_body_geometry_readiness_v1,
-)
 from rocell.application.c03_route_collision_handoff_v1 import (
+    C03FullBodyGeometryAuditV1Error,
     C03RouteCollisionHandoffV1Error,
+    assess_c03_full_body_geometry_readiness_v1,
     assess_c03_station_height_route_sensitivity_v1,
     prepare_c03_route_collision_handoff_v1,
 )
