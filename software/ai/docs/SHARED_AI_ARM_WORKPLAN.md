@@ -1004,19 +1004,19 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-observed-entry` owns ICQ-7 from the exact merged
-ICQ-6 base `d17e9b5c73a08a088315b3135d56a9b405829240`. It may bind the
-existing observed-state seed, deterministic IK, bounded entry sampling,
-configuration collision, and continuous-sweep chain to the exact retained C03
-route and installed-profile identities. The receipt must require one fresh,
-authenticated, read-only joint observation bound to the controller session,
-build, calibration, route, installed profile, rigid placement, tool, and cable
-identities. It must distinguish a qualified entry, a collision, and an
-indeterminate or mismatch result that requires replanning; it may not silently
-snap an observed state to the nominal route start. Synthetic observations and
-profiles remain execution-ineligible, and any identity change invalidates reuse.
-The increment must preserve the exact C03 route, remain zero authority, and emit
-no controller, wire, joint, PWM, serial, transport, retry, permit, or movement
+The arm lane on `codex/c03-aggregate-qualification` owns ICQ-8 from the exact
+merged ICQ-7 base `defafae746ee21189c82bd9d0009621961f1ae42`. It may
+reconstruct one complete route qualification receipt from the exact ICQ-7
+observed-entry receipt, C03 collision handoff and partition intake, cable
+evidence receipt, and ICQ-6 continuous-route receipt. The validator must prove
+exact hashes, shared lineage, route coverage and ordering, entry-to-route joint
+continuity, partition boundary continuity, and one minimum-clearance/limiting-
+body summary across the entry and every owned route segment. Missing,
+duplicated, crossed, stale, mixed-profile, or authority-bearing evidence must
+fail closed. The disposition is limited to `PASS`, `REJECT`, or `BLOCKED`;
+synthetic inputs remain execution-ineligible even after `PASS`. The increment
+must preserve the exact retained C03 route, remain zero authority, and emit no
+controller, wire, joint, PWM, serial, transport, retry, permit, or movement
 command. It must not change AI-lane status or clear an integration or physical-
 authority gate.
 
