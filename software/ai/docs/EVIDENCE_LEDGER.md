@@ -9994,3 +9994,52 @@ rewriting history. New entries must use a unique evidence ID.
   comparison and route testing; obtain one scaled full-board top-down image
   only after the visible stations and devices are fixed; later measure Z,
   installed deviations, attachments, cable sweep, and physical clearance.
+
+### E-20261008-ARM-508 — active nominal collision-proxy audit
+
+- Lane: arm.
+- Stage: ICQ-1 nominal active-proxy comparison.
+- Commit: `7439493d34c4c9d113915d8f9e4cc5e9a2c648cc`.
+- Change: added a deterministic comparison between the six board/device/station
+  AABBs used by the active simulator and the hash-bound nominal layout and CAD
+  sources from ARM-506/507. The report separates nominal under-bounds from
+  conservative over-bounds and refuses to authorize a proxy change.
+- Inputs/fixtures: combined runtime-source SHA-256
+  `2c6cafa10f8b8905e52a4b7e1143bb1359900e1808a229d05673807184d446a2`;
+  focused-test SHA-256
+  `4b7ee70b1f731ddcb900ba2a760f44bda8364bb9754b95607884d30705118e59`.
+  The retained audit is
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\nominal_collision_proxy_audit_v1.json`,
+  file SHA-256
+  `854c94c44c73376b2699adb5ff1fab0d7e7d5d1f78433945e13e10550d9f8137`,
+  content SHA-256
+  `4b5ac8524f6c5b3d72003c39256facdbb65f3533bf467ea952aa8cb66292a6c5`.
+- Commands: `py -3.12 -m pytest
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_installed_collision_profile_builder_v1.py
+  software/tests/unit/test_c03_installed_collision_qualification_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; `py -3.12 -m ruff check
+  software/src/rocell/application/installed_collision_measurement_manifest_v1.py
+  software/src/rocell/application/__init__.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py`;
+  and `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS`; 46 focused and predecessor tests passed in 22.60 seconds,
+  Ruff passed, and all 133 repository policy tests passed.
+- Metrics: all six nominal solids are contained and zero obstacles are
+  under-bounded. Board, keyboard, and phone proxies match their nominal boxes.
+  All station XY footprints match CAD. The fixed 35 mm station proxy extends
+  `28.0 mm` above each keyboard station CAD solid and `24.5 mm` above the
+  phone/TCP station CAD solid.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: containment does not prove installed geometry or clearance. The
+  station height proxies intentionally reserve unknown clamps, fasteners, and
+  service-part volume, so the observed over-bounds may prevent unsafe motion
+  or may cause false stops. No proxy was changed and ICQ-1/ICQ-9 remain blocked.
+- Supersedes: none. ARM-506/507 remain the source and mesh-bound evidence.
+- Next dependency: run the retained exact route through a predeclared
+  sensitivity comparison using the unchanged 35 mm proxies and CAD-solid-only
+  station heights. Any differing collision decisions remain diagnostic until
+  assembled station and service-part heights are physically measured.

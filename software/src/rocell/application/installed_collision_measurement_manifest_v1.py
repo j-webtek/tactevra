@@ -36,6 +36,7 @@ NOMINAL_SOURCE_INVENTORY_SCHEMA = (
     "rocell.installed_collision_nominal_source_inventory.v1"
 )
 NOMINAL_ENVELOPE_AUDIT_SCHEMA = "rocell.installed_collision_nominal_envelope_audit.v1"
+NOMINAL_PROXY_AUDIT_SCHEMA = "rocell.installed_collision_nominal_proxy_audit.v1"
 _BINARY_STL_COMPARISON_TOLERANCE_MM = 0.001
 READY_STATUS = "READY_FOR_INSTALLED_PROFILE_BUILD"
 BLOCKED_STATUS = "BLOCKED_INCOMPLETE_INSTALLED_MEASUREMENTS"
@@ -906,6 +907,126 @@ def build_installed_collision_nominal_envelope_audit_v1(
     return {**core, "content_sha256": _sha(core)}
 
 
+def build_installed_collision_nominal_proxy_audit_v1(
+    context: SimulationContext,
+) -> dict[str, Any]:
+    """Compare active workcell proxies with their nominal digital sources."""
+
+    envelope_audit = build_installed_collision_nominal_envelope_audit_v1(context)
+    layout = json.loads(context.scenario.workcell_layout_path.read_text(encoding="utf-8"))
+    active = {item.obstacle_id: item for item in context.scene.obstacles}
+    devices = layout["devices"]
+    stations = layout["stations"]
+
+    expected = {
+        "board_solid": (
+            [0.0, 0.0, float(layout["board"]["bottom_surface_z"])],
+            [float(layout["board"]["width"]), float(layout["board"]["depth"]), 0.0],
+            "MATCHES_LAYOUT_NOMINAL",
+        ),
+        "keyboard": (
+            [*map(float, devices["keyboard"]["nominal_origin_xy"]),
+             float(devices["keyboard"]["support_plane_z"])],
+            [
+                float(devices["keyboard"]["nominal_origin_xy"][0]
+                      + devices["keyboard"]["nominal_size"][0]),
+                float(devices["keyboard"]["nominal_origin_xy"][1]
+                      + devices["keyboard"]["nominal_size"][1]),
+                float(devices["keyboard"]["support_plane_z"]
+                      + devices["keyboard"]["nominal_size"][2]),
+            ],
+            "MATCHES_LAYOUT_NOMINAL",
+        ),
+        "phone": (
+            [*map(float, devices["phone"]["nominal_origin_xy"]),
+             float(devices["phone"]["support_plane_z"])],
+            [
+                float(devices["phone"]["nominal_origin_xy"][0]
+                      + devices["phone"]["configured_size"][0]),
+                float(devices["phone"]["nominal_origin_xy"][1]
+                      + devices["phone"]["configured_size"][1]),
+                float(devices["phone"]["support_plane_z"]
+                      + devices["phone"]["configured_size"][2]),
+            ],
+            "MATCHES_LAYOUT_NOMINAL",
+        ),
+    }
+    mesh_for_station = {
+        "keyboard_left": "keyboard_station_left",
+        "keyboard_right": "keyboard_station_right",
+        "phone_tcp": "phone_tcp_station",
+    }
+    for station_id, mesh_id in mesh_for_station.items():
+        origin = stations[station_id]["origin_xy"]
+        installed_z = float(stations[station_id]["installed_z"])
+        extents = envelope_audit["mesh_bounds"][mesh_id]["extents_mm"]
+        expected[f"station:{station_id}"] = (
+            [float(origin[0]), float(origin[1]), installed_z],
+            [
+                float(origin[0] + extents[0]),
+                float(origin[1] + extents[1]),
+                float(installed_z + extents[2]),
+            ],
+            "CONSERVATIVE_HEIGHT_PROXY_CONTAINS_CAD_SOLID",
+        )
+
+    comparisons = []
+    for obstacle_id, (nominal_min, nominal_max, classification) in expected.items():
+        obstacle = active[obstacle_id]
+        proxy_min = [obstacle.minimum.x, obstacle.minimum.y, obstacle.minimum.z]
+        proxy_max = [obstacle.maximum.x, obstacle.maximum.y, obstacle.maximum.z]
+        underbound = [
+            max(0.0, proxy_min[index] - nominal_min[index])
+            + max(0.0, nominal_max[index] - proxy_max[index])
+            for index in range(3)
+        ]
+        overbound_low = [
+            max(0.0, nominal_min[index] - proxy_min[index]) for index in range(3)
+        ]
+        overbound_high = [
+            max(0.0, proxy_max[index] - nominal_max[index]) for index in range(3)
+        ]
+        comparisons.append({
+            "obstacle_id": obstacle_id,
+            "active_proxy_minimum_mm": proxy_min,
+            "active_proxy_maximum_mm": proxy_max,
+            "nominal_minimum_mm": nominal_min,
+            "nominal_maximum_mm": nominal_max,
+            "underbound_mm_by_axis": underbound,
+            "overbound_low_mm_by_axis": overbound_low,
+            "overbound_high_mm_by_axis": overbound_high,
+            "has_nominal_underbound": any(value > 0.001 for value in underbound),
+            "classification": classification,
+        })
+    core: dict[str, Any] = {
+        "schema": NOMINAL_PROXY_AUDIT_SCHEMA,
+        "source_envelope_audit_sha256": envelope_audit["content_sha256"],
+        "comparison_count": len(comparisons),
+        "comparisons": comparisons,
+        "underbounded_obstacle_ids": [
+            row["obstacle_id"] for row in comparisons
+            if row["has_nominal_underbound"]
+        ],
+        "conservative_height_proxy_ids": [
+            row["obstacle_id"] for row in comparisons
+            if row["classification"]
+            == "CONSERVATIVE_HEIGHT_PROXY_CONTAINS_CAD_SOLID"
+        ],
+        "all_nominal_solids_contained": not any(
+            row["has_nominal_underbound"] for row in comparisons
+        ),
+        "station_proxy_height_mm": context.scenario.station_proxy_height_mm,
+        "proxy_change_authorized": False,
+        "evidence_class": "NOMINAL_DIGITAL_ONLY",
+        "installed_measurement_status": "PENDING",
+        "collision_qualification": False,
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
+
+
 def render_installed_collision_measurement_worksheet_v1(
     contract: CollisionGeometryContract,
 ) -> str:
@@ -1039,6 +1160,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--draft-captured-at-utc")
     parser.add_argument("--nominal-source-inventory", action="store_true")
     parser.add_argument("--nominal-envelope-audit", action="store_true")
+    parser.add_argument("--nominal-proxy-audit", action="store_true")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args(argv)
     system_manifest = args.system_manifest or (
@@ -1047,6 +1169,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         context = load_simulation_context(args.workspace, system_manifest)
         readiness = assess_current_collision_readiness(context)
+        if args.nominal_proxy_audit:
+            if any((
+                args.measurement_manifest, args.write_pending_draft,
+                args.nominal_source_inventory, args.nominal_envelope_audit,
+            )):
+                raise InstalledCollisionMeasurementManifestV1Error(
+                    "nominal proxy audit cannot be combined with other modes"
+                )
+            print(json.dumps(
+                build_installed_collision_nominal_proxy_audit_v1(context),
+                indent=2,
+                sort_keys=True,
+            ))
+            return 0
         if args.nominal_envelope_audit:
             if any((
                 args.measurement_manifest, args.write_pending_draft,
@@ -1153,7 +1289,9 @@ __all__ = [
     "InstalledCollisionMeasurementManifestV1Error",
     "NOMINAL_SOURCE_INVENTORY_SCHEMA",
     "NOMINAL_ENVELOPE_AUDIT_SCHEMA",
+    "NOMINAL_PROXY_AUDIT_SCHEMA",
     "build_installed_collision_nominal_envelope_audit_v1",
+    "build_installed_collision_nominal_proxy_audit_v1",
     "build_installed_collision_nominal_source_inventory_v1",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "build_pending_installed_collision_measurement_manifest_v1",

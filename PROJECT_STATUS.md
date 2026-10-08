@@ -1,6 +1,7 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-507 nominal mesh-envelope audit,
+Reviewed October 8, 2026 through the ARM-508 active nominal-proxy audit,
+the ARM-507 nominal mesh-envelope audit,
 the ARM-506 nominal collision-source inventory,
 the ARM-505 pending ICQ-1 measurement draft,
 the ARM-504 C03 CLI entrypoint smoke,
