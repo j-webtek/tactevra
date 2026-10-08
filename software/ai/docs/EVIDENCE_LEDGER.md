@@ -11238,3 +11238,59 @@ rewriting history. New entries must use a unique evidence ID.
   preservation should move toward deterministic extraction/copy validation,
   leaving the small model to classify the closed intent and reason, rather than
   asking a generative decoder to reproduce safety-critical payload bytes.
+
+### E-20261008-AI-528 — deterministic composition removes altered text
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: consumed-development diagnostic of a hybrid intent boundary with zero
+  authority. Frozen v11 remains unopened.
+- Base commit: `69f2e92479f85f3a905ace3fda21465991f5362b`.
+- Claim commit: `ec3357d4a68ed5a8c8e21fa597654ecf3aec2a16`.
+- Implementation commit: `c85aa045b8e8ae206eb89db516d8bd7e6596d642`.
+- Change: added a deterministic request-text extractor for one unambiguous
+  quoted span or one exact closed-grammar bare token. When the local model
+  selects `TYPE_TEXT`, its generated `text` field is discarded and replaced by
+  these extracted bytes. Extraction failure converts the attempted action to
+  `CLARIFY(text_ambiguous)`. Model intent type, device, clarification reason,
+  and refusal reason remain learned outputs. No motion adapter is called.
+- Fixture: consumed v5 development split, 160 rows, SHA-256
+  `4f2c8d51894c34b7780394b5f1d2a34e78f5ed59d10cf55909ba16a733567750`.
+  This diagnostic does not select a checkpoint and cannot reopen or replace the
+  rejected AI-527 result. Frozen v11 SHA-256
+  `63ec96fedbfb36b880bfa4e2a40e2bd0253c7c917b5b2b95cd1f52b2d7bc4386`
+  was not opened.
+- Model: unchanged `llama32-1b-rocell-intent-v5-1e:latest`, exact digest
+  `61769bd2f329779e15544e3db1c8f42a6716dfa9245e253a6bdb43f19460c0ba`.
+- Exact command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_schema_decode_eval_v1 --cases
+  software\ai\data\schema_intent_sft_v5_validation.jsonl --manifest
+  software\ai\data\schema_intent_sft_v5.manifest.json --native-split validation
+  --model llama32-1b-rocell-intent-v5-1e:latest --schema
+  software\ai\schemas\offline_typing_intent_v1.schema.json
+  --deterministic-text --output
+  C:\MuJoCoWarp\evidence\issue190\deterministic_intent_payload_v1\v5_validation_diagnostic.json`.
+- Result: `REJECT_CANDIDATE`, exact 144/160 (`0.9`), schema-invalid 0,
+  false-actionable 0, and altered composed text 0. The unchanged model had three
+  altered `TYPE_TEXT` payloads before composition; all 60 actionable rows were
+  composed from deterministic extraction. Remaining failures are twelve
+  `clarify_text` cases mislabeled `device_ambiguous` and four `refuse_stale`
+  cases mislabeled `operation_not_available`.
+- Artifact: primary and `F:` backup are byte-identical at SHA-256
+  `eb37f927905f27d4fb8510e1c239a3122071934de9a8c00e2898e966ba2db067`.
+- Exact focused checks before the diagnostic: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 36 passed in 0.76 seconds. Exact Ruff
+  command over both changed evaluators and the test module passed.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0; local Ollama inference only.
+- Limitations: extraction recognizes a deliberately closed request grammar and
+  is not a general natural-language parser. The diagnostic uses an already
+  consumed development split. It establishes that deterministic composition
+  removes the observed payload mutation class under these cases; it does not
+  qualify the remaining learned classification, broad language understanding,
+  motion, or physical operation.
+- Next dependency: freeze a new classifier-focused corpus whose model target
+  excludes payload text, while keeping deterministic extraction as a separate
+  independently tested boundary. Train and select only the classification
+  fields; then compose the existing closed intent object and require exact
+  zero-false-actionable gates on a new unopened evaluation family.
