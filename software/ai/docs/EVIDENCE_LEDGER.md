@@ -10930,3 +10930,21 @@ rewriting history. New entries must use a unique evidence ID.
   under exact-text and schema-validity evaluation, while separately feeding the
   admitted route through installed collision and fresh-state gates. Neither
   successor may grant physical authority from this evidence.
+
+### E-20261008-ARM-522 — intent-schema public handoff correction
+
+- Lane: AI/model plus integration documentation; all runtime and gate status is
+  unchanged.
+- Base commit: `711affb7e4d74d818701d8d8be543f9d3b966a77`.
+- Preserved failure: PR #264's pull-request automation failed because the shared
+  contract change lacked a public `docs/` migration note and its PR body omitted
+  explicit compatibility and rollback declarations. Its substantive local and
+  GitHub verification results are not rescored.
+- Change: added a public description of the closed intent union, current adapter
+  boundary, additive compatibility, caller migration, and rollback to ARM-520.
+  No schema, producer, consumer, numerical policy, or authority byte changed.
+- Hardware-write count: 0. Physical-movement count: 0. GPU-job count: 0.
+- Limitation: this corrects review handoff completeness only. It adds no language
+  model, physical qualification, collision evidence, or execution authority.
+- Next dependency: resume the separately evaluated offline intent-model work
+  after this corrective PR passes the shared-contract automation.

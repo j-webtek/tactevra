@@ -998,6 +998,13 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/integration lane completed ARM-522 from merged ARM-521 base
+`711affb7e4d74d818701d8d8be543f9d3b966a77`. It adds the public compatibility,
+migration, and rollback note required for the new additive upstream intent
+schema. This documentation correction changes no contract bytes, runtime code,
+gate, lane status, or authority. It preserves the failed PR #264 automation
+result rather than rewriting it.
+
 The AI/integration lane on `codex/intent-schema-to-motion` claims ARM-521 from
 merged ARM-520 base `8e7570ee3b754906e3eceb919936cf2e1ba46296`. It may
 define one closed offline intent schema for `TYPE_TEXT`, `PRESS_KEY`, `CLARIFY`,

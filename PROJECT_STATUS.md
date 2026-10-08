@@ -1,6 +1,7 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-521 closed intent-to-motion adapter,
+Reviewed October 8, 2026 through the ARM-522 intent-schema public handoff,
+the ARM-521 closed intent-to-motion adapter,
 the ARM-520 bounded dynamic intent-to-simulated-motion campaign, the ARM-519 exact
 intent-to-simulated-motion rehearsal, the ARM-518 ambient nominal-support route sensitivity,
 the ARM-517 ambient-light static-workcell contract,
