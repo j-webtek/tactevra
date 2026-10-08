@@ -9390,3 +9390,91 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: implement ICQ-6's reviewed continuous-segment proof method
   and populate the profile with real installed measurements before any
   collision-clear or execution claim can be considered.
+
+### E-20261007-ARM-498 — ICQ-6 proves the bound method and retains the full-route collision
+
+- Stage: S4 / ICQ-6 zero-authority conservative continuous-segment
+  qualification.
+- Lane: arm. AI-lane evidence and integration-gate status remain unchanged.
+- Implementation commit: `eb143839f1699a125c05846c28b109dab169ca30`;
+  exact merged ICQ-5 base:
+  `ad5fad789dcb1ae0858a599c455fb714d46b47c5`.
+- Change: added an exact continuous receipt over the existing reviewed
+  path-radius and independently captured sweep-envelope method. The receipt
+  recomputes every rigid-body bound from exact joint deltas, body path radius,
+  and ancestor joints; requires zero residual motion for configuration-sampled
+  bodies because their admitted sweep envelope already bounds the segment;
+  consumes every owned segment once; reproduces the shared configuration-
+  geometry boundary recheck; and reports `CLEAR`, `COLLISION`, or
+  `INDETERMINATE`. It never derives clearance from endpoints alone. The plan now
+  preserves and explains the historical 328-endpoint wording while binding
+  ICQ-6 to the current exact 321-segment route and 323 partition sample slots.
+- Inputs/fixtures: evaluator source SHA-256
+  `f0b3dfa178e5641842567777c31108519633e30af31ce176e6e00aa07f6b8ee1`;
+  evaluator test SHA-256
+  `f0f5529aff947c536f670ac5cfbdb36cf7e930830ed8d2e6b3600598745d0262`;
+  implementation-plan SHA-256 at the implementation commit
+  `8c07621e0b8335544ec809e4c4129203444aa36879331f323bd564687a422673`;
+  external generator SHA-256
+  `d2fb25e59ab1a905975ec79772a11c3e6e6b642d95a4439313755f2c9e48da46`.
+  The exact route, measurement, rigid, and cable file SHA-256 values are
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`,
+  `a220c36cd79de2a0acd527c0df4892dbd6024e2ac9af766be0178146bf1e3a39`,
+  `1a34f33b7f223e03a665befafd162f9dcc7dec09ff8c8d2f76a5eb373c5b5ae9`,
+  and `d45c642b00c0f4327bc2453a10d6644479baea13f34606685fb6a7e814f9ec71`.
+- Command: exact rehearsal command
+  `C:\Users\WebTek\Desktop\tactevra-c03-partition-evaluator\.venv-ci\Scripts\python.exe C:\MuJoCoWarp\evidence\issue190\c03_continuous_segment_qualification_v1\generate_synthetic_rehearsal_v1.py --workspace C:\Users\WebTek\Desktop\tactevra-c03-continuous-proof --route-workspace C:\MuJoCoWarp\c03cw9 --route C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json --measurements C:\MuJoCoWarp\evidence\issue190\c03_rigid_attachment_binding_v1\synthetic_installed_measurements_v1.json --rigid-manifest C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\synthetic_rigid_binding_for_cable_rehearsal_v1.json --cable-manifest C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\synthetic_c03_cable_manifest_v1.json --output C:\MuJoCoWarp\evidence\issue190\c03_continuous_segment_qualification_v1`.
+- Result: the receipt deterministically returned `COLLISION`, assigned all 321
+  owned segments exactly once, and reproduced the one exact cross-partition
+  boundary recheck. All 321 conservative segment envelopes collided against
+  the synthetic rehearsal profile and the minimum conservative inflated-AABB
+  clearance lower bound was 0.0 mm. The method SHA-256 is
+  `4bf7a8f89c2ecedfca73cd8a46bd0e6b7ea8c361e4c9ca366383cf8bcdb4682f`.
+  Continuous-report content SHA-256 is
+  `5c3d7a1f9579fca6b4740d6bb598021e2334ddbce23869dec9d22f7daf2f451d`;
+  file SHA-256 is
+  `efcd32871afb1f3df72c0591f66b40abd74d5cf69e174e1a955e8c4a7211900b`.
+  Partition file SHA-256 values are
+  `a7826edf64d0db4f2cbafe3a1a9f8294223b53cbdeb5239d9210caf537d8d133`
+  and
+  `82c19a84aa9044381ae9387c9b261052c34743e3139dadbaab533dd93aad7a40`.
+  Rehearsal receipt content SHA-256 is
+  `4a0c60a96d3382c75f1b248e40da7a8599005e12b11678f97da6be8cb0912262`;
+  receipt file SHA-256 is
+  `3f87627296171e1f34b78b27f06354184768f991d0d8a8ff43bea668e2d7b3ed`.
+- Validation: the first focused run passed 8 tests and failed 2 because the
+  draft receipt incorrectly required equal boundary sample-plan hashes; those
+  hashes intentionally differ across the recheck, while the admitted cable
+  geometry must match. The failure was retained in the command output, and the
+  implementation was corrected to compare the exact configuration-geometry
+  bindings. The unchanged focused command then passed 11 tests. Exact related
+  command
+  `C:\Users\WebTek\Desktop\tactevra-c03-partition-evaluator\.venv-ci\Scripts\python.exe -m pytest -q software/tests/unit/test_c03_route_collision_handoff_v1.py software/tests/unit/test_c03_rigid_attachment_binding_v1.py software/tests/unit/test_c03_partition_collision_evaluator_v1.py software/tests/unit/test_c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_cable_envelope_intake_v1.py software/tests/unit/test_collision_foundation.py software/tests/unit/test_partitioned_typing_collision_intake_v1.py software/tests/unit/test_partitioned_bounded_segment_collision_v1.py software/tests/unit/test_fk_collision_pose_adapter.py software/tests/unit/test_phase_local_contact_envelope_gate.py`
+  passed 92 tests in 57.59 seconds. Exact command
+  `py -3.12 -m ruff check software/src/rocell/application/c03_partition_collision_evaluator_v1.py software/tests/unit/test_c03_partition_collision_evaluator_v1.py`
+  passed. The first Ruff attempt in the borrowed isolated environment failed
+  because that environment does not install Ruff; the canonical Python 3.12
+  tool then passed. Exact canonical command
+  `py -3.12 scripts/maintain_repository.py verify --full` passed 945 offline
+  tests with 5 expected Windows symlink skips in 457.87 seconds after all 133
+  repository-policy tests, documentation checks, evidence-scope checks,
+  release-integrity checks, and the 6,511-file source-archive ceiling passed.
+  Five external artifacts were copied to
+  `F:\robot-arm-build-backups\issue190\c03_continuous_segment_qualification_v1`
+  and verified byte-for-byte by SHA-256.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the rehearsal profile and cable data are synthetic contract-test
+  fixtures. `COLLISION` is an honest negative simulation result and does not
+  establish a deployment failure. The numerical clearance is a conservative
+  inflated-AABB lower bound and may be zero without primitive intersection.
+  Real installed geometry, measured cable sweeps, fresh observed entry,
+  controller access, and physical authority remain absent. A future `CLEAR`
+  receipt would prove only the exact bound geometry and would still leave the
+  physical and execution gates closed.
+- Supersedes: none. ARM-496 remains the preserved failed ICQ-5 lineage attempt;
+  ARM-497 remains the discrete partition-evaluation predecessor.
+- Next dependency: ICQ-7 must bind a fresh observed start and continuously
+  qualify entry into the retained route. Physical installation measurements
+  must replace all synthetic rehearsal artifacts before any clearance claim.

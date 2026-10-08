@@ -1004,15 +1004,19 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-partition-collision-evaluator` owns ICQ-5 after the
-merged cable-envelope boundary in `E-20261007-ARM-495`. It may define a strict,
-profile-bound evaluator that consumes each C03 partition's rigid bindings,
-configuration-sampled geometry, and partition-owned sweep evidence exactly once.
-It must report discrete sample and segment results with distinct collision,
-incomplete-evidence, evaluator-error, and resource-limit outcomes. A clear
-discrete sample must never be described as continuous proof. It must not invent
-installed measurements, alter the accepted route, emit commands, or clear any
-controller, integration, or physical-authority gate.
+The arm lane on `codex/c03-continuous-collision-proof` owns ICQ-6 from the exact
+merged ICQ-5 base `ad5fad789dcb1ae0858a599c455fb714d46b47c5`. It may define a
+strict, profile-bound continuous-segment receipt over the existing reviewed
+path-radius swept-envelope method, consume every partition-owned segment exactly
+once, reproduce partition continuity and the shared-boundary recheck, and report
+`CLEAR`, `COLLISION`, or `INDETERMINATE` without relying on endpoint clearance.
+Before implementation it must reconcile the historical 328-segment acceptance
+text with the retained C03 route's current 323 samples and 321 adjacent segments;
+the discrepancy must remain visible and no route identity or count may be
+silently rewritten. It must add adversarial between-sample collision controls,
+preserve uncertainty and limiting-pair evidence, and remain zero authority. It
+must not invent installed measurements, alter the accepted route, emit commands,
+or clear any controller, integration, or physical-authority gate.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
@@ -1941,6 +1945,17 @@ synthetic contract-rehearsal profile. This is a useful negative result and no
 clearance claim: every synthetic sample and envelope collided, ICQ-6 continuous
 proof remains absent, and no command, write, movement, gate, or authority was
 created.
+Evidence `E-20261007-ARM-498` implements the ICQ-6 continuous receipt over the
+reviewed path-radius and independently measured sweep-envelope method. The
+receipt recomputes each rigid-body motion bound from exact joint deltas, body
+path radius, and ancestor joints; rejects changed bounds; consumes all 321
+current route segments once; reproduces the exact configuration-geometry
+boundary recheck; and distinguishes `CLEAR`, `COLLISION`, and `INDETERMINATE`.
+An adversarial fixture proves clear endpoints cannot hide a swept collision.
+The retained full-route synthetic rehearsal remains `COLLISION` on all 321
+segments. This is software and negative synthetic evidence only: real installed
+geometry, fresh observed entry, command generation, and physical authority
+remain blocked.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

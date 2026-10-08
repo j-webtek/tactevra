@@ -12,11 +12,15 @@ from rocell.application.c03_cable_envelope_intake_v1 import (
 from rocell.application.c03_partition_collision_evaluator_v1 import (
     CLEAR_STATUS,
     COLLISION_STATUS,
+    CONTINUOUS_CLEAR_STATUS,
+    CONTINUOUS_COLLISION_STATUS,
+    CONTINUOUS_INDETERMINATE_STATUS,
     ERROR_STATUS,
     INCOMPLETE_STATUS,
     RESOURCE_STATUS,
     C03PartitionCollisionResourcePolicy,
     evaluate_c03_collision_partition_v1,
+    qualify_c03_continuous_segments_v1,
 )
 from rocell.application.installed_collision_profile_builder_v1 import (
     build_installed_collision_profile_v1,
@@ -133,7 +137,7 @@ def admitted(tmp_path, monkeypatch, sim_context):
     return qualification, rigid, profile, cable, snapshot
 
 
-def _evaluate(sim_context, admitted, cable=None, *, policy=None):
+def _evaluate(sim_context, admitted, cable=None, *, policy=None, partition_index=0):
     qualification, rigid, profile, original, snapshot = admitted
     return evaluate_c03_collision_partition_v1(
         sim_context,
@@ -142,9 +146,21 @@ def _evaluate(sim_context, admitted, cable=None, *, policy=None):
         qualification,
         rigid,
         original if cable is None else cable,
-        0,
+        partition_index,
         resource_policy=policy,
     )
+
+
+def _evaluate_all(sim_context, admitted, cable=None):
+    selected = admitted[3] if cable is None else cable
+    return [
+        _evaluate(
+            sim_context, admitted, selected, partition_index=partition_index
+        )
+        for partition_index in range(
+            len(selected.configuration_samples_by_partition)
+        )
+    ]
 
 
 def test_clear_partition_is_deterministic_and_retains_continuous_proof_blocker(
@@ -250,3 +266,120 @@ def test_evaluator_failure_is_a_deterministic_error_receipt(
         "type": "RuntimeError",
         "message": "injected evaluator failure",
     }
+
+
+def test_continuous_receipt_assigns_every_segment_once_and_is_deterministic(
+    sim_context, admitted
+):
+    reports = _evaluate_all(sim_context, admitted)
+    first = qualify_c03_continuous_segments_v1(admitted[3], reports)
+    second = qualify_c03_continuous_segments_v1(admitted[3], reports)
+
+    assert first == second
+    assert first["status"] == CONTINUOUS_CLEAR_STATUS
+    assert first["owned_segment_count"] == admitted[3].report["owned_segment_count"]
+    assert first["all_owned_segments_assigned_exactly_once"] is True
+    assert first["cross_partition_boundary_rechecks_reproduced"] is True
+    assert first["continuous_method"]["endpoint_only_clearance_permitted"] is False
+    assert [
+        item["owned_segment_sequence"] for item in first["segment_reports"]
+    ] == list(range(first["owned_segment_count"]))
+    assert first["continuous_collision_proven_for_bound_geometry"] is True
+    assert first["installed_physical_qualification_complete"] is False
+    assert first["hardware_writes"] == first["physical_movements"] == 0
+    assert first["physical_authority"] is False
+
+
+def test_between_sample_collision_is_not_inferred_clear_from_clear_endpoints(
+    tmp_path, sim_context, admitted
+):
+    rebound = (admitted[0], admitted[1])
+    document = _manifest(rebound)
+    for row in document["sweeps"]:
+        for body in row["bodies"]:
+            body["capsules"][0].update({
+                "start_mm": [0.0, 0.0, 0.0],
+                "end_mm": [0.0, 0.0, 0.0],
+                "measured_radius_mm": 100_000_000.0,
+            })
+    unsigned = {key: value for key, value in document.items() if key != "content_sha256"}
+    import hashlib
+    document["content_sha256"] = hashlib.sha256(_canonical(unsigned)).hexdigest()
+    cable = _load(tmp_path, rebound, document)
+    reports = _evaluate_all(sim_context, admitted, cable)
+
+    assert all(item["discrete_samples_collision_free"] for item in reports)
+    assert any(
+        segment["collisions"]
+        for report in reports
+        for segment in report["segment_reports"]
+    )
+    receipt = qualify_c03_continuous_segments_v1(cable, reports)
+    assert receipt["status"] == CONTINUOUS_COLLISION_STATUS
+    assert receipt["continuous_collision_proven_for_bound_geometry"] is False
+    assert receipt["indeterminate_reason"] is None
+
+
+def test_missing_partition_is_named_indeterminate(sim_context, admitted):
+    reports = _evaluate_all(sim_context, admitted)
+    receipt = qualify_c03_continuous_segments_v1(admitted[3], reports[:-1])
+    assert receipt["status"] == CONTINUOUS_INDETERMINATE_STATUS
+    assert receipt["all_owned_segments_assigned_exactly_once"] is False
+    assert "coverage differs" in receipt["indeterminate_reason"]
+
+
+def test_cross_partition_boundary_tampering_is_named_indeterminate(
+    sim_context, admitted
+):
+    reports = _evaluate_all(sim_context, admitted)
+    changed = [dict(item) for item in reports]
+    successor = dict(changed[1])
+    samples = [dict(item) for item in successor["sample_reports"]]
+    geometry = dict(samples[0]["configuration_evidence_sha256_by_body"])
+    geometry[next(iter(geometry))] = "0" * 64
+    samples[0]["configuration_evidence_sha256_by_body"] = geometry
+    successor["sample_reports"] = samples
+    unsigned = {
+        key: value for key, value in successor.items()
+        if key != "c03_partition_collision_evaluation_sha256"
+    }
+    successor["c03_partition_collision_evaluation_sha256"] = __import__(
+        "hashlib"
+    ).sha256(_canonical(unsigned)).hexdigest()
+    changed[1] = successor
+
+    receipt = qualify_c03_continuous_segments_v1(admitted[3], changed)
+    assert receipt["status"] == CONTINUOUS_INDETERMINATE_STATUS
+    assert receipt["cross_partition_boundary_rechecks_reproduced"] is False
+    assert "boundary differs" in receipt["indeterminate_reason"]
+
+
+def test_motion_bound_tampering_is_named_indeterminate(sim_context, admitted):
+    reports = _evaluate_all(sim_context, admitted)
+    changed = [dict(item) for item in reports]
+    first = dict(changed[0])
+    segments = [dict(item) for item in first["segment_reports"]]
+    segment = segments[0]
+    motion = dict(segment["rigid_motion_bound_mm_by_body"])
+    moving = next(
+        body_id
+        for body_id, names in segment[
+            "motion_ancestor_joint_names_by_body"
+        ].items()
+        if names
+    )
+    motion[moving] += 1.0
+    segment["rigid_motion_bound_mm_by_body"] = motion
+    first["segment_reports"] = segments
+    unsigned = {
+        key: value for key, value in first.items()
+        if key != "c03_partition_collision_evaluation_sha256"
+    }
+    first["c03_partition_collision_evaluation_sha256"] = __import__(
+        "hashlib"
+    ).sha256(_canonical(unsigned)).hexdigest()
+    changed[0] = first
+
+    receipt = qualify_c03_continuous_segments_v1(admitted[3], changed)
+    assert receipt["status"] == CONTINUOUS_INDETERMINATE_STATUS
+    assert "proof evidence differs" in receipt["indeterminate_reason"]

@@ -3,7 +3,8 @@
 - **Document status:** Active implementation plan
 - **Audience:** Arm runtime, simulation, workcell, AI integration, and evidence reviewers
 - **Owner:** Arm runtime and simulation workstream, with workcell measurement support
-- **Reviewed:** 2026-10-07 against `main` commit `00d38a080b69f7236386efac7404b24766e220a9`
+- **Reviewed:** 2026-10-07 against the ICQ-5 merge
+  `ad5fad789dcb1ae0858a599c455fb714d46b47c5`
 - **Authority:** Normative development and evidence guidance only. This plan grants no hardware, movement, contact, controller, or release authority.
 
 ## Objective
@@ -19,9 +20,18 @@ and bounded route partitioning. It does not change AI output semantics, target
 coordinates, joint limits, or the accepted route to make a collision result
 pass.
 
-The immediate target is the promoted 328-segment typing route retained by
-PRs #231-#233. The implementation must remain usable for later routes without
-hard-coding this route's target string or sample count.
+The immediate target is the exact C03 successor retained at
+`E-20261007-AI-490` and handed to collision intake at `E-20261007-ARM-491`:
+321 partition-owned adjacent segments represented by 323 partition sample
+slots, including the route seed and one exact shared-boundary recheck. The
+implementation must remain usable for later routes without hard-coding this
+route's target string or sample count.
+
+Earlier revisions called the superseded 328-endpoint route a "328-segment"
+route. That language conflated source endpoints with adjacent collision
+segments and predates the exact C03 pose-family successor. The historical
+328-endpoint evidence remains preserved; ICQ-6 applies to the hash-bound current
+route and must use its admitted counts rather than either literal number.
 
 ## Current baseline
 
@@ -31,7 +41,7 @@ plan rather than work to repeat:
 | Capability | Current evidence |
 | --- | --- |
 | Strict model-to-arm target ingestion | Semantic target order enters the strict `ModelMotionBatchV2` boundary |
-| Complete accepted route | 328/328 canonical route samples pass the unchanged IK and adjacent-joint continuity gates |
+| Complete accepted route | The current C03 successor has 321 admitted adjacent segments; 323 partition sample slots include the route seed and one boundary recheck |
 | Bounded route partitions | The route is covered by two bounded partitions with an exact boundary recheck |
 | Partition-aware collision intake | Every route configuration and route segment has a declared evidence slot bound to one collision-contract identity |
 | Installed geometry loader | `rocell.installed_collision_geometry_profile.v1` accepts only exact measured sources and fails closed on crossed identities |
@@ -66,7 +76,7 @@ This plan does not:
 accepted ModelMotionBatchV2
         |
         v
-accepted execution plan and 328-segment IK route
+accepted execution plan and exact identity-bound IK route
         |
         v
 partitioned collision intake
@@ -121,7 +131,7 @@ dependency.
 
 - Link this plan from the documentation index and issue #190.
 - Replace issue #190's stale next increment with the post-PR-233 sequence.
-- Record that the 328-segment route and partitioned intake are complete while
+- Record that the exact current route and partitioned intake are complete while
   installed screening remains open.
 - State that the long-lived research branches are extraction sources only.
 
@@ -289,6 +299,14 @@ without losing global route lineage.
 
 ### ICQ-6 — Conservative continuous-segment qualification
 
+**Implementation status (2026-10-07):** the zero-authority continuous receipt
+is implemented at `E-20261007-ARM-498`. It revalidates the existing reviewed
+path-radius and measured-sweep method, derives rigid-body bounds from exact
+joint deltas, body path radii, and ancestor joints, assigns all 321 current
+route segments exactly once, and distinguishes `CLEAR`, `COLLISION`, and
+`INDETERMINATE`. The retained synthetic rehearsal is `COLLISION`; no installed
+clearance or physical qualification is claimed.
+
 **Purpose:** Close the gap between sampled configurations over every route
 segment.
 
@@ -305,7 +323,8 @@ segment.
 
 **Acceptance:**
 
-- All 328 source route segments are assigned exactly once.
+- Every segment owned by the exact admitted route is assigned exactly once;
+  the current C03 successor contains 321 such segments.
 - No segment is inferred clear solely from clear endpoints.
 - Cross-partition continuity and the shared-boundary recheck reproduce.
 - The final receipt distinguishes `CLEAR`, `COLLISION`, and `INDETERMINATE`.
@@ -342,7 +361,7 @@ entry evidence.
 - A reconstruction validator proving exact coverage, order, hashes, and
   boundary continuity.
 - One summary containing the minimum clearance and limiting body pair across
-  entry plus all 328 route segments.
+  entry plus every segment owned by the exact admitted route.
 - Explicit `PASS`, `REJECT`, or `BLOCKED` disposition and complete limitations.
 - Independent replay from retained compact artifacts.
 

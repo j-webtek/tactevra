@@ -59,11 +59,30 @@ from .installed_collision_geometry import InstalledCollisionGeometryProfile
 
 
 SCHEMA = "tactevra.c03_partition_collision_evaluation.v1"
+CONTINUOUS_SCHEMA = "tactevra.c03_continuous_segment_qualification.v1"
 CLEAR_STATUS = "PARTITION_ENVELOPES_CLEAR_ICQ6_PROOF_REQUIRED"
 COLLISION_STATUS = "BLOCKED_PARTITION_COLLISION_DETECTED"
 INCOMPLETE_STATUS = "BLOCKED_INCOMPLETE_PARTITION_EVIDENCE"
 RESOURCE_STATUS = "BLOCKED_PARTITION_RESOURCE_LIMIT"
 ERROR_STATUS = "BLOCKED_PARTITION_EVALUATOR_ERROR"
+CONTINUOUS_CLEAR_STATUS = "CLEAR"
+CONTINUOUS_COLLISION_STATUS = "COLLISION"
+CONTINUOUS_INDETERMINATE_STATUS = "INDETERMINATE"
+
+_CONTINUOUS_METHOD = {
+    "method_id": "C03_PATH_RADIUS_AND_MEASURED_SWEEP_ENVELOPES_V1",
+    "robot_rigid_body_bound": (
+        "body_origin_path_radius_times_sum_of_absolute_exact_ancestor_joint_deltas"
+    ),
+    "configuration_sampled_body_bound": (
+        "independently_captured_conservative_sweep_envelope_with_intermediate_observations"
+    ),
+    "static_and_root_fixed_body_bound": "zero_motion_in_collision_root",
+    "geometry_and_pose_uncertainty": (
+        "collision_profile_clearance_policy_plus_rigid_binding_uncertainty"
+    ),
+    "endpoint_only_clearance_permitted": False,
+}
 
 
 class C03PartitionCollisionEvaluatorV1Error(ValueError):
@@ -593,6 +612,8 @@ def evaluate_c03_collision_partition_v1(
             bodies: list[CollisionBody] = []
             requirements: list[CollisionBodyRequirement] = []
             motion_bounds: dict[str, float] = {}
+            path_radii: dict[str, float] = {}
+            motion_ancestors: dict[str, list[str]] = {}
             start_pose = poses[segment_index]
             for body in installed_profile.contract.bodies:
                 requirements.append(CollisionBodyRequirement(
@@ -611,10 +632,14 @@ def evaluate_c03_collision_partition_v1(
                     primitives = envelope.geometry_root_frame.primitives
                     source = f"measured C03 sweep {envelope.content_sha256}"
                     motion_bounds[body.body_id] = 0.0
+                    path_radii[body.body_id] = 0.0
+                    motion_ancestors[body.body_id] = []
                 elif body.binding_mode is CollisionBindingMode.STATIC_ROOT:
                     primitives = body.primitives
                     source = body.source_reference
                     motion_bounds[body.body_id] = 0.0
+                    path_radii[body.body_id] = 0.0
+                    motion_ancestors[body.body_id] = []
                 elif body.parent_frame in root_fixed:
                     transform = root_fixed[body.parent_frame]
                     primitives = tuple(
@@ -623,6 +648,8 @@ def evaluate_c03_collision_partition_v1(
                     )
                     source = f"root-fixed C03 binding {body.parent_frame}"
                     motion_bounds[body.body_id] = 0.0
+                    path_radii[body.body_id] = 0.0
+                    motion_ancestors[body.body_id] = []
                 else:
                     transform = start_pose.root_t_parent.get(body.parent_frame)
                     if transform is None:
@@ -639,6 +666,10 @@ def evaluate_c03_collision_partition_v1(
                     )
                     source = "pinned URDF path-radius motion bound"
                     motion_bounds[body.body_id] = motion
+                    path_radii[body.body_id] = chain_radius
+                    motion_ancestors[body.body_id] = sorted(
+                        ancestor_joints[body.parent_frame]
+                    )
                 bodies.append(CollisionBody(
                     body.body_id, root_frame, body.role,
                     CollisionEvidenceState.ACCEPTED_MEASURED,
@@ -675,6 +706,9 @@ def evaluate_c03_collision_partition_v1(
                     body_id: envelopes[body_id].content_sha256
                     for body_id in sorted(envelopes)
                 },
+                "joint_delta_rad": delta,
+                "body_path_radius_mm_by_body": path_radii,
+                "motion_ancestor_joint_names_by_body": motion_ancestors,
                 "rigid_motion_bound_mm_by_body": motion_bounds,
                 "collision_report_sha256": evaluation.report_hash,
                 "status": evaluation.status.value,
@@ -745,8 +779,316 @@ def evaluate_c03_collision_partition_v1(
         )
 
 
+def _continuous_result(
+    *, status: str, cable_report: Mapping[str, Any] | None,
+    partition_reports: Sequence[Mapping[str, Any]],
+    segment_reports: Sequence[Mapping[str, Any]], blockers: Sequence[str],
+    boundary_rechecks_reproduced: bool, all_segments_assigned: bool,
+    error: str | None = None,
+) -> dict[str, Any]:
+    core: dict[str, Any] = {
+        "schema": CONTINUOUS_SCHEMA,
+        "status": status,
+        "continuous_method": {
+            **_CONTINUOUS_METHOD,
+            "content_sha256": _sha(_CONTINUOUS_METHOD),
+        },
+        "c03_cable_envelope_intake_report_sha256": (
+            None if cable_report is None else cable_report.get(
+                "c03_cable_envelope_intake_report_sha256"
+            )
+        ),
+        "partition_collision_evaluation_sha256_values": [
+            item.get("c03_partition_collision_evaluation_sha256")
+            for item in partition_reports
+        ],
+        "partition_count": len(partition_reports),
+        "owned_segment_count": len(segment_reports),
+        "segment_reports": list(segment_reports),
+        "all_owned_segments_assigned_exactly_once": all_segments_assigned,
+        "cross_partition_boundary_rechecks_reproduced": (
+            boundary_rechecks_reproduced
+        ),
+        "continuous_collision_proven_for_bound_geometry": (
+            status == CONTINUOUS_CLEAR_STATUS
+        ),
+        "installed_physical_qualification_complete": False,
+        "blockers": list(blockers),
+        "indeterminate_reason": error,
+        "controller_commands": [],
+        "wire_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "c03_continuous_segment_qualification_sha256": _sha(core)}
+
+
+def qualify_c03_continuous_segments_v1(
+    cable_intake: C03CableEnvelopeIntakeV1Result,
+    partition_evaluations: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Produce the zero-authority ICQ-6 receipt for the retained C03 route.
+
+    The receipt revalidates every ICQ-5 segment against the admitted typed sweep
+    evidence.  It never infers a clear segment from its endpoint samples.
+    """
+
+    if not isinstance(cable_intake, C03CableEnvelopeIntakeV1Result):
+        raise TypeError("cable_intake must be C03CableEnvelopeIntakeV1Result")
+    try:
+        supplied = tuple(partition_evaluations)
+    except TypeError as exc:
+        raise TypeError("partition_evaluations must be a finite sequence") from exc
+
+    admitted: list[dict[str, Any]] = []
+    flattened: list[dict[str, Any]] = []
+    cable: dict[str, Any] | None = None
+    boundary_ok = False
+    assigned = False
+    error: str | None = None
+    try:
+        cable = _validated_report(
+            cable_intake.report,
+            schema="tactevra.c03_cable_envelope_intake_report.v1",
+            status=CABLE_READY_STATUS,
+            hash_field="c03_cable_envelope_intake_report_sha256",
+            label="cable intake report",
+        )
+        if len(supplied) != cable["partition_count"]:
+            raise _IncompleteEvidence("partition evaluation coverage differs")
+        common_lineage: dict[str, Any] | None = None
+        expected_global = 0
+        previous_terminal_geometry: Mapping[str, Any] | None = None
+        for partition_index, raw in enumerate(supplied):
+            if not isinstance(raw, Mapping):
+                raise _IncompleteEvidence("partition evaluation must be an object")
+            report = dict(raw)
+            digest = report.pop("c03_partition_collision_evaluation_sha256", None)
+            if (
+                raw.get("schema") != SCHEMA
+                or raw.get("status") not in {
+                    CLEAR_STATUS, COLLISION_STATUS, INCOMPLETE_STATUS,
+                    RESOURCE_STATUS, ERROR_STATUS,
+                }
+                or raw.get("partition_index") != partition_index
+                or not isinstance(digest, str)
+                or digest != _sha(report)
+            ):
+                raise _IncompleteEvidence("partition evaluation is not exact")
+            admitted.append(dict(raw))
+            lineage = {
+                key: raw.get(key)
+                for key in (
+                    "c03_installed_collision_qualification_sha256",
+                    "c03_rigid_attachment_binding_report_sha256",
+                    "c03_cable_envelope_intake_report_sha256",
+                    "partitioned_typing_collision_intake_sha256",
+                    "installed_collision_profile_sha256",
+                    "collision_contract_sha256",
+                )
+            }
+            if common_lineage is None:
+                common_lineage = lineage
+            elif lineage != common_lineage:
+                raise _IncompleteEvidence("partition evaluation lineage crosses")
+            if lineage["c03_cable_envelope_intake_report_sha256"] != cable[
+                "c03_cable_envelope_intake_report_sha256"
+            ]:
+                raise _IncompleteEvidence("partition/cable lineage differs")
+
+            samples = raw.get("sample_reports")
+            segments = raw.get("segment_reports")
+            typed_sweeps = cable_intake.sweep_envelopes_by_partition[partition_index]
+            if (
+                not isinstance(samples, list)
+                or not isinstance(segments, list)
+                or raw.get("sample_count") != len(samples)
+                or raw.get("segment_count") != len(segments)
+                or len(segments) != len(typed_sweeps)
+                or len(samples) != len(segments) + 1
+            ):
+                raise _IncompleteEvidence("partition sample/segment coverage differs")
+            first_geometry = samples[0].get(
+                "configuration_evidence_sha256_by_body"
+            )
+            terminal_geometry = samples[-1].get(
+                "configuration_evidence_sha256_by_body"
+            )
+            if (
+                not isinstance(first_geometry, Mapping)
+                or not isinstance(terminal_geometry, Mapping)
+                or previous_terminal_geometry is not None
+                and dict(first_geometry) != dict(previous_terminal_geometry)
+            ):
+                raise _IncompleteEvidence("shared partition boundary differs")
+            previous_terminal_geometry = terminal_geometry
+
+            for segment_index, (segment, typed) in enumerate(
+                zip(segments, typed_sweeps, strict=True)
+            ):
+                if not isinstance(segment, Mapping):
+                    raise _IncompleteEvidence("segment report must be an object")
+                expected_hashes = {
+                    body_id: typed[body_id].content_sha256
+                    for body_id in sorted(typed)
+                }
+                expected_start = next(iter(typed.values())).start_sample_sha256
+                expected_end = next(iter(typed.values())).end_sample_sha256
+                motion = segment.get("rigid_motion_bound_mm_by_body")
+                joint_delta = segment.get("joint_delta_rad")
+                path_radii = segment.get("body_path_radius_mm_by_body")
+                motion_ancestors = segment.get(
+                    "motion_ancestor_joint_names_by_body"
+                )
+                valid_motion_derivation = (
+                    isinstance(joint_delta, Mapping)
+                    and set(joint_delta) == set(ARM_JOINT_NAMES)
+                    and all(
+                        not isinstance(value, bool)
+                        and isinstance(value, (int, float))
+                        and math.isfinite(float(value))
+                        and float(value) >= 0.0
+                        for value in joint_delta.values()
+                    )
+                    and isinstance(path_radii, Mapping)
+                    and isinstance(motion_ancestors, Mapping)
+                    and isinstance(motion, Mapping)
+                    and set(path_radii) == set(motion)
+                    and set(motion_ancestors) == set(motion)
+                )
+                if valid_motion_derivation:
+                    for body_id, value in motion.items():
+                        radius = path_radii[body_id]
+                        ancestors = motion_ancestors[body_id]
+                        if (
+                            isinstance(radius, bool)
+                            or not isinstance(radius, (int, float))
+                            or not math.isfinite(float(radius))
+                            or float(radius) < 0.0
+                            or not isinstance(ancestors, list)
+                            or any(name not in ARM_JOINT_NAMES for name in ancestors)
+                        ):
+                            valid_motion_derivation = False
+                            break
+                        expected_motion = float(radius) * sum(
+                            float(joint_delta[name]) for name in ancestors
+                        )
+                        if not math.isclose(
+                            float(value), expected_motion, rel_tol=1e-12, abs_tol=1e-9
+                        ):
+                            valid_motion_derivation = False
+                            break
+                if (
+                    segment.get("segment_sequence") != segment_index
+                    or segment.get("start_sample_sha256") != expected_start
+                    or segment.get("end_sample_sha256") != expected_end
+                    or segment.get("configuration_envelope_sha256_by_body")
+                    != expected_hashes
+                    or not valid_motion_derivation
+                    or any(
+                        isinstance(value, bool)
+                        or not isinstance(value, (int, float))
+                        or not math.isfinite(float(value))
+                        or float(value) < 0.0
+                        for value in motion.values()
+                    )
+                    or any(float(motion.get(body_id, -1.0)) != 0.0 for body_id in typed)
+                    or segment.get("minimum_clearance_lower_bound_mm") is None
+                    or not isinstance(segment.get("uncertainty_inflation"), Mapping)
+                ):
+                    raise _IncompleteEvidence("segment proof evidence differs")
+                flattened.append({
+                    "owned_segment_sequence": expected_global,
+                    "partition_index": partition_index,
+                    "segment_sequence": segment_index,
+                    "start_sample_sha256": expected_start,
+                    "end_sample_sha256": expected_end,
+                    "status": segment.get("status"),
+                    "collision_free_diagnostic": segment.get(
+                        "collision_free_diagnostic"
+                    ),
+                    "minimum_clearance_lower_bound_mm": segment[
+                        "minimum_clearance_lower_bound_mm"
+                    ],
+                    "limiting_body_pair": segment.get("limiting_body_pair"),
+                    "joint_delta_rad": dict(joint_delta),
+                    "body_path_radius_mm_by_body": dict(path_radii),
+                    "motion_ancestor_joint_names_by_body": {
+                        body_id: list(names)
+                        for body_id, names in motion_ancestors.items()
+                    },
+                    "rigid_motion_bound_mm_by_body": dict(motion),
+                    "configuration_envelope_sha256_by_body": expected_hashes,
+                    "collision_report_sha256": segment.get(
+                        "collision_report_sha256"
+                    ),
+                    "uncertainty_inflation": dict(segment["uncertainty_inflation"]),
+                    "collisions": list(segment.get("collisions", [])),
+                })
+                expected_global += 1
+
+        boundary_rows = cable.get("boundary_rechecks")
+        boundary_ok = (
+            isinstance(boundary_rows, list)
+            and cable.get("boundary_recheck_count") == len(boundary_rows)
+            and len(boundary_rows) == max(0, len(admitted) - 1)
+            and all(item.get("exact_match") is True for item in boundary_rows)
+        )
+        if not boundary_ok:
+            raise _IncompleteEvidence("shared-boundary recheck is incomplete")
+        assigned = (
+            len(flattened) == cable.get("owned_segment_count")
+            and [item["owned_segment_sequence"] for item in flattened]
+            == list(range(len(flattened)))
+        )
+        if not assigned:
+            raise _IncompleteEvidence("owned segment assignment differs")
+    except (KeyError, IndexError, StopIteration, TypeError, _IncompleteEvidence) as exc:
+        error = str(exc)
+
+    verified_collision = any(
+        item.get("status") == COLLISION_STATUS for item in admitted
+    ) or any(item.get("collisions") for item in flattened)
+    all_clear = (
+        error is None
+        and assigned
+        and boundary_ok
+        and bool(admitted)
+        and all(item.get("status") == CLEAR_STATUS for item in admitted)
+        and all(item.get("collision_free_diagnostic") is True for item in flattened)
+    )
+    if verified_collision:
+        status = CONTINUOUS_COLLISION_STATUS
+        blockers = ["CONSERVATIVE_SEGMENT_COLLISION_DETECTED"]
+    elif all_clear:
+        status = CONTINUOUS_CLEAR_STATUS
+        blockers = [
+            "INSTALLED_PHYSICAL_QUALIFICATION_REQUIRED",
+            "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION",
+        ]
+    else:
+        status = CONTINUOUS_INDETERMINATE_STATUS
+        blockers = ["CONTINUOUS_SEGMENT_PROOF_INCOMPLETE"]
+    return _continuous_result(
+        status=status,
+        cable_report=cable,
+        partition_reports=admitted,
+        segment_reports=flattened,
+        blockers=blockers,
+        boundary_rechecks_reproduced=boundary_ok,
+        all_segments_assigned=assigned,
+        error=error,
+    )
+
+
 __all__ = [
-    "CLEAR_STATUS", "COLLISION_STATUS", "ERROR_STATUS", "INCOMPLETE_STATUS",
+    "CLEAR_STATUS", "COLLISION_STATUS", "CONTINUOUS_CLEAR_STATUS",
+    "CONTINUOUS_COLLISION_STATUS", "CONTINUOUS_INDETERMINATE_STATUS",
+    "CONTINUOUS_SCHEMA", "ERROR_STATUS", "INCOMPLETE_STATUS",
     "RESOURCE_STATUS", "SCHEMA", "C03PartitionCollisionEvaluatorV1Error",
     "C03PartitionCollisionResourcePolicy", "evaluate_c03_collision_partition_v1",
+    "qualify_c03_continuous_segments_v1",
 ]
