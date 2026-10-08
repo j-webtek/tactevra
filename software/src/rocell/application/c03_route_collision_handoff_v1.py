@@ -308,8 +308,14 @@ BASE_CAMERA_GEOMETRY_SCHEMA = "tactevra.c03_base_camera_geometry_readiness.v1"
 STATIC_BASE_CAMERA_GEOMETRY_SCHEMA = (
     "tactevra.c03_static_base_camera_geometry_readiness.v2"
 )
+STATIC_SUPPORT_SOURCE_RECONCILIATION_SCHEMA = (
+    "tactevra.c03_static_support_source_reconciliation.v1"
+)
 EXPECTED_STATIC_SUPPORT_SHA256 = (
     "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+)
+EXPECTED_PRINTABLE_FRAME_SHA256 = (
+    "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
 )
 MESH_BINDING_SCHEMA = "tactevra.isaac_sim_upstream_link_mesh_binding.v1"
 MESH_REDUCTION_SCHEMA = "tactevra.isaac_sim_link_mesh_reduction.v1"
@@ -758,6 +764,118 @@ def assess_c03_static_base_camera_geometry_readiness_v2(
     }
     return {**core, "static_base_camera_geometry_sha256": _sha256(core)}
 
+
+def assess_c03_static_support_source_reconciliation_v1(
+    result: Mapping[str, Any], context: SimulationContext, *,
+    support_design: Mapping[str, Any], support_design_file_sha256: str,
+    printable_frame_design: Mapping[str, Any],
+    printable_frame_design_file_sha256: str,
+) -> dict[str, Any]:
+    """Reconcile nominal support sources without selecting a hybrid assembly."""
+
+    readiness = assess_c03_static_base_camera_geometry_readiness_v2(
+        result, context, support_design=support_design,
+        support_design_file_sha256=support_design_file_sha256,
+    )
+    if (
+        printable_frame_design_file_sha256 != EXPECTED_PRINTABLE_FRAME_SHA256
+        or printable_frame_design.get("schema")
+        != "rocell.static_overhead_camera.printable_frame.v1"
+        or printable_frame_design.get("design_id")
+        != "ROCELL-PRINTABLE-CAMERA-PORTAL-PROTOTYPE-003"
+        or printable_frame_design.get("state")
+        != "PARAMETRIC_PROTOTYPE_NOT_RELEASED_FOR_FABRICATION_OR_ROBOT_OPERATION"
+    ):
+        raise C03FullBodyGeometryAuditV1Error("printable camera portal identity differs")
+    authority = printable_frame_design.get("authority")
+    if not isinstance(authority, Mapping) or any(
+        authority.get(key) is not False for key in (
+            "fabrication_authority", "physical_installation_authority",
+            "robot_motion_authority",
+        )
+    ):
+        raise C03FullBodyGeometryAuditV1Error("printable camera portal carries authority")
+    support = support_design.get("support")
+    layout = printable_frame_design.get("layout")
+    truss = printable_frame_design.get("truss")
+    if not all(isinstance(item, Mapping) for item in (support, layout, truss)):
+        raise C03FullBodyGeometryAuditV1Error("support layout is malformed")
+    shared_datums = {
+        "left_tower_axis_xy_mm": support["post_axis_xy_mm"][0],
+        "right_tower_axis_xy_mm": support["post_axis_xy_mm"][1],
+        "camera_axis_xy_mm": support["camera_axis_xy_mm"],
+        "camera_entrance_pupil_target_z_mm": support["nominal_entrance_pupil_z_mm"],
+    }
+    for key, value in shared_datums.items():
+        if layout.get(key) != value:
+            raise C03FullBodyGeometryAuditV1Error(
+                f"support sources disagree on shared datum {key}"
+            )
+    if (
+        support["structural_profiles"].get("uprights")
+        != "4040 aluminum extrusion"
+        or truss.get("section")
+        != "single-piece open-top U lattice; two side truss planes joined by a full bottom wall"
+    ):
+        raise C03FullBodyGeometryAuditV1Error("support implementations differ")
+    candidate_envelopes = {
+        "support:portal_left_post": {
+            "axis_xy_mm": layout["left_tower_axis_xy_mm"],
+            "section_mm": [truss["width_mm"], truss["height_mm"]],
+        },
+        "support:portal_right_post": {
+            "axis_xy_mm": layout["right_tower_axis_xy_mm"],
+            "section_mm": [truss["width_mm"], truss["height_mm"]],
+        },
+        "support:portal_crossbar": {
+            "axis_x_range_mm": [layout["left_tower_axis_xy_mm"][0], layout["right_tower_axis_xy_mm"][0]],
+            "bottom_z_mm": layout["crossbar_bottom_z_mm"],
+            "section_mm": [truss["width_mm"], truss["height_mm"]],
+        },
+        "support:camera_boom": {
+            "axis_x_mm": layout["boom_axis_x_mm"],
+            "y_range_mm": [layout["boom_root_y_mm"], layout["boom_end_y_mm"]],
+            "bottom_z_mm": layout["boom_bottom_z_mm"],
+            "section_mm": [truss["width_mm"], truss["height_mm"]],
+        },
+    }
+    core = {
+        "schema": STATIC_SUPPORT_SOURCE_RECONCILIATION_SCHEMA,
+        "source_result_receipt_sha256": result["receipt_sha256"],
+        "source_static_readiness_sha256": readiness["static_base_camera_geometry_sha256"],
+        "support_design_file_sha256": support_design_file_sha256,
+        "printable_frame_design_file_sha256": printable_frame_design_file_sha256,
+        "shared_datums": shared_datums,
+        "shared_datums_match": True,
+        "source_selection_state": "AMBIGUOUS_CONTROLLED_SOURCE",
+        "implementation_conflict": {
+            "support_design": "4040_ALUMINUM_AND_BRACED_METAL_BOOMS",
+            "printable_frame_design": "PRINTED_OPEN_U_LATTICE_AND_BENCH_SADDLES",
+        },
+        "candidate_nominal_envelopes": candidate_envelopes,
+        "candidate_envelope_body_count": len(candidate_envelopes),
+        "unbound_static_body_ids": [
+            "support:lighting_boom_left", "support:lighting_boom_right",
+            "lighting:key_light_left", "lighting:key_light_right",
+            "camera:b0477_enclosure", "camera:b0477_lens",
+            "camera:b0477_connector", "cable:fixed_usb_route",
+        ],
+        "blockers": [
+            "CONTROLLED_SUPPORT_IMPLEMENTATION_SELECTION_MISSING",
+            "PRINTABLE_PORTAL_NOT_RELEASED_FOR_FABRICATION_OR_ROBOT_OPERATION",
+            "INSTALLED_SUPPORT_TRANSFORMS_MISSING",
+            "LIGHTING_SUPPORT_GEOMETRY_MISSING",
+        ],
+        "nominal_collision_binding_allowed": False,
+        "installed_geometry_ready": False,
+        "collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [], "hardware_commands_generated": 0,
+        "hardware_access": False, "hardware_writes": 0,
+        "physical_movements": 0, "physical_authority": False,
+    }
+    return {**core, "source_reconciliation_sha256": _sha256(core)}
+
 __all__ = [
     "SCHEMA",
     "EXPECTED_RESULT_RECEIPT_SHA256",
@@ -765,6 +883,7 @@ __all__ = [
     "C03FullBodyGeometryAuditV1Error",
     "BASE_CAMERA_GEOMETRY_SCHEMA",
     "STATIC_BASE_CAMERA_GEOMETRY_SCHEMA",
+    "STATIC_SUPPORT_SOURCE_RECONCILIATION_SCHEMA",
     "C03RouteCollisionHandoffV1Error",
     "FULL_BODY_GEOMETRY_SCHEMA",
     "NOMINAL_TOOL_BINDING_SCHEMA",
@@ -772,6 +891,7 @@ __all__ = [
     "assess_c03_full_body_geometry_readiness_v1",
     "assess_c03_base_camera_geometry_readiness_v1",
     "assess_c03_static_base_camera_geometry_readiness_v2",
+    "assess_c03_static_support_source_reconciliation_v1",
     "assess_c03_nominal_tool_binding_readiness_v1",
     "assess_c03_station_height_route_sensitivity_v1",
     "prepare_c03_route_collision_handoff_v1",

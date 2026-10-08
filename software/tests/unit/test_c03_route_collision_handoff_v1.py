@@ -11,6 +11,7 @@ from rocell.application.c03_route_collision_handoff_v1 import (
     C03RouteCollisionHandoffV1Error,
     assess_c03_base_camera_geometry_readiness_v1,
     assess_c03_static_base_camera_geometry_readiness_v2,
+    assess_c03_static_support_source_reconciliation_v1,
     assess_c03_full_body_geometry_readiness_v1,
     assess_c03_nominal_tool_binding_readiness_v1,
     assess_c03_station_height_route_sensitivity_v1,
@@ -38,6 +39,9 @@ MESH_REDUCTION = WORKSPACE / (
 )
 SUPPORT_DESIGN = (
     WORKSPACE / "hardware/static_overhead_camera/config/support_design.json"
+)
+PRINTABLE_FRAME_DESIGN = WORKSPACE / (
+    "hardware/static_overhead_camera/config/printable_frame_design.json"
 )
 
 
@@ -248,6 +252,46 @@ def test_static_base_camera_audit_accepts_architecture_but_keeps_geometry_blocke
     assert report["installed_camera_geometry_ready"] is False
     assert report["collision_screen_executed"] is False
     assert report["physical_authority"] is False
+
+
+def test_static_support_sources_match_datums_but_refuse_hybrid_binding(
+    sim_context, synthetic_result
+):
+    report = assess_c03_static_support_source_reconciliation_v1(
+        synthetic_result, sim_context,
+        support_design=_json(SUPPORT_DESIGN),
+        support_design_file_sha256=(
+            "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+        ),
+        printable_frame_design=_json(PRINTABLE_FRAME_DESIGN),
+        printable_frame_design_file_sha256=(
+            "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
+        ),
+    )
+    assert report["shared_datums_match"] is True
+    assert report["shared_datums"]["camera_axis_xy_mm"] == [305.0, 228.5]
+    assert report["source_selection_state"] == "AMBIGUOUS_CONTROLLED_SOURCE"
+    assert report["candidate_envelope_body_count"] == 4
+    assert report["nominal_collision_binding_allowed"] is False
+    assert report["collision_screen_executed"] is False
+    assert report["hardware_writes"] == 0
+    assert report["physical_movements"] == 0
+    assert report["physical_authority"] is False
+
+
+def test_static_support_reconciliation_rejects_changed_printable_source(
+    sim_context, synthetic_result
+):
+    with pytest.raises(C03FullBodyGeometryAuditV1Error, match="identity differs"):
+        assess_c03_static_support_source_reconciliation_v1(
+            synthetic_result, sim_context,
+            support_design=_json(SUPPORT_DESIGN),
+            support_design_file_sha256=(
+                "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+            ),
+            printable_frame_design=_json(PRINTABLE_FRAME_DESIGN),
+            printable_frame_design_file_sha256="0" * 64,
+        )
 
 
 def test_handoff_accepts_matching_profile_but_does_not_clear_collision(
