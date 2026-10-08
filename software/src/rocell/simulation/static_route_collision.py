@@ -306,6 +306,23 @@ STATIC_ROUTE_BODY_REQUIREMENTS = (
     _requirement("lighting:key_light_right", "board", StaticRouteBodyRole.LIGHTING, _STATIC, "lighting_design"),
 )
 
+# Retained v2 evidence assumed two dedicated key lights and two lighting booms.
+# The selected workcell instead uses variable ambient illumination, so these
+# four identifiers are explicitly absent physical hardware rather than missing
+# collision geometry. Keep the v2 catalog unchanged and expose an additive
+# ambient-light catalog for new consumers.
+AMBIENT_LIGHT_ABSENT_BODY_IDS = (
+    "support:lighting_boom_left",
+    "support:lighting_boom_right",
+    "lighting:key_light_left",
+    "lighting:key_light_right",
+)
+AMBIENT_LIGHT_STATIC_ROUTE_BODY_REQUIREMENTS = tuple(
+    item
+    for item in STATIC_ROUTE_BODY_REQUIREMENTS
+    if item.body_id not in AMBIENT_LIGHT_ABSENT_BODY_IDS
+)
+
 # Historical v1 readiness evidence used the left-hand identifiers.  This map is
 # deliberately explicit and non-bijective: the static architecture splits broad
 # attachment placeholders into the independently measurable installed bodies
@@ -349,6 +366,43 @@ def build_static_b0477_prehardware_collision_contract(
     an installed-body requirement and cannot clear a physical gate.
     """
 
+    return _build_static_b0477_prehardware_collision_contract(
+        model,
+        scene,
+        requirements=STATIC_ROUTE_BODY_REQUIREMENTS,
+        contract_id="ROCELL-ROARM-M3-RC03-STATIC-B0477-PREHARDWARE-COLLISION-V2",
+    )
+
+
+def build_ambient_light_b0477_prehardware_collision_contract(
+    model: UrdfModel,
+    scene: NominalWorkcellScene | None = None,
+) -> CollisionGeometryContract:
+    """Build the additive v3 contract for variable ambient illumination.
+
+    Illumination remains a perception-domain condition. It is not represented
+    as collision geometry because this architecture has no dedicated light or
+    light-support hardware.
+    """
+
+    return _build_static_b0477_prehardware_collision_contract(
+        model,
+        scene,
+        requirements=AMBIENT_LIGHT_STATIC_ROUTE_BODY_REQUIREMENTS,
+        contract_id=(
+            "ROCELL-ROARM-M3-RC03-AMBIENT-LIGHT-B0477-"
+            "PREHARDWARE-COLLISION-V3"
+        ),
+    )
+
+
+def _build_static_b0477_prehardware_collision_contract(
+    model: UrdfModel,
+    scene: NominalWorkcellScene | None,
+    *,
+    requirements: tuple[StaticRouteBodyRequirement, ...],
+    contract_id: str,
+) -> CollisionGeometryContract:
     if not isinstance(model, UrdfModel):
         raise TypeError("model must be UrdfModel")
     required_links = {
@@ -366,6 +420,7 @@ def build_static_b0477_prehardware_collision_contract(
         raise CollisionContractError(
             f"static B0477 requirements reference absent URDF links: {missing_links}"
         )
+    route_requirements = requirements
     requirements = [
         CollisionBodyRequirement(
             item.body_id,
@@ -377,7 +432,7 @@ def build_static_b0477_prehardware_collision_contract(
                 f"role={item.role.value}; source_key={item.source_key}"
             ),
         )
-        for item in STATIC_ROUTE_BODY_REQUIREMENTS
+        for item in route_requirements
     ]
     bodies = [
         CollisionBody(
@@ -401,7 +456,7 @@ def build_static_b0477_prehardware_collision_contract(
                 f"source remain open; source_key={item.source_key}"
             ),
         )
-        for item in STATIC_ROUTE_BODY_REQUIREMENTS
+        for item in route_requirements
     ]
     if scene is not None:
         if not isinstance(scene, NominalWorkcellScene):
@@ -439,7 +494,7 @@ def build_static_b0477_prehardware_collision_contract(
                 )
             )
     return CollisionGeometryContract(
-        contract_id="ROCELL-ROARM-M3-RC03-STATIC-B0477-PREHARDWARE-COLLISION-V2",
+        contract_id=contract_id,
         root_frame="board",
         requirements=tuple(requirements),
         bodies=tuple(bodies),
@@ -1401,6 +1456,8 @@ def evaluate_static_b0477_target_route(
 
 
 __all__ = [
+    "AMBIENT_LIGHT_ABSENT_BODY_IDS",
+    "AMBIENT_LIGHT_STATIC_ROUTE_BODY_REQUIREMENTS",
     "MAX_STATIC_ROUTE_BODIES",
     "MAX_STATIC_ROUTE_PHASE_POSES",
     "MAX_STATIC_ROUTE_SAMPLES_PER_SEGMENT",
@@ -1438,5 +1495,6 @@ __all__ = [
     "StaticTargetRoute",
     "bind_static_route_target",
     "build_static_b0477_prehardware_collision_contract",
+    "build_ambient_light_b0477_prehardware_collision_contract",
     "evaluate_static_b0477_target_route",
 ]

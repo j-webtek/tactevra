@@ -27,6 +27,7 @@ from rocell.simulation.collision import (
 )
 
 from .collision_readiness import (
+    assess_ambient_light_b0477_collision_readiness,
     assess_current_collision_readiness,
     assess_static_b0477_collision_readiness,
 )
@@ -43,6 +44,9 @@ STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA = (
 )
 PRINTABLE_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA = (
     "rocell.printable_static_b0477_collision_nominal_source_inventory.v3"
+)
+AMBIENT_LIGHT_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA = (
+    "rocell.ambient_light_static_b0477_collision_nominal_source_inventory.v4"
 )
 SELECTED_PRINTABLE_FRAME_SHA256 = (
     "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
@@ -1141,6 +1145,71 @@ def build_printable_static_b0477_collision_nominal_source_inventory_v3(
     return {**core, "content_sha256": _sha(core)}
 
 
+def build_ambient_light_static_b0477_collision_nominal_source_inventory_v4(
+    context: SimulationContext,
+) -> dict[str, Any]:
+    """Remove nonexistent fixed-light bodies from the selected nominal inventory."""
+
+    printable = build_printable_static_b0477_collision_nominal_source_inventory_v3(
+        context
+    )
+    readiness = assess_ambient_light_b0477_collision_readiness(context)
+    absent_ids = {
+        "support:lighting_boom_left",
+        "support:lighting_boom_right",
+        "lighting:key_light_left",
+        "lighting:key_light_right",
+    }
+    bodies = [
+        row for row in printable["bodies"] if row["body_id"] not in absent_ids
+    ]
+    contract_body_ids = {
+        item.body_id for item in readiness.contract.requirements
+    }
+    if {row["body_id"] for row in bodies} != contract_body_ids:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "ambient-light nominal inventory differs from its collision contract"
+        )
+    core = {
+        "schema": AMBIENT_LIGHT_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA,
+        "status": "AMBIENT_LIGHT_ARCHITECTURE_PHYSICAL_VERIFICATION_PENDING",
+        "base_contract_sha256": readiness.contract.content_hash,
+        "robot_model_sha256": printable["robot_model_sha256"],
+        "selected_support_implementation": printable[
+            "selected_support_implementation"
+        ],
+        "source_count": printable["source_count"],
+        "sources": printable["sources"],
+        "body_count": len(bodies),
+        "bodies": bodies,
+        "printable_v3_inventory_sha256": printable["content_sha256"],
+        "declared_absent_physical_body_ids": sorted(absent_ids),
+        "illumination_contract": {
+            "mode": "VARIABLE_AMBIENT",
+            "collision_bodies": [],
+            "vision_domain_variation_required": True,
+            "fixed_lighting_assumed": False,
+        },
+        "arm_clamp_nominal_zone": {
+            "frame": context.scene.board_frame,
+            "rear_edge_x_range_mm": list(
+                context.scene.arm_clamp_rear_edge_x_range_mm
+            ),
+            "source": "active-project/RoCell_v0_3/config/workcell_layout.json#arm_clamp_zone",
+            "factory_table_edge_clamp": True,
+            "installed_footprint_measured": False,
+            "installed_base_transform_measured": False,
+        },
+        "simulation_use_allowed": True,
+        "installed_measurement_status": "PENDING",
+        "collision_qualification": False,
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
+
+
 def _binary_stl_bounds_mm(path: Path) -> dict[str, list[float]]:
     try:
         payload = path.read_bytes()
@@ -1608,6 +1677,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 __all__ = [
+    "AMBIENT_LIGHT_STATIC_B0477_NOMINAL_SOURCE_INVENTORY_SCHEMA",
     "BLOCKED_STATUS",
     "BODY_STATUSES",
     "MAX_MANIFEST_BYTES",
@@ -1626,6 +1696,7 @@ __all__ = [
     "build_installed_collision_nominal_source_inventory_v1",
     "build_static_b0477_collision_nominal_source_inventory_v2",
     "build_printable_static_b0477_collision_nominal_source_inventory_v3",
+    "build_ambient_light_static_b0477_collision_nominal_source_inventory_v4",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "build_pending_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",
