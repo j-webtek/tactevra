@@ -1004,14 +1004,15 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-cable-envelope-intake` owns ICQ-4 after the merged
-rigid-binding boundary in `E-20261007-ARM-493`. It may define a strict import
-adapter that binds measured, uncertainty-inflated cable capsule chains to every
-exact C03 partition sample and every partition-owned adjacent segment, including
-the shared-boundary recheck and complete posture/segment/profile/route lineage.
-It must reject endpoint-only interpolation and crossed or incomplete evidence.
-It must not invent installed cable measurements, execute collision screening,
-alter the accepted route, or clear any controller or physical-authority gate.
+The arm lane on `codex/c03-partition-collision-evaluator` owns ICQ-5 after the
+merged cable-envelope boundary in `E-20261007-ARM-495`. It may define a strict,
+profile-bound evaluator that consumes each C03 partition's rigid bindings,
+configuration-sampled geometry, and partition-owned sweep evidence exactly once.
+It must report discrete sample and segment results with distinct collision,
+incomplete-evidence, evaluator-error, and resource-limit outcomes. A clear
+discrete sample must never be described as continuous proof. It must not invent
+installed measurements, alter the accepted route, emit commands, or clear any
+controller, integration, or physical-authority gate.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
