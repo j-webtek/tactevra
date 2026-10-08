@@ -213,9 +213,11 @@ from .mission_route_coverage import (
 )
 from .collision_readiness import (
     CURRENT_COLLISION_READINESS_SCHEMA,
+    STATIC_B0477_COLLISION_READINESS_SCHEMA,
     CurrentCollisionReadinessReport,
     PinnedUrdfCollisionEvidence,
     assess_current_collision_readiness,
+    assess_static_b0477_collision_readiness,
     inspect_pinned_urdf_collision_evidence,
 )
 from .installed_collision_geometry import (
@@ -1455,6 +1457,7 @@ __all__ = [
     "StaticPhase1StalenessProbe",
     "StaticPhase1SyntheticClosure",
     "CURRENT_COLLISION_READINESS_SCHEMA",
+    "STATIC_B0477_COLLISION_READINESS_SCHEMA",
     "CurrentCollisionReadinessReport",
     "PinnedUrdfCollisionEvidence",
     "INSTALLED_COLLISION_GEOMETRY_PROFILE_SCHEMA",
@@ -1962,6 +1965,7 @@ __all__ = [
     "run_static_phase1_calibration_rehearsal",
     "static_phase1_context_hashes",
     "assess_current_collision_readiness",
+    "assess_static_b0477_collision_readiness",
     "bootstrap_virtual_workcell",
     "inspect_pinned_urdf_collision_evidence",
     "load_installed_collision_geometry_for_context",

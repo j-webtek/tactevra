@@ -26,6 +26,9 @@ from rocell.simulation.collision import (
     audit_collision_geometry,
     build_roarm_m3_prehardware_collision_contract,
 )
+from rocell.simulation.static_route_collision import (
+    build_static_b0477_prehardware_collision_contract,
+)
 
 from ._pinned_model import (
     MAX_PINNED_URDF_BYTES,
@@ -36,6 +39,9 @@ from .context import SimulationContext, revalidate_simulation_context
 
 
 CURRENT_COLLISION_READINESS_SCHEMA = "rocell.current_collision_readiness.v1"
+STATIC_B0477_COLLISION_READINESS_SCHEMA = (
+    "rocell.static_b0477_collision_readiness.v2"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -153,6 +159,7 @@ class CurrentCollisionReadinessReport:
     alignment_report_hash: str
     contract: CollisionGeometryContract
     geometry_audit: CollisionGeometryAudit
+    schema: str = CURRENT_COLLISION_READINESS_SCHEMA
 
     @property
     def status(self) -> str:
@@ -204,8 +211,17 @@ class CurrentCollisionReadinessReport:
         ).hexdigest()
 
     def to_dict(self) -> dict[str, Any]:
+        if self.contract.contract_id.endswith("STATIC-B0477-PREHARDWARE-COLLISION-V2"):
+            architecture_limitations = [
+                "The selected static-overhead architecture separately requires its portal, booms, lighting, B0477 enclosure/lens/connector, fixed USB route, arm harness, clamp, and tool bodies.",
+                "No default dimensions are invented for any absent installed body.",
+            ]
+        else:
+            architecture_limitations = [
+                "No default dimensions are invented for absent robot, holder, camera, connector, cable, clamp, or tool bodies.",
+            ]
         return {
-            "schema": CURRENT_COLLISION_READINESS_SCHEMA,
+            "schema": self.schema,
             "status": self.status,
             "verified_context": {
                 "manifest_id": self.manifest_id,
@@ -246,7 +262,7 @@ class CurrentCollisionReadinessReport:
                     "accepted as reduced installed collision geometry by this report."
                 ),
                 "Nominal RC03 workcell AABBs are diagnostic-only digital proxies.",
-                "No default dimensions are invented for absent robot, holder, camera, connector, cable, clamp, or tool bodies.",
+                *architecture_limitations,
                 "A future complete diagnostic result would still not authorize hardware motion or contact.",
             ],
             "authority": {
@@ -263,12 +279,16 @@ class CurrentCollisionReadinessReport:
 def _build_report(
     context: SimulationContext,
     urdf_evidence: PinnedUrdfCollisionEvidence,
+    *,
+    static_b0477: bool = False,
 ) -> CurrentCollisionReadinessReport:
     loaded_model = urdf_evidence.loaded_model
-    contract = build_roarm_m3_prehardware_collision_contract(
-        loaded_model.model,
-        context.scene,
+    builder = (
+        build_static_b0477_prehardware_collision_contract
+        if static_b0477
+        else build_roarm_m3_prehardware_collision_contract
     )
+    contract = builder(loaded_model.model, context.scene)
     audit = audit_collision_geometry(contract)
     return CurrentCollisionReadinessReport(
         manifest_id=context.snapshot.manifest_id,
@@ -299,6 +319,11 @@ def _build_report(
         alignment_report_hash=context.alignment.report_hash,
         contract=contract,
         geometry_audit=audit,
+        schema=(
+            STATIC_B0477_COLLISION_READINESS_SCHEMA
+            if static_b0477
+            else CURRENT_COLLISION_READINESS_SCHEMA
+        ),
     )
 
 
@@ -317,10 +342,31 @@ def assess_current_collision_readiness(
     return _build_report(context, urdf_evidence)
 
 
+def assess_static_b0477_collision_readiness(
+    context: SimulationContext,
+) -> CurrentCollisionReadinessReport:
+    """Produce the additive v2 static-overhead readiness audit.
+
+    The legacy current-readiness entry point remains stable for retained v1
+    evidence. Consumers must opt into this architecture revision explicitly.
+    """
+
+    if not isinstance(context, SimulationContext):
+        raise TypeError("context must be SimulationContext")
+    revalidate_simulation_context(context)
+    urdf_evidence = inspect_pinned_urdf_collision_evidence(
+        context.scenario.model_path,
+        context.scenario.model_sha256,
+    )
+    return _build_report(context, urdf_evidence, static_b0477=True)
+
+
 __all__ = [
     "CURRENT_COLLISION_READINESS_SCHEMA",
+    "STATIC_B0477_COLLISION_READINESS_SCHEMA",
     "CurrentCollisionReadinessReport",
     "PinnedUrdfCollisionEvidence",
     "assess_current_collision_readiness",
+    "assess_static_b0477_collision_readiness",
     "inspect_pinned_urdf_collision_evidence",
 ]

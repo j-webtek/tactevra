@@ -1103,6 +1103,17 @@ screening geometry, identifies four missing base/clamp inputs, and records that
 the moving-camera collision requirements are incompatible with the selected
 static-overhead camera architecture.
 
+The arm lane on `codex/c03-static-camera-collision-contract` claims ARM-513 from
+merged ARM-512 base `923f771502c4c625689c47b6bf344d77ad7f6fbc`. It may
+add an explicit v2 static-overhead readiness path using the existing static
+B0477 route-body catalog, prove the exact migration, and preserve the legacy
+v1 entry point and reconstruction for retained evidence. It must keep the
+portal, booms, lighting, enclosure, lens, connector, fixed USB route, arm
+harness, base/clamp, tool, robot, board, keyboard, and phone requirements
+explicit; may not install missing geometry or measurements; and must not clear
+ICQ-1/ICQ-9, change AI-lane status, or grant controller, wire, joint, PWM,
+serial, transport, retry, permit, movement, or physical authority.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading
