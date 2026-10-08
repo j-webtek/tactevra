@@ -28,6 +28,9 @@ from rocell_ai.review import review_benchmark  # noqa: E402
 from rocell_ai.model_eval import _proposal_from_response, evaluate_model  # noqa: E402
 from rocell_ai.model_eval import PROMPT_SHA256  # noqa: E402
 from rocell_ai.offline_intent_model_eval_v1 import score_intent_model  # noqa: E402
+from rocell_ai.offline_intent_schema_decode_eval_v1 import (  # noqa: E402
+    build_schema_constrained_payload,
+)
 from build_sft_data import build as build_sft_data  # noqa: E402
 from build_sft_v1_data import build as build_sft_v1_data  # noqa: E402
 from build_sft_v2_data import build as build_sft_v2_data  # noqa: E402
@@ -35,6 +38,18 @@ from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_schema_constrained_successor_changes_only_response_format(self) -> None:
+        case = {"request": 'Type "A!" on the keyboard.',
+                "observation": {"ref": "fixture", "fresh": True}}
+        schema = {"type": "object", "required": ["schema"]}
+        payload = build_schema_constrained_payload(case, "model", schema)
+        self.assertIs(payload["format"], schema)
+        self.assertEqual(payload["options"], {
+            "temperature": 0, "seed": 1, "num_predict": 160, "num_ctx": 4096,
+        })
+        self.assertFalse(payload["stream"])
+        self.assertEqual(payload["model"], "model")
+
     def test_closed_intent_model_score_rejects_false_action_and_text_change(self) -> None:
         cases = [
             {"case_id": "ok", "expected": {"decision": "type_text",
