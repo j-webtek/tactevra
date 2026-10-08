@@ -43,6 +43,10 @@ from build_schema_intent_sft_v4_data import build as build_schema_intent_sft_v4_
 from build_schema_intent_sft_v5_data import build as build_schema_intent_sft_v5_data  # noqa: E402
 from build_schema_intent_sft_v5_data import PUNCTUATION  # noqa: E402
 from build_intent_classifier_v1_data import build as build_intent_classifier_v1_data  # noqa: E402
+from build_intent_classifier_v2_data import (  # noqa: E402
+    build as build_intent_classifier_v2_data,
+    verify_composition_admission,
+)
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
     compose_public_intent_v1,
     parse_classification_v1,
@@ -53,6 +57,43 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v2_data_is_composition_admitted_before_training(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v2_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (640, 200, 240))
+        self.assertEqual(
+            _data_configuration("classifier-v2"),
+            (2127, "intent_classifier_v2", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertEqual(manifest["generation_admission"]["admitted_case_count"], 1080)
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertIn("v12", manifest["excluded_evidence"])
+        rows = train + validation + evaluation
+        self.assertEqual(len(rows), len({row["request"].casefold() for row in rows}))
+        for row in rows:
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
+    def test_classifier_v2_generation_rejects_uncomposable_action(self) -> None:
+        row = {
+            "id": "bad-action",
+            "request": "The physical keys should produce cedar123.",
+            "target": {
+                "schema": "rocell.offline_intent_classification.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+            },
+            "composed_target": {
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+                "text": "cedar123",
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "deterministic composition admission failed"):
+            verify_composition_admission({"validation": [row]})
+
     def test_classifier_v1_data_excludes_model_generated_text(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v1_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (640, 200, 240))
