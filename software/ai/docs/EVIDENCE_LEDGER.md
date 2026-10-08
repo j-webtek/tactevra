@@ -10097,3 +10097,81 @@ rewriting history. New entries must use a unique evidence ID.
   offline full-body lane by binding robot-link, gripper/tool, base/clamp, and
   rigid camera attachment geometry to each of the 321 route configurations;
   moving-cable samples and physical installed geometry remain separate inputs.
+
+### E-20261008-ARM-510 — exact-route full-body geometry readiness audit
+
+- Lane: arm.
+- Stage: ICQ-1 nominal full-body geometry binding.
+- Commit: `b9cb0a36f316861d5baf791f9490fef5bb965817` (consolidated
+  implementation; initial implementation commit
+  `5b44dd88bf4f96e6d46a18d87a974367f9fb80da` is retained in history).
+- Change: added a strict zero-authority audit that admits the exact C03 route,
+  verifies the retained official RoArm mesh-binding and conservative-reduction
+  receipts, binds every reduced robot link to the active 19-body collision
+  contract, and combines that inventory with the six nominal containing
+  workcell proxies. The audit refuses to install candidate geometry or execute
+  collision screening while any full-body input remains incomplete.
+- Inputs/fixtures: exact route
+  `C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json`,
+  file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  mesh-binding receipt SHA-256
+  `dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e`;
+  mesh-reduction receipt SHA-256
+  `ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178`;
+  runtime-source SHA-256
+  `01b9204ef90fafa69a248364893482d8f183ffc3d6aad8ee12db583478b62070`;
+  focused-test SHA-256
+  `f38f928b59cced040cae18ff36dbf534db670c18384137eee31f50c6f18c08a0`.
+  The retained audit is
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_full_body_geometry_audit_v1.json`,
+  file SHA-256
+  `b447aa77e45143aa679e3c4173ffaabced4e21e2129dad9d7f0cd1e220b4fc15`,
+  content SHA-256
+  `a7df98bb0bb32591bfb1c66f37469f9eb90e0eb204c1c19bb872b3f356b62c15`.
+- Commands: exact audit command used `py -3.12` with
+  `load_simulation_context` and
+  `assess_c03_full_body_geometry_readiness_v1`, binding the exact route and
+  retained mesh evidence above. Focused command: `py -3.12 -m pytest
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; followed by `py -3.12 -m ruff check
+  software/src/rocell/application/c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py` and
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`; all 321 route waypoints bind to an inventory with 19
+  required bodies, seven robot bodies, 14 conservative candidate primitives,
+  and six nominal static proxies. Six installation or attachment bodies remain
+  source-only or configuration-dependent. All 43 focused and predecessor tests
+  passed in 24.26 seconds, Ruff passed, and all 133 policy tests passed with the
+  governed archive held at exactly 6,519 files.
+- Failed/corrected increments: the first policy run rejected 6,520 tracked files
+  against the 6,519 ceiling after the audit was added as a new module. The
+  implementation was consolidated into the existing C03 handoff module rather
+  than weakening the ceiling. The first consolidation then produced 10 focused
+  test failures because a geometry receipt helper shadowed the route receipt
+  helper; renaming it to `_verified_geometry_receipt` restored all tests. These
+  failures were not rescored or removed from the development record.
+- Blockers: `CANDIDATE_ROBOT_BOXES_NOT_QUALIFIED`,
+  `ROBOT_PLACEMENT_NOMINAL_UNMEASURED`,
+  `SELF_COLLISION_PAIR_POLICY_NOT_REVIEWED`,
+  `CONTACT_TOOL_TRANSFORM_AND_ENVELOPE_NOT_INSTALLED`,
+  `BASE_AND_FACTORY_CLAMP_GEOMETRY_NOT_INSTALLED`,
+  `CAMERA_ATTACHMENT_GEOMETRY_NOT_INSTALLED`,
+  `MOVING_CAMERA_CABLE_CONFIGURATION_SAMPLES_MISSING`, and
+  `INSTALLED_CLEARANCE_POLICY_PENDING`.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the 14 robot primitives are retained conservative candidates,
+  not qualified installed collision geometry. The audit does not transform
+  primitives through the 321 configurations, choose self-collision exclusions,
+  represent the compliant tool or attachments, sample the moving cable, or run
+  collision queries. It cannot clear ICQ-1 or ICQ-9.
+- Supersedes: none. ARM-509 remains the tool-tip centreline sensitivity result.
+- Next dependency: bind the nominal compliant-tool solids to `hand_tcp` with a
+  reviewed local transform, then bind the base/clamp and rigid camera
+  attachments. Only after those inputs and a reviewed self-collision pair
+  policy exist should a candidate full-body replay be attempted; moving-cable
+  and installed measurements remain separate physical evidence.
