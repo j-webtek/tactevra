@@ -1130,6 +1130,16 @@ Evidence `E-20261008-ARM-514` records all 32 v2 bodies mapped to hash-bound
 nominal sources with zero measured claims, confirms architecture compatibility,
 and retains four base plus four static-camera/lighting physical input blockers.
 
+The arm lane on `codex/c03-static-support-nominal-binding` owns ARM-515 from
+merged ARM-514 base `6910168c617cc0fbc4c8463d2c1abd13dd8f32e8`. It may
+reconcile the retained 4040-aluminum support concept with the newer printable
+portal prototype, hash-bind their shared datums and candidate nominal
+envelopes, and identify the controlled-source decision required before route
+sensitivity. It must not combine the two implementations, select either as the
+installed assembly, run collision screening, clear ICQ-1/ICQ-9, change AI-lane
+status, or grant controller, wire, joint, PWM, serial, transport, retry,
+permit, movement, or physical authority.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading
