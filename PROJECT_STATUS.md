@@ -1,7 +1,8 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-515 static-support source
-reconciliation, the ARM-514 static-camera nominal-source migration,
+Reviewed October 8, 2026 through the ARM-516 printable-support nominal
+selection, the ARM-515 static-support source reconciliation,
+the ARM-514 static-camera nominal-source migration,
 the ARM-513 additive static-overhead collision readiness v2
 contract, and the ARM-512 base/camera geometry readiness audit,
 the ARM-508 active nominal-proxy audit,

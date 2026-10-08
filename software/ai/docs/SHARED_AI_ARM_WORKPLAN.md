@@ -1145,7 +1145,7 @@ datums, four printable candidate support envelopes, and the incompatible
 nominal collision binding until a controlled source selects one implementation;
 installed transforms and lighting geometry remain missing.
 
-The arm lane on `codex/c03-printable-support-selection` owns ARM-516 from merged
+The arm lane on `codex/c03-printable-support-selection` completed ARM-516 from merged
 ARM-515 base `31d524a26fff92cbccc5e42fa4a894388e189beb`. It may select the
 user-confirmed printable camera portal as the nominal support implementation by
 exact design hash and migrate the v2 nominal inventory to its actual design,
@@ -1153,6 +1153,11 @@ manifest, assembly, carriage, and cage sources. It must preserve the prototype's
 no-fabrication/no-installation/no-motion authority, leave lighting undefined,
 leave installed transforms pending, preserve v1/v2 consumers and evidence, and
 must not execute collision screening or clear ICQ-1/ICQ-9.
+Evidence `E-20261008-ARM-516` selects printable prototype 003 by its exact
+design hash for nominal simulation, replaces the obsolete aluminum-source
+references for support/camera/fixed-cable bodies, and leaves all four lighting
+bodies explicitly undefined. All 32 bodies remain unmeasured and the prototype
+retains zero fabrication, installation, motion, and physical authority.
 
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base

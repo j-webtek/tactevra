@@ -10472,3 +10472,66 @@ rewriting history. New entries must use a unique evidence ID.
   v2 nominal inventory to its exact component sources and only then run
   diagnostic route sensitivity; installed qualification still requires the
   completed portal and physical measurements.
+
+### E-20261008-ARM-516 — printable support nominal selection
+
+- Lane: arm.
+- Stage: ICQ-1 selected nominal support-source migration.
+- Commit: `08e405ef95c8ac7aa32a8375f73ac798438d6f49`.
+- Change: added an additive v3 nominal-source inventory that selects printable
+  camera portal prototype 003 by exact design hash, based on the user's report
+  that the printable tower is being fabricated. It migrates the four portal and
+  camera-boom bodies plus the B0477 cage, lens, connector, and fixed USB route
+  to exact printable design, manifest, assembly, carriage, cage, keeper, and
+  camera-profile sources. It does not alter v1 or v2 consumers.
+- Inputs/fixtures: printable-frame-design SHA-256
+  `74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3`;
+  implementation SHA-256
+  `6807105df0218049ac28fc82f5e3e2a13bde784d8ea8e37b37920ee69ec923ba`;
+  focused-test SHA-256
+  `fd32c4cc7abf123e1ca13717643ca84ec3e2da85e135ebdbaa4e06de0af982d9`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_printable_static_source_inventory_v3.json`,
+  file SHA-256
+  `bece67834146dd41bd4b8af135a8de0a822c6cf85fce3876d4e4c90a9a786694`,
+  inventory SHA-256
+  `cd620036a55dcd0cc3068920e7b1850f9496806e6d4dc09868725578b0864c35`.
+- Exact evidence command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -` with the recorded inline Python program that loads the exact
+  simulation context, calls
+  `build_printable_static_b0477_collision_nominal_source_inventory_v3`, and
+  writes the retained sorted-key JSON path above.
+- Exact validation command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -m pytest software/tests/unit/test_collision_foundation.py
+  software/tests/unit/test_static_route_collision.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py
+  software/tests/unit/test_rehearsal_noncontact_stage.py
+  software/tests/unit/test_rehearsal_noncontact_binding.py -q`; then run
+  `py -3.12 -m ruff check software/src/rocell/application/installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py` and
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`. All 169 focused/predecessor tests passed in 34.50
+  seconds and Ruff passed. The inventory contains 32 unmeasured bodies and 15
+  used sources. No body references the obsolete support-design file. Portal,
+  camera, and fixed-cable bodies use the selected printable sources. Both
+  lighting booms and both lights have empty source lists and the explicit state
+  `UNDEFINED_IN_SELECTED_PRINTABLE_ARCHITECTURE`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Failures preserved: ARM-515's ambiguity remains the historical preselection
+  finding; it is not rewritten. The retained v1/v2 inventories still describe
+  their exact earlier assumptions.
+- Limitations: nominal selection is not fabrication approval, installed-part
+  evidence, or collision qualification. The selected source explicitly carries
+  no fabrication, physical-installation, or robot-motion authority. Printed
+  first articles, assembled transforms, fasteners, deflection, USB routing,
+  lighting, and physical clearance remain unverified. No collision query,
+  command, transport, permit, write, or movement occurred. ICQ-1 and ICQ-9
+  remain blocked.
+- Next dependency: define the actual lighting hardware/support geometry, then
+  bind the selected printable component envelopes into a diagnostic-only route
+  sensitivity model. After assembly, replace nominal transforms with measured
+  installed evidence before any collision qualification.
