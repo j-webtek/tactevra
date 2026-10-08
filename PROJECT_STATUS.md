@@ -1,6 +1,7 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-504 C03 CLI entrypoint smoke,
+Reviewed October 8, 2026 through the ARM-505 pending ICQ-1 measurement draft,
+the ARM-504 C03 CLI entrypoint smoke,
 the ARM-503 C03 evidence-packet CLI,
 the ARM-502 C03 physical-evidence packet,
 the ARM-501 numeric observed-entry clearance,
