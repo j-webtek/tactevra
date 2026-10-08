@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/c03_rigid_attachment_binding_manifest_v1.schema.json",
+  "title": "C03 rigid attachment binding manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "binding_manifest_id", "captured_at_utc", "valid_until_utc",
+    "c03_installed_collision_qualification_sha256", "collision_contract_sha256",
+    "installed_collision_profile_content_sha256", "installed_collision_profile_file_sha256",
+    "measurement_manifest_file_sha256", "measurement_manifest_content_sha256",
+    "root_frame", "sources", "transforms", "content_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "tactevra.c03_rigid_attachment_binding_manifest.v1"},
+    "binding_manifest_id": {"type": "string", "minLength": 1},
+    "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "valid_until_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "c03_installed_collision_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "collision_contract_sha256": {"$ref": "#/$defs/sha256"},
+    "installed_collision_profile_content_sha256": {"$ref": "#/$defs/sha256"},
+    "installed_collision_profile_file_sha256": {"$ref": "#/$defs/sha256"},
+    "measurement_manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+    "measurement_manifest_content_sha256": {"$ref": "#/$defs/sha256"},
+    "root_frame": {"type": "string", "minLength": 1},
+    "sources": {
+      "type": "array", "minItems": 1, "maxItems": 128,
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "transforms": {
+      "type": "array", "minItems": 1, "maxItems": 128,
+      "items": {"$ref": "#/$defs/transform"}
+    },
+    "content_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "sha256", "captured_at_utc", "method", "notes"],
+      "properties": {
+        "source_id": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"},
+        "method": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      }
+    },
+    "transform": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "frame", "to_frame", "from_frame", "rotation_row_major", "translation_mm",
+        "translation_uncertainty_mm", "rotation_uncertainty_deg", "source_ids",
+        "captured_at_utc"
+      ],
+      "properties": {
+        "frame": {"type": "string", "minLength": 1},
+        "to_frame": {"type": "string", "minLength": 1},
+        "from_frame": {"type": "string", "minLength": 1},
+        "rotation_row_major": {
+          "type": "array", "minItems": 9, "maxItems": 9,
+          "items": {"type": "number"}
+        },
+        "translation_mm": {
+          "type": "array", "minItems": 3, "maxItems": 3,
+          "items": {"type": "number"}
+        },
+        "translation_uncertainty_mm": {"type": "number", "minimum": 0},
+        "rotation_uncertainty_deg": {"type": "number", "minimum": 0},
+        "source_ids": {
+          "type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "captured_at_utc": {"type": "string", "format": "date-time", "pattern": "Z$"}
+      }
+    }
+  }
+}
