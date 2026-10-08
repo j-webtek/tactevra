@@ -1004,7 +1004,7 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-entry-clearance-v2` owns ICQ-7.1 from the exact
+The arm lane on `codex/c03-entry-clearance-v2` completed ICQ-7.1 from the exact
 merged ICQ-8 base `0b22610c433bea72d04b1e2c43df8541bdb20dc6`. It may add a
 backward-compatible observed-entry clearance supplement that binds the sealed
 ICQ-7 v1 receipt to conservative numeric clearance evidence for every owned
@@ -1016,6 +1016,9 @@ increment may prove that a synthetic clear chain is structurally capable of an
 ICQ-8 `PASS`, but it must not reinterpret the retained colliding rehearsal,
 claim installed physical qualification, clear ICQ-9, or emit controller, wire,
 joint, PWM, serial, transport, retry, permit, or movement authority.
+Evidence `E-20261008-ARM-501` records the implementation and the synthetic
+structural `PASS` fixture; the retained installed-profile rehearsal remains the
+unchanged collision `REJECT` and ICQ-9 remains blocked on physical evidence.
 
 The arm lane on `codex/c03-aggregate-qualification` completed ICQ-8 from the exact
 merged ICQ-7 base `defafae746ee21189c82bd9d0009621961f1ae42`. It may

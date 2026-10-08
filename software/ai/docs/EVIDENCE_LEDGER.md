@@ -9644,3 +9644,57 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: collect real installed-profile, rigid-placement, cable-sweep,
   and fresh T=1051 evidence, then rerun ICQ-5 through ICQ-8. ICQ-9 may consume
   only an exact ICQ-8 `PASS`; this synthetic `REJECT` is ineligible.
+
+### E-20261008-ARM-501 — ICQ-7.1 seals numeric observed-entry clearance
+
+- Lane: arm.
+- Stage: ICQ-7.1 numeric observed-entry clearance.
+- Commit: `8c237d8e930093c62084536a22ef0f093f569fb9`.
+- Change: added conservative numeric AABB-separation evidence to each ICQ-7
+  entry sweep segment, a sealed compatibility supplement derived only from the
+  exact nested ICQ-7 receipt, and optional aggregate consumption. Old clear
+  receipts remain `BLOCKED`; a complete clear receipt with a positive exact
+  supplement can produce zero-authority `PASS`. Changed values, crossed source
+  hashes, missing or reordered segments, collisions, zero margin, and authority
+  fields fail closed.
+- Inputs/fixtures: supplement-source SHA-256
+  `69e8d3afaefe434e4021df4727a907e8f19932050acc28605c53e1cc04dfe2fb`;
+  conservative-sweep-source SHA-256
+  `e61d902830aed31b2a49c5c2994d7fcb44931167a0e2c1e41464f100625026e7`;
+  aggregate-source SHA-256
+  `46c3df7fe71df1581bbeb5abc4ef3bd72936e12a7ba84175a022465c903daa75`;
+  focused-test SHA-256
+  `12e441a27d6cfb7704cc1ef5bdeca2a2452fb3f6148a6baee2568aeb21d4a2c7`.
+- Command: exact focused command
+  `py -3.12 -m pytest -q software/tests/unit/test_c03_observed_entry_clearance_supplement_v1.py software/tests/unit/test_c03_aggregate_qualification_receipt_v1.py software/tests/unit/test_c03_observed_route_entry_qualification_v1.py software/tests/unit/test_fk_collision_pose_adapter.py`
+  with `PYTHONPATH=software/src;software/tests/unit`.
+- Result: `PASS`; 27 focused and predecessor tests passed in 110.09 seconds.
+  The synthetic clear fixture derives two entry-segment margins, preserves
+  exact sample lineage, and produces structural aggregate `PASS` with zero
+  authority. The retained C03 installed-profile rehearsal is not reinterpreted
+  and remains `REJECT` because its entry and route collide.
+- Validation: exact Ruff command over the three changed runtime modules and the
+  focused test passed. The first new-test run preserved four failures caused by
+  an incorrect strict-zip bound; changing the iteration to the two adjacent
+  sample ranges fixed it. The first full verification stopped at 6,517 files
+  against the reviewed 6,515 ceiling. Policy commit `ea665e20d42f16db1dba5cc4ec78caab626ef623`
+  deliberately advances the ceiling to 6,519 with two slots of headroom. The
+  second full attempt passed policy and stopped because the new worktree lacked
+  its ignored `.venv-ci`; linking the existing validated environment fixed the
+  host setup. The unchanged exact command
+  `py -3.12 scripts/maintain_repository.py verify --full` then passed all 133
+  policy tests and 945 offline tests with 5 expected Windows symlink skips in
+  777.02 seconds.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: all positive fixtures are synthetic and offline. AABB separation
+  is conservative and may be zero even when primitive collision checks are
+  clear; zero cannot satisfy the aggregate `PASS` path. No installed geometry,
+  cable sweep, controller feedback, physical clearance, command, permit,
+  movement, or execution authority was created.
+- Supersedes: none. ARM-499 and ARM-500 remain the retained ICQ-7 and ICQ-8
+  predecessors.
+- Next dependency: collect real installed-profile, rigid-placement, cable-sweep,
+  and fresh T=1051 evidence, regenerate ICQ-7 plus this supplement, and rerun
+  ICQ-8. ICQ-9 may consume only an exact physically applicable ICQ-8 `PASS`.
