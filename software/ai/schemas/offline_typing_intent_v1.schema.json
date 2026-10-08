@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/offline_typing_intent_v1.schema.json",
+  "title": "Offline typing intent v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "intent_type", "device", "text"],
+      "properties": {
+        "schema": {"const": "rocell.offline_typing_intent.v1"},
+        "intent_type": {"const": "TYPE_TEXT"},
+        "device": {"enum": ["KEYBOARD", "PHONE"]},
+        "text": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "intent_type", "device", "key"],
+      "properties": {
+        "schema": {"const": "rocell.offline_typing_intent.v1"},
+        "intent_type": {"const": "PRESS_KEY"},
+        "device": {"const": "KEYBOARD"},
+        "key": {"type": "string", "minLength": 1, "maxLength": 32}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "intent_type", "question"],
+      "properties": {
+        "schema": {"const": "rocell.offline_typing_intent.v1"},
+        "intent_type": {"const": "CLARIFY"},
+        "question": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "intent_type", "reason"],
+      "properties": {
+        "schema": {"const": "rocell.offline_typing_intent.v1"},
+        "intent_type": {"const": "REFUSE"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    }
+  ]
+}

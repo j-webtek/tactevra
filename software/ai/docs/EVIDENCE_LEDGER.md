@@ -10855,3 +10855,78 @@ rewriting history. New entries must use a unique evidence ID.
   schema, then feed its admitted route into the existing installed-collision
   and fresh-state gates. Separately collect physical camera, collision, and
   key-effect evidence; none may be inferred from this simulation result.
+
+### E-20261008-ARM-521 — closed offline intent reaches bounded simulated motion
+
+- Lane: AI/model plus integration; arm-lane status and all gates remain unchanged.
+- Stage: S2 exploratory closed-intent composition with zero authority.
+- Base commit: `8e7570ee3b754906e3eceb919936cf2e1ba46296`.
+- Claim commit: `a53ae9e197ce1d2b4c8cea3b19f13e84c8b5f64d`.
+- Implementation commit: `02bd0b835ca32044cfb787692c30186d2e63179a`.
+- Change: added a closed four-variant offline schema (`TYPE_TEXT`, `PRESS_KEY`,
+  `CLARIFY`, `REFUSE`) and a strict adapter that admits only keyboard
+  `TYPE_TEXT`. It preserves exact text, refuses extension fields, phone text,
+  and non-actionable variants, then calls the ARM-520 generator without adding
+  any model-side motion or authority fields.
+- Fixture: `TYPE_TEXT(KEYBOARD, "Move!")`, input file SHA-256
+  `244ab43c9a8db00fcbfc75169c7ac383284937977e0547ceb1e3060f947be9cc`;
+  intent canonical SHA-256
+  `e1b3aba7481f068d63adc3446fefe8f660e4ca87e52f4466409c35112f731220`;
+  schema SHA-256
+  `be0abaef676510691cb9b85e142c5e2c85dc6ccb8a68f7690df7775fe6419c0c`;
+  implementation SHA-256
+  `cd3552f5b7317d83be8380be617003fa9427565e51e573122e675598c483265d`.
+- Exact evidence command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -m rocell_ai.offline_intent_to_motion_v1
+  C:/MuJoCoWarp/evidence/issue190/offline_intent_to_motion_v1/type_text_move_v1.json
+  --fixture software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_9.json
+  --workspace . --derived-workspace C:/MuJoCoWarp/c03intent --output
+  C:/MuJoCoWarp/evidence/issue190/offline_intent_to_motion_v1/offline_intent_to_motion_result_v1.json`.
+- Result: `PASS_OFFLINE_TYPE_TEXT_TO_SIMULATED_IK_RETAIN_BLOCKERS`.
+  Exact targets are `SHIFT,M,O,V,E,SHIFT,1`; all 261 trajectory samples have
+  accepted IK. Batch SHA-256 is
+  `38cebf2af7bbf26b98b6e8305c4fdbbf6239942073511154f7517a56ce96e42a`;
+  ingress SHA-256 is
+  `f1d1d765337e2ff7b04dc18154a089eeb8e56fcd5a4eb84b210d4f9bce9aca3f`;
+  trajectory SHA-256 is
+  `442675437beec4b4cbccda07f730fb9425fbfeb42594a1cd9e4f40126c903767`;
+  nested dynamic receipt is
+  `a48a4319c6fba6a863a41a2d51f7f316f3c319ca439c65b2a353c227859a3bf4`;
+  aggregate receipt is
+  `f0971b71387205196f509a6a59dab8cb10478c85b2ca0c5c33d28348f5ca01d0`.
+  Primary and backup result files match at SHA-256
+  `c1521ff37adbe75b2704a3a3672999d674c8f5bcc24717b42193b703e63dd9bd`.
+- External artifacts are under
+  `C:\MuJoCoWarp\evidence\issue190\offline_intent_to_motion_v1` with
+  hash-matching copies under
+  `F:\robot-arm-build-backups\issue190\offline_intent_to_motion_v1`.
+- Exact focused test command: `py -3.12 -m pytest
+  software/ai/tests/test_c03_arm_route_reconciliation_v1.py -q`; result: 29
+  passed in 1.28 seconds. Exact Ruff command: `py -3.12 -m ruff check
+  software/ai/rocell_ai/offline_intent_to_motion_v1.py
+  software/ai/tests/test_c03_arm_route_reconciliation_v1.py`; result: pass.
+  Exact shared-boundary command: with `PYTHONPATH=software/ai;software/src`, run
+  `py -3.12 -m pytest software/ai/tests/test_c03_arm_route_reconciliation_v1.py
+  software/ai/tests/test_typing_twin_boundary_v1.py
+  software/ai/tests/test_end_to_end_typing_twin.py
+  software/ai/tests/test_actual_output_compatibility_v1.py
+  software/tests/unit/test_model_motion_ingress_v2.py
+  software/tests/unit/test_typing_execution_plan_v1.py
+  software/tests/unit/test_typing_trajectory_plan_v1.py
+  software/tests/unit/test_typing_trajectory_ik_screen_v1.py
+  software/tests/integration/test_typing_shadow_pipeline_v1.py -q`; result:
+  128 passed in 51.11 seconds. Exact full verification command:
+  `py -3.12 scripts/maintain_repository.py verify --full`; result: all 133
+  policy tests and 945 offline tests passed with 5 expected Windows symlink
+  skips in 475.21 seconds. Source archive policy passes at 6,523 files.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0.
+- Limitations: no language model inference is implemented or qualified here;
+  this accepts an already structured intent. It proves semantic-to-simulated-IK
+  composition for one bounded keyboard request. Installed collision geometry,
+  fresh observed arm state, physical Sticky Keys behavior, key registration,
+  transport, and movement remain untested and blocked.
+- Next dependency: connect an offline small language model to this closed schema
+  under exact-text and schema-validity evaluation, while separately feeding the
+  admitted route through installed collision and fresh-state gates. Neither
+  successor may grant physical authority from this evidence.

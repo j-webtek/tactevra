@@ -998,6 +998,24 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/integration lane on `codex/intent-schema-to-motion` claims ARM-521 from
+merged ARM-520 base `8e7570ee3b754906e3eceb919936cf2e1ba46296`. It may
+define one closed offline intent schema for `TYPE_TEXT`, `PRESS_KEY`, `CLARIFY`,
+and `REFUSE`, then connect only an admitted keyboard `TYPE_TEXT` intent to the
+ARM-520 bounded dynamic planner. The adapter must preserve the payload text
+byte-for-byte, reject extra fields and all non-actionable or unsupported intent
+variants, bind the intent and nested result hashes, and retain every collision,
+fresh-state, resource, and authority blocker. It may not change arm-lane or
+AI-lane stage status, clear a gate, interpret free-form language, or emit joint,
+PWM, serial, Waveshare, controller, permit, transport, execution, hardware-
+write, movement, or physical authority.
+Evidence `E-20261008-ARM-521` completes the claim. The closed intent
+`TYPE_TEXT(KEYBOARD, "Move!")` preserves its exact payload, compiles to
+`SHIFT,M,O,V,E,SHIFT,1`, creates a distinct v2 batch, passes strict ingress,
+and admits all 261 simulated IK samples. Non-actionable intent variants, phone
+text, and extension fields fail before workspace materialization. Installed
+collision and fresh-state blockers remain active with zero physical authority.
+
 The AI/integration lane on `codex/dynamic-intent-to-motion` claims ARM-520 from
 merged ARM-519 base `6295df237c3de811ec66e7d02b9096366b197937`. It may
 replace the single frozen phrase dependency with a bounded offline path that
