@@ -1080,13 +1080,16 @@ reductions and the six nominal containing workcell proxies to the exact route,
 then retains eight explicit blockers for the remaining attachments, placement,
 self-collision policy, candidate qualification, and installed clearance.
 
-The arm lane on `codex/c03-nominal-tool-binding` owns ARM-511 from merged
+The arm lane on `codex/c03-nominal-tool-binding` completed ARM-511 from merged
 ARM-510 base `41f38f0898105c6c88236a09585f51724558e2ae`. It may bind the exact
 110 mm planning-tip transform and nominal compliant-tool mesh envelopes,
 compare their identities, and enumerate every missing local transform,
 rod/stylus, compliance-travel, and installed-fit input. It must fail closed if
 those sources do not define one collision envelope, must not substitute the
 planning tip for tool volume, clear ICQ-1 or ICQ-9, or grant authority.
+Evidence `E-20261008-ARM-511` binds the exact 110 mm planning-tip identity and
+the two nominal tool mesh envelopes, then retains six missing assembly inputs
+and refuses to define or install a collision envelope.
 
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base

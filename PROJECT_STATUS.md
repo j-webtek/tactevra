@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-510 full-body geometry readiness audit,
+Reviewed October 8, 2026 through the ARM-511 nominal tool-binding readiness audit,
 the ARM-508 active nominal-proxy audit,
 the ARM-507 nominal mesh-envelope audit,
 the ARM-506 nominal collision-source inventory,
