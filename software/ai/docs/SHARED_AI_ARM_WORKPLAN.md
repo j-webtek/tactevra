@@ -998,6 +998,16 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-schema-sft-data` claims AI-525 from merged
+AI-524 base `d81a2e6f46a09387a34b2366d1a693218fc8e854`. It may freeze
+schema-specific train/development data and an unopened v10 evaluation family,
+extend the existing offline LoRA trainer only enough to consume those exact
+hash-bound bytes and the closed-schema prompt, and run a one-epoch development
+pilot on the cached 1B base. The evaluation split must remain unopened until
+the training and development decision is recorded. It may not promote a model,
+change motion or arm status, invoke motion planning, or emit commands, hardware
+writes, movement, or physical authority.
+
 The AI/model lane on `codex/offline-intent-schema-decoding` claims AI-524 from
 merged AI-523 base `043e8e813929b218b4f52b55d2787da69c09f319`. It may
 rerun the exact installed 1B model, frozen v9 benchmark, prompt, seed, and hard
