@@ -1004,7 +1004,7 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
-The arm lane on `codex/c03-aggregate-qualification` owns ICQ-8 from the exact
+The arm lane on `codex/c03-aggregate-qualification` completed ICQ-8 from the exact
 merged ICQ-7 base `defafae746ee21189c82bd9d0009621961f1ae42`. It may
 reconstruct one complete route qualification receipt from the exact ICQ-7
 observed-entry receipt, C03 collision handoff and partition intake, cable
@@ -1018,7 +1018,9 @@ synthetic inputs remain execution-ineligible even after `PASS`. The increment
 must preserve the exact retained C03 route, remain zero authority, and emit no
 controller, wire, joint, PWM, serial, transport, retry, permit, or movement
 command. It must not change AI-lane status or clear an integration or physical-
-authority gate.
+authority gate. Evidence `E-20261008-ARM-500` records implementation commit
+`f4c39379046eefeeb0c6692e71fd75e017760ba4` and the retained synthetic
+`REJECT` rehearsal over 1 entry segment plus all 321 owned route segments.
 
 The pose-keyloss research checkpoint is now represented by the focused external-
 artifact package in
@@ -1970,7 +1972,15 @@ entry samples and one continuous entry segment and returns
 `COLLISION_REPLAN_REQUIRED`, consistent with the already colliding synthetic
 ICQ-5/6 profile. This is zero-authority contract evidence: the observation,
 profile, placement, cables, and route remain synthetic and execution-ineligible.
-ICQ-8 reconstruction and physical installed evidence remain open.
+Evidence `E-20261008-ARM-500` now reconstructs ICQ-7 entry evidence and ICQ-6
+continuous evidence into one deterministic ICQ-8 receipt. The retained
+synthetic chain proves exact zero-difference entry-to-route continuity, both
+partition boundaries, and complete ownership of 321 route segments. Its
+aggregate disposition is `REJECT` because collision evidence exists in both
+the entry and route receipts. That is the expected honest result for the
+synthetic installed fixture and grants no authority. ICQ-9 remains blocked on
+an ICQ-8 `PASS`; real installed geometry, cable sweeps, and fresh physical
+T=1051 feedback remain open.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

@@ -9568,3 +9568,79 @@ rewriting history. New entries must use a unique evidence ID.
   entry evidence plus ICQ-6 route evidence. Real installed geometry, cable
   sweeps, and a fresh physical T=1051 observation must replace every synthetic
   fixture before any physical clearance or execution claim can be considered.
+
+### E-20261008-ARM-500 — ICQ-8 reconstructs the complete C03 collision receipt
+
+- Lane: arm.
+- Stage: ICQ-8 route reconstruction and qualification receipt.
+- Commit: `f4c39379046eefeeb0c6692e71fd75e017760ba4`.
+- Change: added a strict aggregate validator and parser binding the sealed
+  ICQ-7 entry receipt, C03 handoff and partition intake, cable receipt, and
+  ICQ-6 continuous receipt. It proves common hashes, profile identity, exact
+  entry-to-route joints, partition order and boundaries, exact segment
+  ownership, freshness, collision precedence, deterministic bytes, and zero
+  authority. Altered hashes, mixed profiles, missing/duplicated/reordered
+  segments, stale evidence, and authority-bearing inputs fail closed.
+- Inputs/fixtures: implementation SHA-256
+  `4b1e1d2506969f870221be55f2774b994f322c5685c6d8f9ba00b2a5393345ba`;
+  focused-test SHA-256
+  `1e85fb8d6470bd33b08d331c0486052394686b54288c9dcb8b4c574b7eb66f7e`;
+  plan SHA-256
+  `48490e2399eaef45f99a3c505024ddbf2f7cba1a63323863bfdc067eda844ec0`;
+  external-generator SHA-256
+  `d93fe953d6cd6990103b1056bc437cef58b83ec1a3ebc6be612cd0de20a8ee69`.
+  Exact route, measurement, rigid, cable-manifest, entry, and continuous file
+  SHA-256 values are
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`,
+  `a220c36cd79de2a0acd527c0df4892dbd6024e2ac9af766be0178146bf1e3a39`,
+  `1a34f33b7f223e03a665befafd162f9dcc7dec09ff8c8d2f76a5eb373c5b5ae9`,
+  `d45c642b00c0f4327bc2453a10d6644479baea13f34606685fb6a7e814f9ec71`,
+  `b33551b13292965a47971194f29e3f4ce465a2d51389b54e0a84a82537430e5f`,
+  and `efcd32871afb1f3df72c0591f66b40abd74d5cf69e174e1a955e8c4a7211900b`.
+- Command: exact rehearsal command
+  `py -3.12 C:\MuJoCoWarp\evidence\issue190\c03_aggregate_qualification_v1\generate_synthetic_rehearsal_v1.py --workspace C:\Users\WebTek\Desktop\tactevra-c03-aggregate --route C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json --measurements C:\MuJoCoWarp\evidence\issue190\c03_rigid_attachment_binding_v1\synthetic_installed_measurements_v1.json --rigid-manifest C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\synthetic_rigid_binding_for_cable_rehearsal_v1.json --cable-manifest C:\MuJoCoWarp\evidence\issue190\c03_cable_envelope_intake_v1\synthetic_c03_cable_manifest_v1.json --entry C:\MuJoCoWarp\evidence\issue190\c03_observed_route_entry_v1\synthetic_c03_observed_route_entry_qualification_v1.json --continuous C:\MuJoCoWarp\evidence\issue190\c03_continuous_segment_qualification_v1\synthetic_c03_continuous_segment_qualification_v1.json --output C:\MuJoCoWarp\evidence\issue190\c03_aggregate_qualification_v1`.
+- Result: `REJECT` for the retained synthetic fixture, with zero-radian
+  entry-to-route boundary difference, 1 entry segment, 321 route segments, and
+  322 aggregate segments. Both retained predecessors contain collision
+  evidence. Report content/file SHA-256 values are
+  `6241d614bb2021ff3406d4419d327de0bf777ab5e7e637f0e77f5f7862079535` and
+  `bdd18e277e20bb72ff691463a4822274531348514a436671606e5167a24aaa7a`;
+  rehearsal receipt content/file SHA-256 values are
+  `bbe5c4394a9651b81631511429d6b9860eb196147dc117dcee7be5c4bf963012` and
+  `24012d943cd2878ccafdc8af2252418d366c14d5d176cf0ccac9e59e0b755a20`;
+  reconstructed cable-report file SHA-256 is
+  `3dbe6e163eca0fd52b8f9fc35e22c31a091bdda2fc98c075a7c20465bb6135ab`.
+- Validation: exact focused/adjacent command
+  `py -3.12 -m pytest -q software/tests/unit/test_c03_aggregate_qualification_receipt_v1.py software/tests/unit/test_c03_observed_route_entry_qualification_v1.py software/tests/unit/test_c03_partition_collision_evaluator_v1.py software/tests/unit/test_c03_route_collision_handoff_v1.py`
+  with `PYTHONPATH=software/src;software/tests/unit` passed 30 tests in 81.24
+  seconds. Exact Ruff command
+  `py -3.12 -m ruff check software/src/rocell/application/c03_aggregate_qualification_receipt_v1.py software/tests/unit/test_c03_aggregate_qualification_receipt_v1.py`
+  passed. The first focused run failed because the test module omitted its local
+  simulation-context fixture; it was added and the unchanged command passed.
+  The first retained rehearsal correctly rejected an old cable-report artifact
+  whose receipt hash differed from the ICQ-6 continuous receipt (`b9e57f...`
+  versus `3a2a22...`). The generator now deterministically reconstructs that
+  receipt from the exact manifest; the failed crossed-artifact result remains
+  recorded. The first full repository verification then stopped because
+  `PROJECT_STATUS.md` was still reviewed through ARM-499; the public marker was
+  advanced to ARM-500 before rerunning the unchanged command. Four generated
+  files were copied to
+  `F:\robot-arm-build-backups\issue190\c03_aggregate_qualification_v1` and
+  verified byte-for-byte by SHA-256. The exact full command
+  `py -3.12 scripts/maintain_repository.py verify --full` then passed all 133
+  policy tests and 945 offline tests with 5 expected Windows symlink skips in
+  457.31 seconds.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: all route, observation, controller-session, installed-profile,
+  rigid-placement, cable, and sweep evidence is synthetic and offline. ICQ-7
+  v1 clear-entry receipts contain collision status but no numeric entry margin;
+  this remains explicit. No real feedback was read, no physical clearance was
+  proved, and no command, retry, permit, transport access, write, movement, or
+  physical authority was created.
+- Supersedes: none. ARM-498 and ARM-499 remain the exact ICQ-6 and ICQ-7
+  predecessors.
+- Next dependency: collect real installed-profile, rigid-placement, cable-sweep,
+  and fresh T=1051 evidence, then rerun ICQ-5 through ICQ-8. ICQ-9 may consume
+  only an exact ICQ-8 `PASS`; this synthetic `REJECT` is ineligible.
