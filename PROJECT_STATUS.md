@@ -1,6 +1,7 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-512 base/camera geometry readiness audit,
+Reviewed October 8, 2026 through the ARM-513 additive static-overhead collision
+readiness v2 contract and the ARM-512 base/camera geometry readiness audit,
 the ARM-508 active nominal-proxy audit,
 the ARM-507 nominal mesh-envelope audit,
 the ARM-506 nominal collision-source inventory,

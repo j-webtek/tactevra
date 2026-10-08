@@ -11,6 +11,7 @@ import pytest
 
 from rocell.application.collision_readiness import (
     assess_current_collision_readiness,
+    assess_static_b0477_collision_readiness,
     inspect_pinned_urdf_collision_evidence,
 )
 from rocell.application.context import (
@@ -42,6 +43,10 @@ from rocell.simulation.collision import (
     audit_collision_geometry,
     evaluate_collision_pose,
     evaluate_collision_sweep,
+)
+from rocell.simulation.static_route_collision import (
+    STATIC_B0477_LEGACY_BODY_MIGRATION,
+    STATIC_ROUTE_BODY_REQUIREMENTS,
 )
 
 
@@ -193,6 +198,59 @@ def test_current_artifact_audit_is_context_bound_and_names_every_gap() -> None:
         ["phase_specific_tool_or_contact_allowances_are_global_exclusions"]
         is False
     )
+
+
+def test_static_b0477_contract_migration_is_explicit_and_drops_moving_camera() -> None:
+    context = load_simulation_context(WORKSPACE, MANIFEST)
+    legacy = assess_current_collision_readiness(context)
+    report = assess_static_b0477_collision_readiness(context)
+    required = {item.body_id: item for item in report.contract.requirements}
+    catalog_ids = {item.body_id for item in STATIC_ROUTE_BODY_REQUIREMENTS}
+
+    assert legacy.contract.contract_id == (
+        "ROCELL-ROARM-M3-RC03-PREHARDWARE-COLLISION-V1"
+    )
+    assert report.contract.contract_id == (
+        "ROCELL-ROARM-M3-RC03-STATIC-B0477-PREHARDWARE-COLLISION-V2"
+    )
+    assert report.to_dict()["schema"] == (
+        "rocell.static_b0477_collision_readiness.v2"
+    )
+    assert catalog_ids <= set(required)
+    assert len(report.contract.requirements) == 32
+    assert report.contract.pair_exclusions == ()
+    assert report.geometry_audit.diagnostic_only_exclusion_pairs == ()
+    assert set(report.geometry_audit.diagnostic_only_body_ids) == {
+        "diagnostic_proxy:board_solid",
+        "diagnostic_proxy:keyboard",
+        "diagnostic_proxy:phone",
+        "diagnostic_proxy:station:keyboard_left",
+        "diagnostic_proxy:station:keyboard_right",
+        "diagnostic_proxy:station:phone_tcp",
+    }
+    assert "attachment:moving_camera_cable" not in required
+    assert required["cable:fixed_usb_route"].binding_mode is (
+        CollisionBindingMode.STATIC_ROOT
+    )
+    assert required["attachment:arm_harness"].binding_mode is (
+        CollisionBindingMode.CONFIGURATION_SAMPLED
+    )
+    assert {
+        old_id for old_id, _ in STATIC_B0477_LEGACY_BODY_MIGRATION
+    } == {
+        "installation:base_and_factory_clamp",
+        "attachment:camera_holder",
+        "attachment:camera_module",
+        "attachment:camera_connector",
+        "attachment:moving_camera_cable",
+        "attachment:contact_tool",
+    }
+    migrated_ids = {
+        body_id
+        for _, replacements in STATIC_B0477_LEGACY_BODY_MIGRATION
+        for body_id in replacements
+    }
+    assert migrated_ids <= catalog_ids
 
 
 def test_exact_pinned_urdf_snapshot_inventories_collision_tags(tmp_path: Path) -> None:

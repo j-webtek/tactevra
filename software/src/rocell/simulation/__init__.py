@@ -105,6 +105,7 @@ from .static_route_collision import (
     STATIC_B0477_ROUTE_REPORT_SCHEMA,
     STATIC_B0477_ROUTE_SCHEMA,
     STATIC_B0477_TARGET_BINDING_SCHEMA,
+    STATIC_B0477_LEGACY_BODY_MIGRATION,
     STATIC_ROUTE_BODY_REQUIREMENTS,
     StaticB0477RouteCollisionContract,
     StaticRouteBody,
@@ -128,6 +129,7 @@ from .static_route_collision import (
     StaticRouteTargetBinding,
     StaticTargetRoute,
     bind_static_route_target,
+    build_static_b0477_prehardware_collision_contract,
     evaluate_static_b0477_target_route,
 )
 from .scenario import (
@@ -292,6 +294,7 @@ __all__ = [
     "STATIC_B0477_ROUTE_REPORT_SCHEMA",
     "STATIC_B0477_ROUTE_SCHEMA",
     "STATIC_B0477_TARGET_BINDING_SCHEMA",
+    "STATIC_B0477_LEGACY_BODY_MIGRATION",
     "STATIC_ROUTE_BODY_REQUIREMENTS",
     "SimulatedArmIdentity",
     "SimulatedCameraIdentity",
@@ -368,6 +371,7 @@ __all__ = [
     "controller_raw_to_model_gripper",
     "audit_collision_geometry",
     "bind_static_route_target",
+    "build_static_b0477_prehardware_collision_contract",
     "build_roarm_m3_prehardware_collision_contract",
     "evaluate_collision_pose",
     "evaluate_collision_sweep",

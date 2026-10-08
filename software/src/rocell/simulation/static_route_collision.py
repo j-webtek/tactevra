@@ -15,7 +15,7 @@ physical evidence source and cannot release power, motion, or contact gates.
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping as MappingABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 import hashlib
 import json
@@ -23,7 +23,7 @@ import math
 from types import MappingProxyType
 from typing import Any, Mapping
 
-from rocell.geometry import Vec3
+from rocell.geometry import UrdfModel, Vec3
 from rocell.targets import NominalTargetCatalog, TargetRegion
 
 from .collision import (
@@ -47,6 +47,7 @@ from .collision import (
     audit_collision_geometry,
     evaluate_collision_pose,
 )
+from .scene import NominalWorkcellScene
 
 
 STATIC_B0477_ROUTE_CONTRACT_SCHEMA = "rocell.static_b0477_route_contract.v1"
@@ -305,9 +306,145 @@ STATIC_ROUTE_BODY_REQUIREMENTS = (
     _requirement("lighting:key_light_right", "board", StaticRouteBodyRole.LIGHTING, _STATIC, "lighting_design"),
 )
 
+# Historical v1 readiness evidence used the left-hand identifiers.  This map is
+# deliberately explicit and non-bijective: the static architecture splits broad
+# attachment placeholders into the independently measurable installed bodies
+# already required by the route contract.
+STATIC_B0477_LEGACY_BODY_MIGRATION = (
+    ("installation:base_and_factory_clamp", ("installation:base_clamp",)),
+    (
+        "attachment:camera_holder",
+        (
+            "support:portal_left_post",
+            "support:portal_right_post",
+            "support:portal_crossbar",
+            "support:camera_boom",
+        ),
+    ),
+    (
+        "attachment:camera_module",
+        ("camera:b0477_enclosure", "camera:b0477_lens"),
+    ),
+    ("attachment:camera_connector", ("camera:b0477_connector",)),
+    ("attachment:moving_camera_cable", ("cable:fixed_usb_route",)),
+    (
+        "attachment:contact_tool",
+        ("robot:contact_tool", "robot:tool_tip"),
+    ),
+)
+
 _REQUIREMENTS_BY_ID = MappingProxyType(
     {item.body_id: item for item in STATIC_ROUTE_BODY_REQUIREMENTS}
 )
+
+
+def build_static_b0477_prehardware_collision_contract(
+    model: UrdfModel,
+    scene: NominalWorkcellScene | None = None,
+) -> CollisionGeometryContract:
+    """Build the opt-in fail-closed v2 contract for the selected static camera.
+
+    The route catalog is the sole body-requirement source.  Existing nominal
+    scene AABBs remain separately named diagnostic proxies; they do not satisfy
+    an installed-body requirement and cannot clear a physical gate.
+    """
+
+    if not isinstance(model, UrdfModel):
+        raise TypeError("model must be UrdfModel")
+    required_links = {
+        "base_link",
+        "link1",
+        "link2",
+        "link3",
+        "link4",
+        "link5",
+        "gripper_link",
+        "hand_tcp",
+    }
+    missing_links = sorted(required_links - set(model.link_names))
+    if missing_links:
+        raise CollisionContractError(
+            f"static B0477 requirements reference absent URDF links: {missing_links}"
+        )
+    requirements = [
+        CollisionBodyRequirement(
+            item.body_id,
+            item.parent_frame,
+            item.role.collision_role,
+            item.binding_mode,
+            (
+                "required static B0477 installed body; "
+                f"role={item.role.value}; source_key={item.source_key}"
+            ),
+        )
+        for item in STATIC_ROUTE_BODY_REQUIREMENTS
+    ]
+    bodies = [
+        CollisionBody(
+            item.body_id,
+            item.parent_frame,
+            item.role.collision_role,
+            (
+                CollisionEvidenceState.MISSING
+                if item.role
+                in {
+                    StaticRouteBodyRole.ROARM_BASE,
+                    StaticRouteBodyRole.ROARM_LINK,
+                    StaticRouteBodyRole.ROARM_GRIPPER,
+                }
+                else CollisionEvidenceState.UNKNOWN
+            ),
+            (),
+            item.binding_mode,
+            (
+                "installed dimensions, transform, configuration, or accepted "
+                f"source remain open; source_key={item.source_key}"
+            ),
+        )
+        for item in STATIC_ROUTE_BODY_REQUIREMENTS
+    ]
+    if scene is not None:
+        if not isinstance(scene, NominalWorkcellScene):
+            raise TypeError("scene must be NominalWorkcellScene or None")
+        if scene.board_frame != "board":
+            raise CollisionContractError(
+                "static B0477 prehardware contract expects board frame"
+            )
+        for obstacle in scene.obstacles:
+            body_id = f"diagnostic_proxy:{obstacle.obstacle_id}"
+            requirements.append(
+                CollisionBodyRequirement(
+                    body_id,
+                    scene.board_frame,
+                    CollisionBodyRole.STATIC_ENVIRONMENT,
+                    CollisionBindingMode.STATIC_ROOT,
+                    "nominal RC03 AABB retained for prehardware diagnostics only",
+                )
+            )
+            minimum = Vec3(
+                obstacle.minimum.x, obstacle.minimum.y, obstacle.minimum.z
+            )
+            maximum = Vec3(
+                obstacle.maximum.x, obstacle.maximum.y, obstacle.maximum.z
+            )
+            bodies.append(
+                CollisionBody(
+                    body_id,
+                    scene.board_frame,
+                    CollisionBodyRole.STATIC_ENVIRONMENT,
+                    CollisionEvidenceState.PINNED_DIGITAL,
+                    (OrientedBoxMm((minimum + maximum).scaled(0.5), (maximum - minimum).scaled(0.5)),),
+                    CollisionBindingMode.STATIC_ROOT,
+                    f"nominal scene AABB:{obstacle.source}",
+                )
+            )
+    return CollisionGeometryContract(
+        contract_id="ROCELL-ROARM-M3-RC03-STATIC-B0477-PREHARDWARE-COLLISION-V2",
+        root_frame="board",
+        requirements=tuple(requirements),
+        bodies=tuple(bodies),
+        pair_exclusions=(),
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -1276,6 +1413,7 @@ __all__ = [
     "STATIC_B0477_ROUTE_REPORT_SCHEMA",
     "STATIC_B0477_ROUTE_SCHEMA",
     "STATIC_B0477_TARGET_BINDING_SCHEMA",
+    "STATIC_B0477_LEGACY_BODY_MIGRATION",
     "STATIC_ROUTE_BODY_REQUIREMENTS",
     "StaticB0477RouteCollisionContract",
     "StaticRouteBody",
@@ -1299,5 +1437,6 @@ __all__ = [
     "StaticRouteTargetBinding",
     "StaticTargetRoute",
     "bind_static_route_target",
+    "build_static_b0477_prehardware_collision_contract",
     "evaluate_static_b0477_target_route",
 ]
