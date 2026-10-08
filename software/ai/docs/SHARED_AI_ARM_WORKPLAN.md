@@ -1004,6 +1004,18 @@ SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
 It binds the reviewed arm and AI commits, freezes the implemented v2 boundary,
 and provides shared accepted/rejected cases without advancing operational readiness.
 
+The arm lane on `codex/c03-physical-evidence-packet` claims the bounded ICQ
+physical-evidence readiness increment from merged base
+`985c9b4c4819c845ed097420cacdc7695fe37b20`. It may compose the existing ICQ-1
+through ICQ-8 contracts into one deterministic, hash-bound capture packet that
+lists installed-body measurements, rigid attachment transforms, cable sample
+and sweep coverage, fresh observed-entry state, and the resulting aggregate
+qualification dependency. Missing evidence must remain explicit and any
+supplied artifact must pass its existing strict validator. The packet must not
+invent physical measurements, reinterpret retained synthetic evidence, change
+AI-lane status, clear ICQ-9, or emit controller, wire, joint, PWM, serial,
+transport, retry, permit, or movement authority.
+
 The arm lane on `codex/c03-entry-clearance-v2` completed ICQ-7.1 from the exact
 merged ICQ-8 base `0b22610c433bea72d04b1e2c43df8541bdb20dc6`. It may add a
 backward-compatible observed-entry clearance supplement that binds the sealed
