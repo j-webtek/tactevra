@@ -9753,3 +9753,49 @@ rewriting history. New entries must use a unique evidence ID.
   rigid placement, complete cable sample/sweep coverage, and fresh observed
   T=1051 state, then rerun ICQ-5 through ICQ-8. ICQ-9 may consume only the exact
   physically applicable ICQ-8 `PASS`.
+
+### E-20261008-ARM-503 — operator CLI for the C03 evidence packet
+
+- Lane: arm.
+- Stage: ICQ physical-evidence operator intake; ICQ-9 remains blocked.
+- Commit: `447d0e6d5a52dcafb84e1583eef7dafe6a5adc0d`.
+- Change: added bounded, exact-hash loading for retained C03 route-result bytes
+  and a command-line interface for ARM-502. The CLI accepts only paired paths
+  and hashes for the route and optional installed-measurement, rigid-binding,
+  and cable manifests; rejects duplicate JSON fields and changed route bytes;
+  emits canonical JSON or a read-only Markdown worksheet; and returns status 2
+  while physical evidence is incomplete.
+- Inputs/fixtures: combined runtime-source SHA-256
+  `2c62343cc710e79c0034431dbbcade227e9003f13048237d752a6bfce608fafb`;
+  combined focused-test SHA-256
+  `6acfef8eafdecafc5dde976bb4abf9490acb384ae13243e2b5359a0375608955`.
+  Tests use the exact synthetic route and physical-evidence fixture builders
+  already retained for ARM-493 through ARM-502; none are physical evidence.
+- Command: exact focused chain command
+  `py -3.12 -m pytest software/tests/unit/test_c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_rigid_attachment_binding_v1.py software/tests/unit/test_c03_cable_envelope_intake_v1.py software/tests/unit/test_c03_partition_collision_evaluator_v1.py software/tests/unit/test_c03_observed_route_entry_qualification_v1.py software/tests/unit/test_c03_observed_entry_clearance_supplement_v1.py software/tests/unit/test_c03_aggregate_qualification_receipt_v1.py software/tests/unit/test_c03_physical_evidence_packet_v1.py -q`
+  with `PYTHONPATH=software/src;software/ai`.
+- Result: `PASS`; all 63 focused and predecessor tests passed in 178.16
+  seconds. The CLI test proves a missing-measurement packet renders the correct
+  blocker and returns status 2. Exact route bytes round-trip, while mutation
+  and duplicate-key fixtures fail closed.
+- Validation: exact Ruff command
+  `py -3.12 -m ruff check software/src/rocell/application/c03_physical_evidence_packet_v1.py software/tests/unit/test_c03_physical_evidence_packet_v1.py`
+  passed. Exact full command
+  `py -3.12 scripts/maintain_repository.py verify --full` passed all 133 policy
+  tests and 945 offline tests with 5 expected Windows symlink skips in 576.63
+  seconds. The change adds no tracked paths, preserving the reviewed 6,519-file
+  archive ceiling.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the interface has been exercised only with synthetic offline
+  fixtures. No installed measurement, rigid transform, cable sample or sweep,
+  fresh T=1051 feedback, physical collision clearance, or aggregate physical
+  `PASS` exists. The CLI generates no command, permit, retry, transport access,
+  write, movement, or physical authority.
+- Supersedes: none. ARM-502 remains the composed packet and ARM-493 through
+  ARM-501 remain its reviewed contract predecessors.
+- Next dependency: invoke the CLI with the retained route and real hash-bound
+  captures as they become available, resolve each reported blocker in order,
+  and rerun ICQ-5 through ICQ-8. ICQ-9 still requires an exact physically
+  applicable ICQ-8 `PASS`.

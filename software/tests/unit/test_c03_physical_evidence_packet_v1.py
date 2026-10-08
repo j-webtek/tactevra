@@ -19,6 +19,8 @@ from rocell.application.c03_physical_evidence_packet_v1 import (
     READY_FOR_EVALUATION,
     C03PhysicalEvidencePacketV1Error,
     build_c03_physical_evidence_packet_v1,
+    load_c03_route_result_v1,
+    main,
     render_c03_physical_evidence_packet_markdown_v1,
 )
 from rocell.application.c03_rigid_attachment_binding_v1 import (
@@ -207,3 +209,39 @@ def test_markdown_is_a_read_only_capture_summary(sim_context, route):
     assert "Fresh observed entry state" in rendered
     assert "zero commands, writes, or physical movement" in rendered
     assert "authorize execution" in rendered
+
+
+def test_route_loader_binds_exact_bytes_and_rejects_mutation(tmp_path, route):
+    path, digest = _write(tmp_path, "route.json", route)
+    assert load_c03_route_result_v1(path, digest) == route
+
+    path.write_bytes(path.read_bytes() + b" ")
+    with pytest.raises(C03PhysicalEvidencePacketV1Error, match="hash mismatch"):
+        load_c03_route_result_v1(path, digest)
+
+
+def test_route_loader_rejects_duplicate_json_fields(tmp_path):
+    payload = b'{"schema":"first","schema":"second"}'
+    path = tmp_path / "duplicate-route.json"
+    path.write_bytes(payload)
+    digest = hashlib.sha256(payload).hexdigest()
+
+    with pytest.raises(C03PhysicalEvidencePacketV1Error, match="duplicate"):
+        load_c03_route_result_v1(path, digest)
+
+
+def test_cli_emits_read_only_blocked_worksheet_and_nonzero_status(
+    tmp_path, route, capsys
+):
+    path, digest = _write(tmp_path, "route.json", route)
+    result = main([
+        "--workspace", str(WORKSPACE),
+        "--route-result", str(path),
+        "--route-result-sha256", digest,
+        "--format", "markdown",
+    ])
+
+    captured = capsys.readouterr()
+    assert result == 2
+    assert "BLOCKED_INSTALLED_MEASUREMENTS_REQUIRED" in captured.out
+    assert "zero commands, writes, or physical movement" in captured.out
