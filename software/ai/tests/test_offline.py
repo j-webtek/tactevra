@@ -27,6 +27,7 @@ from rocell_ai.evaluation import evaluate, load_benchmark  # noqa: E402
 from rocell_ai.review import review_benchmark  # noqa: E402
 from rocell_ai.model_eval import _proposal_from_response, evaluate_model  # noqa: E402
 from rocell_ai.model_eval import PROMPT_SHA256  # noqa: E402
+from rocell_ai.offline_intent_model_eval_v1 import score_intent_model  # noqa: E402
 from build_sft_data import build as build_sft_data  # noqa: E402
 from build_sft_v1_data import build as build_sft_v1_data  # noqa: E402
 from build_sft_v2_data import build as build_sft_v2_data  # noqa: E402
@@ -34,6 +35,30 @@ from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_closed_intent_model_score_rejects_false_action_and_text_change(self) -> None:
+        cases = [
+            {"case_id": "ok", "expected": {"decision": "type_text",
+             "device": "keyboard", "text": "A!"}},
+            {"case_id": "changed", "expected": {"decision": "type_text",
+             "device": "keyboard", "text": "teh"}},
+            {"case_id": "ambiguous", "expected": {"decision": "clarify",
+             "reason": "text_ambiguous"}},
+        ]
+        outputs = iter([
+            '{"schema":"rocell.offline_typing_intent.v1","intent_type":"TYPE_TEXT","device":"KEYBOARD","text":"A!"}',
+            '{"schema":"rocell.offline_typing_intent.v1","intent_type":"TYPE_TEXT","device":"KEYBOARD","text":"the"}',
+            '{"schema":"rocell.offline_typing_intent.v1","intent_type":"TYPE_TEXT","device":"KEYBOARD","text":"guess"}',
+        ])
+        result = score_intent_model(
+            cases, "a" * 64, model="fixture", model_digest="b" * 64,
+            generate=lambda _case: next(outputs),
+        )
+        self.assertEqual(result["decision"], "REJECT_CANDIDATE")
+        self.assertEqual(result["exact_count"], 1)
+        self.assertEqual(result["false_actionable_count"], 2)
+        self.assertEqual(result["altered_type_text_count"], 1)
+        self.assertEqual(result["hardware_writes"], 0)
+
     def test_current_grounding_rejects_oversized_request_before_regex(self) -> None:
         with self.assertRaisesRegex(ValueError, "grounding input limit"):
             grounded_propose(
