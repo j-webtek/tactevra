@@ -16,6 +16,7 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     build_installed_collision_nominal_proxy_audit_v1,
     build_installed_collision_nominal_source_inventory_v1,
     build_static_b0477_collision_nominal_source_inventory_v2,
+    build_printable_static_b0477_collision_nominal_source_inventory_v3,
     build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
     main,
@@ -238,6 +239,41 @@ def test_static_b0477_nominal_inventory_covers_v2_without_measurement() -> None:
         610.0, 457.0, 18.0,
     ]
     assert bodies["diagnostic_proxy:keyboard"]["measured"] is False
+    assert inventory["collision_qualification"] is False
+    assert inventory["physical_authority"] is False
+
+
+def test_printable_v3_selects_exact_portal_without_inventing_lighting() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    inventory = build_printable_static_b0477_collision_nominal_source_inventory_v3(
+        context
+    )
+    bodies = {row["body_id"]: row for row in inventory["bodies"]}
+
+    assert inventory["schema"] == (
+        "rocell.printable_static_b0477_collision_nominal_source_inventory.v3"
+    )
+    assert inventory["body_count"] == 32
+    assert inventory["selected_support_implementation"]["design_file_sha256"] == (
+        "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
+    )
+    assert bodies["support:portal_left_post"]["nominal_placement"][
+        "axis_xy_mm"
+    ] == [-60.0, -100.0]
+    assert bodies["support:camera_boom"]["nominal_placement"][
+        "y_range_mm"
+    ] == [-75.0, 253.5]
+    assert bodies["support:lighting_boom_left"]["nominal_sources"] == []
+    assert bodies["lighting:key_light_right"]["nominal_state"] == (
+        "UNDEFINED_IN_SELECTED_PRINTABLE_ARCHITECTURE"
+    )
+    assert all(not row["measured"] for row in inventory["bodies"])
+    assert all(
+        source["path"]
+        != "hardware/static_overhead_camera/config/support_design.json"
+        for source in inventory["sources"]
+    )
+    assert inventory["lighting_geometry_complete"] is False
     assert inventory["collision_qualification"] is False
     assert inventory["physical_authority"] is False
 
