@@ -9935,3 +9935,62 @@ rewriting history. New entries must use a unique evidence ID.
   when the board is ready, capture one perpendicular full-board image with
   board edges and two orthogonal scale/datum references, then collect the
   remaining Z, envelope, uncertainty, attachment, cable, and clearance values.
+
+### E-20261008-ARM-507 — nominal C03 mesh-envelope audit
+
+- Lane: arm.
+- Stage: ICQ-1 nominal digital-envelope verification.
+- Commit: `9b087cb82c5927c358ad9f257226b404fedcdb19`.
+- Change: added a standard-library binary-STL bound reader and a deterministic
+  audit for the left and right keyboard stations, phone/TCP station, compliant
+  tool body and cap, and camera plate. It compares the three station XY mesh
+  extents with the declared workcell envelopes using a fixed `0.001 mm`
+  binary-file comparison tolerance. That tolerance handles float32 encoding
+  only and is explicitly not an installed-part, printing, placement, collision,
+  or physical clearance tolerance.
+- Inputs/fixtures: combined runtime-source SHA-256
+  `42c859116da255a4d29c25fe8d994cae17c465bcc2c78d94cad9b3db93ced442`;
+  focused-test SHA-256
+  `3603eebbc5d515ea886114b512674cc29efb673013b7c3a7d3f84a68c9a99b16`.
+  The retained audit is
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\nominal_collision_envelope_audit_v1.json`,
+  file SHA-256
+  `e628806c464425db5d5116686cf367c2bf18f08662690328a6cf05c061400a34`,
+  content SHA-256
+  `5e8aaebed4ef763a718d2037098dcc27d2896c03a8347205f61bc300338d2d3b`.
+- Commands: `py -3.12 -m pytest
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_installed_collision_profile_builder_v1.py
+  software/tests/unit/test_c03_installed_collision_qualification_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; `py -3.12 -m ruff check
+  software/src/rocell/application/installed_collision_measurement_manifest_v1.py
+  software/src/rocell/application/__init__.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py`;
+  and `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS`; 44 focused and predecessor tests passed in 22.16 seconds,
+  Ruff passed, and all 133 repository policy tests passed. Two earlier focused
+  attempts are preserved as `FAIL`. Strict equality first exposed the phone
+  station's float32 STL extents as `186.300003 x 172.800003 mm` against the
+  declared `186.3 x 172.8 mm`; the audit was changed to the frozen digital
+  tolerance. The next assertion still expected rounded mesh bytes and was then
+  corrected to preserve and test the exact decoded values. The corrected
+  focused module passed 21 tests in 3.79 seconds.
+- Metrics: all three station footprints match their declared envelopes within
+  `0.001 mm`. Nominal bounds are left station `184.5 x 192.0 x 7.0 mm`, right
+  station `162.5 x 192.0 x 7.0 mm`, phone/TCP station
+  `186.300003 x 172.800003 x 10.5 mm`, compliant tool body
+  `28.0 x 24.0 x 66.199997 mm`, tool cap `28.0 x 24.0 x 5.0 mm`, and camera
+  plate `90.0 x 55.0 x 6.0 mm`.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the audit proves consistency between nominal digital files. It
+  does not measure printed shrinkage, installation pose, camera-tower geometry,
+  cable shape, clearance, uncertainty, or any physical article. ICQ-1 and
+  ICQ-9 remain blocked.
+- Supersedes: none. ARM-506 remains the source and capture-scope inventory.
+- Next dependency: use these exact nominal bounds in offline collision-proxy
+  comparison and route testing; obtain one scaled full-board top-down image
+  only after the visible stations and devices are fixed; later measure Z,
+  installed deviations, attachments, cable sweep, and physical clearance.

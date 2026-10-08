@@ -1031,7 +1031,7 @@ Evidence `E-20261008-ARM-506` records the 19-body nominal-source inventory,
 the six-body top-down capture scope, the retained external inventory artifact,
 and the unchanged blocked physical-qualification state.
 
-The arm lane on `codex/c03-nominal-envelope-audit` owns the bounded ICQ-1
+The arm lane on `codex/c03-nominal-envelope-audit` completed the bounded ICQ-1
 digital-envelope audit from merged ARM-506 base
 `c8337dca8db63f98b1dbf287d376967ac4090efb`. It may parse the retained binary
 STLs without external geometry libraries, report exact nominal bounds, and
@@ -1039,6 +1039,9 @@ compare the three station XY footprints with their declared workcell
 envelopes using a fixed digital-encoding tolerance. That tolerance must not be
 used as an installed-part or clearance tolerance. The audit remains nominal,
 offline, and zero-authority and may not clear ICQ-1 or ICQ-9.
+Evidence `E-20261008-ARM-507` records the six-mesh bound audit, exact station
+envelope comparison, retained external audit artifact, digital-only tolerance,
+and unchanged blocked physical-qualification state.
 
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
