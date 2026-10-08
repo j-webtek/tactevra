@@ -1043,13 +1043,16 @@ Evidence `E-20261008-ARM-507` records the six-mesh bound audit, exact station
 envelope comparison, retained external audit artifact, digital-only tolerance,
 and unchanged blocked physical-qualification state.
 
-The arm lane on `codex/c03-nominal-proxy-audit` owns the bounded ICQ-1 active
+The arm lane on `codex/c03-nominal-proxy-audit` completed the bounded ICQ-1 active
 proxy comparison from merged ARM-507 base
 `c0ddfd5e5a742a9e25c87e32663ceedbda6dae7d`. It may compare the six nominal
 board/device/station solids with the exact AABBs used by the active simulation,
 report under-bounds and conservative over-bounds, and identify sensitivity
 work. It must not silently tighten a proxy, treat nominal containment as an
 installed measurement, clear ICQ-1 or ICQ-9, or grant physical authority.
+Evidence `E-20261008-ARM-508` records containment of all six nominal solids,
+the three deliberate 35 mm station-height proxies, the retained audit, and the
+decision to measure route sensitivity before changing any proxy.
 
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
