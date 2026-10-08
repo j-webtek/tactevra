@@ -56,6 +56,11 @@ from rocell_ai.dynamic_intent_to_motion_v1 import (  # noqa: E402
     compile_bounded_intent,
     derive_dynamic_route_fixture,
 )
+from rocell_ai.offline_intent_to_motion_v1 import (  # noqa: E402
+    OfflineIntentToMotionV1Error,
+    parse_offline_typing_intent_v1,
+    run_offline_intent_to_motion_v1,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -575,3 +580,58 @@ def test_dynamic_intent_rejects_uncovered_unsupported_and_oversized_requests() -
         compile_bounded_intent("a\n", {"A"})
     with pytest.raises(DynamicIntentToMotionV1Error, match="exceeds 12 actions"):
         compile_bounded_intent("abcdefghijklm", set("ABCDEFGHIJKLM"))
+
+
+def test_closed_offline_intent_preserves_exact_type_text_payload() -> None:
+    intent = {
+        "schema": "rocell.offline_typing_intent.v1",
+        "intent_type": "TYPE_TEXT",
+        "device": "KEYBOARD",
+        "text": "A! hh1.",
+    }
+
+    assert parse_offline_typing_intent_v1(intent) == intent
+
+
+@pytest.mark.parametrize(
+    "intent",
+    [
+        {"schema": "rocell.offline_typing_intent.v1", "intent_type": "CLARIFY",
+         "question": "What text?"},
+        {"schema": "rocell.offline_typing_intent.v1", "intent_type": "REFUSE",
+         "reason": "unsupported"},
+        {"schema": "rocell.offline_typing_intent.v1", "intent_type": "PRESS_KEY",
+         "device": "KEYBOARD", "key": "A"},
+    ],
+)
+def test_non_actionable_offline_intents_do_not_reach_motion(
+    intent: dict[str, str], tmp_path: Path
+) -> None:
+    with pytest.raises(OfflineIntentToMotionV1Error, match="non-actionable"):
+        run_offline_intent_to_motion_v1(
+            intent,
+            fixture_path=REGENERATED_POSE_ROUTE_FIXTURE,
+            workspace=WORKSPACE,
+            derived_workspace=tmp_path / "must-not-exist",
+        )
+    assert not (tmp_path / "must-not-exist").exists()
+
+
+def test_closed_offline_intent_rejects_phone_and_extension_fields() -> None:
+    phone = {
+        "schema": "rocell.offline_typing_intent.v1",
+        "intent_type": "TYPE_TEXT",
+        "device": "PHONE",
+        "text": "hello",
+    }
+    assert parse_offline_typing_intent_v1(phone) == phone
+    with pytest.raises(OfflineIntentToMotionV1Error, match="only KEYBOARD"):
+        run_offline_intent_to_motion_v1(
+            phone,
+            fixture_path=REGENERATED_POSE_ROUTE_FIXTURE,
+            workspace=WORKSPACE,
+            derived_workspace=WORKSPACE / "must-not-exist",
+        )
+    extended = {**phone, "confidence": 1.0}
+    with pytest.raises(OfflineIntentToMotionV1Error, match="fields differ"):
+        parse_offline_typing_intent_v1(extended)
