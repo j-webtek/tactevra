@@ -10290,3 +10290,61 @@ rewriting history. New entries must use a unique evidence ID.
   review so it represents the selected static-overhead architecture while
   preserving explicit holder/module/connector/cable evidence requirements.
   Gather base/clamp measurements when the arm is installed.
+
+### E-20261008-ARM-513 — additive static-overhead collision readiness v2
+
+- Lane: arm.
+- Stage: ICQ-1 shared collision-contract architecture revision.
+- Commit: `277e1992eed40e7db0f2856f039911858ba67de8`.
+- Change: added an explicit static B0477 prehardware collision contract and
+  readiness entry point using the existing 26-body static-route catalog plus
+  six separately named nominal diagnostic proxies. The exact migration from
+  the six broad legacy installation/attachment placeholders is recorded in
+  code and retained evidence. The fixed USB route is `STATIC_ROOT`; the arm
+  harness remains `CONFIGURATION_SAMPLED`. The legacy v1 builder, readiness
+  entry point, retained rehearsal reconstruction, and serialized bytes remain
+  available and unchanged for deliberate consumer-by-consumer migration.
+- Inputs/fixtures: active hash-pinned simulation context from
+  `software/config/system_manifest.json`; runtime-source SHA-256 values
+  `062a45c3fed5f809bfdb6fd56be257783f8afe86fcd6da43f9b98ffba9e0d771`
+  for `static_route_collision.py` and
+  `1a49f5e55306c5dd3ebf221ffe3d677dfb19e1c1776e78ea932f0f7301c6e8c9`
+  for `collision_readiness.py`; focused-test SHA-256
+  `9018c87fef7e395d12f653be56c1f6f1fda3e192b8191b62cd3bc4e44d397e7d`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_static_b0477_collision_readiness_v2.json`,
+  file SHA-256
+  `a2d7d41e608afb5d80b4d923d58c6a86e391ab264087d94f9e0d93078104df1b`,
+  embedded readiness-report SHA-256
+  `9c3654de23d5784d7cd10471021f6a9100c39655dbf15190a55acd5da1ce2d8e`.
+- Commands: evidence generation used `py -3.12` with
+  `load_simulation_context` and `assess_static_b0477_collision_readiness`.
+  Focused command: `py -3.12 -m pytest
+  software/tests/unit/test_collision_foundation.py
+  software/tests/unit/test_static_route_collision.py
+  software/tests/unit/test_rehearsal_noncontact_stage.py
+  software/tests/unit/test_rehearsal_noncontact_binding.py
+  software/tests/unit/test_offline_study_cli.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; followed by Ruff on the changed Python
+  files and `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`. All 156 focused and downstream tests passed in 18.00
+  seconds, Ruff passed, and all 133 repository-policy tests passed. The v2
+  report contains 32 requirements/bodies: 26 installed-body requirements and
+  six pinned-digital diagnostic proxies. It has zero global pair exclusions,
+  seven missing robot-link envelopes, and 19 unknown installed bodies. The
+  legacy moving-camera body ID is absent from v2 and preserved only in v1.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is an additive contract/readiness revision, not installed
+  geometry or a collision-clear result. No portal, boom, light, camera,
+  connector, cable, arm harness, clamp, contact tool, device, board, or robot
+  envelope was measured or installed. Existing consumers remain on v1 until
+  individually migrated and re-evidenced. ICQ-1 and ICQ-9 remain blocked.
+- Supersedes: none. ARM-512 remains the architecture-mismatch finding and all
+  historical v1 evidence remains valid.
+- Next dependency: migrate the C03 nominal-source inventory and base/camera
+  readiness consumer to the v2 body IDs, binding nominal sources without
+  promoting them to installed evidence; then collect installed portal/camera,
+  fixed USB route, base/clamp, and tool measurements.
