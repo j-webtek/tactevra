@@ -1019,6 +1019,7 @@ is still absent, so ICQ-9 remains blocked.
 The bounded follow-up on `codex/c03-physical-evidence-cli-entry` may add only
 the executable module guard and a subprocess help smoke. It changes no packet,
 gate, evidence, or authority semantics.
+Evidence `E-20261008-ARM-504` records the completed entrypoint smoke.
 
 The arm lane on `codex/c03-physical-evidence-packet` completed the bounded ICQ
 physical-evidence readiness increment from merged base
