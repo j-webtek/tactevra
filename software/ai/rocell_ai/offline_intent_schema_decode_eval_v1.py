@@ -28,8 +28,11 @@ def load_schema_intent_cases(
     raw = cases_path.read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("schema") != "tactevra.closed_intent_sft_data.v4":
-        raise ValueError("native split requires the v4 closed-intent manifest")
+    if manifest.get("schema") not in {
+        "tactevra.closed_intent_sft_data.v4",
+        "tactevra.closed_intent_sft_data.v5",
+    }:
+        raise ValueError("native split requires a supported closed-intent manifest")
     if digest != manifest.get(f"{split}_sha256"):
         raise ValueError(f"{split} data hash mismatch")
     cases = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()]

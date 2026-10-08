@@ -1,0 +1,7 @@
+{
+  "case_count": 200,
+  "cases_sha256": "63ec96fedbfb36b880bfa4e2a40e2bd0253c7c917b5b2b95cd1f52b2d7bc4386",
+  "schema": "tactevra.closed_intent_evaluation_manifest.v11",
+  "source_data_manifest_sha256": "2955ed50a61fea7326e33a828daa0c5a18de07abbf0adcb7f0fbe5203f8dc4a4",
+  "status": "FROZEN_UNOPENED_BEFORE_TRAINING"
+}
