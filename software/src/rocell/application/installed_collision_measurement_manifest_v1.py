@@ -665,12 +665,93 @@ def render_installed_collision_measurement_worksheet_v1(
     return "\n".join(lines) + "\n"
 
 
+def build_pending_installed_collision_measurement_manifest_v1(
+    context: SimulationContext,
+    *,
+    measurement_manifest_id: str,
+    captured_at_utc: str,
+) -> dict[str, Any]:
+    """Build a complete, context-bound draft with no claimed measurements."""
+
+    if not isinstance(context, SimulationContext):
+        raise TypeError("context must be a SimulationContext")
+    manifest_id = _text(measurement_manifest_id, "measurement_manifest_id")
+    _utc(captured_at_utc, "captured_at_utc")
+    readiness = assess_current_collision_readiness(context)
+    if readiness.active_build_id is None:
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "active build id is unavailable"
+        )
+    draft: dict[str, Any] = {
+        "schema": SCHEMA,
+        "measurement_manifest_id": manifest_id,
+        "captured_at_utc": captured_at_utc,
+        "manifest_id": readiness.manifest_id,
+        "manifest_sha256": readiness.manifest_sha256,
+        "active_build_id": readiness.active_build_id,
+        "build_snapshot_sha256": readiness.build_snapshot_hash,
+        "robot_model_sha256": readiness.urdf_sha256,
+        "base_contract_sha256": readiness.contract.content_hash,
+        "root_frame": readiness.contract.root_frame,
+        "sources": [],
+        "body_measurements": [
+            {
+                "body_id": requirement.body_id,
+                "parent_frame": requirement.parent_frame,
+                "role": requirement.role.value,
+                "binding_mode": requirement.binding_mode.value,
+                "status": "PENDING",
+                "source_ids": [],
+                "coordinate_frame": requirement.parent_frame,
+                "units": "mm",
+                "geometry_uncertainty_mm": None,
+                "envelope_primitives": [],
+                "notes": "Pending physical measurement; no value claimed.",
+            }
+            for requirement in readiness.contract.requirements
+        ],
+        "clearance_measurement": {
+            "status": "PENDING",
+            "source_ids": [],
+            "minimum_separation_mm": None,
+            "geometry_uncertainty_mm_per_body": None,
+            "pose_uncertainty_mm_per_body": None,
+            "notes": "Pending reviewed physical clearance policy.",
+        },
+    }
+    draft["content_sha256"] = _sha(draft)
+    payload = _canonical(draft)
+    report = validate_installed_collision_measurement_manifest_v1(
+        draft,
+        contract=readiness.contract,
+        expected_manifest_id=readiness.manifest_id,
+        expected_manifest_sha256=readiness.manifest_sha256,
+        expected_active_build_id=readiness.active_build_id,
+        expected_build_snapshot_sha256=readiness.build_snapshot_hash,
+        expected_robot_model_sha256=readiness.urdf_sha256,
+        file_sha256=hashlib.sha256(payload).hexdigest(),
+    )
+    if (
+        report["status"] != BLOCKED_STATUS
+        or report["measured_body_count"] != 0
+        or len(report["pending_body_ids"]) != len(readiness.contract.requirements)
+        or report["clearance_status"] != "PENDING"
+    ):
+        raise InstalledCollisionMeasurementManifestV1Error(
+            "pending measurement draft did not remain fail closed"
+        )
+    return draft
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--system-manifest", type=Path)
     parser.add_argument("--measurement-manifest", type=Path)
     parser.add_argument("--measurement-manifest-sha256")
+    parser.add_argument("--write-pending-draft", type=Path)
+    parser.add_argument("--draft-manifest-id")
+    parser.add_argument("--draft-captured-at-utc")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args(argv)
     system_manifest = args.system_manifest or (
@@ -679,6 +760,48 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         context = load_simulation_context(args.workspace, system_manifest)
         readiness = assess_current_collision_readiness(context)
+        draft_values = (
+            args.write_pending_draft,
+            args.draft_manifest_id,
+            args.draft_captured_at_utc,
+        )
+        if any(value is not None for value in draft_values):
+            if not all(value is not None for value in draft_values):
+                raise InstalledCollisionMeasurementManifestV1Error(
+                    "pending draft path, manifest id, and capture time are required together"
+                )
+            if args.measurement_manifest is not None:
+                raise InstalledCollisionMeasurementManifestV1Error(
+                    "pending draft creation cannot also validate a measurement manifest"
+                )
+            draft = build_pending_installed_collision_measurement_manifest_v1(
+                context,
+                measurement_manifest_id=args.draft_manifest_id,
+                captured_at_utc=args.draft_captured_at_utc,
+            )
+            payload = json.dumps(
+                draft,
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=True,
+                allow_nan=False,
+            ).encode("utf-8") + b"\n"
+            try:
+                with args.write_pending_draft.open("xb") as handle:
+                    handle.write(payload)
+            except FileExistsError as exc:
+                raise InstalledCollisionMeasurementManifestV1Error(
+                    "pending draft output already exists"
+                ) from exc
+            print(json.dumps({
+                "status": BLOCKED_STATUS,
+                "output_path": str(args.write_pending_draft),
+                "file_sha256": hashlib.sha256(payload).hexdigest(),
+                "content_sha256": draft["content_sha256"],
+                "pending_body_count": len(draft["body_measurements"]),
+                "physical_authority": False,
+            }, indent=2, sort_keys=True))
+            return 2
         if args.measurement_manifest is None:
             if args.measurement_manifest_sha256 is not None:
                 raise InstalledCollisionMeasurementManifestV1Error(
@@ -717,6 +840,7 @@ __all__ = [
     "SCHEMA",
     "InstalledCollisionMeasurementManifestV1Error",
     "load_and_validate_installed_collision_measurement_manifest_v1",
+    "build_pending_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",
     "main",
     "render_installed_collision_measurement_worksheet_v1",

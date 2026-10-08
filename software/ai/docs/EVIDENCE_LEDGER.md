@@ -9829,3 +9829,45 @@ rewriting history. New entries must use a unique evidence ID.
 - Supersedes: none; ARM-503 remains the CLI implementation evidence.
 - Next dependency: run the executable CLI against the retained route and then
   add real installed, rigid, cable, and fresh observed-state evidence in order.
+
+### E-20261008-ARM-505 — pending ICQ-1 installed-measurement draft
+
+- Lane: arm.
+- Stage: ICQ-1 physical measurement capture preparation.
+- Commit: `5a3eed39e613b05878459f82eb0640ece9108d5b`.
+- Change: added a deterministic draft builder and CLI mode that binds the exact
+  active build, robot model, collision contract, root frame, and all 19 required
+  bodies while marking every body and the clearance policy `PENDING`. Drafts
+  contain no sources, primitives, uncertainty, or clearance values and are
+  internally revalidated as blocked before return. File creation uses exclusive
+  mode and refuses to overwrite an existing capture.
+- Inputs/fixtures: runtime-source SHA-256
+  `3ee10ab3e224d0be93b22cbb11d7d018023a45edca38f68e0d67bc88f22b714a`;
+  focused-test SHA-256
+  `855d5b7d9758a3ed0ac08be0d80e77654df245d7f2870ce10081b345745a4477`.
+  The focused tests use the active repository context and synthetic manifest
+  values only; they do not supply physical measurements.
+- Command: exact focused command
+  `py -3.12 -m pytest software/tests/unit/test_installed_collision_measurement_manifest_v1.py software/tests/unit/test_installed_collision_profile_builder_v1.py software/tests/unit/test_c03_installed_collision_qualification_v1.py software/tests/unit/test_c03_physical_evidence_packet_v1.py -q`
+  with `PYTHONPATH=software/src;software/ai`.
+- Result: `PASS`; 39 focused and predecessor tests passed in 21.47 seconds.
+  The generated draft has 19 pending bodies, zero measured bodies, one pending
+  clearance policy, exactly 20 blockers, zero sources, and no claimed geometry.
+  Repeated generation is deterministic and a second write to the same path is
+  rejected.
+- Validation: exact Ruff command over the changed runtime and test passed.
+  Exact full command `py -3.12 scripts/maintain_repository.py verify --full`
+  passed all 133 policy tests and 945 offline tests with 5 expected Windows
+  symlink skips in 491.48 seconds. No tracked file was added, preserving the
+  reviewed 6,519-file archive ceiling.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is an empty, blocked capture draft. Its creation time is
+  operator supplied; every physical source, dimension, primitive, uncertainty,
+  and clearance value still requires collection and review. It creates no
+  collision qualification, command, permit, movement, or physical authority.
+- Supersedes: none. ARM-502 through ARM-504 remain the packet and CLI evidence.
+- Next dependency: create the session draft, populate each body only from
+  hash-bound physical sources, retain pending values where unknown, and run the
+  strict validator. ICQ-2 cannot build a profile until every blocker is closed.

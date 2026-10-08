@@ -12,7 +12,9 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     BLOCKED_STATUS,
     READY_STATUS,
     InstalledCollisionMeasurementManifestV1Error,
+    build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
+    main,
     render_installed_collision_measurement_worksheet_v1,
 )
 from rocell.simulation.collision import CollisionBindingMode
@@ -142,6 +144,74 @@ def test_worksheet_names_every_required_body_and_preserves_sampled_scope() -> No
     assert "`attachment:moving_camera_cable`" in worksheet
     assert "per-configuration geometry in ICQ-4" in worksheet
     assert "no profile, collision result, command, or physical authority" in worksheet
+
+
+def test_pending_draft_names_every_body_without_claiming_values() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    first = build_pending_installed_collision_measurement_manifest_v1(
+        context,
+        measurement_manifest_id="physical-capture-session-001",
+        captured_at_utc=WHEN,
+    )
+    second = build_pending_installed_collision_measurement_manifest_v1(
+        context,
+        measurement_manifest_id="physical-capture-session-001",
+        captured_at_utc=WHEN,
+    )
+
+    assert first == second
+    assert first["sources"] == []
+    assert len(first["body_measurements"]) == 19
+    assert all(row["status"] == "PENDING" for row in first["body_measurements"])
+    assert all(row["source_ids"] == [] for row in first["body_measurements"])
+    assert all(
+        row["geometry_uncertainty_mm"] is None
+        and row["envelope_primitives"] == []
+        for row in first["body_measurements"]
+    )
+    assert first["clearance_measurement"]["status"] == "PENDING"
+    assert first["clearance_measurement"]["minimum_separation_mm"] is None
+
+
+def test_pending_draft_validates_only_as_blocked(tmp_path: Path) -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    draft = build_pending_installed_collision_measurement_manifest_v1(
+        context,
+        measurement_manifest_id="physical-capture-session-002",
+        captured_at_utc=WHEN,
+    )
+    report = _load(tmp_path, draft)
+
+    assert report["status"] == BLOCKED_STATUS
+    assert report["measured_body_count"] == 0
+    assert len(report["pending_body_ids"]) == 19
+    assert len(report["blockers"]) == 20
+    assert "PENDING:CLEARANCE_POLICY" in report["blockers"]
+    assert report["physical_authority"] is False
+
+
+def test_cli_writes_once_and_refuses_to_overwrite_pending_draft(
+    tmp_path: Path, capsys
+) -> None:
+    output = tmp_path / "pending-installed-measurements.json"
+    arguments = [
+        "--workspace", str(WORKSPACE),
+        "--write-pending-draft", str(output),
+        "--draft-manifest-id", "physical-capture-session-003",
+        "--draft-captured-at-utc", WHEN,
+    ]
+
+    assert main(arguments) == 2
+    summary = json.loads(capsys.readouterr().out)
+    assert summary["status"] == BLOCKED_STATUS
+    assert summary["pending_body_count"] == 19
+    assert summary["physical_authority"] is False
+    assert hashlib.sha256(output.read_bytes()).hexdigest() == summary["file_sha256"]
+
+    with pytest.raises(SystemExit) as stopped:
+        main(arguments)
+    assert stopped.value.code == 2
+    assert "already exists" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize(
