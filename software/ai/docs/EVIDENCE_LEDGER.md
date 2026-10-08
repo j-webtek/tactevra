@@ -10175,3 +10175,62 @@ rewriting history. New entries must use a unique evidence ID.
   attachments. Only after those inputs and a reviewed self-collision pair
   policy exist should a candidate full-body replay be attempted; moving-cable
   and installed measurements remain separate physical evidence.
+
+### E-20261008-ARM-511 — nominal compliant-tool binding readiness
+
+- Lane: arm.
+- Stage: ICQ-1 nominal attachment binding.
+- Commit: `4d9272d0d8c8d7cbd6041ca40633ed01b6718232`.
+- Change: added a zero-authority readiness check that admits the exact C03
+  route, binds its 110 mm `hand_tcp`-to-tip planning transform, and binds the
+  nominal compliant-tool body and cap mesh envelopes from ARM-507. It keeps
+  the planning point separate from collision volume and refuses to define a
+  single tool envelope while assembly transforms and installed parts are
+  unresolved.
+- Inputs/fixtures: exact route file and SHA-256 remain
+  `C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json` and
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  runtime-source SHA-256
+  `fd043ff444cf10d83a8379d1ab847bcd740e2e481cb92149d7d94bbf61bda1fa`;
+  focused-test SHA-256
+  `81fda5fdd54967494a55c302d15ce1b7e81b7f6c6efb1fb624d241f9bc40faa5`.
+  Retained audit:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_nominal_tool_binding_readiness_v1.json`,
+  file SHA-256
+  `fe0926e1e3c7f020b5473f44093f72eaab6b353e018d8a25c75c3cb1f5835a4e`,
+  content SHA-256
+  `cac86b7a1c1231023ad25c44a357839186576c5887544d4a4dd41b01ef338da5`.
+- Commands: exact audit command used `py -3.12` with
+  `load_simulation_context` and
+  `assess_c03_nominal_tool_binding_readiness_v1`. Focused command:
+  `py -3.12 -m pytest
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; followed by Ruff on the changed runtime
+  and test files and `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`; the planning transform is translation
+  `[0, 0, -110] mm` with identity rotation and tool-configuration SHA-256
+  `ba538b48bb9c6bc80c01ad4ae792b9784440de4825c5dea5781f3277b8ee4109`.
+  Nominal body extent is `28 x 24 x 66.199997 mm`; nominal cap extent is
+  `28 x 24 x 5 mm`. All 44 focused and predecessor tests passed in 25.61
+  seconds, Ruff passed, and all 133 policy tests passed. No collision envelope
+  was installed or screened.
+- Missing inputs: `HAND_TCP_TO_TOOL_BODY_RIGID_TRANSFORM`,
+  `TOOL_BODY_TO_TOP_CAP_ASSEMBLY_TRANSFORM`,
+  `INSTALLED_ROD_OR_STYLUS_GEOMETRY`,
+  `FREE_AND_COMPRESSED_COMPLIANCE_ENVELOPES`,
+  `GRIP_DEPTH_AND_RETENTION_HARDWARE_ENVELOPE`, and
+  `MOUNTED_JAW_REFERENCE_TO_TIP_MEASUREMENT`.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is a digital readiness result. The printed-tool design is
+  unverified, and the exact assembled rod/stylus, grip depth, compliance state,
+  fasteners, and mounted transform are not available. It does not run a
+  collision query or clear ICQ-1/ICQ-9.
+- Supersedes: none. ARM-510 remains the full 19-body readiness inventory.
+- Next dependency: use controlled assembly CAD if it already fixes all six
+  inputs; otherwise capture the assembled tool dimensions and mounted
+  jaw-reference-to-tip transform after the tool exists. Continue offline in
+  parallel with base/clamp and rigid camera-support geometry binding.

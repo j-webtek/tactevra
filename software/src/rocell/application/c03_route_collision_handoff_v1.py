@@ -299,6 +299,7 @@ def assess_c03_station_height_route_sensitivity_v1(
 
 
 FULL_BODY_GEOMETRY_SCHEMA = "tactevra.c03_full_body_geometry_audit.v1"
+NOMINAL_TOOL_BINDING_SCHEMA = "tactevra.c03_nominal_tool_binding_readiness.v1"
 MESH_BINDING_SCHEMA = "tactevra.isaac_sim_upstream_link_mesh_binding.v1"
 MESH_REDUCTION_SCHEMA = "tactevra.isaac_sim_link_mesh_reduction.v1"
 EXPECTED_MESH_BINDING_RECEIPT_SHA256 = (
@@ -476,6 +477,63 @@ def assess_c03_full_body_geometry_readiness_v1(
     }
     return {**core, "full_body_geometry_audit_sha256": _sha256(core)}
 
+
+def assess_c03_nominal_tool_binding_readiness_v1(
+    result: Mapping[str, Any], context: SimulationContext
+) -> dict[str, Any]:
+    """Bind the planning tip and tool CAD identities without inventing assembly."""
+
+    handoff = prepare_c03_route_collision_handoff_v1(result, context)
+    route = result["route_result"]
+    tool_length = route.get("tool_total_length_mm")
+    tool_identity = route.get("tool_configuration_sha256")
+    if tool_length != 110.0 or not isinstance(tool_identity, str):
+        raise C03FullBodyGeometryAuditV1Error(
+            "C03 route tool identity differs from the exact candidate"
+        )
+    envelope = build_installed_collision_nominal_envelope_audit_v1(context)
+    bounds = envelope["mesh_bounds"]
+    body = bounds["compliant_tool_body"]
+    cap = bounds["compliant_tool_top_cap"]
+    missing = [
+        "HAND_TCP_TO_TOOL_BODY_RIGID_TRANSFORM",
+        "TOOL_BODY_TO_TOP_CAP_ASSEMBLY_TRANSFORM",
+        "INSTALLED_ROD_OR_STYLUS_GEOMETRY",
+        "FREE_AND_COMPRESSED_COMPLIANCE_ENVELOPES",
+        "GRIP_DEPTH_AND_RETENTION_HARDWARE_ENVELOPE",
+        "MOUNTED_JAW_REFERENCE_TO_TIP_MEASUREMENT",
+    ]
+    core = {
+        "schema": NOMINAL_TOOL_BINDING_SCHEMA,
+        "source_result_receipt_sha256": result["receipt_sha256"],
+        "source_handoff_sha256": handoff["c03_collision_handoff_sha256"],
+        "source_envelope_audit_sha256": envelope["content_sha256"],
+        "planning_tip_transform": {
+            "parent_frame": "hand_tcp",
+            "child_frame": "tool_tip",
+            "translation_mm": [0.0, 0.0, -tool_length],
+            "rotation_row_major": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            "tool_configuration_sha256": tool_identity,
+            "planning_only": True,
+        },
+        "nominal_mesh_envelopes": {
+            "compliant_tool_body": body,
+            "compliant_tool_top_cap": cap,
+        },
+        "missing_binding_inputs": missing,
+        "single_collision_envelope_defined": False,
+        "installed_tool_geometry_ready": False,
+        "collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "nominal_tool_binding_sha256": _sha256(core)}
+
 __all__ = [
     "SCHEMA",
     "EXPECTED_RESULT_RECEIPT_SHA256",
@@ -483,8 +541,10 @@ __all__ = [
     "C03FullBodyGeometryAuditV1Error",
     "C03RouteCollisionHandoffV1Error",
     "FULL_BODY_GEOMETRY_SCHEMA",
+    "NOMINAL_TOOL_BINDING_SCHEMA",
     "STATION_HEIGHT_SENSITIVITY_SCHEMA",
     "assess_c03_full_body_geometry_readiness_v1",
+    "assess_c03_nominal_tool_binding_readiness_v1",
     "assess_c03_station_height_route_sensitivity_v1",
     "prepare_c03_route_collision_handoff_v1",
 ]
