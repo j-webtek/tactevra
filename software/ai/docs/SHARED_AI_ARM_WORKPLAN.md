@@ -1175,6 +1175,19 @@ bodies from new consumers, retains 28 ambient-architecture inventory rows, and
 binds the factory clamp to the nominal 225–385 mm rear-edge zone. All 28 rows
 remain unmeasured; installed collision qualification remains blocked.
 
+The arm lane on `codex/c03-ambient-nominal-binding` completed ARM-518 from
+merged ARM-517 base `540e259e22433c46b6b46ea0052f5b0eabc3e13a`. It may
+derive diagnostic AABBs only from the selected printable portal datums and
+nominal B0477 case dimensions, then screen the reconstructed C03 tool-tip
+centreline at predeclared 0/5/10/20 mm clearances. It must keep this distinct
+from a full-body or installed collision screen, retain every unbound clamp,
+lens, connector, USB, harness, and tool-volume dependency, and grant no
+controller, transport, permit, movement, or physical authority.
+Evidence `E-20261008-ARM-518` records six nominal support/camera envelopes and
+zero intersecting segments across all four diagnostic clearances for the
+13-waypoint synthetic reconstructed route fixture. The result remains
+simulation-only and cannot clear ICQ-1 or ICQ-9.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading

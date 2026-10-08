@@ -10610,3 +10610,63 @@ rewriting history. New entries must use a unique evidence ID.
   sensitivity. In parallel, continue lighting-domain vision robustness work;
   after installation, measure the clamp footprint and full board-to-base
   transform before physical collision qualification.
+
+### E-20261008-ARM-518 — ambient nominal-support route sensitivity
+
+- Lane: arm.
+- Stage: ICQ-1 diagnostic nominal support-route sensitivity.
+- Commit: `fc171a9a0f356389b11952e9d90deec423456939`.
+- Change: added a bounded diagnostic that derives six board-frame AABBs from
+  the exact selected printable portal design: left and right posts, crossbar,
+  both camera booms, and the nominal B0477 case. It screens every adjacent
+  segment in the admitted synthetic C03 reconstruction fixture at 0, 5, 10,
+  and 20 mm tool-tip-centreline clearance without treating the result as a
+  full-body or installed collision check.
+- Inputs/fixtures: printable-frame-design SHA-256
+  `74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3`;
+  implementation SHA-256
+  `d277a006dd19321a2ee3acaa621a293006b347c865e2002f1b4ebceec9e06095`;
+  focused-test SHA-256
+  `7800d9164837a60dd7563be3476319fe2ae554c5057a34eb1008489c1cb1bb8c`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_ambient_nominal_support_route_sensitivity_v1.json`,
+  file SHA-256
+  `21e2f605da99f7d0e40fc5f1eaad1f0bba13a4018bbc6f8f1508caa3961e7ae1`,
+  result SHA-256
+  `a60b4f7b1b4e0b774561a3929ddf3008803ad174957a5804b848655c35ec7652`.
+- Exact evidence command: with
+  `PYTHONPATH=software/src;software/ai;software/tests/unit`, run `py -3.12 -`
+  with the recorded inline Python program that loads the exact simulation
+  context, reconstructs the bounded synthetic C03 route fixture, calls
+  `assess_c03_ambient_nominal_support_route_sensitivity_v1`, and writes the
+  retained sorted-key JSON path above.
+- Exact validation command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -m pytest software/tests/unit/test_collision_foundation.py
+  software/tests/unit/test_static_route_collision.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py
+  software/tests/unit/test_rehearsal_noncontact_stage.py
+  software/tests/unit/test_rehearsal_noncontact_binding.py -q`; then run Ruff
+  over the changed Python files and
+  `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`. All 173 focused/predecessor tests passed in 36.94
+  seconds, Ruff passed, and all 133 policy tests passed. The fixture contains
+  13 waypoints and 12 adjacent segments. Zero segments intersected any of the
+  six nominal envelopes at 0, 5, 10, or 20 mm diagnostic clearance.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Failures preserved: none rewritten. ARM-509 remains the separate retained
+  321-waypoint station-height result. ARM-518 uses a smaller reconstructed
+  synthetic fixture and does not replace or rescore ARM-509.
+- Limitations: the check evaluates only a swept point representing the tool-tip
+  centreline. Robot links, installed clamp, complete contact tool, B0477 lens
+  and connector, fixed USB route, arm harness, installed transforms, and
+  measured clearance remain unbound. The nominal camera case proxy places the
+  documented case above the entrance-pupil plane; it is not a received-camera
+  or installed-cage measurement. No controller command, transport, permit,
+  hardware write, or physical movement occurred. ICQ-1 and ICQ-9 remain blocked.
+- Next dependency: bring the retained 321-waypoint route bytes into the same
+  additive diagnostic, add nominal robot-link volumes, and keep the incomplete
+  cable/clamp/tool bodies fail closed until physical measurements exist.
