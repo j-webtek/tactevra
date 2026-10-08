@@ -9871,3 +9871,61 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: create the session draft, populate each body only from
   hash-bound physical sources, retain pending values where unknown, and run the
   strict validator. ICQ-2 cannot build a profile until every blocker is closed.
+
+### E-20261008-ARM-506 — nominal C03 collision-source inventory
+
+- Lane: arm.
+- Stage: ICQ-1 nominal geometry intake preparation.
+- Commit: `43b1ed0ac4ae8144d86feded5164ace8db633d70`.
+- Change: added a deterministic zero-authority inventory that maps all 19
+  required collision bodies to 11 hash-bound existing URDF, CAD, workcell
+  layout, camera profile, and camera support sources. It carries the existing
+  nominal board, keyboard, phone, and station placements without relabeling
+  them as measurements, states one remaining physical check per body, and
+  identifies the six installed bodies for which a scaled top-down image can
+  verify XY and yaw. The camera holder, module, connector, and moving cable
+  remain physically pending while the tower is printed and installed.
+- Inputs/fixtures: combined runtime-source SHA-256
+  `0183d5c0c447dbe5366ad53394083c56266033a31ec899588615a0e5f616dd2c`;
+  focused-test SHA-256
+  `68cec277be254ee307e88085670b8d9d8c0f6c11d8a40fc1b7c274c7bac992e6`.
+  The retained inventory is
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\nominal_collision_source_inventory_v1.json`,
+  file SHA-256
+  `cb68e0c8165ecdc4246b6d6e2ee443a51dc583061ec9a3a319870ce19a5f0ad3`,
+  content SHA-256
+  `549b7f50a52fa8b0e08361280b87924aa664a05d59edb68d27ef8e07090bf22d`.
+- Commands: `py -3.12 -m pytest
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_installed_collision_profile_builder_v1.py
+  software/tests/unit/test_c03_installed_collision_qualification_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; `py -3.12 -m ruff check
+  software/src/rocell/application/installed_collision_measurement_manifest_v1.py
+  software/src/rocell/application/__init__.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py`;
+  and `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS`; 42 focused and predecessor tests passed in 21.59 seconds,
+  Ruff passed, and all 133 repository policy tests passed. The first focused
+  attempt is preserved as `FAIL`: the new test expected 10 unique nominal
+  files while the implementation correctly emitted 11; the assertion was
+  corrected without changing inventory behavior, after which 19 focused tests
+  passed in 3.28 seconds.
+- Validation: the CLI retained a 19-body, 11-source inventory; recomputed every
+  source-file digest; reproduced the layout's board size `[610,457,18]` mm,
+  keyboard origin `[85,85]` mm, and phone origin `[499.2,84.2]` mm; and kept
+  installed measurement status `PENDING`, collision qualification false, and
+  physical authority false. Repository footprint remains exactly 6,519 files.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: this is nominal simulation input and capture planning, not an
+  installed measurement. A top-down image can verify visible XY and yaw only;
+  it cannot prove Z, hidden geometry, uncertainty, cable sweep, or clearance.
+  The printed camera tower and received installed articles remain physically
+  unqualified, so ICQ-1 and ICQ-9 remain blocked.
+- Supersedes: none. ARM-505 remains the empty physical capture draft.
+- Next dependency: continue nominal simulation from the hash-bound sources;
+  when the board is ready, capture one perpendicular full-board image with
+  board edges and two orthogonal scale/datum references, then collect the
+  remaining Z, envelope, uncertainty, attachment, cable, and clearance values.
