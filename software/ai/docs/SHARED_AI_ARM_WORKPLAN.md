@@ -1067,6 +1067,15 @@ Evidence `E-20261008-ARM-509` records zero collision segments and zero decision
 differences across all 320 adjacent exact-route segments under both station
 height models, while retaining the full-body and installed-evidence blockers.
 
+The arm lane on `codex/c03-full-body-route-geometry` owns ARM-510 from merged
+ARM-509 base `1c8342678bc7413b762f9bc5b733ec80b5b16834`. It may bind the
+retained official RoArm link-mesh and conservative-reduction identities to the
+exact C03 route, enumerate the geometry available for every moving rigid body,
+and fail closed on missing tool, clamp/base, rigid camera-support, placement,
+or self-collision-policy evidence. It must not promote the retained candidate
+boxes into an installed profile, claim a full-body collision pass, change
+AI-lane status, clear ICQ-1 or ICQ-9, or grant physical authority.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading
