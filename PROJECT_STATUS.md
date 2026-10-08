@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed October 7, 2026 through the ARM-497 C03 partition collision evaluator,
+Reviewed October 7, 2026 through the ARM-498 C03 continuous collision receipt,
 the ARM-132 shadow-service reuse campaign,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,

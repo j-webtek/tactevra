@@ -299,6 +299,14 @@ without losing global route lineage.
 
 ### ICQ-6 — Conservative continuous-segment qualification
 
+**Implementation status (2026-10-07):** the zero-authority continuous receipt
+is implemented at `E-20261007-ARM-498`. It revalidates the existing reviewed
+path-radius and measured-sweep method, derives rigid-body bounds from exact
+joint deltas, body path radii, and ancestor joints, assigns all 321 current
+route segments exactly once, and distinguishes `CLEAR`, `COLLISION`, and
+`INDETERMINATE`. The retained synthetic rehearsal is `COLLISION`; no installed
+clearance or physical qualification is claimed.
+
 **Purpose:** Close the gap between sampled configurations over every route
 segment.
 

@@ -1945,6 +1945,17 @@ synthetic contract-rehearsal profile. This is a useful negative result and no
 clearance claim: every synthetic sample and envelope collided, ICQ-6 continuous
 proof remains absent, and no command, write, movement, gate, or authority was
 created.
+Evidence `E-20261007-ARM-498` implements the ICQ-6 continuous receipt over the
+reviewed path-radius and independently measured sweep-envelope method. The
+receipt recomputes each rigid-body motion bound from exact joint deltas, body
+path radius, and ancestor joints; rejects changed bounds; consumes all 321
+current route segments once; reproduces the exact configuration-geometry
+boundary recheck; and distinguishes `CLEAR`, `COLLISION`, and `INDETERMINATE`.
+An adversarial fixture proves clear endpoints cannot hide a swept collision.
+The retained full-route synthetic rehearsal remains `COLLISION` on all 321
+segments. This is software and negative synthetic evidence only: real installed
+geometry, fresh observed entry, command generation, and physical authority
+remain blocked.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered
