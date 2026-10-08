@@ -1931,6 +1931,16 @@ owned adjacent segments, and one exact boundary recheck. It rejects
 endpoint-only interpolation and inflates each cable radius by capture and
 unobserved-deformation uncertainty. No installed cable capture exists and no
 collision screening, command, hardware write, movement, or authority occurred.
+Evidence `E-20261007-ARM-496` preserves the first ICQ-5 failure: the current
+unit-test snapshot did not match the retained route's exact calibration hash,
+so both partitions stopped before collision evaluation. Evidence
+`E-20261007-ARM-497` reconstructs the exact retained snapshot and evaluates all
+323 sample slots and all 321 partition-owned sweep slots exactly once. Both
+partitions correctly report `BLOCKED_PARTITION_COLLISION_DETECTED` against the
+synthetic contract-rehearsal profile. This is a useful negative result and no
+clearance claim: every synthetic sample and envelope collided, ICQ-6 continuous
+proof remains absent, and no command, write, movement, gate, or authority was
+created.
 
 1. **S1 software boundary — complete for zero authority:** v2 producer bytes,
    strict decoding, trusted registry, freshness, mutation rejection, and ordered

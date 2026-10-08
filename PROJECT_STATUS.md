@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed October 7, 2026 through the ARM-495 C03 cable-envelope intake,
+Reviewed October 7, 2026 through the ARM-497 C03 partition collision evaluator,
 the ARM-132 shadow-service reuse campaign,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
