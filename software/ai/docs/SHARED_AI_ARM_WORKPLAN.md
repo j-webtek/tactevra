@@ -1007,6 +1007,11 @@ evidence, report structural and semantic results separately, and remain read-
 only and zero-authority. It may not tune the prompt or model, alter the
 benchmark, invoke motion planning, change lane status, or emit commands,
 hardware writes, movement, or physical authority.
+Evidence `E-20261008-AI-524` rejects the same model after exact-schema decoding.
+Structural validity improves from 0/30 to 30/30, proving the decoder correction,
+but exact semantics reach only 7/30, with 21 false actionable outputs and four
+altered typing payloads. The model remains disconnected from motion. The next
+dependency is schema-specific training data and a newly frozen evaluation set.
 
 The AI/model lane on `codex/offline-intent-model-eval` claims AI-523 from
 merged ARM-522 base `e20f9aec993aaab6558db33180ebe204556072f7`. It may add
