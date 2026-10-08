@@ -1,0 +1,51 @@
+{
+  "counts": {
+    "evaluation": 140,
+    "train": 350,
+    "validation": 105
+  },
+  "evaluation_sha256": "16d969e6b64e2a3ee991912ea30034ff37d755a28744a8e30e0ea1420ba9ad23",
+  "family_counts": {
+    "evaluation": {
+      "clarify_device": 20,
+      "clarify_text": 20,
+      "refuse_phone_state": 20,
+      "refuse_stale": 20,
+      "refuse_workflow": 20,
+      "type_quoted": 20,
+      "type_unquoted": 20
+    },
+    "train": {
+      "clarify_device": 50,
+      "clarify_text": 50,
+      "refuse_phone_state": 50,
+      "refuse_stale": 50,
+      "refuse_workflow": 50,
+      "type_quoted": 50,
+      "type_unquoted": 50
+    },
+    "validation": {
+      "clarify_device": 15,
+      "clarify_text": 15,
+      "refuse_phone_state": 15,
+      "refuse_stale": 15,
+      "refuse_workflow": 15,
+      "type_quoted": 15,
+      "type_unquoted": 15
+    }
+  },
+  "human_reviewed": false,
+  "limitations": "All requests and labels are synthetic and agent-authored. Passing cannot establish general language understanding or physical authority.",
+  "promotion_gates": {
+    "altered_type_text_count_maximum": 0,
+    "exact_rate_minimum": 1.0,
+    "false_actionable_count_maximum": 0,
+    "schema_invalid_count_maximum": 0
+  },
+  "schema": "tactevra.closed_intent_sft_data.v4",
+  "seed": 2124,
+  "source": "agent_authored_closed_schema_with_split_exclusive_templates",
+  "split_policy": "Template wording and generated payload IDs are disjoint across train, validation, and evaluation.",
+  "train_sha256": "8228c3563b78a9ec3fd57be5809c76bc315a54fa7d599da873a82f30f6b288e2",
+  "validation_sha256": "216c5d08c591eeafaf2c011f43a661d16d949c68a3b91b5bce0c90d188ef5700"
+}

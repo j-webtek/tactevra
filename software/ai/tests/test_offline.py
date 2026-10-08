@@ -35,9 +35,25 @@ from build_sft_data import build as build_sft_data  # noqa: E402
 from build_sft_v1_data import build as build_sft_v1_data  # noqa: E402
 from build_sft_v2_data import build as build_sft_v2_data  # noqa: E402
 from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
+from build_schema_intent_sft_v4_data import build as build_schema_intent_sft_v4_data  # noqa: E402
+from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_schema_intent_v4_splits_are_disjoint_and_contract_valid(self) -> None:
+        train, validation, evaluation, manifest = build_schema_intent_sft_v4_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (350, 105, 140))
+        requests = [row["request"].casefold() for row in train + validation + evaluation]
+        self.assertEqual(len(requests), len(set(requests)))
+        for row in train + validation + evaluation:
+            self.assertEqual(parse_offline_typing_intent_v1(row["target"]), row["target"])
+        actionable = sum(
+            row["target"]["intent_type"] == "TYPE_TEXT"
+            for row in train + validation + evaluation
+        )
+        self.assertLess(actionable, (len(train) + len(validation) + len(evaluation)) / 2)
+        self.assertEqual(manifest["promotion_gates"]["false_actionable_count_maximum"], 0)
+
     def test_schema_constrained_successor_changes_only_response_format(self) -> None:
         case = {"request": 'Type "A!" on the keyboard.',
                 "observation": {"ref": "fixture", "fresh": True}}
