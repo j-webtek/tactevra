@@ -1,7 +1,8 @@
 # Tactevra project status
 
-Reviewed October 8, 2026 through the ARM-518 ambient nominal-support route
-sensitivity, the ARM-517 ambient-light static-workcell contract,
+Reviewed October 8, 2026 through the ARM-519 exact intent-to-simulated-motion
+rehearsal, the ARM-518 ambient nominal-support route sensitivity,
+the ARM-517 ambient-light static-workcell contract,
 the ARM-516 printable-support nominal selection,
 the ARM-515 static-support source reconciliation,
 the ARM-514 static-camera nominal-source migration,

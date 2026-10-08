@@ -46,6 +46,11 @@ from rocell_ai.c03_exact_route_reconstruction_v1_8 import (  # noqa: E402
 from rocell_ai.c03_exact_route_reconstruction_v1_9 import (  # noqa: E402
     load_fixture as load_regenerated_pose_route_fixture,
 )
+from rocell_ai.intent_to_motion_rehearsal_v1 import (  # noqa: E402
+    IntentToMotionRehearsalV1Error,
+    parse_intent_to_motion_rehearsal_v1,
+    run_intent_to_motion_rehearsal_v1,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -372,3 +377,153 @@ def test_route_successor_binds_admitted_21mm_pose_family() -> None:
     assert fixture["fixture_rebinding"]["numerical_policy_change_count"] == 0
     assert fixture["physical_authority"] is False
     assert not any(fixture["counters"].values())
+
+
+def _intent_route_result(tmp_path: Path) -> tuple[Path, str]:
+    source = json.loads(ROUTE_FIXTURE.read_text(encoding="utf-8"))
+    route = {
+        "schema": "tactevra.c03_exact_route_reconstruction_result.v1",
+        "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+        "ordered_targets": source["route"]["ordered_targets"],
+        "batch_sha256": "1" * 64,
+        "ingress_sha256": "2" * 64,
+        "freshness_sha256": "3" * 64,
+        "execution_plan_sha256": "4" * 64,
+        "trajectory_plan_sha256": "5" * 64,
+        "trajectory_sample_count": 321,
+        "ik_accepted_sample_count": 321,
+        "canonical_ik_route_accepted": True,
+        "canonical_joint_continuity_accepted": True,
+        "collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+        "decision": "PASS_C03_110MM_CANDIDATE_ROUTE_IK_CONTINUITY",
+    }
+    route["receipt_sha256"] = canonical_hash(route)
+    wrapper = {
+        "schema": "tactevra.c03_exact_route_reconstruction_result.v1_9",
+        "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+        "fixture_rebinding_receipt": {
+            "source_predecessor_fixture_sha256": source["fixture_sha256"],
+            "numerical_policy_change_count": 0,
+            "changed_semantic_fields": [
+                "parent.input_bindings.target_catalog.sha256"
+            ],
+        },
+        "route_result": route,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    wrapper["receipt_sha256"] = canonical_hash(wrapper)
+    path = tmp_path / "route-result.json"
+    path.write_text(json.dumps(wrapper, sort_keys=True), encoding="utf-8")
+    import hashlib
+
+    return path, hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _run_intent_rehearsal(tmp_path: Path) -> dict[str, object]:
+    import hashlib
+
+    result_path, result_sha256 = _intent_route_result(tmp_path)
+    return run_intent_to_motion_rehearsal_v1(
+        "hello 2026",
+        source_fixture_path=ROUTE_FIXTURE,
+        source_fixture_sha256=hashlib.sha256(ROUTE_FIXTURE.read_bytes()).hexdigest(),
+        route_result_path=result_path,
+        route_result_sha256=result_sha256,
+    )
+
+
+def test_exact_intent_reaches_zero_authority_simulated_ik_plan(tmp_path: Path) -> None:
+    result = _run_intent_rehearsal(tmp_path)
+
+    assert result["ordered_target_ids"] == [
+        "H", "E", "L", "L", "O", "SPACE", "2", "0", "2", "6",
+    ]
+    assert result["trajectory_sample_count"] == 321
+    assert result["ik_accepted_sample_count"] == 321
+    assert result["terminal_blockers"] == [
+        "INSTALLED_COLLISION_PROFILE_REQUIRED",
+        "FRESH_OBSERVED_START_STATE_REQUIRED_FOR_EXECUTION",
+    ]
+    assert result["controller_commands"] == []
+    assert result["hardware_writes"] == result["physical_movements"] == 0
+    assert result["physical_authority"] is False
+    assert parse_intent_to_motion_rehearsal_v1(result) == result
+
+
+def test_intent_text_and_repeated_target_order_fail_closed(tmp_path: Path) -> None:
+    result_path, result_sha256 = _intent_route_result(tmp_path)
+    import hashlib
+
+    with pytest.raises(
+        IntentToMotionRehearsalV1Error, match="requested text differs"
+    ):
+        run_intent_to_motion_rehearsal_v1(
+            "helo 2026",
+            source_fixture_path=ROUTE_FIXTURE,
+            source_fixture_sha256=hashlib.sha256(
+                ROUTE_FIXTURE.read_bytes()
+            ).hexdigest(),
+            route_result_path=result_path,
+            route_result_sha256=result_sha256,
+        )
+
+    wrapper = json.loads(result_path.read_text(encoding="utf-8"))
+    route = wrapper["route_result"]
+    route["ordered_targets"][2:4] = ["L", "O"]
+    route["receipt_sha256"] = canonical_hash(
+        {key: value for key, value in route.items() if key != "receipt_sha256"}
+    )
+    wrapper["receipt_sha256"] = canonical_hash(
+        {key: value for key, value in wrapper.items() if key != "receipt_sha256"}
+    )
+    result_path.write_text(json.dumps(wrapper, sort_keys=True), encoding="utf-8")
+    changed_sha256 = hashlib.sha256(result_path.read_bytes()).hexdigest()
+    with pytest.raises(IntentToMotionRehearsalV1Error, match="route target order"):
+        run_intent_to_motion_rehearsal_v1(
+            "hello 2026",
+            source_fixture_path=ROUTE_FIXTURE,
+            source_fixture_sha256=hashlib.sha256(
+                ROUTE_FIXTURE.read_bytes()
+            ).hexdigest(),
+            route_result_path=result_path,
+            route_result_sha256=changed_sha256,
+        )
+
+
+def test_intent_rehearsal_rejects_changed_bytes_and_authority(tmp_path: Path) -> None:
+    result_path, result_sha256 = _intent_route_result(tmp_path)
+    import hashlib
+
+    result_path.write_text(
+        result_path.read_text(encoding="utf-8") + " ", encoding="utf-8"
+    )
+    with pytest.raises(IntentToMotionRehearsalV1Error, match="bytes changed"):
+        run_intent_to_motion_rehearsal_v1(
+            "hello 2026",
+            source_fixture_path=ROUTE_FIXTURE,
+            source_fixture_sha256=hashlib.sha256(
+                ROUTE_FIXTURE.read_bytes()
+            ).hexdigest(),
+            route_result_path=result_path,
+            route_result_sha256=result_sha256,
+        )
+
+    result = _run_intent_rehearsal(tmp_path)
+    result["hardware_commands_generated"] = 1
+    result["receipt_sha256"] = canonical_hash(
+        {key: value for key, value in result.items() if key != "receipt_sha256"}
+    )
+    with pytest.raises(IntentToMotionRehearsalV1Error, match="zero authority"):
+        parse_intent_to_motion_rehearsal_v1(result)
