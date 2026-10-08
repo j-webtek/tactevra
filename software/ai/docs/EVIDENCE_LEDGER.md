@@ -10749,6 +10749,9 @@ rewriting history. New entries must use a unique evidence ID.
   software/ai/rocell_ai/intent_to_motion_rehearsal_v1.py
   software/ai/tests/test_c03_arm_route_reconciliation_v1.py`; result: pass.
   Source-archive check passes at the deliberately reviewed 6,520-file ceiling.
+  Exact full verification command `py -3.12
+  scripts/maintain_repository.py verify --full` passed all 133 policy tests and
+  945 offline tests with 5 expected Windows symlink skips in 474.40 seconds.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. GPU-job count: 0.
 - Failure coverage: changed fixture/result bytes, altered exact text, reordered
