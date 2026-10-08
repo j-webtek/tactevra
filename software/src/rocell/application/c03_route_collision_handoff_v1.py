@@ -300,6 +300,10 @@ def assess_c03_station_height_route_sensitivity_v1(
 
 FULL_BODY_GEOMETRY_SCHEMA = "tactevra.c03_full_body_geometry_audit.v1"
 NOMINAL_TOOL_BINDING_SCHEMA = "tactevra.c03_nominal_tool_binding_readiness.v1"
+BASE_CAMERA_GEOMETRY_SCHEMA = "tactevra.c03_base_camera_geometry_readiness.v1"
+EXPECTED_STATIC_SUPPORT_SHA256 = (
+    "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+)
 MESH_BINDING_SCHEMA = "tactevra.isaac_sim_upstream_link_mesh_binding.v1"
 MESH_REDUCTION_SCHEMA = "tactevra.isaac_sim_link_mesh_reduction.v1"
 EXPECTED_MESH_BINDING_RECEIPT_SHA256 = (
@@ -534,16 +538,136 @@ def assess_c03_nominal_tool_binding_readiness_v1(
     }
     return {**core, "nominal_tool_binding_sha256": _sha256(core)}
 
+
+def assess_c03_base_camera_geometry_readiness_v1(
+    result: Mapping[str, Any],
+    context: SimulationContext,
+    *,
+    support_design: Mapping[str, Any],
+    support_design_file_sha256: str,
+) -> dict[str, Any]:
+    """Compare active collision bodies with the static-camera support design."""
+
+    handoff = prepare_c03_route_collision_handoff_v1(result, context)
+    if (
+        support_design_file_sha256 != EXPECTED_STATIC_SUPPORT_SHA256
+        or support_design.get("schema") != "rocell.static_overhead_camera_support.v1"
+        or support_design.get("state")
+        != "SCREENING_CANDIDATE_PHYSICAL_QUALIFICATION_OPEN"
+    ):
+        raise C03FullBodyGeometryAuditV1Error(
+            "static camera support identity differs"
+        )
+    authority = support_design.get("authority")
+    if not isinstance(authority, Mapping) or any(
+        authority.get(field) is not False
+        for field in (
+            "fabrication_authority",
+            "physical_installation_authority",
+            "powered_motion_authority",
+            "contact_authority",
+        )
+    ):
+        raise C03FullBodyGeometryAuditV1Error(
+            "static camera support carries physical authority"
+        )
+    robot = support_design.get("robot_screening")
+    support = support_design.get("support")
+    if (
+        not isinstance(robot, Mapping)
+        or robot.get("state") != "ASSUMED_ONLY_NOT_COLLISION_OR_REACH_PROOF"
+        or robot.get("assumed_base_axis_xy_mm") != [305.0, 457.0]
+        or not isinstance(support, Mapping)
+        or support.get("topology") != "front_portal_on_common_metal_u_frame"
+    ):
+        raise C03FullBodyGeometryAuditV1Error(
+            "static support screening geometry differs"
+        )
+    readiness = assess_current_collision_readiness(context)
+    camera_requirements = [
+        {
+            "body_id": item.body_id,
+            "parent_frame": item.parent_frame,
+            "binding_mode": item.binding_mode.value,
+        }
+        for item in readiness.contract.requirements
+        if item.body_id.startswith("attachment:camera_")
+        or item.body_id == "attachment:moving_camera_cable"
+    ]
+    expected_camera_ids = {
+        "attachment:camera_holder",
+        "attachment:camera_module",
+        "attachment:camera_connector",
+        "attachment:moving_camera_cable",
+    }
+    if {row["body_id"] for row in camera_requirements} != expected_camera_ids:
+        raise C03FullBodyGeometryAuditV1Error(
+            "active camera collision requirements differ"
+        )
+    inventory = build_installed_collision_nominal_source_inventory_v1(context)
+    source_rows = {row["body_id"]: row for row in inventory["bodies"]}
+    if any(source_rows[body_id]["measured"] for body_id in expected_camera_ids):
+        raise C03FullBodyGeometryAuditV1Error(
+            "camera source inventory unexpectedly claims measurement"
+        )
+    base_missing = [
+        "INSTALLED_BASE_Z_ROLL_PITCH_YAW",
+        "FACTORY_CLAMP_FOOTPRINT_AND_HEIGHT",
+        "REINFORCEMENT_PLATE_AND_FASTENER_ENVELOPE",
+        "BOARD_AND_CLAMP_DEFLECTION_ENVELOPE",
+    ]
+    camera_missing = [
+        "COLLISION_CONTRACT_STATIC_CAMERA_ARCHITECTURE_REVISION",
+        "INSTALLED_PORTAL_AND_HOLDER_TRANSFORMS",
+        "RECEIVED_CAMERA_CASE_LENS_CONNECTOR_ENVELOPE",
+        "STATIC_USB_CABLE_ROUTE_AND_STRAIN_RELIEF_ENVELOPE",
+    ]
+    core = {
+        "schema": BASE_CAMERA_GEOMETRY_SCHEMA,
+        "source_result_receipt_sha256": result["receipt_sha256"],
+        "source_handoff_sha256": handoff["c03_collision_handoff_sha256"],
+        "source_inventory_sha256": inventory["content_sha256"],
+        "support_design_file_sha256": support_design_file_sha256,
+        "nominal_base_axis_xy_mm": [305.0, 457.0],
+        "nominal_base_axis_state": "ASSUMED_ONLY_NOT_COLLISION_OR_REACH_PROOF",
+        "base_missing_inputs": base_missing,
+        "support_topology": support["topology"],
+        "nominal_camera_axis_xy_mm": support["camera_axis_xy_mm"],
+        "nominal_camera_entrance_pupil_z_mm": support[
+            "nominal_entrance_pupil_z_mm"
+        ],
+        "active_camera_collision_requirements": camera_requirements,
+        "camera_architecture_compatible": False,
+        "camera_architecture_mismatch": (
+            "active collision contract describes rigid camera attachment frames "
+            "and a moving cable; current design is a static overhead portal"
+        ),
+        "camera_missing_inputs": camera_missing,
+        "installed_base_geometry_ready": False,
+        "installed_camera_geometry_ready": False,
+        "collision_screen_executed": False,
+        "installed_collision_gate_cleared": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "base_camera_geometry_sha256": _sha256(core)}
+
 __all__ = [
     "SCHEMA",
     "EXPECTED_RESULT_RECEIPT_SHA256",
     "EXPECTED_ROUTE_RECEIPT_SHA256",
     "C03FullBodyGeometryAuditV1Error",
+    "BASE_CAMERA_GEOMETRY_SCHEMA",
     "C03RouteCollisionHandoffV1Error",
     "FULL_BODY_GEOMETRY_SCHEMA",
     "NOMINAL_TOOL_BINDING_SCHEMA",
     "STATION_HEIGHT_SENSITIVITY_SCHEMA",
     "assess_c03_full_body_geometry_readiness_v1",
+    "assess_c03_base_camera_geometry_readiness_v1",
     "assess_c03_nominal_tool_binding_readiness_v1",
     "assess_c03_station_height_route_sensitivity_v1",
     "prepare_c03_route_collision_handoff_v1",

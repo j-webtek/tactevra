@@ -9,6 +9,7 @@ import rocell.application.c03_route_collision_handoff_v1 as handoff_module
 from rocell.application.c03_route_collision_handoff_v1 import (
     C03FullBodyGeometryAuditV1Error,
     C03RouteCollisionHandoffV1Error,
+    assess_c03_base_camera_geometry_readiness_v1,
     assess_c03_full_body_geometry_readiness_v1,
     assess_c03_nominal_tool_binding_readiness_v1,
     assess_c03_station_height_route_sensitivity_v1,
@@ -33,6 +34,9 @@ MESH_BINDING = WORKSPACE / (
 MESH_REDUCTION = WORKSPACE / (
     "software/integrations/isaac_sim/evidence/"
     "roarm_m3_link_mesh_reduction_20261004.json"
+)
+SUPPORT_DESIGN = (
+    WORKSPACE / "hardware/static_overhead_camera/config/support_design.json"
 )
 
 
@@ -192,6 +196,28 @@ def test_nominal_tool_binding_keeps_planning_tip_separate_from_volume(
     ] == [28.0, 24.0, 66.199997]
     assert len(report["missing_binding_inputs"]) == 6
     assert report["single_collision_envelope_defined"] is False
+    assert report["collision_screen_executed"] is False
+    assert report["physical_authority"] is False
+
+
+def test_base_camera_audit_rejects_moving_contract_for_static_support(
+    sim_context, synthetic_result
+):
+    report = assess_c03_base_camera_geometry_readiness_v1(
+        synthetic_result,
+        sim_context,
+        support_design=_json(SUPPORT_DESIGN),
+        support_design_file_sha256=(
+            "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+        ),
+    )
+    assert report["nominal_base_axis_xy_mm"] == [305.0, 457.0]
+    assert len(report["base_missing_inputs"]) == 4
+    assert report["support_topology"] == "front_portal_on_common_metal_u_frame"
+    assert report["camera_architecture_compatible"] is False
+    assert len(report["camera_missing_inputs"]) == 4
+    assert report["installed_base_geometry_ready"] is False
+    assert report["installed_camera_geometry_ready"] is False
     assert report["collision_screen_executed"] is False
     assert report["physical_authority"] is False
 
