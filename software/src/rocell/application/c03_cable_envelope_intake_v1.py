@@ -521,6 +521,32 @@ def validate_c03_cable_envelope_intake_v1(
             row["construction_method"] for row in sweep_rows
         }),
         "source_bindings": dict(sorted(source_hashes.items())),
+        "configuration_sample_binding_sha256_by_partition": [
+            [
+                _sha({
+                    "sample_sequence": item.sample_sequence,
+                    "sample_plan_sha256": item.sample_plan_sha256,
+                    "geometry_binding_sha256_by_body": {
+                        body_id: item.geometry_by_body[body_id].content_sha256
+                        for body_id in sorted(item.geometry_by_body)
+                    },
+                })
+                for item in rows
+            ]
+            for rows in samples_by_partition
+        ],
+        "configuration_sweep_binding_sha256_by_partition": [
+            [
+                _sha({
+                    "geometry_binding_sha256_by_body": {
+                        body_id: item[body_id].content_sha256
+                        for body_id in sorted(item)
+                    },
+                })
+                for item in rows
+            ]
+            for rows in sweeps_by_partition
+        ],
         "installed_geometry_collision_screening_executed": False,
         "continuous_collision_proven": False,
         "installed_collision_gate_cleared": False,
