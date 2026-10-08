@@ -10768,3 +10768,90 @@ rewriting history. New entries must use a unique evidence ID.
   identities, then consume measured installed collision evidence and a fresh
   observed start state through the existing ICQ chain. Physical execution stays
   blocked until those independent gates pass.
+
+### E-20261008-ARM-520 — bounded fresh intent reaches distinct simulated C03 IK plans
+
+- Lane: AI/model plus integration; arm-lane status and integration gates remain
+  unchanged.
+- Stage: S2 exploratory dynamic intent-to-motion composition with zero authority.
+- Base commit: `6295df237c3de811ec66e7d02b9096366b197937`.
+- Claim commit: `dfb17f1de4118a029226cbf3559788df0ecd8226`.
+- Implementation commit: `f5c42a84d680d4b62fffafb63bc6d1f253fd03e8`.
+- Change: added a bounded offline operator path that compiles new supported text
+  through the existing US Sticky Keys compiler, rejects requests over 12 actions
+  or targets outside the exact 51-pose family, derives one hash-bound route
+  fixture per request, and runs each through fresh `ModelMotionBatchV2`, strict
+  ingress, freshness, Cartesian trajectory, and canonical C03 IK. The derivation
+  allowlist changes only exact route text, target order, route identity fields,
+  and its limitation statement; tool, numerical, resource, collision, and
+  authority policies remain unchanged.
+- Exact requests and metrics: `robot` compiled to `R,O,B,O,T` and admitted all
+  190 of 190 IK samples; `hh1.` compiled to `H,H,1,PERIOD` and admitted all 162
+  of 162; `A!` compiled to `SHIFT,A,SHIFT,1` and admitted all 155 of 155. Distinct
+  batch hashes are `4a979ab32c3d0c49406634585427a76005520b6150285cd2730b693053461f27`,
+  `b09fe8ceed44c6543644ca83613829b9d17cfd1e24e643d44416f7e116b71220`,
+  and `eb512271d5c830660a93460e56e976dcdcf8dad6c1b1a9ee9c1adda277975d86`.
+- Inputs/fixtures: v1.9 fixture file SHA-256
+  `c30cced8cb494444b2a61228e6b4d850a04812a4b7f7c655d51f7be573d0af71`;
+  canonical fixture SHA-256
+  `cab208fea68adbfc89894b6030c9607b6624d03ada0b8d0691d3c1e6fdbb3467`;
+  implementation SHA-256
+  `afad6caf86d4fd6567deb56c2a8087a7ec21e6dff9125d30c7567b55f30dccaa`;
+  materialized-workspace receipt
+  `fb88a41cec6131d450a6058eb3148f120d717912f0af671f2624d06311e16773`;
+  virtual-profile receipt
+  `c9513c3aaef1d51d1d0594c0eff953516b4e97b9956058e73e4cdb3a997eb1da`;
+  base-rebinding receipt
+  `5d54e2398e03129d246c713a81fa385889774e9218806ee263d10bd980f44b2c`.
+- Exact evidence command: with `PYTHONPATH=software/src;software/ai`, run
+  `py -3.12 -m rocell_ai.dynamic_intent_to_motion_v1
+  software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1_9.json
+  --workspace . --derived-workspace C:/MuJoCoWarp/c03dyn --intent-text robot
+  --intent-text "hh1." --intent-text "A!" --output
+  C:/MuJoCoWarp/evidence/issue190/dynamic_intent_to_motion_v1/dynamic_intent_to_motion_result_v1.json`.
+- Result: `PASS_DYNAMIC_INTENT_TO_SIMULATED_IK_PLAN_RETAIN_COLLISION_BLOCKERS`.
+  Aggregate receipt SHA-256 is
+  `bd761dea8f77c139c3ad99b3863c05f8ba499cba43817d55176a92938b3b6676`.
+  Primary and backup files are byte-identical at SHA-256
+  `8491f4cc1f1d5a1727caed50d8a75adf89a7cbad8caefca32ba3ee99013ed126`.
+- External artifacts:
+  `C:\MuJoCoWarp\evidence\issue190\dynamic_intent_to_motion_v1\dynamic_intent_to_motion_result_v1.json`
+  and hash-matching backup
+  `F:\robot-arm-build-backups\issue190\dynamic_intent_to_motion_v1\dynamic_intent_to_motion_result_v1.json`.
+- Exact focused test command: `py -3.12 -m pytest
+  software/ai/tests/test_c03_arm_route_reconciliation_v1.py -q`; result: 24
+  passed in 1.28 seconds. Exact Ruff command: `py -3.12 -m ruff check
+  software/ai/rocell_ai/dynamic_intent_to_motion_v1.py
+  software/ai/tests/test_c03_arm_route_reconciliation_v1.py`; result: pass.
+  Exact shared-boundary command: with `PYTHONPATH=software/ai;software/src`, run
+  `py -3.12 -m pytest software/ai/tests/test_c03_arm_route_reconciliation_v1.py
+  software/ai/tests/test_typing_twin_boundary_v1.py
+  software/ai/tests/test_end_to_end_typing_twin.py
+  software/ai/tests/test_actual_output_compatibility_v1.py
+  software/tests/unit/test_model_motion_ingress_v2.py
+  software/tests/unit/test_typing_execution_plan_v1.py
+  software/tests/unit/test_typing_trajectory_plan_v1.py
+  software/tests/unit/test_typing_trajectory_ik_screen_v1.py
+  software/tests/integration/test_typing_shadow_pipeline_v1.py -q`; result:
+  123 passed in 51.63 seconds. Exact full verification command:
+  `py -3.12 scripts/maintain_repository.py verify --full`; result: all 133
+  policy tests and 945 offline tests passed, with 5 expected Windows symlink
+  skips, in 473.65 seconds. The source archive passes at the deliberately
+  reviewed 6,521-file ceiling.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0.
+- Failure coverage: empty and unsupported text, a missing admitted pose, more
+  than 12 compiled actions, altered predecessor bytes, changed numerical policy,
+  duplicate pose identities, changed semantic order, incomplete IK, collision
+  promotion, and any nonzero authority field fail closed.
+- Limitations: this proves fresh semantic batching, ingress, trajectory, and IK
+  only for three bounded requests against nominal or simulated catalog,
+  transform, calibration, tool, and pose evidence. It does not run installed
+  collision screening, use a fresh observed controller state, verify a keypress,
+  open transport, send a controller command, or move hardware. Sticky Keys must
+  still be commissioned and verified on the host. Physical execution remains
+  blocked by the installed collision profile and fresh observed start state.
+- Next dependency: expose this bounded generator behind the offline intent
+  schema, then feed its admitted route into the existing installed-collision
+  and fresh-state gates. Separately collect physical camera, collision, and
+  key-effect evidence; none may be inferred from this simulation result.

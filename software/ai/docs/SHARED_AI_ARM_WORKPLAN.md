@@ -1011,6 +1011,13 @@ gates, and retain the installed-collision and fresh-observed-state blockers. It
 may not change AI-lane or arm-lane stage status, clear an integration or
 physical gate, or emit controller, wire, joint, PWM, serial, Waveshare, permit,
 transport, execution, hardware-write, movement, or physical authority.
+Evidence `E-20261008-ARM-520` completes the bounded claim. Three fresh requests
+(`robot`, `hh1.`, and `A!`) compile to 13 ordered semantic actions, including a
+repeated key, punctuation, and two one-shot `SHIFT` actions. Each request creates
+a distinct `ModelMotionBatchV2`, passes strict ingress, and reaches a complete
+canonical IK route of 190, 162, and 155 samples respectively. The result remains
+simulation-only, preserves both terminal blockers, and has zero controller
+commands, hardware writes, physical movements, or physical authority.
 
 The AI/integration lane on `codex/intent-to-motion-offline-pipeline` completed
 ARM-519 from merged ARM-518 base
