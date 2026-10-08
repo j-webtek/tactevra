@@ -1017,6 +1017,20 @@ Evidence `E-20261008-ARM-505` records the fail-closed 19-body draft generator,
 exclusive-create CLI behavior, and full offline regression result. The draft
 contains no physical measurements and ICQ-9 remains blocked.
 
+The arm lane on `codex/c03-geometry-source-inventory` completed the bounded ICQ-1
+nominal-source inventory increment from merged ARM-505 base
+`36d537ca227c57fef4c6c5e1ab80f76fb7ae5a`. It may map all 19 required
+collision bodies to hash-bound existing URDF, CAD, layout, camera-profile, and
+support-design sources; expose nominal placements already present in the
+layout; and state the smallest remaining physical check for each body. Nominal
+sources may support continued simulation but must remain explicitly unmeasured
+and must not clear ICQ-1 or ICQ-9, change AI-lane status, or emit controller,
+wire, joint, PWM, serial, transport, retry, permit, movement, or physical
+authority.
+Evidence `E-20261008-ARM-506` records the 19-body nominal-source inventory,
+the six-body top-down capture scope, the retained external inventory artifact,
+and the unchanged blocked physical-qualification state.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading

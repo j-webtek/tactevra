@@ -12,6 +12,7 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     BLOCKED_STATUS,
     READY_STATUS,
     InstalledCollisionMeasurementManifestV1Error,
+    build_installed_collision_nominal_source_inventory_v1,
     build_pending_installed_collision_measurement_manifest_v1,
     load_and_validate_installed_collision_measurement_manifest_v1,
     main,
@@ -171,6 +172,59 @@ def test_pending_draft_names_every_body_without_claiming_values() -> None:
     )
     assert first["clearance_measurement"]["status"] == "PENDING"
     assert first["clearance_measurement"]["minimum_separation_mm"] is None
+
+
+def test_nominal_source_inventory_covers_every_body_without_claiming_measurement() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    first = build_installed_collision_nominal_source_inventory_v1(context)
+    second = build_installed_collision_nominal_source_inventory_v1(context)
+
+    assert first == second
+    assert first["body_count"] == 19
+    assert first["source_count"] == 11
+    assert all(not source["physical_measurement"] for source in first["sources"])
+    assert all(not body["measured"] for body in first["bodies"])
+    assert first["installed_measurement_status"] == "PENDING"
+    assert first["collision_qualification"] is False
+    assert first["hardware_access"] is False
+    assert first["physical_movements"] == 0
+    assert first["physical_authority"] is False
+    assert all(
+        hashlib.sha256((WORKSPACE / source["path"]).read_bytes()).hexdigest()
+        == source["sha256"]
+        for source in first["sources"]
+    )
+
+
+def test_nominal_source_inventory_exposes_expected_placements_and_photo_scope() -> None:
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    inventory = build_installed_collision_nominal_source_inventory_v1(context)
+    bodies = {row["body_id"]: row for row in inventory["bodies"]}
+
+    assert bodies["workcell:board_solid"]["nominal_placement"]["size_mm"] == [
+        610.0, 457.0, 18.0,
+    ]
+    assert bodies["workcell:keyboard"]["nominal_placement"]["origin_xy_mm"] == [
+        85.0, 85.0,
+    ]
+    assert bodies["workcell:phone"]["nominal_placement"]["origin_xy_mm"] == [
+        499.2, 84.2,
+    ]
+    assert bodies["workcell:station:keyboard_left"]["top_down_image_useful"] is True
+    assert bodies["attachment:camera_holder"]["top_down_image_useful"] is False
+    assert bodies["attachment:moving_camera_cable"]["nominal_state"] == (
+        "CONFIGURATION_MODEL_PENDING"
+    )
+
+
+def test_cli_emits_nominal_source_inventory_without_hardware(capsys) -> None:
+    assert main([
+        "--workspace", str(WORKSPACE), "--nominal-source-inventory",
+    ]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["body_count"] == 19
+    assert report["installed_measurement_status"] == "PENDING"
+    assert report["physical_authority"] is False
 
 
 def test_pending_draft_validates_only_as_blocked(tmp_path: Path) -> None:
