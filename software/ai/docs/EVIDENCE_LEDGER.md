@@ -9919,6 +9919,9 @@ rewriting history. New entries must use a unique evidence ID.
   keyboard origin `[85,85]` mm, and phone origin `[499.2,84.2]` mm; and kept
   installed measurement status `PENDING`, collision qualification false, and
   physical authority false. Repository footprint remains exactly 6,519 files.
+  The corrected exact full command `py -3.12
+  scripts/maintain_repository.py verify --full` passed all 133 policy tests and
+  945 offline tests with 5 expected Windows symlink skips in 470.43 seconds.
 - GPU jobs: 0.
 - Hardware writes: 0.
 - Physical movements: 0.
