@@ -998,6 +998,21 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v3` claims AI-531 from merged
+AI-530 base `a581b914f83b9d6cd378d9ba2aacda066c797161`. It may extend the
+bounded extractor grammar before data generation, freeze fresh classifier-v3
+train/development data and an unopened v14 evaluation family, and train one
+epoch from the same cached 1B base. Before any new corpus bytes are written,
+the generator must verify the exact hashes of all classifier-v1 and
+classifier-v2 source splits, prove zero case-insensitive request-string overlap
+with them, and prove every new row composes exactly through the production
+deterministic composer. Consumed classifier-v1 and classifier-v2 development
+may be used only as historical failure evidence; frozen v11, v12, and v13 must
+remain unopened. Evaluation v14 must remain unopened until a clean development
+decision is committed. The increment may not change the public closed intent
+schema, invoke motion planning, promote a model, change arm-lane status, or
+emit commands, hardware writes, movement, or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v2` claims AI-530 from merged
 AI-529 base `d757695152f37bbf992f4ddbe8458440b287bca8`. It may extend the
 deterministic extractor with a bounded unquoted-text grammar before generating
