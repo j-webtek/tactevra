@@ -15,6 +15,17 @@ REVISION = "9213176726f574b556790deb65791e0c5aa438b6"
 SEED = 2109
 
 
+def _data_configuration(version: str) -> tuple[int, str, str]:
+    """Return the frozen seed, file prefix, and prompt module for one data version."""
+
+    if version == "v4":
+        return 2124, "schema_intent_sft_v4", "rocell_ai.offline_intent_model_eval_v1"
+    seeds = {"v0": SEED, "v1": 2110, "v2": 2111, "v3": 2112}
+    if version not in seeds:
+        raise ValueError(f"unsupported data version: {version}")
+    return seeds[version], f"synthetic_sft_{version}", "rocell_ai.model_eval"
+
+
 def _verified_rows(path: Path, digest: str) -> list[dict]:
     raw = path.read_bytes()
     if hashlib.sha256(raw).hexdigest() != digest:
@@ -26,19 +37,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Local, offline LoRA SFT pilot; no arm access")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3"), default="v0")
+    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4"), default="v0")
     parser.add_argument("--epochs", type=int, default=2)
     args = parser.parse_args()
     if args.epochs < 1 or args.epochs > 10:
         raise ValueError("epochs must be between 1 and 10")
-    train_seed = {"v0": SEED, "v1": 2110, "v2": 2111, "v3": 2112}[args.data_version]
+    train_seed, data_prefix, prompt_module = _data_configuration(args.data_version)
     if args.output.exists():
         raise ValueError("output directory already exists; use a new run path")
     data_dir = AI_DIR / "data"
-    data_prefix = f"synthetic_sft_{args.data_version}"
     manifest_path = data_dir / f"{data_prefix}.manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    for version, expected in manifest["benchmark_sha256"].items():
+    for version, expected in manifest.get("benchmark_sha256", {}).items():
         path = AI_DIR / "eval" / f"benchmark_{version}.jsonl"
         if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError(f"benchmark {version} changed after data generation")
@@ -72,7 +82,10 @@ def main() -> None:
     from sys import path as sys_path
     sys_path.insert(0, str(AI_DIR))
     sys_path.insert(0, str(AI_DIR.parent / "src"))
-    from rocell_ai.model_eval import SYSTEM_PROMPT, PROMPT_SHA256
+    if prompt_module == "rocell_ai.offline_intent_model_eval_v1":
+        from rocell_ai.offline_intent_model_eval_v1 import SYSTEM_PROMPT, PROMPT_SHA256
+    else:
+        from rocell_ai.model_eval import SYSTEM_PROMPT, PROMPT_SHA256
 
     def encode(row: dict) -> tuple[list[int], list[int]]:
         user_content = json.dumps({"request": row["request"], "observation": row["observation"]}, ensure_ascii=False)
@@ -135,6 +148,7 @@ def main() -> None:
     adapter_path = args.output / "adapter_model.safetensors"
     run = {
         "schema": "rocell.ai_sft_run.v0",
+        "data_version": args.data_version,
         "base_repo": REPO,
         "base_revision": REVISION,
         "data_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),

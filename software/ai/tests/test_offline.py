@@ -36,10 +36,19 @@ from build_sft_v1_data import build as build_sft_v1_data  # noqa: E402
 from build_sft_v2_data import build as build_sft_v2_data  # noqa: E402
 from build_sft_v3_data import build as build_sft_v3_data  # noqa: E402
 from build_schema_intent_sft_v4_data import build as build_schema_intent_sft_v4_data  # noqa: E402
+from fit_sft import _data_configuration  # noqa: E402
 from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1  # noqa: E402
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_schema_intent_v4_training_uses_closed_prompt_and_frozen_seed(self) -> None:
+        self.assertEqual(
+            _data_configuration("v4"),
+            (2124, "schema_intent_sft_v4", "rocell_ai.offline_intent_model_eval_v1"),
+        )
+        with self.assertRaisesRegex(ValueError, "unsupported data version"):
+            _data_configuration("v5")
+
     def test_schema_intent_v4_splits_are_disjoint_and_contract_valid(self) -> None:
         train, validation, evaluation, manifest = build_schema_intent_sft_v4_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (350, 105, 140))
