@@ -14,6 +14,7 @@ from .offline_intent_model_eval_v1 import (
     SYSTEM_PROMPT,
     _model_digest,
     _post,
+    extract_requested_text_v1,
     score_intent_model,
 )
 
@@ -77,6 +78,7 @@ def evaluate_schema_constrained(
     model: str,
     schema_path: Path,
     native_split: str | None = None,
+    deterministic_text: bool = False,
 ) -> dict[str, Any]:
     if native_split is None:
         cases, benchmark_hash = load_benchmark(cases_path, manifest_path)
@@ -101,6 +103,7 @@ def evaluate_schema_constrained(
         model=model,
         model_digest=model_digest,
         generate=generate,
+        resolve_text=extract_requested_text_v1 if deterministic_text else None,
     )
     if _model_digest(model) != model_digest:
         raise ValueError("model identity changed during evaluation")
@@ -120,9 +123,11 @@ def main() -> int:
     parser.add_argument("--schema", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--native-split", choices=("validation", "evaluation"))
+    parser.add_argument("--deterministic-text", action="store_true")
     args = parser.parse_args()
     result = evaluate_schema_constrained(
-        args.cases, args.manifest, args.model, args.schema, args.native_split
+        args.cases, args.manifest, args.model, args.schema, args.native_split,
+        args.deterministic_text,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

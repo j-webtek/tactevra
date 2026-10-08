@@ -27,7 +27,10 @@ from rocell_ai.evaluation import evaluate, load_benchmark  # noqa: E402
 from rocell_ai.review import review_benchmark  # noqa: E402
 from rocell_ai.model_eval import _proposal_from_response, evaluate_model  # noqa: E402
 from rocell_ai.model_eval import PROMPT_SHA256  # noqa: E402
-from rocell_ai.offline_intent_model_eval_v1 import score_intent_model  # noqa: E402
+from rocell_ai.offline_intent_model_eval_v1 import (  # noqa: E402
+    extract_requested_text_v1,
+    score_intent_model,
+)
 from rocell_ai.offline_intent_schema_decode_eval_v1 import (  # noqa: E402
     build_schema_constrained_payload,
     load_schema_intent_cases,
@@ -44,6 +47,47 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_deterministic_text_extractor_preserves_bytes_and_fails_closed(self) -> None:
+        self.assertEqual(
+            extract_requested_text_v1('The keyboard must receive verbatim "p5101;;q;;".'),
+            "p5101;;q;;",
+        )
+        self.assertEqual(
+            extract_requested_text_v1("Produce oak5201 using the attached keyboard."),
+            "oak5201",
+        )
+        self.assertIsNone(extract_requested_text_v1('Choose "oak" or "willow".'))
+        self.assertIsNone(extract_requested_text_v1("Please type something suitable."))
+
+    def test_deterministic_text_composition_ignores_model_payload(self) -> None:
+        cases = [{
+            "id": "fixture",
+            "request": 'The keyboard must receive verbatim "p5101;;q;;".',
+            "target": {
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+                "text": "p5101;;q;;",
+            },
+        }]
+        result = score_intent_model(
+            cases,
+            "a" * 64,
+            model="fixture",
+            model_digest="b" * 64,
+            generate=lambda _case: json.dumps({
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "TYPE_TEXT",
+                "device": "KEYBOARD",
+                "text": "p5101;;q;",
+            }),
+            resolve_text=extract_requested_text_v1,
+        )
+        self.assertEqual(result["decision"], "PASS_CANDIDATE")
+        self.assertEqual(result["altered_type_text_count"], 0)
+        self.assertEqual(result["model_altered_type_text_count_before_composition"], 1)
+        self.assertEqual(result["rows"][0]["text_resolution"], "DETERMINISTIC_REQUEST_EXTRACTION")
+
     def test_schema_intent_v5_splits_stress_punctuation_without_v10_reuse(self) -> None:
         train, validation, evaluation, manifest = build_schema_intent_sft_v5_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (480, 160, 200))
