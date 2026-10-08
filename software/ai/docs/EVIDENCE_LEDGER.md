@@ -10234,3 +10234,59 @@ rewriting history. New entries must use a unique evidence ID.
   inputs; otherwise capture the assembled tool dimensions and mounted
   jaw-reference-to-tip transform after the tool exists. Continue offline in
   parallel with base/clamp and rigid camera-support geometry binding.
+
+### E-20261008-ARM-512 — base/clamp and camera-architecture geometry readiness
+
+- Lane: arm.
+- Stage: ICQ-1 nominal installation and architecture compatibility.
+- Commit: `96922675c5175f6d0eb6161205640e4b3a1afa79`.
+- Change: added a zero-authority audit that admits the exact route, binds the
+  static-support design by exact file hash, compares its nominal robot and
+  camera screening facts with the active 19-body collision contract, and
+  refuses to install incompatible geometry.
+- Inputs/fixtures: exact route file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  static support design SHA-256
+  `2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b`;
+  runtime-source SHA-256
+  `2fe0d57bad91b9b898017ab65c4cfc56de5d2b9f4d955e46bf7a13334c2971a4`;
+  focused-test SHA-256
+  `5b3f1b6138f76afea792f295b606be81f1ec35abe3b0a9ed37a646a7c3562f02`.
+  Retained result:
+  `F:\robot-arm-build-backups\issue190\c03_physical_measurement_session_001\c03_base_camera_geometry_readiness_v1.json`,
+  file SHA-256
+  `057a7a356186842d79e54daf08d0b4860f24b96514815a691f8813cefba4296e`,
+  content SHA-256
+  `23da3ddcd721ebff05f8dfe7da47908b13086d161ed380ba63905320300447a7`.
+- Commands: exact audit used `py -3.12` with `load_simulation_context`
+  and `assess_c03_base_camera_geometry_readiness_v1`. Focused command:
+  `py -3.12 -m pytest
+  software/tests/unit/test_c03_route_collision_handoff_v1.py
+  software/tests/unit/test_installed_collision_measurement_manifest_v1.py
+  software/tests/unit/test_c03_physical_evidence_packet_v1.py -q` with
+  `PYTHONPATH=software/src;software/ai`; followed by Ruff on the changed files
+  and `py -3.12 scripts/maintain_repository.py verify`.
+- Result: `PASS_BLOCKED`; the only retained base placement is assumed axis XY
+  `[305, 457] mm`. The current support topology is
+  `front_portal_on_common_metal_u_frame`, with nominal camera axis XY
+  `[305, 228.5] mm` and entrance-pupil Z `1000 mm`. Camera architecture
+  compatibility is false because the active collision contract describes
+  rigid camera attachment frames and a moving cable while the selected design
+  is a static overhead portal. All 45 focused and predecessor tests passed in
+  26.69 seconds, Ruff passed, and all 133 policy tests passed.
+- Base missing inputs: installed base Z/roll/pitch/yaw, factory-clamp footprint
+  and height, reinforcement/fastener envelope, and board/clamp deflection.
+- Camera missing inputs: static-camera collision-contract revision, installed
+  portal/holder transforms, received case/lens/connector envelope, and static
+  USB cable/strain-relief route.
+- GPU jobs: 0.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: nominal screening values are not installed measurements. No
+  static tower solid, base/clamp solid, cable envelope, or collision query was
+  installed. This result clears no integration or physical gate.
+- Supersedes: none. ARM-510 remains the complete 19-body readiness inventory.
+- Next dependency: revise the arm-owned collision-body contract through shared
+  review so it represents the selected static-overhead architecture while
+  preserving explicit holder/module/connector/cable evidence requirements.
+  Gather base/clamp measurements when the arm is installed.
