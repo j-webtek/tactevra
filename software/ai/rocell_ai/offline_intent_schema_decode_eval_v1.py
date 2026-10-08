@@ -18,6 +18,29 @@ from .offline_intent_model_eval_v1 import (
 )
 
 
+def load_schema_intent_cases(
+    cases_path: Path, manifest_path: Path, split: str
+) -> tuple[list[dict[str, Any]], str]:
+    """Load a hash-bound native closed-intent split without opening another split."""
+
+    if split not in {"validation", "evaluation"}:
+        raise ValueError("split must be validation or evaluation")
+    raw = cases_path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("schema") != "tactevra.closed_intent_sft_data.v4":
+        raise ValueError("native split requires the v4 closed-intent manifest")
+    if digest != manifest.get(f"{split}_sha256"):
+        raise ValueError(f"{split} data hash mismatch")
+    cases = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()]
+    if len(cases) != manifest["counts"][split]:
+        raise ValueError(f"{split} data count mismatch")
+    ids = [case["id"] for case in cases]
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"duplicate {split} case IDs")
+    return cases, digest
+
+
 def build_schema_constrained_payload(
     case: dict[str, Any], model: str, decoder_schema: dict[str, Any]
 ) -> dict[str, Any]:
@@ -50,8 +73,14 @@ def evaluate_schema_constrained(
     manifest_path: Path,
     model: str,
     schema_path: Path,
+    native_split: str | None = None,
 ) -> dict[str, Any]:
-    cases, benchmark_hash = load_benchmark(cases_path, manifest_path)
+    if native_split is None:
+        cases, benchmark_hash = load_benchmark(cases_path, manifest_path)
+    else:
+        cases, benchmark_hash = load_schema_intent_cases(
+            cases_path, manifest_path, native_split
+        )
     schema_bytes = schema_path.read_bytes()
     decoder_schema = json.loads(schema_bytes)
     if not isinstance(decoder_schema, dict):
@@ -87,9 +116,10 @@ def main() -> int:
     parser.add_argument("--model", required=True)
     parser.add_argument("--schema", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--native-split", choices=("validation", "evaluation"))
     args = parser.parse_args()
     result = evaluate_schema_constrained(
-        args.cases, args.manifest, args.model, args.schema
+        args.cases, args.manifest, args.model, args.schema, args.native_split
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
