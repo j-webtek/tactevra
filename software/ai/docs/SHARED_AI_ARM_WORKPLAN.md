@@ -1118,6 +1118,15 @@ the exact six-placeholder migration, fixed-versus-sampled cable semantics,
 unchanged legacy-v1 serialization, and the remaining 7 missing plus 19 unknown
 installed-body blockers.
 
+The arm lane on `codex/c03-static-camera-source-migration` claims ARM-514 from
+merged ARM-513 base `bbc4d503290f1535e2844fe7523afa21de2d81a9`. It may add
+v2 nominal-source inventory and base/camera readiness consumers for the static
+B0477 IDs while preserving every v1 entry point and retained result. Nominal
+sources must remain explicitly unmeasured and may not satisfy installed-body
+requirements, clear ICQ-1/ICQ-9, change AI-lane status, or grant controller,
+wire, joint, PWM, serial, transport, retry, permit, movement, or physical
+authority.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading
