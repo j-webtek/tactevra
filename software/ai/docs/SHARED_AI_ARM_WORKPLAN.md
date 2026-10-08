@@ -1091,6 +1091,14 @@ Evidence `E-20261008-ARM-511` binds the exact 110 mm planning-tip identity and
 the two nominal tool mesh envelopes, then retains six missing assembly inputs
 and refuses to define or install a collision envelope.
 
+The arm lane on `codex/c03-base-camera-geometry` owns ARM-512 from merged
+ARM-511 base `3ab8f70a7b27e529d7b60f29878682fa3f809479`. It may compare the
+active base/clamp and camera attachment requirements with the current nominal
+layout, B0477 profile, and static-overhead support design; bind only compatible
+nominal facts; and fail closed on missing base pose, clamp footprint, or camera
+architecture mismatch. It must not install static-tower geometry as moving
+arm geometry, clear ICQ-1/ICQ-9, or grant authority.
+
 The arm lane on `codex/c03-physical-evidence-cli` completed the bounded operator
 interface increment from merged ARM-502 base
 `6cd647ec5cda9f5a1a40d63d79857e6b09d583e6`. It may add strict bounded loading
