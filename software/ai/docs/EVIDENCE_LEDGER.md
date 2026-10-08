@@ -10670,3 +10670,98 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: bring the retained 321-waypoint route bytes into the same
   additive diagnostic, add nominal robot-link volumes, and keep the incomplete
   cable/clamp/tool bodies fail closed until physical measurements exist.
+
+### E-20261008-ARM-519 — exact intent reaches the retained simulated C03 IK plan
+
+- Lane: AI/model plus integration; arm-lane status and integration gates remain
+  unchanged.
+- Stage: S2 exploratory intent-to-motion composition with zero authority.
+- Base commit: `497be7ff23459be08be90087da4a1051e2639419`.
+- Claim commit: `1abd9c532649a97f4e69de418a7cd2184041f64c`.
+- Implementation commit: `a830782640befb760905f4cc38b1be10fce41e75`.
+- Change: added one strict offline operator path that accepts exact keyboard
+  text, compiles it with the existing US Sticky Keys semantic compiler, checks
+  the exact frozen source-route text and ordered targets, verifies the
+  hash-pinned C03 v1.9 wrapper and nested canonical receipts, and binds the
+  request to the existing `ModelMotionBatchV2`, strict ingress, freshness,
+  execution-plan, Cartesian-trajectory, and canonical-IK hashes. The emitted
+  receipt contains no model-side joint, PWM, serial, Waveshare, permit,
+  transport, controller, or execution-authority fields.
+- Exact intent: `hello 2026`; compiled targets:
+  `H,E,L,L,O,SPACE,2,0,2,6`. Repeated `L` and `2` targets remain in exact
+  semantic order.
+- Inputs: source route fixture file SHA-256
+  `c75b2c83f45ae4d6a05cc63265e1222d246a3819984ab03964a384e1dabb5763`;
+  source canonical fixture SHA-256
+  `f48940215bfb211d8e7f1eebc42d04eda9d2a621291bfe2d8350eb86db7cb197`;
+  retained C03 v1.9 result-file SHA-256
+  `ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb`;
+  route-wrapper receipt SHA-256
+  `e8dcaa9b34e46ee5fb8ec4290c18f316c393894dc87c9ba8612a457f3ef2fd60`;
+  nested route receipt SHA-256
+  `f64b2c30099be8494bba052cfcb707562ece61a21694e81c9187d19ceae973e4`.
+  Implementation SHA-256 is
+  `4a0d580e11e588ea6894ee779e4dcfed6b65dbd76f6612b039cdcf817b144971`;
+  focused-test SHA-256 is
+  `299eb0eb2d9df7af05bde27e88a8794003e3b3fb5a1b66774c427649351b8ae4`.
+- Exact evidence command: with `PYTHONPATH=software/ai;software/src`, run
+  `py -3.12 -m rocell_ai.intent_to_motion_rehearsal_v1 --intent-text
+  "hello 2026" --source-fixture
+  software/ai/sim/evidence/c03_exact_route_reconstruction_fixture_v1.json
+  --source-fixture-sha256
+  c75b2c83f45ae4d6a05cc63265e1222d246a3819984ab03964a384e1dabb5763
+  --route-result
+  C:\MuJoCoWarp\evidence\issue190\c03_exact_route_reconstruction_v1\c03_exact_route_reconstruction_result_v1_9.json
+  --route-result-sha256
+  ee89051cf292c257b865a2b217568db6e959ebc5fb12e450b1e9235a9e7be3cb
+  --output <output>`. It was run twice, once to the primary evidence directory
+  and once to the backup directory.
+- Result: `PASS_INTENT_TO_SIMULATED_IK_PLAN_RETAIN_COLLISION_BLOCKERS`.
+  All 10 semantic actions reach a 321-sample simulated trajectory; all 321
+  samples have accepted canonical IK and joint continuity. Stage hashes are
+  batch `1e39f2edade48f978f8a03caefd0ecba19aa84984d633da236ff04cd26a2e329`,
+  ingress `e8de3e1ea7385da802f027c67bbc3514f1e75344f574794d126fb82080789f29`,
+  freshness `cba85098bfc9b1cc631c6fc82f8080d6ad583232db4a8c0c09c84cfa45d7632c`,
+  execution plan
+  `d936e4f30144cf8d33ec56576b2a6063705cd02b0054bb383201112d8064e78f`,
+  and trajectory
+  `36b7e3afbd135084785d8c8b33926a8bc5d4e06d074ca69f85bb413933fd879e`.
+  Receipt SHA-256 is
+  `ba3f4819a2d3e89883a40f4c44782c865d19955eba9334108f8c53be595ea462`;
+  both output files are byte-identical at SHA-256
+  `ea88feb141a1f9950557049fd70d91e2fd40af9df0969896dff29066a0462f59`.
+- External artifacts:
+  `C:\MuJoCoWarp\evidence\issue190\intent_to_motion_rehearsal_v1\intent_to_motion_hello_2026_v1.json`
+  and hash-matching backup
+  `F:\robot-arm-build-backups\issue190\intent_to_motion_rehearsal_v1\intent_to_motion_hello_2026_v1.json`.
+- Exact focused/shared test command: with
+  `PYTHONPATH=software/ai;software/src`, run `py -3.12 -m pytest
+  software/ai/tests/test_c03_arm_route_reconciliation_v1.py
+  software/ai/tests/test_typing_twin_boundary_v1.py
+  software/ai/tests/test_end_to_end_typing_twin.py
+  software/ai/tests/test_actual_output_compatibility_v1.py
+  software/tests/unit/test_model_motion_ingress_v2.py
+  software/tests/unit/test_typing_execution_plan_v1.py
+  software/tests/unit/test_typing_trajectory_plan_v1.py
+  software/tests/unit/test_typing_trajectory_ik_screen_v1.py
+  software/tests/integration/test_typing_shadow_pipeline_v1.py -q`; result:
+  120 passed in 51.80 seconds. Exact Ruff command: `py -3.12 -m ruff check
+  software/ai/rocell_ai/intent_to_motion_rehearsal_v1.py
+  software/ai/tests/test_c03_arm_route_reconciliation_v1.py`; result: pass.
+  Source-archive check passes at the deliberately reviewed 6,520-file ceiling.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0.
+- Failure coverage: changed fixture/result bytes, altered exact text, reordered
+  or removed repeated targets, invalid canonical receipts, incomplete IK, any
+  collision-gate promotion, and any nonzero authority field fail closed.
+- Limitations: this binds one frozen lowercase keyboard request to one retained
+  synthetic C03 route. It does not generate a new route for arbitrary text,
+  run collision screening, install a measured collision profile, read fresh
+  controller state, verify physical key effects, open transport, or move the
+  arm. The candidate catalog, promoted transform, 110 mm tool, calibration,
+  and route remain simulated or nominal.
+- Next dependency: generalize the same exact-text binding to freshly compiled
+  supported requests while retaining per-request `ModelMotionBatchV2` and route
+  identities, then consume measured installed collision evidence and a fresh
+  observed start state through the existing ICQ chain. Physical execution stays
+  blocked until those independent gates pass.
