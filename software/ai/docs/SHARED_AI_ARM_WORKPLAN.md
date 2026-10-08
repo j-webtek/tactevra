@@ -1016,6 +1016,9 @@ joint, PWM, serial, transport, retry, permit, or movement authority.
 Evidence `E-20261008-ARM-503` records the strict route loader, operator CLI,
 blocked exit semantics, and full offline regression result. Physical evidence
 is still absent, so ICQ-9 remains blocked.
+The bounded follow-up on `codex/c03-physical-evidence-cli-entry` may add only
+the executable module guard and a subprocess help smoke. It changes no packet,
+gate, evidence, or authority semantics.
 
 The arm lane on `codex/c03-physical-evidence-packet` completed the bounded ICQ
 physical-evidence readiness increment from merged base
