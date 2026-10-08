@@ -998,6 +998,23 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/deterministic-intent-payload` claims AI-528 from
+merged AI-527 base `69f2e92479f85f3a905ace3fda21465991f5362b`. It may
+add a fail-closed deterministic text extractor and diagnostic composer that
+retains the local model's closed intent classification but never trusts
+model-generated `TYPE_TEXT` bytes. It may rerun only the consumed v5 development
+split to measure whether this removes altered-text failures. Frozen v11 must
+remain unopened. The increment may not retrain or promote a model, weaken any
+exact gate, invoke motion planning, change arm-lane status, or emit commands,
+hardware writes, movement, or physical authority.
+Evidence `E-20261008-AI-528` shows the hybrid boundary removes the byte-copy
+failure class on consumed v5 development evidence: model-generated text had
+three alterations, while deterministic request extraction produced zero
+altered text and zero false actionable outputs, raising exact results from
+141/160 to 144/160. The candidate remains rejected because twelve ambiguity
+and four stale-observation classifications are wrong. Frozen v11 remains
+unopened. The next model work can focus strictly on classification quality.
+
 The AI/model lane on `codex/intent-schema-sft-v5` claims AI-527 from merged
 AI-526 base `f0a4932d00faecb4d37667aa2fac6b1b421c4d6e`. It may freeze
 new split-exclusive train/development data and an unopened v11 evaluation
