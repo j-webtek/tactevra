@@ -35,6 +35,10 @@ _UNQUOTED_TYPE_PATTERNS = tuple(re.compile(pattern) for pattern in (
     r"Use keyboard keys to enter (?P<text>[!-~]+)\.",
     r"Produce (?P<text>[!-~]+) using the attached keyboard\.",
     r"The attached physical keyboard should spell (?P<text>[!-~]+)\.",
+    r"The hardware keys must enter (?P<text>[!-~]+)\.",
+    r"Input (?P<text>[!-~]+) through the attached keyboard\.",
+    r"The physical keyboard must enter (?P<text>[!-~]+)\.",
+    r"Key in (?P<text>[!-~]+) on the attached keyboard\.",
 ))
 
 

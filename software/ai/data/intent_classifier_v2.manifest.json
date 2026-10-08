@@ -1,0 +1,66 @@
+{
+  "counts": {
+    "evaluation": 240,
+    "train": 640,
+    "validation": 200
+  },
+  "evaluation_sha256": "b650957b7e1367b121f9b87242f7fcd20686e169b6e5ee59ad22dc6465d929c0",
+  "excluded_evidence": {
+    "v10": "consumed evaluation only",
+    "v11": "retained unopened and excluded from this campaign",
+    "v12": "retained unopened after classifier-v1 campaign-design rejection",
+    "v5_development": "consumed diagnostic only"
+  },
+  "family_counts": {
+    "evaluation": {
+      "clarify_device": 30,
+      "clarify_text": 30,
+      "refuse_phone_state": 30,
+      "refuse_stale": 30,
+      "refuse_workflow": 30,
+      "type_punctuation": 30,
+      "type_quoted": 30,
+      "type_unquoted": 30
+    },
+    "train": {
+      "clarify_device": 80,
+      "clarify_text": 80,
+      "refuse_phone_state": 80,
+      "refuse_stale": 80,
+      "refuse_workflow": 80,
+      "type_punctuation": 80,
+      "type_quoted": 80,
+      "type_unquoted": 80
+    },
+    "validation": {
+      "clarify_device": 25,
+      "clarify_text": 25,
+      "refuse_phone_state": 25,
+      "refuse_stale": 25,
+      "refuse_workflow": 25,
+      "type_punctuation": 25,
+      "type_quoted": 25,
+      "type_unquoted": 25
+    }
+  },
+  "generation_admission": {
+    "admitted_case_count": 1080,
+    "failure_count": 0,
+    "required": "Every expected classification plus request must compose exactly to composed_target before any corpus bytes are written."
+  },
+  "human_reviewed": false,
+  "limitations": "Synthetic agent-authored classification data; passing cannot qualify general language, motion, or hardware.",
+  "promotion_gates": {
+    "altered_type_text_count_maximum": 0,
+    "classification_exact_rate_minimum": 1.0,
+    "composed_exact_rate_minimum": 1.0,
+    "false_actionable_count_maximum": 0,
+    "schema_invalid_count_maximum": 0
+  },
+  "schema": "tactevra.offline_intent_classifier_data.v1",
+  "seed": 2127,
+  "source": "agent_authored_classification_only_admitted_by_production_deterministic_composer",
+  "split_policy": "Wording, payload stems, IDs, and observations are disjoint across splits.",
+  "train_sha256": "86d617e5b5f152149db3bdd35f38056ed29621f551350638376165b78f9d86f4",
+  "validation_sha256": "6c57e948c7453a68472b9af1ffcaa80dca3dc3d7ddf0813b3fdd574ada6c8d1d"
+}
