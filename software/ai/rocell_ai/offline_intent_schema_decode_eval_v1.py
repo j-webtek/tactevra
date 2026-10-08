@@ -32,6 +32,7 @@ def load_schema_intent_cases(
     if manifest.get("schema") not in {
         "tactevra.closed_intent_sft_data.v4",
         "tactevra.closed_intent_sft_data.v5",
+        "tactevra.offline_intent_classifier_data.v1",
     }:
         raise ValueError("native split requires a supported closed-intent manifest")
     if digest != manifest.get(f"{split}_sha256"):

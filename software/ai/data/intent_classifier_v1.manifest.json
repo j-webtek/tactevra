@@ -1,0 +1,60 @@
+{
+  "counts": {
+    "evaluation": 240,
+    "train": 640,
+    "validation": 200
+  },
+  "evaluation_sha256": "8bac7ed909ceb6794a219510a21d4ac925a4346226c3cb1143f2dcc1167a2a8b",
+  "excluded_evidence": {
+    "v10": "consumed evaluation only",
+    "v11": "retained unopened and excluded from this campaign",
+    "v5_development": "consumed diagnostic only"
+  },
+  "family_counts": {
+    "evaluation": {
+      "clarify_device": 30,
+      "clarify_text": 30,
+      "refuse_phone_state": 30,
+      "refuse_stale": 30,
+      "refuse_workflow": 30,
+      "type_punctuation": 30,
+      "type_quoted": 30,
+      "type_unquoted": 30
+    },
+    "train": {
+      "clarify_device": 80,
+      "clarify_text": 80,
+      "refuse_phone_state": 80,
+      "refuse_stale": 80,
+      "refuse_workflow": 80,
+      "type_punctuation": 80,
+      "type_quoted": 80,
+      "type_unquoted": 80
+    },
+    "validation": {
+      "clarify_device": 25,
+      "clarify_text": 25,
+      "refuse_phone_state": 25,
+      "refuse_stale": 25,
+      "refuse_workflow": 25,
+      "type_punctuation": 25,
+      "type_quoted": 25,
+      "type_unquoted": 25
+    }
+  },
+  "human_reviewed": false,
+  "limitations": "Synthetic agent-authored classification data; passing cannot qualify general language, motion, or hardware.",
+  "promotion_gates": {
+    "altered_type_text_count_maximum": 0,
+    "classification_exact_rate_minimum": 1.0,
+    "composed_exact_rate_minimum": 1.0,
+    "false_actionable_count_maximum": 0,
+    "schema_invalid_count_maximum": 0
+  },
+  "schema": "tactevra.offline_intent_classifier_data.v1",
+  "seed": 2126,
+  "source": "agent_authored_classification_only_with_deterministic_composed_targets",
+  "split_policy": "Wording, payload stems, IDs, and observations are disjoint across splits.",
+  "train_sha256": "1f48601b0449c98577c9700186b657273974c6ca57b6bf9804f3fc201cc1b8d5",
+  "validation_sha256": "866fea3237ecacd12bc65ad7d185edc389878df667c2e39a8f5c5873163923d0"
+}

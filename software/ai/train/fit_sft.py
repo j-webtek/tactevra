@@ -21,6 +21,8 @@ def _data_configuration(version: str) -> tuple[int, str, str]:
     if version in {"v4", "v5"}:
         seed = {"v4": 2124, "v5": 2125}[version]
         return seed, f"schema_intent_sft_{version}", "rocell_ai.offline_intent_model_eval_v1"
+    if version == "classifier-v1":
+        return 2126, "intent_classifier_v1", "rocell_ai.offline_intent_classifier_eval_v1"
     seeds = {"v0": SEED, "v1": 2110, "v2": 2111, "v3": 2112}
     if version not in seeds:
         raise ValueError(f"unsupported data version: {version}")
@@ -38,7 +40,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Local, offline LoRA SFT pilot; no arm access")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5"), default="v0")
+    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5", "classifier-v1"), default="v0")
     parser.add_argument("--epochs", type=int, default=2)
     args = parser.parse_args()
     if args.epochs < 1 or args.epochs > 10:
@@ -85,6 +87,8 @@ def main() -> None:
     sys_path.insert(0, str(AI_DIR.parent / "src"))
     if prompt_module == "rocell_ai.offline_intent_model_eval_v1":
         from rocell_ai.offline_intent_model_eval_v1 import SYSTEM_PROMPT, PROMPT_SHA256
+    elif prompt_module == "rocell_ai.offline_intent_classifier_eval_v1":
+        from rocell_ai.offline_intent_classifier_eval_v1 import SYSTEM_PROMPT, PROMPT_SHA256
     else:
         from rocell_ai.model_eval import SYSTEM_PROMPT, PROMPT_SHA256
 
