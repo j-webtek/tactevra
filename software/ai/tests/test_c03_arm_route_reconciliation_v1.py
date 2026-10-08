@@ -51,6 +51,11 @@ from rocell_ai.intent_to_motion_rehearsal_v1 import (  # noqa: E402
     parse_intent_to_motion_rehearsal_v1,
     run_intent_to_motion_rehearsal_v1,
 )
+from rocell_ai.dynamic_intent_to_motion_v1 import (  # noqa: E402
+    DynamicIntentToMotionV1Error,
+    compile_bounded_intent,
+    derive_dynamic_route_fixture,
+)
 
 
 FIXTURE = AI_ROOT / "sim" / "evidence" / "c03_arm_route_reconciliation_fixture_v1.json"
@@ -527,3 +532,46 @@ def test_intent_rehearsal_rejects_changed_bytes_and_authority(tmp_path: Path) ->
     )
     with pytest.raises(IntentToMotionRehearsalV1Error, match="zero authority"):
         parse_intent_to_motion_rehearsal_v1(result)
+
+
+def test_dynamic_intent_preserves_repeats_case_and_punctuation() -> None:
+    covered = {
+        "SHIFT", "A", "1", "H", "PERIOD", "LEFT_BRACKET",
+        "RIGHT_BRACKET", "BACKSLASH",
+    }
+
+    assert compile_bounded_intent("AA!", covered) == [
+        "SHIFT", "A", "SHIFT", "A", "SHIFT", "1",
+    ]
+    assert compile_bounded_intent("hh.[]\\", covered) == [
+        "H", "H", "PERIOD", "LEFT_BRACKET", "RIGHT_BRACKET", "BACKSLASH",
+    ]
+
+
+def test_dynamic_route_derivation_changes_only_declared_semantics() -> None:
+    predecessor = json.loads(ROUTE_FIXTURE.read_text(encoding="utf-8"))
+    original_rules = predecessor["decision_rules"]
+    original_limits = predecessor["resource_limits"]
+
+    derived, receipt = derive_dynamic_route_fixture(
+        predecessor,
+        "A!",
+        {"SHIFT", "A", "1"},
+    )
+
+    assert derived["route"]["ordered_targets"] == ["SHIFT", "A", "SHIFT", "1"]
+    assert derived["decision_rules"] == original_rules
+    assert derived["resource_limits"] == original_limits
+    assert receipt["unchanged_numerical_policy"] is True
+    assert receipt["action_count"] == 4
+    assert receipt["hardware_writes"] == receipt["physical_movements"] == 0
+    assert receipt["physical_authority"] is False
+
+
+def test_dynamic_intent_rejects_uncovered_unsupported_and_oversized_requests() -> None:
+    with pytest.raises(DynamicIntentToMotionV1Error, match="lack admitted poses"):
+        compile_bounded_intent("a!", {"A", "SHIFT"})
+    with pytest.raises(DynamicIntentToMotionV1Error, match="unsupported text"):
+        compile_bounded_intent("a\n", {"A"})
+    with pytest.raises(DynamicIntentToMotionV1Error, match="exceeds 12 actions"):
+        compile_bounded_intent("abcdefghijklm", set("ABCDEFGHIJKLM"))
