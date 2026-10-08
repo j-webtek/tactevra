@@ -8,6 +8,7 @@ import pytest
 import rocell.application.c03_route_collision_handoff_v1 as handoff_module
 from rocell.application.c03_route_collision_handoff_v1 import (
     C03RouteCollisionHandoffV1Error,
+    assess_c03_station_height_route_sensitivity_v1,
     prepare_c03_route_collision_handoff_v1,
 )
 from rocell.application.context import load_simulation_context
@@ -128,6 +129,39 @@ def test_handoff_accepts_matching_profile_but_does_not_clear_collision(
     assert report["collision_intake"]["status"] == READY_STATUS
     assert report["collision_intake"]["continuous_collision_proven"] is False
     assert report["installed_collision_gate_cleared"] is False
+
+
+def test_station_height_sensitivity_is_diagnostic_and_zero_authority(
+    sim_context, synthetic_result
+):
+    report = assess_c03_station_height_route_sensitivity_v1(
+        synthetic_result, sim_context
+    )
+
+    assert report["waypoint_count"] == len(
+        synthetic_result["route_result"]["ik_screen"]["joint_results"]
+    )
+    assert report["segment_count"] == report["waypoint_count"] - 1
+    assert report["scope"] == "TOOL_TIP_CENTRELINE_DIAGNOSTIC_ONLY"
+    assert report["all_nominal_solids_contained"] is True
+    assert report["proxy_change_authorized"] is False
+    assert report["collision_screen_executed"] is False
+    assert report["installed_collision_gate_cleared"] is False
+    assert report["hardware_writes"] == 0
+    assert report["physical_movements"] == 0
+    assert report["physical_authority"] is False
+
+
+def test_station_height_sensitivity_rejects_unbounded_clearance(
+    sim_context, synthetic_result
+):
+    with pytest.raises(
+        C03RouteCollisionHandoffV1Error,
+        match="segment clearance",
+    ):
+        assess_c03_station_height_route_sensitivity_v1(
+            synthetic_result, sim_context, segment_clearance_mm=26.0
+        )
 
 
 def test_handoff_rejects_mutation_and_authority(sim_context, synthetic_result):
