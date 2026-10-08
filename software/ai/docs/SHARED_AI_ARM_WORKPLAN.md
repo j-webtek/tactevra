@@ -1009,6 +1009,12 @@ fresh-state, resource, and authority blocker. It may not change arm-lane or
 AI-lane stage status, clear a gate, interpret free-form language, or emit joint,
 PWM, serial, Waveshare, controller, permit, transport, execution, hardware-
 write, movement, or physical authority.
+Evidence `E-20261008-ARM-521` completes the claim. The closed intent
+`TYPE_TEXT(KEYBOARD, "Move!")` preserves its exact payload, compiles to
+`SHIFT,M,O,V,E,SHIFT,1`, creates a distinct v2 batch, passes strict ingress,
+and admits all 261 simulated IK samples. Non-actionable intent variants, phone
+text, and extension fields fail before workspace materialization. Installed
+collision and fresh-state blockers remain active with zero physical authority.
 
 The AI/integration lane on `codex/dynamic-intent-to-motion` claims ARM-520 from
 merged ARM-519 base `6295df237c3de811ec66e7d02b9096366b197937`. It may
