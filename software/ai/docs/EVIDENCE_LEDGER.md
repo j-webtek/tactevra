@@ -9910,7 +9910,10 @@ rewriting history. New entries must use a unique evidence ID.
   attempt is preserved as `FAIL`: the new test expected 10 unique nominal
   files while the implementation correctly emitted 11; the assertion was
   corrected without changing inventory behavior, after which 19 focused tests
-  passed in 3.28 seconds.
+  passed in 3.28 seconds. The first full verification attempt is also preserved
+  as `FAIL`: the public project-status reviewed-through marker still named
+  ARM-505 after ARM-506 was appended. The marker was advanced to ARM-506 before
+  the full suite was rerun.
 - Validation: the CLI retained a 19-body, 11-source inventory; recomputed every
   source-file digest; reproduced the layout's board size `[610,457,18]` mm,
   keyboard origin `[85,85]` mm, and phone origin `[499.2,84.2]` mm; and kept
