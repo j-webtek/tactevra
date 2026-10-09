@@ -242,7 +242,9 @@ def verify_admission(rows: dict[str, list[dict]]) -> None:
     refs: set[str] = set()
     for split, values in rows.items():
         for row in values:
-            if compose_public_intent_v1(row["target"], row["request"]) != row["composed_target"]:
+            if compose_public_intent_v1(
+                row["target"], row["request"], require_requested_device=False,
+            ) != row["composed_target"]:
                 failures.append(f"composition:{split}:{row['id']}")
             if deterministic_freshness_classification_v1(row["observation"]) is not None:
                 failures.append(f"freshness:{split}:{row['id']}")

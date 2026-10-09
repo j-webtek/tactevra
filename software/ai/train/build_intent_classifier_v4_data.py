@@ -94,7 +94,9 @@ def verify_composition_admission(rows: dict[str, list[dict]]) -> None:
     failures = []
     for split, values in rows.items():
         for row in values:
-            actual = compose_public_intent_v1(row["target"], row["request"])
+            actual = compose_public_intent_v1(
+                row["target"], row["request"], require_requested_device=False,
+            )
             if actual != row["composed_target"]:
                 failures.append(f"{split}:{row['id']}")
     if failures:

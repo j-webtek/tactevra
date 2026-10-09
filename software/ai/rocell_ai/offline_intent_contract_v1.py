@@ -48,6 +48,18 @@ _PHONE_TYPING_REQUEST = re.compile(
     r"\b(?:type|typing|enter|input|put|place|write)\b)",
     re.IGNORECASE,
 )
+_QUOTED_PAYLOAD = re.compile(r'"[^"\r\n]*"')
+_PHONE_DEVICE = re.compile(r"\b(?:phone|handset|on-screen)\b", re.IGNORECASE)
+_KEYBOARD_DEVICE = re.compile(
+    r"\b(?:keyboard|keyboarding|physical[- ]keys?|hardware[- ]keys?|"
+    r"attached keys?|connected keys?|the keys|key|keying)\b",
+    re.IGNORECASE,
+)
+_EXPLICIT_PHYSICAL_KEYBOARD = re.compile(
+    r"\b(?:physical|hardware|attached|connected)\s+keyboard\b|"
+    r"\b(?:physical|hardware|attached|connected)[- ]keys?\b",
+    re.IGNORECASE,
+)
 
 
 def extract_requested_text_v1(request_text: str) -> str | None:
@@ -65,6 +77,23 @@ def extract_requested_text_v1(request_text: str) -> str | None:
         if match is not None:
             return match.group("text")
     return None
+
+
+def extract_requested_device_v1(request_text: str) -> str | None:
+    """Bind one device from instruction bytes outside the requested payload."""
+
+    if not isinstance(request_text, str):
+        return None
+    instruction = _QUOTED_PAYLOAD.sub('""', request_text)
+    phone = _PHONE_DEVICE.search(instruction) is not None
+    keyboard = _KEYBOARD_DEVICE.search(instruction) is not None
+    if phone and not _EXPLICIT_PHYSICAL_KEYBOARD.search(instruction):
+        # In phone requests, an unqualified "keyboard" names the on-screen
+        # keyboard. Only an explicitly physical keyboard creates a conflict.
+        keyboard = False
+    if phone == keyboard:
+        return None
+    return "PHONE" if phone else "KEYBOARD"
 
 
 def parse_classification_v1(value: Any) -> dict[str, str]:
@@ -85,7 +114,8 @@ def parse_classification_v1(value: Any) -> dict[str, str]:
 
 
 def compose_public_intent_v1(
-    classification: dict[str, str], request_text: str,
+    classification: dict[str, str], request_text: str, *,
+    require_requested_device: bool = True,
 ) -> dict[str, str]:
     parsed = parse_classification_v1(classification)
     kind = parsed["intent_type"]
@@ -97,6 +127,14 @@ def compose_public_intent_v1(
                 "intent_type": "CLARIFY",
                 "question": "text_ambiguous",
             }
+        if require_requested_device:
+            requested_device = extract_requested_device_v1(request_text)
+            if requested_device is None or requested_device != parsed["device"]:
+                return {
+                    "schema": PUBLIC_SCHEMA,
+                    "intent_type": "CLARIFY",
+                    "question": "device_ambiguous",
+                }
         return {
             "schema": PUBLIC_SCHEMA,
             "intent_type": kind,
@@ -202,6 +240,7 @@ __all__ = [
     "classifier_model_observation_v1",
     "deterministic_freshness_classification_v1",
     "deterministic_phone_state_classification_v1",
+    "extract_requested_device_v1",
     "extract_requested_text_v1",
     "parse_classification_v1",
     "parse_public_intent_v1",
