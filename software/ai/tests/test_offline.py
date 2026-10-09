@@ -52,6 +52,10 @@ from build_intent_classifier_v3_data import (  # noqa: E402
     load_historical_requests,
     verify_request_disjointness,
 )
+from build_intent_classifier_v4_data import (  # noqa: E402
+    build as build_intent_classifier_v4_data,
+    load_historical_requests as load_classifier_v4_historical_requests,
+)
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
     compose_public_intent_v1,
     deterministic_freshness_classification_v1,
@@ -63,6 +67,28 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v4_learns_only_fresh_historically_disjoint_cases(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v4_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (560, 175, 210))
+        self.assertEqual(
+            _data_configuration("classifier-v4"),
+            (2129, "intent_classifier_v4", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["historical_corpus_count"], 9)
+        self.assertIn("v14", manifest["excluded_evidence"])
+        historical = load_classifier_v4_historical_requests()
+        rows = train + validation + evaluation
+        self.assertTrue(all(row["observation"]["fresh"] is True for row in rows))
+        self.assertNotIn("refuse_stale", {row["family"] for row in rows})
+        self.assertFalse({row["request"].casefold() for row in rows} & historical)
+        for row in rows:
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_freshness_gate_bypasses_model_only_for_stale_case(self) -> None:
         stale = {
             "id": "stale",
