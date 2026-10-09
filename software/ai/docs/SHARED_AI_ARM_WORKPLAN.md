@@ -1012,6 +1012,14 @@ remain unopened. Evaluation v14 must remain unopened until a clean development
 decision is committed. The increment may not change the public closed intent
 schema, invoke motion planning, promote a model, change arm-lane status, or
 emit commands, hardware writes, movement, or physical authority.
+Evidence `E-20261008-AI-531` selects the one-epoch candidate to open frozen v14.
+Before generation, all six prior corpus hashes matched; all 1,080 new cases
+were composition-exact and had zero request overlap with 1,215 historical
+requests. Fresh development then reached 200/200 exact classifications and
+200/200 exact composed public intents with zero invalid schemas, false
+actionable outputs, or altered text. This is a development-only synthetic
+result. The candidate remains unpromoted and disconnected from motion; only the
+unchanged run on already frozen v14 can decide the held-out result.
 
 The AI/model lane on `codex/intent-classifier-v2` claims AI-530 from merged
 AI-529 base `d757695152f37bbf992f4ddbe8458440b287bca8`. It may extend the
