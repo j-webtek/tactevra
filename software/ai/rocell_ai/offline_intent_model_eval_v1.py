@@ -6,12 +6,14 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import re
 import time
 from typing import Any, Callable
 from urllib import request
 
 from .evaluation import load_benchmark
+from .offline_intent_contract_v1 import (
+    extract_requested_text_v1 as extract_requested_text_v1,
+)
 from .offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
@@ -25,47 +27,6 @@ Allowed objects:
 
 Typing requires an identified device and exact text. Stale observations are refused. Phone typing requires verified KEYBOARD_LOWER state. Calling, dialing, sending, opening apps, and multi-step workflows are refused. Never emit coordinates, keys, motion, joints, commands, or execution claims."""
 PROMPT_SHA256 = hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest()
-
-_UNQUOTED_TYPE_PATTERNS = tuple(re.compile(pattern) for pattern in (
-    r"Type (?P<text>[!-~]+) on the keyboard\.",
-    r"Enter (?P<text>[!-~]+) using the physical keyboard\.",
-    r"The keyboard should receive the word (?P<text>[!-~]+)\.",
-    r"Use the physical keys to write (?P<text>[!-~]+)\.",
-    r"Write (?P<text>[!-~]+) with the physical keyboard\.",
-    r"Use keyboard keys to enter (?P<text>[!-~]+)\.",
-    r"Produce (?P<text>[!-~]+) using the attached keyboard\.",
-    r"The attached physical keyboard should spell (?P<text>[!-~]+)\.",
-    r"The hardware keys must enter (?P<text>[!-~]+)\.",
-    r"Input (?P<text>[!-~]+) through the attached keyboard\.",
-    r"The physical keyboard must enter (?P<text>[!-~]+)\.",
-    r"Key in (?P<text>[!-~]+) on the attached keyboard\.",
-    r"The attached keyboard must input (?P<text>[!-~]+)\.",
-    r"On the physical keyboard, enter (?P<text>[!-~]+)\.",
-    r"The hardware keyboard should input (?P<text>[!-~]+)\.",
-    r"Enter token (?P<text>[!-~]+) through the hardware keyboard\.",
-    r"Have the attached keys enter (?P<text>[!-~]+)\.",
-    r"Input token (?P<text>[!-~]+) with the hardware keyboard\.",
-    r"The physical keyboard should write (?P<text>[!-~]+)\.",
-    r"Use the hardware keys to input (?P<text>[!-~]+)\.",
-))
-
-
-def extract_requested_text_v1(request_text: str) -> str | None:
-    """Extract exact text only from the closed, unambiguous request grammar."""
-
-    if not isinstance(request_text, str):
-        return None
-    quoted = re.findall(r'"([^"\r\n]+)"', request_text)
-    if len(quoted) == 1:
-        return quoted[0]
-    if quoted:
-        return None
-    for pattern in _UNQUOTED_TYPE_PATTERNS:
-        match = pattern.fullmatch(request_text)
-        if match is not None:
-            return match.group("text")
-    return None
-
 
 def _post(payload: dict[str, Any], timeout: int = 120) -> dict[str, Any]:
     req = request.Request(
