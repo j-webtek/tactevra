@@ -12532,3 +12532,51 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a fresh successor corpus containing only actionable
   typing and unavailable-workflow decisions that remain after all deterministic
   gates, then evaluate one bounded candidate without reusing v9 development.
+
+### E-20261009-AI-547A — post-device-ambiguity classifier-v10 corpus frozen
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: pre-result classifier-v10 corpus freeze from merged AI-546 base
+  `36eaa5f5bda3fa47a578ac4e0317c20659b76954`. Claim commit is
+  `ddada8a099c6049fbabcbb7d19e567a0f84f430a`; the freeze is the commit
+  containing this evidence entry and its six generated corpus files.
+- Exact generation command: set `PYTHONPATH=software\ai;software\src`, then
+  run `python software/ai/train/build_intent_classifier_v10_data.py`.
+- Fixtures: 1,000 training, 225 development, and 250 sealed v21 evaluation
+  cases. Training SHA-256 is
+  `19953492a0cb8367368ee7cc34b94dafd74a42cc505bbf94772f83cb69fd6770`;
+  development SHA-256 is
+  `5f92734b3094c4720494b25d6290514b49835989a1624ac6dff2173ffe421e4d`;
+  data-manifest SHA-256 is
+  `1e9955746baead080e05d7768277d12ac3d2e3d897ca43a9f2a5092d8fa72037`;
+  sealed v21 SHA-256 is
+  `0477ab29df5086ef90e7edf0b69edd0711097745d854cab41fde4dbc8dcee093`;
+  sealed-manifest SHA-256 is
+  `d94ce4462355531acf24c222e4b51cba16a011e224baccab08b539e272a51b2a`.
+  Generator SHA-256 is
+  `a6fcdd2bb51f14e65fae8d88846a933558a78968cc427a1d067d74f101891ae0`.
+  All six files were copied to
+  `F:\robot-arm-evidence\issue190\intent_classifier_v10\frozen_corpus`;
+  source and backup hashes match.
+- Admission: all 1,475 rows compose exactly through requested-device binding,
+  pass freshness, and are intercepted by none of the deterministic phone-state,
+  text-ambiguity, or device-ambiguity gates. The corpus contains exactly five
+  decision families: quoted keyboard typing, punctuation keyboard typing,
+  unquoted keyboard typing, verified phone typing, and unavailable-workflow
+  refusal. Generation found zero case-insensitive overlap with 10,100 requests
+  in 22 decoded historical corpora and hash-verified sealed v16, v17, v18, v19,
+  and v20 without decoding.
+- Verification: `python -m pytest software/ai/tests/test_offline.py -q` passed
+  59. Ruff passed the generator, trainer, and focused test. The source-archive
+  ceiling is deliberately advanced by six files from 6,597 to 6,603 for one
+  generator, three train/development/manifest files, and two sealed v21 files;
+  other archive limits remain unchanged.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Model-call
+  count: 0. Physical authority: false.
+- Limitations: synthetic agent-authored language only. Passing generation
+  admission does not establish broad language, model quality, deployment,
+  motion, hardware, or physical capability. V21 through v16 remain unopened.
+- Next dependency: train the single predeclared two-epoch candidate from the
+  cached 1B base, then open development once under exact classification and
+  composition gates. V21 remains sealed until a committed development pass.

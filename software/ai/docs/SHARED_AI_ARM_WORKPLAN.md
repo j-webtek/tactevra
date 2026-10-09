@@ -998,6 +998,32 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v10` claims AI-547 from merged
+AI-546 base `36eaa5f5bda3fa47a578ac4e0317c20659b76954`. It may freeze one
+fresh post-gate classifier corpus containing only five remaining model decision
+families: quoted keyboard typing, punctuation keyboard typing, unquoted
+keyboard typing, verified phone typing, and unavailable-workflow refusal.
+Freshness, phone-state refusal, text ambiguity, and explicit device ambiguity
+must intercept no generated row; every actionable request must still compose
+through exact requested-device binding. Train, development, and unopened v21
+evaluation wording, payloads, IDs, and provenance must be disjoint from all
+prior decoded requests; sealed v16 through v20 may be hash-verified only and
+may not be decoded. The freeze predeclares 200/45/50 rows per family, giving
+1,000 training, 225 development, and 250 evaluation rows, one candidate trained
+for exactly two epochs, one development opening, exact classification and
+composition, and hard zero limits for schema-invalid, false-actionable, and
+altered-text output. V21 may open only after a committed development pass. This
+increment may not construct ModelMotionBatch, invoke motion, emit commands,
+change arm-lane status, or claim execution or physical authority.
+Evidence `E-20261009-AI-547A` freezes the claimed five-family corpus: 1,000
+training, 225 development, and 250 sealed v21 rows. All 1,475 rows pass
+freshness and requested-device composition and are intercepted by none of the
+phone-state, text-ambiguity, or device-ambiguity gates. Generation found zero
+case-insensitive request overlap with 10,100 requests from 22 decoded
+historical corpora and hash-verified sealed v16 through v20 without decoding.
+V21 remains unopened. The next authorized step is the one predeclared
+two-epoch candidate followed by one development opening.
+
 The AI/model lane on `codex/intent-device-ambiguity-gate` claims AI-546 from
 merged AI-545 base `c702b9fa924d559fdbb32f6c6461c535ca3de590`. It may add a
 narrow, motion-free explicit-device ambiguity gate before local model inference.
