@@ -998,6 +998,29 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v10-evaluation` claims AI-549
+from merged AI-548 base `1a47155f451bb244167c9086680ad1bdebb100a4`. It may
+open the frozen 250-row v21 evaluation exactly once using the unchanged local
+classifier-v10 adapter digest
+`340ad8350945ff11952e0bfed04d0ff7be3d3bffdfde4e2c7ddc22ded8606afc`
+and the already frozen deterministic gates, observation policy, schema, and
+promotion thresholds. Promotion requires 250/250 exact classification and
+composition with zero schema-invalid, false-actionable, or altered-text
+outputs. No retraining, prompt change, threshold change, development reuse, or
+second v21 opening is allowed. Any miss rejects the candidate and must be
+preserved. This increment may not construct ModelMotionBatch, invoke motion,
+emit commands, change arm-lane status, or claim execution or physical
+authority.
+Evidence `E-20261009-AI-549` rejects the unchanged candidate on its single v21
+opening at 238/250 exact classification and composition. Quoted typing,
+punctuation typing, verified phone typing, and unavailable-workflow refusal
+each pass 50/50. Unquoted typing passes 38/50; all 12 misses share the held-out
+`Produce <payload> using the attached keyboard` form and safely become
+`REFUSE(operation_not_available)`. Schema-invalid, false-actionable, and
+altered-text counts remain zero. V21 is consumed and may not be reopened. The
+next AI dependency is a fresh successor corpus and sealed evaluation family
+that broadens unquoted action paraphrases without reusing v21 for selection.
+
 The AI/model lane on `codex/intent-classifier-v10-training` claims AI-548 from
 merged AI-547A base `0cfd528bdce6c414f999d6fcf8380a7100032409`. It may train
 the single predeclared classifier-v10 candidate for exactly two epochs from the
