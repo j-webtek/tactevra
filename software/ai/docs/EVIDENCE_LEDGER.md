@@ -11972,6 +11972,13 @@ rewriting history. New entries must use a unique evidence ID.
   All files under
   `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e` were copied
   to the matching `F:\robot-arm-evidence\issue190` path with matching hashes.
+- Verification: set `PYTHONPATH=software\ai;software\src;software\ai\train`,
+  then run `python -m pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q`; result: 64
+  passed. Ruff passed on the changed generator, trainer, and tests. `python
+  scripts/maintain_repository.py verify --full` passed with 133 policy tests,
+  945 offline tests, and 5 expected Windows symlink skips in 474.99 seconds;
+  source-archive containment passed at 6,573 files.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
   GPU training job and local Ollama inference only.
