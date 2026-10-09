@@ -998,6 +998,22 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/fiducial-catalog-precision` claims AI-555 from
+merged AI-554 base `48181ee3f8af524b037fd370ee04f5d882532eeb`. It may
+record the geometry-first localization architecture and add an additive,
+hash-bound precision adapter that consumes the existing
+`AprilTagPoseObservation` plus a frozen target catalog. The adapter must
+abstain without an exactly applicable qualification and must reject wrong
+camera-intrinsics, tag-map, estimator, catalog, domain, frame, freshness,
+inlier-count, or reprojection-residual evidence. Synthetic fixtures may prove
+contract behavior only and must remain labeled synthetic. This increment may
+also record the next WS2 event-terminated press rule and select an independent
+physical target-survey instrument, but it may not implement motion or grant a
+verification event authority to start, extend, or deepen a press. It may not
+add joint, PWM, serial, Waveshare JSON, permit, transport, controller-command,
+execution, or physical authority; change arm-lane status; or complete an
+integration gate.
+
 The AI/model lane on `codex/intent-v11-precision-shadow` claims AI-554 from
 merged AI-553 base `8821b59cb15d3eeb87c8963354a19b4e98e5bec4`. It may
 compose the selected classifier-v11 receipt and deterministic keyboard plan
