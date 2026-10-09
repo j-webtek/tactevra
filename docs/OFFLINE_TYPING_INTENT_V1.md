@@ -96,3 +96,12 @@ typing text was altered. Frozen v17 and retained v16 remain unopened. The
 result supports a stronger architectural boundary for phone-state safety; it
 does not authorize another epoch, evaluation, shadow promotion, motion, or
 physical operation.
+
+Explicit phone typing with missing or non-`KEYBOARD_LOWER` state is now a
+deterministic pre-inference refusal, parallel to stale-evidence refusal. In a
+zero-model-call diagnostic over consumed classifier-v6 development cases, the
+gate refused all 35 phone-state cases and none of the other 210 cases. Verified
+phone requests remain eligible for local classification and semantic phone
+compilation. This closes the observed false-actionable path at the shadow
+boundary; it does not validate broader wording, phone UI state, motion, or
+hardware.

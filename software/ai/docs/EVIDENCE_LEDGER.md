@@ -12070,3 +12070,50 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: place phone-state admission behind a deterministic verified
   device-state boundary, then freeze a fresh corpus and unopened evaluation for
   any remaining learned decisions. Preserve classifier-v6 as rejected evidence.
+
+### E-20261009-AI-540 — deterministic phone-state precondition closes observed actionable path
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: motion-free deterministic intent precondition implemented at full
+  commit `9b03530340baf2b6304d47b2c8bf7fd914bbae0d`; pre-result claim commit is
+  `093deda1fd3df00d7090ce918314f4fe91e33bf8`. Explicit phone typing with
+  missing or non-`KEYBOARD_LOWER` state
+  becomes `REFUSE(phone_state_unverified)` before local model inference.
+  Freshness refusal has precedence; verified phone and keyboard-only requests
+  continue to the model.
+- Exact diagnostic command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python
+  C:\MuJoCoWarp\evidence\issue190\intent_phone_state_gate_v1\run_diagnostic.py`.
+  The script SHA-256 is
+  `4266698e43f8ad290cda1fe82b41d1bd87484c702b20d6e4e5cd2546d0e9c6da`.
+- Fixture: consumed classifier-v6 development data only, 245 cases, SHA-256
+  `3a15c691be85c7310c9e2f0a87ed8ebb7cf76a0d2d1c60dce8c81d56b91a200f`.
+  This diagnostic is not selection and does not rescore the rejected model.
+  V17 and v16 remained unopened.
+- Result: all 35 expected phone-state refusal cases were deterministically
+  refused; zero of 210 other cases were gated. Model-call, ModelMotionBatch,
+  motion-adapter-call, controller-command, hardware-write, and physical-movement
+  counts were all zero. Diagnostic SHA-256 is
+  `4a6ef7db8436734f93faa748584d12efe44a264e6e05077a7cea74c0f7546e37`.
+- External artifacts: evidence-manifest SHA-256
+  `44e38f765491ebcb718f76e018f172fe915bd18656e67463b573af7b7fbce024`.
+  Three files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_phone_state_gate_v1` were copied to
+  the matching `F:\robot-arm-evidence\issue190` path with matching hashes.
+- Focused verification command: set
+  `PYTHONPATH=software\ai;software\src;software\ai\train`, then run `python -m
+  pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q`; result: 70
+  passed. Ruff passed on the three changed runtime modules and two test modules.
+- Full verification: `python scripts/maintain_repository.py verify --full`
+  passed with 133 policy tests, 945 offline tests, and 5 expected Windows
+  symlink skips in 474.89 seconds. Source-archive containment passed at 6,579
+  files.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0.
+- Limitations: the request detector is a bounded explicit phone-typing grammar,
+  not broad natural-language understanding. Passing consumed failure cases is
+  corrective boundary evidence, not a deployment or model-accuracy claim.
+- Next dependency: freeze classifier-v7 training/development and a new unopened
+  evaluation around the decisions remaining after deterministic freshness and
+  phone-state gating; keep classifier-v6 and v17 preserved and unopened.

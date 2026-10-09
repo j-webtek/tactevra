@@ -1012,6 +1012,14 @@ development may be used only as failure evidence and may not be rescored for
 selection. V17 and v16 remain unopened. This increment may not construct
 ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or
 claim execution or physical authority.
+Evidence `E-20261009-AI-540` admits the deterministic phone-state precondition
+at the disconnected intent boundary. Against the consumed classifier-v6
+development failure set, it refused all 35 explicit phone-typing cases with
+missing state, gated none of the other 210 cases, and made zero model calls.
+Focused contract and runtime tests pass missing, wrong, verified, stale,
+keyboard-only, and tampered cases. This is a boundary diagnostic rather than a
+classifier rescore; v17 and v16 remain unopened. The next model campaign may
+learn only decisions left after deterministic freshness and phone-state gates.
 
 The AI/model lane on `codex/intent-classifier-v6` claims AI-539 from merged
 AI-538 base `6f393e5d24868e4800e7c23dff2c6a9501f6cb5f`. It may freeze a
