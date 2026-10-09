@@ -12388,3 +12388,43 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a fresh successor corpus containing only decisions
   that remain after freshness, phone-state, text-ambiguity, and requested-device
   binding; then evaluate one bounded candidate without reusing v8 development.
+
+### E-20261009-AI-545A — post-text-ambiguity classifier-v9 corpus frozen
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: pre-result classifier-v9 corpus freeze from merged AI-544 base
+  `c329ca12457b19fd35c4a23c0aa8a156a060f207`. Claim commit is
+  `c4c8704f805467d83d9bf171791b9401201e1979`; the freeze is the commit
+  containing this evidence entry and its six generated corpus files.
+- Exact generation command: set `PYTHONPATH=software\ai;software\src`, then
+  run `python software/ai/train/build_intent_classifier_v9_data.py`.
+- Fixtures: 1,200 training, 270 development, and 300 sealed v20 evaluation
+  cases. Training SHA-256 is
+  `a2a16ae9d725c9c30cc32600f15461d1f2ddfa5fa325080c86c45741f1c1a4d6`;
+  development SHA-256 is
+  `7fac90f40e5ad3ee3d742dfe4ca74052a7e068d25736827936f1db1e222c57ac`;
+  data-manifest SHA-256 is
+  `42c219bc06b0c94516af551688144918a60559c69f929612816cdb313dbb82e7`;
+  sealed v20 SHA-256 is
+  `abf36b86d3c79ffa17ca9fc7c501f9bb45589e6acfacd5371b2dd80ef08db1dc`;
+  sealed-manifest SHA-256 is
+  `251276f3b4cd179fb649ea46b2f63aa6c4e03022ebd1a8394ccbc43042957b83`.
+- Admission: all 1,770 rows pass deterministic freshness, phone-state, and
+  text-ambiguity gates, compose exactly through requested-device binding, and
+  expose only decision state. No `clarify_text` row remains. Generation found
+  zero case-insensitive overlap with 8,630 requests in 20 decoded historical
+  corpora and hash-verified sealed v16, v17, v18, and v19 without decoding.
+- Verification: `python -m pytest software/ai/tests/test_offline.py -q` passed
+  57. Ruff passed the generator, trainer, and focused test. The source-archive
+  ceiling is deliberately advanced by six files from 6,591 to 6,597 for one
+  generator, three train/development/manifest files, and two sealed v20 files;
+  other archive limits remain unchanged.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Model-call
+  count: 0. Physical authority: false.
+- Limitations: synthetic agent-authored language only. Passing generation
+  admission does not establish broad language, model quality, deployment,
+  motion, hardware, or physical capability. V20 through v16 remain unopened.
+- Next dependency: train the single predeclared two-epoch candidate from the
+  cached 1B base, then open development once under exact classification and
+  composition gates. V20 remains sealed until a committed development pass.

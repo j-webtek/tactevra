@@ -72,6 +72,9 @@ from build_intent_classifier_v7_data import (  # noqa: E402
 from build_intent_classifier_v8_data import (  # noqa: E402
     build as build_intent_classifier_v8_data,
 )
+from build_intent_classifier_v9_data import (  # noqa: E402
+    build as build_intent_classifier_v9_data,
+)
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
     deterministic_phone_state_classification_v1,
@@ -89,6 +92,35 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v9_contains_only_post_text_ambiguity_gate_decisions(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v9_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (1200, 270, 300))
+        self.assertEqual(
+            _data_configuration("classifier-v9"),
+            (2134, "intent_classifier_v9", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertNotIn("clarify_text", {
+            row["family"] for row in train + validation + evaluation
+        })
+        self.assertEqual(
+            manifest["deterministic_preconditions"],
+            [
+                "FRESHNESS_V1", "PHONE_STATE_V1", "TEXT_AMBIGUITY_V1",
+                "REQUESTED_DEVICE_BINDING_V1",
+            ],
+        )
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["sealed_hash_only_count"], 4)
+        for row in train + validation + evaluation:
+            self.assertIsNone(
+                deterministic_text_ambiguity_classification_v1(row["request"])
+            )
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_v8_requires_explicit_device_binding(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v8_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (1400, 315, 350))

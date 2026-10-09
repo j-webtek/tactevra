@@ -1016,6 +1016,13 @@ and altered-text output plus exact classification and composition. V20 may open
 only after a committed development pass. This increment may not construct
 ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or claim
 execution or physical authority.
+Evidence `E-20261009-AI-545A` freezes the claimed post-gate corpus: 1,200
+training, 270 development, and 300 sealed v20 rows. All 1,770 rows pass the
+three pre-inference gates and exact requested-device composition; none belongs
+to the deterministic text-ambiguity family. Generation found zero overlap with
+8,630 requests from 20 decoded historical corpora and hash-verified sealed v16
+through v19 without decoding. V20 remains unopened. The next authorized step is
+the single predeclared two-epoch candidate followed by one development opening.
 
 The AI/model lane on `codex/intent-text-ambiguity` claims AI-544 from merged
 AI-543 base `2a60e6b701a76241a3f4aa4ec68fea27f3619484`. It may add a
