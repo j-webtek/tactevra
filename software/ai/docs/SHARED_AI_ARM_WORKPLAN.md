@@ -1016,6 +1016,14 @@ typing text. V17 may open only after a passing development decision is
 committed. This increment may not invoke motion, construct ModelMotionBatch,
 emit commands, change arm-lane status, or claim execution or physical
 authority.
+Evidence `E-20261009-AI-539` rejects the only classifier-v6 candidate on its
+single development opening. Broader structures improved exact classification
+and composition to 197/245, but seven phone-state refusal cases became
+actionable keyboard typing, violating the zero false-actionable gate. Schema
+invalid and altered-text counts remained zero. V17 and retained v16 remain
+unopened. No additional epoch or evaluation opening is authorized from this
+claim; the next increment must address the phone-state safety boundary before
+another model campaign.
 
 The AI/model lane on `codex/intent-classifier-v5` claims AI-538 after the
 recorded AI-537 one-epoch development rejection. It may train one new candidate

@@ -11991,3 +11991,82 @@ rewriting history. New entries must use a unique evidence ID.
   punctuation typing, while retaining the sanitized observation projection,
   historical-overlap audit, exact composer admission, unopened evaluation, and
   zero false-actionable gate.
+
+### E-20261009-AI-539 — broader language improves exactness but violates phone safety gate
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: one predeclared classifier-v6 candidate under the exact sanitized
+  observation boundary. Full pre-result corpus commit:
+  `9061addcd69c268da4ece26681328abb0bbe26ad`; active-claim commit:
+  `3fd12f5f769cb582c0e94fb788b1d8417c14e011`. Frozen v17 and retained v16
+  stayed unopened.
+- Fixtures: 980 training, 245 development, and 280 sealed evaluation cases.
+  Training SHA-256 is
+  `81c8aa0e87cbcd6b25c829e2bde046bb816a00bfd12c42d8b495f7ea14713457`;
+  development SHA-256 is
+  `3a15c691be85c7310c9e2f0a87ed8ebb7cf76a0d2d1c60dce8c81d56b91a200f`;
+  sealed v17 SHA-256 is
+  `3bd446826a4c2f3549965f6b19b408e46a14e5b7dd283a1e710a9d683968dd47`;
+  data-manifest SHA-256 is
+  `bb9f473f74a8c8bd00c9c43ccb6ec70c341c57004b5b1e0c0ee56f523ae86c60`.
+  Generation admitted all 1,505 deterministic compositions, found zero overlap
+  against 3,975 requests in 14 hash-verified consumed corpora, exposed only
+  `{"fresh": true}` to the model, and hash-verified sealed v16 without
+  decoding it.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run `python
+  software/ai/train/fit_sft.py --data-version classifier-v6 --epochs 2 --device
+  cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v6\pilot_2e`.
+  Results: epoch-one train/validation loss 0.113999/0.034765; epoch-two
+  0.000790/0.017783; 124 optimizer updates. Adapter SHA-256 is
+  `3e533d02ce669e874f08b655d10ec5aa7e95b91788847616e411fe90bebe9edf`;
+  run-manifest SHA-256 is
+  `4ad51f9a50a69c0a1bef27bbf4bafc01652780fba61507192696f1b2524c9579`.
+- Import command: `python software/ai/train/import_adapter.py --adapter-dir
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v6\pilot_2e --staging-dir
+  software\ai\artifacts\intent_classifier_v6_2e_import --base-tag
+  llama32-1b-meta-92131767:latest --tag
+  llama32-1b-rocell-intent-classifier-v6-2e:latest`. Imported local digest:
+  `214c0f8e9204939311b1d5bfa3543fa5f95dce00f046613622bdfa9443ed8ac5`.
+  An earlier command incorrectly appended `adapter` to the adapter directory
+  and failed with `FileNotFoundError` before staging or model mutation. Both
+  attempts are preserved in external `import_attempts.json`, SHA-256
+  `2243059cc02fc8a908f4735c4c1e8b71d5ddcfbde1cb8b196acf7cc9b89fe0cf`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v6_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v6.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v6-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v6\pilot_2e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact classification and composition 197/245,
+  schema-invalid 0, altered text 0, false actionable 7. Family exact counts are
+  quoted typing 26/35, punctuation typing 21/35, unquoted typing 35/35, device
+  ambiguity 31/35, text ambiguity 21/35, workflow refusal 35/35, and phone-state
+  refusal 28/35. All seven false-actionable cases came from one held-out
+  phone-state structure and produced keyboard `TYPE_TEXT`. Scorecard SHA-256 is
+  `08cefca4a7195e7caee48fbd6d0e8b29b5c61337abebf69c6e7b42e71b1f54d9`;
+  failure-analysis SHA-256 is
+  `8791b8d4840e67c1c1e38a23dbf48cbd1e7f078783ee3552136049faa30b50c0`.
+- External artifacts: evidence-manifest SHA-256
+  `c6201fe298f29f8c3d7e8170ed4543071029e186b6aea198e449df09ac1d945d`.
+  Twelve files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v6\pilot_2e` were copied
+  to the matching `F:\robot-arm-evidence\issue190` path with matching hashes.
+- Verification: set `PYTHONPATH=software\ai;software\src;software\ai\train`,
+  then run `python -m pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q`; result: 65
+  passed. Ruff passed on the changed generator, trainer, and tests. `python
+  scripts/maintain_repository.py verify --full` passed with 133 policy tests,
+  945 offline tests, and 5 expected Windows symlink skips in 474.93 seconds;
+  source-archive containment passed at 6,579 files.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only.
+- Limitations: this is synthetic development selection, not general-language,
+  deployment, motion, hardware, or physical qualification. V17 was not scored.
+  Higher aggregate exactness cannot compensate for false actionable output.
+- Next dependency: place phone-state admission behind a deterministic verified
+  device-state boundary, then freeze a fresh corpus and unopened evaluation for
+  any remaining learned decisions. Preserve classifier-v6 as rejected evidence.

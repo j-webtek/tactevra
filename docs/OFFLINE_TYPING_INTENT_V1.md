@@ -86,3 +86,13 @@ epochs reached 97/175; both had zero false-actionable, malformed, or
 altered-text outputs. Frozen v16 was not opened. The next successor must improve
 language diversity while preserving the same sanitized observation projection
 and zero-error safety gates.
+
+The broader-language classifier-v6 campaign improved synthetic development
+classification to 197/245, including complete unquoted typing and workflow
+refusal. It remains rejected because seven of 35 phone-state refusal cases were
+misclassified as actionable keyboard typing. This violates the hard zero
+false-actionable gate even though all output was schema-valid and no composed
+typing text was altered. Frozen v17 and retained v16 remain unopened. The
+result supports a stronger architectural boundary for phone-state safety; it
+does not authorize another epoch, evaluation, shadow promotion, motion, or
+physical operation.
