@@ -1,0 +1,82 @@
+{
+  "counts": {
+    "evaluation": 350,
+    "train": 1400,
+    "validation": 315
+  },
+  "deterministic_preconditions": [
+    "FRESHNESS_V1",
+    "PHONE_STATE_V1",
+    "REQUESTED_DEVICE_BINDING_V1"
+  ],
+  "evaluation_sha256": "5a0ad38af8ba114523bb8893ef8721500973d460c93edf563afddf2958fa138a",
+  "excluded_evidence": {
+    "v16": "retained unopened and hash-verified without decoding",
+    "v17": "retained unopened after classifier-v6 rejection and hash-verified without decoding",
+    "v18": "retained unopened after classifier-v7 rejection and hash-verified without decoding"
+  },
+  "family_counts": {
+    "evaluation": {
+      "clarify_device": 50,
+      "clarify_text": 50,
+      "refuse_workflow": 50,
+      "type_phone_verified": 50,
+      "type_punctuation": 50,
+      "type_quoted": 50,
+      "type_unquoted": 50
+    },
+    "train": {
+      "clarify_device": 200,
+      "clarify_text": 200,
+      "refuse_workflow": 200,
+      "type_phone_verified": 200,
+      "type_punctuation": 200,
+      "type_quoted": 200,
+      "type_unquoted": 200
+    },
+    "validation": {
+      "clarify_device": 45,
+      "clarify_text": 45,
+      "refuse_workflow": 45,
+      "type_phone_verified": 45,
+      "type_punctuation": 45,
+      "type_quoted": 45,
+      "type_unquoted": 45
+    }
+  },
+  "generation_admission": {
+    "admitted_case_count": 2065,
+    "failure_count": 0,
+    "required": "Every row composes exactly through requested-device binding, passes freshness, is not intercepted by phone-state admission, and exposes only decision state."
+  },
+  "historical_request_admission": {
+    "historical_corpus_count": 18,
+    "historical_request_count": 6915,
+    "overlap_count": 0,
+    "sealed_hash_only_count": 3
+  },
+  "human_reviewed": false,
+  "limitations": "Synthetic agent-authored classification data; passing cannot qualify general language, motion, or hardware.",
+  "model_observation_policy": "DECISION_STATE_ONLY_V1",
+  "promotion_gates": {
+    "altered_type_text_count_maximum": 0,
+    "classification_exact_rate_minimum": 1.0,
+    "composed_exact_rate_minimum": 1.0,
+    "false_actionable_count_maximum": 0,
+    "schema_invalid_count_maximum": 0
+  },
+  "schema": "tactevra.offline_intent_classifier_data.v1",
+  "seed": 2133,
+  "source": "agent_authored_explicit_device_post_gate_classifier",
+  "split_policy": "Wording, payload stems, IDs, and provenance are disjoint; every actionable request names exactly one device and phone typing is learned only with verified KEYBOARD_LOWER state.",
+  "train_sha256": "373277bc0de8275cf27d4248eaf694fd28133a2af68ab2b6edbb5b8012a29b72",
+  "training_selection": {
+    "base_model": "meta-llama/Llama-3.2-1B-Instruct",
+    "base_revision": "9213176726f574b556790deb65791e0c5aa438b6",
+    "candidate_count": 1,
+    "development_opens": 1,
+    "epochs": 2,
+    "evaluation_opens_before_committed_development_pass": 0
+  },
+  "validation_sha256": "bf2705c70f432949658b0b5c4de4421a17d655db53b23995530d9eb782455dda"
+}

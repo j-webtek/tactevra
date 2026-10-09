@@ -998,6 +998,35 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v8` claims AI-543 from merged
+AI-542 base `db6dae8d066e83d53c9d5c20ceab145a820e8c83`. It may freeze a
+fresh classifier-v8 train/development family and unopened v19 evaluation for
+decisions remaining after deterministic freshness, phone-state, and requested-
+device binding. Every actionable request must identify exactly one supported
+device and compose through the safe default; no legacy composition option is
+allowed in the new corpus. Generation must hash-verify all decoded historical
+classifier corpora, hash-verify sealed v16 through v18 without decoding, prove
+zero case-insensitive request overlap, and preserve unique family-neutral
+provenance. One candidate is predeclared for exactly two epochs from the same
+cached 1B base, followed by one development opening with hard zero limits for
+schema-invalid, false-actionable, and altered-text output. V19 may open only
+after a passing development decision is committed. This increment may not
+construct ModelMotionBatch, invoke motion, emit commands, change arm-lane
+status, or claim execution or physical authority.
+Evidence `E-20261009-AI-543A` freezes 1,400 training, 315 development, and 350
+sealed v19 cases. All 2,065 rows compose through requested-device binding;
+generation found zero overlap with 6,915 decoded historical requests and hash-
+verified sealed v16 through v18 without decoding. Focused tests pass 54, Ruff
+passes, and the deliberately advanced 6,591-file archive ceiling passes. V19
+is unopened. The next authorized step is the single predeclared two-epoch local
+candidate followed by one development opening.
+Evidence `E-20261009-AI-543B` rejects that single candidate at 299/315 exact
+classification and composition. Invalid, altered-text, and false-actionable
+counts are all zero; every miss is in text ambiguity, where 14 cases became
+device clarification and two became refusal. V19 remains unopened. The next
+increment must address deterministic text-candidate ambiguity before any fresh
+model campaign.
+
 The AI/model lane on `codex/intent-device-binding` claims AI-542 from recorded
 AI-541 rejection commit `6faebb30e74bb696604400f41ff871fe1c4d3e8c`. It may add a
 deterministic requested-device binding at the motion-free composition boundary.
