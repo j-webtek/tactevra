@@ -998,6 +998,21 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-shadow-runtime` claims AI-536 from merged
+AI-535 base `0daed957605b49c02d5ef3caeb48f2929d73ca12`. It may add one
+disconnected, zero-authority shadow runtime that validates an explicit
+freshness bit, bypasses model inference for stale evidence, binds the exact
+retained classifier-v4 Ollama digest, deterministically composes the public
+intent, and compiles semantic keyboard or phone actions only when the composed
+intent is actionable. Its receipt must hash-bind the request, observation,
+model identity, classification source, composed intent, and compiled semantic
+actions; record model-call, ModelMotionBatch, motion-adapter, controller,
+hardware-write, and physical-movement counters; and reject tampering, missing
+freshness, model-identity drift, malformed classifier output, unsupported text,
+and non-actionable compilation. This increment may not import or invoke a
+motion adapter, construct ModelMotionBatch, emit commands, change arm-lane
+status, claim deployment qualification, or acquire physical authority.
+
 The AI/model lane on `codex/intent-classifier-v4` claims AI-534 from merged
 AI-533 base `614b2e06b4032bcc96df1dff00bfeb318d0c1b05`. It may freeze
 fresh classifier-v4 train/development data and an unopened v15 evaluation
