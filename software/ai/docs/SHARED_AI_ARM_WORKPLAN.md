@@ -998,6 +998,17 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/deterministic-intent-freshness` claims AI-533 from
+merged AI-532 base `df8a4ddb10cea98a58e101d86ff07d6fda5d311f`. It may
+add a fail-closed classifier pre-gate that maps an explicitly stale bound
+observation directly to `REFUSE(stale_observation)` before local-model
+inference, then rerun consumed v14 only as a diagnostic. It must preserve the
+AI-532 rejection, report how many cases bypass inference, and leave every fresh
+case to the unchanged model and deterministic text composer. It may not retrain
+or promote a model, treat v14 as fresh selection evidence, invoke motion
+planning, change arm-lane status, or emit commands, hardware writes, movement,
+or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v3` claims AI-531 from merged
 AI-530 base `a581b914f83b9d6cd378d9ba2aacda066c797161`. It may extend the
 bounded extractor grammar before data generation, freeze fresh classifier-v3
