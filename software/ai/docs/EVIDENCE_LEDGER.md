@@ -12686,3 +12686,49 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a fresh successor corpus and sealed evaluation that
   broadens unquoted typing action paraphrases without decoding or selecting on
   v21 again. Preserve the unchanged safety counters as hard gates.
+
+### E-20261009-AI-550A — broadened classifier-v11 corpus frozen
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: pre-result classifier-v11 corpus freeze from merged AI-549 base
+  `6e1f848df545c6fb6fcf15cbc856165d2b97553b`. Claim commit is
+  `f8eb4c53bc2733b3482f31d70b4bba2c5d01706a`; the freeze is the commit
+  containing this evidence entry and its six generated corpus files.
+- Exact generation command: set `PYTHONPATH=software\ai;software\src`, then
+  run `python software/ai/train/build_intent_classifier_v11_data.py`.
+- Fixtures: 1,000 training, 225 development, and 250 sealed v22 cases.
+  Training SHA-256 is
+  `65ec3c7495f67e2edbdf0e43a437779c780248a18e2634c3aab4fa2f7125c3ab`;
+  development SHA-256 is
+  `8be4292f001eff1f92583a79902f1f0f0bbdce7b4738812f7262cdaf4a4ccc7c`;
+  data-manifest SHA-256 is
+  `79178f6635db88f6bc8532ac2b5b58bc7eb087add61494b2d16a870c203d69fb`;
+  sealed v22 SHA-256 is
+  `c149d3c761c2c82a060d6d25df849fc6bacf19d4bd20780b75f138aa63970a85`;
+  sealed-manifest SHA-256 is
+  `73b9e51d3a40c28cf9bdfe5627ace6131a57ebdb2e8645b8c6c7cb1a558147fe`;
+  generator SHA-256 is
+  `7b33263b96cf9e3331a449a27da51ce38315ff5a84eb7bf1f5de9a93dfc6a9ec`.
+- Admission: all 1,475 rows compose exactly through requested-device binding,
+  pass freshness, and are intercepted by none of the phone-state,
+  text-ambiguity, or device-ambiguity gates. The training unquoted grammar
+  contains `Produce <payload> using the attached keyboard`; development and
+  v22 use separate supported unquoted structures. Generation found zero
+  case-insensitive overlap with 11,575 requests in 25 decoded historical
+  corpora, including consumed v21. Sealed v16 through v20 were hash-verified
+  without decoding.
+- Verification: `python -m pytest software/ai/tests/test_offline.py -q` passed
+  60. Ruff passed the generator, trainer, and focused test. The source-archive
+  ceiling is deliberately advanced by six files from 6,603 to 6,609; other
+  archive limits remain unchanged.
+- Backup: all six files were copied to
+  `F:\robot-arm-evidence\issue190\intent_classifier_v11\frozen_corpus`; source
+  and backup hashes match.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Model-call
+  count: 0. Physical authority: false.
+- Limitations: synthetic agent-authored language only. Passing generation
+  admission does not establish broad language, model quality, deployment,
+  motion, hardware, or physical capability. V22 remains unopened.
+- Next dependency: train the single predeclared two-epoch candidate, then open
+  development once under the unchanged exact and zero-unsafe-output gates.

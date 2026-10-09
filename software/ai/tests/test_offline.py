@@ -78,6 +78,10 @@ from build_intent_classifier_v9_data import (  # noqa: E402
 from build_intent_classifier_v10_data import (  # noqa: E402
     build as build_intent_classifier_v10_data,
 )
+from build_intent_classifier_v11_data import (  # noqa: E402
+    TEMPLATES as CLASSIFIER_V11_TEMPLATES,
+    build as build_intent_classifier_v11_data,
+)
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
     deterministic_device_ambiguity_classification_v1,
@@ -96,6 +100,38 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v11_broadens_unquoted_paraphrases_with_fresh_holdout(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v11_data()
+        rows = train + validation + evaluation
+        self.assertEqual((len(train), len(validation), len(evaluation)), (1000, 225, 250))
+        self.assertEqual(
+            _data_configuration("classifier-v11"),
+            (2136, "intent_classifier_v11", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"], {
+            "historical_corpus_count": 25,
+            "historical_request_count": 11575,
+            "overlap_count": 0,
+            "sealed_hash_only_count": 5,
+        })
+        self.assertIn(
+            'Produce {word} using the attached keyboard.',
+            CLASSIFIER_V11_TEMPLATES["train"]["type_unquoted"],
+        )
+        self.assertTrue(
+            set(CLASSIFIER_V11_TEMPLATES["train"]["type_unquoted"]).isdisjoint(
+                CLASSIFIER_V11_TEMPLATES["evaluation"]["type_unquoted"]
+            )
+        )
+        for row in rows:
+            self.assertIsNone(deterministic_text_ambiguity_classification_v1(row["request"]))
+            self.assertIsNone(deterministic_device_ambiguity_classification_v1(row["request"]))
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_v10_contains_only_remaining_model_decisions(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v10_data()
         rows = train + validation + evaluation

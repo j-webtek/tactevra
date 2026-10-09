@@ -1012,6 +1012,14 @@ composition with hard zero schema-invalid, false-actionable, and altered-text
 limits. V22 may open only after a committed development pass. This increment
 may not construct ModelMotionBatch, invoke motion, emit commands, change
 arm-lane status, or claim execution or physical authority.
+Evidence `E-20261009-AI-550A` freezes the claimed successor corpus: 1,000
+training, 225 development, and 250 sealed v22 rows. The training unquoted
+grammar now contains the v21 failure structure while development and v22 use
+disjoint supported structures. All 1,475 rows pass deterministic admission and
+exact composition. Generation finds zero overlap with 11,575 requests from 25
+decoded historical corpora, including consumed v21, while sealed v16 through
+v20 are hash-verified only. V22 remains unopened. The next authorized step is
+the one predeclared two-epoch candidate and one development opening.
 
 The AI/model lane on `codex/intent-classifier-v10-evaluation` claims AI-549
 from merged AI-548 base `1a47155f451bb244167c9086680ad1bdebb100a4`. It may
