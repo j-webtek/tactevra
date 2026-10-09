@@ -122,6 +122,18 @@ WS2_COMPLIANT_HOVER_RUNNER = importlib.util.module_from_spec(
     WS2_COMPLIANT_HOVER_SPEC
 )
 WS2_COMPLIANT_HOVER_SPEC.loader.exec_module(WS2_COMPLIANT_HOVER_RUNNER)
+WS2_STIFFNESS_SCALED_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_stiffness_scaled_search_v1.json"
+)
+WS2_STIFFNESS_SCALED_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_stiffness_scaled_search",
+    ROOT / "software/ai/sim/run_ws2_event_stiffness_scaled_search.py",
+)
+assert WS2_STIFFNESS_SCALED_SPEC and WS2_STIFFNESS_SCALED_SPEC.loader
+WS2_STIFFNESS_SCALED_RUNNER = importlib.util.module_from_spec(
+    WS2_STIFFNESS_SCALED_SPEC
+)
+WS2_STIFFNESS_SCALED_SPEC.loader.exec_module(WS2_STIFFNESS_SCALED_RUNNER)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -1159,3 +1171,26 @@ def test_ws2_compliant_hover_control_binds_stiffness_and_clearances():
         2.0,
         2.25,
     }
+
+
+def test_ws2_stiffness_scaled_fixture_uses_compression_aware_limits():
+    fixture = WS2_STIFFNESS_SCALED_RUNNER.load_fixture(
+        WS2_STIFFNESS_SCALED_FIXTURE
+    )
+    design = fixture["design"]
+    assert design["hard_depth_limit_mm_candidates_by_stiffness"] == {
+        "0.143": [7.05, 7.15, 7.25],
+        "0.0715": [7.6, 7.7, 7.8],
+    }
+    actuation = design["compression_aware_actuation"]["by_stiffness"]
+    assert actuation["0.143"]["high_edge_actuation_command_mm"] == pytest.approx(
+        7.054545454545455
+    )
+    assert actuation["0.143"]["within_compliant_travel"] is True
+    assert actuation["0.0715"]["required_spring_compression_mm"] == pytest.approx(
+        10.90909090909091
+    )
+    assert actuation["0.0715"]["within_compliant_travel"] is False
+    assert actuation["0.0715"]["actuation_requires_compliance_end_stop"] is True
+    assert design["population_per_device"]["total_rows"] == 518400
+    assert fixture["physical_authority"] is False
