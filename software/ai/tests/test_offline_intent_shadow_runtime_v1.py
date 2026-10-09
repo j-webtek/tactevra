@@ -66,6 +66,8 @@ def test_keyboard_text_compiles_exact_order_repeats_and_punctuation() -> None:
     ]
     assert result["composed_intent"]["text"] == "Aa!!"
     assert result["model_call_count"] == len(calls) == 1
+    model_input = json.loads(calls[0]["messages"][1]["content"])
+    assert model_input["observation"] == {"fresh": True}
     assert result["authority_counters"] == {
         "model_motion_batches": 0,
         "motion_adapter_calls": 0,

@@ -18,6 +18,7 @@ from .end_to_end_typing_twin import (
 from .offline_intent_contract_v1 import (
     PROMPT_SHA256,
     SYSTEM_PROMPT,
+    classifier_model_observation_v1,
     compose_public_intent_v1,
     deterministic_freshness_classification_v1,
     parse_classification_v1,
@@ -151,6 +152,7 @@ def run_intent_shadow_runtime_v1(
     gated = deterministic_freshness_classification_v1(normalized_observation)
     model_calls = 0
     if gated is None:
+        model_observation = classifier_model_observation_v1(normalized_observation)
         payload = {
             "model": model,
             "messages": [
@@ -158,7 +160,7 @@ def run_intent_shadow_runtime_v1(
                 {
                     "role": "user",
                     "content": json.dumps(
-                        {"request": request_text, "observation": normalized_observation},
+                        {"request": request_text, "observation": model_observation},
                         ensure_ascii=False,
                     ),
                 },
@@ -190,6 +192,9 @@ def run_intent_shadow_runtime_v1(
         "request_id": request_id,
         "request_sha256": hashlib.sha256(request_text.encode("utf-8")).hexdigest(),
         "observation_sha256": _sha(normalized_observation),
+        "model_observation_sha256": _sha(
+            classifier_model_observation_v1(normalized_observation)
+        ),
         "model": model,
         "model_digest": installed_digest,
         "prompt_sha256": PROMPT_SHA256,
@@ -215,7 +220,7 @@ def parse_intent_shadow_receipt_v1(document: Mapping[str, Any]) -> dict[str, Any
 
     fields = {
         "schema", "status", "scope", "request_id", "request_sha256",
-        "observation_sha256", "model", "model_digest", "prompt_sha256",
+        "observation_sha256", "model_observation_sha256", "model", "model_digest", "prompt_sha256",
         "decoder_schema_sha256", "implementation_sha256", "classification_source",
         "classifier_response_sha256", "classification", "composed_intent",
         "compiled_semantic_actions", "semantic_action_count", "model_call_count",
@@ -266,7 +271,7 @@ def parse_intent_shadow_receipt_v1(document: Mapping[str, Any]) -> dict[str, Any
     if document["authority_counters"] != _COUNTERS or document["physical_authority"] is not False:
         raise IntentShadowRuntimeV1Error("receipt violates zero-authority boundary")
     for field in (
-        "request_sha256", "observation_sha256", "model_digest", "prompt_sha256",
+        "request_sha256", "observation_sha256", "model_observation_sha256", "model_digest", "prompt_sha256",
         "decoder_schema_sha256", "implementation_sha256", "classifier_response_sha256",
     ):
         _validate_digest(document[field], field)

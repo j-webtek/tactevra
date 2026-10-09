@@ -12,6 +12,7 @@ from typing import Any, Callable
 from .offline_intent_contract_v1 import (
     PROMPT_SHA256,
     SYSTEM_PROMPT,
+    classifier_model_observation_v1,
     compose_public_intent_v1,
     deterministic_freshness_classification_v1,
     parse_classification_v1,
@@ -120,6 +121,7 @@ def evaluate_classifier(
     model: str,
     schema_path: Path,
     deterministic_freshness: bool = False,
+    sanitize_observation: bool = False,
 ) -> dict[str, Any]:
     cases, digest = load_schema_intent_cases(cases_path, manifest_path, split)
     schema_bytes = schema_path.read_bytes()
@@ -127,11 +129,16 @@ def evaluate_classifier(
     model_digest = _model_digest(model)
 
     def generate(case: dict[str, Any]) -> str:
+        model_observation = (
+            classifier_model_observation_v1(case["observation"])
+            if sanitize_observation
+            else case["observation"]
+        )
         response = _post({
             "model": model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": json.dumps({"request": case["request"], "observation": case["observation"]}, ensure_ascii=False)},
+                {"role": "user", "content": json.dumps({"request": case["request"], "observation": model_observation}, ensure_ascii=False)},
             ],
             "format": decoder_schema,
             "stream": False,
@@ -146,6 +153,9 @@ def evaluate_classifier(
         model_digest=model_digest,
         generate=generate,
         deterministic_freshness=deterministic_freshness,
+    )
+    result["model_observation_policy"] = (
+        "DECISION_STATE_ONLY_V1" if sanitize_observation else "FULL_OBSERVATION"
     )
     if _model_digest(model) != model_digest:
         raise ValueError("model identity changed during evaluation")
@@ -163,6 +173,7 @@ def main() -> int:
     parser.add_argument("--schema", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--deterministic-freshness", action="store_true")
+    parser.add_argument("--sanitize-observation", action="store_true")
     args = parser.parse_args()
     result = evaluate_classifier(
         args.cases,
@@ -171,6 +182,7 @@ def main() -> int:
         args.model,
         args.schema,
         deterministic_freshness=args.deterministic_freshness,
+        sanitize_observation=args.sanitize_observation,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

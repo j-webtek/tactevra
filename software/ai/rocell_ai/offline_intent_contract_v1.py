@@ -154,12 +154,26 @@ def deterministic_freshness_classification_v1(
     }
 
 
+def classifier_model_observation_v1(observation: Any) -> dict[str, Any]:
+    """Expose only decision-relevant observation state to the language model."""
+
+    deterministic_freshness_classification_v1(observation)
+    sanitized: dict[str, Any] = {"fresh": observation["fresh"]}
+    if "phone_state" in observation:
+        phone_state = observation["phone_state"]
+        if not isinstance(phone_state, str) or not phone_state or len(phone_state) > 64:
+            raise ValueError("observation phone_state must be a bounded string")
+        sanitized["phone_state"] = phone_state
+    return sanitized
+
+
 __all__ = [
     "CLASSIFICATION_SCHEMA",
     "PROMPT_SHA256",
     "PUBLIC_SCHEMA",
     "SYSTEM_PROMPT",
     "compose_public_intent_v1",
+    "classifier_model_observation_v1",
     "deterministic_freshness_classification_v1",
     "extract_requested_text_v1",
     "parse_classification_v1",
