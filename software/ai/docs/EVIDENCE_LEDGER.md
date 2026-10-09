@@ -11478,3 +11478,134 @@ rewriting history. New entries must use a unique evidence ID.
   bytes. Generation must require both zero historical overlap and exact
   production composition. Only a clean development result may open its new
   evaluation family.
+
+### E-20261008-AI-531 — disjoint classifier passes fresh development
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: historically disjoint, composition-admitted classification-only
+  corpus, one-epoch offline training, and development selection with zero
+  authority. Frozen v14 evaluation remains unopened at this decision point.
+- Base commit: `a581b914f83b9d6cd378d9ba2aacda066c797161`.
+- Claim commit: `d282c67b6354e803f7bacfac4c8b0282ae7ca6ac`.
+- Corpus, admission, and trainer commit:
+  `991d8362d05281bddffae8e85d386549516f5ac7`.
+- Fixtures: 640 training, 200 development, and 240 unopened v14 evaluation
+  cases using new wording, payload stems, IDs, observations, and evaluation
+  identities. Train SHA-256 is
+  `c0966f2519ea35cd00c765477d6a336185fc33524e516b9a9305304f0b10a7c5`;
+  development SHA-256 is
+  `748de6d48b6f5e2ee79a50448204e358e61911c46b0db422427ba49664b97fbf`;
+  unopened evaluation SHA-256 is
+  `319dc4ced63a368a61d8e5a4304a329833420bb4f8caef7ff2e2230263dbe98a`.
+  Data-manifest file SHA-256 is
+  `90686b227eb8b79712afdae2ad3ee0eba583bf566b8175dbe7e598c500f69cdd`;
+  v14-manifest file SHA-256 is
+  `0c7c81f76c36d0ae95d30abad916eaf94bf3accd3b8b899a10112cf969ef49cd`;
+  generator SHA-256 is
+  `ce6d399b19b340fc8ca1c59b658f041cd62315e34d631f03ef5c200b6c263bb4`;
+  deterministic-extractor module SHA-256 is
+  `8e9eafe47d735163f98499e5f047f5048cf96da4fcdd5f26745e5ec32b5091ac`.
+- Prewrite admission: exact hashes matched for classifier-v1 training,
+  development, and frozen v12 plus classifier-v2 training, development, and
+  frozen v13. Those six corpora contain 1,215 distinct case-insensitive request
+  strings. New historical overlap is 0/1,080, and production deterministic
+  composition is exact for 1,080/1,080 generated cases. Injected tests reject
+  both an uncomposable action and a case-insensitive historical request reuse.
+  Frozen v11, v12, and v13 remained unopened.
+- Exact training command: `python software/ai/train/fit_sft.py --data-version
+  classifier-v3 --epochs 1 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e`.
+  Result: training loss `0.121097`, development loss `0.001186`, 40 optimizer
+  updates, adapter SHA-256
+  `0ae13a24da2698667f815119adc5ebdf5529027c9d9dc337c7a03167e2870789`.
+  Run-manifest file SHA-256 is
+  `c61df844a478c31e8021f3be606b61e3836656a0c0f630cfc27f54473319e081`.
+- Ollama import: base tag `llama32-1b-meta-92131767:latest`, exact base digest
+  `6319184583b7d9d76f7506bfe9cdba1832f147486129527a33c157c62845d046`,
+  candidate tag `llama32-1b-rocell-intent-classifier-v3:latest`, exact candidate
+  digest
+  `6d7874d2d6c81cda0f66fbafb1e8b270db7c3a2a3e15c747f3c1b0ede5f91d9b`.
+  Import-manifest file SHA-256 is
+  `26e973b5ae5c631d4c5c1ebfce7b7d8534a713da86c597980aeab5736f3d5ad4`.
+- Exact development command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v3_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v3.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v3:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e\validation_scorecard.json`.
+- Development result: `PASS_CANDIDATE`; classification exact 200/200,
+  deterministic composition exact 200/200, schema-invalid 0, false-actionable
+  0, and altered composed text 0. Scorecard SHA-256 is
+  `8539338b3b18cab022ed14c95412b3534d0b210504906a891037f8dbb017c245`.
+  This commits the selection decision to open v14 without changing the model,
+  prompt, schema, composer, gates, or evaluation bytes.
+- Exact focused verification before training: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 43 passed. Exact Ruff checks over the
+  changed extractor, generator, trainer, and tests passed. Source-archive
+  policy passed at the deliberate 6,558-file ceiling.
+- External artifacts at the development decision: nine files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\intent_classifier_v3\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 1 offline training job.
+- Limitations: all data are synthetic and agent-authored. Exact development
+  behavior does not establish broad language understanding, physical
+  qualification, motion safety, deployment readiness, or authority. It selects
+  only this unchanged candidate for one run on frozen v14.
+- Next dependency: run the unchanged candidate once on frozen v14 and preserve
+  pass or failure. No held-out result may invoke the intent-to-motion adapter,
+  promote physical operation, or change arm-lane status.
+
+### E-20261008-AI-532 — stale-language generalization rejects v14 candidate
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: frozen offline held-out classifier evaluation with zero authority.
+- Development-decision commit:
+  `d8cd63cc3df7d37301ea16a90c29e4d859921984`.
+- Candidate: unchanged Ollama tag
+  `llama32-1b-rocell-intent-classifier-v3:latest`, exact digest
+  `6d7874d2d6c81cda0f66fbafb1e8b270db7c3a2a3e15c747f3c1b0ede5f91d9b`;
+  adapter SHA-256
+  `0ae13a24da2698667f815119adc5ebdf5529027c9d9dc337c7a03167e2870789`.
+- Fixture: the previously unopened 240-row v14 evaluation family, SHA-256
+  `319dc4ced63a368a61d8e5a4304a329833420bb4f8caef7ff2e2230263dbe98a`;
+  exact decoder-schema SHA-256
+  `545c54c88ad7e71046791285c4b9fe62f05f0bbae2be5c9a29b2a940d60fa9fe`.
+- Exact command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v14.jsonl --manifest
+  software\ai\data\intent_classifier_v3.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v3:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e\evaluation_v14_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; classification and deterministic composition are
+  exact on 210/240 cases (`0.875`), with schema-invalid 0, false-actionable 0,
+  and altered composed text 0. All 30 failures are the `refuse_stale` family:
+  expected `REFUSE(stale_observation)`, actual
+  `REFUSE(operation_not_available)`. Every other held-out family is 30/30.
+  Scorecard SHA-256 is
+  `33e87e4bb1e8f2d29c70098a6598c6f5089b4e3b8cc47ad679a5492a87be330b`.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 476.16 seconds.
+  Source-archive policy passed at the deliberate 6,558-file ceiling.
+- External artifacts: ten files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\intent_classifier_v3\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0 for evaluation; local Ollama inference only.
+- Limitations: v14 is synthetic and agent-authored. The family-wide failure
+  shows the learned classifier did not generalize the stale-evidence concept to
+  the held-out phrasing. It is not a motion, collision, deployment, or physical
+  qualification result. The candidate remains unpromoted and disconnected
+  from the intent-to-motion adapter.
+- Next dependency: predeclare a new historically disjoint corpus with broader
+  stale-observation language and a new unopened evaluation family. Preserve the
+  zero-overlap and exact-composition generation gates. V14 is consumed and may
+  only serve as historical diagnostic evidence; no later tuning or selection
+  may score against it again.

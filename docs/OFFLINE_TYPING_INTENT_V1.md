@@ -54,3 +54,9 @@ this check remains rejected: 18 of 200 development classifications failed, and
 a provenance audit found request wording reused from its predecessor. Future
 campaigns must also prove zero historical request overlap before writing data.
 These campaign checks do not alter the public intent or motion contracts.
+
+The next historically disjoint campaign passed all 200 development cases but
+failed frozen held-out evaluation on all 30 stale-observation phrasings. Its
+other 210 cases passed. The candidate therefore remains unpromoted; future
+training must broaden stale-evidence language using new splits rather than
+rescore the consumed evaluation set.
