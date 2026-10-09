@@ -60,3 +60,10 @@ failed frozen held-out evaluation on all 30 stale-observation phrasings. Its
 other 210 cases passed. The candidate therefore remains unpromoted; future
 training must broaden stale-evidence language using new splits rather than
 rescore the consumed evaluation set.
+
+Freshness is now treated as a deterministic precondition for classifier
+evaluation. An explicit stale bound observation becomes
+`REFUSE(stale_observation)` before model inference; missing or non-boolean
+freshness is invalid. The local model continues to classify only fresh cases.
+This keeps evidence freshness outside learned language behavior and adds no
+motion or execution authority.
