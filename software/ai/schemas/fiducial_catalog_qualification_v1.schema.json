@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "scope", "domain_id", "device",
+    "detector_configuration_sha256", "detector_implementation_sha256",
+    "estimator_configuration_sha256", "estimator_implementation_sha256",
+    "camera_intrinsics_sha256", "camera_settings_sha256", "tag_map_sha256",
+    "target_catalog_sha256", "board_frame_definition_sha256",
+    "camera_frame", "board_frame", "calibration_dataset_sha256",
+    "evaluation_dataset_sha256", "coverage_probability",
+    "conservative_planar_error_bound_mm", "minimum_inlier_tags",
+    "maximum_inlier_rmse_px", "covered_target_ids", "qualification_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.ai_fiducial_catalog_qualification.v1"},
+    "scope": {"const": "SYNTHETIC_OFFLINE_ONLY"},
+    "domain_id": {"type": "string", "minLength": 1},
+    "device": {"enum": ["keyboard", "phone"]},
+    "detector_configuration_sha256": {"$ref": "#/$defs/sha256"},
+    "detector_implementation_sha256": {"$ref": "#/$defs/sha256"},
+    "estimator_configuration_sha256": {"$ref": "#/$defs/sha256"},
+    "estimator_implementation_sha256": {"$ref": "#/$defs/sha256"},
+    "camera_intrinsics_sha256": {"$ref": "#/$defs/sha256"},
+    "camera_settings_sha256": {"$ref": "#/$defs/sha256"},
+    "tag_map_sha256": {"$ref": "#/$defs/sha256"},
+    "target_catalog_sha256": {"$ref": "#/$defs/sha256"},
+    "board_frame_definition_sha256": {"$ref": "#/$defs/sha256"},
+    "camera_frame": {"type": "string", "minLength": 1},
+    "board_frame": {"type": "string", "minLength": 1},
+    "calibration_dataset_sha256": {"$ref": "#/$defs/sha256"},
+    "evaluation_dataset_sha256": {"$ref": "#/$defs/sha256"},
+    "coverage_probability": {"type": "number", "minimum": 0.95, "exclusiveMaximum": 1},
+    "conservative_planar_error_bound_mm": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+    "minimum_inlier_tags": {"type": "integer", "minimum": 1, "maximum": 256},
+    "maximum_inlier_rmse_px": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+    "covered_target_ids": {
+      "type": "array", "minItems": 1, "maxItems": 256, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "qualification_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}
