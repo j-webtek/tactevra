@@ -11589,6 +11589,10 @@ rewriting history. New entries must use a unique evidence ID.
   `REFUSE(operation_not_available)`. Every other held-out family is 30/30.
   Scorecard SHA-256 is
   `33e87e4bb1e8f2d29c70098a6598c6f5089b4e3b8cc47ad679a5492a87be330b`.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 476.16 seconds.
+  Source-archive policy passed at the deliberate 6,558-file ceiling.
 - External artifacts: ten files under
   `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e` were copied
   to `F:\robot-arm-evidence\issue190\intent_classifier_v3\pilot_1e`; every
