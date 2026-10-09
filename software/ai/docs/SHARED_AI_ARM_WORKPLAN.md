@@ -998,6 +998,26 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v7` claims AI-541 from merged
+AI-540 base `4cf25879c4818a547a5bfd6717741d916b54fe75`. It may freeze a
+fresh classifier-v7 train/development family and unopened v18 evaluation for
+decisions remaining after deterministic freshness and phone-state admission.
+Unverified phone typing is excluded from learned targets; verified phone
+typing with exact `KEYBOARD_LOWER` observation becomes a positive learned
+family. Keyboard typing, device ambiguity, text ambiguity, and unavailable
+workflow families remain. Generation must hash-verify consumed classifier-v1
+through classifier-v6 corpora, hash-verify sealed v16 and v17 without decoding,
+prove zero case-insensitive request overlap with decoded history, admit every
+deterministic composition, prove that no generated learned row is intercepted
+by either deterministic gate, and preserve unique family-neutral provenance.
+One candidate is predeclared for exactly two epochs from the same cached 1B
+base, followed by one development opening under exact classification and
+composition gates and hard zero limits for invalid, false-actionable, and
+altered-text output. V18 may open only after a passing development decision is
+committed. This increment may not construct ModelMotionBatch, invoke motion,
+emit commands, change arm-lane status, or claim execution or physical
+authority.
+
 The AI/model lane on `codex/intent-classifier-v6` claims AI-540 after recorded
 AI-539 development rejection. It may add a deterministic, fail-closed phone
 state precondition beside the existing freshness precondition. An explicit
