@@ -998,6 +998,25 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v6` claims AI-539 from merged
+AI-538 base `6f393e5d24868e4800e7c23dff2c6a9501f6cb5f`. It may freeze a
+fresh classifier-v6 train/development family and unopened v17 evaluation,
+keeping the same seven intent decisions and the exact
+`classifier_model_observation_v1` boundary. The corpus may broaden only
+language structure and paraphrase diversity, with emphasis on punctuation
+typing, quoted typing, text ambiguity, and phone-state refusal. Generation
+must hash-verify classifier-v1 through classifier-v5 corpora, prove zero
+case-insensitive request overlap, admit every deterministic composition, prove
+fresh-only model observations, and prove unique family-neutral provenance
+references. V16 remains unopened and excluded. One candidate is predeclared
+for exactly two epochs from the same cached 1B base, followed by one
+development selection under exact classification and composition gates and
+hard zero limits for invalid output, false-actionable output, and altered
+typing text. V17 may open only after a passing development decision is
+committed. This increment may not invoke motion, construct ModelMotionBatch,
+emit commands, change arm-lane status, or claim execution or physical
+authority.
+
 The AI/model lane on `codex/intent-classifier-v5` claims AI-538 after the
 recorded AI-537 one-epoch development rejection. It may train one new candidate
 from the same frozen classifier-v5 training split and same cached 1B base for
