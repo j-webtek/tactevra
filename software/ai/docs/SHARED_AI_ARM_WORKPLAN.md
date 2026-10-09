@@ -1020,6 +1020,12 @@ verified sealed v16 through v18 without decoding. Focused tests pass 54, Ruff
 passes, and the deliberately advanced 6,591-file archive ceiling passes. V19
 is unopened. The next authorized step is the single predeclared two-epoch local
 candidate followed by one development opening.
+Evidence `E-20261009-AI-543B` rejects that single candidate at 299/315 exact
+classification and composition. Invalid, altered-text, and false-actionable
+counts are all zero; every miss is in text ambiguity, where 14 cases became
+device clarification and two became refusal. V19 remains unopened. The next
+increment must address deterministic text-candidate ambiguity before any fresh
+model campaign.
 
 The AI/model lane on `codex/intent-device-binding` claims AI-542 from recorded
 AI-541 rejection commit `6faebb30e74bb696604400f41ff871fe1c4d3e8c`. It may add a
