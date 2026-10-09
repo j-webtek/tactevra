@@ -69,6 +69,9 @@ from build_intent_classifier_v7_data import (  # noqa: E402
     FAMILIES as CLASSIFIER_V7_FAMILIES,
     build as build_intent_classifier_v7_data,
 )
+from build_intent_classifier_v8_data import (  # noqa: E402
+    build as build_intent_classifier_v8_data,
+)
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
     deterministic_phone_state_classification_v1,
@@ -85,6 +88,26 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v8_requires_explicit_device_binding(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v8_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (1400, 315, 350))
+        self.assertEqual(
+            _data_configuration("classifier-v8"),
+            (2133, "intent_classifier_v8", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertEqual(
+            manifest["deterministic_preconditions"],
+            ["FRESHNESS_V1", "PHONE_STATE_V1", "REQUESTED_DEVICE_BINDING_V1"],
+        )
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["sealed_hash_only_count"], 3)
+        for row in train + validation + evaluation:
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_v7_learns_only_post_gate_decisions(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v7_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (1400, 315, 350))

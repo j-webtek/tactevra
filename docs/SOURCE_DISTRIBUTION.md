@@ -721,3 +721,12 @@ receipts remain external and hash-bound. The corpus contains only decisions
 eligible after deterministic freshness and phone-state admission and grants no
 motion, execution, or physical authority. All byte, duplicate, and reduction
 limits remain unchanged.
+
+The explicit-device classifier-v8 campaign adds six governed paths: one
+generator, three frozen train/development/manifest files, and two unopened v19
+evaluation files. The resulting tree contains 6,591 tracked files. The ceiling
+advances from 6,585 to 6,591 with no spare slots. Model weights, scorecards,
+and runtime receipts remain external and hash-bound. Every actionable corpus
+request composes through deterministic requested-device binding; the corpus
+grants no motion, execution, or physical authority. All byte, duplicate, and
+reduction limits remain unchanged.
