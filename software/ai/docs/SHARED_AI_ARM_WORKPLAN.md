@@ -1023,6 +1023,14 @@ to the deterministic text-ambiguity family. Generation found zero overlap with
 8,630 requests from 20 decoded historical corpora and hash-verified sealed v16
 through v19 without decoding. V20 remains unopened. The next authorized step is
 the single predeclared two-epoch candidate followed by one development opening.
+Evidence `E-20261009-AI-545B` rejects that candidate at 264/270 exact
+classification and composition. Invalid, altered-text, and false-actionable
+counts remain zero. Every miss is the same device-clarification template with
+a literal payload ending in `&&` or `++`; those six rows became safe workflow
+refusals rather than the exact required device clarification. V20 remains
+unopened. The next increment should move explicit device-candidate ambiguity to
+a narrow deterministic pre-inference gate, while preserving unavailable-
+workflow refusal precedence, before freezing another model corpus.
 
 The AI/model lane on `codex/intent-text-ambiguity` claims AI-544 from merged
 AI-543 base `2a60e6b701a76241a3f4aa4ec68fea27f3619484`. It may add a
