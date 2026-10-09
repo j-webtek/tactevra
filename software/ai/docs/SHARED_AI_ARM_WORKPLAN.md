@@ -998,6 +998,27 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-v11-precision-shadow` claims AI-554 from
+merged AI-553 base `8821b59cb15d3eeb87c8963354a19b4e98e5bec4`. It may
+compose the selected classifier-v11 receipt and deterministic keyboard plan
+with the existing `PrecisionAdapterResultV2` and
+`produce_model_motion_batch_v2` boundaries, then submit only admitted canonical
+bytes to the existing zero-hardware arm shadow. Missing, stale, low-confidence,
+wrong-domain, unqualified, or safe-region-crossing precision evidence must
+abstain before arm ingress. Only synthetic integration qualification may be
+used in this increment and must remain labeled synthetic. It may not add joint,
+PWM, serial, Waveshare JSON, permit, transport, controller-command, execution,
+or physical authority; change arm-lane status; or complete an integration gate.
+Evidence `E-20261009-AI-554` completes this stricter composition. The selected
+classifier preserved `H,H,I`; the actual precision adapter result and precision
+batch producer bound the synthetic qualification, observation, target map, and
+safe regions; and one admitted batch reached the existing calibration blocker.
+Missing precision input, absent or low-confidence qualification, and an
+uncertainty disk crossing a target region all produced zero batches. Command,
+write, and movement counts remain zero. The qualification is a synthetic
+integration fixture and cannot satisfy the held final-camera campaign. The next
+dependency remains the measured physical-original perception package.
+
 The AI/model lane on `codex/intent-v11-shadow-integration` claims AI-553 from
 merged AI-552 base `250cba61c76a34bb1679dc9e2b48a5a5be5e3422`. It may pin
 the exact selected classifier-v11 digest and add a read-only composition layer
