@@ -78,6 +78,23 @@ _UNQUOTED_TEXT_AMBIGUITY_PATTERNS = tuple(
         rf"\binstead be\s+(?P<b>{_AMBIGUOUS_TOKEN})\b",
     )
 )
+_DEVICE_AMBIGUITY_PATTERNS = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        r'Choose the input surface that should receive ""\.',
+        r'The destination device is missing for the literal text ""\.',
+        r'Which attached input surface should receive ""\?',
+        r'Identify the destination hardware before entering ""\.',
+        r'No input surface has been selected for ""\.',
+        r'Clarify the target device for the value ""\.',
+        r'The exact text is "", but its destination is unspecified\.',
+        r'Select where the value "" belongs before input\.',
+        r'Specify the destination input surface for ""\.',
+        r'The text "" has no selected device\.',
+        r'Determine where "" should be entered\.',
+        r'A destination must be chosen before inputting ""\.',
+    )
+)
 
 
 def extract_requested_text_v1(request_text: str) -> str | None:
@@ -262,6 +279,25 @@ def deterministic_text_ambiguity_classification_v1(
     }
 
 
+def deterministic_device_ambiguity_classification_v1(
+    request_text: Any,
+) -> dict[str, str] | None:
+    """Clarify one-payload requests that explicitly leave the device undecided."""
+
+    if not isinstance(request_text, str):
+        raise ValueError("request text must be a string")
+    if len(re.findall(r'"([^"\r\n]+)"', request_text)) != 1:
+        return None
+    instruction = _QUOTED_PAYLOAD.sub('""', request_text)
+    if not any(pattern.fullmatch(instruction) for pattern in _DEVICE_AMBIGUITY_PATTERNS):
+        return None
+    return {
+        "schema": CLASSIFICATION_SCHEMA,
+        "intent_type": "CLARIFY",
+        "question": "device_ambiguous",
+    }
+
+
 def classifier_model_observation_v1(observation: Any) -> dict[str, Any]:
     """Expose only decision-relevant observation state to the language model."""
 
@@ -283,6 +319,7 @@ __all__ = [
     "compose_public_intent_v1",
     "classifier_model_observation_v1",
     "deterministic_freshness_classification_v1",
+    "deterministic_device_ambiguity_classification_v1",
     "deterministic_phone_state_classification_v1",
     "deterministic_text_ambiguity_classification_v1",
     "extract_requested_device_v1",
