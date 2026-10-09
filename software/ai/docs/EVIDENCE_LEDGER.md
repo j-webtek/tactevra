@@ -11741,3 +11741,48 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: run the unchanged candidate once on frozen v15 and preserve
   pass or failure. Only that result can decide whether this narrow offline
   classifier is retained for disconnected shadow integration.
+
+### E-20261009-AI-535 — fresh held-out v15 retains classifier for shadow use
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: frozen offline held-out evaluation with deterministic preconditions
+  and zero authority.
+- Development-decision commit:
+  `7a8a9ff00d9bbee7a0aaa82a93bcedc0acef90df`.
+- Candidate: unchanged Ollama tag
+  `llama32-1b-rocell-intent-classifier-v4:latest`, exact digest
+  `acf6758359aa61b3c8ebb3a16953d2e421a0054d3f4b274e93bb5ee0bd7abb5c`;
+  adapter SHA-256
+  `afb2845fa9f07bcddc3437841193b6cf86d9fb150e87240e597e7f08cdcf07f8`.
+- Fixture: previously unopened 210-row v15 evaluation, SHA-256
+  `f1caa44a585e0be9f5e1c4a37c85f1a77acbdb539610fc45c11ba1f481cedeaa`;
+  decoder-schema SHA-256
+  `545c54c88ad7e71046791285c4b9fe62f05f0bbae2be5c9a29b2a940d60fa9fe`.
+- Exact command: set `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v15.jsonl --manifest
+  software\ai\data\intent_classifier_v4.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v4:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e\evaluation_v15_scorecard.json`.
+- Result: `PASS_CANDIDATE`; classification and deterministic composition exact
+  210/210, schema-invalid 0, false-actionable 0, altered text 0, deterministic
+  freshness bypasses 0. Scorecard SHA-256 is
+  `ff12f2ae8f5c55870859f5e4d683948c29bc71ca4d42e8610a16299592bbce69`.
+- External artifacts: ten final files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e` were copied
+  to the matching `F:\robot-arm-evidence\issue190` path; every hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0 for evaluation; local Ollama inference only.
+- Limitations: v15 is synthetic and agent-authored, covers seven closed intent
+  families, and excludes stale evidence because freshness is deterministic. A
+  perfect result does not establish broad language understanding, adversarial
+  robustness, runtime availability, motion safety, deployment readiness, or
+  physical qualification. The candidate is retained only for disconnected
+  shadow integration and has no motion or execution authority.
+- Next dependency: build a shadow-only runtime assembly that applies the
+  deterministic freshness precondition, calls this exact local model identity,
+  composes exact request text, and optionally compiles semantic keystrokes, but
+  emits no ModelMotionBatch and never invokes the motion adapter. Record model
+  identity, input hashes, decisions, and zero-authority counters for review.

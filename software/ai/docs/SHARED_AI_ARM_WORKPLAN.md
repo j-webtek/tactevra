@@ -1021,6 +1021,15 @@ reached 175/175 exact classifications and public intents with zero invalid,
 false actionable, altered-text, or freshness-bypass cases. This remains a
 synthetic development-only result; the unchanged v15 run decides held-out
 retention and cannot confer motion or physical authority.
+Evidence `E-20261009-AI-535` retains the unchanged candidate for disconnected
+shadow integration after a clean frozen v15 result: 210/210 exact
+classifications and composed public intents, zero invalid schemas, false
+actionable outputs, altered text, or freshness bypasses. This is narrow,
+synthetic intent-contract evidence. The model remains upstream of and
+disconnected from ModelMotionBatch, motion planning, and execution. The next
+increment may build a shadow-only runtime assembly that records the model,
+deterministic freshness gate, exact text composer, and deterministic keystroke
+compiler outputs without invoking the motion adapter.
 
 The AI/model lane on `codex/deterministic-intent-freshness` claims AI-533 from
 merged AI-532 base `df8a4ddb10cea98a58e101d86ff07d6fda5d311f`. It may
