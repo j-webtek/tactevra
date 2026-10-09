@@ -11609,3 +11609,56 @@ rewriting history. New entries must use a unique evidence ID.
   zero-overlap and exact-composition generation gates. V14 is consumed and may
   only serve as historical diagnostic evidence; no later tuning or selection
   may score against it again.
+
+### E-20261008-AI-533 — deterministic freshness removes learned stale decision
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: consumed-evaluation diagnostic of a deterministic freshness pre-gate
+  with zero authority. This does not replace the AI-532 rejection.
+- Base commit: `df8a4ddb10cea98a58e101d86ff07d6fda5d311f`.
+- Claim commit: `9f59ba524186ff3d67040d0ad24d8fe3a0e9a391`.
+- Implementation commit: `ebb23c38a7aecabcf8ba9ff2fa7709dc287f2721`.
+- Change: when the hash-bound observation contains the explicit boolean
+  `fresh: false`, the evaluator produces classifier object
+  `REFUSE(stale_observation)` before local-model inference. Fresh observations
+  still use the unchanged local classifier and deterministic text composer.
+  Missing or non-boolean freshness fails validation instead of being coerced.
+  The scorecard records the source for every classification and the bypass
+  count. No motion adapter is called.
+- Fixture: consumed v14 evaluation, 240 rows, SHA-256
+  `319dc4ced63a368a61d8e5a4304a329833420bb4f8caef7ff2e2230263dbe98a`.
+  It is diagnostic only and cannot reopen, replace, or promote the rejected
+  AI-532 result.
+- Model: unchanged `llama32-1b-rocell-intent-classifier-v3:latest`, exact digest
+  `6d7874d2d6c81cda0f66fbafb1e8b270db7c3a2a3e15c747f3c1b0ede5f91d9b`.
+- Exact command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v14.jsonl --manifest
+  software\ai\data\intent_classifier_v3.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v3:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --output
+  C:\MuJoCoWarp\evidence\issue190\deterministic_intent_freshness_v1\v14_diagnostic.json`.
+- Result: diagnostic `PASS_CANDIDATE`; classification exact 240/240,
+  deterministic composition exact 240/240, schema-invalid 0, false-actionable
+  0, and altered composed text 0. The deterministic freshness gate handles 30
+  cases without model inference; the unchanged model handles the remaining
+  210. Artifact SHA-256 is
+  `b101d5fc47564318014bf5f1a2b4c5ab42b18372a2dcd96dbd4d5d10765409e0`;
+  the primary and `F:` backup are byte-identical.
+- Exact focused verification before the diagnostic: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 45 passed. Exact Ruff checks over the
+  changed evaluator and tests passed.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0; local Ollama inference only.
+- Limitations: the diagnostic uses consumed synthetic v14 and cannot select or
+  qualify the model. It establishes only that explicit freshness belongs in a
+  deterministic precondition rather than a learned natural-language decision.
+  It does not establish runtime freshness provenance, language generalization,
+  motion safety, deployment readiness, or physical authority.
+- Next dependency: freeze a new historically disjoint train/development/
+  evaluation family for the remaining learned decisions, with all observations
+  fresh, and separately test the deterministic freshness gate across fresh,
+  stale, missing, and malformed bound observations. Only a new held-out result
+  can support retaining an offline classifier for shadow integration.

@@ -1008,6 +1008,14 @@ case to the unchanged model and deterministic text composer. It may not retrain
 or promote a model, treat v14 as fresh selection evidence, invoke motion
 planning, change arm-lane status, or emit commands, hardware writes, movement,
 or physical authority.
+Evidence `E-20261008-AI-533` shows the deterministic gate removes the complete
+AI-532 stale-language failure class on consumed v14: 30 explicitly stale cases
+bypass inference as `REFUSE(stale_observation)`, the unchanged model handles
+the other 210 cases, and the composed diagnostic is exact on 240/240 with zero
+invalid schemas, false actionable outputs, or altered text. This does not
+promote the rejected checkpoint or turn v14 into fresh evidence. The next fresh
+campaign should evaluate the model only on decisions that remain learned and
+test stale evidence separately as a deterministic contract invariant.
 
 The AI/model lane on `codex/intent-classifier-v3` claims AI-531 from merged
 AI-530 base `a581b914f83b9d6cd378d9ba2aacda066c797161`. It may extend the
