@@ -875,6 +875,19 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model + simulation lane on `codex/ws2-event-terminated-press-sim`
+claims the bounded WS2 event-terminated successor from simulation base
+`13c44aedd3dbd04054d88665332a56e6e7d31bc1`. It may freeze and implement a
+zero-authority comparison against retained fixed-depth recipe 80 using modeled
+host-event latency from 5 through 40 ms. A matching host event may only shorten
+an already admitted descent by starting retraction; it may never start, deepen,
+extend, retry, or redirect motion. No event before the unchanged hard depth
+limit, a wrong-key event, and an event arriving after retraction begins must be
+separate fail-closed outcomes. The first result is limited to `GRAVE` and
+`EQUAL`; expansion to all 51 keys and the stabilized-key subgroup requires the
+smoke to pass without changing its frozen gates. This work grants no command,
+permit, transport, hardware, physical, arm-lane, or integration authority.
+
 The current zero-authority integration baseline is
 [`model_arm_conformance_profile_v1.json`](../../config/model_arm_conformance_profile_v1.json),
 SHA-256 `2430ec5f8362aae76e8250d2d9da292f85375d93750addd944a969b1bc2e4dbd`.
