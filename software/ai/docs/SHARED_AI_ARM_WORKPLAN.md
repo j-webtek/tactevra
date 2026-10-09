@@ -998,6 +998,16 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v11-training` claims AI-551 from
+merged AI-550A base `70263b7d89f585a0d1b6a53ad13f5f2be923f540`. It may train
+the single classifier-v11 candidate for exactly two epochs and open its 225-row
+development split exactly once. Promotion requires 225/225 exact classification
+and composition with zero schema-invalid, false-actionable, or altered-text
+outputs. V22 may not be decoded in this increment. Any miss rejects the
+candidate and must be preserved. This increment may not construct
+ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or
+claim execution or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v11` claims AI-550 from merged
 AI-549 base `6e1f848df545c6fb6fcf15cbc856165d2b97553b`. It may freeze one
 fresh classifier-v11 corpus with the same five post-gate decision families and
