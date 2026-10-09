@@ -79,3 +79,10 @@ train and evaluate under that same sanitized observation contract before it
 can be considered for shadow use. No classifier output can create
 `ModelMotionBatch`, call motion planning, issue commands, or claim physical
 execution.
+
+The first successor trained without provenance tokens remained safe but was
+not accurate enough. One epoch reached 69/175 exact development cases and two
+epochs reached 97/175; both had zero false-actionable, malformed, or
+altered-text outputs. Frozen v16 was not opened. The next successor must improve
+language diversity while preserving the same sanitized observation projection
+and zero-error safety gates.

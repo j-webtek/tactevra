@@ -1009,6 +1009,14 @@ are committed. No corpus, prompt, schema, optimizer, learning rate, gate, model
 input, or runtime boundary may change in this increment, and it may not invoke
 motion, construct ModelMotionBatch, emit commands, change arm-lane status, or
 claim physical authority.
+Evidence `E-20261009-AI-538` rejects the two-epoch candidate at 97/175 exact
+development classifications and compositions, with zero invalid,
+false-actionable, or altered-text outputs. The added epoch recovered all
+unquoted typing and most quoted typing but did not distinguish text ambiguity,
+phone-state refusal, or punctuation typing. V16 remains unopened. The next
+campaign must broaden training-language diversity under the same sanitized
+observation contract rather than add epochs to this consumed development
+selection.
 
 The AI/model lane on `codex/intent-classifier-v5` claims AI-537 from merged
 AI-536 base `2724026b6385d99fb42840ffc8fa971ee72d5f18`. It may freeze

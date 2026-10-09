@@ -11929,3 +11929,58 @@ rewriting history. New entries must use a unique evidence ID.
   base and frozen training data for exactly two epochs, score once on the same
   development split, preserve this failure, and keep v16 unopened until that
   decision is committed.
+
+### E-20261009-AI-538 — two epochs improve but do not qualify sanitized model
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: bounded continuation of development selection using the exact frozen
+  classifier-v5 corpus and sanitized observation contract. V16 stayed unopened.
+- Pre-result decision commit:
+  `16715f9699a227a1c985d748829a370b166832a7`.
+- Unchanged fixtures: training SHA-256
+  `fd599f632a6ecd1f7af8bed762a3a3c6e73edfeb2eea5bb18f885a2a227f12ce`;
+  development SHA-256
+  `9ac696c2563b44923e82cc82c2a84f5cc09c9d228fd0e0b53d9a382959d51daf`;
+  manifest SHA-256
+  `9b3e3b07f75f72db17af69cb9458dd21e3a8f07633906c0462c8a52082fa7346`.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run `python
+  software/ai/train/fit_sft.py --data-version classifier-v5 --epochs 2 --device
+  cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e`.
+  Results: epoch-one train/validation loss 0.171749/0.070078; epoch-two
+  0.000961/0.033555; 70 total updates. Adapter SHA-256 is
+  `e25b175edee475364594179148597c44bba05d5458816a3c27c63f24abf4082d`.
+- Imported local tag: `llama32-1b-rocell-intent-classifier-v5-2e:latest`,
+  exact digest
+  `0063c0ef3885b0eafe8160417508bdc92e43e5243a237876af77c1b9c3560da4`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v5_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v5.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v5-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact classification and composition 97/175,
+  schema-invalid 0, false-actionable 0, altered text 0. Device ambiguity,
+  workflow refusal, and unquoted typing passed 25/25; quoted typing passed
+  22/25; text ambiguity, phone-state refusal, and punctuation typing passed
+  0/25. Scorecard SHA-256 is
+  `d2480d8728e9c6055192be486b2b36ce43af6351e2e85794663acc7ef6de3654`.
+- External artifacts: evidence-manifest SHA-256
+  `c8ee6f6f98ae98cb712fbe4ecee996d3f94ee0e99741bd28a452fe45647ba9dc`.
+  All files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e` were copied
+  to the matching `F:\robot-arm-evidence\issue190` path with matching hashes.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only.
+- Limitations: development has now selected against both one- and two-epoch
+  candidates. V16 remains unbiased but cannot be opened because neither
+  candidate passed development. This synthetic result establishes no broad
+  language, deployment, motion, hardware, or physical capability.
+- Next dependency: freeze a new classifier-v6/v17 campaign with substantially
+  broader training paraphrases for the three systematic failure families and
+  punctuation typing, while retaining the sanitized observation projection,
+  historical-overlap audit, exact composer admission, unopened evaluation, and
+  zero false-actionable gate.
