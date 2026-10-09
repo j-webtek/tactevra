@@ -998,6 +998,23 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v5` claims AI-537 from merged
+AI-536 base `2724026b6385d99fb42840ffc8fa971ee72d5f18`. It may freeze
+fresh classifier-v5 train/development data and an unopened v16 evaluation for
+the same seven learned intent families, train one epoch from the cached 1B
+base, select once on development, and open v16 only after that selection is
+committed. Training, evaluation, and the shadow runtime must all use
+`classifier_model_observation_v1`, which exposes only explicit freshness and
+bounded phone state; provenance references remain hash-bound in corpus records
+but never enter model tokens. Before bytes are written, generation must
+hash-verify classifier-v1 through classifier-v4 corpora, prove zero request
+overlap, admit every deterministic composition, prove every observation fresh,
+and prove provenance identifiers contain no family label. Consumed v15 is
+corrective evidence only. The increment may not weaken the shadow boundary,
+open v16 before a committed development decision, invoke motion planning,
+construct ModelMotionBatch, change arm-lane status, or emit commands, writes,
+movement, or physical authority.
+
 The AI/model lane on `codex/intent-shadow-runtime` claims AI-536 from merged
 AI-535 base `0daed957605b49c02d5ef3caeb48f2929d73ca12`. It may add one
 disconnected, zero-authority shadow runtime that validates an explicit
