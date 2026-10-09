@@ -100,6 +100,16 @@ WS2_HEIGHT_ROBUST_SPEC = importlib.util.spec_from_file_location(
 assert WS2_HEIGHT_ROBUST_SPEC and WS2_HEIGHT_ROBUST_SPEC.loader
 WS2_HEIGHT_ROBUST_RUNNER = importlib.util.module_from_spec(WS2_HEIGHT_ROBUST_SPEC)
 WS2_HEIGHT_ROBUST_SPEC.loader.exec_module(WS2_HEIGHT_ROBUST_RUNNER)
+WS2_FORCE_GUARD_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_force_guard_search_v1.json"
+)
+WS2_FORCE_GUARD_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_force_guard_search",
+    ROOT / "software/ai/sim/run_ws2_event_force_guard_search.py",
+)
+assert WS2_FORCE_GUARD_SPEC and WS2_FORCE_GUARD_SPEC.loader
+WS2_FORCE_GUARD_RUNNER = importlib.util.module_from_spec(WS2_FORCE_GUARD_SPEC)
+WS2_FORCE_GUARD_SPEC.loader.exec_module(WS2_FORCE_GUARD_RUNNER)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -1013,3 +1023,56 @@ def test_ws2_height_robust_control_preserves_every_height_and_landing():
         0.75,
         1.0,
     }
+
+
+def test_ws2_force_guard_fixture_freezes_force_and_immediate_retraction():
+    fixture = WS2_FORCE_GUARD_RUNNER.load_fixture(WS2_FORCE_GUARD_FIXTURE)
+    design = fixture["design"]
+    assert design["maximum_contact_force_n"] == 1.4104166666666667
+    assert design["bottom_out_treatment"] == "DIAGNOSTIC_ONLY_FORCE_IS_GATE"
+    assert design["no_event_response"] == (
+        "IMMEDIATE_RETRACT_AT_HARD_LIMIT_NO_DWELL_REPORT_FAILED_PRESS_NO_RETRY"
+    )
+    assert design["population_per_device"]["total_rows"] == 259200
+    assert fixture["physical_authority"] is False
+    assert set(fixture["counters"].values()) == {0}
+
+
+def test_ws2_force_guard_allows_bounded_bottom_out_but_rejects_excess_force():
+    row = {
+        "actuation_count": 1,
+        "auto_repeat_count": 0,
+        "neighbor_contact": False,
+        "bottom_out_overflow": True,
+        "release_complete": True,
+        "peak_required_force_n": 1.2,
+        "peak_tool_force_n": 1.3,
+        "debounce_hold_complete": True,
+        "event_received": True,
+        "no_event_before_hard_limit": False,
+        "wrong_key_event": False,
+        "late_event_ignored": False,
+        "retry_count": 0,
+    }
+    assert WS2_FORCE_GUARD_RUNNER._matching_pass(row, 1.4104166666666667)
+    row["peak_tool_force_n"] = 1.42
+    assert not WS2_FORCE_GUARD_RUNNER._matching_pass(row, 1.4104166666666667)
+
+
+def test_ws2_force_guard_no_event_requires_immediate_limit_retraction():
+    row = {
+        "no_event_before_hard_limit": True,
+        "event_received": False,
+        "retract_started": True,
+        "retract_start_displacement_mm": 6.1,
+        "release_complete": True,
+        "auto_repeat_count": 0,
+        "neighbor_contact": False,
+        "peak_required_force_n": 1.2,
+        "peak_tool_force_n": 1.3,
+        "retry_count": 0,
+        "bottom_out_overflow": True,
+    }
+    assert WS2_FORCE_GUARD_RUNNER._no_event_pass(row, 1.4104166666666667, 6.1)
+    row["retract_start_displacement_mm"] = 6.0
+    assert not WS2_FORCE_GUARD_RUNNER._no_event_pass(row, 1.4104166666666667, 6.1)
