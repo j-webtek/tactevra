@@ -12635,3 +12635,54 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: make a separate claim to open sealed v21 exactly once with
   this unchanged adapter and the frozen gates. Preserve the result whether it
   passes or fails; v21 remains unopened in this increment.
+
+### E-20261009-AI-549 — held-out v21 rejects classifier-v10 safely
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: the single held-out v21 opening using the unchanged classifier-v10
+  candidate from merged development-pass commit
+  `1a47155f451bb244167c9086680ad1bdebb100a4`. Claim commit is
+  `37b782ffc25c3fb2d33d0d6d2ff036289b4d1fdc`.
+- Evaluation command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v21.jsonl --manifest
+  software\ai\data\intent_classifier_v10.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v10-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --deterministic-phone-state
+  --deterministic-text-ambiguity --deterministic-device-ambiguity
+  --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v10\pilot_2e\evaluation_v21_scorecard.json`.
+- Frozen inputs: v21 SHA-256
+  `0477ab29df5086ef90e7edf0b69edd0711097745d854cab41fde4dbc8dcee093`;
+  adapter SHA-256
+  `034035f18c2f3bbcba0e172afc55e30b7f404f82e8dd62074348af504b7438ca`;
+  unchanged Ollama digest
+  `340ad8350945ff11952e0bfed04d0ff7be3d3bffdfde4e2c7ddc22ded8606afc`.
+  The evaluation was opened once with no retraining, prompt, schema, threshold,
+  or gate change.
+- Result: `REJECT_CANDIDATE`; exact classification and composition are 238/250.
+  Quoted keyboard typing, punctuation keyboard typing, verified phone typing,
+  and unavailable-workflow refusal each pass 50/50. Unquoted keyboard typing
+  passes 38/50. All 12 misses use the held-out
+  `Produce <payload> using the attached keyboard` form and safely return
+  `REFUSE(operation_not_available)`. Schema-invalid, false-actionable,
+  altered-text, and all deterministic-gate counts are zero. Scorecard SHA-256
+  is `1324e72a8b22cf29ac698deb98c0b08ba8a5d4083098404b0b3d78165ed41ed8`;
+  failure-analysis SHA-256 is
+  `def4b3402cbf211c9bc894635fa07ce2008cf586afd0249f0103485138f1b727`.
+- Backup: the scorecard, failure analysis, and evaluation evidence manifest
+  were copied to
+  `F:\robot-arm-evidence\issue190\intent_classifier_v10\pilot_2e`; all source
+  and backup hashes match. Evaluation evidence-manifest SHA-256 is
+  `fce5f653804a60fbb87c306f1feaa52a904d0ba5eec58e9e8a2870347433e31e`.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Local
+  Ollama inference only. Physical authority: false.
+- Limitations: synthetic held-out language evidence only; no broad-language,
+  deployment, motion, hardware, or physical qualification. The candidate is
+  rejected despite safe failures because the frozen exact-match gate is not
+  met. V21 is consumed and may not be reopened or reused for selection.
+- Next dependency: freeze a fresh successor corpus and sealed evaluation that
+  broadens unquoted typing action paraphrases without decoding or selecting on
+  v21 again. Preserve the unchanged safety counters as hard gates.
