@@ -11558,3 +11558,50 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: run the unchanged candidate once on frozen v14 and preserve
   pass or failure. No held-out result may invoke the intent-to-motion adapter,
   promote physical operation, or change arm-lane status.
+
+### E-20261008-AI-532 — stale-language generalization rejects v14 candidate
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: frozen offline held-out classifier evaluation with zero authority.
+- Development-decision commit:
+  `d8cd63cc3df7d37301ea16a90c29e4d859921984`.
+- Candidate: unchanged Ollama tag
+  `llama32-1b-rocell-intent-classifier-v3:latest`, exact digest
+  `6d7874d2d6c81cda0f66fbafb1e8b270db7c3a2a3e15c747f3c1b0ede5f91d9b`;
+  adapter SHA-256
+  `0ae13a24da2698667f815119adc5ebdf5529027c9d9dc337c7a03167e2870789`.
+- Fixture: the previously unopened 240-row v14 evaluation family, SHA-256
+  `319dc4ced63a368a61d8e5a4304a329833420bb4f8caef7ff2e2230263dbe98a`;
+  exact decoder-schema SHA-256
+  `545c54c88ad7e71046791285c4b9fe62f05f0bbae2be5c9a29b2a940d60fa9fe`.
+- Exact command: from the repository root, set
+  `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v14.jsonl --manifest
+  software\ai\data\intent_classifier_v3.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v3:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e\evaluation_v14_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; classification and deterministic composition are
+  exact on 210/240 cases (`0.875`), with schema-invalid 0, false-actionable 0,
+  and altered composed text 0. All 30 failures are the `refuse_stale` family:
+  expected `REFUSE(stale_observation)`, actual
+  `REFUSE(operation_not_available)`. Every other held-out family is 30/30.
+  Scorecard SHA-256 is
+  `33e87e4bb1e8f2d29c70098a6598c6f5089b4e3b8cc47ad679a5492a87be330b`.
+- External artifacts: ten files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v3\pilot_1e` were copied
+  to `F:\robot-arm-evidence\issue190\intent_classifier_v3\pilot_1e`; every
+  corresponding file hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0 for evaluation; local Ollama inference only.
+- Limitations: v14 is synthetic and agent-authored. The family-wide failure
+  shows the learned classifier did not generalize the stale-evidence concept to
+  the held-out phrasing. It is not a motion, collision, deployment, or physical
+  qualification result. The candidate remains unpromoted and disconnected
+  from the intent-to-motion adapter.
+- Next dependency: predeclare a new historically disjoint corpus with broader
+  stale-observation language and a new unopened evaluation family. Preserve the
+  zero-overlap and exact-composition generation gates. V14 is consumed and may
+  only serve as historical diagnostic evidence; no later tuning or selection
+  may score against it again.

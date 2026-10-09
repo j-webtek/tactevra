@@ -1020,6 +1020,12 @@ requests. Fresh development then reached 200/200 exact classifications and
 actionable outputs, or altered text. This is a development-only synthetic
 result. The candidate remains unpromoted and disconnected from motion; only the
 unchanged run on already frozen v14 can decide the held-out result.
+Evidence `E-20261008-AI-532` rejects that unchanged candidate on v14. It matches
+210/240 held-out cases with zero invalid schemas, false actionable outputs, or
+altered text, but all 30 stale-observation requests are mislabeled
+`operation_not_available` rather than `stale_observation`. The candidate is not
+promoted. V14 is consumed; any successor needs a new claim and fresh splits and
+may use this result only to broaden stale-evidence language before freeze.
 
 The AI/model lane on `codex/intent-classifier-v2` claims AI-530 from merged
 AI-529 base `d757695152f37bbf992f4ddbe8458440b287bca8`. It may extend the
