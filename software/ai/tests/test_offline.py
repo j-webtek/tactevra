@@ -60,6 +60,11 @@ from build_intent_classifier_v5_data import (  # noqa: E402
     FAMILIES as CLASSIFIER_V5_FAMILIES,
     build as build_intent_classifier_v5_data,
 )
+from build_intent_classifier_v6_data import (  # noqa: E402
+    FAMILIES as CLASSIFIER_V6_FAMILIES,
+    TEMPLATES as CLASSIFIER_V6_TEMPLATES,
+    build as build_intent_classifier_v6_data,
+)
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
 )
@@ -74,6 +79,37 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v6_broadens_language_under_sanitized_boundary(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v6_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (980, 245, 280))
+        self.assertEqual(
+            _data_configuration("classifier-v6"),
+            (2131, "intent_classifier_v6", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        rows = train + validation + evaluation
+        refs = [row["observation"]["ref"] for row in rows]
+        self.assertEqual(len(refs), len(set(refs)))
+        self.assertTrue(all(
+            classifier_model_observation_v1(row["observation"]) == {"fresh": True}
+            for row in rows
+        ))
+        self.assertFalse(any(
+            family in reference
+            for reference in refs
+            for family in CLASSIFIER_V6_FAMILIES
+        ))
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        for split in ("train", "validation", "evaluation"):
+            self.assertGreaterEqual(len(CLASSIFIER_V6_TEMPLATES[split]["type_punctuation"]), 4)
+            self.assertGreaterEqual(len(CLASSIFIER_V6_TEMPLATES[split]["clarify_text"]), 4)
+            self.assertGreaterEqual(len(CLASSIFIER_V6_TEMPLATES[split]["refuse_phone_state"]), 4)
+        for row in rows:
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_v5_isolates_provenance_from_model_input(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v5_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (560, 175, 210))
