@@ -998,6 +998,39 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v4` claims AI-534 from merged
+AI-533 base `614b2e06b4032bcc96df1dff00bfeb318d0c1b05`. It may freeze
+fresh classifier-v4 train/development data and an unopened v15 evaluation
+family for the seven decisions that remain learned after deterministic
+freshness gating, then train one epoch from the same cached 1B base. Every
+generated observation must be explicitly fresh. Before writing corpus bytes,
+the generator must hash-verify all classifier-v1 through classifier-v3 source
+splits, prove zero case-insensitive request overlap with them, and prove exact
+production composition for every new row. Consumed development and v14 may be
+used only as historical failure evidence; frozen v11, v12, and v13 remain
+unopened. V15 must remain unopened until a clean development decision is
+committed. The increment may not change the public intent schema, weaken the
+deterministic freshness gate, invoke motion planning, promote a model, change
+arm-lane status, or emit commands, hardware writes, movement, or physical
+authority.
+Evidence `E-20261009-AI-534` selects the one-epoch freshness-separated
+candidate to open frozen v15. The generator hash-verified nine historical
+corpora, found zero overlap with 2,295 prior requests, admitted all 945 new
+compositions, and proved every observation explicitly fresh. Development then
+reached 175/175 exact classifications and public intents with zero invalid,
+false actionable, altered-text, or freshness-bypass cases. This remains a
+synthetic development-only result; the unchanged v15 run decides held-out
+retention and cannot confer motion or physical authority.
+Evidence `E-20261009-AI-535` retains the unchanged candidate for disconnected
+shadow integration after a clean frozen v15 result: 210/210 exact
+classifications and composed public intents, zero invalid schemas, false
+actionable outputs, altered text, or freshness bypasses. This is narrow,
+synthetic intent-contract evidence. The model remains upstream of and
+disconnected from ModelMotionBatch, motion planning, and execution. The next
+increment may build a shadow-only runtime assembly that records the model,
+deterministic freshness gate, exact text composer, and deterministic keystroke
+compiler outputs without invoking the motion adapter.
+
 The AI/model lane on `codex/deterministic-intent-freshness` claims AI-533 from
 merged AI-532 base `df8a4ddb10cea98a58e101d86ff07d6fda5d311f`. It may
 add a fail-closed classifier pre-gate that maps an explicitly stale bound

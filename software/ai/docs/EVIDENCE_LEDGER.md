@@ -11666,3 +11666,127 @@ rewriting history. New entries must use a unique evidence ID.
   fresh, and separately test the deterministic freshness gate across fresh,
   stale, missing, and malformed bound observations. Only a new held-out result
   can support retaining an offline classifier for shadow integration.
+
+### E-20261009-AI-534 — freshness-separated classifier passes development
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: fresh-only learned classification corpus, one-epoch offline training,
+  and development selection with zero authority. V15 remains unopened at this
+  decision point.
+- Base commit: `614b2e06b4032bcc96df1dff00bfeb318d0c1b05`.
+- Claim commit: `2941398a53b3c8c41be2eb6191faa4fc99efdd4d`.
+- Corpus, admission, and trainer commit:
+  `c244dbd4fe707197ae456d49bef119115762c7eb`.
+- Fixtures: 560 training, 175 development, and 210 unopened v15 evaluation
+  cases across seven learned families. Every observation is explicitly fresh;
+  stale evidence is excluded from learned targets and remains governed by the
+  deterministic AI-533 gate. Train SHA-256 is
+  `2b226cd42bd491b86950c8dd2d5e410196e038a3200616e44658ebad76e43877`;
+  development SHA-256 is
+  `4ca5c4a3a6bb9f873a432845b5aaea04c61c7e661329de30fdcbf921e1b468b7`;
+  unopened evaluation SHA-256 is
+  `f1caa44a585e0be9f5e1c4a37c85f1a77acbdb539610fc45c11ba1f481cedeaa`.
+  Data-manifest SHA-256 is
+  `552ac80149a0f374322f4e6a449c939636f1038258f6ec3d44115a3caf34c39d`;
+  v15-manifest SHA-256 is
+  `ad329212d21e97712107e3d19de1d4939c21fc9eec46b916db38e863a4164f1f`;
+  generator SHA-256 is
+  `910aee5eadefa07a3b2c674ea7fba1cb55366832786b4ce993e49d8939b9c057`;
+  extractor SHA-256 is
+  `b515195098b01ecd8e4192900e83c7f5ff071e41669150d0efbaed7a90e719ee`.
+- Prewrite admission: exact hashes matched for nine classifier-v1 through
+  classifier-v3 train/development/evaluation corpora containing 2,295 distinct
+  historical request strings. New overlap is 0/945 and production composition
+  is exact on 945/945 cases. Frozen v11, v12, and v13 remained unopened; v14
+  was referenced only as consumed historical bytes.
+- Exact training command: `python software/ai/train/fit_sft.py --data-version
+  classifier-v4 --epochs 1 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e`.
+  Result: training loss `0.136324`, development loss `0.001463`, 35 optimizer
+  updates, adapter SHA-256
+  `afb2845fa9f07bcddc3437841193b6cf86d9fb150e87240e597e7f08cdcf07f8`.
+  Run-manifest SHA-256 is
+  `c35c033edba00ffd4dcd837a9b3dd4b24ab9cdb8e00f8ece4ed0a854c47ca382`.
+- Ollama import: base digest
+  `6319184583b7d9d76f7506bfe9cdba1832f147486129527a33c157c62845d046`;
+  candidate tag `llama32-1b-rocell-intent-classifier-v4:latest`, digest
+  `acf6758359aa61b3c8ebb3a16953d2e421a0054d3f4b274e93bb5ee0bd7abb5c`;
+  import-manifest SHA-256 is
+  `dabee927f798bdd1f665754d2be27de639e94d776efe5e1f818e4dbf2ecfb894`.
+- Exact development command: set `PYTHONPATH=software\ai;software\src`, then
+  run `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v4_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v4.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v4:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e\validation_scorecard.json`.
+- Development result: `PASS_CANDIDATE`; classification and composition exact
+  175/175, schema-invalid 0, false-actionable 0, altered text 0, deterministic
+  freshness bypasses 0. Scorecard SHA-256 is
+  `c41f73d1e698748e8a1dc5c645d487eabc1b8b424e52743d8f9ed3879088cbac`.
+  This commits the decision to open v15 without changing any model, prompt,
+  schema, composer, freshness gate, promotion gate, or evaluation byte.
+- Exact focused verification before training: `python -m pytest
+  software/ai/tests/test_offline.py -q`; 46 passed. Exact Ruff checks passed.
+  Source-archive policy passed at the deliberate 6,564-file ceiling.
+- External artifacts: nine development-decision files were copied from
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e` to the
+  matching `F:\robot-arm-evidence\issue190` path; every hash matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 1 offline training job.
+- Limitations: all data are synthetic and agent-authored. A development pass
+  cannot establish general language understanding, deployment readiness,
+  motion safety, or physical authority.
+- Next dependency: run the unchanged candidate once on frozen v15 and preserve
+  pass or failure. Only that result can decide whether this narrow offline
+  classifier is retained for disconnected shadow integration.
+
+### E-20261009-AI-535 — fresh held-out v15 retains classifier for shadow use
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: frozen offline held-out evaluation with deterministic preconditions
+  and zero authority.
+- Development-decision commit:
+  `7a8a9ff00d9bbee7a0aaa82a93bcedc0acef90df`.
+- Candidate: unchanged Ollama tag
+  `llama32-1b-rocell-intent-classifier-v4:latest`, exact digest
+  `acf6758359aa61b3c8ebb3a16953d2e421a0054d3f4b274e93bb5ee0bd7abb5c`;
+  adapter SHA-256
+  `afb2845fa9f07bcddc3437841193b6cf86d9fb150e87240e597e7f08cdcf07f8`.
+- Fixture: previously unopened 210-row v15 evaluation, SHA-256
+  `f1caa44a585e0be9f5e1c4a37c85f1a77acbdb539610fc45c11ba1f481cedeaa`;
+  decoder-schema SHA-256
+  `545c54c88ad7e71046791285c4b9fe62f05f0bbae2be5c9a29b2a940d60fa9fe`.
+- Exact command: set `PYTHONPATH=software\ai;software\src`, then run `python -m
+  rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v15.jsonl --manifest
+  software\ai\data\intent_classifier_v4.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v4:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e\evaluation_v15_scorecard.json`.
+- Result: `PASS_CANDIDATE`; classification and deterministic composition exact
+  210/210, schema-invalid 0, false-actionable 0, altered text 0, deterministic
+  freshness bypasses 0. Scorecard SHA-256 is
+  `ff12f2ae8f5c55870859f5e4d683948c29bc71ca4d42e8610a16299592bbce69`.
+- External artifacts: ten final files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e` were copied
+  to the matching `F:\robot-arm-evidence\issue190` path; every hash matched.
+- Repository verification: `python scripts/maintain_repository.py verify --full`
+  passed with 133 policy tests, 945 offline tests, and 5 expected Windows
+  symlink skips in 474.11 seconds. The source-archive ceiling passed at 6,564
+  files.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. GPU-job count: 0 for evaluation; local Ollama inference only.
+- Limitations: v15 is synthetic and agent-authored, covers seven closed intent
+  families, and excludes stale evidence because freshness is deterministic. A
+  perfect result does not establish broad language understanding, adversarial
+  robustness, runtime availability, motion safety, deployment readiness, or
+  physical qualification. The candidate is retained only for disconnected
+  shadow integration and has no motion or execution authority.
+- Next dependency: build a shadow-only runtime assembly that applies the
+  deterministic freshness precondition, calls this exact local model identity,
+  composes exact request text, and optionally compiles semantic keystrokes, but
+  emits no ModelMotionBatch and never invokes the motion adapter. Record model
+  identity, input hashes, decisions, and zero-authority counters for review.

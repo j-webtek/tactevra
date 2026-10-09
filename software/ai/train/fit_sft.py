@@ -27,6 +27,8 @@ def _data_configuration(version: str) -> tuple[int, str, str]:
         return 2127, "intent_classifier_v2", "rocell_ai.offline_intent_classifier_eval_v1"
     if version == "classifier-v3":
         return 2128, "intent_classifier_v3", "rocell_ai.offline_intent_classifier_eval_v1"
+    if version == "classifier-v4":
+        return 2129, "intent_classifier_v4", "rocell_ai.offline_intent_classifier_eval_v1"
     seeds = {"v0": SEED, "v1": 2110, "v2": 2111, "v3": 2112}
     if version not in seeds:
         raise ValueError(f"unsupported data version: {version}")
@@ -44,7 +46,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Local, offline LoRA SFT pilot; no arm access")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5", "classifier-v1", "classifier-v2", "classifier-v3"), default="v0")
+    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5", "classifier-v1", "classifier-v2", "classifier-v3", "classifier-v4"), default="v0")
     parser.add_argument("--epochs", type=int, default=2)
     args = parser.parse_args()
     if args.epochs < 1 or args.epochs > 10:

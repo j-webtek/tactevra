@@ -67,3 +67,9 @@ evaluation. An explicit stale bound observation becomes
 freshness is invalid. The local model continues to classify only fresh cases.
 This keeps evidence freshness outside learned language behavior and adds no
 motion or execution authority.
+
+A freshness-separated classifier has now passed a fresh 210-case held-out
+synthetic evaluation for the seven remaining learned intent families. It is
+retained only for disconnected shadow integration. Its output still cannot
+create `ModelMotionBatch`, call motion planning, issue commands, or claim
+physical execution.
