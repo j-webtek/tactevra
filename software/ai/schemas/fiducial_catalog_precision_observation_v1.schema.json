@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "scope", "source_kind", "domain_id", "device",
+    "required_target_ids", "targets", "pose_observation_sha256", "frame",
+    "source_hashes", "fit", "qualification_sha256", "coverage_probability",
+    "conservative_planar_error_bound_mm", "abstain", "abstain_reasons",
+    "authority", "observation_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.ai_fiducial_catalog_precision_observation.v1"},
+    "scope": {"const": "SYNTHETIC_OFFLINE_ONLY"},
+    "source_kind": {"const": "APRILTAG_POSE_PLUS_FROZEN_CATALOG"},
+    "domain_id": {"type": "string", "minLength": 1},
+    "device": {"enum": ["keyboard", "phone"]},
+    "required_target_ids": {
+      "type": "array", "minItems": 1, "maxItems": 256, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "targets": {
+      "type": "array", "minItems": 1, "maxItems": 256,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["target_id", "center_board_mm", "safe_rectangle_board_mm", "source_state"],
+        "properties": {
+          "target_id": {"type": "string", "minLength": 1},
+          "center_board_mm": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}, {"type": "number"}], "items": false},
+          "safe_rectangle_board_mm": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}, {"type": "number"}, {"type": "number"}], "items": false},
+          "source_state": {"const": "SIMULATION_ONLY_NOMINAL_UNMEASURED"}
+        }
+      }
+    },
+    "pose_observation_sha256": {"$ref": "#/$defs/sha256"},
+    "frame": {
+      "type": "object", "additionalProperties": false,
+      "required": ["capture_id", "image_sha256", "host_complete_ns", "host_clock", "camera_settings_sha256"],
+      "properties": {
+        "capture_id": {"type": "string", "minLength": 1},
+        "image_sha256": {"$ref": "#/$defs/sha256"},
+        "host_complete_ns": {"type": "integer", "minimum": 0},
+        "host_clock": {"type": "string", "minLength": 1},
+        "camera_settings_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "source_hashes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["camera_intrinsics_sha256", "tag_map_sha256", "target_catalog_sha256", "board_frame_definition_sha256"],
+      "properties": {
+        "camera_intrinsics_sha256": {"$ref": "#/$defs/sha256"},
+        "tag_map_sha256": {"$ref": "#/$defs/sha256"},
+        "target_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "board_frame_definition_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "fit": {
+      "type": "object", "additionalProperties": false,
+      "required": ["used_tag_ids", "inlier_rmse_px"],
+      "properties": {
+        "used_tag_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
+        "inlier_rmse_px": {"type": "number", "minimum": 0}
+      }
+    },
+    "qualification_sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "coverage_probability": {"anyOf": [{"type": "number", "minimum": 0.95, "exclusiveMaximum": 1}, {"type": "null"}]},
+    "conservative_planar_error_bound_mm": {"anyOf": [{"type": "number", "exclusiveMinimum": 0, "maximum": 100}, {"type": "null"}]},
+    "abstain": {"type": "boolean"},
+    "abstain_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": ["physical_authority", "physical_commands_generated", "can_authorize_motion", "can_release_physical_gates"],
+      "properties": {
+        "physical_authority": {"const": "NONE"},
+        "physical_commands_generated": {"const": 0},
+        "can_authorize_motion": {"const": false},
+        "can_release_physical_gates": {"const": false}
+      }
+    },
+    "observation_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

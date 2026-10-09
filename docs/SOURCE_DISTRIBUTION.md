@@ -62,6 +62,14 @@ policy baseline now points to this merged commit so future checks have a stable,
 post-reduction reference. Containment ceilings remain deliberately above the
 baseline to detect material growth without making normal small changes brittle.
 
+The AI-555 geometry-first precision increment adds exactly five governed paths:
+one zero-authority adapter, two shared JSON schemas, one focused test module,
+and one architecture decision record. The reviewed tracked-file ceiling moves
+from 6,614 to the exact observed 6,619 files. No rendered corpus, model weight,
+camera capture, simulator output, or other generated evidence enters the source
+archive; all byte, duplicate, single-blob, and reduction limits remain
+unchanged.
+
 The main-bound Workstream 1 boundary composition adds five governed paths: one
 zero-authority adapter, the original and LF-policy-amended frozen fixtures, one
 focused test module, and one compact retained summary. The reviewed tracked-file
