@@ -998,6 +998,43 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v5` claims AI-538 after the
+recorded AI-537 one-epoch development rejection. It may train one new candidate
+from the same frozen classifier-v5 training split and same cached 1B base for
+exactly two epochs, then score it once on the already-designated development
+split with the unchanged sanitized observation policy and zero-error gates.
+The one-epoch adapter and scorecard remain preserved as failed evidence. V16
+remains unopened until the two-epoch development result and selection decision
+are committed. No corpus, prompt, schema, optimizer, learning rate, gate, model
+input, or runtime boundary may change in this increment, and it may not invoke
+motion, construct ModelMotionBatch, emit commands, change arm-lane status, or
+claim physical authority.
+Evidence `E-20261009-AI-538` rejects the two-epoch candidate at 97/175 exact
+development classifications and compositions, with zero invalid,
+false-actionable, or altered-text outputs. The added epoch recovered all
+unquoted typing and most quoted typing but did not distinguish text ambiguity,
+phone-state refusal, or punctuation typing. V16 remains unopened. The next
+campaign must broaden training-language diversity under the same sanitized
+observation contract rather than add epochs to this consumed development
+selection.
+
+The AI/model lane on `codex/intent-classifier-v5` claims AI-537 from merged
+AI-536 base `2724026b6385d99fb42840ffc8fa971ee72d5f18`. It may freeze
+fresh classifier-v5 train/development data and an unopened v16 evaluation for
+the same seven learned intent families, train one epoch from the cached 1B
+base, select once on development, and open v16 only after that selection is
+committed. Training, evaluation, and the shadow runtime must all use
+`classifier_model_observation_v1`, which exposes only explicit freshness and
+bounded phone state; provenance references remain hash-bound in corpus records
+but never enter model tokens. Before bytes are written, generation must
+hash-verify classifier-v1 through classifier-v4 corpora, prove zero request
+overlap, admit every deterministic composition, prove every observation fresh,
+and prove provenance identifiers contain no family label. Consumed v15 is
+corrective evidence only. The increment may not weaken the shadow boundary,
+open v16 before a committed development decision, invoke motion planning,
+construct ModelMotionBatch, change arm-lane status, or emit commands, writes,
+movement, or physical authority.
+
 The AI/model lane on `codex/intent-shadow-runtime` claims AI-536 from merged
 AI-535 base `0daed957605b49c02d5ef3caeb48f2929d73ca12`. It may add one
 disconnected, zero-authority shadow runtime that validates an explicit
@@ -1022,6 +1059,13 @@ itself remains a useful zero-authority boundary and now exposes only explicit
 freshness and bounded phone state to inference. The next classifier campaign
 must train, select, and evaluate on this sanitized model-observation contract;
 classifier-v4 may not enter shadow or motion composition.
+Evidence `E-20261009-AI-537` rejects the one-epoch classifier-v5 candidate on
+development at 69/175 exact classification and composition. It produced no
+invalid, altered-text, or false-actionable output, but failed five of seven
+families wholly or partly. Frozen v16 remains unopened. The next bounded
+development candidate uses the same frozen data and configuration for exactly
+two epochs under AI-538; this is continued development selection rather than a
+new evaluation claim.
 
 The AI/model lane on `codex/intent-classifier-v4` claims AI-534 from merged
 AI-533 base `614b2e06b4032bcc96df1dff00bfeb318d0c1b05`. It may freeze

@@ -694,3 +694,12 @@ receipts and the corrective consumed-evaluation diagnostic remain external and
 hash-bound. The new runtime cannot import the motion adapter, construct
 ModelMotionBatch, emit controller output, write hardware, or grant physical
 authority. All byte, duplicate, and reduction limits remain unchanged.
+
+The provenance-sanitized classifier-v5 campaign adds six governed paths: one
+generator, three frozen train/development/manifest files, and two unopened v16
+evaluation files. The resulting tree contains 6,573 tracked files. The ceiling
+advances from 6,567 to 6,573 with no spare slots. Model weights, scorecards, and
+runtime receipts remain external and hash-bound. The corpus exposes only
+decision-relevant observation state to training and inference; it grants no
+motion or physical authority. All byte, duplicate, and reduction limits remain
+unchanged.

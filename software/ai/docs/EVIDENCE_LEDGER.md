@@ -11868,3 +11868,126 @@ rewriting history. New entries must use a unique evidence ID.
   select on fresh data, keep the next evaluation unopened until development is
   committed, and require zero false-actionable outputs before reopening this
   disconnected shadow boundary.
+
+### E-20261009-AI-537 — sanitized classifier one-epoch candidate rejected
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: fresh classifier-v5 data freeze, one-epoch local training, and
+  development selection under the sanitized model-observation contract. Frozen
+  v16 stayed unopened.
+- Claim commit: `91739427492ddd221387fbfb07fb47c158f11186`.
+  Frozen-data commit: `dfc21f2dacf9b9e7b34fec76f7fadee85a07bb7e`.
+- Fixtures: 560 training rows, SHA-256
+  `fd599f632a6ecd1f7af8bed762a3a3c6e73edfeb2eea5bb18f885a2a227f12ce`;
+  175 development rows, SHA-256
+  `9ac696c2563b44923e82cc82c2a84f5cc09c9d228fd0e0b53d9a382959d51daf`;
+  data-manifest SHA-256
+  `9b3e3b07f75f72db17af69cb9458dd21e3a8f07633906c0462c8a52082fa7346`.
+  Frozen unopened v16 has 210 rows, SHA-256
+  `790ebe5f003bde2b95e31ca8fe14dcef79bbfde5460a0423eadbd016990c61c9`.
+- Generation admission: 12 historical corpora were hash-verified; all 3,240
+  historical request strings had zero overlap with the 945 new requests; all
+  945 expected classifications composed exactly; every observation was fresh;
+  every provenance reference was unique and contained no family name; and
+  `classifier_model_observation_v1` projected every row to exactly
+  `{"fresh": true}`.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run `python
+  software/ai/train/fit_sft.py --data-version classifier-v5 --epochs 1 --device
+  cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_1e`.
+  Result: train loss 0.172204, validation loss 0.064705, 35 updates. Adapter
+  SHA-256 is
+  `249397595c6decf4391a3936b667a1c94a81d3fbba3dd656c162085c46f9a830`.
+- Imported local tag: `llama32-1b-rocell-intent-classifier-v5:latest`, exact
+  digest `c36cacacc5bc263762ce3d555d45b8ff116d7e2e292ccaf57c04a00da8000694`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v5_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v5.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v5:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_1e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact classification and composition 69/175,
+  schema-invalid 0, false-actionable 0, and altered text 0. Device ambiguity
+  and workflow refusal passed 25/25 each. Text ambiguity, phone-state refusal,
+  and punctuation typing passed 0/25; quoted typing passed 7/25; unquoted
+  typing passed 12/25. Scorecard SHA-256 is
+  `7e127de2509e5e5e41b5f99304f24752ff6bd9d8831649104123028a1c12c39f`.
+- External artifacts: evidence-manifest SHA-256
+  `2e2b40dac1695417be68f742d506f713a48518ca747f5dcbe695b34271d96dd5`.
+  All files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_1e` were copied
+  to the matching `F:\robot-arm-evidence\issue190` path with matching hashes.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only.
+- Limitations: this is synthetic development selection. Zero false actionable
+  is encouraging but cannot compensate for 39.4% exact accuracy. It establishes
+  no general-language, deployment, motion, hardware, or physical capability.
+- Next dependency: under separately claimed AI-538, train from the same pinned
+  base and frozen training data for exactly two epochs, score once on the same
+  development split, preserve this failure, and keep v16 unopened until that
+  decision is committed.
+
+### E-20261009-AI-538 — two epochs improve but do not qualify sanitized model
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: bounded continuation of development selection using the exact frozen
+  classifier-v5 corpus and sanitized observation contract. V16 stayed unopened.
+- Pre-result decision commit:
+  `16715f9699a227a1c985d748829a370b166832a7`.
+- Unchanged fixtures: training SHA-256
+  `fd599f632a6ecd1f7af8bed762a3a3c6e73edfeb2eea5bb18f885a2a227f12ce`;
+  development SHA-256
+  `9ac696c2563b44923e82cc82c2a84f5cc09c9d228fd0e0b53d9a382959d51daf`;
+  manifest SHA-256
+  `9b3e3b07f75f72db17af69cb9458dd21e3a8f07633906c0462c8a52082fa7346`.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run `python
+  software/ai/train/fit_sft.py --data-version classifier-v5 --epochs 2 --device
+  cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e`.
+  Results: epoch-one train/validation loss 0.171749/0.070078; epoch-two
+  0.000961/0.033555; 70 total updates. Adapter SHA-256 is
+  `e25b175edee475364594179148597c44bba05d5458816a3c27c63f24abf4082d`.
+- Imported local tag: `llama32-1b-rocell-intent-classifier-v5-2e:latest`,
+  exact digest
+  `0063c0ef3885b0eafe8160417508bdc92e43e5243a237876af77c1b9c3560da4`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v5_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v5.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v5-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact classification and composition 97/175,
+  schema-invalid 0, false-actionable 0, altered text 0. Device ambiguity,
+  workflow refusal, and unquoted typing passed 25/25; quoted typing passed
+  22/25; text ambiguity, phone-state refusal, and punctuation typing passed
+  0/25. Scorecard SHA-256 is
+  `d2480d8728e9c6055192be486b2b36ce43af6351e2e85794663acc7ef6de3654`.
+- External artifacts: evidence-manifest SHA-256
+  `c8ee6f6f98ae98cb712fbe4ecee996d3f94ee0e99741bd28a452fe45647ba9dc`.
+  All files under
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v5\pilot_2e` were copied
+  to the matching `F:\robot-arm-evidence\issue190` path with matching hashes.
+- Verification: set `PYTHONPATH=software\ai;software\src;software\ai\train`,
+  then run `python -m pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q`; result: 64
+  passed. Ruff passed on the changed generator, trainer, and tests. `python
+  scripts/maintain_repository.py verify --full` passed with 133 policy tests,
+  945 offline tests, and 5 expected Windows symlink skips in 474.99 seconds;
+  source-archive containment passed at 6,573 files.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only.
+- Limitations: development has now selected against both one- and two-epoch
+  candidates. V16 remains unbiased but cannot be opened because neither
+  candidate passed development. This synthetic result establishes no broad
+  language, deployment, motion, hardware, or physical capability.
+- Next dependency: freeze a new classifier-v6/v17 campaign with substantially
+  broader training paraphrases for the three systematic failure families and
+  punctuation typing, while retaining the sanitized observation projection,
+  historical-overlap audit, exact composer admission, unopened evaluation, and
+  zero false-actionable gate.
