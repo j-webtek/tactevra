@@ -11650,6 +11650,10 @@ rewriting history. New entries must use a unique evidence ID.
 - Exact focused verification before the diagnostic: `python -m pytest
   software/ai/tests/test_offline.py -q`; 45 passed. Exact Ruff checks over the
   changed evaluator and tests passed.
+- Exact full verification command: `python
+  scripts/maintain_repository.py verify --full`; all 133 policy tests and 945
+  offline tests passed with 5 expected Windows symlink skips in 473.95 seconds.
+  Source-archive policy passed at the frozen 6,558-file ceiling.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. GPU-job count: 0; local Ollama inference only.
 - Limitations: the diagnostic uses consumed synthetic v14 and cannot select or
