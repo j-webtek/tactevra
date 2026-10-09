@@ -12810,3 +12810,48 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: pin this exact digest in a separately claimed read-only
   shadow integration from classification through deterministic text compilation
   and the existing ModelMotionBatch boundary, with zero execution authority.
+
+### E-20261009-AI-553 — selected classifier reaches arm shadow boundary
+
+- Stage: S1 bounded read-only AI-to-arm shadow composition.
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Commit: claim commit
+  `a8240bfec0b34431804850435edccdc3ee7e5654`; this row and its bounded
+  implementation are added together after testing that exact claimed tree.
+- Change: pins the selected classifier-v11 digest and composes its existing
+  intent shadow receipt through deterministic keyboard compilation, the typed
+  synthetic perception fixture, `ModelMotionBatchV2`, strict ingress, and the
+  existing zero-hardware arm shadow planner. Missing perception, stale intent,
+  phone motion, and a changed model digest stop before motion planning.
+- Inputs/fixtures: selected-model manifest
+  `software/ai/train/intent_classifier_v11_selected.json`, SHA-256
+  `29ba95017369674660c34ae1033a18c7aaeae172691955d8004b2d311be8321b`;
+  decoder schema SHA-256
+  `545c54c88ad7e71046791285c4b9fe62f05f0bbae2be5c9a29b2a940d60fa9fe`;
+  exact Ollama digest
+  `348514d04a26efc58552e1eb4395e298ca7bc6f1045fb1777a898acb8d75d207`;
+  integration fixtures from
+  `software/tests/integration/test_shared_shadow_runner_v2.py`.
+- Command: set `PYTHONPATH=software\ai;software\src;software\tests\unit;software\tests\integration`,
+  then run `python -m pytest software\tests\integration\test_selected_intent_shadow_bridge_v1.py software\ai\tests\test_offline_intent_shadow_runtime_v1.py software\tests\integration\test_shared_shadow_runner_v2.py -q`;
+  then run `python C:\MuJoCoWarp\evidence\issue190\intent_classifier_v11_shadow_bridge\run_selected_shadow.py`.
+- Result: PASS, 39 focused tests. The real pinned local model preserved ordered
+  targets `H,H,I`, emitted exactly one batch, passed strict ingress, and reached
+  `BLOCKED_CALIBRATION_MISSING_OR_STALE`. The canonical shadow receipt SHA-256
+  is `8b92b426b90e05a241c8ef5551e30c424516624b57518d72ab20e8ce8548b81c`.
+- Artifacts: [bridge](../rocell_ai/selected_intent_shadow_bridge_v1.py),
+  [selected model](../train/intent_classifier_v11_selected.json), and
+  [integration tests](../../tests/integration/test_selected_intent_shadow_bridge_v1.py).
+  The runner and receipt are hash-matched on
+  `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v11_shadow_bridge` and
+  `F:\robot-arm-evidence\issue190\intent_classifier_v11_shadow_bridge`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: synthetic integration perception, registry, calibration, and
+  start-state fixtures only. The terminal blocker proves no usable calibration
+  was supplied. Phone motion remains unavailable. This does not qualify
+  perception, localization, trajectory safety, execution, or physical use.
+- Supersedes: none.
+- Next dependency: qualified measured perception and independent arm-lane
+  review of the exact batch and shadow receipt before any integration gate can
+  advance.
