@@ -60,6 +60,24 @@ _EXPLICIT_PHYSICAL_KEYBOARD = re.compile(
     r"\b(?:physical|hardware|attached|connected)[- ]keys?\b",
     re.IGNORECASE,
 )
+_AMBIGUOUS_TOKEN = r"[A-Za-z0-9][A-Za-z0-9._~!@#$%^&*+=:?/\\-]{0,255}"
+_UNQUOTED_TEXT_AMBIGUITY_PATTERNS = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        rf"\bbetween\s+(?P<a>{_AMBIGUOUS_TOKEN})\s+and\s+(?P<b>{_AMBIGUOUS_TOKEN})\b",
+        rf"(?P<a>{_AMBIGUOUS_TOKEN})\s+versus\s+(?P<b>{_AMBIGUOUS_TOKEN})\b",
+        rf"(?:clarify|confirm|resolve|unclear|intended|which exact|string is intended)"
+        rf"[^\r\n]{{0,160}}?\b(?P<a>{_AMBIGUOUS_TOKEN})\s+or\s+"
+        rf"(?P<b>{_AMBIGUOUS_TOKEN})\b",
+        rf"candidate strings conflict:\s*(?P<a>{_AMBIGUOUS_TOKEN})\s*,\s*"
+        rf"(?P<b>{_AMBIGUOUS_TOKEN})\b",
+        rf"(?:conflicting[^\r\n]{{0,80}}strings were supplied,)\s*"
+        rf"(?P<a>{_AMBIGUOUS_TOKEN})\s+and\s+"
+        rf"(?P<b>{_AMBIGUOUS_TOKEN})\b",
+        rf"\bcould be\s+(?P<a>{_AMBIGUOUS_TOKEN})\s*;[^\r\n]{{0,80}}?"
+        rf"\binstead be\s+(?P<b>{_AMBIGUOUS_TOKEN})\b",
+    )
+)
 
 
 def extract_requested_text_v1(request_text: str) -> str | None:
@@ -218,6 +236,32 @@ def deterministic_phone_state_classification_v1(
     }
 
 
+def deterministic_text_ambiguity_classification_v1(
+    request_text: Any,
+) -> dict[str, str] | None:
+    """Clarify requests that name two distinct payloads in the closed grammar."""
+
+    if not isinstance(request_text, str):
+        raise ValueError("request text must be a string")
+    quoted = re.findall(r'"([^"\r\n]+)"', request_text)
+    if quoted:
+        ambiguous = len(set(quoted)) >= 2
+    else:
+        ambiguous = False
+        for pattern in _UNQUOTED_TEXT_AMBIGUITY_PATTERNS:
+            match = pattern.search(request_text)
+            if match is not None and match.group("a") != match.group("b"):
+                ambiguous = True
+                break
+    if not ambiguous:
+        return None
+    return {
+        "schema": CLASSIFICATION_SCHEMA,
+        "intent_type": "CLARIFY",
+        "question": "text_ambiguous",
+    }
+
+
 def classifier_model_observation_v1(observation: Any) -> dict[str, Any]:
     """Expose only decision-relevant observation state to the language model."""
 
@@ -240,6 +284,7 @@ __all__ = [
     "classifier_model_observation_v1",
     "deterministic_freshness_classification_v1",
     "deterministic_phone_state_classification_v1",
+    "deterministic_text_ambiguity_classification_v1",
     "extract_requested_device_v1",
     "extract_requested_text_v1",
     "parse_classification_v1",

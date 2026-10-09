@@ -16,6 +16,7 @@ from .offline_intent_contract_v1 import (
     compose_public_intent_v1,
     deterministic_freshness_classification_v1,
     deterministic_phone_state_classification_v1,
+    deterministic_text_ambiguity_classification_v1,
     parse_classification_v1,
 )
 from .offline_intent_model_eval_v1 import _model_digest, _post
@@ -32,11 +33,13 @@ def score_classifier(
     generate: Callable[[dict[str, Any]], str],
     deterministic_freshness: bool = False,
     deterministic_phone_state: bool = False,
+    deterministic_text_ambiguity: bool = False,
 ) -> dict[str, Any]:
     rows = []
     exact_classification = exact_composed = invalid = false_actionable = altered_text = 0
     freshness_gate_count = 0
     phone_state_gate_count = 0
+    text_ambiguity_gate_count = 0
     for case in cases:
         expected_classification = case["target"]
         expected_composed = parse_offline_typing_intent_v1(case["composed_target"])
@@ -52,6 +55,9 @@ def score_classifier(
                 case["request"], case.get("observation"),
             )
             classification_source = "DETERMINISTIC_PHONE_STATE_GATE"
+        if gated is None and deterministic_text_ambiguity:
+            gated = deterministic_text_ambiguity_classification_v1(case["request"])
+            classification_source = "DETERMINISTIC_TEXT_AMBIGUITY_GATE"
         if gated is None:
             raw = generate(case)
             classification_source = "LOCAL_MODEL"
@@ -59,8 +65,10 @@ def score_classifier(
             raw = json.dumps(gated, sort_keys=True, separators=(",", ":"))
             if classification_source == "DETERMINISTIC_FRESHNESS_GATE":
                 freshness_gate_count += 1
-            else:
+            elif classification_source == "DETERMINISTIC_PHONE_STATE_GATE":
                 phone_state_gate_count += 1
+            else:
+                text_ambiguity_gate_count += 1
         latency = round((time.perf_counter() - started) * 1000, 1)
         actual_classification = actual_composed = None
         error = None
@@ -115,6 +123,7 @@ def score_classifier(
         "altered_type_text_count": altered_text,
         "deterministic_freshness_gate_count": freshness_gate_count,
         "deterministic_phone_state_gate_count": phone_state_gate_count,
+        "deterministic_text_ambiguity_gate_count": text_ambiguity_gate_count,
         "classification_exact_rate": exact_classification / total,
         "composed_exact_rate": exact_composed / total,
         "decision": "PASS_CANDIDATE" if passed else "REJECT_CANDIDATE",
@@ -134,6 +143,7 @@ def evaluate_classifier(
     schema_path: Path,
     deterministic_freshness: bool = False,
     deterministic_phone_state: bool = False,
+    deterministic_text_ambiguity: bool = False,
     sanitize_observation: bool = False,
 ) -> dict[str, Any]:
     cases, digest = load_schema_intent_cases(cases_path, manifest_path, split)
@@ -167,6 +177,7 @@ def evaluate_classifier(
         generate=generate,
         deterministic_freshness=deterministic_freshness,
         deterministic_phone_state=deterministic_phone_state,
+        deterministic_text_ambiguity=deterministic_text_ambiguity,
     )
     result["model_observation_policy"] = (
         "DECISION_STATE_ONLY_V1" if sanitize_observation else "FULL_OBSERVATION"
@@ -188,6 +199,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--deterministic-freshness", action="store_true")
     parser.add_argument("--deterministic-phone-state", action="store_true")
+    parser.add_argument("--deterministic-text-ambiguity", action="store_true")
     parser.add_argument("--sanitize-observation", action="store_true")
     args = parser.parse_args()
     result = evaluate_classifier(
@@ -198,6 +210,7 @@ def main() -> int:
         args.schema,
         deterministic_freshness=args.deterministic_freshness,
         deterministic_phone_state=args.deterministic_phone_state,
+        deterministic_text_ambiguity=args.deterministic_text_ambiguity,
         sanitize_observation=args.sanitize_observation,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -207,6 +220,7 @@ def main() -> int:
         "schema_invalid_count", "false_actionable_count", "altered_type_text_count",
         "deterministic_freshness_gate_count",
         "deterministic_phone_state_gate_count",
+        "deterministic_text_ambiguity_gate_count",
     )}, sort_keys=True))
     return 0
 

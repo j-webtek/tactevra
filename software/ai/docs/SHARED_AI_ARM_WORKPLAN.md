@@ -998,6 +998,29 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-text-ambiguity` claims AI-544 from merged
+AI-543 base `2a60e6b701a76241a3f4aa4ec68fea27f3619484`. It may add a
+deterministic, motion-free text-candidate ambiguity gate before local model
+inference. Requests containing multiple exact payload candidates under the
+closed ambiguity grammar must become `CLARIFY(text_ambiguous)` with zero model
+calls and zero semantic actions. Freshness and unverified phone-state refusals
+retain precedence. Consumed classifier-v8 development may be replayed only as
+corrective boundary evidence and may not be rescored for model selection.
+Frozen v19, v18, v17, and v16 remain unopened. This increment may not construct
+ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or claim
+execution or physical authority.
+Evidence `E-20261009-AI-544` completes the claimed boundary. The gate recognizes
+only the closed explicit competing-payload grammar, runs after freshness and
+phone-state refusal, and produces `CLARIFY(text_ambiguous)` with zero model calls
+and zero semantic actions. It identified all 200 v8 training and 45 v8
+development `clarify_text` rows with zero hits in other families. A corrective
+replay of the already opened v8 development scorecard moved exact classification
+and composition from 299/315 to 315/315, corrected all 16 prior misses, and
+retained the other 270 prior model outputs. This is boundary evidence rather
+than model reselection; v19 through v16 remain unopened. The next AI dependency
+is a fresh post-gate corpus containing only decisions that remain after all four
+deterministic gates.
+
 The AI/model lane on `codex/intent-classifier-v8` claims AI-543 from merged
 AI-542 base `db6dae8d066e83d53c9d5c20ceab145a820e8c83`. It may freeze a
 fresh classifier-v8 train/development family and unopened v19 evaluation for
