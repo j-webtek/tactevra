@@ -12855,3 +12855,48 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: qualified measured perception and independent arm-lane
   review of the exact batch and shadow receipt before any integration gate can
   advance.
+
+### E-20261009-AI-554 — selected intent crosses actual precision producer
+
+- Stage: S2/S3 synthetic read-only composition rehearsal.
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Commit: claim commit
+  `e6d0c69e11536555b8ab0cbf0db8f9946dab5be6`; the bounded implementation and
+  this evidence row are added together after testing that claimed tree.
+- Change: composes the exact selected classifier-v11 receipt and deterministic
+  repeated-key plan with `PrecisionAdapterResultV2`,
+  `produce_model_motion_batch_v2`, strict registry ingress, and the existing
+  zero-hardware arm shadow. It uses no direct coordinate observations from the
+  intent bridge.
+- Inputs/fixtures: exact selected Ollama digest
+  `348514d04a26efc58552e1eb4395e298ca7bc6f1045fb1777a898acb8d75d207`;
+  synthetic-only 1.0 mm integration qualification covering `H` and `I`;
+  nominal target catalog and typed registry fixtures from the existing precision
+  and shared-boundary tests. Bridge source SHA-256 is
+  `20485cf984715c5a685974c507ed48dcfb59845ae14b0ea5dd4df2861d7e0d05`;
+  integration-test SHA-256 is
+  `591bb4e625f194c9ccedaea9c25f24990e311e731e26cfae057e54b5df973806`.
+- Command: set `PYTHONPATH=software\ai;software\src;software\tests\unit;software\tests\integration;software\ai\tests`,
+  then run `python -m pytest software\tests\integration\test_selected_intent_precision_shadow_v1.py software\ai\tests\test_precision_adapter_v2.py software\tests\integration\test_selected_intent_shadow_bridge_v1.py -q`;
+  then run `python C:\MuJoCoWarp\evidence\issue190\intent_classifier_v11_precision_shadow\run_selected_precision_shadow.py`.
+- Result: PASS, 17 focused tests. The real selected local model preserved
+  `H,H,I`; actual precision production emitted one batch and reached
+  `BLOCKED_CALIBRATION_MISSING_OR_STALE`. Missing precision input, unqualified
+  or low-confidence precision, and safe-region crossing emitted zero batches.
+  Receipt SHA-256 is
+  `37d8ed80446e38a3879309e55098cbcf2e6fd30146da532699502cd970a341db`.
+- Artifacts: [precision shadow bridge](../rocell_ai/selected_intent_precision_shadow_v1.py)
+  and [integration tests](../../tests/integration/test_selected_intent_precision_shadow_v1.py).
+  The runner and receipt are hash-matched on `C:` and `F:` under the respective
+  `issue190/intent_classifier_v11_precision_shadow` evidence directories.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: qualification, placement, registry, calibration, and state are
+  synthetic integration fixtures. The nominal-pose example is constructed to
+  test contract composition and is not a localization accuracy result. No
+  final-camera image, deployment qualification, trajectory clearance,
+  execution, or physical-use claim is made.
+- Supersedes: none.
+- Next dependency: collect the held final-camera physical originals, evaluate
+  the existing precision adapter on disjoint calibration and held-out captures,
+  and install qualification only if its combined error fits the target margin.
