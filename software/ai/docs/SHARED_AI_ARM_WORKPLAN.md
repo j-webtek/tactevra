@@ -1013,6 +1013,14 @@ committed. The increment may not change the public intent schema, weaken the
 deterministic freshness gate, invoke motion planning, promote a model, change
 arm-lane status, or emit commands, hardware writes, movement, or physical
 authority.
+Evidence `E-20261009-AI-534` selects the one-epoch freshness-separated
+candidate to open frozen v15. The generator hash-verified nine historical
+corpora, found zero overlap with 2,295 prior requests, admitted all 945 new
+compositions, and proved every observation explicitly fresh. Development then
+reached 175/175 exact classifications and public intents with zero invalid,
+false actionable, altered-text, or freshness-bypass cases. This remains a
+synthetic development-only result; the unchanged v15 run decides held-out
+retention and cannot confer motion or physical authority.
 
 The AI/model lane on `codex/deterministic-intent-freshness` claims AI-533 from
 merged AI-532 base `df8a4ddb10cea98a58e101d86ff07d6fda5d311f`. It may
