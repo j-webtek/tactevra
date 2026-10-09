@@ -12732,3 +12732,39 @@ rewriting history. New entries must use a unique evidence ID.
   motion, hardware, or physical capability. V22 remains unopened.
 - Next dependency: train the single predeclared two-epoch candidate, then open
   development once under the unchanged exact and zero-unsafe-output gates.
+
+### E-20261009-AI-551 — classifier-v11 passes exact development gates
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: the single two-epoch classifier-v11 candidate and one development
+  opening from merged corpus commit
+  `70263b7d89f585a0d1b6a53ad13f5f2be923f540`. Claim commit is
+  `b3709be7fa3492014d3ba1e337ed0c5229bbf210`.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python software/ai/train/fit_sft.py --data-version classifier-v11 --epochs
+  2 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v11\pilot_2e`.
+  Epoch losses were 0.088990/0.000616 and 0.000425/0.000315 across 126 updates.
+  Adapter SHA-256 is
+  `16639e5bb7a841c5915230e12c9d2f361cd1caef5c47452911fe27b2158b966f`;
+  run-manifest SHA-256 is
+  `629b95a64146633c5b81e3527bd4a26f15aa3c5186465c3838457d9c37880488`.
+- Import result: tag `llama32-1b-rocell-intent-classifier-v11-2e:latest`,
+  digest `348514d04a26efc58552e1eb4395e298ca7bc6f1045fb1777a898acb8d75d207`;
+  import-manifest SHA-256 is
+  `512628a15ae52d641dd3552dd9e8a0a8b79062fd2d7ffa2bbf097dd90d0cd0c9`.
+- Development result: `PASS_CANDIDATE`; exact classification and composition
+  are 225/225. Schema-invalid, false-actionable, altered-text, and all four
+  deterministic-gate counts are zero. Scorecard SHA-256 is
+  `47138071e95d17e1308cc6967a47772a06c3602d465a4fed619c28a7ef1bcc41`.
+  V22 through v16 were not decoded.
+- Backup: the adapter, run manifest, import manifest, and scorecard were copied
+  to `F:\robot-arm-evidence\issue190\intent_classifier_v11\pilot_2e`; hashes
+  match.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only. Physical authority: false.
+- Limitations: synthetic development evidence only; no broad-language,
+  deployment, motion, hardware, or physical qualification. V22 remains sealed.
+- Next dependency: claim and open v22 once with the unchanged candidate and
+  frozen gates, preserving either pass or failure.
