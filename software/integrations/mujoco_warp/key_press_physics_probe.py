@@ -276,6 +276,30 @@ def keyboard_hold_window_admitted(
     return minimum_hold_ms <= hold_ms <= maximum_hold_ms
 
 
+def event_terminated_speed_limit_mm_s(
+    *,
+    actuation_mm: float,
+    bottom_out_mm: float,
+    latency_ms: float,
+    reserved_margin_mm: float,
+) -> float:
+    """Return the maximum descent speed allowed by latency and press window.
+
+    The bound is purely kinematic: speed times worst-case event latency must fit
+    between actuation and bottom-out after reserving the declared margin.
+    """
+
+    values = (actuation_mm, bottom_out_mm, latency_ms, reserved_margin_mm)
+    if not all(math.isfinite(float(value)) for value in values):
+        raise ValueError("event speed-limit inputs must be finite")
+    available = bottom_out_mm - actuation_mm - reserved_margin_mm
+    if actuation_mm <= 0.0 or latency_ms <= 0.0 or reserved_margin_mm < 0.0:
+        raise ValueError("event speed-limit inputs are outside the physical domain")
+    if available <= 0.0:
+        raise ValueError("reserved margin consumes the actuation window")
+    return available * 1000.0 / latency_ms
+
+
 def load_staged_fixture(
     path: Path,
     *,
@@ -576,6 +600,12 @@ def primary_failure(row: dict[str, Any]) -> str:
         return "NONFINITE_OR_OVERFLOW"
     if row.get("neighbor_contact"):
         return "NEIGHBOR_CONTACT"
+    if row.get("wrong_key_event"):
+        return "WRONG_KEY_EVENT"
+    if row.get("late_event_ignored"):
+        return "LATE_EVENT_IGNORED"
+    if row.get("no_event_before_hard_limit"):
+        return "NO_EVENT_BEFORE_HARD_LIMIT"
     if row.get("bottom_out_overflow"):
         return "BOTTOM_OUT"
     if row.get("auto_repeat_count", 0):
@@ -1067,10 +1097,20 @@ def run_smoke_worker(
         if not batch_rows:
             raise ValueError("Stage A batch rows cannot be empty")
         required = {"target_id", "scenario_id", "landing_sample_index"}
+        optional = {"vertical_origin_offset_mm"}
         if vectorized_world_controls:
             required |= {"recipe_index", "compliance_id"}
-        if any(set(row) != required for row in batch_rows):
+        if any(
+            not required.issubset(row) or set(row) - required - optional
+            for row in batch_rows
+        ):
             raise ValueError("Stage A batch row identity changed")
+        if any(
+            type(row.get("vertical_origin_offset_mm", 0.0)) not in (int, float)
+            or not math.isfinite(float(row.get("vertical_origin_offset_mm", 0.0)))
+            for row in batch_rows
+        ):
+            raise ValueError("vertical origin offsets must be finite numbers")
         smoke["target_id"] = batch_rows[0]["target_id"]
         smoke["expected_world_count"] = len(batch_rows)
         if vectorized_world_controls and any(
@@ -1146,6 +1186,10 @@ def run_smoke_worker(
         dtype=np.float64,
     )
     nworld = len(offsets)
+    vertical_origin_offset_mm = np.asarray(
+        [float(row.get("vertical_origin_offset_mm", 0.0)) for row in row_identities],
+        dtype=np.float64,
+    )
     if nworld != smoke["expected_world_count"]:
         raise ValueError("bounded smoke world count changed")
 
@@ -1200,6 +1244,61 @@ def run_smoke_worker(
             0.0 <= float(switch_window["minimum"]) <= float(switch_window["maximum"])
         ):
             raise ValueError("invalid switch closure window")
+    event_termination = (
+        None if control is None else control["control"].get("event_termination")
+    )
+    if event_termination is not None:
+        required_event_fields = {
+            "source",
+            "mode",
+            "latency_ms",
+            "expected_target_id",
+            "reported_target_id",
+            "hard_depth_limit_mm",
+            "reserved_bottom_out_margin_mm",
+            "no_retry",
+            "may_only_shorten_motion",
+        }
+        if set(event_termination) != required_event_fields:
+            raise ValueError("event termination fields changed")
+        if event_termination["source"] != "MODELED_HOST_KEYSTROKE_EVENT":
+            raise ValueError("unsupported event termination source")
+        if event_termination["mode"] not in {
+            "MATCHING",
+            "NO_EVENT",
+            "WRONG_KEY",
+            "LATE_AFTER_RETRACTION",
+        }:
+            raise ValueError("unsupported event termination mode")
+        if (
+            event_termination["expected_target_id"] != smoke["target_id"]
+            or event_termination["no_retry"] is not True
+            or event_termination["may_only_shorten_motion"] is not True
+        ):
+            raise ValueError("event termination lost its fail-closed authority rule")
+        if event_termination["mode"] == "WRONG_KEY":
+            if event_termination["reported_target_id"] in {None, smoke["target_id"]}:
+                raise ValueError("wrong-key event must identify a different target")
+        elif event_termination["mode"] == "NO_EVENT":
+            if event_termination["reported_target_id"] is not None:
+                raise ValueError("no-event mode cannot report a target")
+        elif event_termination["reported_target_id"] != smoke["target_id"]:
+            raise ValueError("matching or late event must identify the expected target")
+        for key in (
+            "latency_ms",
+            "hard_depth_limit_mm",
+            "reserved_bottom_out_margin_mm",
+        ):
+            if type(event_termination[key]) not in (int, float) or not math.isfinite(
+                event_termination[key]
+            ):
+                raise ValueError(f"event termination {key} must be finite")
+        if (
+            float(event_termination["latency_ms"]) <= 0.0
+            or float(event_termination["hard_depth_limit_mm"]) <= 0.0
+            or float(event_termination["reserved_bottom_out_margin_mm"]) < 0.0
+        ):
+            raise ValueError("event termination limits are outside the physical domain")
     if tool_compliance_model not in {None, "NESTED_MOCAP_JOINT", "SERIES_QUASISTATIC"}:
         raise ValueError("unknown tool compliance model")
     if tool_compliance_model == "SERIES_QUASISTATIC" and not vectorized_world_controls:
@@ -1300,7 +1399,21 @@ def run_smoke_worker(
     if control is not None and control["control"].get("control_kind") == "RELEASE":
         release.update(control["control"]["release_protocol_override"])
     extra_s = release["additional_settle_seconds"]
-    total_steps = math.ceil((float(np.max(motion_s)) + extra_s) / dt)
+    if event_termination is not None:
+        hard_depth = float(event_termination["hard_depth_limit_mm"])
+        if hard_depth > float(np.min(press_depth_mm)):
+            raise ValueError("event hard-depth limit cannot extend the frozen recipe")
+        event_descent_s = hard_depth / np.asarray(
+            [float(row["approach_mm_s"]) for row in world_recipes], dtype=np.float64
+        )
+        event_release_s = hard_depth / np.asarray(
+            [float(row["release_mm_s"]) for row in world_recipes], dtype=np.float64
+        )
+        total_steps = math.ceil(
+            (float(np.max(event_descent_s + event_release_s)) + extra_s) / dt
+        )
+    else:
+        total_steps = math.ceil((float(np.max(motion_s)) + extra_s) / dt)
 
     compliance_stiffness = compliance_travel = None
     if world_compliance is not None:
@@ -1323,11 +1436,76 @@ def run_smoke_worker(
     peak_tool_compression_mm = np.zeros(nworld, dtype=np.float64)
     peak_tool_force_n = np.zeros(nworld, dtype=np.float64)
     bottom_overflow = np.zeros(nworld, dtype=bool)
+    activation_time_s = np.full(nworld, np.nan, dtype=np.float64)
+    event_received = np.zeros(nworld, dtype=bool)
+    event_received_time_s = np.full(nworld, np.nan, dtype=np.float64)
+    retract_started = np.zeros(nworld, dtype=bool)
+    retract_start_time_s = np.full(nworld, np.nan, dtype=np.float64)
+    retract_start_displacement_mm = np.zeros(nworld, dtype=np.float64)
+    no_event_before_hard_limit = np.zeros(nworld, dtype=bool)
+    wrong_key_event = np.zeros(nworld, dtype=bool)
+    late_event_ignored = np.zeros(nworld, dtype=bool)
     started = time.perf_counter()
     if settle_pass:
         for step in range(total_steps):
             elapsed = step * dt
-            if vectorized_world_controls:
+            if event_termination is not None:
+                approach_speed = np.asarray(
+                    [float(row["approach_mm_s"]) for row in world_recipes],
+                    dtype=np.float64,
+                )
+                release_speed = np.asarray(
+                    [float(row["release_mm_s"]) for row in world_recipes],
+                    dtype=np.float64,
+                )
+                hard_depth = float(event_termination["hard_depth_limit_mm"])
+                latency_s = float(event_termination["latency_ms"]) / 1000.0
+                mode = event_termination["mode"]
+                due = np.isfinite(activation_time_s) & (
+                    elapsed >= activation_time_s + latency_s
+                )
+                deliver_now = due & ~event_received
+                if mode in {"MATCHING", "WRONG_KEY"}:
+                    event_received |= deliver_now
+                    event_received_time_s = np.where(
+                        deliver_now, elapsed, event_received_time_s
+                    )
+                    wrong_key_event |= deliver_now & (mode == "WRONG_KEY")
+                    late_event_ignored |= (
+                        deliver_now & retract_started & (mode == "MATCHING")
+                    )
+                    start_from_event = deliver_now & ~retract_started
+                else:
+                    start_from_event = np.zeros(nworld, dtype=bool)
+                nominal = np.minimum(approach_speed * elapsed, hard_depth)
+                reached_limit = (nominal >= hard_depth) & ~retract_started
+                start_retract = start_from_event | reached_limit
+                retract_started |= start_retract
+                retract_start_time_s = np.where(
+                    start_retract, elapsed, retract_start_time_s
+                )
+                retract_start_displacement_mm = np.where(
+                    start_retract, nominal, retract_start_displacement_mm
+                )
+                no_event_before_hard_limit |= reached_limit & ~event_received
+                displacement = np.where(
+                    retract_started,
+                    np.maximum(
+                        retract_start_displacement_mm
+                        - release_speed * (elapsed - retract_start_time_s),
+                        0.0,
+                    ),
+                    nominal,
+                )
+                if mode == "LATE_AFTER_RETRACTION":
+                    late_due = retract_started & np.isfinite(activation_time_s) & due
+                    newly_late = late_due & ~event_received
+                    event_received |= newly_late
+                    event_received_time_s = np.where(
+                        newly_late, elapsed, event_received_time_s
+                    )
+                    late_event_ignored |= newly_late
+            elif vectorized_world_controls:
                 displacement = np.where(
                     elapsed < approach_s,
                     press_depth_mm * elapsed / approach_s,
@@ -1354,7 +1532,10 @@ def run_smoke_worker(
                 else:
                     scalar_displacement = 0.0
                 displacement = np.full(nworld, scalar_displacement)
-            effective_displacement = displacement
+            contact_displacement = np.maximum(
+                displacement - vertical_origin_offset_mm, 0.0
+            )
+            effective_displacement = contact_displacement
             modeled_compression_mm: Any = np.zeros(nworld, dtype=np.float64)
             modeled_tool_force_n: Any = np.zeros(nworld, dtype=np.float64)
             if tool_compliance_model == "SERIES_QUASISTATIC":
@@ -1364,7 +1545,7 @@ def run_smoke_worker(
                         compression_scalar,
                         force_scalar,
                     ) = series_compliance_displacement(
-                        float(displacement[0]),
+                        float(contact_displacement[0]),
                         key_stiffness_n_per_mm=values["spring_n_per_mm"],
                         tool_stiffness_n_per_mm=tool_compliance["stiffness_n_per_mm"],
                         tool_travel_mm=tool_compliance["travel_mm"],
@@ -1374,12 +1555,14 @@ def run_smoke_worker(
                     modeled_tool_force_n = np.full(nworld, force_scalar)
                 else:
                     modeled_compression_mm = np.minimum(
-                        displacement
+                        contact_displacement
                         * values["spring_n_per_mm"]
                         / (values["spring_n_per_mm"] + compliance_stiffness),
                         compliance_travel,
                     )
-                    effective_displacement = displacement - modeled_compression_mm
+                    effective_displacement = (
+                        contact_displacement - modeled_compression_mm
+                    )
                     modeled_tool_force_n = compliance_stiffness * modeled_compression_mm
             z_m = (
                 tip_extent_mm
@@ -1397,6 +1580,8 @@ def run_smoke_worker(
             relative_mm = (qpos - rest_qpos) * 1000.0
             center_mm = relative_mm[:, center_joint]
             now_active = center_mm >= actuation_mm
+            first_activation = now_active & ~np.isfinite(activation_time_s)
+            activation_time_s = np.where(first_activation, elapsed, activation_time_s)
             actuation_count += np.logical_and(now_active, ~active)
             active_run = np.where(now_active, active_run + 1, 0)
             maximum_active_run = np.maximum(maximum_active_run, active_run)
@@ -1481,6 +1666,9 @@ def run_smoke_worker(
             "scenario_id": identity["scenario_id"],
             "recipe_index": int(row_recipe["recipe_index"]),
             "landing_sample_index": identity["landing_sample_index"],
+            "vertical_origin_offset_mm": float(
+                identity.get("vertical_origin_offset_mm", 0.0)
+            ),
             "actuation_count": int(actuation_count[index]),
             "auto_repeat_count": int(repeats[index]),
             "neighbor_contact": bool(neighbor_contact[index]),
@@ -1498,6 +1686,34 @@ def run_smoke_worker(
             "final_position_error_mm": float(final_position_error_mm[index]),
             "final_velocity_mm_s": float(final_velocity_mm_s[index]),
         }
+        if event_termination is not None:
+            row.update(
+                {
+                    "event_termination_mode": event_termination["mode"],
+                    "event_latency_ms": float(event_termination["latency_ms"]),
+                    "event_received": bool(event_received[index]),
+                    "event_received_time_ms": (
+                        None
+                        if not math.isfinite(event_received_time_s[index])
+                        else float(event_received_time_s[index] * 1000.0)
+                    ),
+                    "retract_started": bool(retract_started[index]),
+                    "retract_start_time_ms": (
+                        None
+                        if not math.isfinite(retract_start_time_s[index])
+                        else float(retract_start_time_s[index] * 1000.0)
+                    ),
+                    "retract_start_displacement_mm": float(
+                        retract_start_displacement_mm[index]
+                    ),
+                    "no_event_before_hard_limit": bool(
+                        no_event_before_hard_limit[index]
+                    ),
+                    "wrong_key_event": bool(wrong_key_event[index]),
+                    "late_event_ignored": bool(late_event_ignored[index]),
+                    "retry_count": 0,
+                }
+            )
         if switch_window is not None:
             row["debounce_hold_complete"] = keyboard_hold_window_admitted(
                 row["dwell_above_actuation_ms"],
@@ -1519,6 +1735,9 @@ def run_smoke_worker(
             and row["release_complete"]
             and row["force_within_available"]
             and row.get("debounce_hold_complete", True)
+            and not row.get("no_event_before_hard_limit", False)
+            and not row.get("wrong_key_event", False)
+            and not row.get("late_event_ignored", False)
         )
         rows.append(row)
     stack = _stack()
@@ -1586,6 +1805,19 @@ def run_smoke_worker(
             receipt["tool_compliance_options"] = control["control"][
                 "tool_compliance_options"
             ]
+        if event_termination is not None:
+            receipt["event_termination"] = event_termination
+            receipt["batch_stop_required"] = bool(
+                any(row["wrong_key_event"] for row in rows)
+            )
+            receipt["event_authority"] = {
+                "may_start_motion": False,
+                "may_deepen_motion": False,
+                "may_extend_motion": False,
+                "may_retry_motion": False,
+                "may_redirect_motion": False,
+                "may_start_early_retraction": True,
+            }
         positive_pass = bool(
             all(row["actuation_count"] == 1 for row in rows)
             and not any(row["partial_press"] for row in rows)

@@ -43,7 +43,8 @@ WS2_MECHANISMS = (
     ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
 )
 WS2_VECTOR_FIXTURE = (
-    ROOT / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2.json"
+    ROOT
+    / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2_1.json"
 )
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",
@@ -59,6 +60,16 @@ WS2_SPEC = importlib.util.spec_from_file_location(
 WS2_PROBE = importlib.util.module_from_spec(WS2_SPEC)
 assert WS2_SPEC.loader is not None
 WS2_SPEC.loader.exec_module(WS2_PROBE)
+WS2_EVENT_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_terminated_press_v1_4.json"
+)
+WS2_EVENT_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_terminated_press",
+    ROOT / "software/ai/sim/run_ws2_event_terminated_press.py",
+)
+assert WS2_EVENT_SPEC and WS2_EVENT_SPEC.loader
+WS2_EVENT_RUNNER = importlib.util.module_from_spec(WS2_EVENT_SPEC)
+WS2_EVENT_SPEC.loader.exec_module(WS2_EVENT_RUNNER)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -200,6 +211,82 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
         41,
         49,
     ]
+
+
+def test_event_terminated_speed_limit_and_failure_paths():
+    assert WS2_PROBE.event_terminated_speed_limit_mm_s(
+        actuation_mm=1.8,
+        bottom_out_mm=3.0,
+        latency_ms=40.0,
+        reserved_margin_mm=0.2,
+    ) == pytest.approx(25.0)
+    assert WS2_PROBE.event_terminated_speed_limit_mm_s(
+        actuation_mm=1.8,
+        bottom_out_mm=3.0,
+        latency_ms=5.0,
+        reserved_margin_mm=0.2,
+    ) == pytest.approx(200.0)
+    with pytest.raises(ValueError, match="reserved margin consumes"):
+        WS2_PROBE.event_terminated_speed_limit_mm_s(
+            actuation_mm=1.8,
+            bottom_out_mm=3.0,
+            latency_ms=40.0,
+            reserved_margin_mm=1.2,
+        )
+    assert (
+        WS2_PROBE.primary_failure(
+            {"partial_press": True, "no_event_before_hard_limit": True}
+        )
+        == "NO_EVENT_BEFORE_HARD_LIMIT"
+    )
+    assert (
+        WS2_PROBE.primary_failure(
+            {"no_event_before_hard_limit": True, "late_event_ignored": True}
+        )
+        == "LATE_EVENT_IGNORED"
+    )
+    assert (
+        WS2_PROBE.primary_failure({"wrong_key_event": True, "neighbor_contact": False})
+        == "WRONG_KEY_EVENT"
+    )
+
+
+def test_event_terminated_fixture_and_control_are_fail_closed():
+    fixture = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    assert fixture["design"]["latency_ms_range"] == [5.0, 40.0]
+    assert fixture["design"]["initial_target_ids"] == ["GRAVE", "EQUAL"]
+    assert set(fixture["counters"].values()) == {0}
+    campaign, _, physical = WS2_EVENT_RUNNER.load_bound(fixture)
+    control = WS2_EVENT_RUNNER._control(
+        fixture,
+        physical=physical,
+        target_id="GRAVE",
+        profile_id="travel_mm__LOW",
+        scenario_id="MID_SOURCE_MID_RESIDUAL",
+        latency_ms=40.0,
+        mode="MATCHING",
+        approach_mm_s=20.0,
+    )["control"]
+    assert control["physical_keycap_half_extent_mm"] == [7.0, 7.0]
+    assert control["event_termination"] == {
+        "source": "MODELED_HOST_KEYSTROKE_EVENT",
+        "mode": "MATCHING",
+        "latency_ms": 40.0,
+        "expected_target_id": "GRAVE",
+        "reported_target_id": "GRAVE",
+        "hard_depth_limit_mm": 5.0703125,
+        "reserved_bottom_out_margin_mm": 0.2,
+        "no_retry": True,
+        "may_only_shorten_motion": True,
+    }
+    profile = next(
+        row
+        for row in WS2_PROBE.physical_profiles(campaign)
+        if row["profile_id"] == "travel_mm__LOW"
+    )
+    limit, selected = WS2_EVENT_RUNNER._event_speed(fixture, profile, 40.0)
+    assert limit == pytest.approx(5.0)
+    assert selected == pytest.approx(4.0)
 
 
 def test_ws2_runtime_amendment_changes_only_stack_identity():
