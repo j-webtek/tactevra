@@ -998,6 +998,18 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-device-binding` claims AI-542 from recorded
+AI-541 rejection commit `6faebb30e74bb696604400f41ff871fe1c4d3e8c`. It may add a
+deterministic requested-device binding at the motion-free composition boundary.
+An actionable `TYPE_TEXT` classification may compose only when the request
+identifies exactly one supported device and that device agrees with the model
+classification; missing, conflicting, or mismatched device evidence must become
+`CLARIFY(device_ambiguous)`. The consumed classifier-v7 development result may
+be replayed only as a corrective boundary diagnostic and may not be rescored for
+model selection. Frozen v18, v17, and v16 remain unopened. This increment may
+not construct ModelMotionBatch, invoke motion, emit commands, change arm-lane
+status, or claim execution or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v7` claims AI-541 from merged
 AI-540 base `4cf25879c4818a547a5bfd6717741d916b54fe75`. It may freeze a
 fresh classifier-v7 train/development family and unopened v18 evaluation for
