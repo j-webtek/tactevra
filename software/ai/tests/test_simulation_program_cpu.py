@@ -44,7 +44,7 @@ WS2_MECHANISMS = (
 )
 WS2_VECTOR_FIXTURE = (
     ROOT
-    / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2_1.json"
+    / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2_2.json"
 )
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",
@@ -61,7 +61,7 @@ WS2_PROBE = importlib.util.module_from_spec(WS2_SPEC)
 assert WS2_SPEC.loader is not None
 WS2_SPEC.loader.exec_module(WS2_PROBE)
 WS2_EVENT_FIXTURE = (
-    ROOT / "software/ai/sim/evidence/ws2_event_terminated_press_v1_4.json"
+    ROOT / "software/ai/sim/evidence/ws2_event_terminated_press_v1_5.json"
 )
 WS2_EVENT_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_event_terminated_press",
@@ -71,7 +71,7 @@ assert WS2_EVENT_SPEC and WS2_EVENT_SPEC.loader
 WS2_EVENT_RUNNER = importlib.util.module_from_spec(WS2_EVENT_SPEC)
 WS2_EVENT_SPEC.loader.exec_module(WS2_EVENT_RUNNER)
 WS2_EVENT_CONTROL_FIXTURE = (
-    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v1.json"
+    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v3.json"
 )
 WS2_EVENT_CONTROL_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_event_hard_limit_control",
@@ -81,7 +81,7 @@ assert WS2_EVENT_CONTROL_SPEC and WS2_EVENT_CONTROL_SPEC.loader
 WS2_EVENT_CONTROL_RUNNER = importlib.util.module_from_spec(WS2_EVENT_CONTROL_SPEC)
 WS2_EVENT_CONTROL_SPEC.loader.exec_module(WS2_EVENT_CONTROL_RUNNER)
 WS2_EVENT_CONTROL_FIXTURE_V2 = (
-    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v2.json"
+    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v4.json"
 )
 WS2_EVENT_CONTROL_SPEC_V2 = importlib.util.spec_from_file_location(
     "run_ws2_event_hard_limit_control_v2",
@@ -844,6 +844,24 @@ def test_ws2_series_compliance_partitions_command_and_caps_travel():
             tool_stiffness_n_per_mm=0.0,
             tool_travel_mm=6.0,
         )
+
+
+def test_ws2_series_compliance_preserves_mixed_world_commands():
+    np = pytest.importorskip("numpy")
+    commanded = np.asarray([5.5703125, 5.0703125, 4.5703125])
+    effective, compression, force = WS2_PROBE.series_compliance_displacement_rows(
+        np,
+        commanded,
+        key_stiffness_n_per_mm=1.3,
+        tool_stiffness_n_per_mm=0.286,
+        tool_travel_mm=6.0,
+    )
+    assert effective.shape == commanded.shape
+    assert compression.shape == commanded.shape
+    assert force.shape == commanded.shape
+    assert effective[0] > effective[1] > effective[2]
+    assert compression[0] > compression[1] > compression[2]
+    assert effective + compression == pytest.approx(commanded)
 
 
 def test_ws2_tampering_and_cross_gpu_drift_stop():

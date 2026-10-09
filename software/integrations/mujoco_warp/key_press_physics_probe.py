@@ -258,6 +258,48 @@ def series_compliance_displacement(
     return effective_key_command_mm, compression_mm, tool_force_n
 
 
+def series_compliance_displacement_rows(
+    np: Any,
+    commanded_mm: Any,
+    *,
+    key_stiffness_n_per_mm: float,
+    tool_stiffness_n_per_mm: Any,
+    tool_travel_mm: Any,
+) -> tuple[Any, Any, Any]:
+    """Partition each world's command without broadcasting the first world.
+
+    ``tool_stiffness_n_per_mm`` and ``tool_travel_mm`` may be scalars or arrays,
+    but NumPy broadcasting must produce exactly the command shape.  This keeps
+    mixed vertical-origin batches physically distinct in the scalar-recipe path.
+    """
+    commanded = np.asarray(commanded_mm, dtype=np.float64)
+    stiffness = np.broadcast_to(
+        np.asarray(tool_stiffness_n_per_mm, dtype=np.float64), commanded.shape
+    )
+    travel = np.broadcast_to(
+        np.asarray(tool_travel_mm, dtype=np.float64), commanded.shape
+    )
+    if (
+        not np.isfinite(commanded).all()
+        or not np.isfinite(stiffness).all()
+        or not np.isfinite(travel).all()
+        or not math.isfinite(float(key_stiffness_n_per_mm))
+    ):
+        raise ValueError("series-compliance inputs must be finite")
+    if (
+        np.any(commanded < 0.0)
+        or key_stiffness_n_per_mm <= 0.0
+        or np.any(stiffness <= 0.0)
+        or np.any(travel <= 0.0)
+    ):
+        raise ValueError("series-compliance inputs are outside the physical domain")
+    compression = np.minimum(
+        commanded * key_stiffness_n_per_mm / (key_stiffness_n_per_mm + stiffness),
+        travel,
+    )
+    return commanded - compression, compression, stiffness * compression
+
+
 def keyboard_hold_window_admitted(
     hold_ms: float,
     *,
@@ -1540,30 +1582,19 @@ def run_smoke_worker(
             modeled_tool_force_n: Any = np.zeros(nworld, dtype=np.float64)
             if tool_compliance_model == "SERIES_QUASISTATIC":
                 if world_compliance is None:
-                    (
-                        effective_scalar,
-                        compression_scalar,
-                        force_scalar,
-                    ) = series_compliance_displacement(
-                        float(contact_displacement[0]),
-                        key_stiffness_n_per_mm=values["spring_n_per_mm"],
-                        tool_stiffness_n_per_mm=tool_compliance["stiffness_n_per_mm"],
-                        tool_travel_mm=tool_compliance["travel_mm"],
-                    )
-                    effective_displacement = np.full(nworld, effective_scalar)
-                    modeled_compression_mm = np.full(nworld, compression_scalar)
-                    modeled_tool_force_n = np.full(nworld, force_scalar)
-                else:
-                    modeled_compression_mm = np.minimum(
-                        contact_displacement
-                        * values["spring_n_per_mm"]
-                        / (values["spring_n_per_mm"] + compliance_stiffness),
-                        compliance_travel,
-                    )
-                    effective_displacement = (
-                        contact_displacement - modeled_compression_mm
-                    )
-                    modeled_tool_force_n = compliance_stiffness * modeled_compression_mm
+                    compliance_stiffness = float(tool_compliance["stiffness_n_per_mm"])
+                    compliance_travel = float(tool_compliance["travel_mm"])
+                (
+                    effective_displacement,
+                    modeled_compression_mm,
+                    modeled_tool_force_n,
+                ) = series_compliance_displacement_rows(
+                    np,
+                    contact_displacement,
+                    key_stiffness_n_per_mm=values["spring_n_per_mm"],
+                    tool_stiffness_n_per_mm=compliance_stiffness,
+                    tool_travel_mm=compliance_travel,
+                )
             z_m = (
                 tip_extent_mm
                 - rest_qpos[:, center_joint] * 1000.0
