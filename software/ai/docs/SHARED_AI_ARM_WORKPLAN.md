@@ -1011,6 +1011,15 @@ second v22 opening is allowed. Any miss rejects the candidate and must be
 preserved. This increment may not construct ModelMotionBatch, invoke motion,
 emit commands, change arm-lane status, or claim execution or physical
 authority.
+Evidence `E-20261009-AI-552` passes the one-time v22 evaluation at 250/250
+exact classification and composition with zero schema-invalid,
+false-actionable, altered-text, or deterministic-gate rows. The unchanged
+classifier-v11 candidate is selected under the frozen synthetic language
+contract. This is offline language evidence only and grants no motion or
+hardware authority. The next AI dependency is a separately claimed read-only
+shadow integration that pins this digest and exercises intent classification,
+deterministic text compilation, and the existing ModelMotionBatch boundary
+without execution.
 
 The AI/model lane on `codex/intent-classifier-v11-training` claims AI-551 from
 merged AI-550A base `70263b7d89f585a0d1b6a53ad13f5f2be923f540`. It may train

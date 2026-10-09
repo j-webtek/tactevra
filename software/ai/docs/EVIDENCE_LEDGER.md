@@ -12768,3 +12768,45 @@ rewriting history. New entries must use a unique evidence ID.
   deployment, motion, hardware, or physical qualification. V22 remains sealed.
 - Next dependency: claim and open v22 once with the unchanged candidate and
   frozen gates, preserving either pass or failure.
+
+### E-20261009-AI-552 — classifier-v11 passes held-out v22 exactly
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: the single held-out v22 opening using the unchanged classifier-v11
+  candidate from merged development-pass commit
+  `7295d8b0403cb343711f714405bb2f5c8857b446`. Claim commit is
+  `f77dbf338db9acdbdf40891ed85f10bb669033ae`.
+- Evaluation command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\eval\intent_classifier_v22.jsonl --manifest
+  software\ai\data\intent_classifier_v11.manifest.json --split evaluation
+  --model llama32-1b-rocell-intent-classifier-v11-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --deterministic-phone-state
+  --deterministic-text-ambiguity --deterministic-device-ambiguity
+  --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v11\pilot_2e\evaluation_v22_scorecard.json`.
+- Frozen inputs: v22 SHA-256
+  `c149d3c761c2c82a060d6d25df849fc6bacf19d4bd20780b75f138aa63970a85`;
+  adapter SHA-256
+  `16639e5bb7a841c5915230e12c9d2f361cd1caef5c47452911fe27b2158b966f`;
+  unchanged Ollama digest
+  `348514d04a26efc58552e1eb4395e298ca7bc6f1045fb1777a898acb8d75d207`.
+  Evaluation opened once with no retraining or contract change.
+- Result: `PASS_CANDIDATE`; exact classification and composition are 250/250.
+  Schema-invalid, false-actionable, altered-text, and all four deterministic
+  gate counts are zero. Scorecard SHA-256 is
+  `c2c6eff27df62cbc5cc165a11a0fa6dd6960f40f05f2e743d2c9d0dc525900cc`.
+- Backup: the scorecard and evaluation evidence manifest were copied to
+  `F:\robot-arm-evidence\issue190\intent_classifier_v11\pilot_2e`; source and
+  backup hashes match. Evaluation evidence-manifest SHA-256 is
+  `201d827b9a34688f6a694c2eb2ddff66658b73938f7b9cc14ba74bb15eadafc4`.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Local
+  Ollama inference only. Physical authority: false.
+- Limitations: synthetic held-out language evidence only; no unrestricted
+  language, deployment, motion, hardware, or physical qualification. Passing
+  v22 selects the candidate only for bounded offline integration.
+- Next dependency: pin this exact digest in a separately claimed read-only
+  shadow integration from classification through deterministic text compilation
+  and the existing ModelMotionBatch boundary, with zero execution authority.
