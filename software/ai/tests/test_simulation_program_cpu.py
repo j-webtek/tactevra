@@ -70,6 +70,26 @@ WS2_EVENT_SPEC = importlib.util.spec_from_file_location(
 assert WS2_EVENT_SPEC and WS2_EVENT_SPEC.loader
 WS2_EVENT_RUNNER = importlib.util.module_from_spec(WS2_EVENT_SPEC)
 WS2_EVENT_SPEC.loader.exec_module(WS2_EVENT_RUNNER)
+WS2_EVENT_CONTROL_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v1.json"
+)
+WS2_EVENT_CONTROL_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_hard_limit_control",
+    ROOT / "software/ai/sim/run_ws2_event_hard_limit_control.py",
+)
+assert WS2_EVENT_CONTROL_SPEC and WS2_EVENT_CONTROL_SPEC.loader
+WS2_EVENT_CONTROL_RUNNER = importlib.util.module_from_spec(WS2_EVENT_CONTROL_SPEC)
+WS2_EVENT_CONTROL_SPEC.loader.exec_module(WS2_EVENT_CONTROL_RUNNER)
+WS2_EVENT_CONTROL_FIXTURE_V2 = (
+    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v2.json"
+)
+WS2_EVENT_CONTROL_SPEC_V2 = importlib.util.spec_from_file_location(
+    "run_ws2_event_hard_limit_control_v2",
+    ROOT / "software/ai/sim/run_ws2_event_hard_limit_control_v2.py",
+)
+assert WS2_EVENT_CONTROL_SPEC_V2 and WS2_EVENT_CONTROL_SPEC_V2.loader
+WS2_EVENT_CONTROL_RUNNER_V2 = importlib.util.module_from_spec(WS2_EVENT_CONTROL_SPEC_V2)
+WS2_EVENT_CONTROL_SPEC_V2.loader.exec_module(WS2_EVENT_CONTROL_RUNNER_V2)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -287,6 +307,57 @@ def test_event_terminated_fixture_and_control_are_fail_closed():
     limit, selected = WS2_EVENT_RUNNER._event_speed(fixture, profile, 40.0)
     assert limit == pytest.approx(5.0)
     assert selected == pytest.approx(4.0)
+
+
+def test_event_hard_limit_control_is_inside_compliant_window():
+    fixture = WS2_EVENT_CONTROL_RUNNER.load_fixture(WS2_EVENT_CONTROL_FIXTURE)
+    design = fixture["design"]
+    assert design["actuation_plus_tool_compression_mm"] == pytest.approx(
+        3.3272727272727276
+    )
+    assert design["bottom_out_plus_tool_compression_mm"] == pytest.approx(
+        5.545454545454546
+    )
+    assert (
+        design["actuation_plus_tool_compression_mm"]
+        < design["hard_depth_limit_mm"]
+        < design["bottom_out_plus_tool_compression_mm"]
+    )
+    parent_fixture = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent_fixture)
+    control = WS2_EVENT_CONTROL_RUNNER._control(fixture, parent_fixture, physical)[
+        "control"
+    ]
+    assert control["recipe_override"]["approach_mm_s"] == pytest.approx(0.5)
+    assert control["event_termination"]["hard_depth_limit_mm"] == pytest.approx(5.0)
+    assert {row["vertical_origin_offset_mm"] for row in control["batch_rows"]} == {0.0}
+
+
+def test_event_hard_limit_control_tampering_stops(tmp_path: Path):
+    fixture = json.loads(WS2_EVENT_CONTROL_FIXTURE.read_text(encoding="utf-8"))
+    fixture["design"]["hard_depth_limit_mm"] = 6.0
+    fixture_without_hash = {
+        key: value for key, value in fixture.items() if key != "fixture_sha256"
+    }
+    fixture["fixture_sha256"] = WS2_EVENT_CONTROL_RUNNER.value_sha(fixture_without_hash)
+    path = tmp_path / "tampered.json"
+    path.write_text(json.dumps(fixture), encoding="utf-8")
+    with pytest.raises(ValueError, match="declared compliant window"):
+        WS2_EVENT_CONTROL_RUNNER.load_fixture(path)
+
+
+def test_deeper_event_mechanism_control_stays_below_compliant_bottom_out():
+    fixture = WS2_EVENT_CONTROL_RUNNER_V2.load_fixture(WS2_EVENT_CONTROL_FIXTURE_V2)
+    design = fixture["design"]
+    assert design["nominal_simulated_press_depth_mm"] == pytest.approx(5.4)
+    assert design["hard_depth_limit_mm"] < design["bottom_out_plus_tool_compression_mm"]
+    parent_fixture = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent_fixture)
+    control = WS2_EVENT_CONTROL_RUNNER_V2._control(fixture, parent_fixture, physical)[
+        "control"
+    ]
+    assert control["recipe_override"]["press_depth_mm"] == pytest.approx(5.4)
+    assert control["event_termination"]["hard_depth_limit_mm"] == pytest.approx(5.4)
 
 
 def test_ws2_runtime_amendment_changes_only_stack_identity():
