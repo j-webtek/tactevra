@@ -998,6 +998,22 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v8` claims AI-543 from merged
+AI-542 base `db6dae8d066e83d53c9d5c20ceab145a820e8c83`. It may freeze a
+fresh classifier-v8 train/development family and unopened v19 evaluation for
+decisions remaining after deterministic freshness, phone-state, and requested-
+device binding. Every actionable request must identify exactly one supported
+device and compose through the safe default; no legacy composition option is
+allowed in the new corpus. Generation must hash-verify all decoded historical
+classifier corpora, hash-verify sealed v16 through v18 without decoding, prove
+zero case-insensitive request overlap, and preserve unique family-neutral
+provenance. One candidate is predeclared for exactly two epochs from the same
+cached 1B base, followed by one development opening with hard zero limits for
+schema-invalid, false-actionable, and altered-text output. V19 may open only
+after a passing development decision is committed. This increment may not
+construct ModelMotionBatch, invoke motion, emit commands, change arm-lane
+status, or claim execution or physical authority.
+
 The AI/model lane on `codex/intent-device-binding` claims AI-542 from recorded
 AI-541 rejection commit `6faebb30e74bb696604400f41ff871fe1c4d3e8c`. It may add a
 deterministic requested-device binding at the motion-free composition boundary.
