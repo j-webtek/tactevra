@@ -12242,3 +12242,45 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze a fresh classifier corpus whose every actionable
   request names exactly one device, then train one bounded successor and require
   a passing development decision before opening its new sealed evaluation.
+
+### E-20261009-AI-543A — explicit-device classifier-v8 corpus frozen
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: pre-result classifier-v8 corpus freeze from merged AI-542 base
+  `db6dae8d066e83d53c9d5c20ceab145a820e8c83`. Claim commit is
+  `e6326d1c02c8ea4928fcc27891473be98bb37773`; frozen corpus commit is
+  `d1d1603f95eaade7656f64a69c35449f8daf0959`; source normalization commit is
+  `83bbbdce15ca87b874416b6276c89fe2bbfa8f1c`.
+- Exact generation command: set `PYTHONPATH=software\\ai;software\\src`, then
+  run `python software/ai/train/build_intent_classifier_v8_data.py`.
+- Fixtures: 1,400 training, 315 development, and 350 sealed v19 evaluation
+  cases. Training SHA-256 is
+  `373277bc0de8275cf27d4248eaf694fd28133a2af68ab2b6edbb5b8012a29b72`;
+  development SHA-256 is
+  `bf2705c70f432949658b0b5c4de4421a17d655db53b23995530d9eb782455dda`;
+  data-manifest SHA-256 is
+  `1e8539a3bc1c5e9e72717b412c0d62a66a91a7e1537b44409f9fc0490c80a535`;
+  sealed v19 SHA-256 is
+  `5a0ad38af8ba114523bb8893ef8721500973d460c93edf563afddf2958fa138a`;
+  sealed-manifest SHA-256 is
+  `2b14b7f9f46a56565c49e9dd8aba9ff473149ed77f597bbeb8a963e6bf5aeb58`.
+- Admission: every one of 2,065 rows composes exactly through deterministic
+  requested-device binding, passes freshness, is not intercepted by phone-state
+  refusal, and exposes only decision state to the model. Generation found zero
+  case-insensitive overlap with 6,915 requests in 18 decoded historical corpora
+  and hash-verified sealed v16, v17, and v18 without decoding them.
+- Verification: `python -m pytest software/ai/tests/test_offline.py -q` passed
+  54. Ruff passed for the generator, trainer, and focused tests.
+  `python scripts/ci/check_source_archive_footprint.py` passed at 6,591 tracked
+  files and 668,739,579 logical bytes. The reviewed ceiling moved from 6,585 to
+  6,591 for exactly one generator, three train/development/manifest files, and
+  two sealed v19 files; other archive limits remain unchanged.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Model-call
+  count: 0.
+- Limitations: synthetic agent-authored language only. The corpus does not
+  establish broad language, deployment, motion, hardware, or physical
+  capability. V19, v18, v17, and v16 remain unopened.
+- Next dependency: train the single predeclared two-epoch candidate from the
+  cached 1B base, then open development once under exact classification and
+  composition gates. V19 remains sealed until a committed development pass.

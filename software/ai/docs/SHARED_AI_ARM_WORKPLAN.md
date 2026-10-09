@@ -1013,6 +1013,13 @@ schema-invalid, false-actionable, and altered-text output. V19 may open only
 after a passing development decision is committed. This increment may not
 construct ModelMotionBatch, invoke motion, emit commands, change arm-lane
 status, or claim execution or physical authority.
+Evidence `E-20261009-AI-543A` freezes 1,400 training, 315 development, and 350
+sealed v19 cases. All 2,065 rows compose through requested-device binding;
+generation found zero overlap with 6,915 decoded historical requests and hash-
+verified sealed v16 through v18 without decoding. Focused tests pass 54, Ruff
+passes, and the deliberately advanced 6,591-file archive ceiling passes. V19
+is unopened. The next authorized step is the single predeclared two-epoch local
+candidate followed by one development opening.
 
 The AI/model lane on `codex/intent-device-binding` claims AI-542 from recorded
 AI-541 rejection commit `6faebb30e74bb696604400f41ff871fe1c4d3e8c`. It may add a
