@@ -998,6 +998,29 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-device-ambiguity-gate` claims AI-546 from
+merged AI-545 base `c702b9fa924d559fdbb32f6c6461c535ca3de590`. It may add a
+narrow, motion-free explicit-device ambiguity gate before local model inference.
+Only requests in the closed grammar that ask which destination device or input
+surface should receive exactly one literal payload may become
+`CLARIFY(device_ambiguous)` with zero model calls and zero semantic actions.
+Freshness, unverified phone-state, and text-ambiguity decisions retain
+precedence. Unavailable workflows must not be reclassified as device ambiguity.
+Consumed classifier-v9 development may be replayed only as corrective boundary
+evidence and may not be rescored for model selection. Frozen v20 through v16
+remain unopened. This increment may not construct ModelMotionBatch, invoke
+motion, emit commands, change arm-lane status, or claim execution or physical
+authority.
+Evidence `E-20261009-AI-546` completes the claimed boundary. The closed gate
+matches all 200 v9 training and 45 v9 development device-clarification rows and
+zero other-family rows. A corrective replay of the already opened v9
+development scorecard moved exact classification and composition from 264/270
+to 270/270, corrected all six prior misses, and retained the other 225 prior
+model outputs. Workflow requests remain model decisions. This is boundary
+evidence rather than model reselection; v20 through v16 remain unopened. The
+next AI dependency is a fresh corpus containing only actionable typing and
+unavailable-workflow decisions that remain after all deterministic gates.
+
 The AI/model lane on `codex/intent-classifier-v9` claims AI-545 from merged
 AI-544 base `c329ca12457b19fd35c4a23c0aa8a156a060f207`. It may freeze one
 fresh post-gate classifier corpus containing only the six decision families

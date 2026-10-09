@@ -77,6 +77,7 @@ from build_intent_classifier_v9_data import (  # noqa: E402
 )
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
+    deterministic_device_ambiguity_classification_v1,
     deterministic_phone_state_classification_v1,
     deterministic_text_ambiguity_classification_v1,
     extract_requested_device_v1,
@@ -411,6 +412,37 @@ class OfflineContractTests(unittest.TestCase):
             result["rows"][0]["classification_source"],
             "DETERMINISTIC_TEXT_AMBIGUITY_GATE",
         )
+
+    def test_device_ambiguity_gate_is_narrow_and_bypasses_classifier(self) -> None:
+        request = 'Specify the destination input surface for "Rr8 maple85400&&".'
+        expected = {
+            "schema": "rocell.offline_intent_classification.v1",
+            "intent_type": "CLARIFY",
+            "question": "device_ambiguous",
+        }
+        self.assertEqual(deterministic_device_ambiguity_classification_v1(request), expected)
+        for untouched in (
+            'Send "oak" to someone through an app.',
+            'Type "oak" on the physical keyboard.',
+            'Choose between "oak" and "willow".',
+            "Specify the destination input surface.",
+        ):
+            self.assertIsNone(deterministic_device_ambiguity_classification_v1(untouched))
+        case = {
+            "id": "device-ambiguous", "request": request,
+            "observation": {"fresh": True}, "target": expected,
+            "composed_target": {**expected, "schema": "rocell.offline_typing_intent.v1"},
+        }
+        calls = []
+        result = score_classifier(
+            [case], "a" * 64, model="fixture", model_digest="b" * 64,
+            generate=lambda item: calls.append(item) or "{}",
+            deterministic_freshness=True, deterministic_phone_state=True,
+            deterministic_text_ambiguity=True, deterministic_device_ambiguity=True,
+        )
+        self.assertEqual(result["decision"], "PASS_CANDIDATE")
+        self.assertEqual(result["deterministic_device_ambiguity_gate_count"], 1)
+        self.assertEqual(calls, [])
 
     def test_classifier_v3_data_is_composable_and_historically_disjoint(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v3_data()

@@ -167,6 +167,24 @@ def test_freshness_and_phone_state_precede_text_ambiguity() -> None:
     assert phone["classification_source"] == "DETERMINISTIC_PHONE_STATE_GATE"
 
 
+def test_device_ambiguity_bypasses_model_but_workflow_does_not() -> None:
+    result, calls = _run(
+        request='Specify the destination input surface for "Rr8 maple85400&&".',
+    )
+    assert calls == []
+    assert result["classification_source"] == "DETERMINISTIC_DEVICE_AMBIGUITY_GATE"
+    assert result["classification"]["question"] == "device_ambiguous"
+    assert result["semantic_action_count"] == result["model_call_count"] == 0
+    assert parse_intent_shadow_receipt_v1(result) == result
+
+    workflow, workflow_calls = _run(
+        request='Send "oak" to someone through an app.',
+        response=_classification("REFUSE", "operation_not_available"),
+    )
+    assert len(workflow_calls) == 1
+    assert workflow["classification_source"] == "LOCAL_MODEL"
+
+
 @pytest.mark.parametrize("observation", [{}, {"fresh": "yes"}, {"fresh": 1}])
 def test_missing_or_non_boolean_freshness_fails_closed(observation) -> None:
     with pytest.raises(IntentShadowRuntimeV1Error, match="explicit boolean"):
@@ -261,6 +279,15 @@ def test_receipt_tampering_and_authority_changes_are_rejected() -> None:
         json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     with pytest.raises(IntentShadowRuntimeV1Error, match="text-ambiguity gate"):
+        parse_intent_shadow_receipt_v1(changed)
+    changed = copy.deepcopy(result)
+    changed["classification_source"] = "DETERMINISTIC_DEVICE_AMBIGUITY_GATE"
+    changed["model_call_count"] = 0
+    unsigned = {key: value for key, value in changed.items() if key != "receipt_sha256"}
+    changed["receipt_sha256"] = hashlib.sha256(
+        json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    with pytest.raises(IntentShadowRuntimeV1Error, match="device-ambiguity gate"):
         parse_intent_shadow_receipt_v1(changed)
 
 

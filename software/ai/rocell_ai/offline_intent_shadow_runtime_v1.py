@@ -20,6 +20,7 @@ from .offline_intent_contract_v1 import (
     SYSTEM_PROMPT,
     classifier_model_observation_v1,
     compose_public_intent_v1,
+    deterministic_device_ambiguity_classification_v1,
     deterministic_freshness_classification_v1,
     deterministic_phone_state_classification_v1,
     deterministic_text_ambiguity_classification_v1,
@@ -161,6 +162,9 @@ def run_intent_shadow_runtime_v1(
     if gated is None:
         gated = deterministic_text_ambiguity_classification_v1(request_text)
         source = "DETERMINISTIC_TEXT_AMBIGUITY_GATE"
+    if gated is None:
+        gated = deterministic_device_ambiguity_classification_v1(request_text)
+        source = "DETERMINISTIC_DEVICE_AMBIGUITY_GATE"
     model_calls = 0
     if gated is None:
         model_observation = classifier_model_observation_v1(normalized_observation)
@@ -262,6 +266,7 @@ def parse_intent_shadow_receipt_v1(document: Mapping[str, Any]) -> dict[str, Any
         "DETERMINISTIC_FRESHNESS_GATE": 0,
         "DETERMINISTIC_PHONE_STATE_GATE": 0,
         "DETERMINISTIC_TEXT_AMBIGUITY_GATE": 0,
+        "DETERMINISTIC_DEVICE_AMBIGUITY_GATE": 0,
     }
     if document["classification_source"] not in source_calls:
         raise IntentShadowRuntimeV1Error("classification source changed")
@@ -279,6 +284,10 @@ def parse_intent_shadow_receipt_v1(document: Mapping[str, Any]) -> dict[str, Any
         classification.get("question") != "text_ambiguous"
     ):
         raise IntentShadowRuntimeV1Error("text-ambiguity gate classification changed")
+    if document["classification_source"] == "DETERMINISTIC_DEVICE_AMBIGUITY_GATE" and (
+        classification.get("question") != "device_ambiguous"
+    ):
+        raise IntentShadowRuntimeV1Error("device-ambiguity gate classification changed")
     if classification["intent_type"] != "TYPE_TEXT" and composed != {
         **classification,
         "schema": "rocell.offline_typing_intent.v1",
