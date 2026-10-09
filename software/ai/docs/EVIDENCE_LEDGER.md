@@ -12336,3 +12336,55 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: add a deterministic text-candidate ambiguity boundary so
   requests with zero or multiple exact payload candidates cannot depend on a
   model's clarification subtype; then freeze a fresh successor campaign.
+
+### E-20261009-AI-544 — explicit text ambiguity is gated before inference
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: deterministic, motion-free text-candidate ambiguity boundary from
+  merged AI-543 base `2a60e6b701a76241a3f4aa4ec68fea27f3619484`.
+  Claim commit is `354287247256078ee5efdee406396a1250337642` and implementation
+  commit is `f9c4986978c387860bc6776b40b1228d8fbcb83d`.
+- Contract: two distinct quoted payloads, or two distinct unquoted payloads in
+  the closed `between/and`, `versus`, ambiguity-qualified `or`, conflicting
+  comma/and, or `could be/instead be` grammar become
+  `CLARIFY(text_ambiguous)`. A single quoted payload, quoted text containing
+  `or`, and workflow wording such as `send X to Y` do not match. Freshness and
+  unverified phone-state refusal retain precedence. A gate result has zero
+  model calls and zero semantic actions.
+- Corrective replay command: set `PYTHONPATH=software/ai`, then run
+  `python C:\MuJoCoWarp\evidence\issue190\intent_text_ambiguity\run_corrective_replay.py
+  --repo C:\Users\WebTek\Desktop\tactevra-c03-physical-evidence-cli --prior
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v8\pilot_2e\validation_scorecard.json
+  --output C:\MuJoCoWarp\evidence\issue190\intent_text_ambiguity\corrective_diagnostic.json`.
+  Replay-script SHA-256 is
+  `172c13faec01c49dd3f53ebb0a994f0fa966fae6b26f64ba9ce1ec8c23d9c2a0`.
+- Fixtures: opened v8 development JSONL SHA-256
+  `bf2705c70f432949658b0b5c4de4421a17d655db53b23995530d9eb782455dda`
+  and prior scorecard SHA-256
+  `653dc7f44cff65949a156f0e5219e1cab322cd8d2fce4387e74a9e3470527db0`.
+  The replay read no sealed evaluation bytes; v19, v18, v17, and v16 remain
+  unopened.
+- Result: the gate matched all 200 v8 training and all 45 v8 development
+  `clarify_text` rows and zero other-family rows. Corrective development exact
+  classification and composition are 315/315, up from 299/315; all 16 prior
+  failures are corrected, 270 prior model rows are retained, and schema-invalid,
+  altered-text, and false-actionable counts are zero. Corrective diagnostic
+  SHA-256 is
+  `3759a27d9535fe6f4552122d4bd6e8b46373f48800fb41412ccf6336f1ee72a4`.
+  The script and diagnostic were copied to
+  `F:\robot-arm-evidence\issue190\intent_text_ambiguity` and source/backup
+  hashes match.
+- Verification: `python -m pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q` passed 79.
+  Ruff passed all five touched Python files. The source-archive policy passed at
+  6,591 tracked files and 668,754,702 logical bytes.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Corrective
+  replay model-call count: 0. Physical authority: false.
+- Limitations: this is a narrow deterministic grammar and already consumed v8
+  development evidence. The replay is corrective boundary evidence, not model
+  reselection, broad-language evidence, deployment qualification, or physical
+  qualification. No new model was trained and no sealed evaluation was opened.
+- Next dependency: freeze a fresh successor corpus containing only decisions
+  that remain after freshness, phone-state, text-ambiguity, and requested-device
+  binding; then evaluate one bounded candidate without reusing v8 development.
