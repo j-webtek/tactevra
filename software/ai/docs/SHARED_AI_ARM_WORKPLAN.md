@@ -998,6 +998,53 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-device-binding` claims AI-542 from recorded
+AI-541 rejection commit `6faebb30e74bb696604400f41ff871fe1c4d3e8c`. It may add a
+deterministic requested-device binding at the motion-free composition boundary.
+An actionable `TYPE_TEXT` classification may compose only when the request
+identifies exactly one supported device and that device agrees with the model
+classification; missing, conflicting, or mismatched device evidence must become
+`CLARIFY(device_ambiguous)`. The consumed classifier-v7 development result may
+be replayed only as a corrective boundary diagnostic and may not be rescored for
+model selection. Frozen v18, v17, and v16 remain unopened. This increment may
+not construct ModelMotionBatch, invoke motion, emit commands, change arm-lane
+status, or claim execution or physical authority.
+Evidence `E-20261009-AI-542` admits the deterministic requested-device binding
+at the motion-free composition boundary. A consumed v7 development replay made
+zero model calls, converted all seven false-actionable outputs to
+`CLARIFY(device_ambiguous)`, and left frozen v18, v17, and v16 unopened. Nine
+punctuation requests that never named a device also fail closed; this is an
+intentional safety cost and leaves exact composition at 285/315. Focused tests
+pass 74, Ruff passes, and the 6,585-file archive ceiling passes. The next model
+corpus must make the destination device explicit in every actionable example.
+
+The AI/model lane on `codex/intent-classifier-v7` claims AI-541 from merged
+AI-540 base `4cf25879c4818a547a5bfd6717741d916b54fe75`. It may freeze a
+fresh classifier-v7 train/development family and unopened v18 evaluation for
+decisions remaining after deterministic freshness and phone-state admission.
+Unverified phone typing is excluded from learned targets; verified phone
+typing with exact `KEYBOARD_LOWER` observation becomes a positive learned
+family. Keyboard typing, device ambiguity, text ambiguity, and unavailable
+workflow families remain. Generation must hash-verify consumed classifier-v1
+through classifier-v6 corpora, hash-verify sealed v16 and v17 without decoding,
+prove zero case-insensitive request overlap with decoded history, admit every
+deterministic composition, prove that no generated learned row is intercepted
+by either deterministic gate, and preserve unique family-neutral provenance.
+One candidate is predeclared for exactly two epochs from the same cached 1B
+base, followed by one development opening under exact classification and
+composition gates and hard zero limits for invalid, false-actionable, and
+altered-text output. V18 may open only after a passing development decision is
+committed. This increment may not construct ModelMotionBatch, invoke motion,
+emit commands, change arm-lane status, or claim execution or physical
+authority.
+Evidence `E-20261009-AI-541` rejects the only classifier-v7 candidate on its
+single development opening. Exact classification and composition reached
+287/315, and verified phone typing passed 45/45, but seven device-ambiguity
+cases became actionable keyboard typing. Schema-invalid and altered-text
+counts stayed zero. V18, V17, and V16 remain unopened. The next increment must
+bind actionable device selection deterministically before another model
+campaign; no additional epoch or evaluation opening is authorized here.
+
 The AI/model lane on `codex/intent-classifier-v6` claims AI-540 after recorded
 AI-539 development rejection. It may add a deterministic, fail-closed phone
 state precondition beside the existing freshness precondition. An explicit

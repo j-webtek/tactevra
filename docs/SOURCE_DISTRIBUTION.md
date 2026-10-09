@@ -712,3 +712,12 @@ and runtime receipts remain external and hash-bound. The corpus preserves the
 fresh-only observation boundary while broadening request structure; it grants
 no motion, execution, or physical authority. All byte, duplicate, and
 reduction limits remain unchanged.
+
+The post-gate classifier-v7 campaign adds six governed paths: one generator,
+three frozen train/development/manifest files, and two unopened v18 evaluation
+files. The resulting tree contains 6,585 tracked files. The ceiling advances
+from 6,579 to 6,585 with no spare slots. Model weights, scorecards, and runtime
+receipts remain external and hash-bound. The corpus contains only decisions
+eligible after deterministic freshness and phone-state admission and grants no
+motion, execution, or physical authority. All byte, duplicate, and reduction
+limits remain unchanged.

@@ -105,3 +105,19 @@ phone requests remain eligible for local classification and semantic phone
 compilation. This closes the observed false-actionable path at the shadow
 boundary; it does not validate broader wording, phone UI state, motion, or
 hardware.
+
+The post-gate classifier-v7 campaign correctly classified all 45 verified
+phone typing cases and improved total synthetic development accuracy to
+287/315. It remains rejected because seven device-ambiguity cases became
+actionable keyboard typing. Frozen v18, v17, and v16 remain unopened. This
+shows that phone state alone is insufficient: an actionable device must also
+be bound deterministically from the request before semantic compilation.
+
+AI-542 adds that binding at composition time. Device words inside the requested
+quoted payload are ignored. Missing device evidence, conflicting phone and
+physical-keyboard evidence, or disagreement between the request and the model
+becomes `CLARIFY(device_ambiguous)` and compiles no semantic actions. Frozen
+historical corpus builders use an explicit legacy reproduction option so their
+recorded bytes remain reproducible; the runtime and evaluator use the safe
+default. A corrective replay of the already consumed v7 development outputs
+reduced false-actionable cases from 7 to 0 without opening another evaluation.

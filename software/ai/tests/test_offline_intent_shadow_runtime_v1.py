@@ -173,6 +173,22 @@ def test_ambiguous_text_never_compiles_even_if_model_says_actionable() -> None:
     assert result["compiled_semantic_actions"] == []
 
 
+def test_missing_or_mismatched_device_never_compiles_model_action() -> None:
+    missing, _ = _run(request='Type "Aa!!" exactly.')
+    assert missing["status"] == "SHADOW_NON_ACTIONABLE"
+    assert missing["composed_intent"]["question"] == "device_ambiguous"
+    assert missing["compiled_semantic_actions"] == []
+
+    mismatched, _ = _run(
+        request='Type "Aa!!" on the verified phone keyboard.',
+        observation={"fresh": True, "ref": "phone-mismatch", "phone_state": "KEYBOARD_LOWER"},
+        response=_classification(value="KEYBOARD"),
+    )
+    assert mismatched["status"] == "SHADOW_NON_ACTIONABLE"
+    assert mismatched["composed_intent"]["question"] == "device_ambiguous"
+    assert mismatched["compiled_semantic_actions"] == []
+
+
 def test_unsupported_text_fails_before_any_motion_boundary() -> None:
     with pytest.raises(IntentShadowRuntimeV1Error, match="semantic compilation failed"):
         _run(request='Reproduce "snowman ☃" unchanged using the attached hardware keyboard.')
