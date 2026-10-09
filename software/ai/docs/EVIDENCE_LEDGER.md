@@ -12186,3 +12186,59 @@ rewriting history. New entries must use a unique evidence ID.
   scored, and aggregate improvement cannot compensate for unsafe actionability.
 - Next dependency: enforce deterministic device binding for actionable typing,
   then freeze any successor against a fresh development and evaluation family.
+
+### E-20261009-AI-542 — deterministic device binding removes unsafe ambiguity
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: deterministic requested-device binding at the motion-free intent
+  composition boundary. Claim commit is
+  `c92467f96d4be41635e547fea6f4fc3c0bfdd24e`; implementation commit is
+  `384f8b707086d21417e03d382c6a168c196994db`.
+- Contract: quoted payload bytes are removed before device inspection. An
+  actionable `TYPE_TEXT` composes only when the instruction identifies exactly
+  one of `KEYBOARD` or `PHONE` and that device matches the model classification.
+  Missing, conflicting, and mismatched evidence becomes
+  `CLARIFY(device_ambiguous)`. Text ambiguity retains precedence. The runtime
+  and evaluator use this safe default. Frozen classifier-v2 through v7 corpus
+  builders use the explicit `require_requested_device=False` legacy option only
+  to reproduce their previously admitted bytes.
+- Corrective diagnostic fixture: the already consumed 315-case classifier-v7
+  development file, SHA-256
+  `702d53e14a808079b69b29d15344530de4ac40b7fa6d11566dadbc0a16dd63e8`,
+  and its preserved rejected scorecard, SHA-256
+  `f0e443cdddeacb33ea5d7b93ec25de203263e515086d8d307ef5c390bfd6eb9a`.
+  The replay made zero model calls and did not open v18, v17, or v16.
+- Corrective result: false-actionable output fell from 7/315 to 0/315. Exact
+  composed output changed from 287/315 to 285/315. Sixteen compositions changed:
+  seven unsafe device-ambiguity actions and nine punctuation requests that did
+  not name a destination device. Corrective diagnostic SHA-256 is
+  `3baba3565bd2a51367c3efcf55ffe4ae4deb4133435434364b6bfe9b89ebab5a`.
+- Focused verification command: set `PYTHONPATH=software\\ai;software\\src`,
+  then run `python -m pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q`; 74 passed.
+  Ruff passed for the contract, six preserved corpus builders, and both test
+  files. `python scripts/ci/check_source_archive_footprint.py` passed at exactly
+  6,585 tracked files and 667,657,140 logical bytes.
+- Full-suite command: set `PYTHONPATH=software\\ai;software\\src`, then run
+  `python -m pytest software/ai/tests -q`; 353 passed and two inherited checks
+  failed. The untouched AI work registry omits existing tracked test ownership,
+  and the untouched frozen vision manifest disagrees with the preexisting
+  `vision_runtime.py`. No file implicated by either failure differs from base
+  `4cf25879c4818a547a5bfd6717741d916b54fe75`; this increment does not alter
+  another lane's registry or rewrite frozen vision evidence.
+- External evidence-manifest SHA-256 is
+  `0fdd2077a886cda15d4f9ea80dcd789cdce63a9657b4f09137d47144864afe85`.
+  Five files were copied to
+  `F:\\robot-arm-evidence\\issue190\\intent_device_binding` and all hashes
+  matched the source bundle.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Corrective
+  diagnostic model-call count: 0.
+- Limitations: this is a bounded deterministic language rule and synthetic
+  corrective diagnostic, not broad language, deployment, motion, hardware, or
+  physical qualification. The nine newly blocked punctuation requests expose
+  an ambiguity in the old corpus rather than a model regression. V18 remains
+  sealed and unopened.
+- Next dependency: freeze a fresh classifier corpus whose every actionable
+  request names exactly one device, then train one bounded successor and require
+  a passing development decision before opening its new sealed evaluation.

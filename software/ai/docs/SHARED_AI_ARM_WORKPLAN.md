@@ -1009,6 +1009,14 @@ be replayed only as a corrective boundary diagnostic and may not be rescored for
 model selection. Frozen v18, v17, and v16 remain unopened. This increment may
 not construct ModelMotionBatch, invoke motion, emit commands, change arm-lane
 status, or claim execution or physical authority.
+Evidence `E-20261009-AI-542` admits the deterministic requested-device binding
+at the motion-free composition boundary. A consumed v7 development replay made
+zero model calls, converted all seven false-actionable outputs to
+`CLARIFY(device_ambiguous)`, and left frozen v18, v17, and v16 unopened. Nine
+punctuation requests that never named a device also fail closed; this is an
+intentional safety cost and leaves exact composition at 285/315. Focused tests
+pass 74, Ruff passes, and the 6,585-file archive ceiling passes. The next model
+corpus must make the destination device explicit in every actionable example.
 
 The AI/model lane on `codex/intent-classifier-v7` claims AI-541 from merged
 AI-540 base `4cf25879c4818a547a5bfd6717741d916b54fe75`. It may freeze a
