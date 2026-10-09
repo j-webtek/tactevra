@@ -998,6 +998,18 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v10-training` claims AI-548 from
+merged AI-547A base `0cfd528bdce6c414f999d6fcf8380a7100032409`. It may train
+the single predeclared classifier-v10 candidate for exactly two epochs from the
+frozen 1,000-row training split, import that adapter into the local offline
+Ollama runtime, and open the 225-row development split exactly once. Promotion
+requires 225/225 exact classification and composition with zero schema-invalid,
+false-actionable, or altered-text outputs. Any miss rejects the candidate and
+must be preserved. Frozen v21 through v16 may be hash-verified only and may not
+be decoded; v21 may open only after a committed development pass in a later
+claim. This increment may not construct ModelMotionBatch, invoke motion, emit
+commands, change arm-lane status, or claim execution or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v10` claims AI-547 from merged
 AI-546 base `36eaa5f5bda3fa47a578ac4e0317c20659b76954`. It may freeze one
 fresh post-gate classifier corpus containing only five remaining model decision
