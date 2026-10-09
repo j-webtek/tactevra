@@ -998,6 +998,18 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-text-ambiguity` claims AI-544 from merged
+AI-543 base `2a60e6b701a76241a3f4aa4ec68fea27f3619484`. It may add a
+deterministic, motion-free text-candidate ambiguity gate before local model
+inference. Requests containing multiple exact payload candidates under the
+closed ambiguity grammar must become `CLARIFY(text_ambiguous)` with zero model
+calls and zero semantic actions. Freshness and unverified phone-state refusals
+retain precedence. Consumed classifier-v8 development may be replayed only as
+corrective boundary evidence and may not be rescored for model selection.
+Frozen v19, v18, v17, and v16 remain unopened. This increment may not construct
+ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or claim
+execution or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v8` claims AI-543 from merged
 AI-542 base `db6dae8d066e83d53c9d5c20ceab145a820e8c83`. It may freeze a
 fresh classifier-v8 train/development family and unopened v19 evaluation for
