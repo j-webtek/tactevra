@@ -47,6 +47,11 @@ from build_intent_classifier_v2_data import (  # noqa: E402
     build as build_intent_classifier_v2_data,
     verify_composition_admission,
 )
+from build_intent_classifier_v3_data import (  # noqa: E402
+    build as build_intent_classifier_v3_data,
+    load_historical_requests,
+    verify_request_disjointness,
+)
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
     compose_public_intent_v1,
     parse_classification_v1,
@@ -57,6 +62,33 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v3_data_is_composable_and_historically_disjoint(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v3_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (640, 200, 240))
+        self.assertEqual(
+            _data_configuration("classifier-v3"),
+            (2128, "intent_classifier_v3", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertIn("v13", manifest["excluded_evidence"])
+        historical = load_historical_requests()
+        rows = train + validation + evaluation
+        self.assertFalse({row["request"].casefold() for row in rows} & historical)
+        for row in rows:
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
+    def test_classifier_v3_generation_rejects_historical_request_overlap(self) -> None:
+        historical = load_historical_requests()
+        reused = next(iter(historical))
+        with self.assertRaisesRegex(ValueError, "historical request overlap"):
+            verify_request_disjointness(
+                {"validation": [{"request": reused.upper()}]}, historical
+            )
+
     def test_classifier_v2_data_is_composition_admitted_before_training(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v2_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (640, 200, 240))

@@ -1,0 +1,73 @@
+{
+  "counts": {
+    "evaluation": 240,
+    "train": 640,
+    "validation": 200
+  },
+  "evaluation_sha256": "319dc4ced63a368a61d8e5a4304a329833420bb4f8caef7ff2e2230263dbe98a",
+  "excluded_evidence": {
+    "v10": "consumed evaluation only",
+    "v11": "retained unopened and excluded from this campaign",
+    "v12": "retained unopened after classifier-v1 campaign-design rejection",
+    "v13": "retained unopened after classifier-v2 rejection and invalidation",
+    "v5_development": "consumed diagnostic only"
+  },
+  "family_counts": {
+    "evaluation": {
+      "clarify_device": 30,
+      "clarify_text": 30,
+      "refuse_phone_state": 30,
+      "refuse_stale": 30,
+      "refuse_workflow": 30,
+      "type_punctuation": 30,
+      "type_quoted": 30,
+      "type_unquoted": 30
+    },
+    "train": {
+      "clarify_device": 80,
+      "clarify_text": 80,
+      "refuse_phone_state": 80,
+      "refuse_stale": 80,
+      "refuse_workflow": 80,
+      "type_punctuation": 80,
+      "type_quoted": 80,
+      "type_unquoted": 80
+    },
+    "validation": {
+      "clarify_device": 25,
+      "clarify_text": 25,
+      "refuse_phone_state": 25,
+      "refuse_stale": 25,
+      "refuse_workflow": 25,
+      "type_punctuation": 25,
+      "type_quoted": 25,
+      "type_unquoted": 25
+    }
+  },
+  "generation_admission": {
+    "admitted_case_count": 1080,
+    "failure_count": 0,
+    "required": "Every expected classification plus request must compose exactly to composed_target before any corpus bytes are written."
+  },
+  "historical_request_admission": {
+    "historical_corpus_count": 6,
+    "historical_request_count": 1215,
+    "overlap_count": 0,
+    "required": "All case-insensitive request strings must be disjoint from hash-verified classifier-v1 and classifier-v2 corpora."
+  },
+  "human_reviewed": false,
+  "limitations": "Synthetic agent-authored classification data; passing cannot qualify general language, motion, or hardware.",
+  "promotion_gates": {
+    "altered_type_text_count_maximum": 0,
+    "classification_exact_rate_minimum": 1.0,
+    "composed_exact_rate_minimum": 1.0,
+    "false_actionable_count_maximum": 0,
+    "schema_invalid_count_maximum": 0
+  },
+  "schema": "tactevra.offline_intent_classifier_data.v1",
+  "seed": 2128,
+  "source": "agent_authored_classification_only_admitted_by_production_deterministic_composer",
+  "split_policy": "Wording, payload stems, IDs, and observations are disjoint across splits.",
+  "train_sha256": "c0966f2519ea35cd00c765477d6a336185fc33524e516b9a9305304f0b10a7c5",
+  "validation_sha256": "748de6d48b6f5e2ee79a50448204e358e61911c46b0db422427ba49664b97fbf"
+}
