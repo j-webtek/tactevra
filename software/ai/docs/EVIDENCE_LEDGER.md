@@ -12580,3 +12580,58 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: train the single predeclared two-epoch candidate from the
   cached 1B base, then open development once under exact classification and
   composition gates. V21 remains sealed until a committed development pass.
+
+### E-20261009-AI-548 — classifier-v10 passes exact development gates
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: the single predeclared two-epoch classifier-v10 candidate and its one
+  development opening from merged corpus commit
+  `0cfd528bdce6c414f999d6fcf8380a7100032409`. Claim commit is
+  `d4e8a0d901f178763b9a99acbec9798cfa6fc554`.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python software/ai/train/fit_sft.py --data-version classifier-v10 --epochs
+  2 --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v10\pilot_2e`.
+  Epoch-one train/development loss was 0.088087/0.000614; epoch two was
+  0.000435/0.000320; 126 optimizer updates. Adapter SHA-256 is
+  `034035f18c2f3bbcba0e172afc55e30b7f404f82e8dd62074348af504b7438ca`;
+  run-manifest SHA-256 is
+  `d0497f86a242b2e7ce65286df209c7d135a7312452ab5d7d757565a0cb0c6509`.
+- Import command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python software/ai/train/import_adapter.py --adapter-dir
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v10\pilot_2e
+  --staging-dir software\ai\artifacts\intent_classifier_v10_2e_import
+  --base-tag llama32-1b-meta-92131767:latest --tag
+  llama32-1b-rocell-intent-classifier-v10-2e:latest`. The local candidate
+  digest is
+  `340ad8350945ff11952e0bfed04d0ff7be3d3bffdfde4e2c7ddc22ded8606afc`;
+  import-manifest SHA-256 is
+  `604bcebbe4b64ecb331909ca22de4034c0357538c008408c0014a82f340cc3d3`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v10_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v10.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v10-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --deterministic-phone-state
+  --deterministic-text-ambiguity --deterministic-device-ambiguity
+  --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v10\pilot_2e\validation_scorecard.json`.
+- Result: `PASS_CANDIDATE`; exact classification and composition are 225/225.
+  Schema-invalid, altered-text, false-actionable, and all four deterministic
+  gate counts are zero. Scorecard SHA-256 is
+  `c86ea5d288c28b243fcf9ab0ab71ac023e3e8ec868618e7a3fb6003519e032d3`.
+  V21 through v16 were not decoded.
+- Backup: ten evidence files were copied to
+  `F:\robot-arm-evidence\issue190\intent_classifier_v10\pilot_2e`; all source
+  and backup hashes match. External evidence-manifest SHA-256 is
+  `0460252554767224cf0bf0ea3a1aa51a7f94f9bd4c6c741841b66286f6db4253`.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only. Physical authority: false.
+- Limitations: synthetic development selection only; no broad-language,
+  deployment, motion, hardware, or physical qualification. A perfect
+  development score does not substitute for the frozen held-out evaluation.
+- Next dependency: make a separate claim to open sealed v21 exactly once with
+  this unchanged adapter and the frozen gates. Preserve the result whether it
+  passes or fails; v21 remains unopened in this increment.
