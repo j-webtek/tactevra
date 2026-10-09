@@ -90,6 +90,16 @@ WS2_EVENT_CONTROL_SPEC_V2 = importlib.util.spec_from_file_location(
 assert WS2_EVENT_CONTROL_SPEC_V2 and WS2_EVENT_CONTROL_SPEC_V2.loader
 WS2_EVENT_CONTROL_RUNNER_V2 = importlib.util.module_from_spec(WS2_EVENT_CONTROL_SPEC_V2)
 WS2_EVENT_CONTROL_SPEC_V2.loader.exec_module(WS2_EVENT_CONTROL_RUNNER_V2)
+WS2_HEIGHT_ROBUST_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_height_robust_search_v1.json"
+)
+WS2_HEIGHT_ROBUST_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_height_robust_search",
+    ROOT / "software/ai/sim/run_ws2_event_height_robust_search.py",
+)
+assert WS2_HEIGHT_ROBUST_SPEC and WS2_HEIGHT_ROBUST_SPEC.loader
+WS2_HEIGHT_ROBUST_RUNNER = importlib.util.module_from_spec(WS2_HEIGHT_ROBUST_SPEC)
+WS2_HEIGHT_ROBUST_SPEC.loader.exec_module(WS2_HEIGHT_ROBUST_RUNNER)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -949,3 +959,57 @@ def test_ws2_staged_refinement_is_deterministic_and_boundary_only():
         row["recipe_index"] not in coarse for row in first["refinement_identities"]
     )
     assert first["physical_authority"] is False
+
+
+def test_ws2_height_robust_fixture_is_frozen_and_zero_authority():
+    fixture = WS2_HEIGHT_ROBUST_RUNNER.load_fixture(WS2_HEIGHT_ROBUST_FIXTURE)
+    design = fixture["design"]
+    assert design["target_ids"] == ["GRAVE", "EQUAL"]
+    assert design["height_offset_mm_samples"] == [
+        -1.0,
+        -0.75,
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+    ]
+    assert design["population_per_device"] == {
+        "matching_event_rows": 69120,
+        "no_event_rows": 17280,
+        "total_rows": 86400,
+    }
+    assert fixture["physical_authority"] is False
+    assert set(fixture["counters"].values()) == {0}
+
+
+def test_ws2_height_robust_control_preserves_every_height_and_landing():
+    fixture = WS2_HEIGHT_ROBUST_RUNNER.load_fixture(WS2_HEIGHT_ROBUST_FIXTURE)
+    parent = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent)
+    control = WS2_HEIGHT_ROBUST_RUNNER.control_for(
+        fixture,
+        parent,
+        physical,
+        target_id="GRAVE",
+        scenario_id="MID_SOURCE_MID_RESIDUAL",
+        latency_ms=40.0,
+        hard_limit_mm=5.8,
+        mode="MATCHING",
+    )["control"]
+    assert control["recipe_override"]["press_depth_mm"] == 5.8
+    assert control["event_termination"]["hard_depth_limit_mm"] == 5.8
+    assert len(control["batch_rows"]) == 9 * 64
+    assert {row["vertical_origin_offset_mm"] for row in control["batch_rows"]} == {
+        -1.0,
+        -0.75,
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+    }

@@ -1,0 +1,168 @@
+{
+  "bindings": {
+    "parent_fixture": {
+      "fixture_sha256": "c947b183d74679c680546559883af478b5f20e1bc3621a3bd54a45d2fc0913ea",
+      "path": "software/ai/sim/evidence/ws2_event_terminated_press_v1_5.json",
+      "sha256": "ec6dd1e188c99a1d4838971e6c75c00dff6d509874f7f02a88a8dd2e60caebd4"
+    },
+    "parent_runner": {
+      "path": "software/ai/sim/run_ws2_event_terminated_press.py",
+      "sha256": "ed214e5254f6c629185e096146ee43d399fa14cf961afea09018347d73c59244"
+    },
+    "physics_probe": {
+      "path": "software/integrations/mujoco_warp/key_press_physics_probe.py",
+      "sha256": "5a6c07af65e0d7ad9f470c65a8c4665311bf7362da3d4e4e0d479916bf78bf96"
+    },
+    "runner": {
+      "path": "software/ai/sim/run_ws2_event_height_robust_search.py",
+      "sha256": "86bccba5f94de2c7366c9e8be6472631ba727e2af56a0df551eb8cd2e3150763"
+    }
+  },
+  "claim": "Search a bounded compression-aware hard-depth limit for host-event-terminated GRAVE and EQUAL presses across all 64 frozen landing samples, three operational residual scenarios, four provisional event latencies, and nine vertical-origin offsets from -1.0 to +1.0 mm. Report the frozen +/-0.5 mm band and wider +/-0.75 and +/-1.0 mm bands without changing the gate after results.",
+  "counters": {
+    "controller_command_count": 0,
+    "hardware_write_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "transport_count": 0
+  },
+  "created_utc": "2026-10-09T00:00:00Z",
+  "design": {
+    "approach_mm_s": 4.0,
+    "devices": [
+      "cuda:0",
+      "cuda:1"
+    ],
+    "failure_path_rule": "NO_EVENT_MUST_RETRACT_AT_HARD_LIMIT_WITH_NO_RETRY_NO_REPEAT_AND_NO_BOTTOM_OUT",
+    "hard_depth_limit_mm_candidates": [
+      5.2,
+      5.5,
+      5.8,
+      6.1,
+      6.4
+    ],
+    "height_offset_mm_samples": [
+      -1.0,
+      -0.75,
+      -0.5,
+      -0.25,
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "landing_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+    ],
+    "latency_ms_samples": [
+      5.0,
+      15.0,
+      30.0,
+      40.0
+    ],
+    "population_per_device": {
+      "matching_event_rows": 69120,
+      "no_event_rows": 17280,
+      "total_rows": 86400
+    },
+    "profile_id": "travel_mm__LOW",
+    "reported_height_bands_mm": [
+      0.5,
+      0.75,
+      1.0
+    ],
+    "reserved_bottom_out_margin_mm": 0.2,
+    "scenario_ids": [
+      "LOW_SOURCE_HIGH_RESIDUAL",
+      "MID_SOURCE_MID_RESIDUAL",
+      "HIGH_SOURCE_LOW_RESIDUAL"
+    ],
+    "selection_rule": "SELECT_DEEPEST_CANDIDATE_ONLY_IF_EVERY_MATCHING_EVENT_ROW_ADMITS_AND_EVERY_NO_EVENT_ROW_RELEASES_WITH_ZERO_REPEAT_ZERO_BOTTOM_OUT_AND_ZERO_RETRY",
+    "target_ids": [
+      "GRAVE",
+      "EQUAL"
+    ]
+  },
+  "event_authority": {
+    "hard_limit_always_enforced": true,
+    "may_end_press_early": true,
+    "may_extend_motion": false,
+    "may_retry": false,
+    "may_start_motion": false
+  },
+  "fixture_sha256": "14c526ae06f8e59ca1dfffdc722324e49f16fff0dc87f5d5fae7749e9940c748",
+  "limitations": [
+    "Simulation-only exploratory evidence; no physical keyboard, camera, arm, or host timing was measured.",
+    "The +/-1.0 mm range is a provisional stress envelope, not a measured hardware tolerance.",
+    "Event latency samples are provisional until host debounce, USB polling, and OS delivery are measured.",
+    "This search fixes approach speed at 4.0 mm/s and does not select a physical motion policy.",
+    "Hard-limit candidates are simulation controls and are not controller commands or execution authority."
+  ],
+  "physical_authority": false,
+  "schema": "tactevra.ws2_event_height_robust_search_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}
