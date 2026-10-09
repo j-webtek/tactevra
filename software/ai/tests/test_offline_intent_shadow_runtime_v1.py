@@ -137,6 +137,36 @@ def test_verified_phone_typing_still_uses_model() -> None:
     assert result["classification_source"] == "LOCAL_MODEL"
 
 
+def test_text_ambiguity_bypasses_model_and_is_non_actionable() -> None:
+    result, calls = _run(
+        request="Resolve the keyboard payload between oak and willow.",
+    )
+    assert calls == []
+    assert result["classification_source"] == "DETERMINISTIC_TEXT_AMBIGUITY_GATE"
+    assert result["classification"] == {
+        "schema": "rocell.offline_intent_classification.v1",
+        "intent_type": "CLARIFY",
+        "question": "text_ambiguous",
+    }
+    assert result["model_call_count"] == result["semantic_action_count"] == 0
+    assert parse_intent_shadow_receipt_v1(result) == result
+
+
+def test_freshness_and_phone_state_precede_text_ambiguity() -> None:
+    stale, stale_calls = _run(
+        request="Resolve the keyboard payload between oak and willow.",
+        observation={"fresh": False},
+    )
+    assert stale_calls == []
+    assert stale["classification_source"] == "DETERMINISTIC_FRESHNESS_GATE"
+    phone, phone_calls = _run(
+        request="Resolve phone text between oak and willow before typing it.",
+        observation={"fresh": True},
+    )
+    assert phone_calls == []
+    assert phone["classification_source"] == "DETERMINISTIC_PHONE_STATE_GATE"
+
+
 @pytest.mark.parametrize("observation", [{}, {"fresh": "yes"}, {"fresh": 1}])
 def test_missing_or_non_boolean_freshness_fails_closed(observation) -> None:
     with pytest.raises(IntentShadowRuntimeV1Error, match="explicit boolean"):
@@ -222,6 +252,15 @@ def test_receipt_tampering_and_authority_changes_are_rejected() -> None:
         json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     with pytest.raises(IntentShadowRuntimeV1Error, match="phone-state gate"):
+        parse_intent_shadow_receipt_v1(changed)
+    changed = copy.deepcopy(result)
+    changed["classification_source"] = "DETERMINISTIC_TEXT_AMBIGUITY_GATE"
+    changed["model_call_count"] = 0
+    unsigned = {key: value for key, value in changed.items() if key != "receipt_sha256"}
+    changed["receipt_sha256"] = hashlib.sha256(
+        json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    with pytest.raises(IntentShadowRuntimeV1Error, match="text-ambiguity gate"):
         parse_intent_shadow_receipt_v1(changed)
 
 

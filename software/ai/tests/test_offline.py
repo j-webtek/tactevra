@@ -75,6 +75,7 @@ from build_intent_classifier_v8_data import (  # noqa: E402
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
     deterministic_phone_state_classification_v1,
+    deterministic_text_ambiguity_classification_v1,
     extract_requested_device_v1,
 )
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
@@ -315,6 +316,69 @@ class OfflineContractTests(unittest.TestCase):
         self.assertIsNone(deterministic_phone_state_classification_v1(
             'Type "elm42" on the physical keyboard.', {"fresh": True},
         ))
+
+    def test_text_ambiguity_gate_matches_only_closed_competing_payload_grammar(self) -> None:
+        ambiguous = (
+            'Choose "oak" or "willow" for the keyboard.',
+            "Resolve the keyboard payload between oak and willow.",
+            "Choose which exact value to enter, oak versus willow.",
+            "Two candidate strings conflict: oak, willow.",
+            "Clarify whether the requested characters are oak or willow.",
+            "The requested characters could be oak; they could instead be willow.",
+        )
+        for request in ambiguous:
+            with self.subTest(request=request):
+                self.assertEqual(
+                    deterministic_text_ambiguity_classification_v1(request),
+                    {
+                        "schema": "rocell.offline_intent_classification.v1",
+                        "intent_type": "CLARIFY",
+                        "question": "text_ambiguous",
+                    },
+                )
+        unambiguous = (
+            'Type "oak or willow" on the physical keyboard.',
+            'Type "oak" on the physical keyboard.',
+            "Send oak to willow.",
+            'Repeat "oak" or confirm the keyboard is ready.',
+        )
+        for request in unambiguous:
+            with self.subTest(request=request):
+                self.assertIsNone(
+                    deterministic_text_ambiguity_classification_v1(request)
+                )
+
+    def test_text_ambiguity_gate_bypasses_classifier(self) -> None:
+        expected = {
+            "schema": "rocell.offline_intent_classification.v1",
+            "intent_type": "CLARIFY",
+            "question": "text_ambiguous",
+        }
+        case = {
+            "id": "text-ambiguous",
+            "request": "Resolve the keyboard payload between oak and willow.",
+            "observation": {"fresh": True},
+            "target": expected,
+            "composed_target": {
+                **expected,
+                "schema": "rocell.offline_typing_intent.v1",
+            },
+        }
+        calls = []
+        result = score_classifier(
+            [case], "a" * 64, model="fixture", model_digest="b" * 64,
+            generate=lambda item: calls.append(item) or "{}",
+            deterministic_freshness=True,
+            deterministic_phone_state=True,
+            deterministic_text_ambiguity=True,
+        )
+        self.assertEqual(result["decision"], "PASS_CANDIDATE")
+        self.assertEqual(result["deterministic_text_ambiguity_gate_count"], 1)
+        self.assertEqual(calls, [])
+        self.assertEqual(
+            result["rows"][0]["classification_source"],
+            "DETERMINISTIC_TEXT_AMBIGUITY_GATE",
+        )
 
     def test_classifier_v3_data_is_composable_and_historically_disjoint(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v3_data()
