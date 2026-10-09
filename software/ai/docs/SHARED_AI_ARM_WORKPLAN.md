@@ -998,6 +998,29 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v11` claims AI-550 from merged
+AI-549 base `6e1f848df545c6fb6fcf15cbc856165d2b97553b`. It may freeze one
+fresh classifier-v11 corpus with the same five post-gate decision families and
+a broader unquoted-keyboard paraphrase grammar informed by the preserved v21
+failure. V21 is consumed evidence: its 250 requests join decoded historical
+admission and may not be reused for selection. Training, development, and
+sealed v22 full requests, payloads, IDs, and provenance must be disjoint from
+all prior decoded requests; sealed v16 through v20 may be hash-verified only.
+The freeze predeclares 200/45/50 rows per family, one candidate trained for
+exactly two epochs, one development opening, and exact classification and
+composition with hard zero schema-invalid, false-actionable, and altered-text
+limits. V22 may open only after a committed development pass. This increment
+may not construct ModelMotionBatch, invoke motion, emit commands, change
+arm-lane status, or claim execution or physical authority.
+Evidence `E-20261009-AI-550A` freezes the claimed successor corpus: 1,000
+training, 225 development, and 250 sealed v22 rows. The training unquoted
+grammar now contains the v21 failure structure while development and v22 use
+disjoint supported structures. All 1,475 rows pass deterministic admission and
+exact composition. Generation finds zero overlap with 11,575 requests from 25
+decoded historical corpora, including consumed v21, while sealed v16 through
+v20 are hash-verified only. V22 remains unopened. The next authorized step is
+the one predeclared two-epoch candidate and one development opening.
+
 The AI/model lane on `codex/intent-classifier-v10-evaluation` claims AI-549
 from merged AI-548 base `1a47155f451bb244167c9086680ad1bdebb100a4`. It may
 open the frozen 250-row v21 evaluation exactly once using the unchanged local
