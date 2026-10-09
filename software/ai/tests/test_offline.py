@@ -54,6 +54,7 @@ from build_intent_classifier_v3_data import (  # noqa: E402
 )
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
     compose_public_intent_v1,
+    deterministic_freshness_classification_v1,
     parse_classification_v1,
     score_classifier,
 )
@@ -62,6 +63,43 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_freshness_gate_bypasses_model_only_for_stale_case(self) -> None:
+        stale = {
+            "id": "stale",
+            "request": 'Type "oak" on the physical keyboard.',
+            "observation": {"ref": "frame", "fresh": False},
+            "target": {
+                "schema": "rocell.offline_intent_classification.v1",
+                "intent_type": "REFUSE",
+                "reason": "stale_observation",
+            },
+            "composed_target": {
+                "schema": "rocell.offline_typing_intent.v1",
+                "intent_type": "REFUSE",
+                "reason": "stale_observation",
+            },
+        }
+        calls = []
+        result = score_classifier(
+            [stale],
+            "a" * 64,
+            model="fixture",
+            model_digest="b" * 64,
+            generate=lambda case: calls.append(case) or "{}",
+            deterministic_freshness=True,
+        )
+        self.assertEqual(result["decision"], "PASS_CANDIDATE")
+        self.assertEqual(result["deterministic_freshness_gate_count"], 1)
+        self.assertEqual(calls, [])
+        self.assertEqual(
+            result["rows"][0]["classification_source"],
+            "DETERMINISTIC_FRESHNESS_GATE",
+        )
+
+    def test_classifier_freshness_gate_requires_explicit_boolean(self) -> None:
+        with self.assertRaisesRegex(ValueError, "explicit boolean"):
+            deterministic_freshness_classification_v1({"fresh": "false"})
+
     def test_classifier_v3_data_is_composable_and_historically_disjoint(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v3_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (640, 200, 240))

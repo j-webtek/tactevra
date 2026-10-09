@@ -61,6 +61,22 @@ def compose_public_intent_v1(classification: dict[str, str], request_text: str) 
     return {"schema": PUBLIC_SCHEMA, "intent_type": kind, "reason": parsed["reason"]}
 
 
+def deterministic_freshness_classification_v1(
+    observation: Any,
+) -> dict[str, str] | None:
+    """Refuse explicit stale evidence before model inference; validate the bit."""
+
+    if not isinstance(observation, dict) or type(observation.get("fresh")) is not bool:
+        raise ValueError("observation fresh must be an explicit boolean")
+    if observation["fresh"]:
+        return None
+    return {
+        "schema": CLASSIFICATION_SCHEMA,
+        "intent_type": "REFUSE",
+        "reason": "stale_observation",
+    }
+
+
 def score_classifier(
     cases: list[dict[str, Any]],
     cases_sha256: str,
@@ -68,14 +84,27 @@ def score_classifier(
     model: str,
     model_digest: str,
     generate: Callable[[dict[str, Any]], str],
+    deterministic_freshness: bool = False,
 ) -> dict[str, Any]:
     rows = []
     exact_classification = exact_composed = invalid = false_actionable = altered_text = 0
+    freshness_gate_count = 0
     for case in cases:
         expected_classification = case["target"]
         expected_composed = parse_offline_typing_intent_v1(case["composed_target"])
         started = time.perf_counter()
-        raw = generate(case)
+        gated = (
+            deterministic_freshness_classification_v1(case.get("observation"))
+            if deterministic_freshness
+            else None
+        )
+        if gated is None:
+            raw = generate(case)
+            classification_source = "LOCAL_MODEL"
+        else:
+            raw = json.dumps(gated, sort_keys=True, separators=(",", ":"))
+            classification_source = "DETERMINISTIC_FRESHNESS_GATE"
+            freshness_gate_count += 1
         latency = round((time.perf_counter() - started) * 1000, 1)
         actual_classification = actual_composed = None
         error = None
@@ -111,6 +140,7 @@ def score_classifier(
             "parse_error": error,
             "response_sha256": hashlib.sha256(raw.encode()).hexdigest(),
             "latency_ms": latency,
+            "classification_source": classification_source,
         })
     total = len(cases)
     passed = exact_classification == exact_composed == total and invalid == false_actionable == altered_text == 0
@@ -127,6 +157,7 @@ def score_classifier(
         "schema_invalid_count": invalid,
         "false_actionable_count": false_actionable,
         "altered_type_text_count": altered_text,
+        "deterministic_freshness_gate_count": freshness_gate_count,
         "classification_exact_rate": exact_classification / total,
         "composed_exact_rate": exact_composed / total,
         "decision": "PASS_CANDIDATE" if passed else "REJECT_CANDIDATE",
@@ -144,6 +175,7 @@ def evaluate_classifier(
     split: str,
     model: str,
     schema_path: Path,
+    deterministic_freshness: bool = False,
 ) -> dict[str, Any]:
     cases, digest = load_schema_intent_cases(cases_path, manifest_path, split)
     schema_bytes = schema_path.read_bytes()
@@ -163,7 +195,14 @@ def evaluate_classifier(
         })
         return response.get("message", {}).get("content", "")
 
-    result = score_classifier(cases, digest, model=model, model_digest=model_digest, generate=generate)
+    result = score_classifier(
+        cases,
+        digest,
+        model=model,
+        model_digest=model_digest,
+        generate=generate,
+        deterministic_freshness=deterministic_freshness,
+    )
     if _model_digest(model) != model_digest:
         raise ValueError("model identity changed during evaluation")
     result["ollama_version"] = _runtime_version()
@@ -179,13 +218,22 @@ def main() -> int:
     parser.add_argument("--model", required=True)
     parser.add_argument("--schema", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--deterministic-freshness", action="store_true")
     args = parser.parse_args()
-    result = evaluate_classifier(args.cases, args.manifest, args.split, args.model, args.schema)
+    result = evaluate_classifier(
+        args.cases,
+        args.manifest,
+        args.split,
+        args.model,
+        args.schema,
+        deterministic_freshness=args.deterministic_freshness,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps({key: result[key] for key in (
         "decision", "case_count", "classification_exact_count", "composed_exact_count",
         "schema_invalid_count", "false_actionable_count", "altered_type_text_count",
+        "deterministic_freshness_gate_count",
     )}, sort_keys=True))
     return 0
 
