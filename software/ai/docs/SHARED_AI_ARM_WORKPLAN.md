@@ -998,6 +998,22 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v4` claims AI-534 from merged
+AI-533 base `614b2e06b4032bcc96df1dff00bfeb318d0c1b05`. It may freeze
+fresh classifier-v4 train/development data and an unopened v15 evaluation
+family for the seven decisions that remain learned after deterministic
+freshness gating, then train one epoch from the same cached 1B base. Every
+generated observation must be explicitly fresh. Before writing corpus bytes,
+the generator must hash-verify all classifier-v1 through classifier-v3 source
+splits, prove zero case-insensitive request overlap with them, and prove exact
+production composition for every new row. Consumed development and v14 may be
+used only as historical failure evidence; frozen v11, v12, and v13 remain
+unopened. V15 must remain unopened until a clean development decision is
+committed. The increment may not change the public intent schema, weaken the
+deterministic freshness gate, invoke motion planning, promote a model, change
+arm-lane status, or emit commands, hardware writes, movement, or physical
+authority.
+
 The AI/model lane on `codex/deterministic-intent-freshness` claims AI-533 from
 merged AI-532 base `df8a4ddb10cea98a58e101d86ff07d6fda5d311f`. It may
 add a fail-closed classifier pre-gate that maps an explicitly stale bound
