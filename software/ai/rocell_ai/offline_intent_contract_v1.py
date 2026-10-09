@@ -41,6 +41,13 @@ _UNQUOTED_TYPE_PATTERNS = tuple(re.compile(pattern) for pattern in (
     r"The physical keyboard should write (?P<text>[!-~]+)\.",
     r"Use the hardware keys to input (?P<text>[!-~]+)\."
 ))
+_PHONE_TYPING_REQUEST = re.compile(
+    r"(?:\b(?:type|typing|enter|input|put|place|write)\b.{0,160}"
+    r"\b(?:phone|handset|on-screen keyboard)\b|"
+    r"\b(?:phone|handset|on-screen keyboard)\b.{0,160}"
+    r"\b(?:type|typing|enter|input|put|place|write)\b)",
+    re.IGNORECASE,
+)
 
 
 def extract_requested_text_v1(request_text: str) -> str | None:
@@ -154,6 +161,25 @@ def deterministic_freshness_classification_v1(
     }
 
 
+def deterministic_phone_state_classification_v1(
+    request_text: Any, observation: Any,
+) -> dict[str, str] | None:
+    """Refuse explicit phone typing unless the bounded input state is verified."""
+
+    deterministic_freshness_classification_v1(observation)
+    if not isinstance(request_text, str):
+        raise ValueError("request text must be a string")
+    if _PHONE_TYPING_REQUEST.search(request_text) is None:
+        return None
+    if observation.get("phone_state") == "KEYBOARD_LOWER":
+        return None
+    return {
+        "schema": CLASSIFICATION_SCHEMA,
+        "intent_type": "REFUSE",
+        "reason": "phone_state_unverified",
+    }
+
+
 def classifier_model_observation_v1(observation: Any) -> dict[str, Any]:
     """Expose only decision-relevant observation state to the language model."""
 
@@ -175,6 +201,7 @@ __all__ = [
     "compose_public_intent_v1",
     "classifier_model_observation_v1",
     "deterministic_freshness_classification_v1",
+    "deterministic_phone_state_classification_v1",
     "extract_requested_text_v1",
     "parse_classification_v1",
     "parse_public_intent_v1",

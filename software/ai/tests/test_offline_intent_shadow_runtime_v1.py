@@ -87,12 +87,14 @@ def test_phone_text_compiles_only_from_verified_lower_state() -> None:
     )
     assert result["semantic_action_count"] == 4
     assert result["compiled_semantic_actions"][0]["target_id"] == "key_shift"
-    with pytest.raises(IntentShadowRuntimeV1Error, match="verified KEYBOARD_LOWER"):
-        _run(
-            request='Place "A!" exactly into the active phone text field.',
-            observation={"fresh": True, "ref": "phone-2"},
-            response=_classification(value="PHONE"),
-        )
+    refused, calls = _run(
+        request='Place "A!" exactly into the active phone text field.',
+        observation={"fresh": True, "ref": "phone-2"},
+        response=_classification(value="PHONE"),
+    )
+    assert calls == []
+    assert refused["classification_source"] == "DETERMINISTIC_PHONE_STATE_GATE"
+    assert refused["classification"]["reason"] == "phone_state_unverified"
 
 
 def test_stale_observation_bypasses_model_and_is_non_actionable() -> None:
@@ -101,6 +103,38 @@ def test_stale_observation_bypasses_model_and_is_non_actionable() -> None:
     assert result["classification_source"] == "DETERMINISTIC_FRESHNESS_GATE"
     assert result["classification"]["reason"] == "stale_observation"
     assert result["model_call_count"] == result["semantic_action_count"] == 0
+
+
+def test_unverified_phone_typing_bypasses_model_and_is_non_actionable() -> None:
+    result, calls = _run(
+        request='Type "A!" on the phone before confirming its current key layer.',
+        observation={"fresh": True, "ref": "phone-unverified"},
+    )
+    assert calls == []
+    assert result["classification_source"] == "DETERMINISTIC_PHONE_STATE_GATE"
+    assert result["classification"]["reason"] == "phone_state_unverified"
+    assert result["model_call_count"] == result["semantic_action_count"] == 0
+    assert parse_intent_shadow_receipt_v1(result) == result
+
+
+def test_stale_phone_typing_uses_freshness_precedence() -> None:
+    result, calls = _run(
+        request='Enter "A!" using the active phone keyboard.',
+        observation={"fresh": False, "ref": "stale-phone"},
+    )
+    assert calls == []
+    assert result["classification_source"] == "DETERMINISTIC_FRESHNESS_GATE"
+    assert result["classification"]["reason"] == "stale_observation"
+
+
+def test_verified_phone_typing_still_uses_model() -> None:
+    result, calls = _run(
+        request='Enter "A!" using the active phone keyboard.',
+        observation={"fresh": True, "ref": "phone-ok", "phone_state": "KEYBOARD_LOWER"},
+        response=_classification(value="PHONE"),
+    )
+    assert len(calls) == result["model_call_count"] == 1
+    assert result["classification_source"] == "LOCAL_MODEL"
 
 
 @pytest.mark.parametrize("observation", [{}, {"fresh": "yes"}, {"fresh": 1}])
@@ -163,6 +197,15 @@ def test_receipt_tampering_and_authority_changes_are_rejected() -> None:
         json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
     with pytest.raises(IntentShadowRuntimeV1Error, match="zero-authority"):
+        parse_intent_shadow_receipt_v1(changed)
+    changed = copy.deepcopy(result)
+    changed["classification_source"] = "DETERMINISTIC_PHONE_STATE_GATE"
+    changed["model_call_count"] = 0
+    unsigned = {key: value for key, value in changed.items() if key != "receipt_sha256"}
+    changed["receipt_sha256"] = hashlib.sha256(
+        json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    with pytest.raises(IntentShadowRuntimeV1Error, match="phone-state gate"):
         parse_intent_shadow_receipt_v1(changed)
 
 

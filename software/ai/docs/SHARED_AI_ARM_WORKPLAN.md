@@ -998,6 +998,56 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v6` claims AI-540 after recorded
+AI-539 development rejection. It may add a deterministic, fail-closed phone
+state precondition beside the existing freshness precondition. An explicit
+phone typing request may reach model inference only when the observation binds
+the exact verified `KEYBOARD_LOWER` state; otherwise it becomes
+`REFUSE(phone_state_unverified)` with zero model calls and zero semantic
+actions. Freshness refusal retains precedence. The gate must be implemented in
+the shared motion-free intent contract, exercised by the disconnected shadow
+runtime and evaluator, hash-bound in receipts, and covered for missing, wrong,
+verified, stale, keyboard-only, and tampered cases. Consumed classifier-v6
+development may be used only as failure evidence and may not be rescored for
+selection. V17 and v16 remain unopened. This increment may not construct
+ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or
+claim execution or physical authority.
+Evidence `E-20261009-AI-540` admits the deterministic phone-state precondition
+at the disconnected intent boundary. Against the consumed classifier-v6
+development failure set, it refused all 35 explicit phone-typing cases with
+missing state, gated none of the other 210 cases, and made zero model calls.
+Focused contract and runtime tests pass missing, wrong, verified, stale,
+keyboard-only, and tampered cases. This is a boundary diagnostic rather than a
+classifier rescore; v17 and v16 remain unopened. The next model campaign may
+learn only decisions left after deterministic freshness and phone-state gates.
+
+The AI/model lane on `codex/intent-classifier-v6` claims AI-539 from merged
+AI-538 base `6f393e5d24868e4800e7c23dff2c6a9501f6cb5f`. It may freeze a
+fresh classifier-v6 train/development family and unopened v17 evaluation,
+keeping the same seven intent decisions and the exact
+`classifier_model_observation_v1` boundary. The corpus may broaden only
+language structure and paraphrase diversity, with emphasis on punctuation
+typing, quoted typing, text ambiguity, and phone-state refusal. Generation
+must hash-verify classifier-v1 through classifier-v5 corpora, prove zero
+case-insensitive request overlap, admit every deterministic composition, prove
+fresh-only model observations, and prove unique family-neutral provenance
+references. V16 remains unopened and excluded. One candidate is predeclared
+for exactly two epochs from the same cached 1B base, followed by one
+development selection under exact classification and composition gates and
+hard zero limits for invalid output, false-actionable output, and altered
+typing text. V17 may open only after a passing development decision is
+committed. This increment may not invoke motion, construct ModelMotionBatch,
+emit commands, change arm-lane status, or claim execution or physical
+authority.
+Evidence `E-20261009-AI-539` rejects the only classifier-v6 candidate on its
+single development opening. Broader structures improved exact classification
+and composition to 197/245, but seven phone-state refusal cases became
+actionable keyboard typing, violating the zero false-actionable gate. Schema
+invalid and altered-text counts remained zero. V17 and retained v16 remain
+unopened. No additional epoch or evaluation opening is authorized from this
+claim; the next increment must address the phone-state safety boundary before
+another model campaign.
+
 The AI/model lane on `codex/intent-classifier-v5` claims AI-538 after the
 recorded AI-537 one-epoch development rejection. It may train one new candidate
 from the same frozen classifier-v5 training split and same cached 1B base for

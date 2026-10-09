@@ -21,6 +21,7 @@ from .offline_intent_contract_v1 import (
     classifier_model_observation_v1,
     compose_public_intent_v1,
     deterministic_freshness_classification_v1,
+    deterministic_phone_state_classification_v1,
     parse_classification_v1,
     parse_public_intent_v1,
 )
@@ -150,6 +151,12 @@ def run_intent_shadow_runtime_v1(
         raise IntentShadowRuntimeV1Error("installed model digest differs from expected identity")
 
     gated = deterministic_freshness_classification_v1(normalized_observation)
+    source = "DETERMINISTIC_FRESHNESS_GATE"
+    if gated is None:
+        gated = deterministic_phone_state_classification_v1(
+            request_text, normalized_observation,
+        )
+        source = "DETERMINISTIC_PHONE_STATE_GATE"
     model_calls = 0
     if gated is None:
         model_observation = classifier_model_observation_v1(normalized_observation)
@@ -173,7 +180,6 @@ def run_intent_shadow_runtime_v1(
         source = "LOCAL_MODEL"
     else:
         raw = _canonical(gated).decode("ascii")
-        source = "DETERMINISTIC_FRESHNESS_GATE"
     if not isinstance(raw, str) or len(raw.encode("utf-8")) > 4096:
         raise IntentShadowRuntimeV1Error("classifier response is not a bounded string")
     try:
@@ -247,7 +253,11 @@ def parse_intent_shadow_receipt_v1(document: Mapping[str, Any]) -> dict[str, Any
     expected_status = "SHADOW_ACTIONS_COMPILED" if actions else "SHADOW_NON_ACTIONABLE"
     if document["status"] != expected_status or actionable != bool(actions):
         raise IntentShadowRuntimeV1Error("receipt actionability changed")
-    source_calls = {"LOCAL_MODEL": 1, "DETERMINISTIC_FRESHNESS_GATE": 0}
+    source_calls = {
+        "LOCAL_MODEL": 1,
+        "DETERMINISTIC_FRESHNESS_GATE": 0,
+        "DETERMINISTIC_PHONE_STATE_GATE": 0,
+    }
     if document["classification_source"] not in source_calls:
         raise IntentShadowRuntimeV1Error("classification source changed")
     if document["model_call_count"] != source_calls[document["classification_source"]]:
@@ -256,6 +266,10 @@ def parse_intent_shadow_receipt_v1(document: Mapping[str, Any]) -> dict[str, Any
         classification.get("reason") != "stale_observation"
     ):
         raise IntentShadowRuntimeV1Error("freshness gate classification changed")
+    if document["classification_source"] == "DETERMINISTIC_PHONE_STATE_GATE" and (
+        classification.get("reason") != "phone_state_unverified"
+    ):
+        raise IntentShadowRuntimeV1Error("phone-state gate classification changed")
     if classification["intent_type"] != "TYPE_TEXT" and composed != {
         **classification,
         "schema": "rocell.offline_typing_intent.v1",

@@ -60,8 +60,14 @@ from build_intent_classifier_v5_data import (  # noqa: E402
     FAMILIES as CLASSIFIER_V5_FAMILIES,
     build as build_intent_classifier_v5_data,
 )
+from build_intent_classifier_v6_data import (  # noqa: E402
+    FAMILIES as CLASSIFIER_V6_FAMILIES,
+    TEMPLATES as CLASSIFIER_V6_TEMPLATES,
+    build as build_intent_classifier_v6_data,
+)
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
+    deterministic_phone_state_classification_v1,
 )
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
     compose_public_intent_v1,
@@ -74,6 +80,37 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v6_broadens_language_under_sanitized_boundary(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v6_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (980, 245, 280))
+        self.assertEqual(
+            _data_configuration("classifier-v6"),
+            (2131, "intent_classifier_v6", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        rows = train + validation + evaluation
+        refs = [row["observation"]["ref"] for row in rows]
+        self.assertEqual(len(refs), len(set(refs)))
+        self.assertTrue(all(
+            classifier_model_observation_v1(row["observation"]) == {"fresh": True}
+            for row in rows
+        ))
+        self.assertFalse(any(
+            family in reference
+            for reference in refs
+            for family in CLASSIFIER_V6_FAMILIES
+        ))
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        for split in ("train", "validation", "evaluation"):
+            self.assertGreaterEqual(len(CLASSIFIER_V6_TEMPLATES[split]["type_punctuation"]), 4)
+            self.assertGreaterEqual(len(CLASSIFIER_V6_TEMPLATES[split]["clarify_text"]), 4)
+            self.assertGreaterEqual(len(CLASSIFIER_V6_TEMPLATES[split]["refuse_phone_state"]), 4)
+        for row in rows:
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_v5_isolates_provenance_from_model_input(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v5_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (560, 175, 210))
@@ -154,6 +191,62 @@ class OfflineContractTests(unittest.TestCase):
     def test_classifier_freshness_gate_requires_explicit_boolean(self) -> None:
         with self.assertRaisesRegex(ValueError, "explicit boolean"):
             deterministic_freshness_classification_v1({"fresh": "false"})
+
+    def test_phone_state_gate_bypasses_model_for_unverified_phone_typing(self) -> None:
+        request = 'Type "elm42" on the phone before confirming its current key layer.'
+        expected = {
+            "schema": "rocell.offline_intent_classification.v1",
+            "intent_type": "REFUSE",
+            "reason": "phone_state_unverified",
+        }
+        case = {
+            "id": "phone-unverified",
+            "request": request,
+            "observation": {"fresh": True},
+            "target": expected,
+            "composed_target": {
+                **expected,
+                "schema": "rocell.offline_typing_intent.v1",
+            },
+        }
+        calls = []
+        result = score_classifier(
+            [case], "a" * 64, model="fixture", model_digest="b" * 64,
+            generate=lambda item: calls.append(item) or "{}",
+            deterministic_freshness=True,
+            deterministic_phone_state=True,
+        )
+        self.assertEqual(result["decision"], "PASS_CANDIDATE")
+        self.assertEqual(result["deterministic_phone_state_gate_count"], 1)
+        self.assertEqual(result["deterministic_freshness_gate_count"], 0)
+        self.assertEqual(calls, [])
+        self.assertEqual(
+            result["rows"][0]["classification_source"],
+            "DETERMINISTIC_PHONE_STATE_GATE",
+        )
+
+    def test_phone_state_gate_allows_verified_phone_and_ignores_keyboard(self) -> None:
+        phone = 'Enter "elm42" using the active phone keyboard.'
+        self.assertIsNone(deterministic_phone_state_classification_v1(
+            phone, {"fresh": True, "phone_state": "KEYBOARD_LOWER"},
+        ))
+        self.assertEqual(
+            deterministic_phone_state_classification_v1(phone, {"fresh": True}),
+            {
+                "schema": "rocell.offline_intent_classification.v1",
+                "intent_type": "REFUSE",
+                "reason": "phone_state_unverified",
+            },
+        )
+        self.assertEqual(
+            deterministic_phone_state_classification_v1(
+                phone, {"fresh": True, "phone_state": "KEYBOARD_SYMBOLS"},
+            )["reason"],
+            "phone_state_unverified",
+        )
+        self.assertIsNone(deterministic_phone_state_classification_v1(
+            'Type "elm42" on the physical keyboard.', {"fresh": True},
+        ))
 
     def test_classifier_v3_data_is_composable_and_historically_disjoint(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v3_data()

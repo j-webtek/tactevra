@@ -703,3 +703,12 @@ runtime receipts remain external and hash-bound. The corpus exposes only
 decision-relevant observation state to training and inference; it grants no
 motion or physical authority. All byte, duplicate, and reduction limits remain
 unchanged.
+
+The broader-language classifier-v6 campaign adds six governed paths: one
+generator, three frozen train/development/manifest files, and two unopened v17
+evaluation files. The resulting tree contains 6,579 tracked files. The ceiling
+advances from 6,573 to 6,579 with no spare slots. Model weights, scorecards,
+and runtime receipts remain external and hash-bound. The corpus preserves the
+fresh-only observation boundary while broadening request structure; it grants
+no motion, execution, or physical authority. All byte, duplicate, and
+reduction limits remain unchanged.
