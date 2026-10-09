@@ -1015,6 +1015,14 @@ composition, and hard zero limits for schema-invalid, false-actionable, and
 altered-text output. V21 may open only after a committed development pass. This
 increment may not construct ModelMotionBatch, invoke motion, emit commands,
 change arm-lane status, or claim execution or physical authority.
+Evidence `E-20261009-AI-547A` freezes the claimed five-family corpus: 1,000
+training, 225 development, and 250 sealed v21 rows. All 1,475 rows pass
+freshness and requested-device composition and are intercepted by none of the
+phone-state, text-ambiguity, or device-ambiguity gates. Generation found zero
+case-insensitive request overlap with 10,100 requests from 22 decoded
+historical corpora and hash-verified sealed v16 through v20 without decoding.
+V21 remains unopened. The next authorized step is the one predeclared
+two-epoch candidate followed by one development opening.
 
 The AI/model lane on `codex/intent-device-ambiguity-gate` claims AI-546 from
 merged AI-545 base `c702b9fa924d559fdbb32f6c6461c535ca3de590`. It may add a
