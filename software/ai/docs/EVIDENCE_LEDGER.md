@@ -11773,6 +11773,10 @@ rewriting history. New entries must use a unique evidence ID.
 - External artifacts: ten final files under
   `C:\MuJoCoWarp\evidence\issue190\intent_classifier_v4\pilot_1e` were copied
   to the matching `F:\robot-arm-evidence\issue190` path; every hash matched.
+- Repository verification: `python scripts/maintain_repository.py verify --full`
+  passed with 133 policy tests, 945 offline tests, and 5 expected Windows
+  symlink skips in 474.11 seconds. The source-archive ceiling passed at 6,564
+  files.
 - Hardware-write count: 0. Physical-movement count: 0. Controller-command
   count: 0. GPU-job count: 0 for evaluation; local Ollama inference only.
 - Limitations: v15 is synthetic and agent-authored, covers seven closed intent
