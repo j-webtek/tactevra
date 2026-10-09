@@ -1012,6 +1012,16 @@ freshness, model-identity drift, malformed classifier output, unsupported text,
 and non-actionable compilation. This increment may not import or invoke a
 motion adapter, construct ModelMotionBatch, emit commands, change arm-lane
 status, claim deployment qualification, or acquire physical authority.
+Evidence `E-20261009-AI-536` rejects classifier-v4 for shadow use after the
+runtime integration exposed observation-provenance leakage. The identical
+workflow-refusal request was refused when its synthetic `ref` contained the
+family name and became actionable under a neutral reference. A consumed-v15
+diagnostic that removed provenance fields reduced exact classification from
+210/210 to 90/210 and produced 90 false-actionable outputs. The shadow runtime
+itself remains a useful zero-authority boundary and now exposes only explicit
+freshness and bounded phone state to inference. The next classifier campaign
+must train, select, and evaluate on this sanitized model-observation contract;
+classifier-v4 may not enter shadow or motion composition.
 
 The AI/model lane on `codex/intent-classifier-v4` claims AI-534 from merged
 AI-533 base `614b2e06b4032bcc96df1dff00bfeb318d0c1b05`. It may freeze

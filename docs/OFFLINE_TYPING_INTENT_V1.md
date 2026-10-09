@@ -70,6 +70,12 @@ motion or execution authority.
 
 A freshness-separated classifier has now passed a fresh 210-case held-out
 synthetic evaluation for the seven remaining learned intent families. It is
-retained only for disconnected shadow integration. Its output still cannot
-create `ModelMotionBatch`, call motion planning, issue commands, or claim
-physical execution.
+not retained for disconnected shadow integration: the subsequent runtime
+probe found that synthetic observation references encoded family names. With
+those provenance fields removed, exact classification fell to 90/210 and the
+model produced 90 false-actionable outputs. The disconnected runtime now sends
+only explicit freshness and bounded phone state to inference. A successor must
+train and evaluate under that same sanitized observation contract before it
+can be considered for shadow use. No classifier output can create
+`ModelMotionBatch`, call motion planning, issue commands, or claim physical
+execution.
