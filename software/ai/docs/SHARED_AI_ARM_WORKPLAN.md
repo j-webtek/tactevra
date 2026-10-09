@@ -998,6 +998,32 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v9` claims AI-545 from merged
+AI-544 base `c329ca12457b19fd35c4a23c0aa8a156a060f207`. It may freeze one
+fresh post-gate classifier corpus containing only the six decision families
+that remain after deterministic freshness, phone-state, and text-ambiguity
+gates: quoted keyboard typing, punctuation keyboard typing, unquoted keyboard
+typing, verified phone typing, device clarification, and unavailable-workflow
+refusal. Text-ambiguity examples are excluded because that decision is now
+deterministic. Every actionable request must retain exact requested-device
+binding. Train, development, and unopened v20 evaluation wording, payloads,
+IDs, and provenance must be disjoint from all prior decoded requests; sealed
+v16 through v19 may be hash-verified only and may not be decoded. The freeze
+predeclares 200/45/50 rows per family, giving 1,200 training, 270 development,
+and 300 evaluation rows, one candidate trained for exactly two epochs, one
+development opening, and hard zero limits for schema-invalid, false-actionable,
+and altered-text output plus exact classification and composition. V20 may open
+only after a committed development pass. This increment may not construct
+ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or claim
+execution or physical authority.
+Evidence `E-20261009-AI-545A` freezes the claimed post-gate corpus: 1,200
+training, 270 development, and 300 sealed v20 rows. All 1,770 rows pass the
+three pre-inference gates and exact requested-device composition; none belongs
+to the deterministic text-ambiguity family. Generation found zero overlap with
+8,630 requests from 20 decoded historical corpora and hash-verified sealed v16
+through v19 without decoding. V20 remains unopened. The next authorized step is
+the single predeclared two-epoch candidate followed by one development opening.
+
 The AI/model lane on `codex/intent-text-ambiguity` claims AI-544 from merged
 AI-543 base `2a60e6b701a76241a3f4aa4ec68fea27f3619484`. It may add a
 deterministic, motion-free text-candidate ambiguity gate before local model
