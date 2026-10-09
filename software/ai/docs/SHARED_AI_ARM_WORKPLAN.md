@@ -1009,6 +1009,13 @@ must be preserved. Frozen v21 through v16 may be hash-verified only and may not
 be decoded; v21 may open only after a committed development pass in a later
 claim. This increment may not construct ModelMotionBatch, invoke motion, emit
 commands, change arm-lane status, or claim execution or physical authority.
+Evidence `E-20261009-AI-548` passes the claimed development boundary. The
+single two-epoch candidate completed 126 optimizer updates and reached 225/225
+exact classification and composition on the one authorized development
+opening, with zero schema-invalid, false-actionable, altered-text, or
+deterministic-gate rows. V21 through v16 remain unopened. The next AI
+dependency is a separate held-out v21 evaluation claim using this unchanged
+adapter and the already frozen exact gates.
 
 The AI/model lane on `codex/intent-classifier-v10` claims AI-547 from merged
 AI-546 base `36eaa5f5bda3fa47a578ac4e0317c20659b76954`. It may freeze one
