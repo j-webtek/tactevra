@@ -56,6 +56,13 @@ from build_intent_classifier_v4_data import (  # noqa: E402
     build as build_intent_classifier_v4_data,
     load_historical_requests as load_classifier_v4_historical_requests,
 )
+from build_intent_classifier_v5_data import (  # noqa: E402
+    FAMILIES as CLASSIFIER_V5_FAMILIES,
+    build as build_intent_classifier_v5_data,
+)
+from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
+    classifier_model_observation_v1,
+)
 from rocell_ai.offline_intent_classifier_eval_v1 import (  # noqa: E402
     compose_public_intent_v1,
     deterministic_freshness_classification_v1,
@@ -67,6 +74,28 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v5_isolates_provenance_from_model_input(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v5_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (560, 175, 210))
+        self.assertEqual(
+            _data_configuration("classifier-v5"),
+            (2130, "intent_classifier_v5", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        rows = train + validation + evaluation
+        refs = [row["observation"]["ref"] for row in rows]
+        self.assertEqual(len(refs), len(set(refs)))
+        self.assertTrue(all(
+            classifier_model_observation_v1(row["observation"]) == {"fresh": True}
+            for row in rows
+        ))
+        self.assertFalse(any(
+            family in reference
+            for reference in refs
+            for family in CLASSIFIER_V5_FAMILIES
+        ))
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+
     def test_classifier_v4_learns_only_fresh_historically_disjoint_cases(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v4_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (560, 175, 210))

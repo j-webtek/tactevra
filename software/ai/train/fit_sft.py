@@ -29,6 +29,8 @@ def _data_configuration(version: str) -> tuple[int, str, str]:
         return 2128, "intent_classifier_v3", "rocell_ai.offline_intent_classifier_eval_v1"
     if version == "classifier-v4":
         return 2129, "intent_classifier_v4", "rocell_ai.offline_intent_classifier_eval_v1"
+    if version == "classifier-v5":
+        return 2130, "intent_classifier_v5", "rocell_ai.offline_intent_classifier_eval_v1"
     seeds = {"v0": SEED, "v1": 2110, "v2": 2111, "v3": 2112}
     if version not in seeds:
         raise ValueError(f"unsupported data version: {version}")
@@ -46,7 +48,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Local, offline LoRA SFT pilot; no arm access")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5", "classifier-v1", "classifier-v2", "classifier-v3", "classifier-v4"), default="v0")
+    parser.add_argument("--data-version", choices=("v0", "v1", "v2", "v3", "v4", "v5", "classifier-v1", "classifier-v2", "classifier-v3", "classifier-v4", "classifier-v5"), default="v0")
     parser.add_argument("--epochs", type=int, default=2)
     args = parser.parse_args()
     if args.epochs < 1 or args.epochs > 10:
@@ -99,7 +101,11 @@ def main() -> None:
         from rocell_ai.model_eval import SYSTEM_PROMPT, PROMPT_SHA256
 
     def encode(row: dict) -> tuple[list[int], list[int]]:
-        user_content = json.dumps({"request": row["request"], "observation": row["observation"]}, ensure_ascii=False)
+        observation = row["observation"]
+        if args.data_version == "classifier-v5":
+            from rocell_ai.offline_intent_contract_v1 import classifier_model_observation_v1
+            observation = classifier_model_observation_v1(observation)
+        user_content = json.dumps({"request": row["request"], "observation": observation}, ensure_ascii=False)
         messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user_content}]
         prefix = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
         answer = json.dumps(row["target"], separators=(",", ":"), sort_keys=True)
