@@ -65,6 +65,10 @@ from build_intent_classifier_v6_data import (  # noqa: E402
     TEMPLATES as CLASSIFIER_V6_TEMPLATES,
     build as build_intent_classifier_v6_data,
 )
+from build_intent_classifier_v7_data import (  # noqa: E402
+    FAMILIES as CLASSIFIER_V7_FAMILIES,
+    build as build_intent_classifier_v7_data,
+)
 from rocell_ai.offline_intent_contract_v1 import (  # noqa: E402
     classifier_model_observation_v1,
     deterministic_phone_state_classification_v1,
@@ -80,6 +84,40 @@ from rocell_ai.offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
 
 
 class OfflineContractTests(unittest.TestCase):
+    def test_classifier_v7_learns_only_post_gate_decisions(self) -> None:
+        train, validation, evaluation, manifest = build_intent_classifier_v7_data()
+        self.assertEqual((len(train), len(validation), len(evaluation)), (1400, 315, 350))
+        self.assertEqual(
+            _data_configuration("classifier-v7"),
+            (2132, "intent_classifier_v7", "rocell_ai.offline_intent_classifier_eval_v1"),
+        )
+        self.assertNotIn("refuse_phone_state", CLASSIFIER_V7_FAMILIES)
+        self.assertIn("type_phone_verified", CLASSIFIER_V7_FAMILIES)
+        rows = train + validation + evaluation
+        refs = [row["observation"]["ref"] for row in rows]
+        self.assertEqual(len(refs), len(set(refs)))
+        self.assertEqual(manifest["generation_admission"]["failure_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["overlap_count"], 0)
+        self.assertEqual(manifest["historical_request_admission"]["sealed_hash_only_count"], 2)
+        for row in rows:
+            model_observation = classifier_model_observation_v1(row["observation"])
+            if row["family"] == "type_phone_verified":
+                self.assertEqual(
+                    model_observation,
+                    {"fresh": True, "phone_state": "KEYBOARD_LOWER"},
+                )
+                self.assertEqual(row["target"]["device"], "PHONE")
+            else:
+                self.assertEqual(model_observation, {"fresh": True})
+            self.assertIsNone(deterministic_freshness_classification_v1(row["observation"]))
+            self.assertIsNone(deterministic_phone_state_classification_v1(
+                row["request"], row["observation"],
+            ))
+            self.assertEqual(
+                compose_public_intent_v1(row["target"], row["request"]),
+                row["composed_target"],
+            )
+
     def test_classifier_v6_broadens_language_under_sanitized_boundary(self) -> None:
         train, validation, evaluation, manifest = build_intent_classifier_v6_data()
         self.assertEqual((len(train), len(validation), len(evaluation)), (980, 245, 280))
