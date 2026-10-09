@@ -11844,6 +11844,10 @@ rewriting history. New entries must use a unique evidence ID.
   `python -m pytest software/ai/tests/test_offline_intent_shadow_runtime_v1.py
   software/ai/tests/test_offline.py -q`; result: 63 passed. `python -m ruff
   check` on the five changed Python files also passed.
+- Repository verification: `python scripts/maintain_repository.py verify --full`
+  passed with 133 policy tests, 945 offline tests, and 5 expected Windows
+  symlink skips in 476.12 seconds. Source-archive containment passed at 6,567
+  files.
 - External artifacts: evidence-manifest SHA-256
   `a6826bfa8d35a5ffd7bd5382cf139fbdbf0a435c162d29d6f70cd0442f6e4191`.
   All files under
