@@ -12428,3 +12428,56 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: train the single predeclared two-epoch candidate from the
   cached 1B base, then open development once under exact classification and
   composition gates. V20 remains sealed until a committed development pass.
+
+### E-20261009-AI-545B — classifier-v9 is safe but rejected on device clarification
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: the single predeclared two-epoch classifier-v9 candidate and its one
+  development opening from merged corpus commit
+  `053d797f598b507324c43ad50ea114721d3750fd`. Frozen v20 through v16 stayed
+  unopened.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python software/ai/train/fit_sft.py --data-version classifier-v9 --epochs 2
+  --device cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v9\pilot_2e`.
+  Epoch-one train/development loss was 0.075661/0.000735; epoch two was
+  0.000416/0.000329; 150 optimizer updates. Adapter SHA-256 is
+  `772299421bb91c8c593d4f986b4f9f3edd10095ef61bbe90fbda01c210ebbd36`;
+  run-manifest SHA-256 is
+  `66a3bce4940dc5ad23e5a70285f48d78882c1b520a2214bd357009dc5f3b2f6e`.
+- Import result: local tag
+  `llama32-1b-rocell-intent-classifier-v9-2e:latest`, digest
+  `fd4c6ef66524e329bee348f0b5e23aab11dd612f1a2dcad1b8c276ad7bfc8f0b`;
+  import-manifest SHA-256 is
+  `67f82b35d47d9ac6c76e5e615c3ff5e72606241528c5fe959ed15ad39b02d245`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v9_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v9.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v9-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --deterministic-phone-state
+  --deterministic-text-ambiguity --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v9\pilot_2e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact classification and composition 264/270,
+  schema-invalid 0, altered text 0, and false actionable 0. All six failures are
+  `clarify_device` rows using `Specify the destination input surface` with
+  payload suffix `&&` or `++`; the model returned
+  `REFUSE(operation_not_available)`. Scorecard SHA-256 is
+  `1a872b17ebac8812da754fa4f26b671b1d5a8ed29a8753ecf78f58241afbcb07`;
+  failure-analysis SHA-256 is
+  `2f8b3102097896ee9ee8cd6f151a01c48794c9c4ad7a77a51ab6b8161d4f5999`.
+- External evidence-manifest SHA-256 is
+  `669eca7be1d4ee783b2279daeac810843df2b84d2bc214cbe0a696f0b75517fd`.
+  Eleven files were copied to
+  `F:\robot-arm-evidence\issue190\intent_classifier_v9\pilot_2e`; all hashes
+  matched.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. Local GPU
+  training and local Ollama inference only. Physical authority: false.
+- Limitations: synthetic development selection only; no deployment, motion,
+  hardware, or physical qualification. Zero false actionability is necessary
+  but does not override the frozen exact-match gate. V20 remains unopened.
+- Next dependency: add a narrow deterministic explicit-device ambiguity gate
+  before inference, preserving stale, phone-state, text-ambiguity, and
+  unavailable-workflow precedence; then freeze a fresh successor campaign.
