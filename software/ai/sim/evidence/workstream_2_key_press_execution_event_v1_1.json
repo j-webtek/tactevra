@@ -1,0 +1,169 @@
+{
+  "amendment": {
+    "date": "2026-10-09",
+    "parent_fixture_sha256": "4b4c899a4fbe475aa42635051efd18d7ac7e2879c64a52adb4f6752355dc90e8",
+    "reason": "BIND_RETAINED_C02_RELEASE_DIAGNOSTIC_ONE_SECOND_SETTLE_WITHOUT_CHANGING_RELEASE_THRESHOLDS"
+  },
+  "bindings": {
+    "landing_prepass": {
+      "path": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2/landing_prepass.json",
+      "receipt_sha256": "7c0b1a5b120369772344820f5217e49d784320f58240de9b7c79b5d81515cf27",
+      "sha256": "2fec61ac3e49e861568a94faac9618e8a3bbf71399939f3530ae5b7242aac408"
+    },
+    "parent_fixture": {
+      "fixture_sha256": "e2cf169a72486e9ab91f63d2f8f0f3df813be893a5a1c77904b801e287cb1300",
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\bridge_physics_fixture.json",
+      "sha256": "c384d09c125a7ade73b8efce023e5926853f5705a1e7c15e958decca29a11a4b"
+    },
+    "release_diagnostic": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_2_release_diagnostic_v1_1\\diagnostic_result_v1.json",
+      "sha256": "c7563a1eaaa7314b6dcbcc2b29d0477c959ce45fb82d034c05f39bca04bd1484"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transport_operations": 0
+  },
+  "fixture_sha256": "fc80cc75442cce08aa52f0bfac58394cf0b8d286816dc893f026c33413a6883d",
+  "gpu_execution_authorized": false,
+  "limitations": [
+    "numerical settle thresholds are simulator controls not measured servo behavior",
+    "prescribed mocap path measures required force but does not simulate a force-controlled arm",
+    "smoke cannot select a recipe tool or physical policy",
+    "This successor binds the already evaluated exact 3 mm radius, 5x half-length bridge fixture for the event-termination experiment; it changes no numerical protocol.",
+    "The one-second post-release settle is inherited from the retained C02 diagnostic and changes observation time, not commanded press or release motion."
+  ],
+  "numerical_protocol": {
+    "bottom_out_numerical_tolerance_mm": 0.001,
+    "event_rule": "RISING_CROSSING_OF_SETTLED_RELATIVE_CENTER_KEY_QPOS_AT_ACTUATION_FRACTION_TIMES_TRAVEL",
+    "force_rule": "PRESCRIBED_MOCAP_TRAJECTORY_WITH_REQUIRED_SPRING_PLUS_DAMPING_FORCE_SCREEN; NOT FORCE_CONTROL",
+    "mocap_update_each_step": true,
+    "neighbor_contact_displacement_mm": 0.01,
+    "recipe_chunk_size": 4,
+    "release": {
+      "additional_settle_seconds": 1.0,
+      "position_error_limit_mm": 0.05,
+      "velocity_limit_mm_s": 0.05
+    },
+    "repeat_rule": "WORST_CASE_OVER_FROZEN_DELAY_AND_PERIOD_SAMPLES",
+    "settle": {
+      "consecutive_steps": 10,
+      "maximum_seconds": 2.0,
+      "position_delta_limit_m": 1e-06,
+      "velocity_limit_m_s": 1e-05
+    },
+    "world_chunk_limit": 4096
+  },
+  "outputs": {
+    "comparison": "smoke_comparison.json",
+    "root": "C:/MuJoCoWarp/evidence/issue190/simulation_program/workstream_2",
+    "smoke_cuda0": "smoke_cuda0.json",
+    "smoke_cuda1": "smoke_cuda1.json"
+  },
+  "physical_authority": false,
+  "post_smoke_decision": {
+    "campaign_chunk_choice": "SELECT_LARGEST_OF_1024_2048_4096_WORLDS_WITH_PEAK_DEVICE_MEMORY_AT_MOST_70_PERCENT_AND_NO_STOP; RECORD_ONLY_THROUGHPUT_DOES_NOT_CHANGE_PHYSICS_GATES",
+    "pass": "FINITE_ZERO_SOLVER_OVERFLOW_EXACT_WORLD_COUNT_COMPLETE_METRICS_AND_FROZEN_CROSS_GPU_LIMITS",
+    "stop": [
+      "MODEL_COMPILE_FAILURE",
+      "SETTLE_FAILURE",
+      "NONFINITE_STATE",
+      "SOLVER_OVERFLOW",
+      "MISSING_ROW",
+      "CROSS_GPU_DISAGREEMENT"
+    ]
+  },
+  "runtime_compatibility_amendment": {
+    "date": "2026-10-05",
+    "scope": "parent runtime identity only; every execution field unchanged",
+    "status": "PRE_RESULT_RUNTIME_ONLY_AMENDMENT"
+  },
+  "schema": "tactevra.ws2_key_press_execution_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "smoke": {
+    "devices": [
+      "cuda:0",
+      "cuda:1"
+    ],
+    "expected_world_count": 64,
+    "landing_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+    ],
+    "profile_id": "BASELINE",
+    "recipe_indices": [
+      0
+    ],
+    "scenario_ids": [
+      "HIGH_SOURCE_LOW_RESIDUAL"
+    ],
+    "target_id": "GRAVE",
+    "tip_id": "sphere-r1"
+  },
+  "workstream": "WS2_KEY_PRESS_PHYSICS_EXECUTION"
+}
