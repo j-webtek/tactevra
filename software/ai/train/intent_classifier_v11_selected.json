@@ -1,0 +1,12 @@
+{
+  "adapter_sha256": "16639e5bb7a841c5915230e12c9d2f361cd1caef5c47452911fe27b2158b966f",
+  "development_scorecard_sha256": "47138071e95d17e1308cc6967a47772a06c3602d465a4fed619c28a7ef1bcc41",
+  "evaluation_scorecard_sha256": "c2c6eff27df62cbc5cc165a11a0fa6dd6960f40f05f2e743d2c9d0dc525900cc",
+  "model_digest": "348514d04a26efc58552e1eb4395e298ca7bc6f1045fb1777a898acb8d75d207",
+  "model_tag": "llama32-1b-rocell-intent-classifier-v11-2e:latest",
+  "physical_authority": false,
+  "prompt_sha256": "fcab5bf77fbf9093579e40aa229d02fdb6b40c601dea0860f302fad3f7411531",
+  "schema": "tactevra.selected_offline_intent_classifier.v1",
+  "scope": "OFFLINE_SHADOW_ONLY",
+  "v22_cases_sha256": "c149d3c761c2c82a060d6d25df849fc6bacf19d4bd20780b75f138aa63970a85"
+}

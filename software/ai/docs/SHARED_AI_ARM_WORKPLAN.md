@@ -998,6 +998,28 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-v11-shadow-integration` claims AI-553 from
+merged AI-552 base `250cba61c76a34bb1679dc9e2b48a5a5be5e3422`. It may pin
+the exact selected classifier-v11 digest and add a read-only composition layer
+from the existing intent shadow receipt through deterministic keyboard target
+compilation, qualified synthetic perception fixtures, `ModelMotionBatchV2`,
+strict arm ingress, and the existing zero-hardware arm shadow planner. Missing
+perception, non-actionable intent, unsupported phone motion, digest mismatch,
+or any composition error must stop before planning. The layer may report batch
+and shadow-trace hashes but may not emit joint, PWM, serial, Waveshare JSON,
+permit, transport, controller-command, or execution-authority fields. It may
+not change arm-lane status or declare an integration gate complete.
+Evidence `E-20261009-AI-553` completes that bounded shadow composition. The
+exact selected classifier-v11 digest interpreted a fresh keyboard request,
+the deterministic compiler preserved ordered repeated targets `H,H,I`, one
+`ModelMotionBatchV2` crossed strict ingress, and the existing arm shadow
+stopped at `BLOCKED_CALIBRATION_MISSING_OR_STALE`. Controller-command,
+hardware-write, and physical-movement counts are zero. The perception and arm
+inputs remain synthetic integration fixtures, so this is read-only interface
+evidence rather than perception, calibration, trajectory, hardware, or
+integration-gate qualification. The next dependency is qualified measured
+perception plus arm-lane review of this shared-boundary receipt.
+
 The AI/model lane on `codex/intent-classifier-v11-evaluation` claims AI-552
 from merged AI-551 base `7295d8b0403cb343711f714405bb2f5c8857b446`. It may
 open the frozen 250-row v22 evaluation exactly once using the unchanged local
