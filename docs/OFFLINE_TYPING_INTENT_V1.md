@@ -105,3 +105,10 @@ phone requests remain eligible for local classification and semantic phone
 compilation. This closes the observed false-actionable path at the shadow
 boundary; it does not validate broader wording, phone UI state, motion, or
 hardware.
+
+The post-gate classifier-v7 campaign correctly classified all 45 verified
+phone typing cases and improved total synthetic development accuracy to
+287/315. It remains rejected because seven device-ambiguity cases became
+actionable keyboard typing. Frozen v18, v17, and v16 remain unopened. This
+shows that phone state alone is insufficient: an actionable device must also
+be bound deterministically from the request before semantic compilation.

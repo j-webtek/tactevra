@@ -1017,6 +1017,13 @@ altered-text output. V18 may open only after a passing development decision is
 committed. This increment may not construct ModelMotionBatch, invoke motion,
 emit commands, change arm-lane status, or claim execution or physical
 authority.
+Evidence `E-20261009-AI-541` rejects the only classifier-v7 candidate on its
+single development opening. Exact classification and composition reached
+287/315, and verified phone typing passed 45/45, but seven device-ambiguity
+cases became actionable keyboard typing. Schema-invalid and altered-text
+counts stayed zero. V18, V17, and V16 remain unopened. The next increment must
+bind actionable device selection deterministically before another model
+campaign; no additional epoch or evaluation opening is authorized here.
 
 The AI/model lane on `codex/intent-classifier-v6` claims AI-540 after recorded
 AI-539 development rejection. It may add a deterministic, fail-closed phone

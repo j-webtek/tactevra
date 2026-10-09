@@ -12117,3 +12117,72 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: freeze classifier-v7 training/development and a new unopened
   evaluation around the decisions remaining after deterministic freshness and
   phone-state gating; keep classifier-v6 and v17 preserved and unopened.
+
+### E-20261009-AI-541 — verified phone typing passes but device ambiguity remains unsafe
+
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Stage: one predeclared post-gate classifier-v7 candidate. Full pre-result
+  corpus commit is `96774fe4643113d19f11fa71fec64ca22c142746`; active-claim
+  commit is `15b54a0f7ae71aecdb49f480bcb69faa211fc4e2`. Frozen v18,
+  v17, and v16 stayed unopened.
+- Fixtures: 1,400 training, 315 development, and 350 sealed evaluation cases.
+  Training SHA-256 is
+  `b7e90b757f183f6a012d2c17575b20240576204a27b74e42f9bf81ddcd880424`;
+  development SHA-256 is
+  `702d53e14a808079b69b29d15344530de4ac40b7fa6d11566dadbc0a16dd63e8`;
+  sealed v18 SHA-256 is
+  `6558c77fff0555e3b44b82a67edb33c498557e0cd8100c360d427ace970ba307`;
+  manifest SHA-256 is
+  `de294c17ae3656b9b1bc29fd9588c3c53fd590c3f59c60b8a808211eb407bd7f`.
+  Generation admitted all 2,065 compositions through both deterministic gates,
+  found zero overlap against 5,200 requests in 16 decoded historical corpora,
+  and hash-verified sealed v16 and v17 without decoding.
+- Training command: set `PYTHONPATH=software\ai;software\src`, then run `python
+  software/ai/train/fit_sft.py --data-version classifier-v7 --epochs 2 --device
+  cuda:0 --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v7\pilot_2e`.
+  Epoch-one train/validation loss was 0.079992/0.018923; epoch two was
+  0.000706/0.012147; 176 optimizer updates. Adapter SHA-256 is
+  `8a4ad2233e79396c3fe252877aea800d959b1536548d0f751c729153bad81128`;
+  run-manifest SHA-256 is
+  `60a58f74ffc98804bde542efe06a9e18178bd4ab36a653ca72db80e469be6465`.
+- Import command: `python software/ai/train/import_adapter.py --adapter-dir
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v7\pilot_2e --staging-dir
+  software\ai\artifacts\intent_classifier_v7_2e_import --base-tag
+  llama32-1b-meta-92131767:latest --tag
+  llama32-1b-rocell-intent-classifier-v7-2e:latest`. Exact local digest is
+  `2fe498747497fca69c92413a1113d05d86c8b33bbf4d618a4d2c45804720a09f`.
+- Development command: set `PYTHONPATH=software\ai;software\src`, then run
+  `python -m rocell_ai.offline_intent_classifier_eval_v1 --cases
+  software\ai\data\intent_classifier_v7_validation.jsonl --manifest
+  software\ai\data\intent_classifier_v7.manifest.json --split validation
+  --model llama32-1b-rocell-intent-classifier-v7-2e:latest --schema
+  software\ai\schemas\offline_intent_classification_v1.schema.json
+  --deterministic-freshness --deterministic-phone-state
+  --sanitize-observation --output
+  C:\MuJoCoWarp\evidence\issue190\intent_classifier_v7\pilot_2e\validation_scorecard.json`.
+- Result: `REJECT_CANDIDATE`; exact classification and composition 287/315,
+  schema-invalid 0, altered text 0, false actionable 7. Family exact counts:
+  quoted typing 45/45, punctuation typing 36/45, unquoted typing 43/45,
+  verified phone typing 45/45, device ambiguity 38/45, text ambiguity 35/45,
+  and workflow refusal 45/45. All seven unsafe outputs came from one held-out
+  device-ambiguity structure and became keyboard `TYPE_TEXT`. Scorecard SHA-256
+  is `f0e443cdddeacb33ea5d7b93ec25de203263e515086d8d307ef5c390bfd6eb9a`;
+  failure-analysis SHA-256 is
+  `7b13362cd58771ad96f41d632737a7f8e660798712593026cab5416af70e9273`.
+- External evidence-manifest SHA-256 is
+  `9f6a2b19fe90edd831a6b5044604b0eee6d1b5a9174f12399036cdf0a1bc52aa`.
+  Eleven files were copied to the matching
+  `F:\robot-arm-evidence\issue190\intent_classifier_v7\pilot_2e` path with
+  matching hashes.
+- Focused verification: `python -m pytest software/ai/tests/test_offline.py
+  software/ai/tests/test_offline_intent_shadow_runtime_v1.py -q` passed 71;
+  Ruff passed on the generator, trainer, and tests.
+- Hardware-write count: 0. Physical-movement count: 0. Controller-command
+  count: 0. ModelMotionBatch count: 0. Motion-adapter-call count: 0. One local
+  GPU training job and local Ollama inference only.
+- Limitations: synthetic development selection only. It establishes no broad
+  language, deployment, motion, hardware, or physical capability. V18 was not
+  scored, and aggregate improvement cannot compensate for unsafe actionability.
+- Next dependency: enforce deterministic device binding for actionable typing,
+  then freeze any successor against a fresh development and evaluation family.
