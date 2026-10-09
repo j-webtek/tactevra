@@ -685,3 +685,12 @@ numeric margin from the exact uncertainty-inflated sweep evidence already
 sealed inside ICQ-7; it rejects caller-asserted values, missing or reordered
 segments, crossed lineage, changed hashes, collisions, and authority fields.
 All byte, duplicate, and reduction limits remain unchanged.
+
+The disconnected intent shadow runtime adds three governed Python paths: one
+motion-free intent contract module, one zero-authority shadow runtime, and one
+focused test module. The resulting tree contains 6,567 tracked files. The
+ceiling advances from 6,564 to 6,567 with no spare slots. Runtime-scale model
+receipts and the corrective consumed-evaluation diagnostic remain external and
+hash-bound. The new runtime cannot import the motion adapter, construct
+ModelMotionBatch, emit controller output, write hardware, or grant physical
+authority. All byte, duplicate, and reduction limits remain unchanged.
