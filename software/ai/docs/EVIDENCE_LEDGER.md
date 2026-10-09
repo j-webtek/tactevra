@@ -12900,3 +12900,60 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: collect the held final-camera physical originals, evaluate
   the existing precision adapter on disjoint calibration and held-out captures,
   and install qualification only if its combined error fits the target margin.
+
+### E-20261009-AI-555 — geometry-first precision adapter fails closed
+
+- Stage: S1 additive localization contract and architecture decision.
+- Lane: AI/model; arm-lane status and integration gates remain unchanged.
+- Commits: claim commit
+  `6212356fc6bdb8d57bee046d40714e4883835c09`; bounded implementation commit
+  `9c9ee10c155e5aaade21dc69b7bc3ebdd623535a`.
+- Change: adds a zero-authority fiducial-plus-catalog precision observation and
+  synthetic qualification schema. The adapter consumes the existing typed
+  `AprilTagPoseObservation` and nominal target catalog, preserves requested
+  target order, and binds detector, estimator, camera intrinsics/settings,
+  tag map, board frame, catalog, frame, fit, qualification, and freshness.
+  Missing qualification and every tested applicability mismatch abstain.
+- Inputs/fixtures: simulation-only nominal target catalog
+  `software/config/nominal_target_profiles.json`, content SHA-256
+  `6779213e832ab27eeda1e7fb245f57ff8cb0d56707b5aa73a8f31ec483a620f2`;
+  typed one-tag synthetic pose fixtures in
+  `software/ai/tests/test_fiducial_catalog_precision_v1.py`, SHA-256
+  `1637115fc7d6d76bb8c27e41ee1d8741534298ec894d99de6633dfe73797893f`.
+- Command: set `PYTHONPATH=software/src;software/ai`, then run
+  `python -m pytest software/ai/tests/test_fiducial_catalog_precision_v1.py
+  software/tests/unit/test_vision_records.py
+  software/tests/unit/test_planar_pose_estimator.py -q`; validate both new JSON
+  schemas with `python -m json.tool`; run `git diff --check`.
+- Result: PASS, 34 focused tests. Covered exact admission; missing
+  qualification; wrong domain, camera intrinsics/settings, tag map, target
+  catalog, and board frame; uncovered targets; insufficient inlier tags;
+  stale evidence; excessive reprojection residual; qualification tampering;
+  observation tampering; and attempted physical-scope relabeling. Schema JSON
+  and whitespace checks passed. Adapter SHA-256 is
+  `88ffff6c61aa94b3174ef4ea724c4d75cabe6f589e8e45cd3e45fbdc508867bb`;
+  observation-schema SHA-256 is
+  `4acdc1f1a7fa74bdc9a8c148ae33c6d3c9c807a0342271a5569be581f3031793`;
+  qualification-schema SHA-256 is
+  `b893b6a6de998759c9f3362897414bc560b501cb45264f60e36d1435715f8749`;
+  architecture-document SHA-256 is
+  `5028372c4f2bc76d657b92d0ea1b16c1e8e06c013e4ca361f029f6878eaf94db`.
+- Architecture decisions: target coordinates come from observed fixture pose
+  plus a frozen measured catalog; learned vision remains an abstaining scene
+  consistency/obstruction check. The independent physical reference is a
+  repeated caliper survey from tray locating pins or machined datum edges to
+  keycap top edges. The next WS2 successor may use a host keystroke event only
+  to end an already admitted press early and retract; it may never start,
+  deepen, extend, retry, or redirect motion. Hard depth/force/time limits stay.
+- Hardware writes: 0. Physical movements: 0. Controller commands: 0.
+  ModelMotionBatch count: 0. Physical authority: false.
+- Limitations: the catalog and qualification are synthetic-only; the pose
+  fixtures are constructed contract tests. No measured catalog, final-camera
+  capture, held-out fiducial accuracy, event latency, contact behavior,
+  deployment qualification, or physical-use capability is established.
+- Supersedes: none. The 14.400834977 mm learned-localizer bound remains valid
+  evidence and is the reason learned coordinates are not admitted for contact.
+- Next dependency: create the measured target catalog, collect disjoint
+  fiducial calibration/evaluation captures, propose a reviewed physical
+  qualification schema, and run the separately predeclared event-terminated
+  WS2 comparison.

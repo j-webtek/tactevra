@@ -1012,7 +1012,17 @@ physical target-survey instrument, but it may not implement motion or grant a
 verification event authority to start, extend, or deepen a press. It may not
 add joint, PWM, serial, Waveshare JSON, permit, transport, controller-command,
 execution, or physical authority; change arm-lane status; or complete an
-integration gate.
+integration gate. Evidence `E-20261009-AI-555` completes the bounded increment:
+the adapter binds the existing AprilTag pose record to exact detector,
+estimator, camera, tag-map, board-frame, catalog, target, fit, freshness, and
+qualification identities; all mismatch cases abstain. The only supported
+qualification and catalog are explicitly synthetic-only. The architecture
+selects repeated caliper survey from tray datums as the independent physical
+reference and records an event-terminated WS2 successor in which verification
+may only shorten an admitted press by triggering retraction. No batch,
+controller command, hardware write, or physical movement was produced. The
+next dependency is a measured target catalog and a separately reviewed
+physical fiducial qualification schema.
 
 The AI/model lane on `codex/intent-v11-precision-shadow` claims AI-554 from
 merged AI-553 base `8821b59cb15d3eeb87c8963354a19b4e98e5bec4`. It may
