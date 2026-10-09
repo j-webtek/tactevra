@@ -9,72 +9,16 @@ from pathlib import Path
 import time
 from typing import Any, Callable
 
-from .offline_intent_model_eval_v1 import (
-    _model_digest,
-    _post,
-    extract_requested_text_v1,
+from .offline_intent_contract_v1 import (
+    PROMPT_SHA256,
+    SYSTEM_PROMPT,
+    compose_public_intent_v1,
+    deterministic_freshness_classification_v1,
+    parse_classification_v1,
 )
+from .offline_intent_model_eval_v1 import _model_digest, _post
 from .offline_intent_schema_decode_eval_v1 import _runtime_version, load_schema_intent_cases
 from .offline_intent_to_motion_v1 import parse_offline_typing_intent_v1
-
-
-CLASSIFICATION_SCHEMA = "rocell.offline_intent_classification.v1"
-PUBLIC_SCHEMA = "rocell.offline_typing_intent.v1"
-SYSTEM_PROMPT = """Classify one request into exactly one JSON object. Do not reproduce or transform requested text. Return no commentary.
-
-Allowed objects:
-{"schema":"rocell.offline_intent_classification.v1","intent_type":"TYPE_TEXT","device":"KEYBOARD|PHONE"}
-{"schema":"rocell.offline_intent_classification.v1","intent_type":"CLARIFY","question":"device_ambiguous|text_ambiguous|intent_ambiguous"}
-{"schema":"rocell.offline_intent_classification.v1","intent_type":"REFUSE","reason":"operation_not_available|unsupported_by_profile|stale_observation|phone_state_unverified"}
-
-Typing requires an identified device and unambiguous exact text. Stale observations are refused. Phone typing requires verified KEYBOARD_LOWER state. Calling, dialing, sending, opening apps, and multi-step workflows are refused. Never emit text, coordinates, keys, motion, joints, commands, or execution claims."""
-PROMPT_SHA256 = hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest()
-
-
-def parse_classification_v1(value: Any) -> dict[str, str]:
-    if not isinstance(value, dict) or value.get("schema") != CLASSIFICATION_SCHEMA:
-        raise ValueError("invalid classification schema")
-    kind = value.get("intent_type")
-    variants = {
-        "TYPE_TEXT": ({"schema", "intent_type", "device"}, "device", {"KEYBOARD", "PHONE"}),
-        "CLARIFY": ({"schema", "intent_type", "question"}, "question", {"device_ambiguous", "text_ambiguous", "intent_ambiguous"}),
-        "REFUSE": ({"schema", "intent_type", "reason"}, "reason", {"operation_not_available", "unsupported_by_profile", "stale_observation", "phone_state_unverified"}),
-    }
-    if kind not in variants:
-        raise ValueError("invalid classification intent_type")
-    fields, payload_field, allowed = variants[kind]
-    if set(value) != fields or value[payload_field] not in allowed:
-        raise ValueError("invalid classification fields")
-    return dict(value)
-
-
-def compose_public_intent_v1(classification: dict[str, str], request_text: str) -> dict[str, str]:
-    parsed = parse_classification_v1(classification)
-    kind = parsed["intent_type"]
-    if kind == "TYPE_TEXT":
-        text = extract_requested_text_v1(request_text)
-        if text is None:
-            return {"schema": PUBLIC_SCHEMA, "intent_type": "CLARIFY", "question": "text_ambiguous"}
-        return {"schema": PUBLIC_SCHEMA, "intent_type": kind, "device": parsed["device"], "text": text}
-    if kind == "CLARIFY":
-        return {"schema": PUBLIC_SCHEMA, "intent_type": kind, "question": parsed["question"]}
-    return {"schema": PUBLIC_SCHEMA, "intent_type": kind, "reason": parsed["reason"]}
-
-
-def deterministic_freshness_classification_v1(
-    observation: Any,
-) -> dict[str, str] | None:
-    """Refuse explicit stale evidence before model inference; validate the bit."""
-
-    if not isinstance(observation, dict) or type(observation.get("fresh")) is not bool:
-        raise ValueError("observation fresh must be an explicit boolean")
-    if observation["fresh"]:
-        return None
-    return {
-        "schema": CLASSIFICATION_SCHEMA,
-        "intent_type": "REFUSE",
-        "reason": "stale_observation",
-    }
 
 
 def score_classifier(
