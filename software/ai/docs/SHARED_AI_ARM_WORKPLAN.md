@@ -998,6 +998,21 @@ to the ledger using the template above; do not rewrite an earlier result.
 
 ## Active work claims
 
+The AI/model lane on `codex/intent-classifier-v6` claims AI-540 after recorded
+AI-539 development rejection. It may add a deterministic, fail-closed phone
+state precondition beside the existing freshness precondition. An explicit
+phone typing request may reach model inference only when the observation binds
+the exact verified `KEYBOARD_LOWER` state; otherwise it becomes
+`REFUSE(phone_state_unverified)` with zero model calls and zero semantic
+actions. Freshness refusal retains precedence. The gate must be implemented in
+the shared motion-free intent contract, exercised by the disconnected shadow
+runtime and evaluator, hash-bound in receipts, and covered for missing, wrong,
+verified, stale, keyboard-only, and tampered cases. Consumed classifier-v6
+development may be used only as failure evidence and may not be rescored for
+selection. V17 and v16 remain unopened. This increment may not construct
+ModelMotionBatch, invoke motion, emit commands, change arm-lane status, or
+claim execution or physical authority.
+
 The AI/model lane on `codex/intent-classifier-v6` claims AI-539 from merged
 AI-538 base `6f393e5d24868e4800e7c23dff2c6a9501f6cb5f`. It may freeze a
 fresh classifier-v6 train/development family and unopened v17 evaluation,
