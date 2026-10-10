@@ -13,6 +13,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 from types import MappingProxyType
 from typing import Any, Iterable
 
@@ -55,7 +56,8 @@ from .first_motion_drills import (
     run_wrong_model_drills,
 )
 from .cpu_contact_and_ws3 import _load_geometry, load_cpu_contact_fixture
-from .grounded import propose
+from . import SCHEMA_ID
+from .contract import validate_proposal
 from .precision_adapter_v2 import PoseModelOutputV2, PrecisionAdapterResultV2
 from .precision_observation import build as build_precision
 from .scene_observation import canonical_hash
@@ -70,6 +72,39 @@ COUNTERS = {
     "permit_count": 0,
     "transport_count": 0,
 }
+_HOVER_TARGET = re.compile(
+    r"^(?:please\s+)?(?:hover\s+over|move\s+to)\s+(?:the\s+)?(?:key\s+)?"
+    r"([A-Za-z0-9][A-Za-z0-9._-]{0,63})\s*[.!]?\s*$",
+    re.I,
+)
+
+
+def propose_hover_target(
+    *, request_id: str, request: str, observation: dict[str, Any]
+) -> dict[str, str]:
+    """Parse only the bounded hover grammar without changing the typing policy."""
+    if not isinstance(request_id, str) or not request_id.strip():
+        raise ValueError("request_id must be nonempty")
+    if not isinstance(request, str) or not isinstance(observation, dict):
+        raise TypeError("request and observation are required")
+    observation_ref = observation.get("ref")
+    if not isinstance(observation_ref, str) or not observation_ref.strip():
+        raise ValueError("observation.ref must be nonempty")
+    if observation.get("fresh") is not True:
+        raise ValueError("stale observation")
+    match = _HOVER_TARGET.fullmatch(request.strip())
+    if match is None:
+        raise ValueError("request is outside the bounded hover grammar")
+    value = {
+        "schema": SCHEMA_ID,
+        "request_id": request_id,
+        "observation_ref": observation_ref,
+        "decision": "hover_target",
+        "device": "keyboard",
+        "target_id": match.group(1).upper(),
+    }
+    validate_proposal(value)
+    return value
 
 
 def _canonical(value: object) -> bytes:
@@ -125,7 +160,7 @@ def compile_hover_request(
     commissioned_targets: Iterable[str],
     profile_id: str,
 ) -> tuple[dict[str, str], ActionPlan]:
-    proposal = propose(
+    proposal = propose_hover_target(
         request_id=request_id,
         request=request,
         observation={"ref": observation_ref, "fresh": True},
