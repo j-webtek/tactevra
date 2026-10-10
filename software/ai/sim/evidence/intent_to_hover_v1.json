@@ -1,0 +1,216 @@
+{
+  "bindings": {
+    "candidate51_pose_family": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\cpu_contact_ws3_v2\\candidate51_tool_pose_family.json",
+      "sha256": "abfad469a53e282457811dc3a62c765e80c9e3cf878d446a6695470d1327b1dc"
+    },
+    "candidate_target_catalog": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\planner\\nominal_target_profiles_80_measured_candidate.json",
+      "sha256": "0fe3c013a30c42e5b0bb663571f6a5b2996e353b0130c1a6905cb34101b011d8"
+    },
+    "controller_emulator_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
+      "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
+    },
+    "fiducial_map": {
+      "path": "active-project/RoCell_v0_3/fiducials/apriltag_map.json",
+      "sha256": "81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700"
+    },
+    "first_motion_configuration": {
+      "path": "software/ai/sim/evidence/first_motion_consolidated_v1.json",
+      "sha256": "8c7d419dc0185cfd3d2c87246de2e1ebb620de4b2cfcd01dc9718688ffa6f953"
+    },
+    "independent_observer_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_independent_observation_v1.json",
+      "sha256": "d83d0f7428ed516d8b9c2d843f0027a6dd388038fe255ecd1eab8f09ba73eb17"
+    },
+    "rc03_scene_receipt": {
+      "path": "software/integrations/isaac_sim/evidence/rc03_nominal_rigid_scene_20260929.json",
+      "sha256": "df50ff6a0df0ab1b3561783d0140925d9302cd5b1a16e59207cd6f8e13a2d98b"
+    },
+    "rc03_scene_usd": {
+      "path": "C:\\IsaacSim\\artifacts\\issue190\\wp2-scene-002\\rc03_nominal_rigid_scene.usda",
+      "sha256": "77600a60975daaa4d58a20f597851a5d397ed9c452d44ab47ea1832bf42e0f35"
+    },
+    "residual_checkpoint_96": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\paired_height_resolution_training\\checkpoint_assumed_high_96.pt",
+      "sha256": "39e7dc022617171118fc372eeb25c1808d491c90369f224238ee08a8c17d032b"
+    },
+    "residual_resolution_decision": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\paired_height_resolution_training\\paired_height_resolution_decision.json",
+      "sha256": "e616889e53c47d20bdf7c4fbad3cbd3a4295065cdaebb7a24a6179c001932fc6"
+    },
+    "residual_statistics_96": {
+      "path": "C:\\IsaacSim\\evidence\\issue190\\paired_height_resolution_training\\statistics_assumed_high.json",
+      "sha256": "d51c61ee85bff69aebf74a6f18ce96db013547868037bf78a9097d0c3517ee4b"
+    },
+    "robot_import_receipt": {
+      "path": "software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json",
+      "sha256": "f3211aaa496e375f2c5922b50082d84fc64926a8a78e83ca857bfe4d899ddcde"
+    },
+    "robot_mjcf": {
+      "path": "C:\\MuJoCoWarp\\evidence\\mw1\\roarm_m3_kinematic.mjcf",
+      "sha256": "448b711ae30ed3df8a5f5eff66ecb53034f6540eade7264388d86e3911a7a8a0"
+    },
+    "robot_urdf": {
+      "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    "robot_usd": {
+      "path": "C:\\IsaacSim\\artifacts\\issue190\\wp1-import-003\\roarm_m3_kinematic_40dbd84\\roarm_m3_kinematic_40dbd84.usda",
+      "sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
+    },
+    "station_left_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_left.stl",
+      "sha256": "a19b4288b9d6c3fae66f3baa3aa7726fc4acaa440bdb3f16ad3a7ea7791e9a1f"
+    },
+    "station_right_mesh": {
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_right.stl",
+      "sha256": "bc9cc0d252da8d1702c56bbd0afaf6ed79e5dd9891d121dd54372e4692675cf0"
+    },
+    "system_manifest": {
+      "path": "software/config/system_manifest.json",
+      "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+    },
+    "virtual_profile": {
+      "path": "software/config/virtual_commissioning_profile.json",
+      "sha256": "38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634"
+    }
+  },
+  "claim_commit": "00653bea8221eaf591b70b3757254123595fb1d2",
+  "counters": {
+    "hardware_write_count": 0,
+    "isaac_render_count": 0,
+    "mujoco_replay_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "real_command_count": 0,
+    "transport_count": 0
+  },
+  "fixture_sha256": "9212b0eab9b9b9278219487e72401d5ac10bdfda5973fda0d4373e1b828da984",
+  "intent": {
+    "accepted_intent": "hover_target",
+    "coordinates_from_model": false,
+    "device": "keyboard",
+    "schema_id": "rocell.ai.task_proposal.v0",
+    "target_source": "DETERMINISTIC_COMMISSIONED_CATALOG_ONLY",
+    "unknown_target_decision": "ABSTAIN_BEFORE_FRAME",
+    "utterance_patterns": [
+      "Hover over {TARGET}",
+      "Move to {TARGET}"
+    ]
+  },
+  "limitations": [
+    "Fiducial and calibration accuracy are synthetic exploratory assumptions.",
+    "The 96 px model uses assumed high sensor noise and same-lighting synthetic development evidence.",
+    "The robot MJCF has placeholder inertia and supports kinematic replay only.",
+    "Candidate station, keyboard, camera, robot placement, and tool geometry are uninstalled.",
+    "No result authorizes contact or physical motion."
+  ],
+  "motion": {
+    "configuration_id": "FIRST_MOTION_110MM_3MM_PASSIVE_HALTON0573_V1",
+    "contact_forbidden": true,
+    "hover_height_mm": 30.0,
+    "maximum_ground_truth_xy_error_mm": 0.25,
+    "maximum_mujoco_vs_runtime_tip_error_mm": 0.1,
+    "minimum_swept_clearance_mm": 0.0,
+    "park_pose_id": "halton-0573",
+    "path_pattern": [
+      "RISE",
+      "TRANSIT",
+      "DESCEND"
+    ],
+    "safe_region_requires_uncertainty_disk": true,
+    "terminal_phase": "HOVER",
+    "tip_radius_mm": 3.0,
+    "tool_length_mm": 110.0,
+    "transit_height_board_z_mm": 100.0
+  },
+  "negative_scenarios": [
+    {
+      "expected_stage": "FIDUCIAL_PRECISION_ADAPTER",
+      "id": "FIDUCIAL_OCCLUDED"
+    },
+    {
+      "expected_stage": "FIDUCIAL_PRECISION_ADAPTER",
+      "id": "TRAY_SHIFTED"
+    },
+    {
+      "expected_stage": "RESIDUAL_OBSTRUCTION",
+      "id": "TARGET_OBSTRUCTED"
+    },
+    {
+      "expected_stage": "FIDUCIAL_PRECISION_ADAPTER",
+      "id": "STALE_CALIBRATION"
+    },
+    {
+      "expected_stage": "DETERMINISTIC_COMPILER",
+      "id": "UNKNOWN_KEY"
+    }
+  ],
+  "observation": {
+    "camera_family": "FIXED_NADIR_SYNTHETIC_RC03",
+    "coverage_probability": 0.99,
+    "domain_id": "rc03-isaac-nadir-fiducial-exploratory-v1",
+    "fiducial_family": "tag36h11",
+    "maximum_frame_age_ms": 2000,
+    "qualification_scope": "SYNTHETIC_OFFLINE_ONLY_EXPLORATORY",
+    "required_station_tag": "K0",
+    "required_world_tags": [
+      "T0",
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "stale_calibration_age_ms": 2001,
+    "synthetic_fiducial_planar_error_bound_mm": 0.5,
+    "tray_shift_abstain_threshold_mm": 2.0
+  },
+  "pass_criteria": {
+    "all51_pass_count": 51,
+    "contact_sample_count": 0,
+    "descent_below_hover_count": 0,
+    "final_projection_inside_safe_region": true,
+    "hardware_write_count": 0,
+    "negative_correct_abstention_count": 5,
+    "permit_count": 0,
+    "physical_authority": false,
+    "physical_movement_count": 0,
+    "positive_chain_stage_count": 11,
+    "real_command_count": 0,
+    "single_scenario_pass_count": 3,
+    "transport_count": 0,
+    "wrong_model_consequential_undetected_count": 0
+  },
+  "physical_authority": false,
+  "positive_scenarios": {
+    "all_target_count": 51,
+    "all_targets_one_batch": true,
+    "maximum_batch_proposals": 64,
+    "single_targets": [
+      "H",
+      "GRAVE",
+      "EQUAL"
+    ]
+  },
+  "residual_obstruction": {
+    "camera_profile_scope": "ASSUMED_NOISE_SYNTHETIC_EXPLORATORY",
+    "clear_rule": "score < threshold",
+    "input_resolution_px": 96,
+    "obstructed_rule": "score >= threshold",
+    "physical_qualification_claimed": false,
+    "profile_id": "ASSUMED_HIGH",
+    "score_semantics": "UNCALIBRATED_RANKING_SCORE_NOT_CONFIDENCE",
+    "threshold": 0.05
+  },
+  "schema": "tactevra.intent_to_hover_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "wrong_model_drills": {
+    "consequential_undetected_limit": 0,
+    "observer": "ANALYTIC_SILHOUETTE",
+    "types": [
+      "LINK_LENGTH_ERROR",
+      "JOINT_ZERO_ERROR"
+    ]
+  }
+}
