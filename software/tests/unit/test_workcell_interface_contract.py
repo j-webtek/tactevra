@@ -18,15 +18,16 @@ from rocell.workcell.interface_contract import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
-CONTRACT_RELATIVE_PATH = Path("software/config/workcell_icd.json")
+CONTRACT_RELATIVE_PATH = Path("software/config/workcell_icd_v2.json")
 CONTRACT_PATH = WORKSPACE / CONTRACT_RELATIVE_PATH
+HISTORICAL_CONTRACT_PATH = WORKSPACE / "software/config/workcell_icd.json"
 SOURCE_RELATIVE_PATHS = (
     Path("active-project/RoCell_v0_3/config/workcell_layout.json"),
     Path("software/config/arm_frame_contract.json"),
     Path("software/config/arm_connection.json"),
     Path("software/config/camera_profiles/arducam_b0477_imx283_16mm.json"),
-    Path("software/config/camera_architecture_plan.json"),
-    Path("hardware/static_overhead_camera/config/support_design.json"),
+    Path("software/config/camera_architecture_plan_v2.json"),
+    Path("hardware/static_overhead_camera/config/commercial_tripod_candidate.json"),
     Path("hardware/static_overhead_camera/hardware_intake_template.csv"),
     Path("software/config/configuration_epochs.json"),
     Path("software/config/physical_onboarding_policy.json"),
@@ -69,7 +70,7 @@ def test_loads_read_only_source_bound_zero_authority_contract() -> None:
     assert CONTRACT_PATH.read_bytes() == before
     assert contract.path == CONTRACT_PATH.resolve()
     assert contract.content_sha256 == hashlib.sha256(before).hexdigest()
-    assert contract.contract_id == "ROCELL-WORKCELL-ICD-001"
+    assert contract.contract_id == "ROCELL-WORKCELL-ICD-TRIPOD-002"
     assert contract.status == "ADDITIVE_ZERO_AUTHORITY"
     assert contract.zero_physical_authority
     assert contract.interface_description_authority
@@ -91,11 +92,11 @@ def test_loads_read_only_source_bound_zero_authority_contract() -> None:
         "arm_frame_contract",
         "arm_connection",
         "b0477_camera_profile",
-        "camera_architecture_plan",
-        "static_camera_support_design",
         "hardware_intake_template",
         "configuration_epoch_policy",
         "physical_onboarding_policy",
+        "camera_architecture_plan",
+        "commercial_tripod_candidate",
     )
     for source_id, binding in contract.source_bindings.items():
         assert binding.source_id == source_id
@@ -176,6 +177,17 @@ def test_icd_references_canonical_values_instead_of_copying_them() -> None:
     assert "baud" not in document["serial_interface"]
 
 
+def test_explicit_historical_v1_icd_remains_readable() -> None:
+    before = HISTORICAL_CONTRACT_PATH.read_bytes()
+
+    contract = load_workcell_interface_contract(WORKSPACE, HISTORICAL_CONTRACT_PATH)
+
+    assert HISTORICAL_CONTRACT_PATH.read_bytes() == before
+    assert contract.contract_id == "ROCELL-WORKCELL-ICD-001"
+    assert contract.content_sha256 == hashlib.sha256(before).hexdigest()
+    assert contract.zero_physical_authority
+
+
 @pytest.mark.parametrize("change", ["missing", "unknown"])
 def test_rejects_root_schema_drift(tmp_path: Path, change: str) -> None:
     def mutate(document: dict[str, Any]) -> None:
@@ -203,8 +215,8 @@ def test_rejects_unknown_nested_field(tmp_path: Path) -> None:
 def test_rejects_duplicate_json_key(tmp_path: Path) -> None:
     path = _sandbox(tmp_path)
     text = path.read_text(encoding="utf-8").replace(
-        '"schema_version": 1,',
-        '"schema_version": 1,\n  "schema_version": 1,',
+        '"schema_version": 2,',
+        '"schema_version": 2,\n  "schema_version": 2,',
         1,
     )
     path.write_text(text, encoding="utf-8")
@@ -217,7 +229,7 @@ def test_rejects_duplicate_json_key(tmp_path: Path) -> None:
 def test_rejects_nonfinite_json_number(tmp_path: Path, constant: str) -> None:
     path = _sandbox(tmp_path)
     text = path.read_text(encoding="utf-8").replace(
-        '"schema_version": 1', f'"schema_version": {constant}', 1
+        '"schema_version": 2', f'"schema_version": {constant}', 1
     )
     path.write_text(text, encoding="utf-8")
 
@@ -227,7 +239,7 @@ def test_rejects_nonfinite_json_number(tmp_path: Path, constant: str) -> None:
 
 def test_rejects_bool_integer_alias_or_finite_float(tmp_path: Path) -> None:
     path = _mutated_contract(
-        tmp_path, lambda document: document.update({"schema_version": 1.0})
+        tmp_path, lambda document: document.update({"schema_version": 2.0})
     )
     with pytest.raises(WorkcellInterfaceContractError, match="schema_version"):
         load_workcell_interface_contract(tmp_path, path)

@@ -53,16 +53,22 @@ The following remain open until the delivered tripod and B0477 are inspected:
 
 ### Authoritative configuration and runtime validation
 
-- `software/config/camera_architecture_plan.json`: name the independent
-  commercial tripod as the selected unqualified support and replace gantry
-  acceptance, invalidation, collision, and blocker language.
+- `software/config/camera_architecture_plan_v2.json`: implemented as the active
+  default. It names the independent commercial tripod as the selected
+  unqualified support and replaces gantry acceptance, invalidation, collision,
+  and blocker language. The original unmodified v1 file remains available only
+  for explicit historical evidence reads.
 - `software/src/rocell/workcell/camera_architecture.py` and
-  `software/tests/unit/test_camera_architecture_plan.py`: validate the tripod
-  route without weakening fixed-camera, all-tag, freshness, or zero-authority
-  rules.
-- `hardware/static_overhead_camera/config/support_design.json` or its explicit
-  successor: bind the tripod candidate and its measured installation instead of
-  the portal geometry.
+  `software/tests/unit/test_camera_architecture_plan.py`: implemented with a v2
+  active default and explicit v1 compatibility. Both versions preserve the
+  fixed-camera, all-tag, freshness, and zero-authority rules.
+- `software/config/workcell_icd_v2.json`: implemented as the active default and
+  source-bound to the tripod candidate and camera plan v2. The original v1 ICD
+  and its printable support binding remain byte-identical for historical use.
+- `hardware/static_overhead_camera/config/support_design.json`: retained as the
+  historical portal support design. The active v2 ICD instead binds
+  `commercial_tripod_candidate.json`; a later measured installation record will
+  succeed the unqualified candidate after receipt.
 - `software/src/rocell/workcell/static_camera_support.py` and focused tests:
   validate the selected support identity, measurements, and fail-closed gates.
 - `software/config/simulation_hardware_profile.json`: remove the old
@@ -142,7 +148,9 @@ Each active index that links to one of these files must label it
 ## Migration sequence
 
 1. Freeze this inventory and the non-authorizing tripod candidate contract.
-2. Migrate the authoritative camera architecture and strict tests.
+   **Complete.**
+2. Migrate the authoritative camera architecture, workcell ICD, and strict
+   tests by version while preserving v1 bytes. **Complete.**
 3. Migrate active build routes and remove obsolete print jobs from generated
    operator packages while retaining their sources as historical.
 4. Replace support geometry in simulation and re-run coverage, visibility,

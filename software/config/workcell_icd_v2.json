@@ -1,0 +1,196 @@
+{
+  "schema": "rocell.workcell_interface_contract.v2",
+  "schema_version": 2,
+  "contract_id": "ROCELL-WORKCELL-ICD-TRIPOD-002",
+  "status": "ADDITIVE_ZERO_AUTHORITY",
+  "authority": {
+    "interface_description_authority": true,
+    "simulation_validation_authority": true,
+    "hardware_presence_authority": false,
+    "device_open_authority": false,
+    "robot_power_authority": false,
+    "motion_authority": false,
+    "descent_authority": false,
+    "contact_authority": false,
+    "calibration_promotion_authority": false,
+    "physical_release_effect": "NONE",
+    "rule": "Loading or satisfying this ICD only proves source-bound interface compatibility; it never grants device access, energization, calibration promotion, motion, descent, contact, or physical release."
+  },
+  "source_bindings": {
+    "workcell_layout": {
+      "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+      "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+    },
+    "arm_frame_contract": {
+      "path": "software/config/arm_frame_contract.json",
+      "sha256": "5e3d39388149bdd191855e0bdd8c5eb7387f0419da9bc31a15cf3d807f1b9d6d"
+    },
+    "arm_connection": {
+      "path": "software/config/arm_connection.json",
+      "sha256": "8b71efc87f3700aaaa3456d5cdc530d963a8caafe89e90dbb12d8e8935151adf"
+    },
+    "b0477_camera_profile": {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    "camera_architecture_plan": {
+      "path": "software/config/camera_architecture_plan_v2.json",
+      "sha256": "b296d0f1ccd53d82db31816164de1b33d42a6c348271e814060c4242f1ff733f"
+    },
+    "commercial_tripod_candidate": {
+      "path": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+      "sha256": "3f132aee15b5a3b5c65e1c6dfc04523cf5ded61939088bc34e0ddcee9e28fbe9"
+    },
+    "hardware_intake_template": {
+      "path": "hardware/static_overhead_camera/hardware_intake_template.csv",
+      "sha256": "b54e3abd3f8b2c84aaa66ab32606cb9cde7890cda6cc56fe26ffbb3101169215"
+    },
+    "configuration_epoch_policy": {
+      "path": "software/config/configuration_epochs.json",
+      "sha256": "5e0af455425feae892791186c259cff0f124dad3259a37b4acd09598b71eefc7"
+    },
+    "physical_onboarding_policy": {
+      "path": "software/config/physical_onboarding_policy.json",
+      "sha256": "30af2bdf05d239b0eefc2079a88fb1916ab9d09cc4a1cb1a8a40b77f97369ee9"
+    }
+  },
+  "coordinate_conventions": {
+    "layout_and_board_frame_source": "workcell_layout",
+    "arm_frame_registry_source": "arm_frame_contract",
+    "static_camera_frame_source": "camera_architecture_plan",
+    "length_unit": "mm",
+    "angle_unit": "rad",
+    "elapsed_time_unit": "s",
+    "monotonic_timestamp_unit": "ns",
+    "image_coordinate_unit": "px",
+    "voltage_unit": "V",
+    "transform_notation": "A_T_B maps coordinates expressed in frame B into frame A",
+    "frame_definitions_redeclared_here": false,
+    "implicit_frame_aliases_allowed": false,
+    "implicit_unit_conversion_allowed": false,
+    "measured_transform_required_for_physical_use": true
+  },
+  "mechanical_interface": {
+    "canonical_layout_source": "workcell_layout",
+    "canonical_arm_frame_source": "arm_frame_contract",
+    "static_support_candidate_source": "commercial_tripod_candidate",
+    "receipt_and_fit_up_source": "hardware_intake_template",
+    "nominal_or_screening_geometry_is_measurement": false,
+    "unmeasured_geometry_may_authorize_motion": false,
+    "installed_article_identity_and_uncertainty_required": true,
+    "changed_installation_requires_epoch_transition": true,
+    "rule": "Consumers reference the bound layout, frame, tripod, and intake sources; this ICD does not restate dimensions, transforms, fasteners, clearances, or acceptance limits."
+  },
+  "electrical_power_interface": {
+    "arm_connection_source": "arm_connection",
+    "intake_source": "hardware_intake_template",
+    "authority_policy_source": "physical_onboarding_policy",
+    "power_domains": [
+      "host",
+      "camera_usb",
+      "controller_usb",
+      "arm_actuator"
+    ],
+    "usb_data_attachment_implies_actuator_power_authority": false,
+    "software_stop_is_independent_physical_cutoff": false,
+    "provider_controlled_energization_allowed": false,
+    "automatic_power_on_or_repower_allowed": false,
+    "fresh_reviewed_permit_required_for_each_energization": true,
+    "power_loss_discharge_and_gravity_behavior_require_observation": true
+  },
+  "uvc_interface": {
+    "camera_profile_source": "b0477_camera_profile",
+    "architecture_source": "camera_architecture_plan",
+    "support_source": "commercial_tripod_candidate",
+    "identity_selection": "PERSISTENT_OS_AND_DEVICE_IDENTITY_ONLY",
+    "numeric_camera_index_is_authoritative": false,
+    "open_requires_separate_stage_permission": true,
+    "exact_request_and_readback_required": true,
+    "silent_mode_or_control_fallback_allowed": false,
+    "bounded_buffer_flush_before_evidence_capture": true,
+    "identity_mode_and_controls_revalidated_after_reopen": true,
+    "automatic_open_initialize_or_retry_allowed": false
+  },
+  "serial_interface": {
+    "connection_source": "arm_connection",
+    "frame_source": "arm_frame_contract",
+    "identity_selection": "PERSISTENT_CONTROLLER_IDENTITY_ONLY",
+    "port_name_alone_is_authoritative": false,
+    "exclusive_owner_required": true,
+    "open_requires_separate_stage_permission": true,
+    "open_is_potentially_side_effectful": true,
+    "feedback_diagnostic_operation": "ONE_BOUND_T105_REQUEST_EXPECTING_T1051",
+    "generic_write_or_motion_operation_exposed": false,
+    "automatic_connect_initialize_or_retry_allowed": false,
+    "ambiguous_exchange_close_or_cleanup_attempt_required_if_possible": true,
+    "ambiguous_exchange_requires_global_quarantine": true,
+    "ambiguous_exchange_requires_manual_reconciliation": true,
+    "same_t105_exchange_may_be_repeated_automatically": false,
+    "same_t105_exchange_may_be_repeated_as_new_reviewed_attempt": false
+  },
+  "timing_and_freshness": {
+    "ordering_and_deadline_clock": "HOST_MONOTONIC",
+    "wall_clock_is_authoritative_for_ordering": false,
+    "request_start_and_completion_brackets_required": true,
+    "age_and_deadline_rechecked_at_effect_boundary": true,
+    "device_sequence_timestamp_or_token_must_advance_when_available": true,
+    "freshness_evidence_regression_disappearance_or_replay_allowed": false,
+    "host_receipt_time_proves_device_exposure_time": false,
+    "in_motion_visual_correction_requires_qualified_device_exposure_timing": true,
+    "reconnect_begins_new_freshness_epoch_and_requires_revalidation": true,
+    "freshness_history_and_buffer_operations_must_be_bounded": true,
+    "ambiguous_physical_effect_may_be_automatically_retried": false
+  },
+  "provider_roles": {
+    "host_inventory": {
+      "responsibility": "Observe host dependencies and enumerate device identities without opening a selected camera or serial session.",
+      "capability_ceiling": "READ_ONLY_INVENTORY"
+    },
+    "camera_diagnostic": {
+      "responsibility": "Perform only the stage-scoped identity-bound UVC lifecycle declared by this ICD and return evidence receipts.",
+      "capability_ceiling": "CAMERA_IO_NO_ROBOT_EFFECT"
+    },
+    "arm_identity": {
+      "responsibility": "Observe controller identity while actuator power remains off and without opening the serial port.",
+      "capability_ceiling": "READ_ONLY_INVENTORY"
+    },
+    "arm_feedback": {
+      "responsibility": "Perform at most the separately permitted feedback-only serial lifecycle; expose no generic write, motion, torque, descent, or contact operation.",
+      "capability_ceiling": "SINGLE_T105_NO_MOTION_COMMAND"
+    },
+    "safety_evidence": {
+      "responsibility": "Record operator, observer, reviewer, power-topology, cutoff, containment, and first-power observations without controlling energization.",
+      "capability_ceiling": "OBSERVATION_ONLY"
+    },
+    "clock": {
+      "responsibility": "Supply monotonic instants and explicit wall-clock evidence without inventing device exposure timestamps.",
+      "capability_ceiling": "TIME_OBSERVATION_ONLY"
+    },
+    "evidence_store": {
+      "responsibility": "Persist bounded content-addressed evidence with manifest-last semantics and no device access.",
+      "capability_ceiling": "EVIDENCE_ONLY"
+    }
+  },
+  "provider_binding": {
+    "descriptor_and_implementation_hash_required": true,
+    "role_binding_required_before_invocation": true,
+    "one_owned_session_per_physical_device": true,
+    "provider_receipt_must_bind_request_role_epoch_and_source_hashes": true,
+    "unbound_or_substituted_provider_policy": "REJECT",
+    "power_actuation_role_defined": false,
+    "motion_execution_role_defined": false,
+    "contact_execution_role_defined": false,
+    "human_role_attestation_source": "physical_onboarding_policy",
+    "rule": "A provider capability ceiling is not invocation authority; the active stage, permit, identity, leases, epochs, and evidence gates remain independently required."
+  },
+  "configuration_epochs": {
+    "policy_source": "configuration_epoch_policy",
+    "epoch_definitions_redeclared_here": false,
+    "complete_epoch_vector_required_on_evidence": true,
+    "changed_dependency_requires_new_append_only_epoch_record": true,
+    "affected_descendants_invalidated_before_next_effect": true,
+    "cross_epoch_reuse_requires_exact_dependency_hashes": true,
+    "freeze_number_alone_is_epoch_identity": false,
+    "this_contract_may_create_advance_or_promote_an_epoch": false
+  }
+}

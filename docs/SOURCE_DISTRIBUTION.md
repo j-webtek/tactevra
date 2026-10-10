@@ -554,3 +554,11 @@ candidate record, and one focused regression test. This raises the exact
 tracked-file count and governed ceiling to 6,424. It adds no generated CAD,
 print artifact, render, model, dataset, or binary evidence; every byte, blob,
 duplicate, and reduction limit remains unchanged.
+
+The versioned tripod contract migration adds two compact JSON contracts: the
+active camera architecture v2 plan and the active workcell ICD v2. The original
+v1 files remain byte-identical so historical mast and portal evidence can still
+be reproduced explicitly. This raises the exact tracked-file count and governed
+ceiling to 6,426. No generated result, CAD, render, model, dataset, or binary
+evidence enters the source archive; every byte, blob, duplicate, and reduction
+limit remains unchanged.
