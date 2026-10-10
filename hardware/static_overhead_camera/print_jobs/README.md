@@ -1,5 +1,10 @@
 # Printable camera-frame print jobs
 
+> **SUPERSEDED — DO NOT PRINT:** Jobs `00G` and `08A` through `08D` are no
+> longer in the active Phase 1 camera-support route. The selected engineering
+> candidate is an independent commercial floor tripod, ASIN `B0CSYB4YQ2`.
+> These job records remain only for reproducibility and design provenance.
+
 [`printable_camera_frame_jobs.json`](printable_camera_frame_jobs.json) is the
 standalone prototype's part-to-subplate and process mapping. It deliberately
 uses 21 small numbered subplates. The actual geometry-only 3MF files are in
@@ -15,8 +20,9 @@ quantities, profile file, material preset, orientation, brim, supports, bag,
 prerequisites, and a separate native QIDI filename. The sidecar's filename,
 SHA-256, and object count must match `PLATE_VALIDATION.json` before slicing.
 
-Start with `00G-S1`, `00G-C1`, and `00G-P1`. Do not print `08A` through `08D`
-until the applicable raw fit records have been reviewed. For each subplate,
+There is no active starting plate. The historical sequence began with
+`00G-S1`, `00G-C1`, and `00G-P1`, with `08A` through `08D` held for raw-fit
+review. If a future reviewed decision explicitly reopens the design, for each subplate,
 open the validated 3MF, keep its stored placement and `100.00%` scale, apply the
 sidecar's process and separately selected filament preset, inspect every layer,
 and use **Save As** with `native_save_as_pattern`. Never overwrite the generated
