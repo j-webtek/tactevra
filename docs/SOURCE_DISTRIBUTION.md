@@ -547,3 +547,10 @@ separate runtime module so the earlier twin remains byte-identical. This raises
 the exact tracked-file count and governed ceiling to 6,420. The fixture records
 the binding-only amendment and preserves the superseded fixture identity; its
 metrics, ranges, and decision rules are unchanged.
+
+The commercial-tripod camera-support migration adds four reviewable source
+files: one maintained migration inventory, one strict candidate schema, one
+candidate record, and one focused regression test. This raises the exact
+tracked-file count and governed ceiling to 6,424. It adds no generated CAD,
+print artifact, render, model, dataset, or binary evidence; every byte, blob,
+duplicate, and reduction limit remains unchanged.
