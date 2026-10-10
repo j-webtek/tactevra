@@ -1,4 +1,11 @@
 {
+  "amendments": [
+    {
+      "id": "PRE_RESULTS_RESIDUAL_PROFILE_BINDING_20261010",
+      "reason": "Bind the exact assumed-high camera profile required to reproduce the selected 96 px residual checkpoint input.",
+      "timing": "BEFORE_ANY_ISAAC_RENDER_RESIDUAL_SCORE_OR_HOVER_RESULT"
+    }
+  ],
   "bindings": {
     "candidate51_pose_family": {
       "path": "C:\\MuJoCoWarp\\evidence\\issue190\\cpu_contact_ws3_v2\\candidate51_tool_pose_family.json",
@@ -35,6 +42,10 @@
     "residual_checkpoint_96": {
       "path": "C:\\IsaacSim\\evidence\\issue190\\paired_height_resolution_training\\checkpoint_assumed_high_96.pt",
       "sha256": "39e7dc022617171118fc372eeb25c1808d491c90369f224238ee08a8c17d032b"
+    },
+    "residual_noise_experiment": {
+      "path": "software/ai/sim/evidence/paired_height_resolution_noise_experiment_v1.json",
+      "sha256": "134ba6234589ab841bcdaff3b58bf7253154dd9c6cd998bf47b88246799463ac"
     },
     "residual_resolution_decision": {
       "path": "C:\\IsaacSim\\evidence\\issue190\\paired_height_resolution_training\\paired_height_resolution_decision.json",
@@ -87,7 +98,7 @@
     "real_command_count": 0,
     "transport_count": 0
   },
-  "fixture_sha256": "9212b0eab9b9b9278219487e72401d5ac10bdfda5973fda0d4373e1b828da984",
+  "fixture_sha256": "f4ba3497f496ef3fd2a24c903aa24c56cb4520a0c5cbf3226c4973107fb497b1",
   "intent": {
     "accepted_intent": "hover_target",
     "coordinates_from_model": false,
