@@ -4,6 +4,11 @@
       "id": "PRE_RESULTS_RESIDUAL_PROFILE_BINDING_20261010",
       "reason": "Bind the exact assumed-high camera profile required to reproduce the selected 96 px residual checkpoint input.",
       "timing": "BEFORE_ANY_ISAAC_RENDER_RESIDUAL_SCORE_OR_HOVER_RESULT"
+    },
+    {
+      "id": "PRE_RESULTS_ISOLATED_51_TARGET_CONTEXT_20261010",
+      "reason": "Use a dedicated revalidated 51-target simulation context so earlier frozen source files and evidence remain byte intact.",
+      "timing": "BEFORE_ANY_ISAAC_RENDER_RESIDUAL_SCORE_OR_HOVER_RESULT"
     }
   ],
   "bindings": {
@@ -71,6 +76,10 @@
       "path": "C:\\IsaacSim\\artifacts\\issue190\\wp1-import-003\\roarm_m3_kinematic_40dbd84\\roarm_m3_kinematic_40dbd84.usda",
       "sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
     },
+    "simulation_context_lock": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\intent_to_hover\\context\\software\\config\\simulation_bundle_lock.json",
+      "sha256": "fa9bb71d38b466abd6ed7bdd5b53cb9bb5f0de70c936cd6e1704c9a0591268b8"
+    },
     "station_left_mesh": {
       "path": "active-project/RoCell_v0_3/stl/keyboard_station_left.stl",
       "sha256": "a19b4288b9d6c3fae66f3baa3aa7726fc4acaa440bdb3f16ad3a7ea7791e9a1f"
@@ -98,7 +107,7 @@
     "real_command_count": 0,
     "transport_count": 0
   },
-  "fixture_sha256": "f4ba3497f496ef3fd2a24c903aa24c56cb4520a0c5cbf3226c4973107fb497b1",
+  "fixture_sha256": "ef8f9740af8ce7b1408ac72378f0007736e95ac6f613427ef34055fef1ffa651",
   "intent": {
     "accepted_intent": "hover_target",
     "coordinates_from_model": false,
