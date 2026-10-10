@@ -1,6 +1,11 @@
 {
   "amendments": [
     {
+      "id": "POST_V16_HEIGHT_AWARE_CAMERA_OBSERVER_20261010",
+      "reason": "V16 preserved a 47/51 result because it compared the raw perspective projection of the 50 mm hover tip against safe polygons on the 21 mm key plane. The successor observer backprojects the detected tip pixel at its declared height into board x/y before testing the unchanged safe region.",
+      "timing": "AFTER_V16_OBSERVER_FAILURE_AND_BEFORE_ANY_SUCCESSOR_HOVER_RESULT"
+    },
+    {
       "id": "PRE_RESULTS_RESIDUAL_PROFILE_BINDING_20261010",
       "reason": "Bind the exact assumed-high camera profile required to reproduce the selected 96 px residual checkpoint input.",
       "timing": "BEFORE_ANY_ISAAC_RENDER_RESIDUAL_SCORE_OR_HOVER_RESULT"
@@ -107,7 +112,7 @@
     "real_command_count": 0,
     "transport_count": 0
   },
-  "fixture_sha256": "ef8f9740af8ce7b1408ac72378f0007736e95ac6f613427ef34055fef1ffa651",
+  "fixture_sha256": "43a19fc4f5784d7287a59e46a592387f9e6e1e8f48f9050a92bebdaa14222648",
   "intent": {
     "accepted_intent": "hover_target",
     "coordinates_from_model": false,
@@ -191,6 +196,7 @@
     "contact_sample_count": 0,
     "descent_below_hover_count": 0,
     "final_projection_inside_safe_region": true,
+    "final_projection_method": "HEIGHT_AWARE_CAMERA_BACKPROJECTION_TO_BOARD_XY",
     "hardware_write_count": 0,
     "negative_correct_abstention_count": 5,
     "permit_count": 0,

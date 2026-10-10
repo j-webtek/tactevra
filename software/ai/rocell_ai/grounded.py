@@ -27,6 +27,11 @@ _UNAVAILABLE = re.compile(
 _SEQUENCE = re.compile(r"\b(?:and|or|then|after|before|both|either|also)\b", re.I)
 _NEGATION = re.compile(r"\b(?:not|never|don't|cannot|can't|without)\b", re.I)
 _TYPING = re.compile(r"\b(?:type|enter|write|put|place|copy|transcribe)\b", re.I)
+_HOVER_TARGET = re.compile(
+    r"^(?:please\s+)?(?:hover\s+over|move\s+to)\s+(?:the\s+)?(?:key\s+)?"
+    r"([A-Za-z0-9][A-Za-z0-9._-]{0,63})\s*[.!]?\s*$",
+    re.I,
+)
 _UNQUOTED_SUFFIX = re.compile(
     r"^(?:please\s+)?(?:type|enter|write|put)\s+([a-z0-9]+)\s+(?:on|into|in|using|with)\s+"
     r"(?:the\s+)?(?:(?:physical\s+)?keyboard|(?:cell\s+)?phone(?:\s+keyboard)?)\.?$", re.I,
@@ -80,6 +85,15 @@ def propose(*, request_id: str, request: str, observation: dict[str, Any]) -> di
     if observation.get("fresh") is not True:
         return unsupported("stale_observation")
     raw = request.strip()
+    hover = _HOVER_TARGET.fullmatch(raw)
+    if hover is not None:
+        return _proposal(
+            request_id,
+            observation_ref,
+            "hover_target",
+            device="keyboard",
+            target_id=hover.group(1).upper(),
+        )
     quotes = _QUOTED.findall(raw)
     outside = _QUOTED.sub(" ", raw)
     # An already open editor is context; asking to open one remains unavailable.
