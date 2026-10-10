@@ -43,7 +43,8 @@ WS2_MECHANISMS = (
     ROOT / "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json"
 )
 WS2_VECTOR_FIXTURE = (
-    ROOT / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2.json"
+    ROOT
+    / "software/ai/sim/evidence/workstream_2_stage_a_vectorized_throughput_v2_2.json"
 )
 WS2_VECTOR_SPEC = importlib.util.spec_from_file_location(
     "run_ws2_stage_a_vectorized_throughput",
@@ -59,6 +60,80 @@ WS2_SPEC = importlib.util.spec_from_file_location(
 WS2_PROBE = importlib.util.module_from_spec(WS2_SPEC)
 assert WS2_SPEC.loader is not None
 WS2_SPEC.loader.exec_module(WS2_PROBE)
+WS2_EVENT_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_terminated_press_v1_5.json"
+)
+WS2_EVENT_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_terminated_press",
+    ROOT / "software/ai/sim/run_ws2_event_terminated_press.py",
+)
+assert WS2_EVENT_SPEC and WS2_EVENT_SPEC.loader
+WS2_EVENT_RUNNER = importlib.util.module_from_spec(WS2_EVENT_SPEC)
+WS2_EVENT_SPEC.loader.exec_module(WS2_EVENT_RUNNER)
+WS2_EVENT_CONTROL_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v3.json"
+)
+WS2_EVENT_CONTROL_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_hard_limit_control",
+    ROOT / "software/ai/sim/run_ws2_event_hard_limit_control.py",
+)
+assert WS2_EVENT_CONTROL_SPEC and WS2_EVENT_CONTROL_SPEC.loader
+WS2_EVENT_CONTROL_RUNNER = importlib.util.module_from_spec(WS2_EVENT_CONTROL_SPEC)
+WS2_EVENT_CONTROL_SPEC.loader.exec_module(WS2_EVENT_CONTROL_RUNNER)
+WS2_EVENT_CONTROL_FIXTURE_V2 = (
+    ROOT / "software/ai/sim/evidence/ws2_event_hard_limit_control_v4.json"
+)
+WS2_EVENT_CONTROL_SPEC_V2 = importlib.util.spec_from_file_location(
+    "run_ws2_event_hard_limit_control_v2",
+    ROOT / "software/ai/sim/run_ws2_event_hard_limit_control_v2.py",
+)
+assert WS2_EVENT_CONTROL_SPEC_V2 and WS2_EVENT_CONTROL_SPEC_V2.loader
+WS2_EVENT_CONTROL_RUNNER_V2 = importlib.util.module_from_spec(WS2_EVENT_CONTROL_SPEC_V2)
+WS2_EVENT_CONTROL_SPEC_V2.loader.exec_module(WS2_EVENT_CONTROL_RUNNER_V2)
+WS2_HEIGHT_ROBUST_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_height_robust_search_v1.json"
+)
+WS2_HEIGHT_ROBUST_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_height_robust_search",
+    ROOT / "software/ai/sim/run_ws2_event_height_robust_search.py",
+)
+assert WS2_HEIGHT_ROBUST_SPEC and WS2_HEIGHT_ROBUST_SPEC.loader
+WS2_HEIGHT_ROBUST_RUNNER = importlib.util.module_from_spec(WS2_HEIGHT_ROBUST_SPEC)
+WS2_HEIGHT_ROBUST_SPEC.loader.exec_module(WS2_HEIGHT_ROBUST_RUNNER)
+WS2_FORCE_GUARD_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_force_guard_search_v1.json"
+)
+WS2_FORCE_GUARD_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_force_guard_search",
+    ROOT / "software/ai/sim/run_ws2_event_force_guard_search.py",
+)
+assert WS2_FORCE_GUARD_SPEC and WS2_FORCE_GUARD_SPEC.loader
+WS2_FORCE_GUARD_RUNNER = importlib.util.module_from_spec(WS2_FORCE_GUARD_SPEC)
+WS2_FORCE_GUARD_SPEC.loader.exec_module(WS2_FORCE_GUARD_RUNNER)
+WS2_COMPLIANT_HOVER_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_compliant_hover_search_v1.json"
+)
+WS2_COMPLIANT_HOVER_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_compliant_hover_search",
+    ROOT / "software/ai/sim/run_ws2_event_compliant_hover_search.py",
+)
+assert WS2_COMPLIANT_HOVER_SPEC and WS2_COMPLIANT_HOVER_SPEC.loader
+WS2_COMPLIANT_HOVER_RUNNER = importlib.util.module_from_spec(
+    WS2_COMPLIANT_HOVER_SPEC
+)
+WS2_COMPLIANT_HOVER_SPEC.loader.exec_module(WS2_COMPLIANT_HOVER_RUNNER)
+WS2_STIFFNESS_SCALED_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/ws2_event_stiffness_scaled_search_v1.json"
+)
+WS2_STIFFNESS_SCALED_SPEC = importlib.util.spec_from_file_location(
+    "run_ws2_event_stiffness_scaled_search",
+    ROOT / "software/ai/sim/run_ws2_event_stiffness_scaled_search.py",
+)
+assert WS2_STIFFNESS_SCALED_SPEC and WS2_STIFFNESS_SCALED_SPEC.loader
+WS2_STIFFNESS_SCALED_RUNNER = importlib.util.module_from_spec(
+    WS2_STIFFNESS_SCALED_SPEC
+)
+WS2_STIFFNESS_SCALED_SPEC.loader.exec_module(WS2_STIFFNESS_SCALED_RUNNER)
 
 
 def test_fixture_is_section_hashed_and_zero_authority():
@@ -200,6 +275,133 @@ def test_ws2_executable_manifest_is_exact_and_zero_authority():
         41,
         49,
     ]
+
+
+def test_event_terminated_speed_limit_and_failure_paths():
+    assert WS2_PROBE.event_terminated_speed_limit_mm_s(
+        actuation_mm=1.8,
+        bottom_out_mm=3.0,
+        latency_ms=40.0,
+        reserved_margin_mm=0.2,
+    ) == pytest.approx(25.0)
+    assert WS2_PROBE.event_terminated_speed_limit_mm_s(
+        actuation_mm=1.8,
+        bottom_out_mm=3.0,
+        latency_ms=5.0,
+        reserved_margin_mm=0.2,
+    ) == pytest.approx(200.0)
+    with pytest.raises(ValueError, match="reserved margin consumes"):
+        WS2_PROBE.event_terminated_speed_limit_mm_s(
+            actuation_mm=1.8,
+            bottom_out_mm=3.0,
+            latency_ms=40.0,
+            reserved_margin_mm=1.2,
+        )
+    assert (
+        WS2_PROBE.primary_failure(
+            {"partial_press": True, "no_event_before_hard_limit": True}
+        )
+        == "NO_EVENT_BEFORE_HARD_LIMIT"
+    )
+    assert (
+        WS2_PROBE.primary_failure(
+            {"no_event_before_hard_limit": True, "late_event_ignored": True}
+        )
+        == "LATE_EVENT_IGNORED"
+    )
+    assert (
+        WS2_PROBE.primary_failure({"wrong_key_event": True, "neighbor_contact": False})
+        == "WRONG_KEY_EVENT"
+    )
+
+
+def test_event_terminated_fixture_and_control_are_fail_closed():
+    fixture = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    assert fixture["design"]["latency_ms_range"] == [5.0, 40.0]
+    assert fixture["design"]["initial_target_ids"] == ["GRAVE", "EQUAL"]
+    assert set(fixture["counters"].values()) == {0}
+    campaign, _, physical = WS2_EVENT_RUNNER.load_bound(fixture)
+    control = WS2_EVENT_RUNNER._control(
+        fixture,
+        physical=physical,
+        target_id="GRAVE",
+        profile_id="travel_mm__LOW",
+        scenario_id="MID_SOURCE_MID_RESIDUAL",
+        latency_ms=40.0,
+        mode="MATCHING",
+        approach_mm_s=20.0,
+    )["control"]
+    assert control["physical_keycap_half_extent_mm"] == [7.0, 7.0]
+    assert control["event_termination"] == {
+        "source": "MODELED_HOST_KEYSTROKE_EVENT",
+        "mode": "MATCHING",
+        "latency_ms": 40.0,
+        "expected_target_id": "GRAVE",
+        "reported_target_id": "GRAVE",
+        "hard_depth_limit_mm": 5.0703125,
+        "reserved_bottom_out_margin_mm": 0.2,
+        "no_retry": True,
+        "may_only_shorten_motion": True,
+    }
+    profile = next(
+        row
+        for row in WS2_PROBE.physical_profiles(campaign)
+        if row["profile_id"] == "travel_mm__LOW"
+    )
+    limit, selected = WS2_EVENT_RUNNER._event_speed(fixture, profile, 40.0)
+    assert limit == pytest.approx(5.0)
+    assert selected == pytest.approx(4.0)
+
+
+def test_event_hard_limit_control_is_inside_compliant_window():
+    fixture = WS2_EVENT_CONTROL_RUNNER.load_fixture(WS2_EVENT_CONTROL_FIXTURE)
+    design = fixture["design"]
+    assert design["actuation_plus_tool_compression_mm"] == pytest.approx(
+        3.3272727272727276
+    )
+    assert design["bottom_out_plus_tool_compression_mm"] == pytest.approx(
+        5.545454545454546
+    )
+    assert (
+        design["actuation_plus_tool_compression_mm"]
+        < design["hard_depth_limit_mm"]
+        < design["bottom_out_plus_tool_compression_mm"]
+    )
+    parent_fixture = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent_fixture)
+    control = WS2_EVENT_CONTROL_RUNNER._control(fixture, parent_fixture, physical)[
+        "control"
+    ]
+    assert control["recipe_override"]["approach_mm_s"] == pytest.approx(0.5)
+    assert control["event_termination"]["hard_depth_limit_mm"] == pytest.approx(5.0)
+    assert {row["vertical_origin_offset_mm"] for row in control["batch_rows"]} == {0.0}
+
+
+def test_event_hard_limit_control_tampering_stops(tmp_path: Path):
+    fixture = json.loads(WS2_EVENT_CONTROL_FIXTURE.read_text(encoding="utf-8"))
+    fixture["design"]["hard_depth_limit_mm"] = 6.0
+    fixture_without_hash = {
+        key: value for key, value in fixture.items() if key != "fixture_sha256"
+    }
+    fixture["fixture_sha256"] = WS2_EVENT_CONTROL_RUNNER.value_sha(fixture_without_hash)
+    path = tmp_path / "tampered.json"
+    path.write_text(json.dumps(fixture), encoding="utf-8")
+    with pytest.raises(ValueError, match="declared compliant window"):
+        WS2_EVENT_CONTROL_RUNNER.load_fixture(path)
+
+
+def test_deeper_event_mechanism_control_stays_below_compliant_bottom_out():
+    fixture = WS2_EVENT_CONTROL_RUNNER_V2.load_fixture(WS2_EVENT_CONTROL_FIXTURE_V2)
+    design = fixture["design"]
+    assert design["nominal_simulated_press_depth_mm"] == pytest.approx(5.4)
+    assert design["hard_depth_limit_mm"] < design["bottom_out_plus_tool_compression_mm"]
+    parent_fixture = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent_fixture)
+    control = WS2_EVENT_CONTROL_RUNNER_V2._control(fixture, parent_fixture, physical)[
+        "control"
+    ]
+    assert control["recipe_override"]["press_depth_mm"] == pytest.approx(5.4)
+    assert control["event_termination"]["hard_depth_limit_mm"] == pytest.approx(5.4)
 
 
 def test_ws2_runtime_amendment_changes_only_stack_identity():
@@ -688,6 +890,24 @@ def test_ws2_series_compliance_partitions_command_and_caps_travel():
         )
 
 
+def test_ws2_series_compliance_preserves_mixed_world_commands():
+    np = pytest.importorskip("numpy")
+    commanded = np.asarray([5.5703125, 5.0703125, 4.5703125])
+    effective, compression, force = WS2_PROBE.series_compliance_displacement_rows(
+        np,
+        commanded,
+        key_stiffness_n_per_mm=1.3,
+        tool_stiffness_n_per_mm=0.286,
+        tool_travel_mm=6.0,
+    )
+    assert effective.shape == commanded.shape
+    assert compression.shape == commanded.shape
+    assert force.shape == commanded.shape
+    assert effective[0] > effective[1] > effective[2]
+    assert compression[0] > compression[1] > compression[2]
+    assert effective + compression == pytest.approx(commanded)
+
+
 def test_ws2_tampering_and_cross_gpu_drift_stop():
     fixture = WS2_PROBE.load_fixture(WS2_FIXTURE, workspace=ROOT)
     left = {
@@ -773,3 +993,204 @@ def test_ws2_staged_refinement_is_deterministic_and_boundary_only():
         row["recipe_index"] not in coarse for row in first["refinement_identities"]
     )
     assert first["physical_authority"] is False
+
+
+def test_ws2_height_robust_fixture_is_frozen_and_zero_authority():
+    fixture = WS2_HEIGHT_ROBUST_RUNNER.load_fixture(WS2_HEIGHT_ROBUST_FIXTURE)
+    design = fixture["design"]
+    assert design["target_ids"] == ["GRAVE", "EQUAL"]
+    assert design["height_offset_mm_samples"] == [
+        -1.0,
+        -0.75,
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+    ]
+    assert design["population_per_device"] == {
+        "matching_event_rows": 69120,
+        "no_event_rows": 17280,
+        "total_rows": 86400,
+    }
+    assert fixture["physical_authority"] is False
+    assert set(fixture["counters"].values()) == {0}
+
+
+def test_ws2_height_robust_control_preserves_every_height_and_landing():
+    fixture = WS2_HEIGHT_ROBUST_RUNNER.load_fixture(WS2_HEIGHT_ROBUST_FIXTURE)
+    parent = WS2_EVENT_RUNNER.load_fixture(WS2_EVENT_FIXTURE)
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent)
+    control = WS2_HEIGHT_ROBUST_RUNNER.control_for(
+        fixture,
+        parent,
+        physical,
+        target_id="GRAVE",
+        scenario_id="MID_SOURCE_MID_RESIDUAL",
+        latency_ms=40.0,
+        hard_limit_mm=5.8,
+        mode="MATCHING",
+    )["control"]
+    assert control["recipe_override"]["press_depth_mm"] == 5.8
+    assert control["event_termination"]["hard_depth_limit_mm"] == 5.8
+    assert len(control["batch_rows"]) == 9 * 64
+    assert {row["vertical_origin_offset_mm"] for row in control["batch_rows"]} == {
+        -1.0,
+        -0.75,
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+    }
+
+
+def test_ws2_force_guard_fixture_freezes_force_and_immediate_retraction():
+    fixture = WS2_FORCE_GUARD_RUNNER.load_fixture(WS2_FORCE_GUARD_FIXTURE)
+    design = fixture["design"]
+    assert design["maximum_contact_force_n"] == 1.4104166666666667
+    assert design["bottom_out_treatment"] == "DIAGNOSTIC_ONLY_FORCE_IS_GATE"
+    assert design["no_event_response"] == (
+        "IMMEDIATE_RETRACT_AT_HARD_LIMIT_NO_DWELL_REPORT_FAILED_PRESS_NO_RETRY"
+    )
+    assert design["population_per_device"]["total_rows"] == 259200
+    assert fixture["physical_authority"] is False
+    assert set(fixture["counters"].values()) == {0}
+
+
+def test_ws2_force_guard_allows_bounded_bottom_out_but_rejects_excess_force():
+    row = {
+        "actuation_count": 1,
+        "auto_repeat_count": 0,
+        "neighbor_contact": False,
+        "bottom_out_overflow": True,
+        "release_complete": True,
+        "peak_required_force_n": 1.2,
+        "peak_tool_force_n": 1.3,
+        "debounce_hold_complete": True,
+        "event_received": True,
+        "no_event_before_hard_limit": False,
+        "wrong_key_event": False,
+        "late_event_ignored": False,
+        "retry_count": 0,
+    }
+    assert WS2_FORCE_GUARD_RUNNER._matching_pass(row, 1.4104166666666667)
+    row["peak_tool_force_n"] = 1.42
+    assert not WS2_FORCE_GUARD_RUNNER._matching_pass(row, 1.4104166666666667)
+
+
+def test_ws2_force_guard_no_event_requires_immediate_limit_retraction():
+    row = {
+        "no_event_before_hard_limit": True,
+        "event_received": False,
+        "retract_started": True,
+        "retract_start_displacement_mm": 6.1,
+        "release_complete": True,
+        "auto_repeat_count": 0,
+        "neighbor_contact": False,
+        "peak_required_force_n": 1.2,
+        "peak_tool_force_n": 1.3,
+        "retry_count": 0,
+        "bottom_out_overflow": True,
+    }
+    assert WS2_FORCE_GUARD_RUNNER._no_event_pass(row, 1.4104166666666667, 6.1)
+    row["retract_start_displacement_mm"] = 6.0
+    assert not WS2_FORCE_GUARD_RUNNER._no_event_pass(row, 1.4104166666666667, 6.1)
+
+
+def test_ws2_compliant_hover_fixture_freezes_two_phase_population():
+    fixture = WS2_COMPLIANT_HOVER_RUNNER.load_fixture(
+        WS2_COMPLIANT_HOVER_FIXTURE
+    )
+    design = fixture["design"]
+    assert design["tool_stiffness_n_per_mm_candidates"] == [0.286, 0.143, 0.0715]
+    assert design["initial_hover_clearance_mm"] == 3.0
+    assert design["contact_hover_clearance_mm"] == 1.25
+    assert design["rapid_approach_mm_s"] == 100.0
+    assert design["maximum_contact_force_source"].endswith(
+        "MEASUREMENT_DEPENDENT"
+    )
+    assert design["population_per_device"]["total_rows"] == 777600
+    assert fixture["physical_authority"] is False
+    assert set(fixture["counters"].values()) == {0}
+
+
+def test_ws2_compliant_hover_control_binds_stiffness_and_clearances():
+    fixture = WS2_COMPLIANT_HOVER_RUNNER.load_fixture(
+        WS2_COMPLIANT_HOVER_FIXTURE
+    )
+    predecessor_binding = fixture["bindings"]["predecessor_fixture"]
+    predecessor_force = WS2_COMPLIANT_HOVER_RUNNER._load_frozen_fixture(
+        ROOT / predecessor_binding["path"],
+        file_sha256=predecessor_binding["sha256"],
+        fixture_sha256=predecessor_binding["fixture_sha256"],
+    )
+    height_binding = predecessor_force["bindings"]["predecessor_fixture"]
+    predecessor = WS2_COMPLIANT_HOVER_RUNNER._load_frozen_fixture(
+        ROOT / height_binding["path"],
+        file_sha256=height_binding["sha256"],
+        fixture_sha256=height_binding["fixture_sha256"],
+    )
+    parent_binding = predecessor["bindings"]["parent_fixture"]
+    parent = WS2_COMPLIANT_HOVER_RUNNER._load_frozen_fixture(
+        ROOT / parent_binding["path"],
+        file_sha256=parent_binding["sha256"],
+        fixture_sha256=parent_binding["fixture_sha256"],
+    )
+    _, _, physical = WS2_EVENT_RUNNER.load_bound(parent)
+    control = WS2_COMPLIANT_HOVER_RUNNER.control_for(
+        fixture,
+        predecessor,
+        physical,
+        target_id="GRAVE",
+        scenario_id="MID_SOURCE_MID_RESIDUAL",
+        latency_ms=40.0,
+        hard_limit_mm=6.1,
+        approach_mm_s=16.0,
+        tool_stiffness_n_per_mm=0.0715,
+        mode="MATCHING",
+    )["control"]
+    assert control["tool_compliance"] == {
+        "stiffness_n_per_mm": 0.0715,
+        "travel_mm": 6.0,
+    }
+    assert control["event_termination"]["hard_depth_limit_mm"] == pytest.approx(7.35)
+    assert control["recipe_override"]["press_depth_mm"] == pytest.approx(7.35)
+    assert {row["vertical_origin_offset_mm"] for row in control["batch_rows"]} == {
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+        1.25,
+        1.5,
+        1.75,
+        2.0,
+        2.25,
+    }
+
+
+def test_ws2_stiffness_scaled_fixture_uses_compression_aware_limits():
+    fixture = WS2_STIFFNESS_SCALED_RUNNER.load_fixture(
+        WS2_STIFFNESS_SCALED_FIXTURE
+    )
+    design = fixture["design"]
+    assert design["hard_depth_limit_mm_candidates_by_stiffness"] == {
+        "0.143": [7.05, 7.15, 7.25],
+        "0.0715": [7.6, 7.7, 7.8],
+    }
+    actuation = design["compression_aware_actuation"]["by_stiffness"]
+    assert actuation["0.143"]["high_edge_actuation_command_mm"] == pytest.approx(
+        7.054545454545455
+    )
+    assert actuation["0.143"]["within_compliant_travel"] is True
+    assert actuation["0.0715"]["required_spring_compression_mm"] == pytest.approx(
+        10.90909090909091
+    )
+    assert actuation["0.0715"]["within_compliant_travel"] is False
+    assert actuation["0.0715"]["actuation_requires_compliance_end_stop"] is True
+    assert design["population_per_device"]["total_rows"] == 518400
+    assert fixture["physical_authority"] is False

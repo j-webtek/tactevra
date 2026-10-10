@@ -55,6 +55,13 @@ This division is intentional. Models propose *what* the interaction means;
 Tactevra Runtime owns *how* a physical action is checked, planned, authorized,
 encoded, and recorded.
 
+The experimental `hover_target` intent is an additive, simulation-only request
+shape. It carries a device and named target without coordinates. Existing
+typing consumers may continue to reject it; only an explicit hover consumer may
+route it, and that consumer terminates before contact. Migration adds that
+explicit route. Rollback removes the route and validator shape without changing
+stored typing plans, motion batches, controller records, or transport data.
+
 ## Component responsibilities
 
 | Component | Accepts | Produces | Must not claim |
