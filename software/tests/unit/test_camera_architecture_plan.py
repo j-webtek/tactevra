@@ -15,7 +15,8 @@ from rocell.workcell import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
-PLAN_PATH = WORKSPACE / "software/config/camera_architecture_plan.json"
+PLAN_PATH = WORKSPACE / "software/config/camera_architecture_plan_v2.json"
+HISTORICAL_PLAN_PATH = WORKSPACE / "software/config/camera_architecture_plan.json"
 
 
 def _document() -> dict[str, Any]:
@@ -45,10 +46,10 @@ def test_loads_selected_static_primary_plan_without_modifying_source() -> None:
     assert PLAN_PATH.read_bytes() == before
     assert plan.source_path == PLAN_PATH.resolve()
     assert plan.source_sha256 == hashlib.sha256(before).hexdigest()
-    assert plan.plan_id == "ROCELL-CAMERA-STATIC-PRIMARY-001"
+    assert plan.plan_id == "ROCELL-CAMERA-STATIC-PRIMARY-TRIPOD-002"
     assert (
         plan.decision_state
-        == "ARCHITECTURE_SELECTED_CAMERA_PURCHASED_PENDING_RECEIPT_INSPECTION"
+        == "CAMERA_AND_TRIPOD_SELECTED_PENDING_RECEIPT_AND_PHYSICAL_QUALIFICATION"
     )
     assert plan.primary_architecture == "static_overhead_eye_to_hand"
     assert plan.primary_optical_frame == "C_overhead_optical"
@@ -81,6 +82,23 @@ def test_loads_selected_static_primary_plan_without_modifying_source() -> None:
         document["optical_screening"]["state"]
         == "PURCHASED_PENDING_RECEIPT_INSPECTION"
     )
+    assert document["primary"]["mount"]["type"] == (
+        "independent commercial floor tripod"
+    )
+    assert document["primary"]["existing_support_candidates"][
+        "commercial_floor_tripod_asin_b0csyb4yq2"
+    ] == "SELECTED_UNQUALIFIED"
+
+
+def test_explicit_historical_v1_plan_remains_readable() -> None:
+    before = HISTORICAL_PLAN_PATH.read_bytes()
+
+    plan = load_camera_architecture_plan(WORKSPACE, HISTORICAL_PLAN_PATH)
+
+    assert HISTORICAL_PLAN_PATH.read_bytes() == before
+    assert plan.plan_id == "ROCELL-CAMERA-STATIC-PRIMARY-001"
+    assert plan.source_sha256 == hashlib.sha256(before).hexdigest()
+    assert plan.zero_physical_authority
 
 
 @pytest.mark.parametrize(

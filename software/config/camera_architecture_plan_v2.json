@@ -1,0 +1,247 @@
+{
+  "schema": "rocell.camera_architecture_change_plan.v2",
+  "schema_version": 2,
+  "plan_id": "ROCELL-CAMERA-STATIC-PRIMARY-TRIPOD-002",
+  "decision_date": "2026-10-10",
+  "decision_state": "CAMERA_AND_TRIPOD_SELECTED_PENDING_RECEIPT_AND_PHYSICAL_QUALIFICATION",
+  "decision": "Use the user-confirmed purchased Arducam B0477 catalog configuration as the fixed overhead eye-to-hand Phase 1 primary vision source on an independent commercial floor tripod identified by Amazon ASIN B0CSYB4YQ2. The selected listing identifies only a candidate support: delivered identity, interface, payload, working height, rigidity, repeatability, sag, drift, vibration, tethering, floor stability, collision clearance, calibration, and every motion/contact gate remain unverified. Retain an arm-mounted camera only as an unselected Phase 2 local-refinement option.",
+  "authority": {
+    "planning_authority": true,
+    "simulation_authority": true,
+    "physical_release_effect": "NONE",
+    "live_motion_authority": false,
+    "contact_authority": false,
+    "note": "This plan records the approved architectural direction but does not mutate or release Freeze 009. A new controlled freeze must promote it atomically."
+  },
+  "supersession": {
+    "historical_freeze_retained": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-009",
+    "next_freeze_id": null,
+    "supersedes_when_promoted": [
+      "arm-mounted camera as the primary operational camera",
+      "Waveshare IMX335-B selection based on direct fit to the bundled arm holder",
+      "independent fixed camera described only as an optional fallback",
+      "eye-on-arm extrinsic and exposure-to-joint synchronization as Phase 1 prerequisites",
+      "paired 2020 extrusion mast as the active primary camera support",
+      "printable portal frame and RC03 mast jobs as active build instructions"
+    ],
+    "historical_artifacts_are_immutable": true
+  },
+  "routes": {
+    "camera_overhead_primary": {
+      "selected": true,
+      "release_state": "SELECTED_UNQUALIFIED",
+      "required_for_autonomous_descent": true
+    },
+    "camera_arm_secondary": {
+      "selected": false,
+      "release_state": "UNSELECTED_PHASE_2_OPTION",
+      "automatic_fallback_allowed": false
+    },
+    "legacy_camera_mast_optional": {
+      "selected": false,
+      "state": "SUPERSEDED_HISTORICAL_ONLY",
+      "note": "Retained only for historical evidence reproduction. Do not print, build, or install it for the active tripod route."
+    }
+  },
+  "primary": {
+    "architecture": "static_overhead_eye_to_hand",
+    "optical_frame": "C_overhead_optical",
+    "role": "authoritative board and device localization for Phase 1",
+    "runtime_backend_preference": "usb_opencv",
+    "exact_camera": "Arducam B0477 catalog configuration (purchased; received-unit identity unverified)",
+    "exact_sensor": "Sony IMX283 per supplier specification (unverified until receipt inspection)",
+    "exact_lens": "included nominal 16 mm manual-focus C-mount lens per purchase listing (delivered configuration unverified)",
+    "commissioned_mode": null,
+    "persistent_usb_identity": null,
+    "mount": {
+      "type": "independent commercial floor tripod",
+      "relationship_to_arm": "independent floor support, never attached to the arm or board",
+      "height_above_tag_plane_mm": null,
+      "optical_axis_board_intersection_xy_mm": null,
+      "roll_pitch_yaw_deg": null,
+      "support_geometry": null,
+      "camera_interface": null,
+      "collision_geometry": null,
+      "state": "SELECTED_UNQUALIFIED_PENDING_RECEIPT"
+    },
+    "existing_support_candidates": {
+      "commercial_floor_tripod_asin_b0csyb4yq2": "SELECTED_UNQUALIFIED",
+      "paired_2020_mast_and_universal_plate": "SUPERSEDED_DO_NOT_BUILD",
+      "printable_portal_frame": "SUPERSEDED_DO_NOT_PRINT",
+      "commercial_bench_boom": "UNSELECTED",
+      "note": "The commercial floor tripod is the active candidate. Receipt inspection and measured qualification must establish the delivered article and installed geometry before physical use."
+    }
+  },
+  "optional_secondary": {
+    "architecture": "arm_mounted_local_camera",
+    "optical_frame": "C_arm",
+    "selected": false,
+    "allowed_future_roles": [
+      "local target refinement above a proven clearance plane",
+      "tool seating or compliance inspection",
+      "occlusion recovery after independent qualification"
+    ],
+    "prohibited_roles": [
+      "automatic fallback for a failed primary camera",
+      "sole source of contact authority",
+      "override of a disagreeing primary observation"
+    ],
+    "separate_qualification_required": [
+      "camera identity, intrinsics, mode, and settings",
+      "carrier and E_T_Carm extrinsic",
+      "exposure-to-joint synchronization",
+      "moving cable, strain relief, payload, collision, and visibility"
+    ]
+  },
+  "frame_contract": {
+    "board_frame": "B",
+    "vendor_world_frame": "Wv",
+    "controller_frame": "R_ctrl",
+    "primary_camera_frame": "C_overhead_optical",
+    "optional_tool_marker_frame": "M",
+    "tool_tip_frame": "T",
+    "observed_transform": "C_overhead_optical_T_B(i)",
+    "required_static_extrinsic": "Wv_T_C_overhead_optical",
+    "runtime_board_registration": "Wv_T_B(i) = Wv_T_C_overhead_optical * C_overhead_optical_T_B(i)",
+    "controller_bridge": "R_ctrl_T_Wv remains separately measured and bounded",
+    "rule": "Board tags alone do not establish robot pose. Without a commissioned Wv_T_C_overhead_optical, an overhead observation is board-relative diagnostic evidence only; independent B_T_Wv evidence may seed that extrinsic only when bound to a simultaneous camera observation."
+  },
+  "runtime_sequence": [
+    "verify exact camera identity, mode, settings, calibration hashes, and static-support witness",
+    "move only to a prequalified clear observation posture",
+    "wait for measured arm and support settling",
+    "flush bounded buffered frames and capture a uniquely fresh frame",
+    "require all six tags, solve board pose from T0-T3, and validate K0/P0 independently",
+    "validate device presence, seating, orientation, and target map",
+    "bind the accepted observation and calibration hashes to the pending action occurrence",
+    "optionally observe a top-visible tool marker and correct only above the proven clearance plane",
+    "execute the short qualified approach and contact without assuming the target remains visible",
+    "retract to a clear observation posture",
+    "reacquire vision and verify the outcome through the independent computer or Android observer"
+  ],
+  "visibility_contract": {
+    "commissioning": "All six installed tags must be visible and accepted throughout the complete commissioned overview dataset.",
+    "startup": "With the arm in the primary clear observation posture, require all six tags; T0-T3 form the pose solve and K0/P0 remain independent checks.",
+    "per_action": "Capture all six tags from a prequalified primary or recovery observation posture before descent. Missing, ambiguous, stale, or weakly distributed tags block descent.",
+    "occlusion_strategy": "Observe while retracted, approach and contact, retract, then observe and verify.",
+    "recovery": "Only a prequalified retreat to a second clear observation posture is allowed; there is no blind continuation or automatic secondary-camera substitution.",
+    "route_atlas_state": "OPEN_BLOCKING"
+  },
+  "optical_screening": {
+    "board_size_mm": [
+      610.0,
+      457.0
+    ],
+    "provisional_required_coverage_mm": [
+      670.0,
+      517.0
+    ],
+    "coverage_margin_note": "The screening envelope adds 30 mm around every board edge. It is not a released tolerance.",
+    "preferred_sensor_aspect": "4:3 landscape",
+    "field_of_view_rule": "Choose support height from collision clearance first, then compute H/V lens coverage at the exact native crop. Never select from diagonal FOV alone.",
+    "minimum_centered_perpendicular_fov_screen": [
+      {
+        "height_mm": 500.0,
+        "horizontal_deg": 67.6,
+        "vertical_deg": 54.7
+      },
+      {
+        "height_mm": 600.0,
+        "horizontal_deg": 58.4,
+        "vertical_deg": 46.6
+      },
+      {
+        "height_mm": 700.0,
+        "horizontal_deg": 51.2,
+        "vertical_deg": 40.5
+      },
+      {
+        "height_mm": 800.0,
+        "horizontal_deg": 45.4,
+        "vertical_deg": 35.8
+      },
+      {
+        "height_mm": 900.0,
+        "horizontal_deg": 40.8,
+        "vertical_deg": 32.1
+      },
+      {
+        "height_mm": 1000.0,
+        "horizontal_deg": 37.0,
+        "vertical_deg": 29.0
+      }
+    ],
+    "candidate_camera_body": "The Arducam B0477/IMX283 catalog configuration with included nominal 16 mm manual-focus C-mount lens and metal case is purchased and pending receipt inspection; Arducam B0459-1 remains an unselected research alternate.",
+    "previous_wide_lens": "The LN069 100-degree lens is not selected for the static architecture because it may waste resolution at the final safe gantry height.",
+    "state": "PURCHASED_PENDING_RECEIPT_INSPECTION"
+  },
+  "calibration_dependencies": [
+    "physical camera identity, full native 3:2 mode, pixel format, driver, crop, and locked settings",
+    "camera intrinsics and distortion at the exact lens, focus, aperture, resolution, and crop",
+    "measured six-tag corner and optical-plane map in B",
+    "static Wv_T_C_overhead_optical solved directly or derived from independently measured Wv_T_B plus simultaneous B_T_C_overhead_optical",
+    "robot reference and independently bounded R_ctrl-to-Wv correlation",
+    "keyboard pose, key polygons, key surface heights, and safe insets",
+    "phone pose, screen plane, orientation, UI profile, homography, and safe insets",
+    "route-specific G_T_T tool TCP, compliance, travel, and contact limits",
+    "held-out end-to-end keyboard and phone validation"
+  ],
+  "acceptance_gates_to_define_and_measure": [
+    "persistent camera identity and exact mode survive close, reopen, and reboot without silent crop or rescale",
+    "intrinsic calibration uses at least 20 accepted varied ChArUco views and retains held-out residual evidence",
+    "complete calibrated coverage contains all six tag tiles with border margin at both observation postures",
+    "all-six-tag startup and route observation trials pass under the complete qualified lighting envelope",
+    "T0-T3 pose and K0/P0 held-out checks pass independently",
+    "multi-frame pose stability, latency, freshness, and settle-time limits are measured",
+    "tripod, camera, tether, cable, and lighting hardware remain outside every approved swept volume",
+    "warm-up, arm cycling, cable disturbance, remove/reinstall, and 24-hour drift tests pass the allocated vision budget",
+    "every keyboard and phone route has a qualified primary and recovery observation",
+    "camera loss, stale replay, settings drift, tag loss/outlier, support movement, and board movement fault injections produce zero descent or contact permits"
+  ],
+  "invalidation_triggers": {
+    "intrinsics": [
+      "camera, sensor, lens, focus, aperture, resolution, pixel format, ROI, crop, driver, or image orientation change"
+    ],
+    "static_extrinsic_and_visibility": [
+      "tripod, head, center column, camera plate, fastener, camera, tether, cable strain, floor contact, or optical-axis disturbance",
+      "collision or impact involving the tripod or camera",
+      "unexpected reference-witness, pose, or residual drift"
+    ],
+    "tag_map": [
+      "tag movement, damage, replacement, laminate change, or board warp"
+    ],
+    "robot_registration": [
+      "arm clamp, base, reference procedure, servo, firmware, or controller-frame change"
+    ],
+    "device_maps": [
+      "device removal or reseat, case/protector, station, orientation, layout, OS, or UI change"
+    ],
+    "tool_tcp": [
+      "tool, tip, spring, cartridge, gripper seating, or compliance change"
+    ]
+  },
+  "software_migration": [
+    "promote the fixed-overview JPEG/tag/planar-pose topology to the production-aligned primary simulation only after T0-T3 alone fit pose and K0/P0 are excluded from fitting and checked independently",
+    "add a physical-neutral capture, undistortion, detection, pose, quality, and evidence service",
+    "add StaticCameraBoardMeasurement and a camera-neutral BoardRegistrationObserver",
+    "remove eye-on-arm extrinsic from Phase 1 calibration requirements while retaining it for Phase 2",
+    "add support drift, robot-base witness, stale-buffer, settings drift, occlusion, glare, lighting, and phone-band tests",
+    "model tripod, camera, tether, cable, and lighting as static collision bodies",
+    "migrate active project routes and gates to camera_overhead_primary and camera_arm_secondary",
+    "create a new controlled freeze and regenerate manifests, job cards, Step 13, readiness outputs, PDFs, and checksums atomically",
+    "bind the active workcell ICD to the hash-locked commercial tripod candidate instead of the superseded printable support design",
+    "retain superseded mast and portal artifacts only as immutable historical evidence and remove them from active build outputs"
+  ],
+  "open_blockers": [
+    "complete robot swept-volume and independent tripod keepout study",
+    "received-tripod manufacturer, model, head, fasteners, camera interface, payload, height range, footprint, and independent tether identity",
+    "received-unit camera model and sensor identity, delivered lens/mount/case configuration, focus, aperture, mode, field of view, distortion, and persistent USB identity",
+    "final tripod placement, working height, camera aim, floor locks, tether, lighting, cable route, rigidity, sag, drift, vibration, and collision geometry",
+    "measured freshness, buffering, exposure, latency, and settle-time behavior",
+    "static eye-to-hand robot registration method and independent held-out validation",
+    "tool-marker need, design, visibility, and M_T_T calibration",
+    "route-by-route primary/recovery occlusion atlas and numerical error budget",
+    "T0-T3-only board-pose fitting with K0/P0 excluded and evaluated as independent held-out residual checks",
+    "controlled active-build migration and superseding freeze"
+  ]
+}
