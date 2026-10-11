@@ -269,6 +269,11 @@ def run_consolidated_rehearsal(
         workspace, fixture["bindings"]["cpu_contact_fixture"]["path"])
     from rocell_ai.cpu_contact_and_ws3 import load_cpu_contact_fixture
     contact_fixture = load_cpu_contact_fixture(contact_fixture_path, workspace=workspace)
+    compatibility = fixture["bindings"].get("kinematic_compatibility_context")
+    if compatibility is not None:
+        contact_fixture = dict(contact_fixture)
+        contact_fixture["bindings"] = dict(contact_fixture["bindings"])
+        contact_fixture["bindings"]["kinematic_compatibility_context"] = compatibility
     pose_family = _load_bound(fixture["bindings"]["pose_family"], workspace)
     ef = run_stage_ef_contact_screen(contact_fixture, workspace=workspace)
     stage_c = _continuous_stage_c(contact_fixture, fixture, workspace=workspace)
@@ -305,6 +310,19 @@ def run_consolidated_rehearsal(
         workspace, fixture["bindings"]["observation_fixture"]["path"]))
     wrong = run_wrong_model_drills(readiness)
     observers = run_independent_observation_drills(observation, wrong)
+    tripod_binding = fixture["bindings"].get("tripod_support_result")
+    tripod = _load_bound(tripod_binding, workspace) if tripod_binding else None
+    nominal_tripod = tripod.get("nominal_height_result", {}) if tripod else {}
+    tripod_clear = tripod is None or (
+        tripod.get("schema") == "tactevra.tripod_support_screen_result.v1"
+        and tripod.get("physical_authority") is False
+        and tripod.get("official_readiness") == "NOT_READY_FOR_FIRST_POWERED_MOTION"
+        and tripod.get("selected_support", {}).get("support_type")
+        == "independent_commercial_floor_tripod"
+        and nominal_tripod.get("decision") == "PASS_SYNTHETIC_ONLY"
+        and nominal_tripod.get("collision_clear_with_margin") is True
+        and nominal_tripod.get("complete_provisional_coverage") is True
+    )
     result = {
         "schema": "tactevra.first_motion_consolidated_result.v1",
         "scope": SCOPE, "fixture_sha256": fixture["fixture_sha256"],
@@ -328,10 +346,18 @@ def run_consolidated_rehearsal(
         "independent_observers": {key: observers[key] for key in (
             "decision", "original_gap_count", "consequential_some_or_all_count",
             "undetected_consequential_count", "receipt_sha256")},
+        "tripod_support": None if tripod is None else {
+            "decision": tripod.get("decision"),
+            "nominal_height_result": nominal_tripod,
+            "selected_support": tripod.get("selected_support"),
+            "receipt_sha256": tripod.get("receipt_sha256"),
+            "accepted_for_simulation_rehearsal": tripod_clear,
+        },
         "decision": "PASS_ALL_STAGES_SIMULATION_ONLY_PHYSICAL_BLOCKED"
                     if all(row["status"] == "SATISFIED_SIMULATION_ONLY"
                            for row in stage_rows)
                     and observers["undetected_consequential_count"] == 0
+                    and tripod_clear
                     else "STOP_CONSOLIDATED_SIMULATION",
         "official_readiness": "NOT_READY_FOR_FIRST_POWERED_MOTION",
         **COUNTERS, "physical_authority": False,

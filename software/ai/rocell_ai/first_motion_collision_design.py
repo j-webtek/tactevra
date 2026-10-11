@@ -10,6 +10,7 @@ import hashlib
 from itertools import combinations, product
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Iterable
 
 from rocell.application.context import load_simulation_context
@@ -24,6 +25,8 @@ from rocell.simulation.collision import (
     CollisionPose, OrientedBoxMm, SampledCollisionGeometry,
     build_roarm_m3_prehardware_collision_contract, evaluate_collision_pose,
 )
+from rocell.simulation.scenario import load_simulation_scenario
+from rocell.simulation.scene import load_rc03_nominal_scene
 
 from rocell_ai.first_motion_controller_emulator import (
     SCOPE, _baseline_joints, load_emulator_fixture,
@@ -106,8 +109,13 @@ class _World:
             program_path = workspace / program_path
         self.program = load_program_fixture(program_path)
         self.section = self.program["sections"]["phase0_collision_mode"]
-        self.context = load_simulation_context(
-            workspace, workspace / "software/config/system_manifest.json")
+        compatibility = fixture["bindings"].get("kinematic_compatibility_context")
+        if compatibility is None:
+            self.context = load_simulation_context(
+                workspace, workspace / "software/config/system_manifest.json")
+        else:
+            self.context = self._load_kinematic_compatibility_context(
+                compatibility, workspace)
         self.model = UrdfModel.from_file(self.context.scenario.model_path)
         base = build_roarm_m3_prehardware_collision_contract(
             self.model, self.context.scene)
@@ -136,6 +144,61 @@ class _World:
         )
         self.cage = _binary_stl_bounds(Path(self.program["bindings"]["camera_cage_mesh"]["path"]))
         self.carriage = _binary_stl_bounds(Path(self.program["bindings"]["camera_carriage_mesh"]["path"]))
+
+    @staticmethod
+    def _load_kinematic_compatibility_context(
+        binding: dict[str, Any], workspace: Path,
+    ) -> SimpleNamespace:
+        """Load a hash-bound zero-authority kinematic context.
+
+        This path exists for successor evidence after the controlled RC03 source
+        tree has moved beyond a historical full simulation freeze.  It exposes
+        only the scenario and scene consumed by this exploratory collision
+        world; it cannot masquerade as a fully validated SimulationContext.
+        """
+
+        context_path = Path(binding["path"])
+        if not context_path.is_absolute():
+            context_path = workspace / context_path
+        if hashlib.sha256(context_path.read_bytes()).hexdigest() != binding["sha256"]:
+            raise ValueError("kinematic compatibility context binding changed")
+        document = json.loads(context_path.read_text(encoding="utf-8"))
+        unsigned = dict(document)
+        claimed = unsigned.pop("context_sha256", None)
+        if claimed != _sha(unsigned):
+            raise ValueError("kinematic compatibility context hash mismatch")
+        if (
+            document.get("schema") != "tactevra.tripod_kinematic_context.v1"
+            or document.get("scope") != "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+            or document.get("physical_authority") is not False
+            or document.get("kinematic_compatibility_only") is not True
+            or any(document.get("counters", {}).values())
+        ):
+            raise ValueError("kinematic compatibility context changed authority or scope")
+        resolved: dict[str, Path] = {}
+        for name, source_binding in document["bindings"].items():
+            source = Path(source_binding["path"])
+            if not source.is_absolute():
+                source = workspace / source
+            source = source.resolve()
+            if hashlib.sha256(source.read_bytes()).hexdigest() != source_binding["sha256"]:
+                raise ValueError(f"kinematic compatibility input changed: {name}")
+            resolved[name] = source
+        scenario = load_simulation_scenario(
+            workspace, profile_path=resolved["simulation_hardware_profile"])
+        rc03_root = resolved["workcell_layout"].parents[1]
+        scene = load_rc03_nominal_scene(
+            rc03_root,
+            assumed_tag_plane_z_mm=scenario.assumed_tag_plane_z_mm,
+            station_proxy_height_mm=scenario.station_proxy_height_mm,
+        )
+        if scenario.workcell_layout_path != resolved["workcell_layout"]:
+            raise ValueError("kinematic context profile uses another workcell layout")
+        if scenario.apriltag_map_path != resolved["apriltag_map"]:
+            raise ValueError("kinematic context profile uses another AprilTag map")
+        if scenario.model_path != resolved["local_roarm_urdf"]:
+            raise ValueError("kinematic context profile uses another robot model")
+        return SimpleNamespace(scenario=scenario, scene=scene)
 
     def solver(self, tool_length_mm: float) -> RoArmM3NumericalIk:
         return RoArmM3NumericalIk(

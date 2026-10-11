@@ -1,0 +1,62 @@
+{
+  "bindings": {
+    "apriltag_map": {
+      "path": "active-project/RoCell_v0_3/fiducials/apriltag_map.json",
+      "sha256": "81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700"
+    },
+    "camera_architecture_decision": {
+      "path": "active-project/RoCell_v0_3/config/camera_architecture_decision.json",
+      "sha256": "a1f8a7b8f2f8480bfefb632df46ab77377667f7a5f013ee429d6bb6fe38ae7b6"
+    },
+    "commercial_tripod_candidate": {
+      "path": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+      "sha256": "3f132aee15b5a3b5c65e1c6dfc04523cf5ded61939088bc34e0ddcee9e28fbe9"
+    },
+    "hardware_candidates": {
+      "path": "active-project/RoCell_v0_3/config/hardware_candidates.json",
+      "sha256": "7ce612af4ced5d81ba141f1349ac3dbaf99d32c7e80eb88742beb327c0646f06"
+    },
+    "local_roarm_urdf": {
+      "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    "simulation_hardware_profile": {
+      "path": "software/config/simulation_hardware_profile.json",
+      "sha256": "6c24745f8330d0aa77c423d9376adb7bb6c1a090426ed1a38814eb32f6dcd190"
+    },
+    "tripod_support_fixture": {
+      "path": "software/ai/sim/evidence/tripod_support_screen_v1.json",
+      "sha256": "46e03c8ddbd6b9579b4825e8a8a4721b3da6d9c02bb68fcb86fcde1828434928"
+    },
+    "tripod_support_result": {
+      "path": "software/ai/sim/evidence/tripod_support_screen_result_v1.json",
+      "sha256": "0624a316ab857d1000a8302d95d07c8728a966e32890eaa064a5c4280b1908ef"
+    },
+    "workcell_layout": {
+      "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+      "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+    }
+  },
+  "camera_architecture": "static_overhead_b0477_on_independent_commercial_floor_tripod",
+  "context_id": "RC03-TRIPOD-KINEMATIC-COMPATIBILITY-001",
+  "context_sha256": "5f298d2fffef6c913d43a38b35845c5f0f871d4d60d3c7406e7ea0b4d05db802",
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "kinematic_compatibility_only": true,
+  "limitations": [
+    "This context binds the current tripod-era RC03 sources to the retained kinematic profile only; it is not a replacement system freeze or a physical digital twin.",
+    "The retained hardware profile supplies robot kinematics and nominal workcell geometry. Its historical eye-on-arm camera fields are excluded from the tripod support claim.",
+    "Tripod geometry and visibility are admitted only through the separately hash-bound conservative tripod support screen.",
+    "No result authorizes power, motion, contact, calibration promotion, fabrication, or hardware I/O."
+  ],
+  "official_readiness": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+  "physical_authority": false,
+  "schema": "tactevra.tripod_kinematic_context.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}

@@ -106,7 +106,14 @@ def _world_from_exact_fixture(
     design_path = _resolve(
         workspace, passive["bindings"]["collision_design_fixture"]["path"]
     )
-    return _World(json.loads(design_path.read_text(encoding="utf-8")), workspace)
+    design = json.loads(design_path.read_text(encoding="utf-8"))
+    compatibility = exact_fixture.get("bindings", {}).get(
+        "kinematic_compatibility_context")
+    if compatibility is not None:
+        design = dict(design)
+        design["bindings"] = dict(design["bindings"])
+        design["bindings"]["kinematic_compatibility_context"] = compatibility
+    return _World(design, workspace)
 
 
 def _validate_pose_family(
@@ -146,6 +153,12 @@ def build_candidate51_pose_family(
         workspace, fixture["bindings"]["exact_clearance_fixture"]["path"]
     )
     exact_fixture = json.loads(exact_path.read_text(encoding="utf-8"))
+    compatibility = fixture.get("bindings", {}).get(
+        "kinematic_compatibility_context")
+    if compatibility is not None:
+        exact_fixture = dict(exact_fixture)
+        exact_fixture["bindings"] = dict(exact_fixture["bindings"])
+        exact_fixture["bindings"]["kinematic_compatibility_context"] = compatibility
     source_path = _resolve(
         workspace, fixture["bindings"]["candidate51_pose_source"]["path"]
     )
@@ -259,6 +272,12 @@ def _load_geometry(
         workspace, fixture["bindings"]["exact_clearance_fixture"]["path"]
     )
     exact_fixture = json.loads(exact_path.read_text(encoding="utf-8"))
+    compatibility = fixture.get("bindings", {}).get(
+        "kinematic_compatibility_context")
+    if compatibility is not None:
+        exact_fixture = dict(exact_fixture)
+        exact_fixture["bindings"] = dict(exact_fixture["bindings"])
+        exact_fixture["bindings"]["kinematic_compatibility_context"] = compatibility
     if fixture["schema"] == "tactevra.cpu_contact_and_ws3_fixture.v1":
         pose_path = _resolve(
             workspace, fixture["bindings"]["tool_110mm_pose_family"]["path"]

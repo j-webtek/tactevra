@@ -13,6 +13,9 @@ from rocell_ai.first_motion_consolidated import (
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = ROOT / "software/ai/sim/evidence/first_motion_consolidated_v1.json"
+TRIPOD_FIXTURE = (
+    ROOT / "software/ai/sim/evidence/first_motion_consolidated_tripod_v2.json"
+)
 
 
 def test_fixture_binds_the_converged_zero_authority_configuration() -> None:
@@ -53,7 +56,7 @@ def test_every_stage_rejects_a_configuration_mismatch() -> None:
 
 def test_consolidated_rehearsal_covers_a_to_f_and_retains_physical_block() -> None:
     result = run_consolidated_rehearsal(
-        load_consolidated_fixture(FIXTURE, workspace=ROOT), workspace=ROOT)
+        load_consolidated_fixture(TRIPOD_FIXTURE, workspace=ROOT), workspace=ROOT)
     assert result["decision"] == "PASS_ALL_STAGES_SIMULATION_ONLY_PHYSICAL_BLOCKED"
     assert result["stages_satisfied_simulation_only"] == list("ABCDEF")
     assert result["first_stop_stage"] is None
@@ -65,6 +68,11 @@ def test_consolidated_rehearsal_covers_a_to_f_and_retains_physical_block() -> No
     assert result["station_cad_contact_count"] == 0
     assert result["predicted_telemetry_sample_count"] == 198
     assert result["independent_observers"]["undetected_consequential_count"] == 0
+    assert result["tripod_support"]["accepted_for_simulation_rehearsal"] is True
+    assert result["tripod_support"]["nominal_height_result"][
+        "optical_height_mm"] == 850.0
+    assert result["tripod_support"]["selected_support"]["support_type"] == (
+        "independent_commercial_floor_tripod")
     assert result["official_readiness"] == "NOT_READY_FOR_FIRST_POWERED_MOTION"
     assert result["hardware_write_count"] == result["physical_movement_count"] == 0
     assert result["real_command_count"] == result["transport_count"] == 0
