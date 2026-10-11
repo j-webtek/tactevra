@@ -1,0 +1,76 @@
+{
+  "schema": "rocell.rc03.tripod_camera_installation_intake.v1",
+  "record_id": "RC03-TRIPOD-CAMERA-INSTALLATION-INTAKE-001",
+  "status": "AWAITING_RECEIVED_HARDWARE_MEASUREMENTS",
+  "source_bindings": {
+    "commercial_tripod_candidate": {
+      "path": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+      "sha256": "3f132aee15b5a3b5c65e1c6dfc04523cf5ded61939088bc34e0ddcee9e28fbe9"
+    },
+    "b0477_camera_profile": {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    "workcell_layout": {
+      "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+      "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+    }
+  },
+  "received_hardware": {
+    "tripod_brand": null,
+    "tripod_model": null,
+    "tripod_revision_or_lot": null,
+    "included_parts_photo_ids": [],
+    "camera_model_label_photo_id": null,
+    "camera_serial_identity": null
+  },
+  "measured_mount_interface": {
+    "thread_nominal": null,
+    "thread_pitch": null,
+    "usable_thread_depth_mm": null,
+    "selected_screw_length_mm": null,
+    "non_bottoming_engagement_mm": null,
+    "anti_rotation_method": null,
+    "independent_tether_method": null
+  },
+  "measured_support_geometry": {
+    "minimum_optical_height_mm": null,
+    "maximum_loaded_optical_height_mm": null,
+    "installed_optical_height_mm": null,
+    "floor_footprint_polygon_mm": [],
+    "column_head_camera_envelope_mm": null,
+    "adapter_envelope_mm": null,
+    "cable_envelope_and_service_loop_mm": null
+  },
+  "installed_pose": {
+    "board_intersection_xy_mm": null,
+    "roll_deg": null,
+    "pitch_deg": null,
+    "yaw_deg": null,
+    "pose_measurement_method": null
+  },
+  "stability_results": {
+    "static_sag_mm": null,
+    "settle_time_s": null,
+    "cable_pull_displacement_mm": null,
+    "remove_reinstall_peak_to_peak_mm": null,
+    "drift_24h_mm": null,
+    "vibration_result": null
+  },
+  "qualification_results": {
+    "all_six_fiducials_visible": null,
+    "all_model_crop_footprints_visible": null,
+    "camera_controls_locked": null,
+    "witness_marks_applied": null,
+    "collision_screen_passed": null,
+    "wrong_model_injections_block_descent": null
+  },
+  "authority": {
+    "fabrication": false,
+    "physical_installation": false,
+    "robot_power": false,
+    "motion": false,
+    "contact": false,
+    "physical_release_effect": "NONE"
+  }
+}
