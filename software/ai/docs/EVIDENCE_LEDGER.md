@@ -12391,3 +12391,10 @@ rewriting history. New entries must use a unique evidence ID.
 - Hardware-write and movement counts: hardware writes 0; physical movements by this software probe 0; real commands 0; permits 0; transports 0; physical authority false. The operator-created photographs document a physical arrangement, but the probe neither moved nor controlled the arm.
 - Limitations: phone camera identity, intrinsics, distortion, focus, exposure, and pose are unbound. The world-tag coordinates themselves remain nominal, the paper sheets are not surveyed, and tag-plane heights are not measured. No camera calibration, installed board pose, millimetre localization error, uncertainty, residual-obstruction result, motion qualification, or deployment claim is established. Arm-lane status and integration gates remain unchanged.
 - Next dependency: keep the currently readable placement fixed, independently measure every installed tag center from the board datum edges, and generate a measured installation map. Then repeat visibility, calibration, pose, noise, drift, and clearance checks using the rigidly tripod-mounted B0477.
+
+
+### E-20261011-AI-PHONE-TAG-VISIBILITY-003 - successor report line endings normalized
+
+- Correction scope: commit `6ddbb75f` preserved the correct successor measurements but wrote `software/ai/eval/physical_phone_apriltag_visibility_probe_v2.json` with CRLF endings, so `git diff --cached --check` reported each added JSON line as trailing whitespace. No detector input, output value, decision, or qualification field changed.
+- Corrected artifact: the same JSON bytes were normalized to repository LF endings; corrected SHA-256 is `f282724ad666f1014970fe8e27b3fbc7e5d294489410fc15930701884349099f`. The superseded CRLF artifact remains reproducible from commit `6ddbb75f` at SHA-256 `37bbcc8a0c88bff015bf90280d663dcd4a525d734db6cdd8e8e9aa2cfa5309dc`.
+- Authority and outcome: E-20261011-AI-PHONE-TAG-VISIBILITY-002's tag detections, homography diagnostics, limitations, zero hardware writes, zero physical movements by the probe, and next dependency remain unchanged. This correction grants no physical authority.
