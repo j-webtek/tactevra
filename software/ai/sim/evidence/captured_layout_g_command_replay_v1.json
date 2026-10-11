@@ -1,0 +1,72 @@
+{
+  "achieved_tip_board_mm": [
+    197.5000266437593,
+    154.00005371381428,
+    20.000032042529952
+  ],
+  "command": {
+    "T": 102,
+    "acc": 1,
+    "base": -0.1986649084770539,
+    "elbow": 1.8923496032588427,
+    "hand": 2.391592653589793,
+    "roll": -1.3494841440357757e-11,
+    "shoulder": 0.7610719692842788,
+    "spd": 1,
+    "wrist": -1.0826217691239963
+  },
+  "feedback_exchange_count": 33,
+  "hardware_write_count": 0,
+  "limitations": [
+    "The photographs do not provide calibrated camera intrinsics, camera extrinsics, depth, or current encoder state.",
+    "The replay uses the retained board and robot model rather than estimating a metric pose from handheld photographs.",
+    "This result cannot be copied to a physical controller without an installed-pose survey and live preflight."
+  ],
+  "minimum_non_target_key_clearance_mm": 26.999999999999982,
+  "physical_accuracy_claim": false,
+  "physical_authority": false,
+  "physical_movement_count": 0,
+  "predicted_endpoint_joints_rad": [
+    -0.19340920633766337,
+    0.7544920146214922,
+    1.8908510581265443,
+    -1.0790217136066544,
+    0.004296085732866696,
+    2.393336378117302
+  ],
+  "real_transport_open_count": 0,
+  "receipt_sha256": "432767cc59321d3e29ca86024546886b1a51a8bf87d30b5bf49c776a23c69e8d",
+  "runtime_status": "TERMINAL_NO_RETRY",
+  "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+  "scene_basis": "retained hash-bound robot/workcell model corresponding to the photographed arm and keyboard layout; no image-derived 3D registration claim",
+  "schema": "tactevra.captured_layout_command_replay.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_bindings": {
+    "consolidated_fixture": {
+      "fixture_sha256": "b73ba949fac90126e24a84e2b8362c800e8d3dccf3ceeb5aa426640d635542c7",
+      "path": "software/ai/sim/evidence/first_motion_consolidated_tripod_v2.json",
+      "sha256": "6f7f4f6429694c3314b35bbb26a2c03b735ee60ad56e1e42adbade1483118383"
+    },
+    "consolidated_result": {
+      "path": "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json",
+      "receipt_sha256": "22dc51f881530b75f72a9ce4ac543ac608b083d5b24259f34f6d9c3bad6def56",
+      "sha256": "e4e43923467cc86ed161f35ea10f22d486e4d258370a77e53d4653a04102c2f8"
+    },
+    "emulator_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
+      "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
+    },
+    "kinematic_compatibility_context": {
+      "path": "software/ai/sim/evidence/tripod_kinematic_context_v1.json",
+      "sha256": "e3ab27bf2ad65887db44f8954a5d2a6aab63b394daef02b50c8e09db126ccd93"
+    },
+    "pose_family": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\cpu_contact_ws3_v2\\candidate51_tool_pose_family.json",
+      "sha256": "abfad469a53e282457811dc3a62c765e80c9e3cf878d446a6695470d1327b1dc"
+    }
+  },
+  "target_id": "G",
+  "telemetry_sample_count": 33,
+  "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed",
+  "wire_bytes_utf8": "{\"T\":102,\"base\":-0.1986649084770539,\"shoulder\":0.7610719692842788,\"elbow\":1.8923496032588427,\"wrist\":-1.0826217691239963,\"roll\":-1.3494841440357757e-11,\"hand\":2.391592653589793,\"spd\":1,\"acc\":1}"
+}
