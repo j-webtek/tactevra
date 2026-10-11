@@ -33,6 +33,14 @@ def parser() -> argparse.ArgumentParser:
         description="Detect expected RC03 AprilTags without camera calibration."
     )
     result.add_argument("--image", action="append", required=True, type=Path)
+    result.add_argument(
+        "--tag-map",
+        type=Path,
+        help=(
+            "Optional nominal tag map used only for an uncalibrated planar "
+            "layout-consistency diagnostic."
+        ),
+    )
     result.add_argument("--output", required=True, type=Path)
     return result
 
@@ -91,8 +99,86 @@ def main() -> int:
 
     expected = set(EXPECTED_IDS)
     union = set().union(*(set(item["detected_ids"]) for item in image_results))
+    layout_consistency: dict[str, Any] | None = None
+    if args.tag_map is not None:
+        tag_map_path = args.tag_map.resolve(strict=True)
+        tag_map = json.loads(tag_map_path.read_text(encoding="utf-8"))
+        mapped = {
+            int(item["id"]): {
+                "name": name,
+                "role": item["role"],
+                "xy_mm": [float(value) for value in item["nominal_detection_center_xy_mm"]],
+            }
+            for name, item in tag_map["tags"].items()
+        }
+        world_ids = sorted(tag_id for tag_id, item in mapped.items() if item["role"] == "world")
+        if len(world_ids) != 4:
+            raise SystemExit(f"Expected four world tags, found {world_ids}")
+        layout_images: list[dict[str, Any]] = []
+        for image_result in image_results:
+            detections_by_id = {
+                int(item["id"]): item for item in image_result["detections"]
+            }
+            if not set(world_ids).issubset(detections_by_id):
+                layout_images.append(
+                    {
+                        "file_name": image_result["file_name"],
+                        "status": "NOT_COMPUTED_MISSING_WORLD_TAG",
+                        "missing_world_ids": sorted(set(world_ids) - set(detections_by_id)),
+                    }
+                )
+                continue
+            board_points = np.asarray([mapped[tag_id]["xy_mm"] for tag_id in world_ids], dtype=np.float32)
+            image_points = np.asarray(
+                [detections_by_id[tag_id]["center_px"] for tag_id in world_ids],
+                dtype=np.float32,
+            )
+            board_to_image = cv2.getPerspectiveTransform(board_points, image_points)
+            image_to_board = np.linalg.inv(board_to_image)
+            checks: list[dict[str, Any]] = []
+            for tag_id, mapped_item in sorted(mapped.items()):
+                if mapped_item["role"] == "world" or tag_id not in detections_by_id:
+                    continue
+                center = np.asarray([*detections_by_id[tag_id]["center_px"], 1.0])
+                estimate_h = image_to_board @ center
+                estimate = estimate_h[:2] / estimate_h[2]
+                nominal = np.asarray(mapped_item["xy_mm"])
+                delta = estimate - nominal
+                checks.append(
+                    {
+                        "name": mapped_item["name"],
+                        "id": tag_id,
+                        "estimated_board_xy_mm": [round(float(value), 3) for value in estimate],
+                        "nominal_board_xy_mm": mapped_item["xy_mm"],
+                        "delta_xy_mm": [round(float(value), 3) for value in delta],
+                        "planar_error_mm": round(float(np.linalg.norm(delta)), 3),
+                    }
+                )
+            layout_images.append(
+                {
+                    "file_name": image_result["file_name"],
+                    "status": "COMPUTED_EXPLORATORY",
+                    "world_ids": world_ids,
+                    "station_checks": checks,
+                    "max_station_planar_error_mm": (
+                        max(item["planar_error_mm"] for item in checks) if checks else None
+                    ),
+                }
+            )
+        layout_consistency = {
+            "scope": "uncalibrated_nominal_map_consistency_only",
+            "method": "four_world_tag_center_homography",
+            "tag_map_path": str(args.tag_map),
+            "tag_map_sha256": sha256_file(tag_map_path),
+            "tag_map_coordinate_source": tag_map.get("coordinate_source"),
+            "images": layout_images,
+            "qualification": False,
+        }
+    images_with_all_expected_ids = sum(
+        set(item["detected_ids"]) == expected for item in image_results
+    )
     report = {
-        "schema": "rocell.uncalibrated_apriltag_visibility_probe.v1",
+        "schema": "rocell.uncalibrated_apriltag_visibility_probe.v2",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "scope": "exploratory_phone_photographs_only",
         "dictionary": "DICT_APRILTAG_36h11",
@@ -101,15 +187,14 @@ def main() -> int:
         "images": image_results,
         "summary": {
             "image_count": len(image_results),
-            "images_with_all_expected_ids": sum(
-                set(item["detected_ids"]) == expected for item in image_results
-            ),
+            "images_with_all_expected_ids": images_with_all_expected_ids,
             "union_detected_ids": sorted(union),
             "union_contains_all_expected_ids": union == expected,
             "per_id_detection_counts": {
                 str(tag_id): counts[tag_id] for tag_id in EXPECTED_IDS
             },
         },
+        "layout_consistency": layout_consistency,
         "qualification": {
             "camera_intrinsics_available": False,
             "installed_tag_geometry_measured": False,
@@ -124,9 +209,14 @@ def main() -> int:
             "Phone camera identity, intrinsics, distortion, focus, exposure, and pose are unbound.",
             "Image-space tag visibility does not establish metric localization or uncertainty.",
             "The original photographs remain external and are bound here only by SHA-256.",
+            "Planar consistency uses nominal outer-tag centers and cannot replace independent measurement.",
         ],
         "next_dependency": (
-            "Capture one stationary overview with IDs 0-5 simultaneously visible, then "
+            "Independently measure and bind every installed tag center before metric pose use; "
+            "then repeat visibility, calibration, pose, noise, and drift checks with the "
+            "tripod-mounted B0477."
+            if layout_consistency is not None and images_with_all_expected_ids > 0
+            else "Capture one stationary overview with IDs 0-5 simultaneously visible, then "
             "repeat with the tripod-mounted B0477 and measured calibration/tag geometry."
         ),
     }

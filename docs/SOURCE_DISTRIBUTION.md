@@ -562,3 +562,11 @@ be reproduced explicitly. This raises the exact tracked-file count and governed
 ceiling to 6,426. No generated result, CAD, render, model, dataset, or binary
 evidence enters the source archive; every byte, blob, duplicate, and reduction
 limit remains unchanged.
+
+The exploratory physical-tag increment adds three reviewable text artifacts:
+one reusable uncalibrated AprilTag probe and two compact JSON reports covering
+the initial and successor phone-photo observations. This raises the exact
+tracked-file count and governed ceiling to 6,429. The original photographs,
+camera environments, calibration captures, and physical qualification evidence
+remain external and hash-bound; every byte, blob, duplicate, and reduction
+limit remains unchanged.
