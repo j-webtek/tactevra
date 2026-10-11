@@ -75,6 +75,15 @@ def test_default_policy_binds_every_source_and_never_confers_authority() -> None
     assert SHA256.fullmatch(binding.source_binding_sha256)
 
 
+def test_explicit_historical_v1_policy_remains_readable() -> None:
+    policy = load_physical_onboarding_policy(
+        WORKSPACE, WORKSPACE / "software/config/physical_onboarding_policy.json"
+    )
+
+    assert policy.policy_id == "ROCELL-PHYSICAL-ONBOARDING-001"
+    assert policy.policy_relative_path == "software/config/physical_onboarding_policy.json"
+
+
 def test_default_policy_binds_the_executable_and_operator_procedure() -> None:
     """An old session must become stale when its code or runbook changes."""
 
@@ -88,12 +97,12 @@ def test_default_policy_binds_the_executable_and_operator_procedure() -> None:
         "active-project/RoCell_v0_3/config/robot_reach_screening.json",
         "start-rocell-onboarding.ps1",
         "software/pyproject.toml",
-        "software/config/physical_onboarding_foundation.json",
+        "software/config/physical_onboarding_foundation_v2.json",
         "software/config/authority_effect_policy.json",
         "software/config/physical_onboarding_stage_catalog.json",
         "software/config/configuration_epochs.json",
         "software/config/physical_onboarding_hazards.json",
-        "software/config/workcell_icd.json",
+        "software/config/workcell_icd_v3.json",
         "software/config/accuracy_budget_policy.json",
         "software/config/arm_frame_contract.json",
         "software/docs/FIRST_POWER_ON_ONBOARDING.md",

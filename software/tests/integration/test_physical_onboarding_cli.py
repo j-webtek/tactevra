@@ -19,10 +19,12 @@ REPOSITORY_ROOT = SOFTWARE_ROOT.parent
 
 def _copy_arrival_workspace(tmp_path: Path) -> Path:
     workspace = tmp_path / "arrival-workspace"
-    policy_source = REPOSITORY_ROOT / "software/config/physical_onboarding_policy.json"
+    policy_source = (
+        REPOSITORY_ROOT / "software/config/physical_onboarding_policy_v2.json"
+    )
     policy = json.loads(policy_source.read_text(encoding="utf-8"))
     controlled = (
-        "software/config/physical_onboarding_policy.json",
+        "software/config/physical_onboarding_policy_v2.json",
         *policy["controlled_sources"],
     )
     for relative in controlled:

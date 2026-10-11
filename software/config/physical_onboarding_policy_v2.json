@@ -1,0 +1,150 @@
+{
+  "arm_contract": {
+    "automatic_connection": false,
+    "automatic_initialization": false,
+    "automatic_retry": false,
+    "baudrate": 115200,
+    "controller": "ESP32",
+    "dtr": false,
+    "feedback_request": "T=105",
+    "feedback_response": "T=1051",
+    "model": "Waveshare RoArm-M3 Pro",
+    "power_application_is_possible_motion_event": true,
+    "rts": false,
+    "transport": "direct_host_usb_serial"
+  },
+  "authority": {
+    "contact_authority": false,
+    "live_motion_authority": false,
+    "physical_release_effect": "NONE",
+    "robot_power_authority": false
+  },
+  "automation": {
+    "allowed": [
+      "verify_controlled_source_integrity",
+      "inspect_host_dependency_metadata_without_importing_device_backends",
+      "validate_hardware_intake_copy_and_hash_evidence",
+      "enumerate_device_identity_without_opening_the_arm_port",
+      "validate_exact_camera_identity_and_native_mode_receipts",
+      "capture_camera_diagnostics_after_an_explicit_operator_gate",
+      "perform_one_feedback_only_exchange_after_all_build_and_operator_gates",
+      "append_immutable_evidence_and_derive_one_next_action"
+    ],
+    "forbidden": [
+      "automatically_apply_robot_power",
+      "automatically_select_an_ambiguous_camera_or_serial_device",
+      "fall_back_to_a_numeric_camera_index",
+      "automatically_reconnect_or_reopen_a_device_after_failure",
+      "automatically_initialize_home_or_park_the_arm",
+      "automatically_send_motion_or_gripper_commands",
+      "automatically_retry_a_serial_exchange_motion_or_contact",
+      "automatically_repeat_an_uncertain_physical_effect",
+      "grant_robot_power_motion_contact_or_physical_release_authority"
+    ],
+    "resume_replays_in_flight_actions": false
+  },
+  "camera_contract": {
+    "automatic_backend_fallback": false,
+    "expected_model": "Arducam B0477",
+    "expected_sensor": "Sony IMX283",
+    "height_px": 3648,
+    "host_bus": "USB_3_2_GEN_1",
+    "interface": "USB_UVC",
+    "maximum_fps": 9,
+    "mount": "rigid_static_overhead_eye_to_hand",
+    "persistent_identity_required": true,
+    "pixel_format": "YUY2",
+    "width_px": 5472
+  },
+  "controlled_environment": {
+    "bootstrap_script": "setup-rocell.ps1",
+    "linux_venv_python": ".venv/bin/python",
+    "require_workspace_venv_for_device_access": true,
+    "windows_venv_python": ".venv/Scripts/python.exe",
+    "workspace_launcher": "rocell.ps1"
+  },
+  "controlled_sources": [
+    "rocell.ps1",
+    "setup-rocell.ps1",
+    "start-rocell-onboarding.ps1",
+    "software/pyproject.toml",
+    "software/config/system_manifest.json",
+    "software/config/runtime.json",
+    "software/config/physical_onboarding_foundation_v2.json",
+    "software/config/authority_effect_policy.json",
+    "software/config/physical_onboarding_stage_catalog.json",
+    "software/config/configuration_epochs.json",
+    "software/config/physical_onboarding_hazards.json",
+    "software/config/workcell_icd_v3.json",
+    "software/config/accuracy_budget_policy.json",
+    "software/config/arm_frame_contract.json",
+    "active-project/RoCell_v0_3/config/workcell_layout.json",
+    "active-project/RoCell_v0_3/config/robot_reach_screening.json",
+    "software/config/camera_architecture_plan_v2.json",
+    "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+    "software/config/arm_connection.json",
+    "software/docs/FIRST_POWER_ON_ONBOARDING.md",
+    "software/docs/PHYSICAL_ONBOARDING_AUTOMATION.md",
+    "software/docs/B0477_CAMERA_INTEGRATION.md",
+    "hardware/static_overhead_camera/README.md",
+    "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+    "hardware/static_overhead_camera/hardware_intake_template.csv"
+  ],
+  "controlled_source_roots": [
+    "software/src/rocell"
+  ],
+  "limits": {
+    "maximum_evidence_bytes": 33554432,
+    "maximum_evidence_items": 512,
+    "maximum_journal_events": 512,
+    "maximum_total_evidence_bytes": 536870912
+  },
+  "policy_id": "ROCELL-PHYSICAL-ONBOARDING-TRIPOD-002",
+  "schema": "rocell.physical_onboarding_policy.v2",
+  "session_root": "software/runs/physical-onboarding",
+  "workflow": {
+    "human_review_required_stages": [
+      "camera_receipt",
+      "camera_identity",
+      "camera_mode_controls",
+      "camera_frame_freshness",
+      "optics_intrinsics",
+      "static_registration",
+      "arm_identity",
+      "power_safety",
+      "power_on_observation",
+      "feedback_only_connection",
+      "reference_frame_calibration",
+      "noncontact_acceptance",
+      "physical_handoff"
+    ],
+    "ordered_stages": [
+      "workspace_sources",
+      "static_camera_contract",
+      "camera_receipt",
+      "camera_identity",
+      "camera_mode_controls",
+      "camera_frame_freshness",
+      "optics_intrinsics",
+      "static_registration",
+      "arm_identity",
+      "power_safety",
+      "power_on_observation",
+      "feedback_only_connection",
+      "reference_frame_calibration",
+      "noncontact_acceptance",
+      "physical_handoff"
+    ],
+    "possible_device_side_effect_stages": [
+      "camera_mode_controls",
+      "camera_frame_freshness",
+      "optics_intrinsics",
+      "static_registration",
+      "power_safety",
+      "power_on_observation",
+      "feedback_only_connection",
+      "reference_frame_calibration",
+      "noncontact_acceptance"
+    ]
+  }
+}

@@ -23,8 +23,9 @@ from typing import Any, Mapping, Sequence
 
 
 WORKCELL_INTERFACE_CONTRACT_SCHEMA_V1 = "rocell.workcell_interface_contract.v1"
-WORKCELL_INTERFACE_CONTRACT_SCHEMA = "rocell.workcell_interface_contract.v2"
-DEFAULT_WORKCELL_INTERFACE_CONTRACT = Path("software/config/workcell_icd_v2.json")
+WORKCELL_INTERFACE_CONTRACT_SCHEMA_V2 = "rocell.workcell_interface_contract.v2"
+WORKCELL_INTERFACE_CONTRACT_SCHEMA = "rocell.workcell_interface_contract.v3"
+DEFAULT_WORKCELL_INTERFACE_CONTRACT = Path("software/config/workcell_icd_v3.json")
 MAX_WORKCELL_INTERFACE_CONTRACT_BYTES = 64 * 1024
 MAX_WORKCELL_INTERFACE_SOURCE_BYTES = 2 * 1024 * 1024
 
@@ -105,6 +106,20 @@ _EXPECTED_SOURCE_BINDINGS_V2: Mapping[str, tuple[str, str]] = MappingProxyType(
             "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
             "3f132aee15b5a3b5c65e1c6dfc04523cf5ded61939088bc34e0ddcee9e28fbe9",
         ),
+    }
+)
+
+_EXPECTED_SOURCE_BINDINGS_V3: Mapping[str, tuple[str, str]] = MappingProxyType(
+    {
+        key: (
+            (
+                "software/config/physical_onboarding_policy_v2.json",
+                "a331fa0baae6051c23616b9aec02787310d3a1818fc3b28dc4fe796135246c73",
+            )
+            if key == "physical_onboarding_policy"
+            else value
+        )
+        for key, value in _EXPECTED_SOURCE_BINDINGS_V2.items()
     }
 )
 
@@ -666,15 +681,24 @@ def load_workcell_interface_contract(
     elif (
         type(schema) is str
         and type(schema_version) is int
-        and (schema, schema_version) == (WORKCELL_INTERFACE_CONTRACT_SCHEMA, 2)
+        and (schema, schema_version) == (WORKCELL_INTERFACE_CONTRACT_SCHEMA_V2, 2)
     ):
         contract_id = "ROCELL-WORKCELL-ICD-TRIPOD-002"
         expected_bindings = _EXPECTED_SOURCE_BINDINGS_V2
         expected_mechanical = _EXPECTED_MECHANICAL_INTERFACE_V2
         expected_uvc = _EXPECTED_UVC_INTERFACE_V2
+    elif (
+        type(schema) is str
+        and type(schema_version) is int
+        and (schema, schema_version) == (WORKCELL_INTERFACE_CONTRACT_SCHEMA, 3)
+    ):
+        contract_id = "ROCELL-WORKCELL-ICD-TRIPOD-003"
+        expected_bindings = _EXPECTED_SOURCE_BINDINGS_V3
+        expected_mechanical = _EXPECTED_MECHANICAL_INTERFACE_V2
+        expected_uvc = _EXPECTED_UVC_INTERFACE_V2
     else:
         raise WorkcellInterfaceContractError(
-            "schema and schema_version must identify workcell ICD v1 or v2"
+            "schema and schema_version must identify workcell ICD v1, v2, or v3"
         )
     _validate_exact(document["contract_id"], contract_id, "contract_id")
     _validate_exact(document["status"], "ADDITIVE_ZERO_AUTHORITY", "status")
@@ -777,6 +801,7 @@ __all__ = [
     "MAX_WORKCELL_INTERFACE_SOURCE_BYTES",
     "WORKCELL_INTERFACE_CONTRACT_SCHEMA",
     "WORKCELL_INTERFACE_CONTRACT_SCHEMA_V1",
+    "WORKCELL_INTERFACE_CONTRACT_SCHEMA_V2",
     "WorkcellInterfaceContract",
     "WorkcellInterfaceContractError",
     "WorkcellProviderRole",

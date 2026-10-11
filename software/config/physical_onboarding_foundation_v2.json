@@ -1,0 +1,223 @@
+{
+  "schema": "rocell.physical_onboarding_foundation.v2",
+  "foundation_id": "ROCELL-PHYSICAL-ONBOARDING-FOUNDATION-TRIPOD-002",
+  "revision": 2,
+  "revision_date": "2026-10-11",
+  "status": "TRIPOD_CONTRACT_MIGRATED_ZERO_AUTHORITY",
+  "runtime_activation": false,
+  "authority": {
+    "planning_authority": true,
+    "simulation_authority": true,
+    "device_io_authorized": false,
+    "robot_power_authorized": false,
+    "motion_authorized": false,
+    "descent_authorized": false,
+    "contact_authorized": false,
+    "calibration_promotion_authorized": false,
+    "build_promotion_authorized": false,
+    "physical_release_effect": "NONE"
+  },
+  "contracts": [
+    {
+      "id": "ROCELL-AUTHORITY-EFFECT-001",
+      "path": "software/config/authority_effect_policy.json",
+      "sha256": "b5c17346ca6c7b68642f68d8fd3d056198eadb4e685624967d2fd709174246a4"
+    },
+    {
+      "id": "ROCELL-PHYSICAL-ONBOARDING-STAGES-001",
+      "path": "software/config/physical_onboarding_stage_catalog.json",
+      "sha256": "5cfd61200815afcf1c3568e9eb312d8d2ae9176a85d446930b29322a962ddd3a"
+    },
+    {
+      "id": "ROCELL-CONFIGURATION-EPOCHS-001",
+      "path": "software/config/configuration_epochs.json",
+      "sha256": "5e0af455425feae892791186c259cff0f124dad3259a37b4acd09598b71eefc7"
+    },
+    {
+      "id": "ROCELL-PHYSICAL-ONBOARDING-HAZARDS-001",
+      "path": "software/config/physical_onboarding_hazards.json",
+      "sha256": "31f536dafc7a6dea8f346de5b1354db38aaa872c1fe4bea9fe4ffd41676a8f86"
+    },
+    {
+      "id": "ROCELL-WORKCELL-ICD-TRIPOD-003",
+      "path": "software/config/workcell_icd_v3.json",
+      "sha256": "abc0a541fc89cfd309ab295911d14b4248ac480ce82f323e47a73f6d195d13ca"
+    },
+    {
+      "id": "ROCELL-TARGET-ACCURACY-BUDGET-001",
+      "path": "software/config/accuracy_budget_policy.json",
+      "sha256": "43636aede7a156af04c04c155e1af6b2f33ea25618867781864e5c1428ad3ddc"
+    }
+  ],
+  "concurrency_and_durability": {
+    "lease_acquisition_order": [
+      "CELL",
+      "SESSION",
+      "CAMERA",
+      "ARM_CONTROLLER"
+    ],
+    "one_mutable_physical_session_per_cell": true,
+    "pid_only_stale_lock_break_allowed": false,
+    "device_identity_recheck_after_lock": true,
+    "attempt_intent_durable_before_external_effect": true,
+    "camera_open_is_first_possible_effect": true,
+    "serial_open_is_first_possible_effect": true,
+    "manual_energization_instruction_requires_armed_attempt": true,
+    "every_actuator_off_to_on_requires_unique_envelope": true,
+    "stage_11_and_stage_12_envelopes_must_differ": true,
+    "emergency_deenergization_requires_software_permit": false,
+    "automatic_attempt_replay_allowed": false,
+    "windows_effectful_durability_state": "UNQUALIFIED_BLOCKING",
+    "windows_qualification_requires": [
+      "LOCKFILEEX_EXCLUSIVE_LEASE",
+      "WRITE_THROUGH_FILE_OPEN",
+      "FLUSH_FILE_BUFFERS",
+      "ATOMIC_REPLACE",
+      "DIRECTORY_ENTRY_DURABILITY_TEST"
+    ],
+    "effectful_action_allowed_when_durability_unqualified": false,
+    "torn_tail_policy": "READ_ONLY_RECONCILIATION_NO_REPLAY"
+  },
+  "evidence_and_datasets": {
+    "native_frame_width_px": 5472,
+    "native_frame_height_px": 3648,
+    "native_pixel_format": "YUY2",
+    "native_aspect": "3:2",
+    "native_pixel_count": 19961856,
+    "legacy_detector_maximum_image_pixels": 12000000,
+    "implicit_detector_resize_allowed": false,
+    "detector_space_policy": "EXPLICIT_NATIVE_OR_CALIBRATED_WORKING_SPACE_REQUIRED",
+    "minimum_packed_native_frame_bytes": 39923712,
+    "thirty_two_minimum_native_frames_bytes": 1277558784,
+    "legacy_single_item_limit_bytes": 33554432,
+    "legacy_single_item_limit_is_sufficient": false,
+    "storage_format": "CHUNKED_CONTENT_ADDRESSED_MANIFEST_LAST",
+    "manifest_core_digest_excludes_own_digest_field": true,
+    "dataset_types": [
+      "NATIVE_CAPTURE_DATASET",
+      "CALIBRATION_IMAGE_DATASET"
+    ],
+    "calibration_partitions": [
+      "DEVELOPMENT",
+      "MODEL_SELECTION",
+      "UNTOUCHED_ACCEPTANCE"
+    ],
+    "partition_assignment_is_immutable_before_capture": true,
+    "partition_overlap_allowed": false,
+    "untouched_acceptance_may_drive_model_selection": false,
+    "status_verification_scope": "JOURNAL_HIGH_WATER_AND_MANIFESTS_ONLY",
+    "full_verification_required_before": [
+      "MUTATION",
+      "REVIEW",
+      "PROMOTION",
+      "EXPORT"
+    ],
+    "identity_and_mode_authority_backend": "WINDOWS_UVC_NATIVE_ADAPTER",
+    "decode_backend_is_identity_or_mode_authority": false,
+    "raw_evidence_preview_requires_safe_reencode": true
+  },
+  "calibration_assurance": {
+    "freshness_requires_visible_time_varying_stimulus": true,
+    "distinct_frame_hashes_alone_prove_freshness": false,
+    "partition_policy_source": "evidence_and_datasets.calibration_partitions",
+    "development_data_may_be_reused_for_fit": true,
+    "model_selection_data_may_be_used_for_final_acceptance": false,
+    "untouched_acceptance_data_may_be_used_for_fit_or_selection": false,
+    "disturbed_final_calibration_must_be_reacquired": true,
+    "precalibration_motion_bootstrap": {
+      "required_before_repeated_uncalibrated_motion": true,
+      "external_runner_only": true,
+      "empty_cell_required": true,
+      "device_articles_removed": true,
+      "contact_allowed": false,
+      "conservative_surveyed_envelope_required": true,
+      "reduced_limits_required": true,
+      "independent_observer_required": true,
+      "fresh_permit_per_effect_required": true,
+      "actual_stop_gravity_and_power_loss_checks_required": true,
+      "bootstrap_artifacts_are_final_calibration": false
+    }
+  },
+  "commissioning_bundle": {
+    "schema_target": "rocell.installed_workcell_candidate.v1",
+    "phase_order": [
+      "BOOTSTRAP",
+      "REFERENCE_CHARACTERIZATION",
+      "NONCONTACT_QUALIFICATION",
+      "UNTOUCHED_FINAL_ACCEPTANCE"
+    ],
+    "phase_predecessor_hash_required": true,
+    "required_components": [
+      "controlled_source_binding",
+      "provider_implementation_hashes",
+      "runner_implementation_hashes",
+      "camera_receipt",
+      "passive_workcell_receipt",
+      "camera_identity",
+      "camera_mode_controls",
+      "camera_frame_freshness",
+      "installed_camera_intrinsics",
+      "measured_tag_map",
+      "static_camera_to_board_transform",
+      "installed_optical_stability",
+      "passive_visibility_atlas",
+      "dataset_partition_manifests",
+      "exact_arm_physical_identity",
+      "power_safety_review",
+      "first_power_observation",
+      "startup_sweep_evidence",
+      "feedback_only_exchange",
+      "qualified_controller_identity",
+      "bootstrap_phase_receipt",
+      "reference_characterization_phase_receipt",
+      "arm_to_board_transform",
+      "controller_model_correlation",
+      "free_state_tool_tcp",
+      "keyboard_target_map",
+      "phone_target_map",
+      "outcome_observer_candidates",
+      "noncontact_qualification_phase_receipt",
+      "untouched_final_acceptance_phase_receipt",
+      "noncontact_acceptance_report",
+      "arm_induced_visibility_atlas",
+      "collision_configuration",
+      "accuracy_budget_assessment",
+      "configuration_epoch_vector",
+      "global_attempt_ledger_head",
+      "global_quarantine_ledger_head",
+      "reviewer_decisions",
+      "open_blockers"
+    ],
+    "contract_hashes_and_epoch_vector_required": true,
+    "missing_stale_or_unbounded_component_policy": "BLOCK",
+    "physical_runtime_nominal_fallback_allowed": false,
+    "stage_15_effect": "DIAGNOSTIC_CANDIDATE_ONLY",
+    "separate_reviewed_promotion_required": true,
+    "keyboard_and_phone_contact_release_are_independent": true
+  },
+  "threat_model": {
+    "in_scope": [
+      "ACCIDENTAL_REPLAY",
+      "STALE_OR_TAMPERED_EVIDENCE",
+      "CONCURRENT_LOCAL_CLIENTS",
+      "MALFORMED_INPUT",
+      "CROSS_ORIGIN_BROWSER_REQUESTS",
+      "PROCESS_CRASH"
+    ],
+    "trusted_local_administrator_out_of_scope": true,
+    "cryptographic_physical_provenance_claim_allowed": false,
+    "zero_authority_validation_is_physical_qualification": false
+  },
+  "open_implementation_gates": [
+    "V2_SESSION_SCHEMA_AND_V1_READ_ONLY_LOADER",
+    "ATTEMPT_LEDGER_AND_REVIEW_PENDING_STATE",
+    "CELL_DEVICE_LEASES_AND_GLOBAL_QUARANTINE",
+    "WINDOWS_DURABILITY_AND_TORN_TAIL_RECOVERY",
+    "MANUAL_ENERGIZATION_PERMIT_AND_ROLE_ENFORCEMENT",
+    "BOUNDED_PROVIDER_CAMPAIGNS_AND_PROCESS_CONTAINMENT",
+    "CHUNKED_NATIVE_DATASET_AND_VERIFICATION_TIERS",
+    "PRECALIBRATION_MOTION_BOOTSTRAP_CONTRACT",
+    "COMMISSIONING_BUNDLE_AND_NO_NOMINAL_FALLBACK",
+    "KEYBOARD_PHONE_ACCURACY_BUDGET_REVIEW"
+  ]
+}

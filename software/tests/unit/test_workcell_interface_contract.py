@@ -18,9 +18,10 @@ from rocell.workcell.interface_contract import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
-CONTRACT_RELATIVE_PATH = Path("software/config/workcell_icd_v2.json")
+CONTRACT_RELATIVE_PATH = Path("software/config/workcell_icd_v3.json")
 CONTRACT_PATH = WORKSPACE / CONTRACT_RELATIVE_PATH
 HISTORICAL_CONTRACT_PATH = WORKSPACE / "software/config/workcell_icd.json"
+HISTORICAL_V2_CONTRACT_PATH = WORKSPACE / "software/config/workcell_icd_v2.json"
 SOURCE_RELATIVE_PATHS = (
     Path("active-project/RoCell_v0_3/config/workcell_layout.json"),
     Path("software/config/arm_frame_contract.json"),
@@ -30,7 +31,7 @@ SOURCE_RELATIVE_PATHS = (
     Path("hardware/static_overhead_camera/config/commercial_tripod_candidate.json"),
     Path("hardware/static_overhead_camera/hardware_intake_template.csv"),
     Path("software/config/configuration_epochs.json"),
-    Path("software/config/physical_onboarding_policy.json"),
+    Path("software/config/physical_onboarding_policy_v2.json"),
 )
 
 
@@ -70,7 +71,7 @@ def test_loads_read_only_source_bound_zero_authority_contract() -> None:
     assert CONTRACT_PATH.read_bytes() == before
     assert contract.path == CONTRACT_PATH.resolve()
     assert contract.content_sha256 == hashlib.sha256(before).hexdigest()
-    assert contract.contract_id == "ROCELL-WORKCELL-ICD-TRIPOD-002"
+    assert contract.contract_id == "ROCELL-WORKCELL-ICD-TRIPOD-003"
     assert contract.status == "ADDITIVE_ZERO_AUTHORITY"
     assert contract.zero_physical_authority
     assert contract.interface_description_authority
@@ -184,6 +185,15 @@ def test_explicit_historical_v1_icd_remains_readable() -> None:
 
     assert HISTORICAL_CONTRACT_PATH.read_bytes() == before
     assert contract.contract_id == "ROCELL-WORKCELL-ICD-001"
+
+
+def test_explicit_historical_v2_icd_remains_readable() -> None:
+    before = HISTORICAL_V2_CONTRACT_PATH.read_bytes()
+
+    contract = load_workcell_interface_contract(WORKSPACE, HISTORICAL_V2_CONTRACT_PATH)
+
+    assert HISTORICAL_V2_CONTRACT_PATH.read_bytes() == before
+    assert contract.contract_id == "ROCELL-WORKCELL-ICD-TRIPOD-002"
     assert contract.content_sha256 == hashlib.sha256(before).hexdigest()
     assert contract.zero_physical_authority
 
@@ -215,8 +225,8 @@ def test_rejects_unknown_nested_field(tmp_path: Path) -> None:
 def test_rejects_duplicate_json_key(tmp_path: Path) -> None:
     path = _sandbox(tmp_path)
     text = path.read_text(encoding="utf-8").replace(
-        '"schema_version": 2,',
-        '"schema_version": 2,\n  "schema_version": 2,',
+        '"schema_version": 3,',
+        '"schema_version": 3,\n  "schema_version": 3,',
         1,
     )
     path.write_text(text, encoding="utf-8")
@@ -229,7 +239,7 @@ def test_rejects_duplicate_json_key(tmp_path: Path) -> None:
 def test_rejects_nonfinite_json_number(tmp_path: Path, constant: str) -> None:
     path = _sandbox(tmp_path)
     text = path.read_text(encoding="utf-8").replace(
-        '"schema_version": 2', f'"schema_version": {constant}', 1
+        '"schema_version": 3', f'"schema_version": {constant}', 1
     )
     path.write_text(text, encoding="utf-8")
 
@@ -239,7 +249,7 @@ def test_rejects_nonfinite_json_number(tmp_path: Path, constant: str) -> None:
 
 def test_rejects_bool_integer_alias_or_finite_float(tmp_path: Path) -> None:
     path = _mutated_contract(
-        tmp_path, lambda document: document.update({"schema_version": 2.0})
+        tmp_path, lambda document: document.update({"schema_version": 3.0})
     )
     with pytest.raises(WorkcellInterfaceContractError, match="schema_version"):
         load_workcell_interface_contract(tmp_path, path)
