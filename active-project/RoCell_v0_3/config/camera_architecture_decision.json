@@ -1,36 +1,43 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "design_revision": "RC03-INT-R1",
-  "status": "ENGINEERING_ALIGNMENT_HOLD",
-  "user_intent": "The operational camera will be mounted on the robot arm per its intended specification.",
-  "user_intent_recorded_at": "2026-09-01",
-  "exact_arm_camera_specification_reference": null,
-  "current_rc03_baseline": {
-    "architecture": "independent fixed overhead eye-to-hand camera fallback retained but not selected",
-    "route_id": "camera_mast_optional",
-    "route_selected": false,
-    "physical_qualification_state": "NOT_TESTED",
-    "note": "The mast route remains an unqualified fallback only and is intentionally not selected because the user-confirmed final camera architecture is arm-mounted."
+  "status": "STATIC_OVERHEAD_TRIPOD_SELECTED_UNQUALIFIED",
+  "decision": "Phase 1 uses the Arducam B0477 on an independent commercial floor tripod as the static overhead eye-to-hand primary camera.",
+  "decision_source": {
+    "path": "docs/TRIPOD_CAMERA_SUPPORT_MIGRATION_INVENTORY.md",
+    "support_candidate_path": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+    "installation_intake_path": "active-project/RoCell_v0_3/config/tripod_camera_installation_intake_v1.json"
   },
-  "fixed_camera_fallback_release": {
-    "authorized": false,
-    "authorization_reference": null,
-    "release_revision": null,
-    "note": "The independent fixed-camera mast, feet, and universal plate are fallback-only. Route selection is not authorization; all four fallback print jobs remain blocked until a controlled camera decision explicitly releases this branch."
+  "active_route": {
+    "route_id": "camera_overhead_primary",
+    "architecture": "static_overhead_eye_to_hand",
+    "support_type": "independent_commercial_floor_tripod",
+    "camera": "Arducam B0477 with nominal 16 mm lens; received-unit identity remains to be recorded",
+    "selected": true,
+    "qualified": false,
+    "physical_release_effect": "NONE"
   },
-  "conflict": "The user-confirmed arm-mounted intent conflicts with the currently controlled fixed-camera Step 13 workflow and system-level eye-to-hand assumptions. No exact arm-camera model, arm link/frame, mount drawing, or calibration contract was found in the current RC03 package.",
-  "required_before_geometry_or_instruction_release": [
-    "identify the exact camera manufacturer, model, lens, resolution, frame rate, serial interface, and mass",
-    "identify the exact robot link and coordinate frame carrying the camera",
-    "supply or measure the mount interface, fasteners, available envelope, center of mass, and cable exit",
-    "create controlled arm-mount CAD and collision geometry without inventing undocumented dimensions",
-    "include camera, mount, connector, and moving cable mass in the tool payload and reach analysis",
-    "define cable routing, strain relief, minimum relaxed bend, full-joint service loop, snag controls, and flex-life test",
-    "replace or formally supplement the fixed eye-to-hand calibration workflow with a validated eye-in-hand transform chain",
-    "define which board tags and tool/device features must be visible at each approach, hover, contact, and retreat pose",
-    "prove motion-dependent focus, exposure, blur, occlusion, calibration drift, and image timestamp synchronization",
-    "rerun IK, singularity, payload, collision, gravity-drop, and E-stop consequence analysis with the installed camera",
-    "revise Step 13, BOM, print jobs, assembly illustrations, software manifest, calibration schemas, acceptance gates, and checksums under formal change control"
+  "installation_state": {
+    "intake_status": "AWAITING_RECEIVED_HARDWARE_MEASUREMENTS",
+    "required_record": "config/tripod_camera_installation_intake_v1.json",
+    "motion_authorized": false,
+    "contact_authorized": false
+  },
+  "superseded_routes": [
+    {
+      "route_id": "camera_mast_optional",
+      "jobs": [
+        "03C3",
+        "06",
+        "07A",
+        "07B"
+      ],
+      "treatment": "SUPERSEDED_DO_NOT_PRINT"
+    },
+    {
+      "route_id": "arm_mounted_camera_phase_1",
+      "treatment": "HISTORICAL_UNSELECTED"
+    }
   ],
-  "release_rule": "Do not print an invented arm-camera adapter, install the camera on the arm, run camera-guided motion, or claim camera compatibility until the exact specification and all affected controlled artifacts are revised and validated."
+  "release_rule": "Selection is planning authority only. Installation, robot power, motion, and contact remain blocked until the received hardware, installed pose, stability, visibility, collision, and wrong-model fields are recorded and independently accepted."
 }

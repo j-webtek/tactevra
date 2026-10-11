@@ -248,8 +248,8 @@
     {
       "check_id": "camera_architecture_alignment",
       "status": "ENGINEERING_HOLD",
-      "finding": "User intent is an arm-mounted operational camera, while the current RC03 Step 13 and selected mast route are fixed eye-to-hand controls. Decision status is ENGINEERING_ALIGNMENT_HOLD; exact arm-camera specification reference is None.",
-      "required_action": "Control the exact arm-camera specification, carrier frame, mount, mass/COM, moving cable, eye-in-hand calibration, pose visibility/timing, payload, reach, and collisions; then revise every affected artifact before printing or installation."
+      "finding": "Phase 1 selects the Arducam B0477 on an independent commercial floor tripod as the static overhead eye-to-hand primary. Decision status is STATIC_OVERHEAD_TRIPOD_SELECTED_UNQUALIFIED; installation intake status is AWAITING_RECEIVED_HARDWARE_MEASUREMENTS. The legacy RC03 mast jobs are SUPERSEDED_DO_NOT_PRINT.",
+      "required_action": "Complete the hash-bound tripod receipt, mount-interface, support-geometry, installed-pose, stability, all-tag/crop visibility, collision, witness, and wrong-model records before installation or motion."
     },
     {
       "check_id": "named_board_interface_architecture",

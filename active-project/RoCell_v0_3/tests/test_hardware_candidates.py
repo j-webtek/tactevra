@@ -61,7 +61,9 @@ class HardwareCandidateRegistryTests(unittest.TestCase):
     def test_no_candidate_or_registry_status_is_pass_or_released(self) -> None:
         statuses = status_values(self.registry)
         self.assertTrue(statuses)
-        self.assertEqual(set(statuses), {"CANDIDATE_UNVERIFIED"})
+        self.assertEqual(
+            set(statuses), {"CANDIDATE_UNVERIFIED", "SELECTED_UNQUALIFIED"}
+        )
         for candidate in self.registry["candidates"]:
             self.assertEqual(candidate["status"], "CANDIDATE_UNVERIFIED")
             self.assertNotIn(candidate["status"], {"PASS", "RELEASED"})
@@ -183,17 +185,14 @@ class HardwareCandidateRegistryTests(unittest.TestCase):
             "DIGITALLY_CORRECTED_PHYSICAL_QUALIFICATION_REQUIRED",
         )
 
-    def test_camera_architecture_and_reach_stay_on_engineering_hold(self) -> None:
+    def test_tripod_camera_architecture_and_reach_stay_on_hold(self) -> None:
         camera = self.registry["camera_architecture_boundary"]
-        self.assertFalse(camera["exact_arm_camera_specification_present"])
-        self.assertEqual(camera["release_effect"], "ENGINEERING_ALIGNMENT_HOLD")
-        self.assertEqual(camera["current_fallback_route"], "camera_mast_optional")
-        self.assertFalse(camera["fallback_route_selected"])
-        for candidate_id in (
-            camera["fallback_candidate_ids"]
-            + camera["additional_fixed_support_evaluation_candidate_ids"]
-        ):
-            self.assertIn(candidate_id, self.candidates)
+        self.assertEqual(camera["status"], "SELECTED_UNQUALIFIED")
+        self.assertEqual(camera["primary_route"], "camera_overhead_primary")
+        self.assertEqual(camera["release_effect"], "PHYSICAL_QUALIFICATION_HOLD")
+        self.assertEqual(camera["legacy_mast_route"], "camera_mast_optional")
+        self.assertFalse(camera["legacy_mast_selected"])
+        self.assertEqual(camera["legacy_mast_treatment"], "SUPERSEDED_DO_NOT_PRINT")
 
         reach = self.registry["reach_screening"]
         self.assertFalse(reach["digitally_proven_reachable"])

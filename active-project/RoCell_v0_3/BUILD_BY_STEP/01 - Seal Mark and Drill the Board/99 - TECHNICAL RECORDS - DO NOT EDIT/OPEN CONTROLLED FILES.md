@@ -14,6 +14,7 @@ These are direct links to the single canonical files. They are intentionally not
 | reference_only | — | [PRINT_READINESS.json](<../../../PRINT_READINESS.json>) | machine-readable print readiness | `a8c75f05f727…` |
 | verify | — | [PRINT_READINESS.md](<../../../PRINT_READINESS.md>) | current print readiness | `5be5234644cb…` |
 | read | — | [README_FIRST.md](<../../../README_FIRST.md>) | release entry point | `6e3e5a4bf57b…` |
+| read | — | [TRIPOD_CAMERA_INSTALLATION.md](<../../../TRIPOD_CAMERA_INSTALLATION.md>) | tripod installation and qualification procedure | `4fbfbc71cfa1…` |
 | reference_only | — | [cad/step/board_610x457x18_RC03.step](<../../../cad/step/board_610x457x18_RC03.step>) | neutral board reference | `207554f3b727…` |
 | reference_only | 00B | [cad/step/cable_tie_saddle_fit_gauge.step](<../../../cad/step/cable_tie_saddle_fit_gauge.step>) | neutral CAD companion | `2561bed996ff…` |
 | reference_only | 00A | [cad/step/hardware_fit_gauge.step](<../../../cad/step/hardware_fit_gauge.step>) | neutral CAD companion | `5c703f405245…` |
@@ -26,12 +27,13 @@ These are direct links to the single canonical files. They are intentionally not
 | reference_only | 03A | [cad/step/phone_tcp_station.step](<../../../cad/step/phone_tcp_station.step>) | neutral CAD companion | `d44b5a93445d…` |
 | reference_only | 00B | [cad/step/phone_width_fit_test.step](<../../../cad/step/phone_width_fit_test.step>) | neutral CAD companion | `1859fd1974f1…` |
 | reference_only | 00A, 00B | [cad/step/station_locator_fit_gauge.step](<../../../cad/step/station_locator_fit_gauge.step>) | neutral CAD companion | `46a7ba4356c7…` |
-| reference_only | — | [config/assembly_steps.json](<../../../config/assembly_steps.json>) | canonical step-to-file relationship map | `af1920ac851d…` |
+| reference_only | — | [config/assembly_steps.json](<../../../config/assembly_steps.json>) | canonical step-to-file relationship map | `115805cdd45e…` |
 | edit_only_with_controlled_workflow | — | [config/job_build_record.json](<../../../config/job_build_record.json>) | canonical job lifecycle record | `8ffbb767c577…` |
 | edit_only_with_recording_script | — | [config/measurement_record.json](<../../../config/measurement_record.json>) | canonical measurement and gate record | `1fb400eae310…` |
 | reference_only | — | [config/parameters.json](<../../../config/parameters.json>) | canonical CAD parameter set | `769808d90946…` |
-| reference_only | — | [config/print_jobs.json](<../../../config/print_jobs.json>) | canonical print-job definitions | `429bca954219…` |
+| reference_only | — | [config/print_jobs.json](<../../../config/print_jobs.json>) | canonical print-job definitions | `ba82c6e18761…` |
 | reference_only | — | [config/print_profiles.json](<../../../config/print_profiles.json>) | canonical print-profile definitions | `5886a55b3fbd…` |
+| complete | — | [config/tripod_camera_installation_intake_v1.json](<../../../config/tripod_camera_installation_intake_v1.json>) | hash-bound tripod receipt, measurement, pose, stability, and qualification intake | `52ca6f331d2f…` |
 | reference_only | — | [config/workcell_layout.json](<../../../config/workcell_layout.json>) | generated geometry/layout source | `e84db9aa7b88…` |
 | reference_only | — | [drawings/board_610x457_drill_layout.dxf](<../../../drawings/board_610x457_drill_layout.dxf>) | fabrication reference | `abc0ae19ceb2…` |
 | reference_only | — | [drawings/board_610x457_drill_layout.svg](<../../../drawings/board_610x457_drill_layout.svg>) | fabrication reference | `c0e6f3e6273f…` |
@@ -64,7 +66,7 @@ These are direct links to the single canonical files. They are intentionally not
 | consume_accepted_output | 03A | [print_plates_3mf/03A_ABS_phone_TCP_station.print.json](<../../../print_plates_3mf/03A_ABS_phone_TCP_station.print.json>) | controlled plate/profile/hash sidecar | `a0933605a7fb…` |
 | reference_only | — | [scripts/build_illustrated_assembly_guide.py](<../../../scripts/build_illustrated_assembly_guide.py>) | illustrated-guide PDF generator | `6badf0daa975…` |
 | reference_only | — | [scripts/build_manual_pdf.py](<../../../scripts/build_manual_pdf.py>) | controlled detailed-manual PDF renderer | `4baf08d28e35…` |
-| run_from_project_root | — | [scripts/build_step_packages.py](<../../../scripts/build_step_packages.py>) | step-package generator and validator | `38b9b55bfaad…` |
+| run_from_project_root | — | [scripts/build_step_packages.py](<../../../scripts/build_step_packages.py>) | step-package generator and validator | `1b3328e85ad2…` |
 | run_from_project_root | — | [scripts/generate_build_tracker.py](<../../../scripts/generate_build_tracker.py>) | job-lifecycle validator and tracker generator | `6090b47ff751…` |
 | reference_only | — | [scripts/generate_job_cards.py](<../../../scripts/generate_job_cards.py>) | controlled print-traveler instruction generator | `520cf48d2263…` |
 | run_before_each_step | — | [scripts/initialize_step_evidence.py](<../../../scripts/initialize_step_evidence.py>) | non-overwriting active-build evidence initializer | `0a940eabc2ab…` |
@@ -77,7 +79,8 @@ These are direct links to the single canonical files. They are intentionally not
 | run_for_standalone_export | — | [scripts/stage_hash_bound_artifacts.py](<../../../scripts/stage_hash_bound_artifacts.py>) | hash-bound canonical artifact staging and offline verification | `a18eb88d17b2…` |
 | reference_only | — | [scripts/step_evidence_common.py](<../../../scripts/step_evidence_common.py>) | shared step-evidence containment and schema controls | `93fb598ee2de…` |
 | run_from_project_root | — | [scripts/validate_print_readiness.py](<../../../scripts/validate_print_readiness.py>) | typed gate and print-readiness validator | `7dc6159c1582…` |
-| run_from_project_root | — | [scripts/validate_release_package.py](<../../../scripts/validate_release_package.py>) | whole-package release validator | `9b954d47726e…` |
+| run_from_project_root | — | [scripts/validate_release_package.py](<../../../scripts/validate_release_package.py>) | whole-package release validator | `0fc8994764e3…` |
+| run_from_project_root | — | [scripts/validate_tripod_camera_intake.py](<../../../scripts/validate_tripod_camera_intake.py>) | tripod intake hash and zero-authority validator | `c301c91f876a…` |
 | read | — | [slicer_profiles/QIDI_PLUS4/README.md](<../../../slicer_profiles/QIDI_PLUS4/README.md>) | QIDI process-preset import guide | `641631027fd7…` |
 | consume_accepted_output | 00B, 03A | [slicer_profiles/QIDI_PLUS4/abs_rapido_cradle_0p4.process.json](<../../../slicer_profiles/QIDI_PLUS4/abs_rapido_cradle_0p4.process.json>) | importable QIDI Studio process preset | `9276ce298325…` |
 | consume_accepted_output | 00A, 01, 02 | [slicer_profiles/QIDI_PLUS4/abs_rapido_tray_structural_0p4.process.json](<../../../slicer_profiles/QIDI_PLUS4/abs_rapido_tray_structural_0p4.process.json>) | importable QIDI Studio process preset | `c89e92d6af33…` |

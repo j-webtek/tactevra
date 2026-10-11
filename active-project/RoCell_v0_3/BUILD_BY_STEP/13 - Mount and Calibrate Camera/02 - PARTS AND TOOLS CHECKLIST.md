@@ -8,29 +8,30 @@ Each configured physical-input requirement and each distinct structured register
 
 | Quantity | Required input | Required condition |
 | --- | --- | --- |
-| As specified | A controlled camera-architecture revision that closes config/camera_architecture_decision.json; the current ENGINEERING_ALIGNMENT_HOLD prohibits applying the fixed-camera procedure to an arm-mounted camera | Present, identified, and accepted before work |
-| As specified | Actual measured USB camera and the formally released route-specific mount; the accepted Job 03C3 plate applies only to the fixed-mast fallback | Present, identified, and accepted before work |
-| As specified | Selected, measured camera support; the independent mast/stand is fallback-only and does not implement the intended arm mount | Present, identified, and accepted before work |
-| As specified | ChArUco calibration print and definition file | Present, identified, and accepted before work |
+| As specified | Completed config/tripod_camera_installation_intake_v1.json bound to the selected commercial tripod candidate, B0477 profile, and current workcell layout | Present, identified, and accepted before work |
+| As specified | Received Arducam B0477, nominal 16 mm lens, and all delivered camera adapters identified by label and photos | Present, identified, and accepted before work |
+| As specified | Received ASIN B0CSYB4YQ2 commercial floor tripod and every included head or adapter part identified by label and photos | Present, identified, and accepted before work |
+| As specified | Measured non-bottoming camera fastener stack, positive anti-rotation method, and independent safety tether | Present, identified, and accepted before work |
 | As specified | Step 12 measured-installation fiducials/apriltag_map.json plus its recorded SHA-256; coordinate_source must be measured_installation and measurement status PASS | Present, identified, and accepted before work |
-| As specified | USB cable with a service loop and routing clear of arm motion | Present, identified, and accepted before work |
-| As specified | Python 3.10 plus an isolated .venv-vision environment installed from requirements-vision.txt; do not use an unrelated global OpenCV installation | Present, identified, and accepted before work |
-| As specified | Steel rule for the ChArUco scale check, rigid camera-support adjustment tools, and camera-settings access | Present, identified, and accepted before work |
+| As specified | ChArUco calibration target matching the repository-authoritative B0477 commissioning contract | Present, identified, and accepted before work |
+| As specified | USB cable with measured strain relief and service loop clear of every approved swept volume | Present, identified, and accepted before work |
+| As specified | Python environment and B0477 commissioning tools named by the active software camera profile | Present, identified, and accepted before work |
+| As specified | Steel rule, calipers, height measurement, level or pose method, timer, and camera-settings access | Present, identified, and accepted before work |
 
 ## Structured parts, hardware, materials, and tools
 
 | Type | Quantity | Item | Required condition |
 | --- | --- | --- | --- |
-| Vision | 1 | 1080p manual/fixed-exposure USB camera | Mounting interface and blind-thread depth physically measured |
-| Printed part | 0 or 1 | Universal camera plate | Fixed-mast fallback only; accepted Job 03C3; omit for the released arm-mounted architecture |
-| Mounting | As selected | Route-specific camera support | Primary intent is a controlled arm mount; optional fallback mast uses accepted Jobs 06/07A/07B and the illustration position is schematic |
-| Fastener | Measured set | Camera screw/strap and support hardware | No blind-thread bottoming; washers and T-slot engagement verified |
+| Vision | 1 | Arducam B0477 with nominal 16 mm lens | Received identity, delivered optics, mount interface, and runtime mode recorded |
+| Support | 1 | Commercial floor tripod candidate ASIN B0CSYB4YQ2 | Received identity, included parts, loaded height, footprint, locks, and stability measured |
+| Retention | 1 set | Measured camera adapter, fastener, anti-rotation feature, and independent tether | Positive retention with measured engagement and no blind-hole bottoming |
+| Cable | 1 | B0477 USB3 cable and support-side strain relief | Service loop and cable envelope measured; cable pull does not move the camera outside the accepted bound |
 
 ## Printed-part traceability
 
 - Use the accepted, labeled Step-00 kit parts. Do not print the traceability copies during this assembly step.
-- Relevant job IDs: `00E, 03C3, 06, 07A, 07B`.
+- Relevant job IDs: `00E`.
 - Open [03B - PRINT SETTINGS FOR THIS STEP.md](<03B - PRINT SETTINGS FOR THIS STEP.md>) for the exact per-job preset files and current authority.
-- Review the 7 hash-bound canonical model reference(s) and their exact usage labels in [03 - STL MODELS](<03 - STL MODELS/READ ME - HOW TO USE THESE MODELS.md>).
+- Review the 6 hash-bound canonical model reference(s) and their exact usage labels in [03 - STL MODELS](<03 - STL MODELS/READ ME - HOW TO USE THESE MODELS.md>).
 
 The machine-readable source list is in [99 - TECHNICAL RECORDS - DO NOT EDIT](<99 - TECHNICAL RECORDS - DO NOT EDIT/HARDWARE AND TOOLS.csv>).

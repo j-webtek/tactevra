@@ -21,6 +21,11 @@ from typing import Any, Iterable
 import numpy as np
 import trimesh
 
+from validate_tripod_camera_intake import (
+    TripodIntakeError,
+    validate_tripod_camera_intake,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config"
 STL = ROOT / "stl"
@@ -1696,49 +1701,33 @@ def validate_robot_reach_screening(layout: dict[str, Any]) -> int:
 
 
 def validate_camera_architecture_decision(measurement: dict[str, Any]) -> int:
-    """Require an explicit hold where the arm-camera intent conflicts with RC03."""
+    """Validate the selected, unqualified static-overhead tripod architecture."""
     path = CONFIG / "camera_architecture_decision.json"
     if not path.is_file():
         fail("missing config/camera_architecture_decision.json")
     record = _load_json(path)
-    if record.get("schema_version") != 1:
+    if record.get("schema_version") != 2:
         fail("camera architecture decision schema version drift")
     if record.get("design_revision") != EXPECTED_REVISION:
         fail("camera architecture decision revision drift")
-    if record.get("status") != "ENGINEERING_ALIGNMENT_HOLD":
-        fail("camera architecture conflict must remain on ENGINEERING_ALIGNMENT_HOLD")
-    if record.get("exact_arm_camera_specification_reference") is not None:
-        fail("camera architecture record cannot name a specification without revision")
-    baseline = record.get("current_rc03_baseline", {})
-    if baseline.get("route_id") != "camera_mast_optional":
-        fail("camera architecture fallback route drift")
-    if baseline.get("route_selected") is not False:
-        fail("camera architecture record must keep the fixed-mast fallback unselected")
+    if record.get("status") != "STATIC_OVERHEAD_TRIPOD_SELECTED_UNQUALIFIED":
+        fail("camera architecture must select the unqualified static-overhead tripod")
+    active = record.get("active_route", {})
+    if (
+        active.get("route_id") != "camera_overhead_primary"
+        or active.get("support_type") != "independent_commercial_floor_tripod"
+        or active.get("selected") is not True
+        or active.get("qualified") is not False
+        or active.get("physical_release_effect") != "NONE"
+    ):
+        fail("camera architecture active tripod route drift")
     if measurement.get("selected_routes", {}).get("camera_mast_optional") is not False:
-        fail("measurement record must keep the fixed-mast fallback unselected")
-    fallback_release = record.get("fixed_camera_fallback_release")
-    if not isinstance(fallback_release, dict):
-        fail("camera architecture record lacks the fixed-camera fallback release interlock")
-    if fallback_release.get("authorized") is not False:
-        fail("fixed-camera fallback must remain unauthorized while architecture is on hold")
-    if fallback_release.get("authorization_reference") is not None:
-        fail("fixed-camera fallback cannot carry authorization while architecture is on hold")
-    if fallback_release.get("release_revision") is not None:
-        fail("fixed-camera fallback cannot carry a release revision while architecture is on hold")
+        fail("measurement record must keep the superseded fixed-mast route unselected")
     fallback_gate = measurement.get("gates", {}).get(
         "fixed_camera_fallback_architecture_released"
     )
     if not isinstance(fallback_gate, dict) or fallback_gate.get("status") != "NOT_TESTED":
         fail("fixed-camera fallback engineering gate must remain NOT_TESTED on the held RC03 release")
-    expected_gate_fields = {
-        "architecture_decision_status",
-        "architecture_decision_revision",
-        "architecture_decision_sha256",
-        "fixed_camera_fallback_authorized",
-        "fallback_authorization_reference",
-    }
-    if set(fallback_gate.get("recorded_values", {})) != expected_gate_fields:
-        fail("fixed-camera fallback engineering gate evidence schema drift")
     jobs = _load_json(CONFIG / "print_jobs.json").get("jobs", [])
     expected_fallback_jobs = {"03C3", "06", "07A", "07B"}
     gated_fallback_jobs = {
@@ -1750,17 +1739,33 @@ def validate_camera_architecture_decision(measurement: dict[str, Any]) -> int:
     if gated_fallback_jobs != expected_fallback_jobs:
         fail("fixed-camera fallback engineering gate must interlock jobs 03C3, 06, 07A, and 07B")
     for job in jobs:
-        if job.get("job_id") in expected_fallback_jobs and job.get("selection") != "camera_mast_optional":
-            fail(f"camera fallback job {job.get('job_id')} selection drift")
-    requirements = record.get("required_before_geometry_or_instruction_release")
-    if (
-        not isinstance(requirements, list)
-        or len(requirements) < 10
-        or len(requirements) != len(set(requirements))
-        or any(not isinstance(item, str) or not item.strip() for item in requirements)
+        if job.get("job_id") in expected_fallback_jobs and (
+            job.get("selection") != "camera_mast_optional"
+            or job.get("lifecycle") != "SUPERSEDED_DO_NOT_PRINT"
+        ):
+            fail(f"camera fallback job {job.get('job_id')} is not superseded")
+    superseded = record.get("superseded_routes")
+    if not isinstance(superseded, list) or not any(
+        row.get("route_id") == "camera_mast_optional"
+        and set(row.get("jobs", [])) == expected_fallback_jobs
+        and row.get("treatment") == "SUPERSEDED_DO_NOT_PRINT"
+        for row in superseded
     ):
-        fail("camera architecture decision lacks complete unique release requirements")
-    return len(requirements)
+        fail("camera architecture lacks the historical mast-job disposition")
+    try:
+        intake = validate_tripod_camera_intake()
+    except (OSError, UnicodeError, json.JSONDecodeError, TripodIntakeError) as exc:
+        fail(f"invalid tripod installation intake: {exc}")
+    if (
+        intake.get("schema") != "rocell.rc03.tripod_camera_installation_intake.v1"
+        or intake.get("authority", {}).get("physical_release_effect") != "NONE"
+        or any(
+            intake.get("authority", {}).get(key) is not False
+            for key in ("fabrication", "physical_installation", "robot_power", "motion", "contact")
+        )
+    ):
+        fail("tripod installation intake must remain hash-bound and zero authority")
+    return len(superseded)
 
 
 def validate_hardware_candidate_registry(
@@ -1877,10 +1882,13 @@ def validate_hardware_candidate_registry(
 
     camera = registry.get("camera_architecture_boundary", {})
     if (
-        camera.get("exact_arm_camera_specification_present") is not False
-        or camera.get("release_effect") != "ENGINEERING_ALIGNMENT_HOLD"
-        or camera.get("current_fallback_route") != "camera_mast_optional"
-        or camera.get("fallback_route_selected") is not False
+        camera.get("status") != "SELECTED_UNQUALIFIED"
+        or camera.get("primary_architecture") != "static_overhead_eye_to_hand"
+        or camera.get("primary_route") != "camera_overhead_primary"
+        or camera.get("release_effect") != "PHYSICAL_QUALIFICATION_HOLD"
+        or camera.get("legacy_mast_route") != "camera_mast_optional"
+        or camera.get("legacy_mast_selected") is not False
+        or camera.get("legacy_mast_treatment") != "SUPERSEDED_DO_NOT_PRINT"
     ):
         fail("hardware candidate registry camera boundary drift")
     return len(candidates), len(sources)

@@ -122,18 +122,17 @@
       "job_ids": []
     },
     {
-      "canonical_path": "cad/step/camera_plate_universal.step",
-      "sha256": "dea907ee079c77046150115a57bd506ed195e9ecbf436b4effbaf9cb2a89648d",
-      "size_bytes": 1022420,
+      "canonical_path": "TRIPOD_CAMERA_INSTALLATION.md",
+      "sha256": "4fbfbc71cfa17cd241948246ae4db20bb780207e0a61740cdbca1d481e61efa2",
+      "size_bytes": 1570,
       "roles": [
-        "neutral CAD companion"
+        "active tripod installation and qualification procedure",
+        "tripod installation and qualification procedure"
       ],
       "actions": [
-        "reference_only"
+        "read"
       ],
-      "job_ids": [
-        "03C3"
-      ]
+      "job_ids": []
     },
     {
       "canonical_path": "cad/step/hardware_fit_gauge.step",
@@ -147,49 +146,6 @@
       ],
       "job_ids": [
         "00E"
-      ]
-    },
-    {
-      "canonical_path": "cad/step/m5_nut_trap_fit_gauge.step",
-      "sha256": "f9c2aa9abd10fcac616bfac3b0b4eca3b230d55346549e6e070dc9ac53950a7e",
-      "size_bytes": 2253803,
-      "roles": [
-        "neutral CAD companion"
-      ],
-      "actions": [
-        "reference_only"
-      ],
-      "job_ids": [
-        "06"
-      ]
-    },
-    {
-      "canonical_path": "cad/step/mast_foot_2020.step",
-      "sha256": "3aac4dc0473b2db61861d4011fd424f6e26b7cf99e8e9f4d712524635aee2220",
-      "size_bytes": 357095,
-      "roles": [
-        "neutral CAD companion"
-      ],
-      "actions": [
-        "reference_only"
-      ],
-      "job_ids": [
-        "07A",
-        "07B"
-      ]
-    },
-    {
-      "canonical_path": "cad/step/mast_socket_fit_test.step",
-      "sha256": "89c51ec6483ad4f45ac0c538d82485e78aa5d2751729075102875d27a74afdd7",
-      "size_bytes": 1415178,
-      "roles": [
-        "neutral CAD companion"
-      ],
-      "actions": [
-        "reference_only"
-      ],
-      "job_ids": [
-        "06"
       ]
     },
     {
@@ -222,8 +178,8 @@
     },
     {
       "canonical_path": "config/assembly_steps.json",
-      "sha256": "af1920ac851d18c09ad749df5da2ed58dda6c9a40b066966e737430c448a546d",
-      "size_bytes": 117502,
+      "sha256": "115805cdd45ee09bac995f82f3a08ad662f4e80a836e3e96f1dded1635bf8758",
+      "size_bytes": 115579,
       "roles": [
         "canonical step-to-file relationship map"
       ],
@@ -234,13 +190,13 @@
     },
     {
       "canonical_path": "config/camera_architecture_decision.json",
-      "sha256": "93b51f5635373c7a2a3d561e5a6ed0eb23c5b20c5243f158261a144e78c63c6b",
-      "size_bytes": 2988,
+      "sha256": "a1f8a7b8f2f8480bfefb632df46ab77377667f7a5f013ee429d6bb6fe38ae7b6",
+      "size_bytes": 1749,
       "roles": [
-        "camera architecture alignment hold"
+        "selected static-overhead tripod architecture"
       ],
       "actions": [
-        "resolve_by_controlled_revision_before_step"
+        "verify_not_physical_release"
       ],
       "job_ids": []
     },
@@ -282,8 +238,8 @@
     },
     {
       "canonical_path": "config/print_jobs.json",
-      "sha256": "429bca9542193388581eee5266af57b2e7460881f87b23b34693eee3b77c66f4",
-      "size_bytes": 13945,
+      "sha256": "ba82c6e18761c3302b015de16a504c74ada78f9a519698b308c2aeb82b61616f",
+      "size_bytes": 14097,
       "roles": [
         "canonical print-job definitions"
       ],
@@ -301,6 +257,19 @@
       ],
       "actions": [
         "reference_only"
+      ],
+      "job_ids": []
+    },
+    {
+      "canonical_path": "config/tripod_camera_installation_intake_v1.json",
+      "sha256": "52ca6f331d2f2c81c5ba5e288572e17a459c92a2cf502952f1e9cd15586b9111",
+      "size_bytes": 2507,
+      "roles": [
+        "active hash-bound tripod installation intake",
+        "hash-bound tripod receipt, measurement, pose, stability, and qualification intake"
+      ],
+      "actions": [
+        "complete"
       ],
       "job_ids": []
     },
@@ -333,7 +302,7 @@
       "sha256": "9ad313fe625fcccba138a1a178cb653fdefd479f2897df48e725d28749417777",
       "size_bytes": 22744,
       "roles": [
-        "calibration artwork"
+        "historical RC03 calibration artwork retained for traceability"
       ],
       "actions": [
         "reference_only"
@@ -345,10 +314,10 @@
       "sha256": "dd2192e679f764608996957e5708d4e020acca65d0e3fb60f1802897bd866b01",
       "size_bytes": 116990,
       "roles": [
-        "lens-calibration target"
+        "historical RC03 calibration target retained for traceability; not the repository-authoritative B0477 production target"
       ],
       "actions": [
-        "print_actual_size"
+        "reference_only"
       ],
       "job_ids": []
     },
@@ -357,10 +326,10 @@
       "sha256": "ed7aa4bd9d82c9d48d6fe86928f7a13836dde8320a489f8c3f851f074103a672",
       "size_bytes": 280,
       "roles": [
-        "calibration control"
+        "historical RC03 calibration definition retained for traceability"
       ],
       "actions": [
-        "use_with_helper"
+        "reference_only"
       ],
       "job_ids": []
     },
@@ -376,62 +345,6 @@
       ],
       "job_ids": [
         "00E"
-      ]
-    },
-    {
-      "canonical_path": "job_cards/JOB-03C3.md",
-      "sha256": "adcd24a5a74e80924c27c49ea5a998ecad28010edb2ef3e1bdf4b1f3b3d58428",
-      "size_bytes": 6897,
-      "roles": [
-        "controlled print traveler"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "03C3"
-      ]
-    },
-    {
-      "canonical_path": "job_cards/JOB-06.md",
-      "sha256": "9e93f1b61e3d5efb38c70b9525aef508d187721c01b09125d813dd2d93708071",
-      "size_bytes": 5915,
-      "roles": [
-        "controlled print traveler"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "06"
-      ]
-    },
-    {
-      "canonical_path": "job_cards/JOB-07A.md",
-      "sha256": "db28c85e8701f83828c9d702e9f78a9125b239ead7890a3c1ce9d2be1277b0ff",
-      "size_bytes": 6830,
-      "roles": [
-        "controlled print traveler"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07A"
-      ]
-    },
-    {
-      "canonical_path": "job_cards/JOB-07B.md",
-      "sha256": "39fbe63a9aee45bf4e03782900394a848d3e7239607642130c4438976d541c37",
-      "size_bytes": 7044,
-      "roles": [
-        "controlled print traveler"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07B"
       ]
     },
     {
@@ -501,186 +414,6 @@
       ]
     },
     {
-      "canonical_path": "print_plates_3mf/03C3_PETG_camera_plate.3mf",
-      "sha256": "b659444974c21f27d0832b97b0511edd4a879c2049d81ae010cb28d61c8eae42",
-      "size_bytes": 152414,
-      "roles": [
-        "geometry-only QIDI plate"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "03C3"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/03C3_PETG_camera_plate.PRINT_SETTINGS.md",
-      "sha256": "736c5f8666a3beae5a87cf685c04831499f5510dacdec9e17ab651da5af8e214",
-      "size_bytes": 4649,
-      "roles": [
-        "exact operator print-settings sheet"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "03C3"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/03C3_PETG_camera_plate.print.json",
-      "sha256": "bfa1070820c21e695740fe1a8cc52f26531fb76d403bf9a1a1227a60a6d1a29c",
-      "size_bytes": 10220,
-      "roles": [
-        "controlled plate/profile/hash sidecar"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "03C3"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/06_ASA_mast_fit_tests.3mf",
-      "sha256": "02525021bb7f82f1d5c04946222ef5d898551181deb6bedda3b60a54cede6daa",
-      "size_bytes": 704315,
-      "roles": [
-        "geometry-only QIDI plate"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "06"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/06_ASA_mast_fit_tests.PRINT_SETTINGS.md",
-      "sha256": "a0201228b703bd3c1c282ab8fd0fd3124acebf9b68c1abbdbbf65ce502e3a461",
-      "size_bytes": 4880,
-      "roles": [
-        "exact operator print-settings sheet"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "06"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/06_ASA_mast_fit_tests.print.json",
-      "sha256": "2a1fc922da8f2f8953522a287a468824e3b7743d978a8ba39784dd555ff2d7cc",
-      "size_bytes": 11540,
-      "roles": [
-        "controlled plate/profile/hash sidecar"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "06"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/07A_ASA_mast_foot_first_article.3mf",
-      "sha256": "fe98242302efb943e0fba6fb4db4e38f0008ecda19e306688be844dd162af84a",
-      "size_bytes": 100659,
-      "roles": [
-        "geometry-only QIDI plate"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07A"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/07A_ASA_mast_foot_first_article.PRINT_SETTINGS.md",
-      "sha256": "e8d47f729bd0c125a7e9804dac2f342484c0f536f0c5f83a1bffeab28398e7ff",
-      "size_bytes": 4980,
-      "roles": [
-        "exact operator print-settings sheet"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07A"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/07A_ASA_mast_foot_first_article.print.json",
-      "sha256": "aa830046f1152a28fd50d702b9233f8fc3c5854b65f1ea3db505fb4062f9fe19",
-      "size_bytes": 11133,
-      "roles": [
-        "controlled plate/profile/hash sidecar"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07A"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/07B_ASA_mast_foot_second.3mf",
-      "sha256": "1212bdb01b8d4fb140b8eeb7a6e68fdfc604696662d27a199120def6b2260658",
-      "size_bytes": 100664,
-      "roles": [
-        "geometry-only QIDI plate"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07B"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/07B_ASA_mast_foot_second.PRINT_SETTINGS.md",
-      "sha256": "46c56c393526bef5911b0ab604e85f36aeceee2892195a473b9d7931589c97ec",
-      "size_bytes": 5006,
-      "roles": [
-        "exact operator print-settings sheet"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07B"
-      ]
-    },
-    {
-      "canonical_path": "print_plates_3mf/07B_ASA_mast_foot_second.print.json",
-      "sha256": "cb85e1aa58ac2567429b4105a925a120605a188e8a26d1d4fda45147cf8f945e",
-      "size_bytes": 11150,
-      "roles": [
-        "controlled plate/profile/hash sidecar"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "07B"
-      ]
-    },
-    {
-      "canonical_path": "requirements-vision.txt",
-      "sha256": "42ef5240cf2ac5a63f84f7635dc54e2bfb2583bafb9a215d236b93cac3a5e834",
-      "size_bytes": 39,
-      "roles": [
-        "vision dependency versions"
-      ],
-      "actions": [
-        "install_in_isolated_environment"
-      ],
-      "job_ids": []
-    },
-    {
       "canonical_path": "scripts/build_illustrated_assembly_guide.py",
       "sha256": "6badf0daa975d8c0ab5de34cea5a7514dbff8469d2a7b499670a3002d428eb31",
       "size_bytes": 44117,
@@ -706,8 +439,8 @@
     },
     {
       "canonical_path": "scripts/build_step_packages.py",
-      "sha256": "38b9b55bfaad6c80f2465bd99abc134b8a7b488d91e6fc357c3f93f05ec699b9",
-      "size_bytes": 175793,
+      "sha256": "1b3328e85ad2071c1a282f75c50bbc5fdbfb3bec06beccd58e4eb418dd91319d",
+      "size_bytes": 176151,
       "roles": [
         "step-package generator and validator"
       ],
@@ -862,10 +595,22 @@
     },
     {
       "canonical_path": "scripts/validate_release_package.py",
-      "sha256": "9b954d47726e7c09423d31f7cdbd8b0e07dff1b78c11bf826274473062d66ed3",
-      "size_bytes": 118881,
+      "sha256": "0fc8994764e314f9413cdde56d6627c6485bec29ca19839c2e9ccf3923a046ad",
+      "size_bytes": 118799,
       "roles": [
         "whole-package release validator"
+      ],
+      "actions": [
+        "run_from_project_root"
+      ],
+      "job_ids": []
+    },
+    {
+      "canonical_path": "scripts/validate_tripod_camera_intake.py",
+      "sha256": "c301c91f876a68e5fe87aa8da718a6a847e8d816b595c94efa0389d8881faa74",
+      "size_bytes": 2784,
+      "roles": [
+        "tripod intake hash and zero-authority validator"
       ],
       "actions": [
         "run_from_project_root"
@@ -899,84 +644,16 @@
       ]
     },
     {
-      "canonical_path": "slicer_profiles/QIDI_PLUS4/asa_structural_0p4.process.json",
-      "sha256": "a6116150e09eb3212b6d4d76b7def11495593f564f497d2e8e5799ec6e69f7de",
-      "size_bytes": 1710,
-      "roles": [
-        "importable QIDI Studio process preset"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "06",
-        "07A",
-        "07B"
-      ]
-    },
-    {
-      "canonical_path": "slicer_profiles/QIDI_PLUS4/petg_general_0p4.process.json",
-      "sha256": "4e3fcda86460e9823234db1eff750e880a8b43bcb916dc2b584038b97376b605",
-      "size_bytes": 1435,
-      "roles": [
-        "importable QIDI Studio process preset"
-      ],
-      "actions": [
-        "consume_accepted_output"
-      ],
-      "job_ids": [
-        "03C3"
-      ]
-    },
-    {
-      "canonical_path": "software_helpers/calibrate_camera_charuco.py",
-      "sha256": "1d374cf440cfaa6861b0c5714e04893c0c577f3a3ce70f5fe04d0425b339542e",
-      "size_bytes": 6257,
-      "roles": [
-        "lens calibration"
-      ],
-      "actions": [
-        "run_from_project_root"
-      ],
-      "job_ids": []
-    },
-    {
-      "canonical_path": "software_helpers/capture_camera_frames.py",
-      "sha256": "a4b5d57fe1ba68b3fe991c96d85894f8f01621ba2fb5f2d9b404f7d245a10669",
-      "size_bytes": 19369,
-      "roles": [
-        "traceable non-overwriting camera capture"
-      ],
-      "actions": [
-        "run_from_project_root_in_venv"
-      ],
-      "job_ids": []
-    },
-    {
-      "canonical_path": "software_helpers/detect_apriltags.py",
-      "sha256": "4fb2e59d6ae33541de8984321df115533309f5d415e294d4388459dcc28001d0",
-      "size_bytes": 18152,
-      "roles": [
-        "tag verification"
-      ],
-      "actions": [
-        "run_from_project_root"
-      ],
-      "job_ids": []
-    },
-    {
       "canonical_path": "stl/camera_plate_universal.stl",
       "sha256": "7fb63205ddc37b517ee452eda352893c7912cebe74086d977ef0beb8ec2d006f",
       "size_bytes": 560984,
       "roles": [
-        "canonical slicing mesh"
+        "SUPERSEDED_DO_NOT_PRINT legacy mast camera plate"
       ],
       "actions": [
         "reference_only"
       ],
-      "job_ids": [
-        "03C3"
-      ],
+      "job_ids": [],
       "local_copy_usage": "TRACEABILITY_ONLY_DO_NOT_PRINT",
       "canonical_reference": "../../../stl/camera_plate_universal.stl",
       "artifact_resolution": "canonical_hash_bound_reference"
@@ -999,36 +676,16 @@
       "artifact_resolution": "canonical_hash_bound_reference"
     },
     {
-      "canonical_path": "stl/m5_nut_trap_fit_gauge.stl",
-      "sha256": "a6a8dd06689060766bb31f7eca10e6910fb3313a758af185bcbcdfde3c40a01e",
-      "size_bytes": 1261484,
-      "roles": [
-        "canonical slicing mesh"
-      ],
-      "actions": [
-        "reference_only"
-      ],
-      "job_ids": [
-        "06"
-      ],
-      "local_copy_usage": "TRACEABILITY_ONLY_DO_NOT_PRINT",
-      "canonical_reference": "../../../stl/m5_nut_trap_fit_gauge.stl",
-      "artifact_resolution": "canonical_hash_bound_reference"
-    },
-    {
       "canonical_path": "stl/mast_foot_2020.stl",
       "sha256": "2b6384b63a5b191ef88ae5590b50ffb5cd0c64d2102b3145b8336b2fb901faa5",
       "size_bytes": 461684,
       "roles": [
-        "canonical slicing mesh"
+        "SUPERSEDED_DO_NOT_PRINT legacy mast foot"
       ],
       "actions": [
         "reference_only"
       ],
-      "job_ids": [
-        "07A",
-        "07B"
-      ],
+      "job_ids": [],
       "local_copy_usage": "TRACEABILITY_ONLY_DO_NOT_PRINT",
       "canonical_reference": "../../../stl/mast_foot_2020.stl",
       "artifact_resolution": "canonical_hash_bound_reference"
@@ -1038,14 +695,12 @@
       "sha256": "3a8e939ae308baa04fda3891dfc8851a0a3b2caa9e2a91148414255e1114905b",
       "size_bytes": 1299984,
       "roles": [
-        "canonical slicing mesh"
+        "SUPERSEDED_DO_NOT_PRINT legacy mast coupon"
       ],
       "actions": [
         "reference_only"
       ],
-      "job_ids": [
-        "06"
-      ],
+      "job_ids": [],
       "local_copy_usage": "TRACEABILITY_ONLY_DO_NOT_PRINT",
       "canonical_reference": "../../../stl/mast_socket_fit_test.stl",
       "artifact_resolution": "canonical_hash_bound_reference"

@@ -2,7 +2,7 @@
 
 [← Step 14](<../14 - Assemble and Test Spring-Loaded Tool/00 - START HERE.md>) | [Build dashboard](<../00 - START HERE.md>)
 
-**Current result:** **LOCKED**  
+**Current result:** **LOCKED**
 **Next safe action:** Open [01 - BEFORE YOU START.md](<01 - BEFORE YOU START.md>) for the single prerequisite/gate table; do not begin or initialize evidence.  
 **Engineering name:** Final proof, calibration, and commissioning
 
