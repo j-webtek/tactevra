@@ -157,7 +157,7 @@ Each active index that links to one of these files must label it
 2. Migrate the authoritative camera architecture, workcell ICD, and strict
    tests by version while preserving v1 bytes. **Complete.**
 3. Migrate active build routes and remove obsolete print jobs from generated
-   operator packages while retaining their sources as historical.
+   operator packages while retaining their sources as historical. **Complete.**
 4. Replace support geometry in simulation and re-run coverage, visibility,
    collision, and wrong-model checks.
 5. Receive and measure the tripod and B0477 interface; bind measurements to a
@@ -166,3 +166,11 @@ Each active index that links to one of these files must label it
    checksums atomically.
 7. Keep physical motion blocked until the installed support passes every gate
    and the normal first-motion approval process is completed.
+
+The Step 13 migration is implemented in commit
+`3fe31888d7d1a594f14c1266d354f203f95bd685`. The generated operator package now
+uses the hash-bound tripod intake and installation procedure. Legacy mast jobs
+`03C3`, `06`, `07A`, and `07B` remain reproducible but carry
+`SUPERSEDED_DO_NOT_PRINT`. The next migration increment is conservative tripod
+collision geometry plus coverage, visibility, collision, and wrong-model
+simulation; received-hardware qualification remains a later physical gate.
