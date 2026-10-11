@@ -154,6 +154,23 @@ request safety or physical typing. Keep both paths out of arm control.
 
 ## Offline vision seed
 
+`physical_installed_apriltag_xy_working_v1.json` records the completed
+operator photo session as a working installed XY observation for IDs 0-5.
+It is intentionally separate from the canonical tag map: Z, yaw, uncertainty,
+and tool identity remain unbound, so the `tag_plane_placement_measured` gate
+remains `NOT_TESTED`. `reconcile_apriltag_xy_observations.py` uses T0-T3 as
+four planar anchors and holds K0/P0 out as checks against the existing phone
+visibility probe. The checked-in reconciliation reduces the earlier nominal
+map disagreements to 1.488 mm maximum for K0 and 7.437 mm maximum for P0 in
+the available views. These are exploratory phone-image residuals, not camera
+calibration or localization accuracy.
+
+Reproduce that check from the repository root with:
+
+```powershell
+.\.venv-vision\Scripts\python.exe software\ai\eval\reconcile_apriltag_xy_observations.py --visibility-probe software\ai\eval\physical_phone_apriltag_visibility_probe_v2.json --xy-observations software\ai\eval\physical_installed_apriltag_xy_working_v1.json --output software\ai\eval\physical_phone_apriltag_xy_reconciliation_v1.json
+```
+
 `gemma3_4b_real_photo_seed_v0.json` records the provisional 4B scene observer
 on the ten provenance-marked user photos. It matches the agent-authored
 keyboard-presence label on 10/10 images with 1.692 seconds median latency. All
