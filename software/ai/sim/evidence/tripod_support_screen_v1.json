@@ -1,0 +1,93 @@
+{
+  "bindings": {
+    "camera_architecture": {
+      "path": "software/config/camera_architecture_plan_v2.json",
+      "sha256": "b296d0f1ccd53d82db31816164de1b33d42a6c348271e814060c4242f1ff733f"
+    },
+    "camera_profile": {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    "first_motion_consolidated": {
+      "path": "software/ai/sim/evidence/first_motion_consolidated_v1.json",
+      "sha256": "8c7d419dc0185cfd3d2c87246de2e1ebb620de4b2cfcd01dc9718688ffa6f953"
+    },
+    "installation_intake": {
+      "path": "active-project/RoCell_v0_3/config/tripod_camera_installation_intake_v1.json",
+      "sha256": "52ca6f331d2f2c81c5ba5e288572e17a459c92a2cf502952f1e9cd15586b9111"
+    },
+    "tripod_candidate": {
+      "path": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+      "sha256": "3f132aee15b5a3b5c65e1c6dfc04523cf5ded61939088bc34e0ddcee9e28fbe9"
+    },
+    "workcell_icd": {
+      "path": "software/config/workcell_icd_v2.json",
+      "sha256": "1bd836370e5a9eb7e87f44b756f45e0c7a825ec1128116316ffa1b961d6554eb"
+    }
+  },
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "fixture_sha256": "60d1027dbfb62e4937eb63ca04863777d9fbfadc2b745ce314a19aae7b11faf3",
+  "limitations": [
+    "Tripod leg, column, neck, head, adapter, camera, cable, operator keepout, and floor footprint dimensions are conservative synthetic assumptions, not received-product measurements.",
+    "The swept-volume AABB bounds the previously screened first-motion family but does not replace exact installed-geometry collision evaluation.",
+    "Coverage uses the manufacturer-published unmeasured 49 by 38 degree field of view with centered nadir projection and zero distortion.",
+    "A passing synthetic row can guide placement only; received identity, loaded geometry, sag, drift, stability, tether, cable strain, calibration, and installed clearance remain blocking."
+  ],
+  "physical_authority": false,
+  "schema": "tactevra.tripod_support_screen_fixture.v1",
+  "scope": "SYNTHETIC_TRIPOD_SCREEN_ONLY",
+  "screen": {
+    "approved_motion_swept_aabb_mm": {
+      "max": [
+        610.0,
+        457.0,
+        650.0
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "assumption_state": "CONSERVATIVE_UNMEASURED_REJECT_ONLY",
+    "board_size_mm": [
+      610.0,
+      457.0
+    ],
+    "cable_drop_below_optical_mm": 40.0,
+    "cable_radius_mm": 12.0,
+    "column_center_board_xy_mm": [
+      305.0,
+      807.0
+    ],
+    "column_radius_mm": 55.0,
+    "floor_z_mm": -760.0,
+    "foot_height_mm": 70.0,
+    "footprint_radius_mm": 360.0,
+    "neck_above_optical_mm": 140.0,
+    "neck_radius_mm": 40.0,
+    "nominal_height_mm": 850.0,
+    "optical_axis_board_xy_mm": [
+      305.0,
+      228.5
+    ],
+    "optical_height_samples_mm": [
+      700.0,
+      850.0,
+      1000.0
+    ],
+    "required_clearance_mm": 25.0
+  },
+  "selected_support": {
+    "camera_profile_id": "arducam-b0477-imx283-16mm-purchased-001",
+    "candidate_id": "COMMERCIAL-TRIPOD-ASIN-B0CSYB4YQ2",
+    "support_type": "independent_commercial_floor_tripod"
+  }
+}
