@@ -426,14 +426,16 @@
         "software/ai/rocell_ai/motion_assurance.py",
         "software/ai/rocell_ai/motion_sequence_simulation.py",
         "software/ai/rocell_ai/shared_shadow_runner_v2.py",
-        "software/ai/rocell_ai/translation_assurance.py"
+        "software/ai/rocell_ai/translation_assurance.py",
+        "software/ai/rocell_ai/tripod_support_screen.py"
       ],
       "test_paths": [
         "software/ai/tests/test_keyboard_rehearsal.py",
         "software/ai/tests/test_keyboard_route_coverage.py",
         "software/ai/tests/test_model_motion_simulation.py",
         "software/ai/tests/test_motion_assurance.py",
-        "software/ai/tests/test_motion_sequence_simulation.py"
+        "software/ai/tests/test_motion_sequence_simulation.py",
+        "software/ai/tests/test_tripod_support_screen.py"
       ],
       "documentation_paths": [
         "software/ai/docs/MODEL_TO_ARM_TRANSLATION_ASSURANCE.md",
@@ -441,14 +443,16 @@
       ],
       "evidence_paths": [
         "software/ai/eval/keyboard_route_coverage_v0.json",
-        "software/ai/eval/sequence_clearance_study_v0.json"
+        "software/ai/eval/sequence_clearance_study_v0.json",
+        "software/ai/sim/evidence/tripod_support_screen_v1.json",
+        "software/ai/sim/evidence/tripod_support_screen_result_v1.json"
       ],
-      "current_result": "Synthetic named-target routes and shared shadow paths are reproducible and zero-write; missing physical calibration or qualification blocks execution admission.",
+      "current_result": "The selected commercial tripod now has a hash-bound conservative 11-body support screen. The nominal 850 mm and upper 1000 mm samples pass synthetic coverage and swept-volume margins; 700 mm stops on both incomplete coverage and USB-loop collision. Every result remains zero-authority and pending measured installed geometry.",
       "limitations": [
         "Passing simulation is not measured reachability, collision clearance, contact success, or controller qualification.",
         "Independent keyboard outcome verification remains required."
       ],
-      "next_gate": "Combine physically qualified perception with current calibration and configuration evidence, then run one zero-movement shadow batch before any physical review.",
+      "next_gate": "Measure the received tripod footprint, loaded optical height, support envelopes, cable route, sag, drift, and installed pose; replace the reject-only synthetic assumptions and rerun exact installed-geometry collision and visibility checks.",
       "model_motion_batch_boundary": true,
       "controller_authority": false,
       "hardware_writes": 0,
