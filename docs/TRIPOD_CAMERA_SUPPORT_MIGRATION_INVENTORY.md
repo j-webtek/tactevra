@@ -62,9 +62,9 @@ The following remain open until the delivered tripod and B0477 are inspected:
   `software/tests/unit/test_camera_architecture_plan.py`: implemented with a v2
   active default and explicit v1 compatibility. Both versions preserve the
   fixed-camera, all-tag, freshness, and zero-authority rules.
-- `software/config/workcell_icd_v2.json`: implemented as the active default and
-  source-bound to the tripod candidate and camera plan v2. The original v1 ICD
-  and its printable support binding remain byte-identical for historical use.
+- `software/config/workcell_icd_v3.json`: implemented as the active default and
+  source-bound to the tripod candidate, camera plan v2, and onboarding policy
+  v2. Explicit reads of the original v1 and tripod v2 ICDs remain supported.
 - `hardware/static_overhead_camera/config/support_design.json`: retained as the
   historical portal support design. The active v2 ICD instead binds
   `commercial_tripod_candidate.json`; a later measured installation record will
@@ -76,6 +76,11 @@ The following remain open until the delivered tripod and B0477 are inspected:
 
 ### Active build and onboarding
 
+- `software/config/physical_onboarding_policy_v2.json` and
+  `physical_onboarding_foundation_v2.json`: implemented as active defaults.
+  The hash-bound chain now selects workcell ICD v3, camera architecture v2, and
+  the commercial tripod candidate while retaining zero physical authority.
+  Explicit historical v1 policy, foundation, and workcell reads remain valid.
 - `active-project/RoCell_v0_3/config/camera_architecture_decision.json` and
   `v1_prehardware_configuration.json`: select the fixed overhead tripod route.
 - Active project generators, measurement records, build gates, instructions,
