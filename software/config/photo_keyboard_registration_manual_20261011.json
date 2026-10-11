@@ -1,0 +1,38 @@
+{
+  "schema": "rocell.photo_keyboard_registration_input.v1",
+  "status": "MANUALLY_ANNOTATED_PHOTO_ESTIMATE_ONLY",
+  "photo": {
+    "attachment_name": "10-Photo-10.jpg",
+    "sha256": "bad42a5ef7147a254fc6f312aa385fbc55a0c2913009df7310cb359925ca682f",
+    "width_px": 2880,
+    "height_px": 3840
+  },
+  "board_frame": "RC03_B_FRONT_LEFT_X_RIGHT_Y_REAR_MM",
+  "fiducials": [
+    {"id": "A1_KBL_HOLD_R", "board_xy_mm": [102.0, 246.0], "pixel_xy": [721.0, 1923.0]},
+    {"id": "A1_KBL_CLAMP", "board_xy_mm": [165.0, 254.5], "pixel_xy": [946.0, 1904.0]},
+    {"id": "A2_KBR_CLAMP", "board_xy_mm": [320.0, 254.5], "pixel_xy": [1503.0, 1915.0]},
+    {"id": "A3_PT_HOLD_TCP", "board_xy_mm": [425.0, 160.0], "pixel_xy": [1900.0, 2220.0]},
+    {"id": "A3_PT_LOC_RADIAL", "board_xy_mm": [487.5, 217.8], "pixel_xy": [2116.0, 2038.0]},
+    {"id": "A3_PT_LOC_ROUND", "board_xy_mm": [487.5, 115.0], "pixel_xy": [2161.0, 2386.0]},
+    {"id": "A3_PT_HOLD_R1", "board_xy_mm": [588.8, 149.12], "pixel_xy": [2524.0, 2276.0]},
+    {"id": "A3_PT_HOLD_R2", "board_xy_mm": [588.8, 192.32], "pixel_xy": [2498.0, 2130.0]}
+  ],
+  "keyboard_corners_px": {
+    "rear_left": [612.0, 1974.0],
+    "rear_right": [1785.0, 1993.0],
+    "front_right": [1815.0, 2520.0],
+    "front_left": [515.0, 2504.0]
+  },
+  "keyboard_local_orientation": "FRONT_LEFT_AT_BOARD_REAR_RIGHT_HALF_TURN",
+  "housing_dimensions_mm": [315.0, 147.0, 21.0],
+  "pixel_annotation_tolerance_px": 15.0,
+  "study_xy_margin_mm": 15.0,
+  "limitations": [
+    "Board fiducials and keyboard corners were manually read from one overhead photograph.",
+    "The homography maps the paper/board plane; keyboard housing corners are elevated and affected by parallax.",
+    "The 15 mm study margin is an engineering scenario, not a calibrated confidence bound.",
+    "Nominal key centers are not measured product key centers or contact targets.",
+    "No board-to-controller or gripper-tool transform is established by this registration."
+  ]
+}

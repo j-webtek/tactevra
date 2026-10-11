@@ -1,0 +1,74 @@
+{
+  "schema": "rocell.manual_photo_first_motion_preflight.v1",
+  "status": "HOLD_FOR_LIVE_ADMISSION_INPUTS",
+  "purpose": "PREPARE_ONE_SUPERVISED_WRIST_RESPONSE_EXPERIMENT",
+  "manual_photo": {
+    "sha256": "bad42a5ef7147a254fc6f312aa385fbc55a0c2913009df7310cb359925ca682f",
+    "bytes_verified": true,
+    "dimensions_verified": true,
+    "annotation_sha256": "cba719b2d336c7d38cb487b481d6c0bfb3189a539b8b31319371879a589bbc2c",
+    "profile_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+    "board_frame": "RC03_B_FRONT_LEFT_X_RIGHT_Y_REAR_MM",
+    "fiducial_count": 8,
+    "fiducial_max_residual_mm": 1.337,
+    "housing_corner_max_residual_mm": 6.996,
+    "study_xy_margin_mm": 15.0
+  },
+  "photo_contributes": [
+    "Immutable scene record for independent human review",
+    "Provisional keyboard footprint in the printed board frame",
+    "Nominal key-center study coordinates for later calibration"
+  ],
+  "photo_cannot_establish": [
+    "Current controller joint state or feedback freshness",
+    "Board-to-arm or tool transform",
+    "Three-dimensional cable, tool, and swept-volume clearance",
+    "Contact height, key travel, or safe press force",
+    "Motion authority"
+  ],
+  "only_prepared_physical_command": {
+    "T": 101,
+    "joint": 4,
+    "rad": 0.017453292519943295,
+    "spd": 20,
+    "acc": 1
+  },
+  "command_limits": {
+    "maximum_open_attempts": 1,
+    "maximum_motion_write_attempts": 1,
+    "maximum_retry_count": 0,
+    "maximum_command_bytes": 512,
+    "maximum_open_ms": 2000,
+    "maximum_baseline_ms": 1000,
+    "maximum_write_ms": 1000,
+    "maximum_post_observation_ms": 5000,
+    "maximum_cleanup_ms": 2000,
+    "maximum_baseline_bytes": 32768,
+    "maximum_post_bytes": 65536,
+    "maximum_baseline_reads": 256,
+    "maximum_post_reads": 512
+  },
+  "required_live_inputs": [
+    "CURRENT_READ_ONLY_CONTROLLER_SNAPSHOT",
+    "CURRENT_USB_VID_PID_AND_SERIAL_IDENTITY",
+    "INDEPENDENT_WRIST_START_INTERVAL_WITHIN_MINUS5_PLUS5_DEG",
+    "INDEPENDENT_DISTAL_RADIUS_AT_MOST_200_MM",
+    "SECURED_INSTALLATION_AND_FULL_SWEEP_CLEARANCE_REVIEW",
+    "REACHABLE_POWER_SHUTDOWN_AND_OPERATOR_PRESENT",
+    "INDEPENDENT_OBSERVATION_METHOD_READY",
+    "EXACT_TIMED_REQUEST_AND_AUTHENTICATED_REVIEWS"
+  ],
+  "live_sequence": [
+    "Secure the finished board and arm; remove keyboard and loose objects from the swept area.",
+    "Place the shutdown control within the attending operator's immediate reach.",
+    "Acquire a read-only controller snapshot and bind the current USB device identity.",
+    "Independently review wrist start angle, distal radius, cables, and gravity-drop envelope.",
+    "Create and approve the short-lived exact first-motion request.",
+    "Execute once: joint 4, positive 1 degree, speed 20, acceleration 1.",
+    "Observe and record the response, then stop; do not continue to keyboard motion."
+  ],
+  "keyboard_motion_prepared": false,
+  "device_io_performed": false,
+  "physical_authority": false,
+  "motion_authorized": false
+}
