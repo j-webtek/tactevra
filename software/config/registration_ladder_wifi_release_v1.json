@@ -1,0 +1,1 @@
+{"schema":"rocell.registration_ladder_wifi_release.v1","leg":1,"source_goals":[2047,2075,2039,2600,2233,2040,1897],"target_goals":[2107,2075,2039,2600,2233,2040,1897],"speed":20,"acceleration":1,"maximum_writes":1,"retry_allowed":false,"return_movement":false,"gripper_writes":false}
