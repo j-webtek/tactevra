@@ -33,7 +33,7 @@ template<class Services> class RegistrationLadderWifiOwner {
     const char* state=state_==State::Ready?"READY":state_==State::Moving?"MOVING":
                       state_==State::Verified?"VERIFIED":"FAULT";
     const int written=std::snprintf(output,capacity,
-      "{\"schema\":\"rocell.registration_ladder_wifi_status.v1\"," 
+      "{\"schema\":\"rocell.registration_ladder_wifi_status.v1\","
       "\"state\":\"%s\",\"leg\":1,\"attempted\":%s,\"write_count\":%u,"
       "\"retry_allowed\":false,\"fault\":\"%s\"}",state,
       attempted_?"true":"false",write_count_,fault_);
