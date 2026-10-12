@@ -570,3 +570,13 @@ tracked-file count and governed ceiling to 6,429. The original photographs,
 camera environments, calibration captures, and physical qualification evidence
 remain external and hash-bound; every byte, blob, duplicate, and reduction
 limit remains unchanged.
+
+The tripod-installation intake, photo-layout reconciliation, manual-photo
+first-motion rehearsal, and bounded WiFi registration increments add 36
+reviewed text and source files. They cover the maintained tripod procedure and
+validator, compact calibration and rehearsal records, their deterministic
+runtime and tests, and the signed one-leg WiFi firmware/client path. This raises
+the exact tracked-file count and governed ceiling to 6,465. Camera captures,
+generated motion receipts, firmware binaries, environments, and physical
+qualification evidence remain external and hash-bound; every byte, blob,
+duplicate, and reduction limit remains unchanged.
