@@ -7,7 +7,7 @@
   "physical_release_effect": "NONE",
   "live_hardware_access_allowed": false,
   "binding": {
-    "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+    "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-014",
     "design_revision": "RC03-INT-R1",
     "workcell_layout": "active-project/RoCell_v0_3/config/workcell_layout.json",
     "apriltag_map": "active-project/RoCell_v0_3/fiducials/apriltag_map.json",

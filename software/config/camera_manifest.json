@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "manifest_id": "ROCELL-CAMERA-BINDING-001",
-  "system_freeze_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+  "system_freeze_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-014",
   "status": "STANDALONE_HOLDER_FROZEN_USB_CAMERA_CANDIDATE_SELECTED_PHYSICAL_IDENTITY_BLOCKED",
   "architecture": "eye_on_moving_upper_arm",
   "purchased_product": {

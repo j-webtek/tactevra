@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "manifest_id": "ROCELL-CAMERA-BINDING-001",
+  "system_freeze_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+  "status": "STANDALONE_HOLDER_FROZEN_USB_CAMERA_CANDIDATE_SELECTED_PHYSICAL_IDENTITY_BLOCKED",
+  "architecture": "eye_on_moving_upper_arm",
+  "purchased_product": {
+    "product": "Waveshare standalone RoArm-M3 product",
+    "selected_variant": "RoArm-M3-Pro",
+    "product_url": "https://www.waveshare.com/roarm-m3.htm",
+    "camera_holder_included": true,
+    "camera_included": false,
+    "camera_instruction": "Install a camera with the corresponding size directly, or use an adapter for other cameras.",
+    "package_evidence": "The official RoArm-M3-Pro package image lists the arm, accessory pack, 12 V 5 A supply, expansion mounting plate, camera holder, EoAT expansion plate, and base mounting plate. It does not list a camera."
+  },
+  "primary": {
+    "backend": "usb_opencv",
+    "backend_state": "SELECTED_CAMERA_CANDIDATE_PATH",
+    "camera_model": null,
+    "sensor": null,
+    "lens": null,
+    "focus_state": null,
+    "usb_identity": {
+      "vid": null,
+      "pid": null,
+      "serial": null,
+      "persistent_path": null,
+      "state": "OPEN_BLOCKING"
+    },
+    "selected_candidate": {
+      "manufacturer": "Waveshare",
+      "model": "IMX335 5MP USB Camera (B)",
+      "sku": "26719",
+      "state": "SELECTED_UNQUALIFIED_NOT_INCLUDED_WITH_STANDALONE_ARM",
+      "interface": "USB 2.0",
+      "sensor": "IMX335",
+      "module_size_mm": [
+        25.0,
+        24.0
+      ],
+      "camera_hole_center_spacing_mm": [
+        21.0,
+        13.5
+      ],
+      "mounting_holes": "4 x 2.20 mm",
+      "focus": "fixed focus",
+      "lens_mount": "M12",
+      "published_fov_deg": 175.0,
+      "published_formats": [
+        "MJPG",
+        "YVY2"
+      ],
+      "product_url": "https://www.waveshare.com/product/ai/cameras/single-cameras/imx335-5mp-usb-camera-b.htm",
+      "selection_basis": "Official module drawing exactly matches the bundled holder hole-center pattern. This is an engineering selection, not a claim that Waveshare includes or explicitly names this camera on the standalone arm page."
+    },
+    "initial_probe_mode": {
+      "width_px": 1280,
+      "height_px": 720,
+      "fps": 30,
+      "state": "PROVISIONAL_DISCOVERY_MODE_NOT_COMMISSIONED_CALIBRATION_MODE"
+    },
+    "commissioned_mode": null,
+    "numeric_camera_index_is_identity": false
+  },
+  "holder": {
+    "identity": "Waveshare bundled RoArm camera holder",
+    "source_state": "OFFICIAL_PRODUCT_PAGE_CONFIRMED_PHYSICAL_PART_REVISION_OPEN",
+    "camera_hole_center_spacing_mm": [
+      21.0,
+      13.5
+    ],
+    "carrier": "moving upper-arm twin 1020 rail structure",
+    "rail_fastening": "boat nuts and M4 screws",
+    "installed_rail_position_mm": null,
+    "physical_part_revision": null,
+    "drawing_url": "https://files.waveshare.com/wiki/common/Camera%20mounting%20bracket%20drawing.zip"
+  },
+  "controller_distinction": {
+    "arm_controller": "ESP32-WROOM-32",
+    "arm_transport": "USB serial newline JSON at 115200 baud",
+    "camera_transport": "Separate USB video through OpenCV after the selected camera is acquired",
+    "rule": "The arm controller and camera are separate devices and transports. Never treat the RoArm ESP32 HTTP or USB command interface as a camera stream."
+  },
+  "optional_backends": {
+    "esp_http_mjpeg": {
+      "selected": false,
+      "purpose": "Support a separately purchased and physically identified ESP camera only",
+      "required_identity": [
+        "manufacturer and exact model",
+        "board marking and sensor",
+        "MAC address or other persistent identity",
+        "firmware repository and firmware hash",
+        "base URL plus status, snapshot, and stream endpoints",
+        "resolution, frame format, frame sequence, and timestamp behavior",
+        "adapter drawing, power source, mass/CG, and moving cable route"
+      ],
+      "mechanical_rule": "A Waveshare/Ai-Thinker ESP32-CAM is 40.5 x 27 mm and does not match the direct 21 x 13.5 mm holder pattern; it needs a controlled adapter. It is not included or named by the standalone RoArm product page."
+    }
+  },
+  "calibration_contract": {
+    "intrinsics_key_fields": [
+      "physical_camera_identity",
+      "sensor_and_lens",
+      "focus_state",
+      "pixel_format",
+      "resolution",
+      "camera_settings_hash"
+    ],
+    "extrinsics_key_fields": [
+      "holder_part_revision",
+      "carrier_frame_contract_hash",
+      "installed_rail_position",
+      "fastener_state",
+      "cable_and_strain_relief_state"
+    ],
+    "timing_policy": "Use settled stop-and-look capture until a device exposure timestamp is proven synchronized to arm joint feedback. Host receipt time alone cannot qualify in-motion visual correction.",
+    "demo_intrinsics_allowed_for_contact": false
+  },
+  "physical_identity_gate": {
+    "status": "OPEN_BLOCKING",
+    "required_evidence": [
+      "clear front and back photographs of the delivered camera board and holder",
+      "purchase URL or package label",
+      "USB descriptors and enumerated capture modes",
+      "measured board and hole spacing",
+      "installed holder/rail position and fastener record",
+      "camera, holder, connector, and cable mass/CG"
+    ]
+  },
+  "official_sources": [
+    {
+      "id": "WAVESHARE_ROARM_PRODUCT",
+      "url": "https://www.waveshare.com/product/robotics/robot-arm-control/roarm-m3.htm",
+      "supports": "Bundled/open-source camera holder, upper-arm 1020 rails, boat-nut/M4 peripheral mounting, and onboard ESP32 controller distinction"
+    },
+    {
+      "id": "WAVESHARE_IMX335_B",
+      "url": "https://www.waveshare.com/product/ai/cameras/single-cameras/imx335-5mp-usb-camera-b.htm",
+      "supports": "Selected candidate identity, USB interface, sensor/lens, video modes, module envelope, and exact 21 x 13.5 mm mounting pattern"
+    },
+    {
+      "id": "WAVESHARE_ESP32_CAM_SEPARATE_PRODUCT",
+      "url": "https://www.waveshare.com/ESP32-CAM.htm",
+      "supports": "Separate ESP32-CAM/OV2640 product identity and 40.5 x 27 x 4.5 mm board envelope"
+    }
+  ]
+}

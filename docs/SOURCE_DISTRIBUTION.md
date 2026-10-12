@@ -580,3 +580,11 @@ the exact tracked-file count and governed ceiling to 6,465. Camera captures,
 generated motion receipts, firmware binaries, environments, and physical
 qualification evidence remain external and hash-bound; every byte, blob,
 duplicate, and reduction limit remains unchanged.
+
+The formal Freeze 014 reconciliation adds eight immutable provenance records:
+the seven-file Freeze 013 companion snapshot and its single transition record.
+This raises the exact tracked-file count and governed ceiling to 6,473. The
+snapshot records the reviewed tripod migration while preserving zero physical
+authority; it adds no camera captures, generated motion receipts, firmware
+binaries, environments, or physical qualification evidence. Every byte, blob,
+duplicate, and reduction limit remains unchanged.

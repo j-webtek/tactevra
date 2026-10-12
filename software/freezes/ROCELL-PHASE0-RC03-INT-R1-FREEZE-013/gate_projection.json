@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "projection_id": "ROCELL-RC03-CAPABILITIES-FREEZE-013",
+  "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+  "capabilities": {
+    "digital_plan": {
+      "allowed": true,
+      "reason": "Uses semantic targets only and performs no hardware I/O"
+    },
+    "simulated_dry_run": {
+      "allowed": true,
+      "reason": "Uses the hash-bound nominal scene, target maps, tool-tip clearance, synthetic vision, diagnostic URDF IK, and controller emulation; it cannot open hardware or release physical gates"
+    },
+    "camera_capture": {
+      "allowed": false,
+      "reason": "Standalone arm includes no camera; selected candidate has not been received or bound by stable identity"
+    },
+    "arm_feedback": {
+      "allowed": false,
+      "reason": "RC03 safe_to_power_robot is false and arm/controller/firmware identity is open"
+    },
+    "empty_cell_motion": {
+      "allowed": false,
+      "reason": "Physical release, frame contract, reference, reach, collision, E-stop, and gravity-safe gates are incomplete"
+    },
+    "keyboard_contact": {
+      "allowed": false,
+      "reason": "Motion, calibration, contact-guard, force/travel, station, device, and commissioning gates are incomplete"
+    },
+    "phone_contact": {
+      "allowed": false,
+      "reason": "Motion, calibration, contact-guard, force/travel, screen, station, device, and commissioning gates are incomplete"
+    }
+  }
+}
