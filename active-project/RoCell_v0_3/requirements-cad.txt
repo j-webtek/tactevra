@@ -1,6 +1,6 @@
 cadquery>=2.5,<3
 trimesh>=5.1.0
-numpy>=2.0
+numpy>=2.5.3
 networkx>=3.0
 ezdxf>=1.4.4
 svgwrite>=1.4.3
