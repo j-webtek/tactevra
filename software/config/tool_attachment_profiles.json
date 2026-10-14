@@ -1,0 +1,32 @@
+{
+  "schema": "rocell.tool_attachment_profiles.v1",
+  "profiles": [
+    {
+      "profile_id": "bare-jaw-live-calibration-v1",
+      "attachment_profile": "BARE_JAW",
+      "qualification_state": "NONCONTACT_CALIBRATION_IN_PROGRESS",
+      "tcp_definition": "HAND_TCP_LINK",
+      "pose_namespace": "bare_jaw",
+      "contact_authorized": false,
+      "qualified_named_pose_maximum": "KEYBOARD_FIELD_APPROACH_38",
+      "notes": "Live joint endpoints are repeatable only while the arm base, board, and keyboard remain fixed. Absolute keyboard surface height is not yet qualified."
+    },
+    {
+      "profile_id": "stylus-pending-calibration-v1",
+      "attachment_profile": "STYLUS",
+      "qualification_state": "BLOCKED_PENDING_PHYSICAL_MEASUREMENT",
+      "tcp_definition": null,
+      "pose_namespace": "stylus",
+      "contact_authorized": false,
+      "qualified_named_pose_maximum": null,
+      "notes": "Measure the installed TCP offset, orientation, collision geometry, compliance, and mass properties before generating or executing stylus trajectories."
+    }
+  ],
+  "switching_policy": {
+    "explicit_profile_required": true,
+    "invalidate_precomputed_trajectory_on_change": true,
+    "require_new_configuration_epoch_on_change": true,
+    "allow_pose_inheritance_between_profiles": false,
+    "allow_contact_authority_inheritance": false
+  }
+}
