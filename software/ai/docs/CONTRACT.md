@@ -67,6 +67,34 @@ runtime plan carries its SHA-256 hash. Future execution receipts must keep
 requested, transmitted, controller-reported, and independently observed
 effects separate.
 
+### Additive hover decision for zero-authority simulation
+
+The bounded task proposal also permits this additive shape:
+
+```json
+{
+  "schema": "rocell.ai_task_proposal.v0",
+  "request_id": "hover-example-001",
+  "decision": "hover_target",
+  "device": "keyboard",
+  "target_id": "H",
+  "observation_ref": "synthetic-frame-001"
+}
+```
+
+Compatibility is **additive**. Existing `type_text`, `clarify`, and
+`unsupported` shapes and the frozen grounded-typing policy are unchanged.
+Strict consumers that do not implement `hover_target` continue to reject the
+unknown decision. Only the simulation-only intent-to-hover composition accepts
+it, compiles the name through the commissioned target catalog, and terminates
+at the declared noncontact hover. The proposal carries no coordinates, joints,
+controller fields, permit, transport, or physical authority.
+
+Migration requires routing `hover_target` only to a consumer that explicitly
+supports the shape and retaining strict rejection everywhere else. Rollback is
+to remove that route and the additive validator shape; no stored typing plan,
+motion-batch, controller, or transport schema needs conversion.
+
 The experimental [request-grounding gate](../rocell_ai/admission.py) sits
 between model proposals and the read-only compiler adapter. It accepts a
 single quoted payload only when it matches the proposal exactly, a single

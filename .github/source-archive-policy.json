@@ -1,22 +1,22 @@
 {
-  "schema": "tactevra.source-archive-policy.v1",
-  "archive_mode": "github-generated-source-archives",
   "archive_constraint": "GitHub-generated source archives include every tracked path and cannot apply repository-local exclusions.",
-  "ceilings": {
-    "max_tracked_files": 6446,
-    "max_logical_bytes": 900000000,
-    "max_single_blob_bytes": 60000000,
-    "duplicate_min_blob_bytes": 1048576,
-    "max_duplicate_bytes": 240000000
-  },
-  "reduction_targets": {
-    "max_logical_bytes": 681574400,
-    "max_duplicate_bytes": 10485760
-  },
+  "archive_mode": "github-generated-source-archives",
   "baseline": {
     "commit": "28e40d78633a0231bf4d857631aafd797a19f6e3",
-    "tracked_files": 5932,
+    "duplicate_bytes": 4890152,
     "logical_bytes": 644998905,
-    "duplicate_bytes": 4890152
-  }
+    "tracked_files": 5932
+  },
+  "ceilings": {
+    "duplicate_min_blob_bytes": 1048576,
+    "max_duplicate_bytes": 240000000,
+    "max_logical_bytes": 900000000,
+    "max_single_blob_bytes": 60000000,
+    "max_tracked_files": 6450
+  },
+  "reduction_targets": {
+    "max_duplicate_bytes": 10485760,
+    "max_logical_bytes": 681574400
+  },
+  "schema": "tactevra.source-archive-policy.v1"
 }
