@@ -150,7 +150,20 @@ class BuildStepPackageTests(unittest.TestCase):
         self.assertTrue(result["print_job_single_owner"])
         self.assertTrue(result["canonical_files_are_links_not_copies"])
         self.assertEqual(result["local_stl_copies_verified"], 19)
-        self.assertEqual(result["hash_bound_stl_references_verified"], 99)
+        self.assertEqual(result["hash_bound_stl_references_verified"], 98)
+
+    def test_step_13_consumes_tripod_intake_and_excludes_legacy_mast_jobs(self) -> None:
+        config, jobs_doc, _, _ = build_step_packages.load_sources()
+        step = next(row for row in config["steps"] if row["id"] == "13")
+        self.assertEqual(step["print_jobs"], ["00E"])
+        self.assertIn(
+            "config/tripod_camera_installation_intake_v1.json",
+            {row["path"] for row in step["extra_files"]},
+        )
+        self.assertNotIn("camera_mast_optional", step["conditional_input_gates"])
+        jobs = {row["job_id"]: row for row in jobs_doc["jobs"]}
+        for job_id in ("03C3", "06", "07A", "07B"):
+            self.assertEqual(jobs[job_id]["lifecycle"], "SUPERSEDED_DO_NOT_PRINT")
 
     def test_only_step_00_retains_generated_stl_copy_bytes(self) -> None:
         config, _, _, _ = build_step_packages.load_sources()

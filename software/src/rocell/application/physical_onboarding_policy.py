@@ -30,19 +30,20 @@ from rocell.application.physical_onboarding import (
 from rocell.rc03 import BuildSnapshot
 
 
-PHYSICAL_ONBOARDING_POLICY_SCHEMA = "rocell.physical_onboarding_policy.v1"
+PHYSICAL_ONBOARDING_POLICY_SCHEMA_V1 = "rocell.physical_onboarding_policy.v1"
+PHYSICAL_ONBOARDING_POLICY_SCHEMA = "rocell.physical_onboarding_policy.v2"
 PHYSICAL_ONBOARDING_SOURCE_BINDING_SCHEMA = (
     "rocell.physical_onboarding_source_binding.v1"
 )
 DEFAULT_PHYSICAL_ONBOARDING_POLICY = Path(
-    "software/config/physical_onboarding_policy.json"
+    "software/config/physical_onboarding_policy_v2.json"
 )
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _MAX_POLICY_BYTES = 256 * 1024
 _MAX_SOURCE_BYTES = 32 * 1024 * 1024
 _MAX_CONTROLLED_SOURCE_FILES = 2048
-_EXPECTED_CONTROLLED_SOURCES = (
+_EXPECTED_CONTROLLED_SOURCES_V1 = (
     "rocell.ps1",
     "setup-rocell.ps1",
     "start-rocell-onboarding.ps1",
@@ -68,6 +69,15 @@ _EXPECTED_CONTROLLED_SOURCES = (
     "hardware/static_overhead_camera/README.md",
     "hardware/static_overhead_camera/config/support_design.json",
     "hardware/static_overhead_camera/hardware_intake_template.csv",
+)
+_EXPECTED_CONTROLLED_SOURCES = tuple(
+    {
+        "software/config/physical_onboarding_foundation.json": "software/config/physical_onboarding_foundation_v2.json",
+        "software/config/workcell_icd.json": "software/config/workcell_icd_v3.json",
+        "software/config/camera_architecture_plan.json": "software/config/camera_architecture_plan_v2.json",
+        "hardware/static_overhead_camera/config/support_design.json": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+    }.get(path, path)
+    for path in _EXPECTED_CONTROLLED_SOURCES_V1
 )
 _EXPECTED_CONTROLLED_SOURCE_ROOTS = ("software/src/rocell",)
 _EXPECTED_HUMAN_REVIEW_STAGES = tuple(stage.value for stage in STAGE_ORDER[2:])
@@ -263,7 +273,10 @@ class PhysicalOnboardingPolicy:
             raise PhysicalOnboardingPolicyError("policy_id must not be empty")
         if _SHA256_RE.fullmatch(self.policy_file_sha256) is None:
             raise PhysicalOnboardingPolicyError("policy hash is invalid")
-        if self.controlled_sources != _EXPECTED_CONTROLLED_SOURCES:
+        if self.controlled_sources not in (
+            _EXPECTED_CONTROLLED_SOURCES_V1,
+            _EXPECTED_CONTROLLED_SOURCES,
+        ):
             raise PhysicalOnboardingPolicyError("controlled source order changed")
         if self.controlled_source_roots != _EXPECTED_CONTROLLED_SOURCE_ROOTS:
             raise PhysicalOnboardingPolicyError("controlled source-root order changed")
@@ -367,10 +380,20 @@ def load_physical_onboarding_policy(
         },
         "policy",
     )
-    if document["schema"] != PHYSICAL_ONBOARDING_POLICY_SCHEMA:
+    schema = document["schema"]
+    policy_id = document["policy_id"]
+    if (schema, policy_id) == (
+        PHYSICAL_ONBOARDING_POLICY_SCHEMA_V1,
+        "ROCELL-PHYSICAL-ONBOARDING-001",
+    ):
+        expected_sources = _EXPECTED_CONTROLLED_SOURCES_V1
+    elif (schema, policy_id) == (
+        PHYSICAL_ONBOARDING_POLICY_SCHEMA,
+        "ROCELL-PHYSICAL-ONBOARDING-TRIPOD-002",
+    ):
+        expected_sources = _EXPECTED_CONTROLLED_SOURCES
+    else:
         raise PhysicalOnboardingPolicyError("unsupported onboarding policy schema")
-    if document["policy_id"] != "ROCELL-PHYSICAL-ONBOARDING-001":
-        raise PhysicalOnboardingPolicyError("unexpected physical onboarding policy ID")
 
     environment = _mapping(document["controlled_environment"], "controlled_environment")
     _exact_fields(
@@ -396,7 +419,7 @@ def load_physical_onboarding_policy(
 
     _exact_string_list(
         document["controlled_sources"],
-        _EXPECTED_CONTROLLED_SOURCES,
+        expected_sources,
         "controlled_sources",
     )
     _exact_string_list(
@@ -510,7 +533,7 @@ def load_physical_onboarding_policy(
         policy_relative_path=relative_policy,
         policy_file_sha256=hashlib.sha256(payload).hexdigest(),
         session_root_relative=session_root_relative,
-        controlled_sources=_EXPECTED_CONTROLLED_SOURCES,
+        controlled_sources=expected_sources,
         controlled_source_roots=_EXPECTED_CONTROLLED_SOURCE_ROOTS,
         possible_device_side_effect_stages=_EXPECTED_SIDE_EFFECT_STAGES,
         require_workspace_venv_for_device_access=True,
@@ -630,6 +653,7 @@ def bind_physical_onboarding_sources(
 __all__ = [
     "DEFAULT_PHYSICAL_ONBOARDING_POLICY",
     "PHYSICAL_ONBOARDING_POLICY_SCHEMA",
+    "PHYSICAL_ONBOARDING_POLICY_SCHEMA_V1",
     "PHYSICAL_ONBOARDING_SOURCE_BINDING_SCHEMA",
     "ControlledSourceDigest",
     "PhysicalOnboardingPolicy",

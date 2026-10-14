@@ -1,0 +1,337 @@
+{
+  "schema": "rocell.simulation_hardware_profile.v1",
+  "schema_version": 1,
+  "profile_id": "ROCELL-SIM-RC03-M3PRO-IMX335B-001",
+  "status": "ASSUMED_GOOD_FOR_SIMULATION_ONLY",
+  "simulation_only": true,
+  "physical_release_effect": "NONE",
+  "live_hardware_access_allowed": false,
+  "binding": {
+    "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+    "design_revision": "RC03-INT-R1",
+    "workcell_layout": "active-project/RoCell_v0_3/config/workcell_layout.json",
+    "apriltag_map": "active-project/RoCell_v0_3/fiducials/apriltag_map.json",
+    "nominal_target_profiles": "software/config/nominal_target_profiles.json"
+  },
+  "assumption_boundary": {
+    "assumed_good_in_simulation": [
+      "RoArm-M3-Pro assembly and electrical hardware",
+      "factory arm clamp and board remain rigid",
+      "selected Waveshare-compatible IMX335-B camera candidate is present and functional",
+      "RC03 nominal device and tag geometry matches its frozen digital files",
+      "tool routes are represented by explicit virtual sensitivity cases"
+    ],
+    "not_assumed_or_proven": [
+      "installed joint zero offsets or encoder accuracy",
+      "measured board-to-robot transform",
+      "tool TCP, compliance, force, mass, or collision geometry",
+      "camera intrinsics, holder rail position, hand-eye transform, or timing",
+      "measured device key/screen target maps",
+      "payload, singularity, cable, collision, or physical contact safety"
+    ],
+    "rule": "Simulation results may exercise software and reject bad scenarios, but can never set a physical gate to PASS, authorize power, generate an executable hardware command, or authorize contact."
+  },
+  "robot": {
+    "manufacturer": "Waveshare",
+    "model": "RoArm-M3-Pro",
+    "controller": "ESP32-WROOM-32 general driver board",
+    "dof_contract": "5 arm DOF plus 1 gripper DOF",
+    "geometry_scope": "Pinned official Waveshare roarm_m3 kinematics used as a simulation seed. It is not a validated Pro dynamic twin: the source model's masses, zero motion-rate limits, collision meshes, camera, holder, cable, clamp, tool, and installed zero offsets are not accepted physical properties.",
+    "official_model": {
+      "repository": "https://github.com/waveshareteam/roarm_ws",
+      "commit": "40dbd84b553695212fab713e8465f817ba95454d",
+      "path": "src/roarm_main/roarm_description/urdf/roarm_m3/roarm_m3.xacro",
+      "sha256": "b6333849d0e377008eee0a87a5b8cdcf44f7a73edf3d7600e95506a023a234b6",
+      "local_kinematic_projection": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+      "local_kinematic_projection_sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+    },
+    "official_controller_sources": {
+      "python_sdk": {
+        "repository": "https://github.com/waveshareteam/waveshare_roarm_sdk",
+        "commit": "d9893632aa7f5a9cb283136ab024faf3143ea7db"
+      },
+      "firmware_archive": {
+        "url": "https://files.waveshare.com/wiki/RoArm-M3/RoArm-M3_example_20260701.zip",
+        "sha256": "a28247fee0bbb65cc034ff206031b8700d2b1ec8e3a1fa4b1a5a7365c55f1a57"
+      },
+      "assembly_step_archive": {
+        "url": "https://files.waveshare.com/wiki/RoArm-M3/RoArm-M3_STEP_260310.zip",
+        "sha256": "1e2111145276aac14e521f47990fc41de87e2e735623d115a39cc176c9762da2"
+      },
+      "arm_2d_drawing_archive": {
+        "url": "https://files.waveshare.com/wiki/RoArm-M3/RoArm-M3_2Dsize.zip",
+        "sha256": "edd125e39f43d8d8722b7207668c176e75aca866735829be19c98ddd1dba99d0"
+      },
+      "holder_drawing_archive": {
+        "url": "https://files.waveshare.com/wiki/common/Camera%20mounting%20bracket%20drawing.zip",
+        "sha256": "da64a8e053f392a8f9f81b933a864ba9166bf7378f8e820bda1f398b0d4c4e81"
+      },
+      "state": "PINNED_PROVENANCE_ONLY_NOT_RECEIVED_HARDWARE_IDENTITY"
+    },
+    "joint_order": [
+      "base_link_to_link1",
+      "link1_to_link2",
+      "link2_to_link3",
+      "link3_to_link4",
+      "link4_to_link5",
+      "link5_to_gripper_link"
+    ],
+    "ready_joint_positions_rad": [
+      0.0,
+      0.0,
+      2.618,
+      -1.0472,
+      0.0,
+      0.0
+    ],
+    "planning_tip_link": "hand_tcp",
+    "frame_contract": {
+      "urdf_root": "world",
+      "urdf_base": "base_link",
+      "urdf_tip": "hand_tcp",
+      "controller_cartesian_frame": "R_ctrl",
+      "controller_frame_equivalence": "NOT_ASSUMED",
+      "rule": "The vendor T=104 controller Cartesian frame R_ctrl is not treated as world, base_link, or hand_tcp. A measured/controller-correlation transform is required before controller Cartesian commands can be derived from the URDF model."
+    },
+    "controller_model_bridge": {
+      "logical_joint_to_servo_ids": {
+        "base": [
+          11
+        ],
+        "shoulder": [
+          12,
+          13
+        ],
+        "elbow": [
+          14
+        ],
+        "wrist": [
+          15
+        ],
+        "roll": [
+          16
+        ],
+        "gripper": [
+          17
+        ]
+      },
+      "gripper_mapping": {
+        "model_position_rad_close_to_open": [
+          0.0,
+          1.5
+        ],
+        "controller_raw_position_approx_close_to_open_rad": [
+          3.141592653589793,
+          1.641592653589793
+        ],
+        "provisional_formula": "g_raw = pi - q_model",
+        "state": "SIMULATION_BRIDGE_ONLY_NOT_PHYSICALLY_CHARACTERIZED"
+      },
+      "provisional_simulation_joint_intersection_rad": {
+        "base": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "shoulder": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "elbow": [
+          0.0,
+          2.95
+        ],
+        "wrist": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "roll": [
+          -3.141592653589793,
+          3.141592653589793
+        ],
+        "gripper_model": [
+          0.0,
+          1.5
+        ]
+      },
+      "authority": "The provisional intersection is for simulator rejection tests only. It is not a released live-safe joint envelope."
+    },
+    "unresolved_vendor_conflicts": [
+      "The product specification's elbow and HAND angle claims do not cleanly match the firmware/controller documentation or pinned URDF limits.",
+      "The pinned Xacro permits elbow motion down to -1 rad, while current controller documentation describes a nonnegative elbow domain.",
+      "No physical hard-stop, self-interference, payload, or installed-zero characterization has resolved these differences."
+    ],
+    "nominal_board_T_robot_world": {
+      "state": "NOMINAL_ONLY_FROM_RC03_REACH_SCREENING",
+      "to_frame": "board",
+      "from_frame": "world",
+      "translation_mm": [
+        305.0,
+        457.0,
+        0.0
+      ],
+      "rotation_row_major": [
+        0.0,
+        1.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "interpretation": "Robot +X points toward board front (-board Y), robot +Y points toward board right (+board X), and +Z agrees. Base Z and clamp-axis offsets remain unknown."
+    },
+    "virtual_tool_sensitivity_cases": [
+      {
+        "case_id": "hand_tcp_only",
+        "hand_tcp_T_tip_translation_mm": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "case_id": "short_tool_80mm",
+        "hand_tcp_T_tip_translation_mm": [
+          0.0,
+          0.0,
+          -80.0
+        ]
+      },
+      {
+        "case_id": "nominal_tool_100mm",
+        "hand_tcp_T_tip_translation_mm": [
+          0.0,
+          0.0,
+          -100.0
+        ]
+      },
+      {
+        "case_id": "long_tool_120mm",
+        "hand_tcp_T_tip_translation_mm": [
+          0.0,
+          0.0,
+          -120.0
+        ]
+      }
+    ]
+  },
+  "camera": {
+    "manufacturer": "Waveshare",
+    "expected_model": "IMX335 5MP USB Camera (B)",
+    "sku": "26719",
+    "interface": "USB 2.0",
+    "sensor": "Sony IMX335",
+    "rolling_shutter": true,
+    "fixed_focus": true,
+    "module_size_mm": [
+      25.0,
+      24.0
+    ],
+    "holder_hole_centres_mm": [
+      21.0,
+      13.5
+    ],
+    "published_diagonal_fov_deg": 175.0,
+    "published_distortion": "less than -36 percent",
+    "published_video_modes": [
+      {
+        "width_px": 2592,
+        "height_px": 1944,
+        "fps": 30,
+        "format": "MJPG"
+      },
+      {
+        "width_px": 1920,
+        "height_px": 1080,
+        "fps": 30,
+        "format": "MJPG"
+      },
+      {
+        "width_px": 1280,
+        "height_px": 720,
+        "fps": 30,
+        "format": "MJPG"
+      }
+    ],
+    "simulation_stream": {
+      "width_px": 1920,
+      "height_px": 1080,
+      "fps": 30,
+      "intrinsics_state": "SYNTHETIC_SCENARIO_NOT_VENDOR_CALIBRATION",
+      "note": "Synthetic pinhole/distortion cases exercise the pipeline. Real intrinsics must be measured at the locked runtime mode because the published lens is extremely wide and strongly distorted."
+    },
+    "selection_state": "WAVESHARE_COMPATIBLE_SELECTED_CANDIDATE_NOT_EXPLICITLY_NAMED_BY_ARM_PRODUCT_PAGE",
+    "carrier": {
+      "architecture": "eye_on_arm",
+      "holder": "bundled Waveshare camera holder",
+      "mount_pattern_mm": [
+        21.0,
+        13.5
+      ],
+      "carrier_frame": "E",
+      "vendor_carrier_link": "link2",
+      "carrier_resolution": "E is an installation-specific frame rigidly attached to vendor link2; it is not assumed coincident with link2.",
+      "link2_T_holder": null,
+      "holder_T_C_optical": null,
+      "optical_frame": "C_arm",
+      "E_T_Carm_state": "SCENARIO_PARAMETER_ONLY_UNTIL_LINK2_T_HOLDER_AND_HOLDER_T_C_OPTICAL_ARE_MEASURED"
+    },
+    "synthetic_overview_fixture": {
+      "scenario_id": "SYNTHETIC_FIXED_OVERVIEW_TEST_FIXTURE",
+      "scenario_is_arm_mounted_camera": false,
+      "to_frame": "camera_overview_optical",
+      "from_frame": "board",
+      "camera_T_board_row_major": [
+        1.0,
+        0.0,
+        0.0,
+        -305.0,
+        0.0,
+        -1.0,
+        0.0,
+        228.5,
+        0.0,
+        0.0,
+        -1.0,
+        500.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "intrinsics": {
+        "fx_px": 1000.0,
+        "fy_px": 1000.0,
+        "cx_px": 960.0,
+        "cy_px": 540.0
+      },
+      "purpose": "Deterministic whole-board pipeline fixture only; it does not model the link2-mounted camera."
+    }
+  },
+  "simulation_defaults": {
+    "board_frame": "board",
+    "tag_plane_z_mm": 0.3,
+    "station_proxy_height_mm": 35.0,
+    "tool_case_id": "nominal_tool_100mm",
+    "tool_tip_path": {
+      "clearance_above_highest_obstacle_mm": 35.0,
+      "segment_clearance_mm": 5.0,
+      "hover_height_mm": 12.0,
+      "approach_height_mm": 3.0,
+      "contact_overtravel_mm": 1.0,
+      "park_xy_board_mm": [
+        305.0,
+        400.0
+      ]
+    },
+    "ik_diagnostic": {
+      "sampling_policy": "PARK_AND_CONTACT_FIRST_THEN_STRATIFIED_UNIQUE_MAX",
+      "maximum_samples": 8,
+      "max_attempts": 4,
+      "max_iterations_per_attempt": 45
+    },
+    "hardware_commands_generated": 0
+  }
+}

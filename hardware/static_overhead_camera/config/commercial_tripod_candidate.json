@@ -1,0 +1,81 @@
+{
+  "schema": "rocell.static_overhead_camera.commercial_tripod_candidate.v1",
+  "candidate_id": "COMMERCIAL-TRIPOD-ASIN-B0CSYB4YQ2",
+  "decision_state": "SELECTED_UNQUALIFIED",
+  "product": {
+    "asin": "B0CSYB4YQ2",
+    "url": "https://a.co/d/0imgQB3I",
+    "listing_brand": "Victiv",
+    "listing_model": "P70-35RG",
+    "listing_claims": [
+      "floor tripod with flexible overhead neck",
+      "universal 1/4-inch camera screw",
+      "height listing exists at 70 inches",
+      "height listing exists at 88 inches"
+    ],
+    "unverified_or_conflicting": [
+      "delivered brand model and revision",
+      "maximum usable loaded height",
+      "rated payload and stability with B0477 lens adapter and USB cable",
+      "B0477 housing thread type thread depth and anti-rotation compatibility",
+      "listing height conflicts between 70-inch and 88-inch descriptions"
+    ]
+  },
+  "architecture": {
+    "camera_role": "static_overhead_eye_to_hand_phase_1_primary",
+    "support_type": "independent_commercial_floor_tripod",
+    "relationship_to_arm": "no mechanical connection",
+    "relationship_to_board": "independent floor support; no board load",
+    "optical_axis": "nominal nadir; installed roll pitch yaw measured",
+    "primary_load_bearing_printed_part_allowed": false,
+    "safety_tether_required": true
+  },
+  "study_pose": {
+    "board_intersection_xy_mm": [305.0, 228.5],
+    "height_range_mm": [700.0, 1000.0],
+    "nominal_height_mm": 850.0,
+    "commissioned": false
+  },
+  "authority": {
+    "planning": true,
+    "simulation": true,
+    "fabrication": false,
+    "physical_installation": false,
+    "motion": false,
+    "contact": false
+  },
+  "required_measurements": [
+    "received product identity and included parts",
+    "minimum and maximum usable optical height",
+    "floor footprint and overturning margin",
+    "B0477 mount thread diameter pitch and usable depth",
+    "camera lens adapter and cable loaded mass",
+    "static sag and settle time",
+    "pose drift after disturbance remove reinstall and 24 hours",
+    "USB cable pull displacement",
+    "installed roll pitch yaw and board intersection",
+    "installed collision geometry"
+  ],
+  "qualification_gates": [
+    "all six fiducials and complete model crop footprints visible",
+    "camera identity mode focus exposure white balance and orientation locked",
+    "positive anti-rotation and independent safety tether installed",
+    "leg column neck head adapter and cable witness marks match",
+    "measured sag settle vibration and drift fit the vision error budget",
+    "tripod camera adapter and cable remain outside every approved swept volume",
+    "support shift camera tilt cable pull tag loss and stale frame injections block descent",
+    "remove reinstall and 24-hour checks retain the commissioned pose bounds"
+  ],
+  "superseded_active_routes": [
+    "paired 2020 camera mast",
+    "printed camera portal jobs 00G and 08A through 08D",
+    "RC03 mast and camera plate jobs 03C3 06 07A and 07B",
+    "arm-mounted camera as Phase 1 primary"
+  ],
+  "historical_retention": [
+    "retain printable portal CAD jobs drawings BOMs profiles and validation outputs",
+    "retain legacy mast job sources",
+    "retain prior freezes manifests readiness outputs and evidence byte-for-byte",
+    "label retained fabrication routes SUPERSEDED_DO_NOT_PRINT in active indexes"
+  ]
+}

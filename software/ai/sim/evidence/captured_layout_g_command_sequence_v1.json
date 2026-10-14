@@ -1,0 +1,480 @@
+{
+  "all_faults_terminal_no_retry": true,
+  "all_nominal_commands_settled": true,
+  "command_count": 11,
+  "commands": [
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": 4.236649761262015e-12,
+        "elbow": 1.2811275201701178,
+        "hand": 2.391592653589793,
+        "roll": -1.3492432486934284e-11,
+        "shoulder": 0.060673255949723115,
+        "spd": 1,
+        "wrist": 0.22899701668243197
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 1,
+      "phase": "START_ASCEND",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        -0.003997023970232285,
+        0.05326169774327068,
+        1.2816126032086776,
+        0.220548393757081,
+        0.007837801229280407,
+        2.3937765704668896
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "92db8fd59375fe1e1329c3615eed5f9e3ef902b036f5af325f1b22f8ea7bca75"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": 0.7101812353947532,
+        "elbow": 1.771216290596321,
+        "hand": 2.391592653589793,
+        "roll": -3.0634428221739296e-07,
+        "shoulder": -0.8218124345652167,
+        "spd": 1,
+        "wrist": 0.6213964570417418
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 2,
+      "phase": "START_TRANSIT",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        0.7063294511292576,
+        -0.817226358848116,
+        1.7654505069158177,
+        0.6175381258680327,
+        0.005703126035151383,
+        2.398799588084854
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "b1f027f90527a96b9906713d8a76a99e40fce84414a82ce2450d8e5d8a0f83ef"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": 1.4787609375000001,
+        "elbow": 2.0904800000000003,
+        "hand": 2.391592653589793,
+        "roll": -2.1360991735537187,
+        "shoulder": -0.851119341563786,
+        "spd": 1,
+        "wrist": 1.4164023323615156
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 3,
+      "phase": "START_DESCEND",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        1.4793397649773996,
+        -0.8485440919014683,
+        2.0826138512382166,
+        1.4062907235400648,
+        -2.130792038292368,
+        2.3978888858696017
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "609c72fa221d0492218eff744834cf842d88fe4eab4948565a7299a69d7a56d1"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": 0.7101827092100951,
+        "elbow": 2.1056987260949636,
+        "hand": 2.391592653589793,
+        "roll": 1.1765259877449807e-09,
+        "shoulder": -0.916455931358891,
+        "spd": 1,
+        "wrist": 0.381557204752051
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 4,
+      "phase": "TARGET_ASCEND",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        0.7174731674530521,
+        -0.9128807314940018,
+        2.10131322162419,
+        0.38203662785035813,
+        -0.0030584765034326195,
+        2.3985317876201724
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "24bc6b4dec6fdd3c39ea84a438fb7083bff32472c9087d17697c9ad94f10c3e7"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": -0.1986648613914993,
+        "elbow": 1.16104168179604,
+        "hand": 2.391592653589793,
+        "roll": -1.8270875897965818e-11,
+        "shoulder": 0.3461656192717054,
+        "spd": 1,
+        "wrist": 0.06359269489767228
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 5,
+      "phase": "TARGET_TRANSIT",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        -0.19164671494184765,
+        0.3456911454200137,
+        1.1649864991580894,
+        0.06496915717242735,
+        -0.003536900903174125,
+        2.399079038064008
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "6f41b43c44ae572d59b12320861f1394926f73f9b4928057223a4d61af48ef26"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": -0.19866490847605262,
+        "elbow": 1.8587405340914633,
+        "hand": 2.391592653589793,
+        "roll": -1.3504532098642492e-11,
+        "shoulder": 0.65273866584421,
+        "spd": 1,
+        "wrist": -0.9406811859266547
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 6,
+      "phase": "TARGET_DESCEND",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        -0.19145732840850677,
+        0.647794791966691,
+        1.8561533520082114,
+        -0.9369132718342118,
+        -8.728624526524627e-06,
+        2.3925329892202436
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "535cad7458b7679a4d77596d4e0e054b2a7204a20ed01eec9f0762a664a88bae"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": -0.1986649084770539,
+        "elbow": 1.8923496032588427,
+        "hand": 2.391592653589793,
+        "roll": -1.3494841440357757e-11,
+        "shoulder": 0.7610719692842788,
+        "spd": 1,
+        "wrist": -1.0826217691239963
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 7,
+      "phase": "PRESS",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        -0.19551674443313108,
+        0.7530240013500783,
+        1.888232199012401,
+        -1.0817100441728997,
+        0.0008760349047574499,
+        2.3984343420687195
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": -0.19866490847605262,
+        "elbow": 1.8587405340914633,
+        "hand": 2.391592653589793,
+        "roll": -1.3504532098642492e-11,
+        "shoulder": 0.65273866584421,
+        "spd": 1,
+        "wrist": -0.9406811859266547
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 8,
+      "phase": "RETRACT",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        -0.19284946548722423,
+        0.653733206594072,
+        1.8658783673891497,
+        -0.9488020349585788,
+        0.007506734055581805,
+        2.3941514477826122
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "535cad7458b7679a4d77596d4e0e054b2a7204a20ed01eec9f0762a664a88bae"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": -0.1986649084706678,
+        "elbow": 1.1610870376726095,
+        "hand": 2.391592653589793,
+        "roll": -1.3493868771792494e-11,
+        "shoulder": 0.3461422953855658,
+        "spd": 1,
+        "wrist": 0.06357058542677174
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 9,
+      "phase": "RETURN_ASCEND",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        -0.19211642654117875,
+        0.3532325068534582,
+        1.1629317591601143,
+        0.056630725066538976,
+        0.0038580902753611456,
+        2.3926414524600523
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "118f6f0ebf1785f128a6fae78f0f4e57c322be5cc72fe1b65c4da6701b498416"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": 0.7101827092100952,
+        "elbow": 2.1056987260949636,
+        "hand": 2.391592653589793,
+        "roll": 1.1765259904690387e-09,
+        "shoulder": -0.9164559313588911,
+        "spd": 1,
+        "wrist": 0.38155720475205096
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 10,
+      "phase": "RETURN_TRANSIT",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        0.7050639996550903,
+        -0.9112080291374872,
+        2.0987561072490553,
+        0.3755185793297531,
+        0.0053768384623771644,
+        2.3958739061237844
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "43ca784bb7376803ac94e5154ea8d8380f94097e8824e18b760a0d7b323fd55b"
+    },
+    {
+      "command": {
+        "T": 102,
+        "acc": 1,
+        "base": 1.4787609375000001,
+        "elbow": 2.0904800000000003,
+        "hand": 2.391592653589793,
+        "roll": -2.1360991735537187,
+        "shoulder": -0.851119341563786,
+        "spd": 1,
+        "wrist": 1.4164023323615156
+      },
+      "feedback_exchange_count": 33,
+      "hardware_write_count": 0,
+      "ordinal": 11,
+      "phase": "RETURN_DESCEND",
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "predicted_endpoint_joints_rad": [
+        1.4769407116660513,
+        -0.8556265819366571,
+        2.0926379408280043,
+        1.411623543159384,
+        -2.131109486767225,
+        2.3928102394600583
+      ],
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_SETTLED_REHEARSAL_COMPLETE",
+      "telemetry_sample_count": 33,
+      "wire_bytes_sha256": "609c72fa221d0492218eff744834cf842d88fe4eab4948565a7299a69d7a56d1"
+    }
+  ],
+  "fault_count": 6,
+  "fault_rehearsals": [
+    {
+      "fault": "DROPPED_MESSAGE",
+      "hardware_write_count": 0,
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "plant_status": "FAULT_DROPPED_MESSAGE",
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_ZERO_WRITE_CONFIRMED",
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    },
+    {
+      "fault": "DELAYED_TELEMETRY",
+      "hardware_write_count": 0,
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "plant_status": "FAULT_DELAYED_TELEMETRY",
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_ARRIVAL_UNCERTAIN",
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    },
+    {
+      "fault": "SERVO_NOT_RESPONDING",
+      "hardware_write_count": 0,
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "plant_status": "FAULT_SERVO_NOT_RESPONDING",
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_ARRIVAL_UNCERTAIN",
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    },
+    {
+      "fault": "STALL_OVERLOAD",
+      "hardware_write_count": 0,
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "plant_status": "FAULT_STALL_OVERLOAD",
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_ARRIVAL_UNCERTAIN",
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    },
+    {
+      "fault": "ESTOP",
+      "hardware_write_count": 0,
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "plant_status": "FAULT_ESTOP",
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_ARRIVAL_UNCERTAIN",
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    },
+    {
+      "fault": "POWER_INTERRUPTION",
+      "hardware_write_count": 0,
+      "physical_authority": false,
+      "physical_movement_count": 0,
+      "plant_status": "FAULT_POWER_INTERRUPTION",
+      "real_transport_open_count": 0,
+      "runtime_status": "TERMINAL_NO_RETRY",
+      "runtime_terminal_reason": "COMMAND_ARRIVAL_UNCERTAIN",
+      "wire_bytes_sha256": "69ad477132bc2f0b7d503bd3c99f142054a7ae66bca4164a7223615631c458ed"
+    }
+  ],
+  "hardware_write_count": 0,
+  "limitations": [
+    "Photographs do not provide calibrated camera intrinsics, camera extrinsics, depth, or current encoder state.",
+    "The sequence uses the retained board and robot model rather than estimating a metric pose from handheld photographs.",
+    "Predicted telemetry is synthetic and cannot establish installed-path clearance or physical accuracy.",
+    "No result authorizes copying these commands to a physical controller."
+  ],
+  "minimum_non_target_key_clearance_mm": 26.999999999999982,
+  "official_readiness": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+  "park_pose_id": "halton-0573",
+  "physical_accuracy_claim": false,
+  "physical_authority": false,
+  "physical_movement_count": 0,
+  "real_command_count": 0,
+  "receipt_sha256": "bf2321ffa34c604135cb74aa3a1a3a4104cd942b1fc2db4c20787d4a8fcde941",
+  "scene_basis": "retained hash-bound robot/workcell model corresponding to the photographed arm and keyboard layout; no image-derived 3D registration claim",
+  "schema": "tactevra.captured_layout_command_sequence.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "source_bindings": {
+    "configuration_sha256": "125ad4446e33d76c54b6adbc90181442f71f349342078ab7c649f038ef067037",
+    "consolidated_fixture_sha256": "b73ba949fac90126e24a84e2b8362c800e8d3dccf3ceeb5aa426640d635542c7",
+    "consolidated_result": {
+      "path": "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json",
+      "receipt_sha256": "22dc51f881530b75f72a9ce4ac543ac608b083d5b24259f34f6d9c3bad6def56",
+      "sha256": "e4e43923467cc86ed161f35ea10f22d486e4d258370a77e53d4653a04102c2f8"
+    },
+    "emulator_fixture": {
+      "path": "software/ai/sim/evidence/first_motion_controller_emulator_v1.json",
+      "sha256": "46268bba219a1c6c7c3d456e7589a407fb3d759370de0882133c11211b9ebc19"
+    },
+    "kinematic_compatibility_context": {
+      "path": "software/ai/sim/evidence/tripod_kinematic_context_v1.json",
+      "sha256": "e3ab27bf2ad65887db44f8954a5d2a6aab63b394daef02b50c8e09db126ccd93"
+    },
+    "pose_family": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\cpu_contact_ws3_v2\\candidate51_tool_pose_family.json",
+      "sha256": "abfad469a53e282457811dc3a62c765e80c9e3cf878d446a6695470d1327b1dc"
+    }
+  },
+  "target_contact_board_mm": [
+    197.5,
+    154.0,
+    20.0
+  ],
+  "target_hover_board_mm": [
+    197.5,
+    154.0,
+    50.0
+  ],
+  "target_id": "G",
+  "tool_length_mm": 110.0,
+  "transport_count": 0
+}

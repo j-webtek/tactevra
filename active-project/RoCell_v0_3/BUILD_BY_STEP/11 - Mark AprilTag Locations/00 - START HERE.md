@@ -2,7 +2,7 @@
 
 [← Step 10](<../10 - Check Phone Clearances/00 - START HERE.md>) | [Build dashboard](<../00 - START HERE.md>) | Next step locked
 
-**Current result:** **LOCKED**  
+**Current result:** **LOCKED**
 **Next safe action:** Open [01 - BEFORE YOU START.md](<01 - BEFORE YOU START.md>) for the single prerequisite/gate table; do not begin or initialize evidence.  
 **Engineering name:** Transfer the AprilTag centers and +Y direction
 

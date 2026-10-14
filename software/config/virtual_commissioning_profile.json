@@ -6,9 +6,9 @@
   "simulation_only": true,
   "physical_release_effect": "NONE",
   "binding": {
-    "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+    "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-014",
     "design_revision": "RC03-INT-R1",
-    "simulation_bundle_id": "ROCELL-SIM-BUNDLE-RC03-INT-R1-FREEZE-013-013"
+    "simulation_bundle_id": "ROCELL-SIM-BUNDLE-RC03-INT-R1-FREEZE-014-014"
   },
   "selection": {
     "rank": 1,

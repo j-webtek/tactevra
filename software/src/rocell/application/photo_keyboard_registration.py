@@ -12,6 +12,11 @@ import json
 import math
 from pathlib import Path
 
+from rocell.vision.camera import CameraCaptureError, jpeg_dimensions
+
+
+MAX_PHOTO_BYTES = 25 * 1024 * 1024
+
 
 def _xy(value, label: str) -> tuple[float, float]:
     if (not isinstance(value, list) or len(value) != 2 or
@@ -165,10 +170,25 @@ def estimate_files(annotation_path: Path, profile_path: Path, photo_path: Path) 
     annotation = json.loads(annotation_path.read_text(encoding="utf-8"))
     profile_bytes = profile_path.read_bytes()
     profile = json.loads(profile_bytes)["keyboard"]
-    photo_digest = hashlib.sha256(photo_path.read_bytes()).hexdigest()
+    if not photo_path.is_file():
+        raise ValueError("Source photograph must be a regular file")
+    with photo_path.open("rb") as stream:
+        photo_bytes = stream.read(MAX_PHOTO_BYTES + 1)
+    if len(photo_bytes) > MAX_PHOTO_BYTES:
+        raise ValueError("Source photograph exceeds the 25 MiB limit")
+    photo_digest = hashlib.sha256(photo_bytes).hexdigest()
     if photo_digest != annotation["photo"]["sha256"]:
         raise ValueError("Annotated source photograph has changed")
+    try:
+        dimensions = jpeg_dimensions(photo_bytes)
+    except CameraCaptureError as exc:
+        raise ValueError(f"Annotated source photograph is not a valid JPEG: {exc}") from exc
+    expected_dimensions = (annotation["photo"]["width_px"],
+                           annotation["photo"]["height_px"])
+    if dimensions != expected_dimensions:
+        raise ValueError("Annotated source photograph dimensions have changed")
     result = estimate(annotation, profile,
                       profile_sha256=hashlib.sha256(profile_bytes).hexdigest())
     result["source_photo_bytes_verified"] = True
+    result["source_photo_dimensions_verified"] = True
     return result

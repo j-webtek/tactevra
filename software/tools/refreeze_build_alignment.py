@@ -37,6 +37,7 @@ EXPECTED_PREHARDWARE_STATE = (
 )
 PROSPECTIVE_EXTERNAL_VALIDATION_INPUTS = (
     "hardware/static_overhead_camera/config/support_design.json",
+    "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
     "hardware/static_overhead_camera/hardware_intake_template.csv",
 )
 

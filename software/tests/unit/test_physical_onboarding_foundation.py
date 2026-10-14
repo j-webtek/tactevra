@@ -20,14 +20,14 @@ from rocell.application.physical_onboarding_foundation import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
-FOUNDATION_RELATIVE_PATH = Path("software/config/physical_onboarding_foundation.json")
+FOUNDATION_RELATIVE_PATH = Path("software/config/physical_onboarding_foundation_v2.json")
 FOUNDATION_PATH = WORKSPACE / FOUNDATION_RELATIVE_PATH
 CONTRACT_RELATIVE_PATHS = (
     Path("software/config/authority_effect_policy.json"),
     Path("software/config/physical_onboarding_stage_catalog.json"),
     Path("software/config/configuration_epochs.json"),
     Path("software/config/physical_onboarding_hazards.json"),
-    Path("software/config/workcell_icd.json"),
+    Path("software/config/workcell_icd_v3.json"),
     Path("software/config/accuracy_budget_policy.json"),
 )
 CROSS_CONTRACT_RELATIVE_PATHS = (
@@ -35,10 +35,10 @@ CROSS_CONTRACT_RELATIVE_PATHS = (
     Path("active-project/RoCell_v0_3/config/robot_reach_screening.json"),
     Path("software/config/arm_frame_contract.json"),
     Path("software/config/arm_connection.json"),
-    Path("software/config/camera_architecture_plan.json"),
+    Path("software/config/camera_architecture_plan_v2.json"),
     Path("software/config/camera_profiles/arducam_b0477_imx283_16mm.json"),
-    Path("software/config/physical_onboarding_policy.json"),
-    Path("hardware/static_overhead_camera/config/support_design.json"),
+    Path("software/config/physical_onboarding_policy_v2.json"),
+    Path("hardware/static_overhead_camera/config/commercial_tripod_candidate.json"),
     Path("hardware/static_overhead_camera/hardware_intake_template.csv"),
 )
 
@@ -141,6 +141,17 @@ def test_loads_hash_bound_zero_authority_foundation() -> None:
         ].value
         == "noncontact_acceptance"
     )
+
+
+def test_explicit_historical_v1_foundation_remains_readable() -> None:
+    foundation = load_physical_onboarding_foundation(
+        WORKSPACE, WORKSPACE / "software/config/physical_onboarding_foundation.json"
+    )
+
+    assert foundation.foundation_id == "ROCELL-PHYSICAL-ONBOARDING-FOUNDATION-001"
+    assert foundation.source_path == (
+        WORKSPACE / "software/config/physical_onboarding_foundation.json"
+    ).resolve()
 
 
 def test_every_contract_binding_matches_verified_source_bytes() -> None:
@@ -416,7 +427,7 @@ def test_rejects_float_or_nonfinite_number(tmp_path: Path, number: str) -> None:
     path = tmp_path / "number.json"
     path.write_text(
         FOUNDATION_PATH.read_text(encoding="utf-8").replace(
-            '"revision": 1,', f'"revision": {number},', 1
+            '"revision": 2,', f'"revision": {number},', 1
         ),
         encoding="utf-8",
     )

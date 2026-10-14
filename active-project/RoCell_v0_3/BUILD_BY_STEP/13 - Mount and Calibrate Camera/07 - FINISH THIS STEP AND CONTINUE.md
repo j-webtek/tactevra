@@ -4,9 +4,11 @@ Do not continue unless every mandatory acceptance item is PASS and there is no u
 
 ## Required handoff results
 
-- Required result: Camera hardware and cable route are photographed and measured.
-- Required result: Focus/exposure/resolution/support settings are locked; ChArUco intrinsics, previews, hashes, and runtime settings are retained.
-- Required result: All six tags are visible in every required acceptance pose; T0-T3 solve board pose and K0/P0 pass their held-out station-region checks.
+- Required result: The hash-bound intake records received identities, mount stack, support geometry, installed pose, stability, qualification results, and retained evidence.
+- Required result: B0477 identity, runtime mode, controls, orientation, calibration, and hashes are locked.
+- Required result: All six fiducials and every complete model crop footprint are visible at the qualified pose.
+- Required result: Installed tripod and cable collision geometry pass every approved swept-volume screen, and all wrong-model injections block descent.
+- Required result: Authority remains explicitly false pending the separate robot-power, motion, and contact approval process.
 - Required result: Installed items, returned tools, accepted spares, quarantined parts, and affected downstream datums are recorded in the build-ID folder.
 - Required result: The responsible operator ran `python scripts/sign_off_step.py --step 13 --status PASS --operator "OPERATOR_NAME"`; the helper validated and completed `signoff.json`.
 

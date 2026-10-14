@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import csv
 import json
-import math
 from pathlib import Path
 from typing import Any
 
@@ -60,6 +59,7 @@ def build_report() -> dict[str, Any]:
     digital_fit = read_json("config/digital_fit_report.json")
     reach_screening = read_json("config/robot_reach_screening.json")
     camera_architecture = read_json("config/camera_architecture_decision.json")
+    tripod_intake = read_json("config/tripod_camera_installation_intake_v1.json")
 
     checks: list[dict[str, str]] = []
     revisions = {
@@ -247,18 +247,24 @@ def build_report() -> dict[str, Any]:
         )
     )
 
-    camera_aligned = camera_architecture.get("status") == "ALIGNED_AND_REVISED"
+    camera_selected = (
+        camera_architecture.get("status")
+        == "STATIC_OVERHEAD_TRIPOD_SELECTED_UNQUALIFIED"
+    )
+    camera_qualified = tripod_intake.get("status") == "QUALIFIED"
     checks.append(
         check(
             "camera_architecture_alignment",
-            "ENGINEERING_PASS_RECORDED" if camera_aligned else "ENGINEERING_HOLD",
+            "ENGINEERING_PASS_RECORDED"
+            if camera_selected and camera_qualified
+            else "ENGINEERING_HOLD",
             (
-                "User intent is an arm-mounted operational camera, while the current RC03 Step 13 and selected mast route are fixed eye-to-hand controls. "
-                f"Decision status is {camera_architecture.get('status')}; exact arm-camera specification reference is "
-                f"{camera_architecture.get('exact_arm_camera_specification_reference')!r}."
+                "Phase 1 selects the Arducam B0477 on an independent commercial floor tripod as the static overhead eye-to-hand primary. "
+                f"Decision status is {camera_architecture.get('status')}; installation intake status is "
+                f"{tripod_intake.get('status')}. The legacy RC03 mast jobs are SUPERSEDED_DO_NOT_PRINT."
             ),
-            "Control the exact arm-camera specification, carrier frame, mount, mass/COM, moving cable, eye-in-hand calibration, pose visibility/timing, payload, reach, and collisions; then revise every affected artifact before printing or installation."
-            if not camera_aligned
+            "Complete the hash-bound tripod receipt, mount-interface, support-geometry, installed-pose, stability, all-tag/crop visibility, collision, witness, and wrong-model records before installation or motion."
+            if not camera_qualified
             else "",
         )
     )

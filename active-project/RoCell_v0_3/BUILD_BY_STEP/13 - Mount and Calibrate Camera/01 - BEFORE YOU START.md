@@ -12,7 +12,6 @@
 
 | Input | Current result | Evidence needed |
 | --- | --- | --- |
-| `camera_mount_interface_measured` | **NOT_TESTED** | Measure the camera thread, screw engagement, crossbar fasteners, and selected strap. |
 | `tag_plane_placement_measured` | **NOT_TESTED** | Record installed XY, yaw, optical-plane Z, the raw edge distances/baselines, and the calculation method for all six direct tags. Require center error within 0.50 mm and yaw within 0.30 degrees. Camera reprojection and static detection are verified separately in Step 13. |
 
 ## Gather checklist

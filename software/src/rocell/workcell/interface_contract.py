@@ -22,8 +22,10 @@ from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
 
-WORKCELL_INTERFACE_CONTRACT_SCHEMA = "rocell.workcell_interface_contract.v1"
-DEFAULT_WORKCELL_INTERFACE_CONTRACT = Path("software/config/workcell_icd.json")
+WORKCELL_INTERFACE_CONTRACT_SCHEMA_V1 = "rocell.workcell_interface_contract.v1"
+WORKCELL_INTERFACE_CONTRACT_SCHEMA_V2 = "rocell.workcell_interface_contract.v2"
+WORKCELL_INTERFACE_CONTRACT_SCHEMA = "rocell.workcell_interface_contract.v3"
+DEFAULT_WORKCELL_INTERFACE_CONTRACT = Path("software/config/workcell_icd_v3.json")
 MAX_WORKCELL_INTERFACE_CONTRACT_BYTES = 64 * 1024
 MAX_WORKCELL_INTERFACE_SOURCE_BYTES = 2 * 1024 * 1024
 
@@ -48,7 +50,7 @@ _ROOT_FIELDS = frozenset(
     }
 )
 
-_EXPECTED_SOURCE_BINDINGS: Mapping[str, tuple[str, str]] = MappingProxyType(
+_EXPECTED_SOURCE_BINDINGS_V1: Mapping[str, tuple[str, str]] = MappingProxyType(
     {
         "workcell_layout": (
             "active-project/RoCell_v0_3/config/workcell_layout.json",
@@ -86,6 +88,38 @@ _EXPECTED_SOURCE_BINDINGS: Mapping[str, tuple[str, str]] = MappingProxyType(
             "software/config/physical_onboarding_policy.json",
             "30af2bdf05d239b0eefc2079a88fb1916ab9d09cc4a1cb1a8a40b77f97369ee9",
         ),
+    }
+)
+
+_EXPECTED_SOURCE_BINDINGS_V2: Mapping[str, tuple[str, str]] = MappingProxyType(
+    {
+        **{
+            key: value
+            for key, value in _EXPECTED_SOURCE_BINDINGS_V1.items()
+            if key not in {"camera_architecture_plan", "static_camera_support_design"}
+        },
+        "camera_architecture_plan": (
+            "software/config/camera_architecture_plan_v2.json",
+            "b296d0f1ccd53d82db31816164de1b33d42a6c348271e814060c4242f1ff733f",
+        ),
+        "commercial_tripod_candidate": (
+            "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+            "3f132aee15b5a3b5c65e1c6dfc04523cf5ded61939088bc34e0ddcee9e28fbe9",
+        ),
+    }
+)
+
+_EXPECTED_SOURCE_BINDINGS_V3: Mapping[str, tuple[str, str]] = MappingProxyType(
+    {
+        key: (
+            (
+                "software/config/physical_onboarding_policy_v2.json",
+                "a331fa0baae6051c23616b9aec02787310d3a1818fc3b28dc4fe796135246c73",
+            )
+            if key == "physical_onboarding_policy"
+            else value
+        )
+        for key, value in _EXPECTED_SOURCE_BINDINGS_V2.items()
     }
 )
 
@@ -140,6 +174,16 @@ _EXPECTED_MECHANICAL_INTERFACE = {
     ),
 }
 
+_EXPECTED_MECHANICAL_INTERFACE_V2 = {
+    **_EXPECTED_MECHANICAL_INTERFACE,
+    "static_support_candidate_source": "commercial_tripod_candidate",
+    "rule": (
+        "Consumers reference the bound layout, frame, tripod, and intake "
+        "sources; this ICD does not restate dimensions, transforms, fasteners, "
+        "clearances, or acceptance limits."
+    ),
+}
+
 _EXPECTED_ELECTRICAL_POWER_INTERFACE = {
     "arm_connection_source": "arm_connection",
     "intake_source": "hardware_intake_template",
@@ -165,6 +209,11 @@ _EXPECTED_UVC_INTERFACE = {
     "bounded_buffer_flush_before_evidence_capture": True,
     "identity_mode_and_controls_revalidated_after_reopen": True,
     "automatic_open_initialize_or_retry_allowed": False,
+}
+
+_EXPECTED_UVC_INTERFACE_V2 = {
+    **_EXPECTED_UVC_INTERFACE,
+    "support_source": "commercial_tripod_candidate",
 }
 
 _EXPECTED_SERIAL_INTERFACE = {
@@ -506,15 +555,19 @@ def _normalized_relative_path(value: object, label: str) -> str:
 
 
 def _validate_source_bindings(
-    root: Path, value: object
+    root: Path,
+    value: object,
+    *,
+    expected_bindings: Mapping[str, tuple[str, str]],
+    schema_version: int,
 ) -> Mapping[str, WorkcellSourceBinding]:
     bindings = _mapping(value, "source_bindings")
-    _exact_fields(bindings, frozenset(_EXPECTED_SOURCE_BINDINGS), "source_bindings")
+    _exact_fields(bindings, frozenset(expected_bindings), "source_bindings")
     verified: dict[str, WorkcellSourceBinding] = {}
     for source_id, (
         expected_path,
         expected_sha256,
-    ) in _EXPECTED_SOURCE_BINDINGS.items():
+    ) in expected_bindings.items():
         binding = _mapping(bindings[source_id], f"source_bindings.{source_id}")
         _exact_fields(
             binding,
@@ -537,7 +590,7 @@ def _validate_source_bindings(
             )
         if declared_sha256 != expected_sha256:
             raise WorkcellInterfaceContractError(
-                f"source_bindings.{source_id}.sha256 changed from the v1 binding"
+                f"source_bindings.{source_id}.sha256 changed from the v{schema_version} binding"
             )
         resolved = _contained_file(
             root,
@@ -614,13 +667,49 @@ def load_workcell_interface_contract(
     _reject_symlink_chain(selected, "workcell ICD")
     document = _parse_document(payload)
     _exact_fields(document, _ROOT_FIELDS, "workcell ICD")
-    _validate_exact(document["schema"], WORKCELL_INTERFACE_CONTRACT_SCHEMA, "schema")
-    _validate_exact(document["schema_version"], 1, "schema_version")
-    _validate_exact(document["contract_id"], "ROCELL-WORKCELL-ICD-001", "contract_id")
+    schema = document["schema"]
+    schema_version = document["schema_version"]
+    if (
+        type(schema) is str
+        and type(schema_version) is int
+        and (schema, schema_version) == (WORKCELL_INTERFACE_CONTRACT_SCHEMA_V1, 1)
+    ):
+        contract_id = "ROCELL-WORKCELL-ICD-001"
+        expected_bindings = _EXPECTED_SOURCE_BINDINGS_V1
+        expected_mechanical = _EXPECTED_MECHANICAL_INTERFACE
+        expected_uvc = _EXPECTED_UVC_INTERFACE
+    elif (
+        type(schema) is str
+        and type(schema_version) is int
+        and (schema, schema_version) == (WORKCELL_INTERFACE_CONTRACT_SCHEMA_V2, 2)
+    ):
+        contract_id = "ROCELL-WORKCELL-ICD-TRIPOD-002"
+        expected_bindings = _EXPECTED_SOURCE_BINDINGS_V2
+        expected_mechanical = _EXPECTED_MECHANICAL_INTERFACE_V2
+        expected_uvc = _EXPECTED_UVC_INTERFACE_V2
+    elif (
+        type(schema) is str
+        and type(schema_version) is int
+        and (schema, schema_version) == (WORKCELL_INTERFACE_CONTRACT_SCHEMA, 3)
+    ):
+        contract_id = "ROCELL-WORKCELL-ICD-TRIPOD-003"
+        expected_bindings = _EXPECTED_SOURCE_BINDINGS_V3
+        expected_mechanical = _EXPECTED_MECHANICAL_INTERFACE_V2
+        expected_uvc = _EXPECTED_UVC_INTERFACE_V2
+    else:
+        raise WorkcellInterfaceContractError(
+            "schema and schema_version must identify workcell ICD v1, v2, or v3"
+        )
+    _validate_exact(document["contract_id"], contract_id, "contract_id")
     _validate_exact(document["status"], "ADDITIVE_ZERO_AUTHORITY", "status")
     _validate_exact(document["authority"], _EXPECTED_AUTHORITY, "authority")
 
-    source_bindings = _validate_source_bindings(root, document["source_bindings"])
+    source_bindings = _validate_source_bindings(
+        root,
+        document["source_bindings"],
+        expected_bindings=expected_bindings,
+        schema_version=schema_version,
+    )
     _validate_exact(
         document["coordinate_conventions"],
         _EXPECTED_COORDINATE_CONVENTIONS,
@@ -628,7 +717,7 @@ def load_workcell_interface_contract(
     )
     _validate_exact(
         document["mechanical_interface"],
-        _EXPECTED_MECHANICAL_INTERFACE,
+        expected_mechanical,
         "mechanical_interface",
     )
     _validate_exact(
@@ -636,7 +725,7 @@ def load_workcell_interface_contract(
         _EXPECTED_ELECTRICAL_POWER_INTERFACE,
         "electrical_power_interface",
     )
-    _validate_exact(document["uvc_interface"], _EXPECTED_UVC_INTERFACE, "uvc_interface")
+    _validate_exact(document["uvc_interface"], expected_uvc, "uvc_interface")
     _validate_exact(
         document["serial_interface"],
         _EXPECTED_SERIAL_INTERFACE,
@@ -697,7 +786,7 @@ def load_workcell_interface_contract(
     return WorkcellInterfaceContract(
         path=selected,
         content_sha256=hashlib.sha256(payload).hexdigest(),
-        contract_id="ROCELL-WORKCELL-ICD-001",
+        contract_id=contract_id,
         status="ADDITIVE_ZERO_AUTHORITY",
         source_bindings=source_bindings,
         provider_roles=provider_roles,
@@ -711,6 +800,8 @@ __all__ = [
     "MAX_WORKCELL_INTERFACE_CONTRACT_BYTES",
     "MAX_WORKCELL_INTERFACE_SOURCE_BYTES",
     "WORKCELL_INTERFACE_CONTRACT_SCHEMA",
+    "WORKCELL_INTERFACE_CONTRACT_SCHEMA_V1",
+    "WORKCELL_INTERFACE_CONTRACT_SCHEMA_V2",
     "WorkcellInterfaceContract",
     "WorkcellInterfaceContractError",
     "WorkcellProviderRole",

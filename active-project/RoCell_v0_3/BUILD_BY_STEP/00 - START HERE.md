@@ -5,8 +5,8 @@ This is the operator-facing sequence for `RC03-INT-R1`. The CAD, configuration, 
 **Physical state:** `UNRELEASED`  
 **Active build ID:** `2026-09-01_CELL-A`  
 **Print readiness:** 5 READY / 15 WAITING / 4 NOT_SELECTED  
-**Package definition hash:** `65bbe688892e0dcdd2115a28d9f155921587915d80e98f6b01d81aaedcbde3a5`  
-**Canonical snapshot hash:** `06efd7afc3a2b406d822f18b0ae06189c5edbb01dbbd069e0edf35718290f45c`  
+**Package definition hash:** `5f18f598920dc04d0066e1a233f9f313ae48121094868790a4489995069d5313`  
+**Canonical snapshot hash:** `3a3d1894c12af5f94fa453250f0ddb884f3cdda1febb53707d1a1395cb7f9adf`  
 **Selected routes:** phone stylus=True, keyboard rod=True, fixed-mast camera fallback=False (selection is not release)
 
 ## How to use this folder
@@ -44,7 +44,7 @@ This is the operator-facing sequence for `RC03-INT-R1`. The CAD, configuration, 
 | [10](<10 - Check Phone Clearances/00 - START HERE.md>) | **LOCKED** | Check Phone Clearances | 09 | 03A, 03C1, 05A, 05B | 11 |
 | [11](<11 - Mark AprilTag Locations/00 - START HERE.md>) | **LOCKED** | Mark AprilTag Locations | 10 | 03C2 | 12 |
 | [12](<12 - Attach and Measure AprilTags/00 - START HERE.md>) | **LOCKED** | Attach and Measure AprilTags | 11 | 03C2 | 13 |
-| [13](<13 - Mount and Calibrate Camera/00 - START HERE.md>) | **LOCKED** | Mount and Calibrate Camera | 12 | 00E, 03C3, 06, 07A, 07B | 14 |
+| [13](<13 - Mount and Calibrate Camera/00 - START HERE.md>) | **LOCKED** | Mount and Calibrate Camera | 12 | 00E | 14 |
 | [14](<14 - Assemble and Test Spring-Loaded Tool/00 - START HERE.md>) | **LOCKED** | Assemble and Test Spring-Loaded Tool | 13 | 00C, 00D, 00E, 04A, 04B, 04C, 05C, 05D | 15 |
 | [15](<15 - Final Safety Test and Release/00 - START HERE.md>) | **LOCKED** | Final Safety Test and Release | 14 | — | archive |
 

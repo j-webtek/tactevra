@@ -547,3 +547,44 @@ separate runtime module so the earlier twin remains byte-identical. This raises
 the exact tracked-file count and governed ceiling to 6,420. The fixture records
 the binding-only amendment and preserves the superseded fixture identity; its
 metrics, ranges, and decision rules are unchanged.
+
+The commercial-tripod camera-support migration adds four reviewable source
+files: one maintained migration inventory, one strict candidate schema, one
+candidate record, and one focused regression test. This raises the exact
+tracked-file count and governed ceiling to 6,424. It adds no generated CAD,
+print artifact, render, model, dataset, or binary evidence; every byte, blob,
+duplicate, and reduction limit remains unchanged.
+
+The versioned tripod contract migration adds two compact JSON contracts: the
+active camera architecture v2 plan and the active workcell ICD v2. The original
+v1 files remain byte-identical so historical mast and portal evidence can still
+be reproduced explicitly. This raises the exact tracked-file count and governed
+ceiling to 6,426. No generated result, CAD, render, model, dataset, or binary
+evidence enters the source archive; every byte, blob, duplicate, and reduction
+limit remains unchanged.
+
+The exploratory physical-tag increment adds three reviewable text artifacts:
+one reusable uncalibrated AprilTag probe and two compact JSON reports covering
+the initial and successor phone-photo observations. This raises the exact
+tracked-file count and governed ceiling to 6,429. The original photographs,
+camera environments, calibration captures, and physical qualification evidence
+remain external and hash-bound; every byte, blob, duplicate, and reduction
+limit remains unchanged.
+
+The tripod-installation intake, photo-layout reconciliation, manual-photo
+first-motion rehearsal, and bounded WiFi registration increments add 36
+reviewed text and source files. They cover the maintained tripod procedure and
+validator, compact calibration and rehearsal records, their deterministic
+runtime and tests, and the signed one-leg WiFi firmware/client path. This raises
+the exact tracked-file count and governed ceiling to 6,465. Camera captures,
+generated motion receipts, firmware binaries, environments, and physical
+qualification evidence remain external and hash-bound; every byte, blob,
+duplicate, and reduction limit remains unchanged.
+
+The formal Freeze 014 reconciliation adds eight immutable provenance records:
+the seven-file Freeze 013 companion snapshot and its single transition record.
+This raises the exact tracked-file count and governed ceiling to 6,473. The
+snapshot records the reviewed tripod migration while preserving zero physical
+authority; it adds no camera captures, generated motion receipts, firmware
+binaries, environments, or physical qualification evidence. Every byte, blob,
+duplicate, and reduction limit remains unchanged.

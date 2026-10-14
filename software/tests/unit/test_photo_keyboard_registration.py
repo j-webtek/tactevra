@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from rocell.application.photo_keyboard_registration import estimate
+from rocell.application.photo_keyboard_registration import estimate, estimate_files
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -45,3 +45,18 @@ def test_bad_fiducial_or_dimension_is_rejected():
     wrong_size["housing_dimensions_mm"][0] = 300
     with pytest.raises(ValueError, match="housing dimensions"):
         estimate(wrong_size, profile, profile_sha256=digest)
+
+
+def test_source_jpeg_dimensions_must_match_annotation(tmp_path):
+    annotation, _, _ = inputs()
+    # Structurally valid 2 x 3 JPEG for the bounded header parser.
+    photo = tmp_path / "photo.jpg"
+    payload = (b"\xff\xd8\xff\xc0\x00\x11\x08\x00\x03\x00\x02" +
+               b"\x03\x01\x11\x00\x02\x11\x00\x03\x11\x00\xff\xd9")
+    photo.write_bytes(payload)
+    annotation["photo"]["sha256"] = hashlib.sha256(payload).hexdigest()
+    annotation_path = tmp_path / "annotation.json"
+    annotation_path.write_text(json.dumps(annotation), encoding="utf-8")
+    profile_path = ROOT / "config/static_nominal_target_profiles.json"
+    with pytest.raises(ValueError, match="dimensions have changed"):
+        estimate_files(annotation_path, profile_path, photo)

@@ -1,0 +1,126 @@
+{
+  "schema": "rocell.working_installed_apriltag_xy.v1",
+  "created_at": "2026-10-11T00:00:00-04:00",
+  "scope": "operator_supplied_installed_tag_xy_working_observation",
+  "design_revision": "RC03-INT-R1",
+  "board": {
+    "size_xy_mm": [
+      610.0,
+      457.0
+    ],
+    "origin": "front-left board corner",
+    "axes": {
+      "+x": "right",
+      "+y": "rear/toward arm",
+      "+z": "up"
+    }
+  },
+  "coordinate_source": "working_operator_measurement",
+  "measurement": {
+    "status": "WORKING_UNQUALIFIED",
+    "method": "handheld digital-caliper edge measurements documented in operator photographs and operator-reported display readings",
+    "tool_identity": "unbound handheld digital caliper",
+    "session_date": "2026-10-11",
+    "source": "interactive operator measurement session",
+    "source_attachment_batch_ids": [
+      "EA2A77FC-AAFB-4638-8C50-389CC9E81202",
+      "A913BA14-8625-42D6-95C4-3997D2F147AA",
+      "19309DF9-AD35-414B-94C6-6A5EBCB56CB0",
+      "F450246E-908F-46E4-BE44-F7D0484BBD64",
+      "E4881E74-3A49-4890-BC06-5524B3395776",
+      "7EF9F925-49DC-42C1-86F5-8795D65E30C7",
+      "9061560E-3C27-423D-85E5-85F4AC558E24",
+      "A1ACB9DD-C0BA-4A46-81EA-AE673402841E",
+      "659ECD5C-D6BF-4BF7-A48C-F88F964CE7BD",
+      "73A5EC0F-2FE1-4B42-B945-D46F8EB10E10"
+    ]
+  },
+  "tags": {
+    "T0": {
+      "id": 0,
+      "role": "world",
+      "working_detection_center_xy_mm": [
+        27.32,
+        33.31
+      ]
+    },
+    "T1": {
+      "id": 1,
+      "role": "world",
+      "working_detection_center_xy_mm": [
+        403.66,
+        38.45
+      ]
+    },
+    "T2": {
+      "id": 2,
+      "role": "world",
+      "working_detection_center_xy_mm": [
+        32.55,
+        429.5
+      ]
+    },
+    "T3": {
+      "id": 3,
+      "role": "world",
+      "working_detection_center_xy_mm": [
+        581.38,
+        431.47
+      ]
+    },
+    "K0": {
+      "id": 4,
+      "role": "station_check",
+      "working_detection_center_xy_mm": [
+        240.17,
+        265.84
+      ]
+    },
+    "P0": {
+      "id": 5,
+      "role": "station_check",
+      "working_detection_center_xy_mm": [
+        442.05,
+        270.39
+      ],
+      "derivation": {
+        "right_board_edge_to_right_tag_edge_mm": [
+          148.79,
+          149.55
+        ],
+        "right_board_edge_to_left_tag_edge_mm": [
+          186.74
+        ],
+        "front_board_edge_to_front_tag_edge_mm": [
+          250.93,
+          252.03
+        ],
+        "front_board_edge_to_rear_tag_edge_mm": [
+          288.46,
+          290.11
+        ],
+        "computed_center_xy_mm": [
+          442.045,
+          270.3825
+        ]
+      }
+    }
+  },
+  "qualification": {
+    "eligible_for_tag_plane_placement_measured": false,
+    "z_measured": false,
+    "yaw_measured": false,
+    "measurement_uncertainty_available": false,
+    "tool_identity_bound": false,
+    "physical_authority": false
+  },
+  "limitations": [
+    "This is a working XY observation assembled from the completed operator photo session, not the canonical AprilTag map.",
+    "Tag-plane Z, yaw, edge lift, measurement uncertainty, and tool identity were not established.",
+    "The values may be used for exploratory image-consistency checks only and cannot satisfy tag_plane_placement_measured.",
+    "The canonical map remains nominal and NOT_TESTED until the full measurement gate is completed."
+  ],
+  "hardware_writes": 0,
+  "physical_movements_by_analysis": 0,
+  "physical_authority": false
+}

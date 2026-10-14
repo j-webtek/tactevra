@@ -414,16 +414,44 @@ def main() -> int:
         if calibration_registry.get("active_build_id") != rc03.get("active_build_id"):
             errors.append("Calibration registry and RC03 active build IDs differ")
 
-        if camera_decision.get("status") != "ENGINEERING_ALIGNMENT_HOLD":
-            errors.append("Arm-camera decision is not on the required engineering alignment hold")
-        if camera_decision.get("exact_arm_camera_specification_reference") is not None:
-            errors.append("Arm-camera specification was populated without revising the frozen contract")
-
-        camera_baseline = camera_decision.get("current_rc03_baseline", {})
-        if camera_baseline.get("route_id") != "camera_mast_optional":
-            errors.append("Camera decision fallback route no longer matches camera_mast_optional")
-        if camera_baseline.get("route_selected") is not False:
-            errors.append("Camera decision no longer records the mast as an unselected fallback")
+        if camera_decision.get("schema_version") != 2:
+            errors.append("Camera architecture decision is not the fail-closed tripod v2 record")
+        if camera_decision.get("status") != "STATIC_OVERHEAD_TRIPOD_SELECTED_UNQUALIFIED":
+            errors.append("Camera architecture does not select the unqualified overhead tripod")
+        active_camera_route = camera_decision.get("active_route", {})
+        expected_active_camera_route = {
+            "route_id": "camera_overhead_primary",
+            "architecture": "static_overhead_eye_to_hand",
+            "support_type": "independent_commercial_floor_tripod",
+            "selected": True,
+            "qualified": False,
+            "physical_release_effect": "NONE",
+        }
+        for field, expected_value in expected_active_camera_route.items():
+            if active_camera_route.get(field) != expected_value:
+                errors.append(
+                    f"Camera tripod route {field} is {active_camera_route.get(field)!r}, "
+                    f"expected {expected_value!r}"
+                )
+        camera_installation_state = camera_decision.get("installation_state", {})
+        if camera_installation_state.get("intake_status") != "AWAITING_RECEIVED_HARDWARE_MEASUREMENTS":
+            errors.append("Camera tripod intake was advanced without received-hardware measurements")
+        if camera_installation_state.get("motion_authorized") is not False:
+            errors.append("Camera tripod decision unexpectedly authorizes motion")
+        if camera_installation_state.get("contact_authorized") is not False:
+            errors.append("Camera tripod decision unexpectedly authorizes contact")
+        superseded_camera_routes = {
+            row.get("route_id"): row
+            for row in camera_decision.get("superseded_routes", [])
+            if isinstance(row, dict)
+        }
+        mast_disposition = superseded_camera_routes.get("camera_mast_optional", {})
+        if mast_disposition.get("treatment") != "SUPERSEDED_DO_NOT_PRINT":
+            errors.append("Camera decision does not preserve the superseded mast disposition")
+        if set(mast_disposition.get("jobs", [])) != {"03C3", "06", "07A", "07B"}:
+            errors.append("Camera decision superseded mast-job set changed")
+        if superseded_camera_routes.get("arm_mounted_camera_phase_1", {}).get("treatment") != "HISTORICAL_UNSELECTED":
+            errors.append("Camera decision does not retain the historical arm-camera disposition")
         if measurement.get("selected_routes", {}).get("camera_mast_optional") is not False:
             errors.append("RC03 camera_mast_optional route is unexpectedly selected")
 
@@ -445,6 +473,8 @@ def main() -> int:
         for job_id, job in fallback_jobs.items():
             if fallback_gate_id not in job.get("prerequisites", []):
                 errors.append(f"Fallback camera job {job_id} lacks the architecture release interlock")
+            if job.get("lifecycle") != "SUPERSEDED_DO_NOT_PRINT":
+                errors.append(f"Fallback camera job {job_id} is not marked superseded")
         frozen_fallback_gate = manifest["current_build_state"].get(
             "fixed_camera_fallback_release_gate", {}
         )
@@ -466,14 +496,21 @@ def main() -> int:
             errors.append("V1 configuration claims an exact arm camera without a freeze revision")
 
         candidate_camera_boundary = hardware_candidates.get("camera_architecture_boundary", {})
-        if candidate_camera_boundary.get("release_effect") != "ENGINEERING_ALIGNMENT_HOLD":
-            errors.append("Hardware candidate registry no longer preserves the arm-camera hold")
-        if candidate_camera_boundary.get("exact_arm_camera_specification_present") is not False:
-            errors.append("Hardware candidate registry unexpectedly claims an exact arm camera")
-        if candidate_camera_boundary.get("current_fallback_route") != "camera_mast_optional":
-            errors.append("Hardware candidate fallback route changed")
-        if candidate_camera_boundary.get("fallback_route_selected") is not False:
-            errors.append("Hardware candidate registry unexpectedly selects the mast fallback")
+        expected_candidate_camera_boundary = {
+            "status": "SELECTED_UNQUALIFIED",
+            "primary_architecture": "static_overhead_eye_to_hand",
+            "primary_route": "camera_overhead_primary",
+            "release_effect": "PHYSICAL_QUALIFICATION_HOLD",
+            "legacy_mast_route": "camera_mast_optional",
+            "legacy_mast_selected": False,
+            "legacy_mast_treatment": "SUPERSEDED_DO_NOT_PRINT",
+        }
+        for field, expected_value in expected_candidate_camera_boundary.items():
+            if candidate_camera_boundary.get(field) != expected_value:
+                errors.append(
+                    f"Hardware candidate camera boundary {field} is "
+                    f"{candidate_camera_boundary.get(field)!r}, expected {expected_value!r}"
+                )
 
         if not errors and "CAMERA_ARCHITECTURE_ALIGNMENT_HOLD" not in blockers:
             blockers.append("CAMERA_ARCHITECTURE_ALIGNMENT_HOLD")

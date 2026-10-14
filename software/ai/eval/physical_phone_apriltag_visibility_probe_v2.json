@@ -1,0 +1,380 @@
+{
+  "schema": "rocell.uncalibrated_apriltag_visibility_probe.v2",
+  "created_at": "2026-10-11T18:08:25.193222+00:00",
+  "scope": "exploratory_phone_photographs_only",
+  "dictionary": "DICT_APRILTAG_36h11",
+  "expected_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "opencv_version": "5.0.0",
+  "images": [
+    {
+      "file_name": "1-Photo-1.jpg",
+      "sha256": "7b7c5e291b86e6dfa2be0f84701368410697f76d5f3c5cca2d020a957328467f",
+      "width_px": 960,
+      "height_px": 1280,
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "missing_expected_ids": [
+        4
+      ],
+      "detections": [
+        {
+          "id": 0,
+          "center_px": [
+            96.938,
+            290.356
+          ],
+          "area_px2": 2473.308
+        },
+        {
+          "id": 1,
+          "center_px": [
+            128.491,
+            754.182
+          ],
+          "area_px2": 2390.405
+        },
+        {
+          "id": 2,
+          "center_px": [
+            523.909,
+            344.442
+          ],
+          "area_px2": 1228.298
+        },
+        {
+          "id": 3,
+          "center_px": [
+            539.448,
+            883.334
+          ],
+          "area_px2": 1148.29
+        },
+        {
+          "id": 5,
+          "center_px": [
+            396.67,
+            764.379
+          ],
+          "area_px2": 1548.912
+        }
+      ],
+      "rejected_candidates": 56
+    },
+    {
+      "file_name": "2-Photo-2.jpg",
+      "sha256": "5bfb43135645f6f986037fedd6a07915dfc9b3e447eb6de70b5d81fff7b70cbb",
+      "width_px": 960,
+      "height_px": 1280,
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "missing_expected_ids": [],
+      "detections": [
+        {
+          "id": 0,
+          "center_px": [
+            80.275,
+            302.397
+          ],
+          "area_px2": 2908.035
+        },
+        {
+          "id": 1,
+          "center_px": [
+            106.697,
+            798.37
+          ],
+          "area_px2": 2787.564
+        },
+        {
+          "id": 2,
+          "center_px": [
+            551.36,
+            355.919
+          ],
+          "area_px2": 1495.782
+        },
+        {
+          "id": 3,
+          "center_px": [
+            562.697,
+            944.261
+          ],
+          "area_px2": 1444.501
+        },
+        {
+          "id": 4,
+          "center_px": [
+            386.494,
+            585.024
+          ],
+          "area_px2": 1867.645
+        },
+        {
+          "id": 5,
+          "center_px": [
+            403.054,
+            811.505
+          ],
+          "area_px2": 1909.481
+        }
+      ],
+      "rejected_candidates": 49
+    },
+    {
+      "file_name": "3-Photo-3.jpg",
+      "sha256": "b8bf2d89e20e4966159954acb0b51074e86c23dd9a370142dc39300a455b263c",
+      "width_px": 960,
+      "height_px": 1280,
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "missing_expected_ids": [],
+      "detections": [
+        {
+          "id": 0,
+          "center_px": [
+            659.886,
+            854.977
+          ],
+          "area_px2": 1586.524
+        },
+        {
+          "id": 1,
+          "center_px": [
+            650.25,
+            461.13
+          ],
+          "area_px2": 1571.522
+        },
+        {
+          "id": 2,
+          "center_px": [
+            221.246,
+            875.165
+          ],
+          "area_px2": 2066.289
+        },
+        {
+          "id": 3,
+          "center_px": [
+            217.209,
+            239.15
+          ],
+          "area_px2": 2023.729
+        },
+        {
+          "id": 4,
+          "center_px": [
+            413.227,
+            631.752
+          ],
+          "area_px2": 1769.079
+        },
+        {
+          "id": 5,
+          "center_px": [
+            399.719,
+            411.522
+          ],
+          "area_px2": 1942.129
+        }
+      ],
+      "rejected_candidates": 95
+    }
+  ],
+  "summary": {
+    "image_count": 3,
+    "images_with_all_expected_ids": 2,
+    "union_detected_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "union_contains_all_expected_ids": true,
+    "per_id_detection_counts": {
+      "0": 3,
+      "1": 3,
+      "2": 3,
+      "3": 3,
+      "4": 2,
+      "5": 3
+    }
+  },
+  "layout_consistency": {
+    "scope": "uncalibrated_nominal_map_consistency_only",
+    "method": "four_world_tag_center_homography",
+    "tag_map_path": "active-project\\RoCell_v0_3\\fiducials\\apriltag_map.json",
+    "tag_map_sha256": "81c867d28660cdade79cb8024104d82e5568effa0736f07f0947c1007ac23700",
+    "tag_map_coordinate_source": "nominal_layout",
+    "images": [
+      {
+        "file_name": "1-Photo-1.jpg",
+        "status": "COMPUTED_EXPLORATORY",
+        "world_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "station_checks": [
+          {
+            "name": "P0",
+            "id": 5,
+            "estimated_board_xy_mm": [
+              446.156,
+              274.399
+            ],
+            "nominal_board_xy_mm": [
+              459.0,
+              309.0
+            ],
+            "delta_xy_mm": [
+              -12.844,
+              -34.601
+            ],
+            "planar_error_mm": 36.909
+          }
+        ],
+        "max_station_planar_error_mm": 36.909
+      },
+      {
+        "file_name": "2-Photo-2.jpg",
+        "status": "COMPUTED_EXPLORATORY",
+        "world_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "station_checks": [
+          {
+            "name": "K0",
+            "id": 4,
+            "estimated_board_xy_mm": [
+              252.233,
+              266.438
+            ],
+            "nominal_board_xy_mm": [
+              324.0,
+              309.0
+            ],
+            "delta_xy_mm": [
+              -71.767,
+              -42.562
+            ],
+            "planar_error_mm": 83.439
+          },
+          {
+            "name": "P0",
+            "id": 5,
+            "estimated_board_xy_mm": [
+              445.6,
+              274.269
+            ],
+            "nominal_board_xy_mm": [
+              459.0,
+              309.0
+            ],
+            "delta_xy_mm": [
+              -13.4,
+              -34.731
+            ],
+            "planar_error_mm": 37.227
+          }
+        ],
+        "max_station_planar_error_mm": 83.439
+      },
+      {
+        "file_name": "3-Photo-3.jpg",
+        "status": "COMPUTED_EXPLORATORY",
+        "world_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "station_checks": [
+          {
+            "name": "K0",
+            "id": 4,
+            "estimated_board_xy_mm": [
+              251.82,
+              264.676
+            ],
+            "nominal_board_xy_mm": [
+              324.0,
+              309.0
+            ],
+            "delta_xy_mm": [
+              -72.18,
+              -44.324
+            ],
+            "planar_error_mm": 84.703
+          },
+          {
+            "name": "P0",
+            "id": 5,
+            "estimated_board_xy_mm": [
+              446.306,
+              273.204
+            ],
+            "nominal_board_xy_mm": [
+              459.0,
+              309.0
+            ],
+            "delta_xy_mm": [
+              -12.694,
+              -35.796
+            ],
+            "planar_error_mm": 37.98
+          }
+        ],
+        "max_station_planar_error_mm": 84.703
+      }
+    ],
+    "qualification": false
+  },
+  "qualification": {
+    "camera_intrinsics_available": false,
+    "installed_tag_geometry_measured": false,
+    "board_pose_estimated": false,
+    "localization_error_mm_available": false,
+    "deployment_qualification": false,
+    "physical_authority": false
+  },
+  "hardware_writes": 0,
+  "physical_movements_by_probe": 0,
+  "limitations": [
+    "Phone camera identity, intrinsics, distortion, focus, exposure, and pose are unbound.",
+    "Image-space tag visibility does not establish metric localization or uncertainty.",
+    "The original photographs remain external and are bound here only by SHA-256.",
+    "Planar consistency uses nominal outer-tag centers and cannot replace independent measurement."
+  ],
+  "next_dependency": "Independently measure and bind every installed tag center before metric pose use; then repeat visibility, calibration, pose, noise, and drift checks with the tripod-mounted B0477."
+}

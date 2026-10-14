@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/commercial_tripod_candidate.schema.json",
+  "title": "RoCell commercial tripod camera support candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "candidate_id",
+    "decision_state",
+    "product",
+    "architecture",
+    "study_pose",
+    "authority",
+    "required_measurements",
+    "qualification_gates",
+    "superseded_active_routes",
+    "historical_retention"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.static_overhead_camera.commercial_tripod_candidate.v1"},
+    "candidate_id": {"const": "COMMERCIAL-TRIPOD-ASIN-B0CSYB4YQ2"},
+    "decision_state": {"const": "SELECTED_UNQUALIFIED"},
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asin", "url", "listing_brand", "listing_model", "listing_claims", "unverified_or_conflicting"],
+      "properties": {
+        "asin": {"const": "B0CSYB4YQ2"},
+        "url": {"const": "https://a.co/d/0imgQB3I"},
+        "listing_brand": {"type": ["string", "null"]},
+        "listing_model": {"type": ["string", "null"]},
+        "listing_claims": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "unverified_or_conflicting": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["camera_role", "support_type", "relationship_to_arm", "relationship_to_board", "optical_axis", "primary_load_bearing_printed_part_allowed", "safety_tether_required"],
+      "properties": {
+        "camera_role": {"const": "static_overhead_eye_to_hand_phase_1_primary"},
+        "support_type": {"const": "independent_commercial_floor_tripod"},
+        "relationship_to_arm": {"const": "no mechanical connection"},
+        "relationship_to_board": {"const": "independent floor support; no board load"},
+        "optical_axis": {"const": "nominal nadir; installed roll pitch yaw measured"},
+        "primary_load_bearing_printed_part_allowed": {"const": false},
+        "safety_tether_required": {"const": true}
+      }
+    },
+    "study_pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["board_intersection_xy_mm", "height_range_mm", "nominal_height_mm", "commissioned"],
+      "properties": {
+        "board_intersection_xy_mm": {"const": [305.0, 228.5]},
+        "height_range_mm": {"const": [700.0, 1000.0]},
+        "nominal_height_mm": {"const": 850.0},
+        "commissioned": {"const": false}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["planning", "simulation", "fabrication", "physical_installation", "motion", "contact"],
+      "properties": {
+        "planning": {"const": true},
+        "simulation": {"const": true},
+        "fabrication": {"const": false},
+        "physical_installation": {"const": false},
+        "motion": {"const": false},
+        "contact": {"const": false}
+      }
+    },
+    "required_measurements": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+    "qualification_gates": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+    "superseded_active_routes": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+    "historical_retention": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+  },
+  "$defs": {
+    "nonEmptyUniqueStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

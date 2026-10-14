@@ -18,7 +18,8 @@ from .reviewed_hover_recovery_admission import decode_recovery_admission
 class CharacterizationHTTP:
     def __init__(self,address,port=80,*,key,boot,read_only_initial_sequence=0,
                  reviewed_hover_live_release_sha256=None,
-                 recovery_hover_live_release_sha256=None):
+                 recovery_hover_live_release_sha256=None,
+                 registration_ladder_release_sha256=None):
         checked=DiagnosticHTTPReader(address,port)
         self.address,self.port=checked.address,checked.port
         if (type(read_only_initial_sequence) is not int or
@@ -40,6 +41,14 @@ class CharacterizationHTTP:
                  reviewed_hover_live_release_sha256 is not None)):
             raise ValueError('Fresh exclusive recovery-hover release required')
         self.recovery_hover_live_release_sha256=recovery_hover_live_release_sha256
+        if (registration_ladder_release_sha256 is not None and
+                (type(registration_ladder_release_sha256) is not str or
+                 not re.fullmatch(r'[0-9a-f]{64}', registration_ladder_release_sha256) or
+                 registration_ladder_release_sha256 == '0'*64 or
+                 self.read_only_only or reviewed_hover_live_release_sha256 is not None or
+                 recovery_hover_live_release_sha256 is not None)):
+            raise ValueError('Fresh exclusive registration-ladder release required')
+        self.registration_ladder_release_sha256=registration_ladder_release_sha256
         self.session=CharacterizationHTTPSession(key=key,boot=boot)
         # Reconcile a known prior signed request sequence without creating a
         # new write authority. Only GETs are possible on this instance.
@@ -76,6 +85,7 @@ class CharacterizationHTTP:
             multi_hover_prefix='/rocell/air-multi-hover/'
             reviewed_hover_prefix='/rocell/reviewed-hover/'
             recovery_hover_prefix='/rocell/recovery-hover/'
+            registration_ladder_prefix='/rocell/registration-ladder/'
             repeating=type(path) is str and path.startswith(repeat_prefix)
             correcting=type(path) is str and path.startswith(correction_prefix)
             midpoint=type(path) is str and path.startswith(midpoint_prefix)
@@ -90,12 +100,15 @@ class CharacterizationHTTP:
             multi_hover=type(path) is str and path.startswith(multi_hover_prefix)
             reviewed_hover=type(path) is str and path.startswith(reviewed_hover_prefix)
             recovery_hover=type(path) is str and path.startswith(recovery_hover_prefix)
+            registration_ladder=(type(path) is str and
+                                 path.startswith(registration_ladder_prefix))
             fixed=type(path) is str and path.startswith(fixed_prefix)
             park=type(path) is str and path.startswith(park_prefix)
             returning=type(path) is str and path.startswith(return_prefix)
             lifting=type(path) is str and path.startswith(lift_prefix)
             relieving=type(path) is str and path.startswith(relief_prefix)
-            suffix=(path[len(recovery_hover_prefix):] if recovery_hover else
+            suffix=(path[len(registration_ladder_prefix):] if registration_ladder else
+                    path[len(recovery_hover_prefix):] if recovery_hover else
                     path[len(reviewed_hover_prefix):] if reviewed_hover else
                     path[len(multi_hover_prefix):] if multi_hover else
                     path[len(elbow_grid_prefix):] if elbow_grid else
@@ -114,11 +127,20 @@ class CharacterizationHTTP:
                     path[len(park_prefix):] if park else
                     path[len(fixed_prefix):] if fixed else
                     path[len(prefix):] if type(path) is str and path.startswith(prefix) else '')
-            if ((dict(start='POST',status='GET',record='GET',receipt='POST',next='POST') if reviewed_hover or recovery_hover else dict(start='POST',status='GET',record='GET',receipt='POST') if b_hover else dict(start='POST',status='GET',record='GET',receipt='POST',next='POST',**({'source-fault':'GET'} if last or repeat_air or elbow_direction or elbow_shift or elbow_grid or multi_hover else {})) if repeating or correcting or midpoint or air or finale or last or repeat_air or elbow_direction or elbow_shift or elbow_grid or multi_hover else large_pose_relief if relieving else large_pose_lift if lifting else park_return if returning else park_step if park else reanchor if fixed else routes).get(suffix)!=method or type(body) is not bytes
+            if ((dict(leg='POST',status='GET') if registration_ladder else dict(start='POST',status='GET',record='GET',receipt='POST',next='POST') if reviewed_hover or recovery_hover else dict(start='POST',status='GET',record='GET',receipt='POST') if b_hover else dict(start='POST',status='GET',record='GET',receipt='POST',next='POST',**({'source-fault':'GET'} if last or repeat_air or elbow_direction or elbow_shift or elbow_grid or multi_hover else {})) if repeating or correcting or midpoint or air or finale or last or repeat_air or elbow_direction or elbow_shift or elbow_grid or multi_hover else large_pose_relief if relieving else large_pose_lift if lifting else park_return if returning else park_step if park else reanchor if fixed else routes).get(suffix)!=method or type(body) is not bytes
                     or type(timeout) not in (int,float) or not math.isfinite(timeout) or not 0<timeout<=3):
                 raise ValueError('Unsupported campaign request')
             if method=='GET' or suffix=='prepare' or ((fixed or returning) and suffix=='start'):
                 if body:raise ValueError('Body not allowed')
+            elif registration_ladder:
+                if suffix == 'leg':
+                    if self.registration_ladder_release_sha256 is None:
+                        raise ValueError('Exact registration-ladder release required')
+                    expected=(b'RCLW1:'+self.session._boot.encode('ascii')+b':1:'+
+                              self.registration_ladder_release_sha256.encode('ascii')+
+                              b':LIVE_NONCONTACT')
+                    if body != expected:
+                        raise ValueError('Exact registration-ladder admission required')
             elif recovery_hover:
                 if suffix=='start':
                     if self.recovery_hover_live_release_sha256 is None:

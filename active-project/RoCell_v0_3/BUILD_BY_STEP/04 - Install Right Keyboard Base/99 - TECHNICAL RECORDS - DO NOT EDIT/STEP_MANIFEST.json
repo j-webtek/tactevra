@@ -2,9 +2,9 @@
   "schema_version": 1,
   "layout_version": 6,
   "design_revision": "RC03-INT-R1",
-  "package_definition_hash": "65bbe688892e0dcdd2115a28d9f155921587915d80e98f6b01d81aaedcbde3a5",
-  "canonical_snapshot_hash": "06efd7afc3a2b406d822f18b0ae06189c5edbb01dbbd069e0edf35718290f45c",
-  "canonical_input_hash": "06efd7afc3a2b406d822f18b0ae06189c5edbb01dbbd069e0edf35718290f45c",
+  "package_definition_hash": "5f18f598920dc04d0066e1a233f9f313ae48121094868790a4489995069d5313",
+  "canonical_snapshot_hash": "3a3d1894c12af5f94fa453250f0ddb884f3cdda1febb53707d1a1395cb7f9adf",
+  "canonical_input_hash": "3a3d1894c12af5f94fa453250f0ddb884f3cdda1febb53707d1a1395cb7f9adf",
   "step_id": "04",
   "slug": "join_keyboard_slave",
   "title": "Join and retain the keyboard slave station",
@@ -250,6 +250,18 @@
       "job_ids": []
     },
     {
+      "canonical_path": "TRIPOD_CAMERA_INSTALLATION.md",
+      "sha256": "4fbfbc71cfa17cd241948246ae4db20bb780207e0a61740cdbca1d481e61efa2",
+      "size_bytes": 1570,
+      "roles": [
+        "tripod installation and qualification procedure"
+      ],
+      "actions": [
+        "read"
+      ],
+      "job_ids": []
+    },
+    {
       "canonical_path": "cad/step/hardware_fit_gauge.step",
       "sha256": "5c703f405245681d67ac4c495d2412e67bd52a35c49dd70900563c2e42f28de4",
       "size_bytes": 3217336,
@@ -349,8 +361,8 @@
     },
     {
       "canonical_path": "config/assembly_steps.json",
-      "sha256": "af1920ac851d18c09ad749df5da2ed58dda6c9a40b066966e737430c448a546d",
-      "size_bytes": 117502,
+      "sha256": "115805cdd45ee09bac995f82f3a08ad662f4e80a836e3e96f1dded1635bf8758",
+      "size_bytes": 115579,
       "roles": [
         "canonical step-to-file relationship map"
       ],
@@ -397,8 +409,8 @@
     },
     {
       "canonical_path": "config/print_jobs.json",
-      "sha256": "429bca9542193388581eee5266af57b2e7460881f87b23b34693eee3b77c66f4",
-      "size_bytes": 13945,
+      "sha256": "ba82c6e18761c3302b015de16a504c74ada78f9a519698b308c2aeb82b61616f",
+      "size_bytes": 14097,
       "roles": [
         "canonical print-job definitions"
       ],
@@ -416,6 +428,18 @@
       ],
       "actions": [
         "reference_only"
+      ],
+      "job_ids": []
+    },
+    {
+      "canonical_path": "config/tripod_camera_installation_intake_v1.json",
+      "sha256": "52ca6f331d2f2c81c5ba5e288572e17a459c92a2cf502952f1e9cd15586b9111",
+      "size_bytes": 2507,
+      "roles": [
+        "hash-bound tripod receipt, measurement, pose, stability, and qualification intake"
+      ],
+      "actions": [
+        "complete"
       ],
       "job_ids": []
     },
@@ -717,8 +741,8 @@
     },
     {
       "canonical_path": "scripts/build_step_packages.py",
-      "sha256": "38b9b55bfaad6c80f2465bd99abc134b8a7b488d91e6fc357c3f93f05ec699b9",
-      "size_bytes": 175793,
+      "sha256": "1b3328e85ad2071c1a282f75c50bbc5fdbfb3bec06beccd58e4eb418dd91319d",
+      "size_bytes": 176151,
       "roles": [
         "step-package generator and validator"
       ],
@@ -873,10 +897,22 @@
     },
     {
       "canonical_path": "scripts/validate_release_package.py",
-      "sha256": "9b954d47726e7c09423d31f7cdbd8b0e07dff1b78c11bf826274473062d66ed3",
-      "size_bytes": 118881,
+      "sha256": "0fc8994764e314f9413cdde56d6627c6485bec29ca19839c2e9ccf3923a046ad",
+      "size_bytes": 118799,
       "roles": [
         "whole-package release validator"
+      ],
+      "actions": [
+        "run_from_project_root"
+      ],
+      "job_ids": []
+    },
+    {
+      "canonical_path": "scripts/validate_tripod_camera_intake.py",
+      "sha256": "c301c91f876a68e5fe87aa8da718a6a847e8d816b595c94efa0389d8881faa74",
+      "size_bytes": 2784,
+      "roles": [
+        "tripod intake hash and zero-authority validator"
       ],
       "actions": [
         "run_from_project_root"
@@ -1050,7 +1086,7 @@
   "next_step": "05",
   "operator_writable_directory": "06 - SAVE MEASUREMENTS AND PHOTOS",
   "generated_control_hashes": {
-    "00 - START HERE.md": "d64009c159a95d16aee81bc86d12c8a463b34a4790e48f3dac892f785383f3fe",
+    "00 - START HERE.md": "2d7559a2b24ba6657d099fd37e336389102c51a6485eadc8a40cec0b129ec1da",
     "01 - BEFORE YOU START.md": "960912384b7f8da21c0af89dec5421fafcfa3a66805baabf51fe53fc1e7f6941",
     "02 - PARTS AND TOOLS CHECKLIST.md": "d0c096fc751e2a5f43aeb4eb6dd99507b7370b19165b02a7d64d30fbaaf6ac9a",
     "03 - STL MODELS/READ ME - HOW TO USE THESE MODELS.md": "3032838ab3ecfef57c198710fe4cb5d07c02a51dc03fdadbc336e39b9b96e3c3",
@@ -1059,15 +1095,15 @@
     "04 - STEP-BY-STEP INSTRUCTIONS.md": "f5472ff7d59d4fb7738cb46f394580c9452d22eb8295b206926e0213a99cc997",
     "05 - CHECK YOUR WORK.md": "7c0dea62bd402833b0e838f5d5050c6dad99c6a8abe3dd6f52ba638927aa24df",
     "06 - SAVE MEASUREMENTS AND PHOTOS/READ ME - WHAT TO RECORD.md": "cdc6216326868b240b6c769afde84f011e3928991fb48af85b5f8f11644cd42f",
-    "06 - SAVE MEASUREMENTS AND PHOTOS/BUILD_ID_TEMPLATE/measurement_record.json": "3d036e1aedbc6ac73147ba34a7c3488f19cbf9e7c22b96db1fd55f8e15901ed7",
-    "06 - SAVE MEASUREMENTS AND PHOTOS/BUILD_ID_TEMPLATE/signoff.json": "08a0e101c7f618e8929593cec3e794219ec5eccd5fe2328e8304719bcd5d0db7",
+    "06 - SAVE MEASUREMENTS AND PHOTOS/BUILD_ID_TEMPLATE/measurement_record.json": "569e32bec4c0f1927f41629a7b6e2b6867ab1a6a7dcfc762c9511902176aee32",
+    "06 - SAVE MEASUREMENTS AND PHOTOS/BUILD_ID_TEMPLATE/signoff.json": "b375ea2c3f97ad0f66effe3ec25ca5fe087f06142e667a40882f81e1e01529b6",
     "06 - SAVE MEASUREMENTS AND PHOTOS/BUILD_ID_TEMPLATE/Measurements Checklist.md": "b8f7faa1b1cbb159ae609009e49d4d6424d9fd763528261e72bca9fd84482300",
     "06 - SAVE MEASUREMENTS AND PHOTOS/BUILD_ID_TEMPLATE/Finish and Sign Off.md": "796706df2d023d0415682dccab01a604bf645a983875755c175551fe0a1d8dc9",
     "07 - FINISH THIS STEP AND CONTINUE.md": "b655526d949b784a0db348fc1467a790744af7705d78c67a73c979e68d29d5d2",
-    "99 - TECHNICAL RECORDS - DO NOT EDIT/OPEN CONTROLLED FILES.md": "8914681cf3d3d9adf5bdbe5d5a61ed5df0adc8f35b54137eeb038439ddc0d460",
-    "99 - TECHNICAL RECORDS - DO NOT EDIT/FILE INDEX.csv": "177969a5143ec409f980e051dea96c4367b3420634c842401efc5c0e2230553c",
-    "99 - TECHNICAL RECORDS - DO NOT EDIT/FILE MANIFEST.json": "76fd87ef0a42d756411275c30f50a6691faece91682df00b9a265b42638cf0f5",
-    "99 - TECHNICAL RECORDS - DO NOT EDIT/SHA256SUMS.txt": "bc47fe07ad0436fcad3939bfc9da00ad61fa9bea8196adef5b89c0c633c57d52",
+    "99 - TECHNICAL RECORDS - DO NOT EDIT/OPEN CONTROLLED FILES.md": "7d4aa0ea05355cb7f4c184b7804869ace2e98ead41ddfab447c5a7260c8a8e49",
+    "99 - TECHNICAL RECORDS - DO NOT EDIT/FILE INDEX.csv": "a930ea7375608e6b45247fd5c2bc3f0c1545c114c634161ea26f89fbfbee76ea",
+    "99 - TECHNICAL RECORDS - DO NOT EDIT/FILE MANIFEST.json": "70c87d6ae3998a4bd005aebdea055e61c619f5aaf86d9596a5c83318d243b534",
+    "99 - TECHNICAL RECORDS - DO NOT EDIT/SHA256SUMS.txt": "a636cf0bbd4cc3a1842dfdd678718c45fbd35c0f599e4104ea64f283cd7520a7",
     "99 - TECHNICAL RECORDS - DO NOT EDIT/HARDWARE AND TOOLS.csv": "9fe95dd751f9038ff779c9acf6a7d3c1e61f79d624c843d8e8ef8ef93762326a"
   }
 }

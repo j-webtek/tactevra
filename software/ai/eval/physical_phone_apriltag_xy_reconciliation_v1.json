@@ -1,0 +1,171 @@
+{
+  "schema": "rocell.apriltag_xy_observation_reconciliation.v1",
+  "created_at": "2026-10-11T20:06:43.848788+00:00",
+  "scope": "exploratory_working_xy_consistency_only",
+  "method": "four_working_world_tag_center_homography_with_station_tags_held_out",
+  "inputs": {
+    "visibility_probe_path": "software\\ai\\eval\\physical_phone_apriltag_visibility_probe_v2.json",
+    "visibility_probe_sha256": "f282724ad666f1014970fe8e27b3fbc7e5d294489410fc15930701884349099f",
+    "xy_observations_path": "software\\ai\\eval\\physical_installed_apriltag_xy_working_v1.json",
+    "xy_observations_sha256": "1f8bf9e023d0349c15f1729515630b5c05177efce83d5112042fd349aa79292a",
+    "coordinate_source": "working_operator_measurement"
+  },
+  "images": [
+    {
+      "file_name": "1-Photo-1.jpg",
+      "status": "COMPUTED_EXPLORATORY",
+      "world_anchor_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "station_checks": [
+        {
+          "name": "P0",
+          "id": 5,
+          "homography_estimated_board_xy_mm": [
+            439.258,
+            277.164
+          ],
+          "working_observed_board_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -2.792,
+            6.774
+          ],
+          "planar_residual_mm": 7.327
+        }
+      ]
+    },
+    {
+      "file_name": "2-Photo-2.jpg",
+      "status": "COMPUTED_EXPLORATORY",
+      "world_anchor_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "station_checks": [
+        {
+          "name": "K0",
+          "id": 4,
+          "homography_estimated_board_xy_mm": [
+            241.12,
+            266.986
+          ],
+          "working_observed_board_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.95,
+            1.146
+          ],
+          "planar_residual_mm": 1.488
+        },
+        {
+          "name": "P0",
+          "id": 5,
+          "homography_estimated_board_xy_mm": [
+            438.677,
+            277.018
+          ],
+          "working_observed_board_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -3.373,
+            6.628
+          ],
+          "planar_residual_mm": 7.437
+        }
+      ]
+    },
+    {
+      "file_name": "3-Photo-3.jpg",
+      "status": "COMPUTED_EXPLORATORY",
+      "world_anchor_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "station_checks": [
+        {
+          "name": "K0",
+          "id": 4,
+          "homography_estimated_board_xy_mm": [
+            240.562,
+            265.065
+          ],
+          "working_observed_board_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.392,
+            -0.775
+          ],
+          "planar_residual_mm": 0.868
+        },
+        {
+          "name": "P0",
+          "id": 5,
+          "homography_estimated_board_xy_mm": [
+            439.249,
+            275.865
+          ],
+          "working_observed_board_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -2.801,
+            5.475
+          ],
+          "planar_residual_mm": 6.15
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "computed_image_count": 3,
+    "station_checks": {
+      "K0": {
+        "id": 4,
+        "check_count": 2,
+        "mean_planar_residual_mm": 1.178,
+        "max_planar_residual_mm": 1.488
+      },
+      "P0": {
+        "id": 5,
+        "check_count": 3,
+        "mean_planar_residual_mm": 6.971,
+        "max_planar_residual_mm": 7.437
+      }
+    },
+    "maximum_station_planar_residual_mm": 7.437
+  },
+  "interpretation": "The working installed XY observations substantially reduce the nominal-map station disagreements in these phone images. Remaining residuals combine hand measurement error, tag-center extraction, lens distortion, and the planar homography approximation.",
+  "qualification": {
+    "canonical_tag_map_updated": false,
+    "tag_plane_placement_measured": false,
+    "camera_calibrated": false,
+    "deployment_qualification": false,
+    "physical_authority": false
+  },
+  "limitations": [
+    "The XY observations are working, unqualified operator measurements.",
+    "Phone-camera intrinsics, distortion, focus, exposure, and pose are unbound.",
+    "A four-point planar homography fits its world anchors exactly and is used only to check held-out station tags.",
+    "This result cannot establish Z, yaw, uncertainty, metric localization accuracy, or motion authority."
+  ],
+  "hardware_writes": 0,
+  "physical_movements_by_analysis": 0,
+  "physical_authority": false
+}

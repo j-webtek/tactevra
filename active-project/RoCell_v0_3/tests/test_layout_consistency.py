@@ -273,44 +273,35 @@ class RC03LayoutConsistencyTests(unittest.TestCase):
             with mock.patch.object(release, "CONFIG", config):
                 return release.validate_camera_architecture_decision(measurement)
 
-    def test_arm_camera_intent_is_explicitly_held_pending_exact_specification(self) -> None:
+    def test_static_tripod_is_selected_but_remains_unqualified(self) -> None:
         self.assertEqual(
-            release.validate_camera_architecture_decision(self.measurement), 11
+            release.validate_camera_architecture_decision(self.measurement), 2
         )
 
-    def test_camera_architecture_rejects_false_release_or_incomplete_requirements(
-        self,
-    ) -> None:
+    def test_camera_architecture_rejects_false_release(self) -> None:
         source = load_json("config/camera_architecture_decision.json")
 
         false_release = copy.deepcopy(source)
         false_release["status"] = "PASS"
-        with self.assertRaisesRegex(ValueError, "ENGINEERING_ALIGNMENT_HOLD"):
+        with self.assertRaisesRegex(ValueError, "static-overhead tripod"):
             self.validate_camera_fixture(false_release, self.measurement)
 
-        incomplete = copy.deepcopy(source)
-        incomplete["required_before_geometry_or_instruction_release"].pop()
-        incomplete["required_before_geometry_or_instruction_release"].pop()
-        with self.assertRaisesRegex(ValueError, "complete unique release requirements"):
-            self.validate_camera_fixture(incomplete, self.measurement)
+        false_qualification = copy.deepcopy(source)
+        false_qualification["active_route"]["qualified"] = True
+        with self.assertRaisesRegex(ValueError, "active tripod route drift"):
+            self.validate_camera_fixture(false_qualification, self.measurement)
 
-    def test_camera_fallback_route_must_remain_unselected_for_arm_camera_intent(self) -> None:
+    def test_superseded_camera_mast_route_must_remain_unselected(self) -> None:
         source = load_json("config/camera_architecture_decision.json")
         measurement = copy.deepcopy(self.measurement)
         measurement["selected_routes"]["camera_mast_optional"] = True
-        with self.assertRaisesRegex(ValueError, "fixed-mast fallback unselected"):
+        with self.assertRaisesRegex(ValueError, "superseded fixed-mast route unselected"):
             self.validate_camera_fixture(source, measurement)
 
-    def test_camera_fallback_cannot_be_authorized_inside_the_held_release(self) -> None:
+    def test_camera_mast_jobs_must_remain_historical(self) -> None:
         source = load_json("config/camera_architecture_decision.json")
-        source["fixed_camera_fallback_release"].update(
-            {
-                "authorized": True,
-                "authorization_reference": "CAM-FALLBACK-INVALID",
-                "release_revision": source["design_revision"],
-            }
-        )
-        with self.assertRaisesRegex(ValueError, "must remain unauthorized"):
+        source["superseded_routes"][0]["treatment"] = "ACTIVE"
+        with self.assertRaisesRegex(ValueError, "historical mast-job disposition"):
             self.validate_camera_fixture(source, self.measurement)
 
     def test_camera_sidecar_metadata_cannot_drop_the_fallback_gate(self) -> None:

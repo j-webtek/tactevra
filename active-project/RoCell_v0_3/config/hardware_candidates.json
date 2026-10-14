@@ -106,27 +106,18 @@
     ]
   },
   "camera_architecture_boundary": {
-    "status": "CANDIDATE_UNVERIFIED",
-    "user_intended_primary_architecture": "Arm-mounted eye-in-hand camera used according to its intended specification.",
-    "exact_arm_camera_specification_present": false,
-    "release_effect": "ENGINEERING_ALIGNMENT_HOLD",
-    "current_fallback_route": "camera_mast_optional",
-    "fallback_route_selected": false,
-    "fallback_candidate_ids": [
-      "CAMERA-LOGITECH-960-001401",
-      "CAMERA-SUPPORT-8020-20-2020-MAST"
-    ],
-    "additional_fixed_support_evaluation_candidate_ids": [
-      "CAMERA-ARDUCAM-B0495C",
-      "CAMERA-SUPPORT-SMALLRIG-4304"
-    ],
-    "required_before_arm_mount_design": [
-      "Exact camera manufacturer, model, lens, interface, mass, center of mass, and intended-use specification.",
-      "Exact robot link or frame, mounting interface, mount geometry, fasteners, retention, cable-flex route, and strain relief.",
-      "Revised payload, reach, collision, occlusion, calibration, and eye-in-hand transform requirements.",
-      "Controlled CAD, instructions, software, commissioning, and Step 13 acceptance revision."
-    ],
-    "boundary_note": "The unselected fixed-mast route remains an unqualified fallback and does not substitute for, implement, or authorize the missing arm-mounted architecture."
+    "status": "SELECTED_UNQUALIFIED",
+    "primary_architecture": "static_overhead_eye_to_hand",
+    "primary_route": "camera_overhead_primary",
+    "camera": "Arducam B0477 with nominal 16 mm lens; received unit unverified",
+    "support": "independent commercial floor tripod ASIN B0CSYB4YQ2",
+    "support_contract": "hardware/static_overhead_camera/config/commercial_tripod_candidate.json",
+    "installation_intake": "active-project/RoCell_v0_3/config/tripod_camera_installation_intake_v1.json",
+    "release_effect": "PHYSICAL_QUALIFICATION_HOLD",
+    "legacy_mast_route": "camera_mast_optional",
+    "legacy_mast_selected": false,
+    "legacy_mast_treatment": "SUPERSEDED_DO_NOT_PRINT",
+    "boundary_note": "The selected tripod is planning scope only. Received identity, mount, pose, stability, visibility, collision, and wrong-model evidence remain required before installation or motion."
   },
   "route_scope_snapshot": {
     "status": "CANDIDATE_UNVERIFIED",

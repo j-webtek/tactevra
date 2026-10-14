@@ -2,7 +2,7 @@
 
 [Build dashboard](<../00 - START HERE.md>) | Next step locked
 
-**Current result:** **HOLD**  
+**Current result:** **HOLD**
 **Next safe action:** Stop work and open [01 - BEFORE YOU START.md](<01 - BEFORE YOU START.md>); correct and retest every recorded hold before continuing.  
 **Engineering name:** Preflight, measurement, print qualification, and kitting
 

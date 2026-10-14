@@ -19,8 +19,9 @@ import re
 from typing import Any, Mapping, Sequence
 
 
-CAMERA_ARCHITECTURE_PLAN_SCHEMA = "rocell.camera_architecture_change_plan.v1"
-DEFAULT_CAMERA_ARCHITECTURE_PLAN = Path("software/config/camera_architecture_plan.json")
+CAMERA_ARCHITECTURE_PLAN_SCHEMA_V1 = "rocell.camera_architecture_change_plan.v1"
+CAMERA_ARCHITECTURE_PLAN_SCHEMA = "rocell.camera_architecture_change_plan.v2"
+DEFAULT_CAMERA_ARCHITECTURE_PLAN = Path("software/config/camera_architecture_plan_v2.json")
 MAX_CAMERA_ARCHITECTURE_PLAN_BYTES = 256 * 1024
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -117,6 +118,16 @@ _ACCEPTANCE_GATES = (
     "camera loss, stale replay, settings drift, tag loss/outlier, support movement, and board movement fault injections produce zero descent or contact permits",
 )
 
+_ACCEPTANCE_GATES_V2 = tuple(
+    (
+        "tripod, camera, tether, cable, and lighting hardware remain outside every approved swept volume"
+        if item
+        == "gantry, camera, cable, and lighting hardware remain outside every approved swept volume"
+        else item
+    )
+    for item in _ACCEPTANCE_GATES
+)
+
 _INVALIDATION_TRIGGERS = {
     "intrinsics": (
         "camera, sensor, lens, focus, aperture, resolution, pixel format, ROI, crop, driver, or image orientation change",
@@ -135,6 +146,15 @@ _INVALIDATION_TRIGGERS = {
     ),
     "tool_tcp": (
         "tool, tip, spring, cartridge, gripper seating, or compliance change",
+    ),
+}
+
+_INVALIDATION_TRIGGERS_V2 = {
+    **_INVALIDATION_TRIGGERS,
+    "static_extrinsic_and_visibility": (
+        "tripod, head, center column, camera plate, fastener, camera, tether, cable strain, floor contact, or optical-axis disturbance",
+        "collision or impact involving the tripod or camera",
+        "unexpected reference-witness, pose, or residual drift",
     ),
 }
 
@@ -411,7 +431,9 @@ def _validate_supersession(document: Mapping[str, Any]) -> None:
     )
 
 
-def _validate_routes(document: Mapping[str, Any]) -> tuple[bool, bool, bool, bool]:
+def _validate_routes(
+    document: Mapping[str, Any], *, schema_version: int
+) -> tuple[bool, bool, bool, bool]:
     _exact_fields(
         document,
         frozenset(
@@ -472,16 +494,21 @@ def _validate_routes(document: Mapping[str, Any]) -> tuple[bool, bool, bool, boo
         "routes.legacy_camera_mast_optional",
     )
     _literal(legacy["selected"], False, "routes.legacy_camera_mast_optional.selected")
+    expected_legacy_state = (
+        "DEPRECATED_NAME_RETAINED_ONLY_UNTIL_SCHEMA_V2_MIGRATION"
+        if schema_version == 1
+        else "SUPERSEDED_HISTORICAL_ONLY"
+    )
     _literal(
-        legacy["state"],
-        "DEPRECATED_NAME_RETAINED_ONLY_UNTIL_SCHEMA_V2_MIGRATION",
-        "routes.legacy_camera_mast_optional.state",
+        legacy["state"], expected_legacy_state, "routes.legacy_camera_mast_optional.state"
     )
     _text(legacy["note"], "routes.legacy_camera_mast_optional.note")
     return True, True, False, False
 
 
-def _validate_primary(document: Mapping[str, Any]) -> tuple[str, str, str]:
+def _validate_primary(
+    document: Mapping[str, Any], *, schema_version: int
+) -> tuple[str, str, str]:
     _exact_fields(
         document,
         frozenset(
@@ -548,10 +575,22 @@ def _validate_primary(document: Mapping[str, Any]) -> tuple[str, str, str]:
         ),
         "primary.mount",
     )
-    _text(mount["type"], "primary.mount.type")
+    _literal(
+        mount["type"],
+        (
+            "rigid static overhead gantry or crossbar"
+            if schema_version == 1
+            else "independent commercial floor tripod"
+        ),
+        "primary.mount.type",
+    )
     _literal(
         mount["relationship_to_arm"],
-        "fixed to the workcell, never to a moving robot link",
+        (
+            "fixed to the workcell, never to a moving robot link"
+            if schema_version == 1
+            else "independent floor support, never attached to the arm or board"
+        ),
         "primary.mount.relationship_to_arm",
     )
     for field_name in (
@@ -563,24 +602,32 @@ def _validate_primary(document: Mapping[str, Any]) -> tuple[str, str, str]:
         "collision_geometry",
     ):
         _null(mount[field_name], f"primary.mount.{field_name}")
-    _literal(mount["state"], "OPEN_BLOCKING", "primary.mount.state")
+    _literal(
+        mount["state"],
+        "OPEN_BLOCKING" if schema_version == 1 else "SELECTED_UNQUALIFIED_PENDING_RECEIPT",
+        "primary.mount.state",
+    )
 
     supports = _mapping(
         document["existing_support_candidates"], "primary.existing_support_candidates"
     )
+    if schema_version == 1:
+        expected_supports = {
+            "paired_2020_mast_and_universal_plate": "CANDIDATE_ONLY_NOT_RELEASED",
+            "commercial_bench_boom": "CANDIDATE_ONLY_NOT_RELEASED",
+        }
+    else:
+        expected_supports = {
+            "commercial_floor_tripod_asin_b0csyb4yq2": "SELECTED_UNQUALIFIED",
+            "paired_2020_mast_and_universal_plate": "SUPERSEDED_DO_NOT_BUILD",
+            "printable_portal_frame": "SUPERSEDED_DO_NOT_PRINT",
+            "commercial_bench_boom": "UNSELECTED",
+        }
     _exact_fields(
-        supports,
-        frozenset(
-            {"paired_2020_mast_and_universal_plate", "commercial_bench_boom", "note"}
-        ),
-        "primary.existing_support_candidates",
+        supports, frozenset({*expected_supports, "note"}), "primary.existing_support_candidates"
     )
-    for name in ("paired_2020_mast_and_universal_plate", "commercial_bench_boom"):
-        _literal(
-            supports[name],
-            "CANDIDATE_ONLY_NOT_RELEASED",
-            f"primary.existing_support_candidates.{name}",
-        )
+    for name, expected_value in expected_supports.items():
+        _literal(supports[name], expected_value, f"primary.existing_support_candidates.{name}")
     _text(supports["note"], "primary.existing_support_candidates.note")
     return (
         document["architecture"],
@@ -780,7 +827,9 @@ def _validate_optical_screening(
     return board, coverage, tuple(rows)
 
 
-def _validate_supporting_sections(document: Mapping[str, Any]) -> tuple[str, ...]:
+def _validate_supporting_sections(
+    document: Mapping[str, Any], *, schema_version: int
+) -> tuple[str, ...]:
     runtime_sequence = _text_list(document["runtime_sequence"], "runtime_sequence")
     _literal(runtime_sequence, _RUNTIME_SEQUENCE, "runtime_sequence")
 
@@ -799,20 +848,25 @@ def _validate_supporting_sections(document: Mapping[str, Any]) -> tuple[str, ...
     )
     _literal(
         acceptance_gates,
-        _ACCEPTANCE_GATES,
+        _ACCEPTANCE_GATES if schema_version == 1 else _ACCEPTANCE_GATES_V2,
         "acceptance_gates_to_define_and_measure",
     )
 
     _text_list(document["software_migration"], "software_migration")
 
     triggers = _mapping(document["invalidation_triggers"], "invalidation_triggers")
-    expected_triggers = frozenset(_INVALIDATION_TRIGGERS)
+    expected_values = (
+        _INVALIDATION_TRIGGERS
+        if schema_version == 1
+        else _INVALIDATION_TRIGGERS_V2
+    )
+    expected_triggers = frozenset(expected_values)
     _exact_fields(triggers, expected_triggers, "invalidation_triggers")
     for field_name in sorted(expected_triggers):
         values = _text_list(triggers[field_name], f"invalidation_triggers.{field_name}")
         _literal(
             values,
-            _INVALIDATION_TRIGGERS[field_name],
+            expected_values[field_name],
             f"invalidation_triggers.{field_name}",
         )
     return _text_list(document["open_blockers"], "open_blockers")
@@ -890,8 +944,20 @@ def parse_camera_architecture_plan_json(
         ) from exc
     root_document = _mapping(parsed, "camera architecture plan")
     _exact_fields(root_document, _ROOT_FIELDS, "camera architecture plan")
-    _literal(root_document["schema"], CAMERA_ARCHITECTURE_PLAN_SCHEMA, "schema")
-    _literal(root_document["schema_version"], 1, "schema_version")
+    schema = root_document["schema"]
+    schema_version = root_document["schema_version"]
+    if not (
+        type(schema) is str
+        and type(schema_version) is int
+        and (schema, schema_version)
+        in {
+            (CAMERA_ARCHITECTURE_PLAN_SCHEMA_V1, 1),
+            (CAMERA_ARCHITECTURE_PLAN_SCHEMA, 2),
+        }
+    ):
+        raise CameraArchitecturePlanError(
+            "schema and schema_version must identify camera architecture v1 or v2"
+        )
     plan_id = _text(root_document["plan_id"], "plan_id")
     decision_date = _text(root_document["decision_date"], "decision_date")
     try:
@@ -903,7 +969,11 @@ def parse_camera_architecture_plan_json(
     decision_state = _text(root_document["decision_state"], "decision_state")
     _literal(
         decision_state,
-        "ARCHITECTURE_SELECTED_CAMERA_PURCHASED_PENDING_RECEIPT_INSPECTION",
+        (
+            "ARCHITECTURE_SELECTED_CAMERA_PURCHASED_PENDING_RECEIPT_INSPECTION"
+            if schema_version == 1
+            else "CAMERA_AND_TRIPOD_SELECTED_PENDING_RECEIPT_AND_PHYSICAL_QUALIFICATION"
+        ),
         "decision_state",
     )
     _text(root_document["decision"], "decision")
@@ -912,10 +982,14 @@ def parse_camera_architecture_plan_json(
     _validate_authority(authority)
     _validate_supersession(_mapping(root_document["supersession"], "supersession"))
     overhead_selected, overhead_required, secondary_selected, fallback_allowed = (
-        _validate_routes(_mapping(root_document["routes"], "routes"))
+        _validate_routes(
+            _mapping(root_document["routes"], "routes"),
+            schema_version=schema_version,
+        )
     )
     primary_architecture, primary_frame, backend = _validate_primary(
-        _mapping(root_document["primary"], "primary")
+        _mapping(root_document["primary"], "primary"),
+        schema_version=schema_version,
     )
     secondary_architecture, secondary_frame, secondary_selected_again = (
         _validate_secondary(
@@ -935,7 +1009,9 @@ def parse_camera_architecture_plan_json(
     board, coverage, screen = _validate_optical_screening(
         _mapping(root_document["optical_screening"], "optical_screening")
     )
-    blockers = _validate_supporting_sections(root_document)
+    blockers = _validate_supporting_sections(
+        root_document, schema_version=schema_version
+    )
 
     result = CameraArchitecturePlan(
         source_path=source_path,
@@ -971,6 +1047,7 @@ def parse_camera_architecture_plan_json(
 
 __all__ = [
     "CAMERA_ARCHITECTURE_PLAN_SCHEMA",
+    "CAMERA_ARCHITECTURE_PLAN_SCHEMA_V1",
     "DEFAULT_CAMERA_ARCHITECTURE_PLAN",
     "MAX_CAMERA_ARCHITECTURE_PLAN_BYTES",
     "CameraArchitecturePlan",

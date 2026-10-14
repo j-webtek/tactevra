@@ -2,17 +2,17 @@
 
 [← Step 12](<../12 - Attach and Measure AprilTags/00 - START HERE.md>) | [Build dashboard](<../00 - START HERE.md>) | Next step locked
 
-**Current result:** **LOCKED**  
+**Current result:** **LOCKED**
 **Next safe action:** Open [01 - BEFORE YOU START.md](<01 - BEFORE YOU START.md>) for the single prerequisite/gate table; do not begin or initialize evidence.  
-**Engineering name:** Resolve the camera architecture, then mount and prove route-specific vision
+**Engineering name:** Install and qualify the static overhead tripod camera
 
 ## Goal
 
-After the camera architecture is formally aligned, mount the exact measured camera, calibrate it with the route-specific transform method, and prove the required view, timing, cable, payload, and collision envelope. The fixed six-tag eye-to-hand procedure below is retained only as the current independent-mast fallback.
+Receive, measure, install, calibrate, and qualify the Arducam B0477 on the selected independent commercial floor tripod while preserving zero motion and contact authority.
 
 ## Finished when
 
-The camera architecture no longer conflicts with config/camera_architecture_decision.json; the exact mount, camera, cable, calibration chain, visibility set, and motion consequences are controlled and physically accepted.
+The hash-bound tripod intake contains the received support identity, mount stack, support envelope, installed pose, stability results, visibility results, collision screen, and wrong-model checks; the camera is calibrated at locked settings and remains outside approved swept volumes.
 
 ## Assembly image
 
@@ -31,4 +31,4 @@ The camera architecture no longer conflicts with config/camera_architecture_deci
 Model files: [03 - STL MODELS](<03 - STL MODELS/READ ME - HOW TO USE THESE MODELS.md>)  
 Advanced records: [99 - TECHNICAL RECORDS - DO NOT EDIT](<99 - TECHNICAL RECORDS - DO NOT EDIT/OPEN CONTROLLED FILES.md>)
 
-> **STOP:** Stop while config/camera_architecture_decision.json is ENGINEERING_ALIGNMENT_HOLD. The user-intended arm-mounted architecture is not released by the fixed-camera illustration, mast files, plate, or eye-to-hand commands. After formal alignment, also stop if the exact support is unmeasured, the camera moves, a screw can bottom, the moving cable is unqualified, the calibrated transform method does not match the mount architecture, or any route-required target leaves its accepted view.
+> **STOP:** Stop before installation if the received tripod, B0477, adapter, thread, or support geometry is unidentified. Stop before robot power or motion while any intake measurement is missing, any authority field is false, any collision screen is incomplete, or any consequential fault fails to block descent.

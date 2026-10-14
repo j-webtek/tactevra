@@ -1,6 +1,17 @@
 # Static overhead camera architecture plan
 
-> **Printable-frame direction selected 2026-09-06:** The builder requested a
+> **Commercial-tripod direction selected October 10, 2026:** Phase 1 remains a
+> fixed overhead eye-to-hand camera, but the active support candidate is now an
+> independent commercial floor tripod, Amazon ASIN `B0CSYB4YQ2`. The printed
+> portal, paired 2020 mast, and RC03 camera-plate/mast jobs are superseded build
+> routes and remain only as historical evidence. The tripod is
+> `SELECTED_UNQUALIFIED`: delivered identity, camera interface, loaded height,
+> stability, sag, drift, vibration, cable effects, floor footprint, collision
+> geometry, and installed pose are unmeasured. This decision grants no physical
+> authority. See the
+> [migration inventory](docs/TRIPOD_CAMERA_SUPPORT_MIGRATION_INVENTORY.md).
+
+> **Historical printable-frame direction selected 2026-09-06:** The builder requested a
 > completely 3D-printable camera holder and structural frame, with ordinary
 > metal bolts, nuts, washers, and a safety tether permitted. The additive
 > prototype branch is a sectional ABS Rapido, bench-bearing front portal with
@@ -13,10 +24,10 @@
 **Decision date:** 2026-09-05  
 **Decision:** A rigid static overhead eye-to-hand camera is the required Phase 1 primary vision source.  
 **Camera state:** `PURCHASED_PENDING_RECEIPT_INSPECTION`  
-**Architecture state:** selected; source-locked nominal support defined; receipt and physical qualification remain open  
+**Architecture state:** fixed overhead camera selected; commercial tripod candidate selected but unqualified; atomic source-contract migration and physical qualification remain open
 **Physical authority:** None. Robot power, motion, descent, and contact remain blocked.  
 **Machine-readable plan:** [`software/config/camera_architecture_plan.json`](software/config/camera_architecture_plan.json)  
-**Detailed hardware baseline:** [`hardware/static_overhead_camera/README.md`](hardware/static_overhead_camera/README.md), with a source-locked support contract, purchased-camera record, candidate support BOM, coordinate schedule, and vector schematics
+**Current support migration:** [`docs/TRIPOD_CAMERA_SUPPORT_MIGRATION_INVENTORY.md`](docs/TRIPOD_CAMERA_SUPPORT_MIGRATION_INVENTORY.md), with the selected unqualified tripod candidate, exact update inventory, historical-retention rules, and physical qualification gates
 
 ## 1. Why this plan exists
 
@@ -40,8 +51,10 @@ tool, or Job 00A evidence is invalidated merely by selecting static vision.
 
 ## 2. Architecture decision
 
-Phase 1 shall use one camera that is rigidly attached to the workcell or its
-qualified bench reference and never to a moving robot link.
+Phase 1 shall use one camera held by an independently registered commercial
+floor tripod and never attached to a moving robot link or loaded through the
+work board. The installed support pose must be measured and witnessed; the
+product listing and nominal simulation pose are not calibration evidence.
 
 ```text
                            fixed workcell

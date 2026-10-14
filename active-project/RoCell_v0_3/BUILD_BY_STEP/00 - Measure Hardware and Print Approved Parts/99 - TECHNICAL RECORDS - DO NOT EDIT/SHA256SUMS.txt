@@ -13,6 +13,7 @@ ea0555461e87a475f844ffb1405a5dd756ab41f9d49617849c56204e275310bf  ../../../PRINT
 a8c75f05f727fa899c1f873ffea9852b5e6d343cdd302d5c4e02ee4124f74fc3  ../../../PRINT_READINESS.json
 5be5234644cbca322e93f16ec422cd5a6f04059055a2f56d68cf224d61f015b0  ../../../PRINT_READINESS.md
 6e3e5a4bf57be1858e0b691c09b0c7683cc4266eb7df666d371136aa5800ee42  ../../../README_FIRST.md
+4fbfbc71cfa17cd241948246ae4db20bb780207e0a61740cdbca1d481e61efa2  ../../../TRIPOD_CAMERA_INSTALLATION.md
 2561bed996ff1a1c9bb15530b35467d15318812ea3822f77c2e76f80ed74008c  ../../../cad/step/cable_tie_saddle_fit_gauge.step
 122b24630f81598c894d1612c2a6a4c277a3caa51144d40d25899a2293dc0f13  ../../../cad/step/calibration_puck.step
 dea907ee079c77046150115a57bd506ed195e9ecbf436b4effbaf9cb2a89648d  ../../../cad/step/camera_plate_universal.step
@@ -45,12 +46,13 @@ eefa0ca09c4e99dc34434addc66bb64e6574257fd46c8c2a85a9b3e3edb8f053  ../../../cad/s
 3f0eb40a7469b41762b11172b1a28196877c1ce8b74a1a81a2eea7d23d07c3ee  ../../../cad/step/tag_application_frame_55mm.step
 ccb28e4f29bc1f82efdc4477db1dc3a896e7c85c6ffd407c8be3c7598a737145  ../../../cad/step/tool_m3_insert_fit_gauge.step
 adb1b65263e62ef9c9a03e13b410391179e07acf29905b973984a9c157309fcc  ../../../cad/step/tpu_tip_retention_gauge.step
-af1920ac851d18c09ad749df5da2ed58dda6c9a40b066966e737430c448a546d  ../../../config/assembly_steps.json
+115805cdd45ee09bac995f82f3a08ad662f4e80a836e3e96f1dded1635bf8758  ../../../config/assembly_steps.json
 8ffbb767c577fac5c88b8b68a7d4029ac1ca09c5b502f8d27795fb66a585ad64  ../../../config/job_build_record.json
 1fb400eae3104547b9bc75a6824bb137f37acc8274e68d718db7a6d77e734ec9  ../../../config/measurement_record.json
 769808d9094672ff2f281d39eeafff68c1aa0e4e9ec9b552f22084334b1bb6fc  ../../../config/parameters.json
-429bca9542193388581eee5266af57b2e7460881f87b23b34693eee3b77c66f4  ../../../config/print_jobs.json
+ba82c6e18761c3302b015de16a504c74ada78f9a519698b308c2aeb82b61616f  ../../../config/print_jobs.json
 5886a55b3fbdca28bf0d67ea8718a366333e78f2801e1884db00cc9f010ffc5e  ../../../config/print_profiles.json
+52ca6f331d2f2c81c5ba5e288572e17a459c92a2cf502952f1e9cd15586b9111  ../../../config/tripod_camera_installation_intake_v1.json
 e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1  ../../../config/workcell_layout.json
 368b3e653ffc16ece986b7351442f3c9ecdbf2b040d0998784525789c8daf050  ../../../drawings/board_drill_template_letter_1to1.pdf
 c80bea60c22db98e00ce6a095bf53186f0b8bca24366eba3e41d06023c1335a6  ../../../drawings/documentation_sync.json
@@ -157,7 +159,7 @@ aa830046f1152a28fd50d702b9233f8fc3c5854b65f1ea3db505fb4062f9fe19  ../../../print
 cb85e1aa58ac2567429b4105a925a120605a188e8a26d1d4fda45147cf8f945e  ../../../print_plates_3mf/07B_ASA_mast_foot_second.print.json
 6badf0daa975d8c0ab5de34cea5a7514dbff8469d2a7b499670a3002d428eb31  ../../../scripts/build_illustrated_assembly_guide.py
 4baf08d28e3566c3eb3869585275ebc318bf1e076744867221d4d79e2359f182  ../../../scripts/build_manual_pdf.py
-38b9b55bfaad6c80f2465bd99abc134b8a7b488d91e6fc357c3f93f05ec699b9  ../../../scripts/build_step_packages.py
+1b3328e85ad2071c1a282f75c50bbc5fdbfb3bec06beccd58e4eb418dd91319d  ../../../scripts/build_step_packages.py
 6090b47ff751ebb62c6ab8ecd4abc55fa54f79cabde5b86a4231484b2cc67e53  ../../../scripts/generate_build_tracker.py
 520cf48d2263beca0eca351d6960fbfae95e1f9c63e05aec1204957b47271a7f  ../../../scripts/generate_job_cards.py
 0a940eabc2ab22fcc0c4e2b2df9a67fa90224027168127917c2e7879a8725b93  ../../../scripts/initialize_step_evidence.py
@@ -170,7 +172,8 @@ caed2f3b929d24354ae7ff289178e70a94c8729d84ca5f2d55384c483032cbba  ../../../scrip
 a18eb88d17b2adbe930857f4539079bad96090320c4ea161b5d38a29ec44e3d8  ../../../scripts/stage_hash_bound_artifacts.py
 93fb598ee2de6dc0ba60d6eec7291458a728cb087dbe724b9e3bf09aa8933f8a  ../../../scripts/step_evidence_common.py
 7dc6159c15826da700a66d9e271776f8daed14716db80081fedea2e8712fb2ed  ../../../scripts/validate_print_readiness.py
-9b954d47726e7c09423d31f7cdbd8b0e07dff1b78c11bf826274473062d66ed3  ../../../scripts/validate_release_package.py
+0fc8994764e314f9413cdde56d6627c6485bec29ca19839c2e9ccf3923a046ad  ../../../scripts/validate_release_package.py
+c301c91f876a68e5fe87aa8da718a6a847e8d816b595c94efa0389d8881faa74  ../../../scripts/validate_tripod_camera_intake.py
 641631027fd7a0a452653ca7613b0f2f19c91e3bd49e3f90e9c9a3429c1777f4  ../../../slicer_profiles/QIDI_PLUS4/README.md
 c069454369dc8abe726d0db4359928e9fa870c694cdfdf7b044a3debeeb2d564  ../../../slicer_profiles/QIDI_PLUS4/abs_rapido_calibration_0p4.process.json
 9276ce2983256d815925224e7d8fc45032a531678dc336713fc88fa96137e259  ../../../slicer_profiles/QIDI_PLUS4/abs_rapido_cradle_0p4.process.json

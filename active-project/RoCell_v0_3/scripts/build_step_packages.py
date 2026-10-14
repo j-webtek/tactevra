@@ -153,6 +153,12 @@ CORE_REFERENCES = (
     ("config/print_profiles.json", "canonical print-profile definitions", "reference_only"),
     ("config/workcell_layout.json", "generated geometry/layout source", "reference_only"),
     ("config/assembly_steps.json", "canonical step-to-file relationship map", "reference_only"),
+    (
+        "config/tripod_camera_installation_intake_v1.json",
+        "hash-bound tripod receipt, measurement, pose, stability, and qualification intake",
+        "complete",
+    ),
+    ("TRIPOD_CAMERA_INSTALLATION.md", "tripod installation and qualification procedure", "read"),
     ("slicer_profiles/QIDI_PLUS4/README.md", "QIDI process-preset import guide", "read"),
     ("scripts/build_step_packages.py", "step-package generator and validator", "run_from_project_root"),
     (
@@ -162,6 +168,11 @@ CORE_REFERENCES = (
     ),
     ("scripts/validate_print_readiness.py", "typed gate and print-readiness validator", "run_from_project_root"),
     ("scripts/validate_release_package.py", "whole-package release validator", "run_from_project_root"),
+    (
+        "scripts/validate_tripod_camera_intake.py",
+        "tripod intake hash and zero-authority validator",
+        "run_from_project_root",
+    ),
     ("scripts/generate_build_tracker.py", "job-lifecycle validator and tracker generator", "run_from_project_root"),
     ("scripts/generate_job_cards.py", "controlled print-traveler instruction generator", "reference_only"),
     ("scripts/build_manual_pdf.py", "controlled detailed-manual PDF renderer", "reference_only"),
@@ -206,10 +217,8 @@ DIRECT_FILE_REQUIREMENTS = {
         "FASTENER_MAP.csv",
     ),
     "13": (
-        "fiducials/charuco_board_definition.json",
-        "requirements-vision.txt",
-        "software_helpers/calibrate_camera_charuco.py",
-        "software_helpers/detect_apriltags.py",
+        "config/tripod_camera_installation_intake_v1.json",
+        "TRIPOD_CAMERA_INSTALLATION.md",
     ),
 }
 NON_ACTIONABLE_DIRECT_FILE_ACTIONS = {"reference_only", "DO_NOT_PRINT"}
@@ -2050,7 +2059,7 @@ def render_step(
         "",
         top_nav,
         "",
-        f"**Current result:** **{display_state(state)}**  ",
+        f"**Current result:** **{display_state(state)}**",
         f"**Next safe action:** {next_safe_action}  ",
         f"**Engineering name:** {step['title']}",
         "",
@@ -3232,7 +3241,7 @@ def validate_tree(
     ):
         warnings.append("No tool route is selected; route-dependent Step 00 and Step 14 work cannot be completed.")
     if not measurement["selected_routes"].get("camera_mast_optional"):
-        warnings.append("The fixed-mast camera fallback is not selected. Step 13 still requires a controlled, released arm-mounted architecture; do not infer or improvise a support from the fallback files.")
+        warnings.append("The legacy fixed-mast route is correctly unselected. Step 13 uses the selected commercial tripod, which remains unqualified until its hash-bound intake and collision evidence are complete.")
     if readiness["summary"]["ready"] == 0:
         warnings.append("No print job is currently READY; do not start a production print from any step package.")
     override_example = read_json(ROOT / "config" / "user_overrides.example.json")

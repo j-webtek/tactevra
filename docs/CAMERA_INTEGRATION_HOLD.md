@@ -5,8 +5,11 @@
 **Authority:** coordination only; this document grants no movement or hardware authority
 
 Tactevra's next meaningful physical integration milestone depends on the final
-overhead camera being installed in its intended housing and fixed relative to
-the board. Until that installation exists, the project must not invent camera,
+overhead camera being installed on the selected independent commercial floor
+tripod, candidate ASIN `B0CSYB4YQ2`, and registered relative to the board. The
+tripod is selected but unqualified; the older printed portal and paired mast
+are superseded active routes. Until the tripod, camera interface, and installed
+pose are measured, the project must not invent camera,
 board, keyboard, robot-base, or tool transforms, claim real-camera localization
 accuracy, or describe physical typing as qualified.
 
@@ -61,10 +64,12 @@ substitute for the fixed-camera campaign.
 
 Resume the physical-camera workstream only after the following are true:
 
-1. The final housing revision is recorded and the camera is secured in its
-   intended position.
-2. The mount has passed its required fit, stability, tether, and workcell-sweep
-   checks, with limitations recorded.
+1. The received tripod, camera, lens, head, and adapter identities are recorded,
+   and the camera is positively retained against rotation in its intended
+   position.
+2. The tripod has passed loaded-height, floor-stability, sag, settle, vibration,
+   cable-strain, independent-tether, remove/reinstall, 24-hour drift, and
+   workcell-sweep checks, with limitations recorded.
 3. The camera has a persistent identity and commissioned operating settings.
 4. The arm base, board, keyboard, tool, cables, and lighting are frozen for the
    measured campaign, or every permitted variation is declared explicitly.

@@ -1,0 +1,98 @@
+{
+  "schema": "rocell.virtual_commissioning_profile.v1",
+  "schema_version": 1,
+  "profile_id": "ROCELL-VIRTUAL-COMMISSIONING-RANK1-001",
+  "status": "UNMEASURED_SENSITIVITY_OVERLAY",
+  "simulation_only": true,
+  "physical_release_effect": "NONE",
+  "binding": {
+    "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+    "design_revision": "RC03-INT-R1",
+    "simulation_bundle_id": "ROCELL-SIM-BUNDLE-RC03-INT-R1-FREEZE-013-013"
+  },
+  "selection": {
+    "rank": 1,
+    "classification": "UNMEASURED_SENSITIVITY_OVERLAY",
+    "source_layout_report_hash": "3b65e3bca509f7c7e1583e5801e189639ab9e40cbf30827b71794752cd7259b4",
+    "source_mission_route_coverage_hash": "c67ac5d2cece745077ac631304b80f51a19c981edd107812ffa716673fbf2cd4",
+    "interpretation": "Recorded pre-hardware sensitivity rank only. This is not a measured placement, fabrication coordinate, calibration artifact, or physical allowance."
+  },
+  "study_input": {
+    "study_input_id": "reach-944d7463f4c67905",
+    "physical_placement_input": {
+      "transform": "B_T_Ru",
+      "ru_frame": "base_link",
+      "rear_clamp_contact_x_board_mm": 385.0,
+      "clamp_to_base_axis_x_mm": 0.0,
+      "base_axis_x_board_mm": 385.0,
+      "rear_edge_to_base_axis_y_mm": 75.0,
+      "base_link_z_board_mm": 70.1,
+      "base_yaw_board_rad": -1.832595714594046,
+      "matrix_row_major": [
+        -0.25881904510252063,
+        0.9659258262890683,
+        -0.0,
+        385.0,
+        -0.9659258262890683,
+        -0.25881904510252063,
+        0.0,
+        532.0,
+        -0.0,
+        0.0,
+        1.0,
+        70.1,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "derived_solver_transform": {
+      "transform": "B_T_Wv",
+      "wv_frame": "world",
+      "derivation": "B_T_Ru * inverse(Wv_T_Ru)",
+      "matrix_row_major": [
+        -0.25881904510252063,
+        0.9659258262890683,
+        -0.0,
+        385.0,
+        -0.9659258262890683,
+        -0.25881904510252063,
+        0.0,
+        532.0,
+        -0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "route_tool_lengths_mm": {
+      "keyboard": 120.0,
+      "phone": 100.0
+    },
+    "canonical_context_modified": false,
+    "physical_release_effect": "NONE"
+  },
+  "park_probe": {
+    "park_probe_id": "freeze005-selected:park-1839dcc6683d4c77",
+    "frame": "board",
+    "point_mm": [
+      290.0,
+      10.0,
+      70.0
+    ],
+    "classification": "UNMEASURED_SENSITIVITY_OVERLAY",
+    "canonical_context_modified": false
+  },
+  "authority": {
+    "simulation_only": true,
+    "physical_release_effect": "NONE",
+    "live_hardware_access_allowed": false,
+    "hardware_commands_generated": 0,
+    "can_promote_calibrations": false
+  }
+}

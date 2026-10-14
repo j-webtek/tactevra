@@ -6,8 +6,10 @@ Command form: `python scripts/record_step_result.py --step 13 --test TEST_ID --v
 
 | Test | What must be true | How to check | Pass limit | Reviewed gate | Evidence to save | Record result in |
 | --- | --- | --- | --- | --- | --- | --- |
-| `13-B` | Six-tag field of view and world-pose solve | Run the required-tag detector batch across at least 20 saved poses spanning the required empty-cell view | T0, T1, T2, T3, K0, and P0 are present in every pose; board pose is solved from T0-T3 every time; K0/P0 remain held-out station-region checks | `tag_direct_installation_pass` | FOV capture_session.json, pose list, 20 or more JSON reports with empty missing_required_tags and solved board_pose, annotated frames, and representative video | `scripts/record_step_result.py` |
-| `13-C` | Calibration and six-tag vision quality | Calibrate from 20-30 varied ChArUco views, then evaluate all six installed tags across the same 20-pose acceptance set | At least 20 valid calibration views; 20/20 detections for each of T0, T1, T2, T3, K0, and P0; ChArUco RMS reprojection no more than 1.0 px | `tag_direct_installation_pass` | ChArUco capture_session.json, camera intrinsics JSON, preview set, per-pose reports, and six-ID detection table | `scripts/record_step_result.py` |
+| `13-A` | Received tripod, B0477, and retention stack are fully identified and measured | Validate the hash-bound intake and inspect source photos plus mount measurements | Every received_hardware and measured_mount_interface field is populated; engagement is positive and non-bottoming; anti-rotation and independent tether are installed | `camera_mount_interface_measured` | Intake record, label photos, mount measurements, fastener stack, anti-rotation, and tether photos | `scripts/record_step_result.py` |
+| `13-B` | Installed tripod pose and support stability | Measure pose, footprint, sag, settle, cable-pull displacement, remove/reinstall repeatability, 24-hour drift, and vibration | All fields are populated and accepted against the reviewed vision and collision budgets; witness marks match | `tag_direct_installation_pass` | Intake record, raw measurements, timed observations, before/after pose records, and witness photos | `scripts/record_step_result.py` |
+| `13-C` | B0477 calibration and complete overview visibility | Run the active B0477 commissioning and calibration workflow, then evaluate all required fiducials and model crop footprints | Exact identity and mode are locked; calibration passes its controlled limits; all six fiducials and all complete model crop footprints remain visible | `tag_direct_installation_pass` | Camera identity/mode record, calibration report and hash, overview frames, tag reports, crop coverage report, and annotated images | `scripts/record_step_result.py` |
+| `13-D` | Tripod collision envelope and fail-stop injections | Screen the installed support and cable against every approved swept volume and inject support shift, tilt, cable pull, tag loss, stale frame, and witness mismatch | Collision screen passes and every consequential injected fault blocks descent | `tag_direct_installation_pass` | Installed collision geometry, swept-volume reports, injection receipts, and no-descent results | `scripts/record_step_result.py` |
 
 ## Completion status
 
@@ -18,6 +20,6 @@ Command form: `python scripts/record_step_result.py --step 13 --test TEST_ID --v
 
 ## If a check fails
 
-If installed-tag geometry or detection is the cause, return to Step 12. If the camera plate, mast feet, or other printed support hardware is invalid, return to Step 00. Keep local mounting, cable, focus/exposure, capture, or calibration rework in Step 13. Reopen every downstream signoff affected by the correction.
+If source hashes or received identities differ, stop and revise the intake under change control. If pose, stability, visibility, collision, or an injection fails, keep motion and contact blocked, correct the installation, create a new evidence attempt, and repeat every affected check.
 
 The step is PASS only when every test is in limit, all required reviewed gates are PASS, and `signoff.json` is signed PASS.

@@ -66,10 +66,12 @@ from rocell.workcell.static_camera_support import (
 from rocell.vision.camera_profile import CameraProfileError, load_camera_profile
 
 
-PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA = "rocell.physical_onboarding_foundation.v1"
-PHYSICAL_ONBOARDING_FOUNDATION_ID = "ROCELL-PHYSICAL-ONBOARDING-FOUNDATION-001"
+PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA_V1 = "rocell.physical_onboarding_foundation.v1"
+PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA = "rocell.physical_onboarding_foundation.v2"
+PHYSICAL_ONBOARDING_FOUNDATION_ID_V1 = "ROCELL-PHYSICAL-ONBOARDING-FOUNDATION-001"
+PHYSICAL_ONBOARDING_FOUNDATION_ID = "ROCELL-PHYSICAL-ONBOARDING-FOUNDATION-TRIPOD-002"
 DEFAULT_PHYSICAL_ONBOARDING_FOUNDATION = Path(
-    "software/config/physical_onboarding_foundation.json"
+    "software/config/physical_onboarding_foundation_v2.json"
 )
 MAX_PHYSICAL_ONBOARDING_FOUNDATION_BYTES = 128 * 1024
 MAX_REFERENCED_CONTRACT_BYTES = 512 * 1024
@@ -106,7 +108,7 @@ _EXPECTED_AUTHORITY: dict[str, object] = {
     "build_promotion_authorized": False,
     "physical_release_effect": "NONE",
 }
-_EXPECTED_CONTRACTS = (
+_EXPECTED_CONTRACTS_V1 = (
     (
         "ROCELL-AUTHORITY-EFFECT-001",
         "software/config/authority_effect_policy.json",
@@ -131,6 +133,15 @@ _EXPECTED_CONTRACTS = (
         "ROCELL-TARGET-ACCURACY-BUDGET-001",
         "software/config/accuracy_budget_policy.json",
     ),
+)
+_EXPECTED_CONTRACTS = tuple(
+    (
+        "ROCELL-WORKCELL-ICD-TRIPOD-003",
+        "software/config/workcell_icd_v3.json",
+    )
+    if contract_id == "ROCELL-WORKCELL-ICD-001"
+    else (contract_id, path)
+    for contract_id, path in _EXPECTED_CONTRACTS_V1
 )
 _EXPECTED_CONCURRENCY: dict[str, object] = {
     "lease_acquisition_order": ["CELL", "SESSION", "CAMERA", "ARM_CONTROLLER"],
@@ -553,9 +564,15 @@ def _load_specialized_contracts(
             root,
             bindings["ROCELL-PHYSICAL-ONBOARDING-HAZARDS-001"].resolved_path,
         )
-        interface = load_workcell_interface_contract(
-            root, bindings["ROCELL-WORKCELL-ICD-001"].resolved_path
+        interface_binding = next(
+            binding
+            for contract_id, binding in bindings.items()
+            if contract_id in {
+                "ROCELL-WORKCELL-ICD-001",
+                "ROCELL-WORKCELL-ICD-TRIPOD-003",
+            }
         )
+        interface = load_workcell_interface_contract(root, interface_binding.resolved_path)
         accuracy = load_target_accuracy_budget_policy(
             root,
             bindings["ROCELL-TARGET-ACCURACY-BUDGET-001"].resolved_path,
@@ -594,7 +611,7 @@ def _validate_specialized_hashes(
             hazards.register_id,
             hazards.source_sha256,
         ),
-        "ROCELL-WORKCELL-ICD-001": (
+        interface.contract_id: (
             interface.contract_id,
             interface.content_sha256,
         ),
@@ -777,7 +794,6 @@ def _validate_icd_bound_b0477_mode(
 
     try:
         profile_binding = interface.source_bindings["b0477_camera_profile"]
-        support_binding = interface.source_bindings["static_camera_support_design"]
         policy_binding = interface.source_bindings["physical_onboarding_policy"]
     except KeyError as exc:
         raise PhysicalOnboardingFoundationError(
@@ -786,14 +802,9 @@ def _validate_icd_bound_b0477_mode(
 
     try:
         profile = load_camera_profile(profile_binding.resolved_path)
-        support = load_static_camera_support_design(
-            root,
-            support_binding.resolved_path,
-        )
         policy_mode = _physical_policy_native_mode(root, policy_binding)
     except (
         CameraProfileError,
-        StaticCameraSupportError,
         PhysicalOnboardingPolicyError,
     ) as exc:
         raise PhysicalOnboardingFoundationError(
@@ -804,24 +815,41 @@ def _validate_icd_bound_b0477_mode(
         raise PhysicalOnboardingFoundationError(
             "workcell ICD and purchased B0477 profile bytes differ"
         )
-    if support.content_sha256 != support_binding.sha256:
-        raise PhysicalOnboardingFoundationError(
-            "workcell ICD and static camera support bytes differ"
-        )
-    if support.source_sha256.get("purchased_camera_profile") != profile_binding.sha256:
-        raise PhysicalOnboardingFoundationError(
-            "static support and workcell ICD bind different B0477 profile bytes"
-        )
     _bound_payload(
         root,
         profile_binding,
         label="ICD-bound purchased B0477 profile",
     )
-    _bound_payload(
-        root,
-        support_binding,
-        label="ICD-bound static camera support",
-    )
+    support_mode: tuple[int, int, float, str] | None = None
+    if "static_camera_support_design" in interface.source_bindings:
+        support_binding = interface.source_bindings["static_camera_support_design"]
+        try:
+            support = load_static_camera_support_design(root, support_binding.resolved_path)
+        except StaticCameraSupportError as exc:
+            raise PhysicalOnboardingFoundationError(
+                f"ICD-bound B0477 source failed strict validation: {exc}"
+            ) from exc
+        if support.content_sha256 != support_binding.sha256:
+            raise PhysicalOnboardingFoundationError(
+                "workcell ICD and static camera support bytes differ"
+            )
+        if support.source_sha256.get("purchased_camera_profile") != profile_binding.sha256:
+            raise PhysicalOnboardingFoundationError(
+                "static support and workcell ICD bind different B0477 profile bytes"
+            )
+        _bound_payload(root, support_binding, label="ICD-bound static camera support")
+        support_mode = support.native_mode
+    else:
+        candidate_binding = interface.source_bindings.get("commercial_tripod_candidate")
+        if candidate_binding is None:
+            raise PhysicalOnboardingFoundationError(
+                "workcell ICD is missing a static camera support candidate"
+            )
+        _bound_payload(
+            root,
+            candidate_binding,
+            label="ICD-bound commercial tripod candidate",
+        )
 
     width, height, maximum_fps, pixel_format = foundation_mode
     profile_mode = profile.published_mode(_B0477_NATIVE_HOST_BUS, width, height)
@@ -837,11 +865,11 @@ def _validate_icd_bound_b0477_mode(
     )
     if (
         foundation_mode != published_mode
-        or foundation_mode != support.native_mode
+        or (support_mode is not None and foundation_mode != support_mode)
         or foundation_mode != policy_mode
     ):
         raise PhysicalOnboardingFoundationError(
-            "foundation, purchased profile, static support, and onboarding policy B0477 modes differ"
+            "foundation, purchased profile, support, and onboarding policy B0477 modes differ"
         )
 
 
@@ -966,17 +994,24 @@ def load_physical_onboarding_foundation(
         ) from exc
     document = _mapping(parsed, "physical onboarding foundation")
     _exact_fields(document, _ROOT_FIELDS, "physical onboarding foundation")
-    _require_exact(document["schema"], PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA, "schema")
-    _require_exact(
-        document["foundation_id"], PHYSICAL_ONBOARDING_FOUNDATION_ID, "foundation_id"
-    )
-    _require_exact(document["revision"], 1, "revision")
-    _require_exact(document["revision_date"], "2026-09-06", "revision_date")
-    _require_exact(
-        document["status"],
-        "FOUNDATION_IMPLEMENTED_RUNTIME_MIGRATION_PENDING_ZERO_AUTHORITY",
-        "status",
-    )
+    identity = (document["schema"], document["foundation_id"])
+    if identity == (PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA_V1, PHYSICAL_ONBOARDING_FOUNDATION_ID_V1):
+        expected_contracts = _EXPECTED_CONTRACTS_V1
+        expected_revision = 1
+        expected_revision_date = "2026-09-06"
+        expected_status = "FOUNDATION_IMPLEMENTED_RUNTIME_MIGRATION_PENDING_ZERO_AUTHORITY"
+        foundation_id = PHYSICAL_ONBOARDING_FOUNDATION_ID_V1
+    elif identity == (PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA, PHYSICAL_ONBOARDING_FOUNDATION_ID):
+        expected_contracts = _EXPECTED_CONTRACTS
+        expected_revision = 2
+        expected_revision_date = "2026-10-11"
+        expected_status = "TRIPOD_CONTRACT_MIGRATED_ZERO_AUTHORITY"
+        foundation_id = PHYSICAL_ONBOARDING_FOUNDATION_ID
+    else:
+        raise PhysicalOnboardingFoundationError("unsupported physical onboarding foundation schema")
+    _require_exact(document["revision"], expected_revision, "revision")
+    _require_exact(document["revision_date"], expected_revision_date, "revision_date")
+    _require_exact(document["status"], expected_status, "status")
     _require_exact(document["runtime_activation"], False, "runtime_activation")
     _require_exact(document["authority"], _EXPECTED_AUTHORITY, "authority")
     _require_exact(
@@ -1018,7 +1053,7 @@ def load_physical_onboarding_foundation(
 
     raw_contracts = document["contracts"]
     if type(raw_contracts) is not list or len(raw_contracts) != len(
-        _EXPECTED_CONTRACTS
+        expected_contracts
     ):
         raise PhysicalOnboardingFoundationError(
             "contracts must contain the complete bounded contract set"
@@ -1027,7 +1062,7 @@ def load_physical_onboarding_foundation(
     for index, raw_contract in enumerate(raw_contracts):
         entry = _mapping(raw_contract, f"contracts[{index}]")
         _exact_fields(entry, frozenset({"id", "path", "sha256"}), f"contracts[{index}]")
-        expected_id, expected_path = _EXPECTED_CONTRACTS[index]
+        expected_id, expected_path = expected_contracts[index]
         _require_exact(entry["id"], expected_id, f"contracts[{index}].id")
         path = _normalized_contract_path(entry["path"], f"contracts[{index}].path")
         _require_exact(path, expected_path, f"contracts[{index}].path")
@@ -1096,7 +1131,7 @@ def load_physical_onboarding_foundation(
     assert isinstance(bundle, Mapping)
     assert isinstance(threat_model, Mapping)
     result = PhysicalOnboardingFoundation(
-        foundation_id=PHYSICAL_ONBOARDING_FOUNDATION_ID,
+        foundation_id=foundation_id,
         source_path=selected,
         source_sha256=hashlib.sha256(payload).hexdigest(),
         runtime_activation=False,
@@ -1126,7 +1161,9 @@ __all__ = [
     "MAX_PHYSICAL_ONBOARDING_FOUNDATION_BYTES",
     "MAX_REFERENCED_CONTRACT_BYTES",
     "PHYSICAL_ONBOARDING_FOUNDATION_ID",
+    "PHYSICAL_ONBOARDING_FOUNDATION_ID_V1",
     "PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA",
+    "PHYSICAL_ONBOARDING_FOUNDATION_SCHEMA_V1",
     "FoundationContractBinding",
     "PhysicalOnboardingFoundation",
     "PhysicalOnboardingFoundationError",

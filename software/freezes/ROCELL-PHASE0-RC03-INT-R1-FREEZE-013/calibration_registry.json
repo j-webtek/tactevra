@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "registry_id": "ROCELL-CALIBRATION-REGISTRY-001",
+  "system_manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-013",
+  "active_build_id": "2026-09-01_CELL-A",
+  "artifacts": {},
+  "status": "EMPTY_PHYSICAL_CALIBRATION_BLOCKED"
+}

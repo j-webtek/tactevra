@@ -4,8 +4,8 @@ Use one build ID from Step 00 through Step 15. The step folders hold raw evidenc
 
 ## Two hashes with different jobs
 
-- **Package definition hash:** `65bbe688892e0dcdd2115a28d9f155921587915d80e98f6b01d81aaedcbde3a5`. This binds build evidence to the procedure, models, gate schema, job definitions, and acceptance logic. If it changes, affected evidence is stale and must be reviewed/repeated.
-- **Canonical snapshot hash:** `06efd7afc3a2b406d822f18b0ae06189c5edbb01dbbd069e0edf35718290f45c`. This fingerprints the current complete canonical snapshot, including mutable reviewed gate and lifecycle values. It normally changes as valid evidence is synchronized; that change alone does not invalidate earlier evidence whose package definition hash still matches.
+- **Package definition hash:** `5f18f598920dc04d0066e1a233f9f313ae48121094868790a4489995069d5313`. This binds build evidence to the procedure, models, gate schema, job definitions, and acceptance logic. If it changes, affected evidence is stale and must be reviewed/repeated.
+- **Canonical snapshot hash:** `3a3d1894c12af5f94fa453250f0ddb884f3cdda1febb53707d1a1395cb7f9adf`. This fingerprints the current complete canonical snapshot, including mutable reviewed gate and lifecycle values. It normally changes as valid evidence is synchronized; that change alone does not invalidate earlier evidence whose package definition hash still matches.
 - Never rewrite immutable raw evidence merely to replace an older canonical snapshot hash. Preserve the original snapshot field and regenerate the package so dashboards show the current snapshot.
 
 ## 1. Record all three route decisions

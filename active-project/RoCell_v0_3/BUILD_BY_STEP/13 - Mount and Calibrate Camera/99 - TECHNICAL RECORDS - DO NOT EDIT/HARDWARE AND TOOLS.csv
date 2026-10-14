@@ -1,13 +1,14 @@
 source,type,qty,item,critical_condition,status
-required_physical_input,Required input,As specified,A controlled camera-architecture revision that closes config/camera_architecture_decision.json; the current ENGINEERING_ALIGNMENT_HOLD prohibits applying the fixed-camera procedure to an arm-mounted camera,Present and accepted before work,NOT_VERIFIED
-required_physical_input,Required input,As specified,Actual measured USB camera and the formally released route-specific mount; the accepted Job 03C3 plate applies only to the fixed-mast fallback,Present and accepted before work,NOT_VERIFIED
-required_physical_input,Required input,As specified,"Selected, measured camera support; the independent mast/stand is fallback-only and does not implement the intended arm mount",Present and accepted before work,NOT_VERIFIED
-required_physical_input,Required input,As specified,ChArUco calibration print and definition file,Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,"Completed config/tripod_camera_installation_intake_v1.json bound to the selected commercial tripod candidate, B0477 profile, and current workcell layout",Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,"Received Arducam B0477, nominal 16 mm lens, and all delivered camera adapters identified by label and photos",Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,Received ASIN B0CSYB4YQ2 commercial floor tripod and every included head or adapter part identified by label and photos,Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,"Measured non-bottoming camera fastener stack, positive anti-rotation method, and independent safety tether",Present and accepted before work,NOT_VERIFIED
 required_physical_input,Required input,As specified,Step 12 measured-installation fiducials/apriltag_map.json plus its recorded SHA-256; coordinate_source must be measured_installation and measurement status PASS,Present and accepted before work,NOT_VERIFIED
-required_physical_input,Required input,As specified,USB cable with a service loop and routing clear of arm motion,Present and accepted before work,NOT_VERIFIED
-required_physical_input,Required input,As specified,Python 3.10 plus an isolated .venv-vision environment installed from requirements-vision.txt; do not use an unrelated global OpenCV installation,Present and accepted before work,NOT_VERIFIED
-required_physical_input,Required input,As specified,"Steel rule for the ChArUco scale check, rigid camera-support adjustment tools, and camera-settings access",Present and accepted before work,NOT_VERIFIED
-structured_register,Vision,1,1080p manual/fixed-exposure USB camera,Mounting interface and blind-thread depth physically measured,NOT_VERIFIED
-structured_register,Printed part,0 or 1,Universal camera plate,Fixed-mast fallback only; accepted Job 03C3; omit for the released arm-mounted architecture,NOT_VERIFIED
-structured_register,Mounting,As selected,Route-specific camera support,Primary intent is a controlled arm mount; optional fallback mast uses accepted Jobs 06/07A/07B and the illustration position is schematic,NOT_VERIFIED
-structured_register,Fastener,Measured set,Camera screw/strap and support hardware,No blind-thread bottoming; washers and T-slot engagement verified,NOT_VERIFIED
+required_physical_input,Required input,As specified,ChArUco calibration target matching the repository-authoritative B0477 commissioning contract,Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,USB cable with measured strain relief and service loop clear of every approved swept volume,Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,Python environment and B0477 commissioning tools named by the active software camera profile,Present and accepted before work,NOT_VERIFIED
+required_physical_input,Required input,As specified,"Steel rule, calipers, height measurement, level or pose method, timer, and camera-settings access",Present and accepted before work,NOT_VERIFIED
+structured_register,Vision,1,Arducam B0477 with nominal 16 mm lens,"Received identity, delivered optics, mount interface, and runtime mode recorded",NOT_VERIFIED
+structured_register,Support,1,Commercial floor tripod candidate ASIN B0CSYB4YQ2,"Received identity, included parts, loaded height, footprint, locks, and stability measured",NOT_VERIFIED
+structured_register,Retention,1 set,"Measured camera adapter, fastener, anti-rotation feature, and independent tether",Positive retention with measured engagement and no blind-hole bottoming,NOT_VERIFIED
+structured_register,Cable,1,B0477 USB3 cable and support-side strain relief,Service loop and cable envelope measured; cable pull does not move the camera outside the accepted bound,NOT_VERIFIED

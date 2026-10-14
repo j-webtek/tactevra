@@ -1,6 +1,16 @@
 # Printed static camera portal
 
-The current printed-arm candidate is
+> **SUPERSEDED — DO NOT PRINT OR INSTALL:** On October 10, 2026, the active
+> Phase 1 support direction changed to an independent commercial floor tripod,
+> candidate ASIN `B0CSYB4YQ2`. This directory is retained as historical design
+> and validation provenance. Its portal, mast, carriage, cage, keeper, BOM,
+> slicer profiles, and print jobs are not part of the current build route.
+> Nothing in this directory qualifies the tripod or authorizes installation,
+> robot power, motion, descent, or contact. Follow the
+> [tripod migration inventory](../../docs/TRIPOD_CAMERA_SUPPORT_MIGRATION_INVENTORY.md)
+> and its machine-readable candidate contract instead.
+
+The retained printed-portal candidate is
 `ROCELL-PRINTABLE-CAMERA-PORTAL-PROTOTYPE-003`: two bench-bearing front board
 anchors, two four-module uprights, a four-module crossbar, two two-module booms,
 a positive-lock carriage, and a four-sided camera cage with a planar four-bolt
@@ -10,7 +20,7 @@ The board locates the portal and helps react overturning. It does **not** carry
 portal dead load; both `120 x 120 mm` saddle feet bear on the same bench plane
 as the board underside.
 
-## Build from these files
+## Historical build-package contents
 
 - [`PRINTABLE_FRAME_BUILD_GUIDE.md`](PRINTABLE_FRAME_BUILD_GUIDE.md) — exact
   print, hardware, assembly, locking, and qualification sequence
@@ -24,13 +34,16 @@ as the board underside.
 - [`config/printable_frame_design.json`](config/printable_frame_design.json) —
   parametric source contract
 
-Do not slice an assembly STEP or a loose STL for production. Use the exact
+These instructions are preserved to explain the validated prototype package;
+they are not a current print queue. If this historical design is ever reopened
+through a new reviewed decision, do not slice an assembly STEP or a loose STL
+for production. Use the exact
 numbered geometry-only 3MF in [`cad/output/plates_3mf`](cad/output/plates_3mf),
 its matching sidecar, the named process, and the separately selected filament
 preset. Keep stored orientation/placement, 100% scale, supports off, and fuzzy
 skin off.
 
-## Rebuild and verify
+## Historical rebuild and verification
 
 From the workspace root:
 

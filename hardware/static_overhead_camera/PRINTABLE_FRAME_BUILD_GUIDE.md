@@ -1,9 +1,15 @@
 # Printable camera portal — exact prototype build guide
 
+> **SUPERSEDED — DO NOT PRINT OR ASSEMBLE:** The current Phase 1 direction uses
+> an independent commercial floor tripod rather than this printed portal. This
+> guide is retained as historical engineering evidence and does not define the
+> active build. See the
+> [tripod migration inventory](../../docs/TRIPOD_CAMERA_SUPPORT_MIGRATION_INVENTORY.md).
+
 **Design:** `ROCELL-PRINTABLE-CAMERA-PORTAL-PROTOTYPE-003`  
 **Rigid material:** QIDI ABS Rapido  
 **Printer:** QIDI X-Plus 4, 0.4 mm nozzle  
-**State:** validated digital prototype; not released for unattended overhead use or robot motion
+**State:** historical validated digital prototype; superseded and not released for fabrication, installation, overhead use, or robot motion
 
 This guide covers only the camera support load path: the two board/bench
 anchors, uprights, crossbar, booms, carriage, camera cage, keeper, and safety

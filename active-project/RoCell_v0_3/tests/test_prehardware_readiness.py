@@ -34,7 +34,7 @@ class PrehardwareReadinessTests(unittest.TestCase):
         self.assertIn("does not prove", reach["finding"])
         self.assertIn("T_board_base", reach["required_action"])
 
-    def test_arm_camera_intent_remains_an_engineering_alignment_hold(self) -> None:
+    def test_selected_tripod_remains_on_engineering_hold_until_qualified(self) -> None:
         report = prehardware.build_report()
         camera = next(
             row
@@ -42,8 +42,9 @@ class PrehardwareReadinessTests(unittest.TestCase):
             if row["check_id"] == "camera_architecture_alignment"
         )
         self.assertEqual(camera["status"], "ENGINEERING_HOLD")
-        self.assertIn("arm-mounted", camera["finding"])
-        self.assertIn("eye-in-hand calibration", camera["required_action"])
+        self.assertIn("commercial floor tripod", camera["finding"])
+        self.assertIn("SUPERSEDED_DO_NOT_PRINT", camera["finding"])
+        self.assertIn("hash-bound tripod", camera["required_action"])
 
     def test_protected_envelope_and_locator_floor_have_positive_reserve(self) -> None:
         report = prehardware.build_report()

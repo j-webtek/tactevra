@@ -56,6 +56,7 @@ from .first_motion_drills import (
     run_wrong_model_drills,
 )
 from .cpu_contact_and_ws3 import _load_geometry, load_cpu_contact_fixture
+from .evidence_binding import resolve_hash_bound_source
 from . import SCHEMA_ID
 from .contract import validate_proposal
 from .precision_adapter_v2 import PoseModelOutputV2, PrecisionAdapterResultV2
@@ -146,9 +147,7 @@ def load_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
     if any(document["counters"].values()):
         raise ValueError("fixture contains nonzero counters")
     for binding in document["bindings"].values():
-        source = _resolve(workspace, binding["path"])
-        if _file_sha(source) != binding["sha256"]:
-            raise ValueError(f"bound input changed: {binding['path']}")
+        resolve_hash_bound_source(workspace, binding)
     return document
 
 
@@ -621,9 +620,9 @@ def _emulate_and_replay(
     data = mujoco.MjData(model)
     hand_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "hand_tcp")
     profile = json.loads(
-        _resolve(workspace, fixture["bindings"]["virtual_profile"]["path"]).read_text(
-            encoding="utf-8"
-        )
+        resolve_hash_bound_source(
+            workspace, fixture["bindings"]["virtual_profile"]
+        ).read_text(encoding="utf-8")
     )
     board_t_world = np.asarray(
         profile["study_input"]["derived_solver_transform"]["matrix_row_major"],

@@ -1,0 +1,101 @@
+{
+  "body_count": 11,
+  "body_inventory": [
+    "tripod:adapter",
+    "tripod:b0477_camera",
+    "tripod:column",
+    "tripod:floor_footprint",
+    "tripod:head",
+    "tripod:leg_1",
+    "tripod:leg_2",
+    "tripod:leg_3",
+    "tripod:operator_keepout",
+    "tripod:overhead_neck",
+    "tripod:usb_cable_service_loop"
+  ],
+  "counters": {
+    "gpu_jobs": 0,
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision": "PASS_NOMINAL_SYNTHETIC_SCREEN_PHYSICAL_BLOCKED",
+  "fixture_sha256": "60d1027dbfb62e4937eb63ca04863777d9fbfadc2b745ce314a19aae7b11faf3",
+  "height_results": [
+    {
+      "collision_clear_with_margin": false,
+      "complete_provisional_coverage": false,
+      "coverage_mm": [
+        638.0167577456185,
+        482.0586586055314
+      ],
+      "decision": "STOP",
+      "limiting_body_id": "tripod:usb_cable_service_loop",
+      "minimum_swept_volume_clearance_mm": -2.0,
+      "optical_height_mm": 700.0,
+      "visibility_state": "STOP_INCOMPLETE_ENVELOPE"
+    },
+    {
+      "collision_clear_with_margin": true,
+      "complete_provisional_coverage": true,
+      "coverage_mm": [
+        774.734634405394,
+        585.356942592431
+      ],
+      "decision": "PASS_SYNTHETIC_ONLY",
+      "limiting_body_id": "tripod:operator_keepout",
+      "minimum_swept_volume_clearance_mm": 100.0,
+      "optical_height_mm": 850.0,
+      "visibility_state": "PROVISIONAL_FULL_ENVELOPE_VISIBLE"
+    },
+    {
+      "collision_clear_with_margin": true,
+      "complete_provisional_coverage": true,
+      "coverage_mm": [
+        911.4525110651693,
+        688.6552265793306
+      ],
+      "decision": "PASS_SYNTHETIC_ONLY",
+      "limiting_body_id": "tripod:operator_keepout",
+      "minimum_swept_volume_clearance_mm": 100.0,
+      "optical_height_mm": 1000.0,
+      "visibility_state": "PROVISIONAL_FULL_ENVELOPE_VISIBLE"
+    }
+  ],
+  "limitations": [
+    "Tripod leg, column, neck, head, adapter, camera, cable, operator keepout, and floor footprint dimensions are conservative synthetic assumptions, not received-product measurements.",
+    "The swept-volume AABB bounds the previously screened first-motion family but does not replace exact installed-geometry collision evaluation.",
+    "Coverage uses the manufacturer-published unmeasured 49 by 38 degree field of view with centered nadir projection and zero distortion.",
+    "A passing synthetic row can guide placement only; received identity, loaded geometry, sag, drift, stability, tether, cable strain, calibration, and installed clearance remain blocking."
+  ],
+  "nominal_height_result": {
+    "collision_clear_with_margin": true,
+    "complete_provisional_coverage": true,
+    "coverage_mm": [
+      774.734634405394,
+      585.356942592431
+    ],
+    "decision": "PASS_SYNTHETIC_ONLY",
+    "limiting_body_id": "tripod:operator_keepout",
+    "minimum_swept_volume_clearance_mm": 100.0,
+    "optical_height_mm": 850.0,
+    "visibility_state": "PROVISIONAL_FULL_ENVELOPE_VISIBLE"
+  },
+  "official_readiness": "NOT_READY_FOR_FIRST_POWERED_MOTION",
+  "physical_authority": false,
+  "receipt_sha256": "b3d737b4c95bb8271968cbb42dc07636f8ff259b1ef9d8f34ca4b1f0fe9168da",
+  "schema": "tactevra.tripod_support_screen_result.v1",
+  "scope": "SYNTHETIC_TRIPOD_SCREEN_ONLY",
+  "selected_support": {
+    "camera_profile_id": "arducam-b0477-imx283-16mm-purchased-001",
+    "candidate_id": "COMMERCIAL-TRIPOD-ASIN-B0CSYB4YQ2",
+    "support_type": "independent_commercial_floor_tripod"
+  },
+  "wrong_model_checks": {
+    "independent_floor_tripod_required": true,
+    "legacy_mast_or_portal_accepted": false,
+    "tripod_candidate_identity_bound": true
+  }
+}

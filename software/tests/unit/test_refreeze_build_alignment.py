@@ -281,6 +281,11 @@ def test_input_inventory_includes_models_and_foundation_dependencies(
     )
     support_design.parent.mkdir(parents=True)
     support_design.write_text("{}\n", encoding="utf-8")
+    tripod_candidate = (
+        tmp_path
+        / "hardware/static_overhead_camera/config/commercial_tripod_candidate.json"
+    )
+    tripod_candidate.write_text("{}\n", encoding="utf-8")
     intake_template = (
         tmp_path / "hardware/static_overhead_camera/hardware_intake_template.csv"
     )
@@ -294,6 +299,7 @@ def test_input_inventory_includes_models_and_foundation_dependencies(
     assert model.resolve() in observed
     assert camera_profile.resolve() in observed
     assert support_design.resolve() in observed
+    assert tripod_candidate.resolve() in observed
     assert intake_template.resolve() in observed
 
 
