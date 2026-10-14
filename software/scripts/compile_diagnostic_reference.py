@@ -32,7 +32,9 @@ def main():
     if args.target not in allowed and not re.fullmatch(r'configured-diagnostic-candidate-r[1-9][0-9]{0,3}',args.target):
         parser.error('Unknown compile target')
     root=Path(__file__).resolve().parents[1];tools=root/'.firmware-tools'
-    cli=tools/'cli-1.5.1/arduino-cli.exe';config=root/'firmware/arduino-cli.yaml'
+    cli=tools/'cli-1.5.1/arduino-cli.exe'
+    local_config=tools/'arduino-cli.local.yaml'
+    config=local_config if local_config.is_file() else root/'firmware/arduino-cli.yaml'
     sketch=root/'firmware/compile_probe' if args.target=='probe' else tools/args.target/'RoArm-M3_example'
     build,fqbn=build_settings(tools,args.target,args.profile)
     command=[str(cli),'compile','--fqbn',fqbn,'--config-file',str(config),

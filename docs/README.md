@@ -73,6 +73,7 @@ and each document's recorded results before using them.
 | [Photo-estimated keyboard screen](../software/docs/PHOTO_ESTIMATED_KEYBOARD_SCREEN.md) | The photographed keyboard placement, modeling assumptions, and limits of the estimate |
 | [Stylus loading procedure](../software/docs/STYLUS_LOADING_PROCEDURE.md) | Controller prerequisites, attended loading, and mounted-tool measurement requirements |
 | [Selected stylus reference](../software/docs/SELECTED_STYLUS_REFERENCE.md) | The selected tool and what still needs measuring and validating |
+| [Live bare-jaw keyboard calibration](../software/docs/LIVE_BARE_JAW_KEYBOARD_CALIBRATION.md) | Recorded noncontact approach poses and the enforced bare-jaw versus stylus profile boundary |
 | [Full-size keyboard ghost-typing plan](../software/docs/PERIBOARD_PHYSICAL_GHOST_TYPING_PLAN.md) | Keyboard geometry, virtual tip modeling, and noncontact test design; includes earlier checkpoints |
 
 Servo feedback establishes reported joint positions. It does not by itself
