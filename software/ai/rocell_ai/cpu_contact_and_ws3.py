@@ -14,6 +14,8 @@ import math
 from pathlib import Path
 from typing import Any
 
+from rocell_ai.evidence_binding import resolve_hash_bound_source
+
 from rocell_ai.first_motion_clearance_waypoints import (
     _World,
     _hand_board_transform,
@@ -74,7 +76,10 @@ def load_cpu_contact_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
         "tactevra.cpu_contact_and_ws3_fixture.v2",
     }:
         raise ValueError("unexpected CPU contact/WS3 fixture schema")
-    if document.get("scope") != SCOPE or document.get("physical_authority") is not False:
+    if (
+        document.get("scope") != SCOPE
+        or document.get("physical_authority") is not False
+    ):
         raise ValueError("fixture is not zero-authority simulation")
     if any(document.get("counters", {}).get(name, 0) for name in COUNTER_NAMES):
         raise ValueError("fixture contains authority-bearing counters")
@@ -86,9 +91,7 @@ def load_cpu_contact_fixture(path: Path, *, workspace: Path) -> dict[str, Any]:
         if section_claim != _sha(section_copy):
             raise ValueError(f"section hash mismatch: {name}")
     for binding in document["bindings"].values():
-        source = _resolve(workspace, binding["path"])
-        if hashlib.sha256(source.read_bytes()).hexdigest() != binding["sha256"]:
-            raise ValueError(f"bound source changed: {binding['path']}")
+        resolve_hash_bound_source(workspace, binding)
     return document
 
 
@@ -97,9 +100,7 @@ def _world_from_exact_fixture(
 ) -> _World:
     """Construct the retained exploratory world without opening hardware."""
 
-    prior_path = _resolve(
-        workspace, exact_fixture["bindings"]["prior_fixture"]["path"]
-    )
+    prior_path = _resolve(workspace, exact_fixture["bindings"]["prior_fixture"]["path"])
     prior = json.loads(prior_path.read_text(encoding="utf-8"))
     passive_path = _resolve(workspace, prior["bindings"]["prior_fixture"]["path"])
     passive = load_passive_tool_rerun_fixture(passive_path)
@@ -108,7 +109,8 @@ def _world_from_exact_fixture(
     )
     design = json.loads(design_path.read_text(encoding="utf-8"))
     compatibility = exact_fixture.get("bindings", {}).get(
-        "kinematic_compatibility_context")
+        "kinematic_compatibility_context"
+    )
     if compatibility is not None:
         design = dict(design)
         design["bindings"] = dict(design["bindings"])
@@ -130,9 +132,7 @@ def _validate_pose_family(
     for profile in result["profiles"]:
         bundle = profile["pose_bundle"]
         validate_pose_bundle_tool_configuration(bundle, bundle["tool_configuration"])
-        if profile["tool_configuration_sha256"] != bundle[
-            "tool_configuration_sha256"
-        ]:
+        if profile["tool_configuration_sha256"] != bundle["tool_configuration_sha256"]:
             raise ValueError("profile and pose-bundle tool hashes differ")
     if any(result.get(name) for name in COUNTER_NAMES):
         raise ValueError("pose-family result carries authority")
@@ -153,8 +153,7 @@ def build_candidate51_pose_family(
         workspace, fixture["bindings"]["exact_clearance_fixture"]["path"]
     )
     exact_fixture = json.loads(exact_path.read_text(encoding="utf-8"))
-    compatibility = fixture.get("bindings", {}).get(
-        "kinematic_compatibility_context")
+    compatibility = fixture.get("bindings", {}).get("kinematic_compatibility_context")
     if compatibility is not None:
         exact_fixture = dict(exact_fixture)
         exact_fixture["bindings"] = dict(exact_fixture["bindings"])
@@ -187,10 +186,12 @@ def build_candidate51_pose_family(
             failures.append(row["target_id"])
             continue
         achieved = _tip_xyz(world, solved, length)
-        error = math.sqrt(sum(
-            (actual - expected) ** 2
-            for actual, expected in zip(achieved, target, strict=True)
-        ))
+        error = math.sqrt(
+            sum(
+                (actual - expected) ** 2
+                for actual, expected in zip(achieved, target, strict=True)
+            )
+        )
         pose = {
             "target_id": row["target_id"],
             "contact_target_board_mm": dict(target_document),
@@ -237,10 +238,12 @@ def build_candidate51_pose_family(
         }
         bundle = bind_pose_bundle_tool_configuration(base, config)
         validate_pose_bundle_tool_configuration(bundle, config)
-        profiles.append({
-            "tool_configuration_sha256": bundle["tool_configuration_sha256"],
-            "pose_bundle": bundle,
-        })
+        profiles.append(
+            {
+                "tool_configuration_sha256": bundle["tool_configuration_sha256"],
+                "pose_bundle": bundle,
+            }
+        )
     result = {
         "schema": "tactevra.tool_bound_pose_family_result.v1",
         "scope": SCOPE,
@@ -272,8 +275,7 @@ def _load_geometry(
         workspace, fixture["bindings"]["exact_clearance_fixture"]["path"]
     )
     exact_fixture = json.loads(exact_path.read_text(encoding="utf-8"))
-    compatibility = fixture.get("bindings", {}).get(
-        "kinematic_compatibility_context")
+    compatibility = fixture.get("bindings", {}).get("kinematic_compatibility_context")
     if compatibility is not None:
         exact_fixture = dict(exact_fixture)
         exact_fixture["bindings"] = dict(exact_fixture["bindings"])
@@ -283,21 +285,17 @@ def _load_geometry(
             workspace, fixture["bindings"]["tool_110mm_pose_family"]["path"]
         )
         pose_family = load_pose_family_result(pose_path, exact_fixture)
-        expected = set(fixture["sections"]["stage_ef_contact"][
-            "tool_configuration_sha256"
-        ])
+        expected = set(
+            fixture["sections"]["stage_ef_contact"]["tool_configuration_sha256"]
+        )
     else:
         pose_path = _resolve(
-            workspace, fixture["sections"]["pose_generation"][
-                "external_output_path"
-            ]
+            workspace, fixture["sections"]["pose_generation"]["external_output_path"]
         )
         pose_family = _validate_pose_family(
             json.loads(pose_path.read_text(encoding="utf-8")), fixture
         )
-        expected = {
-            row["tool_configuration_sha256"] for row in pose_family["profiles"]
-        }
+        expected = {row["tool_configuration_sha256"] for row in pose_family["profiles"]}
     observed = {row["tool_configuration_sha256"] for row in pose_family["profiles"]}
     if observed != expected:
         raise ValueError("110 mm pose family profile identity mismatch")
@@ -323,18 +321,20 @@ def _nearest_key_distance(
     component: str,
 ) -> tuple[float, str | None]:
     candidates = sorted(
-        ((
-            _aabb_box_lower_bound_mm(
-                swept_aabb,
-                box_center_mm=key["center"],
-                box_size_mm=key["size"],
-            ),
-            key,
-        )
-         for key in keys
-         if not (
-             component == "DISTAL_TIP" and key["target_id"] == requested_target_id
-         )),
+        (
+            (
+                _aabb_box_lower_bound_mm(
+                    swept_aabb,
+                    box_center_mm=key["center"],
+                    box_size_mm=key["size"],
+                ),
+                key,
+            )
+            for key in keys
+            if not (
+                component == "DISTAL_TIP" and key["target_id"] == requested_target_id
+            )
+        ),
         key=lambda item: (item[0], item[1]["target_id"]),
     )
     minimum = float("inf")
@@ -362,9 +362,9 @@ def run_stage_ef_contact_screen(
     section = fixture["sections"]["stage_ef_contact"]
     widths = tuple(float(value) for value in section["keycap_width_height_mm"])
     thicknesses = tuple(float(value) for value in section["keycap_thickness_mm"])
-    thresholds = tuple(float(value) for value in section[
-        "minimum_non_target_clearance_mm"
-    ])
+    thresholds = tuple(
+        float(value) for value in section["minimum_non_target_clearance_mm"]
+    )
     rows: list[dict[str, Any]] = []
     global_minimum = float("inf")
     for profile in pose_family["profiles"]:
@@ -477,9 +477,7 @@ def run_stage_ef_contact_screen(
         "rows": rows,
         "decision": (
             "PASS_EXPLORATORY_STAGE_EF_EXACT_CONTACT"
-            if all(
-                row["decision"] == "PASS_EXPLORATORY_STAGE_CONTACT" for row in rows
-            )
+            if all(row["decision"] == "PASS_EXPLORATORY_STAGE_CONTACT" for row in rows)
             else "STOP_STAGE_EF_CONTACT"
         ),
         "gpu_job_count": 0,
@@ -506,13 +504,17 @@ def run_phone_capacitive_matrix(fixture: dict[str, Any]) -> dict[str, Any]:
                             area_ok = area + 1e-12 >= float(minimum_area)
                             duration_ok = float(duration) >= float(minimum_tap)
                             long_press_detected = float(duration) >= float(long_press)
-                            admitted = area_ok and duration_ok and not long_press_detected
+                            admitted = (
+                                area_ok and duration_ok and not long_press_detected
+                            )
                             rows.append(
                                 {
                                     "contact_radius_mm": float(radius),
                                     "effective_contact_area_fraction": float(fraction),
                                     "effective_contact_area_mm2": area,
-                                    "minimum_registration_area_mm2": float(minimum_area),
+                                    "minimum_registration_area_mm2": float(
+                                        minimum_area
+                                    ),
                                     "duration_ms": float(duration),
                                     "minimum_tap_duration_ms": float(minimum_tap),
                                     "long_press_threshold_ms": float(long_press),
@@ -540,12 +542,8 @@ def run_phone_capacitive_matrix(fixture: dict[str, Any]) -> dict[str, Any]:
             ),
         }
     ceiling = float(section["keyboard_shared_tip_radius_ceiling_mm"])
-    small = [
-        row for radius, row in by_radius.items() if float(radius) <= ceiling
-    ]
-    large = [
-        row for radius, row in by_radius.items() if float(radius) > ceiling
-    ]
+    small = [row for radius, row in by_radius.items() if float(radius) <= ceiling]
+    large = [row for radius, row in by_radius.items() if float(radius) > ceiling]
     if any(row["all_declared_cells_admitted"] for row in small):
         decision = "ONE_TIP_SUPPORTED_ACROSS_DECLARED_RANGES"
     elif not any(row["any_admitted"] for row in small) and any(
@@ -694,9 +692,7 @@ def run_ws3_transition_screen(
         contacts = {}
         for target_id, pose in poses.items():
             xyz = pose["contact_target_board_mm"]
-            contacts[target_id] = (
-                float(xyz["x"]), float(xyz["y"]), float(xyz["z"])
-            )
+            contacts[target_id] = (float(xyz["x"]), float(xyz["y"]), float(xyz["z"]))
             transforms[target_id] = _hand_board_transform(
                 world, tuple(float(value) for value in pose["joint_positions_rad"])
             )
@@ -709,50 +705,77 @@ def run_ws3_transition_screen(
                 destination_orientation = transforms[destination_id]
                 for hover_mm in section["hover_height_above_contact_mm"]:
                     source_hover = (
-                        source_contact[0], source_contact[1],
+                        source_contact[0],
+                        source_contact[1],
                         source_contact[2] + float(hover_mm),
                     )
                     destination_hover = (
-                        destination_contact[0], destination_contact[1],
+                        destination_contact[0],
+                        destination_contact[1],
                         destination_contact[2] + float(hover_mm),
                     )
                     for transit_z in section["transit_height_board_z_mm"]:
                         source_transit = (
-                            source_contact[0], source_contact[1], float(transit_z)
+                            source_contact[0],
+                            source_contact[1],
+                            float(transit_z),
                         )
                         destination_transit = (
-                            destination_contact[0], destination_contact[1],
+                            destination_contact[0],
+                            destination_contact[1],
                             float(transit_z),
                         )
                         phase_points = (
                             (
-                                "SOURCE_RELEASE", source_orientation,
-                                source_contact, source_hover, source_id,
+                                "SOURCE_RELEASE",
+                                source_orientation,
+                                source_contact,
+                                source_hover,
+                                source_id,
                             ),
                             (
-                                "SOURCE_RISE", destination_orientation,
-                                source_hover, source_transit, None,
+                                "SOURCE_RISE",
+                                destination_orientation,
+                                source_hover,
+                                source_transit,
+                                None,
                             ),
                             (
-                                "TRANSIT", destination_orientation,
-                                source_transit, destination_transit, None,
+                                "TRANSIT",
+                                destination_orientation,
+                                source_transit,
+                                destination_transit,
+                                None,
                             ),
                             (
-                                "DESTINATION_DESCENT", destination_orientation,
-                                destination_transit, destination_hover, None,
+                                "DESTINATION_DESCENT",
+                                destination_orientation,
+                                destination_transit,
+                                destination_hover,
+                                None,
                             ),
                         )
                         minimum = float("inf")
                         limiting = None
-                        for phase, orientation, start, end, admitted_target in phase_points:
+                        for (
+                            phase,
+                            orientation,
+                            start,
+                            end,
+                            admitted_target,
+                        ) in phase_points:
                             start_transform = _translated_transform(
                                 orientation, start, length
                             )
-                            end_transform = _translated_transform(orientation, end, length)
+                            end_transform = _translated_transform(
+                                orientation, end, length
+                            )
                             for component in components:
                                 swept, swept_aabb = _swept_collider_and_aabb(
-                                    component["vertices"], start_transform,
-                                    end_transform, margin_mm=component["margin_mm"]
+                                    component["vertices"],
+                                    start_transform,
+                                    end_transform,
+                                    margin_mm=component["margin_mm"],
                                 )
                                 for width in widths:
                                     for thickness in thicknesses:
@@ -777,26 +800,27 @@ def run_ws3_transition_screen(
                                                 "key_thickness_mm": thickness,
                                             }
                         passes = {
-                            str(value): minimum + 1e-9 >= value
-                            for value in thresholds
+                            str(value): minimum + 1e-9 >= value for value in thresholds
                         }
-                        rows.append({
-                            "tool_configuration_sha256": profile[
-                                "tool_configuration_sha256"
-                            ],
-                            "source_target_id": source_id,
-                            "destination_target_id": destination_id,
-                            "hover_height_mm": float(hover_mm),
-                            "transit_height_mm": float(transit_z),
-                            "minimum_key_clearance_mm": minimum,
-                            "limiting_case": limiting,
-                            "threshold_pass": passes,
-                            "decision": (
-                                "PASS_EXPLORATORY_TRANSITION_KEY_CLEARANCE"
-                                if all(passes.values())
-                                else "STOP_TRANSITION_KEY_CLEARANCE"
-                            ),
-                        })
+                        rows.append(
+                            {
+                                "tool_configuration_sha256": profile[
+                                    "tool_configuration_sha256"
+                                ],
+                                "source_target_id": source_id,
+                                "destination_target_id": destination_id,
+                                "hover_height_mm": float(hover_mm),
+                                "transit_height_mm": float(transit_z),
+                                "minimum_key_clearance_mm": minimum,
+                                "limiting_case": limiting,
+                                "threshold_pass": passes,
+                                "decision": (
+                                    "PASS_EXPLORATORY_TRANSITION_KEY_CLEARANCE"
+                                    if all(passes.values())
+                                    else "STOP_TRANSITION_KEY_CLEARANCE"
+                                ),
+                            }
+                        )
     decision = (
         "PASS_EXPLORATORY_WS3_EXACT_KEY_CLEARANCE"
         if all(
@@ -813,7 +837,9 @@ def run_ws3_transition_screen(
         "pose_family_receipt_sha256": pose_family["receipt_sha256"],
         "press_recipe_receipt_sha256": recipe["receipt_sha256"],
         "row_count": len(rows),
-        "minimum_key_clearance_mm": min(row["minimum_key_clearance_mm"] for row in rows),
+        "minimum_key_clearance_mm": min(
+            row["minimum_key_clearance_mm"] for row in rows
+        ),
         "pass_row_count": sum(
             row["decision"] == "PASS_EXPLORATORY_TRANSITION_KEY_CLEARANCE"
             for row in rows
@@ -824,7 +850,8 @@ def run_ws3_transition_screen(
         "gpu_job_count": 0,
         **{name: 0 for name in COUNTER_NAMES},
         "physical_authority": False,
-        "limitations": fixture["limitations"] + [
+        "limitations": fixture["limitations"]
+        + [
             "Key-only screening omits the source-to-destination orientation change.",
             "Full robot/workcell continuous collision screening remains required.",
         ],
@@ -835,9 +862,10 @@ def run_ws3_transition_screen(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=(
-        "pose-family", "stage-ef", "phone", "ws3-prepare", "ws3-screen"
-    ))
+    parser.add_argument(
+        "mode",
+        choices=("pose-family", "stage-ef", "phone", "ws3-prepare", "ws3-screen"),
+    )
     parser.add_argument("--fixture", required=True, type=Path)
     parser.add_argument("--workspace", default=Path("."), type=Path)
     parser.add_argument("--output", required=True, type=Path)
@@ -856,10 +884,15 @@ def main() -> None:
         result = run_ws3_transition_screen(fixture, workspace=workspace)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    print(json.dumps({
-        "decision": result["decision"],
-        "receipt_sha256": result["receipt_sha256"],
-    }, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "decision": result["decision"],
+                "receipt_sha256": result["receipt_sha256"],
+            },
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":

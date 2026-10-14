@@ -1,0 +1,227 @@
+{
+  "amendment": {
+    "date": "2026-10-09",
+    "parent_fixture_sha256": "b6c2d411270a39cd3a45324e2794dc8a533cb3d73df98bb2730903410e079b2c",
+    "reason": "FORMAT_ONLY_SOURCE_REBIND_BEFORE_FINAL_REPLAY",
+    "semantics_population_latency_depth_event_authority_physics_and_gates_unchanged": true,
+    "v1_3_result_preserved": true
+  },
+  "bindings": {
+    "campaign": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\simulation_program\\workstream_2\\c02_1_exact_3mm_bridge_v1_1\\bridge_physics_fixture.json",
+      "sha256": "c384d09c125a7ade73b8efce023e5926853f5705a1e7c15e958decca29a11a4b"
+    },
+    "execution": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_execution_event_v1_1.json",
+      "sha256": "22fb48a934220bd60d07de775958691ef18a842bfd33f9076eaca16b185a059d"
+    },
+    "failed_parent_control": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\ws2_event_terminated\\v1_blocked_baseline_profile\\blocked_control_summary.json",
+      "sha256": "d7c3b983b0c1f34188c209ff3f0c688f49c850e72cfc5a09c4d22777120c7a4b"
+    },
+    "failed_v1_2_comparison": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\ws2_event_terminated\\v1_2\\comparison.json",
+      "sha256": "6c71697736cf25a151f6084316e63eb84fd31866d270f47772ccbb4fac0bb028"
+    },
+    "physical_neighborhoods": {
+      "path": "software/ai/sim/evidence/workstream_2_keyboard_physical_neighborhoods_v1.json",
+      "sha256": "ecc53a067bc0d965a483a54e3d26639e08492bf94bf41ea8e0a081ba83815012"
+    },
+    "physics_probe": {
+      "path": "software/integrations/mujoco_warp/key_press_physics_probe.py",
+      "sha256": "4f4625403890e4d65b1bd05e8724843d96e5899a96f7c794364a2d24160bbe46"
+    },
+    "retained_recipe_envelope": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\cpu_contact_ws3_v3_exact_tip\\ws2_press_recipe_envelope_v1.json",
+      "receipt_sha256": "e81ec89cf27c9f6c81a55b224b305287facc5ebec6e6ab383521271b08f90b3b",
+      "sha256": "26c3cc81bb7a1c5ba205779e5b6e4bf4186a357317857c2e11a8fed61caccbd9"
+    },
+    "runner": {
+      "path": "software/ai/sim/run_ws2_event_terminated_press.py",
+      "sha256": "ed214e5254f6c629185e096146ee43d399fa14cf961afea09018347d73c59244"
+    },
+    "v1_3_comparison": {
+      "path": "C:\\MuJoCoWarp\\evidence\\issue190\\ws2_event_terminated\\v1_3\\comparison.json",
+      "sha256": "d52fc2921a8f55a1b133bd4cb276a982b8c68d36cb84b0b58ab718d5d4075d9d"
+    }
+  },
+  "claim": "Compare fixed-depth recipe 80 with host-event-terminated descent on GRAVE and EQUAL under all 64 frozen horizontal landings, three operational residual scenarios, four event latencies, and provisional -0.5/0/+0.5 mm vertical-origin offsets. Expansion remains forbidden until exact cross-GPU pass.",
+  "counters": {
+    "controller_command_count": 0,
+    "hardware_write_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "transport_count": 0
+  },
+  "created_utc": "2026-10-09T00:00:00Z",
+  "design": {
+    "comparison_metrics": [
+      "minimum_depth_margin_mm",
+      "bottom_out_count",
+      "time_per_key_ms",
+      "keystrokes_per_minute",
+      "maximum_closure_ms"
+    ],
+    "devices": [
+      "cuda:0",
+      "cuda:1"
+    ],
+    "expansion_order": [
+      "ALL_51_KEYS",
+      "STABILIZED_SHIFT_ENTER_SPACE"
+    ],
+    "failure_injection": {
+      "expected_rules": {
+        "LATE_AFTER_RETRACTION": "classify_and_ignore_no_motion_effect",
+        "NO_EVENT": "retract_at_hard_limit_no_retry",
+        "WRONG_KEY": "retract_and_stop_batch"
+      },
+      "latency_ms": 40.0,
+      "modes": [
+        "NO_EVENT",
+        "WRONG_KEY",
+        "LATE_AFTER_RETRACTION"
+      ],
+      "profile_id": "travel_mm__LOW",
+      "scenario_id": "MID_SOURCE_MID_RESIDUAL"
+    },
+    "initial_target_ids": [
+      "GRAVE",
+      "EQUAL"
+    ],
+    "landing_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+    ],
+    "latency_ms_range": [
+      5.0,
+      40.0
+    ],
+    "latency_ms_samples": [
+      5.0,
+      15.0,
+      30.0,
+      40.0
+    ],
+    "latency_scope": "EXPLORATORY_DECLARED_PENDING_PHYSICAL_MEASUREMENT",
+    "profile_ids": [
+      "travel_mm__LOW"
+    ],
+    "profile_scope_note": "Recipe 80 is retained only with its selected travel_mm__LOW switch profile. Vertical origin offsets independently model provisional key-height, flatness, tool-length, and landing-height error.",
+    "reserved_bottom_out_margin_mm": 0.2,
+    "retained_fixed_motion_time_ms": 397.0278378166641,
+    "retained_recipe": {
+      "approach_mm_s": 60.38541666666667,
+      "available_press_force_n": 1.4104166666666667,
+      "dwell_ms": 268.22916666666663,
+      "press_depth_mm": 5.0703125,
+      "recipe_index": 80,
+      "release_mm_s": 113.09375
+    },
+    "scenario_ids": [
+      "LOW_SOURCE_HIGH_RESIDUAL",
+      "MID_SOURCE_MID_RESIDUAL",
+      "HIGH_SOURCE_LOW_RESIDUAL"
+    ],
+    "speed_fraction_of_limit": 0.8,
+    "speed_rule": "min(retained_recipe_approach, 0.8 * (bottom_out - actuation - 0.2) / latency)",
+    "tip_id": "capsule-r3-m5",
+    "tool_compliance": {
+      "stiffness_n_per_mm": 0.286,
+      "travel_mm": 6.0
+    },
+    "vertical_offset_scope": "PROVISIONAL_EXPLORATORY_PENDING_PHYSICAL_KEYCAP_HEIGHT_BOARD_FLATNESS_TOOL_LENGTH_AND_LANDING_MEASUREMENT",
+    "vertical_origin_offset_mm_samples": [
+      -0.5,
+      0.0,
+      0.5
+    ],
+    "wrong_key_target_id": "1"
+  },
+  "event_authority": {
+    "may_deepen_motion": false,
+    "may_extend_motion": false,
+    "may_redirect_motion": false,
+    "may_retry_motion": false,
+    "may_start_early_retraction": true,
+    "may_start_motion": false
+  },
+  "fixture_sha256": "d16d2c2cb2721afc55915b3ba93f43f65feee94661601859233e6259ef1b09e9",
+  "limitations": [
+    "Latency 5-40 ms is exploratory until measured on the commissioned keyboard and host.",
+    "The provisional +/-0.5 mm vertical-origin range is an exploratory sensitivity range, not a measured physical tolerance.",
+    "The key-height proxy is the existing synthetic keycap-thickness range, not measured per-key height.",
+    "The simulator models host-event receipt but grants the event only early-retraction authority.",
+    "The no-event path makes no retry and the wrong-key path requires the enclosing batch to stop.",
+    "Results remain synthetic and cannot qualify physical motion.",
+    "The preserved parent failed all 64 baseline-switch worlds because recipe 80 was selected on travel_mm__LOW; this successor does not erase or rescore that failure.",
+    "The v1.1 dual-GPU attempt stopped before result files because its failure-injection profile named forbidden BASELINE; no returned metric was used to make this correction.",
+    "v1.2 remains an exact cross-GPU STOP: fixed recipe rows auto-repeated and matching host events arrived too late; v1.3 corrects late-event attribution and release observation only.",
+    "v1.4 is a format-only source rebind and requires exact replay; it does not rescore the preserved v1.3 stop."
+  ],
+  "physical_authority": false,
+  "schema": "tactevra.ws2_event_terminated_press_fixture.v1_4",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}
