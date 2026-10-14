@@ -82,6 +82,105 @@ Instrument: calipers, steel rule, height gauge, gauge blocks, and the controlled
 CAD revisions. This replaces nominal key boxes, safe-region assumptions, station
 placement, tray placement, and candidate board transforms.
 
+### 0.5 Passive force-metrology worksheet
+
+This worksheet resolves the measurement dependency retained by
+`E-20261009-SIM-WS2-STIFFNESS-SCALED-007`. It creates raw bench evidence only.
+It does not set a force ceiling, select a press recipe, or authorize arm power.
+
+#### Preconditions and instrument record
+
+1. Disconnect arm actuator power and keep controller, serial, USB-servo, and
+   network controller transports closed. Mechanically support the arm away from
+   the bench setup.
+2. Record the keyboard identity, tool revision, compliant-element revision,
+   scale identity and resolution, caliper identity and resolution, host key
+   logger identity, operator, date/time, and ambient notes.
+3. Verify the unloaded scale returns to zero before and after each measurement
+   group. Preserve drift, overload, unstable, and repeated readings rather than
+   replacing them.
+4. If the scale reports mass, preserve that raw reading and derive force using
+   `force_N = mass_g * 0.00980665`. Never overwrite the mass column with the
+   derived force.
+
+#### A. Tool force, compression, hysteresis, and end stop
+
+1. Install the exact tool and compliant element in a rigid vertical bench
+   fixture. Record the unloaded reference length from the controlled mounting
+   reference to the tool tip.
+2. Place the tip perpendicular to the center of the tared scale. Increase
+   compression in small monotonic steps, collecting at least eight nonzero
+   points before the end stop when the available travel permits it.
+3. At every point record raw scale reading, loaded tool length, calculated
+   compression, derived force, and whether the end stop appears engaged.
+4. Unload through the same approximate compression points. Repeat the complete
+   loading/unloading sweep at least three times without discarding variation.
+5. Continue only within the tool and scale limits until added load no longer
+   produces resolvable additional compression. Record that transition as the
+   observed end-stop interval; do not assign one exact value when instrument
+   resolution supports only a range.
+6. After full unloading, record permanent set. Report the loading curve,
+   unloading curve, local stiffness between adjacent points, hysteresis,
+   repeatability, compliant-travel interval, and end-stop interval with units
+   and instrument-resolution uncertainty.
+
+Raw columns:
+
+`trial_id, direction, raw_mass_g, derived_force_N, unloaded_length_mm, loaded_length_mm, compression_mm, end_stop_observed, stable_reading, notes`
+
+#### B. Keyboard actuation, bottom-out, and return force
+
+1. Place the identified keyboard and its rigid support on the scale, connect
+   the keyboard only to the logging host, and tare the complete stationary
+   assembly. The arm remains isolated and unpowered.
+2. Use the measured tool in the vertical manual fixture. Test at least `GRAVE`,
+   `EQUAL`, one representative ordinary key, and the stabilized `SPACE` key.
+   Record additional stabilized keys such as `ENTER` and `SHIFT` when the fixture
+   can reach them without changing the measurement method.
+3. For each key, approach slowly at the declared press point. Record scale and
+   displacement at first contact, the first host-accepted key event, mechanical
+   bottom-out, release/reset, and full return. Preserve missed, double, wrong-key,
+   unstable, and no-return trials.
+4. Repeat at least five complete loading/unloading trials per key. Repeat any
+   deliberately off-center test as a separate labeled population rather than
+   mixing it with center-press results.
+5. Report per-key and mechanism-class ranges for actuation force, bottom-out
+   force, actuation travel, total travel, reset force/travel, hysteresis, host
+   event latency when observable, and repeatability. Ordinary and stabilized
+   keys remain separate.
+
+Raw columns:
+
+`trial_id, key_id, mechanism_class, press_point, raw_mass_g, derived_force_N, displacement_mm, event_type, host_timestamp, bottom_out_observed, returned, notes`
+
+#### C. Servo datasheet load calculation
+
+1. Preserve the exact servo manufacturer, model, voltage, rated torque, stall
+   torque, duty assumptions, and source-document revision. Rated and stall
+   torque are separate fields.
+2. Record the simulated pose and tool-tip force direction used for the
+   conversion. Use the arm Jacobian for the pose: `tau = J_transpose * F`.
+   For a one-joint sanity check only, `force_N = torque_Nm / perpendicular_arm_m`.
+3. Compute the force at which each joint reaches rated torque and separately
+   report the force corresponding to stall torque. The minimum joint-limited
+   value is the pose-specific bound.
+4. Do not treat stall torque as an allowable continuous contact load. Leave the
+   operating derating factor and physical contact-load gate unset pending arm
+   runtime review and later powered confirmation.
+
+Recorded fields:
+
+`servo_id, model, voltage_V, rated_torque_Nm, stall_torque_Nm, source_hash, pose_id, force_direction, jacobian_hash, rated_force_N, stall_force_N, derating_factor_unset`
+
+#### Admission boundary
+
+Hash-bind the raw tables, photographs, instrument record, derivation script,
+and derived report. The simulation fixture may be amended only after an
+independent review confirms units, tare handling, tool/keyboard identities,
+uncertainty, repeat counts, and end-stop classification. A failed or incomplete
+measurement remains evidence and does not authorize replacing the provisional
+simulation inputs.
+
 Session 0 passes only when all four raw datasets and manifests are hash-bound,
 the arm remained unpowered, hardware writes and physical movements are zero,
 and no unexplained discrepancy was discarded. A failure blocks Stage A.

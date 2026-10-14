@@ -1,0 +1,97 @@
+{
+  "amendment": "POST_RESULT_COMPATIBILITY_REBIND_FOR_ADDITIVE_EVENT_TERMINATION_PROBE_PATH; HISTORICAL_THROUGHPUT_RESULT_UNCHANGED",
+  "bindings": {
+    "campaign": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_physics_v2.json",
+      "sha256": "ecab1ba591cec89f010afb2a577a7bf90188206663fc52bdee090550fdb3ec04"
+    },
+    "execution": {
+      "path": "software/ai/sim/evidence/workstream_2_key_press_execution_v2.json",
+      "sha256": "4896afad4902f7ba9ddf9f7094ceb78ded846bbc0b3c77326ad1ab96bc909b1b"
+    },
+    "mechanisms": {
+      "path": "software/ai/sim/evidence/workstream_2_keyboard_mechanisms_v1.json",
+      "sha256": "94c9f31a8b6f244d2b8e6ba45d2f09c5f3e502e01fbf9689368290e6a81891f2"
+    },
+    "physical_neighborhoods": {
+      "path": "software/ai/sim/evidence/workstream_2_keyboard_physical_neighborhoods_v1.json",
+      "sha256": "ecc53a067bc0d965a483a54e3d26639e08492bf94bf41ea8e0a081ba83815012"
+    },
+    "probe": {
+      "path": "software/integrations/mujoco_warp/key_press_physics_probe.py",
+      "sha256": "4f4625403890e4d65b1bd05e8724843d96e5899a96f7c794364a2d24160bbe46"
+    },
+    "runner": {
+      "path": "software/ai/sim/run_ws2_stage_a_vectorized_throughput.py",
+      "sha256": "8a001027b67fe66a7aa17f46d925eeb22e6019025409550c81ef0898cfc8f34a"
+    },
+    "staged": {
+      "path": "software/ai/sim/evidence/workstream_2_staged_search_v3.json",
+      "sha256": "6261a20e8aeaa0e2c9beb36501fd4f31e84665aedab8eb426757243902c10e5a"
+    }
+  },
+  "counters": {
+    "hardware_writes": 0,
+    "permits": 0,
+    "physical_movements": 0,
+    "real_commands": 0,
+    "transports": 0
+  },
+  "decision": {
+    "both_devices_must_pass": true,
+    "maximum_two_gpu_hours": 12.0,
+    "no_physics_or_safety_gate_change": true,
+    "projection": "MEASURE_ONE_EXACT_1536_WORLD_ORDINARY_BATCH_PER_GPU_AND_MULTIPLY_BY_BALANCED_10716_COMPILED_BATCH_COUNT",
+    "throughput_pass_does_not_authorize_stage_a_launch": true
+  },
+  "fixture_sha256": "500e66c035b022f1ea17de7232c2087a3f61447b7668faeccf93b8860d20f633",
+  "limitations": [
+    "wide-key dimensions and photo-local centers are simulation-only",
+    "stabilized mechanisms are ideal guided sliders without measured stabilizer coupling",
+    "all compliance and timing values remain synthetic and unmeasured",
+    "This compatibility successor only rebinds the additive event-termination probe source; it does not rescore or alter the completed Stage A throughput result."
+  ],
+  "physical_authority": false,
+  "population": {
+    "blocked_special_targets": [],
+    "compiled_identity": "TARGET_PHYSICAL_NEIGHBORHOOD_X_PROFILE_X_TIP",
+    "compliance_count": 4,
+    "current_keyboard_target_count": 51,
+    "landing_count": 8,
+    "ordinary_compiled_batch_count": 10260,
+    "ordinary_target_count": 51,
+    "ordinary_world_count": 26790912,
+    "physical_neighborhood_signature_count": 45,
+    "physical_profile_count": 19,
+    "recipe_count": 12,
+    "scenario_count": 4,
+    "tip_geometry_count": 12,
+    "world_controls": [
+      "SCENARIO",
+      "LANDING",
+      "RECIPE",
+      "SERIES_QUASISTATIC_COMPLIANCE"
+    ],
+    "worlds_per_compiled_batch": 1536
+  },
+  "schema": "tactevra.ws2_stage_a_vectorized_throughput_fixture.v2",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY",
+  "smoke": {
+    "devices": [
+      "cuda:0",
+      "cuda:1"
+    ],
+    "mechanism_class": "ORDINARY_SINGLE_SLIDER_EXPLORATORY",
+    "physical_keycap_half_extent_mm": [
+      7.0,
+      7.0
+    ],
+    "profile_id": "BASELINE",
+    "switch_closure_window_ms": {
+      "maximum": 150.0,
+      "minimum": 30.0
+    },
+    "target_id": "G",
+    "tip_id": "sphere-r1"
+  }
+}
