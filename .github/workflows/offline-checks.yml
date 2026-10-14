@@ -185,7 +185,7 @@ jobs:
           cat "$RUNNER_TEMP/rc03-manual/qualification.json" >> "$GITHUB_STEP_SUMMARY"
       - name: Retain the PDF and qualification summary for visual review
         if: always() && needs.classify.outputs.rc03_manual == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: rc03-assembly-manual-${{ github.sha }}
           path: ${{ runner.temp }}/rc03-manual/
@@ -236,7 +236,7 @@ jobs:
           cat "$RUNNER_TEMP/rc03-reportlab/qualification.json" >> "$GITHUB_STEP_SUMMARY"
       - name: Retain PDFs and qualification summary for visual review
         if: always() && needs.classify.outputs.rc03_reportlab == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: rc03-reportlab-${{ github.sha }}
           path: ${{ runner.temp }}/rc03-reportlab/
@@ -300,7 +300,7 @@ jobs:
           python verify_step_00_bundle.py --verify .
       - name: Retain version-bound mesh qualification receipt
         if: always() && needs.classify.outputs.rc03_trimesh == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: rc03-trimesh-${{ github.sha }}
           path: ${{ runner.temp }}/rc03-trimesh/
