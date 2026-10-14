@@ -1,0 +1,210 @@
+{
+  "bindings": {
+    "physics_probe": {
+      "path": "software/integrations/mujoco_warp/key_press_physics_probe.py",
+      "sha256": "5a6c07af65e0d7ad9f470c65a8c4665311bf7362da3d4e4e0d479916bf78bf96"
+    },
+    "predecessor_fixture": {
+      "fixture_sha256": "b7aa5179df03c172d4dd8926a2af6f9bc20eaf4ab9203dadf0bbb38c8d587a38",
+      "path": "software/ai/sim/evidence/ws2_event_compliant_hover_search_v1.json",
+      "sha256": "5fe1e978be19cc3734b30bc49d4dfdefbb1429ccb3c35fe53f82a6bbbc910f86"
+    },
+    "runner": {
+      "path": "software/ai/sim/run_ws2_event_stiffness_scaled_search.py",
+      "sha256": "866606ef5458f736a4a88953cbc22728bc62c97cac11d96b3ab5bf4fd5416770"
+    }
+  },
+  "claim": "Correct the soft-tool comparison by scaling each hard-limit grid to the command depth required by its stiffness and the full +1 mm key-height edge. Preserve the compliant-hover stop and every force, event, release, repeat, no-retry, and dual-GPU gate.",
+  "counters": {
+    "controller_command_count": 0,
+    "hardware_write_count": 0,
+    "permit_count": 0,
+    "physical_movement_count": 0,
+    "transport_count": 0
+  },
+  "created_utc": "2026-10-09T00:00:00Z",
+  "design": {
+    "approach_mm_s_candidates": [
+      12.0,
+      16.0,
+      20.0,
+      24.0,
+      32.0
+    ],
+    "bottom_out_treatment": "DIAGNOSTIC_ONLY_FORCE_IS_GATE",
+    "compression_aware_actuation": {
+      "by_stiffness": {
+        "0.0715": {
+          "actuation_requires_compliance_end_stop": true,
+          "high_edge_actuation_command_mm": 7.6,
+          "maximum_spring_force_n": 0.42899999999999994,
+          "nominal_actuation_command_mm": 6.6,
+          "required_spring_compression_mm": 10.90909090909091,
+          "within_compliant_travel": false
+        },
+        "0.143": {
+          "high_edge_actuation_command_mm": 7.054545454545455,
+          "maximum_spring_force_n": 0.8579999999999999,
+          "nominal_actuation_command_mm": 6.054545454545455,
+          "required_spring_compression_mm": 5.454545454545455,
+          "within_compliant_travel": true
+        }
+      },
+      "key_actuation_depth_mm": 0.6,
+      "key_actuation_force_n": 0.78,
+      "maximum_height_offset_mm": 1.0,
+      "tool_travel_mm": 6.0
+    },
+    "contact_hover_clearance_mm": 1.25,
+    "devices": [
+      "cuda:0",
+      "cuda:1"
+    ],
+    "hard_depth_limit_mm_candidates_by_stiffness": {
+      "0.0715": [
+        7.6,
+        7.7,
+        7.8
+      ],
+      "0.143": [
+        7.05,
+        7.15,
+        7.25
+      ]
+    },
+    "hard_limit_rule": "CENTER_ON_ACTUATION_COMMAND_AT_PLUS_1MM_HEIGHT_EDGE_WITH_MINUS_0P005_PLUS_0P095_PLUS_0P195MM_MARGIN_SAMPLES",
+    "height_offset_mm_samples": [
+      -1.0,
+      -0.75,
+      -0.5,
+      -0.25,
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "initial_hover_clearance_mm": 3.0,
+    "landing_sample_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+    ],
+    "latency_ms_samples": [
+      5.0,
+      15.0,
+      30.0,
+      40.0
+    ],
+    "maximum_contact_force_n": 1.4104166666666667,
+    "maximum_contact_force_source": "RETAINED_RECIPE_80_AVAILABLE_PRESS_FORCE_NOT_A_PHYSICAL_DAMAGE_BOTTOM_OUT_OR_ARM_LOAD_SPECIFICATION_MEASUREMENT_DEPENDENT",
+    "no_event_response": "IMMEDIATE_RETRACT_AT_HARD_LIMIT_NO_DWELL_REPORT_FAILED_PRESS_NO_RETRY",
+    "population_per_device": {
+      "matching_event_rows": 414720,
+      "no_event_rows": 103680,
+      "total_rows": 518400
+    },
+    "profile_id": "travel_mm__LOW",
+    "rapid_approach_mm_s": 100.0,
+    "reported_height_bands_mm": [
+      0.5,
+      0.75,
+      1.0
+    ],
+    "scenario_ids": [
+      "LOW_SOURCE_HIGH_RESIDUAL",
+      "MID_SOURCE_MID_RESIDUAL",
+      "HIGH_SOURCE_LOW_RESIDUAL"
+    ],
+    "selection_rule": "REQUIRE_ALL_MATCHING_AND_NO_EVENT_ROWS_PASS_FORCE_BOUNDED_RULES_THEN_MINIMIZE_WORST_FORCE_THEN_SPEED_THEN_HARD_LIMIT_THEN_STIFFNESS",
+    "target_ids": [
+      "GRAVE",
+      "EQUAL"
+    ],
+    "tool_compliance_travel_mm": 6.0,
+    "tool_stiffness_n_per_mm_candidates": [
+      0.143,
+      0.0715
+    ]
+  },
+  "event_authority": {
+    "hard_limit_always_enforced": true,
+    "may_end_press_early": true,
+    "may_extend_motion": false,
+    "may_retry": false,
+    "may_start_motion": false,
+    "no_event_must_report_failed_press": true
+  },
+  "fixture_sha256": "962550e42db283a57ac637084071d33231fbacaefed4d4aab7aa4540150f7efc",
+  "limitations": [
+    "Simulation-only exploratory evidence; no physical keyboard, camera, arm, host timing, stiffness, compliant travel, or load was measured.",
+    "The 1.4104166667 N ceiling is recipe-80 available force, not a physical damage, typical bottom-out, or arm-load specification; it remains measurement-dependent.",
+    "The 0.0715 N/mm candidate cannot develop the modeled 0.78 N actuation force inside 6 mm spring travel and therefore depends on the modeled compliance end stop becoming rigid.",
+    "The 0.143 N/mm candidate has only about 0.545 mm spring travel remaining at modeled actuation; real hysteresis and end-stop behavior are absent.",
+    "No passing result can select a physical tool or grant controller authority."
+  ],
+  "physical_authority": false,
+  "schema": "tactevra.ws2_event_stiffness_scaled_search_fixture.v1",
+  "scope": "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+}

@@ -30,8 +30,8 @@ from rocell_ai.first_motion_controller_emulator import (
     _baseline_joints,
     _execute_strict_runtime_path,
     _range_samples,
-    load_emulator_fixture,
 )
+from rocell_ai.evidence_binding import load_compatible_emulator_fixture
 
 SCOPE = "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
 FAULTS = (
@@ -46,7 +46,10 @@ FAULTS = (
 
 def _canonical(value: object) -> bytes:
     return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
         allow_nan=False,
     ).encode()
 
@@ -62,7 +65,8 @@ def _six(values: tuple[float, ...], hand: float) -> tuple[float, ...]:
 
 
 def _phase_endpoints(
-    rows: list[tuple[str, tuple[float, ...]]], expected: tuple[str, ...],
+    rows: list[tuple[str, tuple[float, ...]]],
+    expected: tuple[str, ...],
 ) -> list[tuple[str, tuple[float, ...]]]:
     endpoints: list[tuple[str, tuple[float, ...]]] = []
     for phase in expected:
@@ -74,11 +78,16 @@ def _phase_endpoints(
 
 
 def run_captured_layout_sequence(
-    fixture: dict[str, Any], *, workspace: Path, target_id: str = "G",
+    fixture: dict[str, Any],
+    *,
+    workspace: Path,
+    target_id: str = "G",
 ) -> dict[str, Any]:
     """Rehearse an approach, press, retract, return, and controller faults."""
 
-    contact_path = _resolve(workspace, fixture["bindings"]["cpu_contact_fixture"]["path"])
+    contact_path = _resolve(
+        workspace, fixture["bindings"]["cpu_contact_fixture"]["path"]
+    )
     contact = load_cpu_contact_fixture(contact_path, workspace=workspace)
     contact = dict(contact)
     contact["bindings"] = dict(contact["bindings"])
@@ -87,9 +96,10 @@ def run_captured_layout_sequence(
     ]
     _, pose_family, world = _load_geometry(contact, workspace=workspace)
     profile = next(
-        row for row in pose_family["profiles"]
-        if row["pose_bundle"]["tool_configuration"][
-            "total_hand_tcp_to_tip_length_mm"] == 110.0
+        row
+        for row in pose_family["profiles"]
+        if row["pose_bundle"]["tool_configuration"]["total_hand_tcp_to_tip_length_mm"]
+        == 110.0
     )
     bundle = profile["pose_bundle"]
     target = next(row for row in bundle["poses"] if row["target_id"] == target_id)
@@ -104,112 +114,152 @@ def run_captured_layout_sequence(
 
     park_screen = _load_bound(fixture["bindings"]["park_screen"], workspace)
     park_row = next(
-        row for row in park_screen["top_candidates"]
+        row
+        for row in park_screen["top_candidates"]
         if row["pose_id"] == fixture["configuration"]["park_pose_id"]
     )
     park = tuple(
-        float(park_row["joint_positions_rad"][name])
-        for name in bundle["joint_order"]
+        float(park_row["joint_positions_rad"][name]) for name in bundle["joint_order"]
     )
     emulator_path = _resolve(workspace, fixture["bindings"]["emulator_fixture"]["path"])
-    emulator = load_emulator_fixture(emulator_path)
+    emulator = load_compatible_emulator_fixture(emulator_path, workspace=workspace)
     baseline = _baseline_joints(emulator)
     sample = _range_samples(emulator["controller_emulator"])[0]
 
     park_xyz = _tip_xyz(world, park, tool_length)
     start_route, start_failure = _clearance_route(
-        world, start=baseline[:5], end=park, end_xyz=park_xyz,
-        tool_length=tool_length, transit_z=100.0, samples=3,
+        world,
+        start=baseline[:5],
+        end=park,
+        end_xyz=park_xyz,
+        tool_length=tool_length,
+        transit_z=100.0,
+        samples=3,
     )
     target_route, target_failure = _clearance_route(
-        world, start=park, end=hover, end_xyz=hover_xyz,
-        tool_length=tool_length, transit_z=100.0, samples=3,
+        world,
+        start=park,
+        end=hover,
+        end_xyz=hover_xyz,
+        tool_length=tool_length,
+        transit_z=100.0,
+        samples=3,
     )
     return_route, return_failure = _clearance_route(
-        world, start=hover, end=park, end_xyz=park_xyz,
-        tool_length=tool_length, transit_z=100.0, samples=3,
+        world,
+        start=hover,
+        end=park,
+        end_xyz=park_xyz,
+        tool_length=tool_length,
+        transit_z=100.0,
+        samples=3,
     )
-    failures = [value for value in (start_failure, target_failure, return_failure) if value]
+    failures = [
+        value for value in (start_failure, target_failure, return_failure) if value
+    ]
     if failures:
         raise ValueError(f"command sequence route failed: {failures}")
 
     planned = [
         (f"START_{phase}", joints)
         for phase, joints in _phase_endpoints(
-            start_route, ("ASCEND", "TRANSIT", "DESCEND"))
+            start_route, ("ASCEND", "TRANSIT", "DESCEND")
+        )
     ]
     planned.extend(
         (f"TARGET_{phase}", joints)
         for phase, joints in _phase_endpoints(
-            target_route, ("ASCEND", "TRANSIT", "DESCEND"))
+            target_route, ("ASCEND", "TRANSIT", "DESCEND")
+        )
     )
     planned.extend((("PRESS", contact_joints), ("RETRACT", hover)))
     planned.extend(
         (f"RETURN_{phase}", joints)
         for phase, joints in _phase_endpoints(
-            return_route, ("ASCEND", "TRANSIT", "DESCEND"))
+            return_route, ("ASCEND", "TRANSIT", "DESCEND")
+        )
     )
 
     controller = InMemoryT102Controller(baseline, sample, seed=1907112)
     commands = []
     for index, (phase, joints) in enumerate(planned, start=1):
         command = all_joint_command(
-            _six(joints, baseline[5]), speed=sample.speed_setting,
+            _six(joints, baseline[5]),
+            speed=sample.speed_setting,
             acceleration=sample.acceleration_setting,
         )
         plant, runtime, frame = _execute_strict_runtime_path(
-            emulator, controller, command,
+            emulator,
+            controller,
+            command,
             case_id=f"captured-layout:{target_id}:{index}:{phase}",
         )
-        commands.append({
-            "ordinal": index,
-            "phase": phase,
-            "command": command,
-            "wire_bytes_sha256": frame.wire_bytes_sha256,
-            "runtime_status": runtime["runtime_status"],
-            "runtime_terminal_reason": runtime["runtime_terminal_reason"],
-            "feedback_exchange_count": runtime["runtime_feedback_exchange_count"],
-            "telemetry_sample_count": len(plant["telemetry"]),
-            "predicted_endpoint_joints_rad": plant["measured_joints_rad"],
-            "hardware_write_count": plant["hardware_write_count"],
-            "physical_movement_count": plant["physical_movement_count"],
-            "real_transport_open_count": plant["real_transport_open_count"],
-            "physical_authority": plant["physical_authority"],
-        })
+        commands.append(
+            {
+                "ordinal": index,
+                "phase": phase,
+                "command": command,
+                "wire_bytes_sha256": frame.wire_bytes_sha256,
+                "runtime_status": runtime["runtime_status"],
+                "runtime_terminal_reason": runtime["runtime_terminal_reason"],
+                "feedback_exchange_count": runtime["runtime_feedback_exchange_count"],
+                "telemetry_sample_count": len(plant["telemetry"]),
+                "predicted_endpoint_joints_rad": plant["measured_joints_rad"],
+                "hardware_write_count": plant["hardware_write_count"],
+                "physical_movement_count": plant["physical_movement_count"],
+                "real_transport_open_count": plant["real_transport_open_count"],
+                "physical_authority": plant["physical_authority"],
+            }
+        )
 
     press_command = all_joint_command(
-        _six(contact_joints, baseline[5]), speed=sample.speed_setting,
+        _six(contact_joints, baseline[5]),
+        speed=sample.speed_setting,
         acceleration=sample.acceleration_setting,
     )
     faults = []
     for index, fault in enumerate(FAULTS):
         fault_controller = InMemoryT102Controller(
-            _six(hover, baseline[5]), sample, seed=1907200 + index,
+            _six(hover, baseline[5]),
+            sample,
+            seed=1907200 + index,
         )
         plant, runtime, frame = _execute_strict_runtime_path(
-            emulator, fault_controller, press_command,
-            case_id=f"captured-layout:{target_id}:fault:{fault}", fault=fault,
+            emulator,
+            fault_controller,
+            press_command,
+            case_id=f"captured-layout:{target_id}:fault:{fault}",
+            fault=fault,
         )
-        faults.append({
-            "fault": fault,
-            "plant_status": plant["status"],
-            "wire_bytes_sha256": frame.wire_bytes_sha256,
-            "runtime_status": runtime["runtime_status"],
-            "runtime_terminal_reason": runtime["runtime_terminal_reason"],
-            "hardware_write_count": plant["hardware_write_count"],
-            "physical_movement_count": plant["physical_movement_count"],
-            "real_transport_open_count": plant["real_transport_open_count"],
-            "physical_authority": plant["physical_authority"],
-        })
+        faults.append(
+            {
+                "fault": fault,
+                "plant_status": plant["status"],
+                "wire_bytes_sha256": frame.wire_bytes_sha256,
+                "runtime_status": runtime["runtime_status"],
+                "runtime_terminal_reason": runtime["runtime_terminal_reason"],
+                "hardware_write_count": plant["hardware_write_count"],
+                "physical_movement_count": plant["physical_movement_count"],
+                "real_transport_open_count": plant["real_transport_open_count"],
+                "physical_authority": plant["physical_authority"],
+            }
+        )
 
-    consolidated = _load_bound({
-        "path": "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json",
-        "sha256": hashlib.sha256((
-            workspace / "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json"
-        ).read_bytes()).hexdigest(),
-    }, workspace)
+    consolidated = _load_bound(
+        {
+            "path": "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json",
+            "sha256": hashlib.sha256(
+                (
+                    workspace
+                    / "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json"
+                ).read_bytes()
+            ).hexdigest(),
+        },
+        workspace,
+    )
     clearance = next(
-        row for row in consolidated["stage_c_exact_sweep"]["rows"]
+        row
+        for row in consolidated["stage_c_exact_sweep"]["rows"]
         if row["target_id"] == target_id
         and row["tool_configuration_sha256"] == profile["tool_configuration_sha256"]
     )
@@ -226,10 +276,12 @@ def run_captured_layout_sequence(
             "pose_family": fixture["bindings"]["pose_family"],
             "consolidated_result": {
                 "path": "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json",
-                "sha256": hashlib.sha256((
-                    workspace
-                    / "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json"
-                ).read_bytes()).hexdigest(),
+                "sha256": hashlib.sha256(
+                    (
+                        workspace
+                        / "software/ai/sim/evidence/first_motion_consolidated_tripod_result_v2.json"
+                    ).read_bytes()
+                ).hexdigest(),
                 "receipt_sha256": consolidated["receipt_sha256"],
             },
         },
@@ -276,28 +328,40 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", type=Path, default=Path("."))
     parser.add_argument(
-        "--fixture", type=Path,
-        default=Path("software/ai/sim/evidence/first_motion_consolidated_tripod_v2.json"),
+        "--fixture",
+        type=Path,
+        default=Path(
+            "software/ai/sim/evidence/first_motion_consolidated_tripod_v2.json"
+        ),
     )
     parser.add_argument("--target", default="G")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     workspace = args.workspace.resolve()
-    fixture_path = args.fixture if args.fixture.is_absolute() else workspace / args.fixture
+    fixture_path = (
+        args.fixture if args.fixture.is_absolute() else workspace / args.fixture
+    )
     fixture = load_consolidated_fixture(fixture_path, workspace=workspace)
     result = run_captured_layout_sequence(
-        fixture, workspace=workspace, target_id=args.target,
+        fixture,
+        workspace=workspace,
+        target_id=args.target,
     )
     output = args.output if args.output.is_absolute() else workspace / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes((json.dumps(result, indent=2, sort_keys=True) + "\n").encode())
-    print(json.dumps({
-        "target_id": result["target_id"],
-        "command_count": result["command_count"],
-        "fault_count": result["fault_count"],
-        "all_nominal_commands_settled": result["all_nominal_commands_settled"],
-        "receipt_sha256": result["receipt_sha256"],
-    }, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "target_id": result["target_id"],
+                "command_count": result["command_count"],
+                "fault_count": result["fault_count"],
+                "all_nominal_commands_settled": result["all_nominal_commands_settled"],
+                "receipt_sha256": result["receipt_sha256"],
+            },
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":
