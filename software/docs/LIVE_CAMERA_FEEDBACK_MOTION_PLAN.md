@@ -144,15 +144,36 @@ is required; it is not a prerequisite for using the measured fixed plane.
 
 ### 5. Prove camera-only keyboard localization
 
-- Produce a passive visibility atlas for the full keyboard.
-- Resolve each required key center in the board frame and overlay projections
-  back onto retained images.
-- Repeat captures while the arm remains stationary. Quantify jitter, drift,
-  tag loss, occlusion, and wrong-calibration rejection.
-- Abstain on stale frames, incomplete fiducials, excessive residuals,
-  out-of-workspace targets, or uncertainty above the planned hover margin.
+- The retained `reopen-01-frame-04.jpg` housing outline was reviewed against
+  the known 315 by 147 by 21 mm PERIBOARD-409 candidate dimensions. The fitted
+  image quadrilateral establishes the keyboard plane. Reviewed first/last
+  keycap centers fit each alphanumeric row, while Tab, Enter, and Space use
+  separate visible anchors. This corrects the synthetic catalog's 27.8472 mm
+  mean and 32.9056 mm maximum center offset. The source annotation, housing
+  lines, key anchors, frame hash, and 5 px annotation tolerance are versioned in
+  `software/config/b0477_keyboard_overlay_annotation_20261016.json`.
+- Directly applying the board-plane homography to the elevated keyboard makes
+  the housing appear 333.9-337.4 mm wide and 170.0-171.4 mm deep. Constraining
+  that observation to the known housing size gives a provisional front-left
+  board position of `(69.367, 86.447) mm` and yaw of `0.2932 deg`. The maximum
+  housing-corner residual is 16.8566 mm, which records the visible parallax
+  rather than hiding it.
+- The 30 mm board-XY study margin covers the additive 26.7585 mm review bound:
+  7.4937 mm held-out board-mapping error, 16.8566 mm housing-fit residual, and
+  2.4082 mm conservative conversion of the pixel annotation tolerance.
+- Phase correlation over the keyboard ROI across all ten retained frames shows
+  at most 0.0616 px radial shift. This proves the saved fixed-frame overlay is
+  repeatable for offline review. The fitted row pitches range from 17.9585 to
+  18.6289 mm. These are image-derived centers rather than product metrology.
+- Recompute the result with
+  `software/scripts/measure_fixed_camera_keyboard_overlay.py`. The compact
+  numeric evidence is
+  `software/ai/eval/b0477_keyboard_overlay_20261016.json`; an optional preview
+  can be written outside Git with `--preview`.
 
-Exit: repeatable board-frame targets with no robot command generation.
+Exit: the fixed-frame keyboard overlay is complete for retained-image review.
+No robot command was generated, the camera was not reopened, and the result has
+no motion authority.
 
 ### 6. Join observation to a dry-run hover proposal
 
@@ -242,12 +263,14 @@ canonical manifest, compact numeric results, and content hashes.
 
 ## Immediate next review
 
-Increment C now has a measured fixed-board planar mapping from the retained
-`KEYBOARD_FORWARD_CAL_1` frames. No target printing or new capture is required.
-The next review projects the keyboard outline and proposed key centers back
-into those frames and checks them visually and numerically against the current
-7.4937 mm held-out maximum. Robot transport, camera-guided motion, descent, and
-contact remain disabled.
+Increment C now has both the measured fixed-board planar mapping and the
+reviewed 46-target keyboard image overlay from the retained
+`KEYBOARD_FORWARD_CAL_1` frames. No target printing, new capture, or arm
+movement is required. The next increment joins one already retained frame,
+the board-registration hash, keyboard-overlay hash, target-catalog hash, and
+explicit `BARE_JAW` profile into an unsent `HOVER` proposal. It must prove zero
+transport writes and reject stale epochs, changed hashes, missing targets, and
+any request for descent or contact.
 
 ## 2026-10-15 read-only intake result
 

@@ -1,0 +1,2195 @@
+{
+  "schema": "rocell.fixed_camera_keyboard_overlay.v1",
+  "created_at": "2026-10-16T00:00:00+00:00",
+  "status": "READ_ONLY_IMAGE_OVERLAY_REVIEWED_NOT_MOTION_AUTHORITY",
+  "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
+  "inputs": {
+    "annotation_path": "software/config/b0477_keyboard_overlay_annotation_20261016.json",
+    "annotation_sha256": "fe58efde872b9340d9900be6c8152dad39b27392f355df0b202035537bbd6ed1",
+    "board_registration_path": "software/ai/eval/b0477_fixed_board_registration_20261016.json",
+    "board_registration_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
+    "target_profile_path": "software/config/static_nominal_target_profiles.json",
+    "target_profile_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+    "capture_receipt_path": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/receipt.json",
+    "capture_receipt_sha256": "32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8",
+    "reference_frame": {
+      "path": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/reopen-01-frame-04.jpg",
+      "sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5",
+      "image_size_px": [
+        1920,
+        1080
+      ]
+    }
+  },
+  "keyboard_geometry": {
+    "device_model": "Perixx PERIBOARD-409 U English US candidate",
+    "housing_dimensions_mm": [
+      315.0,
+      147.0,
+      21.0
+    ],
+    "target_pitch_mm": 19.05,
+    "target_count": 46,
+    "target_geometry_status": "IMAGE_FITTED_FROM_REVIEWED_KEY_CENTER_ANCHORS_NOT_PRODUCT_METROLOGY",
+    "housing_corners_px": {
+      "front_left": [
+        228.666,
+        862.235
+      ],
+      "front_right": [
+        1255.019,
+        828.578
+      ],
+      "rear_right": [
+        1238.381,
+        443.681
+      ],
+      "rear_left": [
+        291.657,
+        485.495
+      ]
+    },
+    "keyboard_to_image_homography": [
+      [
+        3.137649434813,
+        0.594338733079,
+        228.665634155273
+      ],
+      [
+        -0.186479463773,
+        -2.286823172832,
+        862.235046386719
+      ],
+      [
+        -9.6106695e-05,
+        0.000568562635,
+        1.0
+      ]
+    ],
+    "image_to_keyboard_homography": [
+      [
+        0.393104996327,
+        0.065727712125,
+        -146.562340187872
+      ],
+      [
+        -0.014666871468,
+        -0.447259203996,
+        388.996369969774
+      ],
+      [
+        4.6119057e-05,
+        0.000260611745,
+        1.0
+      ]
+    ],
+    "target_fit_summary": {
+      "rows": {
+        "number_row": {
+          "first_center_keyboard_xy_mm": [
+            51.639,
+            97.255
+          ],
+          "last_center_keyboard_xy_mm": [
+            256.556,
+            97.803
+          ],
+          "fitted_step_xy_mm": [
+            18.6288,
+            0.0498
+          ],
+          "fitted_pitch_mm": 18.6289
+        },
+        "q_row": {
+          "first_center_keyboard_xy_mm": [
+            62.489,
+            78.934
+          ],
+          "last_center_keyboard_xy_mm": [
+            228.081,
+            79.65
+          ],
+          "fitted_step_xy_mm": [
+            18.399,
+            0.0795
+          ],
+          "fitted_pitch_mm": 18.3992
+        },
+        "a_row": {
+          "first_center_keyboard_xy_mm": [
+            67.915,
+            61.242
+          ],
+          "last_center_keyboard_xy_mm": [
+            250.226,
+            62.503
+          ],
+          "fitted_step_xy_mm": [
+            18.2312,
+            0.1261
+          ],
+          "fitted_pitch_mm": 18.2316
+        },
+        "z_row": {
+          "first_center_keyboard_xy_mm": [
+            76.554,
+            42.635
+          ],
+          "last_center_keyboard_xy_mm": [
+            238.176,
+            43.88
+          ],
+          "fitted_step_xy_mm": [
+            17.958,
+            0.1383
+          ],
+          "fitted_pitch_mm": 17.9585
+        }
+      },
+      "mean_nominal_to_image_fitted_correction_mm": 27.8472,
+      "maximum_nominal_to_image_fitted_correction_mm": 32.9056
+    },
+    "projected_targets": {
+      "1": {
+        "nominal_center_keyboard_xy_mm": [
+          22.0,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          51.639,
+          97.255
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.639,
+          -13.745
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          427.0,
+          600.0
+        ],
+        "region_corners_px": [
+          [
+            403.398,
+            618.431
+          ],
+          [
+            445.925,
+            616.73
+          ],
+          [
+            450.454,
+            581.685
+          ],
+          [
+            408.242,
+            583.418
+          ]
+        ]
+      },
+      "2": {
+        "nominal_center_keyboard_xy_mm": [
+          41.05,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          70.267,
+          97.305
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.217,
+          -13.695
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          483.489,
+          597.587
+        ],
+        "region_corners_px": [
+          [
+            460.026,
+            616.041
+          ],
+          [
+            502.698,
+            614.334
+          ],
+          [
+            506.804,
+            579.249
+          ],
+          [
+            464.45,
+            580.987
+          ]
+        ]
+      },
+      "3": {
+        "nominal_center_keyboard_xy_mm": [
+          60.1,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          88.896,
+          97.355
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          28.796,
+          -13.645
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          540.168,
+          595.165
+        ],
+        "region_corners_px": [
+          [
+            516.845,
+            613.643
+          ],
+          [
+            559.663,
+            611.93
+          ],
+          [
+            563.344,
+            576.804
+          ],
+          [
+            520.846,
+            578.549
+          ]
+        ]
+      },
+      "4": {
+        "nominal_center_keyboard_xy_mm": [
+          79.15,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          107.525,
+          97.405
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          28.375,
+          -13.595
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          597.039,
+          592.736
+        ],
+        "region_corners_px": [
+          [
+            573.857,
+            611.237
+          ],
+          [
+            616.821,
+            609.518
+          ],
+          [
+            620.074,
+            574.351
+          ],
+          [
+            577.432,
+            576.102
+          ]
+        ]
+      },
+      "5": {
+        "nominal_center_keyboard_xy_mm": [
+          98.2,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          126.154,
+          97.454
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.954,
+          -13.546
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          654.101,
+          590.298
+        ],
+        "region_corners_px": [
+          [
+            631.062,
+            608.823
+          ],
+          [
+            674.172,
+            607.098
+          ],
+          [
+            676.995,
+            571.89
+          ],
+          [
+            634.208,
+            573.647
+          ]
+        ]
+      },
+      "6": {
+        "nominal_center_keyboard_xy_mm": [
+          117.25,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          144.783,
+          97.504
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.533,
+          -13.496
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          711.357,
+          587.852
+        ],
+        "region_corners_px": [
+          [
+            688.46,
+            606.4
+          ],
+          [
+            731.719,
+            604.669
+          ],
+          [
+            734.108,
+            569.421
+          ],
+          [
+            691.176,
+            571.184
+          ]
+        ]
+      },
+      "7": {
+        "nominal_center_keyboard_xy_mm": [
+          136.3,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          163.412,
+          97.554
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.112,
+          -13.446
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          768.806,
+          585.398
+        ],
+        "region_corners_px": [
+          [
+            746.054,
+            603.97
+          ],
+          [
+            789.461,
+            602.233
+          ],
+          [
+            791.414,
+            566.943
+          ],
+          [
+            748.335,
+            568.712
+          ]
+        ]
+      },
+      "8": {
+        "nominal_center_keyboard_xy_mm": [
+          155.35,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          182.041,
+          97.604
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          26.691,
+          -13.396
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          826.451,
+          582.935
+        ],
+        "region_corners_px": [
+          [
+            803.844,
+            601.531
+          ],
+          [
+            847.401,
+            599.788
+          ],
+          [
+            848.914,
+            564.457
+          ],
+          [
+            805.688,
+            566.233
+          ]
+        ]
+      },
+      "9": {
+        "nominal_center_keyboard_xy_mm": [
+          174.4,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          200.669,
+          97.654
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          26.269,
+          -13.346
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          884.292,
+          580.464
+        ],
+        "region_corners_px": [
+          [
+            861.832,
+            599.083
+          ],
+          [
+            905.538,
+            597.334
+          ],
+          [
+            906.609,
+            561.963
+          ],
+          [
+            863.235,
+            563.744
+          ]
+        ]
+      },
+      "0": {
+        "nominal_center_keyboard_xy_mm": [
+          193.45,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          219.298,
+          97.703
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.848,
+          -13.297
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          942.329,
+          577.984
+        ],
+        "region_corners_px": [
+          [
+            920.017,
+            596.628
+          ],
+          [
+            963.874,
+            594.872
+          ],
+          [
+            964.499,
+            559.46
+          ],
+          [
+            920.977,
+            561.248
+          ]
+        ]
+      },
+      "MINUS": {
+        "nominal_center_keyboard_xy_mm": [
+          212.5,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          237.927,
+          97.753
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.427,
+          -13.247
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          1000.565,
+          575.496
+        ],
+        "region_corners_px": [
+          [
+            978.402,
+            594.164
+          ],
+          [
+            1022.411,
+            592.402
+          ],
+          [
+            1022.587,
+            556.948
+          ],
+          [
+            978.916,
+            558.742
+          ]
+        ]
+      },
+      "EQUAL": {
+        "nominal_center_keyboard_xy_mm": [
+          231.55,
+          111.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          256.556,
+          97.803
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.006,
+          -13.197
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          1059.0,
+          573.0
+        ],
+        "region_corners_px": [
+          [
+            1036.987,
+            591.691
+          ],
+          [
+            1081.148,
+            589.923
+          ],
+          [
+            1080.872,
+            554.428
+          ],
+          [
+            1037.051,
+            556.229
+          ]
+        ]
+      },
+      "Q": {
+        "nominal_center_keyboard_xy_mm": [
+          31.5,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          62.489,
+          78.934
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          30.989,
+          -11.066
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          454.0,
+          645.0
+        ],
+        "region_corners_px": [
+          [
+            430.223,
+            663.778
+          ],
+          [
+            473.257,
+            662.118
+          ],
+          [
+            477.626,
+            626.341
+          ],
+          [
+            434.915,
+            628.035
+          ]
+        ]
+      },
+      "W": {
+        "nominal_center_keyboard_xy_mm": [
+          50.55,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          80.888,
+          79.014
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          30.338,
+          -10.986
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          510.462,
+          642.588
+        ],
+        "region_corners_px": [
+          [
+            486.826,
+            661.39
+          ],
+          [
+            530.005,
+            659.723
+          ],
+          [
+            533.947,
+            623.906
+          ],
+          [
+            491.093,
+            625.606
+          ]
+        ]
+      },
+      "E": {
+        "nominal_center_keyboard_xy_mm": [
+          69.6,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          99.287,
+          79.093
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.687,
+          -10.907
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          567.111,
+          640.168
+        ],
+        "region_corners_px": [
+          [
+            543.618,
+            658.994
+          ],
+          [
+            586.943,
+            657.321
+          ],
+          [
+            590.455,
+            621.462
+          ],
+          [
+            547.457,
+            623.168
+          ]
+        ]
+      },
+      "R": {
+        "nominal_center_keyboard_xy_mm": [
+          88.65,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          117.686,
+          79.173
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.036,
+          -10.827
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          623.95,
+          637.74
+        ],
+        "region_corners_px": [
+          [
+            600.599,
+            656.589
+          ],
+          [
+            644.071,
+            654.911
+          ],
+          [
+            647.151,
+            619.011
+          ],
+          [
+            604.008,
+            620.723
+          ]
+        ]
+      },
+      "T": {
+        "nominal_center_keyboard_xy_mm": [
+          107.7,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          136.085,
+          79.252
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          28.385,
+          -10.748
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          680.978,
+          635.304
+        ],
+        "region_corners_px": [
+          [
+            657.772,
+            654.177
+          ],
+          [
+            701.392,
+            652.492
+          ],
+          [
+            704.036,
+            616.551
+          ],
+          [
+            660.748,
+            618.27
+          ]
+        ]
+      },
+      "Y": {
+        "nominal_center_keyboard_xy_mm": [
+          126.75,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          154.484,
+          79.332
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.734,
+          -10.668
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          738.197,
+          632.86
+        ],
+        "region_corners_px": [
+          [
+            715.136,
+            651.756
+          ],
+          [
+            758.905,
+            650.066
+          ],
+          [
+            761.111,
+            614.084
+          ],
+          [
+            717.676,
+            615.808
+          ]
+        ]
+      },
+      "U": {
+        "nominal_center_keyboard_xy_mm": [
+          145.8,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          172.883,
+          79.411
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.083,
+          -10.589
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          795.608,
+          630.407
+        ],
+        "region_corners_px": [
+          [
+            772.693,
+            649.328
+          ],
+          [
+            816.611,
+            647.631
+          ],
+          [
+            818.376,
+            611.608
+          ],
+          [
+            774.794,
+            613.338
+          ]
+        ]
+      },
+      "I": {
+        "nominal_center_keyboard_xy_mm": [
+          164.85,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          191.282,
+          79.491
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          26.432,
+          -10.509
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          853.211,
+          627.946
+        ],
+        "region_corners_px": [
+          [
+            830.444,
+            646.891
+          ],
+          [
+            874.512,
+            645.188
+          ],
+          [
+            875.832,
+            609.123
+          ],
+          [
+            832.103,
+            610.86
+          ]
+        ]
+      },
+      "O": {
+        "nominal_center_keyboard_xy_mm": [
+          183.9,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          209.682,
+          79.571
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.782,
+          -10.429
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          911.008,
+          625.477
+        ],
+        "region_corners_px": [
+          [
+            888.39,
+            644.446
+          ],
+          [
+            932.609,
+            642.737
+          ],
+          [
+            933.481,
+            606.631
+          ],
+          [
+            889.603,
+            608.373
+          ]
+        ]
+      },
+      "P": {
+        "nominal_center_keyboard_xy_mm": [
+          202.95,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          228.081,
+          79.65
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.131,
+          -10.35
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          969.0,
+          623.0
+        ],
+        "region_corners_px": [
+          [
+            946.531,
+            641.993
+          ],
+          [
+            990.902,
+            640.278
+          ],
+          [
+            991.324,
+            604.13
+          ],
+          [
+            947.296,
+            605.879
+          ]
+        ]
+      },
+      "A": {
+        "nominal_center_keyboard_xy_mm": [
+          36.3,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          67.915,
+          61.242
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          31.615,
+          -7.758
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          465.0,
+          690.0
+        ],
+        "region_corners_px": [
+          [
+            441.013,
+            709.117
+          ],
+          [
+            484.506,
+            707.499
+          ],
+          [
+            488.833,
+            671.005
+          ],
+          [
+            445.67,
+            672.659
+          ]
+        ]
+      },
+      "S": {
+        "nominal_center_keyboard_xy_mm": [
+          55.35,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          86.146,
+          61.368
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          30.796,
+          -7.632
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          521.554,
+          687.537
+        ],
+        "region_corners_px": [
+          [
+            497.711,
+            706.678
+          ],
+          [
+            541.35,
+            705.053
+          ],
+          [
+            545.245,
+            668.519
+          ],
+          [
+            501.938,
+            670.178
+          ]
+        ]
+      },
+      "D": {
+        "nominal_center_keyboard_xy_mm": [
+          74.4,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          104.377,
+          61.494
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.977,
+          -7.506
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          578.294,
+          685.066
+        ],
+        "region_corners_px": [
+          [
+            554.595,
+            704.23
+          ],
+          [
+            598.381,
+            702.6
+          ],
+          [
+            601.841,
+            666.025
+          ],
+          [
+            558.389,
+            667.69
+          ]
+        ]
+      },
+      "F": {
+        "nominal_center_keyboard_xy_mm": [
+          93.45,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          122.608,
+          61.62
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.158,
+          -7.38
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          635.22,
+          682.586
+        ],
+        "region_corners_px": [
+          [
+            611.667,
+            701.774
+          ],
+          [
+            655.6,
+            700.138
+          ],
+          [
+            658.622,
+            663.522
+          ],
+          [
+            615.025,
+            665.193
+          ]
+        ]
+      },
+      "G": {
+        "nominal_center_keyboard_xy_mm": [
+          112.5,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          140.839,
+          61.746
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          28.339,
+          -7.254
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          692.334,
+          680.099
+        ],
+        "region_corners_px": [
+          [
+            668.927,
+            699.31
+          ],
+          [
+            713.009,
+            697.668
+          ],
+          [
+            715.59,
+            661.011
+          ],
+          [
+            671.847,
+            662.689
+          ]
+        ]
+      },
+      "H": {
+        "nominal_center_keyboard_xy_mm": [
+          131.55,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          159.071,
+          61.872
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.521,
+          -7.128
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          749.636,
+          677.603
+        ],
+        "region_corners_px": [
+          [
+            726.377,
+            696.838
+          ],
+          [
+            770.607,
+            695.19
+          ],
+          [
+            772.744,
+            658.492
+          ],
+          [
+            728.855,
+            660.176
+          ]
+        ]
+      },
+      "J": {
+        "nominal_center_keyboard_xy_mm": [
+          150.6,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          177.302,
+          61.998
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          26.702,
+          -7.002
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          807.126,
+          675.099
+        ],
+        "region_corners_px": [
+          [
+            784.016,
+            694.358
+          ],
+          [
+            828.397,
+            692.704
+          ],
+          [
+            830.087,
+            655.965
+          ],
+          [
+            786.05,
+            657.654
+          ]
+        ]
+      },
+      "K": {
+        "nominal_center_keyboard_xy_mm": [
+          169.65,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          195.533,
+          62.125
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.883,
+          -6.875
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          864.807,
+          672.587
+        ],
+        "region_corners_px": [
+          [
+            841.847,
+            691.869
+          ],
+          [
+            886.378,
+            690.209
+          ],
+          [
+            887.619,
+            653.429
+          ],
+          [
+            843.433,
+            655.125
+          ]
+        ]
+      },
+      "L": {
+        "nominal_center_keyboard_xy_mm": [
+          188.7,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          213.764,
+          62.251
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.064,
+          -6.749
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          922.679,
+          670.066
+        ],
+        "region_corners_px": [
+          [
+            899.87,
+            689.373
+          ],
+          [
+            944.552,
+            687.706
+          ],
+          [
+            945.34,
+            650.885
+          ],
+          [
+            901.006,
+            652.587
+          ]
+        ]
+      },
+      "SEMICOLON": {
+        "nominal_center_keyboard_xy_mm": [
+          207.75,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          231.995,
+          62.377
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          24.245,
+          -6.623
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          980.743,
+          667.537
+        ],
+        "region_corners_px": [
+          [
+            958.086,
+            686.867
+          ],
+          [
+            1002.921,
+            685.195
+          ],
+          [
+            1003.253,
+            648.333
+          ],
+          [
+            958.769,
+            650.041
+          ]
+        ]
+      },
+      "APOSTROPHE": {
+        "nominal_center_keyboard_xy_mm": [
+          226.8,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          250.226,
+          62.503
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          23.426,
+          -6.497
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          1039.0,
+          665.0
+        ],
+        "region_corners_px": [
+          [
+            1016.496,
+            684.354
+          ],
+          [
+            1061.484,
+            682.676
+          ],
+          [
+            1061.357,
+            645.772
+          ],
+          [
+            1016.722,
+            647.486
+          ]
+        ]
+      },
+      "Z": {
+        "nominal_center_keyboard_xy_mm": [
+          45.8,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          76.554,
+          42.635
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          30.754,
+          -5.365
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          486.0,
+          738.0
+        ],
+        "region_corners_px": [
+          [
+            461.812,
+            757.489
+          ],
+          [
+            505.822,
+            755.917
+          ],
+          [
+            510.031,
+            718.637
+          ],
+          [
+            466.359,
+            720.246
+          ]
+        ]
+      },
+      "X": {
+        "nominal_center_keyboard_xy_mm": [
+          64.85,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          94.512,
+          42.774
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          29.662,
+          -5.226
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          542.37,
+          735.587
+        ],
+        "region_corners_px": [
+          [
+            518.326,
+            755.1
+          ],
+          [
+            562.484,
+            753.522
+          ],
+          [
+            566.257,
+            716.201
+          ],
+          [
+            522.44,
+            717.816
+          ]
+        ]
+      },
+      "C": {
+        "nominal_center_keyboard_xy_mm": [
+          83.9,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          112.47,
+          42.912
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          28.57,
+          -5.088
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          598.923,
+          733.167
+        ],
+        "region_corners_px": [
+          [
+            575.025,
+            752.704
+          ],
+          [
+            619.33,
+            751.12
+          ],
+          [
+            622.665,
+            713.757
+          ],
+          [
+            578.702,
+            715.378
+          ]
+        ]
+      },
+      "V": {
+        "nominal_center_keyboard_xy_mm": [
+          102.95,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          130.428,
+          43.05
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          27.478,
+          -4.95
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          655.66,
+          730.738
+        ],
+        "region_corners_px": [
+          [
+            631.91,
+            750.299
+          ],
+          [
+            676.363,
+            748.71
+          ],
+          [
+            679.256,
+            711.305
+          ],
+          [
+            635.147,
+            712.931
+          ]
+        ]
+      },
+      "B": {
+        "nominal_center_keyboard_xy_mm": [
+          122.0,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          148.386,
+          43.189
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          26.386,
+          -4.811
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          712.582,
+          728.302
+        ],
+        "region_corners_px": [
+          [
+            688.98,
+            747.887
+          ],
+          [
+            733.582,
+            746.291
+          ],
+          [
+            736.03,
+            708.845
+          ],
+          [
+            691.775,
+            710.477
+          ]
+        ]
+      },
+      "N": {
+        "nominal_center_keyboard_xy_mm": [
+          141.05,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          166.344,
+          43.327
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          25.294,
+          -4.673
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          769.69,
+          725.858
+        ],
+        "region_corners_px": [
+          [
+            746.237,
+            745.467
+          ],
+          [
+            790.989,
+            743.865
+          ],
+          [
+            792.99,
+            706.377
+          ],
+          [
+            748.587,
+            708.015
+          ]
+        ]
+      },
+      "M": {
+        "nominal_center_keyboard_xy_mm": [
+          160.1,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          184.302,
+          43.465
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          24.202,
+          -4.535
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          826.985,
+          723.405
+        ],
+        "region_corners_px": [
+          [
+            803.682,
+            743.038
+          ],
+          [
+            848.585,
+            741.431
+          ],
+          [
+            850.135,
+            703.901
+          ],
+          [
+            805.584,
+            705.545
+          ]
+        ]
+      },
+      "COMMA": {
+        "nominal_center_keyboard_xy_mm": [
+          179.15,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          202.26,
+          43.604
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          23.11,
+          -4.396
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          884.468,
+          720.945
+        ],
+        "region_corners_px": [
+          [
+            861.316,
+            740.602
+          ],
+          [
+            906.371,
+            738.989
+          ],
+          [
+            907.467,
+            701.417
+          ],
+          [
+            862.767,
+            703.067
+          ]
+        ]
+      },
+      "PERIOD": {
+        "nominal_center_keyboard_xy_mm": [
+          198.2,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          220.218,
+          43.742
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          22.018,
+          -4.258
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          942.139,
+          718.477
+        ],
+        "region_corners_px": [
+          [
+            919.14,
+            738.158
+          ],
+          [
+            964.347,
+            736.539
+          ],
+          [
+            964.987,
+            698.924
+          ],
+          [
+            920.136,
+            700.581
+          ]
+        ]
+      },
+      "SLASH": {
+        "nominal_center_keyboard_xy_mm": [
+          217.25,
+          48.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          238.176,
+          43.88
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          20.926,
+          -4.12
+        ],
+        "nominal_half_extent_mm": [
+          7.0,
+          7.0
+        ],
+        "center_px": [
+          1000.0,
+          716.0
+        ],
+        "region_corners_px": [
+          [
+            977.155,
+            735.706
+          ],
+          [
+            1022.514,
+            734.081
+          ],
+          [
+            1022.695,
+            696.424
+          ],
+          [
+            977.694,
+            698.086
+          ]
+        ]
+      },
+      "TAB": {
+        "nominal_center_keyboard_xy_mm": [
+          13.5,
+          90.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          18.643,
+          78.241
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          5.143,
+          -11.759
+        ],
+        "nominal_half_extent_mm": [
+          10.0,
+          7.0
+        ],
+        "center_px": [
+          320.0,
+          652.0
+        ],
+        "region_corners_px": [
+          [
+            286.748,
+            671.084
+          ],
+          [
+            347.75,
+            668.733
+          ],
+          [
+            353.06,
+            633.026
+          ],
+          [
+            292.512,
+            635.425
+          ]
+        ]
+      },
+      "ENTER": {
+        "nominal_center_keyboard_xy_mm": [
+          250.5,
+          69.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          268.291,
+          59.78
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          17.791,
+          -9.22
+        ],
+        "nominal_half_extent_mm": [
+          13.0,
+          7.0
+        ],
+        "center_px": [
+          1097.0,
+          670.0
+        ],
+        "region_corners_px": [
+          [
+            1055.274,
+            690.151
+          ],
+          [
+            1139.24,
+            687.036
+          ],
+          [
+            1138.501,
+            649.958
+          ],
+          [
+            1055.196,
+            653.139
+          ]
+        ]
+      },
+      "SPACE": {
+        "nominal_center_keyboard_xy_mm": [
+          139.0,
+          27.0
+        ],
+        "image_fitted_center_keyboard_xy_mm": [
+          139.9,
+          20.384
+        ],
+        "nominal_to_image_fitted_delta_mm": [
+          0.9,
+          -6.616
+        ],
+        "nominal_half_extent_mm": [
+          48.0,
+          7.0
+        ],
+        "center_px": [
+          681.0,
+          791.0
+        ],
+        "region_corners_px": [
+          [
+            525.611,
+            815.488
+          ],
+          [
+            834.907,
+            805.0
+          ],
+          [
+            836.586,
+            766.481
+          ],
+          [
+            529.721,
+            777.239
+          ]
+        ]
+      }
+    }
+  },
+  "board_plane_interpretation": {
+    "raw_projected_housing_corners_xy_mm": {
+      "front_left": [
+        60.764,
+        75.275
+      ],
+      "front_right": [
+        394.654,
+        75.555
+      ],
+      "rear_right": [
+        393.964,
+        246.935
+      ],
+      "rear_left": [
+        56.575,
+        245.242
+      ]
+    },
+    "raw_apparent_widths_mm": [
+      333.89,
+      337.393
+    ],
+    "raw_apparent_depths_mm": [
+      170.019,
+      171.381
+    ],
+    "dimension_constrained_front_left_xy_mm": [
+      69.367,
+      86.447
+    ],
+    "dimension_constrained_yaw_deg": 0.2932,
+    "dimension_constrained_corners_xy_mm": [
+      [
+        69.367,
+        86.447
+      ],
+      [
+        384.363,
+        88.059
+      ],
+      [
+        383.611,
+        235.057
+      ],
+      [
+        68.615,
+        233.445
+      ]
+    ],
+    "housing_fit_corner_residuals_mm": [
+      14.101,
+      16.194,
+      15.757,
+      16.857
+    ],
+    "housing_fit_max_corner_residual_mm": 16.8566,
+    "keyboard_height_above_board_mm": 21.0,
+    "interpretation": "Raw board-plane dimensions are enlarged by keyboard height/parallax; the known 315 x 147 mm housing constrains the provisional board pose."
+  },
+  "uncertainty_review": {
+    "board_mapping_held_out_max_error_mm": 7.4937,
+    "housing_model_max_corner_residual_mm": 16.8566,
+    "annotation_tolerance_px": 5.0,
+    "annotation_tolerance_conservative_mm": 2.4082,
+    "additive_review_bound_mm": 26.7585,
+    "declared_board_xy_study_margin_mm": 30.0,
+    "margin_covers_additive_review_bound": true
+  },
+  "retained_frame_repeatability": {
+    "roi_px": [
+      200,
+      430,
+      1300,
+      875
+    ],
+    "frame_count": 10,
+    "maximum_radial_shift_px": 0.0616,
+    "frames": [
+      {
+        "file_name": "reopen-00-frame-00.jpg",
+        "sha256": "9066e3a61f873be7fcc3d9deefec3347f4f8a50499cc9f3347cc2e79126d19b0",
+        "relative_shift_px": [
+          0.0356,
+          0.0159
+        ],
+        "phase_correlation_response": 1.011618
+      },
+      {
+        "file_name": "reopen-00-frame-01.jpg",
+        "sha256": "99aa46faa50b55ef046deb575fb0da7dd9ffc7f69160463010eafa3afaf429d4",
+        "relative_shift_px": [
+          0.0407,
+          -0.0222
+        ],
+        "phase_correlation_response": 1.033723
+      },
+      {
+        "file_name": "reopen-00-frame-02.jpg",
+        "sha256": "9b84da0703d2ca2796fecb7b74f4f26e3a22460772e145d32d789e0157c8d175",
+        "relative_shift_px": [
+          0.0491,
+          -0.0229
+        ],
+        "phase_correlation_response": 1.033086
+      },
+      {
+        "file_name": "reopen-00-frame-03.jpg",
+        "sha256": "5b96d89e415762f02167698ab724875ddd71d37f6c40f6158cbdfca929063e99",
+        "relative_shift_px": [
+          0.061,
+          0.0087
+        ],
+        "phase_correlation_response": 1.023508
+      },
+      {
+        "file_name": "reopen-00-frame-04.jpg",
+        "sha256": "b72c269ad4897d5e5ed1271e03bc5adc16143e85dbefc8e165455de32ca8a99a",
+        "relative_shift_px": [
+          0.0417,
+          0.0058
+        ],
+        "phase_correlation_response": 1.025747
+      },
+      {
+        "file_name": "reopen-01-frame-00.jpg",
+        "sha256": "446668dbd023b58b45ac28cc1b710e8b8065049343e438f8239b88c76a4aa281",
+        "relative_shift_px": [
+          0.0152,
+          -0.0072
+        ],
+        "phase_correlation_response": 1.011046
+      },
+      {
+        "file_name": "reopen-01-frame-01.jpg",
+        "sha256": "2ea9e257251cb8dd382edbdc1e573a43d07b81954c259c3deb95d42c275371e4",
+        "relative_shift_px": [
+          0.0071,
+          -0.0048
+        ],
+        "phase_correlation_response": 1.028702
+      },
+      {
+        "file_name": "reopen-01-frame-02.jpg",
+        "sha256": "ee2b2cf70b69faedefc65dc6c9ccc3be825d0701c347e168fdb695bb42def9a8",
+        "relative_shift_px": [
+          0.0016,
+          0.008
+        ],
+        "phase_correlation_response": 1.028355
+      },
+      {
+        "file_name": "reopen-01-frame-03.jpg",
+        "sha256": "dad2624d5676fd7c1a18333b58ad0f4577597731cb28e487ee53d601ac01a2b4",
+        "relative_shift_px": [
+          -0.018,
+          -0.0019
+        ],
+        "phase_correlation_response": 1.031183
+      },
+      {
+        "file_name": "reopen-01-frame-04.jpg",
+        "sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5",
+        "relative_shift_px": [
+          0.0,
+          0.0
+        ],
+        "phase_correlation_response": 1.0
+      }
+    ]
+  },
+  "limitations": [
+    "The housing edges were reviewed in one retained frame and are not measured key centers.",
+    "The 46 key centers come from the repository nominal ANSI layout and are not product metrology.",
+    "The board homography describes the board plane; the 21 mm-high keyboard produces parallax when mapped through it.",
+    "The image-plane keyboard homography is for overlay review only and does not establish board-to-robot or tool geometry.",
+    "Any camera, support, board, keyboard, or fiducial movement invalidates this annotation."
+  ],
+  "use": {
+    "permitted": [
+      "review the keyboard housing and 46 nominal key targets in retained B0477 frames",
+      "measure fixed-frame image repeatability without opening the camera",
+      "prepare dry-run observation and target-selection integration"
+    ],
+    "not_established": [
+      "measured physical key-center metrology",
+      "camera intrinsics, distortion, or off-plane reconstruction",
+      "board-to-robot transform or tool-center-point geometry",
+      "hover, descent, contact, or camera-guided motion authority"
+    ]
+  },
+  "authority": {
+    "hardware_writes": 0,
+    "camera_opened": false,
+    "robot_transport_opened": false,
+    "robot_motion": false,
+    "camera_guided_motion": false,
+    "contact": false,
+    "physical_authority": false
+  }
+}
