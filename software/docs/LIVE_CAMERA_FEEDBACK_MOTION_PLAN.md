@@ -1,0 +1,237 @@
+# Live camera feedback and motion integration plan
+
+## Scope and present state
+
+This plan joins the newly connected, keyboard-facing camera to the existing
+vision, intent-to-hover, attachment-profile, motion-admission, and telemetry
+contracts. It records the state reported on 2026-10-15 and defines the work
+needed before camera observations may influence physical movement.
+
+The camera is currently **operator reported connected and angled at the
+keyboard**. No device identity, negotiated capture mode, frame, intrinsic
+calibration, camera-to-board transform, visibility result, or timing result was
+collected during this planning pass. Connection alone therefore provides no
+live-capture, registration, motion, descent, or contact authority.
+
+The arm remains in the `BARE_JAW` configuration. Its last verified state is
+`KEYBOARD_FIELD_APPROACH_38`, with measured servo positions
+`[2167, 2340, 1760, 2416, 2161, 2041, 2042]`. Ruler photographs support a
+provisional rigid-jaw clearance of `20 +/- 2 mm` above the key surface. A loose
+cable hangs below the rigid jaw and must be restrained and rephotographed before
+any further motion. No key contact or keypress has been performed.
+
+The machine-readable snapshot is
+`software/config/live_camera_feedback_session_20261015.json`. The two ruler
+photos remain external to the repository; the snapshot records their names,
+sizes, and SHA-256 digests without adding large media to source archives.
+
+## Existing interfaces to reuse
+
+The repository already has the required component boundaries. The integration
+must compose them rather than create an unrelated camera-to-serial shortcut.
+
+| Stage | Existing interface | Intended use |
+|---|---|---|
+| Physical capture | `rocell.vision.usb_opencv.UsbOpenCvCamera` | Open one reviewed persistent device, request an exact mode, read back the negotiated mode, and acquire bounded frames. |
+| Camera onboarding | UVC inventory, camera receipt, physical capture workflow, and B0477 profile contracts | Bind physical identity, mode, manual controls, reconnect behavior, and retained evidence. |
+| Pixel interpretation | Existing AprilTag detector records and `PlanarAprilTagBoardPoseEstimator` | Produce typed detections and a camera-to-board pose with residual and uncertainty evidence. |
+| Target geometry | Keyboard target catalog and `KeyboardCompiler` | Resolve a semantic key to one board-frame target under one catalog hash. |
+| Model proposal | `ModelMotionProposalV2` and `intent_to_hover` | Bind frame/image/model/calibration evidence to a hover-only target proposal. |
+| Tool separation | `CalibratedActionRegistry` and `AttachmentProfile` | Require the exact active attachment; prevent bare-jaw/stylus pose inheritance. |
+| Motion boundary | Reviewed request, first-motion admission, transport gate, and named pose controller | Admit one bounded command only after all predecessor evidence is current. |
+| Feedback | `TelemetryStream` plus post-motion camera capture | Verify settled joint state and independently observed spatial outcome. |
+
+Historical camera manifests still describe older eye-on-arm candidates. The
+active route is the external static-camera architecture introduced by the
+commercial-tripod migration. The connected device must be identified before it
+is associated with the B0477 profile or any other camera profile.
+
+## Closed-loop architecture
+
+The first live implementation must use **stop, settle, observe, decide, then
+move once**. Host receipt timestamps are insufficient for in-motion correction,
+so continuous visual servoing stays out of scope until exposure and controller
+timestamps are independently synchronized.
+
+```text
+reviewed camera identity + locked mode/controls
+                    |
+             finite frame capture
+                    |
+       decode -> rectify -> detect fiducials
+                    |
+       camera-to-board pose + uncertainty
+                    |
+       keyboard target in board coordinates
+                    |
+ hover-only proposal bound to frame/calibration hashes
+                    |
+ attachment-profile + freshness + collision/simulation gates
+                    |
+          one reviewed noncontact command
+                    |
+        settle telemetry + later verification frame
+                    |
+      accept result or stop for human review
+```
+
+No image-processing component receives serial transport authority. No motion
+component may silently acquire a fresher image, replace calibration, change the
+tool profile, retry a rejected proposal, or promote `HOVER` to `CONTACT`.
+
+## Implementation sequence
+
+### 1. Freeze the physical configuration
+
+- Restrain the jaw cable above the rigid-jaw envelope.
+- Keep the base, board, keyboard, fiducials, camera support, focus, aperture,
+  cable routing, and lighting fixed.
+- Assign a workcell epoch. Any change creates a new epoch and invalidates the
+  camera-to-board registration and previously compiled trajectories.
+- Photograph the camera/support, full board coverage, secured jaw cable, and
+  ruler reference. Retain files outside Git and record content hashes.
+
+Exit: a reviewed physical-state manifest with zero movement.
+
+### 2. Identify and qualify the camera connection
+
+- Enumerate the persistent USB identity and all reported modes without using a
+  numeric camera index as identity.
+- Record manufacturer/model markings, serial or persistent path, host bus,
+  cable, support, and whether the device actually matches the B0477 profile.
+- Select one finite capture mode, read back width, height, frame rate, FOURCC,
+  and manual controls, then repeat after close/reopen.
+- Capture a small bounded set of frames; reject stale, duplicate, truncated,
+  unexpectedly converted, or auto-control-drifting frames.
+
+Exit: exact identity/settings receipts and finite snapshots. Arm motion remains
+disabled.
+
+### 3. Lock optics and field of view
+
+- Lock focus, aperture, exposure, gain, white balance, resolution, pixel format,
+  and orientation.
+- Verify the keyboard and all six registration fiducials remain visible with
+  margin through normal lighting, glare, and arm-occlusion cases.
+- Record working distance, support pose, cable load, image orientation, and the
+  selected native and working pixel spaces.
+
+Exit: reviewed optics/coverage report. One attractive image is insufficient.
+
+### 4. Solve installed intrinsics and static registration
+
+- Capture scale-verified ChArUco images using a precommitted fit/holdout split.
+- Solve physical intrinsics and distortion; retain per-view and held-out
+  residuals and the exact undistortion-map hash.
+- Detect the board tags and solve the static camera-to-board transform.
+- Validate against held-out station tags and repeat after warm-up, cable load,
+  and one controlled close/reopen cycle.
+
+Exit: installed intrinsics and extrinsics with uncertainty, residual thresholds,
+and configuration-epoch bindings. Nominal FOV geometry cannot substitute.
+
+### 5. Prove camera-only keyboard localization
+
+- Produce a passive visibility atlas for the full keyboard.
+- Resolve each required key center in the board frame and overlay projections
+  back onto retained images.
+- Repeat captures while the arm remains stationary. Quantify jitter, drift,
+  tag loss, occlusion, and wrong-calibration rejection.
+- Abstain on stale frames, incomplete fiducials, excessive residuals,
+  out-of-workspace targets, or uncertainty above the planned hover margin.
+
+Exit: repeatable board-frame targets with no robot command generation.
+
+### 6. Join observation to a dry-run hover proposal
+
+- Create a coordinator that accepts an already retained frame receipt,
+  calibration hashes, workcell epoch, target catalog, and explicit attachment
+  profile.
+- Compile only `HOVER` proposals. Bind the image, detector, pose, calibration,
+  target catalog, tool profile, and planner/simulation results by SHA-256.
+- Reuse the consolidated intent-to-hover and collision rehearsals to generate
+  an unsent command package.
+- Exercise wrong device, wrong model, old frame, changed camera pose, changed
+  keyboard, changed tool, missing tag, excess residual, and target-outside-frame
+  failures.
+
+Exit: deterministic dry-run receipts. Serial writes remain zero.
+
+### 7. Observe the stationary arm
+
+- With motion still disabled, capture the arm at its current named pose.
+- Compare camera-derived geometry with recorded joint telemetry and the expected
+  bare-jaw envelope.
+- Establish whether the arm occludes required tags and whether the secured cable
+  remains outside the planned swept envelope.
+
+Exit: stationary observation agreement and visibility evidence.
+
+### 8. Separately release one high noncontact move
+
+This stage requires a new reviewed physical-motion request. Begin from a known
+named pose and command one high hover with clearance greater than the combined
+registration, arm, tool, keyboard-height, and cable uncertainty budget.
+
+After the arm settles, capture telemetry and a new camera frame. Compare planned,
+reported, and observed endpoints. Do not automatically correct or retry.
+
+Exit: one reviewed noncontact result or a stopped failure record.
+
+### 9. Add bounded stop-and-look correction
+
+Only after repeated high-hover results pass may a later increment compute one
+small correction from the post-settle frame. Bound translation, rotation,
+velocity, total attempts, and cumulative displacement. Every correction is a
+new proposal and a new one-use authorization. Any disagreement stops the run.
+
+Contact, pressing, continuous visual servoing, and unattended retries remain
+separate future qualifications.
+
+## Mandatory gates for every camera-guided proposal
+
+1. Exact persistent camera identity, mode, controls, and orientation.
+2. Current workcell epoch and unchanged support/keyboard/fiducial state.
+3. Installed intrinsics and camera-to-board transform hashes.
+4. Frame freshness, uniqueness, complete required tags, residual, and
+   uncertainty acceptance.
+5. Exact keyboard target catalog and coordinate-frame conversion.
+6. Explicit `BARE_JAW` attachment profile; stylus remains blocked.
+7. Hover-only interaction and positive clearance above the full uncertainty
+   budget.
+8. Current collision, route, controller, and telemetry checks.
+9. One reviewed command, no autonomous retry, and retained pre/post evidence.
+10. Post-settle telemetry and camera verification before another command.
+
+## Evidence package per attempt
+
+Retain a manifest-last package containing camera identity/settings, raw frame
+hashes, decoded/rectified image hashes, detections, pose and uncertainty,
+calibration and target-catalog hashes, attachment profile, proposal, simulated
+trajectory, reviewed command, telemetry, post-frame assessment, timestamps,
+operator/reviewer identities, and explicit camera-frame, arm-write, movement,
+and contact counts.
+
+Large images remain in the reviewed external evidence store. Git retains the
+canonical manifest, compact numeric results, and content hashes.
+
+## Planned change sets
+
+| Increment | Deliverable | Physical authority |
+|---|---|---|
+| A | This baseline and integration plan | None |
+| B | Read-only camera identity, exact mode/control probe, finite capture receipt | Camera capture only after explicit operator action; arm disabled |
+| C | Physical intrinsics and static-registration dataset/assessment | Camera capture; arm disabled |
+| D | Observation-to-hover dry-run coordinator and fault tests | None; unsent commands only |
+| E | Stationary-arm camera/telemetry comparison | Read-only camera and arm telemetry |
+| F | Separately reviewed single high-hover validation | One bounded noncontact command |
+| G | Stop-and-look correction qualification | One newly authorized bounded correction at a time |
+| H | Stylus TCP, geometry, and new trajectories | Blocked pending installed stylus measurements |
+
+## Immediate next review
+
+Before implementing increment B, review the camera's visible model/serial label,
+connection type, support arrangement, full field of view, and intended capture
+mode. Then choose the existing physical-camera acquisition path that matches the
+observed device. Do not assume the B0477 identity from the current camera angle
+or from a generic USB enumeration.

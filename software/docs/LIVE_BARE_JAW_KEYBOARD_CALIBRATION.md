@@ -11,10 +11,12 @@ The latest verified state is `KEYBOARD_FIELD_APPROACH_38`, reached by command
 `[2167, 2340, 1760, 2416, 2161, 2041, 2042]`. The controller reported the
 trajectory complete and idle. No key contact or keypress was performed.
 
-The modeled approach totals 38 mm from the field calibration pose. Ruler photos
-are being used to establish the remaining absolute surface-height uncertainty.
-The current endpoint is therefore a repeatable **noncontact calibration pose**,
-not a qualified contact pose.
+The modeled approach totals 38 mm from the field calibration pose. Two ruler
+photos captured on 2026-10-15 support a provisional rigid-jaw clearance of
+`20 +/- 2 mm` above the key surface. The loose cable hangs below the rigid jaw
+and must be restrained and rephotographed before any further motion. The current
+endpoint is therefore a repeatable **noncontact calibration pose**, not a
+qualified contact pose.
 
 ## Recorded path
 
@@ -52,10 +54,13 @@ failure in the calibrated action registry.
 
 ## Remaining calibration work
 
-1. Photograph the current endpoint with the ruler zero resting on the key
-   surface and estimate the remaining clearance.
-2. Establish a conservative bare-jaw hover endpoint and repeatability envelope.
-3. Preserve a held-out return trial before qualifying wider keyboard motion.
+1. Restrain the loose jaw cable above the rigid-jaw envelope and capture a new
+   side, front, and workcell overview photograph.
+2. Establish a conservative bare-jaw hover endpoint and repeatability envelope,
+   using the provisional `20 +/- 2 mm` clearance only as an uncertainty input.
+3. Qualify the connected static camera and preserve a held-out return trial
+   before wider keyboard motion. See
+   `software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md`.
 4. Keep contact disabled until key travel, surface height, and reaction limits
    have their own reviewed evidence.
 5. After installing the stylus, measure its TCP and collision envelope and

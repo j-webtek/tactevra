@@ -1,0 +1,77 @@
+{
+  "schema": "rocell.live_camera_feedback_session.v1",
+  "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
+  "recorded_local_date": "2026-10-15",
+  "state": "OPERATOR_REPORTED_CAMERA_CONNECTED_NO_FRAME_CAPTURED",
+  "workcell_epoch": {
+    "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
+    "fixed_items": [
+      "arm base",
+      "plywood workcell board",
+      "keyboard",
+      "fiducial sheets"
+    ],
+    "camera_change_invalidates_registration": true,
+    "tool_change_invalidates_trajectory": true
+  },
+  "arm_baseline": {
+    "attachment_profile": "BARE_JAW",
+    "profile_id": "bare-jaw-live-calibration-v1",
+    "last_verified_pose": "KEYBOARD_FIELD_APPROACH_38",
+    "last_measured_servo_positions": [
+      2167,
+      2340,
+      1760,
+      2416,
+      2161,
+      2041,
+      2042
+    ],
+    "motion_state_at_last_verification": "IDLE_TRAJECTORY_COMPLETE",
+    "rigid_jaw_clearance_mm": 20.0,
+    "rigid_jaw_clearance_uncertainty_mm": 2.0,
+    "clearance_state": "PROVISIONAL_RULER_PHOTO_ESTIMATE",
+    "cable_state": "LOOSE_CABLE_BELOW_RIGID_JAW_REQUIRES_RESTRAINT_BEFORE_MOTION",
+    "contact_authorized": false
+  },
+  "external_ruler_photo_receipts": [
+    {
+      "file_name": "1-Photo-1.jpg",
+      "byte_length": 1451772,
+      "sha256": "e513c8ce8af26885f34738e23fae338a8dd7fa97a813752a23ad8ce983ee8cb4",
+      "retention": "EXTERNAL_TO_REPOSITORY"
+    },
+    {
+      "file_name": "2-Photo-2.jpg",
+      "byte_length": 1417762,
+      "sha256": "0f3cf109a3071f768698dc4c634476569f64073f10de13de713442c93dde0c0e",
+      "retention": "EXTERNAL_TO_REPOSITORY"
+    }
+  ],
+  "camera_baseline": {
+    "connection_state": "OPERATOR_REPORTED_CONNECTED",
+    "orientation_state": "OPERATOR_REPORTED_ANGLED_AT_KEYBOARD",
+    "architecture_candidate": "STATIC_EXTERNAL_CAMERA",
+    "physical_identity": null,
+    "persistent_device_identity": null,
+    "capture_selector": null,
+    "negotiated_mode": null,
+    "locked_controls": null,
+    "intrinsics_artifact_sha256": null,
+    "camera_to_board_transform_sha256": null,
+    "sample_frame_sha256": null,
+    "all_six_fiducials_visible": null,
+    "keyboard_coverage_verified": null,
+    "live_capture_authorized": false,
+    "registration_authorized": false
+  },
+  "authority": {
+    "camera_guided_motion": false,
+    "robot_motion": false,
+    "descent": false,
+    "contact": false,
+    "autonomous_retry": false
+  },
+  "next_gate": "READ_ONLY_CAMERA_IDENTITY_MODE_AND_FINITE_SNAPSHOT",
+  "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
+}
