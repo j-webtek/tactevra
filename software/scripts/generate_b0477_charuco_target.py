@@ -1,4 +1,4 @@
-"""Generate the scale-defined B0477 ChArUco target as a deterministic A3 PDF."""
+"""Generate the workcell-sized B0477 ChArUco target as a deterministic A4 PDF."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DEFINITION = ROOT / "software/config/charuco_b0477_12x9_30mm_22mm.json"
-DEFAULT_OUTPUT = ROOT / "output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf"
+DEFAULT_DEFINITION = ROOT / "software/config/charuco_b0477_10x7_25mm_17_5mm.json"
+DEFAULT_OUTPUT = ROOT / "output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf"
 MM_TO_PT = 72.0 / 25.4
 
 
@@ -22,20 +22,20 @@ def load_definition(path: Path) -> dict[str, Any]:
         "schema": "rocell.physical_charuco_target.v1",
         "kind": "CHARUCO",
         "dictionary": "DICT_5X5_1000",
-        "squares_x": 12,
-        "squares_y": 9,
-        "square_length_mm": 30.0,
-        "marker_length_mm": 22.0,
-        "board_width_mm": 360.0,
-        "board_height_mm": 270.0,
+        "squares_x": 10,
+        "squares_y": 7,
+        "square_length_mm": 25.0,
+        "marker_length_mm": 17.5,
+        "board_width_mm": 250.0,
+        "board_height_mm": 175.0,
         "border_bits": 1,
     }
     for key, value in expected.items():
         if definition.get(key) != value:
             raise ValueError(f"target definition mismatch: {key}")
     contract = definition.get("print_contract", {})
-    if contract.get("page") != "A3_LANDSCAPE" or contract.get("scale_percent") != 100.0:
-        raise ValueError("target must retain the reviewed A3 1:1 print contract")
+    if contract.get("page") != "A4_LANDSCAPE" or contract.get("scale_percent") != 100.0:
+        raise ValueError("target must retain the reviewed A4 1:1 print contract")
     return definition
 
 
@@ -51,13 +51,13 @@ def generate_pdf(definition: dict[str, Any], output: Path) -> str:
         definition["marker_length_mm"] / 1000.0,
         dictionary,
     )
-    raster = board.generateImage((7200, 5400), marginSize=0, borderBits=1)
+    raster = board.generateImage((5000, 3500), marginSize=0, borderBits=1)
     ok, encoded = cv2.imencode(".png", raster, [cv2.IMWRITE_PNG_COMPRESSION, 9])
     if not ok:
         raise RuntimeError("OpenCV could not encode the generated target")
 
-    page_width = 420.0 * MM_TO_PT
-    page_height = 297.0 * MM_TO_PT
+    page_width = 297.0 * MM_TO_PT
+    page_height = 210.0 * MM_TO_PT
     board_width = definition["board_width_mm"] * MM_TO_PT
     board_height = definition["board_height_mm"] * MM_TO_PT
     x = (page_width - board_width) / 2.0
@@ -74,11 +74,11 @@ def generate_pdf(definition: dict[str, Any], output: Path) -> str:
     document.setFont("Helvetica", 6)
     document.drawCentredString(
         page_width / 2.0, page_height - 8.0,
-        "B0477 CHARUCO 12x9 | 30.000 mm squares | 22.000 mm markers | PRINT 100% / ACTUAL SIZE",
+        "B0477 CHARUCO 10x7 | 25.000 mm squares | 17.500 mm markers | PRINT 100% / ACTUAL SIZE",
     )
     document.setLineWidth(0.35)
     scale_x = 14.0 * MM_TO_PT
-    scale_y0 = y + 85.0 * MM_TO_PT
+    scale_y0 = y + 37.5 * MM_TO_PT
     scale_y1 = scale_y0 + 100.0 * MM_TO_PT
     document.line(scale_x, scale_y0, scale_x, scale_y1)
     document.line(scale_x - 2.0 * MM_TO_PT, scale_y0, scale_x + 2.0 * MM_TO_PT, scale_y0)

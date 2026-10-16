@@ -55,22 +55,29 @@ small collection does not qualify all 75 targets or authorize execution.
 ### Camera-calibration readiness
 
 The production calibration contract currently requires the intended Arducam
-B0477 at its native 5472 by 3648 YUY2 mode at 9 fps and a rigidly backed 12 by
-9 ChArUco board using `DICT_5X5_1000`, 30 mm squares, and 22 mm markers. The
+B0477 at its exact commissioned mode and a rigidly backed 10 by 7 ChArUco
+board using `DICT_5X5_1000`, 25 mm squares, and 17.5 mm markers. The
 older retained 5 by 7, 25/17.5 mm `DICT_5X5_100` board is useful for an OpenCV
 tooling smoke only and must not be used to create production calibration.
 
+The 250 by 175 mm production geometry is selected against the measured 610 by
+457 mm workcell and the retained operational camera projection. It supplies 54
+internal corners while preserving room for edge and oblique placements. The
+machine-readable derivation is
+`software/config/charuco_b0477_10x7_25mm_17_5mm.json` under `sizing_basis`.
+
 Before physical capture, verify the camera's persistent identity and exact mode,
 retain the production board asset, measure its printed square and marker scale,
-and verify rigid backing. Capture 24 training views and 8 held-out views across
+and verify rigid backing. Capture the precommitted 20 fit views and 6 held-out views across
 angles and positions, including image corners and edges where distortion is
 strongest. Report training and held-out reprojection separately. Approximately
 0.5 pixel reprojection error is a diagnostic target for this setup, not a
 deployment threshold or automatic qualification decision.
 
-Calibrate and operate in that exact full-native mode. Any lower-resolution,
-MJPG, cropped, binned, or scaled mode requires a separate calibration unless
-its sensor transform is measured and reviewed. Fix the manual focus and aperture
+Calibrate and operate in the exact commissioned mode. The installed operational
+profile is 1920 by 1080 YUY2 at approximately 60 fps. The separate full-native
+5472 by 3648 YUY2 9 fps profile requires its own calibration unless the sensor
+transform is measured and reviewed. Fix the manual focus and aperture
 and disable autofocus, auto exposure, and auto white balance before calibration.
 Retain the focus/aperture witness, exposure, gain, white-balance, controls
 snapshot, and a hash binding those settings. Lighting measurements use the same
@@ -81,10 +88,12 @@ horizontal and four distributed vertical measurements, including opposite board
 extents. Retain every raw measurement and the instrument identity. The allowed
 axis-scale error remains unset until physical measurements are reviewed.
 
-The current read-only probe is retained in
-`physical_charuco_probe_blocked_v1.json`. It found no connected Windows Camera
-or Image-class device. Its zero-capture result is a blocked readiness receipt,
-not camera calibration evidence.
+The historical read-only probe is retained in
+`physical_charuco_probe_blocked_v1.json`. It predates the connected-camera
+session and remains a zero-capture receipt. Current camera identity, mode, and
+visibility evidence are recorded in
+`software/config/live_camera_feedback_session_20261015.json`; neither record is
+camera calibration evidence.
 
 ## Residual v4.2 remedy pilot
 

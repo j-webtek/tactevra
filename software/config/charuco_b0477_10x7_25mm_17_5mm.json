@@ -1,0 +1,216 @@
+{
+  "schema": "rocell.physical_charuco_target.v1",
+  "target_id": "b0477-charuco-10x7-25mm-17_5mm-v2",
+  "kind": "CHARUCO",
+  "dictionary": "DICT_5X5_1000",
+  "squares_x": 10,
+  "squares_y": 7,
+  "square_length_mm": 25.0,
+  "marker_length_mm": 17.5,
+  "board_width_mm": 250.0,
+  "board_height_mm": 175.0,
+  "border_bits": 1,
+  "print_contract": {
+    "page": "A4_LANDSCAPE",
+    "page_width_mm": 297.0,
+    "page_height_mm": 210.0,
+    "scale_percent": 100.0,
+    "fit_to_page": false,
+    "rigid_backing_required": true,
+    "minimum_horizontal_measurements": 4,
+    "minimum_vertical_measurements": 4,
+    "opposite_extents_required": true,
+    "distributed_across_board_required": true,
+    "maximum_axis_scale_error_fraction": 0.0025
+  },
+  "profile_scope": {
+    "operational_mode": {
+      "width_px": 1920,
+      "height_px": 1080,
+      "fps": 60.0,
+      "fourcc": "YUY2",
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15"
+    },
+    "full_native_mode": {
+      "width_px": 5472,
+      "height_px": 3648,
+      "fps": 9.0,
+      "fourcc": "YUY2"
+    },
+    "cross_mode_reuse": "FORBIDDEN_UNLESS_CROP_BIN_SCALE_TRANSFORM_IS_MEASURED_AND_REVIEWED"
+  },
+  "authority": {
+    "physical_scale_verified": false,
+    "intrinsics_valid": false,
+    "registration_valid": false,
+    "robot_motion": false,
+    "contact": false
+  },
+  "sizing_basis": {
+    "schema": "rocell.charuco_target_sizing.v1",
+    "record_id": "B0477-CHARUCO-SIZING-20261016-001",
+    "decision": "SELECT_10X7_25MM_17_5MM_A4",
+    "workcell_inputs": {
+      "board_size_xy_mm": [
+        610.0,
+        457.0
+      ],
+      "installed_tag_tile_size_mm": 55.0,
+      "installed_tag_detection_edge_mm": 40.0,
+      "working_installed_tag_centers_xy_mm": {
+        "T0": [
+          27.32,
+          33.31
+        ],
+        "T1": [
+          403.66,
+          38.45
+        ],
+        "T2": [
+          32.55,
+          429.5
+        ],
+        "T3": [
+          581.38,
+          431.47
+        ],
+        "K0": [
+          240.17,
+          265.84
+        ],
+        "P0": [
+          442.05,
+          270.39
+        ]
+      },
+      "camera_mode": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "fourcc": "YUY2",
+        "fps": 60.0
+      },
+      "source_frame": {
+        "path": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/reopen-01-frame-04.jpg",
+        "sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5",
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      }
+    },
+    "projection_observation": {
+      "method": "T0_T3_center_homography_using_working_operator_measurements",
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "local_scale_at_board_center_px_per_mm": {
+        "x": 2.8618204594,
+        "y": 2.0811245441
+      },
+      "projected_board_corners_px": [
+        [
+          1.2692,
+          1059.6505
+        ],
+        [
+          1980.8387,
+          1003.4166
+        ],
+        [
+          1788.3757,
+          28.6236
+        ],
+        [
+          228.495,
+          104.6552
+        ]
+      ],
+      "held_out_station_center_residual_px": {
+        "K0": 4.9404,
+        "P0": 15.1557
+      },
+      "authority": "SIZING_ONLY_NOT_CAMERA_CALIBRATION_OR_REGISTRATION"
+    },
+    "requirements": {
+      "minimum_detected_charuco_corners_per_view": 30,
+      "fit_view_count": 20,
+      "holdout_view_count": 6,
+      "actual_size_print_required": true,
+      "rigid_backing_required": true,
+      "portable_across_board_edges_and_oblique_views": true
+    },
+    "alternatives": [
+      {
+        "geometry_mm": [
+          125.0,
+          175.0
+        ],
+        "squares": [
+          5,
+          7
+        ],
+        "internal_corner_count": 24,
+        "result": "REJECTED_BELOW_30_CORNER_CAPTURE_GATE"
+      },
+      {
+        "geometry_mm": [
+          360.0,
+          270.0
+        ],
+        "squares": [
+          12,
+          9
+        ],
+        "internal_corner_count": 88,
+        "board_fraction_xy": [
+          0.5902,
+          0.5908
+        ],
+        "projected_center_size_px": [
+          1030.3,
+          561.9
+        ],
+        "result": "REJECTED_EXCESSIVE_WORKCELL_OCCUPANCY_FOR_EDGE_AND_OBLIQUE_VIEWS"
+      },
+      {
+        "geometry_mm": [
+          250.0,
+          175.0
+        ],
+        "squares": [
+          10,
+          7
+        ],
+        "internal_corner_count": 54,
+        "board_fraction_xy": [
+          0.4098,
+          0.3829
+        ],
+        "projected_center_size_px": [
+          715.5,
+          364.2
+        ],
+        "remaining_board_translation_xy_mm": [
+          360.0,
+          282.0
+        ],
+        "result": "SELECTED"
+      }
+    ],
+    "selection_basis": [
+      "Uses the repository's existing 25.0 mm square and 17.5 mm marker standard.",
+      "Provides 54 internal corners, exceeding the 30-corner per-view gate by 80 percent.",
+      "Occupies about 41 percent of board width and 38 percent of board height, preserving placement range.",
+      "Projects to about 716 by 364 pixels at board center in the retained operational view.",
+      "Fits A4 landscape at 100 percent scale with 23.5 mm horizontal and 17.5 mm vertical page margins."
+    ],
+    "limitations": [
+      "The installed-tag XY values are working operator measurements and remain unqualified for metric registration.",
+      "The projection is an engineering sizing observation before intrinsic calibration.",
+      "Physical print scale still requires the bound eight-measurement verification gate."
+    ],
+    "physical_authority": false
+  }
+}
