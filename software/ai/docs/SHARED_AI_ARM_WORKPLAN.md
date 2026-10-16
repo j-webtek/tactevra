@@ -519,6 +519,15 @@ contact outcome observer remains a separate missing dependency. No retained
 candidate is promoted into the physical registry, no repeated measurement is
 requested, and attachment-specific TCP, collision, trajectory, and contact
 evidence remain isolated by profile and configuration epoch.
+ARM-080 adds the zero-capture physical-intrinsics intake for the first missing
+route slot. It pins collection to the retained `1920x1080` YUY2 runtime at
+approximately 60 fps, verifies that mode against the purchased B0477 profile,
+and rejects the older `5472x3648` 9 fps synthetic rehearsal as a physical
+substitute. It requires a precommitted fit/held-out dataset and residual,
+distortion, ROI, map, and stability evidence while requesting no new target
+print and no repeated board/tag measurement. The bare-jaw route audit now
+hash-binds this plan and rejects it when stale. Capture, registry writes,
+motion, and physical authority remain disabled.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

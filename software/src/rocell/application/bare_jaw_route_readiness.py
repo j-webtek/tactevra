@@ -21,6 +21,9 @@ from .static_phase1_calibration import run_static_phase1_calibration_rehearsal
 from .static_phase1_retained_evidence import (
     assess_static_phase1_retained_evidence,
 )
+from .static_phase1_intrinsics_intake import (
+    plan_static_phase1_intrinsics_intake,
+)
 
 
 SCHEMA = "rocell.bare_jaw_route_readiness.v1"
@@ -30,6 +33,9 @@ _REGISTRATION = Path("software/ai/eval/b0477_fixed_board_registration_20261016.j
 _OVERLAY = Path("software/ai/eval/b0477_keyboard_overlay_20261016.json")
 _RETAINED_COVERAGE = Path(
     "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json"
+)
+_INTRINSICS_INTAKE = Path(
+    "software/ai/eval/static_phase1_intrinsics_intake_plan_20261016.json"
 )
 _TOOL_PROFILES = Path("software/config/tool_attachment_profiles.json")
 _SYSTEM_MANIFEST = Path("software/config/system_manifest.json")
@@ -93,11 +99,13 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
     registration_path = root / _REGISTRATION
     overlay_path = root / _OVERLAY
     coverage_path = root / _RETAINED_COVERAGE
+    intrinsics_intake_path = root / _INTRINSICS_INTAKE
     profiles_path = root / _TOOL_PROFILES
     session = _read(session_path)
     registration = _read(registration_path)
     overlay = _read(overlay_path)
     retained_coverage = _read(coverage_path)
+    intrinsics_intake = _read(intrinsics_intake_path)
     profiles = _read(profiles_path)
 
     if session.get("schema") != "rocell.live_camera_feedback_session.v1":
@@ -161,6 +169,11 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
     if retained_coverage != recomputed_coverage:
         raise BareJawRouteReadinessError(
             "retained Phase-1 evidence coverage is stale"
+        )
+    recomputed_intrinsics_intake = plan_static_phase1_intrinsics_intake(root)
+    if intrinsics_intake != recomputed_intrinsics_intake:
+        raise BareJawRouteReadinessError(
+            "static Phase-1 intrinsics intake plan is stale"
         )
 
     context = load_simulation_context(root, root / _SYSTEM_MANIFEST)
@@ -241,6 +254,12 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             "retained_evidence_coverage_artifact_sha256": _sha256(coverage_path),
             "retained_evidence_coverage_sha256": retained_coverage.get(
                 "coverage_sha256"
+            ),
+            "static_intrinsics_intake_artifact_sha256": _sha256(
+                intrinsics_intake_path
+            ),
+            "static_intrinsics_intake_plan_sha256": intrinsics_intake.get(
+                "plan_sha256"
             ),
             "tool_profiles_sha256": _sha256(profiles_path),
             "retained_hover_draft_sha256": draft.get("draft_sha256"),
@@ -359,6 +378,23 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
                 and row.get("coverage_status") == "NO_RETAINED_CANDIDATE"
             ],
             "repeated_measurement_requested": False,
+            "physical_release_effect": "NONE",
+        },
+        "physical_intrinsics_intake": {
+            "status": intrinsics_intake.get("status"),
+            "target_artifact_id": intrinsics_intake.get("target_artifact_id"),
+            "retained_runtime_binding": intrinsics_intake.get(
+                "retained_runtime_binding"
+            ),
+            "legacy_rehearsal_comparison": intrinsics_intake.get(
+                "legacy_rehearsal_comparison"
+            ),
+            "required_new_evidence": intrinsics_intake.get(
+                "required_new_evidence"
+            ),
+            "collection_policy": intrinsics_intake.get("collection_policy"),
+            "next_action": intrinsics_intake.get("next_action"),
+            "capture_ready": intrinsics_intake.get("capture_ready"),
             "physical_release_effect": "NONE",
         },
         "prior_sensitivity_evidence": [

@@ -120,6 +120,22 @@ def test_retained_bare_jaw_route_audit_is_deterministic_and_zero_dispatch(
     assert len(
         first["retained_evidence_coverage"]["route_reusable_candidate_ids"]
     ) == 9
+    intrinsics = first["physical_intrinsics_intake"]
+    assert intrinsics["status"] == "BLOCKED_PHYSICAL_INTRINSICS_INPUTS_REQUIRED"
+    assert intrinsics["retained_runtime_binding"]["mode"] == {
+        "width_px": 1920,
+        "height_px": 1080,
+        "fps": pytest.approx(60.000240000960005),
+        "pixel_format": "YUY2",
+    }
+    assert intrinsics["legacy_rehearsal_comparison"][
+        "eligible_as_physical_intrinsics"
+    ] is False
+    assert intrinsics["collection_policy"]["new_target_print_requested"] is False
+    assert intrinsics["collection_policy"][
+        "repeat_board_or_tag_center_measurements"
+    ] is False
+    assert intrinsics["capture_ready"] is False
     assert "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED" in first["blockers"]
     assert "PLANNER_CAMERA_ARCHITECTURE_RECONCILIATION_REQUIRED" not in first[
         "blockers"
@@ -138,6 +154,9 @@ def _copy_inputs(source: Path, destination: Path) -> None:
         "software/ai/eval/b0477_keyboard_overlay_20261016.json",
         "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
         "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json",
+        "software/ai/eval/static_phase1_intrinsics_intake_plan_20261016.json",
+        "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+        "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json",
     ]
     for relative in paths:
         target = destination / relative

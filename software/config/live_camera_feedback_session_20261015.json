@@ -507,8 +507,8 @@
     "schema": "rocell.bare_jaw_route_readiness.v1",
     "status": "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED",
     "artifact_path": "software/ai/eval/bare_jaw_route_readiness_20261016.json",
-    "artifact_sha256": "51bf5179d0950b6328af80a3e163e4243da6e5b9012c2651c7d3ed55386cb661",
-    "readiness_sha256": "db5142ee976630bbc02b9d159f4250593423edec0da03860d6e6486701bbcbd1",
+    "artifact_sha256": "5d7afca7f341b851c8582d1c2b310f00d645be65f786f7bdffefb6dc6567aa08",
+    "readiness_sha256": "0d586e1c47af9bbf927486d542383973e9c8a78700113111794baa0dc676aedf",
     "blockers": [
       "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED",
       "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
@@ -533,6 +533,11 @@
     "retained_evidence_coverage_sha256": "6ea7e55d1f61bafe1363429bd3a72d094be18badf0b4b4c05684a09553b1957c",
     "retained_route_partial_candidate_count": 9,
     "retained_route_missing_candidate_count": 2,
-    "repeated_measurement_requested": false
+    "repeated_measurement_requested": false,
+    "static_intrinsics_intake_path": "software/ai/eval/static_phase1_intrinsics_intake_plan_20261016.json",
+    "static_intrinsics_intake_artifact_sha256": "deaf95361d662590276251415ee5bc2371c25e58024fcef4aab3c9c8be2b914a",
+    "static_intrinsics_intake_plan_sha256": "4d06b99515d9ec3bedb4e9abf79614a933f1a413edd1ac35409ad269cc70e65f",
+    "static_intrinsics_intake_status": "BLOCKED_PHYSICAL_INTRINSICS_INPUTS_REQUIRED",
+    "static_intrinsics_capture_ready": false
   }
 }
