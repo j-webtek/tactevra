@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "OPERATOR_REPORTED_CAMERA_CONNECTED_NO_FRAME_CAPTURED",
+  "state": "CAMERA_CAPTURED_REGISTRATION_BLOCKED_TAG_COVERAGE",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -52,16 +52,53 @@
     "connection_state": "OPERATOR_REPORTED_CONNECTED",
     "orientation_state": "OPERATOR_REPORTED_ANGLED_AT_KEYBOARD",
     "architecture_candidate": "STATIC_EXTERNAL_CAMERA",
-    "physical_identity": null,
-    "persistent_device_identity": null,
-    "capture_selector": null,
-    "negotiated_mode": null,
+    "physical_identity": {
+      "friendly_name": "Arducam B0477 (USB3 20MP)",
+      "vid": "04b4",
+      "pid": "0477",
+      "windows_pnp_status": "OK"
+    },
+    "persistent_device_identity": "USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000",
+    "capture_selector": {
+      "opencv_index": 0,
+      "backend": "CAP_DSHOW",
+      "numeric_index_is_identity": false,
+      "binding_limitation": "PnP presence does not independently prove OpenCV index mapping"
+    },
+    "negotiated_mode": {
+      "width_px": 1920,
+      "height_px": 1080,
+      "fps": 60.000240000960005,
+      "fourcc": "YUY2",
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+      "stable_after_two_open_cycles": true
+    },
     "locked_controls": null,
     "intrinsics_artifact_sha256": null,
     "camera_to_board_transform_sha256": null,
-    "sample_frame_sha256": null,
-    "all_six_fiducials_visible": null,
-    "keyboard_coverage_verified": null,
+    "sample_frame_sha256": "fbbd55936fbdd2d4f2591594e9163ce966f6002e8d56250fb79515299a69d149",
+    "all_six_fiducials_visible": false,
+    "keyboard_coverage_verified": false,
+    "finite_capture_performed": true,
+    "finite_capture_frame_count": 4,
+    "finite_capture_all_hashes_unique": true,
+    "detected_tag_ids_across_frames": [
+      0,
+      1,
+      3,
+      5
+    ],
+    "missing_required_tag_ids": [
+      2,
+      4
+    ],
+    "external_capture_receipt": {
+      "directory": "software/runs/wizard-exports/live-camera-intake-20261015-04-maintained",
+      "file_name": "receipt.json",
+      "byte_length": 8490,
+      "sha256": "e724228e117ea1423540094a5709b5f041d238c43729165d70a1958033132bda",
+      "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+    },
     "live_capture_authorized": false,
     "registration_authorized": false
   },
@@ -72,6 +109,6 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "READ_ONLY_CAMERA_IDENTITY_MODE_AND_FINITE_SNAPSHOT",
+  "next_gate": "PHYSICAL_CAMERA_FIDUCIAL_COVERAGE_AND_OPTICS_ADJUSTMENT",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
 }

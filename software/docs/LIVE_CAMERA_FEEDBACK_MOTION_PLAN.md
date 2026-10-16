@@ -235,3 +235,48 @@ connection type, support arrangement, full field of view, and intended capture
 mode. Then choose the existing physical-camera acquisition path that matches the
 observed device. Do not assume the B0477 identity from the current camera angle
 or from a generic USB enumeration.
+
+## 2026-10-15 read-only intake result
+
+The explicit camera-only intake identified one present Windows Camera-class
+device named `Arducam B0477 (USB3 20MP)` with PnP instance ID
+`USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000`. The maintained command
+`software/scripts/live_camera_read_only_intake.py` requested `1920x1080`,
+`60 fps`, `YUY2` through DirectShow. Two open/capture/close cycles read back
+the same mode and settings hash. All four retained frames had distinct SHA-256
+digests, and the adapter released the camera after each cycle.
+
+The frames are visibly illuminated and show the keyboard and much of the board,
+but they do not satisfy registration coverage. The released tag36h11 detector
+observed IDs `0, 1, 3, 5` across the set; no individual frame contained all six
+required IDs, and IDs `2` and `4` remained missing from the aggregate. A separate
+`5472x3648` YUY2 check still detected only IDs `1, 3, 5`, so higher resolution
+did not remove the physical view/optics limitation. Registration, camera-guided
+motion, robot transport, descent, and contact remain false.
+
+The reviewed external receipt is
+`software/runs/wizard-exports/live-camera-intake-20261015-04-maintained/receipt.json`
+with SHA-256
+`e724228e117ea1423540094a5709b5f041d238c43729165d70a1958033132bda`.
+The runtime directory is intentionally ignored by Git; the machine-readable
+session snapshot retains its path and digest.
+
+Reproduce the bounded capture from the repository root with the vision
+environment:
+
+```powershell
+.\.venv-vision\Scripts\python.exe software/scripts/live_camera_read_only_intake.py `
+  --pnp-instance-id "USB\VID_04B4&PID_0477&MI_00\8&257B140A&0&0000" `
+  --friendly-name "Arducam B0477 (USB3 20MP)" `
+  --selector 0 --width 1920 --height 1080 --fps 60 --fourcc YUY2 `
+  --reopen-count 2 --frames-per-open 2 `
+  --output-directory software/runs/wizard-exports/<new-directory> `
+  --confirm-camera-only-capture
+```
+
+Before another capture, reposition or raise the camera/support and adjust
+physical lighting/focus so all six tags and the keyboard remain visible with
+margin while the stationary arm stays in frame. Secure the loose jaw cable and
+retain a new workcell photograph. Any camera/support/focus change starts a new
+workcell/optics epoch. Electronic control readback and exact DirectShow endpoint
+binding remain open parts of increment B.
