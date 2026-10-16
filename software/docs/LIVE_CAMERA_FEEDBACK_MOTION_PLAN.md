@@ -309,6 +309,49 @@ collision screening, and controller/telemetry checks before any separately
 reviewed noncontact movement can be proposed. The recorded draft itself remains
 non-executable and requires no target printing or arm movement.
 
+## 2026-10-16 stationary observation checkpoint
+
+Two new five-frame camera-only captures bracketed one guarded arm-telemetry
+preflight while the arm remained untouched at the recorded
+`KEYBOARD_FORWARD_CAL_1` context. Both captures retained the exact B0477 device
+identity, `1920x1080` YUY2 mode, and settings hash. Every frame hash was unique.
+The first capture decoded all six installed tags in four frames; the second did
+so in three. Every tag supplied at least three samples.
+
+`measure_fixed_board_registration.py` now has a no-refit stationary-observation
+mode. It maps fresh tag centers through the retained fixed-epoch homography and
+compares them with the retained per-tag means. The declared bound is 2.0 mm.
+The two observed maxima were 1.3973 mm and 1.3109 mm, so both camera scenes agree
+with the retained camera/board epoch. This is a scene-stability result only.
+
+The read-only arm wrapper stopped before opening the arm transport because its
+required HTTP identity baseline was unavailable. The verified diagnostic shows
+zero HTTP connections, zero serial ports opened, zero serial command writes,
+zero motion commands, and no unresolved operation. Current joint telemetry is
+therefore absent, and stationary-arm agreement remains false. This must remain
+an explicit incomplete gate rather than being inferred from the camera result
+or the previously recorded servo positions.
+
+Reproduce either camera assessment without opening a camera or robot transport:
+
+```powershell
+.\.venv-vision\Scripts\python.exe `
+  software/scripts/measure_fixed_board_registration.py `
+  --frames-directory <finite-capture-directory> `
+  --reference-registration `
+  software/ai/eval/b0477_fixed_board_registration_20261016.json `
+  --maximum-reference-center-shift-mm 2.0 `
+  --minimum-samples-per-tag 3 `
+  --output <ignored-runtime-observation.json>
+```
+
+The compact hashes and verdicts are retained in
+`software/config/live_camera_feedback_session_20261015.json`; the raw frames and
+reports remain ignored runtime evidence. The next gate is authenticated,
+command-free current arm telemetry followed by board-to-arm, bare-jaw TCP, IK,
+joint-limit, and collision screening. No high hover is admitted by this
+checkpoint.
+
 ## 2026-10-15 read-only intake result
 
 The explicit camera-only intake identified one present Windows Camera-class

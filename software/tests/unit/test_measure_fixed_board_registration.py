@@ -97,3 +97,94 @@ def test_report_recovers_fixed_planar_mapping_and_holds_out_station_tags(
     assert validation["held_out_station_center_max_error_mm"] < 0.02
     assert report["authority"]["robot_motion"] is False
     assert report["use"]["not_established"]
+
+
+def test_stationary_observation_requires_camera_agreement_and_keeps_telemetry_open(
+    tmp_path: Path, monkeypatch
+) -> None:
+    registration_path = tmp_path / "registration.json"
+    registration_path.write_text(
+        json.dumps(
+            {
+                "schema": "rocell.fixed_apriltag_board_registration.v1",
+                "inputs": {
+                    "camera_identity": "camera-1",
+                    "settings_sha256": "a" * 64,
+                    "requested_mode": {"width_px": 1920, "height_px": 1080},
+                },
+                "mapping": {"image_to_board_homography": np.eye(3).tolist()},
+                "validation": {
+                    "mapped_center_repeatability": {
+                        f"tag-{tag_id}": {
+                            "id": tag_id,
+                            "mapped_mean_xy_mm": [100.0 + tag_id, 200.0 + tag_id],
+                        }
+                        for tag_id in range(6)
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    frames = tmp_path / "frames"
+    frames.mkdir()
+    receipt_frames = []
+    for index in range(3):
+        name = f"frame-{index}.jpg"
+        payload = f"frame-{index}".encode()
+        (frames / name).write_bytes(payload)
+        receipt_frames.append(
+            {"file_name": name, "sha256": hashlib.sha256(payload).hexdigest()}
+        )
+    (frames / "receipt.json").write_text(
+        json.dumps(
+            {
+                "persistent_device_identity": "camera-1",
+                "requested_mode": {"width_px": 1920, "height_px": 1080},
+                "reopen_cycles": [
+                    {
+                        "negotiated_mode": {"settings_sha256": "a" * 64},
+                        "frames": receipt_frames,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def fake_detect(_path: Path):
+        detections = {}
+        for tag_id in range(6):
+            x, y = 100.5 + tag_id, 200.25 + tag_id
+            detections[tag_id] = np.asarray(
+                [[x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]],
+                dtype=np.float64,
+            )
+        return detections, {tag_id: "synthetic" for tag_id in detections}, [1920, 1080]
+
+    monkeypatch.setattr(MODULE, "detect_tags", fake_detect)
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    report = MODULE.build_stationary_observation_report(
+        frames,
+        registration_path,
+        maximum_reference_center_shift_mm=1.0,
+        minimum_samples_per_tag=3,
+        created_at="2026-10-16T00:00:00+00:00",
+    )
+
+    assert report["status"] == "CAMERA_SCENE_AGREES_TELEMETRY_REQUIRED"
+    assert report["assessment"]["camera_scene_agrees"] is True
+    assert report["assessment"]["maximum_reference_center_shift_mm"] < 1.0
+    assert report["assessment"]["arm_telemetry_available"] is False
+    assert report["assessment"]["stationary_arm_agreement"] is False
+    assert report["authority"]["hardware_writes"] == 0
+
+    rejected = MODULE.build_stationary_observation_report(
+        frames,
+        registration_path,
+        maximum_reference_center_shift_mm=0.4,
+        minimum_samples_per_tag=3,
+        created_at="2026-10-16T00:00:00+00:00",
+    )
+    assert rejected["status"] == "CAMERA_SCENE_DISAGREES"
+    assert rejected["assessment"]["camera_scene_agrees"] is False

@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "HASH_BOUND_RETAINED_HOVER_DRAFT_COMPLETE_STATIONARY_OBSERVATION_PENDING",
+  "state": "FRESH_CAMERA_SCENE_AGREEMENT_RECORDED_ARM_TELEMETRY_PENDING",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -326,7 +326,7 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "FRESH_STATIONARY_ARM_OBSERVATION_AND_CALIBRATED_ROUTE_SCREENING",
+  "next_gate": "RESTORE_AUTHENTICATED_READ_ONLY_ARM_TELEMETRY_THEN_CALIBRATED_ROUTE_SCREENING",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md",
   "retained_hover_draft": {
     "schema": "rocell.retained_keyboard_hover_draft.v1",
@@ -397,5 +397,66 @@
     "contact_authorized": false,
     "autonomous_retry_authorized": false,
     "draft_sha256": "fc033c28a5c98a517ccd72f10353ca04f854bc9803a0cf5fedc67d41dc11af59"
+  },
+  "stationary_observation_20261016": {
+    "schema": "rocell.stationary_camera_telemetry_checkpoint.v1",
+    "named_pose_context": "KEYBOARD_FORWARD_CAL_1",
+    "attachment_profile": "BARE_JAW",
+    "camera_scene_result": "AGREES_WITH_RETAINED_FIXED_EPOCH_MAPPING",
+    "stationary_arm_agreement": false,
+    "camera_policy": {
+      "required_tag_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "minimum_samples_per_tag": 3,
+      "maximum_reference_center_shift_mm": 2.0
+    },
+    "camera_bracket": [
+      {
+        "directory": "software/runs/wizard-exports/live-camera-stationary-forward-cal-1-20261016-01",
+        "receipt_sha256": "b86068242797a55dc7af3469f0daf2b593f9feffcadbe3070e275b070c80e996",
+        "observation_sha256": "19d92c9a015e98135dccdc76f364a9730ae0ff43d76cef44f0bbfb3defb4b195",
+        "frame_count": 5,
+        "complete_six_tag_frame_count": 4,
+        "maximum_reference_center_shift_mm": 1.3973,
+        "camera_scene_agrees": true,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      },
+      {
+        "directory": "software/runs/wizard-exports/live-camera-stationary-forward-cal-1-20261016-02",
+        "receipt_sha256": "d2115d41655f1053578c4e62225c4fd3727e00de51022af5288281ce97b0b373",
+        "observation_sha256": "b8fe079673b2c46cde687c87eea6fad00acdc8c26bafe854ed1a67889a1bec7b",
+        "frame_count": 5,
+        "complete_six_tag_frame_count": 3,
+        "maximum_reference_center_shift_mm": 1.3109,
+        "camera_scene_agrees": true,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      }
+    ],
+    "telemetry_preflight": {
+      "status": "STOPPED_BEFORE_ARM_TRANSPORT",
+      "reason": "HTTP baseline identity was unavailable",
+      "diagnostic_export": "software/runs/wizard-exports/wizard-20261016T193401291168Z-4269958ab80a422fa9ab0cc2894855c3",
+      "manifest_sha256": "d98b35a879b81736cbc18b16ff2db34c2e3a9b5ea67c28cb070e0e5cd12abb6b",
+      "capture_attachment_sha256": "a009ba1be145fffddf804321e6577fc2999471e7e2fd18cd8353510691bb335d",
+      "http_connections_created": 0,
+      "serial_ports_opened": 0,
+      "serial_command_writes_requested": 0,
+      "motion_commands": 0,
+      "unresolved_operation_id": null
+    },
+    "interpretation": "Two fresh finite captures agree with the retained fixed camera/board epoch. Current arm telemetry was not acquired because the guarded reader stopped at its HTTP identity preflight, so this checkpoint does not claim current joint-state or stationary-arm agreement.",
+    "authority": {
+      "robot_transport_opened": false,
+      "robot_motion": false,
+      "camera_guided_motion": false,
+      "descent": false,
+      "contact": false
+    }
   }
 }

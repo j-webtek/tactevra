@@ -119,6 +119,186 @@ def _round_vector(vector: "Any", digits: int = 4) -> list[float]:
     return [round(float(value), digits) for value in vector]
 
 
+def build_stationary_observation_report(
+    frames_directory: Path,
+    registration_path: Path,
+    *,
+    maximum_reference_center_shift_mm: float = 2.0,
+    minimum_samples_per_tag: int = 3,
+    created_at: str | None = None,
+) -> dict[str, Any]:
+    """Compare a fresh finite capture with one retained fixed-epoch mapping.
+
+    This deliberately evaluates camera/board scene stability only. Missing arm
+    telemetry can therefore never be converted into stationary-arm agreement.
+    """
+    import numpy as np
+
+    if maximum_reference_center_shift_mm <= 0:
+        raise ValueError("maximum_reference_center_shift_mm must be positive")
+    if minimum_samples_per_tag <= 0:
+        raise ValueError("minimum_samples_per_tag must be positive")
+
+    registration = json.loads(registration_path.read_text(encoding="utf-8"))
+    if registration.get("schema") != "rocell.fixed_apriltag_board_registration.v1":
+        raise ValueError("Unsupported reference registration schema")
+    reference = {
+        int(item["id"]): np.asarray(item["mapped_mean_xy_mm"], dtype=np.float64)
+        for item in registration["validation"]["mapped_center_repeatability"].values()
+    }
+    if set(reference) != set(range(6)):
+        raise ValueError("Reference registration must contain tag IDs 0-5")
+
+    receipt_path = frames_directory / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt_frames = {
+        frame["file_name"]: frame
+        for cycle in receipt["reopen_cycles"]
+        for frame in cycle["frames"]
+    }
+    image_to_board = np.asarray(
+        registration["mapping"]["image_to_board_homography"], dtype=np.float64
+    )
+    observations: dict[int, list[Any]] = {tag_id: [] for tag_id in reference}
+    frame_results = []
+    all_hashes = []
+    frame_paths = sorted(frames_directory.glob("*.jpg"))
+    receipt_inventory_matches = {path.name for path in frame_paths} == set(
+        receipt_frames
+    )
+    for frame_path in frame_paths:
+        expected = receipt_frames.get(frame_path.name)
+        actual_hash = sha256_file(frame_path)
+        if expected is None or expected.get("sha256") != actual_hash:
+            raise ValueError(
+                f"Frame is absent from receipt or hash changed: {frame_path.name}"
+            )
+        detections, _sources, image_size = detect_tags(frame_path)
+        detected_ids = sorted(tag_id for tag_id in detections if tag_id in reference)
+        for tag_id in detected_ids:
+            center = marker_projective_center(detections[tag_id])
+            observations[tag_id].append(transform_points([center], image_to_board)[0])
+        all_hashes.append(actual_hash)
+        frame_results.append(
+            {
+                "file_name": frame_path.name,
+                "sha256": actual_hash,
+                "image_size_px": image_size,
+                "detected_ids": detected_ids,
+                "all_required_tags_visible": detected_ids == list(range(6)),
+            }
+        )
+    if not frame_results:
+        raise ValueError(f"No JPG frames found in {frames_directory}")
+
+    by_tag = {}
+    all_shifts = []
+    for tag_id, values in observations.items():
+        if values:
+            array = np.asarray(values)
+            deltas = array - reference[tag_id]
+            radial = np.linalg.norm(deltas, axis=1)
+            all_shifts.extend(float(value) for value in radial)
+            by_tag[str(tag_id)] = {
+                "sample_count": len(values),
+                "reference_mapped_center_xy_mm": _round_vector(reference[tag_id], 4),
+                "observed_mean_xy_mm": _round_vector(np.mean(array, axis=0), 4),
+                "observed_mean_delta_xy_mm": _round_vector(
+                    np.mean(array, axis=0) - reference[tag_id], 4
+                ),
+                "mean_radial_shift_mm": round(float(np.mean(radial)), 4),
+                "maximum_radial_shift_mm": round(float(np.max(radial)), 4),
+            }
+        else:
+            by_tag[str(tag_id)] = {"sample_count": 0}
+
+    identity_matches = (
+        receipt.get("persistent_device_identity")
+        == registration["inputs"]["camera_identity"]
+    )
+    settings_hashes = {
+        cycle["negotiated_mode"]["settings_sha256"]
+        for cycle in receipt["reopen_cycles"]
+    }
+    settings_match = settings_hashes == {registration["inputs"]["settings_sha256"]}
+    requested_mode_matches = (
+        receipt.get("requested_mode") == registration["inputs"]["requested_mode"]
+    )
+    hashes_unique = len(all_hashes) == len(set(all_hashes))
+    complete_frame_count = sum(
+        frame["all_required_tags_visible"] for frame in frame_results
+    )
+    samples_sufficient = all(
+        len(values) >= minimum_samples_per_tag for values in observations.values()
+    )
+    maximum_shift = max(all_shifts) if all_shifts else None
+    camera_scene_agrees = all(
+        (
+            identity_matches,
+            settings_match,
+            requested_mode_matches,
+            receipt_inventory_matches,
+            hashes_unique,
+            complete_frame_count > 0,
+            samples_sufficient,
+            maximum_shift is not None
+            and maximum_shift <= maximum_reference_center_shift_mm,
+        )
+    )
+
+    return {
+        "schema": "rocell.fixed_board_stationary_observation.v1",
+        "created_at": created_at or datetime.now(timezone.utc).isoformat(),
+        "status": (
+            "CAMERA_SCENE_AGREES_TELEMETRY_REQUIRED"
+            if camera_scene_agrees
+            else "CAMERA_SCENE_DISAGREES"
+        ),
+        "inputs": {
+            "frames_directory": frames_directory.relative_to(ROOT).as_posix(),
+            "receipt_path": receipt_path.relative_to(ROOT).as_posix(),
+            "receipt_sha256": sha256_file(receipt_path),
+            "registration_path": registration_path.relative_to(ROOT).as_posix(),
+            "registration_sha256": sha256_file(registration_path),
+        },
+        "policy": {
+            "required_tag_ids": list(range(6)),
+            "minimum_samples_per_tag": minimum_samples_per_tag,
+            "maximum_reference_center_shift_mm": maximum_reference_center_shift_mm,
+        },
+        "assessment": {
+            "camera_identity_matches": identity_matches,
+            "camera_settings_match": settings_match,
+            "requested_mode_matches": requested_mode_matches,
+            "receipt_inventory_matches": receipt_inventory_matches,
+            "all_frame_hashes_unique": hashes_unique,
+            "frame_count": len(frame_results),
+            "complete_six_tag_frame_count": complete_frame_count,
+            "all_tags_have_minimum_samples": samples_sufficient,
+            "maximum_reference_center_shift_mm": (
+                round(maximum_shift, 4) if maximum_shift is not None else None
+            ),
+            "camera_scene_agrees": camera_scene_agrees,
+            "arm_telemetry_available": False,
+            "stationary_arm_agreement": False,
+        },
+        "mapped_center_comparison_by_tag": by_tag,
+        "frames": frame_results,
+        "limitations": [
+            "Camera-scene agreement does not establish current arm joint state.",
+            "Arm telemetry is required before stationary-arm agreement can pass.",
+            "This planar comparison does not establish Z, TCP, route, collision, motion, descent, or contact authority.",
+        ],
+        "authority": {
+            "hardware_writes": 0,
+            "robot_transport_opened": False,
+            "robot_motion": False,
+            "camera_guided_motion": False,
+            "physical_authority": False,
+        },
+    }
+
+
 def build_report(
     frames_directory: Path,
     observations_path: Path,
@@ -385,6 +565,15 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--xy-observations", type=Path, default=DEFAULT_OBSERVATIONS)
     result.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     result.add_argument(
+        "--reference-registration",
+        type=Path,
+        help="Assess fresh frames against an existing registration without refitting it",
+    )
+    result.add_argument(
+        "--maximum-reference-center-shift-mm", type=float, default=2.0
+    )
+    result.add_argument("--minimum-samples-per-tag", type=int, default=3)
+    result.add_argument(
         "--created-at", help="Optional stable ISO-8601 evidence timestamp"
     )
     return result
@@ -392,16 +581,25 @@ def parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = parser().parse_args()
-    report = build_report(
-        args.frames_directory.resolve(strict=True),
-        args.xy_observations.resolve(strict=True),
-        created_at=args.created_at,
-    )
+    if args.reference_registration:
+        report = build_stationary_observation_report(
+            args.frames_directory.resolve(strict=True),
+            args.reference_registration.resolve(strict=True),
+            maximum_reference_center_shift_mm=args.maximum_reference_center_shift_mm,
+            minimum_samples_per_tag=args.minimum_samples_per_tag,
+            created_at=args.created_at,
+        )
+    else:
+        report = build_report(
+            args.frames_directory.resolve(strict=True),
+            args.xy_observations.resolve(strict=True),
+            created_at=args.created_at,
+        )
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8", newline="\n") as stream:
         stream.write(json.dumps(report, indent=2) + "\n")
-    print(json.dumps(report["validation"], indent=2))
+    print(json.dumps(report.get("validation", report.get("assessment")), indent=2))
     return 0
 
 
