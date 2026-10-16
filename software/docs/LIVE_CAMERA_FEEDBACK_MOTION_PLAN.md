@@ -397,6 +397,30 @@ retained H target. The attachment policy remains explicit: changing from
 epoch, and permits no pose or contact authority inheritance. The audit opens no
 device, emits no command, and grants no physical authority.
 
+### Retained-evidence coverage
+
+`software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json`
+now maps every retained measurement and observation to the twelve-artifact
+static keyboard closure. The mapping records reusable facts and the exact
+evidence still needed for acceptance without creating a calibration artifact
+or writing the physical registry.
+
+Nine of the eleven hover-route artifacts have partial retained candidates.
+They reuse the exact B0477 identity and negotiated mode, six installed tag
+centers on the 610 x 457 mm board, fixed planar registration, 46 reviewed key
+centers, the `KEYBOARD_FORWARD_CAL_1` controller-register observation, the
+active `BARE_JAW` profile, and the ruler-photo clearance receipts. The two
+hover-route artifacts with no retained candidate are
+`phase1_static_intrinsics` and `phase1_arm_board`. The separate
+`phase1_keyboard_outcome_observer` contact dependency also has no retained
+candidate.
+
+This coverage record requests no repeated measurement. Future collection can
+start with the named remaining acceptance evidence in prerequisite order. A
+change to `STYLUS` uses a separate attachment profile and configuration epoch,
+so its TCP, collision geometry, trajectory, and contact qualification are
+collected independently.
+
 ## 2026-10-15 read-only intake result
 
 The explicit camera-only intake identified one present Windows Camera-class

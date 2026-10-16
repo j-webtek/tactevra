@@ -509,6 +509,16 @@ and the current physical-registry assessment for every artifact. It also binds
 the installed collision-readiness report and names each missing or unknown
 body. The result remains blocked before register projection, IK, route
 densification, collision screening, transport, or hardware access.
+ARM-079 adds a deterministic retained-evidence coverage manifest for that
+graph. It binds the existing camera record, six measured tag centers, fixed
+planar registration, 46-key overlay, settled named-pose feedback, attachment
+profile, and ruler-photo receipts to their exact static Phase-1 artifact slots.
+Nine of eleven hover-route slots have reusable partial candidates; physical
+intrinsics and the arm-to-board transform have no retained candidate, and the
+contact outcome observer remains a separate missing dependency. No retained
+candidate is promoted into the physical registry, no repeated measurement is
+requested, and attachment-specific TCP, collision, trajectory, and contact
+evidence remain isolated by profile and configuration epoch.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

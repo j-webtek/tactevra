@@ -18,6 +18,9 @@ from rocell.calibration import STATIC_OVERHEAD_PHASE1_GRAPH
 from .collision_readiness import assess_current_collision_readiness
 from .context import load_simulation_context
 from .static_phase1_calibration import run_static_phase1_calibration_rehearsal
+from .static_phase1_retained_evidence import (
+    assess_static_phase1_retained_evidence,
+)
 
 
 SCHEMA = "rocell.bare_jaw_route_readiness.v1"
@@ -25,6 +28,9 @@ STATUS = "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED"
 _SESSION = Path("software/config/live_camera_feedback_session_20261015.json")
 _REGISTRATION = Path("software/ai/eval/b0477_fixed_board_registration_20261016.json")
 _OVERLAY = Path("software/ai/eval/b0477_keyboard_overlay_20261016.json")
+_RETAINED_COVERAGE = Path(
+    "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json"
+)
 _TOOL_PROFILES = Path("software/config/tool_attachment_profiles.json")
 _SYSTEM_MANIFEST = Path("software/config/system_manifest.json")
 
@@ -86,10 +92,12 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
     session_path = root / _SESSION
     registration_path = root / _REGISTRATION
     overlay_path = root / _OVERLAY
+    coverage_path = root / _RETAINED_COVERAGE
     profiles_path = root / _TOOL_PROFILES
     session = _read(session_path)
     registration = _read(registration_path)
     overlay = _read(overlay_path)
+    retained_coverage = _read(coverage_path)
     profiles = _read(profiles_path)
 
     if session.get("schema") != "rocell.live_camera_feedback_session.v1":
@@ -148,6 +156,12 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
     if switching.get("invalidate_precomputed_trajectory_on_change") is not True \
             or switching.get("allow_pose_inheritance_between_profiles") is not False:
         raise BareJawRouteReadinessError("attachment profile separation is not enforced")
+
+    recomputed_coverage = assess_static_phase1_retained_evidence(root)
+    if retained_coverage != recomputed_coverage:
+        raise BareJawRouteReadinessError(
+            "retained Phase-1 evidence coverage is stale"
+        )
 
     context = load_simulation_context(root, root / _SYSTEM_MANIFEST)
     calibration = run_static_phase1_calibration_rehearsal(context)
@@ -224,6 +238,10 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             "session_record_id": session.get("record_id"),
             "fixed_board_registration_sha256": _sha256(registration_path),
             "keyboard_overlay_sha256": _sha256(overlay_path),
+            "retained_evidence_coverage_artifact_sha256": _sha256(coverage_path),
+            "retained_evidence_coverage_sha256": retained_coverage.get(
+                "coverage_sha256"
+            ),
             "tool_profiles_sha256": _sha256(profiles_path),
             "retained_hover_draft_sha256": draft.get("draft_sha256"),
             "active_feedback_response_sha256": feedback.get("response_sha256"),
@@ -321,6 +339,26 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             "unknown_required_body_ids": list(collision.unknown_required_body_ids),
             "diagnostic_ready": collision.geometry_audit.diagnostic_ready,
             "continuous_collision_proven": False,
+            "physical_release_effect": "NONE",
+        },
+        "retained_evidence_coverage": {
+            "status": retained_coverage.get("status"),
+            "summary": retained_coverage.get("summary"),
+            "route_reusable_candidate_ids": [
+                row.get("artifact_id")
+                for row in _array(retained_coverage.get("coverage"), "coverage rows")
+                if isinstance(row, Mapping)
+                and row.get("artifact_id") in required_route_artifacts
+                and row.get("coverage_status") == "RETAINED_CANDIDATE_PARTIAL"
+            ],
+            "route_no_candidate_ids": [
+                row.get("artifact_id")
+                for row in _array(retained_coverage.get("coverage"), "coverage rows")
+                if isinstance(row, Mapping)
+                and row.get("artifact_id") in required_route_artifacts
+                and row.get("coverage_status") == "NO_RETAINED_CANDIDATE"
+            ],
+            "repeated_measurement_requested": False,
             "physical_release_effect": "NONE",
         },
         "prior_sensitivity_evidence": [

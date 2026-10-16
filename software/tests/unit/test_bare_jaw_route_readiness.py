@@ -106,6 +106,20 @@ def test_retained_bare_jaw_route_audit_is_deterministic_and_zero_dispatch(
         "attachment:moving_camera_cable",
         "installation:base_and_factory_clamp",
     ]
+    assert first["retained_evidence_coverage"]["summary"] == {
+        "physically_complete_artifact_count": 0,
+        "repeated_measurement_requested": False,
+        "route_artifact_count": 11,
+        "route_missing_candidate_count": 2,
+        "route_partial_candidate_count": 9,
+    }
+    assert first["retained_evidence_coverage"]["route_no_candidate_ids"] == [
+        "phase1_static_intrinsics",
+        "phase1_arm_board",
+    ]
+    assert len(
+        first["retained_evidence_coverage"]["route_reusable_candidate_ids"]
+    ) == 9
     assert "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED" in first["blockers"]
     assert "PLANNER_CAMERA_ARCHITECTURE_RECONCILIATION_REQUIRED" not in first[
         "blockers"
@@ -122,6 +136,8 @@ def _copy_inputs(source: Path, destination: Path) -> None:
         "software/config/tool_attachment_profiles.json",
         "software/ai/eval/b0477_fixed_board_registration_20261016.json",
         "software/ai/eval/b0477_keyboard_overlay_20261016.json",
+        "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
+        "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json",
     ]
     for relative in paths:
         target = destination / relative
