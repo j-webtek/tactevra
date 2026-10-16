@@ -119,36 +119,28 @@ disabled.
 
 Exit: reviewed optics/coverage report. One attractive image is insufficient.
 
-### 4. Solve installed intrinsics and static registration
+### 4. Measure the installed board-plane registration
 
-- Use the workcell-sized A4 target at
-  `output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf`: 10 by 7 squares,
-  25 mm squares, 17.5 mm markers, and `DICT_5X5_1000`.
-- The target is 250 by 175 mm. The sizing record
-  `software/config/charuco_b0477_10x7_25mm_17_5mm.json` under `sizing_basis` derives this from
-  the 610 by 457 mm board, six measured tag centers, the retained operational
-  camera projection, the 30-corner gate, and edge/oblique placement needs.
-- Print at 100% / actual size and mount to rigid backing. Before any dataset
-  frame, bind the target-definition and PDF SHA-256 values and pass four
-  distributed horizontal plus four distributed vertical caliper measurements.
-  Each measurement must be within 0.25% of the defined board extent.
-- Use `software/scripts/live_charuco_dataset_capture.py` to enforce the exact
-  20-fit/6-holdout order and a minimum of 30 detected ChArUco corners per view.
-  A rejected view ends that dataset epoch; it is retained with its reason.
-- Capture scale-verified ChArUco images using a precommitted fit/holdout split.
-- Solve physical intrinsics and distortion; retain per-view and held-out
-  residuals and the exact undistortion-map hash.
-- Detect the board tags and solve the static camera-to-board transform.
-- Validate against held-out station tags and repeat after warm-up, cable load,
-  and one controlled close/reopen cycle.
+- Use the already installed 610 by 457 mm board and its six tag36h11 markers;
+  no additional printed target is required for this planar mapping.
+- Bind the 40 mm detection edge, measured tag centers, common +Y/rear marker
+  orientation, camera identity, operational stream settings, workcell epoch,
+  capture receipt, and every retained frame hash.
+- Fit IDs `0-3` as the perimeter anchors. Reserve interior IDs `4-5` as checks
+  so registration error is observed independently of the fit.
+- Recompute with `software/scripts/measure_fixed_board_registration.py`. The
+  2026-10-16 result uses seven fit-eligible frames and 112 perimeter corners;
+  its fit RMSE is 5.3948 px. Twenty held-out center checks have 4.8330 mm mean
+  and 7.4937 mm maximum error. Mapped-center repeatability is at most 0.6474 mm.
+- Bind the resulting image-to-board and board-to-image matrices to the fixed
+  epoch. Any camera, support, board, keyboard, or fiducial movement invalidates
+  them.
 
-Exit: installed intrinsics and extrinsics with uncertainty, residual thresholds,
-and configuration-epoch bindings. Nominal FOV geometry cannot substitute.
-
-The installed operational stream (`1920x1080`, YUY2, approximately 60 fps) and
-the full-native camera contract (`5472x3648`, YUY2, 9 fps) are distinct
-calibration profiles. Intrinsics cannot cross that boundary unless the exact
-crop, binning, and scale transform is measured and reviewed.
+Exit: a reproducible, read-only board-plane mapping with measured held-out
+residuals. It supports keyboard projection work but does not establish full
+intrinsics, distortion, off-plane Z, board-to-robot registration, or motion
+authority. Full lens characterization can be added later if its residual budget
+is required; it is not a prerequisite for using the measured fixed plane.
 
 ### 5. Prove camera-only keyboard localization
 
@@ -250,14 +242,12 @@ canonical manifest, compact numeric results, and content hashes.
 
 ## Immediate next review
 
-Increment B is complete for finite read-only capture. The repeat at
-`KEYBOARD_FORWARD_CAL_1` retained ten unique frames across two reopen cycles;
-eight frames decoded all six tags and the settings hash remained stable. The
-tracked session record now precommits the 20-view fit and 6-view holdout
-ChArUco acquisition sequence for increment C. The next physical work is to
-scale-verify the calibration target and capture those 26 views in the declared
-order. Do not use the full-tag visibility result itself as registration or
-motion authority.
+Increment C now has a measured fixed-board planar mapping from the retained
+`KEYBOARD_FORWARD_CAL_1` frames. No target printing or new capture is required.
+The next review projects the keyboard outline and proposed key centers back
+into those frames and checks them visually and numerically against the current
+7.4937 mm held-out maximum. Robot transport, camera-guided motion, descent, and
+contact remain disabled.
 
 ## 2026-10-15 read-only intake result
 

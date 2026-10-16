@@ -1,0 +1,864 @@
+{
+  "schema": "rocell.fixed_apriltag_board_registration.v1",
+  "created_at": "2026-10-16T06:53:31-04:00",
+  "status": "MEASURED_FIXED_EPOCH_PLANAR_MAPPING",
+  "method": "consensus_homography_from_installed_tag36h11_ids_0_to_3_corners_with_ids_4_and_5_held_out",
+  "inputs": {
+    "frames_directory": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02",
+    "receipt_path": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/receipt.json",
+    "receipt_sha256": "32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8",
+    "xy_observations_path": "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
+    "xy_observations_sha256": "590e7e0fd1261b47517510a96de7290c74b3d5a8b07ba5ec1188029f9701993a",
+    "camera_identity": "USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000",
+    "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+    "requested_mode": {
+      "backend": "CAP_DSHOW",
+      "fourcc": "YUY2",
+      "fps": 60.0,
+      "height_px": 1080,
+      "width_px": 1920
+    },
+    "board_size_xy_mm": [
+      610.0,
+      457.0
+    ],
+    "tag_detection_edge_mm": 40.0,
+    "tag_top_direction": "+Y/rear/toward arm",
+    "tag_centers_xy_mm": {
+      "T0": [
+        27.32,
+        33.31
+      ],
+      "T1": [
+        403.66,
+        38.45
+      ],
+      "T2": [
+        32.55,
+        429.5
+      ],
+      "T3": [
+        581.38,
+        431.47
+      ],
+      "K0": [
+        240.17,
+        265.84
+      ],
+      "P0": [
+        442.05,
+        270.39
+      ]
+    }
+  },
+  "mapping": {
+    "board_to_image_homography": [
+      [
+        3.107098964662,
+        0.631100410557,
+        1.352290907367
+      ],
+      [
+        -0.160624073451,
+        -2.025782920899,
+        1058.393717959338
+      ],
+      [
+        -6.9950584e-05,
+        0.00057888876,
+        1.0
+      ]
+    ],
+    "image_to_board_homography": [
+      [
+        0.426045780917,
+        0.101780055707,
+        -108.299509409855
+      ],
+      [
+        -0.013981863391,
+        -0.501731732064,
+        531.048620864202
+      ],
+      [
+        3.7896095e-05,
+        0.000297566435,
+        1.0
+      ]
+    ],
+    "projected_board_corners_px": [
+      [
+        1.352,
+        1058.394
+      ],
+      [
+        1981.221,
+        1003.22
+      ],
+      [
+        1788.303,
+        28.342
+      ],
+      [
+        229.145,
+        104.868
+      ]
+    ],
+    "local_scale_at_board_center_px_per_mm": {
+      "x": 2.858993,
+      "y": 2.076227
+    }
+  },
+  "validation": {
+    "source_frame_count": 10,
+    "fit_eligible_frame_count": 7,
+    "world_corner_observation_count": 112,
+    "world_corner_fit_rmse_px": 5.3948,
+    "world_corner_fit_max_px": 14.0748,
+    "held_out_station_center_check_count": 20,
+    "held_out_station_center_mean_error_mm": 4.833,
+    "held_out_station_center_max_error_mm": 7.4937,
+    "held_out_by_tag": {
+      "K0": {
+        "id": 4,
+        "check_count": 10,
+        "mean_error_mm": 2.1888,
+        "max_error_mm": 2.6
+      },
+      "P0": {
+        "id": 5,
+        "check_count": 10,
+        "mean_error_mm": 7.4773,
+        "max_error_mm": 7.4937
+      }
+    },
+    "mapped_center_repeatability": {
+      "T0": {
+        "id": 0,
+        "sample_count": 7,
+        "mapped_mean_xy_mm": [
+          28.8582,
+          31.6886
+        ],
+        "mapped_axis_stddev_mm": [
+          0.1528,
+          0.1493
+        ],
+        "maximum_radial_deviation_from_mean_mm": 0.5119
+      },
+      "T1": {
+        "id": 1,
+        "sample_count": 10,
+        "mapped_mean_xy_mm": [
+          403.7751,
+          38.3562
+        ],
+        "mapped_axis_stddev_mm": [
+          0.0134,
+          0.0214
+        ],
+        "maximum_radial_deviation_from_mean_mm": 0.0441
+      },
+      "T2": {
+        "id": 2,
+        "sample_count": 10,
+        "mapped_mean_xy_mm": [
+          31.4545,
+          430.0998
+        ],
+        "mapped_axis_stddev_mm": [
+          0.0285,
+          0.0285
+        ],
+        "maximum_radial_deviation_from_mean_mm": 0.0983
+      },
+      "T3": {
+        "id": 3,
+        "sample_count": 10,
+        "mapped_mean_xy_mm": [
+          581.6588,
+          431.4466
+        ],
+        "mapped_axis_stddev_mm": [
+          0.0151,
+          0.0107
+        ],
+        "maximum_radial_deviation_from_mean_mm": 0.0291
+      },
+      "K0": {
+        "id": 4,
+        "sample_count": 10,
+        "mapped_mean_xy_mm": [
+          240.2325,
+          268.0073
+        ],
+        "mapped_axis_stddev_mm": [
+          0.3047,
+          0.2752
+        ],
+        "maximum_radial_deviation_from_mean_mm": 0.6474
+      },
+      "P0": {
+        "id": 5,
+        "sample_count": 10,
+        "mapped_mean_xy_mm": [
+          441.813,
+          277.8635
+        ],
+        "mapped_axis_stddev_mm": [
+          0.0178,
+          0.0086
+        ],
+        "maximum_radial_deviation_from_mean_mm": 0.038
+      }
+    }
+  },
+  "frames": [
+    {
+      "file_name": "reopen-00-frame-00.jpg",
+      "sha256": "9066e3a61f873be7fcc3d9deefec3347f4f8a50499cc9f3347cc2e79126d19b0",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.105,
+            267.934
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            -0.065,
+            2.094
+          ],
+          "planar_error_mm": 2.095
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.816,
+            277.865
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.234,
+            7.475
+          ],
+          "planar_error_mm": 7.479
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-00-frame-01.jpg",
+      "sha256": "99aa46faa50b55ef046deb575fb0da7dd9ffc7f69160463010eafa3afaf429d4",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.769,
+            268.37
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.599,
+            2.53
+          ],
+          "planar_error_mm": 2.6
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.832,
+            277.865
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.218,
+            7.475
+          ],
+          "planar_error_mm": 7.479
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-00-frame-02.jpg",
+      "sha256": "9b84da0703d2ca2796fecb7b74f4f26e3a22460772e145d32d789e0157c8d175",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.017,
+            267.853
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            -0.153,
+            2.013
+          ],
+          "planar_error_mm": 2.019
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.796,
+            277.871
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.254,
+            7.481
+          ],
+          "planar_error_mm": 7.486
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-00-frame-03.jpg",
+      "sha256": "5b96d89e415762f02167698ab724875ddd71d37f6c40f6158cbdfca929063e99",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.439,
+            268.238
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.269,
+            2.398
+          ],
+          "planar_error_mm": 2.413
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.842,
+            277.852
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.208,
+            7.462
+          ],
+          "planar_error_mm": 7.465
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-00-frame-04.jpg",
+      "sha256": "b72c269ad4897d5e5ed1271e03bc5adc16143e85dbefc8e165455de32ca8a99a",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": false,
+      "missing_world_ids": [
+        0
+      ],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            239.893,
+            267.564
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            -0.277,
+            1.724
+          ],
+          "planar_error_mm": 1.746
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.776,
+            277.853
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.274,
+            7.463
+          ],
+          "planar_error_mm": 7.468
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-01-frame-00.jpg",
+      "sha256": "446668dbd023b58b45ac28cc1b710e8b8065049343e438f8239b88c76a4aa281",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.518,
+            267.961
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.348,
+            2.121
+          ],
+          "planar_error_mm": 2.149
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.819,
+            277.861
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.231,
+            7.471
+          ],
+          "planar_error_mm": 7.474
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-01-frame-01.jpg",
+      "sha256": "2ea9e257251cb8dd382edbdc1e573a43d07b81954c259c3deb95d42c275371e4",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": false,
+      "missing_world_ids": [
+        0
+      ],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            239.802,
+            267.657
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            -0.368,
+            1.817
+          ],
+          "planar_error_mm": 1.854
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.824,
+            277.866
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.226,
+            7.476
+          ],
+          "planar_error_mm": 7.479
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-01-frame-02.jpg",
+      "sha256": "ee2b2cf70b69faedefc65dc6c9ccc3be825d0701c347e168fdb695bb42def9a8",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": false,
+      "missing_world_ids": [
+        0
+      ],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.208,
+            268.295
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.038,
+            2.455
+          ],
+          "planar_error_mm": 2.456
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.815,
+            277.88
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.235,
+            7.49
+          ],
+          "planar_error_mm": 7.494
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-01-frame-03.jpg",
+      "sha256": "dad2624d5676fd7c1a18333b58ad0f4577597731cb28e487ee53d601ac01a2b4",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.017,
+            267.853
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            -0.153,
+            2.013
+          ],
+          "planar_error_mm": 2.019
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.813,
+            277.853
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.237,
+            7.463
+          ],
+          "planar_error_mm": 7.467
+        }
+      ]
+    },
+    {
+      "file_name": "reopen-01-frame-04.jpg",
+      "sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5",
+      "image_size_px": [
+        1920,
+        1080
+      ],
+      "detected_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "corner_source_by_id": {
+        "0": "apriltag_refined",
+        "1": "apriltag_refined",
+        "2": "apriltag_refined",
+        "3": "apriltag_refined",
+        "4": "opencv_default",
+        "5": "apriltag_refined"
+      },
+      "fit_eligible": true,
+      "missing_world_ids": [],
+      "station_checks": [
+        {
+          "id": 4,
+          "name": "K0",
+          "mapped_center_xy_mm": [
+            240.558,
+            268.347
+          ],
+          "measured_center_xy_mm": [
+            240.17,
+            265.84
+          ],
+          "delta_xy_mm": [
+            0.388,
+            2.507
+          ],
+          "planar_error_mm": 2.537
+        },
+        {
+          "id": 5,
+          "name": "P0",
+          "mapped_center_xy_mm": [
+            441.799,
+            277.869
+          ],
+          "measured_center_xy_mm": [
+            442.05,
+            270.39
+          ],
+          "delta_xy_mm": [
+            -0.251,
+            7.479
+          ],
+          "planar_error_mm": 7.483
+        }
+      ]
+    }
+  ],
+  "use": {
+    "permitted": [
+      "map saved B0477 image pixels to the measured board XY plane",
+      "project measured board locations into the retained camera image",
+      "prepare keyboard-region overlays and read-only targeting checks"
+    ],
+    "not_established": [
+      "camera intrinsics or lens-distortion coefficients",
+      "off-plane Z reconstruction",
+      "board-to-robot transform",
+      "tool-center-point offset or attachment trajectory",
+      "contact or camera-guided motion authority"
+    ]
+  },
+  "epoch_binding": {
+    "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
+    "camera_or_board_movement_invalidates_mapping": true,
+    "tool_change_invalidates_trajectory_not_planar_mapping": true
+  },
+  "authority": {
+    "hardware_writes": 0,
+    "robot_transport_opened": false,
+    "robot_motion": false,
+    "camera_guided_motion": false,
+    "physical_authority": false
+  }
+}

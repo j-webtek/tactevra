@@ -20,11 +20,13 @@ strict localization evaluator. These controls
 formalize software compatibility and evidence requirements but add no physical
 observation or movement authority.
 
-The final-camera dependency is tracked as a targeted physical-integration hold
-in [the camera integration hold](docs/CAMERA_INTEGRATION_HOLD.md). Preparatory
-software, evidence, documentation, and distribution work may continue, but
-measured calibration and physical perception claims must wait for the fixed
-camera installation.
+The final camera is now installed for the October 2026 keyboard campaign. A
+read-only B0477 capture at 1920 by 1080 YUY2 binds the fixed workcell epoch, and
+the measured six-tag board now supplies a reproducible image-to-board planar
+mapping. Its independent interior-tag checks reach 7.4937 mm maximum error, so
+keyboard overlays may proceed while camera-guided motion remains blocked. Full
+intrinsics, board-to-robot registration, tool offsets, contact, and physical
+typing qualification remain open.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
@@ -62,6 +64,7 @@ completed capabilities.
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
 | Keyboard localization | KeyboardPoseNet trained on synthetic images | Candidate keyboard poses and key coordinates can be evaluated offline; real-camera accuracy remains unqualified |
+| Fixed camera board-plane mapping | The installed 610 by 457 mm board and six measured 40 mm AprilTags produce a reproducible B0477 image-to-board homography | Saved-frame overlays can use measured board XY with a current 7.4937 mm held-out maximum; this does not establish lens intrinsics, Z, robot registration, or motion authority |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
