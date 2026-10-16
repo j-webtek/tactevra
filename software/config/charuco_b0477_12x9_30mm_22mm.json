@@ -1,0 +1,49 @@
+{
+  "schema": "rocell.physical_charuco_target.v1",
+  "target_id": "b0477-charuco-12x9-30mm-22mm-v1",
+  "kind": "CHARUCO",
+  "dictionary": "DICT_5X5_1000",
+  "squares_x": 12,
+  "squares_y": 9,
+  "square_length_mm": 30.0,
+  "marker_length_mm": 22.0,
+  "board_width_mm": 360.0,
+  "board_height_mm": 270.0,
+  "border_bits": 1,
+  "print_contract": {
+    "page": "A3_LANDSCAPE",
+    "page_width_mm": 420.0,
+    "page_height_mm": 297.0,
+    "scale_percent": 100.0,
+    "fit_to_page": false,
+    "rigid_backing_required": true,
+    "minimum_horizontal_measurements": 4,
+    "minimum_vertical_measurements": 4,
+    "opposite_extents_required": true,
+    "distributed_across_board_required": true,
+    "maximum_axis_scale_error_fraction": 0.0025
+  },
+  "profile_scope": {
+    "operational_mode": {
+      "width_px": 1920,
+      "height_px": 1080,
+      "fps": 60.0,
+      "fourcc": "YUY2",
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15"
+    },
+    "full_native_mode": {
+      "width_px": 5472,
+      "height_px": 3648,
+      "fps": 9.0,
+      "fourcc": "YUY2"
+    },
+    "cross_mode_reuse": "FORBIDDEN_UNLESS_CROP_BIN_SCALE_TRANSFORM_IS_MEASURED_AND_REVIEWED"
+  },
+  "authority": {
+    "physical_scale_verified": false,
+    "intrinsics_valid": false,
+    "registration_valid": false,
+    "robot_motion": false,
+    "contact": false
+  }
+}

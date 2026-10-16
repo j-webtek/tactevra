@@ -93,6 +93,15 @@ def test_live_session_precommits_intrinsics_fit_and_holdout_views() -> None:
     assert {item["split"] for item in sequence[:20]} == {"FIT"}
     assert {item["split"] for item in sequence[20:]} == {"HOLDOUT"}
     assert plan["split_policy"]["holdout_must_not_enter_fit"] is True
+    assert plan["target"]["minimum_horizontal_scale_measurements"] == 4
+    assert plan["target"]["minimum_vertical_scale_measurements"] == 4
+    assert plan["target"]["definition_sha256"] == (
+        "c8f95230bc42cd14fc546c6fed09af4780155c65da50e6c3c32a3b86eef0613e"
+    )
+    assert plan["target"]["printable_pdf_sha256"] == (
+        "6a1d0d441b54d04b20d443eee3e84b62203e5ff0f92ef70ea48ba795af27670f"
+    )
+    assert plan["mode_separation"]["cross_mode_intrinsics_reuse"].startswith("FORBIDDEN")
     assert plan["authority"] == {
         "physical_calibration_valid": False,
         "registration_valid": False,

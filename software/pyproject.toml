@@ -19,6 +19,11 @@ dependencies = ["Pillow>=10,<13", "packaging>=24,<27"]
 serial = ["pyserial>=3.5,<4"]
 vision = ["numpy>=2,<2.3", "opencv-contrib-python>=4.12,<5"]
 calibration = ["numpy>=2,<2.3"]
+charuco = [
+    "numpy>=2,<2.3",
+    "opencv-contrib-python>=4.12,<6",
+    "reportlab>=4.2,<5",
+]
 test = ["pytest>=8,<10", "jsonschema>=4.23,<5"]
 simulation = [
     "numpy>=1.26,<2.3",
