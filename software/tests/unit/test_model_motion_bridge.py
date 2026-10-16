@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -8,8 +9,9 @@ from rocell.application.model_motion_bridge import (
     ModelMotionBridgeError,
     compile_mapping,
     compile_model_motion_proposal,
+    compile_retained_keyboard_hover_draft,
 )
-from rocell.models import ModelMotionProposal, MotionProposalError, Point3Mm
+from rocell.models import Interaction, ModelMotionProposal, MotionProposalError, Point3Mm
 from rocell.targets import load_nominal_target_catalog
 
 
@@ -153,3 +155,69 @@ def test_candidate_hash_is_deterministic(workspace_root: Path) -> None:
     second = compile_model_motion_proposal(parsed, catalog)
     assert first == second
     assert len(first["candidate_sha256"]) == 64
+
+
+def test_retained_keyboard_hover_draft_binds_reviewed_evidence_without_authority(
+    workspace_root: Path,
+) -> None:
+    values = dict(
+        expected_workcell_epoch_id="keyboard-bare-jaw-camera-intake-20261015",
+        expected_overlay_sha256=(
+            "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407"
+        ),
+        expected_reference_frame_sha256=(
+            "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5"
+        ),
+    )
+    first = compile_retained_keyboard_hover_draft(workspace_root, "H", **values)
+    second = compile_retained_keyboard_hover_draft(workspace_root, "H", **values)
+    session = json.loads((
+        workspace_root / "software/config/live_camera_feedback_session_20261015.json"
+    ).read_text(encoding="utf-8"))
+
+    assert first == second
+    assert first == session["retained_hover_draft"]
+    assert first["status"] == (
+        "UNSENT_RETAINED_EVIDENCE_HOVER_DRAFT_BLOCKED_FROM_INGRESS"
+    )
+    assert first["proposal"]["interaction"] == "HOVER"
+    assert first["proposal"]["target_mm"] == {
+        "x": pytest.approx(212.95070610888823),
+        "y": pytest.approx(149.20958023724344),
+        "z": pytest.approx(21.0),
+    }
+    assert first["requested_waypoints"][0]["point_mm"]["z"] == pytest.approx(48.7953)
+    assert first["bindings"]["attachment_profile"] == "BARE_JAW"
+    assert first["controller_commands"] == []
+    assert first["transport_writes"] == 0
+    assert first["hardware_access"] is first["physical_authority"] is False
+    assert first["descent_authorized"] is first["contact_authorized"] is False
+    assert len(first["draft_sha256"]) == 64
+
+
+@pytest.mark.parametrize("changes,match", [
+    ({"expected_workcell_epoch_id": "stale-epoch"}, "epoch"),
+    ({"expected_overlay_sha256": "1" * 64}, "overlay hash"),
+    ({"expected_reference_frame_sha256": "2" * 64}, "frame hash"),
+    ({"expected_attachment_profile": "STYLUS"}, "attachment profile"),
+    ({"interaction": Interaction.CONTACT}, "HOVER only"),
+])
+def test_retained_keyboard_hover_draft_rejects_stale_or_unsafe_bindings(
+    workspace_root: Path, changes: dict[str, object], match: str,
+) -> None:
+    values: dict[str, object] = {
+        "expected_workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+    }
+    values.update(changes)
+    with pytest.raises(ModelMotionBridgeError, match=match):
+        compile_retained_keyboard_hover_draft(workspace_root, "H", **values)
+
+
+def test_retained_keyboard_hover_draft_requires_a_reviewed_target(
+    workspace_root: Path,
+) -> None:
+    with pytest.raises(ModelMotionBridgeError, match="overlay target"):
+        compile_retained_keyboard_hover_draft(
+            workspace_root, "NOT_A_KEY",
+            expected_workcell_epoch_id="keyboard-bare-jaw-camera-intake-20261015",
+        )

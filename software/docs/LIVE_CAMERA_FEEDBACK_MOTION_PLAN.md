@@ -193,6 +193,36 @@ no motion authority.
 
 Exit: deterministic dry-run receipts. Serial writes remain zero.
 
+Completed for the retained `H` target on 2026-10-16. The maintained
+`model_motion_bridge` retained-target mode verifies the exact workcell epoch,
+retained-frame, annotation, board-registration, overlay, target-catalog, and
+tool-profile hashes before it creates a proposal. It accepts `HOVER` only and
+requires the explicit `BARE_JAW` profile. The resulting proposal resolves the
+reviewed image center to board surface coordinates
+`(212.951, 149.210, 21.000) mm` and records a provisional hover destination at
+`(212.951, 149.210, 48.7953) mm`. The clearance is the recorded 25.7953 mm
+overlay review bound plus the 2.0 mm jaw-clearance uncertainty.
+
+The receipt is embedded under `retained_hover_draft` in
+`software/config/live_camera_feedback_session_20261015.json`. Its status is
+`UNSENT_RETAINED_EVIDENCE_HOVER_DRAFT_BLOCKED_FROM_INGRESS`; observation
+confidence remains `0.0`, controller commands are empty, and transport writes,
+hardware access, physical authority, descent, contact, and autonomous retry are
+all zero or false. Reproduce it without opening the camera or robot transport:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python -m rocell.application.model_motion_bridge `
+  --workspace . `
+  --retained-keyboard-target H `
+  --workcell-epoch-id keyboard-bare-jaw-camera-intake-20261015
+```
+
+The retained frame has no current freshness lease, the planar mapping has no
+qualified Z calibration, and the board-to-arm transform and bare-jaw TCP remain
+uncommissioned for this target. Those blockers intentionally prevent this
+artifact from entering the contact-only typing ingress or any controller path.
+
 ### 7. Observe the stationary arm
 
 - With motion still disabled, capture the arm at its current named pose.
@@ -258,7 +288,7 @@ canonical manifest, compact numeric results, and content hashes.
 | A | This baseline and integration plan | None |
 | B | Read-only camera identity, exact mode/control probe, finite capture receipt | Camera capture only after explicit operator action; arm disabled |
 | C | Physical intrinsics and static-registration dataset/assessment | Camera capture; arm disabled |
-| D | Observation-to-hover dry-run coordinator and fault tests | None; unsent commands only |
+| D | Observation-to-hover dry-run coordinator and fault tests (complete for retained `H`) | None; unsent commands only |
 | E | Stationary-arm camera/telemetry comparison | Read-only camera and arm telemetry |
 | F | Separately reviewed single high-hover validation | One bounded noncontact command |
 | G | Stop-and-look correction qualification | One newly authorized bounded correction at a time |
@@ -266,14 +296,18 @@ canonical manifest, compact numeric results, and content hashes.
 
 ## Immediate next review
 
-Increment C now has both the measured fixed-board planar mapping and the
-reviewed 46-target keyboard image overlay from the retained
-`KEYBOARD_FORWARD_CAL_1` frames. No target printing, new capture, or arm
-movement is required. The next increment joins one already retained frame,
-the board-registration hash, keyboard-overlay hash, target-catalog hash, and
-explicit `BARE_JAW` profile into an unsent `HOVER` proposal. It must prove zero
-transport writes and reject stale epochs, changed hashes, missing targets, and
-any request for descent or contact.
+Increment D now binds the retained `KEYBOARD_FORWARD_CAL_1` frame, measured
+board registration, reviewed 46-target keyboard overlay, target catalog,
+workcell epoch, and explicit `BARE_JAW` profile into one deterministic unsent
+`HOVER` draft. Fault coverage rejects stale epochs, changed overlay or frame
+hashes, missing targets, attachment-profile changes, and contact requests.
+
+The next increment is a fresh stationary-arm observation and calibrated route
+screening. It must add a current scene lease, qualified Z evidence,
+board-to-arm correlation, bare-jaw TCP qualification, IK, joint-limit and
+collision screening, and controller/telemetry checks before any separately
+reviewed noncontact movement can be proposed. The recorded draft itself remains
+non-executable and requires no target printing or arm movement.
 
 ## 2026-10-15 read-only intake result
 
