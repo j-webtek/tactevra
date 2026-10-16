@@ -246,13 +246,20 @@ device named `Arducam B0477 (USB3 20MP)` with PnP instance ID
 the same mode and settings hash. All four retained frames had distinct SHA-256
 digests, and the adapter released the camera after each cycle.
 
-The frames are visibly illuminated and show the keyboard and much of the board,
-but they do not satisfy registration coverage. The released tag36h11 detector
-observed IDs `0, 1, 3, 5` across the set; no individual frame contained all six
-required IDs, and IDs `2` and `4` remained missing from the aggregate. A separate
-`5472x3648` YUY2 check still detected only IDs `1, 3, 5`, so higher resolution
-did not remove the physical view/optics limitation. Registration, camera-guided
-motion, robot transport, descent, and contact remain false.
+The frames are visibly illuminated and show the keyboard and all six installed
+tag tiles. A second pixel review found that the original default-only detector
+under-reported coverage. Combining the default profile with a bounded
+AprilTag-refinement profile produces valid tag36h11 decodes for IDs `0, 1, 2,
+3, 5` across the retained set. Two retained frames contain all four world-pose
+tags `T0-T3` in the same exposure, and station-check tag `P0` is decoded in the
+set.
+
+The remaining tag-4/K0 tile is physically present, but its encoded square lies
+behind the stationary arm near the board center; only a partial edge is exposed
+in the camera pixels. It therefore cannot supply the independent K0 decode
+required by the six-tag policy. The separate `5472x3648` YUY2 check does not
+resolve an occluded code. Registration, camera-guided motion, robot transport,
+descent, and contact remain false.
 
 The reviewed external receipt is
 `software/runs/wizard-exports/live-camera-intake-20261015-04-maintained/receipt.json`
@@ -274,9 +281,10 @@ environment:
   --confirm-camera-only-capture
 ```
 
-Before another capture, reposition or raise the camera/support and adjust
-physical lighting/focus so all six tags and the keyboard remain visible with
-margin while the stationary arm stays in frame. Secure the loose jaw cable and
-retain a new workcell photograph. Any camera/support/focus change starts a new
+Before another capture, first establish a camera observation posture or camera
+position that exposes the complete tag-4/K0 square with border margin. Then
+adjust physical lighting/focus as needed so all six tags and the keyboard remain
+decodable in the same frame. Secure the loose jaw cable and retain a new
+workcell photograph. Any camera/support/focus change starts a new
 workcell/optics epoch. Electronic control readback and exact DirectShow endpoint
 binding remain open parts of increment B.
