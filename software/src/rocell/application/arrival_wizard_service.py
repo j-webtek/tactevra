@@ -5638,6 +5638,11 @@ class ArrivalWizardService:
 
                 check_powered_current()
                 docs = Path(__file__).resolve().parents[3] / "docs"
+                installed_firmware_evidence = None
+                if values.get("installed_r120_verified") is True:
+                    from .installed_r120_evidence import verified_installed_r120_evidence
+                    installed_firmware_evidence = verified_installed_r120_evidence(
+                        self.workspace)
                 outcome = run_feedback(
                     root=self._log.root,
                     session_id=self.session_id,
@@ -5654,6 +5659,7 @@ class ArrivalWizardService:
                         docs / "POWERED_FEEDBACK_PROTOCOL_REVIEW.md",
                         maximum_bytes=65536,
                     ),
+                    installed_firmware_evidence_original=installed_firmware_evidence,
                     deadline_ns=operation_deadline_ns,
                     cancellation=cancel,
                     check_current=check_powered_current,

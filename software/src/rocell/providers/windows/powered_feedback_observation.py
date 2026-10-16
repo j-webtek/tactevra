@@ -17,6 +17,28 @@ from .nonpurging_serial_backend import NonPurgingSerialConnection
 from .powered_feedback_binding import PoweredFeedbackBinding
 
 
+def _complete_feedback(message):
+    """Accept either the vendor pose schema or the reviewed r120 state schema."""
+    vendor = {"x", "y", "z", "tit", "b", "s", "e", "t", "r", "g", "v"}
+    if vendor.issubset(message):
+        return True
+    positions = message.get("p")
+    pose = message.get("pose")
+    active = message.get("motion_active")
+    progress = message.get("trajectory_progress_permille")
+    return (
+        type(positions) is list
+        and len(positions) == 7
+        and all(type(value) is int and 0 <= value <= 4095 for value in positions)
+        and type(pose) is str
+        and 0 < len(pose) <= 64
+        and all(char.isalnum() or char == "_" for char in pose)
+        and type(active) is bool
+        and type(progress) is int
+        and 0 <= progress <= 1000
+    )
+
+
 def observe_rehearsal(binding, api, cancellation):
     if (
         type(binding) is not PoweredFeedbackBinding
@@ -108,9 +130,7 @@ def _observe(binding, api, cancellation):
         feedback = validate_feedback_response_line(
             bytes(response), max_line_bytes=limits["maximum_response_bytes"]
         )
-        if not {"x", "y", "z", "tit", "b", "s", "e", "t", "r", "g", "v"}.issubset(
-            feedback
-        ):
+        if not _complete_feedback(feedback):
             raise RuntimeError("INCOMPLETE_POWERED_FEEDBACK")
         extra = bytearray()
         try:

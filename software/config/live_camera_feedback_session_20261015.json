@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "FRESH_CAMERA_SCENE_AGREEMENT_RECORDED_ARM_TELEMETRY_PENDING",
+  "state": "FRESH_CAMERA_AND_STATIONARY_ARM_AGREEMENT_RECORDED_ROUTE_SCREENING_PENDING",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -326,7 +326,7 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "RESTORE_AUTHENTICATED_READ_ONLY_ARM_TELEMETRY_THEN_CALIBRATED_ROUTE_SCREENING",
+  "next_gate": "CALIBRATED_BARE_JAW_ROUTE_SCREENING_WITHOUT_DISPATCH",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md",
   "retained_hover_draft": {
     "schema": "rocell.retained_keyboard_hover_draft.v1",
@@ -386,9 +386,9 @@
       "Retained frame has no current freshness lease",
       "Camera-to-board mapping is planar and has no qualified Z calibration",
       "Board-to-arm transform and bare-jaw TCP are not commissioned for this target",
-      "No inverse kinematics, route, collision, controller, or telemetry checks ran"
+      "No inverse kinematics, route, collision, or controller dispatch checks ran"
     ],
-    "next_required_gate": "FRESH_STATIONARY_ARM_OBSERVATION_AND_CALIBRATED_ROUTE_SCREENING",
+    "next_required_gate": "CALIBRATED_BARE_JAW_ROUTE_SCREENING_WITHOUT_DISPATCH",
     "controller_commands": [],
     "transport_writes": 0,
     "hardware_access": false,
@@ -403,7 +403,7 @@
     "named_pose_context": "KEYBOARD_FORWARD_CAL_1",
     "attachment_profile": "BARE_JAW",
     "camera_scene_result": "AGREES_WITH_RETAINED_FIXED_EPOCH_MAPPING",
-    "stationary_arm_agreement": false,
+    "stationary_arm_agreement": true,
     "camera_policy": {
       "required_tag_ids": [
         0,
@@ -459,13 +459,48 @@
       "unresolved_operation_id": null,
       "supersedes_http_blocked_export": "software/runs/wizard-exports/wizard-20261016T193401291168Z-4269958ab80a422fa9ab0cc2894855c3"
     },
-    "interpretation": "Two fresh finite captures agree with the retained fixed camera/board epoch. The obsolete HTTP prerequisite is resolved for installed r120, and the exact USB controller completed one owned zero-write observation with confirmed cleanup. No unsolicited pose arrived, as expected for r120, so this checkpoint still does not claim current joint-state or stationary-arm agreement.",
+    "interpretation": "Two fresh finite camera captures agree with the retained fixed camera/board epoch. One owned, r120-bound T105 request returned the exact last verified named pose and seven servo positions, reported motion inactive with trajectory progress 1000, and closed cleanly. The original host result was a decoder mismatch and was reclassified offline from retained bytes; no second request was sent. This establishes stationary camera/arm scene agreement for offline route screening only.",
     "authority": {
       "robot_transport_opened": true,
       "robot_motion": false,
       "camera_guided_motion": false,
       "descent": false,
       "contact": false
+    },
+    "active_feedback": {
+      "status": "RETAINED_R120_T1051_ACCEPTED_AFTER_STRICT_OFFLINE_SCHEMA_RECLASSIFICATION",
+      "attempt_id": "operation-ab0bea37ada941f695bfef74750d1429",
+      "diagnostic_export": "software/runs/wizard-exports/wizard-20261016T203056678337Z-9a481de56037404bab4f6ef605b9fd5a",
+      "manifest_sha256": "4a9ea05e04738c249e4f3f232db4f1adb7c23495094cebd97b2cba92386d842c",
+      "wrapper_export": "software/runs/wizard-exports/wizard-20261016T203056783331Z-d06f041e1dad4d018d108ca90bc2d631",
+      "wrapper_manifest_sha256": "2c604e361611319261a543aeb023c21eda8f5bc16e3dd3e7893dec543bbe7d89",
+      "response_sha256": "9763703d870f2194cdb831f89f96cf807c56241cc5d72085200ec2157d15c801",
+      "response_bytes": 142,
+      "feedback": {
+        "T": 1051,
+        "p": [
+          2052,
+          2149,
+          1956,
+          2550,
+          2227,
+          2041,
+          2042
+        ],
+        "pose": "KEYBOARD_FORWARD_CAL_1",
+        "motion_active": false,
+        "trajectory_progress_permille": 1000
+      },
+      "matches_last_verified_pose": true,
+      "matches_last_measured_servo_positions": true,
+      "confirmed_serial_write_bytes": 10,
+      "serial_cleanup_confirmed": true,
+      "robot_commands_sent": 0,
+      "retry_count": 0,
+      "host_decoder_original_classification": "INCOMPLETE_POWERED_FEEDBACK",
+      "host_decoder_resolution": "R120_NAMED_POSE_AND_SEVEN_REGISTER_SCHEMA_ADDED",
+      "second_request_sent": false,
+      "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
     }
   }
 }

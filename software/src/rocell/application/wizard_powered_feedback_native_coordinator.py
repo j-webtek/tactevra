@@ -213,6 +213,7 @@ def run_feedback(
     generic_review,
     history_original,
     protocol_original,
+    installed_firmware_evidence_original=None,
     deadline_ns,
     cancellation,
     check_current,
@@ -288,6 +289,7 @@ def run_feedback(
         operator_id=startup["operator_id"],
         history_original=history_original,
         protocol_review_original=protocol_original,
+        installed_firmware_evidence_original=installed_firmware_evidence_original,
     )
     originals = {
         "powered_startup_original_sha256": startup_raw,

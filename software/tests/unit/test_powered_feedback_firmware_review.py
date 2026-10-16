@@ -32,6 +32,46 @@ def test_history_is_not_installed_firmware_measurement():
     assert value["command_type"] == 105
 
 
+def test_verified_r120_evidence_is_bound_as_installed_binary():
+    evidence = _canonical({
+        "schema": "rocell.installed_r120_evidence.v1",
+        "candidate": "r120",
+        "app_sha256": "c" * 64,
+        "startup_motion_commands": 0,
+        "feedback_request": {"T": 105},
+        "motion_authorized": False,
+        "physical_authority": False,
+    })
+    raw = create_review(
+        **CONTEXT,
+        operator_id="fixture-operator",
+        history_original=b"SYNTHETIC locally installed r120 record",
+        installed_firmware_evidence_original=evidence,
+    )
+    value = validate_review(raw, **CONTEXT)
+    assert value["reported_firmware_history"] == "LOCALLY_BUILT_AND_FLASH_VERIFIED"
+    assert value["installed_version"] == "r120"
+    assert value["installed_binary_sha256"] == "c" * 64
+    assert value["installed_evidence_sha256"]
+    assert value["motion_authorized"] is value["physical_authority"] is False
+
+
+def test_installed_r120_review_rejects_changed_embedded_evidence():
+    evidence = _canonical({
+        "schema": "rocell.installed_r120_evidence.v1", "candidate": "r120",
+        "app_sha256": "c" * 64, "startup_motion_commands": 0,
+        "feedback_request": {"T": 105}, "motion_authorized": False,
+        "physical_authority": False,
+    })
+    body = json.loads(create_review(
+        **CONTEXT, operator_id="fixture-operator",
+        history_original=b"SYNTHETIC locally installed r120 record",
+        installed_firmware_evidence_original=evidence))
+    body["installed_binary_sha256"] = "d" * 64
+    with pytest.raises(ValueError):
+        validate_review(_canonical(body), **CONTEXT)
+
+
 @pytest.mark.parametrize(
     "field,value",
     [

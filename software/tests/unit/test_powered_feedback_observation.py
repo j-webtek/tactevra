@@ -27,6 +27,7 @@ from test_wizard_native_arm_metadata import snapshot, no_host_access
 from test_powered_arm_feedback_contract import document
 
 REPLY = b'{"T":1051,"x":300,"y":0,"z":200,"tit":0,"b":0,"s":0,"e":1.5,"t":0,"r":0,"g":3,"v":1200}\n'
+R120_REPLY = b'{"T":1051,"p":[2052,2149,1956,2550,2227,2041,2042],"pose":"KEYBOARD_FORWARD_CAL_1","motion_active":false,"trajectory_progress_permille":1000}\n'
 
 
 def binding():
@@ -80,6 +81,20 @@ def test_nominal_and_fragmented_reply_single_write_then_close():
     assert result["lifecycle"]["cleanup_confirmed"] is True
     assert base64.b64decode(result["response"]["base64"]) == REPLY
     assert result["physical_authority"] is False
+
+
+def test_r120_named_pose_reply_single_write_then_close():
+    api = IncapableWin32SerialApi(
+        IncapableWin32Scenario(response_bytes=R120_REPLY, read_fragment_bytes=9)
+    )
+    result = observe_rehearsal(binding(), api, Event())
+    assert result["status"] == "FEEDBACK_OBSERVED_CLOSED", result
+    assert result["feedback"]["p"] == [2052, 2149, 1956, 2550, 2227, 2041, 2042]
+    assert result["feedback"]["pose"] == "KEYBOARD_FORWARD_CAL_1"
+    assert result["feedback"]["motion_active"] is False
+    assert result["feedback"]["trajectory_progress_permille"] == 1000
+    assert result["lifecycle"]["confirmed_write_bytes"] == 10
+    assert result["lifecycle"]["cleanup_confirmed"] is True
 
 
 def test_startup_is_retained_and_never_satisfies_new_query():

@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from rocell.application.wizard_diagnostic_export import WizardDiagnosticExporter, verify_export
+from rocell.application import installed_r120_evidence as r120_evidence
 
 SPEC = importlib.util.spec_from_file_location(
     'bench_usb_http_capture', Path(__file__).resolve().parents[2] / 'scripts/bench_usb_http_capture.py')
@@ -109,6 +110,7 @@ def write_r120_evidence(root, monkeypatch, *, source_suffix=b''):
     image = b'pinned-r120-test-image'
     digest = hashlib.sha256(image).hexdigest()
     monkeypatch.setattr(MODULE, 'R120_APP_SHA256', digest)
+    monkeypatch.setattr(r120_evidence, 'R120_APP_SHA256', digest)
     session = {'arm_baseline': {'installed_firmware': {
         'candidate': 'r120', 'app_sha256': digest, 'startup_motion_commands': 0}}}
     paths = {

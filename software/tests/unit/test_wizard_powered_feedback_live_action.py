@@ -158,6 +158,17 @@ def test_current_powered_setup_and_unchanged_report_required(setup):
         ticket(service, ACTION, firmware_unchanged=False)
 
 
+def test_exactly_one_firmware_evidence_basis_is_required(setup):
+    service, _, _, _ = ready(setup)
+    action(service, SETUP_ACTION, **VALUES)
+    with pytest.raises(WizardError):
+        ticket(service, ACTION, firmware_unchanged=True,
+               installed_r120_verified=True)
+    preview = ticket(service, ACTION, firmware_unchanged=False,
+                     installed_r120_verified=True)
+    assert preview["action_id"] == ACTION
+
+
 def test_new_setup_after_preview_invalidates_ticket(setup):
     service, _, _, _ = ready(setup)
     action(service, SETUP_ACTION, **VALUES)

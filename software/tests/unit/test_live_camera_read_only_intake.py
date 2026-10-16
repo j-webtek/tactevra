@@ -99,3 +99,34 @@ def test_live_session_binds_measured_fixed_board_registration() -> None:
         "camera_guided_motion": False,
         "contact": False,
     }
+
+
+def test_live_session_binds_stationary_r120_feedback_to_arm_baseline() -> None:
+    software_root = Path(__file__).resolve().parents[2]
+    session_path = software_root / "config/live_camera_feedback_session_20261015.json"
+    session = json.loads(session_path.read_text(encoding="utf-8"))
+    arm = session["arm_baseline"]
+    checkpoint = session["stationary_observation_20261016"]
+    active = checkpoint["active_feedback"]
+    feedback = active["feedback"]
+
+    assert checkpoint["stationary_arm_agreement"] is True
+    assert feedback["pose"] == arm["last_verified_pose"]
+    assert feedback["p"] == arm["last_measured_servo_positions"]
+    assert feedback["motion_active"] is False
+    assert feedback["trajectory_progress_permille"] == 1000
+    assert active["confirmed_serial_write_bytes"] == 10
+    assert active["serial_cleanup_confirmed"] is True
+    assert active["robot_commands_sent"] == 0
+    assert active["retry_count"] == 0
+    assert active["second_request_sent"] is False
+    assert session["authority"] == {
+        "camera_guided_motion": False,
+        "robot_motion": False,
+        "descent": False,
+        "contact": False,
+        "autonomous_retry": False,
+    }
+    assert session["next_gate"] == (
+        "CALIBRATED_BARE_JAW_ROUTE_SCREENING_WITHOUT_DISPATCH"
+    )
