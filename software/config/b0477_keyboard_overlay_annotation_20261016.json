@@ -1,0 +1,44 @@
+{
+  "schema": "rocell.fixed_camera_keyboard_annotation.v1",
+  "status": "MANUALLY_REVIEWED_IMAGE_FEATURES_READ_ONLY",
+  "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
+  "reference_frame": {
+    "path": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/reopen-01-frame-04.jpg",
+    "sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5",
+    "image_size_px": [1920, 1080]
+  },
+  "keyboard": {
+    "device_model": "Perixx PERIBOARD-409 U English US candidate",
+    "housing_dimensions_mm": [315.0, 147.0, 21.0],
+    "corner_order": ["front_left", "front_right", "rear_right", "rear_left"],
+    "edge_feature_segments_px": {
+      "front": [[434, 856, 1215, 830], [265, 861, 592, 850], [684, 847, 1000, 837]],
+      "right": [[1239, 458, 1254, 805]],
+      "rear": [[321, 486, 600, 471], [835, 461, 1223, 446], [398, 481, 596, 471], [848, 460, 1066, 451]],
+      "left": [[286, 499, 229, 848], [285, 501, 228, 848], [236, 849, 297, 498]]
+    },
+    "feature_source": "reviewed housing-edge line segments in the retained 1920x1080 frame",
+    "target_anchor_centers_px": {
+      "number_row": {"first": {"id": "1", "xy": [427, 600]}, "last": {"id": "EQUAL", "xy": [1059, 573]}},
+      "q_row": {"first": {"id": "Q", "xy": [454, 645]}, "last": {"id": "P", "xy": [969, 623]}},
+      "a_row": {"first": {"id": "A", "xy": [465, 690]}, "last": {"id": "APOSTROPHE", "xy": [1039, 665]}},
+      "z_row": {"first": {"id": "Z", "xy": [486, 738]}, "last": {"id": "SLASH", "xy": [1000, 716]}},
+      "explicit_targets": {
+        "TAB": [320, 652],
+        "ENTER": [1097, 670],
+        "SPACE": [681, 791]
+      }
+    },
+    "target_anchor_source": "reviewed visible keycap centers in the retained reference frame",
+    "pixel_annotation_tolerance_px": 5.0,
+    "board_xy_study_margin_mm": 30.0
+  },
+  "repeatability_roi_px": [200, 430, 1300, 875],
+  "limitations": [
+    "The housing edges were reviewed in one retained frame and are not measured key centers.",
+    "The 46 key centers come from the repository nominal ANSI layout and are not product metrology.",
+    "The board homography describes the board plane; the 21 mm-high keyboard produces parallax when mapped through it.",
+    "The image-plane keyboard homography is for overlay review only and does not establish board-to-robot or tool geometry.",
+    "Any camera, support, board, keyboard, or fiducial movement invalidates this annotation."
+  ]
+}
