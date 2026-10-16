@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "FIXED_CAMERA_KEYBOARD_OVERLAY_REVIEWED_DRY_RUN_INTEGRATION_PENDING",
+  "state": "HASH_BOUND_RETAINED_HOVER_DRAFT_COMPLETE_STATIONARY_OBSERVATION_PENDING",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -326,6 +326,76 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "JOIN_RETAINED_OBSERVATION_TO_HASH_BOUND_DRY_RUN_HOVER_PROPOSAL_WITH_ZERO_TRANSPORT_WRITES",
-  "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
+  "next_gate": "FRESH_STATIONARY_ARM_OBSERVATION_AND_CALIBRATED_ROUTE_SCREENING",
+  "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md",
+  "retained_hover_draft": {
+    "schema": "rocell.retained_keyboard_hover_draft.v1",
+    "status": "UNSENT_RETAINED_EVIDENCE_HOVER_DRAFT_BLOCKED_FROM_INGRESS",
+    "bindings": {
+      "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
+      "retained_frame_sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5",
+      "overlay_sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407",
+      "annotation_sha256": "255b2f0bc047c7b687946caf8975372cb930a7a494f109db187d7a17789d3fad",
+      "board_registration_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
+      "target_catalog_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+      "tool_profiles_sha256": "ae07fae822d19628a320099eab1f40f837ebc9b082f98e41fc39da1293d9a7e2",
+      "selected_tool_profile_sha256": "a2deeb678c72040f6fd03cd766c7680f20be2e6e25b0e534a52967f35a681f38",
+      "attachment_profile": "BARE_JAW",
+      "profile_id": "bare-jaw-live-calibration-v1"
+    },
+    "proposal": {
+      "schema": "rocell.model_motion_proposal.v1",
+      "proposal_id": "retained-hover-h-c79cb2d19958dc11",
+      "device": "keyboard",
+      "target_id": "H",
+      "coordinate_frame": "board",
+      "target_mm": {
+        "x": 212.95070610888823,
+        "y": 149.20958023724344,
+        "z": 21.0
+      },
+      "interaction": "HOVER",
+      "approach_clearance_mm": 27.7953,
+      "speed_class": "SLOW",
+      "confidence": 0.0,
+      "source": {
+        "model_id": "retained-reviewed-image-centers-v1",
+        "frame_id": "reopen-01-frame-04.jpg",
+        "image_sha256": "50032404cd328c1e0d09fc09d1d4cd8adf83b4444276380f2726eadd74a80ab5"
+      }
+    },
+    "proposal_sha256": "fac0f670a864d99f2f2426b9ff71a8fd332670428d70cff2915fda48f8d49973",
+    "requested_waypoints": [
+      {
+        "phase": "HOVER_DESTINATION",
+        "point_mm": {
+          "frame": "board",
+          "x": 212.95070610888823,
+          "y": 149.20958023724344,
+          "z": 48.7953
+        }
+      }
+    ],
+    "clearance": {
+      "approach_clearance_mm": 27.7953,
+      "overlay_planar_review_bound_mm": 25.7953,
+      "jaw_clearance_uncertainty_mm": 2.0,
+      "rule": "ADDITIVE_REVIEW_BOUND_PLUS_JAW_CLEARANCE_UNCERTAINTY"
+    },
+    "admission_blockers": [
+      "Retained frame has no current freshness lease",
+      "Camera-to-board mapping is planar and has no qualified Z calibration",
+      "Board-to-arm transform and bare-jaw TCP are not commissioned for this target",
+      "No inverse kinematics, route, collision, controller, or telemetry checks ran"
+    ],
+    "next_required_gate": "FRESH_STATIONARY_ARM_OBSERVATION_AND_CALIBRATED_ROUTE_SCREENING",
+    "controller_commands": [],
+    "transport_writes": 0,
+    "hardware_access": false,
+    "physical_authority": false,
+    "descent_authorized": false,
+    "contact_authorized": false,
+    "autonomous_retry_authorized": false,
+    "draft_sha256": "fc033c28a5c98a517ccd72f10353ca04f854bc9803a0cf5fedc67d41dc11af59"
+  }
 }
