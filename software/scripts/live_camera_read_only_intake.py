@@ -93,18 +93,54 @@ def assess_jpeg(payload: bytes, cv2: object) -> dict[str, object]:
         raise RuntimeError("captured JPEG cannot be decoded")
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36h11)
-    detector = cv2.aruco.ArucoDetector(dictionary, cv2.aruco.DetectorParameters())
-    _corners, ids, rejected = detector.detectMarkers(gray)
-    detected = sorted([] if ids is None else {int(item) for item in ids.flatten()})
+    profiles: list[tuple[str, object]] = []
+
+    default = cv2.aruco.DetectorParameters()
+    profiles.append(("opencv_default", default))
+
+    # The overhead view makes the far board-edge tags smaller than the near
+    # tags.  Keep a second, bounded AprilTag-specific profile rather than
+    # treating a default-profile miss as proof that a printed tag is absent.
+    # Both profiles still require a valid tag36h11 decode; their union does not
+    # accept undecoded quadrilaterals or grant registration authority.
+    small_tag = cv2.aruco.DetectorParameters()
+    small_tag.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_APRILTAG
+    small_tag.aprilTagQuadDecimate = 1.0
+    small_tag.aprilTagMinClusterPixels = 3
+    small_tag.minMarkerPerimeterRate = 0.005
+    small_tag.maxMarkerPerimeterRate = 6.0
+    small_tag.errorCorrectionRate = 0.8
+    profiles.append(("small_tag_apriltag_refinement", small_tag))
+
+    detected: set[int] = set()
+    profile_results: list[dict[str, object]] = []
+    rejected_total = 0
+    for profile_name, parameters in profiles:
+        detector = cv2.aruco.ArucoDetector(dictionary, parameters)
+        _corners, ids, rejected = detector.detectMarkers(gray)
+        profile_ids = sorted(
+            [] if ids is None else {int(item) for item in ids.flatten()}
+        )
+        detected.update(profile_ids)
+        rejected_total += len(rejected)
+        profile_results.append(
+            {
+                "profile": profile_name,
+                "detected_tag36h11_ids": profile_ids,
+                "rejected_quad_candidates": len(rejected),
+            }
+        )
+    detected_ids = sorted(detected)
     return {
         "mean_luma_8bit": float(gray.mean()),
         "fraction_luma_le_8": float((gray <= 8).mean()),
         "fraction_luma_ge_247": float((gray >= 247).mean()),
         "laplacian_variance": float(cv2.Laplacian(gray, cv2.CV_64F).var()),
-        "detected_tag36h11_ids": detected,
+        "detected_tag36h11_ids": detected_ids,
+        "detector_profile_results": profile_results,
         "required_tag36h11_ids": sorted(REQUIRED_TAG_IDS),
-        "all_required_tags_visible": REQUIRED_TAG_IDS.issubset(detected),
-        "rejected_quad_candidates": len(rejected),
+        "all_required_tags_visible": REQUIRED_TAG_IDS.issubset(detected_ids),
+        "rejected_quad_candidates": rejected_total,
         "registration_authority": False,
     }
 

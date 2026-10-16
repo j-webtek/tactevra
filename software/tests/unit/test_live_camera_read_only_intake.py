@@ -33,6 +33,37 @@ def test_assessment_never_grants_registration() -> None:
     result = MODULE.assess_jpeg(encoded.tobytes(), cv2)
     assert result["mean_luma_8bit"] == pytest.approx(127, abs=1)
     assert result["detected_tag36h11_ids"] == []
+    assert [item["profile"] for item in result["detector_profile_results"]] == [
+        "opencv_default",
+        "small_tag_apriltag_refinement",
+    ]
+    assert result["all_required_tags_visible"] is False
+    assert result["registration_authority"] is False
+
+
+def test_assessment_unions_only_decoded_ids_across_profiles(monkeypatch) -> None:
+    image = np.full((64, 96, 3), 127, dtype=np.uint8)
+    ok, encoded = cv2.imencode(".jpg", image)
+    assert ok
+
+    results = iter(
+        [
+            ([], np.array([[0], [1], [3]], dtype=np.int32), [object()]),
+            ([], np.array([[1], [2], [3]], dtype=np.int32), [object(), object()]),
+        ]
+    )
+
+    class FakeDetector:
+        def __init__(self, _dictionary, _parameters) -> None:
+            pass
+
+        def detectMarkers(self, _gray):
+            return next(results)
+
+    monkeypatch.setattr(cv2.aruco, "ArucoDetector", FakeDetector)
+    result = MODULE.assess_jpeg(encoded.tobytes(), cv2)
+    assert result["detected_tag36h11_ids"] == [0, 1, 2, 3]
+    assert result["rejected_quad_candidates"] == 3
     assert result["all_required_tags_visible"] is False
     assert result["registration_authority"] is False
 

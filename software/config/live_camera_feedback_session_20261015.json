@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "CAMERA_CAPTURED_REGISTRATION_BLOCKED_TAG_COVERAGE",
+  "state": "CAMERA_CAPTURED_REGISTRATION_BLOCKED_TAG4_OCCLUSION",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -77,7 +77,9 @@
     "intrinsics_artifact_sha256": null,
     "camera_to_board_transform_sha256": null,
     "sample_frame_sha256": "fbbd55936fbdd2d4f2591594e9163ce966f6002e8d56250fb79515299a69d149",
+    "all_six_fiducial_tiles_present_on_board": true,
     "all_six_fiducials_visible": false,
+    "visibility_interpretation": "Tag 4 is physically present but its encoded square is occluded by the stationary arm in the retained camera view.",
     "keyboard_coverage_verified": false,
     "finite_capture_performed": true,
     "finite_capture_frame_count": 4,
@@ -85,13 +87,31 @@
     "detected_tag_ids_across_frames": [
       0,
       1,
+      2,
       3,
       5
     ],
     "missing_required_tag_ids": [
-      2,
       4
     ],
+    "world_pose_solve_tag_ids_detected": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "independent_station_check_tag_ids_detected": [
+      5
+    ],
+    "detector_reanalysis": {
+      "profiles": [
+        "opencv_default",
+        "small_tag_apriltag_refinement"
+      ],
+      "result": "IDs 0, 1, 2, 3, and 5 decode across the retained set when valid decodes from both bounded profiles are combined; frames 00 from the first open and 01 from the second open each contain all four world-pose IDs 0, 1, 2, and 3.",
+      "tag4_nominal_image_region": "The K0/tag-4 station-check tile projects behind the stationary arm near the board center; only a partial edge is exposed.",
+      "registration_authority": false
+    },
     "external_capture_receipt": {
       "directory": "software/runs/wizard-exports/live-camera-intake-20261015-04-maintained",
       "file_name": "receipt.json",
@@ -109,6 +129,6 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "PHYSICAL_CAMERA_FIDUCIAL_COVERAGE_AND_OPTICS_ADJUSTMENT",
+  "next_gate": "PHYSICAL_TAG4_OCCLUSION_CLEARANCE_AND_OPTICS_ADJUSTMENT",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
 }
