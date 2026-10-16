@@ -13,6 +13,12 @@ import json
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from rocell.calibration import STATIC_OVERHEAD_PHASE1_GRAPH
+
+from .collision_readiness import assess_current_collision_readiness
+from .context import load_simulation_context
+from .static_phase1_calibration import run_static_phase1_calibration_rehearsal
+
 
 SCHEMA = "rocell.bare_jaw_route_readiness.v1"
 STATUS = "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED"
@@ -20,6 +26,7 @@ _SESSION = Path("software/config/live_camera_feedback_session_20261015.json")
 _REGISTRATION = Path("software/ai/eval/b0477_fixed_board_registration_20261016.json")
 _OVERLAY = Path("software/ai/eval/b0477_keyboard_overlay_20261016.json")
 _TOOL_PROFILES = Path("software/config/tool_attachment_profiles.json")
+_SYSTEM_MANIFEST = Path("software/config/system_manifest.json")
 
 
 class BareJawRouteReadinessError(ValueError):
@@ -142,9 +149,70 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             or switching.get("allow_pose_inheritance_between_profiles") is not False:
         raise BareJawRouteReadinessError("attachment profile separation is not enforced")
 
+    context = load_simulation_context(root, root / _SYSTEM_MANIFEST)
+    calibration = run_static_phase1_calibration_rehearsal(context)
+    calibration_document = calibration.to_dict()
+    collision = assess_current_collision_readiness(context)
     registration_inputs = _mapping(registration.get("inputs"), "registration inputs")
     overlay_geometry = _mapping(overlay.get("keyboard_geometry"), "keyboard geometry")
     validation = _mapping(registration.get("validation"), "registration validation")
+    closure_rows = _array(
+        calibration_document.get("device_closures"),
+        "static Phase-1 device closures",
+    )
+    keyboard_closure = next(
+        (
+            _mapping(row, "static Phase-1 device closure")
+            for row in closure_rows
+            if isinstance(row, Mapping) and row.get("device") == "keyboard"
+        ),
+        None,
+    )
+    if keyboard_closure is None:
+        raise BareJawRouteReadinessError(
+            "static Phase-1 report omits the keyboard closure"
+        )
+    requirement_rows = _array(
+        keyboard_closure.get("ordered_requirements"),
+        "static Phase-1 keyboard requirements",
+    )
+    requirement_by_id: dict[str, Mapping[str, Any]] = {}
+    for row in requirement_rows:
+        requirement = _mapping(row, "static Phase-1 calibration requirement")
+        artifact_id = requirement.get("artifact_id")
+        if not isinstance(artifact_id, str) or artifact_id in requirement_by_id:
+            raise BareJawRouteReadinessError(
+                "static Phase-1 requirement identity is invalid"
+            )
+        requirement_by_id[artifact_id] = requirement
+    required_route_artifacts = STATIC_OVERHEAD_PHASE1_GRAPH.ordered_closure(
+        ("phase1_keyboard_tcp",)
+    )
+    if not set(required_route_artifacts).issubset(requirement_by_id):
+        raise BareJawRouteReadinessError(
+            "static Phase-1 report omits a route artifact"
+        )
+
+    session_camera_architecture = camera.get("architecture_candidate")
+    graph = _mapping(calibration_document.get("graph"), "static Phase-1 graph")
+    camera_architecture_aligned = (
+        session_camera_architecture == "STATIC_EXTERNAL_CAMERA"
+        and graph.get("architecture") == "RIGID_STATIC_OVERHEAD_EYE_TO_HAND"
+        and graph.get("historical_eye_on_arm_graph_reinterpreted") is False
+    )
+    blockers = [
+        "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED",
+        "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
+        "MEASURED_CONTROLLER_TO_MODEL_CORRELATION_REQUIRED",
+        "MEASURED_BOARD_TO_ARM_TRANSFORM_REQUIRED",
+        "QUALIFIED_KEYBOARD_TARGET_MAP_Z_NORMAL_AND_TRAVEL_REQUIRED",
+        "MEASURED_BARE_JAW_TCP_REQUIRED",
+        "MEASURED_BARE_JAW_COLLISION_GEOMETRY_REQUIRED",
+    ]
+    if not camera_architecture_aligned:
+        raise BareJawRouteReadinessError(
+            "retained fixed camera does not match the selected static Phase-1 graph"
+        )
     report: dict[str, Any] = {
         "schema": SCHEMA,
         "status": STATUS,
@@ -159,6 +227,9 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             "tool_profiles_sha256": _sha256(profiles_path),
             "retained_hover_draft_sha256": draft.get("draft_sha256"),
             "active_feedback_response_sha256": feedback.get("response_sha256"),
+            "system_manifest_sha256": context.snapshot.manifest_sha256,
+            "build_snapshot_sha256": context.snapshot.snapshot_hash,
+            "simulation_bundle_sha256": context.bundle_lock.source_lock_sha256,
         },
         "reusable_measured_geometry": {
             "board_size_xy_mm": registration_inputs.get("board_size_xy_mm"),
@@ -209,8 +280,48 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             "robot_joint_reference": "MISSING",
             "controller_to_model_correlation": "MISSING",
             "board_to_arm_transform": "MISSING",
+            "keyboard_pose_z_and_normal": "MISSING_QUALIFIED_ARTIFACT",
             "bare_jaw_tcp": "MISSING",
             "bare_jaw_installed_collision_geometry": "MISSING",
+        },
+        "static_phase1_calibration_intake": {
+            "status": calibration_document.get("status"),
+            "report_sha256": calibration.report_hash,
+            "manifest_id": calibration_document.get("manifest_id"),
+            "active_build_id": calibration_document.get("active_build_id"),
+            "graph_id": graph.get("graph_id"),
+            "graph_sha256": graph.get("graph_hash"),
+            "physical_registry": calibration_document.get("physical_registry"),
+            "route_terminal_artifact_id": "phase1_keyboard_tcp",
+            "route_artifact_ids": list(required_route_artifacts),
+            "route_artifacts": {
+                artifact_id: requirement_by_id[artifact_id]
+                for artifact_id in required_route_artifacts
+            },
+            "complete_keyboard_requirement_order": [
+                requirement.get("artifact_id") for requirement in requirement_rows
+            ],
+            "contact_completion_artifact_ids": [
+                "phase1_keyboard_outcome_observer"
+            ],
+            "camera_architecture": {
+                "retained_live_session": session_camera_architecture,
+                "selected_graph": graph.get("architecture"),
+                "historical_eye_on_arm_graph_reinterpreted": graph.get(
+                    "historical_eye_on_arm_graph_reinterpreted"
+                ),
+                "aligned": camera_architecture_aligned,
+            },
+            "physical_release_effect": "NONE",
+        },
+        "installed_collision_intake": {
+            "status": collision.status,
+            "report_sha256": collision.report_hash,
+            "missing_required_body_ids": list(collision.missing_required_body_ids),
+            "unknown_required_body_ids": list(collision.unknown_required_body_ids),
+            "diagnostic_ready": collision.geometry_audit.diagnostic_ready,
+            "continuous_collision_proven": False,
+            "physical_release_effect": "NONE",
         },
         "prior_sensitivity_evidence": [
             {
@@ -244,13 +355,7 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
             "continuous_collision_proven": False,
             "unreachable_claim_supported_for_installed_workcell": False,
         },
-        "blockers": [
-            "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
-            "MEASURED_CONTROLLER_TO_MODEL_CORRELATION_REQUIRED",
-            "MEASURED_BOARD_TO_ARM_TRANSFORM_REQUIRED",
-            "MEASURED_BARE_JAW_TCP_REQUIRED",
-            "MEASURED_BARE_JAW_COLLISION_GEOMETRY_REQUIRED",
-        ],
+        "blockers": blockers,
         "next_required_stage": "POPULATE_CALIBRATION_SLOTS_THEN_RERUN_OFFLINE_IK_ROUTE_COLLISION_SCREEN",
         "controller_commands": [],
         "transport_writes": 0,

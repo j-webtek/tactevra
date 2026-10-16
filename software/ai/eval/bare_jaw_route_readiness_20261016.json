@@ -8,17 +8,22 @@
   },
   "bindings": {
     "active_feedback_response_sha256": "9763703d870f2194cdb831f89f96cf807c56241cc5d72085200ec2157d15c801",
+    "build_snapshot_sha256": "2762f29a846db723ab6eb6ce7373e5689589c6a3f7386a28240227ba76a586aa",
     "fixed_board_registration_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
     "keyboard_overlay_sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407",
     "retained_hover_draft_sha256": "8764fe3e330a4140ef669a5c84365c93323f413d82fb58e8f9cdcdde4f6fcb6c",
     "session_record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
+    "simulation_bundle_sha256": "250ead0df46caefd43dfaf331019bbca8fcdcd74e797f4b5742d317bbeaefbc4",
+    "system_manifest_sha256": "f73ac5833a85283f8095080274cc141ff791e82cb7b1d5d6c808ede89b836a5c",
     "tool_profiles_sha256": "ae07fae822d19628a320099eab1f40f837ebc9b082f98e41fc39da1293d9a7e2",
     "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
   },
   "blockers": [
+    "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED",
     "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
     "MEASURED_CONTROLLER_TO_MODEL_CORRELATION_REQUIRED",
     "MEASURED_BOARD_TO_ARM_TRANSFORM_REQUIRED",
+    "QUALIFIED_KEYBOARD_TARGET_MAP_Z_NORMAL_AND_TRAVEL_REQUIRED",
     "MEASURED_BARE_JAW_TCP_REQUIRED",
     "MEASURED_BARE_JAW_COLLISION_GEOMETRY_REQUIRED"
   ],
@@ -28,6 +33,7 @@
     "board_to_arm_transform": "MISSING",
     "camera_to_board_xy": "MEASURED_FIXED_EPOCH_PLANAR_MAPPING",
     "controller_to_model_correlation": "MISSING",
+    "keyboard_pose_z_and_normal": "MISSING_QUALIFIED_ARTIFACT",
     "keyboard_targets_in_board_xy": "REVIEWED_IMAGE_DERIVED_WITH_STUDY_BOUND",
     "keyboard_z": "UNQUALIFIED_OFF_PLANE_HEIGHT_ASSUMPTION",
     "robot_joint_reference": "MISSING"
@@ -36,6 +42,30 @@
   "controller_commands": [],
   "descent_authorized": false,
   "hardware_access": false,
+  "installed_collision_intake": {
+    "continuous_collision_proven": false,
+    "diagnostic_ready": false,
+    "missing_required_body_ids": [
+      "robot:base_link",
+      "robot:gripper",
+      "robot:link1",
+      "robot:link2",
+      "robot:link3",
+      "robot:link4",
+      "robot:link5"
+    ],
+    "physical_release_effect": "NONE",
+    "report_sha256": "43aa2cce7e0e5db05a2526032aea3fc95bf9a8c8ae9821515657c98f48d9fa16",
+    "status": "COLLISION_DIAGNOSTIC_BLOCKED_REQUIRED_GEOMETRY_INCOMPLETE",
+    "unknown_required_body_ids": [
+      "attachment:camera_connector",
+      "attachment:camera_holder",
+      "attachment:camera_module",
+      "attachment:contact_tool",
+      "attachment:moving_camera_cable",
+      "installation:base_and_factory_clamp"
+    ]
+  },
   "next_required_stage": "POPULATE_CALIBRATION_SLOTS_THEN_RERUN_OFFLINE_IK_ROUTE_COLLISION_SCREEN",
   "observed_start": {
     "classification": "OBSERVED_CONTROLLER_REGISTERS_NOT_MODEL_JOINT_RADIANS",
@@ -75,7 +105,7 @@
       "use": "unmeasured 120 mm transform sensitivity overlay only"
     }
   ],
-  "readiness_sha256": "d1ad68304cb0ad5bcfba16e2a5c77a6bd62b49d6d37c6b412802f64a03a7d24c",
+  "readiness_sha256": "6ac1bb265480d8ad93f097f6c004636d556b84aeb3f3f584dd82e9d8f7064d9b",
   "reusable_measured_geometry": {
     "board_size_xy_mm": [
       610.0,
@@ -154,6 +184,315 @@
     "register_to_joint_projection_executed": false,
     "route_densification_executed": false,
     "unreachable_claim_supported_for_installed_workcell": false
+  },
+  "static_phase1_calibration_intake": {
+    "active_build_id": "2026-09-01_CELL-A",
+    "camera_architecture": {
+      "aligned": true,
+      "historical_eye_on_arm_graph_reinterpreted": false,
+      "retained_live_session": "STATIC_EXTERNAL_CAMERA",
+      "selected_graph": "RIGID_STATIC_OVERHEAD_EYE_TO_HAND"
+    },
+    "complete_keyboard_requirement_order": [
+      "phase1_b0477_identity",
+      "phase1_b0477_mode",
+      "phase1_b0477_settings",
+      "phase1_static_intrinsics",
+      "phase1_measured_tag_map",
+      "phase1_static_extrinsic",
+      "phase1_robot_reference",
+      "phase1_controller_correlation",
+      "phase1_arm_board",
+      "phase1_keyboard_target_map",
+      "phase1_keyboard_tcp",
+      "phase1_keyboard_outcome_observer"
+    ],
+    "contact_completion_artifact_ids": [
+      "phase1_keyboard_outcome_observer"
+    ],
+    "graph_id": "static-overhead-b0477-phase1.v1",
+    "graph_sha256": "048ec086935692fb9698f7e44f43e8addc489bacf0f4909b0dfb3691ef397981",
+    "manifest_id": "ROCELL-PHASE0-RC03-INT-R1-FREEZE-014",
+    "physical_registry": {
+      "assessment_count": 15,
+      "blocked": true,
+      "index_present": false,
+      "missing_artifact_ids": [
+        "phase1_b0477_identity",
+        "phase1_b0477_mode",
+        "phase1_b0477_settings",
+        "phase1_static_intrinsics",
+        "phase1_measured_tag_map",
+        "phase1_static_extrinsic",
+        "phase1_robot_reference",
+        "phase1_controller_correlation",
+        "phase1_arm_board",
+        "phase1_keyboard_target_map",
+        "phase1_keyboard_tcp",
+        "phase1_keyboard_outcome_observer",
+        "phase1_phone_target_map",
+        "phase1_phone_tcp",
+        "phase1_phone_outcome_observer"
+      ],
+      "physical_artifacts_all_valid": false,
+      "read_only": true,
+      "relative_path": "software/calibrations",
+      "written": false
+    },
+    "physical_release_effect": "NONE",
+    "report_sha256": "b12f3b08550a65f264fccc441ef2273e2f952ef6fffe2f5e827a4edd97948b0f",
+    "route_artifact_ids": [
+      "phase1_b0477_identity",
+      "phase1_b0477_mode",
+      "phase1_b0477_settings",
+      "phase1_static_intrinsics",
+      "phase1_measured_tag_map",
+      "phase1_static_extrinsic",
+      "phase1_robot_reference",
+      "phase1_controller_correlation",
+      "phase1_arm_board",
+      "phase1_keyboard_target_map",
+      "phase1_keyboard_tcp"
+    ],
+    "route_artifacts": {
+      "phase1_arm_board": {
+        "acceptance_evidence": "Installed clamp/base identity, diverse robot-to-board correspondences, rank/observability evidence, held-out position/orientation residuals, and reseat checks.",
+        "artifact_id": "phase1_arm_board",
+        "artifact_schema": "rocell.phase1_arm_board.v1",
+        "context_dependencies": [
+          "workcell_layout",
+          "static_camera_support"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_arm_board"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_static_extrinsic",
+          "phase1_measured_tag_map",
+          "phase1_robot_reference",
+          "phase1_controller_correlation"
+        ],
+        "purpose": "Solve the installed robot-base-to-board transform independently of the static camera-to-board transform."
+      },
+      "phase1_b0477_identity": {
+        "acceptance_evidence": "Receipt photographs, label/serial records, measured mechanical identity, VID/PID, serial descriptor, persistent OS path, and reconnect/reboot identity trials.",
+        "artifact_id": "phase1_b0477_identity",
+        "artifact_schema": "rocell.phase1_b0477_identity.v1",
+        "context_dependencies": [
+          "camera_architecture_plan",
+          "b0477_catalog_profile"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_b0477_identity"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [],
+        "purpose": "Bind the received camera, IMX283 sensor, included 16 mm lens, enclosure, cable, and stable USB identity."
+      },
+      "phase1_b0477_mode": {
+        "acceptance_evidence": "Enumerated mode inventory plus close/reopen, reconnect, and reboot trials proving the selected native mode without camera-index assumptions.",
+        "artifact_id": "phase1_b0477_mode",
+        "artifact_schema": "rocell.phase1_b0477_mode.v1",
+        "context_dependencies": [
+          "b0477_catalog_profile"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_b0477_mode"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_b0477_identity"
+        ],
+        "purpose": "Bind the exact UVC bus, width, height, frame rate, and pixel format used by calibration and runtime."
+      },
+      "phase1_b0477_settings": {
+        "acceptance_evidence": "Installed camera, mount, lighting, cable/strain-relief, and support identities; control snapshots before and after reopen/reboot; one-metre focus evidence; physical lock witness marks; and disturbance/drift/illumination checks.",
+        "artifact_id": "phase1_b0477_settings",
+        "artifact_schema": "rocell.phase1_b0477_settings.v1",
+        "context_dependencies": [
+          "b0477_catalog_profile",
+          "camera_architecture_plan",
+          "static_camera_support"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_b0477_settings"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_b0477_mode"
+        ],
+        "purpose": "Bind the retained installed optical stack and lock focus, aperture, exposure, gain, white balance, and every available automatic/manual control."
+      },
+      "phase1_controller_correlation": {
+        "acceptance_evidence": "Configuration-diverse feedback/command trials, frame and unit correlation, settling/overshoot/latency bounds, residual model, and reset/reconnect behavior.",
+        "artifact_id": "phase1_controller_correlation",
+        "artifact_schema": "rocell.phase1_controller_correlation.v1",
+        "context_dependencies": [
+          "kinematic_model"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_controller_correlation"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_robot_reference"
+        ],
+        "purpose": "Correlate controller feedback and T=104 command behavior with the pinned vendor kinematic model and host timestamps."
+      },
+      "phase1_keyboard_target_map": {
+        "acceptance_evidence": "Keyboard identity/layout, 46-key coverage, board transform, per-key polygons and safe regions, tool-footprint uncertainty budget, measurements/images, and held-out targeting residuals.",
+        "artifact_id": "phase1_keyboard_target_map",
+        "artifact_schema": "rocell.phase1_keyboard_target_map.v1",
+        "context_dependencies": [
+          "target_catalog",
+          "keyboard_semantic_profile"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_keyboard_target_map"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_static_intrinsics",
+          "phase1_measured_tag_map",
+          "phase1_static_extrinsic"
+        ],
+        "purpose": "Measure the exact keyboard installation, all supported key polygons/safe insets, surface Z/normals, and press travel."
+      },
+      "phase1_keyboard_tcp": {
+        "acceptance_evidence": "Tool/route identity, TCP pivot and contact trials, travel/load limits, repeatability, recovery behavior, and collision-cleared route evidence.",
+        "artifact_id": "phase1_keyboard_tcp",
+        "artifact_schema": "rocell.phase1_keyboard_tcp.v1",
+        "context_dependencies": [
+          "kinematic_model"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_keyboard_tcp"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_arm_board",
+          "phase1_controller_correlation",
+          "phase1_keyboard_target_map"
+        ],
+        "purpose": "Calibrate the selected keyboard tool TCP, compliance, hover/contact/retract travel, and free/contact telemetry."
+      },
+      "phase1_measured_tag_map": {
+        "acceptance_evidence": "Measured corners, optical-plane Z, yaw, uncertainty, method/tool identities, installation photographs, layout hash, and held-out survey residuals.",
+        "artifact_id": "phase1_measured_tag_map",
+        "artifact_schema": "rocell.phase1_measured_tag_map.v1",
+        "context_dependencies": [
+          "workcell_layout",
+          "apriltag_map"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_measured_tag_map"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [],
+        "purpose": "Replace nominal RC03 tag centers and plane assumptions with surveyed board-frame tag geometry."
+      },
+      "phase1_robot_reference": {
+        "acceptance_evidence": "Received arm/servo/controller identities, firmware readback, bounded T=1051 records, repeated references, and joint/reference uncertainty bounds.",
+        "artifact_id": "phase1_robot_reference",
+        "artifact_schema": "rocell.phase1_robot_reference.v1",
+        "context_dependencies": [
+          "system_manifest",
+          "kinematic_model"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_robot_reference"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [],
+        "purpose": "Bind the installed RoArm-M3 Pro, controller/firmware identity, joint order/sign/zero/range, and repeatable reference procedure."
+      },
+      "phase1_static_extrinsic": {
+        "acceptance_evidence": "Static eye-to-hand transform, inlier/residual/covariance evidence, frame witness references, independent held-out station tags, and repeated-installation drift trials.",
+        "artifact_id": "phase1_static_extrinsic",
+        "artifact_schema": "rocell.phase1_static_extrinsic.v1",
+        "context_dependencies": [
+          "camera_architecture_plan",
+          "static_camera_support"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_static_extrinsic"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_static_intrinsics",
+          "phase1_measured_tag_map",
+          "phase1_b0477_settings"
+        ],
+        "purpose": "Solve the rigid camera-to-board transform and qualify reseating, warm-up, cable-load, and time drift."
+      },
+      "phase1_static_intrinsics": {
+        "acceptance_evidence": "Scale-verified ChArUco images captured after retained camera/mount/light/cable installation, immutable source hashes, precommitted fit/held-out split, selected distortion model, residuals by image region, ROI/crop, and undistortion-map hash.",
+        "artifact_id": "phase1_static_intrinsics",
+        "artifact_schema": "rocell.phase1_static_intrinsics.v1",
+        "context_dependencies": [
+          "b0477_catalog_profile",
+          "camera_architecture_plan",
+          "static_camera_support"
+        ],
+        "physical_assessment": {
+          "artifact_hash": null,
+          "reasons": [
+            "MISSING_CALIBRATION:phase1_static_intrinsics"
+          ],
+          "state": "MISSING",
+          "valid": false
+        },
+        "prerequisites": [
+          "phase1_b0477_identity",
+          "phase1_b0477_mode",
+          "phase1_b0477_settings"
+        ],
+        "purpose": "Calibrate the received B0477/lens in the retained installed optical stack at the exact locked mode and settings, including distortion and undistortion geometry."
+      }
+    },
+    "route_terminal_artifact_id": "phase1_keyboard_tcp",
+    "status": "SYNTHETIC_PHASE1_GRAPH_VERIFIED_PHYSICAL_REGISTRY_BLOCKED"
   },
   "status": "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED",
   "transport_writes": 0
