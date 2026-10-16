@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "FRESH_CAMERA_AND_STATIONARY_ARM_AGREEMENT_RECORDED_ROUTE_SCREENING_PENDING",
+  "state": "BARE_JAW_ROUTE_READINESS_AUDITED_CALIBRATION_COMPONENTS_REQUIRED",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -326,7 +326,7 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "CALIBRATED_BARE_JAW_ROUTE_SCREENING_WITHOUT_DISPATCH",
+  "next_gate": "POPULATE_CALIBRATION_SLOTS_THEN_RERUN_OFFLINE_IK_ROUTE_COLLISION_SCREEN",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md",
   "retained_hover_draft": {
     "schema": "rocell.retained_keyboard_hover_draft.v1",
@@ -396,7 +396,7 @@
     "descent_authorized": false,
     "contact_authorized": false,
     "autonomous_retry_authorized": false,
-    "draft_sha256": "fc033c28a5c98a517ccd72f10353ca04f854bc9803a0cf5fedc67d41dc11af59"
+    "draft_sha256": "8764fe3e330a4140ef669a5c84365c93323f413d82fb58e8f9cdcdde4f6fcb6c"
   },
   "stationary_observation_20261016": {
     "schema": "rocell.stationary_camera_telemetry_checkpoint.v1",
@@ -502,5 +502,25 @@
       "second_request_sent": false,
       "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
     }
+  },
+  "route_readiness_audit_20261016": {
+    "schema": "rocell.bare_jaw_route_readiness.v1",
+    "status": "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED",
+    "artifact_path": "software/ai/eval/bare_jaw_route_readiness_20261016.json",
+    "artifact_sha256": "9a161d964877bc61ef8a4f4b0716424dc5235dace9eede92207fde13372d8adf",
+    "readiness_sha256": "d1ad68304cb0ad5bcfba16e2a5c77a6bd62b49d6d37c6b412802f64a03a7d24c",
+    "blockers": [
+      "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
+      "MEASURED_CONTROLLER_TO_MODEL_CORRELATION_REQUIRED",
+      "MEASURED_BOARD_TO_ARM_TRANSFORM_REQUIRED",
+      "MEASURED_BARE_JAW_TCP_REQUIRED",
+      "MEASURED_BARE_JAW_COLLISION_GEOMETRY_REQUIRED"
+    ],
+    "ik_executed": false,
+    "collision_screening_executed": false,
+    "controller_commands": [],
+    "transport_writes": 0,
+    "hardware_access": false,
+    "physical_authority": false
   }
 }
