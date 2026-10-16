@@ -604,3 +604,11 @@ wizard exports, firmware binaries, and deployment journals remain external and
 hash-bound. The exact observed tracked-file count and governed ceiling are
 therefore 6,573; every logical-byte, blob, duplicate, and reduction limit
 remains unchanged.
+
+The bare-jaw route-readiness increment adds four reviewable text files: one
+deterministic audit module, one CLI, one compact retained result, and one
+focused regression test. It reuses existing physical evidence and adds no
+camera frame, firmware binary, motion receipt, model, environment, or generated
+corpus. The exact observed tracked-file count and governed ceiling are therefore
+6,577; every logical-byte, blob, duplicate, and reduction limit remains
+unchanged.

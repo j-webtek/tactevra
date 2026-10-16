@@ -358,6 +358,33 @@ reports remain ignored runtime evidence. The next gate is offline board-to-arm,
 bare-jaw TCP, IK, joint-limit, and collision screening against a fresh scene
 lease. No high hover is admitted by this checkpoint.
 
+## 2026-10-16 bare-jaw route-readiness audit
+
+The deterministic zero-dispatch audit at
+`software/ai/eval/bare_jaw_route_readiness_20261016.json` reconciles the
+retained physical session with the earlier Issue 190 reachability studies. It
+reuses the measured 610 x 457 mm board, the six installed 40 mm tags and their
+recorded centers, the dimension-constrained 315 x 147 x 21 mm keyboard, all 46
+reviewed target centers, the H surface point `[212.951, 149.210, 21.000]` mm,
+the H hover point `[212.951, 149.210, 48.795]` mm, and the settled r120 register
+sample `[2052, 2149, 1956, 2550, 2227, 2041, 2042]`.
+
+The register sample is retained as controller registers, not relabeled as
+model joint radians. The earlier blocked 100/110/120 mm studies and the passing
+120 mm promoted-transform study remain sensitivity bounds because their tool,
+transform, and start state were nominal or synthetic. They therefore do not
+support an installed-workcell unreachable conclusion.
+
+The audit stops before IK and records five explicit inputs that must be
+measured: robot joint reference, controller-to-model correlation,
+board-to-arm transform, bare-jaw TCP, and bare-jaw installed collision
+geometry. Once those slots are populated, the existing measured trajectory
+and collision pipeline can rerun against the retained H target. The attachment
+policy remains explicit: changing from `BARE_JAW` to `STYLUS` invalidates the
+trajectory, starts a new configuration epoch, and permits no pose or contact
+authority inheritance. The audit opens no device, emits no command, and grants
+no physical authority.
+
 ## 2026-10-15 read-only intake result
 
 The explicit camera-only intake identified one present Windows Camera-class

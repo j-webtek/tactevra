@@ -488,6 +488,17 @@ the existing FK/collision/sweep pipeline. It refuses to substitute nominal
 geometry for a measured installed profile and never presents its synthetic seed
 as observed feedback. Physical evidence population and a fresh observed start
 state remain the next dependencies.
+ARM-077 reconciles the retained live keyboard session with the earlier Issue
+190 reachability studies. The zero-dispatch audit reuses the measured board/tag
+layout, reviewed 46-target overlay, H board target and hover, and settled r120
+servo-register sample. It keeps those registers distinct from calibrated model
+joints and classifies every earlier 100/110/120 mm result as a nominal or
+synthetic sensitivity bound. Installed-workcell IK remains intentionally
+unexecuted until robot reference, controller correlation, board-to-arm,
+bare-jaw TCP, and installed bare-jaw collision geometry are measured. The
+BARE_JAW and STYLUS profiles remain separate configuration epochs; switching
+attachments invalidates the route. Hardware access, commands, descent,
+contact, and physical authority remain false.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

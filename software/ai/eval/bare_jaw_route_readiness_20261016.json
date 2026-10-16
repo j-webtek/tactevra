@@ -1,0 +1,160 @@
+{
+  "attachment_profiles": {
+    "active": "BARE_JAW",
+    "active_profile_id": "bare-jaw-live-calibration-v1",
+    "pose_inheritance_allowed": false,
+    "stylus_profile_id": "stylus-pending-calibration-v1",
+    "trajectory_invalidated_on_attachment_change": true
+  },
+  "bindings": {
+    "active_feedback_response_sha256": "9763703d870f2194cdb831f89f96cf807c56241cc5d72085200ec2157d15c801",
+    "fixed_board_registration_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
+    "keyboard_overlay_sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407",
+    "retained_hover_draft_sha256": "8764fe3e330a4140ef669a5c84365c93323f413d82fb58e8f9cdcdde4f6fcb6c",
+    "session_record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
+    "tool_profiles_sha256": "ae07fae822d19628a320099eab1f40f837ebc9b082f98e41fc39da1293d9a7e2",
+    "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+  },
+  "blockers": [
+    "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
+    "MEASURED_CONTROLLER_TO_MODEL_CORRELATION_REQUIRED",
+    "MEASURED_BOARD_TO_ARM_TRANSFORM_REQUIRED",
+    "MEASURED_BARE_JAW_TCP_REQUIRED",
+    "MEASURED_BARE_JAW_COLLISION_GEOMETRY_REQUIRED"
+  ],
+  "calibration_component_status": {
+    "bare_jaw_installed_collision_geometry": "MISSING",
+    "bare_jaw_tcp": "MISSING",
+    "board_to_arm_transform": "MISSING",
+    "camera_to_board_xy": "MEASURED_FIXED_EPOCH_PLANAR_MAPPING",
+    "controller_to_model_correlation": "MISSING",
+    "keyboard_targets_in_board_xy": "REVIEWED_IMAGE_DERIVED_WITH_STUDY_BOUND",
+    "keyboard_z": "UNQUALIFIED_OFF_PLANE_HEIGHT_ASSUMPTION",
+    "robot_joint_reference": "MISSING"
+  },
+  "contact_authorized": false,
+  "controller_commands": [],
+  "descent_authorized": false,
+  "hardware_access": false,
+  "next_required_stage": "POPULATE_CALIBRATION_SLOTS_THEN_RERUN_OFFLINE_IK_ROUTE_COLLISION_SCREEN",
+  "observed_start": {
+    "classification": "OBSERVED_CONTROLLER_REGISTERS_NOT_MODEL_JOINT_RADIANS",
+    "motion_active": false,
+    "named_pose": "KEYBOARD_FORWARD_CAL_1",
+    "servo_register_positions": [
+      2052,
+      2149,
+      1956,
+      2550,
+      2227,
+      2041,
+      2042
+    ],
+    "trajectory_progress_permille": 1000
+  },
+  "physical_authority": false,
+  "prior_sensitivity_evidence": [
+    {
+      "commit": "c5920d1e7",
+      "decision": "BLOCKED_EXACT_HOVER_HAS_NO_MARGIN_ADMISSIBLE_IK",
+      "use": "historical nominal endpoint bound only"
+    },
+    {
+      "commit": "05d67cb41",
+      "decision": "BLOCKED_NO_BOUNDED_DESCENT_CORRIDOR",
+      "use": "historical 110 mm descent bound only"
+    },
+    {
+      "commit": "85f9b5ba4",
+      "decision": "BLOCKED_120MM_EXACT_CONTACT",
+      "use": "historical 120 mm exact-contact bound only"
+    },
+    {
+      "commit": "6bda616f3",
+      "decision": "PASS_IK_CONTINUITY_RETAIN_INSTALLED_COLLISION_BLOCKER",
+      "use": "unmeasured 120 mm transform sensitivity overlay only"
+    }
+  ],
+  "readiness_sha256": "d1ad68304cb0ad5bcfba16e2a5c77a6bd62b49d6d37c6b412802f64a03a7d24c",
+  "reusable_measured_geometry": {
+    "board_size_xy_mm": [
+      610.0,
+      457.0
+    ],
+    "detected_tag_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "held_out_station_center_max_error_mm": 7.4937,
+    "keyboard_front_left_board_xy_mm": [
+      69.367,
+      86.447
+    ],
+    "keyboard_housing_dimensions_mm": [
+      315.0,
+      147.0,
+      21.0
+    ],
+    "keyboard_yaw_deg": 0.2932,
+    "reviewed_target_count": 46,
+    "selected_hover_board_mm": {
+      "frame": "board",
+      "x": 212.95070610888823,
+      "y": 149.20958023724344,
+      "z": 48.7953
+    },
+    "selected_target": {
+      "id": "H",
+      "surface_board_mm": {
+        "x": 212.95070610888823,
+        "y": 149.20958023724344,
+        "z": 21.0
+      }
+    },
+    "tag_centers_xy_mm": {
+      "K0": [
+        240.17,
+        265.84
+      ],
+      "P0": [
+        442.05,
+        270.39
+      ],
+      "T0": [
+        27.32,
+        33.31
+      ],
+      "T1": [
+        403.66,
+        38.45
+      ],
+      "T2": [
+        32.55,
+        429.5
+      ],
+      "T3": [
+        581.38,
+        431.47
+      ]
+    },
+    "tag_detection_edge_mm": 40.0
+  },
+  "schema": "rocell.bare_jaw_route_readiness.v1",
+  "scope": "OFFLINE_BOARD_TO_ARM_AND_BARE_JAW_ROUTE_READINESS_WITHOUT_DISPATCH",
+  "screening": {
+    "board_target_reused": true,
+    "collision_screening_executed": false,
+    "continuous_collision_proven": false,
+    "ik_executed": false,
+    "observed_registers_reused": true,
+    "register_to_joint_projection_executed": false,
+    "route_densification_executed": false,
+    "unreachable_claim_supported_for_installed_workcell": false
+  },
+  "status": "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED",
+  "transport_writes": 0
+}
