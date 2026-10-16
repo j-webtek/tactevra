@@ -7,18 +7,19 @@ vision, intent-to-hover, attachment-profile, motion-admission, and telemetry
 contracts. It records the state reported on 2026-10-15 and defines the work
 needed before camera observations may influence physical movement.
 
-The camera is currently **operator reported connected and angled at the
-keyboard**. No device identity, negotiated capture mode, frame, intrinsic
-calibration, camera-to-board transform, visibility result, or timing result was
-collected during this planning pass. Connection alone therefore provides no
-live-capture, registration, motion, descent, or contact authority.
+The camera is identified as an Arducam B0477 at persistent Windows PnP
+identity `USB\VID_04B4&PID_0477&MI_00\8&257B140A&0&0000`. Bounded capture
+verified `1920x1080`, approximately 60 fps, YUY2, stable settings across reopen,
+and unique retained frames. Installed intrinsics, a camera-to-board transform,
+and synchronized exposure timestamps remain open gates.
 
-The arm remains in the `BARE_JAW` configuration. Its last verified state is
-`KEYBOARD_FIELD_APPROACH_38`, with measured servo positions
-`[2167, 2340, 1760, 2416, 2161, 2041, 2042]`. Ruler photographs support a
-provisional rigid-jaw clearance of `20 +/- 2 mm` above the key surface. A loose
-cable hangs below the rigid jaw and must be restrained and rephotographed before
-any further motion. No key contact or keypress has been performed.
+The arm remains in the `BARE_JAW` configuration. Its current verified state is
+`KEYBOARD_FORWARD_CAL_1`, with measured servo positions
+`[2052, 2149, 1956, 2550, 2227, 2041, 2042]`. This is the first existing pose
+on the recorded reverse chain where the camera decoded all six installed tags
+in one frame. Ruler photographs support a provisional rigid-jaw clearance of
+`20 +/- 2 mm` above the key surface. The observed physical arrangement is
+accepted for this workcell epoch. No key contact or keypress has been performed.
 
 The machine-readable snapshot is
 `software/config/live_camera_feedback_session_20261015.json`. The two ruler
@@ -83,7 +84,7 @@ tool profile, retry a rejected proposal, or promote `HOVER` to `CONTACT`.
 
 ### 1. Freeze the physical configuration
 
-- Restrain the jaw cable above the rigid-jaw envelope.
+- Preserve the accepted physical arrangement for the current workcell epoch.
 - Keep the base, board, keyboard, fiducials, camera support, focus, aperture,
   cable routing, and lighting fixed.
 - Assign a workcell epoch. Any change creates a new epoch and invalidates the
@@ -230,11 +231,11 @@ canonical manifest, compact numeric results, and content hashes.
 
 ## Immediate next review
 
-Before implementing increment B, review the camera's visible model/serial label,
-connection type, support arrangement, full field of view, and intended capture
-mode. Then choose the existing physical-camera acquisition path that matches the
-observed device. Do not assume the B0477 identity from the current camera angle
-or from a generic USB enumeration.
+Increment B is complete for finite read-only capture. Preserve
+`KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose, repeat the
+full-tag capture, then begin increment C with a precommitted intrinsic and
+static-registration fit/holdout dataset. Do not use the full-tag visibility
+result itself as registration or motion authority.
 
 ## 2026-10-15 read-only intake result
 
@@ -281,10 +282,13 @@ environment:
   --confirm-camera-only-capture
 ```
 
-Before another capture, first establish a camera observation posture or camera
-position that exposes the complete tag-4/K0 square with border margin. Then
-adjust physical lighting/focus as needed so all six tags and the keyboard remain
-decodable in the same frame. Secure the loose jaw cable and retain a new
-workcell photograph. Any camera/support/focus change starts a new
-workcell/optics epoch. Electronic control readback and exact DirectShow endpoint
-binding remain open parts of increment B.
+The recorded adjacent reverse chain established
+`KEYBOARD_FORWARD_CAL_1` as the neutral bare-jaw camera observation pose. At
+that pose, five of ten frames decoded all six tags; the remaining five decoded
+IDs `1-5`. The retained receipt is
+`software/runs/wizard-exports/live-camera-observation-forward-cal-1-20261015-01/receipt.json`
+with SHA-256
+`9560ea22b6b9281fa6f8494ccac948f0306764142c30e45d4f937b035067f8cb`.
+Any camera, support, focus, board, keyboard, fiducial, or attachment change
+starts a new workcell or optics epoch. Electronic control readback and exact
+DirectShow endpoint binding remain open qualification items.

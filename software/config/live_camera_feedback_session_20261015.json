@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "CAMERA_CAPTURED_REGISTRATION_BLOCKED_TAG4_OCCLUSION",
+  "state": "NEUTRAL_OBSERVATION_POSE_VERIFIED_ALL_SIX_TAGS_VISIBLE",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -17,22 +17,62 @@
   "arm_baseline": {
     "attachment_profile": "BARE_JAW",
     "profile_id": "bare-jaw-live-calibration-v1",
-    "last_verified_pose": "KEYBOARD_FIELD_APPROACH_38",
+    "last_verified_pose": "KEYBOARD_FORWARD_CAL_1",
     "last_measured_servo_positions": [
-      2167,
-      2340,
-      1760,
-      2416,
-      2161,
+      2052,
+      2149,
+      1956,
+      2550,
+      2227,
       2041,
       2042
     ],
     "motion_state_at_last_verification": "IDLE_TRAJECTORY_COMPLETE",
+    "latest_motion_observation": {
+      "path": [
+        "KEYBOARD_FIELD_APPROACH_25",
+        "KEYBOARD_FIELD_APPROACH_20",
+        "KEYBOARD_FIELD_APPROACH_10",
+        "KEYBOARD_FIELD_CAL_3",
+        "KEYBOARD_DIAGONAL_CAL_2",
+        "KEYBOARD_FORWARD_CAL_1"
+      ],
+      "commands": [
+        420,
+        418,
+        416,
+        414,
+        412
+      ],
+      "adjacent_only": true,
+      "final_pose": "KEYBOARD_FORWARD_CAL_1",
+      "final_servo_positions": [
+        2052,
+        2149,
+        1956,
+        2550,
+        2227,
+        2041,
+        2042
+      ],
+      "controller_pose": "KEYBOARD_FORWARD_CAL_1",
+      "controller_motion_active": false,
+      "trajectory_progress_permille": 1000,
+      "interpretation": "The existing reverse pose chain was traversed one adjacent command at a time. Each endpoint was verified idle before the next command. No contact command was issued."
+    },
     "rigid_jaw_clearance_mm": 20.0,
     "rigid_jaw_clearance_uncertainty_mm": 2.0,
     "clearance_state": "PROVISIONAL_RULER_PHOTO_ESTIMATE",
-    "cable_state": "LOOSE_CABLE_BELOW_RIGID_JAW_REQUIRES_RESTRAINT_BEFORE_MOTION",
-    "contact_authorized": false
+    "cable_state": "OPERATOR_ACCEPTED_CURRENT_PLACEMENT_FOR_SESSION",
+    "contact_authorized": false,
+    "installed_firmware": {
+      "candidate": "r120",
+      "app_sha256": "1b0589fa323a2714777f5c70453eeec6daa94bd8c92a481701689da82ce93fdc",
+      "change": "BOUNDED_COMMANDED_NAMED_POSE_LATCH",
+      "protected_regions_unchanged": true,
+      "startup_motion_commands": 0,
+      "health_verification": "KEYBOARD_FIELD_CAL_3 classified idle across five repeated reads after install"
+    }
   },
   "external_ruler_photo_receipts": [
     {
@@ -76,24 +116,23 @@
     "locked_controls": null,
     "intrinsics_artifact_sha256": null,
     "camera_to_board_transform_sha256": null,
-    "sample_frame_sha256": "fbbd55936fbdd2d4f2591594e9163ce966f6002e8d56250fb79515299a69d149",
+    "sample_frame_sha256": "56ecd1942a2c6ec901acbba687fe2f849c7c590e2e7ab8d8558ada6fd8af7815",
     "all_six_fiducial_tiles_present_on_board": true,
-    "all_six_fiducials_visible": false,
-    "visibility_interpretation": "Tag 4 is physically present but its encoded square is occluded by the stationary arm in the retained camera view.",
-    "keyboard_coverage_verified": false,
+    "all_six_fiducials_visible": true,
+    "visibility_interpretation": "At KEYBOARD_FORWARD_CAL_1, five of ten retained frames decode all six installed tags. The other five decode IDs 1-5.",
+    "keyboard_coverage_verified": true,
     "finite_capture_performed": true,
-    "finite_capture_frame_count": 4,
+    "finite_capture_frame_count": 10,
     "finite_capture_all_hashes_unique": true,
     "detected_tag_ids_across_frames": [
       0,
       1,
       2,
       3,
+      4,
       5
     ],
-    "missing_required_tag_ids": [
-      4
-    ],
+    "missing_required_tag_ids": [],
     "world_pose_solve_tag_ids_detected": [
       0,
       1,
@@ -101,6 +140,7 @@
       3
     ],
     "independent_station_check_tag_ids_detected": [
+      4,
       5
     ],
     "detector_reanalysis": {
@@ -108,19 +148,86 @@
         "opencv_default",
         "small_tag_apriltag_refinement"
       ],
-      "result": "IDs 0, 1, 2, 3, and 5 decode across the retained set when valid decodes from both bounded profiles are combined; frames 00 from the first open and 01 from the second open each contain all four world-pose IDs 0, 1, 2, and 3.",
-      "tag4_nominal_image_region": "The K0/tag-4 station-check tile projects behind the stationary arm near the board center; only a partial edge is exposed.",
+      "result": "Five of ten frames at KEYBOARD_FORWARD_CAL_1 decode IDs 0-5 in one exposure; five decode IDs 1-5.",
       "registration_authority": false
     },
     "external_capture_receipt": {
-      "directory": "software/runs/wizard-exports/live-camera-intake-20261015-04-maintained",
+      "directory": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-20261015-01",
       "file_name": "receipt.json",
-      "byte_length": 8490,
-      "sha256": "e724228e117ea1423540094a5709b5f041d238c43729165d70a1958033132bda",
+      "byte_length": 23171,
+      "sha256": "9560ea22b6b9281fa6f8494ccac948f0306764142c30e45d4f937b035067f8cb",
+      "frame_count": 10,
+      "all_six_visible_in_one_frame": true,
       "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
     },
-    "live_capture_authorized": false,
-    "registration_authorized": false
+    "live_capture_authorized": true,
+    "registration_authorized": false,
+    "neutral_observation_pose": "KEYBOARD_FORWARD_CAL_1",
+    "neutral_observation_servo_positions": [
+      2052,
+      2149,
+      1956,
+      2550,
+      2227,
+      2041,
+      2042
+    ],
+    "pose_visibility_receipts": [
+      {
+        "directory": "software/runs/wizard-exports/live-camera-observation-approach-25-20261015-01",
+        "file_name": "receipt.json",
+        "byte_length": 14963,
+        "sha256": "07422c46337986f0d7ee193ea1b167298f99a82c2fa0abf6077aa1dc1113674b",
+        "frame_count": 6,
+        "all_six_visible_in_one_frame": false,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      },
+      {
+        "directory": "software/runs/wizard-exports/live-camera-observation-approach-20-20261015-01",
+        "file_name": "receipt.json",
+        "byte_length": 22918,
+        "sha256": "8b5836f1a0a0a7c634c7aa57ad4988d69cc865de0cf968fe8fb7a0a4bba3602c",
+        "frame_count": 10,
+        "all_six_visible_in_one_frame": false,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      },
+      {
+        "directory": "software/runs/wizard-exports/live-camera-observation-approach-10-20261015-01",
+        "file_name": "receipt.json",
+        "byte_length": 22903,
+        "sha256": "27b9694a9dd7b39ed324b60f91025a34adfe83319e9552bc0a715c14ad2aaf49",
+        "frame_count": 10,
+        "all_six_visible_in_one_frame": false,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      },
+      {
+        "directory": "software/runs/wizard-exports/live-camera-observation-field-cal-3-20261015-01",
+        "file_name": "receipt.json",
+        "byte_length": 22827,
+        "sha256": "b911ccded78da626c4be111fe4f0dfe04c61e806ab232100d983ee60fa80b08f",
+        "frame_count": 10,
+        "all_six_visible_in_one_frame": false,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      },
+      {
+        "directory": "software/runs/wizard-exports/live-camera-observation-diagonal-cal-2-20261015-01",
+        "file_name": "receipt.json",
+        "byte_length": 22952,
+        "sha256": "7b879a9e49c14f1689e0c5312f5806595ebe4ad56aa6a1c549b58f3b873529f4",
+        "frame_count": 10,
+        "all_six_visible_in_one_frame": false,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      },
+      {
+        "directory": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-20261015-01",
+        "file_name": "receipt.json",
+        "byte_length": 23171,
+        "sha256": "9560ea22b6b9281fa6f8494ccac948f0306764142c30e45d4f937b035067f8cb",
+        "frame_count": 10,
+        "all_six_visible_in_one_frame": true,
+        "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+      }
+    ]
   },
   "authority": {
     "camera_guided_motion": false,
@@ -129,6 +236,6 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "PHYSICAL_TAG4_OCCLUSION_CLEARANCE_AND_OPTICS_ADJUSTMENT",
+  "next_gate": "REPEAT_FORWARD_CAL_1_FULL_TAG_CAPTURE_THEN_COLLECT_INTRINSICS_AND_STATIC_REGISTRATION_DATASET",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
 }

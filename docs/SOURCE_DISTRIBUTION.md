@@ -588,3 +588,11 @@ snapshot records the reviewed tripod migration while preserving zero physical
 authority; it adds no camera captures, generated motion receipts, firmware
 binaries, environments, or physical qualification evidence. Every byte, blob,
 duplicate, and reduction limit remains unchanged.
+
+The live bare-jaw neutral-observation increment adds twelve reviewed source and
+test files: three deterministic firmware transforms, three one-attempt pinned
+deployment tools, and six focused regression tests. Physical camera frames,
+deployment journals, compiled firmware, and environments remain external and
+hash-bound. The exact observed tracked-file count and governed ceiling are
+therefore 6,566; every logical-byte, blob, duplicate, and reduction limit
+remains unchanged.
