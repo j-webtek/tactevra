@@ -1939,7 +1939,14 @@ ACTIONS = (
                 "name": "firmware_unchanged",
                 "label": "Firmware remains unchanged since delivery",
                 "type": "checkbox",
-                "required": True,
+                "required": False,
+                "default": False,
+            },
+            {
+                "name": "installed_r120_verified",
+                "label": "Use the retained verified r120 deployment evidence",
+                "type": "checkbox",
+                "required": False,
                 "default": False,
             },
         ),
@@ -1953,7 +1960,10 @@ ACTIONS = (
         mode="physical",
         timeout_s=30,
         fields=({"name": "firmware_unchanged", "label": "Firmware remains unchanged since delivery",
-                 "type": "checkbox", "required": True, "default": False},),
+                 "type": "checkbox", "required": False, "default": False},
+                {"name": "installed_r120_verified",
+                 "label": "Use the retained verified r120 deployment evidence",
+                 "type": "checkbox", "required": False, "default": False}),
     ),
     ActionDefinition(
         "run_passive_arm_connection",
@@ -2504,6 +2514,13 @@ def validate_action_input(
             if any(ord(char) < 32 and char not in "\n\t" for char in value):
                 raise WizardError("INVALID_TEXT", "Control characters are not allowed.")
         result[name] = value
+    if action.action_id in {"run_powered_arm_feedback", "capture_powered_arm_telemetry"}:
+        bases = (result.get("firmware_unchanged"), result.get("installed_r120_verified"))
+        if sum(item is True for item in bases) != 1:
+            raise WizardError(
+                "CONFIRMATION_REQUIRED",
+                "Select exactly one firmware evidence basis.",
+            )
     # Discovery never opens an endpoint. Accept the legacy power-off
     # acknowledgement, or an explicit metadata-only acknowledgement for a
     # powered setup. Neither grants serial-open or motion permission.

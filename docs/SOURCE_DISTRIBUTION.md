@@ -596,3 +596,11 @@ deployment journals, compiled firmware, and environments remain external and
 hash-bound. The exact observed tracked-file count and governed ceiling are
 therefore 6,566; every logical-byte, blob, duplicate, and reduction limit
 remains unchanged.
+
+The installed-r120 feedback increment adds one reviewable source module that
+binds the local session record, deployment journal, firmware image, and
+serial-only source before a governed T105 observation. Physical response bytes,
+wizard exports, firmware binaries, and deployment journals remain external and
+hash-bound. The exact observed tracked-file count and governed ceiling are
+therefore 6,573; every logical-byte, blob, duplicate, and reduction limit
+remains unchanged.

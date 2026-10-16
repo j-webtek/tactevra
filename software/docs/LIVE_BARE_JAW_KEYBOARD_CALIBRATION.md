@@ -142,7 +142,7 @@ address belongs to an earlier application generation; lack of an HTTP response
 is expected with r120 and is not evidence that the exact USB controller is
 missing.
 
-Use the reviewed zero-write path for the current stationary setup:
+Use the reviewed one-shot feedback path for the current stationary setup:
 
 ```powershell
 python software/scripts/bench_usb_http_capture.py `
@@ -152,18 +152,20 @@ python software/scripts/bench_usb_http_capture.py `
 
 This mode verifies the tracked r120 app hash, deployment journal, session
 record, serial-only source, and exact USB unit before opening the wizard-owned
-capture. It sends no serial, motion, configuration, torque, home, or reset
-command and does not probe the obsolete HTTP endpoint. Because r120 emits a
-pose only in response to T105, an empty zero-write capture remains valid
-negative evidence and must not be promoted to fresh joint telemetry. A future
-feedback query or firmware change remains a separate reviewed step.
+capture. It sends one exact 10-byte T105 feedback request and no motion,
+configuration, torque, home, or reset command. It has no retry path and does
+not probe the obsolete HTTP endpoint.
 
-The 2026-10-16 corrected launch verified the exact CP210x unit on COM4, opened
-and closed the owned observation successfully, confirmed zero written bytes and
-zero motion commands, and observed no complete telemetry sample. The verified
-exports are recorded in
-`software/config/live_camera_feedback_session_20261015.json`. This resolves the
-false HTTP-unreachable blocker while leaving stationary arm agreement pending.
+The 2026-10-16 launch verified the exact CP210x unit on COM4 and the installed
+r120 image, wrote one T105 request, received one 142-byte T1051 response, and
+closed cleanly. The response reported `KEYBOARD_FORWARD_CAL_1`, servo positions
+`[2052, 2149, 1956, 2550, 2227, 2041, 2042]`, inactive motion, and trajectory
+progress 1000. These values exactly match the last verified pose record. The
+original host result labeled the response incomplete because its decoder only
+recognized the vendor Cartesian schema. The retained bytes were reclassified
+offline after adding a strict alternate r120 schema; no second request was
+sent. The export hashes and interpretation are recorded in
+`software/config/live_camera_feedback_session_20261015.json`.
 
 1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose.
 2. Use the measured fixed-board mapping to project the keyboard outline and
@@ -173,8 +175,9 @@ false HTTP-unreachable blocker while leaving stationary arm agreement pending.
    a stronger distortion model is independently measured.
 4. Build the observation-to-hover dry-run coordinator using retained frame,
    detector, registration, target-catalog, and attachment-profile hashes.
-5. Keep serial writes disabled until passive localization, uncertainty,
-   stale-frame, missing-tag, and profile-mismatch tests pass.
+5. Keep motion and configuration writes disabled while board-to-arm, bare-jaw
+   TCP, IK, joint-limit, collision, stale-frame, missing-tag, uncertainty, and
+   profile-mismatch checks are completed offline.
 6. When the stylus is installed, measure its TCP and collision envelope and
    create a separate observation pose and trajectory family. The fixed camera
    plane may be reused only if the camera and board epoch remains unchanged;

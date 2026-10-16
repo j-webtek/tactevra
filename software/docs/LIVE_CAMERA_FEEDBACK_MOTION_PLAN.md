@@ -302,8 +302,8 @@ workcell epoch, and explicit `BARE_JAW` profile into one deterministic unsent
 `HOVER` draft. Fault coverage rejects stale epochs, changed overlay or frame
 hashes, missing targets, attachment-profile changes, and contact requests.
 
-The next increment is a fresh stationary-arm observation and calibrated route
-screening. It must add a current scene lease, qualified Z evidence,
+The stationary-arm observation is now complete. The next increment is
+calibrated route screening. It must add a current scene lease, qualified Z evidence,
 board-to-arm correlation, bare-jaw TCP qualification, IK, joint-limit and
 collision screening, and controller/telemetry checks before any separately
 reviewed noncontact movement can be proposed. The recorded draft itself remains
@@ -324,13 +324,20 @@ compares them with the retained per-tag means. The declared bound is 2.0 mm.
 The two observed maxima were 1.3973 mm and 1.3109 mm, so both camera scenes agree
 with the retained camera/board epoch. This is a scene-stability result only.
 
-The read-only arm wrapper stopped before opening the arm transport because its
-required HTTP identity baseline was unavailable. The verified diagnostic shows
-zero HTTP connections, zero serial ports opened, zero serial command writes,
-zero motion commands, and no unresolved operation. Current joint telemetry is
-therefore absent, and stationary-arm agreement remains false. This must remain
-an explicit incomplete gate rather than being inferred from the camera result
-or the previously recorded servo positions.
+The corrected transport path verified that installed r120 is USB serial-only,
+then used the owned one-shot feedback worker. It opened the exact CP210x unit on
+COM4 once, wrote the exact 10-byte T105 request once, received one 142-byte
+T1051 line, and closed cleanly. The controller reported
+`KEYBOARD_FORWARD_CAL_1`, positions
+`[2052, 2149, 1956, 2550, 2227, 2041, 2042]`, `motion_active=false`, and
+`trajectory_progress_permille=1000`. Those fields match the retained last
+verified pose and establish stationary arm agreement for this checkpoint.
+
+The worker initially classified the response as incomplete because it expected
+the vendor Cartesian response fields. The exact retained line was reclassified
+offline after adding a strict r120 named-pose schema. No second T105 request was
+sent. This establishes a stationary observation, not calibrated joint angles,
+board-to-arm geometry, route safety, or motion authority.
 
 Reproduce either camera assessment without opening a camera or robot transport:
 
@@ -347,10 +354,9 @@ Reproduce either camera assessment without opening a camera or robot transport:
 
 The compact hashes and verdicts are retained in
 `software/config/live_camera_feedback_session_20261015.json`; the raw frames and
-reports remain ignored runtime evidence. The next gate is authenticated,
-command-free current arm telemetry followed by board-to-arm, bare-jaw TCP, IK,
-joint-limit, and collision screening. No high hover is admitted by this
-checkpoint.
+reports remain ignored runtime evidence. The next gate is offline board-to-arm,
+bare-jaw TCP, IK, joint-limit, and collision screening against a fresh scene
+lease. No high hover is admitted by this checkpoint.
 
 ## 2026-10-15 read-only intake result
 

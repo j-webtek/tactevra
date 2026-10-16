@@ -1,4 +1,4 @@
-"""One wizard-owned zero-write USB capture with an explicit transport policy.
+"""One wizard-owned USB observation with an explicit transport policy.
 
 Requires explicit standing-setup acknowledgement. Does not retry an attempt,
 send motion/configuration commands, or substitute a raw serial implementation.
@@ -6,58 +6,24 @@ The installed r120 application is serial-only, so its reviewed mode verifies the
 deployment/source evidence and does not require an inapplicable HTTP baseline.
 """
 import argparse
-import hashlib
 import json
 import time
 from pathlib import Path
 from rocell.application.arrival_wizard_service import ArrivalWizardService
+from rocell.application.installed_r120_evidence import (
+    R120_APP_SHA256, R120_IMAGE, R120_JOURNAL, R120_SESSION, R120_SOURCE,
+    verified_installed_r120_evidence,
+)
 from rocell.application.wizard_diagnostic_export import WizardDiagnosticExporter,verify_export
 from rocell.providers.windows.arm_transport_lock import arm_transport_lock
 from rocell.providers.windows.arm_wifi_deadline import bounded_probe
 
 
-R120_APP_SHA256 = '1b0589fa323a2714777f5c70453eeec6daa94bd8c92a481701689da82ce93fdc'
-R120_SOURCE = Path('software/.firmware-tools/configured-diagnostic-candidate-r120/RoArm-M3_example')
-R120_IMAGE = Path('software/.firmware-tools/build-configured-diagnostic-candidate-r120--default-4mb-no-psram/RoArm-M3_example.ino.bin')
-R120_SESSION = Path('software/config/live_camera_feedback_session_20261015.json')
-R120_JOURNAL = Path('software/runs/live-controller/app-r120-deployment-events.jsonl')
-
-
 def verify_installed_r120_serial_only(workspace):
     """Verify the recorded installed app and that its source has no network path."""
-    workspace = Path(workspace).resolve()
-    session_raw = (workspace / R120_SESSION).read_bytes()
-    session = json.loads(session_raw)
-    installed = session['arm_baseline']['installed_firmware']
-    if (installed.get('candidate'), installed.get('app_sha256'),
-            installed.get('startup_motion_commands')) != ('r120', R120_APP_SHA256, 0):
-        raise RuntimeError('Installed r120 session evidence differs')
-
-    journal_raw = (workspace / R120_JOURNAL).read_bytes()
-    events = [json.loads(line) for line in journal_raw.splitlines() if line.strip()]
-    verified = [event for event in events if event.get('stage') == 'FLASH_VERIFIED']
-    if len(verified) != 1 or verified[0].get('app_sha256') != R120_APP_SHA256 or \
-            verified[0].get('protected_regions_unchanged') is not True:
-        raise RuntimeError('Installed r120 deployment evidence differs')
-
-    image = (workspace / R120_IMAGE).read_bytes()
-    if hashlib.sha256(image).hexdigest() != R120_APP_SHA256:
-        raise RuntimeError('Pinned r120 application image differs')
-    source_paths = sorted((workspace / R120_SOURCE).glob('*'))
-    sources = b'\n'.join(path.read_bytes() for path in source_paths if path.is_file())
-    required = (b'Serial.begin(115200)', b'Serial1.begin(1000000',
-                b'if(strcmp(line_,"{\\"T\\":105}")==0){emitFeedback();return;}')
-    network_tokens = (b'#include <WiFi', b'WiFi.', b'WebServer', b'softAP', b'HTTPServer')
-    if any(token not in sources for token in required) or any(token in sources for token in network_tokens):
-        raise RuntimeError('Pinned r120 source is not the reviewed serial-only application')
-    return {
-        'candidate': 'r120',
-        'app_sha256': R120_APP_SHA256,
-        'deployment_journal_sha256': hashlib.sha256(journal_raw).hexdigest(),
-        'session_record_sha256': hashlib.sha256(session_raw).hexdigest(),
-        'network_transport': 'NOT_IMPLEMENTED_IN_APPLICATION',
-        'usb_capture_policy': 'ZERO_WRITE_UNSOLICITED_ONLY',
-    }
+    value = json.loads(verified_installed_r120_evidence(workspace))
+    value['usb_capture_policy'] = 'ZERO_WRITE_UNSOLICITED_ONLY'
+    return value
 
 
 class ActionTracker:
@@ -114,7 +80,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--standing-powered-clear-setup',action='store_true',required=True)
     parser.add_argument('--installed-r120-usb-only', action='store_true',
-        help='Verify the installed serial-only r120 evidence and omit HTTP probes')
+        help='Verify installed serial-only r120 and issue one governed T105 request')
     args=parser.parse_args()
     workspace=Path(__file__).resolve().parents[2]
     service=ArrivalWizardService(workspace,mode='physical')
@@ -127,6 +93,7 @@ def main():
         with arm_transport_lock():
             if args.installed_r120_usb_only:
                 record['installed_transport_evidence'] = verify_installed_r120_serial_only(workspace)
+                record['installed_transport_evidence']['usb_capture_policy'] = 'ONE_BOUND_T105_REQUEST'
             else:
                 record['http_before']=timed_probe()
                 if record['http_before']['status']!='SUCCEEDED':raise RuntimeError('HTTP baseline unavailable')
@@ -140,7 +107,13 @@ def main():
             action('record_powered_arm_startup',dict(operator_id='user-standing-setup',adapter_on=True,
                 usb_connected=True,secured_and_clear=True,stationary=True,startup_motion='unknown'))
             record['capture_started_ns']=time.perf_counter_ns()
-            action('capture_powered_arm_telemetry',dict(firmware_unchanged=True))
+            if args.installed_r120_usb_only:
+                record['serial_command_writes_requested'] = 1
+                action('run_powered_arm_feedback', dict(
+                    firmware_unchanged=False, installed_r120_verified=True))
+            else:
+                action('capture_powered_arm_telemetry', dict(
+                    firmware_unchanged=True, installed_r120_verified=False))
             record['capture_finished_ns']=time.perf_counter_ns()
             if not args.installed_r120_usb_only:
                 record['http_after']=timed_probe()
