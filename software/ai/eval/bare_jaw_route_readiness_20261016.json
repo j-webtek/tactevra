@@ -11,6 +11,8 @@
     "build_snapshot_sha256": "2762f29a846db723ab6eb6ce7373e5689589c6a3f7386a28240227ba76a586aa",
     "fixed_board_registration_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
     "keyboard_overlay_sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407",
+    "retained_evidence_coverage_artifact_sha256": "1ceb040216df0d50ae04322dbe56e418f5a033a1c3d1b22cebbf9a523023529c",
+    "retained_evidence_coverage_sha256": "6ea7e55d1f61bafe1363429bd3a72d094be18badf0b4b4c05684a09553b1957c",
     "retained_hover_draft_sha256": "8764fe3e330a4140ef669a5c84365c93323f413d82fb58e8f9cdcdde4f6fcb6c",
     "session_record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
     "simulation_bundle_sha256": "250ead0df46caefd43dfaf331019bbca8fcdcd74e797f4b5742d317bbeaefbc4",
@@ -105,7 +107,34 @@
       "use": "unmeasured 120 mm transform sensitivity overlay only"
     }
   ],
-  "readiness_sha256": "6ac1bb265480d8ad93f097f6c004636d556b84aeb3f3f584dd82e9d8f7064d9b",
+  "readiness_sha256": "db5142ee976630bbc02b9d159f4250593423edec0da03860d6e6486701bbcbd1",
+  "retained_evidence_coverage": {
+    "physical_release_effect": "NONE",
+    "repeated_measurement_requested": false,
+    "route_no_candidate_ids": [
+      "phase1_static_intrinsics",
+      "phase1_arm_board"
+    ],
+    "route_reusable_candidate_ids": [
+      "phase1_b0477_identity",
+      "phase1_b0477_mode",
+      "phase1_b0477_settings",
+      "phase1_measured_tag_map",
+      "phase1_static_extrinsic",
+      "phase1_robot_reference",
+      "phase1_controller_correlation",
+      "phase1_keyboard_target_map",
+      "phase1_keyboard_tcp"
+    ],
+    "status": "RETAINED_EVIDENCE_MAPPED_PHYSICAL_CALIBRATION_BLOCKED",
+    "summary": {
+      "physically_complete_artifact_count": 0,
+      "repeated_measurement_requested": false,
+      "route_artifact_count": 11,
+      "route_missing_candidate_count": 2,
+      "route_partial_candidate_count": 9
+    }
+  },
   "reusable_measured_geometry": {
     "board_size_xy_mm": [
       610.0,
