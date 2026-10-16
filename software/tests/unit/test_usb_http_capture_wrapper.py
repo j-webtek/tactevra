@@ -1,5 +1,6 @@
 """Offline wrapper tests: never acquire a port or send a robot command."""
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 
@@ -102,3 +103,39 @@ def test_http_has_explicit_serial_clock_bracket(monkeypatch):
     assert result['host_monotonic_started_ns'] == 100
     assert result['host_monotonic_finished_ns'] == 200
     assert result['request_started_monotonic_s'] == 999.0
+
+
+def write_r120_evidence(root, monkeypatch, *, source_suffix=b''):
+    image = b'pinned-r120-test-image'
+    digest = hashlib.sha256(image).hexdigest()
+    monkeypatch.setattr(MODULE, 'R120_APP_SHA256', digest)
+    session = {'arm_baseline': {'installed_firmware': {
+        'candidate': 'r120', 'app_sha256': digest, 'startup_motion_commands': 0}}}
+    paths = {
+        MODULE.R120_SESSION: json.dumps(session).encode(),
+        MODULE.R120_JOURNAL: (json.dumps({'stage': 'FLASH_VERIFIED',
+            'app_sha256': digest, 'protected_regions_unchanged': True}) + '\n').encode(),
+        MODULE.R120_IMAGE: image,
+        MODULE.R120_SOURCE / 'RoArm-M3_example.ino': (
+            b'Serial.begin(115200); Serial1.begin(1000000,mode,18,19); '
+            b'if(strcmp(line_,"{\\"T\\":105}")==0){emitFeedback();return;}' + source_suffix),
+    }
+    for relative, data in paths.items():
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    return digest
+
+
+def test_installed_r120_serial_only_evidence_is_explicit(tmp_path, monkeypatch):
+    digest = write_r120_evidence(tmp_path, monkeypatch)
+    result = MODULE.verify_installed_r120_serial_only(tmp_path)
+    assert result['app_sha256'] == digest
+    assert result['network_transport'] == 'NOT_IMPLEMENTED_IN_APPLICATION'
+    assert result['usb_capture_policy'] == 'ZERO_WRITE_UNSOLICITED_ONLY'
+
+
+def test_installed_r120_evidence_rejects_network_enabled_source(tmp_path, monkeypatch):
+    write_r120_evidence(tmp_path, monkeypatch, source_suffix=b' WiFi.begin();')
+    with pytest.raises(RuntimeError, match='not the reviewed serial-only'):
+        MODULE.verify_installed_r120_serial_only(tmp_path)

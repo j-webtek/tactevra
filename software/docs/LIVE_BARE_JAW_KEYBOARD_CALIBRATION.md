@@ -133,6 +133,38 @@ failure in the calibrated action registry.
 
 ## Next work
 
+### Installed controller transport correction
+
+The installed r120 application is deliberately USB serial-only. Its staged
+source initializes `Serial` and the servo UART and contains no Wi-Fi station,
+access-point, HTTP server, or HTTP route startup. The prior `192.168.0.225`
+address belongs to an earlier application generation; lack of an HTTP response
+is expected with r120 and is not evidence that the exact USB controller is
+missing.
+
+Use the reviewed zero-write path for the current stationary setup:
+
+```powershell
+python software/scripts/bench_usb_http_capture.py `
+  --standing-powered-clear-setup `
+  --installed-r120-usb-only
+```
+
+This mode verifies the tracked r120 app hash, deployment journal, session
+record, serial-only source, and exact USB unit before opening the wizard-owned
+capture. It sends no serial, motion, configuration, torque, home, or reset
+command and does not probe the obsolete HTTP endpoint. Because r120 emits a
+pose only in response to T105, an empty zero-write capture remains valid
+negative evidence and must not be promoted to fresh joint telemetry. A future
+feedback query or firmware change remains a separate reviewed step.
+
+The 2026-10-16 corrected launch verified the exact CP210x unit on COM4, opened
+and closed the owned observation successfully, confirmed zero written bytes and
+zero motion commands, and observed no complete telemetry sample. The verified
+exports are recorded in
+`software/config/live_camera_feedback_session_20261015.json`. This resolves the
+false HTTP-unreachable blocker while leaving stationary arm agreement pending.
+
 1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose.
 2. Use the measured fixed-board mapping to project the keyboard outline and
    proposed key centers into the retained frames.
