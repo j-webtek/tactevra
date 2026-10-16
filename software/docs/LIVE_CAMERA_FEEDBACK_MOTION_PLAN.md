@@ -421,6 +421,30 @@ change to `STYLUS` uses a separate attachment profile and configuration epoch,
 so its TCP, collision geometry, trajectory, and contact qualification are
 collected independently.
 
+### Physical intrinsics intake
+
+`software/ai/eval/static_phase1_intrinsics_intake_plan_20261016.json` turns the
+first missing route artifact into a deterministic, zero-capture collection
+plan. It binds the retained installed mode exactly: `1920x1080`, YUY2, at
+`60.000240000960005` fps, with settings SHA-256
+`68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15`.
+The purchased camera profile confirms that this mode is supported and the two
+retained open cycles report the same mode and settings identity.
+
+The existing synthetic intrinsics rehearsal remains useful for testing the
+software path, but its `5472x3648`, 9 fps fixture is ineligible as physical
+intrinsics for this installed runtime. The physical dataset must use the
+retained runtime mode, precommit its fit and held-out split, retain immutable
+source hashes and regional coverage, and report the selected distortion model,
+camera matrix, fit residuals, held-out residuals, ROI/crop, undistortion map,
+and stability evidence.
+
+No new target print or repeated board/tag-center measurement is requested. An
+existing target may be used once its scale and metric definition are verified.
+Capture remains held until the received optical-stack identity and locked
+manual-control readback are complete. The plan opens no camera, writes no
+registry entry, sends no robot command, and grants no physical authority.
+
 ## 2026-10-15 read-only intake result
 
 The explicit camera-only intake identified one present Windows Camera-class

@@ -1,0 +1,87 @@
+{
+  "authority": {
+    "camera_frames_requested": 0,
+    "camera_opened": false,
+    "physical_artifacts_created": 0,
+    "physical_authority": false,
+    "physical_registry_written": false,
+    "robot_commands_sent": 0,
+    "robot_transport_opened": false
+  },
+  "capture_ready": false,
+  "collection_policy": {
+    "accept_existing_scale_verified_target": true,
+    "capture_mode_must_equal_retained_runtime": true,
+    "new_target_print_requested": false,
+    "repeat_board_or_tag_center_measurements": false,
+    "split_must_be_committed_before_solution_review": true,
+    "synthetic_rehearsal_may_fill_physical_fields": false
+  },
+  "legacy_rehearsal_comparison": {
+    "eligible_as_physical_intrinsics": false,
+    "matches_retained_runtime": false,
+    "rehearsal_artifact_class": "SYNTHETIC_REHEARSAL_ONLY",
+    "synthetic_mode": {
+      "fps": 9.0,
+      "height_px": 3648,
+      "pixel_format": "YUY2",
+      "width_px": 5472
+    }
+  },
+  "next_action": "COMPLETE_CAMERA_IDENTITY_AND_LOCKED_SETTINGS_BEFORE_PHYSICAL_INTRINSICS_CAPTURE",
+  "plan_sha256": "4d06b99515d9ec3bedb4e9abf79614a933f1a413edd1ac35409ad269cc70e65f",
+  "prerequisites": {
+    "phase1_b0477_identity": "RETAINED_CANDIDATE_PARTIAL",
+    "phase1_b0477_mode": "RETAINED_CANDIDATE_PARTIAL",
+    "phase1_b0477_settings": "RETAINED_CANDIDATE_PARTIAL"
+  },
+  "required_new_evidence": [
+    "received optical-stack identity and persistent reconnect/reboot identity",
+    "locked focus, aperture, exposure, gain, white-balance, and auto-control readback",
+    "scale-verified existing calibration-target identity and metric definition",
+    "precommitted fit/held-out image manifest at the retained runtime mode",
+    "immutable source-image hashes with regional pose and coverage observations",
+    "selected distortion model, camera matrix, and per-view residuals",
+    "held-out regional residuals, valid ROI/crop, and undistortion-map hash",
+    "warm-up, illumination, disturbance, and drift evidence for the retained stack"
+  ],
+  "retained_runtime_binding": {
+    "backend": "CAP_DSHOW",
+    "friendly_name": "Arducam B0477 (USB3 20MP)",
+    "mode": {
+      "fps": 60.000240000960005,
+      "height_px": 1080,
+      "pixel_format": "YUY2",
+      "width_px": 1920
+    },
+    "pid": "0477",
+    "selector": null,
+    "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+    "stable_after_two_open_cycles": true,
+    "vid": "04b4"
+  },
+  "schema": "rocell.static_phase1_intrinsics_intake_plan.v1",
+  "source_bindings": {
+    "live_session": {
+      "hash_scope": "canonical document excluding derived route_readiness_audit_20261016",
+      "path": "software/config/live_camera_feedback_session_20261015.json",
+      "sha256": "9ab3376b2216d65e7edf2f75a637550155ac03a8cd413129d468ebdfe24742fa"
+    },
+    "purchased_profile": {
+      "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+      "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+    },
+    "retained_coverage": {
+      "artifact_sha256": "1ceb040216df0d50ae04322dbe56e418f5a033a1c3d1b22cebbf9a523023529c",
+      "coverage_sha256": "6ea7e55d1f61bafe1363429bd3a72d094be18badf0b4b4c05684a09553b1957c",
+      "path": "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json"
+    },
+    "synthetic_rehearsal": {
+      "path": "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json",
+      "sha256": "d00f71b9a6f2d721a97e6d3b03435261581630ee7b0c08738aae98be9d0b7a74"
+    }
+  },
+  "status": "BLOCKED_PHYSICAL_INTRINSICS_INPUTS_REQUIRED",
+  "target_artifact_id": "phase1_static_intrinsics",
+  "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+}

@@ -16,6 +16,8 @@
     "retained_hover_draft_sha256": "8764fe3e330a4140ef669a5c84365c93323f413d82fb58e8f9cdcdde4f6fcb6c",
     "session_record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
     "simulation_bundle_sha256": "250ead0df46caefd43dfaf331019bbca8fcdcd74e797f4b5742d317bbeaefbc4",
+    "static_intrinsics_intake_artifact_sha256": "deaf95361d662590276251415ee5bc2371c25e58024fcef4aab3c9c8be2b914a",
+    "static_intrinsics_intake_plan_sha256": "4d06b99515d9ec3bedb4e9abf79614a933f1a413edd1ac35409ad269cc70e65f",
     "system_manifest_sha256": "f73ac5833a85283f8095080274cc141ff791e82cb7b1d5d6c808ede89b836a5c",
     "tool_profiles_sha256": "ae07fae822d19628a320099eab1f40f837ebc9b082f98e41fc39da1293d9a7e2",
     "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
@@ -85,6 +87,57 @@
     "trajectory_progress_permille": 1000
   },
   "physical_authority": false,
+  "physical_intrinsics_intake": {
+    "capture_ready": false,
+    "collection_policy": {
+      "accept_existing_scale_verified_target": true,
+      "capture_mode_must_equal_retained_runtime": true,
+      "new_target_print_requested": false,
+      "repeat_board_or_tag_center_measurements": false,
+      "split_must_be_committed_before_solution_review": true,
+      "synthetic_rehearsal_may_fill_physical_fields": false
+    },
+    "legacy_rehearsal_comparison": {
+      "eligible_as_physical_intrinsics": false,
+      "matches_retained_runtime": false,
+      "rehearsal_artifact_class": "SYNTHETIC_REHEARSAL_ONLY",
+      "synthetic_mode": {
+        "fps": 9.0,
+        "height_px": 3648,
+        "pixel_format": "YUY2",
+        "width_px": 5472
+      }
+    },
+    "next_action": "COMPLETE_CAMERA_IDENTITY_AND_LOCKED_SETTINGS_BEFORE_PHYSICAL_INTRINSICS_CAPTURE",
+    "physical_release_effect": "NONE",
+    "required_new_evidence": [
+      "received optical-stack identity and persistent reconnect/reboot identity",
+      "locked focus, aperture, exposure, gain, white-balance, and auto-control readback",
+      "scale-verified existing calibration-target identity and metric definition",
+      "precommitted fit/held-out image manifest at the retained runtime mode",
+      "immutable source-image hashes with regional pose and coverage observations",
+      "selected distortion model, camera matrix, and per-view residuals",
+      "held-out regional residuals, valid ROI/crop, and undistortion-map hash",
+      "warm-up, illumination, disturbance, and drift evidence for the retained stack"
+    ],
+    "retained_runtime_binding": {
+      "backend": "CAP_DSHOW",
+      "friendly_name": "Arducam B0477 (USB3 20MP)",
+      "mode": {
+        "fps": 60.000240000960005,
+        "height_px": 1080,
+        "pixel_format": "YUY2",
+        "width_px": 1920
+      },
+      "pid": "0477",
+      "selector": null,
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+      "stable_after_two_open_cycles": true,
+      "vid": "04b4"
+    },
+    "status": "BLOCKED_PHYSICAL_INTRINSICS_INPUTS_REQUIRED",
+    "target_artifact_id": "phase1_static_intrinsics"
+  },
   "prior_sensitivity_evidence": [
     {
       "commit": "c5920d1e7",
@@ -107,7 +160,7 @@
       "use": "unmeasured 120 mm transform sensitivity overlay only"
     }
   ],
-  "readiness_sha256": "db5142ee976630bbc02b9d159f4250593423edec0da03860d6e6486701bbcbd1",
+  "readiness_sha256": "0d586e1c47af9bbf927486d542383973e9c8a78700113111794baa0dc676aedf",
   "retained_evidence_coverage": {
     "physical_release_effect": "NONE",
     "repeated_measurement_requested": false,
