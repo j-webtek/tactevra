@@ -146,11 +146,12 @@ is required; it is not a prerequisite for using the measured fixed plane.
 
 - The retained `reopen-01-frame-04.jpg` housing outline was reviewed against
   the known 315 by 147 by 21 mm PERIBOARD-409 candidate dimensions. The fitted
-  image quadrilateral establishes the keyboard plane. Reviewed first/last
-  keycap centers fit each alphanumeric row, while Tab, Enter, and Space use
-  separate visible anchors. This corrects the synthetic catalog's 27.8472 mm
-  mean and 32.9056 mm maximum center offset. The source annotation, housing
-  lines, key anchors, frame hash, and 5 px annotation tolerance are versioned in
+  image quadrilateral establishes the keyboard plane. All 43 alphanumeric
+  keycap centers plus Tab, Enter, and Space are individually reviewed in the
+  retained image. This removes the one-key horizontal offset produced by the
+  earlier endpoint-only interpolation and corrects the synthetic catalog's
+  14.5794 mm mean and 20.0384 mm maximum center offset. The source annotation,
+  housing lines, 46 key centers, frame hash, and 3 px annotation tolerance are versioned in
   `software/config/b0477_keyboard_overlay_annotation_20261016.json`.
 - Directly applying the board-plane homography to the elevated keyboard makes
   the housing appear 333.9-337.4 mm wide and 170.0-171.4 mm deep. Constraining
@@ -158,13 +159,15 @@ is required; it is not a prerequisite for using the measured fixed plane.
   board position of `(69.367, 86.447) mm` and yaw of `0.2932 deg`. The maximum
   housing-corner residual is 16.8566 mm, which records the visible parallax
   rather than hiding it.
-- The 30 mm board-XY study margin covers the additive 26.7585 mm review bound:
+- The 30 mm board-XY study margin covers the additive 25.7953 mm review bound:
   7.4937 mm held-out board-mapping error, 16.8566 mm housing-fit residual, and
-  2.4082 mm conservative conversion of the pixel annotation tolerance.
+  1.4450 mm conservative conversion of the pixel annotation tolerance.
 - Phase correlation over the keyboard ROI across all ten retained frames shows
   at most 0.0616 px radial shift. This proves the saved fixed-frame overlay is
-  repeatable for offline review. The fitted row pitches range from 17.9585 to
-  18.6289 mm. These are image-derived centers rather than product metrology.
+  repeatable for offline review. The least-squares row pitches range from
+  18.7339 to 19.1062 mm, and the largest individually reviewed center residual
+  from its row fit is 0.2699 mm. These are image-derived centers rather than
+  product metrology.
 - Recompute the result with
   `software/scripts/measure_fixed_camera_keyboard_overlay.py`. The compact
   numeric evidence is

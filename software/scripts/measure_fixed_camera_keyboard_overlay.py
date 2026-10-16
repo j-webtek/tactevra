@@ -104,41 +104,45 @@ def _target_layout(profile: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def _image_fitted_target_layout(
-    profile: dict[str, Any], anchors: dict[str, Any], image_to_keyboard: Any
+    profile: dict[str, Any], centers_px: dict[str, Any], image_to_keyboard: Any
 ) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
-    """Fit the catalog identities to reviewed visible row endpoints."""
+    """Bind every catalog identity to its reviewed visible keycap center."""
     import numpy as np
 
     nominal = _target_layout(profile)
     fitted: dict[str, dict[str, Any]] = {}
+    if set(centers_px) != set(nominal):
+        missing = sorted(set(nominal) - set(centers_px))
+        extra = sorted(set(centers_px) - set(nominal))
+        raise ValueError(f"Target center identities differ from catalog: missing={missing}, extra={extra}")
     row_names = ("number_row", "q_row", "a_row", "z_row")
     row_summaries = {}
     for row_name, row in zip(row_names, profile["rows"], strict=True):
-        anchor = anchors[row_name]
         names = row["key_ids"]
-        if anchor["first"]["id"] != names[0] or anchor["last"]["id"] != names[-1]:
-            raise ValueError(f"Target anchors do not match {row_name} identities")
-        endpoint_pixels = np.asarray(
-            [anchor["first"]["xy"], anchor["last"]["xy"]], dtype=float
-        )
-        endpoint_local = _transform(endpoint_pixels, image_to_keyboard)
-        step = (endpoint_local[1] - endpoint_local[0]) / (len(names) - 1)
+        row_pixels = np.asarray([centers_px[name] for name in names], dtype=float)
+        row_local = _transform(row_pixels, image_to_keyboard)
+        indices = np.arange(len(names), dtype=float)
+        design = np.column_stack((indices, np.ones(len(names))))
+        x_step, x_origin = np.linalg.lstsq(design, row_local[:, 0], rcond=None)[0]
+        y_step, y_origin = np.linalg.lstsq(design, row_local[:, 1], rcond=None)[0]
+        fitted_line = np.column_stack((x_origin + indices * x_step, y_origin + indices * y_step))
+        line_residuals = np.linalg.norm(row_local - fitted_line, axis=1)
         for index, name in enumerate(names):
             fitted[name] = {
-                "center_xy_mm": (endpoint_local[0] + index * step).tolist(),
+                "center_xy_mm": row_local[index].tolist(),
                 "half_extent_mm": nominal[name]["half_extent_mm"],
                 "nominal_center_xy_mm": nominal[name]["center_xy_mm"],
             }
         row_summaries[row_name] = {
-            "first_center_keyboard_xy_mm": _round_vector(endpoint_local[0], 3),
-            "last_center_keyboard_xy_mm": _round_vector(endpoint_local[1], 3),
-            "fitted_step_xy_mm": _round_vector(step, 4),
-            "fitted_pitch_mm": round(float(np.linalg.norm(step)), 4),
+            "reviewed_center_count": len(names),
+            "first_center_keyboard_xy_mm": _round_vector(row_local[0], 3),
+            "last_center_keyboard_xy_mm": _round_vector(row_local[-1], 3),
+            "least_squares_step_xy_mm": _round_vector([x_step, y_step], 4),
+            "least_squares_pitch_mm": round(float(math.hypot(x_step, y_step)), 4),
+            "maximum_center_to_row_fit_residual_mm": round(float(np.max(line_residuals)), 4),
         }
-    explicit = anchors["explicit_targets"]
-    if set(explicit) != set(profile["explicit_targets"]):
-        raise ValueError("Explicit target anchors differ from the target profile")
-    for name, pixel in explicit.items():
+    for name in profile["explicit_targets"]:
+        pixel = centers_px[name]
         local = _transform([pixel], image_to_keyboard)[0]
         fitted[name] = {
             "center_xy_mm": local.tolist(),
@@ -152,8 +156,14 @@ def _image_fitted_target_layout(
         for item in fitted.values()
     ]
     correction_norms = [float(np.linalg.norm(value)) for value in corrections]
+    maximum_row_residual = max(
+        float(summary["maximum_center_to_row_fit_residual_mm"])
+        for summary in row_summaries.values()
+    )
     return fitted, {
+        "reviewed_center_count": len(fitted),
         "rows": row_summaries,
+        "maximum_individual_center_to_row_fit_residual_mm": round(maximum_row_residual, 4),
         "mean_nominal_to_image_fitted_correction_mm": round(
             float(np.mean(correction_norms)), 4
         ),
@@ -292,7 +302,7 @@ def build_report(
     yaw_deg = math.degrees(math.atan2(rotation[0, 1], rotation[0, 0]))
 
     target_layout, target_fit = _image_fitted_target_layout(
-        profile, keyboard["target_anchor_centers_px"], image_to_keyboard
+        profile, keyboard["target_centers_px"], image_to_keyboard
     )
     projected_targets = {}
     for name, item in target_layout.items():
@@ -364,7 +374,7 @@ def build_report(
             "housing_dimensions_mm": dimensions,
             "target_pitch_mm": float(profile["pitch_mm"]),
             "target_count": len(projected_targets),
-            "target_geometry_status": "IMAGE_FITTED_FROM_REVIEWED_KEY_CENTER_ANCHORS_NOT_PRODUCT_METROLOGY",
+            "target_geometry_status": "INDIVIDUALLY_REVIEWED_IMAGE_KEY_CENTERS_NOT_PRODUCT_METROLOGY",
             "housing_corners_px": {
                 name: _round_vector(point, 3)
                 for name, point in zip(keyboard["corner_order"], corners, strict=True)
