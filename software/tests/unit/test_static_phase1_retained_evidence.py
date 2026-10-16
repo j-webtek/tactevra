@@ -76,6 +76,7 @@ def _copy_inputs(source: Path, destination: Path) -> None:
         "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
         "software/ai/eval/b0477_fixed_board_registration_20261016.json",
         "software/ai/eval/b0477_keyboard_overlay_20261016.json",
+        "software/ai/eval/b0477_locked_controls_qualification_20261016.json",
     ):
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)

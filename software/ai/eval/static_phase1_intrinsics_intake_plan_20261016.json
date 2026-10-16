@@ -28,16 +28,60 @@
       "width_px": 5472
     }
   },
-  "next_action": "COMPLETE_CAMERA_IDENTITY_AND_LOCKED_SETTINGS_BEFORE_PHYSICAL_INTRINSICS_CAPTURE",
-  "plan_sha256": "4d06b99515d9ec3bedb4e9abf79614a933f1a413edd1ac35409ad269cc70e65f",
+  "locked_electronic_controls": {
+    "reopen_qualification": {
+      "all_six_tags_frame_count": 4,
+      "camera_closed_after_each_cycle": true,
+      "detected_tag_union": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "frame_count": 6,
+      "frame_sha256": [
+        "023b41bd3c354d475ddc3615ab147f592a5d561ac9b244e706d8dedc59c9bfd1",
+        "7c2526dc51b96549bde593d3f5fa697a983023f0f6123f21700636177206c7cd",
+        "d6aa31d1b92ccd0c2f5930074a23c13c9755bb46f388c97578055747cae3a27b",
+        "cbd90a67129aab6a983eb8ecda2df6806835c40ca3a6701d5beadaf2c07184f7",
+        "502057afd2859f4a1ae9936050e137ac356d9b1fa499efa6d7d2924348c9442e",
+        "20c3396332f5bbbf7c6e9d95846f78afc1797f60c04b80a73d1b93df24c0d1a7"
+      ],
+      "laplacian_variance_range": [
+        71.8410466247047,
+        72.64395570188898
+      ],
+      "maximum_fraction_luma_ge_247": 1.6878858024691356e-05,
+      "mean_luma_8bit_range": [
+        108.1087215470679,
+        109.10297405478396
+      ],
+      "mean_luma_8bit_spread": 0.9942525077160553,
+      "reopen_cycle_count": 2,
+      "unique_frame_count": 6
+    },
+    "status": "REOPEN_QUALIFIED",
+    "values": {
+      "brightness": 0,
+      "contrast": 10,
+      "exposure": -3,
+      "gain": 500,
+      "saturation": 10,
+      "white_balance": 4500
+    }
+  },
+  "next_action": "COMPLETE_EXISTING_TARGET_IDENTITY_AND_PRECOMMIT_MULTIVIEW_INTRINSICS_DATASET",
+  "plan_sha256": "07b58af7c3d8c0c63edced04656621d6c60f2ad8d6cc2665d6cc18803b75f661",
   "prerequisites": {
     "phase1_b0477_identity": "RETAINED_CANDIDATE_PARTIAL",
     "phase1_b0477_mode": "RETAINED_CANDIDATE_PARTIAL",
     "phase1_b0477_settings": "RETAINED_CANDIDATE_PARTIAL"
   },
   "required_new_evidence": [
-    "received optical-stack identity and persistent reconnect/reboot identity",
-    "locked focus, aperture, exposure, gain, white-balance, and auto-control readback",
+    "mechanical focus and aperture identity with physical lock witness marks",
+    "manual-control and selected-mode persistence across physical reconnect and host reboot",
     "scale-verified existing calibration-target identity and metric definition",
     "precommitted fit/held-out image manifest at the retained runtime mode",
     "immutable source-image hashes with regional pose and coverage observations",
@@ -67,13 +111,18 @@
       "path": "software/config/live_camera_feedback_session_20261015.json",
       "sha256": "9ab3376b2216d65e7edf2f75a637550155ac03a8cd413129d468ebdfe24742fa"
     },
+    "locked_electronic_controls": {
+      "artifact_sha256": "b73522eff4b73bb81d690e702fc07f45e92136f7e222cdb8248269e25f9efd6e",
+      "path": "software/ai/eval/b0477_locked_controls_qualification_20261016.json",
+      "qualification_sha256": "14c157a395de7a0ebe26de399ea4915abc587be3cd4dfaf4e8ea9960fa84adf0"
+    },
     "purchased_profile": {
       "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
       "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
     },
     "retained_coverage": {
-      "artifact_sha256": "1ceb040216df0d50ae04322dbe56e418f5a033a1c3d1b22cebbf9a523023529c",
-      "coverage_sha256": "6ea7e55d1f61bafe1363429bd3a72d094be18badf0b4b4c05684a09553b1957c",
+      "artifact_sha256": "cf5d2465735094d8f5f447564a0327b094440f9384b879a63446491dce8cbde9",
+      "coverage_sha256": "baff511966f89d37da18614b51834ca851d074a5c7e824730b1b6cdfa24a0f61",
       "path": "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json"
     },
     "synthetic_rehearsal": {

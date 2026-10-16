@@ -29,6 +29,9 @@ _PROFILE = Path("software/config/camera_profiles/arducam_b0477_imx283_16mm.json"
 _REHEARSAL = Path(
     "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json"
 )
+_LOCKED_CONTROLS = Path(
+    "software/ai/eval/b0477_locked_controls_qualification_20261016.json"
+)
 
 
 class StaticPhase1IntrinsicsIntakeError(ValueError):
@@ -115,10 +118,21 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
     coverage_path = root / _COVERAGE
     profile_path = root / _PROFILE
     rehearsal_path = root / _REHEARSAL
+    locked_controls_path = root / _LOCKED_CONTROLS
     session = _read(session_path)
     coverage = _read(coverage_path)
     profile = _read(profile_path)
     rehearsal = _read(rehearsal_path)
+    locked_controls = _read(locked_controls_path)
+    if (
+        locked_controls.get("schema")
+        != "rocell.b0477_locked_controls_qualification.v1"
+        or locked_controls.get("status")
+        != "LOCKED_ELECTRONIC_CONTROLS_REOPEN_QUALIFIED_PHYSICAL_INTRINSICS_BLOCKED"
+    ):
+        raise StaticPhase1IntrinsicsIntakeError(
+            "locked electronic controls are not qualified"
+        )
 
     recomputed = assess_static_phase1_retained_evidence(root)
     if coverage != recomputed:
@@ -238,6 +252,13 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
                 "path": _REHEARSAL.as_posix(),
                 "sha256": _sha256(rehearsal_path),
             },
+            "locked_electronic_controls": {
+                "path": _LOCKED_CONTROLS.as_posix(),
+                "artifact_sha256": _sha256(locked_controls_path),
+                "qualification_sha256": locked_controls.get(
+                    "qualification_sha256"
+                ),
+            },
         },
         "retained_runtime_binding": {
             "friendly_name": identity.get("friendly_name"),
@@ -252,6 +273,11 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
             ),
         },
         "prerequisites": prerequisite_status,
+        "locked_electronic_controls": {
+            "status": "REOPEN_QUALIFIED",
+            "values": locked_controls.get("locked_electronic_controls"),
+            "reopen_qualification": locked_controls.get("reopen_qualification"),
+        },
         "legacy_rehearsal_comparison": {
             "synthetic_mode": synthetic_mode,
             "matches_retained_runtime": False,
@@ -259,8 +285,8 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
             "eligible_as_physical_intrinsics": False,
         },
         "required_new_evidence": [
-            "received optical-stack identity and persistent reconnect/reboot identity",
-            "locked focus, aperture, exposure, gain, white-balance, and auto-control readback",
+            "mechanical focus and aperture identity with physical lock witness marks",
+            "manual-control and selected-mode persistence across physical reconnect and host reboot",
             "scale-verified existing calibration-target identity and metric definition",
             "precommitted fit/held-out image manifest at the retained runtime mode",
             "immutable source-image hashes with regional pose and coverage observations",
@@ -277,8 +303,8 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
             "synthetic_rehearsal_may_fill_physical_fields": False,
         },
         "next_action": (
-            "COMPLETE_CAMERA_IDENTITY_AND_LOCKED_SETTINGS_BEFORE_"
-            "PHYSICAL_INTRINSICS_CAPTURE"
+            "COMPLETE_EXISTING_TARGET_IDENTITY_AND_PRECOMMIT_"
+            "MULTIVIEW_INTRINSICS_DATASET"
         ),
         "capture_ready": False,
         "authority": {

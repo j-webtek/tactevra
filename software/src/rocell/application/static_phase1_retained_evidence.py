@@ -22,6 +22,9 @@ _SESSION = Path("software/config/live_camera_feedback_session_20261015.json")
 _TAG_XY = Path("software/ai/eval/physical_installed_apriltag_xy_working_v1.json")
 _REGISTRATION = Path("software/ai/eval/b0477_fixed_board_registration_20261016.json")
 _OVERLAY = Path("software/ai/eval/b0477_keyboard_overlay_20261016.json")
+_LOCKED_CONTROLS = Path(
+    "software/ai/eval/b0477_locked_controls_qualification_20261016.json"
+)
 _TOOL_PROFILES = Path("software/config/tool_attachment_profiles.json")
 
 
@@ -126,6 +129,7 @@ def assess_static_phase1_retained_evidence(workspace: Path) -> dict[str, Any]:
         "installed_tag_xy": root / _TAG_XY,
         "fixed_board_registration": root / _REGISTRATION,
         "keyboard_overlay": root / _OVERLAY,
+        "locked_controls_qualification": root / _LOCKED_CONTROLS,
         "tool_profiles": root / _TOOL_PROFILES,
     }
     documents = {key: _read(path) for key, path in paths.items()}
@@ -148,7 +152,17 @@ def assess_static_phase1_retained_evidence(workspace: Path) -> dict[str, Any]:
     tags = documents["installed_tag_xy"]
     registration = documents["fixed_board_registration"]
     overlay = documents["keyboard_overlay"]
+    locked_controls = documents["locked_controls_qualification"]
     profiles = documents["tool_profiles"]
+    if (
+        locked_controls.get("schema")
+        != "rocell.b0477_locked_controls_qualification.v1"
+        or locked_controls.get("status")
+        != "LOCKED_ELECTRONIC_CONTROLS_REOPEN_QUALIFIED_PHYSICAL_INTRINSICS_BLOCKED"
+    ):
+        raise StaticPhase1RetainedEvidenceError(
+            "locked-controls qualification is not accepted"
+        )
     camera = _mapping(session.get("camera_baseline"), "camera baseline")
     arm = _mapping(session.get("arm_baseline"), "arm baseline")
     stationary = _mapping(
@@ -271,21 +285,29 @@ def assess_static_phase1_retained_evidence(workspace: Path) -> dict[str, Any]:
         _coverage_row(
             "phase1_b0477_settings",
             status="RETAINED_CANDIDATE_PARTIAL",
-            source_ids=common_camera_sources,
+            source_ids=(*common_camera_sources, "locked_controls_qualification"),
             retained_facts={
                 "settings_sha256": mode.get("settings_sha256"),
                 "settings_stable_after_reopen": _mapping(
                     camera.get("repeat_capture_receipt"), "repeat capture receipt"
                 ).get("settings_stable_after_reopen"),
-                "locked_controls": camera.get("locked_controls"),
+                "locked_controls": locked_controls.get(
+                    "locked_electronic_controls"
+                ),
+                "reopen_qualification": locked_controls.get(
+                    "reopen_qualification"
+                ),
+                "qualification_sha256": locked_controls.get(
+                    "qualification_sha256"
+                ),
             },
             remaining_evidence=(
-                "explicit locked focus, aperture, exposure, gain, white-balance, and auto-control values",
-                "installed optical-stack identity and physical lock witness marks",
+                "mechanical focus and aperture identity with physical lock witness marks",
+                "manual-control and selected-mode persistence across reconnect and reboot",
                 "warm-up, illumination, disturbance, and drift checks",
             ),
             non_substitutions=(
-                "the retained settings hash does not reveal or prove locked control values",
+                "electronic reopen persistence does not prove mechanical lock or reboot persistence",
             ),
         ),
         _coverage_row(
