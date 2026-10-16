@@ -75,6 +75,37 @@ The repeat receipt is retained outside Git at
 with SHA-256
 `32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8`.
 
+## Reproducible ChArUco preparation
+
+Generate the reviewed target from its machine-readable definition:
+
+```powershell
+python software/scripts/generate_b0477_charuco_target.py
+```
+
+Print the resulting A3 PDF at 100% / actual size. Copy
+`software/config/charuco_print_scale_evidence.template.json`, record the PDF
+and target-definition hashes, mount the print to rigid backing, and enter four
+distributed width measurements and four distributed height measurements.
+Keep that completed evidence file with the physical capture package.
+
+Before opening the camera, run the fail-closed preflight:
+
+```powershell
+python software/scripts/live_charuco_dataset_capture.py `
+  --session software/config/live_camera_feedback_session_20261015.json `
+  --target software/config/charuco_b0477_12x9_30mm_22mm.json `
+  --scale-evidence C:\path\to\completed-scale-evidence.json `
+  --printable-pdf output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf `
+  --output-directory software/runs/wizard-exports/charuco-preflight-unused `
+  --preflight-only
+```
+
+Remove `--preflight-only`, choose a new output directory, and add
+`--confirm-camera-only-capture` to begin the guided 26-view sequence. The tool
+opens no robot transport, issues no motion, accepts at least 30 decoded ChArUco
+corners per frame, and stops the dataset epoch on the first rejected view.
+
 `KEYBOARD_FORWARD_CAL_1` is therefore the neutral camera observation pose for
 the current bare-jaw workcell epoch. It establishes visibility only. Camera to
 board registration, intrinsics, uncertainty limits, and camera-guided motion
@@ -103,14 +134,23 @@ failure in the calibrated action registry.
 1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose.
    Its full-tag repeatability gate is complete: eight of ten repeat frames
    decoded all six tags.
-2. Capture the precommitted 20-view fit and 6-view holdout ChArUco dataset in
-   `software/config/live_camera_feedback_session_20261015.json`, then solve
-   installed intrinsics and the static camera-to-board transform.
-3. Build the observation-to-hover dry-run coordinator using retained frame,
+2. Print `output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf` on A3 landscape at
+   100% / actual size, mount it to rigid backing, and record four distributed
+   360 mm width measurements plus four distributed 270 mm height measurements
+   in a copy of `software/config/charuco_print_scale_evidence.template.json`.
+3. Run `software/scripts/live_charuco_dataset_capture.py --preflight-only`
+   against that evidence. Only a passing scale and hash gate may proceed to the
+   precommitted 20-view fit and 6-view holdout capture in
+   `software/config/live_camera_feedback_session_20261015.json`.
+4. Solve installed intrinsics for the operational `1920x1080`, YUY2,
+   approximately 60 fps mode, then solve the static camera-to-board transform.
+   The separate full-native `5472x3648`, YUY2, 9 fps contract requires its own
+   calibration unless a crop/bin/scale transform is measured and reviewed.
+5. Build the observation-to-hover dry-run coordinator using retained frame,
    detector, registration, target-catalog, and attachment-profile hashes.
-4. Keep serial writes disabled in that coordinator until passive localization,
+6. Keep serial writes disabled in that coordinator until passive localization,
    uncertainty, stale-frame, missing-tag, and profile-mismatch tests pass.
-5. After installing the stylus, measure its TCP and collision envelope and
+7. After installing the stylus, measure its TCP and collision envelope and
    create a separate observation pose and trajectory family.
 
 The arm was intentionally left stationary at `KEYBOARD_FORWARD_CAL_1` when

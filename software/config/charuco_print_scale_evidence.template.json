@@ -1,0 +1,14 @@
+{
+  "schema": "rocell.charuco_print_scale_evidence.v1",
+  "target_id": "b0477-charuco-12x9-30mm-22mm-v1",
+  "target_definition_sha256": "REPLACE_WITH_RECORDED_SHA256",
+  "printed_pdf_sha256": "REPLACE_WITH_RECORDED_SHA256",
+  "instrument_id": "RECORD_CALIPER_ID",
+  "rigid_backing_confirmed": false,
+  "opposite_extents_measured": false,
+  "distributed_across_board": false,
+  "horizontal_board_width_mm": [],
+  "vertical_board_height_mm": [],
+  "reviewed_by": "",
+  "reviewed_utc": ""
+}

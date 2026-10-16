@@ -248,9 +248,28 @@
       "workcell_epoch": "keyboard-bare-jaw-camera-intake-20261015",
       "target": {
         "kind": "CHARUCO",
-        "definition_state": "MUST_BE_RECORDED_AND_SCALE_VERIFIED_BEFORE_CAPTURE",
+        "target_id": "b0477-charuco-12x9-30mm-22mm-v1",
+        "definition_state": "GENERATED_AWAITING_PRINT_SCALE_VERIFICATION",
+        "definition_path": "software/config/charuco_b0477_12x9_30mm_22mm.json",
+        "definition_sha256": "c8f95230bc42cd14fc546c6fed09af4780155c65da50e6c3c32a3b86eef0613e",
+        "printable_pdf_path": "output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf",
+        "printable_pdf_sha256": "6a1d0d441b54d04b20d443eee3e84b62203e5ff0f92ef70ea48ba795af27670f",
+        "dictionary": "DICT_5X5_1000",
+        "squares_x": 12,
+        "squares_y": 9,
+        "square_length_mm": 30.0,
+        "marker_length_mm": 22.0,
+        "board_width_mm": 360.0,
+        "board_height_mm": 270.0,
         "rigid_backing_required": true,
-        "minimum_scale_measurements": 3
+        "minimum_horizontal_scale_measurements": 4,
+        "minimum_vertical_scale_measurements": 4,
+        "maximum_axis_scale_error_fraction": 0.0025
+      },
+      "mode_separation": {
+        "this_dataset": "1920x1080_YUY2_60FPS_OPERATIONAL",
+        "full_native_profile": "5472x3648_YUY2_9FPS",
+        "cross_mode_intrinsics_reuse": "FORBIDDEN_UNLESS_CROP_BIN_SCALE_TRANSFORM_IS_MEASURED_AND_REVIEWED"
       },
       "split_policy": {
         "assignment": "FIXED_BY_IMAGE_ID_BEFORE_CAPTURE",

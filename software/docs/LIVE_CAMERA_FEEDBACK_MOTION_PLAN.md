@@ -121,6 +121,16 @@ Exit: reviewed optics/coverage report. One attractive image is insufficient.
 
 ### 4. Solve installed intrinsics and static registration
 
+- Use the generated A3 target at
+  `output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf`: 12 by 9 squares,
+  30 mm squares, 22 mm markers, and `DICT_5X5_1000`.
+- Print at 100% / actual size and mount to rigid backing. Before any dataset
+  frame, bind the target-definition and PDF SHA-256 values and pass four
+  distributed horizontal plus four distributed vertical caliper measurements.
+  Each measurement must be within 0.25% of the defined board extent.
+- Use `software/scripts/live_charuco_dataset_capture.py` to enforce the exact
+  20-fit/6-holdout order and a minimum of 30 detected ChArUco corners per view.
+  A rejected view ends that dataset epoch; it is retained with its reason.
 - Capture scale-verified ChArUco images using a precommitted fit/holdout split.
 - Solve physical intrinsics and distortion; retain per-view and held-out
   residuals and the exact undistortion-map hash.
@@ -130,6 +140,11 @@ Exit: reviewed optics/coverage report. One attractive image is insufficient.
 
 Exit: installed intrinsics and extrinsics with uncertainty, residual thresholds,
 and configuration-epoch bindings. Nominal FOV geometry cannot substitute.
+
+The installed operational stream (`1920x1080`, YUY2, approximately 60 fps) and
+the full-native camera contract (`5472x3648`, YUY2, 9 fps) are distinct
+calibration profiles. Intrinsics cannot cross that boundary unless the exact
+crop, binning, and scale transform is measured and reviewed.
 
 ### 5. Prove camera-only keyboard localization
 
