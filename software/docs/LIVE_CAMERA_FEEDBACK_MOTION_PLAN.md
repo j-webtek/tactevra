@@ -231,11 +231,14 @@ canonical manifest, compact numeric results, and content hashes.
 
 ## Immediate next review
 
-Increment B is complete for finite read-only capture. Preserve
-`KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose, repeat the
-full-tag capture, then begin increment C with a precommitted intrinsic and
-static-registration fit/holdout dataset. Do not use the full-tag visibility
-result itself as registration or motion authority.
+Increment B is complete for finite read-only capture. The repeat at
+`KEYBOARD_FORWARD_CAL_1` retained ten unique frames across two reopen cycles;
+eight frames decoded all six tags and the settings hash remained stable. The
+tracked session record now precommits the 20-view fit and 6-view holdout
+ChArUco acquisition sequence for increment C. The next physical work is to
+scale-verify the calibration target and capture those 26 views in the declared
+order. Do not use the full-tag visibility result itself as registration or
+motion authority.
 
 ## 2026-10-15 read-only intake result
 
@@ -292,3 +295,11 @@ with SHA-256
 Any camera, support, focus, board, keyboard, fiducial, or attachment change
 starts a new workcell or optics epoch. Electronic control readback and exact
 DirectShow endpoint binding remain open qualification items.
+
+The repeat external receipt is
+`software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/receipt.json`
+with SHA-256
+`32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8`.
+Eight of ten retained frames decoded IDs `0-5`; the other two decoded IDs
+`1-5`. All frame hashes were unique and the negotiated settings hash was
+unchanged across both reopen cycles. Robot transport remained unopened.

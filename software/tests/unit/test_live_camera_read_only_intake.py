@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import cv2
@@ -71,3 +72,31 @@ def test_assessment_unions_only_decoded_ids_across_profiles(monkeypatch) -> None
 def test_name_rejects_multiline_text() -> None:
     with pytest.raises(ValueError):
         MODULE._name("camera\nsecond line")
+
+
+def test_live_session_precommits_intrinsics_fit_and_holdout_views() -> None:
+    session_path = (
+        Path(__file__).resolve().parents[2]
+        / "config/live_camera_feedback_session_20261015.json"
+    )
+    session = json.loads(session_path.read_text(encoding="utf-8"))
+    plan = session["camera_baseline"]["intrinsics_dataset_precommit"]
+    sequence = plan["capture_sequence"]
+
+    assert [item["sequence_ordinal"] for item in sequence] == list(range(1, 27))
+    assert [item["image_id"] for item in sequence[:20]] == [
+        f"fit-{index:02d}" for index in range(1, 21)
+    ]
+    assert [item["image_id"] for item in sequence[20:]] == [
+        f"holdout-{index:02d}" for index in range(1, 7)
+    ]
+    assert {item["split"] for item in sequence[:20]} == {"FIT"}
+    assert {item["split"] for item in sequence[20:]} == {"HOLDOUT"}
+    assert plan["split_policy"]["holdout_must_not_enter_fit"] is True
+    assert plan["authority"] == {
+        "physical_calibration_valid": False,
+        "registration_valid": False,
+        "camera_guided_motion": False,
+        "robot_motion": False,
+        "contact": False,
+    }

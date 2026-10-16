@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "NEUTRAL_OBSERVATION_POSE_VERIFIED_ALL_SIX_TAGS_VISIBLE",
+  "state": "NEUTRAL_OBSERVATION_POSE_REPEAT_VERIFIED_REGISTRATION_DATASET_PRECOMMITTED",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -119,7 +119,7 @@
     "sample_frame_sha256": "56ecd1942a2c6ec901acbba687fe2f849c7c590e2e7ab8d8558ada6fd8af7815",
     "all_six_fiducial_tiles_present_on_board": true,
     "all_six_fiducials_visible": true,
-    "visibility_interpretation": "At KEYBOARD_FORWARD_CAL_1, five of ten retained frames decode all six installed tags. The other five decode IDs 1-5.",
+    "visibility_interpretation": "At KEYBOARD_FORWARD_CAL_1, the first capture decoded all six tags in five of ten frames. A repeat capture decoded all six tags in eight of ten frames; the remaining two decoded IDs 1-5.",
     "keyboard_coverage_verified": true,
     "finite_capture_performed": true,
     "finite_capture_frame_count": 10,
@@ -148,7 +148,7 @@
         "opencv_default",
         "small_tag_apriltag_refinement"
       ],
-      "result": "Five of ten frames at KEYBOARD_FORWARD_CAL_1 decode IDs 0-5 in one exposure; five decode IDs 1-5.",
+      "result": "First capture: five of ten frames decode IDs 0-5. Repeat capture: eight of ten frames decode IDs 0-5 and two decode IDs 1-5.",
       "registration_authority": false
     },
     "external_capture_receipt": {
@@ -227,7 +227,211 @@
         "all_six_visible_in_one_frame": true,
         "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
       }
-    ]
+    ],
+    "repeat_capture_receipt": {
+      "directory": "software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02",
+      "file_name": "receipt.json",
+      "byte_length": 23342,
+      "sha256": "32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8",
+      "frame_count": 10,
+      "frames_with_all_six_tags": 8,
+      "all_frame_hashes_unique": true,
+      "settings_stable_after_reopen": true,
+      "robot_transport_opened": false,
+      "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
+    },
+    "intrinsics_dataset_precommit": {
+      "status": "AWAITING_SCALE_VERIFIED_TARGET_AND_CAPTURE",
+      "purpose": "Installed 1920x1080 YUY2 intrinsics and distortion solve; no robot motion.",
+      "camera_identity": "USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000",
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+      "workcell_epoch": "keyboard-bare-jaw-camera-intake-20261015",
+      "target": {
+        "kind": "CHARUCO",
+        "definition_state": "MUST_BE_RECORDED_AND_SCALE_VERIFIED_BEFORE_CAPTURE",
+        "rigid_backing_required": true,
+        "minimum_scale_measurements": 3
+      },
+      "split_policy": {
+        "assignment": "FIXED_BY_IMAGE_ID_BEFORE_CAPTURE",
+        "fit_view_count": 20,
+        "holdout_view_count": 6,
+        "holdout_must_not_enter_fit": true,
+        "minimum_detected_charuco_corners_per_view": 30
+      },
+      "capture_sequence": [
+        {
+          "sequence_ordinal": 1,
+          "image_id": "fit-01",
+          "split": "FIT",
+          "required_view": "center-fronto-parallel-near"
+        },
+        {
+          "sequence_ordinal": 2,
+          "image_id": "fit-02",
+          "split": "FIT",
+          "required_view": "center-fronto-parallel-far"
+        },
+        {
+          "sequence_ordinal": 3,
+          "image_id": "fit-03",
+          "split": "FIT",
+          "required_view": "upper-left-fronto-parallel"
+        },
+        {
+          "sequence_ordinal": 4,
+          "image_id": "fit-04",
+          "split": "FIT",
+          "required_view": "upper-right-fronto-parallel"
+        },
+        {
+          "sequence_ordinal": 5,
+          "image_id": "fit-05",
+          "split": "FIT",
+          "required_view": "lower-left-fronto-parallel"
+        },
+        {
+          "sequence_ordinal": 6,
+          "image_id": "fit-06",
+          "split": "FIT",
+          "required_view": "lower-right-fronto-parallel"
+        },
+        {
+          "sequence_ordinal": 7,
+          "image_id": "fit-07",
+          "split": "FIT",
+          "required_view": "left-edge-yaw-positive"
+        },
+        {
+          "sequence_ordinal": 8,
+          "image_id": "fit-08",
+          "split": "FIT",
+          "required_view": "left-edge-yaw-negative"
+        },
+        {
+          "sequence_ordinal": 9,
+          "image_id": "fit-09",
+          "split": "FIT",
+          "required_view": "right-edge-yaw-positive"
+        },
+        {
+          "sequence_ordinal": 10,
+          "image_id": "fit-10",
+          "split": "FIT",
+          "required_view": "right-edge-yaw-negative"
+        },
+        {
+          "sequence_ordinal": 11,
+          "image_id": "fit-11",
+          "split": "FIT",
+          "required_view": "top-edge-pitch-positive"
+        },
+        {
+          "sequence_ordinal": 12,
+          "image_id": "fit-12",
+          "split": "FIT",
+          "required_view": "top-edge-pitch-negative"
+        },
+        {
+          "sequence_ordinal": 13,
+          "image_id": "fit-13",
+          "split": "FIT",
+          "required_view": "bottom-edge-pitch-positive"
+        },
+        {
+          "sequence_ordinal": 14,
+          "image_id": "fit-14",
+          "split": "FIT",
+          "required_view": "bottom-edge-pitch-negative"
+        },
+        {
+          "sequence_ordinal": 15,
+          "image_id": "fit-15",
+          "split": "FIT",
+          "required_view": "center-rotate-positive-30"
+        },
+        {
+          "sequence_ordinal": 16,
+          "image_id": "fit-16",
+          "split": "FIT",
+          "required_view": "center-rotate-negative-30"
+        },
+        {
+          "sequence_ordinal": 17,
+          "image_id": "fit-17",
+          "split": "FIT",
+          "required_view": "center-rotate-positive-60"
+        },
+        {
+          "sequence_ordinal": 18,
+          "image_id": "fit-18",
+          "split": "FIT",
+          "required_view": "center-rotate-negative-60"
+        },
+        {
+          "sequence_ordinal": 19,
+          "image_id": "fit-19",
+          "split": "FIT",
+          "required_view": "center-oblique-near"
+        },
+        {
+          "sequence_ordinal": 20,
+          "image_id": "fit-20",
+          "split": "FIT",
+          "required_view": "center-oblique-far"
+        },
+        {
+          "sequence_ordinal": 21,
+          "image_id": "holdout-01",
+          "split": "HOLDOUT",
+          "required_view": "holdout-upper-left-oblique"
+        },
+        {
+          "sequence_ordinal": 22,
+          "image_id": "holdout-02",
+          "split": "HOLDOUT",
+          "required_view": "holdout-upper-right-oblique"
+        },
+        {
+          "sequence_ordinal": 23,
+          "image_id": "holdout-03",
+          "split": "HOLDOUT",
+          "required_view": "holdout-lower-left-oblique"
+        },
+        {
+          "sequence_ordinal": 24,
+          "image_id": "holdout-04",
+          "split": "HOLDOUT",
+          "required_view": "holdout-lower-right-oblique"
+        },
+        {
+          "sequence_ordinal": 25,
+          "image_id": "holdout-05",
+          "split": "HOLDOUT",
+          "required_view": "holdout-center-rotate-positive-45"
+        },
+        {
+          "sequence_ordinal": 26,
+          "image_id": "holdout-06",
+          "split": "HOLDOUT",
+          "required_view": "holdout-center-rotate-negative-45"
+        }
+      ],
+      "capture_rules": [
+        "Capture in sequence_ordinal order and retain rejected frames with reasons.",
+        "Keep the installed camera, focus, aperture, resolution, pixel format, support, board, and lighting epoch fixed.",
+        "Record raw image SHA-256, detected corner count, board centroid, board area fraction, tilt, and rotation for every view.",
+        "Do not replace a failed holdout view after seeing calibration residuals; start a new declared dataset epoch instead.",
+        "Do not open robot transport or issue any arm command during this dataset."
+      ],
+      "authority": {
+        "physical_calibration_valid": false,
+        "registration_valid": false,
+        "camera_guided_motion": false,
+        "robot_motion": false,
+        "contact": false
+      }
+    }
   },
   "authority": {
     "camera_guided_motion": false,
@@ -236,6 +440,6 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "REPEAT_FORWARD_CAL_1_FULL_TAG_CAPTURE_THEN_COLLECT_INTRINSICS_AND_STATIC_REGISTRATION_DATASET",
+  "next_gate": "SCALE_VERIFY_CHARUCO_TARGET_AND_CAPTURE_PRECOMMITTED_20_FIT_6_HOLDOUT_DATASET",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
 }

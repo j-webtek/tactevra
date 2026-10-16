@@ -11,8 +11,9 @@ The arm is verified idle at the previously recorded
 `KEYBOARD_FORWARD_CAL_1` pose. The latest repeated servo readback is
 `[2052, 2149, 1956, 2550, 2227, 2041, 2042]`. This is the first pose on the
 existing reverse chain where the installed camera observed all six board tags
-in one frame. Five of ten retained frames decoded IDs `0-5`; the other five
-decoded IDs `1-5`. No key contact or keypress was performed.
+in one frame. The first retained capture decoded IDs `0-5` in five of ten
+frames. A second bounded capture at the same stationary pose decoded IDs `0-5`
+in eight of ten frames. No key contact or keypress was performed.
 
 Firmware candidate r120 is installed. It preserves all recorded goals,
 adjacent-only transitions, trajectory limits, and motion commands. It widens
@@ -65,6 +66,15 @@ cycles, and the combined default and small-tag detector profiles.
 | `DIAGONAL_CAL_2` | 10 | `0,1,2,3,5` | No |
 | `FORWARD_CAL_1` | 10 | `0,1,2,3,4,5` | Yes, 5 frames |
 
+A repeat capture at `FORWARD_CAL_1` retained ten more unique frames across two
+camera reopen cycles. Eight frames decoded all six tags, the remaining two
+decoded IDs `1-5`, and the negotiated settings hash remained
+`68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15`.
+The repeat receipt is retained outside Git at
+`software/runs/wizard-exports/live-camera-observation-forward-cal-1-repeat-20261015-02/receipt.json`
+with SHA-256
+`32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8`.
+
 `KEYBOARD_FORWARD_CAL_1` is therefore the neutral camera observation pose for
 the current bare-jaw workcell epoch. It establishes visibility only. Camera to
 board registration, intrinsics, uncertainty limits, and camera-guided motion
@@ -90,10 +100,12 @@ failure in the calibrated action registry.
 
 ## Next work
 
-1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose and
-   repeat its full-tag capture before calibration datasets are collected.
-2. Solve installed intrinsics and the static camera-to-board transform with a
-   precommitted fit/holdout split.
+1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose.
+   Its full-tag repeatability gate is complete: eight of ten repeat frames
+   decoded all six tags.
+2. Capture the precommitted 20-view fit and 6-view holdout ChArUco dataset in
+   `software/config/live_camera_feedback_session_20261015.json`, then solve
+   installed intrinsics and the static camera-to-board transform.
 3. Build the observation-to-hover dry-run coordinator using retained frame,
    detector, registration, target-catalog, and attachment-profile hashes.
 4. Keep serial writes disabled in that coordinator until passive localization,
