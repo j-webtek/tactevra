@@ -3,36 +3,72 @@
 ## Current state
 
 The first live calibration campaign uses the unmodified RoArm-M3 jaw with no
-stylus or compliant tool installed. The arm, plywood board, and keyboard must
-remain fixed for these joint-space endpoints to remain meaningful.
+stylus or compliant tool installed. The arm, plywood board, keyboard, camera,
+and fiducials must remain fixed for these observations and joint-space
+endpoints to remain meaningful.
 
-The latest verified state is `KEYBOARD_FIELD_APPROACH_38`, reached by command
-`T423` under firmware candidate `r117`. Final measured servo positions were
-`[2167, 2340, 1760, 2416, 2161, 2041, 2042]`. The controller reported the
-trajectory complete and idle. No key contact or keypress was performed.
+The arm is verified idle at the previously recorded
+`KEYBOARD_FORWARD_CAL_1` pose. The latest repeated servo readback is
+`[2052, 2149, 1956, 2550, 2227, 2041, 2042]`. This is the first pose on the
+existing reverse chain where the installed camera observed all six board tags
+in one frame. Five of ten retained frames decoded IDs `0-5`; the other five
+decoded IDs `1-5`. No key contact or keypress was performed.
 
-The modeled approach totals 38 mm from the field calibration pose. Two ruler
+Firmware candidate r120 is installed. It preserves all recorded goals,
+adjacent-only transitions, trajectory limits, and motion commands. It widens
+the named-pose settle window from 16 to 20 servo counts and retains the
+completed commanded pose while its readback stays inside that window. This
+matches the repeatable physical settling observed during the reverse path.
+
+The modeled near approach totals 38 mm from the field calibration pose. Ruler
 photos captured on 2026-10-15 support a provisional rigid-jaw clearance of
-`20 +/- 2 mm` above the key surface. The loose cable hangs below the rigid jaw
-and must be restrained and rephotographed before any further motion. The current
-endpoint is therefore a repeatable **noncontact calibration pose**, not a
-qualified contact pose.
+`20 +/- 2 mm` above the key surface. The observed cable placement is accepted
+for this session and recorded as part of the workcell epoch. These endpoints
+remain **noncontact calibration poses**, not qualified contact poses.
 
 ## Recorded path
 
-| Candidate | Command | Named endpoint | Planned joint goals | Modeled incremental descent |
-|---|---:|---|---|---:|
-| r112 | 415 | `KEYBOARD_FIELD_APPROACH_10` | `[2174, 2271, 1825, 2362, 2277, 2040, 2047]` | 10 mm |
-| r113 | 417 | `KEYBOARD_FIELD_APPROACH_20` | `[2174, 2293, 1803, 2383, 2234, 2040, 2047]` | 10 mm |
-| r114 | 419 | `KEYBOARD_FIELD_APPROACH_25` | `[2174, 2305, 1791, 2393, 2213, 2040, 2047]` | 5 mm |
-| r115/r116 | 421 | `KEYBOARD_FIELD_APPROACH_28` | `[2174, 2312, 1784, 2399, 2200, 2040, 2047]` | 3 mm |
-| r117 | 423 | `KEYBOARD_FIELD_APPROACH_38` | `[2174, 2337, 1759, 2416, 2158, 2040, 2047]` | 10 mm |
+| Candidate | Forward | Reverse | Named endpoint | Planned joint goals | Increment |
+|---|---:|---:|---|---|---:|
+| r112 | 415 | 416 | `KEYBOARD_FIELD_APPROACH_10` | `[2174, 2271, 1825, 2362, 2277, 2040, 2047]` | 10 mm |
+| r113 | 417 | 418 | `KEYBOARD_FIELD_APPROACH_20` | `[2174, 2293, 1803, 2383, 2234, 2040, 2047]` | 10 mm |
+| r114 | 419 | 420 | `KEYBOARD_FIELD_APPROACH_25` | `[2174, 2305, 1791, 2393, 2213, 2040, 2047]` | 5 mm |
+| r115/r116 | 421 | 422 | `KEYBOARD_FIELD_APPROACH_28` | `[2174, 2312, 1784, 2399, 2200, 2040, 2047]` | 3 mm |
+| r117 | 423 | 424 | `KEYBOARD_FIELD_APPROACH_38` | `[2174, 2337, 1759, 2416, 2158, 2040, 2047]` | 10 mm |
 
-Each endpoint has a paired reverse command. The runtime accepts only adjacent
-named-pose transitions, uses a limit-derived quintic trajectory at 40 Hz, and
-issues one synchronized servo write per control step. Candidate r116 corrected
-classifier precedence where neighboring pose tolerance bands overlap. Candidate
-r117 checks the closest pose first for the same reason.
+The complete verified reverse chain is:
+
+```text
+APPROACH_38 -> APPROACH_28 -> APPROACH_25 -> APPROACH_20 -> APPROACH_10
+-> FIELD_CAL_3 -> DIAGONAL_CAL_2 -> FORWARD_CAL_1
+```
+
+The runtime accepts only adjacent named-pose transitions and uses a
+limit-derived quintic trajectory at 40 Hz with one synchronized servo write per
+control step. Candidate r118 replaced ordered approach precedence with a
+bounded nearest-endpoint classifier. Candidate r119 retained a completed
+commanded approach endpoint. Candidate r120 applies the same bounded settle
+behavior to every recorded named pose.
+
+## Camera observation results
+
+The fixed Arducam B0477 was captured at each existing pose during the reverse
+chain. Every capture used `1920x1080`, approximately 60 fps, YUY2, two reopen
+cycles, and the combined default and small-tag detector profiles.
+
+| Pose | Frames | Decodable IDs | All six in one frame |
+|---|---:|---|---|
+| `APPROACH_25` | 6 | `0,1,2,3,5` | No |
+| `APPROACH_20` | 10 | `0,1,2,3,5` | No |
+| `APPROACH_10` | 10 | `0,1,2,3,5` | No |
+| `FIELD_CAL_3` | 10 | `0,1,2,3,5` | No |
+| `DIAGONAL_CAL_2` | 10 | `0,1,2,3,5` | No |
+| `FORWARD_CAL_1` | 10 | `0,1,2,3,4,5` | Yes, 5 frames |
+
+`KEYBOARD_FORWARD_CAL_1` is therefore the neutral camera observation pose for
+the current bare-jaw workcell epoch. It establishes visibility only. Camera to
+board registration, intrinsics, uncertainty limits, and camera-guided motion
+remain separate gates.
 
 ## Attachment profile boundary
 
@@ -52,19 +88,18 @@ The machine-readable policy is in
 `software/config/tool_attachment_profiles.json`. Profile mismatch is a hard
 failure in the calibrated action registry.
 
-## Remaining calibration work
+## Next work
 
-1. Restrain the loose jaw cable above the rigid-jaw envelope and capture a new
-   side, front, and workcell overview photograph.
-2. Establish a conservative bare-jaw hover endpoint and repeatability envelope,
-   using the provisional `20 +/- 2 mm` clearance only as an uncertainty input.
-3. Qualify the connected static camera and preserve a held-out return trial
-   before wider keyboard motion. See
-   `software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md`.
-4. Keep contact disabled until key travel, surface height, and reaction limits
-   have their own reviewed evidence.
+1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose and
+   repeat its full-tag capture before calibration datasets are collected.
+2. Solve installed intrinsics and the static camera-to-board transform with a
+   precommitted fit/holdout split.
+3. Build the observation-to-hover dry-run coordinator using retained frame,
+   detector, registration, target-catalog, and attachment-profile hashes.
+4. Keep serial writes disabled in that coordinator until passive localization,
+   uncertainty, stale-frame, missing-tag, and profile-mismatch tests pass.
 5. After installing the stylus, measure its TCP and collision envelope and
-   generate a separate trajectory family from the same fixed workcell frame.
+   create a separate observation pose and trajectory family.
 
-The arm was intentionally left stationary at `KEYBOARD_FIELD_APPROACH_38` when
-this record was written.
+The arm was intentionally left stationary at `KEYBOARD_FORWARD_CAL_1` when
+this record was updated.
