@@ -1,0 +1,89 @@
+{
+  "authority": {
+    "camera_control_writes_observed": 3,
+    "camera_frames_observed": 6,
+    "physical_authority": false,
+    "robot_commands_sent": 0,
+    "robot_transport_opened": false
+  },
+  "camera_binding": {
+    "directshow_device_path": "\\\\?\\usb#vid_04b4&pid_0477&mi_00#8&257b140a&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",
+    "friendly_name": "Arducam B0477 (USB3 20MP)",
+    "mode": {
+      "fps": 60.000240000960005,
+      "height_px": 1080,
+      "pixel_format": "YUY2",
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+      "width_px": 1920
+    },
+    "persistent_device_identity": "USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000",
+    "selector": 0
+  },
+  "locked_electronic_controls": {
+    "brightness": 0,
+    "contrast": 10,
+    "exposure": -3,
+    "gain": 500,
+    "saturation": 10,
+    "white_balance": 4500
+  },
+  "non_substitutions": [
+    "fixed-pose tag visibility does not solve camera intrinsics",
+    "reopen persistence does not prove reconnect or reboot persistence"
+  ],
+  "qualification_sha256": "14c157a395de7a0ebe26de399ea4915abc587be3cd4dfaf4e8ea9960fa84adf0",
+  "remaining_acceptance_evidence": [
+    "mechanical focus and aperture identity with witness marks",
+    "manual-control and selected-mode persistence across physical reconnect and host reboot",
+    "scale-verified existing target with precommitted multi-view fit and held-out capture manifest"
+  ],
+  "reopen_qualification": {
+    "all_six_tags_frame_count": 4,
+    "camera_closed_after_each_cycle": true,
+    "detected_tag_union": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "frame_count": 6,
+    "frame_sha256": [
+      "023b41bd3c354d475ddc3615ab147f592a5d561ac9b244e706d8dedc59c9bfd1",
+      "7c2526dc51b96549bde593d3f5fa697a983023f0f6123f21700636177206c7cd",
+      "d6aa31d1b92ccd0c2f5930074a23c13c9755bb46f388c97578055747cae3a27b",
+      "cbd90a67129aab6a983eb8ecda2df6806835c40ca3a6701d5beadaf2c07184f7",
+      "502057afd2859f4a1ae9936050e137ac356d9b1fa499efa6d7d2924348c9442e",
+      "20c3396332f5bbbf7c6e9d95846f78afc1797f60c04b80a73d1b93df24c0d1a7"
+    ],
+    "laplacian_variance_range": [
+      71.8410466247047,
+      72.64395570188898
+    ],
+    "maximum_fraction_luma_ge_247": 1.6878858024691356e-05,
+    "mean_luma_8bit_range": [
+      108.1087215470679,
+      109.10297405478396
+    ],
+    "mean_luma_8bit_spread": 0.9942525077160553,
+    "reopen_cycle_count": 2,
+    "unique_frame_count": 6
+  },
+  "schema": "rocell.b0477_locked_controls_qualification.v1",
+  "source_bindings": {
+    "capture_receipt": {
+      "path": "software/runs/wizard-exports/physical-intrinsics-controls-qualified-20261016-01/receipt.json",
+      "sha256": "a9f080059db144db15bd92c718934519a2ee9a0d362168be23583aa6d9b1cfe0"
+    },
+    "control_lock": {
+      "path": "software/runs/wizard-exports/camera-control-lock-exposure-minus3-gain500-20261016.json",
+      "sha256": "bcd641ec965722fe82f8ce52184a48f720e44c88c02f561a4124108f9736af5d"
+    },
+    "post_reopen_observation": {
+      "path": "software/runs/wizard-exports/physical-intrinsics-controls-qualified-20261016-01/controls-after-two-reopens.json",
+      "sha256": "61ec4918d0f7cba13dcaee0762955f8153f64178d4cbf7ffaa2cb93e314fce2b"
+    }
+  },
+  "status": "LOCKED_ELECTRONIC_CONTROLS_REOPEN_QUALIFIED_PHYSICAL_INTRINSICS_BLOCKED"
+}

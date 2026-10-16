@@ -528,6 +528,14 @@ distortion, ROI, map, and stability evidence while requesting no new target
 print and no repeated board/tag measurement. The bare-jaw route audit now
 hash-binds this plan and rejects it when stale. Capture, registry writes,
 motion, and physical authority remain disabled.
+ARM-081 qualifies the installed B0477 electronic controls at brightness `0`,
+contrast `10`, saturation `10`, white balance `4500`, gain `500`, and exposure
+`-3`, all in manual mode. Six unique `1920x1080` YUY2 frames across two reopen
+cycles retained one settings identity; four frames decoded all six tags and
+the union was IDs `0-5`. Focus and aperture remain mechanical witness items,
+and reconnect or host-reboot persistence remains unproven. The next camera
+dependency is the existing target identity plus a precommitted multi-view
+fit/held-out dataset. No robot transport or command was used.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

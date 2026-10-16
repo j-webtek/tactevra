@@ -508,3 +508,28 @@ with SHA-256
 Eight of ten retained frames decoded IDs `0-5`; the other two decoded IDs
 `1-5`. All frame hashes were unique and the negotiated settings hash was
 unchanged across both reopen cycles. Robot transport remained unopened.
+
+## 2026-10-16 locked electronic-control checkpoint
+
+The installed B0477 is bound to the exact PnP identity above and DirectShow
+endpoint recorded in
+`software/ai/eval/b0477_locked_controls_qualification_20261016.json`. The
+qualified manual values are brightness `0`, contrast `10`, saturation `10`,
+white balance `4500`, gain `500`, and exposure `-3`. Two camera reopen cycles
+produced six unique `1920x1080` YUY2 frames with an unchanged settings hash.
+Mean luma stayed from `108.1087` to `109.1030`; Laplacian variance stayed from
+`71.8410` to `72.6440`; highlight clipping remained below `0.000017`. Four of
+six frames decoded every required tag and the full set decoded IDs `0-5`.
+
+The earlier dark manual-control trials were restored before this retained
+qualification and are not treated as accepted settings. Focus and aperture do
+not expose electronic DirectShow controls, so their mechanical identity and
+witness marks remain open. Reopen persistence does not establish persistence
+through a physical reconnect or host reboot.
+
+The next physical-intrinsics step uses an existing scale-verified target and a
+precommitted multi-view fit/held-out manifest. A fixed overhead view of one
+coplanar tag arrangement establishes visibility and stability, but does not
+independently solve intrinsics. The target must be presented at varied center,
+edge, corner, distance, and tilt views while the camera and board remain fixed.
+No new target print or repeated board/tag-center measurement is required.

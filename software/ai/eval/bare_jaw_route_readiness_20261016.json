@@ -11,13 +11,13 @@
     "build_snapshot_sha256": "2762f29a846db723ab6eb6ce7373e5689589c6a3f7386a28240227ba76a586aa",
     "fixed_board_registration_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
     "keyboard_overlay_sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407",
-    "retained_evidence_coverage_artifact_sha256": "1ceb040216df0d50ae04322dbe56e418f5a033a1c3d1b22cebbf9a523023529c",
-    "retained_evidence_coverage_sha256": "6ea7e55d1f61bafe1363429bd3a72d094be18badf0b4b4c05684a09553b1957c",
+    "retained_evidence_coverage_artifact_sha256": "cf5d2465735094d8f5f447564a0327b094440f9384b879a63446491dce8cbde9",
+    "retained_evidence_coverage_sha256": "baff511966f89d37da18614b51834ca851d074a5c7e824730b1b6cdfa24a0f61",
     "retained_hover_draft_sha256": "8764fe3e330a4140ef669a5c84365c93323f413d82fb58e8f9cdcdde4f6fcb6c",
     "session_record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
     "simulation_bundle_sha256": "250ead0df46caefd43dfaf331019bbca8fcdcd74e797f4b5742d317bbeaefbc4",
-    "static_intrinsics_intake_artifact_sha256": "deaf95361d662590276251415ee5bc2371c25e58024fcef4aab3c9c8be2b914a",
-    "static_intrinsics_intake_plan_sha256": "4d06b99515d9ec3bedb4e9abf79614a933f1a413edd1ac35409ad269cc70e65f",
+    "static_intrinsics_intake_artifact_sha256": "50b5c7e8d4764adf5750aa2c67dc7a97be35e43ebc806d7d9d25f397775e6196",
+    "static_intrinsics_intake_plan_sha256": "07b58af7c3d8c0c63edced04656621d6c60f2ad8d6cc2665d6cc18803b75f661",
     "system_manifest_sha256": "f73ac5833a85283f8095080274cc141ff791e82cb7b1d5d6c808ede89b836a5c",
     "tool_profiles_sha256": "ae07fae822d19628a320099eab1f40f837ebc9b082f98e41fc39da1293d9a7e2",
     "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
@@ -108,11 +108,11 @@
         "width_px": 5472
       }
     },
-    "next_action": "COMPLETE_CAMERA_IDENTITY_AND_LOCKED_SETTINGS_BEFORE_PHYSICAL_INTRINSICS_CAPTURE",
+    "next_action": "COMPLETE_EXISTING_TARGET_IDENTITY_AND_PRECOMMIT_MULTIVIEW_INTRINSICS_DATASET",
     "physical_release_effect": "NONE",
     "required_new_evidence": [
-      "received optical-stack identity and persistent reconnect/reboot identity",
-      "locked focus, aperture, exposure, gain, white-balance, and auto-control readback",
+      "mechanical focus and aperture identity with physical lock witness marks",
+      "manual-control and selected-mode persistence across physical reconnect and host reboot",
       "scale-verified existing calibration-target identity and metric definition",
       "precommitted fit/held-out image manifest at the retained runtime mode",
       "immutable source-image hashes with regional pose and coverage observations",
@@ -160,7 +160,7 @@
       "use": "unmeasured 120 mm transform sensitivity overlay only"
     }
   ],
-  "readiness_sha256": "0d586e1c47af9bbf927486d542383973e9c8a78700113111794baa0dc676aedf",
+  "readiness_sha256": "309553a529168f8d86512aaa9556229776f61c1a26222d95e3dafd5e56ad7883",
   "retained_evidence_coverage": {
     "physical_release_effect": "NONE",
     "repeated_measurement_requested": false,

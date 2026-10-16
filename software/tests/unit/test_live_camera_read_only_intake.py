@@ -128,5 +128,5 @@ def test_live_session_binds_stationary_r120_feedback_to_arm_baseline() -> None:
         "autonomous_retry": False,
     }
     assert session["next_gate"] == (
-        "CALIBRATED_BARE_JAW_ROUTE_SCREENING_WITHOUT_DISPATCH"
+        "POPULATE_CALIBRATION_SLOTS_THEN_RERUN_OFFLINE_IK_ROUTE_COLLISION_SCREEN"
     )
