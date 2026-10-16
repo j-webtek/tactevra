@@ -2,7 +2,7 @@
   "schema": "rocell.live_camera_feedback_session.v1",
   "record_id": "LIVE-CAMERA-KEYBOARD-20261015-001",
   "recorded_local_date": "2026-10-15",
-  "state": "NEUTRAL_OBSERVATION_POSE_REPEAT_VERIFIED_REGISTRATION_DATASET_PRECOMMITTED",
+  "state": "FIXED_TAG_BOARD_PLANAR_MAPPING_MEASURED_KEYBOARD_OVERLAY_PENDING",
   "workcell_epoch": {
     "epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
     "fixed_items": [
@@ -115,7 +115,7 @@
     },
     "locked_controls": null,
     "intrinsics_artifact_sha256": null,
-    "camera_to_board_transform_sha256": null,
+    "camera_to_board_transform_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
     "sample_frame_sha256": "56ecd1942a2c6ec901acbba687fe2f849c7c590e2e7ab8d8558ada6fd8af7815",
     "all_six_fiducial_tiles_present_on_board": true,
     "all_six_fiducials_visible": true,
@@ -240,216 +240,46 @@
       "robot_transport_opened": false,
       "retention": "EXTERNAL_IGNORED_RUNTIME_EVIDENCE"
     },
-    "intrinsics_dataset_precommit": {
-      "status": "AWAITING_SCALE_VERIFIED_TARGET_AND_CAPTURE",
-      "purpose": "Installed 1920x1080 YUY2 intrinsics and distortion solve; no robot motion.",
-      "camera_identity": "USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000",
-      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
-      "workcell_epoch": "keyboard-bare-jaw-camera-intake-20261015",
-      "target": {
-        "kind": "CHARUCO",
-        "target_id": "b0477-charuco-10x7-25mm-17_5mm-v2",
-        "definition_state": "GENERATED_AWAITING_PRINT_SCALE_VERIFICATION",
-        "definition_path": "software/config/charuco_b0477_10x7_25mm_17_5mm.json",
-        "definition_sha256": "de454230a5bb8c0549e05f5e4681a3dec0ab7c102820a9d8db63e0bd4ffc366c",
-        "printable_pdf_path": "output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf",
-        "printable_pdf_sha256": "dab396fa4a155762df1cc99cf976b47688e9aadaa081c3fe0cfa6480cdde894f",
-        "dictionary": "DICT_5X5_1000",
-        "squares_x": 10,
-        "squares_y": 7,
-        "square_length_mm": 25.0,
-        "marker_length_mm": 17.5,
-        "board_width_mm": 250.0,
-        "board_height_mm": 175.0,
-        "rigid_backing_required": true,
-        "minimum_horizontal_scale_measurements": 4,
-        "minimum_vertical_scale_measurements": 4,
-        "maximum_axis_scale_error_fraction": 0.0025,
-        "sizing_decision": "SELECT_10X7_25MM_17_5MM_A4",
-        "sizing_record_pointer": "software/config/charuco_b0477_10x7_25mm_17_5mm.json#/sizing_basis"
-      },
-      "mode_separation": {
-        "this_dataset": "1920x1080_YUY2_60FPS_OPERATIONAL",
-        "full_native_profile": "5472x3648_YUY2_9FPS",
-        "cross_mode_intrinsics_reuse": "FORBIDDEN_UNLESS_CROP_BIN_SCALE_TRANSFORM_IS_MEASURED_AND_REVIEWED"
-      },
-      "split_policy": {
-        "assignment": "FIXED_BY_IMAGE_ID_BEFORE_CAPTURE",
-        "fit_view_count": 20,
-        "holdout_view_count": 6,
-        "holdout_must_not_enter_fit": true,
-        "minimum_detected_charuco_corners_per_view": 30
-      },
-      "capture_sequence": [
-        {
-          "sequence_ordinal": 1,
-          "image_id": "fit-01",
-          "split": "FIT",
-          "required_view": "center-fronto-parallel-near"
-        },
-        {
-          "sequence_ordinal": 2,
-          "image_id": "fit-02",
-          "split": "FIT",
-          "required_view": "center-fronto-parallel-far"
-        },
-        {
-          "sequence_ordinal": 3,
-          "image_id": "fit-03",
-          "split": "FIT",
-          "required_view": "upper-left-fronto-parallel"
-        },
-        {
-          "sequence_ordinal": 4,
-          "image_id": "fit-04",
-          "split": "FIT",
-          "required_view": "upper-right-fronto-parallel"
-        },
-        {
-          "sequence_ordinal": 5,
-          "image_id": "fit-05",
-          "split": "FIT",
-          "required_view": "lower-left-fronto-parallel"
-        },
-        {
-          "sequence_ordinal": 6,
-          "image_id": "fit-06",
-          "split": "FIT",
-          "required_view": "lower-right-fronto-parallel"
-        },
-        {
-          "sequence_ordinal": 7,
-          "image_id": "fit-07",
-          "split": "FIT",
-          "required_view": "left-edge-yaw-positive"
-        },
-        {
-          "sequence_ordinal": 8,
-          "image_id": "fit-08",
-          "split": "FIT",
-          "required_view": "left-edge-yaw-negative"
-        },
-        {
-          "sequence_ordinal": 9,
-          "image_id": "fit-09",
-          "split": "FIT",
-          "required_view": "right-edge-yaw-positive"
-        },
-        {
-          "sequence_ordinal": 10,
-          "image_id": "fit-10",
-          "split": "FIT",
-          "required_view": "right-edge-yaw-negative"
-        },
-        {
-          "sequence_ordinal": 11,
-          "image_id": "fit-11",
-          "split": "FIT",
-          "required_view": "top-edge-pitch-positive"
-        },
-        {
-          "sequence_ordinal": 12,
-          "image_id": "fit-12",
-          "split": "FIT",
-          "required_view": "top-edge-pitch-negative"
-        },
-        {
-          "sequence_ordinal": 13,
-          "image_id": "fit-13",
-          "split": "FIT",
-          "required_view": "bottom-edge-pitch-positive"
-        },
-        {
-          "sequence_ordinal": 14,
-          "image_id": "fit-14",
-          "split": "FIT",
-          "required_view": "bottom-edge-pitch-negative"
-        },
-        {
-          "sequence_ordinal": 15,
-          "image_id": "fit-15",
-          "split": "FIT",
-          "required_view": "center-rotate-positive-30"
-        },
-        {
-          "sequence_ordinal": 16,
-          "image_id": "fit-16",
-          "split": "FIT",
-          "required_view": "center-rotate-negative-30"
-        },
-        {
-          "sequence_ordinal": 17,
-          "image_id": "fit-17",
-          "split": "FIT",
-          "required_view": "center-rotate-positive-60"
-        },
-        {
-          "sequence_ordinal": 18,
-          "image_id": "fit-18",
-          "split": "FIT",
-          "required_view": "center-rotate-negative-60"
-        },
-        {
-          "sequence_ordinal": 19,
-          "image_id": "fit-19",
-          "split": "FIT",
-          "required_view": "center-oblique-near"
-        },
-        {
-          "sequence_ordinal": 20,
-          "image_id": "fit-20",
-          "split": "FIT",
-          "required_view": "center-oblique-far"
-        },
-        {
-          "sequence_ordinal": 21,
-          "image_id": "holdout-01",
-          "split": "HOLDOUT",
-          "required_view": "holdout-upper-left-oblique"
-        },
-        {
-          "sequence_ordinal": 22,
-          "image_id": "holdout-02",
-          "split": "HOLDOUT",
-          "required_view": "holdout-upper-right-oblique"
-        },
-        {
-          "sequence_ordinal": 23,
-          "image_id": "holdout-03",
-          "split": "HOLDOUT",
-          "required_view": "holdout-lower-left-oblique"
-        },
-        {
-          "sequence_ordinal": 24,
-          "image_id": "holdout-04",
-          "split": "HOLDOUT",
-          "required_view": "holdout-lower-right-oblique"
-        },
-        {
-          "sequence_ordinal": 25,
-          "image_id": "holdout-05",
-          "split": "HOLDOUT",
-          "required_view": "holdout-center-rotate-positive-45"
-        },
-        {
-          "sequence_ordinal": 26,
-          "image_id": "holdout-06",
-          "split": "HOLDOUT",
-          "required_view": "holdout-center-rotate-negative-45"
-        }
+    "planar_registration_valid_for_read_only": true,
+    "planar_registration_motion_authority": false,
+    "fixed_board_planar_registration": {
+      "status": "MEASURED_FIXED_EPOCH_PLANAR_MAPPING",
+      "purpose": "Read-only 1920x1080 image-to-board XY mapping from the already installed six-tag board; no printed target and no robot motion.",
+      "artifact_path": "software/ai/eval/b0477_fixed_board_registration_20261016.json",
+      "artifact_sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9",
+      "source_receipt_sha256": "32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8",
+      "xy_measurements_path": "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
+      "xy_measurements_sha256": "590e7e0fd1261b47517510a96de7290c74b3d5a8b07ba5ec1188029f9701993a",
+      "board_size_xy_mm": [
+        610.0,
+        457.0
       ],
-      "capture_rules": [
-        "Capture in sequence_ordinal order and retain rejected frames with reasons.",
-        "Keep the installed camera, focus, aperture, resolution, pixel format, support, board, and lighting epoch fixed.",
-        "Record raw image SHA-256, detected corner count, board centroid, board area fraction, tilt, and rotation for every view.",
-        "Do not replace a failed holdout view after seeing calibration residuals; start a new declared dataset epoch instead.",
-        "Do not open robot transport or issue any arm command during this dataset."
+      "tag_detection_edge_mm": 40.0,
+      "fit_tag_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "held_out_check_tag_ids": [
+        4,
+        5
+      ],
+      "source_frame_count": 10,
+      "fit_eligible_frame_count": 7,
+      "world_corner_fit_rmse_px": 5.3948,
+      "held_out_station_center_mean_error_mm": 4.833,
+      "held_out_station_center_max_error_mm": 7.4937,
+      "maximum_mapped_center_repeatability_deviation_mm": 0.6474,
+      "limitations": [
+        "This fixed-plane homography does not determine lens distortion or full camera intrinsics.",
+        "It maps only the board plane and does not establish Z, board-to-robot, TCP, contact, or motion authority.",
+        "Any camera, support, board, keyboard, or fiducial movement invalidates the mapping."
       ],
       "authority": {
-        "physical_calibration_valid": false,
-        "registration_valid": false,
-        "camera_guided_motion": false,
+        "robot_transport_opened": false,
         "robot_motion": false,
+        "camera_guided_motion": false,
         "contact": false
       }
     }
@@ -461,6 +291,6 @@
     "contact": false,
     "autonomous_retry": false
   },
-  "next_gate": "SCALE_VERIFY_CHARUCO_TARGET_AND_CAPTURE_PRECOMMITTED_20_FIT_6_HOLDOUT_DATASET",
+  "next_gate": "PROJECT_KEYBOARD_TARGETS_INTO_RETAINED_FRAMES_AND_REVIEW_RESIDUAL_BUDGET",
   "plan": "software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md"
 }

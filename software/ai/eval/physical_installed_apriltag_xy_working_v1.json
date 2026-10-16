@@ -16,8 +16,15 @@
     }
   },
   "coordinate_source": "working_operator_measurement",
+  "installed_tag_geometry": {
+    "family": "tag36h11",
+    "detection_edge_mm": 40.0,
+    "tile_edge_mm": 55.0,
+    "top_edge_direction": "+Y/rear/toward arm",
+    "yaw_deg_in_board_frame": 0.0
+  },
   "measurement": {
-    "status": "WORKING_UNQUALIFIED",
+    "status": "OPERATOR_MEASURED_PLANAR_INPUT",
     "method": "handheld digital-caliper edge measurements documented in operator photographs and operator-reported display readings",
     "tool_identity": "unbound handheld digital caliper",
     "session_date": "2026-10-11",
@@ -107,6 +114,7 @@
     }
   },
   "qualification": {
+    "eligible_for_fixed_epoch_planar_mapping": true,
     "eligible_for_tag_plane_placement_measured": false,
     "z_measured": false,
     "yaw_measured": false,
@@ -115,9 +123,9 @@
     "physical_authority": false
   },
   "limitations": [
-    "This is a working XY observation assembled from the completed operator photo session, not the canonical AprilTag map.",
+    "This is the installed XY and tag-size input assembled from the completed operator measurement session; the canonical design map remains unchanged.",
     "Tag-plane Z, yaw, edge lift, measurement uncertainty, and tool identity were not established.",
-    "The values may be used for exploratory image-consistency checks only and cannot satisfy tag_plane_placement_measured.",
+    "The values may be used for a fixed-epoch planar image-to-board mapping and cannot satisfy full camera intrinsics or tag_plane_placement_measured.",
     "The canonical map remains nominal and NOT_TESTED until the full measurement gate is completed."
   ],
   "hardware_writes": 0,

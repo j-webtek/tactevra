@@ -75,41 +75,38 @@ The repeat receipt is retained outside Git at
 with SHA-256
 `32a7348c78aee8ba437ec14a82daa8e1a1a0679d8d237b165e9a0fa5123b6db8`.
 
-## Reproducible ChArUco preparation
+## Reproducible fixed-board registration
 
-Generate the reviewed target from its machine-readable definition:
+No additional target needs to be printed. The installed 610 by 457 mm board is
+the measurement artifact. Its six tag36h11 detection squares are 40 mm wide;
+their measured centers and common +Y/rear orientation are recorded in
+`software/ai/eval/physical_installed_apriltag_xy_working_v1.json`.
 
-```powershell
-python software/scripts/generate_b0477_charuco_target.py
-```
-
-The selected target is 250 by 175 mm: 10 by 7 squares, 25 mm squares, and
-17.5 mm markers on A4 landscape. Its sizing is derived in
-`software/config/charuco_b0477_10x7_25mm_17_5mm.json` under `sizing_basis` from the measured
-610 by 457 mm workcell, all six recorded tag centers, the retained 1920 by
-1080 camera view, the 30-corner capture gate, and the available placement
-range. Print the resulting A4 PDF at 100% / actual size. Copy
-`software/config/charuco_print_scale_evidence.template.json`, record the PDF
-and target-definition hashes, mount the print to rigid backing, and enter four
-distributed width measurements and four distributed height measurements.
-Keep that completed evidence file with the physical capture package.
-
-Before opening the camera, run the fail-closed preflight:
+Recompute the mapping from the retained camera frames with:
 
 ```powershell
-python software/scripts/live_charuco_dataset_capture.py `
-  --session software/config/live_camera_feedback_session_20261015.json `
-  --target software/config/charuco_b0477_10x7_25mm_17_5mm.json `
-  --scale-evidence C:\path\to\completed-scale-evidence.json `
-  --printable-pdf output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf `
-  --output-directory software/runs/wizard-exports/charuco-preflight-unused `
-  --preflight-only
+.\.venv-vision\Scripts\python.exe software/scripts/measure_fixed_board_registration.py
 ```
 
-Remove `--preflight-only`, choose a new output directory, and add
-`--confirm-camera-only-capture` to begin the guided 26-view sequence. The tool
-opens no robot transport, issues no motion, accepts at least 30 decoded ChArUco
-corners per frame, and stops the dataset epoch on the first rejected view.
+The tool verifies every frame against its capture receipt, merges the default
+and refined tag detectors, fits a consensus board-to-image homography from the
+four perimeter tags, and holds the two interior tags out as independent checks.
+It opens neither camera nor robot transport and performs no movement. The
+compact result is
+`software/ai/eval/b0477_fixed_board_registration_20261016.json`.
+
+Seven of ten frames supplied all four perimeter tags to the fit. Across 112
+perimeter-tag corner observations, reprojection RMSE is 5.3948 px. The 20
+held-out interior-tag center checks have 4.8330 mm mean and 7.4937 mm maximum
+planar error. Repeated mapped centers vary by at most 0.6474 mm in this capture,
+showing that the static view is repeatable while the larger held-out residual
+sets the present accuracy bound.
+
+This result measures the board-plane mapping needed for keyboard overlays. A
+single fixed coplanar view cannot separately determine lens intrinsics and
+distortion, nor does it establish board-to-robot Z, TCP, contact, or motion
+authority. Any movement of the camera, support, board, keyboard, or fiducials
+invalidates it.
 
 `KEYBOARD_FORWARD_CAL_1` is therefore the neutral camera observation pose for
 the current bare-jaw workcell epoch. It establishes visibility only. Camera to
@@ -137,26 +134,19 @@ failure in the calibrated action registry.
 ## Next work
 
 1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose.
-   Its full-tag repeatability gate is complete: eight of ten repeat frames
-   decoded all six tags.
-2. Print `output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf` on A4 landscape at
-   100% / actual size, mount it to rigid backing, and record four distributed
-   250 mm width measurements plus four distributed 175 mm height measurements
-   in a copy of `software/config/charuco_print_scale_evidence.template.json`.
-3. Run `software/scripts/live_charuco_dataset_capture.py --preflight-only`
-   against that evidence. Only a passing scale and hash gate may proceed to the
-   precommitted 20-view fit and 6-view holdout capture in
-   `software/config/live_camera_feedback_session_20261015.json`.
-4. Solve installed intrinsics for the operational `1920x1080`, YUY2,
-   approximately 60 fps mode, then solve the static camera-to-board transform.
-   The separate full-native `5472x3648`, YUY2, 9 fps contract requires its own
-   calibration unless a crop/bin/scale transform is measured and reviewed.
-5. Build the observation-to-hover dry-run coordinator using retained frame,
+2. Use the measured fixed-board mapping to project the keyboard outline and
+   proposed key centers into the retained frames.
+3. Review the overlays against the physical keyboard and keep the current
+   7.4937 mm held-out maximum as the minimum planar uncertainty allowance until
+   a stronger distortion model is independently measured.
+4. Build the observation-to-hover dry-run coordinator using retained frame,
    detector, registration, target-catalog, and attachment-profile hashes.
-6. Keep serial writes disabled in that coordinator until passive localization,
-   uncertainty, stale-frame, missing-tag, and profile-mismatch tests pass.
-7. After installing the stylus, measure its TCP and collision envelope and
-   create a separate observation pose and trajectory family.
+5. Keep serial writes disabled until passive localization, uncertainty,
+   stale-frame, missing-tag, and profile-mismatch tests pass.
+6. When the stylus is installed, measure its TCP and collision envelope and
+   create a separate observation pose and trajectory family. The fixed camera
+   plane may be reused only if the camera and board epoch remains unchanged;
+   every trajectory still requires the matching attachment profile.
 
 The arm was intentionally left stationary at `KEYBOARD_FORWARD_CAL_1` when
 this record was updated.
