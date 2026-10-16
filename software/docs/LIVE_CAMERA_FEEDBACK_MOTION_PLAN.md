@@ -121,9 +121,13 @@ Exit: reviewed optics/coverage report. One attractive image is insufficient.
 
 ### 4. Solve installed intrinsics and static registration
 
-- Use the generated A3 target at
-  `output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf`: 12 by 9 squares,
-  30 mm squares, 22 mm markers, and `DICT_5X5_1000`.
+- Use the workcell-sized A4 target at
+  `output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf`: 10 by 7 squares,
+  25 mm squares, 17.5 mm markers, and `DICT_5X5_1000`.
+- The target is 250 by 175 mm. The sizing record
+  `software/config/charuco_b0477_10x7_25mm_17_5mm.json` under `sizing_basis` derives this from
+  the 610 by 457 mm board, six measured tag centers, the retained operational
+  camera projection, the 30-corner gate, and edge/oblique placement needs.
 - Print at 100% / actual size and mount to rigid backing. Before any dataset
   frame, bind the target-definition and PDF SHA-256 values and pass four
   distributed horizontal plus four distributed vertical caliper measurements.

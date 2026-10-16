@@ -83,7 +83,12 @@ Generate the reviewed target from its machine-readable definition:
 python software/scripts/generate_b0477_charuco_target.py
 ```
 
-Print the resulting A3 PDF at 100% / actual size. Copy
+The selected target is 250 by 175 mm: 10 by 7 squares, 25 mm squares, and
+17.5 mm markers on A4 landscape. Its sizing is derived in
+`software/config/charuco_b0477_10x7_25mm_17_5mm.json` under `sizing_basis` from the measured
+610 by 457 mm workcell, all six recorded tag centers, the retained 1920 by
+1080 camera view, the 30-corner capture gate, and the available placement
+range. Print the resulting A4 PDF at 100% / actual size. Copy
 `software/config/charuco_print_scale_evidence.template.json`, record the PDF
 and target-definition hashes, mount the print to rigid backing, and enter four
 distributed width measurements and four distributed height measurements.
@@ -94,9 +99,9 @@ Before opening the camera, run the fail-closed preflight:
 ```powershell
 python software/scripts/live_charuco_dataset_capture.py `
   --session software/config/live_camera_feedback_session_20261015.json `
-  --target software/config/charuco_b0477_12x9_30mm_22mm.json `
+  --target software/config/charuco_b0477_10x7_25mm_17_5mm.json `
   --scale-evidence C:\path\to\completed-scale-evidence.json `
-  --printable-pdf output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf `
+  --printable-pdf output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf `
   --output-directory software/runs/wizard-exports/charuco-preflight-unused `
   --preflight-only
 ```
@@ -134,9 +139,9 @@ failure in the calibrated action registry.
 1. Retain `KEYBOARD_FORWARD_CAL_1` as the bare-jaw neutral observation pose.
    Its full-tag repeatability gate is complete: eight of ten repeat frames
    decoded all six tags.
-2. Print `output/pdf/b0477_charuco_12x9_30mm_22mm_a3.pdf` on A3 landscape at
+2. Print `output/pdf/b0477_charuco_10x7_25mm_17_5mm_a4.pdf` on A4 landscape at
    100% / actual size, mount it to rigid backing, and record four distributed
-   360 mm width measurements plus four distributed 270 mm height measurements
+   250 mm width measurements plus four distributed 175 mm height measurements
    in a copy of `software/config/charuco_print_scale_evidence.template.json`.
 3. Run `software/scripts/live_charuco_dataset_capture.py --preflight-only`
    against that evidence. Only a passing scale and hash gate may proceed to the

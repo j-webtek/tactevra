@@ -21,9 +21,9 @@ Do not collect a qualification campaign until all of these are retained:
 2. The camera mount, arm base, board, keyboard, tool, cabling, optics, focus,
    exposure, gain, white balance, resolution, and pixel format are frozen as
    one configuration epoch.
-   The current repository-authoritative B0477 mode is full-native 5472 by 3648
-   YUY2 at 9 fps. A lower-resolution, MJPG, cropped, binned, or scaled mode needs
-   its own calibration unless the sensor transform is measured and reviewed.
+   The installed operational B0477 mode is 1920 by 1080 YUY2 at approximately
+   60 fps. The separate full-native 5472 by 3648 YUY2 9 fps profile needs its
+   own calibration unless the sensor transform is measured and reviewed.
    Manual focus and aperture are fixed; autofocus, auto exposure, and auto white
    balance are disabled; exposure, gain, and white balance are locked and hash
    bound before calibration or lighting measurement.
@@ -34,7 +34,7 @@ Do not collect a qualification campaign until all of these are retained:
    SHA-256.
 5. The arm is disabled or held outside the capture volume. Data collection is
    camera-only and may not be combined with a motion test.
-6. The rigid 12 by 9 board's 30 mm squares and 22 mm markers are physically
+6. The rigid 10 by 7 board's 25 mm squares and 17.5 mm markers are physically
    verified using calibrated calipers. Retain at least four distributed
    horizontal and four distributed vertical measurements, including opposite
    extents, with raw values and instrument identity. The axis-error tolerance

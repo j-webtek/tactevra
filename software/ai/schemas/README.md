@@ -331,8 +331,8 @@ the camera geometry, and limits the one-session escrow to a non-statistical
 real-world sanity check. A powered real evaluation remains a separate campaign.
 The [physical ChArUco readiness probe](physical_charuco_probe_v1.schema.json)
 records a read-only Windows device inventory and an OpenCV ArUco tooling smoke.
-It explicitly separates the retained 5x7 smoke board from the production 12x9
-camera-calibration contract. A blocked receipt has zero captures, calibration,
+It explicitly separates the retained 5x7 smoke board from the workcell-sized
+production 10x7 camera-calibration contract. A blocked receipt has zero captures, calibration,
 hardware writes, movements, or physical authority and cannot install intrinsics.
 The preserved probe incorrectly recorded 4 fps. The
 [B0477 commissioning amendment](b0477_commissioning_amendment_v1.schema.json)
