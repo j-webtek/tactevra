@@ -375,15 +375,27 @@ model joint radians. The earlier blocked 100/110/120 mm studies and the passing
 transform, and start state were nominal or synthetic. They therefore do not
 support an installed-workcell unreachable conclusion.
 
-The audit stops before IK and records five explicit inputs that must be
-measured: robot joint reference, controller-to-model correlation,
-board-to-arm transform, bare-jaw TCP, and bare-jaw installed collision
-geometry. Once those slots are populated, the existing measured trajectory
-and collision pipeline can rerun against the retained H target. The attachment
-policy remains explicit: changing from `BARE_JAW` to `STYLUS` invalidates the
-trajectory, starts a new configuration epoch, and permits no pose or contact
-authority inheritance. The audit opens no device, emits no command, and grants
-no physical authority.
+The audit now consumes the additive
+`static-overhead-b0477-phase1.v1` calibration graph. That graph matches the
+retained `STATIC_EXTERNAL_CAMERA` architecture and leaves the historical
+eye-on-arm graph unchanged. The keyboard TCP route closure contains eleven
+ordered physical artifacts: camera identity, mode, settings, intrinsics,
+measured tag map, static extrinsic, robot reference, controller correlation,
+arm-to-board transform, keyboard target map, and keyboard TCP. Independent
+keyboard outcome observation is the twelfth artifact in the full contact
+closure; it is recorded separately because this audit stops at hover-route
+screening.
+
+All eleven route artifacts are currently missing from the physical calibration
+registry. The retained board, tag, and keyboard measurements remain reusable
+inputs, but they do not silently populate those authenticated artifact slots.
+The installed collision intake also reports missing robot link geometry and
+unqualified attachment/base bodies. Once those inputs are populated, the
+existing measured trajectory and collision pipeline can rerun against the
+retained H target. The attachment policy remains explicit: changing from
+`BARE_JAW` to `STYLUS` invalidates the trajectory, starts a new configuration
+epoch, and permits no pose or contact authority inheritance. The audit opens no
+device, emits no command, and grants no physical authority.
 
 ## 2026-10-15 read-only intake result
 

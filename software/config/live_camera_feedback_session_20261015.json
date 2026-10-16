@@ -507,12 +507,14 @@
     "schema": "rocell.bare_jaw_route_readiness.v1",
     "status": "BLOCKED_CALIBRATION_COMPONENTS_REQUIRED",
     "artifact_path": "software/ai/eval/bare_jaw_route_readiness_20261016.json",
-    "artifact_sha256": "9a161d964877bc61ef8a4f4b0716424dc5235dace9eede92207fde13372d8adf",
-    "readiness_sha256": "d1ad68304cb0ad5bcfba16e2a5c77a6bd62b49d6d37c6b412802f64a03a7d24c",
+    "artifact_sha256": "ccc2f508e50add2ee4fa8d4e0659e0bf411ebb18b18571cd14642d8f619a8d59",
+    "readiness_sha256": "6ac1bb265480d8ad93f097f6c004636d556b84aeb3f3f584dd82e9d8f7064d9b",
     "blockers": [
+      "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED",
       "MEASURED_ROBOT_JOINT_REFERENCE_REQUIRED",
       "MEASURED_CONTROLLER_TO_MODEL_CORRELATION_REQUIRED",
       "MEASURED_BOARD_TO_ARM_TRANSFORM_REQUIRED",
+      "QUALIFIED_KEYBOARD_TARGET_MAP_Z_NORMAL_AND_TRAVEL_REQUIRED",
       "MEASURED_BARE_JAW_TCP_REQUIRED",
       "MEASURED_BARE_JAW_COLLISION_GEOMETRY_REQUIRED"
     ],
@@ -521,6 +523,10 @@
     "controller_commands": [],
     "transport_writes": 0,
     "hardware_access": false,
-    "physical_authority": false
+    "physical_authority": false,
+    "static_phase1_report_sha256": "b12f3b08550a65f264fccc441ef2273e2f952ef6fffe2f5e827a4edd97948b0f",
+    "static_phase1_graph_sha256": "048ec086935692fb9698f7e44f43e8addc489bacf0f4909b0dfb3691ef397981",
+    "camera_architecture_aligned": true,
+    "installed_collision_report_sha256": "43aa2cce7e0e5db05a2526032aea3fc95bf9a8c8ae9821515657c98f48d9fa16"
   }
 }

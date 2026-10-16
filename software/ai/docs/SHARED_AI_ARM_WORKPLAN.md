@@ -499,6 +499,16 @@ bare-jaw TCP, and installed bare-jaw collision geometry are measured. The
 BARE_JAW and STYLUS profiles remain separate configuration epochs; switching
 attachments invalidates the route. Hardware access, commands, descent,
 contact, and physical authority remain false.
+ARM-078 corrects the route-readiness calibration intake to the additive
+`static-overhead-b0477-phase1.v1` graph already selected for the installed
+fixed camera. The audit now proves that the retained `STATIC_EXTERNAL_CAMERA`
+architecture matches the rigid static eye-to-hand graph without changing the
+historical eye-on-arm graph. It exposes the complete eleven-artifact keyboard
+TCP route closure, the separate keyboard outcome-observer contact dependency,
+and the current physical-registry assessment for every artifact. It also binds
+the installed collision-readiness report and names each missing or unknown
+body. The result remains blocked before register projection, IK, route
+densification, collision screening, transport, or hardware access.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

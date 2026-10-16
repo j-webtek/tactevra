@@ -52,6 +52,64 @@ def test_retained_bare_jaw_route_audit_is_deterministic_and_zero_dispatch(
     }
     assert first["screening"]["ik_executed"] is False
     assert first["screening"]["unreachable_claim_supported_for_installed_workcell"] is False
+    assert first["static_phase1_calibration_intake"]["status"] == (
+        "SYNTHETIC_PHASE1_GRAPH_VERIFIED_PHYSICAL_REGISTRY_BLOCKED"
+    )
+    assert first["static_phase1_calibration_intake"]["route_artifact_ids"] == [
+        "phase1_b0477_identity",
+        "phase1_b0477_mode",
+        "phase1_b0477_settings",
+        "phase1_static_intrinsics",
+        "phase1_measured_tag_map",
+        "phase1_static_extrinsic",
+        "phase1_robot_reference",
+        "phase1_controller_correlation",
+        "phase1_arm_board",
+        "phase1_keyboard_target_map",
+        "phase1_keyboard_tcp",
+    ]
+    assert first["static_phase1_calibration_intake"]["complete_keyboard_requirement_order"] == [
+        "phase1_b0477_identity",
+        "phase1_b0477_mode",
+        "phase1_b0477_settings",
+        "phase1_static_intrinsics",
+        "phase1_measured_tag_map",
+        "phase1_static_extrinsic",
+        "phase1_robot_reference",
+        "phase1_controller_correlation",
+        "phase1_arm_board",
+        "phase1_keyboard_target_map",
+        "phase1_keyboard_tcp",
+        "phase1_keyboard_outcome_observer",
+    ]
+    assert first["static_phase1_calibration_intake"]["camera_architecture"] == {
+        "retained_live_session": "STATIC_EXTERNAL_CAMERA",
+        "selected_graph": "RIGID_STATIC_OVERHEAD_EYE_TO_HAND",
+        "historical_eye_on_arm_graph_reinterpreted": False,
+        "aligned": True,
+    }
+    assert first["installed_collision_intake"]["diagnostic_ready"] is False
+    assert first["installed_collision_intake"]["missing_required_body_ids"] == [
+        "robot:base_link",
+        "robot:gripper",
+        "robot:link1",
+        "robot:link2",
+        "robot:link3",
+        "robot:link4",
+        "robot:link5",
+    ]
+    assert first["installed_collision_intake"]["unknown_required_body_ids"] == [
+        "attachment:camera_connector",
+        "attachment:camera_holder",
+        "attachment:camera_module",
+        "attachment:contact_tool",
+        "attachment:moving_camera_cable",
+        "installation:base_and_factory_clamp",
+    ]
+    assert "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED" in first["blockers"]
+    assert "PLANNER_CAMERA_ARCHITECTURE_RECONCILIATION_REQUIRED" not in first[
+        "blockers"
+    ]
     assert first["controller_commands"] == []
     assert first["transport_writes"] == 0
     assert first["hardware_access"] is first["physical_authority"] is False
