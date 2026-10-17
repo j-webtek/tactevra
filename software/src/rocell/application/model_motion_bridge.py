@@ -257,6 +257,91 @@ def compile_retained_keyboard_hover_draft(
     return {**report, "draft_sha256": hashlib.sha256(_canonical(report)).hexdigest()}
 
 
+def compile_current_keyboard_hover_draft(
+    workspace: Path,
+    target_id: str,
+    current_observation_path: Path,
+    *,
+    expected_workcell_epoch_id: str,
+    expected_attachment_profile: str = "BARE_JAW",
+) -> dict[str, Any]:
+    """Bind one current read-only image observation to an unsent hover draft."""
+
+    root = Path(workspace).resolve()
+    observation_path = Path(current_observation_path).resolve(strict=True)
+    draft = compile_retained_keyboard_hover_draft(
+        root, target_id,
+        expected_workcell_epoch_id=expected_workcell_epoch_id,
+        expected_attachment_profile=expected_attachment_profile,
+    )
+    observation = _read_json(observation_path)
+    if observation.get("schema") != "rocell.current_planar_keyboard_observation.v1":
+        raise ModelMotionBridgeError("current planar observation schema is unsupported")
+    if observation.get("status") != "CURRENT_PLANAR_KEYBOARD_OBSERVATION_READ_ONLY":
+        raise ModelMotionBridgeError("current planar observation is not accepted")
+    if observation.get("workcell_epoch_id") != expected_workcell_epoch_id:
+        raise ModelMotionBridgeError("current planar observation epoch is stale")
+    inputs = _mapping(observation.get("inputs"), "current observation inputs")
+    if inputs.get("overlay_sha256") != draft["bindings"]["overlay_sha256"]:
+        raise ModelMotionBridgeError("current observation overlay binding is stale")
+    if inputs.get("registration_sha256") != draft["bindings"][
+        "board_registration_sha256"
+    ]:
+        raise ModelMotionBridgeError("current observation registration binding is stale")
+    selected_frame_path = root / str(inputs.get("selected_frame_path"))
+    if not selected_frame_path.is_file() or _file_sha256(
+        selected_frame_path
+    ) != inputs.get("selected_frame_sha256"):
+        raise ModelMotionBridgeError("current selected frame binding is stale")
+    stationary_path = root / str(inputs.get("stationary_observation_path"))
+    if not stationary_path.is_file() or _file_sha256(
+        stationary_path
+    ) != inputs.get("stationary_observation_sha256"):
+        raise ModelMotionBridgeError("current stationary observation binding is stale")
+    targets = _mapping(observation.get("targets"), "current observation targets")
+    target = _mapping(targets.get(target_id), f"current target {target_id!r}")
+    board_xy = target.get("board_center_xy_mm")
+    if not isinstance(board_xy, list) or len(board_xy) != 2:
+        raise ModelMotionBridgeError("current target board center is missing")
+    proposal_target = draft["proposal"]["target_mm"]
+    if any(
+        abs(_number(board_xy[index], "current board target") - proposal_target[axis])
+        > 0.001
+        for index, axis in enumerate(("x", "y"))
+    ):
+        raise ModelMotionBridgeError("current and retained board targets differ")
+
+    report = dict(draft)
+    report.pop("draft_sha256", None)
+    report["schema"] = "rocell.current_keyboard_hover_draft.v1"
+    report["status"] = "UNSENT_CURRENT_SCENE_HOVER_DRAFT_BLOCKED_FROM_INGRESS"
+    report["bindings"] = {
+        **draft["bindings"],
+        "current_observation_path": (
+            observation_path.relative_to(root).as_posix()
+            if observation_path.is_relative_to(root)
+            else observation_path.as_posix()
+        ),
+        "current_observation_sha256": _file_sha256(observation_path),
+        "selected_frame_sha256": inputs["selected_frame_sha256"],
+    }
+    report["current_image_target"] = {
+        "target_id": target_id,
+        "selected_frame_path": inputs["selected_frame_path"],
+        "center_px": target["current_center_px"],
+        "region_corners_px": target["current_region_corners_px"],
+        "scene_binding": observation["scene_binding"],
+    }
+    report["admission_blockers"] = [
+        "Current scene binding is scoped to one saved frame and is not reusable after scene movement",
+        "Current arm telemetry is not bound to this camera observation",
+        "Camera-to-board mapping is planar and has no qualified Z calibration",
+        "Board-to-arm transform and bare-jaw TCP are not commissioned for this target",
+        "No inverse kinematics, route, collision, or controller dispatch checks ran",
+    ]
+    return {**report, "draft_sha256": hashlib.sha256(_canonical(report)).hexdigest()}
+
+
 def _board_target(
     proposal: ModelMotionProposal,
     catalog: NominalTargetCatalog,
@@ -404,13 +489,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     source.add_argument("--retained-keyboard-target")
     parser.add_argument("--minimum-confidence", type=float, default=0.9)
     parser.add_argument("--workcell-epoch-id")
+    parser.add_argument("--current-planar-observation", type=Path)
     args = parser.parse_args(argv)
     if args.retained_keyboard_target is not None:
         if not args.workcell_epoch_id:
             parser.error("--workcell-epoch-id is required for a retained keyboard target")
-        report = compile_retained_keyboard_hover_draft(
-            args.workspace, args.retained_keyboard_target,
-            expected_workcell_epoch_id=args.workcell_epoch_id)
+        if args.current_planar_observation:
+            report = compile_current_keyboard_hover_draft(
+                args.workspace, args.retained_keyboard_target,
+                args.current_planar_observation,
+                expected_workcell_epoch_id=args.workcell_epoch_id)
+        else:
+            report = compile_retained_keyboard_hover_draft(
+                args.workspace, args.retained_keyboard_target,
+                expected_workcell_epoch_id=args.workcell_epoch_id)
     else:
         document = json.loads(
             args.proposal.read_text(encoding="utf-8"),

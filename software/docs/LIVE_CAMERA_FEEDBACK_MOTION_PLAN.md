@@ -358,6 +358,53 @@ reports remain ignored runtime evidence. The next gate is offline board-to-arm,
 bare-jaw TCP, IK, joint-limit, and collision screening against a fresh scene
 lease. No high hover is admitted by this checkpoint.
 
+## 2026-10-16 current planar observation handoff
+
+`observe_current_planar_keyboard.py` closes the read-only handoff from a fresh
+camera capture to the existing model-motion draft. It accepts a finite capture
+only after the no-refit stationary comparison agrees with the retained epoch.
+It then fits a current board homography from world tag IDs 0-3, uses IDs 4-5 as
+independent station checks, and projects all 46 reviewed keyboard targets into
+one hash-bound saved frame. The rendered overlay is adjusted to the current
+view instead of copying reference-frame pixels.
+
+The model-motion bridge can bind that artifact with
+`--current-planar-observation`. The result includes the selected target's
+current pixel center and region alongside the existing board-frame hover draft.
+It still emits no controller commands and cannot enter motion ingress. Current
+arm telemetry, physical intrinsics for off-plane use, board-to-arm calibration,
+bare-jaw TCP, IK, joint-limit, and collision screening remain required.
+
+The first live use retained ten unique frames in ignored runtime directory
+`live-camera-planar-feedback-20261016-03`. Three frames decoded all six tags and
+every tag supplied at least three samples. The no-refit comparison measured a
+maximum 1.5494 mm reference-center shift, inside the established 2.0 mm scene
+bound. The selected six-tag frame produced a 6.9298 px world-corner RMSE; held
+out station checks were 4.855 px for ID 4 and 14.324 px for ID 5. All 46 target
+regions were rendered. The current `H` center is `(706.572, 670.911)` px and
+maps to the retained board target `(212.951, 149.210, 21.000)` mm. The resulting
+draft contains one unsent hover destination and no controller commands. The
+capture receipt, stationary comparison, current observation, rendered overlay,
+and `H` draft are hash-bound in that ignored runtime directory.
+
+Reproduce the observation from a bounded saved capture:
+
+```powershell
+.\.venv-vision\Scripts\python.exe `
+  software/scripts/observe_current_planar_keyboard.py `
+  --frames-directory <finite-capture-directory> `
+  --stationary-observation <stationary-observation.json> `
+  --output <current-planar-observation.json> `
+  --render <current-planar-overlay.jpg>
+
+$env:PYTHONPATH = "software/src"
+.\.venv-vision\Scripts\python.exe -m rocell.application.model_motion_bridge `
+  --workspace . `
+  --retained-keyboard-target H `
+  --workcell-epoch-id keyboard-bare-jaw-camera-intake-20261015 `
+  --current-planar-observation <current-planar-observation.json>
+```
+
 ## 2026-10-16 bare-jaw route-readiness audit
 
 The deterministic zero-dispatch audit at

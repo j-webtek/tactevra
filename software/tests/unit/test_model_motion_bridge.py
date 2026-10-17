@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import pytest
 from rocell.application.model_motion_bridge import (
     ModelMotionBridgeError,
     compile_mapping,
+    compile_current_keyboard_hover_draft,
     compile_model_motion_proposal,
     compile_retained_keyboard_hover_draft,
 )
@@ -221,3 +223,51 @@ def test_retained_keyboard_hover_draft_requires_a_reviewed_target(
             workspace_root, "NOT_A_KEY",
             expected_workcell_epoch_id="keyboard-bare-jaw-camera-intake-20261015",
         )
+
+
+def test_current_keyboard_hover_draft_binds_selected_frame(
+    workspace_root: Path, tmp_path: Path,
+) -> None:
+    retained = compile_retained_keyboard_hover_draft(
+        workspace_root, "H",
+        expected_workcell_epoch_id="keyboard-bare-jaw-camera-intake-20261015",
+    )
+    frame = tmp_path / "frame.jpg"
+    frame.write_bytes(b"current-frame")
+    stationary = tmp_path / "stationary.json"
+    stationary.write_text("{}", encoding="utf-8")
+    observation = tmp_path / "observation.json"
+    def file_hash(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    value = {
+        "schema": "rocell.current_planar_keyboard_observation.v1",
+        "status": "CURRENT_PLANAR_KEYBOARD_OBSERVATION_READ_ONLY",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015",
+        "inputs": {
+            "overlay_sha256": retained["bindings"]["overlay_sha256"],
+            "registration_sha256": retained["bindings"]["board_registration_sha256"],
+            "selected_frame_path": frame.as_posix(),
+            "selected_frame_sha256": file_hash(frame),
+            "stationary_observation_path": stationary.as_posix(),
+            "stationary_observation_sha256": file_hash(stationary),
+        },
+        "scene_binding": {"scope": "SELECTED_SAVED_FRAME_ONLY"},
+        "targets": {"H": {
+            "board_center_xy_mm": [212.951, 149.21],
+            "current_center_px": [812.5, 642.25],
+            "current_region_corners_px": [
+                [800, 630], [825, 630], [825, 655], [800, 655]
+            ],
+        }},
+    }
+    observation.write_text(json.dumps(value), encoding="utf-8")
+
+    report = compile_current_keyboard_hover_draft(
+        workspace_root, "H", observation,
+        expected_workcell_epoch_id="keyboard-bare-jaw-camera-intake-20261015",
+    )
+
+    assert report["status"] == "UNSENT_CURRENT_SCENE_HOVER_DRAFT_BLOCKED_FROM_INGRESS"
+    assert report["current_image_target"]["center_px"] == [812.5, 642.25]
+    assert report["controller_commands"] == []
+    assert report["physical_authority"] is False
