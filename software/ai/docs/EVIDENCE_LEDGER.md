@@ -12906,3 +12906,33 @@ rewriting history. New entries must use a unique evidence ID.
   declaration remain pending. Installed-profile eligibility false; accepted
   uncertainty bodies 0; profile generation false; collision screening false;
   commands 0; hardware access false; movements 0; physical authority false.
+
+### E-20261017-AI-INSTALLED-BASE-TRANSFORM-INTAKE-001 — unresolved transform made explicit
+
+- Source: the retained live-camera session, operator-measured six-tag XY map,
+  bare-jaw route-readiness audit, candidate collision envelopes, Phase-1
+  calibration graph, and three nominal or virtual reach sources. The result
+  records eight exact source bindings.
+- Reused evidence: the 610 x 457 mm board, all six installed tag centers,
+  fixed workcell epoch, `KEYBOARD_FORWARD_CAL_1` register values
+  `[2052, 2149, 1956, 2550, 2227, 2041, 2042]`, and seven local robot-link
+  envelopes. No retained dimension or tag-center measurement is requested
+  again.
+- Exclusion boundary: reach-study `[305, 457]` and `[305, 557]` coordinates,
+  virtual `[385, 532, 70.1]` mm / -105 degree placement, and nominal simulation
+  transforms are recorded as excluded assumptions and cannot populate the
+  physical solution.
+- Completion contract: accepted Phase-1 prerequisites; installed base/clamp
+  identity, envelope, and uncertainty; at least six position- and
+  orientation-diverse correspondences; rank and conditioning evidence;
+  held-out residuals; and reseat repeatability. Attachment changes invalidate
+  trajectories and the future stylus remains a separate profile.
+- Artifact:
+  `software/ai/eval/installed_base_transform_intake_20261017.json`, file
+  SHA-256
+  `3585bc405bf744204dafa446b2cf702abe9c4ff9cbe22f08fafdf56581e2884f`,
+  canonical content SHA-256
+  `9ca77eb8a1fc560058f527b59f08dcb6369bf565e4affd18ff2e056bd78d8052`.
+- Result: `BLOCKED_INSTALLED_BASE_TRANSFORM_EVIDENCE_REQUIRED`; transform
+  fields remain null; profile generation false; collision screening false;
+  commands 0; hardware access false; movements 0; physical authority false.

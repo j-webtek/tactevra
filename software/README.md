@@ -721,6 +721,27 @@ fixed flexible cable, and bare-jaw absence declaration remain without
 geometry; all 19 bodies still require accepted uncertainty. It does not create
 an installed profile or execute collision screening.
 
+Prepare the installed board-to-robot-base transform intake without repeating
+the retained board/tag measurements:
+
+```powershell
+$env:PYTHONPATH='software/src;software/ai'
+python software/ai/run_installed_base_transform_intake.py `
+  --workspace . `
+  --intake-id installed-base-transform-20261017-v1 `
+  --captured-at-utc 2026-10-17T12:00:00Z `
+  --output software/ai/eval/installed_base_transform_intake_20261017.json
+```
+
+Exit code 2 is expected while physical evidence is pending. The intake binds
+the 610 x 457 mm board, all six installed tag centers, the exact
+`KEYBOARD_FORWARD_CAL_1` controller-register observation, seven local robot
+link envelopes, and the Phase-1 prerequisite graph. It quarantines every
+nominal or virtual base coordinate and leaves `B_T_base_link` empty. Completion
+requires accepted prerequisites, base/clamp identity and envelope, at least
+six diverse correspondences, full-rank observability, held-out residuals, and
+reseat repeatability. It performs no hardware I/O or motion.
+
 From the workspace root:
 
 ```powershell

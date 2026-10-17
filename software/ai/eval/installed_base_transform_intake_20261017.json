@@ -1,0 +1,410 @@
+{
+  "assumptions_excluded_from_physical_solution": [
+    {
+      "classification": "SCREENING_ONLY_NOT_PROVEN",
+      "source": "active-project/RoCell_v0_3/config/robot_reach_screening.json",
+      "value": {
+        "board_frame_base_axis_xy_mm": [
+          305.0,
+          457.0
+        ]
+      }
+    },
+    {
+      "classification": "SENSITIVITY_CASE_ONLY",
+      "source": "active-project/RoCell_v0_3/config/robot_reach_screening.json",
+      "value": {
+        "assumed_base_axis_xy_mm": [
+          305.0,
+          557.0
+        ]
+      }
+    },
+    {
+      "classification": "UNMEASURED_SENSITIVITY_OVERLAY",
+      "source": "software/config/virtual_commissioning_profile.json",
+      "value": {
+        "base_axis_x_board_mm": 385.0,
+        "base_axis_y_board_mm": 532.0,
+        "base_link_z_board_mm": 70.1,
+        "base_yaw_board_rad": -1.832595714594046
+      }
+    },
+    {
+      "classification": "NOMINAL_ONLY_FROM_RC03_REACH_SCREENING",
+      "source": "software/config/simulation_hardware_profile.json",
+      "value": {
+        "rotation_row_major": [
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "translation_mm": [
+          305.0,
+          457.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "captured_at_utc": "2026-10-17T12:00:00Z",
+  "collision_screening_executed": false,
+  "completion_rules": {
+    "accepted_thresholds_must_be_declared_by_reviewed_policy": true,
+    "all_prerequisites_must_be_accepted": true,
+    "attachment_change_invalidates_trajectory": true,
+    "minimum_correspondence_count": 6,
+    "minimum_held_out_sample_count": 2,
+    "minimum_orientation_diversity_count": 2,
+    "minimum_position_diversity_count": 3,
+    "minimum_reseat_trial_count": 2,
+    "required_design_matrix_rank": 6,
+    "stylus_requires_separate_profile": true
+  },
+  "content_sha256": "9ca77eb8a1fc560058f527b59f08dcb6369bf565e4affd18ff2e056bd78d8052",
+  "controller_commands": [],
+  "hardware_access": false,
+  "intake_id": "installed-base-transform-20261017-v1",
+  "measurement_intake": {
+    "board_T_robot_base": {
+      "from_frame": "base_link",
+      "quaternion_xyzw": null,
+      "rotation_matrix_row_major": null,
+      "rotation_uncertainty_deg": null,
+      "status": "PENDING",
+      "to_frame": "B",
+      "translation_mm": null,
+      "translation_uncertainty_mm": null
+    },
+    "correspondences": [],
+    "held_out_validation": {
+      "maximum_orientation_residual_deg": null,
+      "maximum_position_residual_mm": null,
+      "rms_orientation_residual_deg": null,
+      "rms_position_residual_mm": null,
+      "sample_count": 0,
+      "status": "PENDING"
+    },
+    "installed_base_and_clamp": {
+      "arm_serial_or_unique_id": null,
+      "clamp_edge_to_base_axis_offset_xyz_mm": null,
+      "conservative_board_frame_envelope": null,
+      "controller_id": null,
+      "factory_clamp_revision": null,
+      "geometry_uncertainty_mm": null,
+      "installation_witness_ids": [],
+      "status": "PENDING"
+    },
+    "observability": {
+      "condition_number": null,
+      "correspondence_count": 0,
+      "design_matrix_rank": null,
+      "orientation_diversity_count": 0,
+      "position_diversity_count": 0,
+      "status": "PENDING"
+    },
+    "reseat_repeatability": {
+      "maximum_rotation_delta_deg": null,
+      "maximum_translation_delta_mm": null,
+      "status": "PENDING",
+      "trial_count": 0
+    },
+    "source_ids": []
+  },
+  "next_action": "ACCEPT_PREREQUISITES_THEN_CAPTURE_DIVERSE_ROBOT_TO_BOARD_CORRESPONDENCES_AND_SOLVE_HELD_OUT_TRANSFORM",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "profile_generated": false,
+  "retained_context": {
+    "all_six_fiducials_visible": true,
+    "attachment_profile": "BARE_JAW",
+    "attachment_profile_id": "bare-jaw-live-calibration-v1",
+    "board_axes": {
+      "+x": "right",
+      "+y": "rear/toward arm",
+      "+z": "up"
+    },
+    "board_frame": "B",
+    "board_origin": "front-left board corner",
+    "board_size_xy_mm": [
+      610.0,
+      457.0
+    ],
+    "board_to_arm_transform_status": "MISSING",
+    "detected_tag_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "fixed_items": [
+      "arm base",
+      "plywood workcell board",
+      "keyboard",
+      "fiducial sheets"
+    ],
+    "installed_tag_centers_xy_mm": {
+      "K0": [
+        240.17,
+        265.84
+      ],
+      "P0": [
+        442.05,
+        270.39
+      ],
+      "T0": [
+        27.32,
+        33.31
+      ],
+      "T1": [
+        403.66,
+        38.45
+      ],
+      "T2": [
+        32.55,
+        429.5
+      ],
+      "T3": [
+        581.38,
+        431.47
+      ]
+    },
+    "installed_tag_geometry": {
+      "detection_edge_mm": 40.0,
+      "family": "tag36h11",
+      "tile_edge_mm": 55.0,
+      "top_edge_direction": "+Y/rear/toward arm",
+      "yaw_deg_in_board_frame": 0.0
+    },
+    "neutral_observation_pose": "KEYBOARD_FORWARD_CAL_1",
+    "neutral_observation_servo_positions": [
+      2052,
+      2149,
+      1956,
+      2550,
+      2227,
+      2041,
+      2042
+    ],
+    "robot_local_envelopes": [
+      {
+        "body_id": "robot:base_link",
+        "envelope": {
+          "maximum_mm": [
+            42.521708,
+            40.800001,
+            1.500002
+          ],
+          "minimum_mm": [
+            -56.000002,
+            -40.800001,
+            -71.1
+          ],
+          "size_mm": [
+            98.52171,
+            81.600002,
+            72.600002
+          ]
+        },
+        "frame": "base_link"
+      },
+      {
+        "body_id": "robot:link1",
+        "envelope": {
+          "maximum_mm": [
+            27.388891,
+            36.210001,
+            62.146684
+          ],
+          "minimum_mm": [
+            -27.388891,
+            -36.210001,
+            1.499998
+          ],
+          "size_mm": [
+            54.777782,
+            72.420002,
+            60.646686
+          ]
+        },
+        "frame": "link1"
+      },
+      {
+        "body_id": "robot:link2",
+        "envelope": {
+          "maximum_mm": [
+            246.815401,
+            40.002402,
+            39.410002
+          ],
+          "minimum_mm": [
+            -9.999732,
+            -15.510002,
+            -39.610002
+          ],
+          "size_mm": [
+            256.815133,
+            55.512404,
+            79.020004
+          ]
+        },
+        "frame": "link2"
+      },
+      {
+        "body_id": "robot:link3",
+        "envelope": {
+          "maximum_mm": [
+            12.360402,
+            10.109599,
+            18.000002
+          ],
+          "minimum_mm": [
+            -15.507169,
+            -154.696581,
+            -17.520002
+          ],
+          "size_mm": [
+            27.867571,
+            164.80618,
+            35.520004
+          ]
+        },
+        "frame": "link3"
+      },
+      {
+        "body_id": "robot:link4",
+        "envelope": {
+          "maximum_mm": [
+            25.257477,
+            9.500428,
+            20.200201
+          ],
+          "minimum_mm": [
+            -28.669602,
+            -52.299578,
+            -20.199803
+          ],
+          "size_mm": [
+            53.927079,
+            61.800006,
+            40.400004
+          ]
+        },
+        "frame": "link4"
+      },
+      {
+        "body_id": "robot:link5",
+        "envelope": {
+          "maximum_mm": [
+            15.497937,
+            17.773655,
+            119.885622
+          ],
+          "minimum_mm": [
+            -30.998083,
+            -17.746347,
+            -0.749514
+          ],
+          "size_mm": [
+            46.49602,
+            35.520002,
+            120.635136
+          ]
+        },
+        "frame": "link5"
+      },
+      {
+        "body_id": "robot:gripper",
+        "envelope": {
+          "maximum_mm": [
+            67.082605,
+            15.240369,
+            0.750224
+          ],
+          "minimum_mm": [
+            -10.767399,
+            -9.999633,
+            -38.617346
+          ],
+          "size_mm": [
+            77.850004,
+            25.240002,
+            39.36757
+          ]
+        },
+        "frame": "gripper_link"
+      }
+    ],
+    "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+  },
+  "schema": "rocell.installed_base_transform_intake.v1",
+  "source_bindings": [
+    {
+      "byte_length": 23937,
+      "path": "software/config/live_camera_feedback_session_20261015.json",
+      "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+    },
+    {
+      "byte_length": 3785,
+      "path": "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
+      "sha256": "590e7e0fd1261b47517510a96de7290c74b3d5a8b07ba5ec1188029f9701993a"
+    },
+    {
+      "byte_length": 25009,
+      "path": "software/ai/eval/bare_jaw_route_readiness_20261016.json",
+      "sha256": "400336dbde61b1d8afde35ce868df46b37c4eb4da80bbee5f94485b1e1a716ea"
+    },
+    {
+      "byte_length": 19468,
+      "path": "software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json",
+      "sha256": "3961602a2541703f1132b7dbbf0c79d04c2794142b669b2836d15f2f7348c667"
+    },
+    {
+      "byte_length": 20206,
+      "path": "software/src/rocell/calibration/static_phase1_requirements.py",
+      "sha256": "3151ea447657a2a4d5d2837cdf17cac1934d266fc188f8a901a7b325bdb12fd9"
+    },
+    {
+      "byte_length": 3153,
+      "path": "active-project/RoCell_v0_3/config/robot_reach_screening.json",
+      "sha256": "348fccf9be88fc32299ab10fce14e764869422191a43963631e4f5f0ccb9e53b"
+    },
+    {
+      "byte_length": 2759,
+      "path": "software/config/virtual_commissioning_profile.json",
+      "sha256": "35d8b4744c5148c168c4c208c0520a6a1c3bb63ec368586c683a1e30b0f2a7e0"
+    },
+    {
+      "byte_length": 11060,
+      "path": "software/config/simulation_hardware_profile.json",
+      "sha256": "631de51103a274150fc4e28a5292ed4e7c0755d2a457f23dd2ecc86cbd5dabac"
+    }
+  ],
+  "status": "BLOCKED_INSTALLED_BASE_TRANSFORM_EVIDENCE_REQUIRED",
+  "target_artifact": {
+    "acceptance_evidence": "Installed clamp/base identity, diverse robot-to-board correspondences, rank/observability evidence, held-out position/orientation residuals, and reseat checks.",
+    "artifact_id": "phase1_arm_board",
+    "artifact_schema": "rocell.phase1_arm_board.v1",
+    "prerequisite_status": {
+      "phase1_controller_correlation": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT",
+      "phase1_measured_tag_map": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT",
+      "phase1_robot_reference": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT",
+      "phase1_static_extrinsic": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT"
+    },
+    "prerequisites": [
+      "phase1_static_extrinsic",
+      "phase1_measured_tag_map",
+      "phase1_robot_reference",
+      "phase1_controller_correlation"
+    ],
+    "purpose": "Solve the installed robot-base-to-board transform independently of the static camera-to-board transform."
+  }
+}
