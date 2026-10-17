@@ -59,6 +59,12 @@ binds exact prerequisite bytes, and evaluates `no_attachment` and
 `stylus_attachment` together while retaining their different downstream
 blockers. The draft itself is not evidence and no coordinates are inferred from
 the rejected planar camera model.
+The downstream board-to-robot composition boundary now requires independently
+reviewed 3-D correspondences, three noncollinear fit points, two held-out
+points, stable installation identity, and a passing reseat check. It can map a
+ready 46-key package into robot-frame localization candidates, but those points
+are not motion targets. No current board-to-robot measurement artifact passes
+that boundary, and clearance remains open for both attachment profiles.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or

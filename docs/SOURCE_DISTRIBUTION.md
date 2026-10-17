@@ -642,3 +642,13 @@ the exact measurement and prerequisite bytes, evaluates both attachment
 profiles, and cannot authorize motion or contact. No image, physical
 measurement, calibration corpus, controller artifact, or generated geometry
 enters the archive. All byte, duplicate, and reduction limits remain unchanged.
+
+The board-to-robot composition boundary adds four governed paths: one CPU-only
+3-D rigid-fit/composition module, two strict schemas, and one focused test
+module. The file-count ceiling advances from 6,521 to the exact expected 6,525
+files. It requires independently reviewed installation-bound measurements,
+separates fit points from held-out checks, maps a passing 46-key package into
+robot-frame localization candidates for both attachment profiles, and retains
+clearance, motion, and contact as blockers. No image, physical measurement,
+calibration corpus, controller artifact, or generated geometry enters the
+archive. All byte, duplicate, and reduction limits remain unchanged.

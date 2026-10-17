@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/board_to_robot_measurements_v1.schema.json",
+  "title": "Reviewed board-to-robot measurements v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "source_frame", "target_frame", "units", "measurement_method", "board", "installation", "review", "correspondences", "thresholds"],
+  "properties": {
+    "schema": {"const": "rocell.board_to_robot_measurements.v1"},
+    "status": {"enum": ["DRAFT_UNREVIEWED", "REVIEWED_INDEPENDENT_BOARD_TO_ROBOT_MEASUREMENTS"]},
+    "source_frame": {"const": "RC03_board"},
+    "target_frame": {"const": "robot_base"},
+    "units": {"const": "mm"},
+    "measurement_method": {"const": "independent_robot_to_board_correspondences"},
+    "board": {
+      "type": "object", "additionalProperties": false,
+      "required": ["width_mm", "depth_mm"],
+      "properties": {"width_mm": {"const": 610.0}, "depth_mm": {"const": 457.0}}
+    },
+    "installation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["robot_base_identity", "board_identity", "installation_unchanged", "reseat_check_passed"],
+      "properties": {
+        "robot_base_identity": {"type": "string"},
+        "board_identity": {"type": "string"},
+        "installation_unchanged": {"type": "boolean"},
+        "reseat_check_passed": {"type": "boolean"}
+      }
+    },
+    "review": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reviewed", "reviewer", "reviewed_at", "notes"],
+      "properties": {
+        "reviewed": {"type": "boolean"}, "reviewer": {"type": "string"},
+        "reviewed_at": {"type": "string"}, "notes": {"type": "string"}
+      }
+    },
+    "correspondences": {
+      "type": "array", "minItems": 0,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["point_id", "role", "board_xyz_mm", "robot_xyz_mm"],
+        "properties": {
+          "point_id": {"type": "string", "minLength": 1},
+          "role": {"enum": ["FIT", "HOLDOUT"]},
+          "board_xyz_mm": {"$ref": "#/$defs/vector3"},
+          "robot_xyz_mm": {"$ref": "#/$defs/vector3"}
+        }
+      }
+    },
+    "thresholds": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_fit_rms_residual_mm", "max_fit_residual_mm", "max_holdout_residual_mm"],
+      "properties": {
+        "max_fit_rms_residual_mm": {"type": "number", "exclusiveMinimum": 0, "maximum": 3},
+        "max_fit_residual_mm": {"type": "number", "exclusiveMinimum": 0, "maximum": 5},
+        "max_holdout_residual_mm": {"type": "number", "exclusiveMinimum": 0, "maximum": 5}
+      }
+    }
+  },
+  "$defs": {
+    "vector3": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {"type": "number"}
+    }
+  }
+}

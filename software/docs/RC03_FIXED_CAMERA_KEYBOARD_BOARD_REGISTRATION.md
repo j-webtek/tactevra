@@ -80,3 +80,38 @@ limits, or excessive fit residuals. The resulting package evaluates
 `no_attachment` and `stylus_attachment` from the same keyboard transform while
 retaining their separate downstream blockers. It cannot authorize motion or
 contact.
+
+## Board-to-robot handoff
+
+`rocell.vision.fixed_camera_keyboard_robot_localization_v1` implements the
+next fail-closed boundary. It consumes a ready keyboard registration package,
+the exact bound target profile, and independently reviewed 3-D
+`RC03_board`-to-`robot_base` correspondences. At least three fit points must
+span both board axes, at least two separate held-out points are required, and
+the unchanged-installation and reseat checks must pass. The governed limits are
+3 mm fit RMS, 5 mm maximum fit residual, and 5 mm maximum held-out residual.
+
+Create the local measurement draft without printing another target:
+
+```powershell
+$env:PYTHONPATH = "software/src"
+python -m rocell.vision.fixed_camera_keyboard_robot_localization_v1 `
+  --write-template board-to-robot-measurements.json
+```
+
+After the measurement contract has independent review, compose it with the
+keyboard package and exact target profile:
+
+```powershell
+python -m rocell.vision.fixed_camera_keyboard_robot_localization_v1 `
+  board-to-robot-measurements.json `
+  keyboard-board-registration-package.json `
+  software/config/static_nominal_target_profiles.json `
+  > keyboard-robot-localization.json
+```
+
+A passing result maps all 46 key centres at the profile's 21 mm target plane
+into `robot_base` as localization candidates. The result still emits no motion
+target and cannot authorize motion or contact. Installed continuous clearance
+remains open for both profiles; the stylus profile additionally retains its
+own TCP and trajectory blockers.
