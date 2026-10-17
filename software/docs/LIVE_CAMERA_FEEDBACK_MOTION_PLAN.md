@@ -794,3 +794,30 @@ existing target moves. Capture remains blocked until that target's immutable
 identity, metric feature definition, two-axis scale measurements, and rigid
 flat backing are recorded. This contract requests no new print and opens no
 camera or robot transport.
+
+## 2026-10-17 static-overhead collision measurement packet
+
+The reusable installed-collision measurement validator and deterministic
+profile builder now accept an explicit source-binding object. This lets the
+selected static-overhead graph use the previously reviewed qualification path
+without loading the historical arm-mounted camera roster.
+
+`run_static_overhead_collision_profile_intake.py` generated a digital pending
+manifest, validation report, and on-screen worksheet against immutable
+FREEZE-013 commit `869d6f7ed7d1013a8003457a819ccaee3a03a1e7`. The exact
+static contract SHA-256 remains
+`fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39`.
+The packet inventories all 19 required bodies once and records the retained
+board, keyboard, B0477, support-design, and bare-jaw candidates in notes so
+those facts do not need to be re-entered. They remain pending until source
+hashes, conservative envelopes, and uncertainties are accepted.
+
+The manifest file SHA-256 is
+`5ca32f47d65c138c3916361232d608f7ef4f5c40b98edf8d380794e6115d9702`,
+its content SHA-256 is
+`55b0c1bdc736123b2b7e33512e02ccd10744080ef8a5ebbd1e45120b722dc9f6`,
+and the validation-report SHA-256 is
+`96bcde44181790430244a9b516213e4cbe472f6635b91790f580f54997661efd`.
+The result is `BLOCKED_STATIC_OVERHEAD_MEASUREMENTS_PENDING`: no profile or
+collision screening was produced, and commands, hardware access, movement,
+and physical authority remain zero or false.

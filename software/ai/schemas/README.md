@@ -360,3 +360,11 @@ builder verifies the declaration self-hash and campaign binding, inventories
 only existing regular files, and emits the evidence index consumed by the
 preflight. It does not create evidence bytes or infer custody. Declaration and
 custody-review authenticity remain owner-review responsibilities.
+
+The [installed collision measurement manifest](installed_collision_measurement_manifest_v1.schema.json)
+records one conservative measured-envelope row for each required installed body,
+plus clearance and uncertainty evidence. Static-overhead intake supplies the
+exact frozen source bindings explicitly, so it cannot silently substitute the
+historical arm-mounted camera roster. Pending rows preserve known installation
+facts without inventing geometry; only a complete, strictly validated manifest
+can produce the separate zero-authority installed collision profile.

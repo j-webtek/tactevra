@@ -18,6 +18,7 @@ implementation details or evidence for a specific part of the system.
 | Contribute code or documentation | [Contributing](../CONTRIBUTING.md) |
 | Explore physical build resources | [Hardware build guide](HARDWARE_BUILD_GUIDE.md) |
 | Build the system visualization | [Blender workcell explainer](../presentations/blender/README.md) |
+| Follow camera feedback and motion integration | [Live camera feedback and motion plan](../software/docs/LIVE_CAMERA_FEEDBACK_MOTION_PLAN.md) |
 
 ## Choose by role
 

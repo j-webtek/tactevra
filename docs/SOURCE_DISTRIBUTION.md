@@ -663,3 +663,13 @@ static-camera contract while retaining the historical arm-camera contract.
 Generated intake reports and the detached FREEZE-013 checkout remain ignored.
 The exact governed ceiling is therefore 6,617; every logical-byte, blob,
 duplicate, and reduction limit remains unchanged.
+
+The static-overhead profile-intake increment adds twelve reviewable source and
+evidence files: the reviewed manifest and profile-builder foundations, their
+schemas and tests, one explicit static-overhead adapter, one command-line
+wrapper, one focused regression test, and three deterministic pending-packet
+artifacts. The packet is intentionally tracked because it is the reproducible
+handoff from retained installation facts to the remaining measurement work.
+It contains no commands or physical authority. The exact governed ceiling is
+therefore 6,629; every logical-byte, blob, duplicate, and reduction limit
+remains unchanged.
