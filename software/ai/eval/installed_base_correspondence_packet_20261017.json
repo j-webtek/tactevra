@@ -1,0 +1,261 @@
+{
+  "collection_requirements": [
+    "accept all phase1_arm_board prerequisite artifacts",
+    "keep board, arm base, camera support, tags, and attachment fixed",
+    "record one immutable controller feedback receipt per slot",
+    "bind the base_link witness-point derivation from accepted controller correlation",
+    "record one immutable camera observation receipt per slot",
+    "bind the board-frame witness-point measurement derived from that observation",
+    "bind the same timestamp, workcell epoch, and attachment profile",
+    "measure the same rigid witness point in base_link and board frames",
+    "preserve the precommitted training and held-out split",
+    "include at least three board regions and two height classes"
+  ],
+  "content_sha256": "68a9dab271549ecc3f75e5584034b47f1dfe7bd78e0ae4af8e13d4a707e62065",
+  "controller_commands": [],
+  "created_at_utc": "2026-10-17T14:00:00Z",
+  "fixed_context": {
+    "attachment_profile": "BARE_JAW",
+    "attachment_profile_id": "bare-jaw-live-calibration-v1",
+    "board_size_xy_mm": [
+      610.0,
+      457.0
+    ],
+    "installed_tag_centers_xy_mm": {
+      "K0": [
+        240.17,
+        265.84
+      ],
+      "P0": [
+        442.05,
+        270.39
+      ],
+      "T0": [
+        27.32,
+        33.31
+      ],
+      "T1": [
+        403.66,
+        38.45
+      ],
+      "T2": [
+        32.55,
+        429.5
+      ],
+      "T3": [
+        581.38,
+        431.47
+      ]
+    },
+    "neutral_observation_pose": "KEYBOARD_FORWARD_CAL_1",
+    "neutral_observation_servo_positions": [
+      2052,
+      2149,
+      1956,
+      2550,
+      2227,
+      2041,
+      2042
+    ],
+    "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+  },
+  "hardware_access": false,
+  "intake_binding": {
+    "content_sha256": "9ca77eb8a1fc560058f527b59f08dcb6369bf565e4affd18ff2e056bd78d8052",
+    "file_sha256": "3585bc405bf744204dafa446b2cf702abe9c4ff9cbe22f08fafdf56581e2884f",
+    "intake_id": "installed-base-transform-20261017-v1",
+    "path": "software/ai/eval/installed_base_transform_intake_20261017.json"
+  },
+  "packet_id": "installed-base-correspondences-20261017-v1",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "precommitted_split": {
+    "held_out_slot_count": 2,
+    "held_out_used_for_fit": false,
+    "slots": [
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "FRONT_LEFT",
+        "required_height_class": "LOW",
+        "slot_id": "train-front-left-low",
+        "split": "TRAINING",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "FRONT_RIGHT",
+        "required_height_class": "LOW",
+        "slot_id": "train-front-right-low",
+        "split": "TRAINING",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "REAR_LEFT",
+        "required_height_class": "LOW",
+        "slot_id": "train-rear-left-low",
+        "split": "TRAINING",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "REAR_RIGHT",
+        "required_height_class": "LOW",
+        "slot_id": "train-rear-right-low",
+        "split": "TRAINING",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "CENTER_LEFT",
+        "required_height_class": "HIGH",
+        "slot_id": "train-center-left-high",
+        "split": "TRAINING",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "CENTER_RIGHT",
+        "required_height_class": "HIGH",
+        "slot_id": "train-center-right-high",
+        "split": "TRAINING",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "CENTER_FRONT",
+        "required_height_class": "HELD_OUT",
+        "slot_id": "heldout-center-front",
+        "split": "HELD_OUT",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      },
+      {
+        "attachment_profile_id": "bare-jaw-live-calibration-v1",
+        "base_point_derivation_sha256": null,
+        "base_point_xyz_mm": null,
+        "board_point_measurement_sha256": null,
+        "board_point_xyz_mm": null,
+        "camera_observation_sha256": null,
+        "captured_at_utc": null,
+        "controller_feedback_sha256": null,
+        "notes": null,
+        "pose_label": null,
+        "required_board_region": "CENTER_REAR",
+        "required_height_class": "HELD_OUT",
+        "slot_id": "heldout-center-rear",
+        "split": "HELD_OUT",
+        "status": "PENDING",
+        "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
+      }
+    ],
+    "training_slot_count": 6
+  },
+  "prerequisite_status": {
+    "phase1_controller_correlation": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT",
+    "phase1_measured_tag_map": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT",
+    "phase1_robot_reference": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT",
+    "phase1_static_extrinsic": "REQUIRED_ACCEPTED_PHYSICAL_ARTIFACT"
+  },
+  "remaining_after_position_fit": [
+    "orientation-diverse pose validation",
+    "held-out orientation residuals",
+    "installed base and clamp envelope plus uncertainty",
+    "at least two reseat repeatability trials",
+    "reviewed physical acceptance thresholds"
+  ],
+  "retained_pose_labels_for_collection_planning_only": [
+    "KEYBOARD_FIELD_APPROACH_25",
+    "KEYBOARD_FIELD_APPROACH_20",
+    "KEYBOARD_FIELD_APPROACH_10",
+    "KEYBOARD_FIELD_CAL_3",
+    "KEYBOARD_DIAGONAL_CAL_2",
+    "KEYBOARD_FORWARD_CAL_1"
+  ],
+  "retained_pose_reuse_rule": "A retained label is a collection-planning candidate only. Each slot requires fresh synchronized feedback and camera evidence in this epoch.",
+  "schema": "rocell.installed_base_correspondence_packet.v1",
+  "solver_policy": {
+    "maximum_points": 8,
+    "minimum_held_out_points": 2,
+    "minimum_training_points": 6,
+    "proper_rigid_transform_only": true,
+    "scale_or_shear_fit_allowed": false
+  },
+  "status": "BLOCKED_PREREQUISITES_THEN_CORRESPONDENCE_COLLECTION",
+  "transform_contract": {
+    "candidate_kind": "POSITION_ONLY_PROPER_RIGID_TRANSFORM",
+    "physical_acceptance_artifact": "phase1_arm_board",
+    "source_frame": "base_link",
+    "target_frame": "B",
+    "units": "mm"
+  }
+}

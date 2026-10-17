@@ -12936,3 +12936,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Result: `BLOCKED_INSTALLED_BASE_TRANSFORM_EVIDENCE_REQUIRED`; transform
   fields remain null; profile generation false; collision screening false;
   commands 0; hardware access false; movements 0; physical authority false.
+
+### E-20261017-AI-INSTALLED-BASE-CORRESPONDENCE-PACKET-001 — fit split precommitted
+
+- Source: installed-base-transform intake file SHA-256
+  `3585bc405bf744204dafa446b2cf702abe9c4ff9cbe22f08fafdf56581e2884f`
+  and canonical content SHA-256
+  `9ca77eb8a1fc560058f527b59f08dcb6369bf565e4affd18ff2e056bd78d8052`.
+- Split: six training slots span front/rear, left/right, and low/high geometry.
+  Two center-region slots are precommitted as untouched held-out samples.
+  Existing pose names remain collection-planning candidates and do not fill a
+  correspondence.
+- Evidence boundary: every completed slot must bind controller feedback, the
+  accepted `base_link` witness-point derivation, simultaneous camera evidence,
+  the board-frame witness-point measurement, fixed epoch, attachment profile,
+  and UTC timestamp. The offline solver fits a proper rigid transform only and
+  rejects scale, shear, reflection, insufficient excitation, changed splits,
+  and failed held-out residuals.
+- Artifact:
+  `software/ai/eval/installed_base_correspondence_packet_20261017.json`, file
+  SHA-256
+  `2a3325fbd366d397f57e6a78a9408ea84c3d594247c81bfb284b9c1e2ca30bf5`,
+  canonical content SHA-256
+  `68a9dab271549ecc3f75e5584034b47f1dfe7bd78e0ae4af8e13d4a707e62065`.
+- Result: `BLOCKED_PREREQUISITES_THEN_CORRESPONDENCE_COLLECTION`; all eight
+  slots remain pending. A passing future fit remains position-only until
+  orientation, base/clamp, uncertainty, reviewed thresholds, and reseat gates
+  pass. Commands 0; hardware access false; movements 0; physical authority
+  false.
