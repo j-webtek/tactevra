@@ -12654,3 +12654,30 @@ rewriting history. New entries must use a unique evidence ID.
 - Chain update: intrinsics plan file SHA-256 `706253e9cee4bfa875af87cb424fb280a8ba741295788360e8a003967a8e1dfe`, plan SHA-256 `d771089a5aea8b7d7e73e0892bea0ac4297cf76c765fdd803a5e3467098a4c40`; route file SHA-256 `400336dbde61b1d8afde35ce868df46b37c4eb4da80bbee5f94485b1e1a716ea`, readiness SHA-256 `11d14a268045134a566ae15a7114985afdef85cd1532ea95abe73072e9eee34d`.
 - Authority: camera opens 0; camera frames requested 0; robot transport opens 0; robot commands 0; physical authority false. Next action is `BIND_EXISTING_MOVABLE_PLANAR_TARGET_THEN_CAPTURE_SLOT_01`.
 - Source archive: four tracked files add the reconciliation builder, CLI, compact artifact, and focused tests; the reviewed tracked-file ceiling rises from 6,595 to 6,599. Other archive ceilings are unchanged.
+### E-20261016-AI-CURRENT-H-LAYOUT-SENSITIVITY-001 — current camera H replay
+
+- Source: current bare-jaw route intake canonical SHA-256
+  `02e6ec1936ede521fc43c55b31c5c1ca367de066d2f125f54506b722f23ed0c0`,
+  selected frame SHA-256
+  `96f77b11b9587cc0001ac162b2d7592443744074d3617152b61fa05b80056c87`,
+  and the immutable FREEZE-013 static simulation reconciliation commit
+  `869d6f7ed7d1013a8003457a819ccaee3a03a1e7`.
+- Target: observed keyboard `H` surface point
+  `[212.95070610888823, 149.20958023724344, 21.0]` mm and hover point
+  `[212.95070610888823, 149.20958023724344, 48.7953]` mm in the board frame,
+  under the explicit `BARE_JAW` profile.
+- Hypothesis: retained promoted park `[290.0, 10.0]` mm and unmeasured 120 mm
+  keyboard tool/layout profile file SHA-256
+  `38b348ace299140e5908cf367fc15f32b33bebe9b064d5efffe5dcf95f7b4634`.
+- Result: `CURRENT_H_PASSES_UNMEASURED_LAYOUT_SENSITIVITY`; geometry passes,
+  sampled IK converges, and all 32 dense-route waypoints are accepted with no
+  first failure. Canonical report SHA-256 is
+  `b9a22cb1e03211b37528d613f5bb532c8103f22d1deab650359dfe160f1f0d86`.
+- Meaning: the current camera coordinate is numerically reachable under the
+  retained candidate setup. The earlier nominal `PARK` failure therefore does
+  not establish that installed `H` is unreachable. Installed reachability is
+  still blocked on measured controller/model correlation, arm-to-board
+  transform, bare-jaw TCP, and installed collision geometry.
+- Authority: hardware access 0; commands 0; writes 0; physical authority false;
+  descent and contact remain unauthorized. The generated report and historical
+  detached checkout remain outside the tracked source archive.

@@ -629,3 +629,11 @@ route-readiness JSON without opening a camera or robot transport. Generated
 intake reports stay in the ignored runtime evidence directory. The exact
 observed tracked-file count and governed ceiling are therefore 6,605; every
 logical-byte, blob, duplicate, and reduction limit remains unchanged.
+
+The current-target layout-sensitivity increment adds three reviewable source
+files: one source-bound replay module, one command-line wrapper, and one focused
+regression test. It consumes the current ignored route intake and replays that
+coordinate only through the retained FREEZE-013 static simulation boundary.
+Generated sensitivity reports and the detached historical source checkout stay
+outside the source archive. The exact governed ceiling is therefore 6,608;
+every logical-byte, blob, duplicate, and reduction limit remains unchanged.
