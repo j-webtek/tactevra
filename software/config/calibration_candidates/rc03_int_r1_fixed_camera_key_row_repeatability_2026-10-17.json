@@ -1,0 +1,74 @@
+{
+  "blockers": [
+    "INDIVIDUAL_KEY_CENTERS_NOT_OBSERVED"
+  ],
+  "board_space_motion_targets_emitted": false,
+  "camera_mode_verified": true,
+  "contact_authorized": false,
+  "independent_key_center_observations_present": false,
+  "individual_key_localization_ready": false,
+  "maximum_temporal_row_feature_delta_mm": 2.0,
+  "motion_authorized": false,
+  "reference_frame_sha256": "09f9ce8a02360aeccc81195312791c6e4262cbc8b99d1d79b74fe3d2d376b199",
+  "reference_result_sha256": "b96fba6355b526166405781c58e4b6ec1e4232017827e846cf90af00fa065b28",
+  "repeat_capture_record_sha256": "af06de8cf0610a5877c92eda6fe4e1d48ad3476d8b71b95a35d942ddd8654251",
+  "repeat_frame_bytes_verified": true,
+  "repeat_frame_sha256": "2eb7dde8db2c4c9ae4b40f05bc535c9271b14c63704ebf13f4ddce017e1b20a1",
+  "row_comparisons": [
+    {
+      "contrast_band_temporal_delta_mm": 0.0,
+      "first_key": "1",
+      "gap_phase_temporal_delta_mm": 0.0,
+      "last_key": "EQUAL",
+      "reference_contrast_band_offset_mm": 4.0,
+      "reference_gap_phase_offset_mm": -2.667,
+      "repeat_contrast_band_offset_mm": 4.0,
+      "repeat_gap_phase_offset_mm": -2.667,
+      "repeat_observable": true,
+      "repeatability_passed": true,
+      "row_index": 0
+    },
+    {
+      "contrast_band_temporal_delta_mm": 0.333,
+      "first_key": "Q",
+      "gap_phase_temporal_delta_mm": 0.0,
+      "last_key": "P",
+      "reference_contrast_band_offset_mm": -5.0,
+      "reference_gap_phase_offset_mm": -1.333,
+      "repeat_contrast_band_offset_mm": -4.667,
+      "repeat_gap_phase_offset_mm": -1.333,
+      "repeat_observable": true,
+      "repeatability_passed": true,
+      "row_index": 1
+    },
+    {
+      "contrast_band_temporal_delta_mm": 0.0,
+      "first_key": "A",
+      "gap_phase_temporal_delta_mm": 0.0,
+      "last_key": "APOSTROPHE",
+      "reference_contrast_band_offset_mm": -2.333,
+      "reference_gap_phase_offset_mm": -3.333,
+      "repeat_contrast_band_offset_mm": -2.333,
+      "repeat_gap_phase_offset_mm": -3.333,
+      "repeat_observable": true,
+      "repeatability_passed": true,
+      "row_index": 2
+    },
+    {
+      "contrast_band_temporal_delta_mm": 1.667,
+      "first_key": "Z",
+      "gap_phase_temporal_delta_mm": 0.0,
+      "last_key": "SLASH",
+      "reference_contrast_band_offset_mm": -1.0,
+      "reference_gap_phase_offset_mm": -0.333,
+      "repeat_contrast_band_offset_mm": 0.667,
+      "repeat_gap_phase_offset_mm": -0.333,
+      "repeat_observable": true,
+      "repeatability_passed": true,
+      "row_index": 3
+    }
+  ],
+  "row_feature_temporal_repeatability_ready": true,
+  "schema": "rocell.fixed_camera_key_row_repeatability.v1",
+  "status": "DISTINCT_FRAME_ROW_REPEATABILITY_ONLY_NOT_KEY_CENTERS"
+}

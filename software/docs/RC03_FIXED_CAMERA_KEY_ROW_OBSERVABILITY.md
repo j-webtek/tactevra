@@ -47,8 +47,9 @@ physical result against its schema; the large source frame remains external.
 
 ## Next evidence
 
-Capture a distinct fixed-camera frame without moving the board, keyboard, or
-camera, then require the same row features to repeat. A later detector can use
+The distinct-frame requirement is now satisfied by the
+[key-row repeatability result](RC03_FIXED_CAMERA_KEY_ROW_REPEATABILITY.md).
+A later detector can use
 the retained per-key windows and repeated row phases to fit explicit keycap
 edges. Only independently fitted centers with recorded residuals can reconsider
 the individual-key image-localization gate. Board-to-robot and clearance gates

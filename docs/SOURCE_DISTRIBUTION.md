@@ -467,6 +467,14 @@ review presentation; no simulator corpus, dependency tree, controller artifact,
 GPU artifact, or authority-bearing output enters the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The fixed-camera key-row repeatability increment adds five governed paths: one
+CPU-only comparison module, one strict schema, one focused test module, and one
+compact result note plus result while exposing the existing rectifier as a
+public helper. The file-count ceiling advances from 6,493 to 6,498. Both camera
+frames and the repeat capture record remain external by hash. The result emits
+no key center, board-space target, motion, or contact authority. The measured
+tree is 661,901,179 logical bytes with 4,890,152 governed duplicate bytes.
+
 The first-hover binding audit adds four governed paths: one CPU-only audit
 module, one focused test module, one frozen fixture, and one generated result
 bound by its receipt hash. The file-count ceiling advances from 6,428 to the
