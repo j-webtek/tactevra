@@ -26,6 +26,12 @@ maximum contrast-band offset. These features are not key-center measurements;
 individual-key localization remains open. A distinct second frame now repeats
 the four row features within 1.667 mm as recorded in the
 [repeatability result](../software/docs/RC03_FIXED_CAMERA_KEY_ROW_REPEATABILITY.md).
+Those two frames now also produce 46 repeatable
+[image-space key-center candidates](../software/docs/RC03_FIXED_CAMERA_KEY_CENTER_CANDIDATES.md)
+from local keycap edges, with a 2.166 mm maximum temporal change. They are
+recorded for the `no_attachment` profile only and are not board-space contact
+targets. Independent board-space validation, board-to-robot registration, and
+clearance remain open.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
@@ -100,8 +106,8 @@ After those conditions are met, follow this order:
    estimates cover only part of this item.
 2. Collect disjoint calibration and held-out final-camera observations. One
    temporal held-out frame is retained and all four main rows are observable;
-   its row structure repeats in a distinct frame; individual key-center
-   observations remain.
+   its row structure repeats in a distinct frame; 46 image-space key-center
+   candidates are retained, while independent board-space validation remains.
 3. Run the frozen preflight and localization evaluator.
 4. Demonstrate that the combined perception, calibration, tracking/settling,
    and tool uncertainty fits inside the chosen target safe region.

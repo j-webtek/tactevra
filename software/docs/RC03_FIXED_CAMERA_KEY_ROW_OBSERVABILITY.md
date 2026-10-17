@@ -49,8 +49,8 @@ physical result against its schema; the large source frame remains external.
 
 The distinct-frame requirement is now satisfied by the
 [key-row repeatability result](RC03_FIXED_CAMERA_KEY_ROW_REPEATABILITY.md).
-A later detector can use
-the retained per-key windows and repeated row phases to fit explicit keycap
-edges. Only independently fitted centers with recorded residuals can reconsider
-the individual-key image-localization gate. Board-to-robot and clearance gates
-remain separate after that.
+The follow-on [key-center candidate result](RC03_FIXED_CAMERA_KEY_CENTER_CANDIDATES.md)
+now uses the retained windows and repeated row phases to fit explicit keycap
+edges in both frames. It closes the image-space candidate step only.
+Board-space key validation, board-to-robot registration, and clearance remain
+separate gates.

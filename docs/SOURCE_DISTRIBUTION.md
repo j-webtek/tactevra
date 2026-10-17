@@ -475,6 +475,17 @@ frames and the repeat capture record remain external by hash. The result emits
 no key center, board-space target, motion, or contact authority. The measured
 tree is 661,901,179 logical bytes with 4,890,152 governed duplicate bytes.
 
+The fixed-camera key-center candidate increment adds five governed paths: one
+CPU-only Pillow and NumPy estimator, one strict result schema, one focused test
+module, one compact hash-bound result, and one result note. The file-count
+ceiling advances from 6,498 to the exact expected 6,503 files for those reviewed
+paths only. Both large source frames and the camera capture record remain outside
+the archive. The result retains 46 two-frame image-space candidates for the
+`no_attachment` profile while keeping board-space validation, transforms,
+clearance, motion, and contact blocked. The measured tree is 661,959,847 logical
+bytes with 4,890,152 governed duplicate bytes. All byte, duplicate, and
+reduction limits remain unchanged.
+
 The first-hover binding audit adds four governed paths: one CPU-only audit
 module, one focused test module, one frozen fixture, and one generated result
 bound by its receipt hash. The file-count ceiling advances from 6,428 to the

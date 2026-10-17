@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_key_center_candidates_v1.schema.json",
+  "title": "Fixed camera key center candidates v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "profile", "repeatability_result_sha256", "reference_frame_sha256", "repeat_frame_sha256", "rectified_pixels_per_mm", "maximum_key_center_temporal_delta_mm", "reference_row_fits", "repeat_row_fits", "key_center_candidates", "key_center_candidate_count", "image_space_key_center_candidates_ready", "independent_key_center_observations_present", "individual_key_localization_ready", "board_space_motion_targets_emitted", "board_to_robot_transform_verified", "physical_clearance_verified", "motion_authorized", "contact_authorized", "blockers", "limitations"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_key_center_candidates.v1"},
+    "status": {"const": "IMAGE_SPACE_KEY_CENTER_CANDIDATES_ONLY_NOT_MOTION_TARGETS"},
+    "profile": {"const": "no_attachment"},
+    "repeatability_result_sha256": {"$ref": "#/$defs/digest"},
+    "reference_frame_sha256": {"$ref": "#/$defs/digest"},
+    "repeat_frame_sha256": {"$ref": "#/$defs/digest"},
+    "rectified_pixels_per_mm": {"const": 3},
+    "maximum_key_center_temporal_delta_mm": {"type": "number", "exclusiveMinimum": 0},
+    "reference_row_fits": {"$ref": "#/$defs/rows"},
+    "repeat_row_fits": {"$ref": "#/$defs/rows"},
+    "key_center_candidates": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"$ref": "#/$defs/key"}},
+    "key_center_candidate_count": {"const": 46},
+    "image_space_key_center_candidates_ready": {"type": "boolean"},
+    "independent_key_center_observations_present": {"const": true},
+    "individual_key_localization_ready": {"const": false},
+    "board_space_motion_targets_emitted": {"const": false},
+    "board_to_robot_transform_verified": {"const": false},
+    "physical_clearance_verified": {"const": false},
+    "motion_authorized": {"const": false},
+    "contact_authorized": {"const": false},
+    "blockers": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"enum": ["BOARD_SPACE_KEY_CENTER_VALIDATION_MISSING", "BOARD_TO_ROBOT_TRANSFORM_UNVERIFIED", "PHYSICAL_CLEARANCE_UNVERIFIED"]}},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "xy": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "rows": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/row"}},
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_index", "first_key", "last_key", "x_shift_mm", "y_shift_mm", "half_width_mm", "half_height_mm"],
+      "properties": {
+        "row_index": {"type": "integer", "minimum": 0, "maximum": 3},
+        "first_key": {"type": "string", "minLength": 1},
+        "last_key": {"type": "string", "minLength": 1},
+        "x_shift_mm": {"type": "number"},
+        "y_shift_mm": {"type": "number"},
+        "half_width_mm": {"type": "number", "exclusiveMinimum": 0},
+        "half_height_mm": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "key": {
+      "type": "object", "additionalProperties": false,
+      "required": ["key_id", "reference_center_xy_mm", "repeat_center_xy_mm", "temporal_center_delta_mm", "reference_edge_span_xy_mm", "repeat_edge_span_xy_mm", "reference_minimum_edge_peak_ratio", "repeat_minimum_edge_peak_ratio", "span_plausibility_passed", "candidate_repeatability_passed"],
+      "properties": {
+        "key_id": {"type": "string", "minLength": 1},
+        "reference_center_xy_mm": {"$ref": "#/$defs/xy"},
+        "repeat_center_xy_mm": {"$ref": "#/$defs/xy"},
+        "temporal_center_delta_mm": {"type": "number", "minimum": 0},
+        "reference_edge_span_xy_mm": {"$ref": "#/$defs/xy"},
+        "repeat_edge_span_xy_mm": {"$ref": "#/$defs/xy"},
+        "reference_minimum_edge_peak_ratio": {"type": "number", "minimum": 0},
+        "repeat_minimum_edge_peak_ratio": {"type": "number", "minimum": 0},
+        "span_plausibility_passed": {"type": "boolean"},
+        "candidate_repeatability_passed": {"type": "boolean"}
+      }
+    }
+  }
+}
