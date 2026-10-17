@@ -821,3 +821,24 @@ and the validation-report SHA-256 is
 The result is `BLOCKED_STATIC_OVERHEAD_MEASUREMENTS_PENDING`: no profile or
 collision screening was produced, and commands, hardware access, movement,
 and physical authority remain zero or false.
+
+### Candidate source coverage audit
+
+The follow-on source audit maps tracked CAD, configuration, and retained
+observation artifacts to all 19 required collision bodies. It hashes 15 unique
+candidate files and records the qualification limit for each mapping. All 19
+bodies have at least one candidate source, but zero bodies have an accepted
+measurement source. Candidate CAD, nominal dimensions, photo registration,
+and retained observations are therefore not promoted into collision geometry.
+
+The retained report is
+`software/ai/eval/static_overhead_collision_source_audit_20261017.json` with
+file SHA-256
+`0b499d9493648d0a9286decc237b979e74a119ad20755c3870beea9b68da4dfc`
+and canonical report SHA-256
+`868f7cf5515e47c4dfc84a5c1923973befb21f4bfc122822241be43d24c6bc3b`.
+Its status is `BLOCKED_CANDIDATE_SOURCES_REQUIRE_QUALIFICATION`. The next stage
+is to qualify conservative installed envelopes, placements, and uncertainties
+against the existing body-by-body intake. Profile generation, collision
+screening, controller commands, hardware access, movement, and physical
+authority remain zero or false.

@@ -1,0 +1,469 @@
+{
+  "accepted_measurement_body_count": 0,
+  "base_contract_sha256": "fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39",
+  "body_source_coverage": [
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:base_link",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "base_link"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link1",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "link1"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link2",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "link2"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link3",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "link3"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link4",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "link4"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link5",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "link5"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:gripper",
+      "candidate_sources": [
+        {
+          "byte_count": 22064,
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "limitation": "The retained reduction says candidate_profile_installable=false and retains non-watertight and replay blockers.",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "byte_count": 2849,
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "limitation": "The governed URDF explicitly omits visual and collision geometry.",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "gripper_link"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:base_and_factory_clamp",
+      "candidate_sources": [
+        {
+          "byte_count": 23937,
+          "evidence_class": "INSTALLED_OBSERVATION_CONTEXT_ONLY",
+          "limitation": "The retained session identifies the installation epoch but contains no conservative base-and-clamp envelope.",
+          "path": "software/config/live_camera_feedback_session_20261015.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_support",
+      "candidate_sources": [
+        {
+          "byte_count": 8466,
+          "evidence_class": "SCREENING_DESIGN_CANDIDATE",
+          "limitation": "The support contract explicitly leaves exact cut lengths and physical qualification open.",
+          "path": "hardware/static_overhead_camera/config/support_design.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+        },
+        {
+          "byte_count": 55939877,
+          "evidence_class": "DESIGN_CAD_NOT_INSTALLED_METROLOGY",
+          "limitation": "Prototype CAD does not establish the installed support placement, fasteners, or uncertainty.",
+          "path": "hardware/static_overhead_camera/cad/output/assembly/printable_camera_portal_prototype.step",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "09ef1c1f1aff5fc5237b1b6d8fb40d351df0e3866ff6e3334f4c8a742a9d83f2"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_module",
+      "candidate_sources": [
+        {
+          "byte_count": 8478,
+          "evidence_class": "CATALOG_IDENTITY_AND_OPTICS",
+          "limitation": "The profile binds the camera configuration but is not an installed case-envelope measurement.",
+          "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+        },
+        {
+          "byte_count": 2664409,
+          "evidence_class": "NOMINAL_CAGE_CAD",
+          "limitation": "The cage subassembly does not qualify the received camera case or installed transform.",
+          "path": "hardware/static_overhead_camera/cad/output/assembly/camera_cage_nominal_subassembly.step",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "3f820a69d436db0a08215a7ddc857da6f3eed12b36ae726977ccfed83d9dc1b5"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_connector",
+      "candidate_sources": [
+        {
+          "byte_count": 168074,
+          "evidence_class": "CONNECTOR_KEEPER_DESIGN_CAD",
+          "limitation": "Keeper CAD does not establish the installed plug, strain relief, placement, or uncertainty.",
+          "path": "hardware/static_overhead_camera/cad/output/revisions/08D-C2_usb_keeper_v1/08D-C2_ABS_USB_clearance_keeper_v1.step",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "4bfab94bdeb8a828de778f79532110b27eb9bc4c5d3017a5bd660cb69bc4a512"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_cable",
+      "candidate_sources": [
+        {
+          "byte_count": 23937,
+          "evidence_class": "CABLE_VISIBILITY_CONTEXT_ONLY",
+          "limitation": "The retained observations show the cable context but do not provide a fixed conservative cable envelope.",
+          "path": "software/config/live_camera_feedback_session_20261015.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "attachment:contact_tool",
+      "candidate_sources": [
+        {
+          "byte_count": 23937,
+          "evidence_class": "BARE_JAW_CONFIGURATION_CONTEXT",
+          "limitation": "The session records BARE_JAW, but the absence declaration still needs a reviewed source compatible with the measurement contract.",
+          "path": "software/config/live_camera_feedback_session_20261015.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "hand_tcp"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:board_solid",
+      "candidate_sources": [
+        {
+          "byte_count": 20624,
+          "evidence_class": "FROZEN_DIGITAL_PHYSICAL_MEASUREMENT_OPEN",
+          "limitation": "The frozen 610 x 457 x 18 mm board is explicitly marked physical_measurement_state=OPEN_BLOCKING.",
+          "path": "software/freezes/ROCELL-PHASE0-RC03-INT-R1-FREEZE-013/system_manifest.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:keyboard",
+      "candidate_sources": [
+        {
+          "byte_count": 1972,
+          "evidence_class": "MANUAL_PHOTO_ESTIMATE_ONLY",
+          "limitation": "The registration records 315 x 147 x 21 mm and image placement but explicitly does not establish physical metrology.",
+          "path": "software/config/photo_keyboard_registration_manual_20261011.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "cba719b2d336c7d38cb487b481d6c0bfb3189a539b8b31319371879a589bbc2c"
+        },
+        {
+          "byte_count": 44746,
+          "evidence_class": "DIMENSION_CONSTRAINED_IMAGE_OVERLAY",
+          "limitation": "The overlay improves image alignment but does not establish a measured board-frame envelope or pose uncertainty.",
+          "path": "software/ai/eval/b0477_keyboard_overlay_20261016.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:phone",
+      "candidate_sources": [
+        {
+          "byte_count": 20624,
+          "evidence_class": "SELECTED_NOMINAL_DEVICE",
+          "limitation": "The selected phone dimensions and placement remain physically unqualified.",
+          "path": "software/freezes/ROCELL-PHASE0-RC03-INT-R1-FREEZE-013/system_manifest.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:station:keyboard_left",
+      "candidate_sources": [
+        {
+          "byte_count": 1443534,
+          "evidence_class": "CONTROLLED_DESIGN_CAD",
+          "limitation": "Controlled CAD does not establish the printed installed article, board transform, or manufacturing uncertainty.",
+          "path": "active-project/RoCell_v0_3/cad/step/keyboard_station_left.step",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "749d12f4c123c4355d0b10ba7c90d40b3b53157097588d8063f1c9c1309350dd"
+        },
+        {
+          "byte_count": 17043,
+          "evidence_class": "NOMINAL_LAYOUT",
+          "limitation": "The layout is nominal simulation geometry rather than installed placement evidence.",
+          "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:station:keyboard_right",
+      "candidate_sources": [
+        {
+          "byte_count": 1278974,
+          "evidence_class": "CONTROLLED_DESIGN_CAD",
+          "limitation": "Controlled CAD does not establish the printed installed article, board transform, or manufacturing uncertainty.",
+          "path": "active-project/RoCell_v0_3/cad/step/keyboard_station_right.step",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "eb236d1c716a55b70be6b77e8364473d4553a34e54e8d1e4aea3bef507fd97fc"
+        },
+        {
+          "byte_count": 17043,
+          "evidence_class": "NOMINAL_LAYOUT",
+          "limitation": "The layout is nominal simulation geometry rather than installed placement evidence.",
+          "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    },
+    {
+      "accepted_measurement_source_count": 0,
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:station:phone_tcp",
+      "candidate_sources": [
+        {
+          "byte_count": 2693848,
+          "evidence_class": "CONTROLLED_DESIGN_CAD",
+          "limitation": "Controlled CAD does not establish the printed installed article, board transform, or manufacturing uncertainty.",
+          "path": "active-project/RoCell_v0_3/cad/step/phone_tcp_station.step",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "d44b5a93445dc761df13682001579da495c733eaf83701b988592362eea476a8"
+        },
+        {
+          "byte_count": 17043,
+          "evidence_class": "NOMINAL_LAYOUT",
+          "limitation": "The layout is nominal simulation geometry rather than installed placement evidence.",
+          "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+          "qualification": "CANDIDATE_ONLY",
+          "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+        }
+      ],
+      "decision": "CANDIDATE_ONLY",
+      "next_action": "Qualify a conservative installed envelope, placement, and uncertainty from reviewed evidence before changing this body from PENDING.",
+      "parent_frame": "board"
+    }
+  ],
+  "candidate_body_count": 19,
+  "collision_screening_executed": false,
+  "controller_commands": [],
+  "hardware_access": false,
+  "measurement_manifest_content_sha256": "55b0c1bdc736123b2b7e33512e02ccd10744080ef8a5ebbd1e45120b722dc9f6",
+  "measurement_manifest_file_sha256": "5ca32f47d65c138c3916361232d608f7ef4f5c40b98edf8d380794e6115d9702",
+  "missing_candidate_body_count": 0,
+  "next_required_stage": "QUALIFY_INSTALLED_ENVELOPES_PLACEMENTS_AND_UNCERTAINTIES",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "profile_generated": false,
+  "report_sha256": "868f7cf5515e47c4dfc84a5c1923973befb21f4bfc122822241be43d24c6bc3b",
+  "required_body_count": 19,
+  "schema": "rocell.static_overhead_collision_source_audit.v1",
+  "source_revision": "57b21fdda076b9d540e5c825cc5ecf598c90d053",
+  "status": "BLOCKED_CANDIDATE_SOURCES_REQUIRE_QUALIFICATION",
+  "unique_candidate_source_count": 15
+}
