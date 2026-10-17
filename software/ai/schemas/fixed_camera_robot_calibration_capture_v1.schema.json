@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/fixed_camera_robot_calibration_capture_v1.schema.json",
+  "title": "Passive fixed-camera robot calibration capture v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "capture_id", "capture_input_sha256", "installation_epoch_id", "profile", "role", "bindings", "correspondence", "quality", "review_status", "hardware_access", "controller_commands", "motion_targets_emitted", "motion_authorized", "contact_authorized"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_robot_calibration_capture.v1"},
+    "status": {"const": "PASSIVE_CORRESPONDENCE_CAPTURED"},
+    "capture_id": {"type": "string", "minLength": 1}, "capture_input_sha256": {"$ref": "#/$defs/sha256"},
+    "installation_epoch_id": {"type": "string", "minLength": 1}, "profile": {"const": "no_attachment"},
+    "role": {"enum": ["FIT", "HOLDOUT"]},
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["frame_sha256", "camera_identity_sha256", "settings_sha256", "board_pose_observation_sha256", "camera_intrinsics_sha256", "tag_map_sha256", "tool_reference_observation_sha256", "kinematic_reference_sha256", "robot_base_identity"],
+      "properties": {
+        "frame_sha256": {"$ref": "#/$defs/sha256"}, "camera_identity_sha256": {"$ref": "#/$defs/sha256"},
+        "settings_sha256": {"$ref": "#/$defs/sha256"}, "board_pose_observation_sha256": {"$ref": "#/$defs/sha256"},
+        "camera_intrinsics_sha256": {"$ref": "#/$defs/sha256"}, "tag_map_sha256": {"$ref": "#/$defs/sha256"},
+        "tool_reference_observation_sha256": {"$ref": "#/$defs/sha256"}, "kinematic_reference_sha256": {"$ref": "#/$defs/sha256"},
+        "robot_base_identity": {"type": "string", "minLength": 1}
+      }
+    },
+    "correspondence": {"$ref": "#/$defs/correspondence"},
+    "quality": {
+      "type": "object", "additionalProperties": false,
+      "required": ["pose_fit_tag_ids", "held_out_tag_ids", "board_pose_reprojection_rms_px", "held_out_max_residual_px", "tool_reference_uncertainty_mm", "maximum_joint_span_rad", "endpoint_span_mm", "maximum_reported_fk_error_mm", "feedback_bracket_ns"],
+      "properties": {
+        "pose_fit_tag_ids": {"const": [0, 1, 2, 3]}, "held_out_tag_ids": {"const": [4, 5]},
+        "board_pose_reprojection_rms_px": {"type": "number", "minimum": 0, "maximum": 2},
+        "held_out_max_residual_px": {"type": "number", "minimum": 0, "maximum": 2},
+        "tool_reference_uncertainty_mm": {"type": "number", "minimum": 0, "maximum": 3},
+        "maximum_joint_span_rad": {"type": "number", "minimum": 0, "maximum": 0.01},
+        "endpoint_span_mm": {"type": "number", "minimum": 0, "maximum": 2},
+        "maximum_reported_fk_error_mm": {"type": "number", "minimum": 0, "maximum": 5},
+        "feedback_bracket_ns": {"type": "integer", "minimum": 0, "maximum": 1000000000}
+      }
+    },
+    "review_status": {"const": "UNREVIEWED_CAPTURE"}, "hardware_access": {"const": false},
+    "controller_commands": {"const": []}, "motion_targets_emitted": {"const": false},
+    "motion_authorized": {"const": false}, "contact_authorized": {"const": false}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "vector3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+    "correspondence": {"type": "object", "additionalProperties": false, "required": ["point_id", "role", "board_xyz_mm", "robot_xyz_mm"], "properties": {"point_id": {"type": "string"}, "role": {"enum": ["FIT", "HOLDOUT"]}, "board_xyz_mm": {"$ref": "#/$defs/vector3"}, "robot_xyz_mm": {"$ref": "#/$defs/vector3"}}}
+  }
+}

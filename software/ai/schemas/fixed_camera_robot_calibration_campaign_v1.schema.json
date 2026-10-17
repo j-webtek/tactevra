@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/fixed_camera_robot_calibration_campaign_v1.schema.json",
+  "title": "Passive fixed-camera robot calibration campaign v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "installation_epoch_id", "profile", "capture_result_sha256s", "capture_count", "fit_count", "holdout_count", "measurement_draft", "measurement_draft_sha256", "stylus_profile_status", "review_status", "hardware_access", "controller_commands", "motion_targets_emitted", "motion_authorized", "contact_authorized"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_robot_calibration_campaign.v1"},
+    "status": {"const": "MEASUREMENT_DRAFT_READY_FOR_INDEPENDENT_REVIEW"},
+    "installation_epoch_id": {"type": "string", "minLength": 1}, "profile": {"const": "no_attachment"},
+    "capture_result_sha256s": {"type": "array", "minItems": 5, "maxItems": 64, "uniqueItems": true, "items": {"$ref": "#/$defs/sha256"}},
+    "capture_count": {"type": "integer", "minimum": 5, "maximum": 64}, "fit_count": {"type": "integer", "minimum": 3},
+    "holdout_count": {"type": "integer", "minimum": 2},
+    "measurement_draft": {"$ref": "board_to_robot_measurements_v1.schema.json"},
+    "measurement_draft_sha256": {"$ref": "#/$defs/sha256"},
+    "stylus_profile_status": {"const": "SEPARATE_TCP_AND_CLEARANCE_CAPTURE_REQUIRED"},
+    "review_status": {"const": "UNREVIEWED_CAMPAIGN"}, "hardware_access": {"const": false},
+    "controller_commands": {"const": []}, "motion_targets_emitted": {"const": false},
+    "motion_authorized": {"const": false}, "contact_authorized": {"const": false}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

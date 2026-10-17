@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/fixed_camera_robot_calibration_capture_input_v1.schema.json",
+  "title": "Passive fixed-camera robot calibration capture input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "capture_id", "installation_epoch_id", "profile", "role", "frame", "board_pose", "tool_reference", "robot_feedback", "kinematic_binding"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_robot_calibration_capture_input.v1"},
+    "capture_id": {"type": "string", "minLength": 1},
+    "installation_epoch_id": {"type": "string", "minLength": 1},
+    "profile": {"const": "no_attachment"},
+    "role": {"enum": ["FIT", "HOLDOUT"]},
+    "frame": {
+      "type": "object", "additionalProperties": false,
+      "required": ["capture_id", "frame_sha256", "captured_at_ns", "clock_id", "camera_identity_sha256", "settings_sha256"],
+      "properties": {
+        "capture_id": {"type": "string", "minLength": 1}, "frame_sha256": {"$ref": "#/$defs/sha256"},
+        "captured_at_ns": {"type": "integer", "minimum": 0}, "clock_id": {"type": "string", "minLength": 1},
+        "camera_identity_sha256": {"$ref": "#/$defs/sha256"}, "settings_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "board_pose": {
+      "type": "object", "additionalProperties": false,
+      "required": ["observation_sha256", "frame_sha256", "camera_intrinsics_sha256", "tag_map_sha256", "pose_fit_tag_ids", "held_out_tag_ids", "reprojection_rms_px", "held_out_max_residual_px"],
+      "properties": {
+        "observation_sha256": {"$ref": "#/$defs/sha256"}, "frame_sha256": {"$ref": "#/$defs/sha256"},
+        "camera_intrinsics_sha256": {"$ref": "#/$defs/sha256"}, "tag_map_sha256": {"$ref": "#/$defs/sha256"},
+        "pose_fit_tag_ids": {"const": [0, 1, 2, 3]}, "held_out_tag_ids": {"const": [4, 5]},
+        "reprojection_rms_px": {"type": "number", "minimum": 0, "maximum": 2},
+        "held_out_max_residual_px": {"type": "number", "minimum": 0, "maximum": 2}
+      }
+    },
+    "tool_reference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["method", "observation_sha256", "frame_sha256", "detector_id", "detector_version", "configuration_sha256", "implementation_sha256", "board_xyz_mm", "uncertainty_mm"],
+      "properties": {
+        "method": {"const": "CALIBRATED_FIXED_CAMERA_BARE_JAW_REFERENCE"},
+        "observation_sha256": {"$ref": "#/$defs/sha256"}, "frame_sha256": {"$ref": "#/$defs/sha256"},
+        "detector_id": {"type": "string", "minLength": 1}, "detector_version": {"type": "string", "minLength": 1},
+        "configuration_sha256": {"$ref": "#/$defs/sha256"}, "implementation_sha256": {"$ref": "#/$defs/sha256"},
+        "board_xyz_mm": {"$ref": "#/$defs/vector3"}, "uncertainty_mm": {"type": "number", "minimum": 0, "maximum": 3}
+      }
+    },
+    "robot_feedback": {
+      "type": "object", "additionalProperties": false,
+      "required": ["robot_base_identity", "clock_id", "pre_timestamp_ns", "post_timestamp_ns", "pre_feedback_line", "post_feedback_line"],
+      "properties": {
+        "robot_base_identity": {"type": "string", "minLength": 1}, "clock_id": {"type": "string", "minLength": 1},
+        "pre_timestamp_ns": {"type": "integer", "minimum": 0}, "post_timestamp_ns": {"type": "integer", "minimum": 0},
+        "pre_feedback_line": {"type": "string", "minLength": 1, "maxLength": 65536},
+        "post_feedback_line": {"type": "string", "minLength": 1, "maxLength": 65536}
+      }
+    },
+    "kinematic_binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model_id", "reference_sha256", "robot_frame", "endpoint_frame"],
+      "properties": {
+        "model_id": {"const": "roarm_m3_firmware_reference_v1"}, "reference_sha256": {"$ref": "#/$defs/sha256"},
+        "robot_frame": {"const": "robot_base"}, "endpoint_frame": {"const": "bare_jaw_reference"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "vector3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}}
+  }
+}

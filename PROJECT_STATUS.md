@@ -53,8 +53,13 @@ candidates. A no-print package builder now creates a governed four-corner
 measurement template, binds reviewed measurements to the retained prerequisites,
 and evaluates both attachment profiles together without granting physical
 authority. Absolute keyboard-to-board registration,
-independent physical key measurement, the remaining commissioned
-transforms, and physical action authority still require measured qualification.
+independent physical key measurement, the remaining commissioned transforms,
+and physical action authority still require measured qualification. A passive
+camera/robot calibration capture boundary now reuses the known 610 x 457 mm
+board, six-tag map, installed camera bindings, and raw robot feedback to build
+an unreviewed board-to-robot worksheet without additional ruler measurements.
+It performs no acquisition or movement and still requires retained live
+captures plus independent review.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
@@ -91,7 +96,7 @@ completed capabilities.
 | Local interface | Browser and terminal rehearsal, task planning, diagnostic exports | Software workflows can be explored without connecting a robot |
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
-| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, 46 two-frame keycap-edge center candidates, a provisional board-plane rigid-fit audit, an elevated-plane coherence audit, a governed no-print anchor package builder, a held-out board-to-robot composition boundary, and an attachment-aware installed-clearance handoff | The no-attachment board-plane audit places 45/46 keys within 7 mm, while the elevated-plane audit passes 46/46 with a 3.328 mm maximum residual; reviewed keyboard and board-to-robot measurements can be composed for both attachment profiles, and exact distinct bare-jaw/stylus installed profiles can feed profile-specific route construction, but the current installation still has no accepted absolute registration, reviewed profile binding, or continuous clearance result, and no motion target, motion, or contact is authorized |
+| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, 46 two-frame keycap-edge center candidates, a provisional board-plane rigid-fit audit, an elevated-plane coherence audit, a governed no-print anchor package builder, a passive camera/robot correspondence campaign, a held-out board-to-robot composition boundary, and an attachment-aware installed-clearance handoff | The no-attachment board-plane audit places 45/46 keys within 7 mm, while the elevated-plane audit passes 46/46 with a 3.328 mm maximum residual; passive records can now produce a hash-bound unreviewed board-to-robot draft and reviewed measurements can be composed for both attachment profiles, but the current installation still has no accepted absolute registration, reviewed profile binding, or continuous clearance result, and no motion target, motion, or contact is authorized |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
