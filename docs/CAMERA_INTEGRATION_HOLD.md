@@ -32,6 +32,13 @@ from local keycap edges, with a 2.166 mm maximum temporal change. They are
 recorded for the `no_attachment` profile only and are not board-space contact
 targets. Independent board-space validation, board-to-robot registration, and
 clearance remain open.
+The follow-on
+[board-plane key audit](../software/docs/RC03_FIXED_CAMERA_BOARD_KEY_VALIDATION.md)
+projects those candidates through the separately calibrated AprilTag map. It
+places 45 of 46 keys inside the 7 mm study limit in both frames; `SPACE` remains
+outside at 8.144 mm worst case. Elevated key-plane parallax and an independent
+physical key measurement remain unresolved, so the audit emits no target and
+does not change motion or contact authority.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
@@ -107,7 +114,9 @@ After those conditions are met, follow this order:
 2. Collect disjoint calibration and held-out final-camera observations. One
    temporal held-out frame is retained and all four main rows are observable;
    its row structure repeats in a distinct frame; 46 image-space key-center
-   candidates are retained, while independent board-space validation remains.
+   candidates are retained; the provisional board-plane audit passes 45 of 46,
+   while `SPACE`, elevated-plane correction, and independent physical validation
+   remain.
 3. Run the frozen preflight and localization evaluator.
 4. Demonstrate that the combined perception, calibration, tracking/settling,
    and tool uncertainty fits inside the chosen target safe region.

@@ -1,0 +1,750 @@
+{
+  "blockers": [
+    "BOARD_PLANE_ALL_KEYS_NOT_WITHIN_LIMIT",
+    "INDEPENDENT_PHYSICAL_KEY_MEASUREMENT_MISSING",
+    "ELEVATED_KEY_PLANE_PARALLAX_UNCORRECTED",
+    "BOARD_TO_ROBOT_TRANSFORM_UNVERIFIED",
+    "PHYSICAL_CLEARANCE_UNVERIFIED"
+  ],
+  "board_observation_temporal_limit_mm": 3.1,
+  "board_plane_key_validation_ready": false,
+  "board_space_motion_targets_emitted": false,
+  "board_to_robot_transform_verified": false,
+  "calibration_sha256": "55e8eefa844b510b4b2e0958cbe8490f01b4c42d081758eb051e3826a6e73fd9",
+  "candidate_result_sha256": "477c43f91c69f2d5d97ec3203c91711ea36aaf2030600b559d7d0dca0df9838c",
+  "contact_authorized": false,
+  "failed_key_ids": [
+    "SPACE"
+  ],
+  "independent_physical_key_measurement_present": false,
+  "individual_key_limit_mm": 7.0,
+  "key_validation_count": 46,
+  "key_validations": [
+    {
+      "board_observation_temporal_delta_mm": 0.94,
+      "board_plane_validation_passed": true,
+      "key_id": "1",
+      "reference_board_observation_xy_mm": [
+        125.066,
+        180.148
+      ],
+      "reference_rigid_pose_residual_mm": 5.462,
+      "repeat_board_observation_xy_mm": [
+        124.935,
+        181.079
+      ],
+      "repeat_rigid_pose_residual_mm": 5.816
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.607,
+      "board_plane_validation_passed": true,
+      "key_id": "2",
+      "reference_board_observation_xy_mm": [
+        143.841,
+        181.457
+      ],
+      "reference_rigid_pose_residual_mm": 6.136,
+      "repeat_board_observation_xy_mm": [
+        143.593,
+        182.011
+      ],
+      "repeat_rigid_pose_residual_mm": 6.313
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.971,
+      "board_plane_validation_passed": true,
+      "key_id": "3",
+      "reference_board_observation_xy_mm": [
+        163.594,
+        181.293
+      ],
+      "reference_rigid_pose_residual_mm": 5.051,
+      "repeat_board_observation_xy_mm": [
+        163.299,
+        182.218
+      ],
+      "repeat_rigid_pose_residual_mm": 5.594
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.0,
+      "board_plane_validation_passed": true,
+      "key_id": "4",
+      "reference_board_observation_xy_mm": [
+        181.548,
+        182.582
+      ],
+      "reference_rigid_pose_residual_mm": 6.229,
+      "repeat_board_observation_xy_mm": [
+        181.548,
+        182.582
+      ],
+      "repeat_rigid_pose_residual_mm": 5.923
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.746,
+      "board_plane_validation_passed": true,
+      "key_id": "5",
+      "reference_board_observation_xy_mm": [
+        200.181,
+        183.324
+      ],
+      "reference_rigid_pose_residual_mm": 6.567,
+      "repeat_board_observation_xy_mm": [
+        200.279,
+        182.584
+      ],
+      "repeat_rigid_pose_residual_mm": 5.742
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.365,
+      "board_plane_validation_passed": true,
+      "key_id": "6",
+      "reference_board_observation_xy_mm": [
+        218.886,
+        182.955
+      ],
+      "reference_rigid_pose_residual_mm": 6.131,
+      "repeat_board_observation_xy_mm": [
+        219.196,
+        183.147
+      ],
+      "repeat_rigid_pose_residual_mm": 5.813
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.334,
+      "board_plane_validation_passed": true,
+      "key_id": "7",
+      "reference_board_observation_xy_mm": [
+        237.921,
+        184.628
+      ],
+      "reference_rigid_pose_residual_mm": 6.799,
+      "repeat_board_observation_xy_mm": [
+        238.255,
+        184.635
+      ],
+      "repeat_rigid_pose_residual_mm": 6.391
+    },
+    {
+      "board_observation_temporal_delta_mm": 2.407,
+      "board_plane_validation_passed": true,
+      "key_id": "8",
+      "reference_board_observation_xy_mm": [
+        257.964,
+        183.0
+      ],
+      "reference_rigid_pose_residual_mm": 4.584,
+      "repeat_board_observation_xy_mm": [
+        257.665,
+        185.388
+      ],
+      "repeat_rigid_pose_residual_mm": 6.248
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.235,
+      "board_plane_validation_passed": true,
+      "key_id": "9",
+      "reference_board_observation_xy_mm": [
+        277.243,
+        184.121
+      ],
+      "reference_rigid_pose_residual_mm": 4.659,
+      "repeat_board_observation_xy_mm": [
+        277.385,
+        184.308
+      ],
+      "repeat_rigid_pose_residual_mm": 4.581
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.51,
+      "board_plane_validation_passed": true,
+      "key_id": "0",
+      "reference_board_observation_xy_mm": [
+        296.183,
+        184.683
+      ],
+      "reference_rigid_pose_residual_mm": 4.679,
+      "repeat_board_observation_xy_mm": [
+        295.711,
+        184.489
+      ],
+      "repeat_rigid_pose_residual_mm": 4.912
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.681,
+      "board_plane_validation_passed": true,
+      "key_id": "MINUS",
+      "reference_board_observation_xy_mm": [
+        314.349,
+        185.594
+      ],
+      "reference_rigid_pose_residual_mm": 5.539,
+      "repeat_board_observation_xy_mm": [
+        314.051,
+        183.941
+      ],
+      "repeat_rigid_pose_residual_mm": 5.09
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.506,
+      "board_plane_validation_passed": true,
+      "key_id": "EQUAL",
+      "reference_board_observation_xy_mm": [
+        332.815,
+        186.145
+      ],
+      "reference_rigid_pose_residual_mm": 5.97,
+      "repeat_board_observation_xy_mm": [
+        333.284,
+        186.336
+      ],
+      "repeat_rigid_pose_residual_mm": 5.69
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.17,
+      "board_plane_validation_passed": true,
+      "key_id": "Q",
+      "reference_board_observation_xy_mm": [
+        140.094,
+        157.008
+      ],
+      "reference_rigid_pose_residual_mm": 2.161,
+      "repeat_board_observation_xy_mm": [
+        139.924,
+        157.004
+      ],
+      "repeat_rigid_pose_residual_mm": 1.707
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.266,
+      "board_plane_validation_passed": true,
+      "key_id": "W",
+      "reference_board_observation_xy_mm": [
+        158.696,
+        157.613
+      ],
+      "reference_rigid_pose_residual_mm": 1.882,
+      "repeat_board_observation_xy_mm": [
+        158.891,
+        157.432
+      ],
+      "repeat_rigid_pose_residual_mm": 1.536
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.664,
+      "board_plane_validation_passed": true,
+      "key_id": "E",
+      "reference_board_observation_xy_mm": [
+        177.558,
+        159.517
+      ],
+      "reference_rigid_pose_residual_mm": 2.996,
+      "repeat_board_observation_xy_mm": [
+        177.613,
+        157.854
+      ],
+      "repeat_rigid_pose_residual_mm": 1.181
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.11,
+      "board_plane_validation_passed": true,
+      "key_id": "R",
+      "reference_board_observation_xy_mm": [
+        196.908,
+        158.474
+      ],
+      "reference_rigid_pose_residual_mm": 1.58,
+      "repeat_board_observation_xy_mm": [
+        195.853,
+        158.819
+      ],
+      "repeat_rigid_pose_residual_mm": 1.194
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.875,
+      "board_plane_validation_passed": true,
+      "key_id": "T",
+      "reference_board_observation_xy_mm": [
+        214.836,
+        159.983
+      ],
+      "reference_rigid_pose_residual_mm": 2.069,
+      "repeat_board_observation_xy_mm": [
+        213.976,
+        160.147
+      ],
+      "repeat_rigid_pose_residual_mm": 2.112
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.185,
+      "board_plane_validation_passed": true,
+      "key_id": "Y",
+      "reference_board_observation_xy_mm": [
+        233.458,
+        159.48
+      ],
+      "reference_rigid_pose_residual_mm": 1.045,
+      "repeat_board_observation_xy_mm": [
+        233.434,
+        159.664
+      ],
+      "repeat_rigid_pose_residual_mm": 0.955
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.497,
+      "board_plane_validation_passed": true,
+      "key_id": "U",
+      "reference_board_observation_xy_mm": [
+        253.046,
+        159.921
+      ],
+      "reference_rigid_pose_residual_mm": 0.694,
+      "repeat_board_observation_xy_mm": [
+        252.549,
+        159.91
+      ],
+      "repeat_rigid_pose_residual_mm": 0.617
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.495,
+      "board_plane_validation_passed": true,
+      "key_id": "I",
+      "reference_board_observation_xy_mm": [
+        271.706,
+        160.524
+      ],
+      "reference_rigid_pose_residual_mm": 0.728,
+      "repeat_board_observation_xy_mm": [
+        271.211,
+        160.513
+      ],
+      "repeat_rigid_pose_residual_mm": 0.905
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.0,
+      "board_plane_validation_passed": true,
+      "key_id": "O",
+      "reference_board_observation_xy_mm": [
+        290.478,
+        160.947
+      ],
+      "reference_rigid_pose_residual_mm": 0.735,
+      "repeat_board_observation_xy_mm": [
+        290.478,
+        160.947
+      ],
+      "repeat_rigid_pose_residual_mm": 0.624
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.328,
+      "board_plane_validation_passed": true,
+      "key_id": "P",
+      "reference_board_observation_xy_mm": [
+        308.847,
+        161.36
+      ],
+      "reference_rigid_pose_residual_mm": 1.293,
+      "repeat_board_observation_xy_mm": [
+        309.175,
+        161.367
+      ],
+      "repeat_rigid_pose_residual_mm": 0.892
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.011,
+      "board_plane_validation_passed": true,
+      "key_id": "A",
+      "reference_board_observation_xy_mm": [
+        144.409,
+        133.423
+      ],
+      "reference_rigid_pose_residual_mm": 1.052,
+      "repeat_board_observation_xy_mm": [
+        145.397,
+        133.632
+      ],
+      "repeat_rigid_pose_residual_mm": 1.838
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.206,
+      "board_plane_validation_passed": true,
+      "key_id": "S",
+      "reference_board_observation_xy_mm": [
+        164.901,
+        133.384
+      ],
+      "reference_rigid_pose_residual_mm": 2.339,
+      "repeat_board_observation_xy_mm": [
+        163.815,
+        133.909
+      ],
+      "repeat_rigid_pose_residual_mm": 1.787
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.914,
+      "board_plane_validation_passed": true,
+      "key_id": "D",
+      "reference_board_observation_xy_mm": [
+        182.835,
+        132.915
+      ],
+      "reference_rigid_pose_residual_mm": 2.903,
+      "repeat_board_observation_xy_mm": [
+        182.253,
+        134.738
+      ],
+      "repeat_rigid_pose_residual_mm": 1.448
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.712,
+      "board_plane_validation_passed": true,
+      "key_id": "F",
+      "reference_board_observation_xy_mm": [
+        201.268,
+        134.48
+      ],
+      "reference_rigid_pose_residual_mm": 1.964,
+      "repeat_board_observation_xy_mm": [
+        201.96,
+        134.314
+      ],
+      "repeat_rigid_pose_residual_mm": 2.566
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.589,
+      "board_plane_validation_passed": true,
+      "key_id": "G",
+      "reference_board_observation_xy_mm": [
+        221.011,
+        134.426
+      ],
+      "reference_rigid_pose_residual_mm": 2.725,
+      "repeat_board_observation_xy_mm": [
+        221.463,
+        134.804
+      ],
+      "repeat_rigid_pose_residual_mm": 2.828
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.097,
+      "board_plane_validation_passed": true,
+      "key_id": "H",
+      "reference_board_observation_xy_mm": [
+        241.024,
+        134.2
+      ],
+      "reference_rigid_pose_residual_mm": 3.865,
+      "repeat_board_observation_xy_mm": [
+        241.05,
+        135.296
+      ],
+      "repeat_rigid_pose_residual_mm": 3.182
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.258,
+      "board_plane_validation_passed": true,
+      "key_id": "J",
+      "reference_board_observation_xy_mm": [
+        259.964,
+        135.224
+      ],
+      "reference_rigid_pose_residual_mm": 3.488,
+      "repeat_board_observation_xy_mm": [
+        260.151,
+        135.046
+      ],
+      "repeat_rigid_pose_residual_mm": 3.955
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.985,
+      "board_plane_validation_passed": true,
+      "key_id": "K",
+      "reference_board_observation_xy_mm": [
+        278.448,
+        135.325
+      ],
+      "reference_rigid_pose_residual_mm": 3.838,
+      "repeat_board_observation_xy_mm": [
+        279.412,
+        135.531
+      ],
+      "repeat_rigid_pose_residual_mm": 4.159
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.31,
+      "board_plane_validation_passed": true,
+      "key_id": "L",
+      "reference_board_observation_xy_mm": [
+        296.815,
+        135.788
+      ],
+      "reference_rigid_pose_residual_mm": 3.935,
+      "repeat_board_observation_xy_mm": [
+        295.506,
+        135.755
+      ],
+      "repeat_rigid_pose_residual_mm": 4.153
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.387,
+      "board_plane_validation_passed": true,
+      "key_id": "SEMICOLON",
+      "reference_board_observation_xy_mm": [
+        314.967,
+        136.065
+      ],
+      "reference_rigid_pose_residual_mm": 4.362,
+      "repeat_board_observation_xy_mm": [
+        314.62,
+        136.237
+      ],
+      "repeat_rigid_pose_residual_mm": 4.253
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.535,
+      "board_plane_validation_passed": true,
+      "key_id": "APOSTROPHE",
+      "reference_board_observation_xy_mm": [
+        333.515,
+        136.533
+      ],
+      "reference_rigid_pose_residual_mm": 4.647,
+      "repeat_board_observation_xy_mm": [
+        333.007,
+        136.7
+      ],
+      "repeat_rigid_pose_residual_mm": 4.567
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.472,
+      "board_plane_validation_passed": true,
+      "key_id": "Z",
+      "reference_board_observation_xy_mm": [
+        159.352,
+        113.572
+      ],
+      "reference_rigid_pose_residual_mm": 4.84,
+      "repeat_board_observation_xy_mm": [
+        159.638,
+        113.947
+      ],
+      "repeat_rigid_pose_residual_mm": 5.338
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.474,
+      "board_plane_validation_passed": true,
+      "key_id": "X",
+      "reference_board_observation_xy_mm": [
+        178.518,
+        112.629
+      ],
+      "reference_rigid_pose_residual_mm": 5.29,
+      "repeat_board_observation_xy_mm": [
+        178.656,
+        114.097
+      ],
+      "repeat_rigid_pose_residual_mm": 5.364
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.783,
+      "board_plane_validation_passed": true,
+      "key_id": "C",
+      "reference_board_observation_xy_mm": [
+        197.903,
+        114.438
+      ],
+      "reference_rigid_pose_residual_mm": 5.351,
+      "repeat_board_observation_xy_mm": [
+        197.33,
+        114.971
+      ],
+      "repeat_rigid_pose_residual_mm": 4.966
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.61,
+      "board_plane_validation_passed": true,
+      "key_id": "V",
+      "reference_board_observation_xy_mm": [
+        215.839,
+        114.014
+      ],
+      "reference_rigid_pose_residual_mm": 4.559,
+      "repeat_board_observation_xy_mm": [
+        216.479,
+        115.491
+      ],
+      "repeat_rigid_pose_residual_mm": 5.083
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.637,
+      "board_plane_validation_passed": true,
+      "key_id": "B",
+      "reference_board_observation_xy_mm": [
+        235.051,
+        114.721
+      ],
+      "reference_rigid_pose_residual_mm": 4.701,
+      "repeat_board_observation_xy_mm": [
+        235.007,
+        116.358
+      ],
+      "repeat_rigid_pose_residual_mm": 4.547
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.453,
+      "board_plane_validation_passed": true,
+      "key_id": "N",
+      "reference_board_observation_xy_mm": [
+        253.971,
+        114.511
+      ],
+      "reference_rigid_pose_residual_mm": 4.979,
+      "repeat_board_observation_xy_mm": [
+        253.953,
+        115.964
+      ],
+      "repeat_rigid_pose_residual_mm": 4.636
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.64,
+      "board_plane_validation_passed": true,
+      "key_id": "M",
+      "reference_board_observation_xy_mm": [
+        273.027,
+        115.214
+      ],
+      "reference_rigid_pose_residual_mm": 4.969,
+      "repeat_board_observation_xy_mm": [
+        272.49,
+        115.561
+      ],
+      "repeat_rigid_pose_residual_mm": 4.579
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.182,
+      "board_plane_validation_passed": true,
+      "key_id": "COMMA",
+      "reference_board_observation_xy_mm": [
+        290.863,
+        115.883
+      ],
+      "reference_rigid_pose_residual_mm": 3.973,
+      "repeat_board_observation_xy_mm": [
+        290.885,
+        115.702
+      ],
+      "repeat_rigid_pose_residual_mm": 4.32
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.182,
+      "board_plane_validation_passed": true,
+      "key_id": "PERIOD",
+      "reference_board_observation_xy_mm": [
+        309.813,
+        116.22
+      ],
+      "reference_rigid_pose_residual_mm": 4.118,
+      "repeat_board_observation_xy_mm": [
+        309.835,
+        116.04
+      ],
+      "repeat_rigid_pose_residual_mm": 4.43
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.181,
+      "board_plane_validation_passed": true,
+      "key_id": "SLASH",
+      "reference_board_observation_xy_mm": [
+        328.18,
+        116.722
+      ],
+      "reference_rigid_pose_residual_mm": 3.781,
+      "repeat_board_observation_xy_mm": [
+        328.201,
+        116.542
+      ],
+      "repeat_rigid_pose_residual_mm": 4.047
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.788,
+      "board_plane_validation_passed": true,
+      "key_id": "TAB",
+      "reference_board_observation_xy_mm": [
+        119.216,
+        157.467
+      ],
+      "reference_rigid_pose_residual_mm": 3.208,
+      "repeat_board_observation_xy_mm": [
+        118.939,
+        158.205
+      ],
+      "repeat_rigid_pose_residual_mm": 3.438
+    },
+    {
+      "board_observation_temporal_delta_mm": 0.356,
+      "board_plane_validation_passed": true,
+      "key_id": "ENTER",
+      "reference_board_observation_xy_mm": [
+        355.685,
+        137.272
+      ],
+      "reference_rigid_pose_residual_mm": 5.305,
+      "repeat_board_observation_xy_mm": [
+        355.383,
+        137.084
+      ],
+      "repeat_rigid_pose_residual_mm": 5.468
+    },
+    {
+      "board_observation_temporal_delta_mm": 1.763,
+      "board_plane_validation_passed": false,
+      "key_id": "SPACE",
+      "reference_board_observation_xy_mm": [
+        255.984,
+        93.377
+      ],
+      "reference_rigid_pose_residual_mm": 8.048,
+      "repeat_board_observation_xy_mm": [
+        255.017,
+        91.904
+      ],
+      "repeat_rigid_pose_residual_mm": 8.144
+    }
+  ],
+  "limitations": [
+    "Board observations are projections through the provisional Z=0 board homography; the elevated key plane is not intrinsically corrected.",
+    "The AprilTag board map is independent of the key-edge fit, but both key observations originate from the retained camera views rather than an independent physical key measurement.",
+    "This audit measures rigid-layout coherence only and does not emit accepted board-space targets.",
+    "The no-attachment result does not apply to the separate stylus_attachment TCP and trajectory profile."
+  ],
+  "motion_authorized": false,
+  "physical_clearance_verified": false,
+  "profile": "no_attachment",
+  "profile_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+  "reference_frame_sha256": "09f9ce8a02360aeccc81195312791c6e4262cbc8b99d1d79b74fe3d2d376b199",
+  "reference_rigid_pose": {
+    "front_left_board_xy_mm": [
+      110.398,
+      64.261
+    ],
+    "maximum_residual_mm": 8.048,
+    "median_residual_mm": 4.24,
+    "rms_residual_mm": 4.336,
+    "yaw_deg": 1.973
+  },
+  "registration_input_sha256": "226664e545db9b9a30a4fbbd2c2382e74ee3f6c4e4ee4673a1d439b511a8fd68",
+  "repeat_frame_sha256": "2eb7dde8db2c4c9ae4b40f05bc535c9271b14c63704ebf13f4ddce017e1b20a1",
+  "repeat_rigid_pose": {
+    "front_left_board_xy_mm": [
+      110.048,
+      64.873
+    ],
+    "maximum_residual_mm": 8.144,
+    "median_residual_mm": 4.375,
+    "rms_residual_mm": 4.329,
+    "yaw_deg": 1.808
+  },
+  "schema": "rocell.fixed_camera_board_key_validation.v1",
+  "status": "BOARD_PLANE_KEY_VALIDATION_INCOMPLETE_NO_MOTION_AUTHORITY",
+  "validated_key_count": 45
+}

@@ -43,3 +43,8 @@ center candidates do not collapse those profiles.
 3. Qualify the board-to-robot transform and installed clearances separately for
    `no_attachment` and `stylus_attachment`.
 4. Only then consider a sparse noncontact hover plan. Contact remains later.
+
+The first board-plane projection audit is now recorded in
+[`RC03_FIXED_CAMERA_BOARD_KEY_VALIDATION.md`](RC03_FIXED_CAMERA_BOARD_KEY_VALIDATION.md).
+It passes 45 of 46 keys under the existing 7 mm study limit but leaves `SPACE`,
+elevated-plane parallax, and independent physical validation unresolved.
