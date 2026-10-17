@@ -646,3 +646,12 @@ initial seed. Generated comparison reports and the detached FREEZE-013 checkout
 remain ignored and outside the source archive. The exact governed ceiling is
 therefore 6,611; every logical-byte, blob, duplicate, and reduction limit
 remains unchanged.
+
+The retained-start entry-bridge increment adds three reviewable source files:
+one bounded interpolation and pinned-FK analysis module, one command-line
+wrapper, and one focused regression test. It reuses the canonical joint sampler
+and the ignored retained-start report without opening robot transport or
+claiming collision clearance. Generated bridge reports and the detached
+FREEZE-013 checkout remain outside the source archive. The exact governed
+ceiling is therefore 6,614; every logical-byte, blob, duplicate, and reduction
+limit remains unchanged.
