@@ -383,6 +383,9 @@ def assess_bare_jaw_route_readiness(workspace: Path) -> dict[str, Any]:
         "physical_intrinsics_intake": {
             "status": intrinsics_intake.get("status"),
             "target_artifact_id": intrinsics_intake.get("target_artifact_id"),
+            "target_reconciliation": intrinsics_intake.get(
+                "target_reconciliation"
+            ),
             "retained_runtime_binding": intrinsics_intake.get(
                 "retained_runtime_binding"
             ),

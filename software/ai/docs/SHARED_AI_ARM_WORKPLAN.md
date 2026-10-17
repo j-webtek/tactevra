@@ -544,6 +544,17 @@ are ineligible and a rejected slot cannot migrate between splits. The camera
 and installed board stay fixed; only the existing scale-verified target moves.
 Target identity and scale remain the next physical input, so capture readiness
 and all motion authority remain false.
+ARM-083 reconciles the completed installed-board metrology with that target
+requirement. It retains the `610 x 457` mm board, six exact tag centers,
+`tag36h11` family, `40` mm detection edges, and `55` mm tiles without requesting
+another measurement. The fixed board remains valid for the current planar
+overlay, while its single plane pose is insufficient to solve lens intrinsics.
+The remaining intake accepts an existing ChArUco target or a metric AprilTag
+grid after immutable identity, two-axis scale, and rigid-flatness evidence are
+bound. No new print is requested. The camera, installed board, and arm stay
+fixed; only the existing target moves through the precommitted views. Capture,
+robot transport, commands, and physical authority remain disabled until that
+binding is complete.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

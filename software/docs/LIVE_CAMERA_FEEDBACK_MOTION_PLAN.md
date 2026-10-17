@@ -445,6 +445,23 @@ Capture remains held until the received optical-stack identity and locked
 manual-control readback are complete. The plan opens no camera, writes no
 registry entry, sends no robot command, and grants no physical authority.
 
+The target reconciliation artifact
+`software/ai/eval/static_intrinsics_target_reconciliation_20261016.json`
+preserves the completed board metrology as an input rather than treating it as
+missing: the board is `610 x 457` mm, the installed family is `tag36h11`, the
+detection edge is `40` mm, the tile edge is `55` mm, and the six measured tag
+centers remain bound exactly. Those measurements continue to support the fixed
+image-to-board planar registration and do not need to be repeated.
+
+That fixed camera/fixed board epoch contains one plane pose, so it cannot by
+itself constrain focal length and lens distortion. The remaining input is one
+existing movable planar target. The intake accepts either a ChArUco target with
+its dictionary and metric square/marker definition or an AprilTag grid with
+ordered IDs and metric corner coordinates. Its identity, two-axis scale, flat
+backing, and unchanged use across the precommitted views must be retained before
+slot 01 is captured. The camera, installed board, and arm remain fixed while
+only that target is presented at the scheduled poses.
+
 ## 2026-10-15 read-only intake result
 
 The explicit camera-only intake identified one present Windows Camera-class
