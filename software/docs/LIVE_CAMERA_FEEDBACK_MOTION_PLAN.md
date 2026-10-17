@@ -937,3 +937,13 @@ or already measured slot, and recomputes the output content hash. Filling the
 eighth slot changes the state to ready only when all four physical prerequisite
 artifacts are accepted; otherwise the packet remains explicitly blocked before
 fit. The ingest operation performs no capture, controller access, or motion.
+
+Before the position fit, prerequisite acceptance must be bound from the
+production physical calibration registry. The binder resolves exactly
+`phase1_static_extrinsic`, `phase1_measured_tag_map`,
+`phase1_robot_reference`, and `phase1_controller_correlation` against the
+active manifest, build, and dependency hashes. The packet records the four
+resolved artifact hashes together with hashes for the registry index and
+context file. The fit rejects accepted-looking status strings when this binding
+is absent or malformed. The maintained physical registry is currently empty,
+so the binder fails closed until real `VALID` artifacts are published.
