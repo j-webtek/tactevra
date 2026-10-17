@@ -150,6 +150,35 @@ feedback acquisition, and collection of the five spatially separated samples
 remain the next integration step. No manual board dimension, tag spacing,
 keyboard size, or key-plane measurement needs to be repeated.
 
+Retained capture files can now be checked directly. A single record is compiled
+with no hardware access as follows:
+
+```powershell
+$env:PYTHONPATH = "software/src"
+python -m rocell.calibration.fixed_camera_robot_calibration_capture_v1 `
+  capture-fit-a.json `
+  --expected-sha256 <exact-file-sha256>
+```
+
+After collecting three spatially separated `FIT` records and two separate
+`HOLDOUT` records, compile the campaign in one deterministic invocation:
+
+```powershell
+python -m rocell.calibration.fixed_camera_robot_calibration_capture_v1 `
+  --campaign `
+  capture-fit-a.json capture-fit-b.json capture-fit-c.json `
+  capture-holdout-a.json capture-holdout-b.json
+```
+
+`--expected-sha256` may be repeated once per input, in the same order, to pin
+the exact bytes. Files are bounded to 1 MiB, decoded as strict UTF-8 JSON, and
+reject duplicate keys, non-finite values, malformed records, reused camera
+frames, reused board-pose observations, and reused tool-reference
+observations. The compiler still opens no camera or serial endpoint and emits
+no robot command. Windows currently reports the intended installed devices as
+Arducam B0477 and the RoArm CP210x bridge on COM4; this inventory is discovery
+evidence only and does not qualify either endpoint.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

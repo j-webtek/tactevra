@@ -13,9 +13,12 @@ Stylus geometry remains a separate TCP and installed-clearance calibration.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
+from pathlib import Path
+import sys
 from typing import Any, Mapping, Sequence
 
 from rocell.arm.feedback import FeedbackError, Feedback1051, parse_feedback_line
@@ -37,10 +40,59 @@ MAX_BRACKET_NS = 1_000_000_000
 MAX_JOINT_SPAN_RAD = 0.01
 MAX_ENDPOINT_SPAN_MM = 2.0
 MAX_REPORTED_FK_ERROR_MM = 5.0
+MAX_CAPTURE_FILE_BYTES = 1024 * 1024
 
 
 class FixedCameraRobotCalibrationCaptureError(ValueError):
     """A passive capture or campaign is inconsistent or incomplete."""
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise FixedCameraRobotCalibrationCaptureError(
+                f"duplicate JSON key {key!r}")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError(f"non-finite JSON constant {value}")
+
+
+def _read_capture_file(
+    path: Path,
+    *,
+    expected_sha256: str | None = None,
+) -> Mapping[str, Any]:
+    """Load one bounded capture file and optionally pin its exact bytes."""
+    try:
+        payload = path.read_bytes()
+    except OSError as exc:
+        raise FixedCameraRobotCalibrationCaptureError(
+            f"could not read capture file {path}: {exc}") from exc
+    if not payload or len(payload) > MAX_CAPTURE_FILE_BYTES:
+        raise FixedCameraRobotCalibrationCaptureError(
+            f"capture file {path} must contain 1 to {MAX_CAPTURE_FILE_BYTES} bytes")
+    actual_sha256 = hashlib.sha256(payload).hexdigest()
+    if expected_sha256 is not None:
+        expected = _sha(expected_sha256, "expected capture file SHA-256")
+        if actual_sha256 != expected:
+            raise FixedCameraRobotCalibrationCaptureError(
+                f"capture file SHA-256 mismatch for {path}")
+    try:
+        document = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=_reject_duplicate_keys,
+            parse_constant=_reject_json_constant,
+        )
+    except FixedCameraRobotCalibrationCaptureError:
+        raise
+    except (UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        raise FixedCameraRobotCalibrationCaptureError(
+            f"capture file {path} is not strict UTF-8 JSON: {exc}") from exc
+    return _mapping(document, f"capture file {path}")
 
 
 def _canonical(value: object) -> bytes:
@@ -366,6 +418,15 @@ def compile_campaign(captures: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     ids = [result["capture_id"] for result in results]
     if len(set(ids)) != len(ids):
         raise FixedCameraRobotCalibrationCaptureError("capture IDs must be unique")
+    for binding, label in (
+        ("frame_sha256", "camera frames"),
+        ("board_pose_observation_sha256", "board-pose observations"),
+        ("tool_reference_observation_sha256", "tool-reference observations"),
+    ):
+        values = [result["bindings"][binding] for result in results]
+        if len(set(values)) != len(values):
+            raise FixedCameraRobotCalibrationCaptureError(
+                f"campaign {label} must be unique")
     fit = [result for result in results if result["role"] == "FIT"]
     holdout = [result for result in results if result["role"] == "HOLDOUT"]
     if len(fit) < 3 or len(holdout) < 2:
@@ -440,8 +501,72 @@ def compile_campaign(captures: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
+def compile_files(
+    paths: Sequence[Path],
+    *,
+    campaign: bool,
+    expected_sha256s: Sequence[str] = (),
+) -> dict[str, Any]:
+    """Compile hash-pinnable retained capture files without device access."""
+    selected_paths = tuple(paths)
+    selected_hashes = tuple(expected_sha256s)
+    if not selected_paths:
+        raise FixedCameraRobotCalibrationCaptureError(
+            "at least one retained capture file is required")
+    if selected_hashes and len(selected_hashes) != len(selected_paths):
+        raise FixedCameraRobotCalibrationCaptureError(
+            "expected SHA-256 count must equal capture file count")
+    documents = [
+        _read_capture_file(
+            path,
+            expected_sha256=(selected_hashes[index] if selected_hashes else None),
+        )
+        for index, path in enumerate(selected_paths)
+    ]
+    if campaign:
+        return compile_campaign(documents)
+    if len(documents) != 1:
+        raise FixedCameraRobotCalibrationCaptureError(
+            "single-capture mode accepts exactly one file; use --campaign")
+    return compile_capture(documents[0])
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Compile retained fixed-camera/robot calibration records without "
+            "opening the camera or robot"
+        ))
+    parser.add_argument(
+        "captures", type=Path, nargs="+", help="Retained capture-input JSON files")
+    parser.add_argument(
+        "--campaign", action="store_true",
+        help="Aggregate at least three FIT and two HOLDOUT capture files")
+    parser.add_argument(
+        "--expected-sha256", action="append", default=[], metavar="SHA256",
+        help=(
+            "Exact file-byte SHA-256 pin; repeat once per capture in input order"
+        ))
+    args = parser.parse_args(argv)
+    try:
+        result = compile_files(
+            args.captures,
+            campaign=args.campaign,
+            expected_sha256s=args.expected_sha256,
+        )
+    except FixedCameraRobotCalibrationCaptureError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    sys.stdout.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    return 0
+
+
 __all__ = [
     "CAPTURE_INPUT_SCHEMA", "CAPTURE_RESULT_SCHEMA", "CAMPAIGN_RESULT_SCHEMA",
-    "FixedCameraRobotCalibrationCaptureError", "compile_capture",
-    "compile_campaign",
+    "MAX_CAPTURE_FILE_BYTES", "FixedCameraRobotCalibrationCaptureError",
+    "compile_capture", "compile_campaign", "compile_files",
 ]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
