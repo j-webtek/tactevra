@@ -689,3 +689,11 @@ dimensions and partitions the remaining qualification work without generating
 an installed profile, opening hardware, or requesting repeated measurement.
 The exact governed ceiling is therefore 6,637; every logical-byte, blob,
 duplicate, and reduction limit remains unchanged.
+
+The static-overhead candidate-envelope increment adds four reviewable text
+files: one dependency-free envelope derivation module, one command-line
+wrapper, one compact retained report, and one focused regression test. It
+derives source-hashed local or board-frame candidate bounds for 16 of the 19
+collision bodies while leaving installed placement and uncertainty acceptance
+open. The exact governed ceiling is therefore 6,641; every logical-byte, blob,
+duplicate, and reduction limit remains unchanged.

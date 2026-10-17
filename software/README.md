@@ -701,6 +701,24 @@ The work order reuses retained dimensions, requests no repeated dimension
 measurement, and keeps every body pending until envelope, placement, and
 uncertainty evidence is accepted.
 
+Derive the next offline candidate-envelope stage from the retained work order:
+
+```powershell
+$env:PYTHONPATH='software/src;software/ai'
+python software/ai/run_static_overhead_collision_candidate_envelopes.py `
+  --workspace . `
+  --work-order software/ai/eval/static_overhead_collision_qualification_work_order_20261017.json `
+  --work-order-sha256 7778833cd1cbab12a1559de5900fa053843a062b9e2dc4565968a2ea913b9d2b `
+  --output software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json
+```
+
+This dependency-free pass reads the controlled STL, layout, support, and robot
+reduction sources and binds every source hash into the result. It derives 16
+candidate envelopes and seven candidate board-frame placements. The base and
+factory clamp, fixed flexible cable, and bare-jaw absence declaration remain
+without geometry; all 19 bodies still require accepted uncertainty. It does
+not create an installed profile or execute collision screening.
+
 From the workspace root:
 
 ```powershell

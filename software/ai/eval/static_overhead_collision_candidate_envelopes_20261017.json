@@ -1,0 +1,654 @@
+{
+  "accepted_uncertainty_body_count": 0,
+  "bodies_without_accepted_uncertainty": [
+    "robot:base_link",
+    "robot:link1",
+    "robot:link2",
+    "robot:link3",
+    "robot:link4",
+    "robot:link5",
+    "robot:gripper",
+    "installation:base_and_factory_clamp",
+    "installation:static_camera_support",
+    "installation:static_camera_module",
+    "installation:static_camera_connector",
+    "installation:static_camera_cable",
+    "attachment:contact_tool",
+    "workcell:board_solid",
+    "workcell:keyboard",
+    "workcell:phone",
+    "workcell:station:keyboard_left",
+    "workcell:station:keyboard_right",
+    "workcell:station:phone_tcp"
+  ],
+  "bodies_without_candidate_envelope": [
+    "installation:base_and_factory_clamp",
+    "installation:static_camera_cable",
+    "attachment:contact_tool"
+  ],
+  "bodies_without_candidate_placement": [
+    "robot:base_link",
+    "robot:link1",
+    "robot:link2",
+    "robot:link3",
+    "robot:link4",
+    "robot:link5",
+    "robot:gripper",
+    "installation:base_and_factory_clamp",
+    "installation:static_camera_module",
+    "installation:static_camera_connector",
+    "installation:static_camera_cable",
+    "attachment:contact_tool"
+  ],
+  "body_candidates": [
+    {
+      "body_id": "robot:base_link",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          42.521708,
+          40.800001,
+          1.500002
+        ],
+        "minimum_mm": [
+          -56.000002,
+          -40.800001,
+          -71.1
+        ],
+        "size_mm": [
+          98.52171,
+          81.600002,
+          72.600002
+        ]
+      },
+      "frame": "base_link",
+      "primitive_count": 2,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "robot:link1",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          27.388891,
+          36.210001,
+          62.146684
+        ],
+        "minimum_mm": [
+          -27.388891,
+          -36.210001,
+          1.499998
+        ],
+        "size_mm": [
+          54.777782,
+          72.420002,
+          60.646686
+        ]
+      },
+      "frame": "link1",
+      "primitive_count": 2,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "robot:link2",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          246.815401,
+          40.002402,
+          39.410002
+        ],
+        "minimum_mm": [
+          -9.999732,
+          -15.510002,
+          -39.610002
+        ],
+        "size_mm": [
+          256.815133,
+          55.512404,
+          79.020004
+        ]
+      },
+      "frame": "link2",
+      "primitive_count": 2,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "robot:link3",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          12.360402,
+          10.109599,
+          18.000002
+        ],
+        "minimum_mm": [
+          -15.507169,
+          -154.696581,
+          -17.520002
+        ],
+        "size_mm": [
+          27.867571,
+          164.80618,
+          35.520004
+        ]
+      },
+      "frame": "link3",
+      "primitive_count": 4,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "robot:link4",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          25.257477,
+          9.500428,
+          20.200201
+        ],
+        "minimum_mm": [
+          -28.669602,
+          -52.299578,
+          -20.199803
+        ],
+        "size_mm": [
+          53.927079,
+          61.800006,
+          40.400004
+        ]
+      },
+      "frame": "link4",
+      "primitive_count": 2,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "robot:link5",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          15.497937,
+          17.773655,
+          119.885622
+        ],
+        "minimum_mm": [
+          -30.998083,
+          -17.746347,
+          -0.749514
+        ],
+        "size_mm": [
+          46.49602,
+          35.520002,
+          120.635136
+        ]
+      },
+      "frame": "link5",
+      "primitive_count": 1,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "robot:gripper",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_LINK_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          67.082605,
+          15.240369,
+          0.750224
+        ],
+        "minimum_mm": [
+          -10.767399,
+          -9.999633,
+          -38.617346
+        ],
+        "size_mm": [
+          77.850004,
+          25.240002,
+          39.36757
+        ]
+      },
+      "frame": "gripper_link",
+      "primitive_count": 1,
+      "remaining_requirements": [
+        "review whole-link coverage and non-watertight source components",
+        "accept installed base transform and placement uncertainty",
+        "accept geometry uncertainty and false-positive behavior"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "installation:base_and_factory_clamp",
+      "candidate_placement_available": false,
+      "candidate_state": "ENVELOPE_PENDING",
+      "remaining_requirements": [
+        "record a conservative installed base-and-clamp envelope",
+        "accept board-frame placement and uncertainty"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "installation:static_camera_support",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_CAD_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          730.0,
+          314.5,
+          1090.900024
+        ],
+        "minimum_mm": [
+          -120.0,
+          -250.0,
+          -18.0
+        ],
+        "size_mm": [
+          850.0,
+          564.5,
+          1108.900024
+        ]
+      },
+      "frame": "B",
+      "remaining_requirements": [
+        "verify installed support revision and accept placement and geometry uncertainty"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "installation:static_camera_module",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_CAGE_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          96.0,
+          134.0,
+          42.0
+        ],
+        "minimum_mm": [
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        "size_mm": [
+          96.0,
+          134.0,
+          42.0
+        ]
+      },
+      "frame": "CAMERA_CAGE_LOCAL",
+      "remaining_requirements": [
+        "bind the received camera/cage installed transform",
+        "accept geometry and placement uncertainty"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "installation:static_camera_connector",
+      "candidate_placement_available": false,
+      "candidate_state": "LOCAL_CONNECTOR_FRAME_ENVELOPE_DERIVED",
+      "envelope": {
+        "maximum_mm": [
+          96.0,
+          89.0,
+          6.0
+        ],
+        "minimum_mm": [
+          -0.0,
+          7.0,
+          0.0
+        ],
+        "size_mm": [
+          96.0,
+          82.0,
+          6.0
+        ]
+      },
+      "frame": "CAMERA_CONNECTOR_LOCAL",
+      "remaining_requirements": [
+        "bind the installed connector transform",
+        "accept geometry and placement uncertainty"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "installation:static_camera_cable",
+      "candidate_placement_available": false,
+      "candidate_state": "FLEXIBLE_ENVELOPE_PENDING",
+      "remaining_requirements": [
+        "record the fixed cable occupied region and routing variability"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "attachment_profile": "BARE_JAW",
+      "body_id": "attachment:contact_tool",
+      "candidate_placement_available": false,
+      "candidate_state": "BARE_JAW_ABSENCE_DECLARATION_PENDING_ACCEPTANCE",
+      "remaining_requirements": [
+        "accept that BARE_JAW has no contact-tool body",
+        "qualify every future stylus as a separate attachment profile"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "workcell:board_solid",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_ENVELOPE_DERIVED_FROM_RETAINED_DIMENSIONS",
+      "envelope": {
+        "maximum_mm": [
+          610.0,
+          457.0,
+          0.0
+        ],
+        "minimum_mm": [
+          0.0,
+          0.0,
+          -18.0
+        ],
+        "size_mm": [
+          610.0,
+          457.0,
+          18.0
+        ]
+      },
+      "frame": "B",
+      "remaining_requirements": [
+        "accept board-frame datum and installed uncertainty"
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "workcell:keyboard",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_ENVELOPE_DERIVED_FROM_RETAINED_DIMENSIONS",
+      "envelope": {
+        "maximum_mm": [
+          400.0,
+          232.0,
+          21.0
+        ],
+        "minimum_mm": [
+          85.0,
+          85.0,
+          0.0
+        ],
+        "size_mm": [
+          315.0,
+          147.0,
+          21.0
+        ]
+      },
+      "frame": "B",
+      "remaining_requirements": [
+        "accept installed placement and uncertainty"
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "workcell:phone",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_ENVELOPE_DERIVED_FROM_RETAINED_DIMENSIONS",
+      "envelope": {
+        "maximum_mm": [
+          577.1,
+          248.6,
+          11.9
+        ],
+        "minimum_mm": [
+          499.2,
+          84.2,
+          4.0
+        ],
+        "size_mm": [
+          77.9,
+          164.4,
+          7.9
+        ]
+      },
+      "frame": "B",
+      "remaining_requirements": [
+        "accept installed placement and uncertainty"
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "workcell:station:keyboard_left",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_ENVELOPE_DERIVED_FROM_CONTROLLED_STL",
+      "envelope": {
+        "maximum_mm": [
+          264.5,
+          264.0,
+          7.0
+        ],
+        "minimum_mm": [
+          80.0,
+          72.0,
+          0.0
+        ],
+        "size_mm": [
+          184.5,
+          192.0,
+          7.0
+        ]
+      },
+      "frame": "B",
+      "local_envelope": {
+        "maximum_mm": [
+          184.5,
+          192.0,
+          7.0
+        ],
+        "minimum_mm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_mm": [
+          184.5,
+          192.0,
+          7.0
+        ]
+      },
+      "remaining_requirements": [
+        "verify installed article and accept placement uncertainty"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "workcell:station:keyboard_right",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_ENVELOPE_DERIVED_FROM_CONTROLLED_STL",
+      "envelope": {
+        "maximum_mm": [
+          405.0,
+          264.0,
+          7.0
+        ],
+        "minimum_mm": [
+          242.5,
+          72.0,
+          0.0
+        ],
+        "size_mm": [
+          162.5,
+          192.0,
+          7.0
+        ]
+      },
+      "frame": "B",
+      "local_envelope": {
+        "maximum_mm": [
+          162.5,
+          192.0,
+          7.0
+        ],
+        "minimum_mm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_mm": [
+          162.5,
+          192.0,
+          7.0
+        ]
+      },
+      "remaining_requirements": [
+        "verify installed article and accept placement uncertainty"
+      ],
+      "uncertainty_available": false
+    },
+    {
+      "body_id": "workcell:station:phone_tcp",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_ENVELOPE_DERIVED_FROM_CONTROLLED_STL",
+      "envelope": {
+        "maximum_mm": [
+          597.300003,
+          252.800003,
+          10.5
+        ],
+        "minimum_mm": [
+          411.0,
+          80.0,
+          0.0
+        ],
+        "size_mm": [
+          186.300003,
+          172.800003,
+          10.5
+        ]
+      },
+      "frame": "B",
+      "local_envelope": {
+        "maximum_mm": [
+          186.300003,
+          172.800003,
+          10.5
+        ],
+        "minimum_mm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_mm": [
+          186.300003,
+          172.800003,
+          10.5
+        ]
+      },
+      "remaining_requirements": [
+        "verify installed article and accept placement uncertainty"
+      ],
+      "uncertainty_available": false
+    }
+  ],
+  "candidate_board_or_link_frame_placement_body_count": 7,
+  "candidate_envelope_body_count": 16,
+  "collision_screening_executed": false,
+  "controller_commands": [],
+  "hardware_access": false,
+  "installed_profile_eligible": false,
+  "next_required_stage": "REVIEW_INSTALLED_PLACEMENTS_AND_ASSIGN_CONSERVATIVE_UNCERTAINTIES",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "profile_generated": false,
+  "repeat_dimension_measurement_body_ids": [],
+  "report_sha256": "c279631ca452d399c3070defbb31adc8d8707db60371bf846a3dd1a1a1db0b55",
+  "required_body_count": 19,
+  "schema": "rocell.static_overhead_collision_candidate_envelopes.v1",
+  "source_bindings": [
+    {
+      "byte_length": 17043,
+      "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+      "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+    },
+    {
+      "byte_length": 1311584,
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_left.stl",
+      "sha256": "a19b4288b9d6c3fae66f3baa3aa7726fc4acaa440bdb3f16ad3a7ea7791e9a1f"
+    },
+    {
+      "byte_length": 1046084,
+      "path": "active-project/RoCell_v0_3/stl/keyboard_station_right.stl",
+      "sha256": "bc9cc0d252da8d1702c56bbd0afaf6ed79e5dd9891d121dd54372e4692675cf0"
+    },
+    {
+      "byte_length": 2272184,
+      "path": "active-project/RoCell_v0_3/stl/phone_tcp_station.stl",
+      "sha256": "63e02e28f9bb818007564eab7e82e2b9ce8417f30bdf3cbec3c3a86ec08ac32e"
+    },
+    {
+      "byte_length": 11787684,
+      "path": "hardware/static_overhead_camera/cad/output/assembly/printable_camera_portal_printed_parts_only.stl",
+      "sha256": "999f60da097a3ca6c99a1c25219ae143d86120df52eb7ef9531d4b0076c5e637"
+    },
+    {
+      "byte_length": 447684,
+      "path": "hardware/static_overhead_camera/cad/output/revisions/08D-C2_usb_keeper_v1/08D-C2_ABS_USB_clearance_keeper_v1.stl",
+      "sha256": "da39b8e4dab7818535bb82dfd918259a5c45d58dff915eb809f02890b9961907"
+    },
+    {
+      "byte_length": 1919684,
+      "path": "hardware/static_overhead_camera/cad/output/stl/camera_cage_body.stl",
+      "sha256": "ded4d2b85fadeaca7c27b9c2a34f34203ebb02f2e730d8377fb1bca953e90052"
+    },
+    {
+      "byte_length": 321684,
+      "path": "hardware/static_overhead_camera/cad/output/stl/camera_cage_keeper.stl",
+      "sha256": "74a829cfe1f8f57f3801bcf2eacf97e3afeebd448aca96709fbf2016aa20a730"
+    },
+    {
+      "byte_length": 8466,
+      "path": "hardware/static_overhead_camera/config/support_design.json",
+      "sha256": "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+    },
+    {
+      "byte_length": 22064,
+      "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+      "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+    }
+  ],
+  "status": "CANDIDATE_ENVELOPES_DERIVED_PLACEMENT_AND_UNCERTAINTY_REVIEW_PENDING",
+  "support_design_state": "SCREENING_CANDIDATE_PHYSICAL_QUALIFICATION_OPEN",
+  "work_order_file_sha256": "7778833cd1cbab12a1559de5900fa053843a062b9e2dc4565968a2ea913b9d2b",
+  "work_order_sha256": "14ad82ae7e09bc81da1357d26fe72c7444de7a152dc755540017a28a5f86bac6"
+}
