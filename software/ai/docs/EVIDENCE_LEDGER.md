@@ -12881,3 +12881,28 @@ rewriting history. New entries must use a unique evidence ID.
   installed-profile eligibility false; accepted uncertainty bodies 0; profile
   generation false; collision screening false; commands 0; hardware access
   false; movements 0; physical authority false.
+
+### E-20261017-AI-STATIC-CAMERA-CAD-PLACEMENT-001 — indexed board-frame bounds recovered
+
+- Source: the prior candidate-envelope artifact above, controlled printable
+  frame design and generator, and the cover-only USB keeper revision. The
+  regenerated result records thirteen exact source bindings.
+- Coverage: the static camera module and revised USB keeper now have candidate
+  board-frame placement across all three permitted X indices and both
+  permitted Y indices. The six-position union bounds are B
+  `[245, 180.5, 1000]` through `[365, 335.5, 1074]` mm for the camera module
+  and B `[245, 187.5, 1068]` through `[365, 290.5, 1074]` mm for the keeper.
+  Candidate placement coverage increases from seven to nine of 19 bodies;
+  candidate envelope coverage remains 16 of 19.
+- Artifact:
+  `software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json`,
+  file SHA-256
+  `3961602a2541703f1132b7dbbf0c79d04c2794142b669b2836d15f2f7348c667`,
+  canonical report SHA-256
+  `1305f96ef1f35cf0294d1ebe573c7f3754f968dfc829868fb494859d839fb938`.
+- Qualification boundary: the installed article, selected lock index, and
+  geometry and placement uncertainty remain unaccepted. Robot-base placement,
+  base/clamp geometry, flexible cable geometry, and the `BARE_JAW` absence
+  declaration remain pending. Installed-profile eligibility false; accepted
+  uncertainty bodies 0; profile generation false; collision screening false;
+  commands 0; hardware access false; movements 0; physical authority false.

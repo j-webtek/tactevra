@@ -106,6 +106,22 @@ def _box(origin: list[float], size: list[float]) -> dict[str, list[float]]:
     }
 
 
+def _translate_bounds(
+    envelope: dict[str, list[float]], translation: list[float]
+) -> dict[str, list[float]]:
+    return _box(
+        [envelope["minimum_mm"][axis] + translation[axis] for axis in range(3)],
+        envelope["size_mm"],
+    )
+
+
+def _require_source_contract(path: Path, required_fragments: tuple[str, ...]) -> None:
+    source = path.read_text(encoding="utf-8")
+    missing = [fragment for fragment in required_fragments if fragment not in source]
+    if missing:
+        raise ValueError(f"candidate source contract changed: {path}: {missing[0]}")
+
+
 def _candidate_box_corners(primitive: dict[str, Any]) -> list[tuple[float, float, float]]:
     center = primitive["center_mm"]
     half = primitive["half_extents_mm"]
@@ -149,6 +165,9 @@ def build_static_overhead_collision_candidate_envelopes_v1(
         "robot": workspace / "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
         "layout": workspace / "active-project/RoCell_v0_3/config/workcell_layout.json",
         "support": workspace / "hardware/static_overhead_camera/config/support_design.json",
+        "printable_frame": workspace / "hardware/static_overhead_camera/config/printable_frame_design.json",
+        "frame_generator": workspace / "hardware/static_overhead_camera/cad/generate_printable_frame.py",
+        "usb_keeper_revision": workspace / "hardware/static_overhead_camera/cad/build_usb_keeper_revision.py",
         "portal": workspace / "hardware/static_overhead_camera/cad/output/assembly/printable_camera_portal_printed_parts_only.stl",
         "cage": workspace / "hardware/static_overhead_camera/cad/output/stl/camera_cage_body.stl",
         "keeper": workspace / "hardware/static_overhead_camera/cad/output/stl/camera_cage_keeper.stl",
@@ -164,6 +183,26 @@ def build_static_overhead_collision_candidate_envelopes_v1(
     robot = _load_json(paths["robot"])
     layout = _load_json(paths["layout"])
     support = _load_json(paths["support"])
+    printable_frame = _load_json(paths["printable_frame"])
+    _require_source_contract(
+        paths["frame_generator"],
+        (
+            "CAMERA_CAGE_X0 = CAMERA_X - 48.0",
+            "CAMERA_CAGE_Y0 = CAMERA_Y - 48.0",
+            'parts["camera_cage_body"].translate((CAMERA_CAGE_X0, CAMERA_CAGE_Y0, 1026.0))',
+            'parts["camera_cage_keeper"].translate((CAMERA_CAGE_X0, CAMERA_CAGE_Y0, 1068.0))',
+            "rounded_plate(38.0, 38.0, 25.0, 2.0, CAMERA_X - 19.0 + delta_x, CAMERA_Y - 19.0 + delta_y, 1034.0)",
+            "circle(19.75).extrude(34.0).translate((0, 0, 1000.0))",
+        ),
+    )
+    _require_source_contract(
+        paths["usb_keeper_revision"],
+        (
+            '"""Export a cover-only, photo-informed USB clearance revision; preserve old plates."""',
+            "original = g.camera_cage_keeper()",
+            "Cover only; existing cage and selected physical shims unchanged",
+        ),
+    )
     work_ids = [row["body_id"] for row in work_order["body_qualification_work"]]
     if len(set(work_ids)) != 19:
         raise ValueError("work order body IDs must be unique")
@@ -243,23 +282,95 @@ def build_static_overhead_collision_candidate_envelopes_v1(
         "uncertainty_available": False,
         "remaining_requirements": ["verify installed support revision and accept placement and geometry uncertainty"],
     }
+    camera_axis = printable_frame["layout"]["camera_axis_xy_mm"]
+    if camera_axis != [305.0, 228.5]:
+        raise ValueError("printable frame camera axis changed; review CAD placement contract")
+    camera = printable_frame["camera"]
+    if camera["nominal_case_xyz_mm"] != [38.0, 38.0, 25.0]:
+        raise ValueError("printable frame nominal camera case changed")
+    if camera["nominal_lens_outside_diameter_mm"] != 39.5:
+        raise ValueError("printable frame nominal lens diameter changed")
+    x_offsets = printable_frame["layout"]["installed_camera_x_offsets_mm"]
+    y_offsets = printable_frame["layout"]["installed_camera_y_offsets_mm"]
+    if x_offsets != [-12.0, 0.0, 12.0] or y_offsets != [0.0, 21.0]:
+        raise ValueError("printable frame positive-lock indices changed")
+    cage_origin = [camera_axis[0] - 48.0, camera_axis[1] - 48.0, 1026.0]
+    keeper_origin = [camera_axis[0] - 48.0, camera_axis[1] - 48.0, 1068.0]
+    cage_local = _stl_bounds(paths["cage"])
+    keeper_local = _stl_bounds(paths["keeper"])
+    connector_local = _stl_bounds(paths["connector"])
+    lens_radius = camera["nominal_lens_outside_diameter_mm"] / 2.0
+    module_index_envelopes = []
+    connector_index_envelopes = []
+    for delta_x in x_offsets:
+        for delta_y in y_offsets:
+            offset = [delta_x, delta_y, 0.0]
+            cage_board = _translate_bounds(
+                cage_local,
+                [cage_origin[axis] + offset[axis] for axis in range(3)],
+            )
+            keeper_board = _translate_bounds(
+                keeper_local,
+                [keeper_origin[axis] + offset[axis] for axis in range(3)],
+            )
+            camera_case_board = _box(
+                [
+                    camera_axis[0] - 19.0 + delta_x,
+                    camera_axis[1] - 19.0 + delta_y,
+                    1034.0,
+                ],
+                camera["nominal_case_xyz_mm"],
+            )
+            camera_lens_board = _box(
+                [
+                    camera_axis[0] - lens_radius + delta_x,
+                    camera_axis[1] - lens_radius + delta_y,
+                    1000.0,
+                ],
+                [lens_radius * 2.0, lens_radius * 2.0, 34.0],
+            )
+            module_index_envelopes.extend(
+                [cage_board, keeper_board, camera_case_board, camera_lens_board]
+            )
+            connector_index_envelopes.append(
+                _translate_bounds(
+                    connector_local,
+                    [keeper_origin[axis] + offset[axis] for axis in range(3)],
+                )
+            )
     rows["installation:static_camera_module"] = {
         "body_id": "installation:static_camera_module",
-        "candidate_state": "LOCAL_CAGE_FRAME_ENVELOPE_DERIVED",
-        "frame": "CAMERA_CAGE_LOCAL",
-        "envelope": _union_bounds([_stl_bounds(paths["cage"]), _stl_bounds(paths["keeper"])]),
-        "candidate_placement_available": False,
+        "candidate_state": "BOARD_FRAME_CAD_ENVELOPE_DERIVED",
+        "frame": "B",
+        "local_envelope": _union_bounds([cage_local, keeper_local]),
+        "envelope": _union_bounds(module_index_envelopes),
+        "positive_lock_indices_included": {
+            "x_offsets_mm": x_offsets,
+            "y_offsets_mm": y_offsets,
+        },
+        "candidate_placement_available": True,
         "uncertainty_available": False,
-        "remaining_requirements": ["bind the received camera/cage installed transform", "accept geometry and placement uncertainty"],
+        "remaining_requirements": [
+            "verify the received camera/cage article and selected positive-lock index",
+            "accept geometry and placement uncertainty",
+        ],
     }
     rows["installation:static_camera_connector"] = {
         "body_id": "installation:static_camera_connector",
-        "candidate_state": "LOCAL_CONNECTOR_FRAME_ENVELOPE_DERIVED",
-        "frame": "CAMERA_CONNECTOR_LOCAL",
-        "envelope": _stl_bounds(paths["connector"]),
-        "candidate_placement_available": False,
+        "candidate_state": "BOARD_FRAME_CAD_ENVELOPE_DERIVED",
+        "frame": "B",
+        "local_envelope": connector_local,
+        "envelope": _union_bounds(connector_index_envelopes),
+        "positive_lock_indices_included": {
+            "x_offsets_mm": x_offsets,
+            "y_offsets_mm": y_offsets,
+        },
+        "candidate_placement_available": True,
         "uncertainty_available": False,
-        "remaining_requirements": ["bind the installed connector transform", "accept geometry and placement uncertainty"],
+        "remaining_requirements": [
+            "verify the installed revised keeper article and selected positive-lock index",
+            "accept geometry and placement uncertainty",
+        ],
     }
     rows["installation:base_and_factory_clamp"] = {
         "body_id": "installation:base_and_factory_clamp",

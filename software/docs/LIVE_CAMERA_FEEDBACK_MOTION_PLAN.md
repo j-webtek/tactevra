@@ -870,16 +870,17 @@ The first offline execution stage now derives conservative axis-aligned bounds
 from the pinned robot box reductions, frozen workcell dimensions, controlled
 station STL files, and static-camera STL files. The result covers 16 of the 19
 collision bodies. Board, keyboard, phone, three stations, and the printable
-camera support have candidate board-frame placement. Robot links retain local
-link-frame bounds pending the installed base transform; the camera module and
-connector retain local bounds pending their installed transforms.
+camera support have candidate board-frame placement. The controlled
+printable-frame generator also recovers candidate board-frame placement for
+the camera module and revised USB keeper. Robot links retain local link-frame
+bounds pending the installed base transform.
 
 The retained artifact is
 `software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json`
 with file SHA-256
-`8ffd4399d2fa4a82be575b7e68114b86a0d886c486f34abf187d68b469e75d2f`
+`3961602a2541703f1132b7dbbf0c79d04c2794142b669b2836d15f2f7348c667`
 and canonical report SHA-256
-`c279631ca452d399c3070defbb31adc8d8707db60371bf846a3dd1a1a1db0b55`.
+`1305f96ef1f35cf0294d1ebe573c7f3754f968dfc829868fb494859d839fb938`.
 No repeated board, keyboard, or phone dimension measurement is requested. The
 base and factory clamp, fixed cable, and bare-jaw absence declaration remain
 without candidate geometry, and no uncertainty has been accepted. The next
