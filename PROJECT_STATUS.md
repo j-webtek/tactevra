@@ -33,11 +33,11 @@ strict localization evaluator. These controls
 formalize software compatibility and evidence requirements but add no physical
 observation or movement authority.
 
-The final-camera dependency is tracked as a targeted physical-integration hold
-in [the camera integration hold](docs/CAMERA_INTEGRATION_HOLD.md). Preparatory
-software, evidence, documentation, and distribution work may continue, but
-measured calibration and physical perception claims must wait for the fixed
-camera installation.
+The installed-camera dependency is tracked as a targeted physical-integration
+hold in [the camera integration hold](docs/CAMERA_INTEGRATION_HOLD.md). A
+provisional board-plane map and fixed-camera keyboard-region estimate are now
+recorded. Individual-key localization, the remaining commissioned transforms,
+and physical action authority still require measured qualification.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
@@ -74,7 +74,7 @@ completed capabilities.
 | Local interface | Browser and terminal rehearsal, task planning, diagnostic exports | Software workflows can be explored without connecting a robot |
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
-| Keyboard localization | KeyboardPoseNet trained on synthetic images | Candidate keyboard poses and key coordinates can be evaluated offline; real-camera accuracy remains unqualified |
+| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate | The fixed setup reproduces the board and keyboard region, but its 13.38 mm housing residual is too large for the declared 7 mm individual-key limit; key accuracy remains unqualified |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
@@ -232,6 +232,15 @@ profile can enter that localization path; the stylus profile remains blocked
 for its own TCP, clearance, and contact calibration. This candidate grants no
 motion or contact authority and does not satisfy the still-open intrinsic, 3-D,
 board-to-robot, keyboard, or installed camera/support evidence requirements.
+
+The same session now includes one separately hash-bound held-out camera frame.
+World-tag centers reproduce the board map within 0.664 mm and stationary audit
+tags within 0.431 pixel. A dimension-constrained 315 x 147 mm keyboard fit
+locates the keyboard region at approximately [110.29, 68.29] mm with 2.480
+degrees yaw. Its 13.38 mm maximum housing residual exceeds the 7 mm
+individual-key limit, so the generated 46 nominal key centers are overlays,
+not hover or contact targets. Motion, contact, and the stylus profile remain
+blocked.
 
 ARM-074 adds a zero-authority T2A compiler from ordered typing actions to
 semantic Cartesian endpoints, bounded-step IK/collision screening samples, and
