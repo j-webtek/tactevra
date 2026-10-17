@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_key_row_observability_v1.schema.json",
+  "title": "Fixed camera key row observability v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "registration_input_sha256", "calibration_sha256",
+    "profile_sha256", "source_frame_sha256", "source_frame_bytes_verified",
+    "profile", "rectified_pixels_per_mm", "thresholds",
+    "standard_row_observations", "standard_row_observation_count",
+    "image_feedback_observability_ready",
+    "independent_key_center_observations_present",
+    "individual_key_localization_ready", "board_space_motion_targets_emitted",
+    "contact_authorized", "motion_authorized", "blockers", "limitations"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_key_row_observability.v1"},
+    "status": {"const": "ROW_FEATURE_EVIDENCE_ONLY_NOT_KEY_CENTERS"},
+    "registration_input_sha256": {"$ref": "#/$defs/digest"},
+    "calibration_sha256": {"$ref": "#/$defs/digest"},
+    "profile_sha256": {"$ref": "#/$defs/digest"},
+    "source_frame_sha256": {"$ref": "#/$defs/digest"},
+    "source_frame_bytes_verified": {"const": true},
+    "profile": {"enum": ["no_attachment", "stylus_attachment"]},
+    "rectified_pixels_per_mm": {"const": 3},
+    "thresholds": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "row_search_radius_mm", "gap_phase_search_radius_mm",
+        "minimum_row_feature_contrast", "minimum_gap_phase_peak_ratio",
+        "maximum_feature_offset_mm"
+      ],
+      "properties": {
+        "row_search_radius_mm": {"type": "number", "exclusiveMinimum": 0},
+        "gap_phase_search_radius_mm": {"type": "number", "exclusiveMinimum": 0},
+        "minimum_row_feature_contrast": {"type": "number", "exclusiveMinimum": 0},
+        "minimum_gap_phase_peak_ratio": {"type": "number", "exclusiveMinimum": 1},
+        "maximum_feature_offset_mm": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "standard_row_observations": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"$ref": "#/$defs/row"}
+    },
+    "standard_row_observation_count": {"const": 4},
+    "image_feedback_observability_ready": {"type": "boolean"},
+    "independent_key_center_observations_present": {"const": false},
+    "individual_key_localization_ready": {"const": false},
+    "board_space_motion_targets_emitted": {"const": false},
+    "contact_authorized": {"const": false},
+    "motion_authorized": {"const": false},
+    "blockers": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"enum": [
+        "INDIVIDUAL_KEY_CENTERS_NOT_OBSERVED",
+        "STANDARD_KEY_ROW_FEATURES_INSUFFICIENT",
+        "STYLUS_TCP_AND_CONTACT_PROFILE_MISSING"
+      ]}
+    },
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "row_index", "first_key", "last_key", "key_count",
+        "expected_row_y_mm", "observed_contrast_band_y_mm",
+        "contrast_band_offset_mm", "contrast_above_band_median",
+        "repeated_gap_phase_offset_mm", "gap_phase_peak_ratio",
+        "contrast_passed", "gap_phase_passed", "offset_limit_passed",
+        "observable"
+      ],
+      "properties": {
+        "row_index": {"type": "integer", "minimum": 0, "maximum": 3},
+        "first_key": {"type": "string", "minLength": 1},
+        "last_key": {"type": "string", "minLength": 1},
+        "key_count": {"type": "integer", "minimum": 2},
+        "expected_row_y_mm": {"type": "number"},
+        "observed_contrast_band_y_mm": {"type": "number"},
+        "contrast_band_offset_mm": {"type": "number"},
+        "contrast_above_band_median": {"type": "number", "minimum": 0},
+        "repeated_gap_phase_offset_mm": {"type": "number"},
+        "gap_phase_peak_ratio": {"type": "number", "minimum": 0},
+        "contrast_passed": {"type": "boolean"},
+        "gap_phase_passed": {"type": "boolean"},
+        "offset_limit_passed": {"type": "boolean"},
+        "observable": {"type": "boolean"}
+      }
+    }
+  }
+}

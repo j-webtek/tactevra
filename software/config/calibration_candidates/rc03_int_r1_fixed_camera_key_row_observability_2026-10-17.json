@@ -1,0 +1,99 @@
+{
+  "blockers": [
+    "INDIVIDUAL_KEY_CENTERS_NOT_OBSERVED"
+  ],
+  "board_space_motion_targets_emitted": false,
+  "calibration_sha256": "55e8eefa844b510b4b2e0958cbe8490f01b4c42d081758eb051e3826a6e73fd9",
+  "contact_authorized": false,
+  "image_feedback_observability_ready": true,
+  "independent_key_center_observations_present": false,
+  "individual_key_localization_ready": false,
+  "limitations": [
+    "The detected contrast bands and repeated gap phases establish image observability, not physical key centers.",
+    "The assessment uses one hash-bound frame and does not establish temporal repeatability across a fresh capture.",
+    "No board-space correction is derived from these row features."
+  ],
+  "motion_authorized": false,
+  "profile": "no_attachment",
+  "profile_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+  "rectified_pixels_per_mm": 3,
+  "registration_input_sha256": "226664e545db9b9a30a4fbbd2c2382e74ee3f6c4e4ee4673a1d439b511a8fd68",
+  "schema": "rocell.fixed_camera_key_row_observability.v1",
+  "source_frame_bytes_verified": true,
+  "source_frame_sha256": "09f9ce8a02360aeccc81195312791c6e4262cbc8b99d1d79b74fe3d2d376b199",
+  "standard_row_observation_count": 4,
+  "standard_row_observations": [
+    {
+      "contrast_above_band_median": 46.818,
+      "contrast_band_offset_mm": 4.0,
+      "contrast_passed": true,
+      "expected_row_y_mm": 111.0,
+      "first_key": "1",
+      "gap_phase_passed": true,
+      "gap_phase_peak_ratio": 1.579,
+      "key_count": 12,
+      "last_key": "EQUAL",
+      "observable": true,
+      "observed_contrast_band_y_mm": 115.0,
+      "offset_limit_passed": true,
+      "repeated_gap_phase_offset_mm": -2.667,
+      "row_index": 0
+    },
+    {
+      "contrast_above_band_median": 33.554,
+      "contrast_band_offset_mm": -5.0,
+      "contrast_passed": true,
+      "expected_row_y_mm": 90.0,
+      "first_key": "Q",
+      "gap_phase_passed": true,
+      "gap_phase_peak_ratio": 3.839,
+      "key_count": 10,
+      "last_key": "P",
+      "observable": true,
+      "observed_contrast_band_y_mm": 85.0,
+      "offset_limit_passed": true,
+      "repeated_gap_phase_offset_mm": -1.333,
+      "row_index": 1
+    },
+    {
+      "contrast_above_band_median": 23.595,
+      "contrast_band_offset_mm": -2.333,
+      "contrast_passed": true,
+      "expected_row_y_mm": 69.0,
+      "first_key": "A",
+      "gap_phase_passed": true,
+      "gap_phase_peak_ratio": 3.118,
+      "key_count": 11,
+      "last_key": "APOSTROPHE",
+      "observable": true,
+      "observed_contrast_band_y_mm": 66.667,
+      "offset_limit_passed": true,
+      "repeated_gap_phase_offset_mm": -3.333,
+      "row_index": 2
+    },
+    {
+      "contrast_above_band_median": 29.502,
+      "contrast_band_offset_mm": -1.0,
+      "contrast_passed": true,
+      "expected_row_y_mm": 48.0,
+      "first_key": "Z",
+      "gap_phase_passed": true,
+      "gap_phase_peak_ratio": 5.183,
+      "key_count": 10,
+      "last_key": "SLASH",
+      "observable": true,
+      "observed_contrast_band_y_mm": 47.0,
+      "offset_limit_passed": true,
+      "repeated_gap_phase_offset_mm": -0.333,
+      "row_index": 3
+    }
+  ],
+  "status": "ROW_FEATURE_EVIDENCE_ONLY_NOT_KEY_CENTERS",
+  "thresholds": {
+    "gap_phase_search_radius_mm": 6.0,
+    "maximum_feature_offset_mm": 7.0,
+    "minimum_gap_phase_peak_ratio": 1.4,
+    "minimum_row_feature_contrast": 15.0,
+    "row_search_radius_mm": 6.0
+  }
+}

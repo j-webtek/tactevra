@@ -66,3 +66,8 @@ The first part of that increment is now available as deterministic, bounded
 [key feedback search windows](RC03_FIXED_CAMERA_KEY_FEEDBACK_ROI.md). They tell
 a later detector where to look for all 46 keys while preserving the distinction
 between nominal image geometry and independently observed key centers.
+
+The retained frame has since passed the bounded
+[key-row observability assessment](RC03_FIXED_CAMERA_KEY_ROW_OBSERVABILITY.md).
+All four standard rows expose usable contrast and repeated gap structure, but a
+distinct repeat frame and independently fitted key centers are still required.
