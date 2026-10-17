@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/keyboard_clearance_profile_bindings_v1.schema.json",
+  "title": "Keyboard clearance attachment-profile bindings v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "robot_localization_sha256", "profiles", "review"],
+  "properties": {
+    "schema": {"const": "rocell.keyboard_clearance_profile_bindings.v1"},
+    "status": {"enum": ["DRAFT_UNREVIEWED", "REVIEWED_ATTACHMENT_PROFILE_BINDINGS"]},
+    "robot_localization_sha256": {"$ref": "#/$defs/digestOrBlank"},
+    "profiles": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/profile"}
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewed", "reviewer", "reviewed_at", "notes"],
+      "properties": {
+        "reviewed": {"type": "boolean"},
+        "reviewer": {"type": "string"},
+        "reviewed_at": {"type": "string"},
+        "notes": {"type": "string"}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "digestOrBlank": {"type": "string", "pattern": "^$|^[0-9a-f]{64}$"},
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "attachment_state", "installed_collision_profile_id", "installed_collision_profile_file_sha256", "measured_tcp_sha256"],
+      "properties": {
+        "profile": {"enum": ["no_attachment", "stylus_attachment"]},
+        "attachment_state": {"enum": ["BARE_JAW", "STYLUS_INSTALLED"]},
+        "installed_collision_profile_id": {"type": "string"},
+        "installed_collision_profile_file_sha256": {"$ref": "#/$defs/digestOrBlank"},
+        "measured_tcp_sha256": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/digest"}]}
+      }
+    }
+  }
+}
