@@ -223,6 +223,16 @@ canonical binding order before constructing ARM-070 inputs. It eliminates
 manual transcription but does not create any missing observation, decide model
 accuracy, advance the epoch, or grant hardware authority.
 
+The 2026-10-17 RC03 camera session now contributes a separately bounded fixed
+board-plane candidate. Three permanent world tags fit a 1920 x 1080 YUY2,
+60 fps pixel-to-board map with 3.53 mm RMS and 5.65 mm maximum residual. A new
+loader verifies the exact stream, fixed-installation assertion, residuals, and
+tool-profile separation before allowing guarded localization. The bare-jaw
+profile can enter that localization path; the stylus profile remains blocked
+for its own TCP, clearance, and contact calibration. This candidate grants no
+motion or contact authority and does not satisfy the still-open intrinsic, 3-D,
+board-to-robot, keyboard, or installed camera/support evidence requirements.
+
 ARM-074 adds a zero-authority T2A compiler from ordered typing actions to
 semantic Cartesian endpoints, bounded-step IK/collision screening samples, and
 analytically jerk-bounded quintic timing estimates. It preserves repeated keys

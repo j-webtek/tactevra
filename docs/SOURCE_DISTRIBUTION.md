@@ -70,6 +70,15 @@ deterministic sweep outputs remain external and hash-bound; no generated
 trajectory corpus or simulator asset is added to the source archive. All byte
 and reduction limits remain unchanged.
 
+The RC03 fixed board-plane integration adds six governed paths: one compact
+candidate and hash manifest, one validator, one assessment schema, one focused
+test module, and one operating note. The reviewed tracked-file ceiling moves
+from 6,473 to the exact observed 6,479 files. The measured tree is 661,795,902
+logical bytes with 4,890,152 governed duplicate bytes. The source frames and
+overlay remain in the external physical-evidence store and are represented by
+hash rather than copied into the source archive; all byte and reduction limits
+remain unchanged.
+
 The issue #190 first-hover extraction adds ten net governed paths beyond the
 preceding merged snapshot: three replay/verifier modules, three tests, and four
 retained or derived evidence records. The reviewed tracked-file ceiling

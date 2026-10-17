@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_board_plane_assessment_v1.schema.json",
+  "title": "Fixed board-plane assessment v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "calibration_sha256",
+    "profile",
+    "guarded_localization_ready",
+    "open_loop_contact_authorized",
+    "motion_authorized",
+    "blockers"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.fixed_board_plane_assessment.v1"},
+    "calibration_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "profile": {
+      "type": "string",
+      "enum": ["no_attachment", "stylus_attachment"]
+    },
+    "guarded_localization_ready": {"type": "boolean"},
+    "open_loop_contact_authorized": {"const": false},
+    "motion_authorized": {"const": false},
+    "blockers": {
+      "type": "array",
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "CAMERA_MODE_DRIFT",
+          "CAMERA_OR_BOARD_MOVED",
+          "UNKNOWN_TOOL_PROFILE",
+          "STYLUS_TCP_AND_CONTACT_PROFILE_MISSING",
+          "TOOL_PROFILE_NOT_ADMITTED"
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"guarded_localization_ready": {"const": true}}},
+      "then": {"properties": {"blockers": {"maxItems": 0}}}
+    }
+  ]
+}

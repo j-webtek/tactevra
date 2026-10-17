@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "created_local": "2026-10-17",
+  "status": "accepted-provisional-fixed-plane",
+  "safe_for_runtime_board_plane": true,
+  "safe_for_open_loop_contact": false,
+  "camera_mode": {
+    "backend": "DirectShow",
+    "width": 1920,
+    "height": 1080,
+    "pixel_format": "YUY2",
+    "fps": 60.0
+  },
+  "board": {
+    "width_mm": 610.0,
+    "depth_mm": 457.0,
+    "origin": "front-left finished board corner",
+    "x_axis": "+X right",
+    "y_axis": "+Y rear/arm side",
+    "z_plane_mm": 0.0
+  },
+  "tag_dictionary": "DICT_APRILTAG_36h11",
+  "tag_black_edge_mm": 40.0,
+  "world_tags_used": [
+    1,
+    2,
+    3
+  ],
+  "world_tag_centers_mm": {
+    "0": [
+      47.0,
+      40.0
+    ],
+    "1": [
+      440.0,
+      40.0
+    ],
+    "2": [
+      47.0,
+      410.0
+    ],
+    "3": [
+      563.0,
+      410.0
+    ]
+  },
+  "source_frames": [
+    "view-007-center-left-rigid.jpg",
+    "board-plane-current.png"
+  ],
+  "pixel_to_board_homography": [
+    [
+      0.4343436605631862,
+      0.17339647201305355,
+      -75.77145562979756
+    ],
+    [
+      -0.01626819181060835,
+      -0.4958442640897328,
+      518.2131137588835
+    ],
+    [
+      8.097674442155338e-05,
+      0.0003531327633104905,
+      1.0
+    ]
+  ],
+  "board_to_pixel_homography": [
+    [
+      2.362334390536426,
+      0.6965245701592326,
+      -181.95065085650825
+    ],
+    [
+      -0.20264212555738262,
+      -1.5328443933890672,
+      778.9855771805964
+    ],
+    [
+      -0.00011973457441952433,
+      0.00048489528426135734,
+      0.7396484419029414
+    ]
+  ],
+  "fit": {
+    "point_count": 12,
+    "mean_error_mm": 3.0957135375672977,
+    "rms_error_mm": 3.533161024549304,
+    "max_error_mm": 5.647663121308702,
+    "mean_error_px": 8.435339998810084,
+    "rms_error_px": 9.75389502323239,
+    "max_error_px": 15.425243573280223,
+    "per_world_tag_corner_error_mm": {
+      "1": [
+        1.9419806773060198,
+        4.173505239979522,
+        1.4339212148197036,
+        3.7187360210971625
+      ],
+      "2": [
+        0.8628515343169141,
+        4.701945970045667,
+        0.529464186108755,
+        4.729336401028566
+      ],
+      "3": [
+        1.9899052453707198,
+        5.096334312831295,
+        2.322918526594544,
+        5.647663121308702
+      ]
+    }
+  },
+  "station_tag_audit": {
+    "4": {
+      "observed_center_px": [
+        749.75,
+        408.75
+      ],
+      "inferred_board_center_mm": [
+        266.17326485013217,
+        251.72262730620338
+      ],
+      "nominal_guide_center_mm": [
+        324.0,
+        309.0
+      ],
+      "nominal_delta_mm": [
+        -57.82673514986783,
+        -57.27737269379662
+      ],
+      "used_in_fit": false
+    },
+    "5": {
+      "observed_center_px": [
+        1313.75,
+        348.5
+      ],
+      "inferred_board_center_mm": [
+        451.6460322003513,
+        263.5642439255459
+      ],
+      "nominal_guide_center_mm": [
+        459.0,
+        309.0
+      ],
+      "nominal_delta_mm": [
+        -7.353967799648672,
+        -45.435756074454105
+      ],
+      "used_in_fit": false
+    }
+  },
+  "scope": [
+    "Valid while the camera and board remain fixed",
+    "Maps camera pixels onto the board Z=0 plane",
+    "Use closed-loop visual correction for approach and contact",
+    "Recompute if the camera or board moves"
+  ],
+  "profiles": {
+    "no_attachment": {
+      "camera_board_mapping": "this artifact",
+      "tool_center_point": "existing bare-jaw profile",
+      "status": "ready for guarded camera-feedback integration"
+    },
+    "stylus_attachment": {
+      "camera_board_mapping": "this artifact",
+      "tool_center_point": "requires separate stylus TCP calibration",
+      "trajectory": "requires stylus clearance/contact limits",
+      "status": "pending attachment calibration"
+    }
+  }
+}
