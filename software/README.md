@@ -687,6 +687,20 @@ Exit code 2 is the expected fail-closed result until installed envelopes,
 placements, and uncertainties are qualified. The audit performs no camera or
 robot I/O and grants no physical authority.
 
+Build the ordered qualification work order from that retained audit:
+
+```powershell
+$env:PYTHONPATH='software/src;software/ai'
+python software/ai/run_static_overhead_collision_qualification_work_order.py `
+  --source-audit software/ai/eval/static_overhead_collision_source_audit_20261017.json `
+  --source-audit-sha256 0b499d9493648d0a9286decc237b979e74a119ad20755c3870beea9b68da4dfc `
+  --output software/ai/eval/static_overhead_collision_qualification_work_order_20261017.json
+```
+
+The work order reuses retained dimensions, requests no repeated dimension
+measurement, and keeps every body pending until envelope, placement, and
+uncertainty evidence is accepted.
+
 From the workspace root:
 
 ```powershell

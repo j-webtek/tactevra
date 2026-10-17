@@ -842,3 +842,24 @@ is to qualify conservative installed envelopes, placements, and uncertainties
 against the existing body-by-body intake. Profile generation, collision
 screening, controller commands, hardware access, movement, and physical
 authority remain zero or false.
+
+### Qualification work order
+
+The source-bound qualification work order converts the 19 candidate mappings
+into five ordered review stages. It reuses the retained board, keyboard, and
+phone dimension records and requests no repeated dimension measurement. Seven
+robot bodies receive whole-link envelope review, six CAD-backed fixed bodies
+receive envelope derivation plus installed-placement review, and the remaining
+base/clamp, fixed cable, and bare-jaw attachment rows retain their distinct
+qualification actions. A later stylus remains a separate attachment profile.
+
+The retained artifact is
+`software/ai/eval/static_overhead_collision_qualification_work_order_20261017.json`
+with file SHA-256
+`7778833cd1cbab12a1559de5900fa053843a062b9e2dc4565968a2ea913b9d2b`
+and canonical work-order SHA-256
+`14ad82ae7e09bc81da1357d26fe72c7444de7a152dc755540017a28a5f86bac6`.
+Its status is `READY_FOR_REVIEWED_QUALIFICATION_ZERO_AUTHORITY`. Every body
+remains pending; no installed profile or collision screen is produced.
+Commands, hardware access, movement, and physical authority remain zero or
+false.
