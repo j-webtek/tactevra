@@ -12798,3 +12798,32 @@ rewriting history. New entries must use a unique evidence ID.
 - Result: `BLOCKED_STATIC_OVERHEAD_MEASUREMENTS_PENDING`; profile generation
   false; collision screening false; commands 0; hardware access false;
   movements 0; physical authority false.
+
+### E-20261017-AI-STATIC-COLLISION-SOURCE-AUDIT-001 — candidate source coverage bound
+
+- Source: immutable FREEZE-013 reconciliation commit
+  `869d6f7ed7d1013a8003457a819ccaee3a03a1e7`, source revision
+  `57b21fdda076b9d540e5c825cc5ecf598c90d053`, static-overhead contract
+  SHA-256
+  `fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39`,
+  and pending-manifest file SHA-256
+  `5ca32f47d65c138c3916361232d608f7ef4f5c40b98edf8d380794e6115d9702`.
+- Coverage: all 19 required body IDs map to at least one tracked candidate;
+  15 unique candidate files are byte-counted and SHA-256 bound. Candidate
+  classes include reduced robot boxes, topology-only URDF, controlled and
+  nominal CAD, configuration, fixed-installation context, frozen nominal
+  dimensions, and dimension-constrained image registration.
+- Qualification boundary: accepted measurement bodies 0; missing candidate
+  bodies 0. Every mapping remains `CANDIDATE_ONLY`, and each row records why it
+  cannot establish a conservative installed envelope, placement, or
+  uncertainty.
+- Artifact: `software/ai/eval/static_overhead_collision_source_audit_20261017.json`,
+  file SHA-256
+  `0b499d9493648d0a9286decc237b979e74a119ad20755c3870beea9b68da4dfc`,
+  canonical report SHA-256
+  `868f7cf5515e47c4dfc84a5c1923973befb21f4bfc122822241be43d24c6bc3b`.
+- Result: `BLOCKED_CANDIDATE_SOURCES_REQUIRE_QUALIFICATION`; profile generation
+  false; collision screening false; commands 0; hardware access false;
+  movements 0; physical authority false. Next action is to qualify installed
+  envelopes, placements, and uncertainties without repeating retained source
+  discovery.

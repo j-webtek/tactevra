@@ -669,6 +669,24 @@ src/rocell/
 
 ## Tests
 
+The static-overhead candidate source coverage audit can be reproduced against
+the immutable FREEZE-013 checkout and the retained pending manifest:
+
+```powershell
+$env:PYTHONPATH='software/src;software/ai'
+python software/ai/run_static_overhead_collision_source_audit.py `
+  --contract-workspace <freeze-013-checkout> `
+  --source-workspace <current-checkout> `
+  --measurement-manifest software/ai/eval/static_overhead_installed_collision_measurements_pending_20261017.json `
+  --measurement-manifest-sha256 5ca32f47d65c138c3916361232d608f7ef4f5c40b98edf8d380794e6115d9702 `
+  --source-revision 57b21fdda076b9d540e5c825cc5ecf598c90d053 `
+  --output software/ai/eval/static_overhead_collision_source_audit_20261017.json
+```
+
+Exit code 2 is the expected fail-closed result until installed envelopes,
+placements, and uncertainties are qualified. The audit performs no camera or
+robot I/O and grants no physical authority.
+
 From the workspace root:
 
 ```powershell

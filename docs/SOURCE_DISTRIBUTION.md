@@ -673,3 +673,11 @@ handoff from retained installation facts to the remaining measurement work.
 It contains no commands or physical authority. The exact governed ceiling is
 therefore 6,629; every logical-byte, blob, duplicate, and reduction limit
 remains unchanged.
+
+The static-overhead candidate-source audit increment adds four reviewable text
+files: one deterministic audit module, one command-line wrapper, one compact
+retained report, and one focused regression test. It maps and hashes existing
+repository sources for all 19 collision bodies without promoting any candidate
+to measured geometry or opening hardware. The exact governed ceiling is
+therefore 6,633; every logical-byte, blob, duplicate, and reduction limit
+remains unchanged.
