@@ -12681,3 +12681,33 @@ rewriting history. New entries must use a unique evidence ID.
 - Authority: hardware access 0; commands 0; writes 0; physical authority false;
   descent and contact remain unauthorized. The generated report and historical
   detached checkout remain outside the tracked source archive.
+
+### E-20261016-AI-CURRENT-START-ROUTE-SENSITIVITY-001 — retained start correlation
+
+- Source: current bare-jaw intake SHA-256
+  `02e6ec1936ede521fc43c55b31c5c1ca367de066d2f125f54506b722f23ed0c0`,
+  passing H sensitivity SHA-256
+  `b9a22cb1e03211b37528d613f5bb532c8103f22d1deab650359dfe160f1f0d86`,
+  retained registers `[2052, 2149, 1956, 2550, 2227, 2041, 2042]`, and
+  pinned reference-map source SHA-256
+  `a28247fee0bbb65cc034ff206031b8700d2b1ec8e3a1fa4b1a5a7365c55f1a57`.
+- Projection: the five analysis-only arm coordinates are
+  `[-0.0061359232, 0.1549320596, 2.3408546823, 0.2745825610,
+  0.0107378655]` rad. They are reference projections, not authenticated
+  installed joint state; the retained sample is not synchronized with the
+  current camera frame.
+- Comparison: the first accepted PARK solution is at a maximum joint distance
+  of `1.688447331924208` rad from the reference projection, exceeding the
+  `0.35` rad route step policy. The closest of all 32 accepted baseline
+  waypoints remains `0.8971257638034815` rad away.
+- Seeded result: an explicit reference-seeded dense route evaluates the first
+  PARK waypoint and stops with `MAXIMUM_ADJACENT_JOINT_DELTA_EXCEEDED`. The
+  solver returns the same PARK branch. Status is
+  `REFERENCE_START_OUTSIDE_FIRST_ROUTE_JOINT_STEP`; canonical report SHA-256 is
+  `0a21fbea7be73e9bf4aa7ffe98a01bc10e059bdd24a191bf69a3d10ee8c7f7fe`.
+- Meaning: direct splicing from the retained reference pose into the passing
+  synthetic route is rejected. This is not an installed unreachability result.
+  Commissioned controller/model and arm/board calibration must precede a staged
+  entry-route and installed collision screen.
+- Authority: hardware access 0; commands 0; writes 0; physical authority false.
+  Generated evidence and the detached historical checkout remain untracked.

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .model_motion_simulation import run as run_model_motion
+from .model_motion_simulation import run_with_route_evidence as run_model_motion_with_route
 from .scene_observation import canonical_hash
 
 
@@ -62,9 +63,13 @@ def _verify_intake(intake: Mapping[str, Any]) -> None:
         raise ValueError("current route intake must remain zero-write")
 
 
-def run(
-    intake: Mapping[str, Any], *, workspace: Path, profile_path: Path
-) -> dict[str, Any]:
+def _run(
+    intake: Mapping[str, Any],
+    *,
+    workspace: Path,
+    profile_path: Path,
+    include_route_evidence: bool,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
     """Screen the intake target under a frozen, explicitly unmeasured hypothesis."""
 
     _verify_intake(intake)
@@ -115,12 +120,18 @@ def run(
             "image_sha256": selected_frame_sha256,
         },
     }
-    simulation = run_model_motion(
-        proposal,
-        workspace=workspace,
-        park_xy_board_mm=(290.0, 10.0),
-        robot_layout_profile=profile_path,
-    )
+    simulation_kwargs = {
+        "workspace": workspace,
+        "park_xy_board_mm": (290.0, 10.0),
+        "robot_layout_profile": profile_path,
+    }
+    if include_route_evidence:
+        simulation, route = run_model_motion_with_route(
+            proposal, **simulation_kwargs
+        )
+    else:
+        simulation = run_model_motion(proposal, **simulation_kwargs)
+        route = None
     passed = simulation["dense_route_all_waypoints_accepted"] is True
     report = {
         "schema": SCHEMA,
@@ -159,7 +170,37 @@ def run(
         "transport_writes": 0,
         "hardware_access": False,
     }
-    return {**report, "report_sha256": canonical_hash(report)}
+    return {**report, "report_sha256": canonical_hash(report)}, route
 
 
-__all__ = ["SCHEMA", "run"]
+def run(
+    intake: Mapping[str, Any], *, workspace: Path, profile_path: Path
+) -> dict[str, Any]:
+    """Return the stable current-target sensitivity report."""
+
+    report, _ = _run(
+        intake,
+        workspace=workspace,
+        profile_path=profile_path,
+        include_route_evidence=False,
+    )
+    return report
+
+
+def run_with_route_evidence(
+    intake: Mapping[str, Any], *, workspace: Path, profile_path: Path
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Return the stable report plus its zero-authority dense-route evidence."""
+
+    report, route = _run(
+        intake,
+        workspace=workspace,
+        profile_path=profile_path,
+        include_route_evidence=True,
+    )
+    if route is None:  # Defensive: the selected branch always returns a route.
+        raise RuntimeError("current target route evidence was not produced")
+    return report, route
+
+
+__all__ = ["SCHEMA", "run", "run_with_route_evidence"]

@@ -1285,7 +1285,13 @@ def evaluate_joint_trajectory_solution(
     )
 
 
-def screen_scenario_route(scenario, plan, geometry):
+def screen_scenario_route(
+    scenario,
+    plan,
+    geometry,
+    *,
+    initial_arm_joint_positions_rad=None,
+):
     """One bounded dense pass for an already validated architecture context.
 
     Uses the canonical densifier, solver and joint/Jacobian checks. This lower
@@ -1315,7 +1321,15 @@ def screen_scenario_route(scenario, plan, geometry):
         joint_bounds_rad=scenario.controller_joint_intersection_rad,
         options=IkOptions(max_attempts=scenario.ik_policy.max_attempts,
             max_iterations_per_attempt=scenario.ik_policy.max_iterations_per_attempt))
-    previous = None
+    previous = (
+        None
+        if initial_arm_joint_positions_rad is None
+        else _validated_arm_joint_values(
+            initial_arm_joint_positions_rad,
+            label="initial_arm_joint_positions_rad",
+            bounds=scenario.controller_joint_intersection_rad,
+        )
+    )
     results = []
     failure = None
     for waypoint in waypoints:
