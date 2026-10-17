@@ -8,10 +8,14 @@ import pytest
 
 from rocell.application.installed_base_correspondence_packet_v1 import (
     CANDIDATE_STATUS,
+    COLLECTING_STATUS,
     FAILED_STATUS,
     PENDING_STATUS,
+    PREREQUISITE_BLOCKED_FIT_STATUS,
+    READY_STATUS,
     build_pending_installed_base_correspondence_packet_v1,
     fit_installed_base_position_candidate_v1,
+    record_installed_base_correspondence_sample_v1,
 )
 from rocell.geometry.transforms import RigidTransform, Vec3
 from rocell.models.frames import Point3Mm
@@ -48,6 +52,75 @@ def _rehash(document: dict[str, object]) -> None:
             allow_nan=False,
         ).encode()
     ).hexdigest()
+
+
+def _record(packet: dict[str, object], slot_id: str) -> dict[str, object]:
+    return record_installed_base_correspondence_sample_v1(
+        packet,
+        slot_id=slot_id,
+        pose_label="KEYBOARD_FORWARD_CAL_1",
+        base_point_xyz_mm=[1.0, 2.0, 3.0],
+        board_point_xyz_mm=[4.0, 5.0, 6.0],
+        controller_feedback_sha256="a" * 64,
+        base_point_derivation_sha256="b" * 64,
+        camera_observation_sha256="c" * 64,
+        board_point_measurement_sha256="d" * 64,
+        captured_at_utc=WHEN,
+        notes="offline fixture",
+    )
+
+
+def test_record_sample_is_immutable_and_content_bound() -> None:
+    pending = _pending()
+    updated = _record(pending, "train-front-left-low")
+
+    assert pending["precommitted_split"]["slots"][0]["status"] == "PENDING"
+    assert updated["status"] == COLLECTING_STATUS
+    assert updated["precommitted_split"]["slots"][0]["status"] == "MEASURED"
+    assert updated["content_sha256"] != pending["content_sha256"]
+    with pytest.raises(ValueError, match="already recorded"):
+        _record(updated, "train-front-left-low")
+
+
+def test_record_sample_rejects_unknown_slot_and_unbound_evidence() -> None:
+    pending = _pending()
+    with pytest.raises(ValueError, match="not in the precommitted split"):
+        _record(pending, "unknown-slot")
+    with pytest.raises(ValueError, match="nonzero lowercase SHA-256"):
+        record_installed_base_correspondence_sample_v1(
+            pending,
+            slot_id="train-front-left-low",
+            pose_label="fixture",
+            base_point_xyz_mm=[1.0, 2.0, 3.0],
+            board_point_xyz_mm=[4.0, 5.0, 6.0],
+            controller_feedback_sha256="0" * 64,
+            base_point_derivation_sha256="b" * 64,
+            camera_observation_sha256="c" * 64,
+            board_point_measurement_sha256="d" * 64,
+            captured_at_utc=WHEN,
+        )
+
+
+def test_all_recorded_samples_remain_blocked_by_physical_prerequisites() -> None:
+    packet = _pending()
+    for row in packet["precommitted_split"]["slots"]:
+        packet = _record(packet, row["slot_id"])
+
+    assert packet["status"] == PREREQUISITE_BLOCKED_FIT_STATUS
+    assert packet["physical_authority"] is False
+
+
+def test_all_recorded_samples_are_ready_when_prerequisites_are_accepted() -> None:
+    packet = _pending()
+    packet["prerequisite_status"] = {
+        key: "ACCEPTED_PHYSICAL_ARTIFACT" for key in packet["prerequisite_status"]
+    }
+    _rehash(packet)
+    for row in packet["precommitted_split"]["slots"]:
+        packet = _record(packet, row["slot_id"])
+
+    assert packet["status"] == READY_STATUS
+    assert packet["physical_authority"] is False
 
 
 def test_pending_packet_is_deterministic_precommitted_and_zero_authority() -> None:

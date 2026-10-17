@@ -926,3 +926,14 @@ evidence. A passing result is deliberately classified as a position candidate;
 orientation-diverse validation, base/clamp envelope and uncertainty, reviewed
 thresholds, and two reseat trials remain required before the installed base
 transform can become complete. This packet generates no motion command.
+
+The packet runner also provides an offline, append-one-slot ingest operation.
+It accepts an exact precommitted slot ID, the same witness point expressed in
+`base_link` and `B`, a UTC capture time, and four evidence files. Their bytes
+are SHA-256 bound as controller feedback, base-point derivation, simultaneous
+camera observation, and board-point measurement. The operation verifies the
+incoming packet content hash, copies rather than mutates it, refuses an unknown
+or already measured slot, and recomputes the output content hash. Filling the
+eighth slot changes the state to ready only when all four physical prerequisite
+artifacts are accepted; otherwise the packet remains explicitly blocked before
+fit. The ingest operation performs no capture, controller access, or motion.
