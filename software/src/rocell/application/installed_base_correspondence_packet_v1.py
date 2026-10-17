@@ -30,6 +30,7 @@ SCHEMA = "rocell.installed_base_correspondence_packet.v1"
 PENDING_STATUS = "BLOCKED_PREREQUISITES_THEN_CORRESPONDENCE_COLLECTION"
 COLLECTING_STATUS = "CORRESPONDENCE_COLLECTION_IN_PROGRESS"
 PREREQUISITE_BLOCKED_FIT_STATUS = "BLOCKED_PREREQUISITES_BEFORE_OFFLINE_FIT"
+PREREQUISITE_ASSESSMENT_BLOCKED_STATUS = "BLOCKED_PHYSICAL_PREREQUISITES"
 READY_STATUS = "READY_FOR_OFFLINE_POSITION_FIT"
 CANDIDATE_STATUS = "POSITION_CANDIDATE_ONLY_ORIENTATION_AND_RESEAT_PENDING"
 FAILED_STATUS = "POSITION_DIAGNOSTIC_FAILED"
@@ -243,6 +244,83 @@ def bind_installed_base_prerequisites_v1(
     unsigned = {key: value for key, value in updated.items() if key != "content_sha256"}
     updated["content_sha256"] = _sha(unsigned)
     return updated
+
+
+def assess_installed_base_prerequisites_v1(
+    packet: dict[str, Any],
+    resolution: CalibrationResolution,
+    *,
+    manifest_id: str,
+    active_build_id: str,
+    context_file_sha256: str,
+    context_content_sha256: str,
+    registry_index_sha256: str | None,
+    assessed_at_utc: str,
+) -> dict[str, Any]:
+    """Describe an exact registry resolution without granting acceptance."""
+
+    _validate_packet_integrity(packet)
+    if not isinstance(resolution, CalibrationResolution):
+        raise TypeError("resolution must be a CalibrationResolution")
+    expected_ids = set(packet["prerequisite_status"])
+    if set(resolution.assessments) != expected_ids:
+        raise ValueError("prerequisite resolution must contain the exact required IDs")
+    for name, value in (
+        ("manifest_id", manifest_id),
+        ("active_build_id", active_build_id),
+    ):
+        if not isinstance(value, str) or not value.strip() or len(value) > 256:
+            raise ValueError(f"{name} must be bounded non-empty text")
+    for name, digest in (
+        ("context_file_sha256", context_file_sha256),
+        ("context_content_sha256", context_content_sha256),
+    ):
+        if not isinstance(digest, str) or not _HASH.fullmatch(digest) or digest == "0" * 64:
+            raise ValueError(f"{name} must be a nonzero lowercase SHA-256 digest")
+    if registry_index_sha256 is not None and (
+        not isinstance(registry_index_sha256, str)
+        or not _HASH.fullmatch(registry_index_sha256)
+        or registry_index_sha256 == "0" * 64
+    ):
+        raise ValueError(
+            "registry_index_sha256 must be null or a nonzero lowercase SHA-256 digest"
+        )
+    if not isinstance(assessed_at_utc, str) or not assessed_at_utc.endswith("Z"):
+        raise ValueError("assessed_at_utc must be an ISO-8601 UTC timestamp")
+
+    assessments = {
+        artifact_id: {
+            "state": assessment.state.value,
+            "artifact_sha256": assessment.artifact_hash,
+            "reasons": list(assessment.reasons),
+        }
+        for artifact_id, assessment in resolution.assessments.items()
+    }
+    core = {
+        "schema": "rocell.installed_base_prerequisite_assessment.v1",
+        "status": (
+            "READY_TO_BIND_PHYSICAL_PREREQUISITES"
+            if resolution.all_valid
+            else PREREQUISITE_ASSESSMENT_BLOCKED_STATUS
+        ),
+        "packet_id": packet["packet_id"],
+        "packet_content_sha256": packet["content_sha256"],
+        "assessed_at_utc": assessed_at_utc,
+        "manifest_id": manifest_id.strip(),
+        "active_build_id": active_build_id.strip(),
+        "context_file_sha256": context_file_sha256,
+        "context_content_sha256": context_content_sha256,
+        "registry_index_present": registry_index_sha256 is not None,
+        "registry_index_sha256": registry_index_sha256,
+        "all_valid": resolution.all_valid,
+        "assessments": assessments,
+        "fit_eligible": False,
+        "controller_commands": [],
+        "hardware_access": False,
+        "physical_movements": 0,
+        "physical_authority": False,
+    }
+    return {**core, "content_sha256": _sha(core)}
 
 
 def build_pending_installed_base_correspondence_packet_v1(
@@ -494,9 +572,11 @@ __all__ = [
     "FAILED_STATUS",
     "PENDING_STATUS",
     "PREREQUISITE_BLOCKED_FIT_STATUS",
+    "PREREQUISITE_ASSESSMENT_BLOCKED_STATUS",
     "READY_STATUS",
     "SCHEMA",
     "build_pending_installed_base_correspondence_packet_v1",
+    "assess_installed_base_prerequisites_v1",
     "bind_installed_base_prerequisites_v1",
     "fit_installed_base_position_candidate_v1",
     "record_installed_base_correspondence_sample_v1",

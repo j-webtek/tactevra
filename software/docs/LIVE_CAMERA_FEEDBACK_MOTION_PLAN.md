@@ -947,3 +947,11 @@ resolved artifact hashes together with hashes for the registry index and
 context file. The fit rejects accepted-looking status strings when this binding
 is absent or malformed. The maintained physical registry is currently empty,
 so the binder fails closed until real `VALID` artifacts are published.
+
+The same runner now preserves a useful fail-closed result for that empty state.
+It writes an immutable prerequisite-assessment report with the exact four
+artifact states and registry reasons, records that the index is absent, returns
+exit code 2, and grants no fit or physical authority. Once every artifact is
+valid, the identical command produces the registry-bound packet instead. This
+keeps missing physical evidence visible without creating an empty index or
+inventing acceptance data.

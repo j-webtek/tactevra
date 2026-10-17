@@ -13003,3 +13003,23 @@ rewriting history. New entries must use a unique evidence ID.
 - Result: registry-bound prerequisite implementation and regression tests
   prepared; original pending packet unchanged; commands 0; hardware access
   false; movements 0; physical authority false.
+
+
+### E-20261017-AI-INSTALLED-BASE-PREREQUISITE-ASSESSMENT-001 — empty registry remains diagnosable
+
+- Source: registry-binding implementation merged as PR 337 and the unchanged
+  pending correspondence packet file SHA-256
+  `2a3325fbd366d397f57e6a78a9408ea84c3d594247c81bfb284b9c1e2ca30bf5`.
+- Operation: the binding runner now emits a deterministic assessment successor
+  whenever the exact four prerequisite artifacts do not all resolve `VALID`.
+  The report binds the packet, manifest, active build, assessment time, and
+  context hashes; records every artifact state, hash, and reason; and represents
+  an absent registry index explicitly instead of attempting to hash a missing
+  file.
+- Failure boundary: the assessment requires the exact prerequisite ID set and
+  valid provenance fields. It remains ineligible for fit and cannot be converted
+  into accepted packet status. A successful bind still requires all-valid
+  registry resolution and a real hash-bound index.
+- Result: the maintained empty registry reports all four exact
+  `MISSING_CALIBRATION` reasons with exit code 2; commands 0; hardware access
+  false; movements 0; physical authority false.

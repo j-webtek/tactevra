@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -13,6 +16,7 @@ from rocell.application.installed_base_correspondence_packet_v1 import (
     PENDING_STATUS,
     PREREQUISITE_BLOCKED_FIT_STATUS,
     READY_STATUS,
+    assess_installed_base_prerequisites_v1,
     bind_installed_base_prerequisites_v1,
     build_pending_installed_base_correspondence_packet_v1,
     fit_installed_base_position_candidate_v1,
@@ -170,6 +174,76 @@ def test_prerequisite_binding_rejects_missing_registry_artifacts() -> None:
             registry_index_sha256="9" * 64,
             assessed_at_utc=WHEN,
         )
+
+    report = assess_installed_base_prerequisites_v1(
+        packet,
+        resolution,
+        manifest_id="manifest-1",
+        active_build_id="build-1",
+        context_file_sha256="e" * 64,
+        context_content_sha256="f" * 64,
+        registry_index_sha256=None,
+        assessed_at_utc=WHEN,
+    )
+    assert report["status"] == "BLOCKED_PHYSICAL_PREREQUISITES"
+    assert report["registry_index_present"] is False
+    assert report["all_valid"] is False
+    assert report["fit_eligible"] is False
+    assert set(report["assessments"]) == set(packet["prerequisite_status"])
+    assert all(
+        row["state"] == "MISSING" for row in report["assessments"].values()
+    )
+    assert report["physical_authority"] is False
+
+
+def test_bind_runner_reports_empty_registry_without_masking_missing_artifacts(
+    tmp_path: Path,
+) -> None:
+    packet_path = tmp_path / "packet.json"
+    context_path = tmp_path / "context.json"
+    output_path = tmp_path / "assessment.json"
+    registry_path = tmp_path / "calibrations"
+    packet_path.write_text(json.dumps(_pending()), encoding="utf-8")
+    context_path.write_text(json.dumps({"phase1_graph": "a" * 64}), encoding="utf-8")
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = str(WORKSPACE / "software/src")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(WORKSPACE / "software/ai/run_installed_base_correspondence_packet.py"),
+            "--packet",
+            str(packet_path),
+            "--bind-prerequisites",
+            "--calibration-registry",
+            str(registry_path),
+            "--context-hashes",
+            str(context_path),
+            "--manifest-id",
+            "manifest-1",
+            "--active-build-id",
+            "build-1",
+            "--assessed-at-utc",
+            WHEN,
+            "--output",
+            str(output_path),
+        ],
+        cwd=WORKSPACE,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 2, result.stderr
+    report = json.loads(output_path.read_text(encoding="utf-8"))
+    assert report["status"] == "BLOCKED_PHYSICAL_PREREQUISITES"
+    assert report["registry_index_present"] is False
+    assert {
+        tuple(row["reasons"])
+        for row in report["assessments"].values()
+    } == {
+        (f"MISSING_CALIBRATION:{artifact_id}",)
+        for artifact_id in report["assessments"]
+    }
 
 
 def test_prerequisite_binding_is_immutable() -> None:

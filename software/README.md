@@ -783,10 +783,13 @@ The context file is a JSON object mapping dependency IDs to lowercase SHA-256
 digests. The operation resolves the exact four prerequisites through the
 production calibration registry and records their artifact hashes, the active
 manifest and build, the registry-index hash, and both file and canonical hashes
-of the context. It fails unless every assessment is `VALID`. The repository's
-physical registry is currently empty, so this step remains blocked until the
-accepted physical artifacts are installed; changing packet status strings is
-insufficient.
+of the context. When any assessment is not `VALID`, the command exits with code
+2 and writes a deterministic `rocell.installed_base_prerequisite_assessment.v1`
+report containing every state and reason. This also works when the intentionally
+empty registry has no `index.json`; the absent index is recorded instead of
+masking the missing-artifact diagnostics. A bound packet is emitted only after
+all four artifacts resolve as valid and the real registry index can be hashed.
+Changing packet status strings is insufficient.
 
 Record one synchronized correspondence without hand-editing the packet:
 
