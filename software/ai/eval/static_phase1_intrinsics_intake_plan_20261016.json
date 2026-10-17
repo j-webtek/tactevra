@@ -705,8 +705,8 @@
       ]
     }
   },
-  "next_action": "VERIFY_EXISTING_TARGET_IDENTITY_AND_SCALE_THEN_COLLECT_PRECOMMITTED_MULTIVIEW_DATASET",
-  "plan_sha256": "5f8d4de302d79a80bb68c04ba0833139afe09366b6c7f5d092cc1806e196561d",
+  "next_action": "BIND_EXISTING_MOVABLE_PLANAR_TARGET_THEN_CAPTURE_PRECOMMITTED_MULTIVIEW_DATASET",
+  "plan_sha256": "d771089a5aea8b7d7e73e0892bea0ac4297cf76c765fdd803a5e3467098a4c40",
   "prerequisites": {
     "phase1_b0477_identity": "RETAINED_CANDIDATE_PARTIAL",
     "phase1_b0477_mode": "RETAINED_CANDIDATE_PARTIAL",
@@ -766,9 +766,107 @@
     "synthetic_rehearsal": {
       "path": "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json",
       "sha256": "d00f71b9a6f2d721a97e6d3b03435261581630ee7b0c08738aae98be9d0b7a74"
+    },
+    "target_reconciliation": {
+      "artifact_sha256": "fe1b064b5fbf82d3b808efa4ddbbfa0fca5417cd67a185cbc4bd6eb72276900e",
+      "path": "software/ai/eval/static_intrinsics_target_reconciliation_20261016.json",
+      "reconciliation_sha256": "9f3b1582d23a425f519ddf6ccf1b5350a18abc31a68c8e65aec74e05115666a0"
     }
   },
   "status": "BLOCKED_PHYSICAL_INTRINSICS_INPUTS_REQUIRED",
   "target_artifact_id": "phase1_static_intrinsics",
+  "target_reconciliation": {
+    "accepted_existing_target_classes": [
+      {
+        "required_identity": [
+          "dictionary",
+          "squares_x",
+          "squares_y",
+          "square_length_mm",
+          "marker_length_mm"
+        ],
+        "target_class": "CHARUCO"
+      },
+      {
+        "required_identity": [
+          "dictionary",
+          "ordered_tag_ids",
+          "metric_corner_coordinates_xy_mm"
+        ],
+        "target_class": "APRILTAG_GRID"
+      }
+    ],
+    "collection_policy": {
+      "arm_motion_required": false,
+      "camera_and_installed_board_remain_fixed": true,
+      "move_existing_target_only": true,
+      "new_target_print_requested": false,
+      "robot_commands_sent": 0,
+      "robot_transport_opened": false
+    },
+    "completed_fixed_board_evidence": {
+      "board_size_xy_mm": [
+        610.0,
+        457.0
+      ],
+      "eligible_for_fixed_epoch_planar_mapping": true,
+      "fit_eligible_frame_count": 7,
+      "repeat_board_or_tag_measurements_required": false,
+      "source_frame_count": 10,
+      "tag_centers_xy_mm": {
+        "K0": [
+          240.17,
+          265.84
+        ],
+        "P0": [
+          442.05,
+          270.39
+        ],
+        "T0": [
+          27.32,
+          33.31
+        ],
+        "T1": [
+          403.66,
+          38.45
+        ],
+        "T2": [
+          32.55,
+          429.5
+        ],
+        "T3": [
+          581.38,
+          431.47
+        ]
+      },
+      "tag_detection_edge_mm": 40.0,
+      "tag_family": "tag36h11",
+      "tag_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "tag_tile_edge_mm": 55.0
+    },
+    "existing_target_binding_requirements": [
+      "immutable target identity and feature definition",
+      "metric scale provenance across both target axes",
+      "at least 30 detectable non-collinear feature corners per accepted view",
+      "rigid flat backing witness",
+      "one unchanged physical target through all precommitted slots"
+    ],
+    "intrinsics_observability_decision": {
+      "distinct_plane_poses_in_retained_board_frames": 1,
+      "existing_board_measurements_are_rejected": false,
+      "fixed_board": true,
+      "fixed_board_eligible_as_multiview_intrinsics_dataset": false,
+      "fixed_camera": true,
+      "reason": "One fixed planar pose supports the retained image-to-board homography but cannot independently constrain focal length and lens distortion for the commissioned camera."
+    },
+    "status": "FIXED_BOARD_RECONCILED_MOVABLE_TARGET_REQUIRED"
+  },
   "workcell_epoch_id": "keyboard-bare-jaw-camera-intake-20261015"
 }

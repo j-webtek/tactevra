@@ -12,7 +12,7 @@
     "max_duplicate_bytes": 240000000,
     "max_logical_bytes": 900000000,
     "max_single_blob_bytes": 60000000,
-    "max_tracked_files": 6595
+    "max_tracked_files": 6599
   },
   "reduction_targets": {
     "max_duplicate_bytes": 10485760,

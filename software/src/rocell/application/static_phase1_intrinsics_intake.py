@@ -35,6 +35,9 @@ _LOCKED_CONTROLS = Path(
 _MULTIVIEW_CONTRACT = Path(
     "software/ai/eval/static_intrinsics_multiview_capture_contract_20261016.json"
 )
+_TARGET_RECONCILIATION = Path(
+    "software/ai/eval/static_intrinsics_target_reconciliation_20261016.json"
+)
 
 
 class StaticPhase1IntrinsicsIntakeError(ValueError):
@@ -123,12 +126,14 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
     rehearsal_path = root / _REHEARSAL
     locked_controls_path = root / _LOCKED_CONTROLS
     multiview_contract_path = root / _MULTIVIEW_CONTRACT
+    target_reconciliation_path = root / _TARGET_RECONCILIATION
     session = _read(session_path)
     coverage = _read(coverage_path)
     profile = _read(profile_path)
     rehearsal = _read(rehearsal_path)
     locked_controls = _read(locked_controls_path)
     multiview_contract = _read(multiview_contract_path)
+    target_reconciliation = _read(target_reconciliation_path)
     if (
         locked_controls.get("schema")
         != "rocell.b0477_locked_controls_qualification.v1"
@@ -147,6 +152,16 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
     ):
         raise StaticPhase1IntrinsicsIntakeError(
             "physical-intrinsics multi-view contract is not precommitted"
+        )
+    if (
+        target_reconciliation.get("schema")
+        != "rocell.static_intrinsics_target_reconciliation.v1"
+        or target_reconciliation.get("status")
+        != "FIXED_BOARD_RECONCILED_MOVABLE_TARGET_REQUIRED"
+        or target_reconciliation.get("capture_ready") is not False
+    ):
+        raise StaticPhase1IntrinsicsIntakeError(
+            "physical-intrinsics target reconciliation is not retained"
         )
 
     recomputed = assess_static_phase1_retained_evidence(root)
@@ -279,6 +294,13 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
                 "artifact_sha256": _sha256(multiview_contract_path),
                 "contract_sha256": multiview_contract.get("contract_sha256"),
             },
+            "target_reconciliation": {
+                "path": _TARGET_RECONCILIATION.as_posix(),
+                "artifact_sha256": _sha256(target_reconciliation_path),
+                "reconciliation_sha256": target_reconciliation.get(
+                    "reconciliation_sha256"
+                ),
+            },
         },
         "retained_runtime_binding": {
             "friendly_name": identity.get("friendly_name"),
@@ -327,8 +349,24 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
             "dataset_commitment": multiview_contract.get("dataset_commitment"),
             "target_intake": multiview_contract.get("target_intake"),
         },
+        "target_reconciliation": {
+            "status": target_reconciliation.get("status"),
+            "completed_fixed_board_evidence": target_reconciliation.get(
+                "completed_fixed_board_evidence"
+            ),
+            "intrinsics_observability_decision": target_reconciliation.get(
+                "intrinsics_observability_decision"
+            ),
+            "accepted_existing_target_classes": target_reconciliation.get(
+                "accepted_existing_target_classes"
+            ),
+            "existing_target_binding_requirements": target_reconciliation.get(
+                "existing_target_binding_requirements"
+            ),
+            "collection_policy": target_reconciliation.get("collection_policy"),
+        },
         "next_action": (
-            "VERIFY_EXISTING_TARGET_IDENTITY_AND_SCALE_THEN_COLLECT_"
+            "BIND_EXISTING_MOVABLE_PLANAR_TARGET_THEN_CAPTURE_"
             "PRECOMMITTED_MULTIVIEW_DATASET"
         ),
         "capture_ready": False,

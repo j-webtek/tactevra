@@ -1,0 +1,143 @@
+{
+  "accepted_existing_target_classes": [
+    {
+      "required_identity": [
+        "dictionary",
+        "squares_x",
+        "squares_y",
+        "square_length_mm",
+        "marker_length_mm"
+      ],
+      "target_class": "CHARUCO"
+    },
+    {
+      "required_identity": [
+        "dictionary",
+        "ordered_tag_ids",
+        "metric_corner_coordinates_xy_mm"
+      ],
+      "target_class": "APRILTAG_GRID"
+    }
+  ],
+  "authority": {
+    "camera_frames_requested": 0,
+    "camera_opened": false,
+    "physical_authority": false,
+    "robot_commands_sent": 0,
+    "robot_transport_opened": false
+  },
+  "capture_ready": false,
+  "collection_policy": {
+    "arm_motion_required": false,
+    "camera_and_installed_board_remain_fixed": true,
+    "move_existing_target_only": true,
+    "new_target_print_requested": false,
+    "robot_commands_sent": 0,
+    "robot_transport_opened": false
+  },
+  "completed_fixed_board_evidence": {
+    "board_size_xy_mm": [
+      610.0,
+      457.0
+    ],
+    "eligible_for_fixed_epoch_planar_mapping": true,
+    "fit_eligible_frame_count": 7,
+    "repeat_board_or_tag_measurements_required": false,
+    "source_frame_count": 10,
+    "tag_centers_xy_mm": {
+      "K0": [
+        240.17,
+        265.84
+      ],
+      "P0": [
+        442.05,
+        270.39
+      ],
+      "T0": [
+        27.32,
+        33.31
+      ],
+      "T1": [
+        403.66,
+        38.45
+      ],
+      "T2": [
+        32.55,
+        429.5
+      ],
+      "T3": [
+        581.38,
+        431.47
+      ]
+    },
+    "tag_detection_edge_mm": 40.0,
+    "tag_family": "tag36h11",
+    "tag_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "tag_tile_edge_mm": 55.0
+  },
+  "existing_target_binding_requirements": [
+    "immutable target identity and feature definition",
+    "metric scale provenance across both target axes",
+    "at least 30 detectable non-collinear feature corners per accepted view",
+    "rigid flat backing witness",
+    "one unchanged physical target through all precommitted slots"
+  ],
+  "intrinsics_observability_decision": {
+    "distinct_plane_poses_in_retained_board_frames": 1,
+    "existing_board_measurements_are_rejected": false,
+    "fixed_board": true,
+    "fixed_board_eligible_as_multiview_intrinsics_dataset": false,
+    "fixed_camera": true,
+    "reason": "One fixed planar pose supports the retained image-to-board homography but cannot independently constrain focal length and lens distortion for the commissioned camera."
+  },
+  "legacy_target_record": {
+    "definition": {
+      "camera_model": "Arducam B0477",
+      "capture_fps": 4,
+      "dictionary": "DICT_5X5_1000",
+      "marker_length_mm": 22.0,
+      "native_height_px": 3648,
+      "native_width_px": 5472,
+      "pixel_format": "YUY2",
+      "rigid_backing_required": true,
+      "square_length_mm": 30.0,
+      "squares_x": 12,
+      "squares_y": 9
+    },
+    "eligible_for_capture": false,
+    "physical_asset_retained": false,
+    "physical_scale_verified": false,
+    "reason": "The definition exists, but no matching physical target was retained.",
+    "rigid_backing_verified": false
+  },
+  "next_action": "BIND_EXISTING_MOVABLE_PLANAR_TARGET_THEN_CAPTURE_SLOT_01",
+  "reconciliation_sha256": "9f3b1582d23a425f519ddf6ccf1b5350a18abc31a68c8e65aec74e05115666a0",
+  "schema": "rocell.static_intrinsics_target_reconciliation.v1",
+  "source_bindings": {
+    "fixed_board_registration": {
+      "path": "software/ai/eval/b0477_fixed_board_registration_20261016.json",
+      "sha256": "e7466c1d13417f571b43e6ec3731b826e129779ba9a5cbd7559a7b9838bedcf9"
+    },
+    "installed_apriltag_xy": {
+      "path": "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
+      "sha256": "590e7e0fd1261b47517510a96de7290c74b3d5a8b07ba5ec1188029f9701993a"
+    },
+    "legacy_charuco_probe": {
+      "path": "software/ai/eval/physical_charuco_probe_blocked_v1.json",
+      "sha256": "5b593eb1b416c33fbbad0e092f4a454d865121c02817b601a3fe3f3e2b000eef"
+    },
+    "multiview_capture_contract": {
+      "contract_sha256": "3accca2fa2aacd3ae1a1c6721b59776291802ae9b148d6968f3e9a5d8aaae083",
+      "path": "software/ai/eval/static_intrinsics_multiview_capture_contract_20261016.json",
+      "sha256": "706d8ce484cd467baa0f1519fae37c5b73b22e325e8fe70d8deb5a0f923b2787"
+    }
+  },
+  "status": "FIXED_BOARD_RECONCILED_MOVABLE_TARGET_REQUIRED"
+}

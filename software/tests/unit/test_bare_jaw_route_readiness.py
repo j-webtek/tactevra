@@ -135,6 +135,14 @@ def test_retained_bare_jaw_route_audit_is_deterministic_and_zero_dispatch(
     assert intrinsics["collection_policy"][
         "repeat_board_or_tag_center_measurements"
     ] is False
+    reconciliation = intrinsics["target_reconciliation"]
+    assert reconciliation["completed_fixed_board_evidence"][
+        "repeat_board_or_tag_measurements_required"
+    ] is False
+    assert reconciliation["intrinsics_observability_decision"][
+        "existing_board_measurements_are_rejected"
+    ] is False
+    assert reconciliation["collection_policy"]["new_target_print_requested"] is False
     assert intrinsics["capture_ready"] is False
     assert "MEASURED_STATIC_CAMERA_CHAIN_REQUIRED" in first["blockers"]
     assert "PLANNER_CAMERA_ARCHITECTURE_RECONCILIATION_REQUIRED" not in first[
@@ -155,6 +163,9 @@ def _copy_inputs(source: Path, destination: Path) -> None:
         "software/ai/eval/physical_installed_apriltag_xy_working_v1.json",
         "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json",
         "software/ai/eval/static_phase1_intrinsics_intake_plan_20261016.json",
+        "software/ai/eval/static_intrinsics_multiview_capture_contract_20261016.json",
+        "software/ai/eval/static_intrinsics_target_reconciliation_20261016.json",
+        "software/ai/eval/b0477_locked_controls_qualification_20261016.json",
         "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
         "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json",
     ]
