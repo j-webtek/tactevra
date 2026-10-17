@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 from typing import Any
 
+from rocell.calibration import ArtifactState, CalibrationResolution
 from rocell.calibration.rigid_correspondence import (
     CorrespondenceOrigin,
     DEFAULT_RIGID_CORRESPONDENCE_POLICY,
@@ -173,6 +174,77 @@ def record_installed_base_correspondence_sample_v1(
     return updated
 
 
+def bind_installed_base_prerequisites_v1(
+    packet: dict[str, Any],
+    resolution: CalibrationResolution,
+    *,
+    manifest_id: str,
+    active_build_id: str,
+    context_file_sha256: str,
+    context_content_sha256: str,
+    registry_index_sha256: str,
+    assessed_at_utc: str,
+) -> dict[str, Any]:
+    """Bind an all-valid physical-registry resolution to the packet."""
+
+    _validate_packet_integrity(packet)
+    if "prerequisite_acceptance" in packet:
+        raise ValueError("physical prerequisite acceptance is already bound")
+    if not isinstance(resolution, CalibrationResolution):
+        raise TypeError("resolution must be a CalibrationResolution")
+    expected_ids = set(packet["prerequisite_status"])
+    if set(resolution.assessments) != expected_ids:
+        raise ValueError("prerequisite resolution must contain the exact required IDs")
+    if not resolution.all_valid:
+        reasons = ",".join(resolution.reasons) or "NON_VALID_ASSESSMENT"
+        raise ValueError(f"physical prerequisite resolution is not valid: {reasons}")
+    for name, value in (
+        ("manifest_id", manifest_id),
+        ("active_build_id", active_build_id),
+    ):
+        if not isinstance(value, str) or not value.strip() or len(value) > 256:
+            raise ValueError(f"{name} must be bounded non-empty text")
+    for name, digest in (
+        ("context_file_sha256", context_file_sha256),
+        ("context_content_sha256", context_content_sha256),
+        ("registry_index_sha256", registry_index_sha256),
+    ):
+        if not isinstance(digest, str) or not _HASH.fullmatch(digest) or digest == "0" * 64:
+            raise ValueError(f"{name} must be a nonzero lowercase SHA-256 digest")
+    if not isinstance(assessed_at_utc, str) or not assessed_at_utc.endswith("Z"):
+        raise ValueError("assessed_at_utc must be an ISO-8601 UTC timestamp")
+
+    artifacts: dict[str, str] = {}
+    for artifact_id in sorted(expected_ids):
+        assessment = resolution.assessments[artifact_id]
+        if assessment.state is not ArtifactState.VALID or assessment.artifact_hash is None:
+            raise ValueError(f"prerequisite {artifact_id} is not a valid artifact")
+        artifacts[artifact_id] = assessment.artifact_hash
+    updated = json.loads(json.dumps(packet, allow_nan=False))
+    updated["prerequisite_status"] = {
+        artifact_id: "ACCEPTED_PHYSICAL_ARTIFACT" for artifact_id in sorted(expected_ids)
+    }
+    updated["prerequisite_acceptance"] = {
+        "schema": "rocell.installed_base_prerequisite_acceptance.v1",
+        "assessed_at_utc": assessed_at_utc,
+        "manifest_id": manifest_id.strip(),
+        "active_build_id": active_build_id.strip(),
+        "context_file_sha256": context_file_sha256,
+        "context_content_sha256": context_content_sha256,
+        "registry_index_sha256": registry_index_sha256,
+        "artifact_sha256": artifacts,
+    }
+    slots = updated["precommitted_split"]["slots"]
+    measured = sum(item["status"] == "MEASURED" for item in slots)
+    if measured == len(slots):
+        updated["status"] = READY_STATUS
+    else:
+        updated["status"] = COLLECTING_STATUS
+    unsigned = {key: value for key, value in updated.items() if key != "content_sha256"}
+    updated["content_sha256"] = _sha(unsigned)
+    return updated
+
+
 def build_pending_installed_base_correspondence_packet_v1(
     intake_path: Path,
     intake_file_sha256: str,
@@ -299,6 +371,40 @@ def _completed_input(packet: dict[str, Any]) -> RigidCorrespondenceInput:
         for value in packet["prerequisite_status"].values()
     ):
         raise ValueError("phase1_arm_board prerequisites are not accepted")
+    acceptance = packet.get("prerequisite_acceptance", {})
+    artifact_hashes = acceptance.get("artifact_sha256", {})
+    expected_ids = set(packet["prerequisite_status"])
+    binding_hashes = (
+        acceptance.get("context_file_sha256"),
+        acceptance.get("context_content_sha256"),
+        acceptance.get("registry_index_sha256"),
+    )
+    if (
+        acceptance.get("schema")
+        != "rocell.installed_base_prerequisite_acceptance.v1"
+        or not isinstance(acceptance.get("manifest_id"), str)
+        or not acceptance["manifest_id"].strip()
+        or len(acceptance["manifest_id"]) > 256
+        or not isinstance(acceptance.get("active_build_id"), str)
+        or not acceptance["active_build_id"].strip()
+        or len(acceptance["active_build_id"]) > 256
+        or not isinstance(acceptance.get("assessed_at_utc"), str)
+        or not acceptance["assessed_at_utc"].endswith("Z")
+        or any(
+            not isinstance(digest, str)
+            or not _HASH.fullmatch(digest)
+            or digest == "0" * 64
+            for digest in binding_hashes
+        )
+        or set(artifact_hashes) != expected_ids
+        or any(
+            not isinstance(digest, str)
+            or not _HASH.fullmatch(digest)
+            or digest == "0" * 64
+            for digest in artifact_hashes.values()
+        )
+    ):
+        raise ValueError("physical prerequisite acceptance binding is missing or invalid")
 
     fixed = packet["fixed_context"]
     slots = packet["precommitted_split"]["slots"]
@@ -391,6 +497,7 @@ __all__ = [
     "READY_STATUS",
     "SCHEMA",
     "build_pending_installed_base_correspondence_packet_v1",
+    "bind_installed_base_prerequisites_v1",
     "fit_installed_base_position_candidate_v1",
     "record_installed_base_correspondence_sample_v1",
 ]

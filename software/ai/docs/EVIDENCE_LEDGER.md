@@ -12981,3 +12981,25 @@ rewriting history. New entries must use a unique evidence ID.
   while any physical prerequisite is unaccepted.
 - Result: sample-ingest implementation and tests prepared; commands 0; hardware
   access false; movements 0; physical authority false.
+
+
+### E-20261017-AI-INSTALLED-BASE-PREREQUISITE-BINDING-001 — registry-derived prerequisite acceptance
+
+- Source: precommitted installed-base correspondence packet file SHA-256
+  `2a3325fbd366d397f57e6a78a9408ea84c3d594247c81bfb284b9c1e2ca30bf5`
+  and canonical content SHA-256
+  `68a9dab271549ecc3f75e5584034b47f1dfe7bd78e0ae4af8e13d4a707e62065`.
+- Operation: prerequisite acceptance is derived from an all-valid production
+  `CalibrationRegistry.resolve` result for exactly `phase1_static_extrinsic`,
+  `phase1_measured_tag_map`, `phase1_robot_reference`, and
+  `phase1_controller_correlation`. The immutable packet successor binds the
+  active manifest and build, assessment time, each accepted artifact hash, the
+  registry-index hash, and the context file and canonical-content hashes.
+- Failure boundary: missing, stale, mismatched, or extra artifact assessments;
+  zero, uppercase, or malformed digests; changed packet content; a second bind;
+  and accepted-looking status strings without the complete provenance binding
+  fail closed before the offline fit. The maintained physical registry remains
+  empty, so no prerequisite was accepted by this work.
+- Result: registry-bound prerequisite implementation and regression tests
+  prepared; original pending packet unchanged; commands 0; hardware access
+  false; movements 0; physical authority false.

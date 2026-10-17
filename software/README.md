@@ -764,6 +764,30 @@ reuses the hardened proper-rigid Kabsch implementation and forbids scale or
 shear. Even a passing fit remains a position-only candidate until orientation,
 base/clamp geometry, reviewed thresholds, and reseat evidence are accepted.
 
+Bind prerequisites from the physical calibration registry before fitting:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/ai/run_installed_base_correspondence_packet.py `
+  --packet work/installed-base-correspondences.json `
+  --bind-prerequisites `
+  --calibration-registry software/calibrations `
+  --context-hashes work/static-phase1-context-hashes.json `
+  --manifest-id <active-manifest-id> `
+  --active-build-id <active-build-id> `
+  --assessed-at-utc <ISO-8601-UTC> `
+  --output work/installed-base-correspondences.bound.json
+```
+
+The context file is a JSON object mapping dependency IDs to lowercase SHA-256
+digests. The operation resolves the exact four prerequisites through the
+production calibration registry and records their artifact hashes, the active
+manifest and build, the registry-index hash, and both file and canonical hashes
+of the context. It fails unless every assessment is `VALID`. The repository's
+physical registry is currently empty, so this step remains blocked until the
+accepted physical artifacts are installed; changing packet status strings is
+insufficient.
+
 Record one synchronized correspondence without hand-editing the packet:
 
 ```powershell

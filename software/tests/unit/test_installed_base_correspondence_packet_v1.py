@@ -13,10 +13,12 @@ from rocell.application.installed_base_correspondence_packet_v1 import (
     PENDING_STATUS,
     PREREQUISITE_BLOCKED_FIT_STATUS,
     READY_STATUS,
+    bind_installed_base_prerequisites_v1,
     build_pending_installed_base_correspondence_packet_v1,
     fit_installed_base_position_candidate_v1,
     record_installed_base_correspondence_sample_v1,
 )
+from rocell.calibration import ArtifactAssessment, ArtifactState, CalibrationResolution
 from rocell.geometry.transforms import RigidTransform, Vec3
 from rocell.models.frames import Point3Mm
 
@@ -70,6 +72,30 @@ def _record(packet: dict[str, object], slot_id: str) -> dict[str, object]:
     )
 
 
+def _accepted(packet: dict[str, object]) -> dict[str, object]:
+    resolution = CalibrationResolution(
+        {
+            artifact_id: ArtifactAssessment(
+                artifact_id,
+                ArtifactState.VALID,
+                chr(ord("a") + index) * 64,
+                (),
+            )
+            for index, artifact_id in enumerate(packet["prerequisite_status"])
+        }
+    )
+    return bind_installed_base_prerequisites_v1(
+        packet,
+        resolution,
+        manifest_id="manifest-1",
+        active_build_id="build-1",
+        context_file_sha256="e" * 64,
+        context_content_sha256="f" * 64,
+        registry_index_sha256="9" * 64,
+        assessed_at_utc=WHEN,
+    )
+
+
 def test_record_sample_is_immutable_and_content_bound() -> None:
     pending = _pending()
     updated = _record(pending, "train-front-left-low")
@@ -111,16 +137,45 @@ def test_all_recorded_samples_remain_blocked_by_physical_prerequisites() -> None
 
 
 def test_all_recorded_samples_are_ready_when_prerequisites_are_accepted() -> None:
-    packet = _pending()
-    packet["prerequisite_status"] = {
-        key: "ACCEPTED_PHYSICAL_ARTIFACT" for key in packet["prerequisite_status"]
-    }
-    _rehash(packet)
+    packet = _accepted(_pending())
+    assert packet["status"] == COLLECTING_STATUS
     for row in packet["precommitted_split"]["slots"]:
         packet = _record(packet, row["slot_id"])
 
     assert packet["status"] == READY_STATUS
     assert packet["physical_authority"] is False
+
+
+def test_prerequisite_binding_rejects_missing_registry_artifacts() -> None:
+    packet = _pending()
+    resolution = CalibrationResolution(
+        {
+            artifact_id: ArtifactAssessment(
+                artifact_id,
+                ArtifactState.MISSING,
+                None,
+                (f"MISSING_CALIBRATION:{artifact_id}",),
+            )
+            for artifact_id in packet["prerequisite_status"]
+        }
+    )
+    with pytest.raises(ValueError, match="physical prerequisite resolution is not valid"):
+        bind_installed_base_prerequisites_v1(
+            packet,
+            resolution,
+            manifest_id="manifest-1",
+            active_build_id="build-1",
+            context_file_sha256="e" * 64,
+            context_content_sha256="f" * 64,
+            registry_index_sha256="9" * 64,
+            assessed_at_utc=WHEN,
+        )
+
+
+def test_prerequisite_binding_is_immutable() -> None:
+    packet = _accepted(_pending())
+    with pytest.raises(ValueError, match="acceptance is already bound"):
+        _accepted(packet)
 
 
 def test_pending_packet_is_deterministic_precommitted_and_zero_authority() -> None:
@@ -156,13 +211,23 @@ def test_packet_rejects_wrong_intake_hash_and_unaccepted_prerequisites() -> None
         )
     with pytest.raises(ValueError, match="prerequisites are not accepted"):
         fit_installed_base_position_candidate_v1(_pending())
+    spoofed = _pending()
+    spoofed["prerequisite_status"] = {
+        key: "ACCEPTED_PHYSICAL_ARTIFACT" for key in spoofed["prerequisite_status"]
+    }
+    _rehash(spoofed)
+    with pytest.raises(ValueError, match="acceptance binding is missing or invalid"):
+        fit_installed_base_position_candidate_v1(spoofed)
+
+    malformed = _accepted(_pending())
+    malformed["prerequisite_acceptance"]["registry_index_sha256"] = "A" * 64
+    _rehash(malformed)
+    with pytest.raises(ValueError, match="acceptance binding is missing or invalid"):
+        fit_installed_base_position_candidate_v1(malformed)
 
 
 def test_completed_synthetic_packet_fits_position_candidate_only() -> None:
-    packet = _pending()
-    packet["prerequisite_status"] = {
-        key: "ACCEPTED_PHYSICAL_ARTIFACT" for key in packet["prerequisite_status"]
-    }
+    packet = _accepted(_pending())
     truth = RigidTransform.from_rpy_translation_mm(
         "B",
         "base_link",
@@ -210,10 +275,7 @@ def test_completed_synthetic_packet_fits_position_candidate_only() -> None:
 
 
 def test_changed_precommitted_split_fails_closed() -> None:
-    packet = _pending()
-    packet["prerequisite_status"] = {
-        key: "ACCEPTED_PHYSICAL_ARTIFACT" for key in packet["prerequisite_status"]
-    }
+    packet = _accepted(_pending())
     packet["precommitted_split"]["slots"][0]["split"] = "HELD_OUT"
     _rehash(packet)
     with pytest.raises(ValueError, match="six training and two held out"):
@@ -221,10 +283,7 @@ def test_changed_precommitted_split_fails_closed() -> None:
 
 
 def test_failed_diagnostic_is_not_labeled_as_position_candidate() -> None:
-    packet = _pending()
-    packet["prerequisite_status"] = {
-        key: "ACCEPTED_PHYSICAL_ARTIFACT" for key in packet["prerequisite_status"]
-    }
+    packet = _accepted(_pending())
     points = (
         (-100.0, -80.0, 20.0),
         (110.0, -70.0, 25.0),
