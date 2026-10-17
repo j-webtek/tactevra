@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 
 from rocell.application.installed_base_correspondence_packet_v1 import (
+    assess_installed_base_prerequisites_v1,
     bind_installed_base_prerequisites_v1,
     build_pending_installed_base_correspondence_packet_v1,
     fit_installed_base_position_candidate_v1,
@@ -102,17 +103,36 @@ def main() -> int:
             manifest_id=args.manifest_id,
             active_build_id=args.active_build_id,
         )
-        report = bind_installed_base_prerequisites_v1(
-            packet,
-            resolution,
-            manifest_id=args.manifest_id,
-            active_build_id=args.active_build_id,
-            context_file_sha256=_sha256(args.context_hashes),
-            context_content_sha256=_canonical_sha256(context_hashes),
-            registry_index_sha256=_sha256(registry.index_path),
-            assessed_at_utc=args.assessed_at_utc,
-        )
-        exit_code = 0
+        context_file_sha256 = _sha256(args.context_hashes)
+        context_content_sha256 = _canonical_sha256(context_hashes)
+        if resolution.all_valid:
+            report = bind_installed_base_prerequisites_v1(
+                packet,
+                resolution,
+                manifest_id=args.manifest_id,
+                active_build_id=args.active_build_id,
+                context_file_sha256=context_file_sha256,
+                context_content_sha256=context_content_sha256,
+                registry_index_sha256=_sha256(registry.index_path),
+                assessed_at_utc=args.assessed_at_utc,
+            )
+            exit_code = 0
+        else:
+            report = assess_installed_base_prerequisites_v1(
+                packet,
+                resolution,
+                manifest_id=args.manifest_id,
+                active_build_id=args.active_build_id,
+                context_file_sha256=context_file_sha256,
+                context_content_sha256=context_content_sha256,
+                registry_index_sha256=(
+                    _sha256(registry.index_path)
+                    if registry.index_path.is_file()
+                    else None
+                ),
+                assessed_at_utc=args.assessed_at_utc,
+            )
+            exit_code = 2
     elif args.record_slot is not None:
         required = (
             args.packet,
