@@ -536,6 +536,14 @@ the union was IDs `0-5`. Focus and aperture remain mechanical witness items,
 and reconnect or host-reboot persistence remains unproven. The next camera
 dependency is the existing target identity plus a precommitted multi-view
 fit/held-out dataset. No robot transport or command was used.
+ARM-082 precommits that dataset before any calibration image is accepted. It
+freezes 32 named slots: 24 training and 8 held out, with nine image regions,
+three tilt bands, four rotation bands, and two apparent-area bands. At least
+20 training and 6 held-out views must survive review. Fixed-pose duplicates
+are ineligible and a rejected slot cannot migrate between splits. The camera
+and installed board stay fixed; only the existing scale-verified target moves.
+Target identity and scale remain the next physical input, so capture readiness
+and all motion authority remain false.
 The AI precision lane now has a mainline-compatible pose-output adapter and v2
 batch producer. It preserves repeated targets and abstains on qualification,
 domain, freshness, identity, confidence, or containment failure. Its retained

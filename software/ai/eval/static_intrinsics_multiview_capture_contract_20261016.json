@@ -1,0 +1,673 @@
+{
+  "authority": {
+    "camera_frames_requested": 0,
+    "camera_opened": false,
+    "physical_authority": false,
+    "robot_commands_sent": 0,
+    "robot_transport_opened": false
+  },
+  "camera_binding": {
+    "directshow_device_path": "\\\\?\\usb#vid_04b4&pid_0477&mi_00#8&257b140a&0&0000#{65e8773d-8f56-11d0-a3b9-00a0c9223196}\\global",
+    "friendly_name": "Arducam B0477 (USB3 20MP)",
+    "mode": {
+      "fps": 60.000240000960005,
+      "height_px": 1080,
+      "pixel_format": "YUY2",
+      "settings_sha256": "68de0820caeb41a79508ffe613f438dc06fa2303422676fa6a9f1d2943cb0c15",
+      "width_px": 1920
+    },
+    "persistent_device_identity": "USB\\VID_04B4&PID_0477&MI_00\\8&257B140A&0&0000",
+    "selector": 0
+  },
+  "capture_ready": false,
+  "collection_rules": {
+    "camera_and_board_remain_fixed": true,
+    "capture_mode_must_match_locked_binding": true,
+    "controls_must_match_locked_binding": true,
+    "do_not_replace_rejected_slot_with_other_split": true,
+    "move_target_only": true,
+    "one_fresh_frame_per_slot": true,
+    "record_source_hash_and_observed_geometry_before_fit": true,
+    "robot_commands_sent": 0,
+    "robot_transport_opened": false
+  },
+  "contract_sha256": "3accca2fa2aacd3ae1a1c6721b59776291802ae9b148d6968f3e9a5d8aaae083",
+  "dataset_commitment": {
+    "fixed_pose_duplicates_eligible": false,
+    "held_out_slots": 8,
+    "minimum_accepted_views": 26,
+    "minimum_held_out_views": 6,
+    "minimum_training_views": 20,
+    "slots": [
+      {
+        "capture_id": "intrinsics-view-01",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_LEFT",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-02",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "TOP_CENTER",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-03",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_RIGHT",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-04",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "MID_LEFT",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-05",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "CENTER",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-06",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "MID_RIGHT",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-07",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "BOTTOM_LEFT",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-08",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "BOTTOM_CENTER",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-09",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "BOTTOM_RIGHT",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-10",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "TOP_LEFT",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-11",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_CENTER",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-12",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "TOP_RIGHT",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-13",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "MID_LEFT",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-14",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "CENTER",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-15",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "MID_RIGHT",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-16",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "BOTTOM_LEFT",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-17",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "BOTTOM_CENTER",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-18",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "BOTTOM_RIGHT",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-19",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_LEFT",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-20",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "TOP_CENTER",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-21",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_RIGHT",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-22",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "MID_LEFT",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-23",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "CENTER",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-24",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "MID_RIGHT",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "TRAINING"
+      },
+      {
+        "capture_id": "intrinsics-view-25",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_LEFT",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-26",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "TOP_RIGHT",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-27",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "MID_LEFT",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-28",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "MID_RIGHT",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-29",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "BOTTOM_LEFT",
+        "requested_rotation_band_deg": [
+          -75,
+          -25
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-30",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "BOTTOM_RIGHT",
+        "requested_rotation_band_deg": [
+          -24,
+          15
+        ],
+        "requested_tilt_band_deg": [
+          29,
+          42
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-31",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.1,
+          0.17
+        ],
+        "requested_image_region": "TOP_CENTER",
+        "requested_rotation_band_deg": [
+          16,
+          55
+        ],
+        "requested_tilt_band_deg": [
+          5,
+          15
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      },
+      {
+        "capture_id": "intrinsics-view-32",
+        "observed_target_geometry": null,
+        "requested_area_fraction_band": [
+          0.18,
+          0.28
+        ],
+        "requested_image_region": "BOTTOM_CENTER",
+        "requested_rotation_band_deg": [
+          56,
+          85
+        ],
+        "requested_tilt_band_deg": [
+          16,
+          28
+        ],
+        "source_image_sha256": null,
+        "split": "HELD_OUT"
+      }
+    ],
+    "split_frozen_before_capture": true,
+    "total_slots": 32,
+    "training_slots": 24
+  },
+  "locked_controls_qualification": {
+    "artifact_sha256": "b73522eff4b73bb81d690e702fc07f45e92136f7e222cdb8248269e25f9efd6e",
+    "path": "software/ai/eval/b0477_locked_controls_qualification_20261016.json",
+    "qualification_sha256": "14c157a395de7a0ebe26de399ea4915abc587be3cd4dfaf4e8ea9960fa84adf0"
+  },
+  "next_action": "VERIFY_EXISTING_TARGET_IDENTITY_AND_SCALE",
+  "schema": "rocell.static_intrinsics_multiview_capture_contract.v1",
+  "status": "PRECOMMITTED_CAPTURE_CONTRACT_TARGET_IDENTITY_REQUIRED",
+  "target_intake": {
+    "accept_existing_scale_verified_planar_target": true,
+    "new_target_print_requested": false,
+    "required_before_capture": [
+      "target kind and immutable identity",
+      "metric feature definition and dictionary when applicable",
+      "scale measurements across both target axes",
+      "rigid flat backing and unchanged physical target witness"
+    ]
+  }
+}
