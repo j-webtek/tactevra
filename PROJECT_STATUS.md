@@ -36,8 +36,9 @@ observation or movement authority.
 The installed-camera dependency is tracked as a targeted physical-integration
 hold in [the camera integration hold](docs/CAMERA_INTEGRATION_HOLD.md). A
 provisional board-plane map and fixed-camera keyboard-region estimate are now
-recorded. That region now yields 46 bounded camera search windows for future
-key feedback. Individual-key localization, the remaining commissioned
+recorded. That region yields 46 bounded camera search windows, and the retained
+frame supplies bounded contrast and gap-phase observations for all four main
+key rows. Individual-key localization, the remaining commissioned
 transforms, and physical action authority still require measured qualification.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
@@ -75,7 +76,7 @@ completed capabilities.
 | Local interface | Browser and terminal rehearsal, task planning, diagnostic exports | Software workflows can be explored without connecting a robot |
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
-| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate and 46 deterministic key feedback search windows | The fixed setup reproduces the board and narrows future image analysis to bounded key regions, but its 13.38 mm housing residual is too large for the declared 7 mm individual-key limit; no key center has been independently observed and key accuracy remains unqualified |
+| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, and four observed row-feature bands | The fixed setup reproduces the board and exposes useful structure across every main key row, but its 13.38 mm housing residual is too large for the declared 7 mm individual-key limit; no key center has been independently observed and key accuracy remains unqualified |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
@@ -244,10 +245,12 @@ not hover or contact targets. Motion, contact, and the stylus profile remain
 blocked.
 
 Those same reviewed housing corners now define 46 deterministic camera search
-windows for the nominal key footprints. This prepares bounded image feedback
-without treating the window centers as measurements or emitting board-space
-targets. Independent key-center or row-feature observations remain the next
-localization evidence step.
+windows for the nominal key footprints. The exact retained frame has also been
+rectified and supplies bounded contrast-band and repeated-gap observations for
+all four standard rows, with a 5.0 mm maximum contrast-band offset. This proves
+row-feature observability while treating neither the window centers nor row
+features as physical key-center measurements. No board-space target is emitted;
+independent key-center fitting and a distinct-frame repeatability check remain.
 
 ARM-074 adds a zero-authority T2A compiler from ordered typing actions to
 semantic Cartesian endpoints, bounded-step IK/collision screening samples, and

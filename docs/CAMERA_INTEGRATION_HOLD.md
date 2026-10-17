@@ -19,6 +19,11 @@ The accepted image quadrilateral now also produces 46 bounded
 [key feedback search windows](../software/docs/RC03_FIXED_CAMERA_KEY_FEEDBACK_ROI.md).
 Those image regions prepare independent visual refinement but are nominal,
 emit no board-space target, and do not change the hold.
+The exact retained frame now also passes the bounded
+[key-row observability assessment](../software/docs/RC03_FIXED_CAMERA_KEY_ROW_OBSERVABILITY.md):
+all four main rows expose a contrast band and repeated gap phase, with a 5.0 mm
+maximum contrast-band offset. These features are not key-center measurements;
+individual-key localization and distinct-frame repeatability remain open.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
@@ -92,7 +97,8 @@ After those conditions are met, follow this order:
    tool-to-joint transforms. The provisional board-plane and keyboard-region
    estimates cover only part of this item.
 2. Collect disjoint calibration and held-out final-camera observations. One
-   temporal held-out frame is now retained; individual key observations remain.
+   temporal held-out frame is retained and all four main rows are observable;
+   a distinct repeat frame and individual key-center observations remain.
 3. Run the frozen preflight and localization evaluator.
 4. Demonstrate that the combined perception, calibration, tracking/settling,
    and tool uncertainty fits inside the chosen target safe region.

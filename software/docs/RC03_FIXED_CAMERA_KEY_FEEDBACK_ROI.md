@@ -27,6 +27,11 @@ search to 46 explicit image regions. The next detector must derive independent
 key-center or row-feature observations inside them and retain residuals before
 individual-key localization can be reconsidered.
 
+The retained-frame follow-on is now recorded in
+[the key-row observability result](RC03_FIXED_CAMERA_KEY_ROW_OBSERVABILITY.md).
+It finds usable structure across all four standard rows but deliberately does
+not reinterpret the row features as independently observed key centers.
+
 ## Reproduce
 
 From `software/`:

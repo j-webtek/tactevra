@@ -572,3 +572,13 @@ existing strict profile consumer, and emits no collision result, controller
 artifact, hardware operation, or physical authority. Synthetic fixtures are
 test inputs only and do not qualify installed geometry. All byte, duplicate,
 and reduction limits remain unchanged.
+
+The fixed-camera key-row observability increment adds five governed paths: one
+CPU-only Pillow and NumPy estimator, one strict result schema, one focused test
+module, one compact hash-bound result, and one result note. The file-count
+ceiling advances from 6,488 to the exact expected 6,493 files for those reviewed
+paths only. The retained external frame remains outside the source archive. The
+result establishes bounded row-feature visibility while keeping individual key
+centers, board-space targets, motion, and contact blocked. The measured tree is
+661,881,978 logical bytes with 4,890,152 governed duplicate bytes. All byte,
+duplicate, and reduction limits remain unchanged.
