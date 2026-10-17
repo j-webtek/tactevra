@@ -49,8 +49,8 @@ def _load_json(path: Path) -> dict[str, Any]:
     return document
 
 
-def _rectify_luminance(image: Image.Image, homography: object,
-                       width_mm: float, depth_mm: float):
+def rectify_luminance(image: Image.Image, homography: object,
+                      width_mm: float, depth_mm: float):
     import numpy as np
 
     rgb = np.asarray(image.convert("RGB"), dtype=float)
@@ -229,7 +229,7 @@ def estimate_files(
             if not isinstance(dimensions, list) or len(dimensions) != 3:
                 raise FixedCameraKeyRowObservabilityError(
                     "keyboard dimensions are missing")
-            luminance = _rectify_luminance(
+            luminance = rectify_luminance(
                 image, roi["local_keyboard_to_pixel_homography"],
                 float(dimensions[0]), float(dimensions[1]))
     except (OSError, ValueError) as exc:
@@ -302,7 +302,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 __all__ = [
     "FixedCameraKeyRowObservabilityError", "assess_rectified_luminance",
-    "estimate_files",
+    "estimate_files", "rectify_luminance",
 ]
 
 

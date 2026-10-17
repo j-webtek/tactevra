@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_key_row_repeatability_v1.schema.json",
+  "title": "Fixed camera key row repeatability v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "reference_result_sha256", "reference_frame_sha256", "repeat_capture_record_sha256", "repeat_frame_sha256", "repeat_frame_bytes_verified", "camera_mode_verified", "maximum_temporal_row_feature_delta_mm", "row_comparisons", "row_feature_temporal_repeatability_ready", "independent_key_center_observations_present", "individual_key_localization_ready", "board_space_motion_targets_emitted", "motion_authorized", "contact_authorized", "blockers"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_key_row_repeatability.v1"},
+    "status": {"const": "DISTINCT_FRAME_ROW_REPEATABILITY_ONLY_NOT_KEY_CENTERS"},
+    "reference_result_sha256": {"$ref": "#/$defs/digest"},
+    "reference_frame_sha256": {"$ref": "#/$defs/digest"},
+    "repeat_capture_record_sha256": {"$ref": "#/$defs/digest"},
+    "repeat_frame_sha256": {"$ref": "#/$defs/digest"},
+    "repeat_frame_bytes_verified": {"const": true},
+    "camera_mode_verified": {"const": true},
+    "maximum_temporal_row_feature_delta_mm": {"type": "number", "exclusiveMinimum": 0},
+    "row_comparisons": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/row"}},
+    "row_feature_temporal_repeatability_ready": {"type": "boolean"},
+    "independent_key_center_observations_present": {"const": false},
+    "individual_key_localization_ready": {"const": false},
+    "board_space_motion_targets_emitted": {"const": false},
+    "motion_authorized": {"const": false},
+    "contact_authorized": {"const": false},
+    "blockers": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["INDIVIDUAL_KEY_CENTERS_NOT_OBSERVED", "ROW_FEATURE_TEMPORAL_REPEATABILITY_FAILED"]}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_index", "first_key", "last_key", "reference_contrast_band_offset_mm", "repeat_contrast_band_offset_mm", "contrast_band_temporal_delta_mm", "reference_gap_phase_offset_mm", "repeat_gap_phase_offset_mm", "gap_phase_temporal_delta_mm", "repeat_observable", "repeatability_passed"],
+      "properties": {
+        "row_index": {"type": "integer", "minimum": 0, "maximum": 3},
+        "first_key": {"type": "string", "minLength": 1},
+        "last_key": {"type": "string", "minLength": 1},
+        "reference_contrast_band_offset_mm": {"type": "number"},
+        "repeat_contrast_band_offset_mm": {"type": "number"},
+        "contrast_band_temporal_delta_mm": {"type": "number"},
+        "reference_gap_phase_offset_mm": {"type": "number"},
+        "repeat_gap_phase_offset_mm": {"type": "number"},
+        "gap_phase_temporal_delta_mm": {"type": "number"},
+        "repeat_observable": {"type": "boolean"},
+        "repeatability_passed": {"type": "boolean"}
+      }
+    }
+  }
+}

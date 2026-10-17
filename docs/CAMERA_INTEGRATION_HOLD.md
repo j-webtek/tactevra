@@ -23,7 +23,9 @@ The exact retained frame now also passes the bounded
 [key-row observability assessment](../software/docs/RC03_FIXED_CAMERA_KEY_ROW_OBSERVABILITY.md):
 all four main rows expose a contrast band and repeated gap phase, with a 5.0 mm
 maximum contrast-band offset. These features are not key-center measurements;
-individual-key localization and distinct-frame repeatability remain open.
+individual-key localization remains open. A distinct second frame now repeats
+the four row features within 1.667 mm as recorded in the
+[repeatability result](../software/docs/RC03_FIXED_CAMERA_KEY_ROW_REPEATABILITY.md).
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
@@ -98,7 +100,8 @@ After those conditions are met, follow this order:
    estimates cover only part of this item.
 2. Collect disjoint calibration and held-out final-camera observations. One
    temporal held-out frame is retained and all four main rows are observable;
-   a distinct repeat frame and individual key-center observations remain.
+   its row structure repeats in a distinct frame; individual key-center
+   observations remain.
 3. Run the frozen preflight and localization evaluator.
 4. Demonstrate that the combined perception, calibration, tracking/settling,
    and tool uncertainty fits inside the chosen target safe region.
