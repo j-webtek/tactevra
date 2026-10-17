@@ -127,9 +127,15 @@ def validate(value: Any) -> dict[str, Any]:
     return value
 
 
-def run(value: object, *, workspace: Path, minimum_confidence: float = 0.9,
-        park_xy_board_mm: tuple[float, float] | None = None,
-        robot_layout_profile: Path | None = None) -> dict[str, Any]:
+def _run_with_route_evidence(
+    value: object,
+    *,
+    workspace: Path,
+    minimum_confidence: float = 0.9,
+    park_xy_board_mm: tuple[float, float] | None = None,
+    robot_layout_profile: Path | None = None,
+    initial_arm_joint_positions_rad: dict[str, float] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     assurance = build_assurance(value, workspace=workspace, minimum_confidence=minimum_confidence)
     candidate = assurance["candidate"]
     if candidate["device"] != "keyboard" or candidate["interaction"] != "CONTACT":
@@ -188,7 +194,12 @@ def run(value: object, *, workspace: Path, minimum_confidence: float = 0.9,
         plan, context.snapshot, hardware_profile, context.scene, targets,
     )
     ik = run_scenario_ik(scenario, geometry)
-    route = screen_scenario_route(scenario, plan, geometry)
+    route = screen_scenario_route(
+        scenario,
+        plan,
+        geometry,
+        initial_arm_joint_positions_rad=initial_arm_joint_positions_rad,
+    )
     route_passed = route["all_waypoints_accepted"] is True
     route_round = route.get("round") or {}
     failed = next((row for row in route_round.get("joint_results", []) if not row["accepted"]), None)
@@ -238,4 +249,46 @@ def run(value: object, *, workspace: Path, minimum_confidence: float = 0.9,
             "installed_tool_verified": False,
             "physical_execution_authorized": False,
         }
-    return validate({**core, "simulation_sha256": canonical_hash(core)})
+    return validate({**core, "simulation_sha256": canonical_hash(core)}), route
+
+
+def run(value: object, *, workspace: Path, minimum_confidence: float = 0.9,
+        park_xy_board_mm: tuple[float, float] | None = None,
+        robot_layout_profile: Path | None = None,
+        initial_arm_joint_positions_rad: dict[str, float] | None = None) -> dict[str, Any]:
+    """Return the stable compact simulation report."""
+
+    report, _ = _run_with_route_evidence(
+        value,
+        workspace=workspace,
+        minimum_confidence=minimum_confidence,
+        park_xy_board_mm=park_xy_board_mm,
+        robot_layout_profile=robot_layout_profile,
+        initial_arm_joint_positions_rad=initial_arm_joint_positions_rad,
+    )
+    return report
+
+
+def run_with_route_evidence(
+    value: object,
+    *,
+    workspace: Path,
+    minimum_confidence: float = 0.9,
+    park_xy_board_mm: tuple[float, float] | None = None,
+    robot_layout_profile: Path | None = None,
+    initial_arm_joint_positions_rad: dict[str, float] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Return the compact report and the zero-authority dense-route evidence.
+
+    This additive analysis API exposes the already-computed route details.  It
+    does not alter the stable report schema or add execution authority.
+    """
+
+    return _run_with_route_evidence(
+        value,
+        workspace=workspace,
+        minimum_confidence=minimum_confidence,
+        park_xy_board_mm=park_xy_board_mm,
+        robot_layout_profile=robot_layout_profile,
+        initial_arm_joint_positions_rad=initial_arm_joint_positions_rad,
+    )

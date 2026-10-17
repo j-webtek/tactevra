@@ -480,6 +480,44 @@ base pose, 120 mm tool, controller-to-model correlation, arm-to-board transform,
 and installed collision geometry remain unmeasured. Hardware access, commands,
 writes, and physical authority remain zero.
 
+## 2026-10-16 retained start-to-route sensitivity
+
+`run_current_start_route_sensitivity.py` consumes the same current bare-jaw
+intake and projects its settled `KEYBOARD_FORWARD_CAL_1` registers through the
+pinned vendor reference map. The resulting five arm coordinates are explicitly
+classified `REFERENCE_ONLY_NOT_INSTALLED_CALIBRATION`; shoulder servo 13 remains
+a coupled follower observation and gripper servo 17 remains outside the
+five-joint arm route.
+
+The comparison reuses the exact FREEZE-013 H route above and exposes its already
+computed joint solutions without changing the stable compact simulation schema.
+It also reruns the dense route with the reference-projected register pose as the
+initial IK seed. Reproduce it with the same detached checkout:
+
+```powershell
+$env:PYTHONPATH = "software/src;software/ai"
+python software/ai/run_current_start_route_sensitivity.py `
+  --intake <current-bare-jaw-route-intake.json> `
+  --simulation-workspace C:\path\to\tactevra-freeze013-sim `
+  --output <current-start-freeze013-route-sensitivity.json>
+```
+
+The retained reference pose differs from the accepted first PARK state by a
+maximum of `1.688447331924208` rad, above the route policy's `0.35` rad
+adjacent-joint bound. The closest accepted waypoint is still `0.8971257638034815`
+rad away. The explicit seeded run evaluates one PARK waypoint and stops with
+`MAXIMUM_ADJACENT_JOINT_DELTA_EXCEEDED`; its solver returns the same PARK
+solution, so seeding does not reveal a closer accepted branch. The canonical
+comparison report SHA-256 is
+`0a21fbea7be73e9bf4aa7ffe98a01bc10e059bdd24a191bf69a3d10ee8c7f7fe`.
+
+This result does not make the H target unreachable. It establishes that the
+retained reference-projected start cannot be spliced directly into the passing
+synthetic PARK route under the existing step policy. The next planning increment
+is an explicit staged entry route after commissioned controller-to-model and
+board-to-arm calibration, followed by installed collision screening. The
+analysis opens no device, sends no command, and grants no physical authority.
+
 ## 2026-10-16 bare-jaw route-readiness audit
 
 The deterministic zero-dispatch audit at

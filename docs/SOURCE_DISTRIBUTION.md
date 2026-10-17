@@ -637,3 +637,12 @@ coordinate only through the retained FREEZE-013 static simulation boundary.
 Generated sensitivity reports and the detached historical source checkout stay
 outside the source archive. The exact governed ceiling is therefore 6,608;
 every logical-byte, blob, duplicate, and reduction limit remains unchanged.
+
+The retained-start route-sensitivity increment adds three reviewable source
+files: one register-to-route comparison module, one command-line wrapper, and
+one focused regression test. Existing simulation modules are extended in place
+to expose already-computed route evidence and accept an explicit analysis-only
+initial seed. Generated comparison reports and the detached FREEZE-013 checkout
+remain ignored and outside the source archive. The exact governed ceiling is
+therefore 6,611; every logical-byte, blob, duplicate, and reduction limit
+remains unchanged.
