@@ -39,6 +39,13 @@ places 45 of 46 keys inside the 7 mm study limit in both frames; `SPACE` remains
 outside at 8.144 mm worst case. Elevated key-plane parallax and an independent
 physical key measurement remain unresolved, so the audit emits no target and
 does not change motion or contact authority.
+The subsequent
+[elevated key-plane audit](../software/docs/RC03_FIXED_CAMERA_ELEVATED_KEY_PLANE_VALIDATION.md)
+evaluates the same observations in the rectified 315 x 147 mm keyboard plane.
+All 46 keys pass there; the maximum residual is 3.328 mm, and `SPACE` falls to
+2.889 mm reference and 1.238 mm repeat. This isolates the earlier failure to
+Z=0 projection. Absolute keyboard-to-board registration, independent physical
+validation, and all physical authority remain blocked.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
@@ -115,8 +122,8 @@ After those conditions are met, follow this order:
    temporal held-out frame is retained and all four main rows are observable;
    its row structure repeats in a distinct frame; 46 image-space key-center
    candidates are retained; the provisional board-plane audit passes 45 of 46,
-   while `SPACE`, elevated-plane correction, and independent physical validation
-   remain.
+   while the elevated-plane layout audit passes 46 of 46. Absolute
+   keyboard-to-board registration and independent physical validation remain.
 3. Run the frozen preflight and localization evaluator.
 4. Demonstrate that the combined perception, calibration, tracking/settling,
    and tool uncertainty fits inside the chosen target safe region.

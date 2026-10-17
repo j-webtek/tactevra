@@ -1,0 +1,754 @@
+{
+  "absolute_keyboard_to_board_transform_verified": false,
+  "blockers": [
+    "ABSOLUTE_KEYBOARD_TO_BOARD_TRANSFORM_UNVERIFIED",
+    "INDEPENDENT_PHYSICAL_KEY_MEASUREMENT_MISSING",
+    "BOARD_TO_ROBOT_TRANSFORM_UNVERIFIED",
+    "PHYSICAL_CLEARANCE_UNVERIFIED"
+  ],
+  "board_space_motion_targets_emitted": false,
+  "board_to_robot_transform_verified": false,
+  "candidate_result_sha256": "477c43f91c69f2d5d97ec3203c91711ea36aaf2030600b559d7d0dca0df9838c",
+  "contact_authorized": false,
+  "elevated_key_plane_coherence_ready": true,
+  "failed_key_ids": [],
+  "independent_physical_key_measurement_present": false,
+  "individual_key_limit_mm": 7.0,
+  "key_validation_count": 46,
+  "key_validations": [
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "1",
+      "local_observation_temporal_delta_mm": 0.833,
+      "reference_local_observation_xy_mm": [
+        21.0,
+        105.5
+      ],
+      "reference_rigid_layout_residual_mm": 0.842,
+      "repeat_local_observation_xy_mm": [
+        21.0,
+        106.333
+      ],
+      "repeat_rigid_layout_residual_mm": 0.711
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "2",
+      "local_observation_temporal_delta_mm": 0.527,
+      "reference_local_observation_xy_mm": [
+        39.5,
+        106.333
+      ],
+      "reference_rigid_layout_residual_mm": 0.419,
+      "repeat_local_observation_xy_mm": [
+        39.333,
+        106.833
+      ],
+      "repeat_rigid_layout_residual_mm": 0.433
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "3",
+      "local_observation_temporal_delta_mm": 0.85,
+      "reference_local_observation_xy_mm": [
+        58.833,
+        105.833
+      ],
+      "reference_rigid_layout_residual_mm": 0.448,
+      "repeat_local_observation_xy_mm": [
+        58.667,
+        106.667
+      ],
+      "repeat_rigid_layout_residual_mm": 0.425
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "4",
+      "local_observation_temporal_delta_mm": 0.0,
+      "reference_local_observation_xy_mm": [
+        76.667,
+        106.667
+      ],
+      "reference_rigid_layout_residual_mm": 1.085,
+      "repeat_local_observation_xy_mm": [
+        76.667,
+        106.667
+      ],
+      "repeat_rigid_layout_residual_mm": 0.88
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "5",
+      "local_observation_temporal_delta_mm": 0.667,
+      "reference_local_observation_xy_mm": [
+        95.167,
+        107.0
+      ],
+      "reference_rigid_layout_residual_mm": 1.728,
+      "repeat_local_observation_xy_mm": [
+        95.167,
+        106.333
+      ],
+      "repeat_rigid_layout_residual_mm": 1.341
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "6",
+      "local_observation_temporal_delta_mm": 0.373,
+      "reference_local_observation_xy_mm": [
+        113.667,
+        106.333
+      ],
+      "reference_rigid_layout_residual_mm": 1.932,
+      "repeat_local_observation_xy_mm": [
+        114.0,
+        106.5
+      ],
+      "repeat_rigid_layout_residual_mm": 1.593
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "7",
+      "local_observation_temporal_delta_mm": 0.334,
+      "reference_local_observation_xy_mm": [
+        132.833,
+        107.5
+      ],
+      "reference_rigid_layout_residual_mm": 2.406,
+      "repeat_local_observation_xy_mm": [
+        133.167,
+        107.5
+      ],
+      "repeat_rigid_layout_residual_mm": 2.025
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "8",
+      "local_observation_temporal_delta_mm": 2.166,
+      "reference_local_observation_xy_mm": [
+        152.667,
+        105.667
+      ],
+      "reference_rigid_layout_residual_mm": 0.994,
+      "repeat_local_observation_xy_mm": [
+        152.667,
+        107.833
+      ],
+      "repeat_rigid_layout_residual_mm": 2.077
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "9",
+      "local_observation_temporal_delta_mm": 0.235,
+      "reference_local_observation_xy_mm": [
+        172.167,
+        106.333
+      ],
+      "reference_rigid_layout_residual_mm": 0.73,
+      "repeat_local_observation_xy_mm": [
+        172.333,
+        106.5
+      ],
+      "repeat_rigid_layout_residual_mm": 0.672
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "0",
+      "local_observation_temporal_delta_mm": 0.527,
+      "reference_local_observation_xy_mm": [
+        191.333,
+        106.5
+      ],
+      "reference_rigid_layout_residual_mm": 0.801,
+      "repeat_local_observation_xy_mm": [
+        190.833,
+        106.333
+      ],
+      "repeat_rigid_layout_residual_mm": 1.027
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "MINUS",
+      "local_observation_temporal_delta_mm": 1.581,
+      "reference_local_observation_xy_mm": [
+        209.833,
+        107.0
+      ],
+      "reference_rigid_layout_residual_mm": 1.541,
+      "repeat_local_observation_xy_mm": [
+        209.333,
+        105.5
+      ],
+      "repeat_rigid_layout_residual_mm": 1.499
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "EQUAL",
+      "local_observation_temporal_delta_mm": 0.527,
+      "reference_local_observation_xy_mm": [
+        228.667,
+        107.167
+      ],
+      "reference_rigid_layout_residual_mm": 1.819,
+      "repeat_local_observation_xy_mm": [
+        229.167,
+        107.333
+      ],
+      "repeat_rigid_layout_residual_mm": 1.734
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "Q",
+      "local_observation_temporal_delta_mm": 0.167,
+      "reference_local_observation_xy_mm": [
+        32.5,
+        84.5
+      ],
+      "reference_rigid_layout_residual_mm": 2.76,
+      "repeat_local_observation_xy_mm": [
+        32.333,
+        84.5
+      ],
+      "repeat_rigid_layout_residual_mm": 2.767
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "W",
+      "local_observation_temporal_delta_mm": 0.236,
+      "reference_local_observation_xy_mm": [
+        50.833,
+        84.667
+      ],
+      "reference_rigid_layout_residual_mm": 2.024,
+      "repeat_local_observation_xy_mm": [
+        51.0,
+        84.5
+      ],
+      "repeat_rigid_layout_residual_mm": 2.385
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "E",
+      "local_observation_temporal_delta_mm": 1.509,
+      "reference_local_observation_xy_mm": [
+        69.667,
+        86.0
+      ],
+      "reference_rigid_layout_residual_mm": 2.091,
+      "repeat_local_observation_xy_mm": [
+        69.5,
+        84.5
+      ],
+      "repeat_rigid_layout_residual_mm": 1.854
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "R",
+      "local_observation_temporal_delta_mm": 1.054,
+      "reference_local_observation_xy_mm": [
+        88.667,
+        84.667
+      ],
+      "reference_rigid_layout_residual_mm": 1.756,
+      "repeat_local_observation_xy_mm": [
+        87.667,
+        85.0
+      ],
+      "repeat_rigid_layout_residual_mm": 0.823
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "T",
+      "local_observation_temporal_delta_mm": 0.85,
+      "reference_local_observation_xy_mm": [
+        106.667,
+        85.667
+      ],
+      "reference_rigid_layout_residual_mm": 1.042,
+      "repeat_local_observation_xy_mm": [
+        105.833,
+        85.833
+      ],
+      "repeat_rigid_layout_residual_mm": 0.67
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "Y",
+      "local_observation_temporal_delta_mm": 0.167,
+      "reference_local_observation_xy_mm": [
+        125.167,
+        84.833
+      ],
+      "reference_rigid_layout_residual_mm": 0.145,
+      "repeat_local_observation_xy_mm": [
+        125.167,
+        85.0
+      ],
+      "repeat_rigid_layout_residual_mm": 0.215
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "U",
+      "local_observation_temporal_delta_mm": 0.5,
+      "reference_local_observation_xy_mm": [
+        144.833,
+        84.833
+      ],
+      "reference_rigid_layout_residual_mm": 0.757,
+      "repeat_local_observation_xy_mm": [
+        144.333,
+        84.833
+      ],
+      "repeat_rigid_layout_residual_mm": 0.367
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "I",
+      "local_observation_temporal_delta_mm": 0.5,
+      "reference_local_observation_xy_mm": [
+        163.667,
+        85.0
+      ],
+      "reference_rigid_layout_residual_mm": 0.564,
+      "repeat_local_observation_xy_mm": [
+        163.167,
+        85.0
+      ],
+      "repeat_rigid_layout_residual_mm": 0.094
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "O",
+      "local_observation_temporal_delta_mm": 0.0,
+      "reference_local_observation_xy_mm": [
+        182.667,
+        85.0
+      ],
+      "reference_rigid_layout_residual_mm": 0.522,
+      "repeat_local_observation_xy_mm": [
+        182.667,
+        85.0
+      ],
+      "repeat_rigid_layout_residual_mm": 0.547
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "P",
+      "local_observation_temporal_delta_mm": 0.334,
+      "reference_local_observation_xy_mm": [
+        201.333,
+        85.0
+      ],
+      "reference_rigid_layout_residual_mm": 0.222,
+      "repeat_local_observation_xy_mm": [
+        201.667,
+        85.0
+      ],
+      "repeat_rigid_layout_residual_mm": 0.515
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "A",
+      "local_observation_temporal_delta_mm": 1.014,
+      "reference_local_observation_xy_mm": [
+        33.5,
+        63.167
+      ],
+      "reference_rigid_layout_residual_mm": 1.315,
+      "repeat_local_observation_xy_mm": [
+        34.5,
+        63.333
+      ],
+      "repeat_rigid_layout_residual_mm": 1.086
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "S",
+      "local_observation_temporal_delta_mm": 1.118,
+      "reference_local_observation_xy_mm": [
+        53.667,
+        62.667
+      ],
+      "reference_rigid_layout_residual_mm": 1.266,
+      "repeat_local_observation_xy_mm": [
+        52.667,
+        63.167
+      ],
+      "repeat_rigid_layout_residual_mm": 1.451
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "D",
+      "local_observation_temporal_delta_mm": 1.7,
+      "reference_local_observation_xy_mm": [
+        71.333,
+        61.833
+      ],
+      "reference_rigid_layout_residual_mm": 2.468,
+      "repeat_local_observation_xy_mm": [
+        71.0,
+        63.5
+      ],
+      "repeat_rigid_layout_residual_mm": 1.743
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "F",
+      "local_observation_temporal_delta_mm": 0.687,
+      "reference_local_observation_xy_mm": [
+        89.833,
+        62.833
+      ],
+      "reference_rigid_layout_residual_mm": 2.157,
+      "repeat_local_observation_xy_mm": [
+        90.5,
+        62.667
+      ],
+      "repeat_rigid_layout_residual_mm": 1.906
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "G",
+      "local_observation_temporal_delta_mm": 0.601,
+      "reference_local_observation_xy_mm": [
+        109.5,
+        62.333
+      ],
+      "reference_rigid_layout_residual_mm": 1.996,
+      "repeat_local_observation_xy_mm": [
+        110.0,
+        62.667
+      ],
+      "repeat_rigid_layout_residual_mm": 1.624
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "H",
+      "local_observation_temporal_delta_mm": 1.014,
+      "reference_local_observation_xy_mm": [
+        129.5,
+        61.667
+      ],
+      "reference_rigid_layout_residual_mm": 2.221,
+      "repeat_local_observation_xy_mm": [
+        129.667,
+        62.667
+      ],
+      "repeat_rigid_layout_residual_mm": 1.42
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "J",
+      "local_observation_temporal_delta_mm": 0.235,
+      "reference_local_observation_xy_mm": [
+        148.667,
+        62.167
+      ],
+      "reference_rigid_layout_residual_mm": 1.694,
+      "repeat_local_observation_xy_mm": [
+        148.833,
+        62.0
+      ],
+      "repeat_rigid_layout_residual_mm": 2.022
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "K",
+      "local_observation_temporal_delta_mm": 1.014,
+      "reference_local_observation_xy_mm": [
+        167.333,
+        61.833
+      ],
+      "reference_rigid_layout_residual_mm": 2.081,
+      "repeat_local_observation_xy_mm": [
+        168.333,
+        62.0
+      ],
+      "repeat_rigid_layout_residual_mm": 2.025
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "L",
+      "local_observation_temporal_delta_mm": 1.333,
+      "reference_local_observation_xy_mm": [
+        186.0,
+        61.833
+      ],
+      "reference_rigid_layout_residual_mm": 2.203,
+      "repeat_local_observation_xy_mm": [
+        184.667,
+        61.833
+      ],
+      "repeat_rigid_layout_residual_mm": 3.002
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "SEMICOLON",
+      "local_observation_temporal_delta_mm": 0.372,
+      "reference_local_observation_xy_mm": [
+        204.5,
+        61.667
+      ],
+      "reference_rigid_layout_residual_mm": 2.613,
+      "repeat_local_observation_xy_mm": [
+        204.167,
+        61.833
+      ],
+      "repeat_rigid_layout_residual_mm": 2.642
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "APOSTROPHE",
+      "local_observation_temporal_delta_mm": 0.527,
+      "reference_local_observation_xy_mm": [
+        223.5,
+        61.667
+      ],
+      "reference_rigid_layout_residual_mm": 2.629,
+      "repeat_local_observation_xy_mm": [
+        223.0,
+        61.833
+      ],
+      "repeat_rigid_layout_residual_mm": 2.742
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "Z",
+      "local_observation_temporal_delta_mm": 0.472,
+      "reference_local_observation_xy_mm": [
+        45.5,
+        44.833
+      ],
+      "reference_rigid_layout_residual_mm": 2.391,
+      "repeat_local_observation_xy_mm": [
+        45.833,
+        45.167
+      ],
+      "repeat_rigid_layout_residual_mm": 2.642
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "X",
+      "local_observation_temporal_delta_mm": 1.374,
+      "reference_local_observation_xy_mm": [
+        64.333,
+        43.5
+      ],
+      "reference_rigid_layout_residual_mm": 1.37,
+      "repeat_local_observation_xy_mm": [
+        64.667,
+        44.833
+      ],
+      "repeat_rigid_layout_residual_mm": 2.302
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "C",
+      "local_observation_temporal_delta_mm": 0.707,
+      "reference_local_observation_xy_mm": [
+        83.833,
+        44.667
+      ],
+      "reference_rigid_layout_residual_mm": 2.442,
+      "repeat_local_observation_xy_mm": [
+        83.333,
+        45.167
+      ],
+      "repeat_rigid_layout_residual_mm": 2.343
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "V",
+      "local_observation_temporal_delta_mm": 1.573,
+      "reference_local_observation_xy_mm": [
+        101.667,
+        43.833
+      ],
+      "reference_rigid_layout_residual_mm": 1.056,
+      "repeat_local_observation_xy_mm": [
+        102.5,
+        45.167
+      ],
+      "repeat_rigid_layout_residual_mm": 2.465
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "B",
+      "local_observation_temporal_delta_mm": 1.509,
+      "reference_local_observation_xy_mm": [
+        121.0,
+        44.0
+      ],
+      "reference_rigid_layout_residual_mm": 1.358,
+      "repeat_local_observation_xy_mm": [
+        121.167,
+        45.5
+      ],
+      "repeat_rigid_layout_residual_mm": 2.615
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "N",
+      "local_observation_temporal_delta_mm": 1.344,
+      "reference_local_observation_xy_mm": [
+        140.0,
+        43.333
+      ],
+      "reference_rigid_layout_residual_mm": 0.854,
+      "repeat_local_observation_xy_mm": [
+        140.167,
+        44.667
+      ],
+      "repeat_rigid_layout_residual_mm": 1.916
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "M",
+      "local_observation_temporal_delta_mm": 0.601,
+      "reference_local_observation_xy_mm": [
+        159.333,
+        43.5
+      ],
+      "reference_rigid_layout_residual_mm": 1.191,
+      "repeat_local_observation_xy_mm": [
+        158.833,
+        43.833
+      ],
+      "repeat_rigid_layout_residual_mm": 1.067
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "COMMA",
+      "local_observation_temporal_delta_mm": 0.167,
+      "reference_local_observation_xy_mm": [
+        177.5,
+        43.667
+      ],
+      "reference_rigid_layout_residual_mm": 0.849,
+      "repeat_local_observation_xy_mm": [
+        177.5,
+        43.5
+      ],
+      "repeat_rigid_layout_residual_mm": 0.637
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "PERIOD",
+      "local_observation_temporal_delta_mm": 0.167,
+      "reference_local_observation_xy_mm": [
+        196.833,
+        43.5
+      ],
+      "reference_rigid_layout_residual_mm": 0.795,
+      "repeat_local_observation_xy_mm": [
+        196.833,
+        43.333
+      ],
+      "repeat_rigid_layout_residual_mm": 0.729
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "SLASH",
+      "local_observation_temporal_delta_mm": 0.167,
+      "reference_local_observation_xy_mm": [
+        215.667,
+        43.5
+      ],
+      "reference_rigid_layout_residual_mm": 0.729,
+      "repeat_local_observation_xy_mm": [
+        215.667,
+        43.333
+      ],
+      "repeat_rigid_layout_residual_mm": 0.639
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "TAB",
+      "local_observation_temporal_delta_mm": 0.688,
+      "reference_local_observation_xy_mm": [
+        12.167,
+        85.333
+      ],
+      "reference_rigid_layout_residual_mm": 0.535,
+      "repeat_local_observation_xy_mm": [
+        12.0,
+        86.0
+      ],
+      "repeat_rigid_layout_residual_mm": 0.572
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "ENTER",
+      "local_observation_temporal_delta_mm": 0.372,
+      "reference_local_observation_xy_mm": [
+        246.333,
+        61.833
+      ],
+      "reference_rigid_layout_residual_mm": 3.1,
+      "repeat_local_observation_xy_mm": [
+        246.0,
+        61.667
+      ],
+      "repeat_rigid_layout_residual_mm": 3.328
+    },
+    {
+      "elevated_plane_coherence_passed": true,
+      "key_id": "SPACE",
+      "local_observation_temporal_delta_mm": 1.771,
+      "reference_local_observation_xy_mm": [
+        139.333,
+        23.833
+      ],
+      "reference_rigid_layout_residual_mm": 2.889,
+      "repeat_local_observation_xy_mm": [
+        138.167,
+        22.5
+      ],
+      "repeat_rigid_layout_residual_mm": 1.238
+    }
+  ],
+  "keyboard_plane_dimensions_mm": [
+    315.0,
+    147.0,
+    21.0
+  ],
+  "limitations": [
+    "The audit uses the rectified 315 x 147 mm keyboard housing plane and does not project observations through the RC03 Z=0 board homography.",
+    "Passing local-plane coherence isolates the earlier SPACE failure to plane projection, but does not determine the keyboard plane's absolute board-frame translation.",
+    "Both observations originate from retained camera views rather than an independent physical key-center measurement.",
+    "No board-space target, board-to-robot transform, clearance result, motion command, or contact authority is produced.",
+    "The no-attachment result does not apply to the separate stylus_attachment TCP and trajectory profile."
+  ],
+  "local_observation_temporal_limit_mm": 3.1,
+  "motion_authorized": false,
+  "physical_clearance_verified": false,
+  "profile": "no_attachment",
+  "profile_sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+  "reference_frame_sha256": "09f9ce8a02360aeccc81195312791c6e4262cbc8b99d1d79b74fe3d2d376b199",
+  "reference_rigid_layout": {
+    "front_left_keyboard_xy_mm": [
+      -1.8,
+      -5.021
+    ],
+    "maximum_residual_mm": 3.1,
+    "median_residual_mm": 1.364,
+    "rms_residual_mm": 1.692,
+    "yaw_deg": -0.049
+  },
+  "registration_input_sha256": "226664e545db9b9a30a4fbbd2c2382e74ee3f6c4e4ee4673a1d439b511a8fd68",
+  "repeat_frame_sha256": "2eb7dde8db2c4c9ae4b40f05bc535c9271b14c63704ebf13f4ddce017e1b20a1",
+  "repeat_rigid_layout": {
+    "front_left_keyboard_xy_mm": [
+      -2.084,
+      -4.456
+    ],
+    "maximum_residual_mm": 3.328,
+    "median_residual_mm": 1.475,
+    "rms_residual_mm": 1.719,
+    "yaw_deg": -0.199
+  },
+  "schema": "rocell.fixed_camera_elevated_key_plane_validation.v1",
+  "space_key_elevated_plane_coherence_passed": true,
+  "status": "ELEVATED_KEY_PLANE_COHERENCE_READY_NO_BOARD_TARGETS",
+  "validated_key_count": 46
+}
