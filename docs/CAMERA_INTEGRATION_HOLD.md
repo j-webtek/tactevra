@@ -65,6 +65,13 @@ points, stable installation identity, and a passing reseat check. It can map a
 ready 46-key package into robot-frame localization candidates, but those points
 are not motion targets. No current board-to-robot measurement artifact passes
 that boundary, and clearance remains open for both attachment profiles.
+An attachment-aware clearance intake now binds a passing localization package
+to two distinct measured installed collision profiles and a separately measured
+stylus TCP. It preserves the bare-jaw/stylus split and hands the 46 candidates
+to profile-specific route construction before the existing typing collision
+intake. No current reviewed binding satisfies this boundary, and the handoff
+does not generate a trajectory, perform collision screening, or grant physical
+authority.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or

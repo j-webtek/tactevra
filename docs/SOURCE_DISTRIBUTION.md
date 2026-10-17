@@ -652,3 +652,13 @@ robot-frame localization candidates for both attachment profiles, and retains
 clearance, motion, and contact as blockers. No image, physical measurement,
 calibration corpus, controller artifact, or generated geometry enters the
 archive. All byte, duplicate, and reduction limits remain unchanged.
+
+The attachment-aware keyboard-clearance handoff adds four governed paths: one
+zero-I/O application boundary, two strict schemas, and one focused unit-test
+module. The file-count ceiling advances from 6,525 to the exact expected 6,529
+files. The boundary requires distinct reviewed bare-jaw and stylus installed
+collision profiles, binds the exact robot-localization bytes, and retains the
+stylus TCP as separate measured evidence. It emits route-construction inputs
+only; no trajectory, collision result, controller artifact, hardware operation,
+or physical authority enters the archive. All byte, duplicate, and reduction
+limits remain unchanged.

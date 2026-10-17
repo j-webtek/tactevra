@@ -115,3 +115,29 @@ into `robot_base` as localization candidates. The result still emits no motion
 target and cannot authorize motion or contact. Installed continuous clearance
 remains open for both profiles; the stylus profile additionally retains its
 own TCP and trajectory blockers.
+
+## Attachment-aware clearance handoff
+
+`rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a
+passing robot-localization package to the existing installed collision and
+typing-route pipeline. It requires two distinct measured installed collision
+profiles: one reviewed as `BARE_JAW` for `no_attachment`, and one reviewed as
+`STYLUS_INSTALLED` for `stylus_attachment`. The stylus binding also requires
+the exact measured TCP artifact hash. Profile IDs and file hashes cannot be
+reused across the two configurations.
+
+Prepare the local binding worksheet after the robot-localization result exists:
+
+```powershell
+$env:PYTHONPATH = "software/src"
+python -m rocell.application.fixed_camera_keyboard_clearance_intake_v1 `
+  --write-template keyboard-clearance-profile-bindings.json `
+  --robot-localization keyboard-robot-localization.json
+```
+
+The reviewed worksheet binds the exact localization bytes and both installed
+profile files. The compiler then emits 46 profile-specific route-construction
+inputs and names `typing_collision_intake_v1` as the downstream collision
+evidence stage. It does not construct a trajectory or run a collision screen.
+Continuous clearance, a fresh observed start state, and physical authority
+remain false until their existing downstream gates pass.
