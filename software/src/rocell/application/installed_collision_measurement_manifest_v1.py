@@ -10,6 +10,7 @@ device, or grants physical authority.
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from datetime import datetime
 import hashlib
 import json
@@ -69,6 +70,18 @@ _CLEARANCE_FIELDS = {
 
 class InstalledCollisionMeasurementManifestV1Error(ValueError):
     """The measurement manifest is malformed, crossed, or unbounded."""
+
+
+@dataclass(frozen=True, slots=True)
+class InstalledCollisionMeasurementBindingsV1:
+    """Exact source identities needed to validate one collision manifest."""
+
+    contract: CollisionGeometryContract
+    manifest_id: str
+    manifest_sha256: str
+    active_build_id: str
+    build_snapshot_sha256: str
+    robot_model_sha256: str
 
 
 def _canonical(value: object) -> bytes:
@@ -587,6 +600,36 @@ def load_and_validate_installed_collision_measurement_manifest_v1(
     return report
 
 
+def load_installed_collision_measurement_manifest_for_bindings_v1(
+    path: str | Path,
+    expected_file_sha256: str,
+    *,
+    bindings: InstalledCollisionMeasurementBindingsV1,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Validate one manifest against caller-supplied, hash-bound sources.
+
+    This is the reusable boundary for alternate source routes such as the
+    static-overhead camera graph. The caller must construct ``bindings`` from a
+    freshly revalidated source context; no nominal or legacy camera semantics
+    are inferred here.
+    """
+
+    if not isinstance(bindings, InstalledCollisionMeasurementBindingsV1):
+        raise TypeError("bindings must be InstalledCollisionMeasurementBindingsV1")
+    document, file_hash = _load_json(Path(path), expected_file_sha256)
+    report = validate_installed_collision_measurement_manifest_v1(
+        document,
+        contract=bindings.contract,
+        expected_manifest_id=bindings.manifest_id,
+        expected_manifest_sha256=bindings.manifest_sha256,
+        expected_active_build_id=bindings.active_build_id,
+        expected_build_snapshot_sha256=bindings.build_snapshot_sha256,
+        expected_robot_model_sha256=bindings.robot_model_sha256,
+        file_sha256=file_hash,
+    )
+    return document, report
+
+
 def load_installed_collision_measurement_manifest_v1(
     path: str | Path,
     expected_file_sha256: str,
@@ -607,18 +650,18 @@ def load_installed_collision_measurement_manifest_v1(
         raise InstalledCollisionMeasurementManifestV1Error(
             "active build id is unavailable"
         )
-    document, file_hash = _load_json(Path(path), expected_file_sha256)
-    report = validate_installed_collision_measurement_manifest_v1(
-        document,
-        contract=readiness.contract,
-        expected_manifest_id=readiness.manifest_id,
-        expected_manifest_sha256=readiness.manifest_sha256,
-        expected_active_build_id=readiness.active_build_id,
-        expected_build_snapshot_sha256=readiness.build_snapshot_hash,
-        expected_robot_model_sha256=readiness.urdf_sha256,
-        file_sha256=file_hash,
+    return load_installed_collision_measurement_manifest_for_bindings_v1(
+        path,
+        expected_file_sha256,
+        bindings=InstalledCollisionMeasurementBindingsV1(
+            readiness.contract,
+            readiness.manifest_id,
+            readiness.manifest_sha256,
+            readiness.active_build_id,
+            readiness.build_snapshot_hash,
+            readiness.urdf_sha256,
+        ),
     )
-    return document, report
 
 
 def render_installed_collision_measurement_worksheet_v1(
@@ -715,9 +758,11 @@ __all__ = [
     "READY_STATUS",
     "REPORT_SCHEMA",
     "SCHEMA",
+    "InstalledCollisionMeasurementBindingsV1",
     "InstalledCollisionMeasurementManifestV1Error",
     "load_and_validate_installed_collision_measurement_manifest_v1",
     "load_installed_collision_measurement_manifest_v1",
+    "load_installed_collision_measurement_manifest_for_bindings_v1",
     "main",
     "render_installed_collision_measurement_worksheet_v1",
     "validate_installed_collision_measurement_manifest_v1",

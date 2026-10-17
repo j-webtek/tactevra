@@ -12769,3 +12769,32 @@ rewriting history. New entries must use a unique evidence ID.
   Collision screening false; continuous proof false; hardware access false;
   commands 0; writes 0; physical authority false. Generated evidence and the
   detached historical checkout remain untracked.
+
+### E-20261017-AI-STATIC-INSTALLED-PROFILE-INTAKE-001 — digital measurement packet prepared
+
+- Source: immutable FREEZE-013 reconciliation commit
+  `869d6f7ed7d1013a8003457a819ccaee3a03a1e7` and static-overhead
+  collision-contract SHA-256
+  `fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39`.
+- Integration: the reviewed installed-measurement validator and deterministic
+  profile builder now accept explicit source bindings. The static adapter binds
+  the 19-body fixed-camera roster and excludes the historical arm-camera
+  holder, module, connector, and moving cable.
+- Retained inputs: the pending packet records `BARE_JAW`, Arducam B0477 IMX283
+  with 16 mm lens, the support-design candidate, a 610 x 457 x 18 mm board
+  candidate, and a 315 x 147 x 21 mm keyboard candidate as notes. These are
+  context only; no measured collision envelope is inferred from them.
+- Artifacts: manifest file SHA-256
+  `5ca32f47d65c138c3916361232d608f7ef4f5c40b98edf8d380794e6115d9702`;
+  manifest content SHA-256
+  `55b0c1bdc736123b2b7e33512e02ccd10744080ef8a5ebbd1e45120b722dc9f6`;
+  validation SHA-256
+  `f562770cc4b81aa14a69066e0b6d2d661adcfd637602ed030eafa5376a6b93e5`;
+  report SHA-256
+  `96bcde44181790430244a9b516213e4cbe472f6635b91790f580f54997661efd`.
+- Verification: all 19 required bodies occur exactly once and remain pending;
+  focused manifest, builder, static adapter, and strict-consumer suites report
+  24 passing tests, with Ruff clean.
+- Result: `BLOCKED_STATIC_OVERHEAD_MEASUREMENTS_PENDING`; profile generation
+  false; collision screening false; commands 0; hardware access false;
+  movements 0; physical authority false.

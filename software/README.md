@@ -17,6 +17,20 @@ synthetic evidence. This does not establish physical typing or a complete
 camera-to-arm workflow. Integration work is tracked in the
 [shared developer workplan](ai/docs/SHARED_AI_ARM_WORKPLAN.md).
 
+The static-overhead collision intake can reproduce the current pending
+measurement packet from the immutable FREEZE-013 workspace without opening
+camera or robot transport:
+
+```powershell
+$env:PYTHONPATH = "software/src;software/ai"
+python software/ai/run_static_overhead_collision_profile_intake.py `
+  --workspace C:\path\to\freeze-013-checkout
+```
+
+The pending mode writes a manifest, validation report, and worksheet. It
+returns a blocked result until every required conservative envelope, source
+hash, uncertainty, exclusion, and measured clearance passes strict validation.
+
 | Need | Current source |
 | --- | --- |
 | First installation and hardware-free walkthrough | [Getting started](../docs/GETTING_STARTED.md) |
