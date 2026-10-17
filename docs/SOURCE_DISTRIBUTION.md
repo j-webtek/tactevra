@@ -633,3 +633,12 @@ localization candidates only after a bounded fit, and keeps board-to-robot,
 clearance, motion, and contact authority blocked. No image, calibration corpus,
 controller artifact, generated geometry, or physical measurement enters the
 archive. All byte, duplicate, and reduction limits remain unchanged.
+
+The reviewed-anchor package workflow adds four governed paths: one CPU-only
+template/package builder, two strict schemas, and one focused test module. The
+file-count ceiling advances from 6,517 to the exact expected 6,521 files. The
+builder accepts no draft or estimated coordinate as reviewed evidence, binds
+the exact measurement and prerequisite bytes, evaluates both attachment
+profiles, and cannot authorize motion or contact. No image, physical
+measurement, calibration corpus, controller artifact, or generated geometry
+enters the archive. All byte, duplicate, and reduction limits remain unchanged.

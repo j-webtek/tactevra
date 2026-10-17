@@ -53,6 +53,12 @@ least three independently reviewed, noncollinear board-frame anchors. It emits
 46 localization candidates after a passing fit while preserving separate
 `no_attachment` and `stylus_attachment` blockers and granting no motion or
 contact authority. No current artifact satisfies that input.
+The same note documents a no-print anchor workflow. Its package builder creates
+a local four-corner draft, requires explicit independent review before intake,
+binds exact prerequisite bytes, and evaluates `no_attachment` and
+`stylus_attachment` together while retaining their different downstream
+blockers. The draft itself is not evidence and no coordinates are inferred from
+the rejected planar camera model.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or

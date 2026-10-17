@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/fixed_camera_keyboard_anchor_measurements_v1.schema.json",
+  "title": "Fixed-camera keyboard anchor measurements v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "status",
+    "coordinate_frame",
+    "coordinate_definition",
+    "units",
+    "measurement_method",
+    "board",
+    "review",
+    "anchors",
+    "thresholds"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_keyboard_anchor_measurements.v1"},
+    "status": {"const": "REVIEWED_INDEPENDENT_BOARD_FRAME_MEASUREMENTS"},
+    "coordinate_frame": {"const": "RC03_board"},
+    "coordinate_definition": {"type": "string", "minLength": 1},
+    "units": {"const": "mm"},
+    "measurement_method": {"const": "direct_board_frame_measurement"},
+    "board": {
+      "type": "object",
+      "required": ["width_mm", "depth_mm"],
+      "properties": {
+        "width_mm": {"const": 610.0},
+        "depth_mm": {"const": 457.0}
+      },
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "required": ["reviewed", "reviewer", "reviewed_at", "notes"],
+      "properties": {
+        "reviewed": {"const": true},
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "anchors": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["point_id", "board_xy_mm"],
+        "properties": {
+          "point_id": {"type": "string", "minLength": 1},
+          "board_xy_mm": {
+            "type": "array",
+            "prefixItems": [{"type": "number"}, {"type": "number"}],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "required": ["max_rms_residual_mm", "max_anchor_residual_mm"],
+      "properties": {
+        "max_rms_residual_mm": {"type": "number", "exclusiveMinimum": 0},
+        "max_anchor_residual_mm": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
