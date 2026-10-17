@@ -712,12 +712,14 @@ python software/ai/run_static_overhead_collision_candidate_envelopes.py `
   --output software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json
 ```
 
-This dependency-free pass reads the controlled STL, layout, support, and robot
-reduction sources and binds every source hash into the result. It derives 16
-candidate envelopes and seven candidate board-frame placements. The base and
-factory clamp, fixed flexible cable, and bare-jaw absence declaration remain
-without geometry; all 19 bodies still require accepted uncertainty. It does
-not create an installed profile or execute collision screening.
+This dependency-free pass reads the controlled STL, layout, support, camera
+generator, and robot reduction sources and binds every source hash into the
+result. It derives 16 candidate envelopes and nine candidate board-frame
+placements. The camera module and revised USB keeper placement are recovered
+from the controlled printable-frame CAD contract. The base and factory clamp,
+fixed flexible cable, and bare-jaw absence declaration remain without
+geometry; all 19 bodies still require accepted uncertainty. It does not create
+an installed profile or execute collision screening.
 
 From the workspace root:
 

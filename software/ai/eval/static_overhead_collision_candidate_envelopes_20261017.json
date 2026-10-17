@@ -35,8 +35,6 @@
     "robot:link5",
     "robot:gripper",
     "installation:base_and_factory_clamp",
-    "installation:static_camera_module",
-    "installation:static_camera_connector",
     "installation:static_camera_cable",
     "attachment:contact_tool"
   ],
@@ -290,9 +288,27 @@
     },
     {
       "body_id": "installation:static_camera_module",
-      "candidate_placement_available": false,
-      "candidate_state": "LOCAL_CAGE_FRAME_ENVELOPE_DERIVED",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_CAD_ENVELOPE_DERIVED",
       "envelope": {
+        "maximum_mm": [
+          365.0,
+          335.5,
+          1074.0
+        ],
+        "minimum_mm": [
+          245.0,
+          180.5,
+          1000.0
+        ],
+        "size_mm": [
+          120.0,
+          155.0,
+          74.0
+        ]
+      },
+      "frame": "B",
+      "local_envelope": {
         "maximum_mm": [
           96.0,
           134.0,
@@ -309,18 +325,46 @@
           42.0
         ]
       },
-      "frame": "CAMERA_CAGE_LOCAL",
+      "positive_lock_indices_included": {
+        "x_offsets_mm": [
+          -12.0,
+          0.0,
+          12.0
+        ],
+        "y_offsets_mm": [
+          0.0,
+          21.0
+        ]
+      },
       "remaining_requirements": [
-        "bind the received camera/cage installed transform",
+        "verify the received camera/cage article and selected positive-lock index",
         "accept geometry and placement uncertainty"
       ],
       "uncertainty_available": false
     },
     {
       "body_id": "installation:static_camera_connector",
-      "candidate_placement_available": false,
-      "candidate_state": "LOCAL_CONNECTOR_FRAME_ENVELOPE_DERIVED",
+      "candidate_placement_available": true,
+      "candidate_state": "BOARD_FRAME_CAD_ENVELOPE_DERIVED",
       "envelope": {
+        "maximum_mm": [
+          365.0,
+          290.5,
+          1074.0
+        ],
+        "minimum_mm": [
+          245.0,
+          187.5,
+          1068.0
+        ],
+        "size_mm": [
+          120.0,
+          103.0,
+          6.0
+        ]
+      },
+      "frame": "B",
+      "local_envelope": {
         "maximum_mm": [
           96.0,
           89.0,
@@ -337,9 +381,19 @@
           6.0
         ]
       },
-      "frame": "CAMERA_CONNECTOR_LOCAL",
+      "positive_lock_indices_included": {
+        "x_offsets_mm": [
+          -12.0,
+          0.0,
+          12.0
+        ],
+        "y_offsets_mm": [
+          0.0,
+          21.0
+        ]
+      },
       "remaining_requirements": [
-        "bind the installed connector transform",
+        "verify the installed revised keeper article and selected positive-lock index",
         "accept geometry and placement uncertainty"
       ],
       "uncertainty_available": false
@@ -581,7 +635,7 @@
       "uncertainty_available": false
     }
   ],
-  "candidate_board_or_link_frame_placement_body_count": 7,
+  "candidate_board_or_link_frame_placement_body_count": 9,
   "candidate_envelope_body_count": 16,
   "collision_screening_executed": false,
   "controller_commands": [],
@@ -592,7 +646,7 @@
   "physical_movements": 0,
   "profile_generated": false,
   "repeat_dimension_measurement_body_ids": [],
-  "report_sha256": "c279631ca452d399c3070defbb31adc8d8707db60371bf846a3dd1a1a1db0b55",
+  "report_sha256": "1305f96ef1f35cf0294d1ebe573c7f3754f968dfc829868fb494859d839fb938",
   "required_body_count": 19,
   "schema": "rocell.static_overhead_collision_candidate_envelopes.v1",
   "source_bindings": [
@@ -617,6 +671,16 @@
       "sha256": "63e02e28f9bb818007564eab7e82e2b9ce8417f30bdf3cbec3c3a86ec08ac32e"
     },
     {
+      "byte_length": 7031,
+      "path": "hardware/static_overhead_camera/cad/build_usb_keeper_revision.py",
+      "sha256": "290a73c8a0d791e51393aa0ae755d0eeae930535086b3d3ef8246b57ee3b5dd6"
+    },
+    {
+      "byte_length": 176208,
+      "path": "hardware/static_overhead_camera/cad/generate_printable_frame.py",
+      "sha256": "707bae1b23df98986a15d1e2326e647d0ce7d82ea0af04b209771ae0642112ef"
+    },
+    {
       "byte_length": 11787684,
       "path": "hardware/static_overhead_camera/cad/output/assembly/printable_camera_portal_printed_parts_only.stl",
       "sha256": "999f60da097a3ca6c99a1c25219ae143d86120df52eb7ef9531d4b0076c5e637"
@@ -635,6 +699,11 @@
       "byte_length": 321684,
       "path": "hardware/static_overhead_camera/cad/output/stl/camera_cage_keeper.stl",
       "sha256": "74a829cfe1f8f57f3801bcf2eacf97e3afeebd448aca96709fbf2016aa20a730"
+    },
+    {
+      "byte_length": 21853,
+      "path": "hardware/static_overhead_camera/config/printable_frame_design.json",
+      "sha256": "74ce3a823168ad3cfb54ed02db60863ed17253694993653d7b1e4bb6fa447bb3"
     },
     {
       "byte_length": 8466,

@@ -28,7 +28,7 @@ def test_candidate_envelopes_are_deterministic_complete_and_zero_authority() -> 
     assert first["required_body_count"] == 19
     assert len(rows) == 19
     assert first["candidate_envelope_body_count"] == 16
-    assert first["candidate_board_or_link_frame_placement_body_count"] == 7
+    assert first["candidate_board_or_link_frame_placement_body_count"] == 9
     assert first["accepted_uncertainty_body_count"] == 0
     assert first["bodies_without_candidate_envelope"] == [
         "installation:base_and_factory_clamp",
@@ -41,6 +41,16 @@ def test_candidate_envelopes_are_deterministic_complete_and_zero_authority() -> 
     assert rows["workcell:station:keyboard_left"]["envelope"]["size_mm"] == [184.5, 192.0, 7.0]
     assert rows["workcell:station:phone_tcp"]["envelope"]["size_mm"] == [186.300003, 172.800003, 10.5]
     assert rows["installation:static_camera_support"]["envelope"]["size_mm"] == [850.0, 564.5, 1108.900024]
+    assert rows["installation:static_camera_module"]["envelope"] == {
+        "minimum_mm": [245.0, 180.5, 1000.0],
+        "maximum_mm": [365.0, 335.5, 1074.0],
+        "size_mm": [120.0, 155.0, 74.0],
+    }
+    assert rows["installation:static_camera_connector"]["envelope"] == {
+        "minimum_mm": [245.0, 187.5, 1068.0],
+        "maximum_mm": [365.0, 290.5, 1074.0],
+        "size_mm": [120.0, 103.0, 6.0],
+    }
     assert rows["attachment:contact_tool"]["attachment_profile"] == "BARE_JAW"
     assert first["repeat_dimension_measurement_body_ids"] == []
     assert first["installed_profile_eligible"] is False
@@ -54,7 +64,7 @@ def test_candidate_envelopes_are_deterministic_complete_and_zero_authority() -> 
 
 def test_candidate_envelopes_bind_every_source_file() -> None:
     report = build_static_overhead_collision_candidate_envelopes_v1(WORKSPACE, WORK_ORDER, _work_order_sha256())
-    assert len(report["source_bindings"]) == 10
+    assert len(report["source_bindings"]) == 13
     for source in report["source_bindings"]:
         path = WORKSPACE / source["path"]
         assert path.stat().st_size == source["byte_length"]
