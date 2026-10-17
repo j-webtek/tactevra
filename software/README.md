@@ -764,6 +764,30 @@ reuses the hardened proper-rigid Kabsch implementation and forbids scale or
 shear. Even a passing fit remains a position-only candidate until orientation,
 base/clamp geometry, reviewed thresholds, and reseat evidence are accepted.
 
+Record one synchronized correspondence without hand-editing the packet:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/ai/run_installed_base_correspondence_packet.py `
+  --packet work/installed-base-correspondences.json `
+  --record-slot train-front-left-low `
+  --pose-label KEYBOARD_FIELD_APPROACH_25 `
+  --base-point-xyz-mm <x> <y> <z> `
+  --board-point-xyz-mm <x> <y> <z> `
+  --controller-feedback-evidence work/controller-feedback.json `
+  --base-point-derivation-evidence work/base-point-derivation.json `
+  --camera-observation-evidence work/camera-observation.json `
+  --board-point-measurement-evidence work/board-point-measurement.json `
+  --captured-at-utc <ISO-8601-UTC> `
+  --output work/installed-base-correspondences.next.json
+```
+
+The recorder hashes all four evidence files, validates the packet hash and
+fixed split, and refuses to overwrite a measured slot. Point values must come
+from the bound derivation and measurement evidence; the recorder does not infer
+them from a pose name or photograph. Completing all eight slots still leaves
+the packet blocked unless every physical prerequisite has been accepted.
+
 From the workspace root:
 
 ```powershell

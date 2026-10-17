@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import replace
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 from typing import Any
@@ -26,6 +27,9 @@ from rocell.models.frames import Point3Mm
 
 SCHEMA = "rocell.installed_base_correspondence_packet.v1"
 PENDING_STATUS = "BLOCKED_PREREQUISITES_THEN_CORRESPONDENCE_COLLECTION"
+COLLECTING_STATUS = "CORRESPONDENCE_COLLECTION_IN_PROGRESS"
+PREREQUISITE_BLOCKED_FIT_STATUS = "BLOCKED_PREREQUISITES_BEFORE_OFFLINE_FIT"
+READY_STATUS = "READY_FOR_OFFLINE_POSITION_FIT"
 CANDIDATE_STATUS = "POSITION_CANDIDATE_ONLY_ORIENTATION_AND_RESEAT_PENDING"
 FAILED_STATUS = "POSITION_DIAGNOSTIC_FAILED"
 _HASH = re.compile(r"[0-9a-f]{64}\Z")
@@ -67,6 +71,106 @@ def _load_bound_json(path: Path, expected_sha256: str) -> dict[str, Any]:
     if value.get("content_sha256") != _sha(unsigned):
         raise ValueError("installed base intake content hash mismatch")
     return value
+
+
+def _validate_packet_integrity(packet: dict[str, Any]) -> None:
+    if packet.get("schema") != SCHEMA:
+        raise ValueError("unsupported correspondence packet schema")
+    unsigned = {key: value for key, value in packet.items() if key != "content_sha256"}
+    if packet.get("content_sha256") != _sha(unsigned):
+        raise ValueError("correspondence packet content hash mismatch")
+    slots = packet.get("precommitted_split", {}).get("slots", [])
+    actual_split = [(row.get("slot_id"), row.get("split")) for row in slots]
+    expected_split = [(row[0], row[1]) for row in _SLOT_ROWS]
+    if actual_split != expected_split:
+        raise ValueError("precommitted split must remain six training and two held out")
+
+
+def _point_values(value: object, name: str) -> list[float]:
+    if (
+        not isinstance(value, (list, tuple))
+        or len(value) != 3
+        or any(
+            isinstance(item, bool)
+            or not isinstance(item, (int, float))
+            or not math.isfinite(item)
+            or abs(item) > 10_000.0
+            for item in value
+        )
+    ):
+        raise ValueError(f"{name} must contain three finite millimetre values")
+    return [float(item) for item in value]
+
+
+def record_installed_base_correspondence_sample_v1(
+    packet: dict[str, Any],
+    *,
+    slot_id: str,
+    pose_label: str,
+    base_point_xyz_mm: object,
+    board_point_xyz_mm: object,
+    controller_feedback_sha256: str,
+    base_point_derivation_sha256: str,
+    camera_observation_sha256: str,
+    board_point_measurement_sha256: str,
+    captured_at_utc: str,
+    notes: str | None = None,
+) -> dict[str, Any]:
+    """Record one immutable synchronized sample without touching hardware."""
+
+    _validate_packet_integrity(packet)
+    if not isinstance(slot_id, str) or not slot_id:
+        raise ValueError("slot_id is required")
+    if (
+        not isinstance(pose_label, str)
+        or not pose_label.strip()
+        or len(pose_label) > 128
+    ):
+        raise ValueError("pose_label must be bounded non-empty text")
+    if not isinstance(captured_at_utc, str) or not captured_at_utc.endswith("Z"):
+        raise ValueError("captured_at_utc must be an ISO-8601 UTC timestamp")
+    if notes is not None and (not isinstance(notes, str) or len(notes) > 512):
+        raise ValueError("notes must be null or bounded text")
+    evidence = {
+        "controller_feedback_sha256": controller_feedback_sha256,
+        "base_point_derivation_sha256": base_point_derivation_sha256,
+        "camera_observation_sha256": camera_observation_sha256,
+        "board_point_measurement_sha256": board_point_measurement_sha256,
+    }
+    for name, digest in evidence.items():
+        if not isinstance(digest, str) or not _HASH.fullmatch(digest) or digest == "0" * 64:
+            raise ValueError(f"{name} must be a nonzero lowercase SHA-256 digest")
+
+    updated = json.loads(json.dumps(packet, allow_nan=False))
+    slots = updated["precommitted_split"]["slots"]
+    matching = [row for row in slots if row["slot_id"] == slot_id]
+    if len(matching) != 1:
+        raise ValueError("slot_id is not in the precommitted split")
+    row = matching[0]
+    if row["status"] != "PENDING":
+        raise ValueError(f"correspondence slot {slot_id} is already recorded")
+    row.update(
+        status="MEASURED",
+        pose_label=pose_label.strip(),
+        base_point_xyz_mm=_point_values(base_point_xyz_mm, "base_point_xyz_mm"),
+        board_point_xyz_mm=_point_values(board_point_xyz_mm, "board_point_xyz_mm"),
+        captured_at_utc=captured_at_utc,
+        notes=notes,
+        **evidence,
+    )
+    measured = sum(item["status"] == "MEASURED" for item in slots)
+    if measured < len(slots):
+        updated["status"] = COLLECTING_STATUS
+    elif all(
+        value == "ACCEPTED_PHYSICAL_ARTIFACT"
+        for value in updated["prerequisite_status"].values()
+    ):
+        updated["status"] = READY_STATUS
+    else:
+        updated["status"] = PREREQUISITE_BLOCKED_FIT_STATUS
+    unsigned = {key: value for key, value in updated.items() if key != "content_sha256"}
+    updated["content_sha256"] = _sha(unsigned)
+    return updated
 
 
 def build_pending_installed_base_correspondence_packet_v1(
@@ -189,11 +293,7 @@ def build_pending_installed_base_correspondence_packet_v1(
 
 
 def _completed_input(packet: dict[str, Any]) -> RigidCorrespondenceInput:
-    if packet.get("schema") != SCHEMA:
-        raise ValueError("unsupported correspondence packet schema")
-    unsigned = {key: value for key, value in packet.items() if key != "content_sha256"}
-    if packet.get("content_sha256") != _sha(unsigned):
-        raise ValueError("correspondence packet content hash mismatch")
+    _validate_packet_integrity(packet)
     if any(
         value != "ACCEPTED_PHYSICAL_ARTIFACT"
         for value in packet["prerequisite_status"].values()
@@ -202,10 +302,6 @@ def _completed_input(packet: dict[str, Any]) -> RigidCorrespondenceInput:
 
     fixed = packet["fixed_context"]
     slots = packet["precommitted_split"]["slots"]
-    actual_split = [(row.get("slot_id"), row.get("split")) for row in slots]
-    expected_split = [(row[0], row[1]) for row in _SLOT_ROWS]
-    if actual_split != expected_split:
-        raise ValueError("precommitted split must remain six training and two held out")
     training: list[RigidPointPair] = []
     held_out: list[RigidPointPair] = []
     for row in slots:
@@ -288,9 +384,13 @@ def fit_installed_base_position_candidate_v1(packet: dict[str, Any]) -> dict[str
 
 __all__ = [
     "CANDIDATE_STATUS",
+    "COLLECTING_STATUS",
     "FAILED_STATUS",
     "PENDING_STATUS",
+    "PREREQUISITE_BLOCKED_FIT_STATUS",
+    "READY_STATUS",
     "SCHEMA",
     "build_pending_installed_base_correspondence_packet_v1",
     "fit_installed_base_position_candidate_v1",
+    "record_installed_base_correspondence_sample_v1",
 ]

@@ -12964,3 +12964,20 @@ rewriting history. New entries must use a unique evidence ID.
   orientation, base/clamp, uncertainty, reviewed thresholds, and reseat gates
   pass. Commands 0; hardware access false; movements 0; physical authority
   false.
+
+### E-20261017-AI-INSTALLED-BASE-SAMPLE-INGEST-001 — guarded slot recording
+
+- Source: precommitted installed-base correspondence packet file SHA-256
+  `2a3325fbd366d397f57e6a78a9408ea84c3d594247c81bfb284b9c1e2ca30bf5`
+  and canonical content SHA-256
+  `68a9dab271549ecc3f75e5584034b47f1dfe7bd78e0ae4af8e13d4a707e62065`.
+- Operation: the offline runner records exactly one named precommitted slot,
+  copies rather than mutates the input, binds controller feedback, base-point
+  derivation, camera observation, and board-point measurement by SHA-256, and
+  recomputes the packet content digest.
+- Failure boundary: unknown slots, repeat writes, malformed points, malformed
+  timestamps, changed splits, changed packet content, and zero or malformed
+  evidence digests fail closed. Eight measured slots remain blocked before fit
+  while any physical prerequisite is unaccepted.
+- Result: sample-ingest implementation and tests prepared; commands 0; hardware
+  access false; movements 0; physical authority false.
