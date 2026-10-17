@@ -611,3 +611,15 @@ result establishes bounded row-feature visibility while keeping individual key
 centers, board-space targets, motion, and contact blocked. The measured tree is
 661,881,978 logical bytes with 4,890,152 governed duplicate bytes. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The fixed-camera elevated key-plane audit adds five governed paths: one CPU-only
+local-plane validator, one strict result schema, one focused test module, one
+compact hash-bound result, and one result note. The file-count ceiling advances
+from 6,508 to the exact expected 6,513 files. The audit passes all 46 keys under
+the 7 mm study limit and isolates the earlier `SPACE` miss to Z=0 projection.
+It emits no board-space target and retains absolute keyboard-to-board
+registration, independent physical validation, transforms, clearance, motion,
+and contact as blockers. No image, calibration corpus, controller artifact, or
+generated geometry enters the archive. All byte, duplicate, and reduction
+limits remain unchanged. The staged tree measures 662,047,514 logical bytes
+with 4,890,152 governed duplicate bytes.

@@ -42,9 +42,12 @@ key rows. A distinct second frame repeats those features within 1.667 mm. The
 two frames now also produce 46 keycap-edge center candidates with a 2.166 mm
 worst temporal change under the `no_attachment` profile. A provisional
 board-plane audit places 45 of 46 within the 7 mm study limit in both frames;
-`SPACE` remains outside at 8.144 mm worst case. The audit remains observational
-and does not create board-space contact targets. Independent physical key
-measurement, the remaining commissioned
+`SPACE` remains outside at 8.144 mm worst case. Evaluating the same observations
+in the rectified elevated keyboard plane passes all 46 keys with a 3.328 mm
+worst residual and reduces `SPACE` to 2.889 mm reference and 1.238 mm repeat.
+This isolates the prior failure to Z=0 projection but does not create
+board-space contact targets. Absolute keyboard-to-board registration,
+independent physical key measurement, the remaining commissioned
 transforms, and physical action authority still require measured qualification.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
@@ -82,7 +85,7 @@ completed capabilities.
 | Local interface | Browser and terminal rehearsal, task planning, diagnostic exports | Software workflows can be explored without connecting a robot |
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
-| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, 46 two-frame keycap-edge center candidates, and a provisional board-plane rigid-fit audit | The no-attachment audit places 45/46 keys within 7 mm in both frames, while `SPACE` reaches 8.144 mm; elevated-plane parallax and independent physical validation remain open, and no board-space key target, board-to-robot transform, clearance result, motion, or contact is authorized |
+| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, 46 two-frame keycap-edge center candidates, a provisional board-plane rigid-fit audit, and an elevated-plane coherence audit | The no-attachment board-plane audit places 45/46 keys within 7 mm, while the elevated-plane audit passes 46/46 with a 3.328 mm maximum residual; absolute keyboard-to-board registration and independent physical validation remain open, and no board-space key target, board-to-robot transform, clearance result, motion, or contact is authorized |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
@@ -266,6 +269,13 @@ remains outside at 8.048 mm and 8.144 mm, while the largest temporal board
 change is 2.407 mm. This narrows the remaining error to the wide-key/elevated
 plane model but does not supply an independent physical key measurement or any
 motion target.
+
+Auditing the same 46 observations directly in the rectified 315 x 147 mm
+keyboard plane passes every key in both frames. The worst residuals are 3.100 mm
+and 3.328 mm; `SPACE` falls to 2.889 mm and 1.238 mm. The evidence isolates the
+board-plane miss to Z=0 projection, but it cannot establish absolute
+keyboard-to-board translation without valid intrinsics or an independent
+board-frame measurement. It emits no board-space target or physical authority.
 
 ARM-074 adds a zero-authority T2A compiler from ordered typing actions to
 semantic Cartesian endpoints, bounded-step IK/collision screening samples, and

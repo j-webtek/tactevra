@@ -48,3 +48,8 @@ The first board-plane projection audit is now recorded in
 [`RC03_FIXED_CAMERA_BOARD_KEY_VALIDATION.md`](RC03_FIXED_CAMERA_BOARD_KEY_VALIDATION.md).
 It passes 45 of 46 keys under the existing 7 mm study limit but leaves `SPACE`,
 elevated-plane parallax, and independent physical validation unresolved.
+The follow-on
+[`RC03_FIXED_CAMERA_ELEVATED_KEY_PLANE_VALIDATION.md`](RC03_FIXED_CAMERA_ELEVATED_KEY_PLANE_VALIDATION.md)
+evaluates the same observations before Z=0 projection and passes all 46 keys.
+It resolves local layout coherence while leaving absolute board registration,
+independent physical validation, and all physical authority blocked.

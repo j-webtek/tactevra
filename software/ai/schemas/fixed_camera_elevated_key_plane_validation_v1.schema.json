@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_elevated_key_plane_validation_v1.schema.json",
+  "title": "Fixed camera elevated key-plane validation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "profile", "candidate_result_sha256", "registration_input_sha256", "profile_sha256", "reference_frame_sha256", "repeat_frame_sha256", "keyboard_plane_dimensions_mm", "individual_key_limit_mm", "local_observation_temporal_limit_mm", "reference_rigid_layout", "repeat_rigid_layout", "key_validations", "key_validation_count", "validated_key_count", "failed_key_ids", "elevated_key_plane_coherence_ready", "space_key_elevated_plane_coherence_passed", "absolute_keyboard_to_board_transform_verified", "independent_physical_key_measurement_present", "board_space_motion_targets_emitted", "board_to_robot_transform_verified", "physical_clearance_verified", "motion_authorized", "contact_authorized", "blockers", "limitations"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_elevated_key_plane_validation.v1"},
+    "status": {"enum": ["ELEVATED_KEY_PLANE_COHERENCE_READY_NO_BOARD_TARGETS", "ELEVATED_KEY_PLANE_COHERENCE_INCOMPLETE_NO_BOARD_TARGETS"]},
+    "profile": {"const": "no_attachment"},
+    "candidate_result_sha256": {"$ref": "#/$defs/digest"},
+    "registration_input_sha256": {"$ref": "#/$defs/digest"},
+    "profile_sha256": {"$ref": "#/$defs/digest"},
+    "reference_frame_sha256": {"$ref": "#/$defs/digest"},
+    "repeat_frame_sha256": {"$ref": "#/$defs/digest"},
+    "keyboard_plane_dimensions_mm": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "exclusiveMinimum": 0}},
+    "individual_key_limit_mm": {"type": "number", "exclusiveMinimum": 0},
+    "local_observation_temporal_limit_mm": {"type": "number", "exclusiveMinimum": 0},
+    "reference_rigid_layout": {"$ref": "#/$defs/pose"},
+    "repeat_rigid_layout": {"$ref": "#/$defs/pose"},
+    "key_validations": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"$ref": "#/$defs/key"}},
+    "key_validation_count": {"const": 46},
+    "validated_key_count": {"type": "integer", "minimum": 0, "maximum": 46},
+    "failed_key_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "elevated_key_plane_coherence_ready": {"type": "boolean"},
+    "space_key_elevated_plane_coherence_passed": {"type": "boolean"},
+    "absolute_keyboard_to_board_transform_verified": {"const": false},
+    "independent_physical_key_measurement_present": {"const": false},
+    "board_space_motion_targets_emitted": {"const": false},
+    "board_to_robot_transform_verified": {"const": false},
+    "physical_clearance_verified": {"const": false},
+    "motion_authorized": {"const": false},
+    "contact_authorized": {"const": false},
+    "blockers": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"enum": ["ELEVATED_KEY_PLANE_ALL_KEYS_NOT_WITHIN_LIMIT", "ABSOLUTE_KEYBOARD_TO_BOARD_TRANSFORM_UNVERIFIED", "INDEPENDENT_PHYSICAL_KEY_MEASUREMENT_MISSING", "BOARD_TO_ROBOT_TRANSFORM_UNVERIFIED", "PHYSICAL_CLEARANCE_UNVERIFIED"]}},
+    "limitations": {"type": "array", "minItems": 5, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "xy": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["front_left_keyboard_xy_mm", "yaw_deg", "rms_residual_mm", "maximum_residual_mm", "median_residual_mm"],
+      "properties": {
+        "front_left_keyboard_xy_mm": {"$ref": "#/$defs/xy"},
+        "yaw_deg": {"type": "number"},
+        "rms_residual_mm": {"type": "number", "minimum": 0},
+        "maximum_residual_mm": {"type": "number", "minimum": 0},
+        "median_residual_mm": {"type": "number", "minimum": 0}
+      }
+    },
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "reference_local_observation_xy_mm", "repeat_local_observation_xy_mm", "reference_rigid_layout_residual_mm", "repeat_rigid_layout_residual_mm", "local_observation_temporal_delta_mm", "elevated_plane_coherence_passed"],
+      "properties": {
+        "key_id": {"type": "string", "minLength": 1},
+        "reference_local_observation_xy_mm": {"$ref": "#/$defs/xy"},
+        "repeat_local_observation_xy_mm": {"$ref": "#/$defs/xy"},
+        "reference_rigid_layout_residual_mm": {"type": "number", "minimum": 0},
+        "repeat_rigid_layout_residual_mm": {"type": "number", "minimum": 0},
+        "local_observation_temporal_delta_mm": {"type": "number", "minimum": 0},
+        "elevated_plane_coherence_passed": {"type": "boolean"}
+      }
+    }
+  }
+}

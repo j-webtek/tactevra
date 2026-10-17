@@ -33,8 +33,11 @@ and trajectory qualification.
 
 ## Next evidence
 
-1. Correct the elevated key-plane projection using a commissioned camera model,
-   or independently measure enough key centers in the board frame.
-2. Recheck `SPACE` and the full 46-key set against the unchanged 7 mm limit.
-3. Only after all keys pass, commission the board-to-robot transform and
-   installed clearance for each attachment profile.
+The follow-on [elevated key-plane audit](RC03_FIXED_CAMERA_ELEVATED_KEY_PLANE_VALIDATION.md)
+passes all 46 keys and reduces `SPACE` to 2.889 mm reference and 1.238 mm repeat
+residuals. This isolates the board-plane failure to the Z=0 projection model.
+
+1. Establish the absolute keyboard-plane-to-board transform using a valid
+   camera model or independent board-frame measurements.
+2. Commission the board-to-robot transform.
+3. Validate installed clearance separately for each attachment profile.
