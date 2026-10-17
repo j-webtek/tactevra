@@ -621,5 +621,5 @@ It emits no board-space target and retains absolute keyboard-to-board
 registration, independent physical validation, transforms, clearance, motion,
 and contact as blockers. No image, calibration corpus, controller artifact, or
 generated geometry enters the archive. All byte, duplicate, and reduction
-limits remain unchanged. The staged tree measures 662,047,514 logical bytes
+limits remain unchanged. The PR #347 committed tree measured 662,047,577 logical bytes
 with 4,890,152 governed duplicate bytes.
