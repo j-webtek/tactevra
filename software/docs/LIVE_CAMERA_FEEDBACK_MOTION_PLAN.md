@@ -405,6 +405,44 @@ $env:PYTHONPATH = "software/src"
   --current-planar-observation <current-planar-observation.json>
 ```
 
+## 2026-10-16 current bare-jaw route-screening intake
+
+`build_current_bare_jaw_route_intake.py` now joins the current planar
+observation, its unsent `H` hover draft, and the retained bare-jaw route audit.
+The join is strict: all three artifacts must have valid embedded digests, one
+workcell epoch, the explicit `BARE_JAW` profile, the same saved frame, the same
+pixel target, and the same board target. The current frame must contain IDs
+`0-5` and all 46 reviewed keyboard targets.
+
+The first live intake used the ignored runtime evidence in
+`live-camera-planar-feedback-20261016-03`. It bound current `H` pixel center
+`(706.572, 670.911)` to surface point
+`(212.951, 149.210, 21.000)` mm and hover point
+`(212.951, 149.210, 48.7953)` mm. Its deterministic status is
+`BLOCKED_ARM_SPACE_CALIBRATION_REQUIRED`. Current planar camera localization is
+complete for the saved frame, while the arm start is still the retained settled
+register sample and is not synchronized to that frame. Board-to-arm projection,
+IK, route, and collision screening did not run.
+
+Reproduce the join without opening either device:
+
+```powershell
+$env:PYTHONPATH = "software/src"
+python software/scripts/build_current_bare_jaw_route_intake.py `
+  --current-observation <current-planar-observation.json> `
+  --hover-draft <current-h-hover-draft.json> `
+  --output <current-bare-jaw-route-intake.json>
+```
+
+The output records the remaining arm-space requirements explicitly: a current
+telemetry binding, measured robot joint reference, controller-to-model
+correlation, board-to-arm transform, qualified keyboard Z/normal/travel,
+bare-jaw TCP, and installed collision geometry. The formal static-camera graph
+also retains its full physical camera-chain requirement; this does not undo the
+completed current board-plane localization or grant off-plane calibration.
+Changing to the stylus invalidates this intake and starts its separate profile
+and trajectory family.
+
 ## 2026-10-16 bare-jaw route-readiness audit
 
 The deterministic zero-dispatch audit at
