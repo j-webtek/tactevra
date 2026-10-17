@@ -46,6 +46,13 @@ All 46 keys pass there; the maximum residual is 3.328 mm, and `SPACE` falls to
 2.889 mm reference and 1.238 mm repeat. This isolates the earlier failure to
 Z=0 projection. Absolute keyboard-to-board registration, independent physical
 validation, and all physical authority remain blocked.
+The typed
+[keyboard-to-board registration boundary](../software/docs/RC03_FIXED_CAMERA_KEYBOARD_BOARD_REGISTRATION.md)
+now accepts the missing transform only from an accepted 3-D camera model or at
+least three independently reviewed, noncollinear board-frame anchors. It emits
+46 localization candidates after a passing fit while preserving separate
+`no_attachment` and `stylus_attachment` blockers and granting no motion or
+contact authority. No current artifact satisfies that input.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
