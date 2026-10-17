@@ -61,3 +61,8 @@ row features in a fresh fixed-camera frame and refine the keyboard transform
 below the 7 mm individual-key limit. After that, the board target still must be
 connected to a verified board-to-robot transform and a clearance-screened
 noncontact waypoint before any physical motion review.
+
+The first part of that increment is now available as deterministic, bounded
+[key feedback search windows](RC03_FIXED_CAMERA_KEY_FEEDBACK_ROI.md). They tell
+a later detector where to look for all 46 keys while preserving the distinction
+between nominal image geometry and independently observed key centers.

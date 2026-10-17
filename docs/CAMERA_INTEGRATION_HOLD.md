@@ -15,6 +15,10 @@ a reproducible keyboard-region estimate, as recorded in
 [`RC03_FIXED_CAMERA_KEYBOARD_REGISTRATION.md`](../software/docs/RC03_FIXED_CAMERA_KEYBOARD_REGISTRATION.md).
 Its 13.38 mm maximum housing residual exceeds the 7 mm individual-key limit, so
 key-center localization and hover planning remain held.
+The accepted image quadrilateral now also produces 46 bounded
+[key feedback search windows](../software/docs/RC03_FIXED_CAMERA_KEY_FEEDBACK_ROI.md).
+Those image regions prepare independent visual refinement but are nominal,
+emit no board-space target, and do not change the hold.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
