@@ -40,9 +40,11 @@ recorded. That region yields 46 bounded camera search windows, and the retained
 frame supplies bounded contrast and gap-phase observations for all four main
 key rows. A distinct second frame repeats those features within 1.667 mm. The
 two frames now also produce 46 keycap-edge center candidates with a 2.166 mm
-worst temporal change under the `no_attachment` profile. They remain
-image-space candidates rather than board-space contact targets.
-Board-space individual-key validation, the remaining commissioned
+worst temporal change under the `no_attachment` profile. A provisional
+board-plane audit places 45 of 46 within the 7 mm study limit in both frames;
+`SPACE` remains outside at 8.144 mm worst case. The audit remains observational
+and does not create board-space contact targets. Independent physical key
+measurement, the remaining commissioned
 transforms, and physical action authority still require measured qualification.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
@@ -80,7 +82,7 @@ completed capabilities.
 | Local interface | Browser and terminal rehearsal, task planning, diagnostic exports | Software workflows can be explored without connecting a robot |
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
-| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, and 46 two-frame keycap-edge center candidates | The no-attachment fixed view yields repeatable image-space candidates with a 2.166 mm worst temporal change, but the housing rectification has not been independently validated in board space; no board-space key target, board-to-robot transform, clearance result, motion, or contact is authorized |
+| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, 46 two-frame keycap-edge center candidates, and a provisional board-plane rigid-fit audit | The no-attachment audit places 45/46 keys within 7 mm in both frames, while `SPACE` reaches 8.144 mm; elevated-plane parallax and independent physical validation remain open, and no board-space key target, board-to-robot transform, clearance result, motion, or contact is authorized |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
@@ -255,7 +257,15 @@ all four standard rows, with a 5.0 mm maximum contrast-band offset. This proves
 row-feature observability while treating neither the window centers nor row
 features as physical key-center measurements. No board-space target is emitted;
 The row features repeat in a distinct second frame within 1.667 mm while every
-gap phase remains unchanged. Independent per-key center fitting remains.
+gap phase remains unchanged. The per-key fitting result follows below.
+
+The two frames now also provide 46 independently fitted keycap-edge candidates.
+Projecting them through the provisional AprilTag board map and fitting one rigid
+keyboard pose per frame places 45 keys within the 7 mm study limit. `SPACE`
+remains outside at 8.048 mm and 8.144 mm, while the largest temporal board
+change is 2.407 mm. This narrows the remaining error to the wide-key/elevated
+plane model but does not supply an independent physical key measurement or any
+motion target.
 
 ARM-074 adds a zero-authority T2A compiler from ordered typing actions to
 semantic Cartesian endpoints, bounded-step IK/collision screening samples, and

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_board_key_validation_v1.schema.json",
+  "title": "Fixed camera board key validation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "profile", "candidate_result_sha256", "registration_input_sha256", "calibration_sha256", "profile_sha256", "reference_frame_sha256", "repeat_frame_sha256", "individual_key_limit_mm", "board_observation_temporal_limit_mm", "reference_rigid_pose", "repeat_rigid_pose", "key_validations", "key_validation_count", "validated_key_count", "failed_key_ids", "board_plane_key_validation_ready", "independent_physical_key_measurement_present", "board_space_motion_targets_emitted", "board_to_robot_transform_verified", "physical_clearance_verified", "motion_authorized", "contact_authorized", "blockers", "limitations"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_board_key_validation.v1"},
+    "status": {"enum": ["BOARD_PLANE_KEY_VALIDATION_READY_NO_MOTION_AUTHORITY", "BOARD_PLANE_KEY_VALIDATION_INCOMPLETE_NO_MOTION_AUTHORITY"]},
+    "profile": {"const": "no_attachment"},
+    "candidate_result_sha256": {"$ref": "#/$defs/digest"},
+    "registration_input_sha256": {"$ref": "#/$defs/digest"},
+    "calibration_sha256": {"$ref": "#/$defs/digest"},
+    "profile_sha256": {"$ref": "#/$defs/digest"},
+    "reference_frame_sha256": {"$ref": "#/$defs/digest"},
+    "repeat_frame_sha256": {"$ref": "#/$defs/digest"},
+    "individual_key_limit_mm": {"type": "number", "exclusiveMinimum": 0},
+    "board_observation_temporal_limit_mm": {"type": "number", "exclusiveMinimum": 0},
+    "reference_rigid_pose": {"$ref": "#/$defs/pose"},
+    "repeat_rigid_pose": {"$ref": "#/$defs/pose"},
+    "key_validations": {"type": "array", "minItems": 46, "maxItems": 46, "items": {"$ref": "#/$defs/key"}},
+    "key_validation_count": {"const": 46},
+    "validated_key_count": {"type": "integer", "minimum": 0, "maximum": 46},
+    "failed_key_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "board_plane_key_validation_ready": {"type": "boolean"},
+    "independent_physical_key_measurement_present": {"const": false},
+    "board_space_motion_targets_emitted": {"const": false},
+    "board_to_robot_transform_verified": {"const": false},
+    "physical_clearance_verified": {"const": false},
+    "motion_authorized": {"const": false},
+    "contact_authorized": {"const": false},
+    "blockers": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"enum": ["BOARD_PLANE_ALL_KEYS_NOT_WITHIN_LIMIT", "INDEPENDENT_PHYSICAL_KEY_MEASUREMENT_MISSING", "ELEVATED_KEY_PLANE_PARALLAX_UNCORRECTED", "BOARD_TO_ROBOT_TRANSFORM_UNVERIFIED", "PHYSICAL_CLEARANCE_UNVERIFIED"]}},
+    "limitations": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "xy": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["front_left_board_xy_mm", "yaw_deg", "rms_residual_mm", "maximum_residual_mm", "median_residual_mm"],
+      "properties": {
+        "front_left_board_xy_mm": {"$ref": "#/$defs/xy"},
+        "yaw_deg": {"type": "number"},
+        "rms_residual_mm": {"type": "number", "minimum": 0},
+        "maximum_residual_mm": {"type": "number", "minimum": 0},
+        "median_residual_mm": {"type": "number", "minimum": 0}
+      }
+    },
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "reference_board_observation_xy_mm", "repeat_board_observation_xy_mm", "reference_rigid_pose_residual_mm", "repeat_rigid_pose_residual_mm", "board_observation_temporal_delta_mm", "board_plane_validation_passed"],
+      "properties": {
+        "key_id": {"type": "string", "minLength": 1},
+        "reference_board_observation_xy_mm": {"$ref": "#/$defs/xy"},
+        "repeat_board_observation_xy_mm": {"$ref": "#/$defs/xy"},
+        "reference_rigid_pose_residual_mm": {"type": "number", "minimum": 0},
+        "repeat_rigid_pose_residual_mm": {"type": "number", "minimum": 0},
+        "board_observation_temporal_delta_mm": {"type": "number", "minimum": 0},
+        "board_plane_validation_passed": {"type": "boolean"}
+      }
+    }
+  }
+}
