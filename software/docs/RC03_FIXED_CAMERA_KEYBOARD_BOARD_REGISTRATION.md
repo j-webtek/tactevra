@@ -46,3 +46,37 @@ The next accepted evidence can come from a valid final-camera 3-D calibration
 or independent board-frame anchors. No additional paper target is required if
 an accepted camera model or independent anchors are obtained through another
 qualified method.
+
+## No-print anchor workflow
+
+`rocell.vision.fixed_camera_keyboard_anchor_package_v1` prepares and consumes
+the independent-anchor path. Create a local draft from the repository root:
+
+```powershell
+$env:PYTHONPATH = "software/src"
+python -m rocell.vision.fixed_camera_keyboard_anchor_package_v1 `
+  --write-template keyboard-anchors.json
+```
+
+Record board-frame X/Y in millimetres for at least three named housing corners.
+The frame is `RC03_board`: X begins at the board's left edge and Y begins at its
+front edge. Change the draft status to
+`REVIEWED_INDEPENDENT_BOARD_FRAME_MEASUREMENTS`, record the reviewer and an
+offset-bearing ISO-8601 review time, and then compile both profiles together:
+
+```powershell
+python -m rocell.vision.fixed_camera_keyboard_anchor_package_v1 `
+  keyboard-anchors.json `
+  software/config/calibration_candidates/rc03_int_r1_fixed_camera_elevated_key_plane_validation_2026-10-17.json `
+  software/config/static_nominal_target_profiles.json `
+  > keyboard-board-registration-package.json
+```
+
+The builder hashes the exact measurement, elevated-plane validation, target
+profile, and generated registration input. It rejects drafts, missing review
+metadata, changed board dimensions, non-millimetre coordinates, invalid anchor
+geometry, out-of-board anchors, loosened 3 mm RMS or 5 mm individual-anchor
+limits, or excessive fit residuals. The resulting package evaluates
+`no_attachment` and `stylus_attachment` from the same keyboard transform while
+retaining their separate downstream blockers. It cannot authorize motion or
+contact.

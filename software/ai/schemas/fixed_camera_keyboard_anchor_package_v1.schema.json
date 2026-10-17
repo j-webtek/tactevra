@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/fixed_camera_keyboard_anchor_package_v1.schema.json",
+  "title": "Fixed-camera keyboard anchor package v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "status",
+    "measurement_sha256",
+    "elevated_validation_sha256",
+    "target_profile_sha256",
+    "registration_input_sha256",
+    "registration_input",
+    "profiles",
+    "shared_keyboard_to_board_transform_verified",
+    "profile_separation_preserved",
+    "motion_targets_emitted",
+    "motion_authorized",
+    "contact_authorized"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_keyboard_anchor_package.v1"},
+    "status": {
+      "enum": [
+        "KEYBOARD_BOARD_REGISTRATION_PACKAGE_READY",
+        "KEYBOARD_BOARD_REGISTRATION_PACKAGE_REJECTED"
+      ]
+    },
+    "measurement_sha256": {"$ref": "#/$defs/sha256"},
+    "elevated_validation_sha256": {"$ref": "#/$defs/sha256"},
+    "target_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "registration_input_sha256": {"$ref": "#/$defs/sha256"},
+    "registration_input": {"type": "object"},
+    "profiles": {
+      "type": "object",
+      "required": ["no_attachment", "stylus_attachment"],
+      "properties": {
+        "no_attachment": {"$ref": "#/$defs/profile"},
+        "stylus_attachment": {"$ref": "#/$defs/profile"}
+      },
+      "additionalProperties": false
+    },
+    "shared_keyboard_to_board_transform_verified": {"type": "boolean"},
+    "profile_separation_preserved": {"const": true},
+    "motion_targets_emitted": {"const": false},
+    "motion_authorized": {"const": false},
+    "contact_authorized": {"const": false}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "profile": {
+      "type": "object",
+      "required": [
+        "schema",
+        "profile",
+        "absolute_keyboard_to_board_transform_verified",
+        "motion_authorized",
+        "contact_authorized",
+        "blockers"
+      ],
+      "properties": {
+        "schema": {"const": "rocell.fixed_camera_keyboard_board_registration.v1"},
+        "profile": {"enum": ["no_attachment", "stylus_attachment"]},
+        "absolute_keyboard_to_board_transform_verified": {"type": "boolean"},
+        "motion_authorized": {"const": false},
+        "contact_authorized": {"const": false},
+        "blockers": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}
