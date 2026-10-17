@@ -116,6 +116,40 @@ target and cannot authorize motion or contact. Installed continuous clearance
 remains open for both profiles; the stylus profile additionally retains its
 own TCP and trajectory blockers.
 
+## Passive camera and robot capture workflow
+
+`rocell.calibration.fixed_camera_robot_calibration_capture_v1` prepares the
+remaining board-to-robot measurements without asking for more ruler readings.
+It consumes retained records only and performs no camera, robot, or filesystem
+I/O. Each capture binds one exact fixed-camera frame to:
+
+- a board pose fitted from RC03 tags `0` through `3`, with tags `4` and `5`
+  retained as independent residual checks;
+- a calibrated bare-jaw reference observation in `RC03_board` coordinates;
+- raw T=1051 feedback immediately before and after the frame; and
+- the pinned RoArm-M3 firmware kinematic reference.
+
+The compiler requires the camera frame to fall inside the feedback bracket,
+reproduces the robot endpoint from all six feedback joint fields, compares the
+reproduced endpoint with the controller-reported XYZ, and rejects movement,
+timing, identity, settings, intrinsics, tag-map, or detector drift. A campaign
+requires at least three noncollinear fit captures and two held-out captures
+from one unchanged installation epoch. Its output is an exact
+`board_to_robot_measurements.v1` **draft** plus the hashes of every normalized
+capture. The installation and review flags remain false so the existing
+localization boundary cannot consume the draft until the evidence is reviewed.
+
+This workflow uses `no_attachment` because the board-to-robot transform is
+shared workcell geometry. Installing the stylus does not create a second board
+transform. It requires a separate measured stylus TCP and installed-clearance
+profile, which remain bound by the attachment-aware handoff below.
+
+The current increment establishes the capture and aggregation contract. Live
+camera acquisition, the calibrated bare-jaw visual detector, retained robot
+feedback acquisition, and collection of the five spatially separated samples
+remain the next integration step. No manual board dimension, tag spacing,
+keyboard size, or key-plane measurement needs to be repeated.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

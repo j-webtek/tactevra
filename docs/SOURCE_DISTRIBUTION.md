@@ -624,6 +624,18 @@ generated geometry enters the archive. All byte, duplicate, and reduction
 limits remain unchanged. The PR #347 committed tree measured 662,047,577 logical bytes
 with 4,890,152 governed duplicate bytes.
 
+The passive fixed-camera robot-calibration capture increment adds five governed
+paths: one CPU-only capture/campaign compiler, three strict schemas, and one
+focused test module. The file-count ceiling advances from 6,529 to the exact
+expected 6,534 files. The compiler reuses the existing board dimensions and
+tag map, fits tags 0–3 while checking tags 4–5 independently, brackets every frame with stationary raw
+T=1051 feedback, reproduces the bare-jaw endpoint through pinned firmware
+kinematics, and emits only an unreviewed board-to-robot measurement draft. It
+opens no camera or robot, sends no command, and keeps the stylus TCP and
+installed-clearance evidence separate. No image, capture corpus, controller
+artifact, generated geometry, or physical measurement enters the archive. All
+byte, duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
