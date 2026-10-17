@@ -1,0 +1,554 @@
+{
+  "base_contract_sha256": "fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39",
+  "body_qualification_work": [
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:base_link",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "base_link",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link1",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "link1",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link2",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "link2",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link3",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "link3",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link4",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "link4",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:link5",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "link5",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "robot:gripper",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONSERVATIVE_BOX_CANDIDATES_ONLY",
+          "path": "software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20260929.json",
+          "sha256": "7176ac55e0a4f5a7099d48a6968e53e3e0134ee027f55837c594470b53eb5431"
+        },
+        {
+          "evidence_class": "KINEMATIC_TOPOLOGY_ONLY",
+          "path": "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf",
+          "sha256": "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "gripper_link",
+      "qualification_action_class": "REVIEW_CONSERVATIVE_LINK_ENVELOPE",
+      "qualification_actions": [
+        "Review whole-link coverage and non-watertight components.",
+        "Select conservative primitives and geometry uncertainty.",
+        "Bind the reviewed envelope to the pinned robot frame."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:base_and_factory_clamp",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "INSTALLED_OBSERVATION_CONTEXT_ONLY",
+          "path": "software/config/live_camera_feedback_session_20261015.json",
+          "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "QUALIFY_INSTALLED_BASE_AND_CLAMP",
+      "qualification_actions": [
+        "Record a conservative installed base-and-clamp envelope.",
+        "Bind its board-frame placement and placement uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_support",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "SCREENING_DESIGN_CANDIDATE",
+          "path": "hardware/static_overhead_camera/config/support_design.json",
+          "sha256": "2392257405b54022039be1da96e005690fe74df32256607a61d374d7c1720d1b"
+        },
+        {
+          "evidence_class": "DESIGN_CAD_NOT_INSTALLED_METROLOGY",
+          "path": "hardware/static_overhead_camera/cad/output/assembly/printable_camera_portal_prototype.step",
+          "sha256": "09ef1c1f1aff5fc5237b1b6d8fb40d351df0e3866ff6e3334f4c8a742a9d83f2"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT",
+      "qualification_actions": [
+        "Derive a conservative envelope from the pinned candidate CAD.",
+        "Review the installed article, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_module",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CATALOG_IDENTITY_AND_OPTICS",
+          "path": "software/config/camera_profiles/arducam_b0477_imx283_16mm.json",
+          "sha256": "c15264f866d81b99cc1155171e21d3416d3a1fa7a244b5ae97642cc989f2e024"
+        },
+        {
+          "evidence_class": "NOMINAL_CAGE_CAD",
+          "path": "hardware/static_overhead_camera/cad/output/assembly/camera_cage_nominal_subassembly.step",
+          "sha256": "3f820a69d436db0a08215a7ddc857da6f3eed12b36ae726977ccfed83d9dc1b5"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT",
+      "qualification_actions": [
+        "Derive a conservative envelope from the pinned candidate CAD.",
+        "Review the installed article, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_connector",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONNECTOR_KEEPER_DESIGN_CAD",
+          "path": "hardware/static_overhead_camera/cad/output/revisions/08D-C2_usb_keeper_v1/08D-C2_ABS_USB_clearance_keeper_v1.step",
+          "sha256": "4bfab94bdeb8a828de778f79532110b27eb9bc4c5d3017a5bd660cb69bc4a512"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT",
+      "qualification_actions": [
+        "Derive a conservative envelope from the pinned candidate CAD.",
+        "Review the installed article, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "installation:static_camera_cable",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CABLE_VISIBILITY_CONTEXT_ONLY",
+          "path": "software/config/live_camera_feedback_session_20261015.json",
+          "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "QUALIFY_FIXED_FLEXIBLE_ENVELOPE",
+      "qualification_actions": [
+        "Define the fixed camera cable's conservative occupied region.",
+        "Record routing variability and envelope uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "RIGID_FRAME",
+      "body_id": "attachment:contact_tool",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "BARE_JAW_CONFIGURATION_CONTEXT",
+          "path": "software/config/live_camera_feedback_session_20261015.json",
+          "sha256": "48db2369c0aed81a38ca5e61c0e07fd32896828c03f53e20a1685f1b777b823a"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "hand_tcp",
+      "qualification_action_class": "REVIEW_BARE_JAW_ABSENCE_DECLARATION",
+      "qualification_actions": [
+        "Confirm the BARE_JAW profile has no contact-tool body.",
+        "Keep any future stylus in a separate attachment profile."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:board_solid",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "FROZEN_DIGITAL_PHYSICAL_MEASUREMENT_OPEN",
+          "path": "software/freezes/ROCELL-PHASE0-RC03-INT-R1-FREEZE-013/system_manifest.json",
+          "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "REVIEW_RETAINED_DIMENSIONS_AND_BIND_PLACEMENT",
+      "qualification_actions": [
+        "Reuse the retained dimension record; do not request a repeat measurement.",
+        "Review the conservative envelope, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": true,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:keyboard",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "MANUAL_PHOTO_ESTIMATE_ONLY",
+          "path": "software/config/photo_keyboard_registration_manual_20261011.json",
+          "sha256": "cba719b2d336c7d38cb487b481d6c0bfb3189a539b8b31319371879a589bbc2c"
+        },
+        {
+          "evidence_class": "DIMENSION_CONSTRAINED_IMAGE_OVERLAY",
+          "path": "software/ai/eval/b0477_keyboard_overlay_20261016.json",
+          "sha256": "157acbe5e81e784d1fdc3e6a32f092bf2b21a95a24b1b6d0bc2ce6351f8ce407"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "REVIEW_RETAINED_DIMENSIONS_AND_BIND_PLACEMENT",
+      "qualification_actions": [
+        "Reuse the retained dimension record; do not request a repeat measurement.",
+        "Review the conservative envelope, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": true,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:phone",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "SELECTED_NOMINAL_DEVICE",
+          "path": "software/freezes/ROCELL-PHASE0-RC03-INT-R1-FREEZE-013/system_manifest.json",
+          "sha256": "0cfb19c0972d4fe5cc526ca78d44422b2ef9c52354a8da637ec608b8dec7f55d"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "REVIEW_RETAINED_DIMENSIONS_AND_BIND_PLACEMENT",
+      "qualification_actions": [
+        "Reuse the retained dimension record; do not request a repeat measurement.",
+        "Review the conservative envelope, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": true,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:station:keyboard_left",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONTROLLED_DESIGN_CAD",
+          "path": "active-project/RoCell_v0_3/cad/step/keyboard_station_left.step",
+          "sha256": "749d12f4c123c4355d0b10ba7c90d40b3b53157097588d8063f1c9c1309350dd"
+        },
+        {
+          "evidence_class": "NOMINAL_LAYOUT",
+          "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+          "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT",
+      "qualification_actions": [
+        "Derive a conservative envelope from the controlled station CAD.",
+        "Review the installed article, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:station:keyboard_right",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONTROLLED_DESIGN_CAD",
+          "path": "active-project/RoCell_v0_3/cad/step/keyboard_station_right.step",
+          "sha256": "eb236d1c716a55b70be6b77e8364473d4553a34e54e8d1e4aea3bef507fd97fc"
+        },
+        {
+          "evidence_class": "NOMINAL_LAYOUT",
+          "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+          "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT",
+      "qualification_actions": [
+        "Derive a conservative envelope from the controlled station CAD.",
+        "Review the installed article, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    },
+    {
+      "binding_mode": "STATIC_ROOT",
+      "body_id": "workcell:station:phone_tcp",
+      "candidate_source_bindings": [
+        {
+          "evidence_class": "CONTROLLED_DESIGN_CAD",
+          "path": "active-project/RoCell_v0_3/cad/step/phone_tcp_station.step",
+          "sha256": "d44b5a93445dc761df13682001579da495c733eaf83701b988592362eea476a8"
+        },
+        {
+          "evidence_class": "NOMINAL_LAYOUT",
+          "path": "active-project/RoCell_v0_3/config/workcell_layout.json",
+          "sha256": "e84db9aa7b88db442f042c6f546196e350c822a2e7609cb4b652b3da535df2e1"
+        }
+      ],
+      "measurement_status_after_work_order": "PENDING",
+      "parent_frame": "board",
+      "qualification_action_class": "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT",
+      "qualification_actions": [
+        "Derive a conservative envelope from the controlled station CAD.",
+        "Review the installed article, board-frame placement, and uncertainty."
+      ],
+      "repeat_dimension_measurement_requested": false,
+      "retained_dimensions_reused": false,
+      "source_decision": "CANDIDATE_ONLY"
+    }
+  ],
+  "collision_screening_executed": false,
+  "controller_commands": [],
+  "execution_order": [
+    {
+      "body_ids": [
+        "workcell:board_solid",
+        "installation:base_and_factory_clamp"
+      ],
+      "name": "REFERENCE_AND_BASE",
+      "stage": 1
+    },
+    {
+      "body_ids": [
+        "robot:base_link",
+        "robot:link1",
+        "robot:link2",
+        "robot:link3",
+        "robot:link4",
+        "robot:link5",
+        "robot:gripper",
+        "attachment:contact_tool"
+      ],
+      "name": "ROBOT_AND_ATTACHMENT_PROFILE",
+      "stage": 2
+    },
+    {
+      "body_ids": [
+        "installation:static_camera_support",
+        "installation:static_camera_module",
+        "installation:static_camera_connector",
+        "installation:static_camera_cable"
+      ],
+      "name": "STATIC_CAMERA_INSTALLATION",
+      "stage": 3
+    },
+    {
+      "body_ids": [
+        "workcell:keyboard",
+        "workcell:phone",
+        "workcell:station:keyboard_left",
+        "workcell:station:keyboard_right",
+        "workcell:station:phone_tcp"
+      ],
+      "name": "WORKCELL_ARTICLES_AND_STATIONS",
+      "stage": 4
+    },
+    {
+      "body_ids": [],
+      "name": "GLOBAL_CLEARANCE_AND_UNCERTAINTY_REVIEW",
+      "stage": 5
+    }
+  ],
+  "hardware_access": false,
+  "measurement_manifest_file_sha256": "5ca32f47d65c138c3916361232d608f7ef4f5c40b98edf8d380794e6115d9702",
+  "next_required_stage": "EXECUTE_REVIEWED_QUALIFICATION_WORK_ORDER",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "profile_generated": false,
+  "qualification_action_class_counts": {
+    "DERIVE_CAD_ENVELOPE_AND_BIND_INSTALLED_PLACEMENT": 6,
+    "QUALIFY_FIXED_FLEXIBLE_ENVELOPE": 1,
+    "QUALIFY_INSTALLED_BASE_AND_CLAMP": 1,
+    "REVIEW_BARE_JAW_ABSENCE_DECLARATION": 1,
+    "REVIEW_CONSERVATIVE_LINK_ENVELOPE": 7,
+    "REVIEW_RETAINED_DIMENSIONS_AND_BIND_PLACEMENT": 3
+  },
+  "repeat_dimension_measurement_body_ids": [],
+  "required_body_count": 19,
+  "retained_dimension_body_ids": [
+    "workcell:board_solid",
+    "workcell:keyboard",
+    "workcell:phone"
+  ],
+  "schema": "rocell.static_overhead_collision_qualification_work_order.v1",
+  "source_audit_file_sha256": "0b499d9493648d0a9286decc237b979e74a119ad20755c3870beea9b68da4dfc",
+  "source_audit_report_sha256": "868f7cf5515e47c4dfc84a5c1923973befb21f4bfc122822241be43d24c6bc3b",
+  "status": "READY_FOR_REVIEWED_QUALIFICATION_ZERO_AUTHORITY",
+  "work_order_sha256": "14ad82ae7e09bc81da1357d26fe72c7444de7a152dc755540017a28a5f86bac6"
+}

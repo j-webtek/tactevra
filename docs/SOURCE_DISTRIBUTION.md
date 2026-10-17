@@ -681,3 +681,11 @@ repository sources for all 19 collision bodies without promoting any candidate
 to measured geometry or opening hardware. The exact governed ceiling is
 therefore 6,633; every logical-byte, blob, duplicate, and reduction limit
 remains unchanged.
+
+The static-overhead qualification-work-order increment adds four reviewable
+text files: one deterministic work-order module, one command-line wrapper, one
+compact retained report, and one focused regression test. It reuses retained
+dimensions and partitions the remaining qualification work without generating
+an installed profile, opening hardware, or requesting repeated measurement.
+The exact governed ceiling is therefore 6,637; every logical-byte, blob,
+duplicate, and reduction limit remains unchanged.

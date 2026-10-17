@@ -12827,3 +12827,29 @@ rewriting history. New entries must use a unique evidence ID.
   movements 0; physical authority false. Next action is to qualify installed
   envelopes, placements, and uncertainties without repeating retained source
   discovery.
+
+### E-20261017-AI-STATIC-COLLISION-QUALIFICATION-WORK-ORDER-001 — retained dimensions preserved
+
+- Source: candidate-source audit file SHA-256
+  `0b499d9493648d0a9286decc237b979e74a119ad20755c3870beea9b68da4dfc`,
+  canonical audit SHA-256
+  `868f7cf5515e47c4dfc84a5c1923973befb21f4bfc122822241be43d24c6bc3b`,
+  and static-overhead contract SHA-256
+  `fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39`.
+- Work partition: 19 unique body rows are assigned across five ordered stages.
+  Seven robot bodies require conservative whole-link envelope review; six
+  CAD-backed fixed bodies require envelope derivation and installed-placement
+  review; base/clamp, fixed cable, and bare-jaw attachment retain separate
+  actions; board, keyboard, and phone reuse their retained dimension records.
+- Reuse boundary: repeated dimension measurement is requested for zero bodies.
+  Retained dimensions do not establish accepted envelopes, placements, or
+  uncertainties. All 19 measurement rows remain pending, and any future stylus
+  remains a separate attachment profile from `BARE_JAW`.
+- Artifact: `software/ai/eval/static_overhead_collision_qualification_work_order_20261017.json`,
+  file SHA-256
+  `7778833cd1cbab12a1559de5900fa053843a062b9e2dc4565968a2ea913b9d2b`,
+  canonical work-order SHA-256
+  `14ad82ae7e09bc81da1357d26fe72c7444de7a152dc755540017a28a5f86bac6`.
+- Result: `READY_FOR_REVIEWED_QUALIFICATION_ZERO_AUTHORITY`; profile generation
+  false; collision screening false; commands 0; hardware access false;
+  movements 0; physical authority false.
