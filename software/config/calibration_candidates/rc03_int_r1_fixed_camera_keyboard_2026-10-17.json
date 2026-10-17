@@ -1,0 +1,60 @@
+{
+  "schema": "rocell.fixed_camera_keyboard_registration_input.v1",
+  "status": "MANUALLY_REVIEWED_FIXED_CAMERA_ESTIMATE_ONLY",
+  "created_local": "2026-10-17",
+  "frame": {
+    "external_path_hint": "output/calibration/rc03-int-r1/2026-10-17/heldout-keyboard/heldout-001.png",
+    "sha256": "09f9ce8a02360aeccc81195312791c6e4262cbc8b99d1d79b74fe3d2d376b199",
+    "bytes": 3185340,
+    "width_px": 1920,
+    "height_px": 1080,
+    "camera_mode": {
+      "backend": "DirectShow",
+      "width": 1920,
+      "height": 1080,
+      "pixel_format": "YUY2",
+      "fps": 60.0
+    }
+  },
+  "bindings": {
+    "board_plane_calibration": {
+      "path": "software/config/calibration_candidates/rc03_int_r1_fixed_board_plane_2026-10-17.json",
+      "sha256": "55e8eefa844b510b4b2e0958cbe8490f01b4c42d081758eb051e3826a6e73fd9"
+    },
+    "target_profile": {
+      "path": "software/config/static_nominal_target_profiles.json",
+      "sha256": "0cc4b46ce6a7b94f32ba1d64f9818c094f6005636c4d56480f5907b773cd5276",
+      "profile_id": "periboard-409-us-nominal-sim-v1-static-v1"
+    }
+  },
+  "board_frame": "RC03_B_FRONT_LEFT_X_RIGHT_Y_REAR_MM",
+  "detected_world_tag_centers_px": {
+    "1": [1253.926, 891.103],
+    "2": [230.0457, 150.3831],
+    "3": [1647.226, 40.9035]
+  },
+  "detected_station_tag_centers_px": {
+    "4": [749.9667, 408.4789],
+    "5": [1313.6697, 348.0764]
+  },
+  "keyboard_corners_px": {
+    "front_left": [193.423, 870.102],
+    "front_right": [1218.323, 801.159],
+    "rear_right": [1187.0, 425.0],
+    "rear_left": [244.0, 492.0]
+  },
+  "housing_dimensions_mm": [315.0, 147.0, 21.0],
+  "thresholds": {
+    "max_world_tag_center_error_mm": 2.0,
+    "max_station_tag_center_drift_px": 2.0,
+    "max_housing_corner_fit_error_mm": 15.0,
+    "individual_key_localization_limit_mm": 7.0
+  },
+  "limitations": [
+    "The source is one held-out frame from the fixed camera and is retained outside the repository by hash.",
+    "Keyboard housing corners were manually reviewed against visible housing edges in the fixed-camera frame.",
+    "The board homography maps Z=0 while the observed keyboard housing top is elevated, so the dimension-constrained housing fit absorbs parallax.",
+    "The housing fit residual exceeds the individual-key localization limit; nominal key centers are region estimates, not measured contact targets.",
+    "No board-to-robot transform, installed clearance result, key-contact result, or stylus TCP is established by this registration."
+  ]
+}

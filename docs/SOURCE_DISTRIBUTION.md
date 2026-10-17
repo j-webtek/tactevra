@@ -79,6 +79,14 @@ overlay remain in the external physical-evidence store and are represented by
 hash rather than copied into the source archive; all byte and reduction limits
 remain unchanged.
 
+The RC03 fixed-camera keyboard-region increment adds five governed paths: one
+compact hash-bound registration input, one estimator, one assessment schema,
+one focused test module, and one operating note. The reviewed tracked-file
+ceiling moves from 6,479 to 6,484 files. The 3.19 MiB held-out frame remains in
+the external physical-evidence store. The measured tree is 661,827,614 logical
+bytes with 4,890,152 governed duplicate bytes. Existing status and camera notes
+are updated in place, and all byte and reduction limits remain unchanged.
+
 The issue #190 first-hover extraction adds ten net governed paths beyond the
 preceding merged snapshot: three replay/verifier modules, three tests, and four
 retained or derived evidence records. The reviewed tracked-file ceiling

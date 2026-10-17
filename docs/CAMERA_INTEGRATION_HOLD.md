@@ -10,6 +10,11 @@
 The overhead camera is now installed and fixed relative to the RC03 board. A
 provisional planar mapping has been retained and integrated as described in
 [`RC03_FIXED_BOARD_PLANE_INTEGRATION.md`](../software/docs/RC03_FIXED_BOARD_PLANE_INTEGRATION.md).
+One held-out fixed-camera frame also passed a temporal board check and produced
+a reproducible keyboard-region estimate, as recorded in
+[`RC03_FIXED_CAMERA_KEYBOARD_REGISTRATION.md`](../software/docs/RC03_FIXED_CAMERA_KEYBOARD_REGISTRATION.md).
+Its 13.38 mm maximum housing residual exceeds the 7 mm individual-key limit, so
+key-center localization and hover planning remain held.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
@@ -52,7 +57,7 @@ physical action.
 - Final camera identity, mode, focus, exposure, resolution, and optical-domain
   qualification.
 - Full intrinsic and 3-D camera-to-board calibration and repeatability measurement.
-- Final-camera keyboard localization accuracy or safe-region-fit claims.
+- Final-camera individual-key localization accuracy or safe-region-fit claims.
 - A complete measured configuration epoch binding the camera, support, board,
   keyboard, robot base, tool, cables, and lighting.
 - Perception-driven noncontact hover qualification.
@@ -80,8 +85,10 @@ candidate only after the following are true:
 After those conditions are met, follow this order:
 
 1. Commission the camera-to-board, board-to-robot, keyboard-to-board, and
-   tool-to-joint transforms.
-2. Collect disjoint calibration and held-out final-camera observations.
+   tool-to-joint transforms. The provisional board-plane and keyboard-region
+   estimates cover only part of this item.
+2. Collect disjoint calibration and held-out final-camera observations. One
+   temporal held-out frame is now retained; individual key observations remain.
 3. Run the frozen preflight and localization evaluator.
 4. Demonstrate that the combined perception, calibration, tracking/settling,
    and tool uncertainty fits inside the chosen target safe region.

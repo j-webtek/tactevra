@@ -53,7 +53,11 @@ artifact that promotes the stylus profile before those measurements exist.
 1. Feed detected target pixels through `project_pixel()` and retain the source
    frame hash, calibration hash, projected board coordinate, and uncertainty.
 2. Register the keyboard in board coordinates and validate several held-out key
-   centers against camera feedback.
+   centers against camera feedback. The first fixed-camera housing registration
+   is now recorded in
+   [`RC03_FIXED_CAMERA_KEYBOARD_REGISTRATION.md`](RC03_FIXED_CAMERA_KEYBOARD_REGISTRATION.md):
+   its region estimate passes temporal board checks, while its 13.38 mm maximum
+   housing residual keeps individual-key localization blocked.
 3. Convert the verified board target into an approach waypoint through the
    existing measured planner. Keep descent and contact blocked.
 4. Run noncontact hover trials with repeated visual correction and measure the
