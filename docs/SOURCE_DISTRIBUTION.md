@@ -93,7 +93,7 @@ one operating note. The reviewed tracked-file ceiling moves from 6,484 to the
 exact expected 6,488 files. It derives 46 bounded image search windows from the
 already reviewed keyboard quadrilateral and adds no source frame, observed key
 center, board-space target, controller artifact, or authority-bearing output.
-The measured tree is 661,853,206 logical bytes with 4,890,152 governed
+The measured tree is 661,853,262 logical bytes with 4,890,152 governed
 duplicate bytes. Existing status and camera notes are updated in place, and all
 byte, duplicate, and reduction limits remain unchanged.
 
