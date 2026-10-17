@@ -2231,6 +2231,22 @@ _ROARM_BODY_REQUIREMENTS = (
     ("attachment:contact_tool", "hand_tcp", CollisionBodyRole.TOOL),
 )
 
+_ARM_CAMERA_BODY_IDS = frozenset(
+    {
+        "attachment:camera_holder",
+        "attachment:camera_module",
+        "attachment:camera_connector",
+        "attachment:moving_camera_cable",
+    }
+)
+
+_STATIC_OVERHEAD_CAMERA_BODY_REQUIREMENTS = (
+    ("installation:static_camera_support", CollisionBodyRole.ATTACHMENT),
+    ("installation:static_camera_module", CollisionBodyRole.CAMERA),
+    ("installation:static_camera_connector", CollisionBodyRole.CONNECTOR),
+    ("installation:static_camera_cable", CollisionBodyRole.CABLE),
+)
+
 
 def build_roarm_m3_prehardware_collision_contract(
     model: UrdfModel,
@@ -2359,6 +2375,66 @@ def build_roarm_m3_prehardware_collision_contract(
     )
 
 
+def build_roarm_m3_static_overhead_collision_contract(
+    model: UrdfModel,
+    scene: NominalWorkcellScene | None = None,
+) -> CollisionGeometryContract:
+    """Build the fail-closed roster for a fixed external overhead camera.
+
+    The historical prehardware contract models an arm camera, including one
+    configuration-sampled moving camera cable. A static eye-to-hand epoch has
+    different bodies: support, camera, connector, and cable are all fixed in
+    the board-root frame. Their primitives remain unknown until installed
+    measurements are accepted.
+    """
+
+    historical = build_roarm_m3_prehardware_collision_contract(model, scene)
+    requirements = [
+        item
+        for item in historical.requirements
+        if item.body_id not in _ARM_CAMERA_BODY_IDS
+    ]
+    bodies = [
+        item for item in historical.bodies if item.body_id not in _ARM_CAMERA_BODY_IDS
+    ]
+    insertion = next(
+        index
+        for index, item in enumerate(requirements)
+        if item.body_id == "attachment:contact_tool"
+    )
+    static_requirements = [
+        CollisionBodyRequirement(
+            body_id,
+            historical.root_frame,
+            role,
+            CollisionBindingMode.STATIC_ROOT,
+            "complete installed fixed-camera envelope is required for collision diagnostics",
+        )
+        for body_id, role in _STATIC_OVERHEAD_CAMERA_BODY_REQUIREMENTS
+    ]
+    static_bodies = [
+        CollisionBody(
+            body_id,
+            historical.root_frame,
+            role,
+            CollisionEvidenceState.UNKNOWN,
+            (),
+            CollisionBindingMode.STATIC_ROOT,
+            "installed fixed-camera dimensions and board-frame envelope remain open",
+        )
+        for body_id, role in _STATIC_OVERHEAD_CAMERA_BODY_REQUIREMENTS
+    ]
+    requirements[insertion:insertion] = static_requirements
+    bodies[insertion:insertion] = static_bodies
+    return CollisionGeometryContract(
+        contract_id="ROCELL-ROARM-M3-STATIC-OVERHEAD-PREHARDWARE-COLLISION-V1",
+        root_frame=historical.root_frame,
+        requirements=tuple(requirements),
+        bodies=tuple(bodies),
+        pair_exclusions=historical.pair_exclusions,
+    )
+
+
 __all__ = [
     "COLLISION_AUDIT_SCHEMA",
     "COLLISION_CONTRACT_SCHEMA",
@@ -2395,6 +2471,7 @@ __all__ = [
     "SampledCollisionGeometry",
     "audit_collision_geometry",
     "build_roarm_m3_prehardware_collision_contract",
+    "build_roarm_m3_static_overhead_collision_contract",
     "evaluate_collision_pose",
     "evaluate_collision_sweep",
 ]
