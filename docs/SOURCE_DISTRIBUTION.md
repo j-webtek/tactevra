@@ -87,6 +87,16 @@ the external physical-evidence store. The measured tree is 661,827,614 logical
 bytes with 4,890,152 governed duplicate bytes. Existing status and camera notes
 are updated in place, and all byte and reduction limits remain unchanged.
 
+The RC03 fixed-camera key-feedback ROI increment adds four governed paths: one
+deterministic projective mapper, one output schema, one focused test module, and
+one operating note. The reviewed tracked-file ceiling moves from 6,484 to the
+exact expected 6,488 files. It derives 46 bounded image search windows from the
+already reviewed keyboard quadrilateral and adds no source frame, observed key
+center, board-space target, controller artifact, or authority-bearing output.
+The measured tree is 661,853,206 logical bytes with 4,890,152 governed
+duplicate bytes. Existing status and camera notes are updated in place, and all
+byte, duplicate, and reduction limits remain unchanged.
+
 The issue #190 first-hover extraction adds ten net governed paths beyond the
 preceding merged snapshot: three replay/verifier modules, three tests, and four
 retained or derived evidence records. The reviewed tracked-file ceiling
