@@ -533,3 +533,19 @@ coplanar tag arrangement establishes visibility and stability, but does not
 independently solve intrinsics. The target must be presented at varied center,
 edge, corner, distance, and tilt views while the camera and board remain fixed.
 No new target print or repeated board/tag-center measurement is required.
+
+### Precommitted multi-view dataset
+
+`software/ai/eval/static_intrinsics_multiview_capture_contract_20261016.json`
+freezes 32 capture slots before physical calibration: 24 training and 8 held
+out. The schedule covers nine image regions, three tilt bands, four rotation
+bands, and two apparent-area bands. A minimum of 20 training and 6 held-out
+views must remain after review. Fixed-pose duplicates are ineligible, rejected
+slots cannot change split, and every accepted image must retain its source hash
+and observed target geometry before fitting.
+
+During this collection the installed camera and board remain fixed; only the
+existing target moves. Capture remains blocked until that target's immutable
+identity, metric feature definition, two-axis scale measurements, and rigid
+flat backing are recorded. This contract requests no new print and opens no
+camera or robot transport.

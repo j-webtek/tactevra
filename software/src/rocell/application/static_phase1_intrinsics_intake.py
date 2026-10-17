@@ -32,6 +32,9 @@ _REHEARSAL = Path(
 _LOCKED_CONTROLS = Path(
     "software/ai/eval/b0477_locked_controls_qualification_20261016.json"
 )
+_MULTIVIEW_CONTRACT = Path(
+    "software/ai/eval/static_intrinsics_multiview_capture_contract_20261016.json"
+)
 
 
 class StaticPhase1IntrinsicsIntakeError(ValueError):
@@ -119,11 +122,13 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
     profile_path = root / _PROFILE
     rehearsal_path = root / _REHEARSAL
     locked_controls_path = root / _LOCKED_CONTROLS
+    multiview_contract_path = root / _MULTIVIEW_CONTRACT
     session = _read(session_path)
     coverage = _read(coverage_path)
     profile = _read(profile_path)
     rehearsal = _read(rehearsal_path)
     locked_controls = _read(locked_controls_path)
+    multiview_contract = _read(multiview_contract_path)
     if (
         locked_controls.get("schema")
         != "rocell.b0477_locked_controls_qualification.v1"
@@ -132,6 +137,16 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
     ):
         raise StaticPhase1IntrinsicsIntakeError(
             "locked electronic controls are not qualified"
+        )
+    if (
+        multiview_contract.get("schema")
+        != "rocell.static_intrinsics_multiview_capture_contract.v1"
+        or multiview_contract.get("status")
+        != "PRECOMMITTED_CAPTURE_CONTRACT_TARGET_IDENTITY_REQUIRED"
+        or multiview_contract.get("capture_ready") is not False
+    ):
+        raise StaticPhase1IntrinsicsIntakeError(
+            "physical-intrinsics multi-view contract is not precommitted"
         )
 
     recomputed = assess_static_phase1_retained_evidence(root)
@@ -259,6 +274,11 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
                     "qualification_sha256"
                 ),
             },
+            "multiview_capture_contract": {
+                "path": _MULTIVIEW_CONTRACT.as_posix(),
+                "artifact_sha256": _sha256(multiview_contract_path),
+                "contract_sha256": multiview_contract.get("contract_sha256"),
+            },
         },
         "retained_runtime_binding": {
             "friendly_name": identity.get("friendly_name"),
@@ -302,9 +322,14 @@ def plan_static_phase1_intrinsics_intake(workspace: Path) -> dict[str, Any]:
             "split_must_be_committed_before_solution_review": True,
             "synthetic_rehearsal_may_fill_physical_fields": False,
         },
+        "multiview_capture_contract": {
+            "status": multiview_contract.get("status"),
+            "dataset_commitment": multiview_contract.get("dataset_commitment"),
+            "target_intake": multiview_contract.get("target_intake"),
+        },
         "next_action": (
-            "COMPLETE_EXISTING_TARGET_IDENTITY_AND_PRECOMMIT_"
-            "MULTIVIEW_INTRINSICS_DATASET"
+            "VERIFY_EXISTING_TARGET_IDENTITY_AND_SCALE_THEN_COLLECT_"
+            "PRECOMMITTED_MULTIVIEW_DATASET"
         ),
         "capture_ready": False,
         "authority": {

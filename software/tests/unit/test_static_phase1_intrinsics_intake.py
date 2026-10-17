@@ -57,9 +57,12 @@ def test_plan_binds_retained_runtime_and_rejects_synthetic_substitution(
     assert first["locked_electronic_controls"]["values"]["exposure"] == -3
     assert first["locked_electronic_controls"]["values"]["gain"] == 500
     assert first["next_action"] == (
-        "COMPLETE_EXISTING_TARGET_IDENTITY_AND_PRECOMMIT_"
-        "MULTIVIEW_INTRINSICS_DATASET"
+        "VERIFY_EXISTING_TARGET_IDENTITY_AND_SCALE_THEN_COLLECT_"
+        "PRECOMMITTED_MULTIVIEW_DATASET"
     )
+    assert first["multiview_capture_contract"]["dataset_commitment"][
+        "training_slots"
+    ] == 24
     assert first["authority"]["camera_opened"] is False
     assert first["authority"]["robot_commands_sent"] == 0
     assert len(first["plan_sha256"]) == 64
@@ -75,6 +78,7 @@ def _copy_inputs(source: Path, destination: Path) -> None:
         "software/ai/eval/b0477_keyboard_overlay_20261016.json",
         "software/ai/eval/static_phase1_retained_evidence_coverage_20261016.json",
         "software/ai/eval/b0477_locked_controls_qualification_20261016.json",
+        "software/ai/eval/static_intrinsics_multiview_capture_contract_20261016.json",
         "software/tests/fixtures/camera/b0477_synthetic_intrinsics_rehearsal.json",
     ):
         target = destination / relative
