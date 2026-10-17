@@ -12853,3 +12853,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Result: `READY_FOR_REVIEWED_QUALIFICATION_ZERO_AUTHORITY`; profile generation
   false; collision screening false; commands 0; hardware access false;
   movements 0; physical authority false.
+
+### E-20261017-AI-STATIC-COLLISION-CANDIDATE-ENVELOPES-001 — offline bounds derived
+
+- Source: qualification work-order file SHA-256
+  `7778833cd1cbab12a1559de5900fa053843a062b9e2dc4565968a2ea913b9d2b`,
+  canonical work-order SHA-256
+  `14ad82ae7e09bc81da1357d26fe72c7444de7a152dc755540017a28a5f86bac6`,
+  plus ten exact source bindings recorded in the retained result.
+- Coverage: 16 of 19 bodies now have reproducible conservative candidate
+  envelopes. Seven have candidate placement in the board frame. Robot links
+  remain in local link frames; the camera module and connector remain in local
+  CAD frames. Base/clamp and flexible cable geometry remain pending, while the
+  `BARE_JAW` contact-tool row remains an explicit absence declaration pending
+  acceptance.
+- Reuse boundary: board 610 x 457 x 18 mm, keyboard 315 x 147 x 21 mm, phone
+  77.9 x 164.4 x 7.9 mm, and controlled station meshes are reused. Repeated
+  dimension measurement is requested for zero bodies.
+- Artifact:
+  `software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json`,
+  file SHA-256
+  `8ffd4399d2fa4a82be575b7e68114b86a0d886c486f34abf187d68b469e75d2f`,
+  canonical report SHA-256
+  `c279631ca452d399c3070defbb31adc8d8707db60371bf846a3dd1a1a1db0b55`.
+- Result:
+  `CANDIDATE_ENVELOPES_DERIVED_PLACEMENT_AND_UNCERTAINTY_REVIEW_PENDING`;
+  installed-profile eligibility false; accepted uncertainty bodies 0; profile
+  generation false; collision screening false; commands 0; hardware access
+  false; movements 0; physical authority false.

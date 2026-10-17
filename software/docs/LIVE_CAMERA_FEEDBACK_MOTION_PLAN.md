@@ -863,3 +863,26 @@ Its status is `READY_FOR_REVIEWED_QUALIFICATION_ZERO_AUTHORITY`. Every body
 remains pending; no installed profile or collision screen is produced.
 Commands, hardware access, movement, and physical authority remain zero or
 false.
+
+### Candidate envelope derivation
+
+The first offline execution stage now derives conservative axis-aligned bounds
+from the pinned robot box reductions, frozen workcell dimensions, controlled
+station STL files, and static-camera STL files. The result covers 16 of the 19
+collision bodies. Board, keyboard, phone, three stations, and the printable
+camera support have candidate board-frame placement. Robot links retain local
+link-frame bounds pending the installed base transform; the camera module and
+connector retain local bounds pending their installed transforms.
+
+The retained artifact is
+`software/ai/eval/static_overhead_collision_candidate_envelopes_20261017.json`
+with file SHA-256
+`8ffd4399d2fa4a82be575b7e68114b86a0d886c486f34abf187d68b469e75d2f`
+and canonical report SHA-256
+`c279631ca452d399c3070defbb31adc8d8707db60371bf846a3dd1a1a1db0b55`.
+No repeated board, keyboard, or phone dimension measurement is requested. The
+base and factory clamp, fixed cable, and bare-jaw absence declaration remain
+without candidate geometry, and no uncertainty has been accepted. The next
+stage is installed-placement review and assignment of conservative uncertainty
+values. Profile generation, collision screening, commands, hardware access,
+movement, and physical authority remain zero or false.
