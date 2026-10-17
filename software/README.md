@@ -742,6 +742,28 @@ requires accepted prerequisites, base/clamp identity and envelope, at least
 six diverse correspondences, full-rank observability, held-out residuals, and
 reseat repeatability. It performs no hardware I/O or motion.
 
+Generate the precommitted position-correspondence collection packet:
+
+```powershell
+$env:PYTHONPATH='software/src;software/ai'
+$intake = 'software/ai/eval/installed_base_transform_intake_20261017.json'
+$sha = (Get-FileHash -Algorithm SHA256 $intake).Hash.ToLower()
+python software/ai/run_installed_base_correspondence_packet.py `
+  --intake $intake `
+  --intake-sha256 $sha `
+  --packet-id installed-base-correspondences-20261017-v1 `
+  --created-at-utc 2026-10-17T14:00:00Z `
+  --output software/ai/eval/installed_base_correspondence_packet_20261017.json
+```
+
+The packet precommits six training and two untouched held-out slots across
+board regions and height classes. Every completed slot must bind controller
+feedback, its accepted base-frame point derivation, a simultaneous camera
+observation, and the resulting board-frame point measurement. The offline fit
+reuses the hardened proper-rigid Kabsch implementation and forbids scale or
+shear. Even a passing fit remains a position-only candidate until orientation,
+base/clamp geometry, reviewed thresholds, and reseat evidence are accepted.
+
 From the workspace root:
 
 ```powershell

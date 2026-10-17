@@ -907,3 +907,22 @@ residuals, base/clamp geometry and uncertainty, and repeated reseat results.
 An attachment change continues to invalidate trajectories; a stylus requires
 its own profile. This stage issues no controller command and grants no motion,
 contact, collision-screening, or physical authority.
+
+### Base correspondence collection and offline fit
+
+`software/ai/eval/installed_base_correspondence_packet_20261017.json`
+precommits the next data boundary. Six training slots cover front, rear, left,
+right, low, and high geometry; two center-region samples are held out before
+collection and cannot enter the fit. Existing named poses are retained only as
+collection-planning labels. Every slot requires fresh, synchronized evidence
+in the same workcell epoch and bare-jaw profile.
+
+Each sample binds four hashes: controller feedback, the accepted derivation of
+the witness point in `base_link`, camera observation, and the measurement of
+that same witness point in board frame `B`. The runner can later feed a
+completed packet to the existing bounded proper-rigid correspondence fitter.
+It cannot fit scale or shear and reports training, held-out, and observability
+evidence. A passing result is deliberately classified as a position candidate;
+orientation-diverse validation, base/clamp envelope and uncertainty, reviewed
+thresholds, and two reseat trials remain required before the installed base
+transform can become complete. This packet generates no motion command.
