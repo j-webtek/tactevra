@@ -1,14 +1,19 @@
 # Camera integration hold
 
-**Status:** active physical-integration hold  
-**Started:** September 28, 2026  
+**Status:** fixed camera installed; qualification hold remains
+
+**Started:** September 28, 2026
+
+**Updated:** October 17, 2026
 **Authority:** coordination only; this document grants no movement or hardware authority
 
-Tactevra's next meaningful physical integration milestone depends on the final
-overhead camera being installed in its intended housing and fixed relative to
-the board. Until that installation exists, the project must not invent camera,
-board, keyboard, robot-base, or tool transforms, claim real-camera localization
-accuracy, or describe physical typing as qualified.
+The overhead camera is now installed and fixed relative to the RC03 board. A
+provisional planar mapping has been retained and integrated as described in
+[`RC03_FIXED_BOARD_PLANE_INTEGRATION.md`](../software/docs/RC03_FIXED_BOARD_PLANE_INTEGRATION.md).
+The hold now applies to the remaining commissioned transforms, received-camera
+evidence, tool geometry, held-out localization, and physical action authority.
+The project must not promote the planar mapping into a 3-D, robot-base, tool, or
+contact calibration or describe physical typing as qualified.
 
 This is a targeted hold, not a general development freeze.
 
@@ -42,11 +47,11 @@ only a successful read of current status, not a readiness claim.
 None of this work qualifies a model, a camera, a route, a controller, or a
 physical action.
 
-## Work deferred until the fixed camera is available
+## Work still deferred pending qualification
 
 - Final camera identity, mode, focus, exposure, resolution, and optical-domain
   qualification.
-- Camera-to-board calibration and repeatability measurement.
+- Full intrinsic and 3-D camera-to-board calibration and repeatability measurement.
 - Final-camera keyboard localization accuracy or safe-region-fit claims.
 - A complete measured configuration epoch binding the camera, support, board,
   keyboard, robot base, tool, cables, and lighting.
@@ -57,9 +62,10 @@ physical action.
 Additional broad ghost-motion routines do not close these gaps and should not
 substitute for the fixed-camera campaign.
 
-## Conditions to resume physical integration
+## Conditions to advance beyond guarded board localization
 
-Resume the physical-camera workstream only after the following are true:
+Advance the physical-camera workstream beyond the provisional fixed-plane
+candidate only after the following are true:
 
 1. The final housing revision is recorded and the camera is secured in its
    intended position.

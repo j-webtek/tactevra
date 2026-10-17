@@ -1,0 +1,54 @@
+{
+  "schema": "rocell.fixed_board_plane_candidate_manifest.v1",
+  "configuration": "RC03-INT-R1",
+  "capture_date_local": "2026-10-17",
+  "artifact": {
+    "path": "rc03_int_r1_fixed_board_plane_2026-10-17.json",
+    "bytes": 3765,
+    "sha256": "55e8eefa844b510b4b2e0958cbe8490f01b4c42d081758eb051e3826a6e73fd9"
+  },
+  "externally_retained_sources": [
+    {
+      "name": "board-plane-homography.json",
+      "bytes": 3937,
+      "sha256": "bb6a16ad8fb9460cd7ccbf58aa4ed7ddad595fca909c6e4d68769507acacc73b"
+    },
+    {
+      "name": "board-plane-current.png",
+      "bytes": 3240618,
+      "sha256": "e696432b37e4406047a1ff2852fb96aa1d4fc3e41445643f7fc322b1218097d7"
+    },
+    {
+      "name": "view-007-center-left-rigid.jpg",
+      "bytes": 661816,
+      "sha256": "e69b7dd5458ccbabe13a13b6fd2f7a9a9148c0db7753620926c0d2b03c04a586"
+    },
+    {
+      "name": "board-plane-homography-overlay.png",
+      "bytes": 3365966,
+      "sha256": "4fe00c85f04462922fa5559a2dd75d1b6ec28910d961945f00957d7f478132b1"
+    },
+    {
+      "name": "BOARD_PLANE_CALIBRATION_REPORT.md",
+      "bytes": 1526,
+      "sha256": "2137f894dacebde36d896fce5a9118d74d9d857274a7e86e9cc9d7d90ed46412"
+    },
+    {
+      "name": "intrinsics-rejected-ill-conditioned.json",
+      "bytes": 4221,
+      "sha256": "e0e25d021ef64be8c79cedb7e6a8d3d1a0dd9f0eecde641338cdc600d827bbce"
+    }
+  ],
+  "qualification": {
+    "state": "PROVISIONAL_FIXED_BOARD_PLANE_ONLY",
+    "guarded_localization_candidate": true,
+    "intrinsics_accepted": false,
+    "three_dimensional_pose_accepted": false,
+    "open_loop_contact_authorized": false,
+    "motion_authorized": false
+  },
+  "profile_separation": {
+    "no_attachment": "GUARDED_LOCALIZATION_CANDIDATE",
+    "stylus_attachment": "BLOCKED_PENDING_TCP_CLEARANCE_AND_CONTACT_CALIBRATION"
+  }
+}
