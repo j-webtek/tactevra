@@ -20,7 +20,9 @@ record, and all row comparisons.
 ## Interpretation
 
 This establishes temporal repeatability of coarse row structure in two distinct
-frames. It does not identify physical key centers, refine the keyboard transform,
-emit board-space targets, or authorize motion or contact. The next image step is
-explicit keycap-edge or key-center fitting inside the 46 retained search windows,
-with residuals reported separately for each key.
+frames. The follow-on
+[key-center candidate result](RC03_FIXED_CAMERA_KEY_CENTER_CANDIDATES.md) now
+fits explicit keycap edges inside all 46 retained search windows and records
+per-key two-frame residuals. Those candidates remain image-space evidence; they
+do not refine the keyboard-to-board transform, emit board-space targets, or
+authorize motion or contact.

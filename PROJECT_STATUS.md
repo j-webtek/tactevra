@@ -38,8 +38,11 @@ hold in [the camera integration hold](docs/CAMERA_INTEGRATION_HOLD.md). A
 provisional board-plane map and fixed-camera keyboard-region estimate are now
 recorded. That region yields 46 bounded camera search windows, and the retained
 frame supplies bounded contrast and gap-phase observations for all four main
-key rows. A distinct second frame repeats those features within 1.667 mm.
-Individual-key localization, the remaining commissioned
+key rows. A distinct second frame repeats those features within 1.667 mm. The
+two frames now also produce 46 keycap-edge center candidates with a 2.166 mm
+worst temporal change under the `no_attachment` profile. They remain
+image-space candidates rather than board-space contact targets.
+Board-space individual-key validation, the remaining commissioned
 transforms, and physical action authority still require measured qualification.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
@@ -77,7 +80,7 @@ completed capabilities.
 | Local interface | Browser and terminal rehearsal, task planning, diagnostic exports | Software workflows can be explored without connecting a robot |
 | Text interpretation | Grounded parser and deterministic compiler for supported requests | Supported text can become an ordered list of named actions; arbitrary language is not guaranteed |
 | Scene assessment | Local vision adapters and experimental Gemma scene checks | Saved images can be assessed for device visibility and quality; results remain provisional |
-| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, and repeatable row features across two distinct frames | The fixed setup reproduces the board and exposes stable structure across every main key row, but its 13.38 mm housing residual is too large for the declared 7 mm individual-key limit; no key center has been independently observed and key accuracy remains unqualified |
+| Keyboard localization | KeyboardPoseNet trained on synthetic images plus one fixed-camera keyboard-region estimate, 46 deterministic key feedback search windows, repeatable row features, and 46 two-frame keycap-edge center candidates | The no-attachment fixed view yields repeatable image-space candidates with a 2.166 mm worst temporal change, but the housing rectification has not been independently validated in board space; no board-space key target, board-to-robot transform, clearance result, motion, or contact is authorized |
 | AI-to-arm interface | V2 batch assembler, strict decoder, registry snapshot, and freshness checks | Actual assembler output passes shared software tests with synthetic evidence, preserving action order and rejecting tested invalid inputs |
 | Model/arm compatibility | Shared conformance profile and operational-readiness gate | Software can reject tested incompatibilities and incomplete evidence before execution; a pass does not authorize movement or qualify a physical setup |
 | Precision evidence | Pose-output adapter, deterministic V2 batch producer, identity/capture bindings, and compact held-out synthetic evaluation | The adapter preserves repeated targets and fails closed on invalid qualification, domain, freshness, confidence, identity, or containment; its 14.400834977 mm synthetic bound crosses ordinary key safe regions, so deployment qualification remains uninstalled |
