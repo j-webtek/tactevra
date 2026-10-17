@@ -621,3 +621,11 @@ the ignored runtime evidence directory and are hash-bound from the generated
 report. The exact observed tracked-file count and governed ceiling are therefore
 6,602; every logical-byte, blob, duplicate, and reduction limit remains
 unchanged.
+
+The current bare-jaw route-intake increment adds three reviewable source files:
+one saved-artifact binder, one command-line wrapper, and one focused regression
+test. The binder consumes current planar observation, unsent hover, and retained
+route-readiness JSON without opening a camera or robot transport. Generated
+intake reports stay in the ignored runtime evidence directory. The exact
+observed tracked-file count and governed ceiling are therefore 6,605; every
+logical-byte, blob, duplicate, and reduction limit remains unchanged.
