@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_keyboard_board_registration_v1.schema.json",
+  "title": "Fixed camera keyboard-to-board registration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "profile", "evidence_sha256", "elevated_validation_sha256", "target_profile_sha256", "source_kind", "source_artifact_sha256", "anchor_count", "pose", "anchor_residuals_mm", "max_rms_residual_mm", "max_anchor_residual_mm", "absolute_keyboard_to_board_transform_verified", "board_space_key_candidates_emitted", "board_space_key_candidates", "board_to_robot_transform_verified", "physical_clearance_verified", "motion_targets_emitted", "motion_authorized", "contact_authorized", "blockers", "limitations"],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_keyboard_board_registration.v1"},
+    "status": {"enum": ["ABSOLUTE_KEYBOARD_TO_BOARD_LOCALIZATION_READY", "ABSOLUTE_KEYBOARD_TO_BOARD_LOCALIZATION_REJECTED"]},
+    "profile": {"enum": ["no_attachment", "stylus_attachment"]},
+    "evidence_sha256": {"$ref": "#/$defs/digest"},
+    "elevated_validation_sha256": {"$ref": "#/$defs/digest"},
+    "target_profile_sha256": {"$ref": "#/$defs/digest"},
+    "source_kind": {"enum": ["independent_board_frame_measurements", "accepted_3d_camera_model"]},
+    "source_artifact_sha256": {"$ref": "#/$defs/digest"},
+    "anchor_count": {"type": "integer", "minimum": 3},
+    "pose": {"$ref": "#/$defs/pose"},
+    "anchor_residuals_mm": {
+      "type": "object",
+      "minProperties": 3,
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "max_rms_residual_mm": {"type": "number", "exclusiveMinimum": 0},
+    "max_anchor_residual_mm": {"type": "number", "exclusiveMinimum": 0},
+    "absolute_keyboard_to_board_transform_verified": {"type": "boolean"},
+    "board_space_key_candidates_emitted": {"type": "boolean"},
+    "board_space_key_candidates": {
+      "type": "array",
+      "maxItems": 46,
+      "items": {"$ref": "#/$defs/key"}
+    },
+    "board_to_robot_transform_verified": {"const": false},
+    "physical_clearance_verified": {"const": false},
+    "motion_targets_emitted": {"const": false},
+    "motion_authorized": {"const": false},
+    "contact_authorized": {"const": false},
+    "blockers": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"enum": ["KEYBOARD_TO_BOARD_REGISTRATION_RESIDUAL_EXCEEDED", "BOARD_TO_ROBOT_TRANSFORM_UNVERIFIED", "PHYSICAL_CLEARANCE_UNVERIFIED", "STYLUS_TCP_UNVERIFIED", "STYLUS_TRAJECTORY_UNVERIFIED"]}},
+    "limitations": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "xy": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["front_left_board_xy_mm", "yaw_deg", "rms_residual_mm", "maximum_residual_mm", "median_residual_mm"],
+      "properties": {
+        "front_left_board_xy_mm": {"$ref": "#/$defs/xy"},
+        "yaw_deg": {"type": "number"},
+        "rms_residual_mm": {"type": "number", "minimum": 0},
+        "maximum_residual_mm": {"type": "number", "minimum": 0},
+        "median_residual_mm": {"type": "number", "minimum": 0}
+      }
+    },
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "board_xy_mm"],
+      "properties": {
+        "key_id": {"type": "string", "minLength": 1},
+        "board_xy_mm": {"$ref": "#/$defs/xy"}
+      }
+    }
+  }
+}

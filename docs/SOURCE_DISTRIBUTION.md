@@ -623,3 +623,13 @@ and contact as blockers. No image, calibration corpus, controller artifact, or
 generated geometry enters the archive. All byte, duplicate, and reduction
 limits remain unchanged. The PR #347 committed tree measured 662,047,577 logical bytes
 with 4,890,152 governed duplicate bytes.
+
+The absolute keyboard-to-board registration boundary adds four governed paths:
+one CPU-only rigid registration module, one strict result schema, one focused
+test module, and one operating note. The file-count ceiling advances from 6,513
+to the exact expected 6,517 files. The boundary accepts only an accepted 3-D
+camera-model artifact or independently reviewed board-frame anchors, emits
+localization candidates only after a bounded fit, and keeps board-to-robot,
+clearance, motion, and contact authority blocked. No image, calibration corpus,
+controller artifact, generated geometry, or physical measurement enters the
+archive. All byte, duplicate, and reduction limits remain unchanged.

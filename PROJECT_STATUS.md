@@ -46,7 +46,10 @@ board-plane audit places 45 of 46 within the 7 mm study limit in both frames;
 in the rectified elevated keyboard plane passes all 46 keys with a 3.328 mm
 worst residual and reduces `SPACE` to 2.889 mm reference and 1.238 mm repeat.
 This isolates the prior failure to Z=0 projection but does not create
-board-space contact targets. Absolute keyboard-to-board registration,
+board-space contact targets. A typed absolute keyboard-to-board registration
+boundary now requires accepted 3-D camera evidence or at least three
+independent noncollinear board-frame anchors before it emits 46 localization
+candidates. Absolute keyboard-to-board registration,
 independent physical key measurement, the remaining commissioned
 transforms, and physical action authority still require measured qualification.
 
