@@ -443,6 +443,43 @@ completed current board-plane localization or grant off-plane calibration.
 Changing to the stylus invalidates this intake and starts its separate profile
 and trajectory family.
 
+## 2026-10-16 current H layout-sensitivity replay
+
+`run_current_target_sensitivity.py` consumes the current bare-jaw intake and
+derives one board-frame `H` contact proposal at the observed surface point. It
+then calls the existing geometry, sampled IK, and dense-route screen with the
+retained promoted park `(290, 10)` mm and unmeasured 120 mm layout hypothesis.
+The contact proposal exists only to exercise the complete approach route; it
+does not change the blocked `HOVER` request or authorize descent.
+
+The layout hypothesis belongs to the immutable FREEZE-013 static bundle. The
+active tree is FREEZE-014, so reproduction must supply a detached source
+checkout at the reconciliation commit rather than relabeling the historical
+bundle. One reproducible setup is:
+
+```powershell
+git worktree add --detach C:\path\to\tactevra-freeze013-sim `
+  869d6f7ed7d1013a8003457a819ccaee3a03a1e7
+$env:PYTHONPATH = "software/src;software/ai"
+python software/ai/run_current_target_sensitivity.py `
+  --intake <current-bare-jaw-route-intake.json> `
+  --simulation-workspace C:\path\to\tactevra-freeze013-sim `
+  --output <current-h-freeze013-layout-sensitivity.json>
+```
+
+The current replay evaluates surface point
+`(212.950706, 149.209580, 21.000000)` mm and hover point
+`(212.950706, 149.209580, 48.795300)` mm. Geometry passes, sampled IK converges,
+and all 32 dense-route waypoints are accepted with no first failure. The report
+status is `CURRENT_H_PASSES_UNMEASURED_LAYOUT_SENSITIVITY`, and its canonical
+SHA-256 is
+`b9a22cb1e03211b37528d613f5bb532c8103f22d1deab650359dfe160f1f0d86`.
+The result narrows the old nominal `PARK` failure to setup and registration
+assumptions. It does not establish installed reachability because the promoted
+base pose, 120 mm tool, controller-to-model correlation, arm-to-board transform,
+and installed collision geometry remain unmeasured. Hardware access, commands,
+writes, and physical authority remain zero.
+
 ## 2026-10-16 bare-jaw route-readiness audit
 
 The deterministic zero-dispatch audit at
