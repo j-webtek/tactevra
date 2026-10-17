@@ -887,3 +887,23 @@ without candidate geometry, and no uncertainty has been accepted. The next
 stage is installed-placement review and assignment of conservative uncertainty
 values. Profile generation, collision screening, commands, hardware access,
 movement, and physical authority remain zero or false.
+
+### Installed base-transform intake
+
+The installed base transform is now represented by
+`software/ai/eval/installed_base_transform_intake_20261017.json`. The artifact
+reuses the operator-measured six-tag XY map, board dimensions, fixed workcell
+epoch, neutral observation pose and servo-register sample, and seven local
+robot-link envelopes. These retained facts prevent repeated measurement, but
+they do not independently solve the robot-base pose.
+
+The intake explicitly excludes the `[305, 457]` and `[305, 557]` reach-study
+coordinates, the virtual `[385, 532, 70.1]` mm / -105 degree sensitivity pose,
+and the nominal simulation transform from physical calibration. The physical
+`B_T_base_link` fields remain null until the Phase-1 prerequisites and diverse
+robot-to-board correspondence set are accepted. The completion validator also
+requires rank and conditioning evidence, held-out position and orientation
+residuals, base/clamp geometry and uncertainty, and repeated reseat results.
+An attachment change continues to invalidate trajectories; a stylus requires
+its own profile. This stage issues no controller command and grants no motion,
+contact, collision-screening, or physical authority.
