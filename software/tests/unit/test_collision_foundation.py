@@ -40,6 +40,7 @@ from rocell.simulation.collision import (
     SphereMm,
     SampledCollisionGeometry,
     audit_collision_geometry,
+    build_roarm_m3_static_overhead_collision_contract,
     evaluate_collision_pose,
     evaluate_collision_sweep,
 )
@@ -193,6 +194,46 @@ def test_current_artifact_audit_is_context_bound_and_names_every_gap() -> None:
         ["phase_specific_tool_or_contact_allowances_are_global_exclusions"]
         is False
     )
+
+
+def test_static_overhead_contract_replaces_arm_camera_roster() -> None:
+    context = load_simulation_context(WORKSPACE, MANIFEST)
+    report = assess_current_collision_readiness(context)
+    contract = build_roarm_m3_static_overhead_collision_contract(
+        inspect_pinned_urdf_collision_evidence(
+            context.scenario.model_path, context.scenario.model_sha256
+        ).loaded_model.model,
+        context.scene,
+    )
+
+    body_ids = {item.body_id for item in contract.requirements}
+    assert len(contract.requirements) == len(report.contract.requirements)
+    assert not {
+        "attachment:camera_holder",
+        "attachment:camera_module",
+        "attachment:camera_connector",
+        "attachment:moving_camera_cable",
+    } & body_ids
+    expected = {
+        "installation:static_camera_support",
+        "installation:static_camera_module",
+        "installation:static_camera_connector",
+        "installation:static_camera_cable",
+    }
+    assert expected <= body_ids
+    static_requirements = {
+        item.body_id: item for item in contract.requirements if item.body_id in expected
+    }
+    assert all(
+        item.parent_frame == "board"
+        and item.binding_mode is CollisionBindingMode.STATIC_ROOT
+        for item in static_requirements.values()
+    )
+    assert not any(
+        item.binding_mode is CollisionBindingMode.CONFIGURATION_SAMPLED
+        for item in contract.requirements
+    )
+    assert contract.pair_exclusions == report.contract.pair_exclusions
 
 
 def test_exact_pinned_urdf_snapshot_inventories_collision_tags(tmp_path: Path) -> None:

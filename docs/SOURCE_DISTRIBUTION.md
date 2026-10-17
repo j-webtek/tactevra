@@ -655,3 +655,11 @@ claiming collision clearance. Generated bridge reports and the detached
 FREEZE-013 checkout remain outside the source archive. The exact governed
 ceiling is therefore 6,614; every logical-byte, blob, duplicate, and reduction
 limit remains unchanged.
+
+The static-overhead collision-intake increment adds three reviewable source
+files: one bridge-to-collision intake module, one command-line wrapper, and one
+focused regression test. Existing collision code and tests gain an additive
+static-camera contract while retaining the historical arm-camera contract.
+Generated intake reports and the detached FREEZE-013 checkout remain ignored.
+The exact governed ceiling is therefore 6,617; every logical-byte, blob,
+duplicate, and reduction limit remains unchanged.

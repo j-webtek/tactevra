@@ -12,8 +12,8 @@
 
 This foundation provides a typed, bounded, deterministic collision-model
 contract for the RoArm-M3-Pro RC03 workcell. It is the software boundary for
-representing robot links, the factory base/clamp, camera assembly, moving
-camera cable, contact tool, and static placemat objects before pose and sweep
+representing robot links, the factory base/clamp, the selected camera
+architecture, contact tool, and static placemat objects before pose and sweep
 diagnostics are attempted.
 
 It does not authorize the robot. Every contract, audit, pose report, and sweep
@@ -33,6 +33,22 @@ The implementation is split between:
 This is separate from the existing geometric route simulator's coarse
 tool-tip-versus-AABB checks. The collision foundation is not yet wired into a
 typing or phone-tapping route executor.
+
+### Camera-architecture-specific rosters
+
+`build_roarm_m3_prehardware_collision_contract` retains the historical optional
+arm-camera roster, including a configuration-sampled moving camera cable.
+`build_roarm_m3_static_overhead_collision_contract` is the additive Phase 1
+roster. It replaces those four arm-camera bodies with the static camera support,
+camera module, connector, and cable, all bound as `STATIC_ROOT` bodies in the
+board frame. The static roster does not infer their shapes: installed measured
+primitives are still required before collision evaluation can run.
+
+The rosters cannot be interchanged within one profile. Changing camera
+architecture changes the collision-contract hash and requires a distinct
+installed profile. A fixed external camera cable therefore creates no
+configuration-sampled geometry slots along an arm route; it remains required
+static environment geometry and still needs an accepted installed envelope.
 
 ## Versioned data model
 

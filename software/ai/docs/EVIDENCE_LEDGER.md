@@ -12741,3 +12741,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Authority: collision screening executed false; continuous path proven false;
   hardware access false; commands 0; writes 0; physical authority false. The
   generated report and detached historical checkout remain untracked.
+
+### E-20261016-AI-STATIC-ENTRY-COLLISION-INTAKE-001 — camera roster corrected
+
+- Source: entry-bridge report SHA-256
+  `cc7eb690d1e1aca7e144c3122a4e30602504de7c3a899bcd7af61ad41a65ab31`
+  and immutable FREEZE-013 reconciliation commit
+  `869d6f7ed7d1013a8003457a819ccaee3a03a1e7`.
+- Architecture correction: the additive static-overhead contract excludes the
+  historical arm-camera holder, module, connector, and moving cable. Static
+  support, camera module, connector, and cable are board-root `STATIC_ROOT`
+  bodies. The historical contract remains available for the separate optional
+  arm-camera architecture.
+- Exact intake: 35 bridge samples and 34 adjacent arm segments; static-overhead
+  collision-contract SHA-256
+  `fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39`.
+  Fixed-camera configuration-geometry and configuration-sweep slot counts are
+  zero. This does not remove the conservative inter-sample arm sweep stage.
+- Remaining geometry: missing reduced bodies are `base_link`, `gripper`, and
+  `link1` through `link5`. Unknown installed bodies are base/clamp, contact
+  tool, static support, camera module, connector, and fixed camera cable.
+  Accepted pair exclusions plus measured clearance and uncertainty remain
+  required.
+- Result: `BLOCKED_STATIC_OVERHEAD_INSTALLED_COLLISION_PROFILE_REQUIRED`;
+  canonical report SHA-256
+  `f9b4c3e16298dc40936c3e0ccb9eb1f0b9629ed3ea0f6bf4c624497ea533bff6`.
+  Collision screening false; continuous proof false; hardware access false;
+  commands 0; writes 0; physical authority false. Generated evidence and the
+  detached historical checkout remain untracked.

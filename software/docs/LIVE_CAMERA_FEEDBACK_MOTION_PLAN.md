@@ -552,6 +552,40 @@ collision geometry needed to evaluate this polyline. Continuous path proven,
 physical execution authorized, hardware access, commands, and writes remain
 false or zero.
 
+### Static-overhead collision evidence intake
+
+The generic historical collision roster still described an arm-mounted camera.
+`run_current_start_entry_collision_intake.py` now selects an additive
+static-overhead roster before binding the 35-sample entry bridge. The fixed
+support, camera module, connector, and cable are board-root `STATIC_ROOT`
+bodies; the old holder, arm camera, connector, and moving camera cable are
+absent. Reproduce the intake against the same detached FREEZE-013 checkout:
+
+```powershell
+$env:PYTHONPATH = "software/src;software/ai"
+python software/ai/run_current_start_entry_collision_intake.py `
+  --intake <current-bare-jaw-route-intake.json> `
+  --simulation-workspace C:\path\to\tactevra-freeze013-sim `
+  --output <current-start-freeze013-entry-collision-intake.json>
+```
+
+The exact contract SHA-256 is
+`fe86a921dc05c406eef9d052efd77274e795e4d64eb873ea539afae3386d6d39`.
+The seven robot bodies remain missing reduced geometry. The base/clamp,
+bare-jaw tool, static support, camera, connector, and fixed cable remain
+unknown. Because the selected camera path is fixed, required
+configuration-sampled geometry and cable-sweep slots are both zero for the 35
+bridge samples. The 34 adjacent arm segments still require conservative sweep
+qualification after all discrete samples clear.
+
+Status is `BLOCKED_STATIC_OVERHEAD_INSTALLED_COLLISION_PROFILE_REQUIRED`; the
+canonical report SHA-256 is
+`f9b4c3e16298dc40936c3e0ccb9eb1f0b9629ed3ea0f6bf4c624497ea533bff6`.
+This corrects the profile roster; it does not supply any missing shape,
+exclusion, clearance, uncertainty, or calibration evidence. Screening,
+continuous proof, hardware access, commands, writes, and authority remain false
+or zero.
+
 ## 2026-10-16 bare-jaw route-readiness audit
 
 The deterministic zero-dispatch audit at

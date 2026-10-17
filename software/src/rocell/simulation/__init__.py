@@ -89,6 +89,7 @@ from .collision import (
     SampledCollisionGeometry,
     audit_collision_geometry,
     build_roarm_m3_prehardware_collision_contract,
+    build_roarm_m3_static_overhead_collision_contract,
     evaluate_collision_pose,
     evaluate_collision_sweep,
 )
@@ -378,6 +379,7 @@ __all__ = [
     "audit_collision_geometry",
     "bind_static_route_target",
     "build_roarm_m3_prehardware_collision_contract",
+    "build_roarm_m3_static_overhead_collision_contract",
     "evaluate_collision_pose",
     "evaluate_collision_sweep",
     "load_collision_exclusion_policy_candidate",
