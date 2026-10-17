@@ -12711,3 +12711,33 @@ rewriting history. New entries must use a unique evidence ID.
   entry-route and installed collision screen.
 - Authority: hardware access 0; commands 0; writes 0; physical authority false.
   Generated evidence and the detached historical checkout remain untracked.
+
+### E-20261016-AI-CURRENT-START-ENTRY-BRIDGE-001 — bounded reference entry candidate
+
+- Source: current bare-jaw intake SHA-256
+  `02e6ec1936ede521fc43c55b31c5c1ca367de066d2f125f54506b722f23ed0c0`,
+  retained-start sensitivity SHA-256
+  `0a21fbea7be73e9bf4aa7ffe98a01bc10e059bdd24a191bf69a3d10ee8c7f7fe`,
+  and immutable FREEZE-013 reconciliation commit
+  `869d6f7ed7d1013a8003457a819ccaee3a03a1e7`.
+- Candidate: the canonical bounded joint sampler interpolates from reference
+  projection `[-0.0061359232, 0.1549320596, 2.3408546823, 0.2745825610,
+  0.0107378655]` rad to the accepted PARK solution. A `0.05` rad policy yields
+  34 subdivisions and 35 samples; maximum observed joint gap is
+  `0.0496602156448298` rad and every sample is inside the retained joint-limit
+  intersection.
+- Pinned FK: the modeled tool-tip polyline is `450.194006976734` mm long with
+  maximum sampled segment `16.0134964113358` mm. Board-frame bounds are x
+  `[290.0027670230398, 362.78508636213735]` mm, y
+  `[10.01520406465761, 446.21626841995703]` mm, and z
+  `[19.829703088951504, 69.99845272143027]` mm. Status is
+  `REFERENCE_ENTRY_BRIDGE_SAMPLED_COLLISION_EVIDENCE_REQUIRED`; canonical report
+  SHA-256 is
+  `cc7eb690d1e1aca7e144c3122a4e30602504de7c3a899bcd7af61ad41a65ab31`.
+- Meaning: the deterministic bridge removes the direct-splice joint-step
+  discontinuity as an offline candidate. Installed collision clearance and
+  continuous-path acceptance remain open because commissioned arm-to-board,
+  bare-jaw TCP, and installed collision geometry are absent.
+- Authority: collision screening executed false; continuous path proven false;
+  hardware access false; commands 0; writes 0; physical authority false. The
+  generated report and detached historical checkout remain untracked.

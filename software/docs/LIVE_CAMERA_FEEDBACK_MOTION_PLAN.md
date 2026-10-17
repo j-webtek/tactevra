@@ -518,6 +518,40 @@ is an explicit staged entry route after commissioned controller-to-model and
 board-to-arm calibration, followed by installed collision screening. The
 analysis opens no device, sends no command, and grants no physical authority.
 
+### Reference-only staged entry bridge
+
+`run_current_start_entry_bridge.py` turns the rejected direct splice into a
+finite analysis candidate. It uses the repository's canonical bounded joint
+sampler to interpolate from the retained reference projection to the accepted
+PARK solution with a `0.05` rad maximum joint step, then projects every sample
+through the exact pinned FREEZE-013 model and promoted rank-1 layout.
+
+```powershell
+$env:PYTHONPATH = "software/src;software/ai"
+python software/ai/run_current_start_entry_bridge.py `
+  --intake <current-bare-jaw-route-intake.json> `
+  --simulation-workspace C:\path\to\tactevra-freeze013-sim `
+  --output <current-start-freeze013-entry-bridge.json>
+```
+
+The deterministic result contains 34 subdivisions and 35 samples. Its maximum
+observed adjacent joint change is `0.0496602156448298` rad, and all samples are
+inside the retained controller/model joint-limit intersection. Under the
+unmeasured layout hypothesis, the tool-tip polyline is `450.194006976734` mm
+long, its largest sampled segment is `16.0134964113358` mm, and its board-frame
+bounds are x `[290.0027670230398, 362.78508636213735]` mm, y
+`[10.01520406465761, 446.21626841995703]` mm, and z
+`[19.829703088951504, 69.99845272143027]` mm. The canonical report SHA-256 is
+`cc7eb690d1e1aca7e144c3122a4e30602504de7c3a899bcd7af61ad41a65ab31`.
+
+Status `REFERENCE_ENTRY_BRIDGE_SAMPLED_COLLISION_EVIDENCE_REQUIRED` means the
+candidate resolves the discrete joint-step gap for offline study. It does not
+establish installed clearance: the repository still lacks the commissioned
+arm-to-board transform, installed bare-jaw TCP, and installed scene/robot
+collision geometry needed to evaluate this polyline. Continuous path proven,
+physical execution authorized, hardware access, commands, and writes remain
+false or zero.
+
 ## 2026-10-16 bare-jaw route-readiness audit
 
 The deterministic zero-dispatch audit at
