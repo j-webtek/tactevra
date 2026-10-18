@@ -215,6 +215,31 @@ The installed B0477 identity and mode, feedback source, installation witness,
 and review artifacts must be qualified before a physical application can create
 the permit or call this boundary.
 
+### Retained five-capture campaign composition
+
+`rocell.calibration.fixed_camera_retained_campaign_v1` removes the remaining
+manual seam between the six-file retained observation bundles and the passive
+campaign compiler. The caller provides a bounded list of typed source bundles
+and one shared six-tag map. Every bundle carries exact byte pins for its bracket
+record, separate native JPEG, reviewed intrinsics, six-tag evidence, reviewed
+bare-jaw calibration, and same-frame bare-jaw landmark evidence.
+
+Each bundle first passes through
+`compile_retained_fixed_camera_calibration_observation_v1`. The composer then
+passes the resulting native capture inputs to the existing `compile_campaign`
+validator. That validator remains the single source of truth for at least three
+spatially spanning `FIT` captures, two distinct `HOLDOUT` captures, unique
+frames and observations, one installation epoch, and unchanged camera, robot,
+settings, intrinsics, tag-map, and firmware-kinematic bindings. Shared reviewed
+intrinsics and bare-jaw calibration records are expected; capture-specific
+bracket, JPEG, tag, and landmark evidence must remain distinct.
+
+The result contains the existing unreviewed board-to-robot measurement draft
+and a receipt binding every observation and campaign hash. Independent review,
+installation/reseat confirmation, both attachment clearance profiles, and the
+stylus TCP remain separate later gates. The composer performs no hardware I/O,
+emits no command, and cannot release the static-camera freeze.
+
 ### Retained acquisition-bracket replay
 
 `rocell.calibration.fixed_camera_bracket_evidence_v1` closes the retained-file

@@ -742,6 +742,17 @@ It opens no camera or robot and adds no image, calibration corpus, controller
 artifact, generated geometry, or physical measurement to the archive. All
 byte, duplicate, and reduction limits remain unchanged.
 
+The retained fixed-camera campaign composition adds two governed paths: one
+CPU-only campaign composer and one focused unit-test module. The file-count
+ceiling advances from 6,554 to the exact expected 6,556 files. The composer
+passes every caller-pinned six-file observation bundle through the existing
+retained-observation compiler and delegates the resulting capture inputs to
+the existing passive campaign validator. It does not duplicate spatial,
+uniqueness, installation, or invariant-binding policy; opens no device; emits
+no command; and adds no image, calibration corpus, controller artifact,
+generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
