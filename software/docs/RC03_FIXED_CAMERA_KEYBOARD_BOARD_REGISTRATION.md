@@ -240,6 +240,29 @@ breadth without repeating the board, keyboard, tag-spacing, or key-plane
 measurements. This increment is deterministic offline software evidence; it
 does not qualify the installed camera or promote the physical freeze.
 
+### Retained six-tag detector and rectifier replay
+
+`rocell.calibration.fixed_camera_tag_evidence_v1` supplies the retained-file
+adapter for the board-pose extractor's two in-memory inputs. The caller pins
+the exact JSON bytes. The record carries both the raw detector batch and the
+reviewed rectified batch, along with source and destination pixel spaces and
+the exact rectification configuration and implementation identities.
+
+The loader requires both batches to bind the same complete frame metadata and
+preserve every tag identity, acceptance decision, margin, hamming value, and
+rejection reason. Rectification may change corner coordinates and detector
+processing identity only. The returned object implements both `detect()` and
+`rectify_detection_batch()`, but it replays only against the exact retained
+`FramePacket` and exact retained raw batch. Its destination is fixed to
+`UNDISTORTED_PINHOLE_PIXELS`, which is the pixel space required by the reviewed
+native intrinsics.
+
+This closes the retained six-tag integration seam in front of the existing
+disjoint fit/holdout board-pose policy. It opens no device, emits no command,
+and grants no motion, contact, calibration-review, or freeze-release authority.
+The physical producer must still create the qualified native-frame detection
+and rectification evidence.
+
 ### Native-frame observation composition
 
 `rocell.calibration.fixed_camera_calibration_observation_v1` joins the retained

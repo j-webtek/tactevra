@@ -711,6 +711,17 @@ opens no camera or robot and adds no image, jaw model, calibration corpus,
 generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The retained fixed-camera tag evidence intake adds two governed paths: one
+strict CPU-only JSON loader/replay adapter and one focused unit-test module.
+The file-count ceiling advances from 6,548 to the exact expected 6,550 files.
+The loader requires caller-pinned bytes and semantic integrity, retains both
+raw and rectified six-tag batches for one exact frame, and refuses frame,
+detector, tag-decision, margin, hamming, pixel-space, or rectifier-identity
+substitution. It implements the existing detector and reviewed-rectifier
+protocols without opening a camera or robot and adds no image, calibration
+corpus, generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
