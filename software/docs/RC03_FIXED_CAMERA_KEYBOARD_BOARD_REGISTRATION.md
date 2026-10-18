@@ -238,6 +238,30 @@ breadth without repeating the board, keyboard, tag-spacing, or key-plane
 measurements. This increment is deterministic offline software evidence; it
 does not qualify the installed camera or promote the physical freeze.
 
+### Native-frame observation composition
+
+`rocell.calibration.fixed_camera_calibration_observation_v1` joins the retained
+read-only bracket and image observations at one deterministic boundary. It
+requires the complete B0477 `5472 x 3648` frame and a reviewed physical
+intrinsics record bound to the same persistent camera identity, locked
+settings, undistorted pinhole pixel space, rectification configuration, and
+six-tag map. Cropped or resized Camera-app views are rejected; they remain
+useful for operator framing but cannot become calibration evidence.
+
+The coordinator runs the six-tag board-pose extractor, invokes an injected
+offline calibrated bare-jaw observer on the same immutable frame, and delegates
+the final record to `fixed_camera_robot_calibration_capture_v1`. This keeps the
+fit/audit tag policy, feedback bracket, firmware kinematics, and residual limits
+in their existing single sources of truth. The output is still an unreviewed
+`no_attachment` correspondence. It cannot open either device, generate a
+trajectory, or release `SUPERSEDING_STATIC_CAMERA_FREEZE_NOT_PROMOTED`.
+
+The next physical prerequisite is therefore explicit: retain a native frame
+from the qualified camera mode and produce the independently reviewed physical
+intrinsics/rectification record plus calibrated bare-jaw detector evidence.
+The established board dimensions, tag spacing, keyboard geometry, and 21 mm
+key plane are reused and do not need to be measured again.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

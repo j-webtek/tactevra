@@ -657,6 +657,17 @@ emits no command, and adds no image, calibration corpus, controller artifact,
 generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The native-frame calibration-observation increment adds two governed paths:
+one CPU-only composition boundary and one focused unit-test module. The
+file-count ceiling advances from 6,538 to the exact expected 6,540 files. The
+boundary requires an exact full-frame `5472 x 3648` capture and reviewed
+physical bindings for camera identity, settings, intrinsics, rectification,
+and the six-tag map. It composes the existing board-pose extractor, a calibrated
+bare-jaw observer, and the existing passive capture compiler without opening a
+camera or robot. No image, calibration corpus, controller artifact, generated
+geometry, or physical measurement enters the archive. All byte, duplicate,
+and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
