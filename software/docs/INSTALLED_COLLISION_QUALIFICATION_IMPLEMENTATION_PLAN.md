@@ -250,6 +250,15 @@ configuration and between adjacent configurations.
 **Purpose:** Execute full-body collision checks over every bounded partition
 without losing global route lineage.
 
+**Implementation status:** The offline profile-bound evaluator is implemented.
+It consumes the exact admitted `no_attachment` and `stylus_attachment`
+partition plans and typed reviewed evidence, preserves boundary rechecks, runs
+discrete FK checks before conservative adjacent-sample sweeps, and retains
+separate clear, collision, and incomplete outcomes. Synthetic tests cover the
+orchestration and crossed-profile rejection. This is software readiness only;
+the superseding static-camera freeze remains unpromoted and no physical release
+is claimed.
+
 **Deliverables:**
 
 - A profile-bound evaluator consuming one partition, rigid bindings,

@@ -868,3 +868,13 @@ and disjoint independent review for both attachment profiles, then decodes the
 accepted values into existing typed collision inputs. It runs no evaluator,
 opens no hardware, and grants no physical authority. All byte, duplicate, and
 reduction limits remain unchanged.
+
+The fixed-camera profile-bound partition collision evaluator adds two governed
+paths: one offline application module and one focused unit-test module. The
+file-count ceiling advances from 6,580 to the exact expected 6,582 files. It
+binds both admitted profile evidence sets to their exact canonical partition
+plans, runs the existing discrete FK collision evaluator, and conditionally
+runs the existing conservative adjacent-sample sweep evaluator. It preserves
+clear, collision, and incomplete outcomes, opens no hardware, and grants no
+physical authority. All byte, duplicate, and reduction limits remain
+unchanged.\n
