@@ -668,6 +668,16 @@ camera or robot. No image, calibration corpus, controller artifact, generated
 geometry, or physical measurement enters the archive. All byte, duplicate,
 and reduction limits remain unchanged.
 
+The reviewed physical-intrinsics intake adds two governed paths: one strict,
+CPU-only retained-record loader and one focused unit-test module. The
+file-count ceiling advances from 6,540 to the exact expected 6,542 files. The
+loader requires exact file-byte pinning, internal semantic integrity, native
+full-frame mode, rational distortion and rectified pinhole bindings, passing
+reviewed residual limits, and a content-addressed independent review. It opens
+no camera or robot and adds no image, calibration corpus, controller artifact,
+generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513

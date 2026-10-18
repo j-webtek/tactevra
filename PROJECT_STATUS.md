@@ -89,6 +89,17 @@ crossed-settings, crossed-map, synthetic, or unreviewed inputs reject before a
 calibration correspondence can be emitted. The boundary performs no hardware
 I/O and does not change the physical freeze or motion authority.
 
+The reviewed physical-intrinsics prerequisite now has a strict retained-file
+intake rather than a constructor-only handoff. The loader requires the caller
+to pin the exact file SHA-256, rejects duplicate keys, nonfinite values,
+unknown fields, changed semantic integrity, non-native modes, crops/rescaling,
+crossed optical models, failed held-out limits, incomplete review metadata, and
+any physical-authority claim. A passing record reconstructs the exact
+undistorted pinhole model consumed by the native-frame coordinator while
+retaining the calibration dataset, split, rectifier, tag-map, and independent
+review hashes. It cannot authenticate the declared reviewer, collect the
+physical images, open either device, or release the physical freeze.
+
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
 examples today. A reliable physical typing or phone-operation product is still
