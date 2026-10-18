@@ -764,6 +764,17 @@ calibration corpus, controller artifact, generated geometry, or physical
 measurement to the archive. All byte, duplicate, and reduction limits remain
 unchanged.
 
+The retained fixed-camera campaign review intake adds two governed paths: one
+strict CPU-only decision intake and one focused adversarial test module. The
+file-count ceiling advances from 6,558 to the exact expected 6,560 files. The
+intake requires canonical decision bytes from a reviewer distinct from the
+producer, binds the exact packet and campaign hashes, preserves explained
+rejection, and requires installation-continuity plus reseat confirmation for
+acceptance. It opens no device, emits no command, grants no physical authority,
+and adds no image, calibration corpus, controller artifact, generated geometry,
+or physical measurement to the archive. All byte, duplicate, and reduction
+limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513

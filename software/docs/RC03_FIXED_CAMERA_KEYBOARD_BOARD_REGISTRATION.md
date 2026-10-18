@@ -462,6 +462,30 @@ captures and two distinct `HOLDOUT` captures from one unchanged installation
 epoch. The stylus keeps a separate measured TCP and installed-clearance
 profile; it does not create a second board-to-robot transform.
 
+### External campaign review intake
+
+`rocell.calibration.fixed_camera_campaign_review_intake_v1` admits the
+separately authored decision for one exact deterministic campaign packet. The
+blank packet template now includes `review_packet_sha256`; the reviewer fills
+that field only after packet creation, avoiding a self-referential archive
+hash. Intake requires exact canonical JSON bytes, all packet and campaign
+digests, a reviewer identity distinct from the producer, an offset-aware review
+time, bounded findings, and `physical_authority: false`.
+
+`REJECT` is a terminal retained outcome for that intake and must include at
+least one finding. It does not produce a reviewed measurement. `ACCEPT` also
+requires the reviewer to confirm both installation continuity and the reseat
+check. The accepted output changes only the measurement review metadata and
+status needed by the existing board-to-robot localization boundary. Its receipt
+still records no camera access, controller command, movement target, motion,
+contact, or physical release effect.
+
+This intake validates an actual external decision supplied by its caller. It
+does not create, infer, or impersonate that decision, and no synthetic result
+can satisfy the physical campaign gate. The shared board transform remains the
+`no_attachment` campaign result; the stylus attachment continues to require its
+separate TCP and installed-clearance qualification.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

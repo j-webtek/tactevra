@@ -139,6 +139,16 @@ installation continuity, and reseat confirmation blank. Any review decision
 must be created separately and bind the final packet hash. Packet creation and
 inspection cannot change the draft or grant physical authority.
 
+The separate decision can now be admitted through a strict zero-hardware
+intake. The decision must use canonical JSON, name a reviewer distinct from
+the campaign producer, bind the exact final packet hash and all campaign
+digests, and retain zero physical authority. Rejection is preserved with at
+least one finding and produces no reviewed measurement. Acceptance additionally
+requires explicit unchanged-installation and reseat confirmations; only then
+does the intake produce the reviewed board-to-robot measurement already
+required by localization. That reviewed measurement still grants no motion,
+contact, clearance, camera qualification, or freeze-release authority.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a
