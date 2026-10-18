@@ -213,6 +213,31 @@ The installed B0477 identity and mode, feedback source, installation witness,
 and review artifacts must be qualified before a physical application can create
 the permit or call this boundary.
 
+### Offline six-tag board-pose extraction
+
+`rocell.vision.fixed_camera_board_pose_extractor_v1` supplies the missing
+image-to-board-pose policy between the existing pixel detector and passive
+capture compiler. It receives one immutable frame plus already configured
+detector, rectifier, intrinsics, and the existing six-tag RC03 map. It opens no
+camera and has no robot transport.
+
+The extractor requires accepted `tag36h11` detections for all six station tags.
+Tags `0` through `3` are copied into a separate pose-fit batch and all four must
+remain inliers. Tags `4` and `5` are never supplied to the estimator; their
+corners are projected through the completed pose and retained as independent
+residual evidence. The default held-out maximum is 2 pixels. A result above
+that limit remains inspectable but cannot produce the `board_pose` mapping
+accepted by `fixed_camera_robot_calibration_capture_v1`.
+
+The result binds the exact JPEG, full six-tag detection batch, rectified pixel
+space, camera intrinsics, complete tag map, estimator configuration,
+implementation, fit observation, and per-corner held-out residuals by SHA-256.
+Later integration can capture at the camera's qualified native mode, rectify
+detections into the calibrated pinhole space, and preserve the full board
+breadth without repeating the board, keyboard, tag-spacing, or key-plane
+measurements. This increment is deterministic offline software evidence; it
+does not qualify the installed camera or promote the physical freeze.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a
