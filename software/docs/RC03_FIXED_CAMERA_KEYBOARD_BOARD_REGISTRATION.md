@@ -289,6 +289,31 @@ and review still have to be produced and retained outside this zero-I/O
 boundary. No additional board, tag, keyboard, or key-plane measurements are
 required.
 
+### Reviewed bare-jaw observer
+
+`rocell.calibration.fixed_camera_bare_jaw_observer_v1` supplies the concrete
+offline observer used by the native-frame coordinator. Its detector input is a
+calibrated 3-D `bare_jaw_reference` point in the camera optical frame. The
+observer deliberately refuses to manufacture depth from a single image pixel.
+It applies the inverse `camera_optical_T_RC03_board` pose from the same frame
+and returns the compiler's exact `CALIBRATED_FIXED_CAMERA_BARE_JAW_REFERENCE`
+mapping.
+
+The retained JSON calibration must be pinned by its exact file SHA-256 and
+must bind the detector ID/version/configuration/implementation, reviewed
+intrinsics, complete six-tag map, camera frame, bare-jaw reference model,
+physical dataset, held-out millimetre metrics, uncertainty ceiling, and an
+independent reviewer. The detector output repeats those bindings and the frame
+hash. The observer adds the board-pose translation uncertainty conservatively
+to the detector uncertainty and rejects a combined result above 3 mm or an
+`X/Y` location outside the `610 x 457 mm` board.
+
+This closes the software seam without claiming the physical artifact exists.
+The remaining physical work is to retain and independently review the actual
+detector-calibration record and supply its same-frame 3-D observation. Neither
+the loader nor observer opens a camera, reads the robot, creates a trajectory,
+or promotes the installation freeze.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

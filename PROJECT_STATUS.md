@@ -100,6 +100,18 @@ retaining the calibration dataset, split, rectifier, tag-map, and independent
 review hashes. It cannot authenticate the declared reviewer, collect the
 physical images, open either device, or release the physical freeze.
 
+The calibrated bare-jaw prerequisite now has the same fail-closed retained
+boundary. A strict loader pins the exact detector-calibration file bytes,
+camera intrinsics, six-tag map, camera frame, bare-jaw reference model,
+held-out metric limits, distinct producer/reviewer identities, and zero
+authority. The offline observer requires a calibrated 3-D jaw reference from
+the same immutable frame, converts it through the inverse reviewed board pose,
+combines detector and board-pose translation uncertainty, and emits the exact
+tool-reference record accepted by the passive capture compiler. It refuses to
+infer depth from a lone pixel. A real retained detector-calibration record and
+native-frame detector output remain physical inputs; this code opens no device
+and does not promote `SUPERSEDING_STATIC_CAMERA_FREEZE_NOT_PROMOTED`.
+
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
 examples today. A reliable physical typing or phone-operation product is still
