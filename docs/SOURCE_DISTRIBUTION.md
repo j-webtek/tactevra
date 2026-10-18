@@ -831,3 +831,12 @@ clearance, localization, batch, ingress, and attachment-specific configuration
 bytes; emits distinct bare-jaw and stylus plans plus a binding manifest and
 completion receipt; and has zero hardware or physical authority. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The fixed-camera profile-separated route screen adds two governed paths: one
+offline application module and one focused unit-test module. The file-count
+ceiling advances from 6,572 to the exact expected 6,574 files. It replays both
+admitted plans through the existing trajectory, IK, and collision-intake
+boundaries with distinct attachment policies, seed identities, and installed
+profiles. It publishes hash-bound evidence only and cannot screen installed
+geometry, prove continuous clearance, observe a fresh start state, or authorize
+hardware. All byte, duplicate, and reduction limits remain unchanged.
