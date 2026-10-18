@@ -678,6 +678,17 @@ no camera or robot and adds no image, calibration corpus, controller artifact,
 generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The calibrated bare-jaw observer increment adds two governed paths: one strict
+retained detector-calibration loader plus camera-to-board observer and one
+focused unit-test module. The file-count ceiling advances from 6,542 to the
+exact expected 6,544 files. The boundary pins the detector, intrinsics, tag
+map, jaw reference model, held-out physical metrics, independent review, and
+same native-frame observation before producing the passive compiler's exact
+tool-reference record. It opens no camera or robot and adds no image,
+calibration corpus, controller artifact, generated geometry, or physical
+measurement to the archive. All byte, duplicate, and reduction limits remain
+unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
