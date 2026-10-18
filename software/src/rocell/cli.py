@@ -480,6 +480,51 @@ def _command_admit_fixed_camera_campaign_review(args: argparse.Namespace) -> int
     return int(ExitCode.OK)
 
 
+def _command_admit_fixed_camera_keyboard_localization(
+    args: argparse.Namespace,
+) -> int:
+    """Compose exact reviewed localization inputs without hardware access."""
+
+    from rocell.calibration.fixed_camera_keyboard_localization_admission_v1 import (
+        FixedCameraKeyboardLocalizationAdmissionError,
+        admit_fixed_camera_keyboard_localization_v1,
+    )
+
+    try:
+        result = admit_fixed_camera_keyboard_localization_v1(
+            args.review_admission_receipt,
+            expected_review_admission_receipt_file_sha256=(
+                args.review_admission_receipt_sha256
+            ),
+            reviewed_measurement_path=args.reviewed_measurement,
+            expected_reviewed_measurement_file_sha256=(
+                args.reviewed_measurement_sha256
+            ),
+            keyboard_package_path=args.keyboard_package,
+            expected_keyboard_package_file_sha256=args.keyboard_package_sha256,
+            target_profile_path=args.target_profile,
+            expected_target_profile_file_sha256=args.target_profile_sha256,
+            output_directory=args.output_directory,
+        )
+    except (FixedCameraKeyboardLocalizationAdmissionError, OSError) as exc:
+        raise ConfigurationError(
+            "FIXED_CAMERA_KEYBOARD_LOCALIZATION_ADMISSION_REJECTED",
+            str(exc),
+        ) from exc
+    report = dict(result.receipt)
+    report["output_directory"] = str(result.output_directory)
+    report["localization_path"] = str(result.localization_path)
+    report["completion_receipt_path"] = str(result.receipt_path)
+    if args.json:
+        _json_dump(report)
+    else:
+        print(str(report["status"]))
+        print(f"Localization: {result.localization_path}")
+        print(f"Completion receipt: {result.receipt_path}")
+        print("Physical authority: NONE")
+    return int(ExitCode.OK)
+
+
 def _command_doctor(args: argparse.Namespace) -> int:
     bootstrap = _load_virtual_bootstrap(args)
     snapshot = bootstrap.context.snapshot
@@ -5528,6 +5573,76 @@ def build_parser() -> argparse.ArgumentParser:
     _add_json_argument(campaign_review_admission)
     campaign_review_admission.set_defaults(
         handler=_command_admit_fixed_camera_campaign_review
+    )
+
+    keyboard_localization_admission = commands.add_parser(
+        "admit-fixed-camera-keyboard-localization",
+        help="Admit exact reviewed fixed-camera keyboard localization inputs",
+        description=(
+            "Bind an accepted review-admission receipt to its exact reviewed "
+            "board-to-robot measurement, keyboard package, and target profile, "
+            "then publish both attachment-profile localization candidates and a "
+            "completion receipt into a new directory. This command never opens "
+            "hardware, constructs a trajectory, or grants physical authority."
+        ),
+    )
+    keyboard_localization_admission.add_argument(
+        "--review-admission-receipt",
+        type=Path,
+        required=True,
+        help="Exact accepted review-intake-receipt.json file",
+    )
+    keyboard_localization_admission.add_argument(
+        "--review-admission-receipt-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact review admission receipt bytes",
+    )
+    keyboard_localization_admission.add_argument(
+        "--reviewed-measurement",
+        type=Path,
+        required=True,
+        help="Exact reviewed-board-to-robot-measurement.json file",
+    )
+    keyboard_localization_admission.add_argument(
+        "--reviewed-measurement-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact reviewed measurement bytes",
+    )
+    keyboard_localization_admission.add_argument(
+        "--keyboard-package",
+        type=Path,
+        required=True,
+        help="Exact ready keyboard-to-board registration package JSON",
+    )
+    keyboard_localization_admission.add_argument(
+        "--keyboard-package-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact keyboard package bytes",
+    )
+    keyboard_localization_admission.add_argument(
+        "--target-profile",
+        type=Path,
+        required=True,
+        help="Exact target profile JSON bound by the keyboard package",
+    )
+    keyboard_localization_admission.add_argument(
+        "--target-profile-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact target profile bytes",
+    )
+    keyboard_localization_admission.add_argument(
+        "--output-directory",
+        type=Path,
+        required=True,
+        help="New directory for localization and its completion receipt",
+    )
+    _add_json_argument(keyboard_localization_admission)
+    keyboard_localization_admission.set_defaults(
+        handler=_command_admit_fixed_camera_keyboard_localization
     )
 
     doctor = commands.add_parser(

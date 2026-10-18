@@ -551,6 +551,42 @@ writes `reviewed-board-to-robot-measurement.json`; rejection deliberately does
 not. Both are offline retained outcomes with zero motion, contact, or release
 authority.
 
+### Reviewed localization admission
+
+`rocell.calibration.fixed_camera_keyboard_localization_admission_v1` closes the
+next file-level seam. It requires the accepted `review-intake-receipt.json` and
+its `reviewed-board-to-robot-measurement.json` to retain their canonical names
+in one directory. The receipt's artifact size, file hash, and meaning hash must
+all match the exact measurement. The caller also pins the exact ready
+keyboard-to-board package and target profile bytes.
+
+Publish the offline localization result with:
+
+```powershell
+rocell admit-fixed-camera-keyboard-localization `
+  --review-admission-receipt admitted-review/review-intake-receipt.json `
+  --review-admission-receipt-sha256 <exact-receipt-sha256> `
+  --reviewed-measurement admitted-review/reviewed-board-to-robot-measurement.json `
+  --reviewed-measurement-sha256 <exact-measurement-sha256> `
+  --keyboard-package keyboard-board-registration-package.json `
+  --keyboard-package-sha256 <exact-keyboard-package-sha256> `
+  --target-profile software/config/static_nominal_target_profiles.json `
+  --target-profile-sha256 <exact-target-profile-sha256> `
+  --output-directory admitted-localization `
+  --json
+```
+
+The command reruns the existing rigid-transform fit and held-out residual
+checks before writing anything. Success writes
+`keyboard-robot-localization.json` first and
+`localization-admission-receipt.json` last. Both `no_attachment` and
+`stylus_attachment` receive the same 46 localized key candidates, while their
+downstream clearance, TCP, and trajectory blockers remain separate. A residual
+failure, altered source, crossed receipt/measurement pair, incomplete profile,
+or existing output directory fails closed. The output is localization evidence
+only: no trajectory, controller command, motion, contact, or static-camera
+freeze release is produced.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

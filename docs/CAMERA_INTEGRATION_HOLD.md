@@ -186,6 +186,13 @@ only a successful read of current status, not a readiness claim.
   writes a reviewed board-to-robot measurement only for a valid acceptance.
   Rejection remains a retained outcome without a measurement; neither outcome
   grants hardware or physical authority.
+- After acceptance, use `rocell admit-fixed-camera-keyboard-localization` with
+  exact hashes for that admission receipt, its co-located reviewed measurement,
+  the ready keyboard-to-board package, and the bound target profile. The command
+  publishes both 46-key attachment-profile localization candidate sets and a
+  completion receipt into a new directory. It rejects crossed or altered review
+  artifacts and failed fit/holdout residuals, constructs no trajectory, and
+  grants no hardware or physical authority.
 - Prepare blank measured-configuration and commissioning records without
   entering estimated values as measurements.
 - Reconcile repository status, release-readiness, documentation, ownership,
