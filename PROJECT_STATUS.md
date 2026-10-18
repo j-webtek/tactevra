@@ -79,6 +79,16 @@ implementation. It does not open the installed camera, read a robot endpoint,
 command the arm, or promote `SUPERSEDING_STATIC_CAMERA_FREEZE_NOT_PROMOTED`;
 those physical integration and review gates remain open work.
 
+The retained observation path now has one fail-closed offline composition
+boundary. It requires the complete `5472 x 3648` B0477 frame, an independently
+reviewed physical intrinsics binding for the same camera identity and settings,
+the exact six-tag map, and a calibrated bare-jaw observation from that same
+frame. It then runs the six-tag extractor and existing passive capture compiler
+without duplicating their quality policy. Cropped, resized, crossed-camera,
+crossed-settings, crossed-map, synthetic, or unreviewed inputs reject before a
+calibration correspondence can be emitted. The boundary performs no hardware
+I/O and does not change the physical freeze or motion authority.
+
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
 examples today. A reliable physical typing or phone-operation product is still
