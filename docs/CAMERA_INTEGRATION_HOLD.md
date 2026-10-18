@@ -180,6 +180,12 @@ only a successful read of current status, not a readiness claim.
   packet and its completion receipt into a new directory. Existing paths are
   never overwritten; receipt presence marks a complete offline export only and
   grants no physical authority.
+- After an independent reviewer authors the separate canonical decision, use
+  `rocell admit-fixed-camera-campaign-review` with exact packet and decision
+  hashes. The command writes a terminal intake receipt into a new directory and
+  writes a reviewed board-to-robot measurement only for a valid acceptance.
+  Rejection remains a retained outcome without a measurement; neither outcome
+  grants hardware or physical authority.
 - Prepare blank measured-configuration and commissioning records without
   entering estimated values as measurements.
 - Reconcile repository status, release-readiness, documentation, ownership,

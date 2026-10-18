@@ -531,6 +531,26 @@ can satisfy the physical campaign gate. The shared board transform remains the
 `no_attachment` campaign result; the stylus attachment continues to require its
 separate TCP and installed-clearance qualification.
 
+The file-level admission boundary is available through:
+
+```powershell
+rocell admit-fixed-camera-campaign-review `
+  --review-packet fixed-camera-campaign-review.zip `
+  --review-packet-sha256 <exact-packet-sha256> `
+  --review-decision review-decision.json `
+  --review-decision-sha256 <exact-decision-sha256> `
+  --output-directory admitted-review `
+  --json
+```
+
+`fixed_camera_campaign_review_admission_v1` rejects source symlinks, size or
+hash drift, crossed packet/decision bindings, self-review, noncanonical JSON,
+and existing output paths before publishing anything. It writes
+`review-intake-receipt.json` last as the completion marker. Acceptance also
+writes `reviewed-board-to-robot-measurement.json`; rejection deliberately does
+not. Both are offline retained outcomes with zero motion, contact, or release
+authority.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a
