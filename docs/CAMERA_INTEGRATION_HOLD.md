@@ -85,6 +85,14 @@ jaw landmark model or qualified physical landmark source is currently present,
 so the adapter does not change this hold. It prevents a loose pixel, an
 unreviewed pose, or photographs alone from being promoted into metric 3-D.
 
+The adapter now has a strict retained-evidence intake. A caller must pin the
+exact JSON file bytes; the record then binds the immutable frame and capture
+identity, camera settings, reviewed intrinsics, detector implementation,
+complete rigid model, transform, and every fit/holdout pixel. Its pose source
+refuses replay against a different capture, frame, settings, intrinsics, pixel
+space, camera frame, or reference model. This makes later physical evidence
+reproducible, but no accepted physical record is present and the hold remains.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a
