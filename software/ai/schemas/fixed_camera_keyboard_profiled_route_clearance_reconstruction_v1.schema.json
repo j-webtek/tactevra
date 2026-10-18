@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/fixed_camera_keyboard_profiled_route_clearance_reconstruction_v1.schema.json",
+  "title": "RoCell fixed-camera keyboard profiled route clearance reconstruction v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "disposition",
+    "source_profiled_partition_collision_evaluation_sha256",
+    "calibration_snapshot_sha256", "build_snapshot_sha256",
+    "kinematic_model_sha256", "profiles", "profile_separation_preserved",
+    "expected_route_segment_count_per_profile",
+    "minimum_clearance_lower_bound_mm_across_profiles",
+    "limiting_profile_route_segment", "fresh_observed_start_state_present",
+    "observed_entry_continuous_clearance_proven", "blockers",
+    "next_required_stage", "authority",
+    "profiled_route_clearance_reconstruction_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_keyboard_profiled_route_clearance_reconstruction.v1"},
+    "status": {"enum": [
+      "ROUTE_CLEARANCE_RECONSTRUCTED_FRESH_ENTRY_REQUIRED",
+      "REJECTED_ROUTE_COLLISION_DETECTED",
+      "BLOCKED_ROUTE_CLEARANCE_EVIDENCE_INCOMPLETE"
+    ]},
+    "disposition": {"enum": ["REJECT", "BLOCKED"]},
+    "source_profiled_partition_collision_evaluation_sha256": {"$ref": "#/$defs/hash"},
+    "calibration_snapshot_sha256": {"$ref": "#/$defs/hash"},
+    "build_snapshot_sha256": {"$ref": "#/$defs/hash"},
+    "kinematic_model_sha256": {"$ref": "#/$defs/hash"},
+    "profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_attachment", "stylus_attachment"],
+      "properties": {
+        "no_attachment": {"$ref": "#/$defs/profile"},
+        "stylus_attachment": {"$ref": "#/$defs/profile"}
+      }
+    },
+    "profile_separation_preserved": {"const": true},
+    "expected_route_segment_count_per_profile": {"const": 328},
+    "minimum_clearance_lower_bound_mm_across_profiles": {
+      "type": ["number", "null"], "minimum": 0
+    },
+    "limiting_profile_route_segment": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "allOf": [
+            {"$ref": "#/$defs/limiter"},
+            {
+              "type": "object",
+              "required": ["profile"],
+              "properties": {
+                "profile": {"enum": ["no_attachment", "stylus_attachment"]}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fresh_observed_start_state_present": {"const": false},
+    "observed_entry_continuous_clearance_proven": {"const": false},
+    "blockers": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "next_required_stage": {"type": "string", "minLength": 1},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controller_commands", "hardware_commands_generated", "hardware_access",
+        "physical_movements", "physical_authority"
+      ],
+      "properties": {
+        "controller_commands": {"type": "array", "maxItems": 0},
+        "hardware_commands_generated": {"const": 0},
+        "hardware_access": {"const": false},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false}
+      }
+    },
+    "profiled_route_clearance_reconstruction_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "bodyPair": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "limiter": {
+      "type": "object",
+      "required": [
+        "partition_index", "partition_segment_sequence",
+        "source_segment_index", "body_pair"
+      ],
+      "properties": {
+        "partition_index": {"type": "integer", "minimum": 0},
+        "partition_segment_sequence": {"type": "integer", "minimum": 0},
+        "source_segment_index": {"type": "integer", "minimum": 0, "maximum": 327},
+        "body_pair": {"$ref": "#/$defs/bodyPair"}
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile", "installed_collision_profile_sha256",
+        "source_partitioned_typing_collision_intake_sha256",
+        "partition_count", "route_segment_count", "route_segment_start_index",
+        "route_segment_end_index_exclusive", "minimum_clearance_lower_bound_mm",
+        "limiting_route_segment", "all_segment_clearance_bounds_determinate",
+        "all_route_segments_continuously_clear"
+      ],
+      "properties": {
+        "profile": {"enum": ["no_attachment", "stylus_attachment"]},
+        "installed_collision_profile_sha256": {"$ref": "#/$defs/hash"},
+        "source_partitioned_typing_collision_intake_sha256": {"$ref": "#/$defs/hash"},
+        "partition_count": {"type": "integer", "minimum": 1, "maximum": 64},
+        "route_segment_count": {"const": 328},
+        "route_segment_start_index": {"const": 0},
+        "route_segment_end_index_exclusive": {"const": 328},
+        "minimum_clearance_lower_bound_mm": {"type": ["number", "null"], "minimum": 0},
+        "limiting_route_segment": {
+          "oneOf": [{"type": "null"}, {"$ref": "#/$defs/limiter"}]
+        },
+        "all_segment_clearance_bounds_determinate": {"type": "boolean"},
+        "all_route_segments_continuously_clear": {"type": "boolean"}
+      }
+    }
+  }
+}

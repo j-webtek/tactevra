@@ -259,3 +259,80 @@ def test_rejects_crossed_profile_lineage(simulation_context, monkeypatch) -> Non
         subject.evaluate_fixed_camera_keyboard_profiled_collision_partitions_v1(
             simulation_context, measured, documents, admitted, installed
         )
+
+
+def test_accepts_distinct_boundary_sample_hashes_when_joint_recheck_is_exact(
+    simulation_context, monkeypatch
+) -> None:
+    measured, installed, documents, admitted = _fixtures(simulation_context)
+    for profile_name in PROFILES:
+        document = documents[profile_name]
+        first = document["partitions"][0]
+        joints = first["bounded_joint_sample_plan"][-1]["joint_positions_rad"]
+        successor_samples = (
+            BoundedJointConfigurationSample(0, 1, 0, 1, 0.0, joints),
+            BoundedJointConfigurationSample(1, 1, 1, 1, 1.0, joints),
+        )
+        successor_core = {
+            **{
+                key: value
+                for key, value in first.items()
+                if key != "partition_intake_sha256"
+            },
+            "partition_index": 1,
+            "source_result_start_index": 1,
+            "source_result_end_index_exclusive": 2,
+            "first_sample_sha256": successor_samples[0].content_sha256,
+            "terminal_sample_sha256": successor_samples[-1].content_sha256,
+            "bounded_joint_sample_plan": [item.to_dict() for item in successor_samples],
+        }
+        successor = {
+            **successor_core,
+            "partition_intake_sha256": _sha(successor_core),
+        }
+        boundary_core = {
+            "predecessor_partition_index": 0,
+            "successor_partition_index": 1,
+            "source_boundary_result_index": 0,
+            "predecessor_terminal_sample_sha256": first["terminal_sample_sha256"],
+            "successor_boundary_recheck_sample_sha256": successor[
+                "first_sample_sha256"
+            ],
+            "maximum_joint_difference_rad": 0.0,
+            "boundary_recheck_required": True,
+            "extra_zero_length_sweep_envelope_required": False,
+            "first_successor_route_segment_owned_by_partition": 1,
+        }
+        core = dict(document)
+        core.pop("partitioned_typing_collision_intake_sha256")
+        core["partitions"] = [first, successor]
+        core["boundary_lineage"] = [
+            {**boundary_core, "boundary_lineage_sha256": _sha(boundary_core)}
+        ]
+        documents[profile_name] = {
+            **core,
+            "partitioned_typing_collision_intake_sha256": _sha(core),
+        }
+        admitted[profile_name] = replace(
+            admitted[profile_name],
+            configuration_geometry_by_partition=(({}, {}), ({}, {})),
+            sweep_envelopes_by_partition=(({},), ({},)),
+        )
+
+    monkeypatch.setattr(
+        subject,
+        "_evaluate_discrete_partition",
+        lambda *args: _discrete("DISCRETE_WAYPOINTS_CLEAR_CONTINUOUS_PROOF_REQUIRED"),
+    )
+    monkeypatch.setattr(
+        subject,
+        "evaluate_conservative_segment_sweeps_from_plan",
+        lambda *args: {
+            "status": "CONSERVATIVE_SEGMENT_SWEEPS_CLEAR_RELEASE_GATES_REMAIN"
+        },
+    )
+    result = subject.evaluate_fixed_camera_keyboard_profiled_collision_partitions_v1(
+        simulation_context, measured, documents, admitted, installed
+    )
+    assert result["status"] == subject.STATUS_CLEAR
+    assert all(item["partition_count"] == 2 for item in result["profiles"].values())

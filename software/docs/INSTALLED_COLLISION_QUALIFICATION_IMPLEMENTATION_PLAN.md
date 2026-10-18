@@ -339,6 +339,17 @@ state without assuming the synthetic route seed.
 **Purpose:** Reassemble the complete route result from bounded partition and
 entry evidence.
 
+**Implementation status:** The profile-separated route portion is implemented.
+It independently revalidates the sealed collision evaluation, declared
+partition ownership, boundary lineage, exact ordered coverage of all 328
+source segments per profile, per-segment sample hashes, and the reconstructed
+minimum clearance and limiting body pair. The shared boundary comparison uses
+exact joint equality while retaining distinct predecessor and successor sample
+hashes because those samples carry different segment-ownership metadata. A
+clear reconstructed route remains `BLOCKED` pending ICQ-7 fresh observed-start
+and continuous entry qualification. The final entry-plus-route receipt and
+`PASS` disposition therefore remain outstanding.
+
 **Deliverables:**
 
 - A reconstruction validator proving exact coverage, order, hashes, and
