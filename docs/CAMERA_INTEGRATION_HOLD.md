@@ -93,6 +93,15 @@ refuses replay against a different capture, frame, settings, intrinsics, pixel
 space, camera frame, or reference model. This makes later physical evidence
 reproducible, but no accepted physical record is present and the hold remains.
 
+The six-tag branch now has the same retained replay boundary. One exact,
+caller-pinned JSON record carries the raw detector batch and its reviewed
+rectified batch for the same frame. The adapter rejects crossed frames,
+modified tag decisions or scores, a changed rectifier implementation, and any
+pixel-space or authority substitution before it can satisfy the existing
+native observation coordinator's detector and rectifier protocols. This closes
+an in-memory integration seam; it does not create a qualified physical tag
+record or alter the hold.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a
