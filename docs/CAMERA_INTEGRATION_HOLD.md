@@ -121,6 +121,15 @@ intrinsics, tag maps, detector identities, reference models, or file bytes fail
 closed. A passing result is still an unreviewed `no_attachment` correspondence;
 it grants no camera, robot, movement, contact, or freeze-release authority.
 
+The retained campaign path is also composed at one zero-hardware boundary.
+It accepts a bounded list of the exact six-file observation bundles, compiles
+each through the complete retained-observation validator, and passes their
+native capture inputs to the existing campaign compiler. The campaign compiler
+still owns the minimum three `FIT` plus two `HOLDOUT` rule, noncollinear board
+coverage, unique frame/pose/tool evidence, unchanged installation epoch, and
+invariant camera, robot, settings, intrinsics, tag-map, and kinematic bindings.
+Its output remains an unreviewed measurement draft with no physical authority.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a
