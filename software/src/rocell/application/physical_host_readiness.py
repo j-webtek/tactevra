@@ -41,7 +41,7 @@ _DEPENDENCY_VERSION_POLICIES = {
     "numpy": ">=2,<2.3",
     "cv2": ">=4.12,<5",
     "serial": ">=3.5,<4",
-    "pytest": ">=8,<9",
+    "pytest": ">=8,<10",
 }
 _DEVICE_DEPENDENCY_NAMES = ("packaging", "PIL", "numpy", "cv2", "serial")
 _RUNTIME_MODULE_PATHS = {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from rocell.calibration.fixed_camera_robot_calibration_capture_v1 import (
     FixedCameraRobotCalibrationCaptureError,
     compile_campaign,
     compile_capture,
+    compile_files,
+    main,
 )
 from rocell.kinematics.firmware_reference import REFERENCE_SHA256, forward
 
@@ -42,6 +45,9 @@ def _capture(
     joints: tuple[float, ...] = (0.0, 0.55, 1.1, -0.2, 0.0, 0.0),
 ) -> dict:
     line = _feedback(joints)
+    def digest(label: str) -> str:
+        return hashlib.sha256(f"{capture_id}:{label}".encode()).hexdigest()
+
     return {
         "schema": "rocell.fixed_camera_robot_calibration_capture_input.v1",
         "capture_id": capture_id,
@@ -50,15 +56,15 @@ def _capture(
         "role": role,
         "frame": {
             "capture_id": capture_id,
-            "frame_sha256": "a" * 64,
+            "frame_sha256": digest("frame"),
             "captured_at_ns": 1_200_000_000,
             "clock_id": "host-monotonic-1",
             "camera_identity_sha256": "b" * 64,
             "settings_sha256": "c" * 64,
         },
         "board_pose": {
-            "observation_sha256": "d" * 64,
-            "frame_sha256": "a" * 64,
+            "observation_sha256": digest("board-pose"),
+            "frame_sha256": digest("frame"),
             "camera_intrinsics_sha256": "e" * 64,
             "tag_map_sha256": "f" * 64,
             "pose_fit_tag_ids": [0, 1, 2, 3],
@@ -68,8 +74,8 @@ def _capture(
         },
         "tool_reference": {
             "method": "CALIBRATED_FIXED_CAMERA_BARE_JAW_REFERENCE",
-            "observation_sha256": "1" * 64,
-            "frame_sha256": "a" * 64,
+            "observation_sha256": digest("tool-reference"),
+            "frame_sha256": digest("frame"),
             "detector_id": "rocell.bare-jaw-reference",
             "detector_version": "1.0.0",
             "configuration_sha256": "2" * 64,
@@ -195,3 +201,64 @@ def test_campaign_rejects_camera_binding_drift():
     with pytest.raises(FixedCameraRobotCalibrationCaptureError,
                        match="bindings drifted"):
         compile_campaign(captures)
+
+
+def test_campaign_rejects_reused_frame_evidence():
+    captures = [
+        _capture("fit-a", board_xyz=(40.0, 40.0, 0.0)),
+        _capture("fit-b", board_xyz=(560.0, 45.0, 0.0)),
+        _capture("fit-c", board_xyz=(60.0, 410.0, 0.0)),
+        _capture("hold-a", role="HOLDOUT", board_xyz=(545.0, 400.0, 0.0)),
+        _capture("hold-b", role="HOLDOUT", board_xyz=(305.0, 228.5, 0.0)),
+    ]
+    captures[-1]["frame"]["frame_sha256"] = captures[0]["frame"]["frame_sha256"]
+    captures[-1]["board_pose"]["frame_sha256"] = captures[0]["frame"][
+        "frame_sha256"]
+    captures[-1]["tool_reference"]["frame_sha256"] = captures[0]["frame"][
+        "frame_sha256"]
+    with pytest.raises(FixedCameraRobotCalibrationCaptureError,
+                       match="camera frames must be unique"):
+        compile_campaign(captures)
+
+
+def test_file_workflow_pins_exact_bytes_and_compiles_campaign(tmp_path):
+    captures = [
+        _capture("fit-a", board_xyz=(40.0, 40.0, 0.0)),
+        _capture("fit-b", board_xyz=(560.0, 45.0, 0.0),
+                 joints=(0.4, 0.55, 1.1, -0.2, 0.0, 0.0)),
+        _capture("fit-c", board_xyz=(60.0, 410.0, 0.0),
+                 joints=(-0.4, 0.6, 1.05, -0.2, 0.0, 0.0)),
+        _capture("holdout-a", role="HOLDOUT", board_xyz=(545.0, 400.0, 0.0),
+                 joints=(0.25, 0.7, 0.95, -0.3, 0.0, 0.0)),
+        _capture("holdout-b", role="HOLDOUT", board_xyz=(305.0, 228.5, 0.0),
+                 joints=(-0.1, 0.65, 1.0, -0.25, 0.0, 0.0)),
+    ]
+    paths = []
+    pins = []
+    for index, capture in enumerate(captures):
+        payload = (json.dumps(capture, sort_keys=True) + "\n").encode()
+        path = tmp_path / f"capture-{index}.json"
+        path.write_bytes(payload)
+        paths.append(path)
+        pins.append(hashlib.sha256(payload).hexdigest())
+
+    result = compile_files(paths, campaign=True, expected_sha256s=pins)
+    assert result["status"] == "MEASUREMENT_DRAFT_READY_FOR_INDEPENDENT_REVIEW"
+    assert result["capture_count"] == 5
+
+    with pytest.raises(FixedCameraRobotCalibrationCaptureError,
+                       match="SHA-256 mismatch"):
+        compile_files(paths, campaign=True, expected_sha256s=["0" * 64] * 5)
+
+
+def test_file_workflow_rejects_duplicate_keys_and_cli_reports_error(
+    tmp_path, capsys,
+):
+    duplicate = tmp_path / "duplicate.json"
+    duplicate.write_text('{"schema":"a","schema":"b"}', encoding="utf-8")
+    with pytest.raises(FixedCameraRobotCalibrationCaptureError,
+                       match="duplicate JSON key"):
+        compile_files([duplicate], campaign=False)
+
+    assert main([str(duplicate)]) == 2
+    assert "duplicate JSON key" in capsys.readouterr().err

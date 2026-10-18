@@ -33,7 +33,7 @@ _TEST_DEPENDENCY_VERSIONS = {
     "numpy": "2.2.0",
     "opencv-contrib-python": "4.12.0.88",
     "pyserial": "3.5",
-    "pytest": "8.4.0",
+    "pytest": "9.1.1",
 }
 
 

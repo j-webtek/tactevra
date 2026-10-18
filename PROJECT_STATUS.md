@@ -58,8 +58,10 @@ and physical action authority still require measured qualification. A passive
 camera/robot calibration capture boundary now reuses the known 610 x 457 mm
 board, six-tag map, installed camera bindings, and raw robot feedback to build
 an unreviewed board-to-robot worksheet without additional ruler measurements.
-It performs no acquisition or movement and still requires retained live
-captures plus independent review.
+Its retained-file workflow now enforces bounded strict JSON, optional exact
+file-byte hashes, unique frame/pose/tool observations, and deterministic single
+capture or five-point campaign compilation. It performs no acquisition or
+movement and still requires retained live captures plus independent review.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
