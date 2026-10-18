@@ -823,3 +823,11 @@ manifest before invoking the existing typed clearance compiler. It writes the
 zero-authority intake before its receipt and cannot open hardware, generate a
 trajectory, perform collision screening, or authorize motion or contact. All
 byte, duplicate, and reduction limits remain unchanged.
+
+The fixed-camera profiled typing-plan admission adds two governed paths: one
+offline application module and one focused unit-test module. The file-count
+ceiling advances from 6,570 to the exact expected 6,572 files. It pins admitted
+clearance, localization, batch, ingress, and attachment-specific configuration
+bytes; emits distinct bare-jaw and stylus plans plus a binding manifest and
+completion receipt; and has zero hardware or physical authority. All byte,
+duplicate, and reduction limits remain unchanged.
