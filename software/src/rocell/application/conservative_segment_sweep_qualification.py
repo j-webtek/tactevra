@@ -24,6 +24,7 @@ from rocell.simulation.collision import (
     CollisionBindingMode,
     CollisionBody,
     CollisionBodyRequirement,
+    CollisionClearanceLowerBoundStatus,
     CollisionEvaluationPolicy,
     CollisionEvaluationStatus,
     CollisionEvidenceState,
@@ -33,6 +34,7 @@ from rocell.simulation.collision import (
     SampledCollisionGeometry,
     SphereMm,
     evaluate_collision_pose,
+    evaluate_collision_pose_clearance_lower_bound,
 )
 
 from ._pinned_model import load_pinned_urdf
@@ -322,6 +324,10 @@ def evaluate_conservative_segment_sweeps_from_plan(
     segment_reports: list[dict[str, Any]] = []
     all_clear = True
     collision_found = False
+    all_clearance_bounds_determinate = True
+    minimum_clearance_lower_bound_mm: float | None = None
+    limiting_segment_sequence: int | None = None
+    limiting_body_pair: list[str] | None = None
     all_pair_exclusions_physically_accepted = all(
         item.evidence_state.is_physically_accepted
         for item in installed_profile.contract.pair_exclusions
@@ -437,18 +443,54 @@ def evaluate_conservative_segment_sweeps_from_plan(
             tuple(bodies),
             installed_profile.contract.pair_exclusions,
         )
+        evaluation_policy = CollisionEvaluationPolicy(
+            clearance_policy=installed_profile.clearance_policy
+        )
+        envelope_pose = CollisionPose(
+            f"conservative-segment-{segment_sequence:04d}",
+            installed_profile.contract.root_frame,
+            {},
+        )
         evaluation = evaluate_collision_pose(
             envelope_contract,
-            CollisionPose(
-                f"conservative-segment-{segment_sequence:04d}",
-                installed_profile.contract.root_frame,
-                {},
-            ),
-            CollisionEvaluationPolicy(
-                clearance_policy=installed_profile.clearance_policy
-            ),
+            envelope_pose,
+            evaluation_policy,
         )
-        clear = evaluation.collision_free_diagnostic
+        clearance = evaluate_collision_pose_clearance_lower_bound(
+            envelope_contract,
+            envelope_pose,
+            evaluation_policy,
+        )
+        if clearance.collision_pose_report_sha256 != evaluation.report_hash:
+            raise ConservativeSegmentSweepQualificationError(
+                "clearance result differs from its collision evaluation"
+            )
+        clearance_determinate = (
+            clearance.status is not CollisionClearanceLowerBoundStatus.INDETERMINATE
+        )
+        all_clearance_bounds_determinate = (
+            all_clearance_bounds_determinate and clearance_determinate
+        )
+        if (
+            clearance.minimum_clearance_lower_bound_mm is not None
+            and (
+                minimum_clearance_lower_bound_mm is None
+                or clearance.minimum_clearance_lower_bound_mm
+                < minimum_clearance_lower_bound_mm
+            )
+        ):
+            minimum_clearance_lower_bound_mm = (
+                clearance.minimum_clearance_lower_bound_mm
+            )
+            limiting_segment_sequence = segment_sequence
+            limiting_body_pair = (
+                list(clearance.limiting_body_pair)
+                if clearance.limiting_body_pair is not None
+                else None
+            )
+        clear = evaluation.collision_free_diagnostic and (
+            clearance.status is CollisionClearanceLowerBoundStatus.CLEAR
+        )
         all_clear = all_clear and clear
         collision_found = collision_found or (
             evaluation.status is CollisionEvaluationStatus.COLLISION_DETECTED
@@ -466,6 +508,16 @@ def evaluate_conservative_segment_sweeps_from_plan(
                 },
                 "conservative_contract_sha256": envelope_contract.content_hash,
                 "collision_report_sha256": evaluation.report_hash,
+                "clearance_lower_bound_report_sha256": clearance.report_hash,
+                "clearance_lower_bound_status": clearance.status.value,
+                "minimum_clearance_lower_bound_mm": (
+                    clearance.minimum_clearance_lower_bound_mm
+                ),
+                "clearance_limiting_body_pair": (
+                    list(clearance.limiting_body_pair)
+                    if clearance.limiting_body_pair is not None
+                    else None
+                ),
                 "status": evaluation.status.value,
                 "collision_free_diagnostic": clear,
                 "collisions": [item.to_dict() for item in evaluation.collisions],
@@ -499,6 +551,16 @@ def evaluate_conservative_segment_sweeps_from_plan(
         "status": status,
         "segment_count": len(segment_reports),
         "segment_reports": segment_reports,
+        "clearance_lower_bound_method": (
+            "minimum policy-inflated primitive separation with exact mixed-primitive "
+            "distances and conservative normalized OBB separating-axis lower bounds"
+        ),
+        "minimum_clearance_lower_bound_mm": minimum_clearance_lower_bound_mm,
+        "limiting_segment_sequence": limiting_segment_sequence,
+        "limiting_body_pair": limiting_body_pair,
+        "all_segment_clearance_bounds_determinate": (
+            all_clearance_bounds_determinate
+        ),
         "all_conservative_segment_sweeps_clear": all_clear,
         "all_pair_exclusions_physically_accepted": (
             all_pair_exclusions_physically_accepted
@@ -600,6 +662,10 @@ def qualify_conservative_segment_sweeps(
     segment_reports: list[dict[str, Any]] = []
     all_clear = True
     collision_found = False
+    all_clearance_bounds_determinate = True
+    minimum_clearance_lower_bound_mm: float | None = None
+    limiting_segment_sequence: int | None = None
+    limiting_body_pair: list[str] | None = None
     all_pair_exclusions_physically_accepted = all(
         item.evidence_state.is_physically_accepted
         for item in installed_profile.contract.pair_exclusions
@@ -703,18 +769,54 @@ def qualify_conservative_segment_sweeps(
             tuple(bodies),
             installed_profile.contract.pair_exclusions,
         )
+        evaluation_policy = CollisionEvaluationPolicy(
+            clearance_policy=installed_profile.clearance_policy
+        )
+        envelope_pose = CollisionPose(
+            f"conservative-segment-{segment_sequence:04d}",
+            installed_profile.contract.root_frame,
+            {},
+        )
         evaluation = evaluate_collision_pose(
             envelope_contract,
-            CollisionPose(
-                f"conservative-segment-{segment_sequence:04d}",
-                installed_profile.contract.root_frame,
-                {},
-            ),
-            CollisionEvaluationPolicy(
-                clearance_policy=installed_profile.clearance_policy
-            ),
+            envelope_pose,
+            evaluation_policy,
         )
-        clear = evaluation.collision_free_diagnostic
+        clearance = evaluate_collision_pose_clearance_lower_bound(
+            envelope_contract,
+            envelope_pose,
+            evaluation_policy,
+        )
+        if clearance.collision_pose_report_sha256 != evaluation.report_hash:
+            raise ConservativeSegmentSweepQualificationError(
+                "clearance result differs from its collision evaluation"
+            )
+        clearance_determinate = (
+            clearance.status is not CollisionClearanceLowerBoundStatus.INDETERMINATE
+        )
+        all_clearance_bounds_determinate = (
+            all_clearance_bounds_determinate and clearance_determinate
+        )
+        if (
+            clearance.minimum_clearance_lower_bound_mm is not None
+            and (
+                minimum_clearance_lower_bound_mm is None
+                or clearance.minimum_clearance_lower_bound_mm
+                < minimum_clearance_lower_bound_mm
+            )
+        ):
+            minimum_clearance_lower_bound_mm = (
+                clearance.minimum_clearance_lower_bound_mm
+            )
+            limiting_segment_sequence = segment_sequence
+            limiting_body_pair = (
+                list(clearance.limiting_body_pair)
+                if clearance.limiting_body_pair is not None
+                else None
+            )
+        clear = evaluation.collision_free_diagnostic and (
+            clearance.status is CollisionClearanceLowerBoundStatus.CLEAR
+        )
         all_clear = all_clear and clear
         collision_found = collision_found or (
             evaluation.status is CollisionEvaluationStatus.COLLISION_DETECTED
@@ -732,6 +834,16 @@ def qualify_conservative_segment_sweeps(
                 },
                 "conservative_contract_sha256": envelope_contract.content_hash,
                 "collision_report_sha256": evaluation.report_hash,
+                "clearance_lower_bound_report_sha256": clearance.report_hash,
+                "clearance_lower_bound_status": clearance.status.value,
+                "minimum_clearance_lower_bound_mm": (
+                    clearance.minimum_clearance_lower_bound_mm
+                ),
+                "clearance_limiting_body_pair": (
+                    list(clearance.limiting_body_pair)
+                    if clearance.limiting_body_pair is not None
+                    else None
+                ),
                 "status": evaluation.status.value,
                 "collision_free_diagnostic": clear,
                 "collisions": [item.to_dict() for item in evaluation.collisions],
@@ -779,6 +891,16 @@ def qualify_conservative_segment_sweeps(
         ),
         "configuration_bound_method": (
             "profile_bound_measured_root_frame_envelope_per_adjacent_sample_pair"
+        ),
+        "clearance_lower_bound_method": (
+            "minimum policy-inflated primitive separation with exact mixed-primitive "
+            "distances and conservative normalized OBB separating-axis lower bounds"
+        ),
+        "minimum_clearance_lower_bound_mm": minimum_clearance_lower_bound_mm,
+        "limiting_segment_sequence": limiting_segment_sequence,
+        "limiting_body_pair": limiting_body_pair,
+        "all_segment_clearance_bounds_determinate": (
+            all_clearance_bounds_determinate
         ),
         "all_conservative_segment_sweeps_clear": all_clear,
         "all_pair_exclusions_physically_accepted": (

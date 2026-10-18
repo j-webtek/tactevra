@@ -877,4 +877,12 @@ plans, runs the existing discrete FK collision evaluator, and conditionally
 runs the existing conservative adjacent-sample sweep evaluator. It preserves
 clear, collision, and incomplete outcomes, opens no hardware, and grants no
 physical authority. All byte, duplicate, and reduction limits remain
-unchanged.\n
+unchanged.
+
+The conservative segment clearance-bound increment modifies only existing
+governed source, schema, test, and operating-plan paths. It adds no tracked
+path, so the reviewed file-count ceiling remains exactly 6,582 files. The
+existing sweep evaluator now publishes residual policy-inflated clearance
+lower bounds, limiting body pairs, and explicit `CLEAR`, `COLLISION`, or
+`INDETERMINATE` outcomes. All byte, duplicate, and reduction limits remain
+unchanged.

@@ -512,6 +512,16 @@ def test_conservative_segment_sweeps_clear_bound_geometry(context) -> None:
     assert all(
         item["collision_free_diagnostic"] for item in report["segment_reports"]
     )
+    assert report["all_segment_clearance_bounds_determinate"] is True
+    assert report["minimum_clearance_lower_bound_mm"] > 0.0
+    assert report["limiting_segment_sequence"] == 0
+    assert len(report["limiting_body_pair"]) == 2
+    assert all(
+        item["clearance_lower_bound_status"] == "CLEAR"
+        and item["minimum_clearance_lower_bound_mm"] > 0.0
+        and len(item["clearance_limiting_body_pair"]) == 2
+        for item in report["segment_reports"]
+    )
     schema = json.loads(
         (
             WORKSPACE
@@ -539,6 +549,11 @@ def test_conservative_segment_sweep_detects_envelope_collision(context) -> None:
     assert report["status"] == "BLOCKED_CONSERVATIVE_SWEEP_COLLISION"
     assert report["all_conservative_segment_sweeps_clear"] is False
     assert report["continuous_collision_proven_for_bound_geometry"] is False
+    assert report["minimum_clearance_lower_bound_mm"] == 0.0
+    assert any(
+        item["clearance_lower_bound_status"] == "COLLISION"
+        for item in report["segment_reports"]
+    )
 
 
 def test_conservative_segment_sweep_rejects_crossed_envelope(context) -> None:

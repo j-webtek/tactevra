@@ -55,6 +55,7 @@ from .scene import (
 )
 from .collision import (
     COLLISION_AUDIT_SCHEMA,
+    COLLISION_CLEARANCE_LOWER_BOUND_SCHEMA,
     COLLISION_CONTRACT_SCHEMA,
     COLLISION_POSE_REPORT_SCHEMA,
     COLLISION_SWEEP_REPORT_SCHEMA,
@@ -66,6 +67,8 @@ from .collision import (
     CollisionBodyRequirement,
     CollisionBodyRole,
     CollisionClearanceEvidenceState,
+    CollisionClearanceLowerBoundEvaluation,
+    CollisionClearanceLowerBoundStatus,
     CollisionClearancePolicy,
     CollisionContractError,
     CollisionEvaluationPolicy,
@@ -90,6 +93,7 @@ from .collision import (
     audit_collision_geometry,
     build_roarm_m3_prehardware_collision_contract,
     evaluate_collision_pose,
+    evaluate_collision_pose_clearance_lower_bound,
     evaluate_collision_sweep,
 )
 from .static_route_collision import (
@@ -207,6 +211,7 @@ __all__ = [
     "AabbMm",
     "ClearanceCheck",
     "COLLISION_AUDIT_SCHEMA",
+    "COLLISION_CLEARANCE_LOWER_BOUND_SCHEMA",
     "COLLISION_CONTRACT_SCHEMA",
     "COLLISION_POSE_REPORT_SCHEMA",
     "COLLISION_SWEEP_REPORT_SCHEMA",
@@ -218,6 +223,8 @@ __all__ = [
     "CollisionBodyRequirement",
     "CollisionBodyRole",
     "CollisionClearanceEvidenceState",
+    "CollisionClearanceLowerBoundEvaluation",
+    "CollisionClearanceLowerBoundStatus",
     "CollisionClearancePolicy",
     "CollisionContractError",
     "CollisionEvaluationPolicy",
@@ -370,6 +377,7 @@ __all__ = [
     "bind_static_route_target",
     "build_roarm_m3_prehardware_collision_contract",
     "evaluate_collision_pose",
+    "evaluate_collision_pose_clearance_lower_bound",
     "evaluate_collision_sweep",
     "evaluate_static_b0477_target_route",
     "load_rc03_nominal_scene",
