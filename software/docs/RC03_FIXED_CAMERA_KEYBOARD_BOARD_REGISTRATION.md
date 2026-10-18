@@ -179,6 +179,40 @@ no robot command. Windows currently reports the intended installed devices as
 Arducam B0477 and the RoArm CP210x bridge on COM4; this inventory is discovery
 evidence only and does not qualify either endpoint.
 
+### Read-only live acquisition boundary
+
+`rocell.calibration.fixed_camera_robot_acquisition_v1` defines the missing
+capture sequence used before the retained-file compiler. It accepts two narrow
+provider surfaces: an already-open camera that can only be probed or captured,
+and a feedback-only source that can only return one retained T=1051 sample. The
+coordinator performs exactly:
+
+1. one pre-frame T=1051 sample;
+2. one camera frame with no retry; and
+3. one post-frame T=1051 sample.
+
+The reviewed permit binds the camera identity, settings, camera qualification,
+feedback qualification, installation witness, and review record by SHA-256.
+The complete camera request interval must lie inside the feedback timestamps on
+one host clock and the full bracket must complete within one second. Joint,
+forward-kinematic endpoint, and reported-XYZ drift use the same limits as the
+passive compiler. The returned JPEG remains separate from its canonical bracket
+so the owning application can retain the image without embedding it in JSON.
+
+After board-pose and calibrated bare-jaw observations are computed from that
+exact JPEG, `build_capture_input_v1` joins them to the bracket and runs the
+existing passive compiler as the final compatibility check. This preserves one
+validation source for fit tags 0–3, held-out tags 4–5, observation hashes,
+timing, stationarity, and firmware kinematics.
+
+The coordinator has no `open`, `close`, motion, torque, or contact operation and
+is not registered with the current physical dispatcher. The active manifest
+still represents the older moving-camera freeze, so
+`SUPERSEDING_STATIC_CAMERA_FREEZE_NOT_PROMOTED` remains a deliberate blocker.
+The installed B0477 identity and mode, feedback source, installation witness,
+and review artifacts must be qualified before a physical application can create
+the permit or call this boundary.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

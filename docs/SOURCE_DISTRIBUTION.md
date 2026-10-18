@@ -636,6 +636,17 @@ installed-clearance evidence separate. No image, capture corpus, controller
 artifact, generated geometry, or physical measurement enters the archive. All
 byte, duplicate, and reduction limits remain unchanged.
 
+The fixed-camera/feedback acquisition boundary adds two governed paths: one
+read-only coordinator and one focused unit-test module. The file-count ceiling
+advances from 6,534 to the exact expected 6,536 files. The coordinator accepts
+only an already-open identity-bound camera and a feedback-only source, performs
+exactly two T=105 feedback requests around one frame with no retry, and binds
+qualification, installation, and review artifacts by hash. It has no camera-open,
+motion, torque, or contact operation and is not connected to the blocked
+physical dispatcher. No image, capture corpus, controller artifact, generated
+geometry, or physical measurement enters the archive. All byte, duplicate, and
+reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
