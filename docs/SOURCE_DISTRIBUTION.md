@@ -732,6 +732,16 @@ no camera or robot and adds no image, calibration corpus, controller artifact,
 generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The complete retained fixed-camera observation composition adds two governed
+paths: one CPU-only compiler and one focused end-to-end test module. The
+file-count ceiling advances from 6,552 to the exact expected 6,554 files. The
+compiler requires six caller-pinned source files, composes the reviewed
+intrinsics, tag, bracket, bare-jaw calibration, and landmark adapters, and
+delegates to the existing native observation and passive capture validators.
+It opens no camera or robot and adds no image, calibration corpus, controller
+artifact, generated geometry, or physical measurement to the archive. All
+byte, duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
