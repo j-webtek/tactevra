@@ -77,6 +77,14 @@ evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or
 contact calibration or describe physical typing as qualified.
 
+The bare-jaw image-to-3-D boundary now has an offline audited landmark adapter.
+It binds a retained rigid jaw model and reviewed detector identity, then checks
+at least four fit and two holdout landmarks by independent reprojection before
+emitting the existing calibrated observation contract. No trustworthy retained
+jaw landmark model or qualified physical landmark source is currently present,
+so the adapter does not change this hold. It prevents a loose pixel, an
+unreviewed pose, or photographs alone from being promoted into metric 3-D.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a

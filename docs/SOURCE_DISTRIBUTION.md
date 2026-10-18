@@ -689,6 +689,17 @@ calibration corpus, controller artifact, generated geometry, or physical
 measurement to the archive. All byte, duplicate, and reduction limits remain
 unchanged.
 
+The auditable bare-jaw landmark adapter adds two governed paths: one CPU-only
+rigid-model/reprojection boundary and one focused unit-test module. The
+file-count ceiling advances from 6,544 to the exact expected 6,546 files. The
+adapter binds exact intrinsics, model, detector configuration, and detector
+implementation identities; requires four fit plus two holdout landmarks; and
+independently checks full-frame, positive-depth, per-landmark, and group RMS
+limits before emitting the existing calibrated camera-frame observation. It
+opens no camera or robot and adds no image, jaw model, calibration corpus,
+generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513

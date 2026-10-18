@@ -144,11 +144,13 @@ shared workcell geometry. Installing the stylus does not create a second board
 transform. It requires a separate measured stylus TCP and installed-clearance
 profile, which remain bound by the attachment-aware handoff below.
 
-The current increment establishes the capture and aggregation contract. Live
-camera acquisition, the calibrated bare-jaw visual detector, retained robot
-feedback acquisition, and collection of the five spatially separated samples
-remain the next integration step. No manual board dimension, tag spacing,
-keyboard size, or key-plane measurement needs to be repeated.
+The capture and aggregation contracts are established. The bare-jaw observer
+and audited landmark adapter are also implemented, but their physical rigid
+landmark model and qualified landmark/pose source are not retained. Qualified
+live camera acquisition, retained robot feedback acquisition, and collection
+of the five spatially separated samples remain the next integration step. No
+manual board dimension, tag spacing, keyboard size, or key-plane measurement
+needs to be repeated.
 
 Retained capture files can now be checked directly. A single record is compiled
 with no hardware access as follows:
@@ -308,11 +310,26 @@ hash. The observer adds the board-pose translation uncertainty conservatively
 to the detector uncertainty and rejects a combined result above 3 mm or an
 `X/Y` location outside the `610 x 457 mm` board.
 
-This closes the software seam without claiming the physical artifact exists.
-The remaining physical work is to retain and independently review the actual
-detector-calibration record and supply its same-frame 3-D observation. Neither
-the loader nor observer opens a camera, reads the robot, creates a trajectory,
-or promotes the installation freeze.
+`rocell.calibration.fixed_camera_bare_jaw_landmarks_v1` now supplies the
+auditable adapter behind that detector contract. It requires the exact retained
+jaw reference-model SHA-256 and a landmark/pose source whose detector,
+configuration, and implementation identities match the reviewed calibration.
+For every native frame it independently projects the rigid model through the
+reviewed pinhole intrinsics. At least four predeclared `FIT` landmarks and two
+separate `HOLDOUT` landmarks must be present; both groups must pass bounded
+reprojection checks, every model landmark must appear exactly once, and every
+point must remain in front of the camera and inside the full frame. Only then
+does the adapter derive the camera-frame reference from the verified rigid
+transform and emit `BareJawCameraObservationV1`.
+
+This closes the evidence-verification seam without claiming the physical
+artifact exists or inventing jaw geometry from the photographs. The remaining
+physical work is now narrower: retain the exact bare-jaw landmark model,
+qualify its landmark/pose source and detector calibration with disjoint views,
+and obtain the same-frame landmark evidence. The established board, tag,
+keyboard, and key-plane dimensions do not need to be measured again. None of
+these offline modules opens a camera, reads the robot, creates a trajectory, or
+promotes the installation freeze.
 
 ## Attachment-aware clearance handoff
 
