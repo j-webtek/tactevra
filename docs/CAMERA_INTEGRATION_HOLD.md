@@ -290,3 +290,9 @@ stylus separation after clearance admission. Its receipt binds two distinct
 execution plans and tool profiles to the exact localization and installed
 collision identities. It produces no trajectory, IK result, collision result,
 controller command, motion authority, contact authority, or freeze release.
+
+The profile-separated route screening boundary also leaves the freeze in
+place. It can compile and screen both admitted routes offline and enumerate the
+exact collision evidence slots for each installed profile, but it does not
+perform installed-geometry collision screening, prove continuous clearance,
+observe a fresh controller start state, or authorize motion.

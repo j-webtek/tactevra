@@ -690,3 +690,28 @@ These outputs remain offline planning evidence. Each profile must next compile
 its own trajectory and IK screen, then enter `typing_collision_intake_v1` with
 the installed collision profile named in the manifest. Continuous collision
 evidence and a fresh observed start state remain required before execution.
+
+### Profile-separated route screening bundle
+
+`fixed_camera_keyboard_profiled_route_screen_v1` is the next offline boundary
+after profile-specific typing-plan admission. It consumes the exact co-located
+plan receipt, manifest, and both typing plans. The caller supplies the active
+verified simulation context, the shared planner calibration snapshot, and
+separate trajectory policies, IK seed identities, and installed collision
+profiles for `no_attachment` and `stylus_attachment`.
+
+The boundary runs the existing deterministic trajectory compiler, numerical IK
+screen, and `typing_collision_intake_v1` independently for each profile. It
+fails closed if a plan is crossed with the other attachment's installed
+collision profile, the profiles reuse one trajectory policy or IK seed
+identity, either IK screen is blocked, or either collision intake does not
+reach `READY_FOR_OFFLINE_PROFILE_BOUND_COLLISION_EVIDENCE`.
+
+A successful new-directory publication contains three artifacts per profile:
+the canonical trajectory plan, IK screen, and collision-evidence intake. The
+manifest binds their hashes to the source plan, calibration snapshot, build
+snapshot, kinematic model, installed collision profile, required evidence
+slots, and remaining blockers. The completion receipt is written last. This is
+still a zero-authority offline result: installed-geometry collision screening,
+continuous clearance, a fresh observed start state, controller commands, and
+physical release remain absent.
