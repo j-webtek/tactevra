@@ -394,6 +394,30 @@ board, tag, keyboard, and key-plane dimensions do not need to be measured
 again. None of these offline modules opens a camera, reads the robot, creates a
 trajectory, or promotes the installation freeze.
 
+### Complete retained observation composition
+
+`rocell.calibration.fixed_camera_retained_observation_v1` joins the retained
+physical inputs into the native-frame coordinator. One call requires caller
+SHA-256 pins for the acquisition bracket JSON, its separate JPEG, reviewed
+intrinsics, raw/rectified six-tag evidence, reviewed bare-jaw detector
+calibration, and same-frame bare-jaw landmark evidence. The RC03 six-tag map is
+passed as its existing typed object and must match the independent hashes in
+both reviewed calibrations.
+
+The compiler builds the audited landmark detector and reviewed bare-jaw
+observer, extracts the disjoint four-fit/two-holdout board pose, and delegates
+the final correspondence to the existing passive capture compiler. It emits a
+compact receipt binding all six source files and every validated typed object.
+No source loader is bypassed and no duplicate validation policy is introduced.
+
+This closes the application composition seam only. The result remains an
+unreviewed `no_attachment` capture with zero physical authority. A qualified
+producer still has to create and independently review the physical records,
+and the stationary campaign still requires three spatially separated `FIT`
+captures and two distinct `HOLDOUT` captures from one unchanged installation
+epoch. The stylus keeps a separate measured TCP and installed-clearance
+profile; it does not create a second board-to-robot transform.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a

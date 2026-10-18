@@ -4,7 +4,7 @@
 
 **Started:** September 28, 2026
 
-**Updated:** October 17, 2026
+**Updated:** October 18, 2026
 **Authority:** coordination only; this document grants no movement or hardware authority
 
 The overhead camera is now installed and fixed relative to the RC03 board. A
@@ -110,6 +110,16 @@ acquisition. Crossed timing, altered drift metrics, changed JPEG bytes, and any
 authority substitution fail closed. This completes retained input coverage for
 the native observation coordinator, but no qualified physical bracket has been
 accepted and the hold remains.
+
+The complete retained observation path is now composed at one zero-hardware
+boundary. The compiler requires exact caller pins for the bracket record, its
+separate native JPEG, reviewed intrinsics, six-tag evidence, reviewed bare-jaw
+calibration, and same-frame bare-jaw landmarks. It then invokes the existing
+board-pose, landmark-reprojection, feedback, firmware-kinematic, and passive
+capture validators without loosening any check. Crossed frames, settings,
+intrinsics, tag maps, detector identities, reference models, or file bytes fail
+closed. A passing result is still an unreviewed `no_attachment` correspondence;
+it grants no camera, robot, movement, contact, or freeze-release authority.
 
 This is a targeted hold, not a general development freeze.
 
