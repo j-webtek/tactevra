@@ -737,3 +737,29 @@ configuration geometry, conservative sweep envelopes, and a fresh observed
 start state are still required. It does not screen installed geometry, prove
 continuous clearance, generate controller commands, access hardware, release
 the static-camera freeze, or authorize physical motion.
+
+### Profile-specific collision evidence templates
+
+`fixed_camera_keyboard_profiled_collision_evidence_template_v1` converts the
+completed collision-partition bundle into a reviewable measurement workbook.
+It accepts only the named, co-located receipt, manifest, and bare-jaw and stylus
+partition intakes with exact byte hashes. It rechecks every semantic hash,
+partition sample, boundary recheck, installed-profile identity, and evidence
+count before publishing anything.
+
+The resulting bare-jaw and stylus templates remain separate. Each template
+lists every required rigid attachment transform, every configuration-sampled
+body at every bounded sample, and every conservative body envelope for every
+owned adjacent-sample segment. Sample and segment hashes are copied from the
+verified plan so later evidence cannot silently move to another pose or route.
+Only source hashes accepted by that exact installed profile may be used when
+the blank fields are completed.
+
+All measurement fields are deliberately null and marked
+`REQUIRED_MEASURED_INPUT`. The templates do not estimate geometry from the
+camera photographs or treat the existing board measurements as collision
+evidence. Their completion receipt is written last into a new directory. The
+next boundary must parse independently reviewed measurements, bind them to
+these slots, and run the existing discrete and conservative sweep evaluators.
+Until then, collision clearance, a fresh observed start state, controller
+commands, hardware access, freeze release, and physical motion remain blocked.

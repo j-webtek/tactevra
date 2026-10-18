@@ -203,6 +203,10 @@ only a successful read of current status, not a readiness claim.
   grants no hardware or physical authority.
 - Prepare blank measured-configuration and commissioning records without
   entering estimated values as measurements.
+- Render the profile-specific collision evidence templates from the exact
+  partition receipt. The templates keep bare-jaw and stylus geometry separate
+  and enumerate every rigid transform, sampled-body geometry, and conservative
+  sweep envelope as a blank required measurement; they do not qualify a route.
 - Reconcile repository status, release-readiness, documentation, ownership,
   provenance, and external-artifact records.
 - Resolve distribution and licensing blockers independently of camera work.
@@ -304,3 +308,10 @@ independently, and publishes their boundary lineage and evidence requirements.
 The output is an evidence request, not collision evidence: measured geometry,
 continuous sweep qualification, a fresh observed start state, and every form
 of execution authority remain absent.
+
+The collision evidence template boundary makes that request concrete without
+weakening the hold. It accepts only the completed partition bundle, reproduces
+the exact per-profile sample and segment identities, and leaves every measured
+transform and geometry field null. The blank templates cannot be admitted as
+evidence, do not run collision evaluation, and grant no camera, controller,
+contact, freeze-release, hardware, or physical authority.
