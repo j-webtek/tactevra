@@ -850,3 +850,12 @@ collision planner. It publishes hash-bound partition lineage and evidence
 requirements only; it supplies no measured geometry, performs no collision
 screening, observes no fresh start state, and grants no hardware or physical
 authority. All byte, duplicate, and reduction limits remain unchanged.
+
+The fixed-camera profile-specific collision evidence template adds two
+governed paths: one offline application module and one focused unit-test
+module. The file-count ceiling advances from 6,576 to the exact expected 6,578
+files. It revalidates the complete partition bundle and renders separate blank
+bare-jaw and stylus slots for every rigid attachment, sampled configuration
+body, and conservative sweep envelope. It supplies no measured value, performs
+no collision screening, opens no hardware, and grants no physical authority.
+All byte, duplicate, and reduction limits remain unchanged.
