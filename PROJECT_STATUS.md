@@ -60,8 +60,14 @@ board, six-tag map, installed camera bindings, and raw robot feedback to build
 an unreviewed board-to-robot worksheet without additional ruler measurements.
 Its retained-file workflow now enforces bounded strict JSON, optional exact
 file-byte hashes, unique frame/pose/tool observations, and deterministic single
-capture or five-point campaign compilation. It performs no acquisition or
-movement and still requires retained live captures plus independent review.
+capture or five-point campaign compilation. A separate read-only acquisition
+coordinator now defines the exact feedback/frame/feedback boundary needed to
+produce those live records. It accepts only an already-open persistently bound
+camera, hash-bound qualified sources, an unchanged-installation witness, and a
+review record; it captures one frame with no retry and exposes no motion,
+torque, or contact method. The active installation freeze still blocks wiring
+that coordinator to physical providers, and image observations plus independent
+review remain required.
 
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
