@@ -240,6 +240,25 @@ installation/reseat confirmation, both attachment clearance profiles, and the
 stylus TCP remain separate later gates. The composer performs no hardware I/O,
 emits no command, and cannot release the static-camera freeze.
 
+### Independent-review handoff packet
+
+`rocell.calibration.fixed_camera_campaign_review_packet_v1` turns one typed
+retained campaign into a deterministic review-only ZIP. It includes the exact
+campaign result, unreviewed measurement draft, campaign receipt, each
+observation receipt, a blank review-decision template, reviewer instructions,
+and a manifest that hashes every member. The inspector rejects unexpected,
+duplicate, unsafe, compressed, encrypted, oversized, altered, crossed, or
+authority-bearing members.
+
+The packet records the campaign producer. It deliberately leaves reviewer
+identity, decision, review time, findings, installation continuity, and reseat
+confirmation unset. The independent reviewer must obtain the separately
+retained originals, compare them with the five observation receipts, preserve
+FIT/HOLDOUT separation, and issue a separate decision bound to the final packet
+SHA-256. Building or inspecting the packet does not perform or impersonate that
+review, promote the measurement draft, authorize motion/contact, or release the
+static-camera freeze.
+
 ### Retained acquisition-bracket replay
 
 `rocell.calibration.fixed_camera_bracket_evidence_v1` closes the retained-file
