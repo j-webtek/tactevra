@@ -262,6 +262,33 @@ intrinsics/rectification record plus calibrated bare-jaw detector evidence.
 The established board dimensions, tag spacing, keyboard geometry, and 21 mm
 key plane are reused and do not need to be measured again.
 
+### Reviewed physical-intrinsics intake
+
+`rocell.calibration.fixed_camera_physical_intrinsics_v1` closes the retained
+file boundary in front of the native-frame coordinator. The caller must provide
+the SHA-256 of the exact JSON bytes. The strict loader then binds:
+
+- the persistent B0477 identity and locked settings;
+- the exact `5472 x 3648 @ 9 fps YUY2` full-frame mode;
+- the eight-coefficient OpenCV rational distortion solution;
+- the rectified pinhole matrix and rectification configuration;
+- the six-tag map, dataset manifest, and precommitted held-out split;
+- the measured residuals and the reviewed acceptance limits; and
+- distinct declared calibration-producer and reviewer identities, the
+  offset-bearing review time, and independent review-record hash.
+
+The record rejects failed residual limits, missing physical/native/full-frame
+gates, a non-accept review decision, altered semantic integrity, or any camera,
+robot, motion, contact, or release authority. A passing record is converted
+directly into `ReviewedNativeIntrinsicsV1`, so the observation coordinator no
+longer needs an application to assemble that binding from loose values.
+
+The loader binds the declared reviewer and review record but cannot
+authenticate the reviewer. The qualified calibration images, solver output,
+and review still have to be produced and retained outside this zero-I/O
+boundary. No additional board, tag, keyboard, or key-plane measurements are
+required.
+
 ## Attachment-aware clearance handoff
 
 `rocell.application.fixed_camera_keyboard_clearance_intake_v1` connects a
