@@ -840,3 +840,13 @@ boundaries with distinct attachment policies, seed identities, and installed
 profiles. It publishes hash-bound evidence only and cannot screen installed
 geometry, prove continuous clearance, observe a fresh start state, or authorize
 hardware. All byte, duplicate, and reduction limits remain unchanged.
+
+The fixed-camera profile-specific collision partition handoff adds two
+governed paths: one offline application module and one focused unit-test
+module. The file-count ceiling advances from 6,574 to the exact expected 6,576
+files. It revalidates the exact route-screen bundle and independently
+partitions the bare-jaw and stylus IK routes through the existing bounded
+collision planner. It publishes hash-bound partition lineage and evidence
+requirements only; it supplies no measured geometry, performs no collision
+screening, observes no fresh start state, and grants no hardware or physical
+authority. All byte, duplicate, and reduction limits remain unchanged.

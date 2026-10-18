@@ -715,3 +715,25 @@ slots, and remaining blockers. The completion receipt is written last. This is
 still a zero-authority offline result: installed-geometry collision screening,
 continuous clearance, a fresh observed start state, controller commands, and
 physical release remain absent.
+
+### Profile-specific collision partition handoff
+
+`fixed_camera_keyboard_profiled_collision_partitions_v1` consumes the exact
+route-screen receipt, manifest, and two co-located IK reports. It rechecks the
+file hashes, semantic hashes, calibration/build/model lineage, and installed
+collision-profile identity before calling the existing bounded route
+partitioner independently for `no_attachment` and `stylus_attachment`.
+
+Each output report owns every route segment exactly once and repeats the exact
+terminal configuration at partition boundaries for conservative rechecking.
+The bundle manifest keeps the two installed geometries separate and lists the
+required configuration geometry and sweep-envelope evidence for every
+partition. The completion receipt is written last into a new directory; a
+crossed profile, altered source, blocked partition, or existing destination
+fails before publication.
+
+This handoff plans evidence only. Measured rigid-attachment bindings,
+configuration geometry, conservative sweep envelopes, and a fresh observed
+start state are still required. It does not screen installed geometry, prove
+continuous clearance, generate controller commands, access hardware, release
+the static-camera freeze, or authorize physical motion.

@@ -296,3 +296,11 @@ place. It can compile and screen both admitted routes offline and enumerate the
 exact collision evidence slots for each installed profile, but it does not
 perform installed-geometry collision screening, prove continuous clearance,
 observe a fresh controller start state, or authorize motion.
+
+The profile-specific collision partition handoff preserves that hold while
+making long routes reviewable in bounded pieces. It accepts only the exact
+hash-bound route-screen bundle, partitions the bare-jaw and stylus IK routes
+independently, and publishes their boundary lineage and evidence requirements.
+The output is an evidence request, not collision evidence: measured geometry,
+continuous sweep qualification, a fresh observed start state, and every form
+of execution authority remain absent.
