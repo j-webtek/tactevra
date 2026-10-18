@@ -612,3 +612,43 @@ inputs and names `typing_collision_intake_v1` as the downstream collision
 evidence stage. It does not construct a trajectory or run a collision screen.
 Continuous clearance, a fresh observed start state, and physical authority
 remain false until their existing downstream gates pass.
+
+### Clearance admission command
+
+Once both installed profiles, the reviewed binding worksheet, and the measured
+stylus TCP artifact exist, publish the operational handoff with exact byte
+pins:
+
+```powershell
+rocell --workspace . admit-fixed-camera-keyboard-clearance `
+  --localization-admission-receipt admitted-localization/localization-admission-receipt.json `
+  --localization-admission-receipt-sha256 <exact-receipt-sha256> `
+  --localization admitted-localization/keyboard-robot-localization.json `
+  --localization-sha256 <exact-localization-sha256> `
+  --profile-bindings keyboard-clearance-profile-bindings.json `
+  --profile-bindings-sha256 <exact-bindings-sha256> `
+  --bare-jaw-profile bare-jaw-installed-collision-profile.json `
+  --bare-jaw-profile-sha256 <exact-bare-jaw-profile-sha256> `
+  --stylus-profile stylus-installed-collision-profile.json `
+  --stylus-profile-sha256 <exact-stylus-profile-sha256> `
+  --stylus-tcp measured-stylus-tcp.json `
+  --stylus-tcp-sha256 <exact-stylus-tcp-sha256> `
+  --system-manifest-sha256 <exact-system-manifest-sha256> `
+  --output-directory admitted-clearance `
+  --json
+```
+
+The command verifies that the localization and its admission receipt are
+co-located and byte-consistent, the stylus TCP bytes match the reviewed
+binding, each installed profile is distinct and compatible with the selected
+manifest, and all 46 candidates remain present in each profile. Success writes
+`keyboard-clearance-intake.json` first and
+`clearance-admission-receipt.json` last. Existing output directories,
+substituted files, crossed localization artifacts, profile reuse, or context
+drift fail closed.
+
+This handoff is still pre-trajectory evidence. Its next stage is to construct
+separate typing execution plans and pass each through
+`typing_collision_intake_v1` with continuous collision screening and a fresh
+observed start state. The admission command has no camera, controller,
+trajectory, collision-screening, motion, contact, or freeze-release authority.

@@ -525,6 +525,63 @@ def _command_admit_fixed_camera_keyboard_localization(
     return int(ExitCode.OK)
 
 
+def _command_admit_fixed_camera_keyboard_clearance(
+    args: argparse.Namespace,
+) -> int:
+    """Compose exact attachment clearance inputs without hardware access."""
+
+    from rocell.application.fixed_camera_keyboard_clearance_admission_v1 import (
+        FixedCameraKeyboardClearanceAdmissionError,
+        admit_fixed_camera_keyboard_clearance_v1,
+    )
+    from rocell.application.context import SimulationContextError
+
+    workspace = _find_workspace(args.workspace)
+    manifest_path = _manifest_path(workspace, args.manifest)
+    try:
+        result = admit_fixed_camera_keyboard_clearance_v1(
+            args.localization_admission_receipt,
+            expected_localization_admission_receipt_file_sha256=(
+                args.localization_admission_receipt_sha256
+            ),
+            localization_path=args.localization,
+            expected_localization_file_sha256=args.localization_sha256,
+            profile_bindings_path=args.profile_bindings,
+            expected_profile_bindings_file_sha256=args.profile_bindings_sha256,
+            bare_jaw_profile_path=args.bare_jaw_profile,
+            expected_bare_jaw_profile_file_sha256=args.bare_jaw_profile_sha256,
+            stylus_profile_path=args.stylus_profile,
+            expected_stylus_profile_file_sha256=args.stylus_profile_sha256,
+            stylus_tcp_path=args.stylus_tcp,
+            expected_stylus_tcp_file_sha256=args.stylus_tcp_sha256,
+            workspace=workspace,
+            manifest_path=manifest_path,
+            expected_manifest_file_sha256=args.system_manifest_sha256,
+            output_directory=args.output_directory,
+        )
+    except (
+        FixedCameraKeyboardClearanceAdmissionError,
+        SimulationContextError,
+        OSError,
+    ) as exc:
+        raise ConfigurationError(
+            "FIXED_CAMERA_KEYBOARD_CLEARANCE_ADMISSION_REJECTED",
+            str(exc),
+        ) from exc
+    report = dict(result.receipt)
+    report["output_directory"] = str(result.output_directory)
+    report["clearance_intake_path"] = str(result.intake_path)
+    report["completion_receipt_path"] = str(result.receipt_path)
+    if args.json:
+        _json_dump(report)
+    else:
+        print(str(report["status"]))
+        print(f"Clearance intake: {result.intake_path}")
+        print(f"Completion receipt: {result.receipt_path}")
+        print("Physical authority: NONE")
+    return int(ExitCode.OK)
+
+
 def _command_doctor(args: argparse.Namespace) -> int:
     bootstrap = _load_virtual_bootstrap(args)
     snapshot = bootstrap.context.snapshot
@@ -5643,6 +5700,107 @@ def build_parser() -> argparse.ArgumentParser:
     _add_json_argument(keyboard_localization_admission)
     keyboard_localization_admission.set_defaults(
         handler=_command_admit_fixed_camera_keyboard_localization
+    )
+
+    keyboard_clearance_admission = commands.add_parser(
+        "admit-fixed-camera-keyboard-clearance",
+        help="Admit exact attachment-specific installed-clearance inputs",
+        description=(
+            "Bind an admitted localization package to reviewed bare-jaw and "
+            "stylus installed-collision profiles, the measured stylus TCP, and "
+            "the selected system manifest. Publish a profile-separated route "
+            "construction handoff and completion receipt in a new directory. "
+            "This command never opens hardware, constructs a trajectory, runs "
+            "collision screening, or grants physical authority."
+        ),
+    )
+    keyboard_clearance_admission.add_argument(
+        "--localization-admission-receipt",
+        type=Path,
+        required=True,
+        help="Exact localization-admission-receipt.json file",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--localization-admission-receipt-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact localization receipt bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--localization",
+        type=Path,
+        required=True,
+        help="Exact keyboard-robot-localization.json file",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--localization-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact localization bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--profile-bindings",
+        type=Path,
+        required=True,
+        help="Reviewed keyboard clearance profile bindings JSON",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--profile-bindings-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact reviewed bindings bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--bare-jaw-profile",
+        type=Path,
+        required=True,
+        help="Exact measured installed-collision profile for no_attachment",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--bare-jaw-profile-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact bare-jaw profile bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--stylus-profile",
+        type=Path,
+        required=True,
+        help="Exact measured installed-collision profile for stylus_attachment",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--stylus-profile-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact stylus profile bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--stylus-tcp",
+        type=Path,
+        required=True,
+        help="Exact measured stylus TCP artifact",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--stylus-tcp-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact measured stylus TCP bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--system-manifest-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the selected system manifest bytes",
+    )
+    keyboard_clearance_admission.add_argument(
+        "--output-directory",
+        type=Path,
+        required=True,
+        help="New directory for clearance intake and its completion receipt",
+    )
+    _add_json_argument(keyboard_clearance_admission)
+    keyboard_clearance_admission.set_defaults(
+        handler=_command_admit_fixed_camera_keyboard_clearance
     )
 
     doctor = commands.add_parser(

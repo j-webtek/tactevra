@@ -72,6 +72,14 @@ to profile-specific route construction before the existing typing collision
 intake. No current reviewed binding satisfies this boundary, and the handoff
 does not generate a trajectory, perform collision screening, or grant physical
 authority.
+Its operational admission command now pins the exact localization receipt and
+artifact, reviewed profile bindings, both installed-profile files, measured
+stylus TCP bytes, and selected system manifest. It publishes the clearance
+intake before a completion receipt in a new directory and refuses crossed,
+changed, reused, or context-incompatible inputs. This closes the offline file
+handoff without claiming that the presently missing physical profile evidence
+exists. Profile-specific trajectory construction, continuous collision
+screening, and a fresh observed start state remain required afterward.
 The hold now applies to the remaining commissioned transforms, received-camera
 evidence, tool geometry, held-out localization, and physical action authority.
 The project must not promote the planar mapping into a 3-D, robot-base, tool, or

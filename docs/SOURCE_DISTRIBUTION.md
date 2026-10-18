@@ -813,3 +813,13 @@ stylus TCP as separate measured evidence. It emits route-construction inputs
 only; no trajectory, collision result, controller artifact, hardware operation,
 or physical authority enters the archive. All byte, duplicate, and reduction
 limits remain unchanged.
+
+The keyboard-clearance admission layer adds two governed paths: one strict
+offline file-admission module and one focused unit-test module. The file-count
+ceiling advances from 6,568 to the exact expected 6,570 files. It pins the
+admitted localization pair, reviewed attachment bindings, two distinct
+installed-collision profiles, measured stylus TCP bytes, and selected system
+manifest before invoking the existing typed clearance compiler. It writes the
+zero-authority intake before its receipt and cannot open hardware, generate a
+trajectory, perform collision screening, or authorize motion or contact. All
+byte, duplicate, and reduction limits remain unchanged.
