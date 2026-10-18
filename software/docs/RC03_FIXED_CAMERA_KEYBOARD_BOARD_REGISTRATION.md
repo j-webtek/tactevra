@@ -322,14 +322,29 @@ point must remain in front of the camera and inside the full frame. Only then
 does the adapter derive the camera-frame reference from the verified rigid
 transform and emit `BareJawCameraObservationV1`.
 
-This closes the evidence-verification seam without claiming the physical
-artifact exists or inventing jaw geometry from the photographs. The remaining
-physical work is now narrower: retain the exact bare-jaw landmark model,
-qualify its landmark/pose source and detector calibration with disjoint views,
-and obtain the same-frame landmark evidence. The established board, tag,
-keyboard, and key-plane dimensions do not need to be measured again. None of
-these offline modules opens a camera, reads the robot, creates a trajectory, or
-promotes the installation freeze.
+`rocell.calibration.fixed_camera_bare_jaw_landmark_evidence_v1` supplies the
+retained-file boundary in front of that adapter. The caller pins the exact file
+SHA-256, and the strict loader rejects duplicate keys, nonfinite values,
+unknown fields, altered semantic integrity, invalid transforms, and any
+authority claim. The reconstructed pose source is usable only with the exact
+capture ID, JPEG hash, camera settings, frame dimensions, camera frame, pixel
+space, intrinsics hash, and reference-model hash recorded in the package. Its
+receipt records those bindings and explicitly carries no release effect.
+
+This package contains the complete rigid model and the same-frame landmark
+estimate, so the future physical producer does not need an application-specific
+in-memory bridge. An accepted record can build `AuditedBareJawLandmarkDetectorV1`
+directly; that detector still performs all independent fit and holdout
+reprojection checks before the reviewed observer can emit a board-frame point.
+
+These boundaries close the evidence-verification and retention seams without
+claiming the physical artifact exists or inventing jaw geometry from the
+photographs. The remaining physical work is now narrower: produce and review
+the exact rigid landmark model and detector calibration with disjoint views,
+then retain each native-frame estimate in the strict package. The established
+board, tag, keyboard, and key-plane dimensions do not need to be measured
+again. None of these offline modules opens a camera, reads the robot, creates a
+trajectory, or promotes the installation freeze.
 
 ## Attachment-aware clearance handoff
 

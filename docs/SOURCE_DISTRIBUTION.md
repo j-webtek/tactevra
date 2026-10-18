@@ -700,6 +700,17 @@ opens no camera or robot and adds no image, jaw model, calibration corpus,
 generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The retained bare-jaw landmark evidence intake adds two governed paths: one
+strict CPU-only JSON loader/replay source and one focused unit-test module. The
+file-count ceiling advances from 6,546 to the exact expected 6,548 files. The
+loader requires caller-pinned bytes and semantic integrity, binds one capture
+to its frame, settings, reviewed intrinsics, detector identities, rigid model,
+transform, and complete fit/holdout pixel set, and refuses cross-frame or
+cross-model replay before the audited adapter performs reprojection checks. It
+opens no camera or robot and adds no image, jaw model, calibration corpus,
+generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
