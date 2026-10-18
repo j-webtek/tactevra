@@ -324,3 +324,11 @@ existing typed collision inputs. Admission itself does not evaluate a sample
 or sweep, observe the controller, release the static-camera freeze, or grant
 physical authority. Profile-bound partition evaluation remains the next
 offline stage after real evidence is supplied and independently accepted.
+
+The profile-bound partition evaluator is now implemented as an offline
+software boundary. It binds the admitted typed evidence to each exact bare-jaw
+or stylus partition, runs discrete FK collision checks, and runs conservative
+adjacent-sample sweeps only after a clear discrete result. This implementation
+does not mean real evidence has been supplied or that the superseding
+static-camera freeze is promoted. Clear software output still grants no camera,
+controller, contact, freeze-release, hardware, or physical authority.\n

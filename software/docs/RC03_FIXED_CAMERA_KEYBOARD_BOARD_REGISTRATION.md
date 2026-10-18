@@ -792,3 +792,20 @@ continuous collision checks. Its receipt therefore retains empty controller
 commands, zero hardware writes, no hardware access, no physical authority, and
 no freeze-release effect. The next stage is the profile-bound partition
 evaluator over these admitted inputs and the exact source partition plans.
+
+### Profile-bound partition collision evaluation
+
+`fixed_camera_keyboard_profiled_partition_collision_evaluator_v1` implements
+that offline evaluator. It revalidates both partition documents against the
+active calibration, build, model, collision contract, and distinct installed
+profiles; reconstructs each canonical bounded sample plan; checks boundary
+rechecks; and requires exact admitted sample and segment coverage.
+
+Each partition first runs the existing FK-derived discrete collision adapter.
+Only a clear discrete result may enter the existing conservative adjacent-
+sample sweep evaluator. A discrete collision, conservative sweep collision,
+or incomplete result remains a distinct fail-closed outcome. The aggregate
+keeps bare-jaw and stylus results separate and collision takes precedence over
+incomplete evidence. Even a clear diagnostic retains the fresh observed-start
+gate and produces no controller command, hardware access, freeze release, or
+physical authority.
