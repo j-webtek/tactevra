@@ -151,6 +151,7 @@ def test_builds_deterministic_review_only_packet_and_inspects_it() -> None:
             [name for name in names if name.startswith("evidence/observations/")]
         ) == 5
         assert decision["producer_id"] == "camera-campaign-producer"
+        assert decision["review_packet_sha256"] == ""
         assert decision["reviewer_id"] == ""
         assert decision["decision"] == ""
         assert decision["installation_unchanged"] is False

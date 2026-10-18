@@ -262,6 +262,7 @@ def _decision_template(
     return {
         "schema": "rocell.fixed_camera_campaign_review_decision.v1",
         "status": "DRAFT_AWAITING_EXTERNAL_INDEPENDENT_REVIEW",
+        "review_packet_sha256": "",
         "campaign_result_sha256": campaign_sha256,
         "measurement_draft_sha256": measurement_sha256,
         "campaign_receipt_sha256": campaign_receipt_sha256,
