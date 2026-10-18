@@ -130,6 +130,15 @@ coverage, unique frame/pose/tool evidence, unchanged installation epoch, and
 invariant camera, robot, settings, intrinsics, tag-map, and kinematic bindings.
 Its output remains an unreviewed measurement draft with no physical authority.
 
+The resulting campaign can now be packaged for external independent review
+without promoting it. The deterministic review archive binds the campaign
+result, measurement draft, campaign receipt, all per-capture observation
+receipts, a blank decision template, and exact reviewer instructions. It
+requires a named producer while leaving reviewer identity, decision,
+installation continuity, and reseat confirmation blank. Any review decision
+must be created separately and bind the final packet hash. Packet creation and
+inspection cannot change the draft or grant physical authority.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a

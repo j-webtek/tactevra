@@ -753,6 +753,17 @@ no command; and adds no image, calibration corpus, controller artifact,
 generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The retained fixed-camera campaign review handoff adds two governed paths: one
+deterministic review-packet builder/inspector and one focused unit-test module.
+The file-count ceiling advances from 6,556 to the exact expected 6,558 files.
+The packet binds the campaign result, unreviewed measurement draft, campaign
+receipt, all observation receipts, a blank decision template, and reviewer
+instructions. It cannot record review completion, promote the draft, open a
+device, emit a command, or grant physical authority, and it adds no image,
+calibration corpus, controller artifact, generated geometry, or physical
+measurement to the archive. All byte, duplicate, and reduction limits remain
+unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
