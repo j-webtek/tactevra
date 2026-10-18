@@ -176,6 +176,10 @@ only a successful read of current status, not a readiness claim.
   future file handoff. It requires a complete explicit planar tag map and
   contained relative paths, and it produces the existing unreviewed campaign
   plus deterministic review packet without camera or robot access.
+- Use `rocell export-fixed-camera-retained-campaign` to publish that verified
+  packet and its completion receipt into a new directory. Existing paths are
+  never overwritten; receipt presence marks a complete offline export only and
+  grants no physical authority.
 - Prepare blank measured-configuration and commissioning records without
   entering estimated values as measurements.
 - Reconcile repository status, release-readiness, documentation, ownership,
