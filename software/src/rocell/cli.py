@@ -391,6 +391,46 @@ def _command_integration_readiness(args: argparse.Namespace) -> int:
     return int(ExitCode.OK)
 
 
+def _command_export_fixed_camera_retained_campaign(args: argparse.Namespace) -> int:
+    """Compile and export one exact retained campaign without hardware access."""
+
+    from rocell.calibration.fixed_camera_retained_campaign_export_v1 import (
+        FixedCameraRetainedCampaignExportError,
+        export_fixed_camera_retained_campaign_v1,
+    )
+    from rocell.calibration.fixed_camera_retained_campaign_manifest_v1 import (
+        FixedCameraRetainedCampaignManifestError,
+    )
+
+    try:
+        result = export_fixed_camera_retained_campaign_v1(
+            args.campaign_manifest,
+            expected_manifest_file_sha256=args.campaign_manifest_sha256,
+            output_directory=args.output_directory,
+        )
+    except (
+        FixedCameraRetainedCampaignExportError,
+        FixedCameraRetainedCampaignManifestError,
+        OSError,
+    ) as exc:
+        raise ConfigurationError(
+            "FIXED_CAMERA_RETAINED_CAMPAIGN_EXPORT_REJECTED",
+            str(exc),
+        ) from exc
+    report = dict(result.receipt)
+    report["output_directory"] = str(result.output_directory)
+    report["review_packet_path"] = str(result.packet_path)
+    report["completion_receipt_path"] = str(result.receipt_path)
+    if args.json:
+        _json_dump(report)
+    else:
+        print(str(report["status"]))
+        print(f"Review packet: {result.packet_path}")
+        print(f"Completion receipt: {result.receipt_path}")
+        print("Physical authority: NONE")
+    return int(ExitCode.OK)
+
+
 def _command_doctor(args: argparse.Namespace) -> int:
     bootstrap = _load_virtual_bootstrap(args)
     snapshot = bootstrap.context.snapshot
@@ -5362,6 +5402,39 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_json_argument(integration_readiness)
     integration_readiness.set_defaults(handler=_command_integration_readiness)
+
+    retained_campaign_export = commands.add_parser(
+        "export-fixed-camera-retained-campaign",
+        help="Compile and export one hash-pinned fixed-camera campaign offline",
+        description=(
+            "Verify the exact retained campaign manifest and every pinned input, "
+            "compile the five-capture campaign, and publish a deterministic review "
+            "packet plus completion receipt into a new directory. This command "
+            "never opens a camera or controller and grants no physical authority."
+        ),
+    )
+    retained_campaign_export.add_argument(
+        "--campaign-manifest",
+        type=Path,
+        required=True,
+        help="Exact rocell.fixed_camera_retained_campaign_manifest.v1 JSON file",
+    )
+    retained_campaign_export.add_argument(
+        "--campaign-manifest-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact campaign manifest bytes",
+    )
+    retained_campaign_export.add_argument(
+        "--output-directory",
+        type=Path,
+        required=True,
+        help="New directory for the review ZIP and completion receipt",
+    )
+    _add_json_argument(retained_campaign_export)
+    retained_campaign_export.set_defaults(
+        handler=_command_export_fixed_camera_retained_campaign
+    )
 
     doctor = commands.add_parser(
         "doctor", help="Run side-effect-free runtime diagnostics"

@@ -263,6 +263,28 @@ and review packet hashes. The entry point only reads caller-selected files and
 returns values in memory. It opens no camera or robot, writes no output,
 authorizes no motion or contact, and cannot release the static-camera freeze.
 
+### Offline review export
+
+Once the exact manifest and every retained input exist, publish the review-only
+handoff with:
+
+```powershell
+rocell export-fixed-camera-retained-campaign `
+  --campaign-manifest <campaign.json> `
+  --campaign-manifest-sha256 <sha256> `
+  --output-directory <new-review-directory> `
+  --json
+```
+
+The command compiles the complete campaign before creating output. It refuses
+an existing output path, writes the deterministic review ZIP first, and writes
+`export-receipt.json` last as the completion marker. The receipt binds the
+manifest compilation receipt, review packet hash, artifact name, and size. An
+interrupted directory without that completion receipt is incomplete evidence
+and must not be reviewed or reused. The command imports no hardware adapter,
+opens no device, grants no motion or contact authority, and does not promote the
+measurement draft or release the static-camera freeze.
+
 ### Independent-review handoff packet
 
 `rocell.calibration.fixed_camera_campaign_review_packet_v1` turns one typed
