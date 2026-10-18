@@ -431,6 +431,55 @@ def _command_export_fixed_camera_retained_campaign(args: argparse.Namespace) -> 
     return int(ExitCode.OK)
 
 
+def _command_admit_fixed_camera_campaign_review(args: argparse.Namespace) -> int:
+    """Admit exact external review files without hardware access."""
+
+    from rocell.calibration.fixed_camera_campaign_review_admission_v1 import (
+        FixedCameraCampaignReviewAdmissionError,
+        admit_fixed_camera_campaign_review_v1,
+    )
+    from rocell.calibration.fixed_camera_campaign_review_intake_v1 import (
+        FixedCameraCampaignReviewIntakeError,
+    )
+
+    try:
+        result = admit_fixed_camera_campaign_review_v1(
+            args.review_packet,
+            expected_packet_file_sha256=args.review_packet_sha256,
+            decision_path=args.review_decision,
+            expected_decision_file_sha256=args.review_decision_sha256,
+            output_directory=args.output_directory,
+        )
+    except (
+        FixedCameraCampaignReviewAdmissionError,
+        FixedCameraCampaignReviewIntakeError,
+        OSError,
+    ) as exc:
+        raise ConfigurationError(
+            "FIXED_CAMERA_CAMPAIGN_REVIEW_ADMISSION_REJECTED",
+            str(exc),
+        ) from exc
+    report = dict(result.receipt)
+    report["output_directory"] = str(result.output_directory)
+    report["completion_receipt_path"] = str(result.receipt_path)
+    report["reviewed_measurement_path"] = (
+        str(result.reviewed_measurement_path)
+        if result.reviewed_measurement_path is not None
+        else None
+    )
+    if args.json:
+        _json_dump(report)
+    else:
+        print(str(report["status"]))
+        if result.reviewed_measurement_path is not None:
+            print(f"Reviewed measurement: {result.reviewed_measurement_path}")
+        else:
+            print("Reviewed measurement: not produced")
+        print(f"Completion receipt: {result.receipt_path}")
+        print("Physical authority: NONE")
+    return int(ExitCode.OK)
+
+
 def _command_doctor(args: argparse.Namespace) -> int:
     bootstrap = _load_virtual_bootstrap(args)
     snapshot = bootstrap.context.snapshot
@@ -5434,6 +5483,51 @@ def build_parser() -> argparse.ArgumentParser:
     _add_json_argument(retained_campaign_export)
     retained_campaign_export.set_defaults(
         handler=_command_export_fixed_camera_retained_campaign
+    )
+
+    campaign_review_admission = commands.add_parser(
+        "admit-fixed-camera-campaign-review",
+        help="Admit one hash-pinned external fixed-camera campaign review",
+        description=(
+            "Verify an exported review packet and separately authored canonical "
+            "decision by their exact file hashes, then publish a terminal intake "
+            "receipt and, for acceptance only, a reviewed measurement into a new "
+            "directory. This command never opens hardware or grants authority."
+        ),
+    )
+    campaign_review_admission.add_argument(
+        "--review-packet",
+        type=Path,
+        required=True,
+        help="Exact deterministic fixed-camera campaign review ZIP",
+    )
+    campaign_review_admission.add_argument(
+        "--review-packet-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact review packet bytes",
+    )
+    campaign_review_admission.add_argument(
+        "--review-decision",
+        type=Path,
+        required=True,
+        help="Exact canonical external review-decision JSON file",
+    )
+    campaign_review_admission.add_argument(
+        "--review-decision-sha256",
+        type=_sha256_argument,
+        required=True,
+        help="Lowercase SHA-256 of the exact review decision bytes",
+    )
+    campaign_review_admission.add_argument(
+        "--output-directory",
+        type=Path,
+        required=True,
+        help="New directory for the intake receipt and accepted measurement",
+    )
+    _add_json_argument(campaign_review_admission)
+    campaign_review_admission.set_defaults(
+        handler=_command_admit_fixed_camera_campaign_review
     )
 
     doctor = commands.add_parser(
