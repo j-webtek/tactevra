@@ -284,3 +284,9 @@ When the camera is installed, record rather than estimate:
 
 The detailed campaign procedure remains in
 [`software/ai/docs/PHYSICAL_CAMERA_LOCALIZATION_CAMPAIGN.md`](../software/ai/docs/PHYSICAL_CAMERA_LOCALIZATION_CAMPAIGN.md).
+
+The offline profile-specific typing-plan admission preserves bare-jaw and
+stylus separation after clearance admission. Its receipt binds two distinct
+execution plans and tool profiles to the exact localization and installed
+collision identities. It produces no trajectory, IK result, collision result,
+controller command, motion authority, contact authority, or freeze release.

@@ -582,6 +582,62 @@ def _command_admit_fixed_camera_keyboard_clearance(
     return int(ExitCode.OK)
 
 
+def _command_admit_fixed_camera_keyboard_profiled_typing_plans(
+    args: argparse.Namespace,
+) -> int:
+    """Publish exact attachment-separated typing plans without hardware access."""
+
+    from rocell.application.fixed_camera_keyboard_profiled_typing_plan_v1 import (
+        FixedCameraKeyboardProfiledTypingPlanV1Error,
+        admit_fixed_camera_keyboard_profiled_typing_plans_v1,
+    )
+
+    try:
+        result = admit_fixed_camera_keyboard_profiled_typing_plans_v1(
+            args.clearance_admission_receipt,
+            expected_clearance_admission_receipt_file_sha256=(
+                args.clearance_admission_receipt_sha256
+            ),
+            clearance_intake_path=args.clearance_intake,
+            expected_clearance_intake_file_sha256=args.clearance_intake_sha256,
+            localization_path=args.localization,
+            expected_localization_file_sha256=args.localization_sha256,
+            model_motion_batch_path=args.model_motion_batch,
+            expected_model_motion_batch_file_sha256=args.model_motion_batch_sha256,
+            ingress_report_path=args.ingress_report,
+            expected_ingress_report_file_sha256=args.ingress_report_sha256,
+            no_attachment_config_path=args.no_attachment_config,
+            expected_no_attachment_config_file_sha256=(
+                args.no_attachment_config_sha256
+            ),
+            stylus_attachment_config_path=args.stylus_attachment_config,
+            expected_stylus_attachment_config_file_sha256=(
+                args.stylus_attachment_config_sha256
+            ),
+            output_directory=args.output_directory,
+        )
+    except (FixedCameraKeyboardProfiledTypingPlanV1Error, OSError) as exc:
+        raise ConfigurationError(
+            "FIXED_CAMERA_KEYBOARD_PROFILED_TYPING_PLAN_ADMISSION_REJECTED",
+            str(exc),
+        ) from exc
+    report = dict(result.receipt)
+    report["output_directory"] = str(result.output_directory)
+    report["plan_paths"] = {
+        name: str(path) for name, path in result.plan_paths.items()
+    }
+    report["manifest_path"] = str(result.manifest_path)
+    report["completion_receipt_path"] = str(result.receipt_path)
+    if args.json:
+        _json_dump(report)
+    else:
+        print(str(report["status"]))
+        print(f"Profiled plan manifest: {result.manifest_path}")
+        print(f"Completion receipt: {result.receipt_path}")
+        print("Physical authority: NONE")
+    return int(ExitCode.OK)
+
+
 def _command_doctor(args: argparse.Namespace) -> int:
     bootstrap = _load_virtual_bootstrap(args)
     snapshot = bootstrap.context.snapshot
@@ -5801,6 +5857,46 @@ def build_parser() -> argparse.ArgumentParser:
     _add_json_argument(keyboard_clearance_admission)
     keyboard_clearance_admission.set_defaults(
         handler=_command_admit_fixed_camera_keyboard_clearance
+    )
+
+    profiled_typing_admission = commands.add_parser(
+        "admit-fixed-camera-keyboard-profiled-typing-plans",
+        help="Admit separate bare-jaw and stylus typing execution plans",
+        description=(
+            "Bind an admitted fixed-camera clearance handoff, localization, "
+            "model-motion batch, ingress report, and two attachment-specific "
+            "typing configs. Publish two deterministic zero-authority execution "
+            "plans, a profile binding manifest, and a completion receipt."
+        ),
+    )
+    profiled_typing_arguments = (
+        ("clearance-admission-receipt", "Exact clearance admission receipt"),
+        ("clearance-intake", "Exact admitted keyboard clearance intake"),
+        ("localization", "Exact keyboard robot localization"),
+        ("model-motion-batch", "Exact admitted v2 model-motion batch"),
+        ("ingress-report", "Exact accepted v2 ingress report"),
+        ("no-attachment-config", "Bare-jaw typing execution config"),
+        ("stylus-attachment-config", "Stylus typing execution config"),
+    )
+    for argument, help_text in profiled_typing_arguments:
+        profiled_typing_admission.add_argument(
+            f"--{argument}", type=Path, required=True, help=help_text
+        )
+        profiled_typing_admission.add_argument(
+            f"--{argument}-sha256",
+            type=_sha256_argument,
+            required=True,
+            help=f"Lowercase SHA-256 of the exact {help_text.lower()} bytes",
+        )
+    profiled_typing_admission.add_argument(
+        "--output-directory",
+        type=Path,
+        required=True,
+        help="New directory for both plans, manifest, and completion receipt",
+    )
+    _add_json_argument(profiled_typing_admission)
+    profiled_typing_admission.set_defaults(
+        handler=_command_admit_fixed_camera_keyboard_profiled_typing_plans
     )
 
     doctor = commands.add_parser(

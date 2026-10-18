@@ -652,3 +652,41 @@ separate typing execution plans and pass each through
 `typing_collision_intake_v1` with continuous collision screening and a fresh
 observed start state. The admission command has no camera, controller,
 trajectory, collision-screening, motion, contact, or freeze-release authority.
+
+### Profile-specific typing-plan admission
+
+After an accepted v2 keyboard batch and its ingress report exist, compile the
+ordered key request independently for the bare-jaw and stylus configurations:
+
+```powershell
+rocell admit-fixed-camera-keyboard-profiled-typing-plans `
+  --clearance-admission-receipt admitted-clearance/clearance-admission-receipt.json `
+  --clearance-admission-receipt-sha256 <exact-receipt-sha256> `
+  --clearance-intake admitted-clearance/keyboard-clearance-intake.json `
+  --clearance-intake-sha256 <exact-intake-sha256> `
+  --localization admitted-localization/keyboard-robot-localization.json `
+  --localization-sha256 <exact-localization-sha256> `
+  --model-motion-batch keyboard-model-motion-batch.json `
+  --model-motion-batch-sha256 <exact-batch-sha256> `
+  --ingress-report keyboard-model-motion-ingress.json `
+  --ingress-report-sha256 <exact-ingress-sha256> `
+  --no-attachment-config bare-jaw-typing-config.json `
+  --no-attachment-config-sha256 <exact-bare-config-sha256> `
+  --stylus-attachment-config stylus-typing-config.json `
+  --stylus-attachment-config-sha256 <exact-stylus-config-sha256> `
+  --output-directory admitted-profiled-typing-plans `
+  --json
+```
+
+The command rejects unknown keys, altered inputs, reused attachment configs,
+reused tool-profile hashes, crossed localization, or an existing output
+directory. It writes the bare-jaw plan, stylus plan, and profile binding
+manifest before writing the completion receipt last. The manifest binds each
+plan to its exact candidate set, installed collision profile, collision
+contract, clearance policy, measured TCP state, execution config, and ordered
+key sequence.
+
+These outputs remain offline planning evidence. Each profile must next compile
+its own trajectory and IK screen, then enter `typing_collision_intake_v1` with
+the installed collision profile named in the manifest. Continuous collision
+evidence and a fresh observed start state remain required before execution.
