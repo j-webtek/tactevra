@@ -240,6 +240,29 @@ installation/reseat confirmation, both attachment clearance profiles, and the
 stylus TCP remain separate later gates. The composer performs no hardware I/O,
 emits no command, and cannot release the static-camera freeze.
 
+### Hash-pinned campaign manifest handoff
+
+`rocell.calibration.fixed_camera_retained_campaign_manifest_v1` provides the
+single offline entry point for the retained campaign. Its manifest names a
+fully explicit `rocell.planar_apriltag_board_map.v1` artifact and every file in
+each retained observation bundle. Every path is a normalized relative POSIX
+path below the manifest directory and every file carries its expected SHA-256.
+Absolute paths, parent traversal, duplicate JSON fields, nonfinite values,
+substituted bytes, unknown fields, and nonzero authority claims are rejected.
+
+The planar map is rebuilt into `PlanarBoardTagMap`; the manifest cannot fill a
+missing tag-plane Z value from the nominal RC03 layout. This preserves the
+known six-tag X/Y geometry without misrepresenting the current
+`tag_plane_placement_measured: NOT_TESTED` record as physical evidence. Once a
+reviewed planar map and the real retained capture files exist, the entry point
+passes them through the existing retained-observation and campaign compilers,
+then creates the deterministic independent-review packet in one call.
+
+The returned receipt binds the manifest, tag-map artifact, compiled campaign,
+and review packet hashes. The entry point only reads caller-selected files and
+returns values in memory. It opens no camera or robot, writes no output,
+authorizes no motion or contact, and cannot release the static-camera freeze.
+
 ### Independent-review handoff packet
 
 `rocell.calibration.fixed_camera_campaign_review_packet_v1` turns one typed
