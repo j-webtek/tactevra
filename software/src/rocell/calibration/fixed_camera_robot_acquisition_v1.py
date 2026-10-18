@@ -313,6 +313,97 @@ class CalibrationCaptureBracketV1:
         return _sha256_bytes(_canonical(self.to_dict()))
 
 
+def validate_calibration_bracket_v1(
+    bracket: CalibrationCaptureBracketV1,
+) -> CalibrationCaptureBracketV1:
+    """Revalidate one live or retained bracket against the shared policy."""
+
+    if not isinstance(bracket, CalibrationCaptureBracketV1):
+        raise TypeError("bracket must be CalibrationCaptureBracketV1")
+    _sha(bracket.permit_sha256, "permit_sha256")
+    _text(bracket.installation_epoch_id, "installation_epoch_id")
+    _sha(bracket.camera_identity_sha256, "camera_identity_sha256")
+    if not isinstance(bracket.frame, FramePacket):
+        raise TypeError("bracket.frame must be FramePacket")
+    pre, post = bracket.pre_feedback, bracket.post_feedback
+    if not isinstance(pre, RetainedFeedbackSampleV1) or not isinstance(
+        post, RetainedFeedbackSampleV1
+    ):
+        raise TypeError("bracket feedback must be RetainedFeedbackSampleV1")
+    if pre.clock_id != post.clock_id or (
+        pre.robot_base_identity != post.robot_base_identity
+    ):
+        raise FixedCameraRobotAcquisitionError(
+            "feedback identity or clock changed inside the retained bracket"
+        )
+    if bracket.frame.timestamp_quality not in (
+        TimestampQuality.HOST_RECEIPT,
+        TimestampQuality.SETTLED_BRACKET,
+    ):
+        raise FixedCameraRobotAcquisitionError(
+            "frame lacks usable host timing for a settled bracket"
+        )
+    if not (
+        pre.received_at_ns <= bracket.frame.host_request_ns
+        <= bracket.frame.host_first_byte_ns
+        <= bracket.frame.host_complete_ns
+        <= post.received_at_ns
+    ):
+        raise FixedCameraRobotAcquisitionError(
+            "feedback samples do not bracket the complete frame request"
+        )
+    if post.received_at_ns - pre.received_at_ns > MAX_BRACKET_NS:
+        raise FixedCameraRobotAcquisitionError(
+            "camera/feedback bracket exceeds one second"
+        )
+
+    pre_joints, post_joints = _joints(pre.parsed), _joints(post.parsed)
+    maximum_joint_span = max(
+        abs(a - b) for a, b in zip(pre_joints, post_joints, strict=True)
+    )
+    if maximum_joint_span > MAX_JOINT_SPAN_RAD:
+        raise FixedCameraRobotAcquisitionError(
+            "robot joints changed during camera capture"
+        )
+    pre_fk = tuple(float(value) for value in forward(*pre_joints[:4])[:3])
+    post_fk = tuple(float(value) for value in forward(*post_joints[:4])[:3])
+    endpoint_span = _distance(pre_fk, post_fk)
+    if endpoint_span > MAX_ENDPOINT_SPAN_MM:
+        raise FixedCameraRobotAcquisitionError(
+            "robot endpoint changed during camera capture"
+        )
+    maximum_reported_error = max(
+        _distance(_reported_xyz(pre.parsed), pre_fk),
+        _distance(_reported_xyz(post.parsed), post_fk),
+    )
+    if maximum_reported_error > MAX_REPORTED_FK_ERROR_MM:
+        raise FixedCameraRobotAcquisitionError(
+            "reported endpoint differs from pinned forward kinematics"
+        )
+    expected_metrics = (
+        (bracket.maximum_joint_span_rad, maximum_joint_span, "joint span"),
+        (bracket.endpoint_span_mm, endpoint_span, "endpoint span"),
+        (
+            bracket.maximum_reported_fk_error_mm,
+            maximum_reported_error,
+            "reported FK error",
+        ),
+    )
+    for retained, recomputed, label in expected_metrics:
+        if (
+            isinstance(retained, bool)
+            or not isinstance(retained, (int, float))
+            or not math.isfinite(float(retained))
+            or not math.isclose(
+                float(retained), recomputed, rel_tol=0.0, abs_tol=1e-12
+            )
+        ):
+            raise FixedCameraRobotAcquisitionError(
+                f"retained {label} differs from recomputed evidence"
+            )
+    return bracket
+
+
 def acquire_calibration_bracket_v1(
     camera: AlreadyOpenCalibrationCamera,
     feedback: FeedbackOnlyCalibrationSource,
@@ -396,7 +487,7 @@ def acquire_calibration_bracket_v1(
         raise FixedCameraRobotAcquisitionError(
             "reported endpoint differs from pinned forward kinematics")
 
-    return CalibrationCaptureBracketV1(
+    bracket = CalibrationCaptureBracketV1(
         permit_sha256=permit.sha256,
         installation_epoch_id=permit.installation_epoch_id,
         frame=frame,
@@ -407,6 +498,7 @@ def acquire_calibration_bracket_v1(
         endpoint_span_mm=endpoint_span,
         maximum_reported_fk_error_mm=maximum_reported_error,
     )
+    return validate_calibration_bracket_v1(bracket)
 
 
 def build_capture_input_v1(
@@ -464,4 +556,5 @@ __all__ = [
     "RetainedFeedbackSampleV1",
     "acquire_calibration_bracket_v1",
     "build_capture_input_v1",
+    "validate_calibration_bracket_v1",
 ]

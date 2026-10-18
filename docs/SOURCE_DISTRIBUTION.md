@@ -722,6 +722,16 @@ protocols without opening a camera or robot and adds no image, calibration
 corpus, generated geometry, or physical measurement to the archive. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The retained fixed-camera acquisition-bracket intake adds two governed paths:
+one strict CPU-only JSON/JPEG loader and one focused unit-test module. The
+file-count ceiling advances from 6,550 to the exact expected 6,552 files. The
+loader requires independent caller pins for the record and JPEG, reconstructs
+the exact frame and feedback samples, and reuses the live acquisition
+validator for timing, stationarity, and firmware-kinematic evidence. It opens
+no camera or robot and adds no image, calibration corpus, controller artifact,
+generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
