@@ -9,7 +9,10 @@
     "bounded_segment_qualification_sha256",
     "installed_collision_profile_sha256", "kinematic_model_sha256",
     "segment_count", "segment_reports", "rigid_bound_method",
-    "configuration_bound_method", "all_conservative_segment_sweeps_clear",
+    "configuration_bound_method", "clearance_lower_bound_method",
+    "minimum_clearance_lower_bound_mm", "limiting_segment_sequence",
+    "limiting_body_pair", "all_segment_clearance_bounds_determinate",
+    "all_conservative_segment_sweeps_clear",
     "all_pair_exclusions_physically_accepted",
     "continuous_collision_proven_for_bound_geometry", "blockers",
     "next_required_stage", "controller_commands", "hardware_commands_generated",
@@ -36,7 +39,9 @@
           "segment_sequence", "start_sample_sha256", "end_sample_sha256",
           "joint_delta_rad", "rigid_motion_bound_mm_by_body",
           "configuration_envelope_sha256_by_body",
-          "conservative_contract_sha256", "collision_report_sha256", "status",
+          "conservative_contract_sha256", "collision_report_sha256",
+          "clearance_lower_bound_report_sha256", "clearance_lower_bound_status",
+          "minimum_clearance_lower_bound_mm", "clearance_limiting_body_pair", "status",
           "collision_free_diagnostic", "collisions", "pose_blockers"
         ],
         "properties": {
@@ -52,6 +57,22 @@
           },
           "conservative_contract_sha256": {"$ref": "#/$defs/hash"},
           "collision_report_sha256": {"$ref": "#/$defs/hash"},
+          "clearance_lower_bound_report_sha256": {"$ref": "#/$defs/hash"},
+          "clearance_lower_bound_status": {
+            "enum": ["CLEAR", "COLLISION", "INDETERMINATE"]
+          },
+          "minimum_clearance_lower_bound_mm": {
+            "type": ["number", "null"], "minimum": 0
+          },
+          "clearance_limiting_body_pair": {
+            "oneOf": [
+              {"type": "null"},
+              {
+                "type": "array", "minItems": 2, "maxItems": 2,
+                "items": {"type": "string", "minLength": 1}
+              }
+            ]
+          },
           "status": {"type": "string", "minLength": 1},
           "collision_free_diagnostic": {"type": "boolean"},
           "collisions": {"type": "array"},
@@ -61,6 +82,23 @@
     },
     "rigid_bound_method": {"type": "string", "minLength": 1},
     "configuration_bound_method": {"type": "string", "minLength": 1},
+    "clearance_lower_bound_method": {"type": "string", "minLength": 1},
+    "minimum_clearance_lower_bound_mm": {
+      "type": ["number", "null"], "minimum": 0
+    },
+    "limiting_segment_sequence": {
+      "type": ["integer", "null"], "minimum": 0
+    },
+    "limiting_body_pair": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "array", "minItems": 2, "maxItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        }
+      ]
+    },
+    "all_segment_clearance_bounds_determinate": {"type": "boolean"},
     "all_conservative_segment_sweeps_clear": {"type": "boolean"},
     "all_pair_exclusions_physically_accepted": {"type": "boolean"},
     "continuous_collision_proven_for_bound_geometry": {"type": "boolean"},

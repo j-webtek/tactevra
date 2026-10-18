@@ -42,6 +42,7 @@ COLLISION_CONTRACT_SCHEMA = "rocell.collision_geometry_contract.v1"
 COLLISION_AUDIT_SCHEMA = "rocell.collision_geometry_audit.v1"
 COLLISION_POSE_REPORT_SCHEMA = "rocell.collision_pose_report.v1"
 COLLISION_SWEEP_REPORT_SCHEMA = "rocell.collision_sweep_report.v1"
+COLLISION_CLEARANCE_LOWER_BOUND_SCHEMA = "rocell.collision_clearance_lower_bound.v1"
 
 HARD_MAX_REQUIREMENTS = 128
 HARD_MAX_BODIES = 128
@@ -146,6 +147,14 @@ class CollisionEvaluationStatus(str, Enum):
     COLLISION_DETECTED = "COLLISION_DETECTED"
     CLEAR_AT_SAMPLED_POSE = "CLEAR_AT_SAMPLED_POSE"
     CLEAR_AT_DISCRETE_SWEEP_SAMPLES = "CLEAR_AT_DISCRETE_SWEEP_SAMPLES"
+
+
+class CollisionClearanceLowerBoundStatus(str, Enum):
+    """Outcome of a conservative residual-clearance calculation."""
+
+    CLEAR = "CLEAR"
+    COLLISION = "COLLISION"
+    INDETERMINATE = "INDETERMINATE"
 
 
 class CollisionBlockerCode(str, Enum):
@@ -1357,6 +1366,112 @@ def _obb_intersects_obb(left: _WorldObb, right: _WorldObb) -> bool:
     return True
 
 
+def _obb_clearance_lower_bound_mm(left: _WorldObb, right: _WorldObb) -> float:
+    """Return a conservative Euclidean separation lower bound for two OBBs."""
+
+    left_axes = _obb_axes(left)
+    right_axes = _obb_axes(right)
+    left_half = _coordinates(left.half_extents_mm)
+    right_half = _coordinates(right.half_extents_mm)
+    rotation = tuple(
+        tuple(left_axes[row].dot(right_axes[column]) for column in range(3))
+        for row in range(3)
+    )
+    absolute = tuple(
+        tuple(abs(rotation[row][column]) for column in range(3))
+        for row in range(3)
+    )
+    offset_world = right.center_mm - left.center_mm
+    offset = tuple(offset_world.dot(axis) for axis in left_axes)
+    gaps: list[float] = []
+    for axis in range(3):
+        left_radius = left_half[axis]
+        right_radius = sum(right_half[j] * absolute[axis][j] for j in range(3))
+        gaps.append(abs(offset[axis]) - left_radius - right_radius)
+    for axis in range(3):
+        left_radius = sum(left_half[i] * absolute[i][axis] for i in range(3))
+        right_radius = right_half[axis]
+        projection = abs(sum(offset[i] * rotation[i][axis] for i in range(3)))
+        gaps.append(projection - left_radius - right_radius)
+    for left_axis in range(3):
+        left_next = (left_axis + 1) % 3
+        left_last = (left_axis + 2) % 3
+        for right_axis in range(3):
+            axis_norm = math.sqrt(
+                max(0.0, 1.0 - rotation[left_axis][right_axis] ** 2)
+            )
+            if axis_norm <= _RELATIVE_PARALLEL_TOLERANCE:
+                continue
+            right_next = (right_axis + 1) % 3
+            right_last = (right_axis + 2) % 3
+            left_radius = (
+                left_half[left_next] * absolute[left_last][right_axis]
+                + left_half[left_last] * absolute[left_next][right_axis]
+            )
+            right_radius = (
+                right_half[right_next] * absolute[left_axis][right_last]
+                + right_half[right_last] * absolute[left_axis][right_next]
+            )
+            projection = abs(
+                offset[left_last] * rotation[left_next][right_axis]
+                - offset[left_next] * rotation[left_last][right_axis]
+            )
+            gaps.append((projection - left_radius - right_radius) / axis_norm)
+    return max(0.0, max(gaps, default=0.0))
+
+
+def _primitive_clearance_lower_bound_mm(
+    left: _WorldPrimitive,
+    right: _WorldPrimitive,
+) -> float:
+    """Residual clearance after primitive inflation, in millimetres."""
+
+    if isinstance(left, _WorldSphere) and isinstance(right, _WorldSphere):
+        center_distance = math.sqrt(_squared_distance(left.center_mm, right.center_mm))
+        return max(0.0, center_distance - left.radius_mm - right.radius_mm)
+    if isinstance(left, _WorldSphere) and isinstance(right, _WorldCapsule):
+        axis_distance = math.sqrt(
+            _point_segment_distance_squared(
+                left.center_mm, right.start_mm, right.end_mm
+            )
+        )
+        return max(0.0, axis_distance - left.radius_mm - right.radius_mm)
+    if isinstance(left, _WorldCapsule) and isinstance(right, _WorldSphere):
+        return _primitive_clearance_lower_bound_mm(right, left)
+    if isinstance(left, _WorldCapsule) and isinstance(right, _WorldCapsule):
+        axis_distance = math.sqrt(
+            _segment_segment_distance_squared(
+                left.start_mm, left.end_mm, right.start_mm, right.end_mm
+            )
+        )
+        return max(0.0, axis_distance - left.radius_mm - right.radius_mm)
+    if isinstance(left, _WorldSphere) and isinstance(right, _WorldObb):
+        local = _to_obb_local(left.center_mm, right)
+        return max(
+            0.0,
+            math.sqrt(_point_aabb_distance_squared(local, right.half_extents_mm))
+            - left.radius_mm,
+        )
+    if isinstance(left, _WorldObb) and isinstance(right, _WorldSphere):
+        return _primitive_clearance_lower_bound_mm(right, left)
+    if isinstance(left, _WorldCapsule) and isinstance(right, _WorldObb):
+        local_start = _to_obb_local(left.start_mm, right)
+        local_end = _to_obb_local(left.end_mm, right)
+        return max(
+            0.0,
+            math.sqrt(
+                _segment_aabb_distance_squared(
+                    local_start, local_end, right.half_extents_mm
+                )
+            )
+            - left.radius_mm,
+        )
+    if isinstance(left, _WorldObb) and isinstance(right, _WorldCapsule):
+        return _primitive_clearance_lower_bound_mm(right, left)
+    assert isinstance(left, _WorldObb) and isinstance(right, _WorldObb)
+    return _obb_clearance_lower_bound_mm(left, right)
+
+
 def _primitive_intersects(left: _WorldPrimitive, right: _WorldPrimitive) -> bool:
     if isinstance(left, _WorldSphere) and isinstance(right, _WorldSphere):
         return _squared_distance(left.center_mm, right.center_mm) <= (
@@ -1402,6 +1517,47 @@ class CollisionPair:
             "second_body_id": self.second_body_id,
             "first_primitive_index": self.first_primitive_index,
             "second_primitive_index": self.second_primitive_index,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class CollisionClearanceLowerBoundEvaluation:
+    """Conservative residual clearance across all evaluated body pairs."""
+
+    status: CollisionClearanceLowerBoundStatus
+    minimum_clearance_lower_bound_mm: float | None
+    limiting_body_pair: tuple[str, str] | None
+    checked_body_pair_count: int
+    checked_primitive_pair_count: int
+    collision_pose_report_sha256: str
+
+    @property
+    def report_hash(self) -> str:
+        return _stable_hash(self.to_dict())
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema": COLLISION_CLEARANCE_LOWER_BOUND_SCHEMA,
+            "status": self.status.value,
+            "minimum_clearance_lower_bound_mm": self.minimum_clearance_lower_bound_mm,
+            "limiting_body_pair": (
+                list(self.limiting_body_pair)
+                if self.limiting_body_pair is not None
+                else None
+            ),
+            "checked_body_pair_count": self.checked_body_pair_count,
+            "checked_primitive_pair_count": self.checked_primitive_pair_count,
+            "collision_pose_report_sha256": self.collision_pose_report_sha256,
+            "method": (
+                "minimum inflated-primitive separation; exact for sphere/capsule/OBB "
+                "mixed pairs and conservative normalized separating-axis lower bound "
+                "for OBB/OBB pairs"
+            ),
+            "semantics": (
+                "residual millimetres after minimum-separation, geometry-uncertainty, "
+                "and pose-uncertainty inflation"
+            ),
+            "physical_authority": False,
         }
 
 
@@ -1763,6 +1919,97 @@ def evaluate_collision_pose(
         narrow_phase_primitive_pair_test_count=narrow_tests,
         collisions=tuple(collisions),
         input_bindings=CollisionPoseInputBindings(contract, pose, selected_policy),
+    )
+
+
+def evaluate_collision_pose_clearance_lower_bound(
+    contract: CollisionGeometryContract,
+    pose: CollisionPose,
+    policy: CollisionEvaluationPolicy | None = None,
+) -> CollisionClearanceLowerBoundEvaluation:
+    """Measure conservative residual clearance for one collision pose.
+
+    The same audited, transformed, and policy-inflated primitives used by the
+    collision query are evaluated. Incomplete evidence remains explicitly
+    indeterminate, and this companion result never adds physical authority.
+    """
+
+    selected_policy = policy or CollisionEvaluationPolicy()
+    evaluation = evaluate_collision_pose(contract, pose, selected_policy)
+    if not evaluation.evaluation_complete:
+        return CollisionClearanceLowerBoundEvaluation(
+            CollisionClearanceLowerBoundStatus.INDETERMINATE,
+            None,
+            None,
+            0,
+            0,
+            evaluation.report_hash,
+        )
+    world, pose_blockers = _pose_body_primitives(contract, pose)
+    if pose_blockers:
+        return CollisionClearanceLowerBoundEvaluation(
+            CollisionClearanceLowerBoundStatus.INDETERMINATE,
+            None,
+            None,
+            0,
+            0,
+            evaluation.report_hash,
+        )
+    assert selected_policy.clearance_policy is not None
+    inflation = selected_policy.clearance_policy.per_body_inflation_mm
+    world = {
+        body_id: tuple(_inflate_world_primitive(item, inflation) for item in primitives)
+        for body_id, primitives in world.items()
+    }
+    body_pairs = _candidate_body_pairs(contract, world)
+    if not body_pairs:
+        return CollisionClearanceLowerBoundEvaluation(
+            CollisionClearanceLowerBoundStatus.INDETERMINATE,
+            None,
+            None,
+            0,
+            0,
+            evaluation.report_hash,
+        )
+    minimum: float | None = None
+    limiting_pair: tuple[str, str] | None = None
+    primitive_pair_count = 0
+    for left_id, right_id in body_pairs:
+        for left in world[left_id]:
+            for right in world[right_id]:
+                primitive_pair_count += 1
+                if (
+                    primitive_pair_count
+                    > selected_policy.maximum_primitive_pair_tests_per_pose
+                ):
+                    raise CollisionResourceLimitError(
+                        "clearance primitive-pair tests exceed per-pose policy cap"
+                    )
+                candidate = _primitive_clearance_lower_bound_mm(left, right)
+                if minimum is None or candidate < minimum:
+                    minimum = candidate
+                    limiting_pair = (left_id, right_id)
+    collision_detected = (
+        evaluation.status is CollisionEvaluationStatus.COLLISION_DETECTED
+    )
+    if collision_detected:
+        first_collision = evaluation.collisions[0]
+        minimum = 0.0
+        limiting_pair = (
+            first_collision.first_body_id,
+            first_collision.second_body_id,
+        )
+    return CollisionClearanceLowerBoundEvaluation(
+        (
+            CollisionClearanceLowerBoundStatus.COLLISION
+            if collision_detected
+            else CollisionClearanceLowerBoundStatus.CLEAR
+        ),
+        minimum,
+        limiting_pair,
+        len(body_pairs),
+        primitive_pair_count,
+        evaluation.report_hash,
     )
 
 
@@ -2361,6 +2608,7 @@ def build_roarm_m3_prehardware_collision_contract(
 
 __all__ = [
     "COLLISION_AUDIT_SCHEMA",
+    "COLLISION_CLEARANCE_LOWER_BOUND_SCHEMA",
     "COLLISION_CONTRACT_SCHEMA",
     "COLLISION_POSE_REPORT_SCHEMA",
     "COLLISION_SWEEP_REPORT_SCHEMA",
@@ -2372,6 +2620,8 @@ __all__ = [
     "CollisionBodyRequirement",
     "CollisionBodyRole",
     "CollisionClearanceEvidenceState",
+    "CollisionClearanceLowerBoundEvaluation",
+    "CollisionClearanceLowerBoundStatus",
     "CollisionClearancePolicy",
     "CollisionContractError",
     "CollisionEvaluationPolicy",
@@ -2396,5 +2646,6 @@ __all__ = [
     "audit_collision_geometry",
     "build_roarm_m3_prehardware_collision_contract",
     "evaluate_collision_pose",
+    "evaluate_collision_pose_clearance_lower_bound",
     "evaluate_collision_sweep",
 ]

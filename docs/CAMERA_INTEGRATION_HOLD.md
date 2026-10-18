@@ -331,4 +331,13 @@ or stylus partition, runs discrete FK collision checks, and runs conservative
 adjacent-sample sweeps only after a clear discrete result. This implementation
 does not mean real evidence has been supplied or that the superseding
 static-camera freeze is promoted. Clear software output still grants no camera,
-controller, contact, freeze-release, hardware, or physical authority.\n
+controller, contact, freeze-release, hardware, or physical authority.
+
+The conservative segment evaluator now also reports the residual clearance
+lower bound and limiting body pair for every evaluated adjacent-sample sweep.
+Those values are computed after the installed profile's minimum separation and
+geometry/pose uncertainty inflation. Missing inputs remain `INDETERMINATE`, and
+the two attachment profiles remain separate. This closes the reusable software
+method portion of continuous-segment qualification; accepted installed
+evidence for the complete routes, fresh observed entry, reconstruction, and the
+superseding freeze promotion remain outstanding.

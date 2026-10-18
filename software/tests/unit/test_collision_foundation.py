@@ -26,6 +26,7 @@ from rocell.simulation.collision import (
     CollisionBodyRequirement,
     CollisionBodyRole,
     CollisionClearanceEvidenceState,
+    CollisionClearanceLowerBoundStatus,
     CollisionClearancePolicy,
     CollisionEvaluationPolicy,
     CollisionEvaluationStatus,
@@ -41,6 +42,7 @@ from rocell.simulation.collision import (
     SampledCollisionGeometry,
     audit_collision_geometry,
     evaluate_collision_pose,
+    evaluate_collision_pose_clearance_lower_bound,
     evaluate_collision_sweep,
 )
 
@@ -134,6 +136,73 @@ def _origin_pose() -> CollisionPose:
             "second_frame": _transform("second_frame"),
         },
     )
+
+
+def test_clearance_lower_bound_reports_residual_policy_inflated_distance() -> None:
+    contract = _two_body_contract(
+        SphereMm(Vec3.zero(), 1.0),
+        OrientedBoxMm(Vec3.zero(), Vec3(1.0, 1.0, 1.0)),
+    )
+    pose = CollisionPose(
+        "separated",
+        "root",
+        {
+            "first_frame": _transform("first_frame"),
+            "second_frame": _transform("second_frame", x=5.0),
+        },
+    )
+
+    report = evaluate_collision_pose_clearance_lower_bound(contract, pose, _policy())
+
+    assert report.status is CollisionClearanceLowerBoundStatus.CLEAR
+    assert report.minimum_clearance_lower_bound_mm == pytest.approx(2.999)
+    assert report.limiting_body_pair == ("first", "second")
+    assert report.checked_body_pair_count == 1
+    assert report.checked_primitive_pair_count == 1
+    assert report.to_dict()["physical_authority"] is False
+
+
+def test_obb_clearance_uses_conservative_separating_axis_bound() -> None:
+    contract = _two_body_contract(
+        OrientedBoxMm(Vec3.zero(), Vec3(1.0, 1.0, 1.0)),
+        OrientedBoxMm(
+            Vec3.zero(),
+            Vec3(1.0, 1.0, 1.0),
+            Rotation3.from_rpy(0.0, 0.0, math.pi / 4.0),
+        ),
+    )
+    pose = CollisionPose(
+        "separated-boxes",
+        "root",
+        {
+            "first_frame": _transform("first_frame"),
+            "second_frame": _transform("second_frame", x=5.0),
+        },
+    )
+
+    report = evaluate_collision_pose_clearance_lower_bound(contract, pose, _policy())
+
+    assert report.status is CollisionClearanceLowerBoundStatus.CLEAR
+    assert report.minimum_clearance_lower_bound_mm is not None
+    assert 0.0 < report.minimum_clearance_lower_bound_mm < 3.0
+
+
+def test_clearance_lower_bound_preserves_collision_and_indeterminate_states() -> None:
+    contract = _two_body_contract(
+        SphereMm(Vec3.zero(), 1.0), SphereMm(Vec3.zero(), 1.0)
+    )
+    collision = evaluate_collision_pose_clearance_lower_bound(
+        contract, _origin_pose(), _policy()
+    )
+    indeterminate = evaluate_collision_pose_clearance_lower_bound(
+        contract, _origin_pose()
+    )
+
+    assert collision.status is CollisionClearanceLowerBoundStatus.COLLISION
+    assert collision.minimum_clearance_lower_bound_mm == 0.0
+    assert indeterminate.status is CollisionClearanceLowerBoundStatus.INDETERMINATE
+    assert indeterminate.minimum_clearance_lower_bound_mm is None
+    assert indeterminate.limiting_body_pair is None
 
 
 def test_current_artifact_audit_is_context_bound_and_names_every_gap() -> None:

@@ -280,6 +280,20 @@ is claimed.
 **Purpose:** Close the gap between sampled configurations over every route
 segment.
 
+**Implementation status:** The reusable continuous-segment engine is
+implemented. Each rigid body is expanded by a pinned serial-chain motion bound,
+each configuration-sampled body consumes its measured adjacent-sample sweep
+envelope, and the configured minimum separation plus geometry and pose
+uncertainty are applied before collision evaluation. Every segment now reports
+a residual clearance lower bound and limiting body pair. Sphere, capsule, and
+mixed OBB distances are exact; OBB-to-OBB distance uses a normalized
+separating-axis lower bound. Missing geometry, policy, pose, or evaluable pairs
+remain explicitly `INDETERMINATE`. Synthetic tests cover between-sample
+collisions hidden by clear endpoints. Completion for the promoted route still
+requires accepted installed evidence for all 328 source segments and exact
+cross-partition reconstruction; this software increment supplies no physical
+authority.
+
 **Deliverables:**
 
 - A documented conservative method: validated continuous-distance solver,
