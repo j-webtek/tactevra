@@ -215,6 +215,31 @@ The installed B0477 identity and mode, feedback source, installation witness,
 and review artifacts must be qualified before a physical application can create
 the permit or call this boundary.
 
+### Retained acquisition-bracket replay
+
+`rocell.calibration.fixed_camera_bracket_evidence_v1` closes the retained-file
+seam immediately after read-only acquisition. The caller pins the exact bracket
+JSON and the separately retained JPEG by SHA-256. The JSON preserves the full
+`FramePacket` timing and freshness metadata, both exact T=1051 feedback lines,
+their receipt timestamps and identities, the reviewed permit binding, and the
+recorded stationarity metrics.
+
+The loader reconstructs `CalibrationCaptureBracketV1` and passes it through
+`validate_calibration_bracket_v1`, the same validator now used by live
+acquisition. That validator recomputes joint drift, firmware-forward-kinematic
+endpoint drift, and reported-XYZ error; checks the complete frame request is
+inside one feedback bracket; and refuses changed clock or robot identities.
+The retained metrics must match the recomputed values rather than merely stay
+below their limits.
+
+The resulting bracket can be supplied directly to the native observation
+coordinator with the existing retained intrinsics, six-tag, and bare-jaw
+adapters. The loader performs bounded reads only, emits a zero-authority
+receipt, and cannot qualify the source capture or release the static-camera
+freeze. A physical producer must still retain a qualified native JPEG and its
+reviewed read-only bracket; no board, tag, keyboard, or key-plane dimensions
+need to be measured again.
+
 ### Offline six-tag board-pose extraction
 
 `rocell.vision.fixed_camera_board_pose_extractor_v1` supplies the missing

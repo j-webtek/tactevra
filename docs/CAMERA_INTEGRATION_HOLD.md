@@ -102,6 +102,15 @@ native observation coordinator's detector and rectifier protocols. This closes
 an in-memory integration seam; it does not create a qualified physical tag
 record or alter the hold.
 
+The acquisition bracket now also has strict retained replay. The caller pins
+both the bracket JSON and its separately retained JPEG. The loader reconstructs
+the original `FramePacket` and feedback samples, then invokes the same shared
+timing, stationarity, and firmware-kinematic validator used by live read-only
+acquisition. Crossed timing, altered drift metrics, changed JPEG bytes, and any
+authority substitution fail closed. This completes retained input coverage for
+the native observation coordinator, but no qualified physical bracket has been
+accepted and the hold remains.
+
 This is a targeted hold, not a general development freeze.
 
 At any time, inspect the retained cross-lane blocker map without opening a
