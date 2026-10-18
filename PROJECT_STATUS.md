@@ -69,6 +69,16 @@ torque, or contact method. The active installation freeze still blocks wiring
 that coordinator to physical providers, and image observations plus independent
 review remain required.
 
+The fixed-camera perception path now includes a zero-authority six-tag
+board-pose extractor. It requires one exact rectified detection set containing
+all RC03 tags, fits only tags 0 through 3, and evaluates excluded tags 4 and 5
+as independent 2-pixel residual checks. Passing output is shaped for the
+existing passive camera/robot capture compiler and is hash-bound to the frame,
+intrinsics, complete tag map, detector evidence, estimator configuration, and
+implementation. It does not open the installed camera, read a robot endpoint,
+command the arm, or promote `SUPERSEDING_STATIC_CAMERA_FREEZE_NOT_PROMOTED`;
+those physical integration and review gates remain open work.
+
 Tactevra (formerly RoCell) is an experimental robot workcell intended to carry out keyboard and phone
 tasks from a person's text request. You can explore the software and run offline
 examples today. A reliable physical typing or phone-operation product is still

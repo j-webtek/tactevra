@@ -647,6 +647,16 @@ physical dispatcher. No image, capture corpus, controller artifact, generated
 geometry, or physical measurement enters the archive. All byte, duplicate, and
 reduction limits remain unchanged.
 
+The fixed-camera board-pose extraction increment adds two governed paths: one
+CPU-only six-tag coordinator and one focused unit-test module. The file-count
+ceiling advances from 6,536 to the exact expected 6,538 files. The coordinator
+reuses the existing pixel detector, optical rectifier, planar estimator, RC03
+tag map, and capture compiler contract. It fits tags 0 through 3 while retaining
+tags 4 and 5 solely as independent residual checks. It opens no camera or robot,
+emits no command, and adds no image, calibration corpus, controller artifact,
+generated geometry, or physical measurement to the archive. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The absolute keyboard-to-board registration boundary adds four governed paths:
 one CPU-only rigid registration module, one strict result schema, one focused
 test module, and one operating note. The file-count ceiling advances from 6,513
