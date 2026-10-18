@@ -763,3 +763,32 @@ next boundary must parse independently reviewed measurements, bind them to
 these slots, and run the existing discrete and conservative sweep evaluators.
 Until then, collision clearance, a fresh observed start state, controller
 commands, hardware access, freeze release, and physical motion remain blocked.
+
+### Profile-specific measured collision evidence admission
+
+`fixed_camera_keyboard_profiled_collision_evidence_admission_v1` closes the
+file boundary between the blank workbooks and the existing typed collision
+evaluators. It revalidates the exact template receipt, manifest, and both
+profile templates, then accepts one closed-schema completion and one exact
+independent review for each profile. Every input is pinned by an expected file
+SHA-256; symlinks, duplicate JSON keys, nonfinite values, changed lineage,
+crossed profiles, missing slots, and unaccepted measurement sources fail
+closed.
+
+The completion files must retain every partition, sample, segment, body, and
+boundary identity from their source templates. Rigid attachment transforms,
+configuration geometry, and sweep envelopes must decode to the existing
+`MeasuredRigidAttachmentBinding`, `MeasuredConfigurationGeometryBinding`, and
+`MeasuredConfigurationSweepEnvelopeBinding` types with
+`ACCEPTED_MEASURED` evidence. Each evidence source SHA-256 must already belong
+to the exact installed collision profile. The review binds the exact
+completion bytes and semantic hash, records an `ACCEPT` decision, and requires
+a reviewer identity disjoint from every measurement producer across both
+profiles.
+
+Admission writes a manifest and completion receipt last in a new directory and
+returns profile-separated typed evaluator inputs. It does not run discrete or
+continuous collision checks. Its receipt therefore retains empty controller
+commands, zero hardware writes, no hardware access, no physical authority, and
+no freeze-release effect. The next stage is the profile-bound partition
+evaluator over these admitted inputs and the exact source partition plans.

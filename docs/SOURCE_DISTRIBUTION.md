@@ -859,3 +859,12 @@ bare-jaw and stylus slots for every rigid attachment, sampled configuration
 body, and conservative sweep envelope. It supplies no measured value, performs
 no collision screening, opens no hardware, and grants no physical authority.
 All byte, duplicate, and reduction limits remain unchanged.
+
+The fixed-camera profile-specific measured collision evidence admission adds
+two governed paths: one offline application module and one focused unit-test
+module. The file-count ceiling advances from 6,578 to the exact expected 6,580
+files. It revalidates the complete template bundle, exact completed evidence,
+and disjoint independent review for both attachment profiles, then decodes the
+accepted values into existing typed collision inputs. It runs no evaluator,
+opens no hardware, and grants no physical authority. All byte, duplicate, and
+reduction limits remain unchanged.

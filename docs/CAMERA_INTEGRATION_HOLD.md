@@ -315,3 +315,12 @@ the exact per-profile sample and segment identities, and leaves every measured
 transform and geometry field null. The blank templates cannot be admitted as
 evidence, do not run collision evaluation, and grant no camera, controller,
 contact, freeze-release, hardware, or physical authority.
+
+The measured collision evidence admission boundary is also implemented. It
+requires exact completed bare-jaw and stylus files plus exact independent
+reviews, preserves every template lineage field, rejects crossed profiles or
+unaccepted measurement sources, and decodes the measured values into the
+existing typed collision inputs. Admission itself does not evaluate a sample
+or sweep, observe the controller, release the static-camera freeze, or grant
+physical authority. Profile-bound partition evaluation remains the next
+offline stage after real evidence is supplied and independently accepted.
