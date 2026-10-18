@@ -172,6 +172,10 @@ only a successful read of current status, not a readiness claim.
   policy, failure handling, and hardware-incapable controller previews.
 - Maintain the physical-camera campaign manifest, preflight, evaluator, capture
   naming convention, and evidence export workflow using synthetic fixtures.
+- Use the hash-pinned retained-campaign manifest compiler to rehearse the exact
+  future file handoff. It requires a complete explicit planar tag map and
+  contained relative paths, and it produces the existing unreviewed campaign
+  plus deterministic review packet without camera or robot access.
 - Prepare blank measured-configuration and commissioning records without
   entering estimated values as measurements.
 - Reconcile repository status, release-readiness, documentation, ownership,
