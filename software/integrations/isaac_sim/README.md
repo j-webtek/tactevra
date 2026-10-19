@@ -37,6 +37,31 @@ identities. Synthetic unit fixtures exercise this boundary but are not native
 replay evidence. A real passing ICQ-8 receipt and accepted installed collision
 profile remain prerequisites for the WP3 acceptance run.
 
+The existing `joint_schedule_isaac_replay_probe.py` also exposes an
+`--admission-only` mode for this handoff. It reads and validates every input,
+then writes a sealed `NATIVE_ISAAC_ADMISSION_ONLY` receipt and exits before the
+`isaacsim` import. The boundary additionally binds the governed robot USD to
+its sealed import receipt, verifies the expected six-DOF articulation order,
+and requires the profiled route's five arm joints in that exact order. This
+receipt authorizes only a later native process start; it is not replay,
+physics, clearance, tracking, settle, contact, or repeatability evidence.
+
+```powershell
+$env:PYTHONPATH = "software/src"
+python software/integrations/isaac_sim/joint_schedule_isaac_replay_probe.py `
+  --admission-only `
+  --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --import-receipt software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json `
+  --profiled-handoff C:\IsaacSim\requests\profiled-entry-route-handoff.json `
+  --toolchain-lock software/config/isaac_sim_toolchain_lock.json `
+  --output C:\IsaacSim\evidence\profiled-native-admission.json `
+  --status-output C:\IsaacSim\evidence\profiled-native-admission.status.json
+```
+
+The command is intentionally unusable until the real retained ICQ-8 handoff
+exists. It must not be substituted with a synthetic fixture for operational
+admission.
+
 For a reader-oriented explanation of how Isaac Sim relates to Tactevra's
 deterministic simulators and the proposed MuJoCo Warp lane, see the
 [simulation overview](../../../docs/SIMULATION.md).

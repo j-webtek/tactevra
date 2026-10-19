@@ -8487,3 +8487,30 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: retain the real selected-profile ICQ-8 handoff, then run it
   without replanning on the selected Isaac runner and record tracking, settle,
   repeatability, interruption, and categorized disagreement evidence.
+
+### E-20261019-INT-479 — native Isaac process-start admission is executable
+
+- Stage: S3 simulation oracle WP3 process-start preparation.
+- Lane: executable zero-authority admission; no Isaac import, GPU job, camera,
+  controller, or robot process was opened.
+- Objective: place the strict selected-profile validation on an executable
+  boundary that completes before native runtime startup.
+- Inputs: one sealed ready profiled handoff, the exact selected toolchain lock,
+  the governed robot USD bytes, and the sealed URDF-import receipt.
+- Decision rule outcome: admission succeeds only when the handoff and lock pass
+  independent native-intake validation, the USD byte digest and size match the
+  import receipt, the receipt seal and zero-authority fields remain intact, the
+  imported articulation order matches the six governed DOFs, and every one of
+  the 329 route configurations contains the exact five arm joints in order.
+  Success emits a sealed admission-only receipt and exits before importing
+  `isaacsim`; crossed USD, articulation, or joint identities fail closed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: the admission receipt is not simulation evidence and promotes
+  no gate. Tests use a synthetic ready handoff. The real ICQ-8 handoff and
+  accepted installed collision profile remain absent.
+- Next dependency: supply the real retained ICQ-8 handoff, run admission
+  against the governed external USD, then execute the exact admitted route in
+  the selected native runner without replanning and retain tracking, settle,
+  repeatability, interruption, and categorized disagreement evidence.

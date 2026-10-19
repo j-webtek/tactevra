@@ -12,7 +12,11 @@ import json
 import math
 from pathlib import Path
 import subprocess
-from typing import Any
+from typing import Any, Mapping
+
+from rocell.application.profiled_entry_route_isaac_replay_handoff_v1 import (
+    parse_profiled_entry_route_isaac_replay_handoff_v1,
+)
 
 
 SCHEMA = "tactevra.isaac_joint_schedule_replay.v1"
@@ -27,6 +31,7 @@ EXPECTED_DOFS = [
 HAND_TCP_PATH = "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/hand_tcp"
 TIP_ERROR_LIMIT_MM = 0.25
 JOINT_TRACKING_LIMIT_RAD = 1e-6
+ADMISSION_SCHEMA = "tactevra.profiled_native_isaac_admission.v1"
 
 
 def _digest(value: bytes) -> str:
@@ -115,15 +120,107 @@ def _validate_bundle(bundle: dict[str, Any]) -> None:
             raise ValueError("actual-emitter input digest is invalid")
 
 
+def _validate_profiled_native_admission(
+    handoff: Mapping[str, Any],
+    toolchain_lock: Mapping[str, Any],
+    import_receipt: Mapping[str, Any],
+    *,
+    usd_bytes: bytes,
+    import_receipt_file_sha256: str,
+) -> dict[str, Any]:
+    """Validate every governed identity before Isaac or a GPU can start."""
+
+    parsed = parse_profiled_entry_route_isaac_replay_handoff_v1(
+        handoff,
+        require_ready=True,
+        toolchain_lock=toolchain_lock,
+    )
+    receipt = dict(import_receipt)
+    claimed_receipt_sha = receipt.pop("receipt_sha256", None)
+    if claimed_receipt_sha != _digest(_canonical(receipt)):
+        raise ValueError("robot import receipt digest mismatch")
+    if (
+        receipt.get("schema") != "tactevra.isaac_sim_urdf_import.v1"
+        or receipt.get("hardware_access") is not False
+        or receipt.get("physical_authority") is not False
+        or receipt.get("wire_commands") != []
+        or receipt.get("hardware_writes") != 0
+        or receipt.get("physical_movements") != 0
+    ):
+        raise ValueError("robot import receipt crossed the zero-authority boundary")
+    external_files = receipt.get("external_files")
+    if (
+        not isinstance(external_files, list)
+        or len(external_files) != 1
+        or external_files[0].get("sha256") != _digest(usd_bytes)
+        or external_files[0].get("size_bytes") != len(usd_bytes)
+    ):
+        raise ValueError("robot USD differs from its governed import receipt")
+    normalization = receipt.get("articulation_root_normalization")
+    if (
+        not isinstance(normalization, Mapping)
+        or normalization.get("expected_live_dof_order") != EXPECTED_DOFS
+    ):
+        raise ValueError("governed import articulation order differs")
+    trajectory = parsed["trajectory"]
+    arm_joints = EXPECTED_DOFS[:5]
+    for sample in trajectory["samples"]:
+        if list(sample["joint_positions_rad"]) != arm_joints:
+            raise ValueError("profiled trajectory joint order differs from the governed arm")
+
+    request = parsed["isaac_replay_request"]
+    core: dict[str, Any] = {
+        "schema": ADMISSION_SCHEMA,
+        "status": "READY_FOR_NATIVE_ISAAC_START_ZERO_AUTHORITY",
+        "evidence_class": "NATIVE_ISAAC_ADMISSION_ONLY",
+        "active_profile": parsed["active_profile"],
+        "profile_separation_preserved": True,
+        "isaac_replay_handoff_sha256": parsed[
+            "isaac_replay_handoff_sha256"
+        ],
+        "isaac_replay_request_sha256": request["request_sha256"],
+        "trajectory_sha256": trajectory["trajectory_sha256"],
+        "toolchain_lock_sha256": parsed["toolchain_lock_sha256"],
+        "robot_import_receipt_file_sha256": import_receipt_file_sha256,
+        "robot_import_receipt_sha256": claimed_receipt_sha,
+        "robot_usd_sha256": _digest(usd_bytes),
+        "sample_count": trajectory["sample_count"],
+        "segment_count": trajectory["segment_count"],
+        "joint_names": arm_joints,
+        "limitations": [
+            "admission_only_no_isaac_import_or_gpu_start",
+            "no_physics_tracking_settle_contact_or_repeatability_evidence",
+            "no_gate_promotion_or_physical_authority",
+        ],
+        "controller_commands": [],
+        "hardware_access": False,
+        "physical_authority": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    return {**core, "admission_sha256": _digest(_canonical(core))}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--usd", type=Path, required=True)
     parser.add_argument("--import-receipt", type=Path, required=True)
-    parser.add_argument("--bundle", type=Path, required=True)
-    parser.add_argument("--virtual-profile", type=Path, required=True)
+    parser.add_argument("--bundle", type=Path)
+    parser.add_argument("--virtual-profile", type=Path)
+    parser.add_argument("--profiled-handoff", type=Path)
+    parser.add_argument("--toolchain-lock", type=Path)
+    parser.add_argument("--admission-only", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--status-output", type=Path, required=True)
     args = parser.parse_args()
+    if args.admission_only:
+        if args.profiled_handoff is None or args.toolchain_lock is None:
+            parser.error("--admission-only requires --profiled-handoff and --toolchain-lock")
+        if args.bundle is not None or args.virtual_profile is not None:
+            parser.error("--admission-only cannot consume the legacy replay inputs")
+    elif args.bundle is None or args.virtual_profile is None:
+        parser.error("legacy replay requires --bundle and --virtual-profile")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.status_output.parent.mkdir(parents=True, exist_ok=True)
     app = None
@@ -131,12 +228,37 @@ def main() -> int:
         usd = args.usd.resolve(strict=True)
         receipt_raw = args.import_receipt.resolve(strict=True).read_bytes()
         import_receipt = json.loads(receipt_raw)
+        usd_bytes = usd.read_bytes()
+        if args.admission_only:
+            handoff = json.loads(
+                args.profiled_handoff.resolve(strict=True).read_text(encoding="utf-8")
+            )
+            toolchain_lock = json.loads(
+                args.toolchain_lock.resolve(strict=True).read_text(encoding="utf-8")
+            )
+            admission = _validate_profiled_native_admission(
+                handoff,
+                toolchain_lock,
+                import_receipt,
+                usd_bytes=usd_bytes,
+                import_receipt_file_sha256=_digest(receipt_raw),
+            )
+            args.output.write_text(
+                json.dumps(admission, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            args.status_output.write_text(json.dumps({
+                "status": admission["status"],
+                "admission_sha256": admission["admission_sha256"],
+                "active_profile": admission["active_profile"],
+            }, sort_keys=True) + "\n", encoding="utf-8")
+            return 0
         bundle_raw = args.bundle.resolve(strict=True).read_bytes()
         bundle = json.loads(bundle_raw)
         profile_raw = args.virtual_profile.resolve(strict=True).read_bytes()
         profile = json.loads(profile_raw)
         _validate_bundle(bundle)
-        if import_receipt["external_files"][0]["sha256"] != _digest(usd.read_bytes()):
+        if import_receipt["external_files"][0]["sha256"] != _digest(usd_bytes):
             raise ValueError("robot USD differs from its import receipt")
         if bundle["source"]["virtual_profile_sha256"] != _digest(profile_raw):
             raise ValueError("virtual geometry profile differs from the arm schedule source")
