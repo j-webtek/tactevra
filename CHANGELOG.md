@@ -26,6 +26,10 @@ as described in the [versioning policy](docs/VERSIONING.md).
 - Added strict independent intake validation for the selected-profile Isaac WP3
   handoff, including exact trajectory, request, attachment-profile,
   zero-authority, and selected toolchain identity checks before native use.
+- Added an executable native Isaac admission-only boundary that binds the
+  selected-profile handoff to the reviewed toolchain, governed robot USD,
+  import receipt, articulation order, and route joint order before importing
+  Isaac Sim or starting a GPU job.
 - Selected the exact zero-authority Isaac Sim 6.1.0.0 internal integration
   runner from retained launch evidence, with a hash-bound license and
   compatibility disposition that prohibits runtime and generated-asset
