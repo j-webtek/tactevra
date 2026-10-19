@@ -886,3 +886,14 @@ existing sweep evaluator now publishes residual policy-inflated clearance
 lower bounds, limiting body pairs, and explicit `CLEAR`, `COLLISION`, or
 `INDETERMINATE` outcomes. All byte, duplicate, and reduction limits remain
 unchanged.
+
+The profile-separated route-clearance reconstruction increment adds three
+governed paths: one offline reconstruction module, one strict output schema,
+and one focused unit-test module. The file-count ceiling advances from 6,582
+to the exact expected 6,585 files. It also corrects the existing evaluator to
+validate shared partition boundaries by exact joint equality and declared
+boundary lineage while preserving each sample's distinct segment-ownership
+hash. The reconstruction assigns all 328 source segments exactly once for
+each attachment profile and recomputes their clearance minima. It opens no
+hardware and remains blocked on fresh observed entry evidence, so all byte,
+duplicate, and reduction limits remain unchanged.

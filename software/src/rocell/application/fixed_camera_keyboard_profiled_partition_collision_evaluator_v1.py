@@ -265,10 +265,20 @@ def evaluate_fixed_camera_keyboard_profiled_collision_partitions_v1(
                 f"partition, evidence, calibration, or profile lineage differs: {profile_name}"
             )
 
+        boundary_lineage = document.get("boundary_lineage")
+        if (
+            not isinstance(boundary_lineage, list)
+            or len(boundary_lineage) != len(partitions) - 1
+        ):
+            raise FixedCameraKeyboardProfiledPartitionCollisionEvaluatorV1Error(
+                f"partition boundary lineage coverage differs: {profile_name}"
+            )
+
         partition_reports: list[dict[str, Any]] = []
         profile_collision = False
         profile_incomplete = False
-        previous_terminal: str | None = None
+        previous_partition: Mapping[str, Any] | None = None
+        previous_terminal: BoundedJointConfigurationSample | None = None
         for index, partition in enumerate(partitions):
             if (
                 not isinstance(partition, Mapping)
@@ -288,17 +298,52 @@ def evaluate_fixed_camera_keyboard_profiled_collision_partitions_v1(
                 partition.get("bounded_sample_count") != len(plan)
                 or partition.get("first_sample_sha256") != plan[0].content_sha256
                 or partition.get("terminal_sample_sha256") != plan[-1].content_sha256
-                or (
-                    previous_terminal is not None
-                    and previous_terminal != plan[0].content_sha256
-                )
                 or len(evidence.configuration_geometry_by_partition[index]) != len(plan)
                 or len(evidence.sweep_envelopes_by_partition[index]) != len(plan) - 1
             ):
                 raise FixedCameraKeyboardProfiledPartitionCollisionEvaluatorV1Error(
                     f"partition evidence coverage or boundary lineage differs: {profile_name}:{index}"
                 )
-            previous_terminal = plan[-1].content_sha256
+            if previous_terminal is not None and previous_partition is not None:
+                boundary = boundary_lineage[index - 1]
+                if not isinstance(boundary, Mapping):
+                    raise FixedCameraKeyboardProfiledPartitionCollisionEvaluatorV1Error(
+                        f"partition boundary lineage is malformed: {profile_name}:{index - 1}"
+                    )
+                boundary_core = dict(boundary)
+                boundary_hash = boundary_core.pop("boundary_lineage_sha256", None)
+                maximum_delta = max(
+                    abs(
+                        previous_terminal.joint_positions_rad[name]
+                        - plan[0].joint_positions_rad[name]
+                    )
+                    for name in ARM_JOINT_NAMES
+                )
+                if (
+                    boundary_hash != _sha(boundary_core)
+                    or boundary.get("predecessor_partition_index") != index - 1
+                    or boundary.get("successor_partition_index") != index
+                    or boundary.get("source_boundary_result_index")
+                    != partition.get("source_result_start_index") - 1
+                    or boundary.get("predecessor_terminal_sample_sha256")
+                    != previous_terminal.content_sha256
+                    or boundary.get("successor_boundary_recheck_sample_sha256")
+                    != plan[0].content_sha256
+                    or boundary.get("maximum_joint_difference_rad") != 0.0
+                    or maximum_delta != 0.0
+                    or boundary.get("boundary_recheck_required") is not True
+                    or boundary.get("extra_zero_length_sweep_envelope_required")
+                    is not False
+                    or boundary.get("first_successor_route_segment_owned_by_partition")
+                    != index
+                    or previous_partition.get("source_result_end_index_exclusive")
+                    != partition.get("source_result_start_index")
+                ):
+                    raise FixedCameraKeyboardProfiledPartitionCollisionEvaluatorV1Error(
+                        f"partition boundary lineage differs: {profile_name}:{index - 1}"
+                    )
+            previous_partition = partition
+            previous_terminal = plan[-1]
             discrete = _evaluate_discrete_partition(
                 context,
                 calibration_snapshot,

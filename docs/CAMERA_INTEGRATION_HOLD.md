@@ -341,3 +341,11 @@ the two attachment profiles remain separate. This closes the reusable software
 method portion of continuous-segment qualification; accepted installed
 evidence for the complete routes, fresh observed entry, reconstruction, and the
 superseding freeze promotion remain outstanding.
+
+The next offline reconstruction boundary is also implemented. It verifies
+that both attachment profiles retain exact ordered ownership of all 328 route
+segments across their bounded partitions, validates the declared shared
+boundary rechecks without conflating their distinct ownership hashes, and
+recomputes the minimum route clearance and limiting body pair. Its successful
+status still requires a fresh observed start and continuously qualified entry;
+it does not promote the superseding freeze or create physical authority.
