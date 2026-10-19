@@ -907,3 +907,13 @@ and dense telemetry chain to the first joint state of one profile's reconstructe
 attachment-profile separation. It grants no controller, hardware, or physical
 authority, and missing real evidence remains blocked; byte, duplicate, and
 reduction limits remain unchanged.
+
+The profiled entry-route Isaac replay handoff increment adds three governed
+paths: one offline handoff module, one strict output schema, and one focused
+unit-test module. The file-count ceiling advances from 6,588 to the exact
+expected 6,591 files. The adapter reconstructs both attachment-profile routes,
+binds the selected passing receipt to all 329 route configurations, and emits
+an exact non-replanning request only when the authoritative toolchain lock is
+selected. The current lock remains unselected, so it emits a named blocker and
+no replay request. It opens no simulator or hardware and grants no physical
+authority; byte, duplicate, and reduction limits remain unchanged.

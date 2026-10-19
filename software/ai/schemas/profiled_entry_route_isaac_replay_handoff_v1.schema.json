@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/profiled_entry_route_isaac_replay_handoff_v1.schema.json",
+  "title": "Profiled entry-route Isaac replay handoff v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "active_profile",
+    "profile_separation_preserved",
+    "profiled_entry_route_qualification_sha256",
+    "partitioned_typing_collision_intake_sha256",
+    "installed_collision_profile_sha256",
+    "calibration_snapshot_sha256",
+    "build_snapshot_sha256",
+    "trajectory",
+    "toolchain_lock_sha256",
+    "toolchain_selection_status",
+    "isaac_replay_request",
+    "blockers",
+    "next_required_stage",
+    "authority",
+    "isaac_replay_handoff_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.profiled_entry_route_isaac_replay_handoff.v1"},
+    "status": {
+      "enum": [
+        "READY_FOR_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY",
+        "BLOCKED_ISAAC_TOOLCHAIN_LOCK_UNSELECTED",
+        "BLOCKED_PROFILED_ENTRY_ROUTE_QUALIFICATION_REQUIRED"
+      ]
+    },
+    "active_profile": {"enum": ["no_attachment", "stylus_attachment"]},
+    "profile_separation_preserved": {"const": true},
+    "profiled_entry_route_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "partitioned_typing_collision_intake_sha256": {"$ref": "#/$defs/sha256"},
+    "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "calibration_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "build_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+    "trajectory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_count", "segment_count", "samples", "trajectory_sha256"],
+      "properties": {
+        "sample_count": {"const": 329},
+        "segment_count": {"const": 328},
+        "samples": {
+          "type": "array",
+          "minItems": 329,
+          "maxItems": 329,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "route_sample_sequence",
+              "source_segment_index",
+              "joint_positions_rad",
+              "source_sample_sha256"
+            ],
+            "properties": {
+              "route_sample_sequence": {"type": "integer", "minimum": 0, "maximum": 328},
+              "source_segment_index": {"type": ["integer", "null"]},
+              "joint_positions_rad": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {"type": "number"}
+              },
+              "source_sample_sha256": {"$ref": "#/$defs/sha256"}
+            }
+          }
+        },
+        "trajectory_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "toolchain_lock_sha256": {"$ref": "#/$defs/sha256"},
+    "toolchain_selection_status": {"enum": ["SELECTED", "UNSELECTED"]},
+    "isaac_replay_request": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "active_profile",
+            "qualification_sha256",
+            "partitioned_typing_collision_intake_sha256",
+            "trajectory_sha256",
+            "toolchain_lock_sha256",
+            "isaac_sim_version",
+            "installation_sha256",
+            "extension_lock_sha256",
+            "settings_profile_sha256",
+            "random_seed",
+            "replan_allowed",
+            "request_sha256"
+          ],
+          "properties": {
+            "active_profile": {"enum": ["no_attachment", "stylus_attachment"]},
+            "qualification_sha256": {"$ref": "#/$defs/sha256"},
+            "partitioned_typing_collision_intake_sha256": {"$ref": "#/$defs/sha256"},
+            "trajectory_sha256": {"$ref": "#/$defs/sha256"},
+            "toolchain_lock_sha256": {"$ref": "#/$defs/sha256"},
+            "isaac_sim_version": {"type": "string", "minLength": 1},
+            "installation_sha256": {"$ref": "#/$defs/sha256"},
+            "extension_lock_sha256": {"$ref": "#/$defs/sha256"},
+            "settings_profile_sha256": {"$ref": "#/$defs/sha256"},
+            "random_seed": {"const": 0},
+            "replan_allowed": {"const": false},
+            "request_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_required_stage": {"type": "string", "minLength": 1},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controller_commands",
+        "hardware_commands_generated",
+        "hardware_access",
+        "physical_movements",
+        "physical_authority"
+      ],
+      "properties": {
+        "controller_commands": {"const": []},
+        "hardware_commands_generated": {"const": 0},
+        "hardware_access": {"const": false},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false}
+      }
+    },
+    "isaac_replay_handoff_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

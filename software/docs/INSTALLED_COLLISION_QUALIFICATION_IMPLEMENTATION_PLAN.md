@@ -376,6 +376,15 @@ build, calibration, controller session, and route start is supplied.
 **Purpose:** Hand a collision-qualified route to the next simulation work
 package without changing its authority.
 
+**Implementation status (2026-10-18):** The portable handoff adapter and
+strict receipt schema are implemented. The adapter independently reconstructs
+both attachment-profile routes, matches the selected ICQ-8 qualification,
+extracts the exact 329 configurations behind its 328 segments, and forbids
+replanning. With the repository lock still `UNSELECTED`, it deterministically
+returns `BLOCKED_ISAAC_TOOLCHAIN_LOCK_UNSELECTED` and no replay request. Native
+replay, tracking/settle evidence, repeatability evidence, and ICQ-9 completion
+remain blocked on WP0 plus a real passing ICQ-8 receipt.
+
 **Deliverables:**
 
 - An Isaac request adapter that consumes the exact accepted trajectory and ICQ
@@ -392,6 +401,9 @@ package without changing its authority.
 
 - Native replay is deterministic within declared tolerances.
 - A simulator pass remains advisory and cannot promote a physical gate.
+
+The portable adapter is preparation for these acceptance checks; it is not a
+native replay receipt and does not satisfy ICQ-9 by itself.
 
 ## Parallel WP0 work
 
