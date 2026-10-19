@@ -359,3 +359,12 @@ inactive profile does not cross into the active profile result. This is an
 offline evidence boundary only: absent fresh matching evidence remains
 `BLOCKED`, and every result retains zero controller, hardware, and physical
 authority.
+
+The zero-authority WP3 handoff contract is also prepared. It replays the full
+two-profile reconstruction, binds one passing selected-profile receipt to the
+exact 329 route configurations, and explicitly disallows replanning. The
+checked-in Isaac toolchain lock remains `UNSELECTED`, so current output retains
+`BLOCKED_ISAAC_TOOLCHAIN_LOCK_UNSELECTED`, contains no native replay request,
+and does not launch Isaac Sim or change this hold. A selected reviewed WP0 lock
+and real passing ICQ-8 evidence are still required before native advisory
+replay can begin.
