@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import sys
 
 import pytest
 
@@ -30,6 +32,108 @@ JOINTS = {
     "link3_to_link4": 0.4,
     "link4_to_link5": 0.5,
 }
+
+
+def _sha(value):
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
+
+
+def _ready_profiled_admission():
+    lock = {
+        "schema": "rocell.isaac_sim_toolchain_lock.v1",
+        "selection_status": "SELECTED",
+        "isaac_sim_version": "test-only",
+        "installation_sha256": "1" * 64,
+        "extension_lock_sha256": "2" * 64,
+        "settings_profile_sha256": "3" * 64,
+        "runner_platform": "offline-test",
+        "launch_method": "test-only",
+        "license_review_status": "REVIEWED_FOR_INTERNAL_INTEGRATION",
+        "hardware_access": False,
+        "physical_authority": False,
+        "wire_commands": [],
+    }
+    samples = [{
+        "route_sample_sequence": sequence,
+        "source_segment_index": None if sequence == 0 else sequence - 1,
+        "joint_positions_rad": dict(JOINTS),
+        "source_sample_sha256": f"{sequence:064x}",
+    } for sequence in range(329)]
+    trajectory_core = {
+        "sample_count": 329,
+        "segment_count": 328,
+        "samples": samples,
+    }
+    trajectory = {**trajectory_core, "trajectory_sha256": _sha(trajectory_core)}
+    request_core = {
+        "active_profile": "no_attachment",
+        "qualification_sha256": "4" * 64,
+        "partitioned_typing_collision_intake_sha256": "5" * 64,
+        "trajectory_sha256": trajectory["trajectory_sha256"],
+        "toolchain_lock_sha256": _sha(lock),
+        "isaac_sim_version": lock["isaac_sim_version"],
+        "installation_sha256": lock["installation_sha256"],
+        "extension_lock_sha256": lock["extension_lock_sha256"],
+        "settings_profile_sha256": lock["settings_profile_sha256"],
+        "random_seed": 0,
+        "replan_allowed": False,
+    }
+    request = {**request_core, "request_sha256": _sha(request_core)}
+    handoff_core = {
+        "schema": "rocell.profiled_entry_route_isaac_replay_handoff.v1",
+        "status": "READY_FOR_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY",
+        "active_profile": "no_attachment",
+        "profile_separation_preserved": True,
+        "profiled_entry_route_qualification_sha256": "4" * 64,
+        "partitioned_typing_collision_intake_sha256": "5" * 64,
+        "installed_collision_profile_sha256": "6" * 64,
+        "calibration_snapshot_sha256": "7" * 64,
+        "build_snapshot_sha256": "8" * 64,
+        "trajectory": trajectory,
+        "toolchain_lock_sha256": _sha(lock),
+        "toolchain_selection_status": "SELECTED",
+        "isaac_replay_request": request,
+        "blockers": [],
+        "next_required_stage": "RUN_EXACT_NATIVE_ISAAC_REPLAY_AND_RETAIN_RECEIPT",
+        "authority": {
+            "controller_commands": [],
+            "hardware_commands_generated": 0,
+            "hardware_access": False,
+            "physical_movements": 0,
+            "physical_authority": False,
+        },
+    }
+    handoff = {
+        **handoff_core,
+        "isaac_replay_handoff_sha256": _sha(handoff_core),
+    }
+    usd = b"governed-test-usd"
+    receipt_core = {
+        "schema": "tactevra.isaac_sim_urdf_import.v1",
+        "external_files": [{
+            "path": "robot.usda",
+            "sha256": hashlib.sha256(usd).hexdigest(),
+            "size_bytes": len(usd),
+        }],
+        "articulation_root_normalization": {
+            "expected_live_dof_order": list(REPLAY.EXPECTED_DOFS),
+        },
+        "hardware_access": False,
+        "physical_authority": False,
+        "wire_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+    }
+    receipt = {**receipt_core, "receipt_sha256": _sha(receipt_core)}
+    return handoff, lock, receipt, usd
 
 
 def _report():
@@ -155,3 +259,96 @@ def test_v2_bundle_rejects_unbound_actual_emitter_claim():
         BUNDLE.build_replay_bundle(
             report, raw, COMMIT, require_actual_emitter=True
         )
+
+
+def test_profiled_native_admission_binds_every_identity_before_isaac_import():
+    handoff, lock, receipt, usd = _ready_profiled_admission()
+    admission = REPLAY._validate_profiled_native_admission(
+        handoff,
+        lock,
+        receipt,
+        usd_bytes=usd,
+        import_receipt_file_sha256="9" * 64,
+    )
+    assert admission["status"] == "READY_FOR_NATIVE_ISAAC_START_ZERO_AUTHORITY"
+    assert admission["active_profile"] == "no_attachment"
+    assert admission["sample_count"] == 329
+    assert admission["segment_count"] == 328
+    assert admission["controller_commands"] == []
+    assert admission["gate_promotions"] == []
+    assert "isaacsim" not in sys.modules
+
+
+@pytest.mark.parametrize("mutation", ["usd", "dof_order", "joint_order"])
+def test_profiled_native_admission_rejects_crossed_governed_inputs(mutation):
+    handoff, lock, receipt, usd = _ready_profiled_admission()
+    if mutation == "usd":
+        usd += b"-changed"
+    elif mutation == "dof_order":
+        receipt["articulation_root_normalization"]["expected_live_dof_order"].reverse()
+        core = dict(receipt)
+        core.pop("receipt_sha256")
+        receipt["receipt_sha256"] = _sha(core)
+    else:
+        joints = handoff["trajectory"]["samples"][0]["joint_positions_rad"]
+        handoff["trajectory"]["samples"][0]["joint_positions_rad"] = dict(
+            reversed(list(joints.items()))
+        )
+        trajectory = handoff["trajectory"]
+        trajectory_core = dict(trajectory)
+        trajectory_core.pop("trajectory_sha256")
+        trajectory["trajectory_sha256"] = _sha(trajectory_core)
+        handoff["isaac_replay_request"]["trajectory_sha256"] = trajectory[
+            "trajectory_sha256"
+        ]
+        request_core = dict(handoff["isaac_replay_request"])
+        request_core.pop("request_sha256")
+        handoff["isaac_replay_request"]["request_sha256"] = _sha(request_core)
+        handoff_core = dict(handoff)
+        handoff_core.pop("isaac_replay_handoff_sha256")
+        handoff["isaac_replay_handoff_sha256"] = _sha(handoff_core)
+    with pytest.raises(ValueError):
+        REPLAY._validate_profiled_native_admission(
+            handoff,
+            lock,
+            receipt,
+            usd_bytes=usd,
+            import_receipt_file_sha256="9" * 64,
+        )
+
+
+def test_admission_only_cli_exits_before_native_runtime(monkeypatch, tmp_path):
+    handoff, lock, receipt, usd = _ready_profiled_admission()
+    paths = {
+        "usd": tmp_path / "robot.usda",
+        "receipt": tmp_path / "import.json",
+        "handoff": tmp_path / "handoff.json",
+        "lock": tmp_path / "lock.json",
+        "output": tmp_path / "admission.json",
+        "status": tmp_path / "admission.status.json",
+    }
+    paths["usd"].write_bytes(usd)
+    for name, value in (
+        ("receipt", receipt),
+        ("handoff", handoff),
+        ("lock", lock),
+    ):
+        paths[name].write_text(json.dumps(value), encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", [
+        "joint_schedule_isaac_replay_probe.py",
+        "--admission-only",
+        "--usd", str(paths["usd"]),
+        "--import-receipt", str(paths["receipt"]),
+        "--profiled-handoff", str(paths["handoff"]),
+        "--toolchain-lock", str(paths["lock"]),
+        "--output", str(paths["output"]),
+        "--status-output", str(paths["status"]),
+    ])
+    assert REPLAY.main() == 0
+    assert json.loads(paths["output"].read_text())["evidence_class"] == (
+        "NATIVE_ISAAC_ADMISSION_ONLY"
+    )
+    assert json.loads(paths["status"].read_text())["status"] == (
+        "READY_FOR_NATIVE_ISAAC_START_ZERO_AUTHORITY"
+    )
+    assert "isaacsim" not in sys.modules

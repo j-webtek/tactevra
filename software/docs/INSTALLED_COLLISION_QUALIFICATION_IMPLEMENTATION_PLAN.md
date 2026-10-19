@@ -377,13 +377,17 @@ build, calibration, controller session, and route start is supplied.
 package without changing its authority.
 
 **Implementation status (2026-10-19):** The portable handoff adapter, strict
-receipt schema, and independent native-intake parser are implemented. The
+receipt schema, independent native-intake parser, and executable admission-only
+boundary are implemented. The
 adapter independently reconstructs both attachment-profile routes, matches the
 selected ICQ-8 qualification, extracts the exact 329 configurations behind its
 328 segments, and forbids replanning. WP0 now selects the exact Isaac Sim
 6.1.0.0 runner. Before native use, the parser revalidates the sealed handoff,
 trajectory extent and samples, profile separation, request lineage,
 zero-authority boundary, and exact selected toolchain identities. Native
+admission additionally verifies the governed USD against its sealed import
+receipt, the expected articulation order, and exact profiled route joint order
+before the `isaacsim` import or any GPU startup. Native
 replay, tracking/settle evidence, repeatability evidence, and ICQ-9 completion
 remain blocked on a retained real passing ICQ-8 receipt and accepted installed
 collision profile; synthetic unit fixtures are not native execution evidence.
