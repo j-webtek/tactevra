@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 import json
 from pathlib import Path
 
@@ -126,10 +127,37 @@ def test_receipt_tampering_and_gate_promotion_reject() -> None:
         IsaacSimRunReceipt.from_dict(document)
 
 
-def test_unselected_repository_toolchain_lock_fails_closed() -> None:
+def test_repository_toolchain_lock_matches_reviewed_exact_runner() -> None:
     path = WORKSPACE / "software/config/isaac_sim_toolchain_lock.json"
-    with pytest.raises(IsaacSimContractError, match="not selected"):
-        IsaacSimToolchainLock.load(path)
+    selected = IsaacSimToolchainLock.load(path)
+    assert selected.isaac_sim_version == "6.1.0.0"
+    assert selected.installation_sha256 == (
+        "ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258"
+    )
+    assert selected.license_review_status == "REVIEWED_FOR_INTERNAL_INTEGRATION"
+
+
+def test_repository_lock_matches_retained_owner_authorized_launch() -> None:
+    evidence = (
+        WORKSPACE
+        / "software/integrations/isaac_sim/evidence"
+        / "windows_dual_rtx3090_first_launch_20260929.json"
+    )
+    assert hashlib.sha256(evidence.read_bytes()).hexdigest() == (
+        "bc41e5070109de62a1a78388e9b46ebd8a0882cecc567141ad43ea9ba90b20ee"
+    )
+    launch = json.loads(evidence.read_text(encoding="utf-8"))
+    lock = IsaacSimToolchainLock.load(
+        WORKSPACE / "software/config/isaac_sim_toolchain_lock.json"
+    )
+    assert launch["license_acceptance_status"] == "OWNER_AUTHORIZED_INTERNAL_USE"
+    assert launch["isaacsim_distribution"] == lock.isaac_sim_version
+    assert launch["installation_sha256"] == lock.installation_sha256
+    assert launch["extension_lock_sha256"] == lock.extension_lock_sha256
+    assert launch["settings_profile_sha256"] == lock.settings_profile_sha256
+    assert launch["hardware_access"] is launch["physical_authority"] is False
+    assert launch["hardware_writes"] == launch["physical_movements"] == 0
+    assert launch["wire_commands"] == []
 
 
 def test_selected_toolchain_lock_requires_exact_digests_and_license_review() -> None:
@@ -148,8 +176,21 @@ def test_selected_toolchain_lock_requires_exact_digests_and_license_review() -> 
         "license_review_status": "REVIEWED_FOR_INTERNAL_INTEGRATION",
     })
     selected = IsaacSimToolchainLock.from_dict(document)
-    assert selected.runner_platform == "dual-rtx-3090-candidate"
+    assert selected.runner_platform == (
+        "windows-11-amd64-dual-rtx3090-driver-595.97-compatibility-qualified"
+    )
     document["installation_sha256"] = "UNPINNED"
     with pytest.raises(IsaacSimContractError, match="installation_sha256"):
+        IsaacSimToolchainLock.from_dict(document)
+
+
+def test_unselected_toolchain_lock_still_fails_closed() -> None:
+    document = json.loads(
+        (WORKSPACE / "software/config/isaac_sim_toolchain_lock.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    document["selection_status"] = "UNSELECTED"
+    with pytest.raises(IsaacSimContractError, match="not selected"):
         IsaacSimToolchainLock.from_dict(document)
 

@@ -231,8 +231,9 @@ they can reach a controller.
 Isaac currently acts as an **advisory oracle** downstream of Tactevra's strict
 admission boundary. Its retained evidence can expose disagreement or block a
 route, but it cannot emit arm commands or promote a physical safety gate. The
-authoritative Isaac runner lock is still unselected, and installed geometry,
-continuous clearance, contact mechanics, and measured calibration remain open.
+exact Isaac 6.1.0.0 internal integration runner is selected with a reviewed
+compatibility exception; installed geometry, continuous clearance, contact
+mechanics, and measured calibration remain open.
 
 The [simulation overview](docs/SIMULATION.md) explains what has actually run,
 how MuJoCo Warp fits without being overclaimed, and where to inspect the
@@ -247,7 +248,7 @@ receipts and integration work.
 | Keyboard targets | Mixed sequences and all 46 named targets compile offline in exact order | Real-camera coordinate qualification |
 | Perception | Scene-quality, precision-adapter, saved-image, and abstention paths exist | Final-camera evaluation and a bound that fits applicable key-safe regions |
 | Motion planning | Ordered smooth trajectories and lifecycle records compile offline | Installed transforms, IK, cable, and collision qualification |
-| Higher-fidelity simulation | Isaac import/FK parity, RC03 scene composition, target overlays, a retained noncontact hover prefix, and finite collision differentials have merged evidence | Select the governed runner, bind installed geometry, add dynamics/contact/camera campaigns, and qualify disagreements |
+| Higher-fidelity simulation | The governed Isaac 6.1.0.0 runner, import/FK parity, RC03 scene composition, target overlays, a retained noncontact hover prefix, and finite collision differentials have merged evidence | Bind installed geometry, add dynamics/contact/camera campaigns, and qualify disagreements |
 | Controller runtime | Ownership, encoding, feedback matching, deadlines, and no-ambiguous-retry behavior are rehearsed | Installed-controller qualification and measured timing |
 | Physical interaction | Earlier supervised movement and feedback experiments provide development evidence | One measured non-contact hover, then one independently verified keypress |
 | Phone operation | Contracts and planning concepts exist | Qualified screen perception, state transitions, and verified taps |

@@ -23,6 +23,10 @@ as described in the [versioning policy](docs/VERSIONING.md).
 
 ### Changed
 
+- Selected the exact zero-authority Isaac Sim 6.1.0.0 internal integration
+  runner from retained launch evidence, with a hash-bound license and
+  compatibility disposition that prohibits runtime and generated-asset
+  redistribution.
 - Renamed the canonical GitHub repository from `j-webtek/robot-arm-build` to
   `j-webtek/tactevra`; GitHub redirects the former URL.
 - Added repository ownership, citation, changelog, and source-versioning metadata.

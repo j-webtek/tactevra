@@ -103,13 +103,18 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe software\integrations\isaac_sim\first_l
   --installer-sha256 979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122
 ```
 
-The compatibility launch passes, but the repository toolchain lock remains
-`UNSELECTED`. The RTX 3090 remains outside NVIDIA's documented 6.1.0 minimum
-GPU set. The launch also reported PCIe device 0 at width x4 versus its x16
+The compatibility launch passes. The exact runner was subsequently selected
+for internal integration in the reviewed
+[`toolchain lock`](../../config/isaac_sim_toolchain_lock.json).
+The RTX 3090 remains outside NVIDIA's documented 6.1.0 minimum GPU set, so the
+selection is an empirical compatibility exception and does not claim official
+NVIDIA support. The launch also reported PCIe device 0 at width x4 versus its x16
 maximum, no CUDA peer access between the GPUs, a stale localhost Omniverse
 proxy setting, and an OpenUSD asset-converter build warning. WP1 must resolve
 or explicitly isolate the OpenUSD importer warning and prove import/FK parity
-before a runner-selection change can be reviewed.
+before relying on imported kinematics; that bounded parity evidence is now
+retained. Dynamics, contact, rendering, and physical behavior remain
+unqualified.
 
 ## Governed RoArm URDF import
 
@@ -409,12 +414,21 @@ From the repository root:
 python scripts/ci/check_docs.py
 ```
 
-## Select the external runner
+## Selected external runner
 
 The committed
 [`isaac_sim_toolchain_lock.json`](../../config/isaac_sim_toolchain_lock.json)
-is deliberately `UNSELECTED`. Do not replace its null fields with guessed
-values. On the designated compute runner:
+selects the exact Isaac Sim 6.1.0.0 installation from the retained compatibility
+launch. The retained launch receipt and evidence ledger bind the installation,
+extensions, settings, installer, internal-use authorization,
+nonredistribution disposition, and the RTX 3090 compatibility exception.
+NVIDIA runtime files and generated NVIDIA assets stay external to Git.
+
+This reviewed record supersedes the earlier `UNSELECTED` placeholder. Historical
+receipts that name that blocker remain immutable and do not describe the current
+lock state.
+
+For any replacement runner:
 
 1. install or pull one exact Isaac Sim release using an NVIDIA-supported path;
 2. retain the exact installer/container identity and calculate its SHA-256;
@@ -426,9 +440,9 @@ values. On the designated compute runner:
 7. change `selection_status` to `SELECTED` only in the same reviewed change
    that supplies all required identities.
 
-`IsaacSimToolchainLock.load(...)` rejects the repository placeholder, partial
-selections, unreviewed licensing, invalid digests, added fields, or any attempt
-to add hardware authority.
+`IsaacSimToolchainLock.load(...)` rejects unselected or partial records,
+unreviewed licensing, invalid digests, added fields, or any attempt to add
+hardware authority.
 
 ## Next implementation boundary
 
