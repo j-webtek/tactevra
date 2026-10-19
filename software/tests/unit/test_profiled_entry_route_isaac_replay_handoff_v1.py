@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 
@@ -54,6 +55,28 @@ def _selected_lock() -> dict:
     }
 
 
+def _sha(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def _ready_handoff(lock: dict | None = None) -> dict:
+    documents, evaluation, qualification = _qualification()
+    return subject.prepare_profiled_entry_route_isaac_replay_handoff_v1(
+        qualification,
+        documents,
+        evaluation,
+        lock or _selected_lock(),
+    )
+
+
 def test_current_selected_lock_prepares_exact_route_for_native_replay() -> None:
     documents, evaluation, qualification = _qualification()
     lock = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
@@ -92,14 +115,72 @@ def test_selected_lock_prepares_exact_non_replanning_request() -> None:
     )
 
 
+def test_native_intake_independently_validates_ready_handoff_and_toolchain() -> None:
+    lock = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
+    result = _ready_handoff(lock)
+    parsed = subject.parse_profiled_entry_route_isaac_replay_handoff_v1(
+        result,
+        require_ready=True,
+        toolchain_lock=lock,
+    )
+    assert parsed == result
+
+
+def test_native_intake_rejects_tampered_trajectory() -> None:
+    result = _ready_handoff()
+    joints = result["trajectory"]["samples"][1]["joint_positions_rad"]
+    joints[next(iter(joints))] += 0.001
+    with pytest.raises(
+        subject.ProfiledEntryRouteIsaacReplayHandoffV1Error,
+        match="handoff hash differs",
+    ):
+        subject.parse_profiled_entry_route_isaac_replay_handoff_v1(result)
+
+
+def test_native_intake_rejects_crossed_selected_toolchain() -> None:
+    lock = _selected_lock()
+    result = _ready_handoff(lock)
+    crossed = copy.deepcopy(lock)
+    crossed["settings_profile_sha256"] = "4" * 64
+    with pytest.raises(
+        subject.ProfiledEntryRouteIsaacReplayHandoffV1Error,
+        match="toolchain identity differs",
+    ):
+        subject.parse_profiled_entry_route_isaac_replay_handoff_v1(
+            result,
+            require_ready=True,
+            toolchain_lock=crossed,
+        )
+
+
+def test_native_intake_rejects_blocked_handoff() -> None:
+    result = _ready_handoff()
+    result["status"] = subject.STATUS_QUALIFICATION_BLOCKED
+    result["isaac_replay_request"] = None
+    result["blockers"] = ["PROFILED_ENTRY_ROUTE_QUALIFICATION_REQUIRED"]
+    result["next_required_stage"] = (
+        "COMPLETE_FRESH_SELECTED_PROFILE_ENTRY_ROUTE_QUALIFICATION"
+    )
+    unsigned = dict(result)
+    unsigned.pop("isaac_replay_handoff_sha256")
+    result["isaac_replay_handoff_sha256"] = _sha(unsigned)
+    with pytest.raises(
+        subject.ProfiledEntryRouteIsaacReplayHandoffV1Error,
+        match="requires a READY handoff",
+    ):
+        subject.parse_profiled_entry_route_isaac_replay_handoff_v1(
+            result,
+            require_ready=True,
+            toolchain_lock=_selected_lock(),
+        )
+
+
 def test_crossed_attachment_profile_is_rejected() -> None:
     documents, evaluation, qualification = _qualification()
     crossed = copy.deepcopy(qualification)
     crossed["active_profile"] = "stylus_attachment"
     core = dict(crossed)
     core.pop("profiled_entry_route_qualification_sha256")
-    import hashlib
-
     crossed["profiled_entry_route_qualification_sha256"] = hashlib.sha256(
         json.dumps(
             core,
