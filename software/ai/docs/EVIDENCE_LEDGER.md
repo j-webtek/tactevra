@@ -8413,3 +8413,51 @@ rewriting history. New entries must use a unique evidence ID.
   configuration geometry plus conservative sweep-envelope evidence for every
   enumerated slot. Only then may per-partition discrete and continuous collision
   evaluation run; a fresh observed start state remains independently required.
+
+### E-20261018-INT-477 — exact Isaac 6.1 internal runner selected
+
+- Stage: S2/S3 simulation oracle WP0.
+- Lane: zero-authority integration configuration. No physical readiness or
+  controller gate changed.
+- Objective: replace the fail-closed placeholder with the exact retained Isaac
+  Sim runner after reviewing its installation, launch, license, redistribution,
+  and compatibility evidence.
+- Selected identity: Isaac Sim distribution `6.1.0.0`, Kit `6.1.0`, installation
+  SHA-256 `ccb196b9c987865ee86918301f00705b1dd5a42449c3119f2119aeb2adf51258`,
+  extension-lock SHA-256
+  `6e0d70db81fe16273341e65bd3cf0bc70dffe4a88a5cc0a7bacf51110dd27c70`,
+  settings-profile SHA-256
+  `0cbc21c4dbeeb7b2a0ce6c4c4875681834da8c12c83aa49cd36f09654b3ea473`,
+  and installer SHA-256
+  `979ed00fea181c786f608967377d6d83ac82e6368275994a4182ec79d97b3122`.
+- Evidence: historical candidate file SHA-256
+  `063a4fe5afae0f786043b9eae36cad28b69ca224eddb8e47c84252dc757eb017`;
+  successful first-launch file SHA-256
+  `bc41e5070109de62a1a78388e9b46ebd8a0882cecc567141ad43ea9ba90b20ee`;
+  launch receipt SHA-256
+  `fa28e3a5878f77cc928a93861b35cdf9fac53b857840fbdacef9907aefc1d0ee`.
+- License disposition: the retained launch records the project owner's
+  `OWNER_AUTHORIZED_INTERNAL_USE`. The reviewed NVIDIA Software License
+  Agreement and Isaac Sim Additional Software and Materials License permit the
+  selected internal integration scope. NVIDIA runtime files and generated
+  NVIDIA assets are not redistributable through this repository and remain
+  external. The authoritative selection is the closed-schema toolchain lock;
+  its exact file identity is recorded by the merge commit.
+- Compatibility disposition: NVIDIA does not list RTX 3090 in the documented
+  6.1 minimum GPU set. The two 24 GiB cards are accepted only as a project-level
+  empirical compatibility exception backed by the successful headless launch
+  and bounded WP1 import/FK parity. Official NVIDIA support is not claimed.
+- Decision rule outcome: WP0 may close for this exact internal runner. Any
+  version, installation, extension set, settings profile, driver, launch
+  method, or host change requires a new reviewed selection record.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- Wire commands: `[]`.
+- Limitations: selection enables exact native Isaac replay preparation only.
+  It does not qualify dynamics, contact, rendering, installed collision
+  geometry, continuous clearance, measured calibration, controller transport,
+  execution permits, or physical behavior.
+- Next dependency: run the already prepared, exact, non-replanning profiled
+  route request in the selected native runner and retain a zero-authority
+  receipt. Installed collision policy and physical clearance remain separately
+  blocked by missing measured installed geometry and engineering acceptance.

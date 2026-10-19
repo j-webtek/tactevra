@@ -54,7 +54,7 @@ def _selected_lock() -> dict:
     }
 
 
-def test_current_unselected_lock_retains_exact_route_and_blocks_launch() -> None:
+def test_current_selected_lock_prepares_exact_route_for_native_replay() -> None:
     documents, evaluation, qualification = _qualification()
     lock = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
     result = subject.prepare_profiled_entry_route_isaac_replay_handoff_v1(
@@ -63,11 +63,12 @@ def test_current_unselected_lock_retains_exact_route_and_blocks_launch() -> None
         evaluation,
         lock,
     )
-    assert result["status"] == subject.STATUS_TOOLCHAIN_BLOCKED
+    assert result["status"] == subject.STATUS_READY
     assert result["trajectory"]["sample_count"] == 329
     assert result["trajectory"]["segment_count"] == 328
-    assert result["isaac_replay_request"] is None
-    assert result["blockers"] == ["ISAAC_SIM_TOOLCHAIN_LOCK_UNSELECTED"]
+    assert result["isaac_replay_request"]["replan_allowed"] is False
+    assert result["isaac_replay_request"]["isaac_sim_version"] == "6.1.0.0"
+    assert result["blockers"] == []
     assert result["authority"] == subject.ZERO_AUTHORITY
     jsonschema.Draft202012Validator(
         json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))

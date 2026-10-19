@@ -265,9 +265,13 @@ and seed.
 
 ### WP0 — decision and toolchain lock
 
-**Current status:** Contract and fake-adapter foundation implemented. Exact
-Isaac Sim installation selection, extension/settings export, and applicable
-license review remain open on the designated compute runner.
+**Current status:** Complete for the exact internal integration runner. Isaac
+Sim 6.1.0.0, its installation, extensions, settings, deterministic headless
+launch, tested driver, and internal-use-only license disposition are selected
+and hash-bound. Dual RTX 3090 compatibility is supported by retained launch and
+kinematic-parity evidence as an explicit project exception; official NVIDIA
+support, runtime redistribution, dynamics, contact, rendering, and physical
+qualification are not claimed.
 
 **Deliverables**
 
