@@ -339,16 +339,20 @@ state without assuming the synthetic route seed.
 **Purpose:** Reassemble the complete route result from bounded partition and
 entry evidence.
 
-**Implementation status:** The profile-separated route portion is implemented.
-It independently revalidates the sealed collision evaluation, declared
-partition ownership, boundary lineage, exact ordered coverage of all 328
-source segments per profile, per-segment sample hashes, and the reconstructed
-minimum clearance and limiting body pair. The shared boundary comparison uses
-exact joint equality while retaining distinct predecessor and successor sample
-hashes because those samples carry different segment-ownership metadata. A
-clear reconstructed route remains `BLOCKED` pending ICQ-7 fresh observed-start
-and continuous entry qualification. The final entry-plus-route receipt and
-`PASS` disposition therefore remain outstanding.
+**Implementation status:** The profile-separated route reconstruction and the
+selected-profile entry-plus-route receipt are implemented. The reconstruction
+independently revalidates the sealed collision evaluation, declared partition
+ownership, boundary lineage, exact ordered coverage of all 328 source segments
+per profile, per-segment sample hashes, and the reconstructed minimum clearance
+and limiting body pair. The shared boundary comparison uses exact joint
+equality while retaining distinct predecessor and successor sample hashes
+because those samples carry different segment-ownership metadata. The final
+adapter selects one attachment profile, binds a sealed observed-entry chain to
+that profile and the first route joint state, validates retained dense telemetry
+lineage, and recomputes the limiting clearance across entry plus route. It can
+emit `PASS`, `REJECT`, or `BLOCKED`, always with zero authority. Real operation
+remains `BLOCKED` until fresh ICQ-7 evidence matching the installed profile,
+build, calibration, controller session, and route start is supplied.
 
 **Deliverables:**
 

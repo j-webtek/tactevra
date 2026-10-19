@@ -897,3 +897,13 @@ hash. The reconstruction assigns all 328 source segments exactly once for
 each attachment profile and recomputes their clearance minima. It opens no
 hardware and remains blocked on fresh observed entry evidence, so all byte,
 duplicate, and reduction limits remain unchanged.
+
+The selected-profile entry-plus-route qualification increment adds three more
+governed paths: one offline qualification module, one strict output schema, and
+one focused unit-test module. The file-count ceiling advances from 6,585 to the
+exact expected 6,588 files. The adapter joins the retained observed-entry sweep
+and dense telemetry chain to the first joint state of one profile's reconstructed
+328-segment route, recomputes the combined clearance minimum, and preserves
+attachment-profile separation. It grants no controller, hardware, or physical
+authority, and missing real evidence remains blocked; byte, duplicate, and
+reduction limits remain unchanged.

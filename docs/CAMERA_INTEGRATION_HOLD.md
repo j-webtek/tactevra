@@ -349,3 +349,13 @@ boundary rechecks without conflating their distinct ownership hashes, and
 recomputes the minimum route clearance and limiting body pair. Its successful
 status still requires a fresh observed start and continuously qualified entry;
 it does not promote the superseding freeze or create physical authority.
+
+The selected-profile entry-plus-route adapter now closes the software join. It
+replays that reconstruction, selects exactly one attachment profile, verifies
+the observed entry endpoint equals the first route joint state, binds the entry
+sweep to retained dense telemetry, and reports the minimum clearance across the
+entry and all 328 selected-profile route segments. An incomplete or colliding
+inactive profile does not cross into the active profile result. This is an
+offline evidence boundary only: absent fresh matching evidence remains
+`BLOCKED`, and every result retains zero controller, hardware, and physical
+authority.
