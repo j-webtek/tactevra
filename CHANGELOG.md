@@ -23,6 +23,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
 
 ### Changed
 
+- Added strict independent intake validation for the selected-profile Isaac WP3
+  handoff, including exact trajectory, request, attachment-profile,
+  zero-authority, and selected toolchain identity checks before native use.
 - Selected the exact zero-authority Isaac Sim 6.1.0.0 internal integration
   runner from retained launch evidence, with a hash-bound license and
   compatibility disposition that prohibits runtime and generated-asset

@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import re
 from typing import Any, Mapping
 
 from rocell.integrations.isaac_sim.contracts import IsaacSimContractError
@@ -37,6 +39,47 @@ STATUS_READY = "READY_FOR_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY"
 STATUS_TOOLCHAIN_BLOCKED = "BLOCKED_ISAAC_TOOLCHAIN_LOCK_UNSELECTED"
 STATUS_QUALIFICATION_BLOCKED = "BLOCKED_PROFILED_ENTRY_ROUTE_QUALIFICATION_REQUIRED"
 EXPECTED_ROUTE_SEGMENT_COUNT = 328
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_FIELDS = {
+    "schema",
+    "status",
+    "active_profile",
+    "profile_separation_preserved",
+    "profiled_entry_route_qualification_sha256",
+    "partitioned_typing_collision_intake_sha256",
+    "installed_collision_profile_sha256",
+    "calibration_snapshot_sha256",
+    "build_snapshot_sha256",
+    "trajectory",
+    "toolchain_lock_sha256",
+    "toolchain_selection_status",
+    "isaac_replay_request",
+    "blockers",
+    "next_required_stage",
+    "authority",
+    "isaac_replay_handoff_sha256",
+}
+_TRAJECTORY_FIELDS = {"sample_count", "segment_count", "samples", "trajectory_sha256"}
+_SAMPLE_FIELDS = {
+    "route_sample_sequence",
+    "source_segment_index",
+    "joint_positions_rad",
+    "source_sample_sha256",
+}
+_REQUEST_FIELDS = {
+    "active_profile",
+    "qualification_sha256",
+    "partitioned_typing_collision_intake_sha256",
+    "trajectory_sha256",
+    "toolchain_lock_sha256",
+    "isaac_sim_version",
+    "installation_sha256",
+    "extension_lock_sha256",
+    "settings_profile_sha256",
+    "random_seed",
+    "replan_allowed",
+    "request_sha256",
+}
 ZERO_AUTHORITY: Mapping[str, object] = {
     "controller_commands": [],
     "hardware_commands_generated": 0,
@@ -48,6 +91,47 @@ ZERO_AUTHORITY: Mapping[str, object] = {
 
 class ProfiledEntryRouteIsaacReplayHandoffV1Error(ValueError):
     """The qualification, profile route, or toolchain lineage differs."""
+
+
+def _require_sha256(value: object, label: str) -> str:
+    if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            f"{label} is not a lowercase SHA-256 digest"
+        )
+    return value
+
+
+def _require_exact_fields(
+    value: Mapping[str, Any], expected: set[str], label: str
+) -> None:
+    if set(value) != expected:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            f"{label} fields differ"
+        )
+
+
+def _require_joint_map(value: object, label: str) -> dict[str, float]:
+    if (
+        not isinstance(value, Mapping)
+        or not value
+        or any(not isinstance(name, str) or not name for name in value)
+    ):
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            f"{label} must contain named joints"
+        )
+    result: dict[str, float] = {}
+    for name, raw in value.items():
+        if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                f"{label}.{name} is not numeric"
+            )
+        number = float(raw)
+        if not math.isfinite(number):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                f"{label}.{name} is not finite"
+            )
+        result[name] = number
+    return result
 
 
 def _canonical(value: object) -> bytes:
@@ -76,6 +160,202 @@ def _sealed(value: Mapping[str, Any], hash_field: str, label: str) -> dict[str, 
     supplied = core.pop(hash_field, None)
     if not isinstance(supplied, str) or supplied != _sha(core):
         raise ProfiledEntryRouteIsaacReplayHandoffV1Error(f"{label} hash differs")
+    return dict(value)
+
+
+def parse_profiled_entry_route_isaac_replay_handoff_v1(
+    value: Mapping[str, Any],
+    *,
+    require_ready: bool = False,
+    toolchain_lock: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Independently validate a retained WP3 handoff before native intake."""
+
+    if not isinstance(value, Mapping):
+        raise TypeError("profiled_entry_route_isaac_replay_handoff must be an object")
+    document = dict(value)
+    _require_exact_fields(document, _FIELDS, "Isaac replay handoff")
+    document = _sealed(
+        document,
+        "isaac_replay_handoff_sha256",
+        "Isaac replay handoff",
+    )
+    if document.get("schema") != SCHEMA:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff schema differs"
+        )
+    status = document.get("status")
+    if status not in {
+        STATUS_READY,
+        STATUS_TOOLCHAIN_BLOCKED,
+        STATUS_QUALIFICATION_BLOCKED,
+    }:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff status differs"
+        )
+    if document.get("active_profile") not in SUPPORTED_PROFILES:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff active profile is unsupported"
+        )
+    if document.get("profile_separation_preserved") is not True:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff crossed attachment profiles"
+        )
+    for field in (
+        "profiled_entry_route_qualification_sha256",
+        "partitioned_typing_collision_intake_sha256",
+        "installed_collision_profile_sha256",
+        "calibration_snapshot_sha256",
+        "build_snapshot_sha256",
+        "toolchain_lock_sha256",
+    ):
+        _require_sha256(document.get(field), field)
+    if document.get("authority") != dict(ZERO_AUTHORITY):
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff violates the zero-authority contract"
+        )
+    blockers = document.get("blockers")
+    if (
+        not isinstance(blockers, list)
+        or any(not isinstance(item, str) or not item for item in blockers)
+        or len(blockers) != len(set(blockers))
+    ):
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff blockers are invalid"
+        )
+    if not isinstance(document.get("next_required_stage"), str) or not document[
+        "next_required_stage"
+    ]:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay handoff next stage is invalid"
+        )
+
+    trajectory_raw = document.get("trajectory")
+    if not isinstance(trajectory_raw, Mapping):
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay trajectory is absent"
+        )
+    trajectory = dict(trajectory_raw)
+    _require_exact_fields(trajectory, _TRAJECTORY_FIELDS, "Isaac replay trajectory")
+    trajectory = _sealed(trajectory, "trajectory_sha256", "Isaac replay trajectory")
+    samples = trajectory.get("samples")
+    if (
+        trajectory.get("sample_count") != EXPECTED_ROUTE_SEGMENT_COUNT + 1
+        or trajectory.get("segment_count") != EXPECTED_ROUTE_SEGMENT_COUNT
+        or not isinstance(samples, list)
+        or len(samples) != EXPECTED_ROUTE_SEGMENT_COUNT + 1
+    ):
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "Isaac replay trajectory extent differs"
+        )
+    for sequence, sample_raw in enumerate(samples):
+        if not isinstance(sample_raw, Mapping):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                f"Isaac replay sample {sequence} is malformed"
+            )
+        sample = dict(sample_raw)
+        _require_exact_fields(sample, _SAMPLE_FIELDS, f"Isaac replay sample {sequence}")
+        if sample.get("route_sample_sequence") != sequence:
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                f"Isaac replay sample sequence differs at {sequence}"
+            )
+        source_segment = sample.get("source_segment_index")
+        if source_segment is not None and (
+            isinstance(source_segment, bool) or not isinstance(source_segment, int)
+        ):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                f"Isaac replay source segment differs at {sequence}"
+            )
+        _require_joint_map(
+            sample.get("joint_positions_rad"),
+            f"Isaac replay sample {sequence}.joint_positions_rad",
+        )
+        _require_sha256(
+            sample.get("source_sample_sha256"),
+            f"Isaac replay sample {sequence}.source_sample_sha256",
+        )
+
+    request_raw = document.get("isaac_replay_request")
+    if status == STATUS_READY:
+        if document.get("toolchain_selection_status") != "SELECTED":
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "ready Isaac replay handoff lacks a selected toolchain"
+            )
+        if blockers:
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "ready Isaac replay handoff retains blockers"
+            )
+        if not isinstance(request_raw, Mapping):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "ready Isaac replay handoff has no request"
+            )
+        request = dict(request_raw)
+        _require_exact_fields(request, _REQUEST_FIELDS, "Isaac replay request")
+        request = _sealed(request, "request_sha256", "Isaac replay request")
+        for field in (
+            "qualification_sha256",
+            "partitioned_typing_collision_intake_sha256",
+            "trajectory_sha256",
+            "toolchain_lock_sha256",
+            "installation_sha256",
+            "extension_lock_sha256",
+            "settings_profile_sha256",
+        ):
+            _require_sha256(request.get(field), f"Isaac replay request.{field}")
+        if (
+            request.get("active_profile") != document["active_profile"]
+            or request.get("qualification_sha256")
+            != document["profiled_entry_route_qualification_sha256"]
+            or request.get("partitioned_typing_collision_intake_sha256")
+            != document["partitioned_typing_collision_intake_sha256"]
+            or request.get("trajectory_sha256") != trajectory_raw["trajectory_sha256"]
+            or request.get("toolchain_lock_sha256")
+            != document["toolchain_lock_sha256"]
+            or not isinstance(request.get("isaac_sim_version"), str)
+            or not request["isaac_sim_version"]
+            or request.get("random_seed") != 0
+            or request.get("replan_allowed") is not False
+        ):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "Isaac replay request and handoff lineage differ"
+            )
+    else:
+        if request_raw is not None or not blockers:
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "blocked Isaac replay handoff request or blockers differ"
+            )
+        if document.get("toolchain_selection_status") not in {"SELECTED", "UNSELECTED"}:
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "blocked Isaac replay handoff toolchain status differs"
+            )
+
+    if require_ready and status != STATUS_READY:
+        raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+            "native Isaac intake requires a READY handoff"
+        )
+    if require_ready:
+        if not isinstance(toolchain_lock, Mapping):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "native Isaac intake requires the selected toolchain lock"
+            )
+        lock = dict(toolchain_lock)
+        try:
+            selected_lock = IsaacSimToolchainLock.from_dict(lock)
+        except IsaacSimContractError as exc:
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(str(exc)) from exc
+        request = dict(request_raw)  # status READY proved this mapping above
+        if (
+            _sha(lock) != document["toolchain_lock_sha256"]
+            or request["isaac_sim_version"] != selected_lock.isaac_sim_version
+            or request["installation_sha256"] != selected_lock.installation_sha256
+            or request["extension_lock_sha256"]
+            != selected_lock.extension_lock_sha256
+            or request["settings_profile_sha256"]
+            != selected_lock.settings_profile_sha256
+        ):
+            raise ProfiledEntryRouteIsaacReplayHandoffV1Error(
+                "native Isaac intake toolchain identity differs"
+            )
     return dict(value)
 
 
@@ -346,5 +626,6 @@ __all__ = [
     "STATUS_TOOLCHAIN_BLOCKED",
     "STATUS_QUALIFICATION_BLOCKED",
     "ProfiledEntryRouteIsaacReplayHandoffV1Error",
+    "parse_profiled_entry_route_isaac_replay_handoff_v1",
     "prepare_profiled_entry_route_isaac_replay_handoff_v1",
 ]

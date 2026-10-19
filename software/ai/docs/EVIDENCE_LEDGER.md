@@ -8461,3 +8461,29 @@ rewriting history. New entries must use a unique evidence ID.
   route request in the selected native runner and retain a zero-authority
   receipt. Installed collision policy and physical clearance remain separately
   blocked by missing measured installed geometry and engineering acceptance.
+
+### E-20261019-INT-478 — native Isaac handoff intake fails closed
+
+- Stage: S3 simulation oracle WP3 intake preparation.
+- Lane: portable zero-authority validation; no simulator, camera, controller,
+  or robot process was opened.
+- Objective: ensure a retained selected-profile handoff cannot reach the native
+  Isaac runner until its complete envelope and the current selected toolchain
+  identity are independently revalidated.
+- Inputs: the strict `rocell.profiled_entry_route_isaac_replay_handoff.v1`
+  envelope and the authoritative Isaac Sim toolchain lock.
+- Decision rule outcome: native intake accepts only a sealed `READY` handoff
+  containing exactly 329 configurations / 328 segments, one preserved
+  attachment profile, a correlated non-replanning request, the complete
+  zero-authority declaration, and exact matching Isaac installation,
+  extension, and settings identities. Blocked handoffs, crossed locks, changed
+  samples, unknown fields, malformed hashes, and authority drift fail closed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: this is portable intake validation, not a native replay receipt.
+  The passing unit input is synthetic. A real passing ICQ-8 receipt and an
+  accepted installed collision profile remain required before WP3 execution.
+- Next dependency: retain the real selected-profile ICQ-8 handoff, then run it
+  without replanning on the selected Isaac runner and record tracking, settle,
+  repeatability, interruption, and categorized disagreement evidence.

@@ -27,6 +27,16 @@ has evidence class `CONTRACT_TEST_ONLY` and expressly establishes only contract
 behavior. Later sections distinguish that portable layer from the retained
 external Isaac runs; none grants hardware authority.
 
+The WP3 selected-profile handoff now has a strict independent parser in
+`rocell.application.profiled_entry_route_isaac_replay_handoff_v1`. Native
+intake must require a `READY_FOR_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY` handoff and
+the current authoritative toolchain lock. The parser revalidates all 329 route
+configurations, 328 segments, request lineage, attachment-profile separation,
+zero-authority fields, and exact Isaac installation, extension, and settings
+identities. Synthetic unit fixtures exercise this boundary but are not native
+replay evidence. A real passing ICQ-8 receipt and accepted installed collision
+profile remain prerequisites for the WP3 acceptance run.
+
 For a reader-oriented explanation of how Isaac Sim relates to Tactevra's
 deterministic simulators and the proposed MuJoCo Warp lane, see the
 [simulation overview](../../../docs/SIMULATION.md).
