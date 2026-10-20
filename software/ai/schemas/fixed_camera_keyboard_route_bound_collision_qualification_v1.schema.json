@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_keyboard_route_bound_collision_qualification_v1.schema.json",
+  "title": "Fixed camera keyboard route-bound collision qualification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "disposition", "profiles",
+    "source_profiled_partition_collision_evaluation_sha256",
+    "source_profiled_route_clearance_reconstruction_sha256",
+    "profile_separation_preserved",
+    "exact_route_binding_verified_before_evaluation",
+    "expected_route_sample_count_per_profile",
+    "expected_route_segment_count_per_profile", "blockers",
+    "next_required_stage", "authority",
+    "route_bound_collision_qualification_sha256"
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile", "installed_collision_profile_sha256",
+        "partitioned_typing_collision_intake_sha256", "completion_sha256",
+        "independent_review_sha256", "route_envelope_binding_sha256",
+        "route_sample_count", "route_segment_count"
+      ],
+      "properties": {
+        "profile": {"enum": ["no_attachment", "stylus_attachment"]},
+        "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+        "partitioned_typing_collision_intake_sha256": {"$ref": "#/$defs/sha256"},
+        "completion_sha256": {"$ref": "#/$defs/sha256"},
+        "independent_review_sha256": {"$ref": "#/$defs/sha256"},
+        "route_envelope_binding_sha256": {"$ref": "#/$defs/sha256"},
+        "route_sample_count": {"const": 329},
+        "route_segment_count": {"const": 328}
+      }
+    }
+  },
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_keyboard_route_bound_collision_qualification.v1"},
+    "status": {
+      "enum": [
+        "ROUTE_BOUND_CLEARANCE_RECONSTRUCTED_FRESH_ENTRY_REQUIRED",
+        "REJECTED_ROUTE_BOUND_COLLISION_DETECTED",
+        "BLOCKED_ROUTE_BOUND_CLEARANCE_EVIDENCE_INCOMPLETE"
+      ]
+    },
+    "disposition": {"enum": ["REJECT", "BLOCKED"]},
+    "profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_attachment", "stylus_attachment"],
+      "properties": {
+        "no_attachment": {"$ref": "#/$defs/profile"},
+        "stylus_attachment": {"$ref": "#/$defs/profile"}
+      }
+    },
+    "source_profiled_partition_collision_evaluation_sha256": {"$ref": "#/$defs/sha256"},
+    "source_profiled_route_clearance_reconstruction_sha256": {"$ref": "#/$defs/sha256"},
+    "profile_separation_preserved": {"const": true},
+    "exact_route_binding_verified_before_evaluation": {"const": true},
+    "expected_route_sample_count_per_profile": {"const": 329},
+    "expected_route_segment_count_per_profile": {"const": 328},
+    "blockers": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_required_stage": {"type": "string", "minLength": 1},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "installed_geometry_collision_screening_executed",
+        "fresh_observed_start_state_present", "controller_commands",
+        "hardware_commands_generated", "hardware_writes", "hardware_access",
+        "physical_movements", "physical_authority", "physical_release_effect"
+      ],
+      "properties": {
+        "installed_geometry_collision_screening_executed": {"const": true},
+        "fresh_observed_start_state_present": {"const": false},
+        "controller_commands": {"type": "array", "maxItems": 0},
+        "hardware_commands_generated": {"const": 0},
+        "hardware_writes": {"const": 0},
+        "hardware_access": {"const": false},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false},
+        "physical_release_effect": {"const": "NONE"}
+      }
+    },
+    "route_bound_collision_qualification_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}

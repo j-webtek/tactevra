@@ -121,6 +121,15 @@ adds no installed measurement export, image, trajectory corpus, or simulator
 asset. The committed tree is 663,174,957 logical bytes with 4,890,152 governed
 duplicate bytes; all byte, duplicate, and reduction limits remain unchanged.
 
+The route-bound evaluator and ICQ-8 handoff adds three governed paths: one
+zero-authority orchestrator, one receipt schema, and one focused test module.
+The reviewed tracked-file ceiling moves from 6,595 to the exact observed 6,598
+files. The orchestrator references existing reviewed profile evidence and route
+artifacts by their retained hashes, adding no measurement export, source image,
+trajectory corpus, or simulator asset. The committed tree is 663,206,939
+logical bytes with 4,890,152 governed duplicate bytes; all byte, duplicate, and
+reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
