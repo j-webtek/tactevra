@@ -31,7 +31,7 @@
     {
       "case_id": "maximum_posture_boundary",
       "detail": [
-        "postures=64"
+        "postures=512"
       ],
       "expected": "PASS",
       "matched": true,
@@ -82,7 +82,7 @@
   "physical_authority": false,
   "physical_movements": 0,
   "qualification_installed": false,
-  "report_sha256": "373494058fabbe118ba7073642b17f2874e874f2e73ca839b6a5934f4b1bc57e",
+  "report_sha256": "a14f1253ea2a72de066c53114ee610bd8057211bb09d75abc53f9ffdf9d4f3a8",
   "schema": "rocell.installed_geometry_cable_rehearsal.v1",
   "transport_opened": false
 }

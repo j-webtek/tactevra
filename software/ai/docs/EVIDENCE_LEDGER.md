@@ -8514,3 +8514,26 @@ rewriting history. New entries must use a unique evidence ID.
   against the governed external USD, then execute the exact admitted route in
   the selected native runner without replanning and retain tracking, settle,
   repeatability, interruption, and categorized disagreement evidence.
+
+### E-20261020-INT-480 — profiled full-route configuration-envelope binding
+
+- Stage: ICQ-4 installed collision qualification software readiness.
+- Lane: offline profile-route configuration-envelope intake.
+- Change: extended the finite configuration-envelope intake ceiling from 64 to
+  512 postures and added an independent binder for the promoted
+  329-configuration / 328-segment profile route.
+- Result: the binder revalidates sealed partition ownership and boundary
+  lineage, binds every posture to the exact joint-state hash, and binds every
+  adjacent sweep to its two route samples. Missing, reused, crossed-profile, or
+  boundary-changed evidence fails closed.
+- Artifacts:
+  `software/src/rocell/application/profiled_route_cable_envelope_binding_v1.py`,
+  `software/ai/schemas/profiled_route_cable_envelope_binding_v1.schema.json`,
+  and `software/tests/unit/test_profiled_route_cable_envelope_binding_v1.py`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: synthetic offline software evidence only; no installed
+  qualification, hardware access, controller commands, or physical authority.
+- Next dependency: reviewed installed configuration-envelope and uncertainty
+  evidence for the exact selected attachment profile and route.

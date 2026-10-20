@@ -61,6 +61,7 @@ TESTS = (
     "software/tests/unit/test_camera_arrival_fault_campaign_v1.py",
     "software/tests/unit/test_camera_arrival_session_manifest_v1.py",
     "software/tests/unit/test_installed_geometry_cable_rehearsal_v1.py",
+    "software/tests/unit/test_profiled_route_cable_envelope_binding_v1.py",
     "software/tests/unit/test_immutable_camera_replay_v1.py",
     "software/tests/unit/test_pre_camera_observability_v1.py",
     "software/tests/unit/test_operational_latency_trace_v1.py",
