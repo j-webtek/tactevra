@@ -13,7 +13,6 @@ import hashlib
 import json
 import math
 import re
-from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
 from rocell.simulation.collision import CollisionBindingMode
@@ -23,7 +22,10 @@ from .installed_collision_geometry import InstalledCollisionGeometryProfile
 
 SCHEMA = "rocell.installed_cable_envelope_intake.v1"
 EVIDENCE_CLASS = "SYNTHETIC_OFFLINE_ONLY"
-MAX_POSTURES = 64
+# The promoted fixed-camera keyboard route contains 329 configurations.  Keep
+# the resource bound finite while allowing one complete route plus reasonable
+# future growth.
+MAX_POSTURES = 512
 _HASH = re.compile(r"^[0-9a-f]{64}$")
 _BODY_ID = "attachment:moving_camera_cable"
 

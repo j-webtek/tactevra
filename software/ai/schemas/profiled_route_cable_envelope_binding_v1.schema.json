@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/profiled_route_cable_envelope_binding_v1.schema.json",
+  "title": "Profiled route configuration envelope binding v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "evidence_class",
+    "installed_collision_profile_sha256",
+    "partitioned_typing_collision_intake_sha256", "sampled_body_id",
+    "source_sha256", "envelope_intake_sha256", "maximum_uncertainty_mm",
+    "route_sample_count", "route_segment_count", "posture_bindings",
+    "segment_bindings", "blockers", "authority",
+    "profiled_route_cable_envelope_binding_sha256"
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "properties": {
+    "schema": {"const": "rocell.profiled_route_cable_envelope_binding.v1"},
+    "status": {"const": "ROUTE_BOUND_SYNTHETIC_ENVELOPE_INSTALLED_QUALIFICATION_BLOCKED"},
+    "evidence_class": {"const": "SYNTHETIC_OFFLINE_ONLY"},
+    "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "partitioned_typing_collision_intake_sha256": {"$ref": "#/$defs/sha256"},
+    "sampled_body_id": {"const": "attachment:moving_camera_cable"},
+    "source_sha256": {"$ref": "#/$defs/sha256"},
+    "envelope_intake_sha256": {"$ref": "#/$defs/sha256"},
+    "maximum_uncertainty_mm": {"type": "number", "minimum": 0},
+    "route_sample_count": {"const": 329},
+    "route_segment_count": {"const": 328},
+    "posture_bindings": {
+      "type": "array",
+      "minItems": 329,
+      "maxItems": 329,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "route_sample_sequence", "posture_id", "route_sample_sha256",
+          "joint_state_sha256", "capsule_count"
+        ],
+        "properties": {
+          "route_sample_sequence": {"type": "integer", "minimum": 0, "maximum": 328},
+          "posture_id": {"type": "string", "minLength": 1},
+          "route_sample_sha256": {"$ref": "#/$defs/sha256"},
+          "joint_state_sha256": {"$ref": "#/$defs/sha256"},
+          "capsule_count": {"type": "integer", "minimum": 1, "maximum": 16}
+        }
+      }
+    },
+    "segment_bindings": {
+      "type": "array",
+      "minItems": 328,
+      "maxItems": 328,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "route_segment_sequence", "start_route_sample_sha256",
+          "end_route_sample_sha256", "start_posture_id", "end_posture_id",
+          "capsule_count"
+        ],
+        "properties": {
+          "route_segment_sequence": {"type": "integer", "minimum": 0, "maximum": 327},
+          "start_route_sample_sha256": {"$ref": "#/$defs/sha256"},
+          "end_route_sample_sha256": {"$ref": "#/$defs/sha256"},
+          "start_posture_id": {"type": "string", "minLength": 1},
+          "end_posture_id": {"type": "string", "minLength": 1},
+          "capsule_count": {"type": "integer", "minimum": 1, "maximum": 16}
+        }
+      }
+    },
+    "blockers": {
+      "const": ["REVIEWED_INSTALLED_CONFIGURATION_ENVELOPE_EVIDENCE_REQUIRED"]
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "qualification_installed", "hardware_access", "controller_commands",
+        "hardware_writes", "physical_movements", "physical_authority"
+      ],
+      "properties": {
+        "qualification_installed": {"const": false},
+        "hardware_access": {"const": false},
+        "controller_commands": {"type": "array", "maxItems": 0},
+        "hardware_writes": {"const": 0},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false}
+      }
+    },
+    "profiled_route_cable_envelope_binding_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}

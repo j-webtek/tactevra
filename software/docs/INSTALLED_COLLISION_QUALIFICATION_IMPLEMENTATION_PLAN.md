@@ -226,6 +226,16 @@ deployment profile or clearance qualification is claimed.
 **Purpose:** Represent moving cables conservatively at every required route
 configuration and between adjacent configurations.
 
+**Implementation status (2026-10-20):** The bounded envelope intake now accepts
+up to 512 postures, which covers the promoted 329-configuration route while
+retaining a finite resource ceiling. An independent profile-route binder
+validates the sealed partition lineage, exact shared-boundary recheck, all 329
+ordered joint-state hashes, and all 328 adjacent sweep bindings. Crossed
+profiles, reused posture evidence, missing samples, missing sweeps, and changed
+partition boundaries fail closed. The retained evidence class remains
+`SYNTHETIC_OFFLINE_ONLY`, so this completes route-binding software readiness
+without supplying reviewed installed evidence or physical authority.
+
 **Deliverables:**
 
 - A capture/import adapter for capsule-chain cable envelopes at each bounded

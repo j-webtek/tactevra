@@ -250,6 +250,10 @@ from .installed_cable_envelope_intake_v1 import (
     InstalledCableEnvelopeIntakeV1Error,
     build_synthetic_cable_envelope_intake_v1,
 )
+from .profiled_route_cable_envelope_binding_v1 import (
+    ProfiledRouteCableEnvelopeBindingV1Error,
+    bind_profiled_route_cable_envelope_v1,
+)
 from .installed_geometry_cable_rehearsal_v1 import (
     SCHEMA as INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA,
     InstalledGeometryCableRehearsalV1Error,
@@ -1460,7 +1464,9 @@ __all__ = [
     "INSTALLED_CABLE_ENVELOPE_INTAKE_SCHEMA",
     "InstalledCableEnvelopeIntakeV1",
     "InstalledCableEnvelopeIntakeV1Error",
+    "ProfiledRouteCableEnvelopeBindingV1Error",
     "build_synthetic_cable_envelope_intake_v1",
+    "bind_profiled_route_cable_envelope_v1",
     "INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA",
     "InstalledGeometryCableRehearsalV1Error",
     "build_synthetic_installed_collision_profile_v1",
