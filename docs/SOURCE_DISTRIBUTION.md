@@ -589,7 +589,10 @@ retain incomplete measurements only as an explicit blocked result and never
 creates an installed profile, collision result, controller artifact, hardware
 operation, or physical authority. No raw measurement capture, simulator corpus,
 dependency tree, GPU artifact, or generated geometry enters the archive. All
-byte, duplicate, and reduction limits remain unchanged.
+byte, duplicate, and reduction limits remain unchanged. Attachment configurations
+use separate manifests; reviewed absence remains blocked when the active base
+contract still requires that body, so actual omission requires a separately
+reviewed base-contract revision.
 
 The ICQ-2 installed-profile builder increment adds two governed paths: one
 deterministic zero-authority builder and one focused unit-test module. The
