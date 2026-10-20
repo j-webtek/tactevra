@@ -8537,3 +8537,34 @@ rewriting history. New entries must use a unique evidence ID.
   qualification, hardware access, controller commands, or physical authority.
 - Next dependency: reviewed installed configuration-envelope and uncertainty
   evidence for the exact selected attachment profile and route.
+
+### E-20261020-INT-481 — reviewed envelope admission to exact-route join
+
+- Stage: ICQ-4 installed collision qualification admission readiness.
+- Lane: reviewed profile evidence to exact route binding.
+- Change: extended the existing route binder with an additive join from the
+  independently reviewed, profile-separated collision-evidence admission
+  result. Added a strict output schema and focused acceptance and boundary
+  tamper tests.
+- Result: one selected attachment profile now retains exact completion and
+  independent-review hashes, installed-profile and accepted-source lineage,
+  all 329 accepted measured posture geometries, all 328 accepted measured
+  sweep geometries, identical shared-boundary evidence, and the installed
+  clearance/uncertainty policy in one sealed zero-authority receipt.
+- Artifacts:
+  `software/src/rocell/application/profiled_route_cable_envelope_binding_v1.py`,
+  `software/ai/schemas/admitted_profiled_route_configuration_envelope_binding_v1.schema.json`,
+  and `software/tests/unit/test_profiled_route_cable_envelope_binding_v1.py`.
+- Verification: 19 related evidence/partition/admission tests passed; the clean
+  governed hardware-free matrix passed with 952 tests and 5 expected Windows
+  symlink skips; Ruff and repository verification passed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: this is an admission join, not measurement evidence, collision
+  evaluation, route qualification, or physical release. The present retained
+  package does not contain the reviewed installed values needed to exercise
+  the accepted path.
+- Next dependency: supply and independently review the profile-separated
+  installed evidence, then run the existing partition evaluators and ICQ-8
+  reconstruction on the admitted exact-route binding.

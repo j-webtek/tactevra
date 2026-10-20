@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/admitted_profiled_route_configuration_envelope_binding_v1.schema.json",
+  "title": "Admitted reviewed configuration envelope route binding v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "evidence_class", "attachment_profile",
+    "installed_collision_profile_sha256",
+    "partitioned_typing_collision_intake_sha256",
+    "profiled_collision_evidence_admission_manifest_sha256",
+    "completion_sha256", "independent_review_sha256", "sampled_body_id",
+    "accepted_source_sha256_values", "clearance_policy",
+    "route_sample_count", "route_segment_count", "posture_bindings",
+    "segment_bindings", "next_required_stage", "authority",
+    "admitted_profiled_route_configuration_envelope_binding_sha256"
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "properties": {
+    "schema": {"const": "rocell.admitted_profiled_route_configuration_envelope_binding.v1"},
+    "status": {"const": "ADMITTED_REVIEWED_CONFIGURATION_ENVELOPE_ROUTE_BOUND_ZERO_AUTHORITY"},
+    "evidence_class": {"const": "REVIEWED_INSTALLED"},
+    "attachment_profile": {"enum": ["no_attachment", "stylus_attachment"]},
+    "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "partitioned_typing_collision_intake_sha256": {"$ref": "#/$defs/sha256"},
+    "profiled_collision_evidence_admission_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "completion_sha256": {"$ref": "#/$defs/sha256"},
+    "independent_review_sha256": {"$ref": "#/$defs/sha256"},
+    "sampled_body_id": {"const": "attachment:moving_camera_cable"},
+    "accepted_source_sha256_values": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"$ref": "#/$defs/sha256"}
+    },
+    "clearance_policy": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "minimum_separation_mm", "geometry_uncertainty_mm_per_body",
+        "pose_uncertainty_mm_per_body", "source_reference"
+      ],
+      "properties": {
+        "minimum_separation_mm": {"type": "number", "minimum": 0},
+        "geometry_uncertainty_mm_per_body": {"type": "number", "minimum": 0},
+        "pose_uncertainty_mm_per_body": {"type": "number", "minimum": 0},
+        "source_reference": {"type": "string", "minLength": 1}
+      }
+    },
+    "route_sample_count": {"const": 329},
+    "route_segment_count": {"const": 328},
+    "posture_bindings": {
+      "type": "array", "minItems": 329, "maxItems": 329,
+      "items": {
+            "type": "object", "additionalProperties": false,
+            "required": [
+              "route_sample_sequence", "route_sample_sha256",
+              "joint_state_sha256", "configuration_geometry_sha256",
+              "source_sha256", "primitive_count"
+            ],
+            "properties": {
+              "route_sample_sequence": {"type": "integer", "minimum": 0, "maximum": 328},
+              "route_sample_sha256": {"$ref": "#/$defs/sha256"},
+              "joint_state_sha256": {"$ref": "#/$defs/sha256"},
+              "configuration_geometry_sha256": {"$ref": "#/$defs/sha256"},
+              "source_sha256": {"$ref": "#/$defs/sha256"},
+              "primitive_count": {"type": "integer", "minimum": 1, "maximum": 64}
+            }
+      }
+    },
+    "segment_bindings": {
+      "type": "array", "minItems": 328, "maxItems": 328,
+      "items": {
+            "type": "object", "additionalProperties": false,
+            "required": [
+              "route_segment_sequence", "start_route_sample_sha256",
+              "end_route_sample_sha256", "sweep_geometry_sha256",
+              "source_sha256", "primitive_count"
+            ],
+            "properties": {
+              "route_segment_sequence": {"type": "integer", "minimum": 0, "maximum": 327},
+              "start_route_sample_sha256": {"$ref": "#/$defs/sha256"},
+              "end_route_sample_sha256": {"$ref": "#/$defs/sha256"},
+              "sweep_geometry_sha256": {"$ref": "#/$defs/sha256"},
+              "source_sha256": {"$ref": "#/$defs/sha256"},
+              "primitive_count": {"type": "integer", "minimum": 1, "maximum": 64}
+            }
+      }
+    },
+    "next_required_stage": {"const": "RUN_PROFILE_BOUND_PARTITION_COLLISION_EVALUATORS"},
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "qualification_installed", "hardware_access", "controller_commands",
+        "hardware_writes", "physical_movements", "physical_authority"
+      ],
+      "properties": {
+        "qualification_installed": {"const": false},
+        "hardware_access": {"const": false},
+        "controller_commands": {"type": "array", "maxItems": 0},
+        "hardware_writes": {"const": 0},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false}
+      }
+    },
+    "admitted_profiled_route_configuration_envelope_binding_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}
