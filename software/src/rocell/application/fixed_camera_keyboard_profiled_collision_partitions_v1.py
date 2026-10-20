@@ -18,6 +18,7 @@ import re
 from typing import Any, Mapping
 
 from rocell.calibration import PlannerCalibrationSnapshot
+from rocell.simulation.collision import CollisionAttachmentProfile
 
 from .bounded_segment_collision_qualification import BoundedSegmentSamplingPolicy
 from .context import SimulationContext
@@ -380,6 +381,7 @@ def partition_fixed_camera_keyboard_profiled_collision_routes_v1(
             expected_trajectory_plan_sha256=source_row["typing_trajectory_plan_sha256"],
             expected_calibration_snapshot_sha256=(calibration_snapshot.snapshot_sha256),
             installed_profile=profile,
+            attachment_profile=CollisionAttachmentProfile(name),
             sampling_policy=(
                 None if sampling_policies is None else sampling_policies[name]
             ),

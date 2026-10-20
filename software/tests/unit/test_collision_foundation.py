@@ -19,6 +19,7 @@ from rocell.application.context import (
 )
 from rocell.geometry import RigidTransform, Rotation3, Vec3
 from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
     CapsuleMm,
     CollisionBindingMode,
     CollisionBlockerCode,
@@ -261,6 +262,34 @@ def test_current_artifact_audit_is_context_bound_and_names_every_gap() -> None:
         document["contract"]["exclusion_policy"]
         ["phase_specific_tool_or_contact_allowances_are_global_exclusions"]
         is False
+    )
+
+
+def test_attachment_profiles_have_distinct_fail_closed_base_contracts() -> None:
+    context = load_simulation_context(WORKSPACE, MANIFEST)
+    stylus = assess_current_collision_readiness(
+        context,
+        attachment_profile=CollisionAttachmentProfile.STYLUS_ATTACHMENT,
+    )
+    no_attachment = assess_current_collision_readiness(
+        context,
+        attachment_profile=CollisionAttachmentProfile.NO_ATTACHMENT,
+    )
+
+    stylus_ids = {item.body_id for item in stylus.contract.requirements}
+    no_attachment_ids = {
+        item.body_id for item in no_attachment.contract.requirements
+    }
+    assert len(stylus_ids) == 19
+    assert len(no_attachment_ids) == 18
+    assert stylus_ids - no_attachment_ids == {"attachment:contact_tool"}
+    assert no_attachment_ids < stylus_ids
+    assert stylus.contract.content_hash != no_attachment.contract.content_hash
+    assert stylus.contract.contract_id != no_attachment.contract.contract_id
+    assert stylus.attachment_profile is CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    assert no_attachment.attachment_profile is CollisionAttachmentProfile.NO_ATTACHMENT
+    assert no_attachment.to_dict()["verified_context"]["attachment_profile"] == (
+        "no_attachment"
     )
 
 

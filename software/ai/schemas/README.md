@@ -110,6 +110,16 @@ inventories every body required by the active collision contract, binds methods,
 instruments, units, frames, source hashes, uncertainty, and clearance evidence,
 and allows incomplete worksheets to remain explicitly blocked. Its validator
 never creates an installed profile or grants collision or physical authority.
+Measurement manifests are selected against an explicit attachment-profile base
+contract. `no_attachment` has an 18-body inventory that omits only the contact
+tool; `stylus_attachment` has the 19-body inventory. Their contract identifiers
+and hashes differ, so validation, profile construction, strict loading, and the
+fixed-camera clearance handoff reject cross-profile evidence. Generate a
+worksheet or validate a manifest with, for example,
+`--attachment-profile no_attachment` or
+`--attachment-profile stylus_attachment`. The default remains
+`stylus_attachment` for compatibility, while retained operational evidence
+should always record the selector explicitly.
 
 The S4 zero-write controller boundary publishes five strict, closed schemas:
 the [T=102 encoding profile](zero_write_waveshare_t102_profile_v1.schema.json),

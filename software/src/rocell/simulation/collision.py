@@ -139,6 +139,13 @@ class CollisionBindingMode(str, Enum):
     CONFIGURATION_SAMPLED = "CONFIGURATION_SAMPLED"
 
 
+class CollisionAttachmentProfile(str, Enum):
+    """Installed attachment configuration bound into a collision contract."""
+
+    NO_ATTACHMENT = "no_attachment"
+    STYLUS_ATTACHMENT = "stylus_attachment"
+
+
 class CollisionEvaluationStatus(str, Enum):
     BLOCKED_INCOMPLETE_GEOMETRY = "BLOCKED_INCOMPLETE_GEOMETRY"
     BLOCKED_INCOMPLETE_POSE = "BLOCKED_INCOMPLETE_POSE"
@@ -2482,6 +2489,10 @@ _ROARM_BODY_REQUIREMENTS = (
 def build_roarm_m3_prehardware_collision_contract(
     model: UrdfModel,
     scene: NominalWorkcellScene | None = None,
+    *,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
 ) -> CollisionGeometryContract:
     """Describe current collision coverage without inventing any dimensions.
 
@@ -2492,6 +2503,8 @@ def build_roarm_m3_prehardware_collision_contract(
 
     if not isinstance(model, UrdfModel):
         raise TypeError("model must be UrdfModel")
+    if not isinstance(attachment_profile, CollisionAttachmentProfile):
+        raise TypeError("attachment_profile must be CollisionAttachmentProfile")
     if len(model.links) > HARD_MAX_REQUIREMENTS or len(model.joints) > HARD_MAX_REQUIREMENTS:
         raise CollisionResourceLimitError("URDF topology exceeds collision projection hard cap")
     required_links = {
@@ -2512,6 +2525,11 @@ def build_roarm_m3_prehardware_collision_contract(
     requirements: list[CollisionBodyRequirement] = []
     bodies: list[CollisionBody] = []
     for body_id, parent, role in _ROARM_BODY_REQUIREMENTS:
+        if (
+            attachment_profile is CollisionAttachmentProfile.NO_ATTACHMENT
+            and body_id == "attachment:contact_tool"
+        ):
+            continue
         mode = (
             CollisionBindingMode.CONFIGURATION_SAMPLED
             if role is CollisionBodyRole.CABLE
@@ -2598,7 +2616,11 @@ def build_roarm_m3_prehardware_collision_contract(
                 )
             )
     return CollisionGeometryContract(
-        contract_id="ROCELL-ROARM-M3-RC03-PREHARDWARE-COLLISION-V1",
+        contract_id=(
+            "ROCELL-ROARM-M3-RC03-PREHARDWARE-COLLISION-V1"
+            if attachment_profile is CollisionAttachmentProfile.STYLUS_ATTACHMENT
+            else "ROCELL-ROARM-M3-RC03-PREHARDWARE-COLLISION-NO-ATTACHMENT-V1"
+        ),
         root_frame="board",
         requirements=tuple(requirements),
         bodies=tuple(bodies),
@@ -2613,6 +2635,7 @@ __all__ = [
     "COLLISION_POSE_REPORT_SCHEMA",
     "COLLISION_SWEEP_REPORT_SCHEMA",
     "CapsuleMm",
+    "CollisionAttachmentProfile",
     "CollisionBindingMode",
     "CollisionBlocker",
     "CollisionBlockerCode",

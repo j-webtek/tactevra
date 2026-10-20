@@ -15,7 +15,10 @@ from rocell.application.installed_collision_profile_builder_v1 import (
     BUILT_STATUS,
     build_installed_collision_profile_v1,
 )
-from rocell.simulation.collision import CollisionBindingMode
+from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
+    CollisionBindingMode,
+)
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
@@ -39,9 +42,18 @@ def _rehash(document: dict[str, object]) -> None:
     document["content_sha256"] = hashlib.sha256(_canonical(unsigned)).hexdigest()
 
 
-def _document(*, pending_body: str | None = None) -> dict[str, object]:
+def _document(
+    *,
+    pending_body: str | None = None,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
+) -> dict[str, object]:
     context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     bodies = []
     primitive_kinds = ("sphere", "capsule", "oriented_box")
     primitive_index = 0
@@ -130,10 +142,22 @@ def _write(tmp_path: Path, document: dict[str, object]) -> tuple[Path, str]:
     return path, hashlib.sha256(payload).hexdigest()
 
 
-def _build(tmp_path: Path, document: dict[str, object]):
+def _build(
+    tmp_path: Path,
+    document: dict[str, object],
+    *,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
+):
     path, digest = _write(tmp_path, document)
     context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
-    return build_installed_collision_profile_v1(path, digest, context=context)
+    return build_installed_collision_profile_v1(
+        path,
+        digest,
+        context=context,
+        attachment_profile=attachment_profile,
+    )
 
 
 def test_build_is_byte_stable_hash_bound_and_zero_authority(tmp_path: Path) -> None:
@@ -208,6 +232,36 @@ def test_every_body_is_present_once_and_strict_consumer_accepts_output(
     )
     assert profile.content_sha256 == result.profile_document["content_sha256"]
     assert profile.to_dict()["physical_authority"] is False
+
+
+def test_no_attachment_profile_omits_only_contact_tool_and_loads_strictly(
+    tmp_path: Path,
+) -> None:
+    attachment_profile = CollisionAttachmentProfile.NO_ATTACHMENT
+    result = _build(
+        tmp_path,
+        _document(attachment_profile=attachment_profile),
+        attachment_profile=attachment_profile,
+    )
+
+    assert result.status == BUILT_STATUS
+    body_ids = {body["body_id"] for body in result.profile_document["bodies"]}
+    assert len(body_ids) == 18
+    assert "attachment:contact_tool" not in body_ids
+
+    profile_path = tmp_path / "no-attachment-profile.json"
+    profile_path.write_bytes(result.profile_bytes)
+    context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
+    profile = load_installed_collision_geometry_for_context(
+        profile_path,
+        result.profile_file_sha256,
+        context=context,
+        expected_source_bindings=result.profile_document["source_bindings"],
+        attachment_profile=attachment_profile,
+    )
+    assert profile.base_contract_sha256 == result.profile_document[
+        "base_contract_sha256"
+    ]
 
 
 def test_incomplete_measurements_return_named_block_without_profile(

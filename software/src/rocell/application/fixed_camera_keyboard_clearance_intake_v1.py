@@ -19,6 +19,7 @@ from typing import Any, Mapping
 from .collision_readiness import assess_current_collision_readiness
 from .context import SimulationContext, revalidate_simulation_context
 from .installed_collision_geometry import InstalledCollisionGeometryProfile
+from rocell.simulation.collision import CollisionAttachmentProfile
 
 
 SCHEMA = "rocell.fixed_camera_keyboard_clearance_intake.v1"
@@ -181,8 +182,12 @@ def _validate_localization(value: Mapping[str, Any]) -> str:
 def _profile_matches_context(
     profile: InstalledCollisionGeometryProfile,
     context: SimulationContext,
+    attachment_profile: CollisionAttachmentProfile,
 ) -> bool:
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     return (
         profile.manifest_id == context.snapshot.manifest_id
         and profile.manifest_sha256 == context.snapshot.manifest_sha256
@@ -288,7 +293,8 @@ def compile_clearance_intake(
                 != binding["installed_collision_profile_file_sha256"]):
             raise FixedCameraKeyboardClearanceIntakeV1Error(
                 f"installed profile differs from reviewed binding: {profile_name}")
-        if not _profile_matches_context(installed, context):
+        attachment_profile = CollisionAttachmentProfile(profile_name)
+        if not _profile_matches_context(installed, context, attachment_profile):
             raise FixedCameraKeyboardClearanceIntakeV1Error(
                 f"installed profile differs from active context: {profile_name}")
         if (installed.profile_id in installed_ids
