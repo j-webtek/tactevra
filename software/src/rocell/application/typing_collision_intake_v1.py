@@ -18,7 +18,10 @@ import json
 from typing import Any, Mapping
 
 from rocell.calibration import PlannerCalibrationSnapshot
-from rocell.simulation.collision import CollisionBindingMode
+from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
+    CollisionBindingMode,
+)
 
 from ._pinned_model import load_pinned_urdf
 from .bounded_segment_collision_qualification import (
@@ -85,8 +88,12 @@ def _validated_ik_report(value: object) -> dict[str, Any]:
 def _profile_matches_context(
     profile: InstalledCollisionGeometryProfile,
     context: SimulationContext,
+    attachment_profile: CollisionAttachmentProfile,
 ) -> bool:
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     return (
         profile.manifest_id == context.snapshot.manifest_id
         and profile.manifest_sha256 == context.snapshot.manifest_sha256
@@ -105,6 +112,9 @@ def prepare_typing_collision_intake_v1(
     snapshot: PlannerCalibrationSnapshot,
     installed_profile: InstalledCollisionGeometryProfile | None = None,
     *,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
     sampling_policy: BoundedSegmentSamplingPolicy | None = None,
     prepared_planner: PreparedTypingPlannerV1 | None = None,
     context_lifecycle: SimulationContextLifecycleV1 | None = None,
@@ -120,6 +130,8 @@ def prepare_typing_collision_intake_v1(
         raise TypeError("context must be a SimulationContext")
     if not isinstance(snapshot, PlannerCalibrationSnapshot):
         raise TypeError("snapshot must be a PlannerCalibrationSnapshot")
+    if not isinstance(attachment_profile, CollisionAttachmentProfile):
+        raise TypeError("attachment_profile must be CollisionAttachmentProfile")
     if installed_profile is not None and not isinstance(
         installed_profile, InstalledCollisionGeometryProfile
     ):
@@ -146,6 +158,7 @@ def prepare_typing_collision_intake_v1(
                 context,
                 snapshot,
                 installed_profile,
+                attachment_profile=attachment_profile,
                 sampling_policy=sampling_policy,
                 prepared_planner=prepared_planner,
                 _lifecycle_binding=binding,
@@ -203,7 +216,10 @@ def prepare_typing_collision_intake_v1(
         results,
         selected,
     )
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     if installed_profile is None:
         contract = readiness.contract
         status = PROFILE_REQUIRED_STATUS
@@ -215,7 +231,9 @@ def prepare_typing_collision_intake_v1(
         ]
         next_stage = "LOAD_EXACT_MEASURED_INSTALLED_COLLISION_PROFILE"
     else:
-        if not _profile_matches_context(installed_profile, context):
+        if not _profile_matches_context(
+            installed_profile, context, attachment_profile
+        ):
             raise TypingCollisionIntakeV1Error(
                 "installed collision profile differs from the active context"
             )

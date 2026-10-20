@@ -16,7 +16,10 @@ import json
 import math
 from typing import Any, Mapping
 
-from rocell.simulation.collision import CollisionBindingMode
+from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
+    CollisionBindingMode,
+)
 
 from ._pinned_model import load_pinned_urdf
 from .bounded_segment_collision_qualification import BoundedSegmentSamplingPolicy
@@ -83,6 +86,9 @@ def prepare_partitioned_typing_collision_intake_v1(
     expected_trajectory_plan_sha256: str,
     expected_calibration_snapshot_sha256: str,
     installed_profile: InstalledCollisionGeometryProfile | None = None,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
     sampling_policy: BoundedSegmentSamplingPolicy | None = None,
     maximum_partitions: int = 64,
 ) -> dict[str, Any]:
@@ -96,6 +102,8 @@ def prepare_partitioned_typing_collision_intake_v1(
         raise TypeError(
             "installed_profile must be an InstalledCollisionGeometryProfile"
         )
+    if not isinstance(attachment_profile, CollisionAttachmentProfile):
+        raise TypeError("attachment_profile must be CollisionAttachmentProfile")
     expected_hashes = (
         expected_execution_plan_sha256,
         expected_trajectory_plan_sha256,
@@ -145,7 +153,10 @@ def prepare_partitioned_typing_collision_intake_v1(
         policy,
         maximum_partitions=maximum_partitions,
     )
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     if installed_profile is None:
         contract = readiness.contract
         status = PROFILE_REQUIRED_STATUS
@@ -157,7 +168,9 @@ def prepare_partitioned_typing_collision_intake_v1(
         ]
         next_stage = "LOAD_EXACT_MEASURED_INSTALLED_COLLISION_PROFILE"
     else:
-        if not _profile_matches_context(installed_profile, context):
+        if not _profile_matches_context(
+            installed_profile, context, attachment_profile
+        ):
             raise PartitionedTypingCollisionIntakeV1Error(
                 "installed collision profile differs from the active context"
             )

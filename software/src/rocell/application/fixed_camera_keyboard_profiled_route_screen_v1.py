@@ -22,6 +22,7 @@ import re
 from typing import Any, Mapping
 
 from rocell.calibration import PlannerCalibrationSnapshot
+from rocell.simulation.collision import CollisionAttachmentProfile
 
 from .bounded_segment_collision_qualification import BoundedSegmentSamplingPolicy
 from .context import SimulationContext
@@ -475,6 +476,7 @@ def screen_fixed_camera_keyboard_profiled_routes_v1(
             context,
             calibration_snapshot,
             profile,
+            attachment_profile=CollisionAttachmentProfile(name),
             sampling_policy=(
                 None
                 if collision_sampling_policies is None

@@ -33,6 +33,7 @@ from rocell.calibration.fixed_camera_keyboard_localization_admission_v1 import (
     RECEIPT_NAME as LOCALIZATION_RECEIPT_NAME,
     ZERO_AUTHORITY as LOCALIZATION_ZERO_AUTHORITY,
 )
+from rocell.simulation.collision import CollisionAttachmentProfile
 
 
 MAX_JSON_BYTES = 4 * 1024 * 1024
@@ -372,6 +373,7 @@ def admit_fixed_camera_keyboard_clearance_v1(
                 bare_bytes,
                 _sha256(bare_bytes),
                 context=context,
+                attachment_profile=CollisionAttachmentProfile.NO_ATTACHMENT,
                 expected_source_bindings=_profile_source_bindings(
                     bare_document, "bare jaw installed profile"
                 ),
@@ -380,6 +382,7 @@ def admit_fixed_camera_keyboard_clearance_v1(
                 stylus_bytes,
                 _sha256(stylus_bytes),
                 context=context,
+                attachment_profile=CollisionAttachmentProfile.STYLUS_ATTACHMENT,
                 expected_source_bindings=_profile_source_bindings(
                     stylus_document, "stylus installed profile"
                 ),

@@ -15,7 +15,10 @@ from rocell.application.installed_collision_measurement_manifest_v1 import (
     load_and_validate_installed_collision_measurement_manifest_v1,
     render_installed_collision_measurement_worksheet_v1,
 )
-from rocell.simulation.collision import CollisionBindingMode
+from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
+    CollisionBindingMode,
+)
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
@@ -31,9 +34,18 @@ def _canonical(value: object) -> bytes:
     ).encode("utf-8")
 
 
-def _document(*, pending_body: str | None = None) -> dict[str, object]:
+def _document(
+    *,
+    pending_body: str | None = None,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
+) -> dict[str, object]:
     context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     bodies = []
     for requirement in readiness.contract.requirements:
         pending = requirement.body_id == pending_body
@@ -95,11 +107,21 @@ def _write(tmp_path: Path, document: dict[str, object]) -> tuple[Path, str]:
     return path, hashlib.sha256(payload).hexdigest()
 
 
-def _load(tmp_path: Path, document: dict[str, object]) -> dict[str, object]:
+def _load(
+    tmp_path: Path,
+    document: dict[str, object],
+    *,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
+) -> dict[str, object]:
     path, digest = _write(tmp_path, document)
     context = load_simulation_context(WORKSPACE, SYSTEM_MANIFEST)
     return load_and_validate_installed_collision_measurement_manifest_v1(
-        path, digest, context=context
+        path,
+        digest,
+        context=context,
+        attachment_profile=attachment_profile,
     )
 
 
@@ -122,6 +144,33 @@ def test_complete_manifest_is_ready_but_creates_no_profile_or_authority(
     assert report["controller_commands"] == []
     assert report["hardware_access"] is False
     assert report["physical_authority"] is False
+
+
+def test_no_attachment_manifest_uses_distinct_18_body_contract(
+    tmp_path: Path,
+) -> None:
+    document = _document(
+        attachment_profile=CollisionAttachmentProfile.NO_ATTACHMENT
+    )
+    report = _load(
+        tmp_path,
+        document,
+        attachment_profile=CollisionAttachmentProfile.NO_ATTACHMENT,
+    )
+
+    assert report["status"] == READY_STATUS
+    assert report["required_body_count"] == 18
+    assert report["measured_body_count"] == 18
+    assert all(
+        row["body_id"] != "attachment:contact_tool"
+        for row in document["body_measurements"]
+    )
+
+    with pytest.raises(
+        InstalledCollisionMeasurementManifestV1Error,
+        match="context binding mismatch: base_contract_sha256",
+    ):
+        _load(tmp_path, document)
 
 
 def test_pending_body_is_valid_but_fails_closed(tmp_path: Path) -> None:

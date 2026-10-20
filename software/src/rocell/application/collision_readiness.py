@@ -20,6 +20,7 @@ import xml.etree.ElementTree as ElementTree
 from rocell.geometry import parse_urdf
 
 from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
     CollisionBlockerCode,
     CollisionGeometryAudit,
     CollisionGeometryContract,
@@ -151,6 +152,7 @@ class CurrentCollisionReadinessReport:
     scene_source_hashes: tuple[tuple[str, str], ...]
     alignment_status: str
     alignment_report_hash: str
+    attachment_profile: CollisionAttachmentProfile
     contract: CollisionGeometryContract
     geometry_audit: CollisionGeometryAudit
 
@@ -220,6 +222,7 @@ class CurrentCollisionReadinessReport:
                 "bundle_artifact_hashes": dict(self.bundle_artifact_hashes),
                 "alignment_status": self.alignment_status,
                 "alignment_report_hash": self.alignment_report_hash,
+                "attachment_profile": self.attachment_profile.value,
             },
             "verified_sources": {
                 "urdf": {
@@ -263,11 +266,13 @@ class CurrentCollisionReadinessReport:
 def _build_report(
     context: SimulationContext,
     urdf_evidence: PinnedUrdfCollisionEvidence,
+    attachment_profile: CollisionAttachmentProfile,
 ) -> CurrentCollisionReadinessReport:
     loaded_model = urdf_evidence.loaded_model
     contract = build_roarm_m3_prehardware_collision_contract(
         loaded_model.model,
         context.scene,
+        attachment_profile=attachment_profile,
     )
     audit = audit_collision_geometry(contract)
     return CurrentCollisionReadinessReport(
@@ -297,6 +302,7 @@ def _build_report(
         scene_source_hashes=tuple(sorted(context.scene.source_hashes.items())),
         alignment_status=context.alignment.status,
         alignment_report_hash=context.alignment.report_hash,
+        attachment_profile=attachment_profile,
         contract=contract,
         geometry_audit=audit,
     )
@@ -304,17 +310,23 @@ def _build_report(
 
 def assess_current_collision_readiness(
     context: SimulationContext,
+    *,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
 ) -> CurrentCollisionReadinessReport:
     """Revalidate locked sources and produce the current fail-closed audit."""
 
     if not isinstance(context, SimulationContext):
         raise TypeError("context must be SimulationContext")
+    if not isinstance(attachment_profile, CollisionAttachmentProfile):
+        raise TypeError("attachment_profile must be CollisionAttachmentProfile")
     revalidate_simulation_context(context)
     urdf_evidence = inspect_pinned_urdf_collision_evidence(
         context.scenario.model_path,
         context.scenario.model_sha256,
     )
-    return _build_report(context, urdf_evidence)
+    return _build_report(context, urdf_evidence, attachment_profile)
 
 
 __all__ = [

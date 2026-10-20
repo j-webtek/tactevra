@@ -20,6 +20,7 @@ from rocell.application.installed_collision_geometry import (
 )
 from rocell.geometry import Vec3
 from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
     CollisionBindingMode,
     CollisionBody,
     CollisionClearanceEvidenceState,
@@ -84,27 +85,6 @@ def _localization() -> dict:
 
 
 def _profiles(context) -> dict[str, InstalledCollisionGeometryProfile]:
-    readiness = assess_current_collision_readiness(context)
-    bodies = tuple(
-        CollisionBody(
-            requirement.body_id,
-            requirement.parent_frame,
-            requirement.role,
-            CollisionEvidenceState.ACCEPTED_MEASURED,
-            (() if requirement.binding_mode is CollisionBindingMode.CONFIGURATION_SAMPLED
-             else (SphereMm(Vec3(50_000.0 + index, 0.0, 0.0), 0.1),)),
-            requirement.binding_mode,
-            "unit-test measured geometry",
-        )
-        for index, requirement in enumerate(readiness.contract.requirements)
-    )
-    contract = CollisionGeometryContract(
-        "keyboard-clearance-intake-test",
-        readiness.contract.root_frame,
-        readiness.contract.requirements,
-        bodies,
-        readiness.contract.pair_exclusions,
-    )
     policy = CollisionClearancePolicy(
         0.1,
         0.05,
@@ -112,8 +92,36 @@ def _profiles(context) -> dict[str, InstalledCollisionGeometryProfile]:
         CollisionClearanceEvidenceState.ACCEPTED_MEASURED,
         "unit-test measured clearance",
     )
-    return {
-        profile: InstalledCollisionGeometryProfile(
+    profiles = {}
+    for index, profile in enumerate(("no_attachment", "stylus_attachment")):
+        readiness = assess_current_collision_readiness(
+            context,
+            attachment_profile=CollisionAttachmentProfile(profile),
+        )
+        bodies = tuple(
+            CollisionBody(
+                requirement.body_id,
+                requirement.parent_frame,
+                requirement.role,
+                CollisionEvidenceState.ACCEPTED_MEASURED,
+                (() if requirement.binding_mode
+                    is CollisionBindingMode.CONFIGURATION_SAMPLED
+                 else (SphereMm(Vec3(50_000.0 + body_index, 0.0, 0.0), 0.1),)),
+                requirement.binding_mode,
+                "unit-test measured geometry",
+            )
+            for body_index, requirement in enumerate(
+                readiness.contract.requirements
+            )
+        )
+        contract = CollisionGeometryContract(
+            f"keyboard-clearance-intake-test-{profile}",
+            readiness.contract.root_frame,
+            readiness.contract.requirements,
+            bodies,
+            readiness.contract.pair_exclusions,
+        )
+        profiles[profile] = InstalledCollisionGeometryProfile(
             f"{profile}-installed-profile",
             readiness.manifest_id,
             readiness.manifest_sha256,
@@ -127,8 +135,7 @@ def _profiles(context) -> dict[str, InstalledCollisionGeometryProfile]:
             str(index + 6) * 64,
             str(index + 8) * 64,
         )
-        for index, profile in enumerate(("no_attachment", "stylus_attachment"))
-    }
+    return profiles
 
 
 def _bindings(localization: dict, profiles: dict) -> dict:

@@ -594,6 +594,17 @@ use separate manifests; reviewed absence remains blocked when the active base
 contract still requires that body, so actual omission requires a separately
 reviewed base-contract revision.
 
+The collision foundation now publishes two explicit base-contract revisions.
+`no_attachment` requires 18 installed bodies and omits only
+`attachment:contact_tool`; `stylus_attachment` retains the original 19-body
+contract and its existing identifier and digest. ICQ-1, ICQ-2, strict profile
+loading, and the fixed-camera clearance admission select the contract from the
+attachment profile and reject a profile built for the other inventory. The ICQ-1
+CLI exposes this choice as `--attachment-profile`; callers should pass it
+explicitly for retained evidence even though the compatibility default remains
+`stylus_attachment`. This changes no archive path count and grants no hardware or
+physical authority.
+
 The ICQ-2 installed-profile builder increment adds two governed paths: one
 deterministic zero-authority builder and one focused unit-test module. The
 file-count ceiling advances from 6,471 to the exact expected 6,473 files for

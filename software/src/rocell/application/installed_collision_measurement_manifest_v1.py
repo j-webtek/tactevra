@@ -21,6 +21,7 @@ from typing import Any, Mapping, Sequence
 from rocell.simulation.collision import (
     HARD_MAX_BODIES,
     HARD_MAX_PRIMITIVES_PER_BODY,
+    CollisionAttachmentProfile,
     CollisionBindingMode,
     CollisionGeometryContract,
 )
@@ -576,6 +577,9 @@ def load_and_validate_installed_collision_measurement_manifest_v1(
     expected_file_sha256: str,
     *,
     context: SimulationContext,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
 ) -> dict[str, Any]:
     """Load one exact file and validate it against the active context."""
 
@@ -583,6 +587,7 @@ def load_and_validate_installed_collision_measurement_manifest_v1(
         path,
         expected_file_sha256,
         context=context,
+        attachment_profile=attachment_profile,
     )
     return report
 
@@ -592,6 +597,9 @@ def load_installed_collision_measurement_manifest_v1(
     expected_file_sha256: str,
     *,
     context: SimulationContext,
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Load, strictly validate, and return one exact manifest plus its report.
 
@@ -602,7 +610,12 @@ def load_installed_collision_measurement_manifest_v1(
 
     if not isinstance(context, SimulationContext):
         raise TypeError("context must be a SimulationContext")
-    readiness = assess_current_collision_readiness(context)
+    if not isinstance(attachment_profile, CollisionAttachmentProfile):
+        raise TypeError("attachment_profile must be CollisionAttachmentProfile")
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     if readiness.active_build_id is None:
         raise InstalledCollisionMeasurementManifestV1Error(
             "active build id is unavailable"
@@ -630,6 +643,7 @@ def render_installed_collision_measurement_worksheet_v1(
         "# Installed collision measurement worksheet",
         "",
         f"- Base contract SHA-256: `{contract.content_hash}`",
+        f"- Contract ID: `{contract.contract_id}`",
         f"- Root frame: `{contract.root_frame}`",
         f"- Required bodies: {len(contract.requirements)}",
         "- Status: `UNMEASURED_TEMPLATE`",
@@ -677,6 +691,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--system-manifest", type=Path)
     parser.add_argument("--measurement-manifest", type=Path)
     parser.add_argument("--measurement-manifest-sha256")
+    parser.add_argument(
+        "--attachment-profile",
+        choices=tuple(item.value for item in CollisionAttachmentProfile),
+        default=CollisionAttachmentProfile.STYLUS_ATTACHMENT.value,
+    )
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     args = parser.parse_args(argv)
     system_manifest = args.system_manifest or (
@@ -684,7 +703,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     try:
         context = load_simulation_context(args.workspace, system_manifest)
-        readiness = assess_current_collision_readiness(context)
+        attachment_profile = CollisionAttachmentProfile(args.attachment_profile)
+        readiness = assess_current_collision_readiness(
+            context,
+            attachment_profile=attachment_profile,
+        )
         if args.measurement_manifest is None:
             if args.measurement_manifest_sha256 is not None:
                 raise InstalledCollisionMeasurementManifestV1Error(
@@ -700,6 +723,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.measurement_manifest,
             args.measurement_manifest_sha256,
             context=context,
+            attachment_profile=attachment_profile,
         )
     except (OSError, ValueError) as exc:
         parser.error(str(exc))

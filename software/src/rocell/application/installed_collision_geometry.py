@@ -20,6 +20,7 @@ from typing import Any, Mapping, Sequence
 
 from rocell.geometry import Rotation3, Vec3
 from rocell.simulation.collision import (
+    CollisionAttachmentProfile,
     HARD_MAX_BODIES,
     HARD_MAX_EXCLUDED_PAIRS,
     HARD_MAX_PRIMITIVES_PER_BODY,
@@ -480,10 +481,16 @@ def load_installed_collision_geometry_for_context(
     *,
     context: SimulationContext,
     expected_source_bindings: Mapping[str, str],
+    attachment_profile: CollisionAttachmentProfile = (
+        CollisionAttachmentProfile.STYLUS_ATTACHMENT
+    ),
 ) -> InstalledCollisionGeometryProfile:
     """Revalidate the locked context, then load its exact measured profile."""
 
-    readiness = assess_current_collision_readiness(context)
+    readiness = assess_current_collision_readiness(
+        context,
+        attachment_profile=attachment_profile,
+    )
     if readiness.active_build_id is None:
         raise InstalledCollisionGeometryError(
             "verified context has no active build id for installed geometry"
