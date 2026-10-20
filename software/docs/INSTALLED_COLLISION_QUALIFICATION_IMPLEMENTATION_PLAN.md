@@ -235,6 +235,15 @@ profiles, reused posture evidence, missing samples, missing sweeps, and changed
 partition boundaries fail closed. The retained evidence class remains
 `SYNTHETIC_OFFLINE_ONLY`, so this completes route-binding software readiness
 without supplying reviewed installed evidence or physical authority.
+The reviewed-evidence join is also implemented: once the existing independent
+admission boundary has accepted both profile-separated evidence packages, the
+selected profile can be bound to the exact route without translating it into a
+second evidence format. The join revalidates the admission seal, installed
+profile and source hashes, all accepted measured posture and sweep geometry,
+the 329/328 route extent, and identical geometry at the shared partition
+recheck. It carries the installed clearance and uncertainty policy forward and
+still grants no execution or physical authority. Real reviewed measurements
+remain the external input dependency.
 
 **Deliverables:**
 

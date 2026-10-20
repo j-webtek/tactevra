@@ -113,6 +113,14 @@ duplicate bytes. No source frame, installed measurement export, trajectory
 corpus, or simulator asset is added; all byte, duplicate, and reduction limits
 remain unchanged.
 
+The reviewed-evidence route join adds one governed schema path while extending
+the existing binder and focused tests in place. The reviewed tracked-file
+ceiling moves from 6,594 to the exact expected 6,595 files. The join consumes
+the existing independently reviewed, profile-separated evidence object; it
+adds no installed measurement export, image, trajectory corpus, or simulator
+asset. The committed tree is 663,174,957 logical bytes with 4,890,152 governed
+duplicate bytes; all byte, duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
