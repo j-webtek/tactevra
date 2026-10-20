@@ -639,6 +639,12 @@ def render_installed_collision_measurement_worksheet_v1(
         "conservative envelopes, and uncertainty in the manifest. Do not fill "
         "unknown values with nominal dimensions.",
         "",
+        "Create a separate manifest for each installed attachment configuration. "
+        "A `DECLARED_ABSENT` row preserves reviewed absence evidence but remains "
+        "blocked because it cannot remove a body required by this base contract. "
+        "A configuration that truly omits a required body needs a separately "
+        "reviewed base-contract revision before profile construction.",
+        "",
         "| Body ID | Parent frame | Role | Binding mode | Required capture |",
         "| --- | --- | --- | --- | --- |",
     ]

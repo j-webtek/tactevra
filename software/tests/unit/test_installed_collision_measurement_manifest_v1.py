@@ -142,6 +142,9 @@ def test_worksheet_names_every_required_body_and_preserves_sampled_scope() -> No
     assert "`attachment:moving_camera_cable`" in worksheet
     assert "per-configuration geometry in ICQ-4" in worksheet
     assert "no profile, collision result, command, or physical authority" in worksheet
+    assert "separate manifest for each installed attachment configuration" in worksheet
+    assert "`DECLARED_ABSENT`" in worksheet
+    assert "separately reviewed base-contract revision" in worksheet
 
 
 @pytest.mark.parametrize(
