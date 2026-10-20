@@ -8568,3 +8568,38 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: supply and independently review the profile-separated
   installed evidence, then run the existing partition evaluators and ICQ-8
   reconstruction on the admitted exact-route binding.
+
+### E-20261020-INT-482 — route-bound evaluator and ICQ-8 handoff
+
+- Stage: ICQ-5/ICQ-8 installed collision qualification orchestration readiness.
+- Lane: reviewed exact-route evidence to collision evaluation and clearance
+  reconstruction.
+- Change: added an additive zero-authority orchestrator that requires the exact
+  reviewed configuration-envelope receipt for both attachment profiles before
+  invoking the existing partition evaluator and ICQ-8 reconstruction.
+- Result: each receipt is independently resealed and checked against its
+  installed profile, partition hash, completion and independent-review hashes,
+  clearance policy, accepted source set, all 329 ordered route samples, and all
+  328 segment endpoints. A stale, crossed, omitted, or tampered binding fails
+  before evaluation. The resulting receipt binds both route receipts to the
+  evaluator and reconstruction hashes while preserving clear, collision, and
+  incomplete outcomes.
+- Artifacts:
+  `software/src/rocell/application/fixed_camera_keyboard_route_bound_collision_qualification_v1.py`,
+  `software/ai/schemas/fixed_camera_keyboard_route_bound_collision_qualification_v1.schema.json`,
+  and
+  `software/tests/unit/test_fixed_camera_keyboard_route_bound_collision_qualification_v1.py`.
+- Verification: 27 related route-binding/evaluator/reconstruction tests passed;
+  the clean governed hardware-free matrix passed with 961 tests and 5 expected
+  Windows symlink skips; Ruff, documentation checks, repository verification,
+  base-package import, package smoke, and dependency checks passed.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: this boundary does not create installed measurements, collision
+  results, fresh observed entry evidence, controller commands, or physical
+  authority. The accepted path remains dependent on retained, independently
+  reviewed profile-separated installed evidence.
+- Next dependency: populate the retained reviewed evidence packages, exercise
+  this boundary over their exact route bindings, then qualify the fresh
+  observed start and entry before native replay.

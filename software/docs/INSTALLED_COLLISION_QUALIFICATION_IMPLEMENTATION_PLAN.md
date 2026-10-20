@@ -273,10 +273,14 @@ without losing global route lineage.
 It consumes the exact admitted `no_attachment` and `stylus_attachment`
 partition plans and typed reviewed evidence, preserves boundary rechecks, runs
 discrete FK checks before conservative adjacent-sample sweeps, and retains
-separate clear, collision, and incomplete outcomes. Synthetic tests cover the
-orchestration and crossed-profile rejection. This is software readiness only;
-the superseding static-camera freeze remains unpromoted and no physical release
-is claimed.
+separate clear, collision, and incomplete outcomes. An additive route-bound
+orchestrator now requires both sealed reviewed-envelope receipts before the
+evaluator can run. It independently matches every one of the 329 posture hashes
+and 328 segment endpoint pairs to the corresponding partition route, along with
+installed-profile, completion, review, source, and clearance-policy lineage.
+Synthetic tests cover orchestration, tamper rejection, and crossed-profile
+rejection. This is software readiness only; the superseding static-camera
+freeze remains unpromoted and no physical release is claimed.
 
 **Deliverables:**
 
@@ -372,6 +376,11 @@ lineage, and recomputes the limiting clearance across entry plus route. It can
 emit `PASS`, `REJECT`, or `BLOCKED`, always with zero authority. Real operation
 remains `BLOCKED` until fresh ICQ-7 evidence matching the installed profile,
 build, calibration, controller session, and route start is supplied.
+The route-bound orchestrator now calls this reconstruction only after both
+reviewed-envelope bindings pass exact-route verification, then emits a sealed
+receipt joining the two binding hashes to the evaluator and reconstruction
+hashes. Clear, collision, and incomplete dispositions remain distinct, and a
+clear reconstruction still requires fresh observed entry qualification.
 
 **Deliverables:**
 
