@@ -262,6 +262,12 @@ from .fixed_camera_keyboard_route_bound_collision_qualification_v1 import (
     FixedCameraKeyboardRouteBoundCollisionQualificationV1Error,
     qualify_fixed_camera_keyboard_route_bound_collisions_v1,
 )
+from .fixed_camera_keyboard_route_bound_entry_qualification_v1 import (
+    SCHEMA as FIXED_CAMERA_KEYBOARD_ROUTE_BOUND_ENTRY_QUALIFICATION_SCHEMA,
+    FixedCameraKeyboardRouteBoundEntryQualificationV1Error,
+    parse_fixed_camera_keyboard_route_bound_entry_v1,
+    qualify_fixed_camera_keyboard_route_bound_entry_v1,
+)
 from .installed_geometry_cable_rehearsal_v1 import (
     SCHEMA as INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA,
     InstalledGeometryCableRehearsalV1Error,
@@ -1481,6 +1487,10 @@ __all__ = [
     "FIXED_CAMERA_KEYBOARD_ROUTE_BOUND_COLLISION_QUALIFICATION_SCHEMA",
     "FixedCameraKeyboardRouteBoundCollisionQualificationV1Error",
     "qualify_fixed_camera_keyboard_route_bound_collisions_v1",
+    "FIXED_CAMERA_KEYBOARD_ROUTE_BOUND_ENTRY_QUALIFICATION_SCHEMA",
+    "FixedCameraKeyboardRouteBoundEntryQualificationV1Error",
+    "parse_fixed_camera_keyboard_route_bound_entry_v1",
+    "qualify_fixed_camera_keyboard_route_bound_entry_v1",
     "INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA",
     "InstalledGeometryCableRehearsalV1Error",
     "build_synthetic_installed_collision_profile_v1",

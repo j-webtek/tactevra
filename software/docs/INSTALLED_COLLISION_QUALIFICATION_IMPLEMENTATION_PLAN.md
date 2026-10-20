@@ -340,6 +340,16 @@ authority.
 **Purpose:** Prove the arm can enter the qualified route from its actual current
 state without assuming the synthetic route seed.
 
+**Implementation status:** The existing observed-state, bounded entry,
+discrete collision, continuous sweep, measured-dynamics, tracking, and retained
+telemetry stages are now joined to the exact reviewed-route boundary. The
+route-bound entry adapter independently reseals the ICQ-5/ICQ-8 receipt,
+reconstructs the supplied profile-separated route, and checks the evaluator,
+reconstruction, selected installed profile, and route-envelope binding hashes
+before calling the existing fresh-entry qualifier. A route collision or
+incomplete route stops before entry qualification. `PASS`, `REJECT`, and
+`BLOCKED` remain distinct, and the sealed result retains zero authority.
+
 **Deliverables:**
 
 - One fresh, authenticated, read-only joint-state observation contract.
@@ -380,7 +390,10 @@ The route-bound orchestrator now calls this reconstruction only after both
 reviewed-envelope bindings pass exact-route verification, then emits a sealed
 receipt joining the two binding hashes to the evaluator and reconstruction
 hashes. Clear, collision, and incomplete dispositions remain distinct, and a
-clear reconstruction still requires fresh observed entry qualification.
+clear reconstruction still requires fresh observed entry qualification. The
+route-bound entry adapter now preserves that reviewed-route lineage through the
+ICQ-7 join instead of allowing the older entry qualifier to be treated as
+standalone completion evidence.
 
 **Deliverables:**
 

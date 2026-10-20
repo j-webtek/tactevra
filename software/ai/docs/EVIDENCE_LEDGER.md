@@ -8603,3 +8603,32 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: populate the retained reviewed evidence packages, exercise
   this boundary over their exact route bindings, then qualify the fresh
   observed start and entry before native replay.
+
+### E-20261020-INT-483 — exact-route binding carried through ICQ-7 entry
+
+- Stage: ICQ-7 installed collision qualification orchestration readiness.
+- Lane: reviewed exact-route receipt to fresh selected-profile entry join.
+- Change: added an additive zero-authority adapter that requires the sealed
+  route-bound collision qualification before invoking the existing profiled
+  observed-entry and route qualifier.
+- Result: the adapter independently reconstructs the supplied route and checks
+  the evaluator, reconstruction, selected installed profile, and reviewed
+  route-envelope binding hashes. Route collision and incomplete-route outcomes
+  stop before entry qualification. A clear route may proceed to the existing
+  fresh observation chain, with `PASS`, `REJECT`, and `BLOCKED` preserved in a
+  sealed receipt.
+- Artifacts:
+  `software/src/rocell/application/fixed_camera_keyboard_route_bound_entry_qualification_v1.py`,
+  `software/ai/schemas/fixed_camera_keyboard_route_bound_entry_qualification_v1.schema.json`,
+  and
+  `software/tests/unit/test_fixed_camera_keyboard_route_bound_entry_qualification_v1.py`.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: this is a lineage and orchestration boundary. It does not create
+  installed measurements, a fresh controller observation, collision results,
+  tracking telemetry, controller commands, native replay, or physical
+  authority.
+- Next dependency: exercise the route-bound evaluator with retained reviewed
+  installed evidence, capture a fresh authenticated read-only start for the
+  selected profile, and pass the existing ICQ-7 entry chain through this join.
