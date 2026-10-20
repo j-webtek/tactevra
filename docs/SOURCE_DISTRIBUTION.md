@@ -105,6 +105,14 @@ tree remains 649,432,899 logical
 bytes with 4,890,152 governed duplicate bytes; the logical-byte, single-blob,
 duplicate-byte, and reduction limits are unchanged.
 
+The issue #190 exact-route configuration-envelope increment adds three governed
+paths: one route binder, one output schema, and one focused test module. The
+reviewed tracked-file ceiling moves from 6,591 to the exact observed 6,594
+files. The measured tree is 663,144,801 logical bytes with 4,890,152 governed
+duplicate bytes. No source frame, installed measurement export, trajectory
+corpus, or simulator asset is added; all byte, duplicate, and reduction limits
+remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
