@@ -68,6 +68,37 @@ pose. Held-out samples must not be reused to choose or tune the fit.
 
 ## Freeze the collection before capture
 
+Before freezing a plan, run the offline `assess` command against retained facts.
+It produces a deterministic
+`rocell.position_vector_calibration_collection_readiness.v1` report and never
+opens the controller or camera. Missing installed-firmware identity remains an
+explicit `INSTALLED_FIRMWARE_SHA256_UNVERIFIED` blocker; the vendor archive
+hash must not be used as a substitute. The assessment also requires at least
+eight unique pose labels so the default five training and three held-out slots
+can remain disjoint.
+
+The current retained bare-jaw evidence is correctly `BLOCKED`: the exact
+installed firmware SHA-256 is unverified, and the reviewed A/B catalog contains
+only six unique poses (`A_CLEAR`, `A_HOVER`, `A_DOWN`, `B_CLEAR`, `B_HOVER`,
+`B_DOWN`). This is a readiness result, not a request to move the arm.
+
+```powershell
+python -m rocell.calibration.position_vector_campaign assess `
+  --vid 10c4 --pid ea60 `
+  --unit-serial 52E4E1E8337FEF119E92181CEDD322A4 `
+  --attachment-profile no_attachment `
+  --truth-method link_fiducial_pose `
+  --retained-pose A_CLEAR --retained-pose A_HOVER --retained-pose A_DOWN `
+  --retained-pose B_CLEAR --retained-pose B_HOVER --retained-pose B_DOWN `
+  --output position-vector-readiness.json
+```
+
+Add `--firmware-sha256` only after the exact installed image has independent
+evidence. Add two or more unique reviewed pose labels only after those physical
+configurations and their independent truth procedure are defined. A
+`READY_TO_PREPARE` report means the inputs can be partitioned into a plan; it
+grants no physical authority.
+
 The `prepare` command creates two new offline records before any physical
 collection begins:
 

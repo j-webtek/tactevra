@@ -14,9 +14,11 @@ from rocell.calibration.position_vector_campaign import (
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
     PLAN_SCHEMA,
+    READINESS_SCHEMA,
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
+    assess_collection_readiness,
     build_calibration_artifact,
     canonical_sha256,
     collection_observations_template,
@@ -128,6 +130,64 @@ def observations(source_plan=None):
             for index, sample in enumerate(source["samples"])
         ],
     }
+
+
+def test_readiness_reports_retained_firmware_and_pose_blockers_without_authority():
+    result = assess_collection_readiness(
+        controller_identity={key: CONTROLLER[key] for key in ("vid", "pid", "unit_serial")},
+        installed_firmware_sha256=None,
+        attachment_profile="no_attachment",
+        truth_method="link_fiducial_pose",
+        retained_pose_labels=[
+            "A_CLEAR", "A_HOVER", "A_DOWN", "B_CLEAR", "B_HOVER", "B_DOWN"
+        ],
+    )
+
+    assert result["schema"] == READINESS_SCHEMA
+    assert result["status"] == "BLOCKED"
+    assert result["blockers"] == [
+        "INSTALLED_FIRMWARE_SHA256_UNVERIFIED",
+        "UNIQUE_SOURCE_POSE_COUNT_6_BELOW_8",
+    ]
+    assert result["installed_firmware_sha256"] is None
+    assert not result["ready_to_prepare"]
+    assert result["authority"] == {
+        "controller_opened": False,
+        "camera_opened": False,
+        "commands_sent": 0,
+        "motion_authorized": False,
+        "physical_authority": False,
+    }
+
+
+def test_readiness_passes_only_with_exact_firmware_and_enough_unique_poses():
+    result = assess_collection_readiness(
+        controller_identity={key: CONTROLLER[key] for key in ("vid", "pid", "unit_serial")},
+        installed_firmware_sha256=CONTROLLER["firmware_sha256"],
+        attachment_profile="stylus_attachment",
+        truth_method="mechanical_angle_fixture",
+        retained_pose_labels=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(8)],
+    )
+
+    assert result["status"] == "READY_TO_PREPARE"
+    assert result["blockers"] == []
+    assert result["ready_to_prepare"]
+
+
+def test_readiness_deduplicates_pose_inventory_and_reports_duplicates():
+    result = assess_collection_readiness(
+        controller_identity={key: CONTROLLER[key] for key in ("vid", "pid", "unit_serial")},
+        installed_firmware_sha256=CONTROLLER["firmware_sha256"],
+        attachment_profile="no_attachment",
+        truth_method="link_fiducial_pose",
+        retained_pose_labels=["A", "A", "B"],
+    )
+
+    assert result["retained_pose_labels"] == ["A", "B"]
+    assert result["blockers"] == [
+        "UNIQUE_SOURCE_POSE_COUNT_2_BELOW_8",
+        "SOURCE_POSE_LABELS_NOT_UNIQUE",
+    ]
 
 
 def planned_dataset(source_plan=None):
@@ -418,4 +478,36 @@ def test_file_workflow_prepares_and_compiles_frozen_collection(tmp_path):
             "--truth-method", "link_fiducial_pose", *pose_args,
             "--plan-output", str(plan_path),
             "--observations-output", str(tmp_path / "another.json"),
+        ])
+
+
+def test_file_workflow_writes_blocked_readiness_report_without_hardware(tmp_path):
+    output = tmp_path / "readiness.json"
+    pose_args = []
+    for name in ("A_CLEAR", "A_HOVER", "A_DOWN", "B_CLEAR", "B_HOVER", "B_DOWN"):
+        pose_args.extend(["--retained-pose", name])
+
+    assert main([
+        "assess",
+        "--vid", CONTROLLER["vid"],
+        "--pid", CONTROLLER["pid"],
+        "--unit-serial", CONTROLLER["unit_serial"],
+        "--attachment-profile", "no_attachment",
+        "--truth-method", "link_fiducial_pose",
+        *pose_args,
+        "--output", str(output),
+    ]) == 0
+    report = json.loads(output.read_bytes())
+    assert report["status"] == "BLOCKED"
+    assert report["blockers"] == [
+        "INSTALLED_FIRMWARE_SHA256_UNVERIFIED",
+        "UNIQUE_SOURCE_POSE_COUNT_6_BELOW_8",
+    ]
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main([
+            "assess", "--vid", CONTROLLER["vid"], "--pid", CONTROLLER["pid"],
+            "--unit-serial", CONTROLLER["unit_serial"],
+            "--attachment-profile", "no_attachment",
+            "--truth-method", "link_fiducial_pose", *pose_args,
+            "--output", str(output),
         ])
