@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.local/schemas/fixed_camera_keyboard_route_bound_entry_qualification_v1.schema.json",
+  "title": "Fixed camera keyboard route-bound entry qualification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "disposition", "active_profile",
+    "route_bound_collision_qualification_sha256",
+    "source_profiled_partition_collision_evaluation_sha256",
+    "source_profiled_route_clearance_reconstruction_sha256",
+    "route_envelope_binding_sha256", "installed_collision_profile_sha256",
+    "profiled_entry_route_qualification",
+    "profiled_entry_route_qualification_sha256",
+    "observed_route_entry_sha256", "observed_route_entry_sweep_sha256",
+    "observed_route_entry_coverage_sha256",
+    "exact_route_binding_verified_before_entry_qualification",
+    "profile_separation_preserved", "blockers", "next_required_stage",
+    "authority", "route_bound_entry_qualification_sha256"
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullableSha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_route_binding_verified",
+        "installed_geometry_collision_screening_executed",
+        "controller_commands", "hardware_commands_generated",
+        "hardware_writes", "hardware_access", "physical_movements",
+        "physical_authority", "physical_release_effect"
+      ],
+      "properties": {
+        "exact_route_binding_verified": {"const": true},
+        "installed_geometry_collision_screening_executed": {"const": true},
+        "controller_commands": {"type": "array", "maxItems": 0},
+        "hardware_commands_generated": {"const": 0},
+        "hardware_writes": {"const": 0},
+        "hardware_access": {"const": false},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false},
+        "physical_release_effect": {"const": "NONE"}
+      }
+    }
+  },
+  "properties": {
+    "schema": {"const": "rocell.fixed_camera_keyboard_route_bound_entry_qualification.v1"},
+    "status": {
+      "enum": [
+        "ROUTE_BOUND_PROFILED_ENTRY_ROUTE_QUALIFIED_ZERO_AUTHORITY",
+        "REJECTED_ROUTE_BOUND_PROFILED_ENTRY_OR_ROUTE_COLLISION",
+        "BLOCKED_ROUTE_BOUND_PROFILED_ENTRY_ROUTE_EVIDENCE_INCOMPLETE"
+      ]
+    },
+    "disposition": {"enum": ["PASS", "REJECT", "BLOCKED"]},
+    "active_profile": {"enum": ["no_attachment", "stylus_attachment"]},
+    "route_bound_collision_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "source_profiled_partition_collision_evaluation_sha256": {"$ref": "#/$defs/sha256"},
+    "source_profiled_route_clearance_reconstruction_sha256": {"$ref": "#/$defs/sha256"},
+    "route_envelope_binding_sha256": {"$ref": "#/$defs/sha256"},
+    "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "profiled_entry_route_qualification": {
+      "type": ["object", "null"]
+    },
+    "profiled_entry_route_qualification_sha256": {"$ref": "#/$defs/nullableSha256"},
+    "observed_route_entry_sha256": {"$ref": "#/$defs/nullableSha256"},
+    "observed_route_entry_sweep_sha256": {"$ref": "#/$defs/nullableSha256"},
+    "observed_route_entry_coverage_sha256": {"$ref": "#/$defs/nullableSha256"},
+    "exact_route_binding_verified_before_entry_qualification": {"const": true},
+    "profile_separation_preserved": {"const": true},
+    "blockers": {
+      "type": "array", "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_required_stage": {"type": "string", "minLength": 1},
+    "authority": {"$ref": "#/$defs/authority"},
+    "route_bound_entry_qualification_sha256": {"$ref": "#/$defs/sha256"}
+  }
+}

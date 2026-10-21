@@ -130,6 +130,14 @@ trajectory corpus, or simulator asset. The committed tree is 663,206,939
 logical bytes with 4,890,152 governed duplicate bytes; all byte, duplicate, and
 reduction limits remain unchanged.
 
+The route-bound ICQ-7 entry join adds three governed paths: one zero-authority
+lineage adapter, one strict receipt schema, and one focused test module. The
+reviewed tracked-file ceiling moves from 6,598 to the exact expected 6,601
+files. The adapter carries existing evaluator, reconstruction, installed
+profile, route-envelope, and fresh-entry hashes; it adds no measurement export,
+camera frame, telemetry corpus, simulator asset, or runtime artifact. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
