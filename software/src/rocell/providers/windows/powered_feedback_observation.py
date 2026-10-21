@@ -11,6 +11,10 @@ import time
 from threading import Event
 
 from rocell.application.physical_connection_contracts import EvidenceOrigin
+from rocell.arm.feedback_profile import (
+    Feedback1051Profile,
+    classify_feedback_1051_profile,
+)
 from rocell.arm.feedback_wire import validate_feedback_response_line
 from .nonpurging_serial_api import IncapableWin32SerialApi
 from .nonpurging_serial_backend import NonPurgingSerialConnection
@@ -108,10 +112,13 @@ def _observe(binding, api, cancellation):
         feedback = validate_feedback_response_line(
             bytes(response), max_line_bytes=limits["maximum_response_bytes"]
         )
-        if not {"x", "y", "z", "tit", "b", "s", "e", "t", "r", "g", "v"}.issubset(
-            feedback
-        ):
-            raise RuntimeError("INCOMPLETE_POWERED_FEEDBACK")
+        profile = classify_feedback_1051_profile(feedback)
+        if profile is not Feedback1051Profile.FULL_WAVESHARE:
+            raise RuntimeError(
+                "INSTALLED_POSITION_VECTOR_FEEDBACK_PROFILE"
+                if profile is Feedback1051Profile.POSITION_VECTOR_NAMED_POSE
+                else "INCOMPLETE_POWERED_FEEDBACK"
+            )
         extra = bytearray()
         try:
             # A second packet makes this single-response observation ambiguous.

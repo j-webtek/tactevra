@@ -408,3 +408,32 @@ current setup confirmation. Opening serial can cause controller reset/startup
 movement; keep the arm secured and the area clear. No deliberate motion command
 is part of the query. Review actual feedback and closure evidence before deciding
 on any subsequent bounded movement or calibration step.
+
+## Received-unit response-profile finding (2026-10-21)
+
+The operator-present live sequence was run once against the reviewed CP210x
+controller identity after a zero-write observation received no bytes. The
+active attempt wrote the single fixed 10-byte `T=105` request and received one
+complete 142-byte newline-terminated `T=1051` JSON response. Serial cleanup and
+owned-process exit were confirmed; no retry or motion command occurred.
+
+The received response uses an installed position-vector profile:
+
+```json
+{"T":1051,"p":[2050,2147,1958,2550,2227,2041,2042],"pose":"KEYBOARD_FORWARD_CAL_1","motion_active":false,"trajectory_progress_permille":1000}
+```
+
+This differs from the full Waveshare field set required by the powered-feedback
+qualification (`x,y,z,tit,b,s,e,t,r,g,v`). Transport therefore worked, while the
+operation correctly remained failed and physically unqualified. The seven raw
+counts and named-pose metadata are evidence of an installed response shape;
+they are not calibrated joint or tool-tip measurements.
+
+`feedback_profile.py` now names this exact bounded response shape as
+`POSITION_VECTOR_NAMED_POSE`. The powered observation still rejects it, retains
+the original response bytes, and reports
+`INSTALLED_POSITION_VECTOR_FEEDBACK_PROFILE` instead of the generic incomplete
+feedback label. Extra fields, malformed counts, invalid pose identifiers,
+non-Boolean motion state, and out-of-range progress remain `UNKNOWN` and fail
+closed. Supporting any operational use requires a separately reviewed profile
+mapping and installed-controller qualification; this classifier grants none.
