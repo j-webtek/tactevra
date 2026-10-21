@@ -14,6 +14,7 @@ from rocell.calibration.position_vector_campaign import (
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
     PLAN_SCHEMA,
+    PREPARATION_RECEIPT_SCHEMA,
     READINESS_SCHEMA,
     REVIEW_SCHEMA,
     CampaignPolicy,
@@ -23,9 +24,11 @@ from rocell.calibration.position_vector_campaign import (
     canonical_sha256,
     collection_observations_template,
     compile_planned_dataset,
+    create_assessed_collection_package,
     create_collection_plan,
     fit_campaign_dataset,
     load_campaign_dataset,
+    load_collection_readiness,
     load_collection_plan,
     main,
 )
@@ -188,6 +191,72 @@ def test_readiness_deduplicates_pose_inventory_and_reports_duplicates():
         "UNIQUE_SOURCE_POSE_COUNT_2_BELOW_8",
         "SOURCE_POSE_LABELS_NOT_UNIQUE",
     ]
+
+
+def ready_assessment():
+    return assess_collection_readiness(
+        controller_identity={key: CONTROLLER[key] for key in ("vid", "pid", "unit_serial")},
+        installed_firmware_sha256=CONTROLLER["firmware_sha256"],
+        attachment_profile="no_attachment",
+        truth_method="link_fiducial_pose",
+        retained_pose_labels=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(8)],
+    )
+
+
+def test_assessed_preparation_binds_exact_readiness_and_all_outputs():
+    readiness = ready_assessment()
+    source_plan, source_observations, receipt = create_assessed_collection_package(
+        readiness_document=readiness,
+        dataset_id="installed-arm-count-campaign-01",
+        producer_id="calibration-producer-01",
+        training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+        held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+    )
+
+    assert source_plan == plan()
+    assert source_observations == collection_observations_template(source_plan)
+    assert receipt == {
+        "schema": PREPARATION_RECEIPT_SCHEMA,
+        "status": "PREPARED_FROM_ASSESSED_EVIDENCE",
+        "dataset_id": source_plan["dataset_id"],
+        "producer_id": source_plan["producer_id"],
+        "readiness_sha256": canonical_sha256(readiness),
+        "plan_sha256": canonical_sha256(source_plan),
+        "observations_sha256": canonical_sha256(source_observations),
+        "authority": source_plan["authority"],
+    }
+
+
+def test_assessed_preparation_rejects_blocked_tampered_or_crossed_readiness():
+    blocked = assess_collection_readiness(
+        controller_identity={key: CONTROLLER[key] for key in ("vid", "pid", "unit_serial")},
+        installed_firmware_sha256=None,
+        attachment_profile="no_attachment",
+        truth_method="link_fiducial_pose",
+        retained_pose_labels=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(8)],
+    )
+    with pytest.raises(PositionVectorCampaignError, match="readiness is blocked"):
+        create_assessed_collection_package(
+            readiness_document=blocked,
+            dataset_id="campaign-01",
+            producer_id="producer-01",
+            training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+            held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+        )
+
+    tampered = ready_assessment()
+    tampered["ready_to_prepare"] = False
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        load_collection_readiness(tampered)
+
+    with pytest.raises(PositionVectorCampaignError, match="do not match"):
+        create_assessed_collection_package(
+            readiness_document=ready_assessment(),
+            dataset_id="campaign-01",
+            producer_id="producer-01",
+            training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+            held_out_poses=["CAL_POSE_05", "CAL_POSE_06", "UNREVIEWED_POSE"],
+        )
 
 
 def planned_dataset(source_plan=None):
@@ -478,6 +547,50 @@ def test_file_workflow_prepares_and_compiles_frozen_collection(tmp_path):
             "--truth-method", "link_fiducial_pose", *pose_args,
             "--plan-output", str(plan_path),
             "--observations-output", str(tmp_path / "another.json"),
+        ])
+
+
+def test_file_workflow_prepares_from_exact_assessment_with_receipt(tmp_path):
+    readiness_path = tmp_path / "readiness.json"
+    plan_path = tmp_path / "plan.json"
+    observations_path = tmp_path / "observations.json"
+    receipt_path = tmp_path / "preparation-receipt.json"
+    readiness_path.write_text(json.dumps(ready_assessment()), encoding="utf-8")
+    pose_args = []
+    for ordinal in range(5):
+        pose_args.extend(["--training-pose", f"CAL_POSE_{ordinal:02d}"])
+    for ordinal in range(5, 8):
+        pose_args.extend(["--held-out-pose", f"CAL_POSE_{ordinal:02d}"])
+
+    assert main([
+        "prepare-assessed",
+        "--readiness", str(readiness_path),
+        "--dataset-id", "installed-arm-count-campaign-01",
+        "--producer-id", "calibration-producer-01",
+        *pose_args,
+        "--plan-output", str(plan_path),
+        "--observations-output", str(observations_path),
+        "--receipt-output", str(receipt_path),
+    ]) == 0
+
+    prepared_plan = json.loads(plan_path.read_bytes())
+    prepared_observations = json.loads(observations_path.read_bytes())
+    receipt = json.loads(receipt_path.read_bytes())
+    assert receipt["readiness_sha256"] == canonical_sha256(ready_assessment())
+    assert receipt["plan_sha256"] == canonical_sha256(prepared_plan)
+    assert receipt["observations_sha256"] == canonical_sha256(prepared_observations)
+    assert receipt["authority"]["commands_sent"] == 0
+
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
+        main([
+            "prepare-assessed",
+            "--readiness", str(readiness_path),
+            "--dataset-id", "installed-arm-count-campaign-01",
+            "--producer-id", "calibration-producer-01",
+            *pose_args,
+            "--plan-output", str(plan_path),
+            "--observations-output", str(tmp_path / "other-observations.json"),
+            "--receipt-output", str(tmp_path / "other-receipt.json"),
         ])
 
 
