@@ -147,6 +147,13 @@ adds no measurement export, camera frame, telemetry corpus, simulator asset,
 or runtime artifact. All byte, duplicate, and reduction limits remain
 unchanged.
 
+The route-bound native-admission tightening changes only existing governed
+source, integration-test, and documentation files. It adds no path and does not
+change the 6,604-file ceiling. The admission-only executable now rejects the
+legacy inner handoff and retains the existing outer route-bound collision,
+fresh-entry, and reviewed-envelope hashes before any Isaac import or GPU start.
+All byte, duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact

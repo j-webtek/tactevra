@@ -27,15 +27,17 @@ has evidence class `CONTRACT_TEST_ONLY` and expressly establishes only contract
 behavior. Later sections distinguish that portable layer from the retained
 external Isaac runs; none grants hardware authority.
 
-The WP3 selected-profile handoff now has a strict independent parser in
-`rocell.application.profiled_entry_route_isaac_replay_handoff_v1`. Native
-intake must require a `READY_FOR_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY` handoff and
-the current authoritative toolchain lock. The parser revalidates all 329 route
-configurations, 328 segments, request lineage, attachment-profile separation,
-zero-authority fields, and exact Isaac installation, extension, and settings
-identities. Synthetic unit fixtures exercise this boundary but are not native
-replay evidence. A real passing ICQ-8 receipt and accepted installed collision
-profile remain prerequisites for the WP3 acceptance run.
+The WP3 selected-profile handoff is wrapped by the exact route-bound entry
+handoff in `rocell.application.route_bound_entry_isaac_replay_handoff_v1`.
+Native intake requires its
+`READY_ROUTE_BOUND_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY` result and the current
+authoritative toolchain lock. It revalidates the outer collision and fresh-entry
+lineage before independently parsing the nested replay handoff, all 329 route
+configurations, 328 segments, attachment-profile separation, zero-authority
+fields, and exact Isaac installation, extension, and settings identities.
+Synthetic unit fixtures exercise this boundary but are not native replay
+evidence. A real passing ICQ-8 receipt and accepted installed collision profile
+remain prerequisites for the WP3 acceptance run.
 
 The existing `joint_schedule_isaac_replay_probe.py` also exposes an
 `--admission-only` mode for this handoff. It reads and validates every input,
@@ -52,7 +54,7 @@ python software/integrations/isaac_sim/joint_schedule_isaac_replay_probe.py `
   --admission-only `
   --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
   --import-receipt software/integrations/isaac_sim/evidence/roarm_m3_urdf_import_20260929.json `
-  --profiled-handoff C:\IsaacSim\requests\profiled-entry-route-handoff.json `
+  --route-bound-handoff C:\IsaacSim\requests\route-bound-entry-handoff.json `
   --toolchain-lock software/config/isaac_sim_toolchain_lock.json `
   --output C:\IsaacSim\evidence\profiled-native-admission.json `
   --status-output C:\IsaacSim\evidence\profiled-native-admission.status.json

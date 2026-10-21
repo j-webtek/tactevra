@@ -8663,3 +8663,33 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: retain real independently reviewed installed-profile
   evidence, capture the fresh authenticated read-only start, exercise this
   chain, then admit and run the exact request on the selected native runner.
+
+### E-20261020-INT-485 — route-bound chain required at native Isaac admission
+
+- Stage: ICQ-9 native admission-only boundary readiness.
+- Lane: route-bound collision and fresh-entry handoff to the selected native
+  Isaac runner.
+- Change: tightened the executable admission-only probe so its only accepted
+  handoff is the outer route-bound ICQ-9 receipt. The former inner
+  selected-profile handoff is no longer a command-line or validator input.
+- Result: admission independently validates the outer receipt, requires its
+  ready status, revalidates the nested non-replanning request against the exact
+  selected toolchain, governed USD/import receipt, articulation order, and
+  route joint order, and retains the outer collision, fresh-entry,
+  route-envelope, and handoff hashes in the sealed admission receipt.
+- Artifacts:
+  `software/integrations/isaac_sim/joint_schedule_isaac_replay_probe.py`,
+  `software/integrations/isaac_sim/README.md`, and
+  `software/tests/integration/test_joint_schedule_replay_bundle.py`.
+- Focused verification: 28 route-bound handoff, legacy nested-handoff, and
+  native admission integration tests passed; Ruff passed.
+- Governed portable matrix: 989 passed with 5 expected Windows symlink skips.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: this boundary exits before `isaacsim` import. It does not create
+  installed measurements, fresh controller observations, native replay,
+  tracking/settle/repeat telemetry, controller commands, or physical authority.
+- Next dependency: retain real reviewed installed-profile evidence and a fresh
+  authenticated read-only start, produce the exact outer handoff, and run this
+  admission on the selected native runner before the separate replay process.

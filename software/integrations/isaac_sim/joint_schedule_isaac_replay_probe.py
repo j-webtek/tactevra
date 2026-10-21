@@ -17,6 +17,10 @@ from typing import Any, Mapping
 from rocell.application.profiled_entry_route_isaac_replay_handoff_v1 import (
     parse_profiled_entry_route_isaac_replay_handoff_v1,
 )
+from rocell.application.route_bound_entry_isaac_replay_handoff_v1 import (
+    STATUS_READY as ROUTE_BOUND_READY,
+    parse_route_bound_entry_isaac_replay_handoff_v1,
+)
 
 
 SCHEMA = "tactevra.isaac_joint_schedule_replay.v1"
@@ -31,7 +35,7 @@ EXPECTED_DOFS = [
 HAND_TCP_PATH = "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/hand_tcp"
 TIP_ERROR_LIMIT_MM = 0.25
 JOINT_TRACKING_LIMIT_RAD = 1e-6
-ADMISSION_SCHEMA = "tactevra.profiled_native_isaac_admission.v1"
+ADMISSION_SCHEMA = "tactevra.route_bound_native_isaac_admission.v1"
 
 
 def _digest(value: bytes) -> str:
@@ -120,7 +124,7 @@ def _validate_bundle(bundle: dict[str, Any]) -> None:
             raise ValueError("actual-emitter input digest is invalid")
 
 
-def _validate_profiled_native_admission(
+def _validate_route_bound_native_admission(
     handoff: Mapping[str, Any],
     toolchain_lock: Mapping[str, Any],
     import_receipt: Mapping[str, Any],
@@ -130,8 +134,14 @@ def _validate_profiled_native_admission(
 ) -> dict[str, Any]:
     """Validate every governed identity before Isaac or a GPU can start."""
 
+    route_bound = parse_route_bound_entry_isaac_replay_handoff_v1(handoff)
+    if route_bound["status"] != ROUTE_BOUND_READY:
+        raise ValueError("native Isaac intake requires a READY route-bound handoff")
+    nested = route_bound["isaac_replay_handoff"]
+    if not isinstance(nested, Mapping):
+        raise ValueError("READY route-bound handoff lacks its nested replay handoff")
     parsed = parse_profiled_entry_route_isaac_replay_handoff_v1(
-        handoff,
+        nested,
         require_ready=True,
         toolchain_lock=toolchain_lock,
     )
@@ -175,6 +185,18 @@ def _validate_profiled_native_admission(
         "evidence_class": "NATIVE_ISAAC_ADMISSION_ONLY",
         "active_profile": parsed["active_profile"],
         "profile_separation_preserved": True,
+        "route_bound_isaac_replay_handoff_sha256": route_bound[
+            "route_bound_isaac_replay_handoff_sha256"
+        ],
+        "route_bound_collision_qualification_sha256": route_bound[
+            "route_bound_collision_qualification_sha256"
+        ],
+        "route_bound_entry_qualification_sha256": route_bound[
+            "route_bound_entry_qualification_sha256"
+        ],
+        "route_envelope_binding_sha256": route_bound[
+            "route_envelope_binding_sha256"
+        ],
         "isaac_replay_handoff_sha256": parsed[
             "isaac_replay_handoff_sha256"
         ],
@@ -208,15 +230,17 @@ def main() -> int:
     parser.add_argument("--import-receipt", type=Path, required=True)
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--virtual-profile", type=Path)
-    parser.add_argument("--profiled-handoff", type=Path)
+    parser.add_argument("--route-bound-handoff", type=Path)
     parser.add_argument("--toolchain-lock", type=Path)
     parser.add_argument("--admission-only", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--status-output", type=Path, required=True)
     args = parser.parse_args()
     if args.admission_only:
-        if args.profiled_handoff is None or args.toolchain_lock is None:
-            parser.error("--admission-only requires --profiled-handoff and --toolchain-lock")
+        if args.route_bound_handoff is None or args.toolchain_lock is None:
+            parser.error(
+                "--admission-only requires --route-bound-handoff and --toolchain-lock"
+            )
         if args.bundle is not None or args.virtual_profile is not None:
             parser.error("--admission-only cannot consume the legacy replay inputs")
     elif args.bundle is None or args.virtual_profile is None:
@@ -231,12 +255,12 @@ def main() -> int:
         usd_bytes = usd.read_bytes()
         if args.admission_only:
             handoff = json.loads(
-                args.profiled_handoff.resolve(strict=True).read_text(encoding="utf-8")
+                args.route_bound_handoff.resolve(strict=True).read_text(encoding="utf-8")
             )
             toolchain_lock = json.loads(
                 args.toolchain_lock.resolve(strict=True).read_text(encoding="utf-8")
             )
-            admission = _validate_profiled_native_admission(
+            admission = _validate_route_bound_native_admission(
                 handoff,
                 toolchain_lock,
                 import_receipt,

@@ -417,7 +417,7 @@ standalone completion evidence.
 **Purpose:** Hand a collision-qualified route to the next simulation work
 package without changing its authority.
 
-**Implementation status (2026-10-19):** The portable handoff adapter, strict
+**Implementation status (2026-10-20):** The portable handoff adapter, strict
 receipt schema, independent native-intake parser, and executable admission-only
 boundary are implemented. The
 adapter independently reconstructs both attachment-profile routes, matches the
@@ -439,6 +439,12 @@ route-bound fresh-entry receipt, and only then delegates to the existing exact
 non-replanning Isaac handoff. Rejected or incomplete entry chains stop before
 handoff preparation. A ready nested handoff retains both route-bound hashes,
 the reviewed route-envelope and installed-profile hashes, and zero authority.
+The executable admission-only boundary now accepts only that outer route-bound
+handoff. It rejects the formerly accepted inner selected-profile handoff,
+retains the collision, fresh-entry, reviewed-envelope, and outer-handoff hashes
+in its sealed admission receipt, and still exits before `isaacsim` import or GPU
+startup. This closes the last native-intake software path around the reviewed
+route and fresh-entry chain.
 
 **Deliverables:**
 
