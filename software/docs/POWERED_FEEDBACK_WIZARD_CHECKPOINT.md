@@ -437,3 +437,38 @@ feedback label. Extra fields, malformed counts, invalid pose identifiers,
 non-Boolean motion state, and out-of-range progress remain `UNKNOWN` and fail
 closed. Supporting any operational use requires a separately reviewed profile
 mapping and installed-controller qualification; this classifier grants none.
+
+## Position-vector calibration contract (2026-10-21)
+
+The retained controller history identifies the seven position slots as servo
+IDs 11 through 17. This makes the raw vector structurally useful: indices 0,
+1, 3, 4, 5, and 6 correspond to the primary base, shoulder, elbow, wrist-pitch,
+wrist-roll, and gripper servos, while index 2 is the driven member of the mirrored
+shoulder pair. The ordering is now explicit in a zero-I/O calibration boundary;
+it is not inferred anew from each response.
+
+`arm/position_vector_calibration.py` separates two outcomes:
+
+1. An exact installed response can be described as `CALIBRATION_REQUIRED`, with
+   its raw counts and known servo slots retained. This does not compute or claim
+   canonical joint state.
+2. Conversion is available only when the caller supplies a strict
+   `rocell.position_vector_calibration.v1` artifact bound to the exact controller
+   VID, PID, unit serial, and firmware SHA-256. The artifact must contain the
+   fixed servo and canonical joint orders, one bounded affine count conversion
+   for every logical joint, at least two training and one held-out observation
+   per joint, passing held-out error limits, a validated mirrored-shoulder
+   residual/tolerance, and distinct dataset, fit-report, and independent-review
+   SHA-256 identities.
+
+Runtime conversion rechecks controller identity, response shape, shoulder-pair
+agreement, and each calibrated joint range. Any mismatch fails closed. Even a
+valid converted result sets `motion_authorized` and `physical_authority` false;
+it is an observation contract, not an execution permit.
+
+The single retained `KEYBOARD_FORWARD_CAL_1` response cannot populate an
+accepted artifact. It provides one stationary vector and no independently
+measured canonical joint truth, per-joint span, held-out sample, or firmware
+binary identity. The next physical calibration campaign must therefore be
+planned separately and requires new explicit hardware authorization. No further
+query, retry, motion, or device access was performed for this increment.

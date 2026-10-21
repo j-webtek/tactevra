@@ -163,6 +163,17 @@ named rejected diagnostic profile. No camera frame, controller transcript,
 measurement export, trajectory corpus, or simulator asset enters the source
 archive, and all byte, duplicate, and reduction limits remain unchanged.
 
+The position-vector calibration-contract increment adds two governed paths: one
+strict, zero-I/O calibration loader/converter and one focused unit-test module.
+The reviewed tracked-file ceiling moves from 6,606 to the exact expected 6,608
+files. Existing documentation is updated in place. The contract requires exact
+controller and firmware identity, servo order, six per-joint fits, mirrored-
+shoulder validation, held-out residual limits, and distinct dataset, fit, and
+independent-review hashes before accepting counts as calibrated joint state.
+It adds no calibration dataset, controller transcript, generated corpus, or
+authority-bearing output; all byte, duplicate, and reduction limits remain
+unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
