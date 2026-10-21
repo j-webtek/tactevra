@@ -33,6 +33,7 @@ FIT_REPORT_SCHEMA = "rocell.position_vector_calibration_fit_report.v1"
 REVIEW_SCHEMA = "rocell.position_vector_calibration_review.v1"
 PLAN_SCHEMA = "rocell.position_vector_calibration_collection_plan.v1"
 OBSERVATIONS_SCHEMA = "rocell.position_vector_calibration_observations.v1"
+READINESS_SCHEMA = "rocell.position_vector_calibration_collection_readiness.v1"
 SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
 TRUTH_METHODS = (
     "encoder_reference_fixture",
@@ -161,6 +162,80 @@ def canonical_bytes(value: Any) -> bytes:
 
 def canonical_sha256(value: Any) -> str:
     return hashlib.sha256(canonical_bytes(value)).hexdigest()
+
+
+def assess_collection_readiness(
+    *,
+    controller_identity: Mapping[str, Any],
+    installed_firmware_sha256: str | None,
+    attachment_profile: str,
+    truth_method: str,
+    retained_pose_labels: list[str] | tuple[str, ...],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Report whether retained facts can support freezing a collection plan.
+
+    Missing facts become explicit blockers rather than placeholders in a plan.
+    This pure assessment performs no controller, camera, or filesystem access.
+    """
+
+    identity = _mapping(controller_identity, "controller_identity")
+    if set(identity) != {"vid", "pid", "unit_serial"}:
+        raise PositionVectorCampaignError("controller_identity fields do not match the contract")
+    vid = identity.get("vid")
+    pid = identity.get("pid")
+    if not isinstance(vid, str) or _HEX4.fullmatch(vid) is None:
+        raise PositionVectorCampaignError("controller_identity.vid is invalid")
+    if not isinstance(pid, str) or _HEX4.fullmatch(pid) is None:
+        raise PositionVectorCampaignError("controller_identity.pid is invalid")
+    serial = _identifier(identity.get("unit_serial"), "controller_identity.unit_serial")
+    if attachment_profile not in SUPPORTED_ATTACHMENTS:
+        raise PositionVectorCampaignError("readiness attachment profile is invalid")
+    if truth_method not in TRUTH_METHODS:
+        raise PositionVectorCampaignError("readiness truth method is unsupported")
+    if not isinstance(retained_pose_labels, (list, tuple)):
+        raise PositionVectorCampaignError("retained pose labels must be an array")
+    poses = [
+        _identifier(value, f"retained_pose_labels[{index}]")
+        for index, value in enumerate(retained_pose_labels)
+    ]
+    unique_poses = list(dict.fromkeys(poses))
+    required_pose_count = policy.minimum_training_samples + policy.minimum_held_out_samples
+    blockers = []
+    firmware = None
+    if installed_firmware_sha256 is None:
+        blockers.append("INSTALLED_FIRMWARE_SHA256_UNVERIFIED")
+    else:
+        firmware = _digest(installed_firmware_sha256, "installed_firmware_sha256")
+    if len(unique_poses) < required_pose_count:
+        blockers.append(
+            f"UNIQUE_SOURCE_POSE_COUNT_{len(unique_poses)}_BELOW_{required_pose_count}"
+        )
+    if len(unique_poses) != len(poses):
+        blockers.append("SOURCE_POSE_LABELS_NOT_UNIQUE")
+    return {
+        "schema": READINESS_SCHEMA,
+        "status": "READY_TO_PREPARE" if not blockers else "BLOCKED",
+        "controller_identity": {"vid": vid, "pid": pid, "unit_serial": serial},
+        "installed_firmware_sha256": firmware,
+        "attachment_profile": attachment_profile,
+        "truth_method": truth_method,
+        "retained_pose_labels": unique_poses,
+        "requirements": {
+            "minimum_training_samples": policy.minimum_training_samples,
+            "minimum_held_out_samples": policy.minimum_held_out_samples,
+            "minimum_unique_source_poses": required_pose_count,
+        },
+        "blockers": blockers,
+        "ready_to_prepare": not blockers,
+        "authority": {
+            "controller_opened": False,
+            "camera_opened": False,
+            "commands_sent": 0,
+            "motion_authorized": False,
+            "physical_authority": False,
+        },
+    }
 
 
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
@@ -713,10 +788,21 @@ def _write_new(path: str, value: Mapping[str, Any]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Prepare, compile, fit, or finalize evidence without hardware imports."""
+    """Assess, prepare, compile, fit, or finalize evidence without hardware imports."""
 
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    assess_parser = commands.add_parser(
+        "assess", help="report retained-evidence blockers before preparing a plan"
+    )
+    assess_parser.add_argument("--vid", required=True)
+    assess_parser.add_argument("--pid", required=True)
+    assess_parser.add_argument("--unit-serial", required=True)
+    assess_parser.add_argument("--firmware-sha256")
+    assess_parser.add_argument("--attachment-profile", choices=SUPPORTED_ATTACHMENTS, required=True)
+    assess_parser.add_argument("--truth-method", choices=TRUTH_METHODS, required=True)
+    assess_parser.add_argument("--retained-pose", action="append", default=[])
+    assess_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -754,6 +840,20 @@ def main(argv: list[str] | None = None) -> int:
     build_parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
 
+    if args.command == "assess":
+        result = assess_collection_readiness(
+            controller_identity={
+                "vid": args.vid,
+                "pid": args.pid,
+                "unit_serial": args.unit_serial,
+            },
+            installed_firmware_sha256=args.firmware_sha256,
+            attachment_profile=args.attachment_profile,
+            truth_method=args.truth_method,
+            retained_pose_labels=args.retained_pose,
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -806,11 +906,13 @@ __all__ = [
     "FIT_REPORT_SCHEMA",
     "OBSERVATIONS_SCHEMA",
     "PLAN_SCHEMA",
+    "READINESS_SCHEMA",
     "REVIEW_SCHEMA",
     "SUPPORTED_ATTACHMENTS",
     "TRUTH_METHODS",
     "CampaignPolicy",
     "PositionVectorCampaignError",
+    "assess_collection_readiness",
     "build_calibration_artifact",
     "canonical_bytes",
     "canonical_sha256",
