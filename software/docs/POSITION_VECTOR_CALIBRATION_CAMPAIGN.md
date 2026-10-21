@@ -66,6 +66,59 @@ The default policy requires:
 Samples should cover the intended operating range rather than cluster near one
 pose. Held-out samples must not be reused to choose or tune the fit.
 
+## Freeze the collection before capture
+
+The `prepare` command creates two new offline records before any physical
+collection begins:
+
+- `rocell.position_vector_calibration_collection_plan.v1` freezes the exact
+  controller and firmware binding, attachment profile, truth method, policy,
+  ordered training and held-out pose labels, and sample IDs. Its authority
+  block proves that no controller or camera was opened and no command or motion
+  authority was issued.
+- `rocell.position_vector_calibration_observations.v1` is a plan-hash-bound
+  template with one empty evidence slot for every planned sample.
+
+Pose labels are campaign identities, not movement instructions. Preparing a
+plan cannot move the arm. Use distinct labels for every independently chosen
+stationary configuration and reserve the held-out labels before fitting.
+
+For example, from the `software` directory:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign prepare `
+  --dataset-id installed-arm-count-campaign-01 `
+  --producer-id calibration-producer-01 `
+  --vid 10c4 --pid ea60 `
+  --unit-serial CONTROLLER_SERIAL `
+  --firmware-sha256 EXACT_INSTALLED_FIRMWARE_SHA256 `
+  --attachment-profile no_attachment `
+  --truth-method link_fiducial_pose `
+  --training-pose CAL_TRAIN_01 --training-pose CAL_TRAIN_02 `
+  --training-pose CAL_TRAIN_03 --training-pose CAL_TRAIN_04 `
+  --training-pose CAL_TRAIN_05 `
+  --held-out-pose CAL_HOLDOUT_01 --held-out-pose CAL_HOLDOUT_02 `
+  --held-out-pose CAL_HOLDOUT_03 `
+  --plan-output position-vector-plan.json `
+  --observations-output position-vector-observations.json
+```
+
+Populate each observation slot only from its named stationary sample. Each slot
+requires seven retained raw counts, all six independent joint angles, a unique
+truth-evidence hash, `stationary: true`, `motion_active: false`, and
+`trajectory_progress_permille: 1000`. Then compile the plan-bound observations:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign compile `
+  --plan position-vector-plan.json `
+  --observations position-vector-observations.json `
+  --output position-vector-dataset.json
+```
+
+Compilation fails if a slot is missing, reordered, renamed, bound to another
+plan, or incomplete. The generated dataset is passed through the same strict
+dataset validator used by `fit`.
+
 ## Offline commands
 
 From the `software` directory, create the deterministic fit report:
@@ -122,8 +175,10 @@ campaign.
 ## Physical collection boundary
 
 A future physical campaign requires fresh, explicit hardware authorization.
-Begin from a secured neutral pose, collect only stationary observations, retain
-the independent truth evidence for every sample, and keep training and held-out
-poses disjoint. The current single T1051 response remains
+Begin from a secured neutral pose, freeze the collection plan, collect only
+stationary observations, retain the independent truth evidence for every
+sample, and keep training and held-out poses disjoint. Prepare separate plans
+for `no_attachment` and `stylus_attachment`; observations cannot cross their
+plan hashes. The current single T1051 response remains
 `CALIBRATION_REQUIRED`; it is useful as retained evidence but cannot satisfy the
 campaign on its own.

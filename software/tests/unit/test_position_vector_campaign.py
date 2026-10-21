@@ -12,13 +12,19 @@ from rocell.arm.position_vector_calibration import (
 from rocell.calibration.position_vector_campaign import (
     DATASET_SCHEMA,
     FIT_REPORT_SCHEMA,
+    OBSERVATIONS_SCHEMA,
+    PLAN_SCHEMA,
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
     build_calibration_artifact,
     canonical_sha256,
+    collection_observations_template,
+    compile_planned_dataset,
+    create_collection_plan,
     fit_campaign_dataset,
     load_campaign_dataset,
+    load_collection_plan,
     main,
 )
 
@@ -90,6 +96,128 @@ def review(source, fit, **updates):
     }
     value.update(updates)
     return value
+
+
+def plan():
+    return create_collection_plan(
+        dataset_id="installed-arm-count-campaign-01",
+        producer_id="calibration-producer-01",
+        controller_binding=CONTROLLER,
+        attachment_profile="no_attachment",
+        training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+        held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+        truth_method="link_fiducial_pose",
+    )
+
+
+def observations(source_plan=None):
+    source_plan = source_plan or plan()
+    source = dataset(source_plan["attachment_profile"])
+    return {
+        "schema": OBSERVATIONS_SCHEMA,
+        "plan_sha256": canonical_sha256(source_plan),
+        "samples": [
+            {
+                **{
+                    key: value
+                    for key, value in sample.items()
+                    if key not in {"sample_id", "split", "source_pose", "truth_method"}
+                },
+                "sample_id": source_plan["slots"][index]["sample_id"],
+            }
+            for index, sample in enumerate(source["samples"])
+        ],
+    }
+
+
+def planned_dataset(source_plan=None):
+    source_plan = source_plan or plan()
+    value = dataset(source_plan["attachment_profile"])
+    for sample, slot in zip(value["samples"], source_plan["slots"], strict=True):
+        sample["sample_id"] = slot["sample_id"]
+    return value
+
+
+def test_collection_plan_freezes_profile_split_and_empty_evidence_slots():
+    first = plan()
+    second = plan()
+    template = collection_observations_template(first)
+
+    assert first == second == load_collection_plan(first)
+    assert first["schema"] == PLAN_SCHEMA
+    assert first["attachment_profile"] == "no_attachment"
+    assert [slot["split"] for slot in first["slots"]] == [
+        *("TRAINING" for _ in range(5)),
+        *("HELD_OUT" for _ in range(3)),
+    ]
+    assert first["authority"] == {
+        "controller_opened": False,
+        "camera_opened": False,
+        "commands_sent": 0,
+        "motion_authorized": False,
+        "physical_authority": False,
+    }
+    assert template["plan_sha256"] == canonical_sha256(first)
+    assert all(sample["raw_position_counts"] is None for sample in template["samples"])
+
+
+def test_planned_observations_compile_into_existing_strict_dataset_and_fit():
+    source_plan = plan()
+    compiled = compile_planned_dataset(source_plan, observations(source_plan))
+
+    assert compiled == load_campaign_dataset(planned_dataset(source_plan))
+    assert fit_campaign_dataset(compiled, calibration_id="fit-01")["status"] == "PASS"
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (lambda value: value.update(plan_sha256="0" * 64), "plan hash"),
+        (
+            lambda value: value["samples"].__setitem__(
+                0, {**value["samples"][0], "sample_id": "wrong-slot"}
+            ),
+            "sample order",
+        ),
+        (lambda value: value["samples"].pop(), "every planned slot"),
+        (
+            lambda value: value["samples"][0].update(raw_position_counts=None),
+            "raw_position_counts",
+        ),
+    ],
+)
+def test_planned_observations_reject_incomplete_or_crossed_evidence(mutate, match):
+    source_plan = plan()
+    value = observations(source_plan)
+    mutate(value)
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        compile_planned_dataset(source_plan, value)
+
+
+def test_collection_plan_rejects_profile_crossing_duplicate_poses_and_short_split():
+    with pytest.raises(PositionVectorCampaignError, match="attachment profile"):
+        create_collection_plan(
+            dataset_id="campaign-01", producer_id="producer-01",
+            controller_binding=CONTROLLER, attachment_profile="unknown",
+            training_poses=[f"p-{i}" for i in range(5)],
+            held_out_poses=[f"h-{i}" for i in range(3)],
+            truth_method="link_fiducial_pose",
+        )
+    with pytest.raises(PositionVectorCampaignError, match="unique"):
+        create_collection_plan(
+            dataset_id="campaign-01", producer_id="producer-01",
+            controller_binding=CONTROLLER, attachment_profile="no_attachment",
+            training_poses=["same", "p-1", "p-2", "p-3", "p-4"],
+            held_out_poses=["same", "h-1", "h-2"],
+            truth_method="link_fiducial_pose",
+        )
+    with pytest.raises(PositionVectorCampaignError, match="held-out slots"):
+        create_collection_plan(
+            dataset_id="campaign-01", producer_id="producer-01",
+            controller_binding=CONTROLLER, attachment_profile="no_attachment",
+            training_poses=[f"p-{i}" for i in range(5)], held_out_poses=["h-0"],
+            truth_method="link_fiducial_pose",
+        )
 
 
 def test_campaign_builds_existing_strict_artifact_and_converts_feedback():
@@ -238,4 +366,56 @@ def test_file_workflow_creates_new_fit_and_artifact_without_overwrite(tmp_path):
         main([
             "fit", "--dataset", str(dataset_path), "--calibration-id", "fit-01",
             "--output", str(fit_path),
+        ])
+
+
+def test_file_workflow_prepares_and_compiles_frozen_collection(tmp_path):
+    plan_path = tmp_path / "plan.json"
+    observations_path = tmp_path / "observations.json"
+    dataset_path = tmp_path / "dataset.json"
+    pose_args = []
+    for ordinal in range(5):
+        pose_args.extend(["--training-pose", f"CAL_POSE_{ordinal:02d}"])
+    for ordinal in range(5, 8):
+        pose_args.extend(["--held-out-pose", f"CAL_POSE_{ordinal:02d}"])
+
+    assert main([
+        "prepare",
+        "--dataset-id", "installed-arm-count-campaign-01",
+        "--producer-id", "calibration-producer-01",
+        "--vid", CONTROLLER["vid"],
+        "--pid", CONTROLLER["pid"],
+        "--unit-serial", CONTROLLER["unit_serial"],
+        "--firmware-sha256", CONTROLLER["firmware_sha256"],
+        "--attachment-profile", "no_attachment",
+        "--truth-method", "link_fiducial_pose",
+        *pose_args,
+        "--plan-output", str(plan_path),
+        "--observations-output", str(observations_path),
+    ]) == 0
+    prepared_plan = json.loads(plan_path.read_bytes())
+    assert prepared_plan == plan()
+    observations_path.write_text(
+        json.dumps(observations(prepared_plan)), encoding="utf-8"
+    )
+    assert main([
+        "compile", "--plan", str(plan_path),
+        "--observations", str(observations_path), "--output", str(dataset_path),
+    ]) == 0
+    assert load_campaign_dataset(json.loads(dataset_path.read_bytes())) == load_campaign_dataset(
+        planned_dataset(prepared_plan)
+    )
+
+    with pytest.raises(PositionVectorCampaignError, match="preparation output"):
+        main([
+            "prepare",
+            "--dataset-id", "installed-arm-count-campaign-01",
+            "--producer-id", "calibration-producer-01",
+            "--vid", CONTROLLER["vid"], "--pid", CONTROLLER["pid"],
+            "--unit-serial", CONTROLLER["unit_serial"],
+            "--firmware-sha256", CONTROLLER["firmware_sha256"],
+            "--attachment-profile", "no_attachment",
+            "--truth-method", "link_fiducial_pose", *pose_args,
+            "--plan-output", str(plan_path),
+            "--observations-output", str(tmp_path / "another.json"),
         ])
