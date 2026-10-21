@@ -1,0 +1,531 @@
+"""Offline producer for reviewed T=1051 count-to-joint calibration artifacts.
+
+The campaign consumes retained observations and independent joint truth.  It
+does not open a controller, request feedback, or issue motion.  Training and
+held-out samples remain disjoint, and an accepted artifact is emitted only
+after a separate reviewer accepts the exact dataset and deterministic fit.
+"""
+
+from __future__ import annotations
+
+import argparse
+from dataclasses import dataclass
+from datetime import datetime
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+from typing import Any, Mapping
+
+from rocell.arm.position_vector_calibration import (
+    JOINT_ORDER,
+    PRIMARY_INDEX,
+    PROFILE,
+    SCHEMA as ARTIFACT_SCHEMA,
+    SERVO_ORDER,
+    load_position_vector_calibration,
+)
+
+
+DATASET_SCHEMA = "rocell.position_vector_calibration_dataset.v1"
+FIT_REPORT_SCHEMA = "rocell.position_vector_calibration_fit_report.v1"
+REVIEW_SCHEMA = "rocell.position_vector_calibration_review.v1"
+SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
+TRUTH_METHODS = (
+    "encoder_reference_fixture",
+    "link_fiducial_pose",
+    "manufacturer_traceable_fixture",
+    "mechanical_angle_fixture",
+)
+
+_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
+_DIGEST = re.compile(r"^[0-9a-f]{64}$")
+_HEX4 = re.compile(r"^[0-9a-f]{4}$")
+_CONTROLLER_FIELDS = frozenset({"vid", "pid", "unit_serial", "firmware_sha256"})
+_DATASET_FIELDS = frozenset(
+    {
+        "schema",
+        "dataset_id",
+        "producer_id",
+        "controller_binding",
+        "attachment_profile",
+        "position_order_servo_ids",
+        "joint_order",
+        "samples",
+    }
+)
+_SAMPLE_FIELDS = frozenset(
+    {
+        "sample_id",
+        "split",
+        "source_pose",
+        "raw_position_counts",
+        "canonical_joints_rad",
+        "truth_method",
+        "truth_evidence_sha256",
+        "stationary",
+        "motion_active",
+        "trajectory_progress_permille",
+    }
+)
+_REVIEW_FIELDS = frozenset(
+    {
+        "schema",
+        "dataset_sha256",
+        "fit_report_sha256",
+        "producer_id",
+        "reviewer_id",
+        "decision",
+        "reviewed_at",
+        "review_notes_sha256",
+    }
+)
+
+
+class PositionVectorCampaignError(ValueError):
+    """Retained campaign evidence cannot support an accepted calibration."""
+
+
+@dataclass(frozen=True)
+class CampaignPolicy:
+    minimum_training_samples: int = 5
+    minimum_held_out_samples: int = 3
+    minimum_training_count_span: int = 128
+    accepted_max_abs_error_rad: float = 0.035
+    shoulder_runtime_tolerance_counts: int = 24
+
+    def __post_init__(self) -> None:
+        if self.minimum_training_samples < 2:
+            raise PositionVectorCampaignError("at least two training samples are required")
+        if self.minimum_held_out_samples < 1:
+            raise PositionVectorCampaignError("at least one held-out sample is required")
+        if not 1 <= self.minimum_training_count_span <= 4095:
+            raise PositionVectorCampaignError("training count span is outside its bound")
+        if not 0.0 < self.accepted_max_abs_error_rad <= math.pi:
+            raise PositionVectorCampaignError("accepted joint error is outside its bound")
+        if not 0 <= self.shoulder_runtime_tolerance_counts <= 256:
+            raise PositionVectorCampaignError("shoulder tolerance is outside its bound")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "minimum_training_samples": self.minimum_training_samples,
+            "minimum_held_out_samples": self.minimum_held_out_samples,
+            "minimum_training_count_span": self.minimum_training_count_span,
+            "accepted_max_abs_error_rad": self.accepted_max_abs_error_rad,
+            "shoulder_runtime_tolerance_counts": self.shoulder_runtime_tolerance_counts,
+        }
+
+
+def canonical_bytes(value: Any) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
+
+
+def canonical_sha256(value: Any) -> str:
+    return hashlib.sha256(canonical_bytes(value)).hexdigest()
+
+
+def _mapping(value: Any, label: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise PositionVectorCampaignError(f"{label} must be an object")
+    return value
+
+
+def _exact(value: Mapping[str, Any], fields: frozenset[str], label: str) -> None:
+    if set(value) != fields:
+        raise PositionVectorCampaignError(f"{label} fields do not match the contract")
+
+
+def _identifier(value: Any, label: str) -> str:
+    if not isinstance(value, str) or _IDENTIFIER.fullmatch(value) is None:
+        raise PositionVectorCampaignError(f"{label} is not a bounded identifier")
+    return value
+
+
+def _digest(value: Any, label: str) -> str:
+    if not isinstance(value, str) or _DIGEST.fullmatch(value) is None:
+        raise PositionVectorCampaignError(f"{label} is not a lowercase SHA-256")
+    return value
+
+
+def _number(value: Any, label: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise PositionVectorCampaignError(f"{label} is not a finite number")
+    result = float(value)
+    if not -2 * math.pi <= result <= 2 * math.pi:
+        raise PositionVectorCampaignError(f"{label} is outside the joint-angle bound")
+    return result
+
+
+def _controller(value: Any) -> dict[str, str]:
+    raw = _mapping(value, "controller_binding")
+    _exact(raw, _CONTROLLER_FIELDS, "controller_binding")
+    vid = raw.get("vid")
+    pid = raw.get("pid")
+    if not isinstance(vid, str) or _HEX4.fullmatch(vid) is None:
+        raise PositionVectorCampaignError("controller_binding.vid is invalid")
+    if not isinstance(pid, str) or _HEX4.fullmatch(pid) is None:
+        raise PositionVectorCampaignError("controller_binding.pid is invalid")
+    return {
+        "vid": vid,
+        "pid": pid,
+        "unit_serial": _identifier(raw.get("unit_serial"), "controller_binding.unit_serial"),
+        "firmware_sha256": _digest(
+            raw.get("firmware_sha256"), "controller_binding.firmware_sha256"
+        ),
+    }
+
+
+def _sample(value: Any, index: int) -> dict[str, Any]:
+    label = f"samples[{index}]"
+    raw = _mapping(value, label)
+    _exact(raw, _SAMPLE_FIELDS, label)
+    split = raw.get("split")
+    if split not in {"TRAINING", "HELD_OUT"}:
+        raise PositionVectorCampaignError(f"{label}.split is invalid")
+    counts = raw.get("raw_position_counts")
+    if (
+        not isinstance(counts, list)
+        or len(counts) != 7
+        or any(isinstance(item, bool) or not isinstance(item, int) or not 0 <= item <= 4095
+               for item in counts)
+    ):
+        raise PositionVectorCampaignError(f"{label}.raw_position_counts is invalid")
+    joints = _mapping(raw.get("canonical_joints_rad"), f"{label}.canonical_joints_rad")
+    if list(joints) != list(JOINT_ORDER):
+        raise PositionVectorCampaignError(f"{label}.canonical joint order is invalid")
+    method = raw.get("truth_method")
+    if method not in TRUTH_METHODS:
+        raise PositionVectorCampaignError(f"{label}.truth_method is unsupported")
+    if raw.get("stationary") is not True or raw.get("motion_active") is not False:
+        raise PositionVectorCampaignError(f"{label} is not a stationary observation")
+    if raw.get("trajectory_progress_permille") != 1000:
+        raise PositionVectorCampaignError(f"{label} trajectory is not complete")
+    return {
+        "sample_id": _identifier(raw.get("sample_id"), f"{label}.sample_id"),
+        "split": split,
+        "source_pose": _identifier(raw.get("source_pose"), f"{label}.source_pose"),
+        "raw_position_counts": list(counts),
+        "canonical_joints_rad": {
+            joint: _number(joints.get(joint), f"{label}.{joint}") for joint in JOINT_ORDER
+        },
+        "truth_method": method,
+        "truth_evidence_sha256": _digest(
+            raw.get("truth_evidence_sha256"), f"{label}.truth_evidence_sha256"
+        ),
+        "stationary": True,
+        "motion_active": False,
+        "trajectory_progress_permille": 1000,
+    }
+
+
+def load_campaign_dataset(document: Mapping[str, Any]) -> dict[str, Any]:
+    """Strict-decode retained physical observations without performing I/O."""
+
+    raw = _mapping(document, "dataset")
+    _exact(raw, _DATASET_FIELDS, "dataset")
+    if raw.get("schema") != DATASET_SCHEMA:
+        raise PositionVectorCampaignError("dataset schema mismatch")
+    if raw.get("position_order_servo_ids") != list(SERVO_ORDER):
+        raise PositionVectorCampaignError("dataset servo order mismatch")
+    if raw.get("joint_order") != list(JOINT_ORDER):
+        raise PositionVectorCampaignError("dataset joint order mismatch")
+    attachment = raw.get("attachment_profile")
+    if attachment not in SUPPORTED_ATTACHMENTS:
+        raise PositionVectorCampaignError("dataset attachment profile is invalid")
+    values = raw.get("samples")
+    if not isinstance(values, list):
+        raise PositionVectorCampaignError("dataset samples must be an array")
+    samples = [_sample(item, index) for index, item in enumerate(values)]
+    ids = [item["sample_id"] for item in samples]
+    evidence = [item["truth_evidence_sha256"] for item in samples]
+    if len(set(ids)) != len(ids):
+        raise PositionVectorCampaignError("sample IDs must be unique")
+    if len(set(evidence)) != len(evidence):
+        raise PositionVectorCampaignError("truth evidence hashes must be unique")
+    return {
+        "schema": DATASET_SCHEMA,
+        "dataset_id": _identifier(raw.get("dataset_id"), "dataset_id"),
+        "producer_id": _identifier(raw.get("producer_id"), "producer_id"),
+        "controller_binding": _controller(raw.get("controller_binding")),
+        "attachment_profile": attachment,
+        "position_order_servo_ids": list(SERVO_ORDER),
+        "joint_order": list(JOINT_ORDER),
+        "samples": samples,
+    }
+
+
+def _linear_fit(points: list[tuple[int, float]], joint: str) -> tuple[float, float]:
+    mean_x = sum(point[0] for point in points) / len(points)
+    mean_y = sum(point[1] for point in points) / len(points)
+    denominator = sum((point[0] - mean_x) ** 2 for point in points)
+    if denominator == 0:
+        raise PositionVectorCampaignError(f"{joint} training counts have no span")
+    slope = sum((x - mean_x) * (y - mean_y) for x, y in points) / denominator
+    if not math.isfinite(slope) or abs(slope) < 1e-12:
+        raise PositionVectorCampaignError(f"{joint} fitted scale is degenerate")
+    count_zero = mean_x - mean_y / slope
+    if not 0.0 <= count_zero <= 4095.0 or not -0.1 <= slope <= 0.1:
+        raise PositionVectorCampaignError(f"{joint} fitted parameters are outside bounds")
+    return count_zero, slope
+
+
+def fit_campaign_dataset(
+    document: Mapping[str, Any],
+    *,
+    calibration_id: str,
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Fit affine joint models and evaluate a disjoint held-out split."""
+
+    dataset = load_campaign_dataset(document)
+    calibration = _identifier(calibration_id, "calibration_id")
+    training = [item for item in dataset["samples"] if item["split"] == "TRAINING"]
+    held_out = [item for item in dataset["samples"] if item["split"] == "HELD_OUT"]
+    if len(training) < policy.minimum_training_samples:
+        raise PositionVectorCampaignError("insufficient training samples")
+    if len(held_out) < policy.minimum_held_out_samples:
+        raise PositionVectorCampaignError("insufficient held-out samples")
+
+    joints: list[dict[str, Any]] = []
+    for joint in JOINT_ORDER:
+        primary = PRIMARY_INDEX[joint]
+        points = [
+            (item["raw_position_counts"][primary], item["canonical_joints_rad"][joint])
+            for item in training
+        ]
+        span = max(point[0] for point in points) - min(point[0] for point in points)
+        if span < policy.minimum_training_count_span:
+            raise PositionVectorCampaignError(f"{joint} training count span is insufficient")
+        zero, scale = _linear_fit(points, joint)
+        held_errors = [
+            abs(
+                (item["raw_position_counts"][primary] - zero) * scale
+                - item["canonical_joints_rad"][joint]
+            )
+            for item in held_out
+        ]
+        maximum_error = max(held_errors)
+        if maximum_error > policy.accepted_max_abs_error_rad:
+            raise PositionVectorCampaignError(f"{joint} held-out error exceeds policy")
+        all_angles = [item["canonical_joints_rad"][joint] for item in dataset["samples"]]
+        joints.append(
+            {
+                "joint": joint,
+                "primary_index": primary,
+                "count_zero": zero,
+                "radians_per_count": scale,
+                "minimum_rad": min(all_angles),
+                "maximum_rad": max(all_angles),
+                "training_sample_count": len(training),
+                "held_out_sample_count": len(held_out),
+                "held_out_max_abs_error_rad": maximum_error,
+                "accepted_max_abs_error_rad": policy.accepted_max_abs_error_rad,
+                "training_count_span": span,
+            }
+        )
+
+    training_sums = [item["raw_position_counts"][1] + item["raw_position_counts"][2]
+                     for item in training]
+    held_out_sums = [item["raw_position_counts"][1] + item["raw_position_counts"][2]
+                     for item in held_out]
+    nominal_sum = round(sum(training_sums) / len(training_sums))
+    training_residual = max(abs(value - nominal_sum) for value in training_sums)
+    held_out_residual = max(abs(value - nominal_sum) for value in held_out_sums)
+    if max(training_residual, held_out_residual) > policy.shoulder_runtime_tolerance_counts:
+        raise PositionVectorCampaignError("mirrored shoulder residual exceeds policy")
+
+    return {
+        "schema": FIT_REPORT_SCHEMA,
+        "status": "PASS",
+        "calibration_id": calibration,
+        "dataset_id": dataset["dataset_id"],
+        "dataset_sha256": canonical_sha256(dataset),
+        "producer_id": dataset["producer_id"],
+        "attachment_profile": dataset["attachment_profile"],
+        "policy": policy.to_dict(),
+        "joints": joints,
+        "shoulder_pair": {
+            "driving_index": 1,
+            "driven_index": 2,
+            "nominal_sum_counts": nominal_sum,
+            "runtime_tolerance_counts": policy.shoulder_runtime_tolerance_counts,
+            "training_max_abs_residual_counts": training_residual,
+            "held_out_max_abs_residual_counts": held_out_residual,
+        },
+        "motion_authorized": False,
+        "physical_authority": False,
+    }
+
+
+def _policy(value: Any) -> CampaignPolicy:
+    raw = _mapping(value, "fit_report.policy")
+    if set(raw) != set(CampaignPolicy().to_dict()):
+        raise PositionVectorCampaignError("fit report policy fields do not match")
+    try:
+        return CampaignPolicy(**raw)
+    except TypeError as exc:
+        raise PositionVectorCampaignError("fit report policy is invalid") from exc
+
+
+def _review(
+    document: Mapping[str, Any], *, dataset_sha256: str, fit_report_sha256: str,
+    producer_id: str,
+) -> dict[str, Any]:
+    raw = _mapping(document, "review")
+    _exact(raw, _REVIEW_FIELDS, "review")
+    if raw.get("schema") != REVIEW_SCHEMA:
+        raise PositionVectorCampaignError("review schema mismatch")
+    if raw.get("dataset_sha256") != dataset_sha256:
+        raise PositionVectorCampaignError("review dataset hash mismatch")
+    if raw.get("fit_report_sha256") != fit_report_sha256:
+        raise PositionVectorCampaignError("review fit report hash mismatch")
+    if raw.get("producer_id") != producer_id:
+        raise PositionVectorCampaignError("review producer mismatch")
+    reviewer = _identifier(raw.get("reviewer_id"), "reviewer_id")
+    if reviewer == producer_id:
+        raise PositionVectorCampaignError("reviewer must be independent of producer")
+    if raw.get("decision") != "ACCEPT":
+        raise PositionVectorCampaignError("review decision is not ACCEPT")
+    reviewed_at = raw.get("reviewed_at")
+    if not isinstance(reviewed_at, str):
+        raise PositionVectorCampaignError("reviewed_at is invalid")
+    try:
+        timestamp = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError("reviewed_at is invalid") from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError("reviewed_at must include a UTC offset")
+    normalized = dict(raw)
+    normalized["review_notes_sha256"] = _digest(
+        raw.get("review_notes_sha256"), "review_notes_sha256"
+    )
+    return normalized
+
+
+def build_calibration_artifact(
+    dataset_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Verify dataset, deterministic fit, and independent review, then emit v1."""
+
+    dataset = load_campaign_dataset(dataset_document)
+    fit = _mapping(fit_report_document, "fit_report")
+    policy = _policy(fit.get("policy"))
+    expected = fit_campaign_dataset(
+        dataset, calibration_id=_identifier(fit.get("calibration_id"), "calibration_id"),
+        policy=policy,
+    )
+    if canonical_bytes(fit) != canonical_bytes(expected):
+        raise PositionVectorCampaignError("fit report does not reproduce from the dataset")
+    dataset_hash = canonical_sha256(dataset)
+    fit_hash = canonical_sha256(expected)
+    review = _review(
+        review_document,
+        dataset_sha256=dataset_hash,
+        fit_report_sha256=fit_hash,
+        producer_id=dataset["producer_id"],
+    )
+    review_hash = canonical_sha256(review)
+    if len({dataset_hash, fit_hash, review_hash}) != 3:
+        raise PositionVectorCampaignError("campaign evidence hashes are not distinct")
+    artifact = {
+        "schema": ARTIFACT_SCHEMA,
+        "calibration_id": expected["calibration_id"],
+        "response_profile": PROFILE,
+        "controller_binding": dataset["controller_binding"],
+        "position_order_servo_ids": list(SERVO_ORDER),
+        "joint_order": list(JOINT_ORDER),
+        "joints": [
+            {key: value for key, value in row.items() if key != "training_count_span"}
+            for row in expected["joints"]
+        ],
+        "shoulder_pair": expected["shoulder_pair"],
+        "evidence": {
+            "dataset_sha256": dataset_hash,
+            "fit_report_sha256": fit_hash,
+            "independent_review_sha256": review_hash,
+        },
+    }
+    load_position_vector_calibration(artifact)
+    return artifact
+
+
+def _read_json(path: str) -> Mapping[str, Any]:
+    try:
+        value = json.loads(Path(path).read_bytes())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise PositionVectorCampaignError(f"cannot read JSON input {path}") from exc
+    return _mapping(value, path)
+
+
+def _write_new(path: str, value: Mapping[str, Any]) -> None:
+    try:
+        with Path(path).open("xb") as stream:
+            stream.write(canonical_bytes(value) + b"\n")
+    except FileExistsError as exc:
+        raise PositionVectorCampaignError(f"refusing to replace existing output {path}") from exc
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Fit or finalize retained JSON evidence without any hardware imports."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    fit_parser = commands.add_parser("fit", help="fit and validate a retained dataset")
+    fit_parser.add_argument("--dataset", required=True)
+    fit_parser.add_argument("--calibration-id", required=True)
+    fit_parser.add_argument("--output", required=True)
+    fit_parser.add_argument("--minimum-training-samples", type=int, default=5)
+    fit_parser.add_argument("--minimum-held-out-samples", type=int, default=3)
+    fit_parser.add_argument("--minimum-training-count-span", type=int, default=128)
+    fit_parser.add_argument("--accepted-max-abs-error-rad", type=float, default=0.035)
+    fit_parser.add_argument("--shoulder-runtime-tolerance-counts", type=int, default=24)
+    build_parser = commands.add_parser("build", help="verify review and emit calibration")
+    build_parser.add_argument("--dataset", required=True)
+    build_parser.add_argument("--fit-report", required=True)
+    build_parser.add_argument("--review", required=True)
+    build_parser.add_argument("--output", required=True)
+    args = parser.parse_args(argv)
+
+    if args.command == "fit":
+        policy = CampaignPolicy(
+            minimum_training_samples=args.minimum_training_samples,
+            minimum_held_out_samples=args.minimum_held_out_samples,
+            minimum_training_count_span=args.minimum_training_count_span,
+            accepted_max_abs_error_rad=args.accepted_max_abs_error_rad,
+            shoulder_runtime_tolerance_counts=args.shoulder_runtime_tolerance_counts,
+        )
+        result = fit_campaign_dataset(
+            _read_json(args.dataset), calibration_id=args.calibration_id, policy=policy
+        )
+    else:
+        result = build_calibration_artifact(
+            _read_json(args.dataset),
+            _read_json(args.fit_report),
+            _read_json(args.review),
+        )
+    _write_new(args.output, result)
+    return 0
+
+
+__all__ = [
+    "DATASET_SCHEMA",
+    "FIT_REPORT_SCHEMA",
+    "REVIEW_SCHEMA",
+    "SUPPORTED_ATTACHMENTS",
+    "TRUTH_METHODS",
+    "CampaignPolicy",
+    "PositionVectorCampaignError",
+    "build_calibration_artifact",
+    "canonical_bytes",
+    "canonical_sha256",
+    "fit_campaign_dataset",
+    "load_campaign_dataset",
+    "main",
+]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
