@@ -115,6 +115,37 @@ def _ready_profiled_admission():
         **handoff_core,
         "isaac_replay_handoff_sha256": _sha(handoff_core),
     }
+    route_bound_core = {
+        "schema": "rocell.route_bound_entry_isaac_replay_handoff.v1",
+        "status": "READY_ROUTE_BOUND_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY",
+        "active_profile": "no_attachment",
+        "route_bound_collision_qualification_sha256": "9" * 64,
+        "route_bound_entry_qualification_sha256": "a" * 64,
+        "route_envelope_binding_sha256": "b" * 64,
+        "installed_collision_profile_sha256": "6" * 64,
+        "profiled_entry_route_qualification_sha256": "4" * 64,
+        "isaac_replay_handoff": handoff,
+        "isaac_replay_handoff_sha256": handoff["isaac_replay_handoff_sha256"],
+        "profile_separation_preserved": True,
+        "exact_route_and_fresh_entry_verified_before_handoff": True,
+        "blockers": [],
+        "next_required_stage": "RUN_EXACT_NATIVE_ISAAC_REPLAY_AND_RETAIN_RECEIPT",
+        "authority": {
+            "exact_route_binding_verified": True,
+            "fresh_entry_binding_verified": True,
+            "replan_allowed": False,
+            "controller_commands": [],
+            "hardware_commands_generated": 0,
+            "hardware_writes": 0,
+            "hardware_access": False,
+            "physical_movements": 0,
+            "physical_authority": False,
+        },
+    }
+    route_bound = {
+        **route_bound_core,
+        "route_bound_isaac_replay_handoff_sha256": _sha(route_bound_core),
+    }
     usd = b"governed-test-usd"
     receipt_core = {
         "schema": "tactevra.isaac_sim_urdf_import.v1",
@@ -133,7 +164,7 @@ def _ready_profiled_admission():
         "physical_movements": 0,
     }
     receipt = {**receipt_core, "receipt_sha256": _sha(receipt_core)}
-    return handoff, lock, receipt, usd
+    return route_bound, lock, receipt, usd
 
 
 def _report():
@@ -261,9 +292,9 @@ def test_v2_bundle_rejects_unbound_actual_emitter_claim():
         )
 
 
-def test_profiled_native_admission_binds_every_identity_before_isaac_import():
+def test_route_bound_native_admission_binds_every_identity_before_isaac_import():
     handoff, lock, receipt, usd = _ready_profiled_admission()
-    admission = REPLAY._validate_profiled_native_admission(
+    admission = REPLAY._validate_route_bound_native_admission(
         handoff,
         lock,
         receipt,
@@ -274,13 +305,15 @@ def test_profiled_native_admission_binds_every_identity_before_isaac_import():
     assert admission["active_profile"] == "no_attachment"
     assert admission["sample_count"] == 329
     assert admission["segment_count"] == 328
+    assert admission["route_bound_collision_qualification_sha256"] == "9" * 64
+    assert admission["route_bound_entry_qualification_sha256"] == "a" * 64
     assert admission["controller_commands"] == []
     assert admission["gate_promotions"] == []
     assert "isaacsim" not in sys.modules
 
 
 @pytest.mark.parametrize("mutation", ["usd", "dof_order", "joint_order"])
-def test_profiled_native_admission_rejects_crossed_governed_inputs(mutation):
+def test_route_bound_native_admission_rejects_crossed_governed_inputs(mutation):
     handoff, lock, receipt, usd = _ready_profiled_admission()
     if mutation == "usd":
         usd += b"-changed"
@@ -290,25 +323,26 @@ def test_profiled_native_admission_rejects_crossed_governed_inputs(mutation):
         core.pop("receipt_sha256")
         receipt["receipt_sha256"] = _sha(core)
     else:
-        joints = handoff["trajectory"]["samples"][0]["joint_positions_rad"]
-        handoff["trajectory"]["samples"][0]["joint_positions_rad"] = dict(
+        nested = handoff["isaac_replay_handoff"]
+        joints = nested["trajectory"]["samples"][0]["joint_positions_rad"]
+        nested["trajectory"]["samples"][0]["joint_positions_rad"] = dict(
             reversed(list(joints.items()))
         )
-        trajectory = handoff["trajectory"]
+        trajectory = nested["trajectory"]
         trajectory_core = dict(trajectory)
         trajectory_core.pop("trajectory_sha256")
         trajectory["trajectory_sha256"] = _sha(trajectory_core)
-        handoff["isaac_replay_request"]["trajectory_sha256"] = trajectory[
+        nested["isaac_replay_request"]["trajectory_sha256"] = trajectory[
             "trajectory_sha256"
         ]
-        request_core = dict(handoff["isaac_replay_request"])
+        request_core = dict(nested["isaac_replay_request"])
         request_core.pop("request_sha256")
-        handoff["isaac_replay_request"]["request_sha256"] = _sha(request_core)
-        handoff_core = dict(handoff)
+        nested["isaac_replay_request"]["request_sha256"] = _sha(request_core)
+        handoff_core = dict(nested)
         handoff_core.pop("isaac_replay_handoff_sha256")
-        handoff["isaac_replay_handoff_sha256"] = _sha(handoff_core)
+        nested["isaac_replay_handoff_sha256"] = _sha(handoff_core)
     with pytest.raises(ValueError):
-        REPLAY._validate_profiled_native_admission(
+        REPLAY._validate_route_bound_native_admission(
             handoff,
             lock,
             receipt,
@@ -339,7 +373,7 @@ def test_admission_only_cli_exits_before_native_runtime(monkeypatch, tmp_path):
         "--admission-only",
         "--usd", str(paths["usd"]),
         "--import-receipt", str(paths["receipt"]),
-        "--profiled-handoff", str(paths["handoff"]),
+        "--route-bound-handoff", str(paths["handoff"]),
         "--toolchain-lock", str(paths["lock"]),
         "--output", str(paths["output"]),
         "--status-output", str(paths["status"]),
@@ -352,3 +386,15 @@ def test_admission_only_cli_exits_before_native_runtime(monkeypatch, tmp_path):
         "READY_FOR_NATIVE_ISAAC_START_ZERO_AUTHORITY"
     )
     assert "isaacsim" not in sys.modules
+
+
+def test_native_admission_rejects_legacy_inner_handoff() -> None:
+    route_bound, lock, receipt, usd = _ready_profiled_admission()
+    with pytest.raises(ValueError, match="fields differ"):
+        REPLAY._validate_route_bound_native_admission(
+            route_bound["isaac_replay_handoff"],
+            lock,
+            receipt,
+            usd_bytes=usd,
+            import_receipt_file_sha256="9" * 64,
+        )
