@@ -27,6 +27,11 @@ from test_wizard_native_arm_metadata import snapshot, no_host_access
 from test_powered_arm_feedback_contract import document
 
 REPLY = b'{"T":1051,"x":300,"y":0,"z":200,"tit":0,"b":0,"s":0,"e":1.5,"t":0,"r":0,"g":3,"v":1200}\n'
+POSITION_VECTOR_REPLY = (
+    b'{"T":1051,"p":[2050,2147,1958,2550,2227,2041,2042],'
+    b'"pose":"KEYBOARD_FORWARD_CAL_1","motion_active":false,'
+    b'"trajectory_progress_permille":1000}\n'
+)
 
 
 def binding():
@@ -98,6 +103,20 @@ def test_incomplete_ambiguous_or_wrong_response_rejected(response):
     assert result["status"] == "FAILED"
     assert result["feedback"] is None
     assert result["lifecycle"]["write_consumed"] is True
+
+
+def test_installed_position_vector_profile_is_named_and_remains_rejected():
+    api = IncapableWin32SerialApi(
+        IncapableWin32Scenario(response_bytes=POSITION_VECTOR_REPLY)
+    )
+    result = observe_rehearsal(binding(), api, Event())
+    assert result["status"] == "FAILED"
+    assert result["feedback"] is None
+    assert result["errors"] == ["INSTALLED_POSITION_VECTOR_FEEDBACK_PROFILE"]
+    assert base64.b64decode(result["response"]["base64"]) == POSITION_VECTOR_REPLY
+    assert result["lifecycle"]["confirmed_write_bytes"] == 10
+    assert result["lifecycle"]["cleanup_confirmed"] is True
+    assert result["motion_authorized"] is False
 
 
 def test_short_write_not_retried():
