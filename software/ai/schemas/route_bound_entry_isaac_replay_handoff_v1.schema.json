@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tactevra.dev/schemas/route_bound_entry_isaac_replay_handoff_v1.schema.json",
+  "title": "Route-bound entry Isaac replay handoff v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "active_profile",
+    "route_bound_collision_qualification_sha256",
+    "route_bound_entry_qualification_sha256",
+    "route_envelope_binding_sha256",
+    "installed_collision_profile_sha256",
+    "profiled_entry_route_qualification_sha256",
+    "isaac_replay_handoff",
+    "isaac_replay_handoff_sha256",
+    "profile_separation_preserved",
+    "exact_route_and_fresh_entry_verified_before_handoff",
+    "blockers",
+    "next_required_stage",
+    "authority",
+    "route_bound_isaac_replay_handoff_sha256"
+  ],
+  "properties": {
+    "schema": {"const": "rocell.route_bound_entry_isaac_replay_handoff.v1"},
+    "status": {
+      "enum": [
+        "READY_ROUTE_BOUND_NATIVE_ISAAC_REPLAY_ZERO_AUTHORITY",
+        "BLOCKED_ROUTE_BOUND_NATIVE_ISAAC_REPLAY_EVIDENCE_INCOMPLETE",
+        "REJECTED_ROUTE_BOUND_ENTRY_OR_ROUTE_COLLISION"
+      ]
+    },
+    "active_profile": {"enum": ["no_attachment", "stylus_attachment"]},
+    "route_bound_collision_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "route_bound_entry_qualification_sha256": {"$ref": "#/$defs/sha256"},
+    "route_envelope_binding_sha256": {"$ref": "#/$defs/sha256"},
+    "installed_collision_profile_sha256": {"$ref": "#/$defs/sha256"},
+    "profiled_entry_route_qualification_sha256": {
+      "oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]
+    },
+    "isaac_replay_handoff": {"type": ["object", "null"]},
+    "isaac_replay_handoff_sha256": {
+      "oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]
+    },
+    "profile_separation_preserved": {"const": true},
+    "exact_route_and_fresh_entry_verified_before_handoff": {"const": true},
+    "blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_required_stage": {"type": "string", "minLength": 1},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_route_binding_verified",
+        "fresh_entry_binding_verified",
+        "replan_allowed",
+        "controller_commands",
+        "hardware_commands_generated",
+        "hardware_writes",
+        "hardware_access",
+        "physical_movements",
+        "physical_authority"
+      ],
+      "properties": {
+        "exact_route_binding_verified": {"const": true},
+        "fresh_entry_binding_verified": {"const": true},
+        "replan_allowed": {"const": false},
+        "controller_commands": {"const": []},
+        "hardware_commands_generated": {"const": 0},
+        "hardware_writes": {"const": 0},
+        "hardware_access": {"const": false},
+        "physical_movements": {"const": 0},
+        "physical_authority": {"const": false}
+      }
+    },
+    "route_bound_isaac_replay_handoff_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

@@ -8632,3 +8632,34 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: exercise the route-bound evaluator with retained reviewed
   installed evidence, capture a fresh authenticated read-only start for the
   selected profile, and pass the existing ICQ-7 entry chain through this join.
+
+### E-20261020-INT-484 — route-bound ICQ-7 chain carried into ICQ-9
+
+- Stage: ICQ-9 native replay handoff orchestration readiness.
+- Lane: exact reviewed route and fresh entry chain to the existing
+  non-replanning Isaac handoff.
+- Change: added an additive zero-authority adapter that requires the sealed
+  route-bound collision and entry receipts before invoking the existing
+  selected-profile Isaac replay handoff.
+- Result: the adapter independently reconstructs and verifies the supplied
+  route-bound collision receipt, checks the selected reviewed route-envelope
+  and installed-profile hashes against the fresh-entry receipt, and carries
+  both route-bound receipt identities into a sealed ICQ-9 handoff. Rejected or
+  incomplete entry chains stop before nested handoff preparation.
+- Artifacts:
+  `software/src/rocell/application/route_bound_entry_isaac_replay_handoff_v1.py`,
+  `software/ai/schemas/route_bound_entry_isaac_replay_handoff_v1.schema.json`,
+  and
+  `software/tests/unit/test_route_bound_entry_isaac_replay_handoff_v1.py`.
+- Focused verification: 22 route-bound entry and Isaac handoff tests passed.
+- Governed portable matrix: 975 passed with 5 expected Windows symlink skips.
+- Hardware-write count: 0.
+- Physical-movement count: 0.
+- GPU-job count: 0.
+- Limitations: this is an offline lineage and admission adapter. It does not
+  create reviewed installed geometry, fresh controller observations, native
+  replay, tracking or settle telemetry, controller commands, or physical
+  authority.
+- Next dependency: retain real independently reviewed installed-profile
+  evidence, capture the fresh authenticated read-only start, exercise this
+  chain, then admit and run the exact request on the selected native runner.

@@ -23,6 +23,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
 
 ### Changed
 
+- Bound the selected-profile Isaac replay handoff to the exact route-reviewed
+  collision and fresh-entry receipts before producing a non-replanning native
+  request.
 - Added strict independent intake validation for the selected-profile Isaac WP3
   handoff, including exact trajectory, request, attachment-profile,
   zero-authority, and selected toolchain identity checks before native use.
