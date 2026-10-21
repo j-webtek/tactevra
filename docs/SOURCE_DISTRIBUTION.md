@@ -154,6 +154,15 @@ legacy inner handoff and retains the existing outer route-bound collision,
 fresh-entry, and reviewed-envelope hashes before any Isaac import or GPU start.
 All byte, duplicate, and reduction limits remain unchanged.
 
+The installed T1051 position-vector feedback classifier adds two governed paths:
+one pure, zero-authority response-shape classifier and one focused unit-test
+module. The reviewed tracked-file ceiling moves from 6,604 to the exact expected
+6,606 files. The classifier neither opens hardware nor converts raw controller
+counts into calibrated joint state; it preserves the installed response as a
+named rejected diagnostic profile. No camera frame, controller transcript,
+measurement export, trajectory corpus, or simulator asset enters the source
+archive, and all byte, duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
