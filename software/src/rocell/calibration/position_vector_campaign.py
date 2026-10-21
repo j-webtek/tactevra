@@ -31,6 +31,8 @@ from rocell.arm.position_vector_calibration import (
 DATASET_SCHEMA = "rocell.position_vector_calibration_dataset.v1"
 FIT_REPORT_SCHEMA = "rocell.position_vector_calibration_fit_report.v1"
 REVIEW_SCHEMA = "rocell.position_vector_calibration_review.v1"
+PLAN_SCHEMA = "rocell.position_vector_calibration_collection_plan.v1"
+OBSERVATIONS_SCHEMA = "rocell.position_vector_calibration_observations.v1"
 SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
 TRUTH_METHODS = (
     "encoder_reference_fixture",
@@ -79,6 +81,42 @@ _REVIEW_FIELDS = frozenset(
         "decision",
         "reviewed_at",
         "review_notes_sha256",
+    }
+)
+_PLAN_FIELDS = frozenset(
+    {
+        "schema",
+        "dataset_id",
+        "producer_id",
+        "controller_binding",
+        "attachment_profile",
+        "position_order_servo_ids",
+        "joint_order",
+        "policy",
+        "slots",
+        "authority",
+    }
+)
+_PLAN_SLOT_FIELDS = frozenset({"sample_id", "split", "source_pose", "truth_method"})
+_PLAN_AUTHORITY_FIELDS = frozenset(
+    {
+        "controller_opened",
+        "camera_opened",
+        "commands_sent",
+        "motion_authorized",
+        "physical_authority",
+    }
+)
+_OBSERVATIONS_FIELDS = frozenset({"schema", "plan_sha256", "samples"})
+_OBSERVATION_FIELDS = frozenset(
+    {
+        "sample_id",
+        "raw_position_counts",
+        "canonical_joints_rad",
+        "truth_evidence_sha256",
+        "stationary",
+        "motion_active",
+        "trajectory_progress_permille",
     }
 )
 
@@ -192,8 +230,8 @@ def _sample(value: Any, index: int) -> dict[str, Any]:
     ):
         raise PositionVectorCampaignError(f"{label}.raw_position_counts is invalid")
     joints = _mapping(raw.get("canonical_joints_rad"), f"{label}.canonical_joints_rad")
-    if list(joints) != list(JOINT_ORDER):
-        raise PositionVectorCampaignError(f"{label}.canonical joint order is invalid")
+    if set(joints) != set(JOINT_ORDER):
+        raise PositionVectorCampaignError(f"{label}.canonical joints are invalid")
     method = raw.get("truth_method")
     if method not in TRUTH_METHODS:
         raise PositionVectorCampaignError(f"{label}.truth_method is unsupported")
@@ -253,6 +291,212 @@ def load_campaign_dataset(document: Mapping[str, Any]) -> dict[str, Any]:
         "joint_order": list(JOINT_ORDER),
         "samples": samples,
     }
+
+
+def create_collection_plan(
+    *,
+    dataset_id: str,
+    producer_id: str,
+    controller_binding: Mapping[str, Any],
+    attachment_profile: str,
+    training_poses: list[str] | tuple[str, ...],
+    held_out_poses: list[str] | tuple[str, ...],
+    truth_method: str,
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Freeze a finite collection campaign without opening any hardware."""
+
+    if attachment_profile not in SUPPORTED_ATTACHMENTS:
+        raise PositionVectorCampaignError("collection plan attachment profile is invalid")
+    if truth_method not in TRUTH_METHODS:
+        raise PositionVectorCampaignError("collection plan truth method is unsupported")
+    if not isinstance(training_poses, (list, tuple)) or not isinstance(
+        held_out_poses, (list, tuple)
+    ):
+        raise PositionVectorCampaignError("collection plan poses must be arrays")
+    if len(training_poses) < policy.minimum_training_samples:
+        raise PositionVectorCampaignError("collection plan has insufficient training slots")
+    if len(held_out_poses) < policy.minimum_held_out_samples:
+        raise PositionVectorCampaignError("collection plan has insufficient held-out slots")
+    poses = [
+        _identifier(value, f"training_poses[{index}]")
+        for index, value in enumerate(training_poses)
+    ] + [
+        _identifier(value, f"held_out_poses[{index}]")
+        for index, value in enumerate(held_out_poses)
+    ]
+    if len(set(poses)) != len(poses):
+        raise PositionVectorCampaignError("collection plan source poses must be unique")
+    slots = []
+    for index, source_pose in enumerate(poses):
+        training = index < len(training_poses)
+        prefix = "train" if training else "holdout"
+        ordinal = index if training else index - len(training_poses)
+        slots.append(
+            {
+                "sample_id": f"{prefix}-{ordinal + 1:02d}",
+                "split": "TRAINING" if training else "HELD_OUT",
+                "source_pose": source_pose,
+                "truth_method": truth_method,
+            }
+        )
+    return load_collection_plan(
+        {
+            "schema": PLAN_SCHEMA,
+            "dataset_id": dataset_id,
+            "producer_id": producer_id,
+            "controller_binding": dict(controller_binding),
+            "attachment_profile": attachment_profile,
+            "position_order_servo_ids": list(SERVO_ORDER),
+            "joint_order": list(JOINT_ORDER),
+            "policy": policy.to_dict(),
+            "slots": slots,
+            "authority": {
+                "controller_opened": False,
+                "camera_opened": False,
+                "commands_sent": 0,
+                "motion_authorized": False,
+                "physical_authority": False,
+            },
+        }
+    )
+
+
+def load_collection_plan(document: Mapping[str, Any]) -> dict[str, Any]:
+    """Strict-decode a frozen, offline collection plan."""
+
+    raw = _mapping(document, "collection_plan")
+    _exact(raw, _PLAN_FIELDS, "collection_plan")
+    if raw.get("schema") != PLAN_SCHEMA:
+        raise PositionVectorCampaignError("collection plan schema mismatch")
+    if raw.get("position_order_servo_ids") != list(SERVO_ORDER):
+        raise PositionVectorCampaignError("collection plan servo order mismatch")
+    if raw.get("joint_order") != list(JOINT_ORDER):
+        raise PositionVectorCampaignError("collection plan joint order mismatch")
+    attachment = raw.get("attachment_profile")
+    if attachment not in SUPPORTED_ATTACHMENTS:
+        raise PositionVectorCampaignError("collection plan attachment profile is invalid")
+    policy = _policy(raw.get("policy"), label="collection_plan.policy")
+    authority = _mapping(raw.get("authority"), "collection_plan.authority")
+    _exact(authority, _PLAN_AUTHORITY_FIELDS, "collection_plan.authority")
+    if authority != {
+        "controller_opened": False,
+        "camera_opened": False,
+        "commands_sent": 0,
+        "motion_authorized": False,
+        "physical_authority": False,
+    }:
+        raise PositionVectorCampaignError("collection plan cannot grant physical authority")
+    values = raw.get("slots")
+    if not isinstance(values, list):
+        raise PositionVectorCampaignError("collection plan slots must be an array")
+    slots = []
+    for index, value in enumerate(values):
+        label = f"collection_plan.slots[{index}]"
+        slot = _mapping(value, label)
+        _exact(slot, _PLAN_SLOT_FIELDS, label)
+        split = slot.get("split")
+        if split not in {"TRAINING", "HELD_OUT"}:
+            raise PositionVectorCampaignError(f"{label}.split is invalid")
+        method = slot.get("truth_method")
+        if method not in TRUTH_METHODS:
+            raise PositionVectorCampaignError(f"{label}.truth_method is unsupported")
+        slots.append(
+            {
+                "sample_id": _identifier(slot.get("sample_id"), f"{label}.sample_id"),
+                "split": split,
+                "source_pose": _identifier(slot.get("source_pose"), f"{label}.source_pose"),
+                "truth_method": method,
+            }
+        )
+    ids = [slot["sample_id"] for slot in slots]
+    poses = [slot["source_pose"] for slot in slots]
+    if len(set(ids)) != len(ids):
+        raise PositionVectorCampaignError("collection plan sample IDs must be unique")
+    if len(set(poses)) != len(poses):
+        raise PositionVectorCampaignError("collection plan source poses must be unique")
+    if sum(slot["split"] == "TRAINING" for slot in slots) < policy.minimum_training_samples:
+        raise PositionVectorCampaignError("collection plan has insufficient training slots")
+    if sum(slot["split"] == "HELD_OUT" for slot in slots) < policy.minimum_held_out_samples:
+        raise PositionVectorCampaignError("collection plan has insufficient held-out slots")
+    return {
+        "schema": PLAN_SCHEMA,
+        "dataset_id": _identifier(raw.get("dataset_id"), "dataset_id"),
+        "producer_id": _identifier(raw.get("producer_id"), "producer_id"),
+        "controller_binding": _controller(raw.get("controller_binding")),
+        "attachment_profile": attachment,
+        "position_order_servo_ids": list(SERVO_ORDER),
+        "joint_order": list(JOINT_ORDER),
+        "policy": policy.to_dict(),
+        "slots": slots,
+        "authority": dict(authority),
+    }
+
+
+def collection_observations_template(plan_document: Mapping[str, Any]) -> dict[str, Any]:
+    """Return explicit empty evidence slots for a previously frozen plan."""
+
+    plan = load_collection_plan(plan_document)
+    return {
+        "schema": OBSERVATIONS_SCHEMA,
+        "plan_sha256": canonical_sha256(plan),
+        "samples": [
+            {
+                "sample_id": slot["sample_id"],
+                "raw_position_counts": None,
+                "canonical_joints_rad": None,
+                "truth_evidence_sha256": None,
+                "stationary": None,
+                "motion_active": None,
+                "trajectory_progress_permille": None,
+            }
+            for slot in plan["slots"]
+        ],
+    }
+
+
+def compile_planned_dataset(
+    plan_document: Mapping[str, Any], observations_document: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Combine a frozen plan with complete retained observations."""
+
+    plan = load_collection_plan(plan_document)
+    observations = _mapping(observations_document, "observations")
+    _exact(observations, _OBSERVATIONS_FIELDS, "observations")
+    if observations.get("schema") != OBSERVATIONS_SCHEMA:
+        raise PositionVectorCampaignError("observations schema mismatch")
+    if observations.get("plan_sha256") != canonical_sha256(plan):
+        raise PositionVectorCampaignError("observations plan hash mismatch")
+    values = observations.get("samples")
+    if not isinstance(values, list) or len(values) != len(plan["slots"]):
+        raise PositionVectorCampaignError("observations do not fill every planned slot")
+    samples = []
+    for index, (value, slot) in enumerate(zip(values, plan["slots"], strict=True)):
+        label = f"observations.samples[{index}]"
+        observation = _mapping(value, label)
+        _exact(observation, _OBSERVATION_FIELDS, label)
+        if observation.get("sample_id") != slot["sample_id"]:
+            raise PositionVectorCampaignError("observation sample order differs from plan")
+        samples.append(
+            {
+                **dict(observation),
+                "split": slot["split"],
+                "source_pose": slot["source_pose"],
+                "truth_method": slot["truth_method"],
+            }
+        )
+    return load_campaign_dataset(
+        {
+            "schema": DATASET_SCHEMA,
+            "dataset_id": plan["dataset_id"],
+            "producer_id": plan["producer_id"],
+            "controller_binding": plan["controller_binding"],
+            "attachment_profile": plan["attachment_profile"],
+            "position_order_servo_ids": list(SERVO_ORDER),
+            "joint_order": list(JOINT_ORDER),
+            "samples": samples,
+        }
+    )
 
 
 def _linear_fit(points: list[tuple[int, float]], joint: str) -> tuple[float, float]:
@@ -358,8 +602,8 @@ def fit_campaign_dataset(
     }
 
 
-def _policy(value: Any) -> CampaignPolicy:
-    raw = _mapping(value, "fit_report.policy")
+def _policy(value: Any, *, label: str = "fit_report.policy") -> CampaignPolicy:
+    raw = _mapping(value, label)
     if set(raw) != set(CampaignPolicy().to_dict()):
         raise PositionVectorCampaignError("fit report policy fields do not match")
     try:
@@ -469,10 +713,31 @@ def _write_new(path: str, value: Mapping[str, Any]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Fit or finalize retained JSON evidence without any hardware imports."""
+    """Prepare, compile, fit, or finalize evidence without hardware imports."""
 
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    prepare_parser = commands.add_parser(
+        "prepare", help="freeze a collection plan and empty observation template"
+    )
+    prepare_parser.add_argument("--dataset-id", required=True)
+    prepare_parser.add_argument("--producer-id", required=True)
+    prepare_parser.add_argument("--vid", required=True)
+    prepare_parser.add_argument("--pid", required=True)
+    prepare_parser.add_argument("--unit-serial", required=True)
+    prepare_parser.add_argument("--firmware-sha256", required=True)
+    prepare_parser.add_argument("--attachment-profile", choices=SUPPORTED_ATTACHMENTS, required=True)
+    prepare_parser.add_argument("--truth-method", choices=TRUTH_METHODS, required=True)
+    prepare_parser.add_argument("--training-pose", action="append", required=True)
+    prepare_parser.add_argument("--held-out-pose", action="append", required=True)
+    prepare_parser.add_argument("--plan-output", required=True)
+    prepare_parser.add_argument("--observations-output", required=True)
+    compile_parser = commands.add_parser(
+        "compile", help="compile complete observations into the strict dataset"
+    )
+    compile_parser.add_argument("--plan", required=True)
+    compile_parser.add_argument("--observations", required=True)
+    compile_parser.add_argument("--output", required=True)
     fit_parser = commands.add_parser("fit", help="fit and validate a retained dataset")
     fit_parser.add_argument("--dataset", required=True)
     fit_parser.add_argument("--calibration-id", required=True)
@@ -489,7 +754,33 @@ def main(argv: list[str] | None = None) -> int:
     build_parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
 
-    if args.command == "fit":
+    if args.command == "prepare":
+        plan = create_collection_plan(
+            dataset_id=args.dataset_id,
+            producer_id=args.producer_id,
+            controller_binding={
+                "vid": args.vid,
+                "pid": args.pid,
+                "unit_serial": args.unit_serial,
+                "firmware_sha256": args.firmware_sha256,
+            },
+            attachment_profile=args.attachment_profile,
+            training_poses=args.training_pose,
+            held_out_poses=args.held_out_pose,
+            truth_method=args.truth_method,
+        )
+        plan_path = Path(args.plan_output)
+        observations_path = Path(args.observations_output)
+        if plan_path.exists() or observations_path.exists():
+            raise PositionVectorCampaignError("refusing to replace existing preparation output")
+        _write_new(args.plan_output, plan)
+        _write_new(args.observations_output, collection_observations_template(plan))
+        return 0
+    if args.command == "compile":
+        result = compile_planned_dataset(
+            _read_json(args.plan), _read_json(args.observations)
+        )
+    elif args.command == "fit":
         policy = CampaignPolicy(
             minimum_training_samples=args.minimum_training_samples,
             minimum_held_out_samples=args.minimum_held_out_samples,
@@ -513,6 +804,8 @@ def main(argv: list[str] | None = None) -> int:
 __all__ = [
     "DATASET_SCHEMA",
     "FIT_REPORT_SCHEMA",
+    "OBSERVATIONS_SCHEMA",
+    "PLAN_SCHEMA",
     "REVIEW_SCHEMA",
     "SUPPORTED_ATTACHMENTS",
     "TRUTH_METHODS",
@@ -521,8 +814,12 @@ __all__ = [
     "build_calibration_artifact",
     "canonical_bytes",
     "canonical_sha256",
+    "collection_observations_template",
+    "compile_planned_dataset",
+    "create_collection_plan",
     "fit_campaign_dataset",
     "load_campaign_dataset",
+    "load_collection_plan",
     "main",
 ]
 
