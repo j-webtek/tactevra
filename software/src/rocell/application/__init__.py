@@ -267,6 +267,13 @@ from .fixed_camera_keyboard_route_bound_entry_qualification_v1 import (
     FixedCameraKeyboardRouteBoundEntryQualificationV1Error,
     parse_fixed_camera_keyboard_route_bound_entry_v1,
     qualify_fixed_camera_keyboard_route_bound_entry_v1,
+    verify_fixed_camera_keyboard_route_bound_collision_receipt_v1,
+)
+from .route_bound_entry_isaac_replay_handoff_v1 import (
+    SCHEMA as ROUTE_BOUND_ENTRY_ISAAC_REPLAY_HANDOFF_SCHEMA,
+    RouteBoundEntryIsaacReplayHandoffV1Error,
+    parse_route_bound_entry_isaac_replay_handoff_v1,
+    prepare_route_bound_entry_isaac_replay_handoff_v1,
 )
 from .installed_geometry_cable_rehearsal_v1 import (
     SCHEMA as INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA,
@@ -1491,6 +1498,11 @@ __all__ = [
     "FixedCameraKeyboardRouteBoundEntryQualificationV1Error",
     "parse_fixed_camera_keyboard_route_bound_entry_v1",
     "qualify_fixed_camera_keyboard_route_bound_entry_v1",
+    "verify_fixed_camera_keyboard_route_bound_collision_receipt_v1",
+    "ROUTE_BOUND_ENTRY_ISAAC_REPLAY_HANDOFF_SCHEMA",
+    "RouteBoundEntryIsaacReplayHandoffV1Error",
+    "parse_route_bound_entry_isaac_replay_handoff_v1",
+    "prepare_route_bound_entry_isaac_replay_handoff_v1",
     "INSTALLED_GEOMETRY_CABLE_REHEARSAL_SCHEMA",
     "InstalledGeometryCableRehearsalV1Error",
     "build_synthetic_installed_collision_profile_v1",

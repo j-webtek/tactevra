@@ -154,7 +154,7 @@ def _qualify_entry(
     )
 
 
-def _verify_route_bound_receipt(
+def verify_fixed_camera_keyboard_route_bound_collision_receipt_v1(
     receipt: Mapping[str, Any],
     partition_documents: Mapping[str, Mapping[str, Any]],
     collision_evaluation: Mapping[str, Any],
@@ -250,7 +250,7 @@ def qualify_fixed_camera_keyboard_route_bound_entry_v1(
         raise FixedCameraKeyboardRouteBoundEntryQualificationV1Error(
             "active_profile is not supported"
         )
-    route_bound, route = _verify_route_bound_receipt(
+    route_bound, route = verify_fixed_camera_keyboard_route_bound_collision_receipt_v1(
         route_bound_collision_qualification,
         partition_documents,
         collision_evaluation,
@@ -461,4 +461,5 @@ __all__ = [
     "FixedCameraKeyboardRouteBoundEntryQualificationV1Error",
     "parse_fixed_camera_keyboard_route_bound_entry_v1",
     "qualify_fixed_camera_keyboard_route_bound_entry_v1",
+    "verify_fixed_camera_keyboard_route_bound_collision_receipt_v1",
 ]

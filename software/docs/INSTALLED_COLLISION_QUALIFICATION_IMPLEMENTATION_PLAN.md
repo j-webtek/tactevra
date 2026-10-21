@@ -432,6 +432,13 @@ before the `isaacsim` import or any GPU startup. Native
 replay, tracking/settle evidence, repeatability evidence, and ICQ-9 completion
 remain blocked on a retained real passing ICQ-8 receipt and accepted installed
 collision profile; synthetic unit fixtures are not native execution evidence.
+The route-bound ICQ-9 adapter now removes the remaining software bypass around
+the ICQ-7 join: it revalidates the supplied route-bound collision receipt
+against the exact partition documents and evaluation, requires the sealed
+route-bound fresh-entry receipt, and only then delegates to the existing exact
+non-replanning Isaac handoff. Rejected or incomplete entry chains stop before
+handoff preparation. A ready nested handoff retains both route-bound hashes,
+the reviewed route-envelope and installed-profile hashes, and zero authority.
 
 **Deliverables:**
 

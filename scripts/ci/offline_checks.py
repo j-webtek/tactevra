@@ -64,6 +64,7 @@ TESTS = (
     "software/tests/unit/test_profiled_route_cable_envelope_binding_v1.py",
     "software/tests/unit/test_fixed_camera_keyboard_route_bound_collision_qualification_v1.py",
     "software/tests/unit/test_fixed_camera_keyboard_route_bound_entry_qualification_v1.py",
+    "software/tests/unit/test_route_bound_entry_isaac_replay_handoff_v1.py",
     "software/tests/unit/test_immutable_camera_replay_v1.py",
     "software/tests/unit/test_pre_camera_observability_v1.py",
     "software/tests/unit/test_operational_latency_trace_v1.py",
