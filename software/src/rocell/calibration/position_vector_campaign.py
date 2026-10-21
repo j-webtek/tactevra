@@ -34,6 +34,9 @@ REVIEW_SCHEMA = "rocell.position_vector_calibration_review.v1"
 PLAN_SCHEMA = "rocell.position_vector_calibration_collection_plan.v1"
 OBSERVATIONS_SCHEMA = "rocell.position_vector_calibration_observations.v1"
 READINESS_SCHEMA = "rocell.position_vector_calibration_collection_readiness.v1"
+PREPARATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_preparation_receipt.v1"
+)
 SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
 TRUTH_METHODS = (
     "encoder_reference_fixture",
@@ -118,6 +121,28 @@ _OBSERVATION_FIELDS = frozenset(
         "stationary",
         "motion_active",
         "trajectory_progress_permille",
+    }
+)
+_READINESS_FIELDS = frozenset(
+    {
+        "schema",
+        "status",
+        "controller_identity",
+        "installed_firmware_sha256",
+        "attachment_profile",
+        "truth_method",
+        "retained_pose_labels",
+        "requirements",
+        "blockers",
+        "ready_to_prepare",
+        "authority",
+    }
+)
+_READINESS_REQUIREMENT_FIELDS = frozenset(
+    {
+        "minimum_training_samples",
+        "minimum_held_out_samples",
+        "minimum_unique_source_poses",
     }
 )
 
@@ -236,6 +261,47 @@ def assess_collection_readiness(
             "physical_authority": False,
         },
     }
+
+
+def load_collection_readiness(document: Mapping[str, Any]) -> dict[str, Any]:
+    """Strict-decode and reproduce an offline readiness assessment."""
+
+    raw = _mapping(document, "collection_readiness")
+    _exact(raw, _READINESS_FIELDS, "collection_readiness")
+    if raw.get("schema") != READINESS_SCHEMA:
+        raise PositionVectorCampaignError("collection readiness schema mismatch")
+    requirements = _mapping(raw.get("requirements"), "collection_readiness.requirements")
+    _exact(
+        requirements,
+        _READINESS_REQUIREMENT_FIELDS,
+        "collection_readiness.requirements",
+    )
+    minimum_training = requirements.get("minimum_training_samples")
+    minimum_held_out = requirements.get("minimum_held_out_samples")
+    if (
+        isinstance(minimum_training, bool)
+        or not isinstance(minimum_training, int)
+        or isinstance(minimum_held_out, bool)
+        or not isinstance(minimum_held_out, int)
+    ):
+        raise PositionVectorCampaignError("collection readiness requirements are invalid")
+    policy = CampaignPolicy(
+        minimum_training_samples=minimum_training,
+        minimum_held_out_samples=minimum_held_out,
+    )
+    expected = assess_collection_readiness(
+        controller_identity=_mapping(
+            raw.get("controller_identity"), "collection_readiness.controller_identity"
+        ),
+        installed_firmware_sha256=raw.get("installed_firmware_sha256"),
+        attachment_profile=raw.get("attachment_profile"),
+        truth_method=raw.get("truth_method"),
+        retained_pose_labels=raw.get("retained_pose_labels"),
+        policy=policy,
+    )
+    if expected != dict(raw):
+        raise PositionVectorCampaignError("collection readiness does not reproduce")
+    return expected
 
 
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
@@ -435,6 +501,72 @@ def create_collection_plan(
             },
         }
     )
+
+
+def create_assessed_collection_package(
+    *,
+    readiness_document: Mapping[str, Any],
+    dataset_id: str,
+    producer_id: str,
+    training_poses: list[str] | tuple[str, ...],
+    held_out_poses: list[str] | tuple[str, ...],
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Prepare a plan from the exact facts in a passing readiness report."""
+
+    readiness = load_collection_readiness(readiness_document)
+    if not readiness["ready_to_prepare"]:
+        raise PositionVectorCampaignError(
+            "collection readiness is blocked: " + ", ".join(readiness["blockers"])
+        )
+    if not isinstance(training_poses, (list, tuple)) or not isinstance(
+        held_out_poses, (list, tuple)
+    ):
+        raise PositionVectorCampaignError("assessed collection poses must be arrays")
+    selected_poses = [
+        _identifier(value, f"training_poses[{index}]")
+        for index, value in enumerate(training_poses)
+    ] + [
+        _identifier(value, f"held_out_poses[{index}]")
+        for index, value in enumerate(held_out_poses)
+    ]
+    retained_poses = readiness["retained_pose_labels"]
+    if len(selected_poses) != len(set(selected_poses)):
+        raise PositionVectorCampaignError("assessed collection poses must be unique")
+    if set(selected_poses) != set(retained_poses):
+        raise PositionVectorCampaignError(
+            "assessed collection poses do not match readiness evidence"
+        )
+    requirements = readiness["requirements"]
+    policy = CampaignPolicy(
+        minimum_training_samples=requirements["minimum_training_samples"],
+        minimum_held_out_samples=requirements["minimum_held_out_samples"],
+    )
+    identity = readiness["controller_identity"]
+    plan = create_collection_plan(
+        dataset_id=dataset_id,
+        producer_id=producer_id,
+        controller_binding={
+            **identity,
+            "firmware_sha256": readiness["installed_firmware_sha256"],
+        },
+        attachment_profile=readiness["attachment_profile"],
+        training_poses=training_poses,
+        held_out_poses=held_out_poses,
+        truth_method=readiness["truth_method"],
+        policy=policy,
+    )
+    observations = collection_observations_template(plan)
+    receipt = {
+        "schema": PREPARATION_RECEIPT_SCHEMA,
+        "status": "PREPARED_FROM_ASSESSED_EVIDENCE",
+        "dataset_id": plan["dataset_id"],
+        "producer_id": plan["producer_id"],
+        "readiness_sha256": canonical_sha256(readiness),
+        "plan_sha256": canonical_sha256(plan),
+        "observations_sha256": canonical_sha256(observations),
+        "authority": dict(plan["authority"]),
+    }
+    return plan, observations, receipt
 
 
 def load_collection_plan(document: Mapping[str, Any]) -> dict[str, Any]:
@@ -818,6 +950,18 @@ def main(argv: list[str] | None = None) -> int:
     prepare_parser.add_argument("--held-out-pose", action="append", required=True)
     prepare_parser.add_argument("--plan-output", required=True)
     prepare_parser.add_argument("--observations-output", required=True)
+    assessed_parser = commands.add_parser(
+        "prepare-assessed",
+        help="prepare from one exact passing readiness report",
+    )
+    assessed_parser.add_argument("--readiness", required=True)
+    assessed_parser.add_argument("--dataset-id", required=True)
+    assessed_parser.add_argument("--producer-id", required=True)
+    assessed_parser.add_argument("--training-pose", action="append", required=True)
+    assessed_parser.add_argument("--held-out-pose", action="append", required=True)
+    assessed_parser.add_argument("--plan-output", required=True)
+    assessed_parser.add_argument("--observations-output", required=True)
+    assessed_parser.add_argument("--receipt-output", required=True)
     compile_parser = commands.add_parser(
         "compile", help="compile complete observations into the strict dataset"
     )
@@ -876,6 +1020,29 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.plan_output, plan)
         _write_new(args.observations_output, collection_observations_template(plan))
         return 0
+    if args.command == "prepare-assessed":
+        plan, observations, receipt = create_assessed_collection_package(
+            readiness_document=_read_json(args.readiness),
+            dataset_id=args.dataset_id,
+            producer_id=args.producer_id,
+            training_poses=args.training_pose,
+            held_out_poses=args.held_out_pose,
+        )
+        output_paths = (
+            Path(args.plan_output),
+            Path(args.observations_output),
+            Path(args.receipt_output),
+        )
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias assessed preparation output"
+            )
+        _write_new(args.plan_output, plan)
+        _write_new(args.observations_output, observations)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "compile":
         result = compile_planned_dataset(
             _read_json(args.plan), _read_json(args.observations)
@@ -906,6 +1073,7 @@ __all__ = [
     "FIT_REPORT_SCHEMA",
     "OBSERVATIONS_SCHEMA",
     "PLAN_SCHEMA",
+    "PREPARATION_RECEIPT_SCHEMA",
     "READINESS_SCHEMA",
     "REVIEW_SCHEMA",
     "SUPPORTED_ATTACHMENTS",
@@ -918,9 +1086,11 @@ __all__ = [
     "canonical_sha256",
     "collection_observations_template",
     "compile_planned_dataset",
+    "create_assessed_collection_package",
     "create_collection_plan",
     "fit_campaign_dataset",
     "load_campaign_dataset",
+    "load_collection_readiness",
     "load_collection_plan",
     "main",
 ]

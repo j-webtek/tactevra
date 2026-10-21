@@ -99,8 +99,10 @@ configurations and their independent truth procedure are defined. A
 `READY_TO_PREPARE` report means the inputs can be partitioned into a plan; it
 grants no physical authority.
 
-The `prepare` command creates two new offline records before any physical
-collection begins:
+Use `prepare-assessed` for the governed handoff. It consumes one exact passing
+readiness report, requires the training and held-out labels to partition the
+same retained pose catalog, and creates three offline records before any
+physical collection begins:
 
 - `rocell.position_vector_calibration_collection_plan.v1` freezes the exact
   controller and firmware binding, attachment profile, truth method, policy,
@@ -109,6 +111,9 @@ collection begins:
   authority was issued.
 - `rocell.position_vector_calibration_observations.v1` is a plan-hash-bound
   template with one empty evidence slot for every planned sample.
+- `rocell.position_vector_calibration_preparation_receipt.v1` binds the exact
+  readiness report, plan, and observation template by canonical SHA-256. It
+  also repeats the zero-authority declaration.
 
 Pose labels are campaign identities, not movement instructions. Preparing a
 plan cannot move the arm. Use distinct labels for every independently chosen
@@ -116,23 +121,29 @@ stationary configuration and reserve the held-out labels before fitting.
 
 For example, from the `software` directory:
 
+The example assumes `position-vector-readiness.json` is a passing report whose
+retained pose catalog is exactly the eight labels partitioned below.
+
 ```powershell
-python -m rocell.calibration.position_vector_campaign prepare `
+python -m rocell.calibration.position_vector_campaign prepare-assessed `
+  --readiness position-vector-readiness.json `
   --dataset-id installed-arm-count-campaign-01 `
   --producer-id calibration-producer-01 `
-  --vid 10c4 --pid ea60 `
-  --unit-serial CONTROLLER_SERIAL `
-  --firmware-sha256 EXACT_INSTALLED_FIRMWARE_SHA256 `
-  --attachment-profile no_attachment `
-  --truth-method link_fiducial_pose `
   --training-pose CAL_TRAIN_01 --training-pose CAL_TRAIN_02 `
   --training-pose CAL_TRAIN_03 --training-pose CAL_TRAIN_04 `
   --training-pose CAL_TRAIN_05 `
   --held-out-pose CAL_HOLDOUT_01 --held-out-pose CAL_HOLDOUT_02 `
   --held-out-pose CAL_HOLDOUT_03 `
   --plan-output position-vector-plan.json `
-  --observations-output position-vector-observations.json
+  --observations-output position-vector-observations.json `
+  --receipt-output position-vector-preparation-receipt.json
 ```
+
+The lower-level `prepare` command remains available for compatibility and
+controlled test construction. Operational preparation should use
+`prepare-assessed` so controller, firmware, attachment, truth-method, and pose
+facts cannot drift between assessment and plan creation. Both paths are
+offline and refuse to replace existing outputs.
 
 Populate each observation slot only from its named stationary sample. Each slot
 requires seven retained raw counts, all six independent joint angles, a unique
