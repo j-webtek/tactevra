@@ -174,6 +174,17 @@ It adds no calibration dataset, controller transcript, generated corpus, or
 authority-bearing output; all byte, duplicate, and reduction limits remain
 unchanged.
 
+The offline position-vector calibration-campaign increment adds three governed
+paths: one strict dataset/fit/review producer, one focused unit-test module, and
+one operator guide. The reviewed tracked-file ceiling moves from 6,608 to the
+exact expected 6,611 files. The producer deterministically fits retained,
+stationary observations with independent joint truth, evaluates a disjoint
+held-out split and mirrored-shoulder residual, and requires a separate reviewer
+to accept exact dataset and fit hashes before emitting the existing runtime
+artifact. It opens no hardware, grants no physical authority, and retains no
+new measurement corpus; all byte, duplicate, and reduction limits remain
+unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
