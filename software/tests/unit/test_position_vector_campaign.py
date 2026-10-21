@@ -15,11 +15,14 @@ from rocell.calibration.position_vector_campaign import (
     OBSERVATIONS_SCHEMA,
     PLAN_SCHEMA,
     PREPARATION_RECEIPT_SCHEMA,
+    READINESS_EVIDENCE_RECEIPT_SCHEMA,
+    READINESS_EVIDENCE_SCHEMA,
     READINESS_SCHEMA,
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
     assess_collection_readiness,
+    assess_reviewed_readiness_evidence,
     build_calibration_artifact,
     canonical_sha256,
     collection_observations_template,
@@ -201,6 +204,66 @@ def ready_assessment():
         truth_method="link_fiducial_pose",
         retained_pose_labels=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(8)],
     )
+
+
+def reviewed_evidence():
+    return {
+        "schema": READINESS_EVIDENCE_SCHEMA,
+        "campaign_id": "installed-arm-count-campaign-01",
+        "producer_id": "calibration-producer-01",
+        "controller_identity": {
+            key: CONTROLLER[key] for key in ("vid", "pid", "unit_serial")
+        },
+        "installed_firmware_sha256": CONTROLLER["firmware_sha256"],
+        "firmware_evidence_sha256": "b" * 64,
+        "firmware_verifier_id": "firmware-reviewer-02",
+        "attachment_profile": "no_attachment",
+        "truth_method": "link_fiducial_pose",
+        "poses": [
+            {
+                "label": f"CAL_POSE_{ordinal:02d}",
+                "truth_procedure_sha256": hashlib.sha256(
+                    f"procedure-{ordinal}".encode()
+                ).hexdigest(),
+                "reviewer_id": "pose-reviewer-03",
+            }
+            for ordinal in range(8)
+        ],
+    }
+
+
+def test_reviewed_evidence_derives_hash_bound_ready_assessment():
+    readiness, receipt = assess_reviewed_readiness_evidence(reviewed_evidence())
+
+    assert readiness == ready_assessment()
+    assert receipt["schema"] == READINESS_EVIDENCE_RECEIPT_SCHEMA
+    assert receipt["status"] == "READY_TO_PREPARE"
+    assert receipt["evidence_sha256"] == canonical_sha256(reviewed_evidence())
+    assert receipt["readiness_sha256"] == canonical_sha256(readiness)
+    assert receipt["authority"]["commands_sent"] == 0
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (lambda value: value.update(firmware_verifier_id=value["producer_id"]), "independent"),
+        (
+            lambda value: value["poses"][0].update(reviewer_id=value["producer_id"]),
+            "independent",
+        ),
+        (
+            lambda value: value["poses"][1].update(
+                truth_procedure_sha256=value["poses"][0]["truth_procedure_sha256"]
+            ),
+            "procedure hashes",
+        ),
+    ],
+)
+def test_reviewed_evidence_rejects_nonindependent_or_reused_provenance(mutate, match):
+    value = reviewed_evidence()
+    mutate(value)
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        assess_reviewed_readiness_evidence(value)
 
 
 def test_assessed_preparation_binds_exact_readiness_and_all_outputs():
@@ -624,3 +687,21 @@ def test_file_workflow_writes_blocked_readiness_report_without_hardware(tmp_path
             "--truth-method", "link_fiducial_pose", *pose_args,
             "--output", str(output),
         ])
+
+
+def test_file_workflow_assesses_reviewed_evidence_without_hardware(tmp_path):
+    evidence_path = tmp_path / "reviewed-evidence.json"
+    readiness_path = tmp_path / "readiness.json"
+    receipt_path = tmp_path / "readiness-receipt.json"
+    evidence_path.write_text(json.dumps(reviewed_evidence()), encoding="utf-8")
+
+    assert main([
+        "assess-reviewed",
+        "--evidence", str(evidence_path),
+        "--readiness-output", str(readiness_path),
+        "--receipt-output", str(receipt_path),
+    ]) == 0
+    readiness = json.loads(readiness_path.read_bytes())
+    receipt = json.loads(receipt_path.read_bytes())
+    assert readiness["status"] == "READY_TO_PREPARE"
+    assert receipt["readiness_sha256"] == canonical_sha256(readiness)

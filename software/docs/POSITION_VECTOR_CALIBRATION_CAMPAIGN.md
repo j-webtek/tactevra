@@ -68,6 +68,25 @@ pose. Held-out samples must not be reused to choose or tune the fit.
 
 ## Freeze the collection before capture
 
+For the final governed assessment, place the retained facts in a
+`rocell.position_vector_calibration_readiness_evidence.v1` manifest and run
+`assess-reviewed`. The manifest binds the controller identity, exact installed
+firmware digest and its evidence digest, an independent firmware verifier, and
+one unique truth-procedure digest plus independent reviewer for every pose.
+The command emits the ordinary readiness report and a receipt hashing both the
+reviewed evidence and derived readiness result:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign assess-reviewed `
+  --evidence position-vector-reviewed-evidence.json `
+  --readiness-output position-vector-readiness.json `
+  --receipt-output position-vector-readiness-receipt.json
+```
+
+The producer cannot serve as firmware verifier or pose reviewer, and truth
+procedure hashes cannot be reused across poses. This records provenance; it
+does not manufacture missing physical evidence.
+
 Before freezing a plan, run the offline `assess` command against retained facts.
 It produces a deterministic
 `rocell.position_vector_calibration_collection_readiness.v1` report and never
