@@ -472,3 +472,27 @@ measured canonical joint truth, per-joint span, held-out sample, or firmware
 binary identity. The next physical calibration campaign must therefore be
 planned separately and requires new explicit hardware authorization. No further
 query, retry, motion, or device access was performed for this increment.
+
+## Offline position-vector campaign workflow (2026-10-21)
+
+`calibration/position_vector_campaign.py` now implements the offline campaign
+that can produce the strict position-vector artifact described above. It
+validates controller and attachment identity, stationary seven-count samples,
+independent six-joint truth, disjoint training and held-out evidence, count
+coverage, held-out error, and mirrored-shoulder agreement. Its default gates are
+five training samples, three held-out samples, 128 counts of training span per
+primary joint, 0.035 radians maximum held-out error, and 24 counts maximum
+shoulder residual.
+
+The workflow produces a deterministic fit report and requires an accepting
+review from someone other than the dataset producer. Unique truth-evidence
+hashes and exact dataset, fit-report, and review hashes prevent evidence reuse
+or artifact crossing. The builder recomputes the fit before emitting the
+runtime artifact. See
+[`POSITION_VECTOR_CALIBRATION_CAMPAIGN.md`](POSITION_VECTOR_CALIBRATION_CAMPAIGN.md)
+for the dataset contract, commands, attachment-profile separation, and physical
+collection boundary.
+
+This addition performed no hardware access. The retained observation remains
+`CALIBRATION_REQUIRED`; a physical campaign still requires fresh authorization
+and independent measurements.
