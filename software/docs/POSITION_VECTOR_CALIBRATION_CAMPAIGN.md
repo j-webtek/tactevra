@@ -171,18 +171,36 @@ refuses to replace existing outputs.
 Populate each observation slot only from its named stationary sample. Each slot
 requires seven retained raw counts, all six independent joint angles, a unique
 truth-evidence hash, `stationary: true`, `motion_active: false`, and
-`trajectory_progress_permille: 1000`. Then compile the plan-bound observations:
+`trajectory_progress_permille: 1000`. Then use `compile-reviewed` to reproduce
+the complete reviewed preparation chain before compiling the plan-bound
+observations:
 
 ```powershell
-python -m rocell.calibration.position_vector_campaign compile `
+python -m rocell.calibration.position_vector_campaign compile-reviewed `
+  --evidence position-vector-reviewed-evidence.json `
+  --readiness position-vector-readiness.json `
+  --readiness-receipt position-vector-readiness-receipt.json `
+  --preparation-receipt position-vector-preparation-receipt.json `
   --plan position-vector-plan.json `
   --observations position-vector-observations.json `
-  --output position-vector-dataset.json
+  --output position-vector-dataset.json `
+  --receipt-output position-vector-compilation-receipt.json
 ```
 
-Compilation fails if a slot is missing, reordered, renamed, bound to another
-plan, or incomplete. The generated dataset is passed through the same strict
-dataset validator used by `fit`.
+Compilation fails if the reviewed evidence, readiness result, readiness
+receipt, preparation receipt, plan, or observation set crosses another
+campaign or attachment profile. It also fails if a slot is missing, reordered,
+renamed, bound to another plan, or incomplete. The generated
+`rocell.position_vector_calibration_reviewed_compilation_receipt.v1` record
+binds every reviewed-preparation hash plus the filled observations and strict
+dataset hash while repeating the zero-authority declaration. The generated
+dataset is passed through the same strict validator used by `fit`.
+
+The lower-level `compile` command remains available for compatibility and
+controlled test construction. Operational compilation should use
+`compile-reviewed` so the filled observations cannot be detached from their
+reviewed preparation chain. Both commands are offline and refuse to replace
+existing output files.
 
 ## Offline commands
 
