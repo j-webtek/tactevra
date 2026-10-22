@@ -18,6 +18,7 @@ from rocell.calibration.position_vector_campaign import (
     READINESS_EVIDENCE_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_SCHEMA,
     READINESS_SCHEMA,
+    REVIEWED_PREPARATION_RECEIPT_SCHEMA,
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
@@ -29,6 +30,7 @@ from rocell.calibration.position_vector_campaign import (
     compile_planned_dataset,
     create_assessed_collection_package,
     create_collection_plan,
+    create_reviewed_collection_package,
     fit_campaign_dataset,
     load_campaign_dataset,
     load_collection_readiness,
@@ -319,6 +321,82 @@ def test_assessed_preparation_rejects_blocked_tampered_or_crossed_readiness():
             producer_id="producer-01",
             training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
             held_out_poses=["CAL_POSE_05", "CAL_POSE_06", "UNREVIEWED_POSE"],
+        )
+
+
+def test_reviewed_preparation_binds_the_complete_provenance_chain():
+    evidence = reviewed_evidence()
+    readiness, readiness_receipt = assess_reviewed_readiness_evidence(evidence)
+    source_plan, source_observations, receipt = create_reviewed_collection_package(
+        evidence_document=evidence,
+        readiness_document=readiness,
+        readiness_receipt_document=readiness_receipt,
+        training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+        held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+    )
+
+    _, _, assessed_receipt = create_assessed_collection_package(
+        readiness_document=readiness,
+        dataset_id=evidence["campaign_id"],
+        producer_id=evidence["producer_id"],
+        training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+        held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+    )
+    assert source_plan == plan()
+    assert source_observations == collection_observations_template(source_plan)
+    assert receipt == {
+        "schema": REVIEWED_PREPARATION_RECEIPT_SCHEMA,
+        "status": "PREPARED_FROM_REVIEWED_EVIDENCE",
+        "campaign_id": evidence["campaign_id"],
+        "producer_id": evidence["producer_id"],
+        "evidence_sha256": readiness_receipt["evidence_sha256"],
+        "readiness_evidence_receipt_sha256": canonical_sha256(readiness_receipt),
+        "readiness_sha256": canonical_sha256(readiness),
+        "assessed_preparation_receipt_sha256": canonical_sha256(assessed_receipt),
+        "plan_sha256": canonical_sha256(source_plan),
+        "observations_sha256": canonical_sha256(source_observations),
+        "authority": source_plan["authority"],
+    }
+
+
+def test_reviewed_preparation_rejects_crossed_or_tampered_provenance():
+    evidence = reviewed_evidence()
+    readiness, readiness_receipt = assess_reviewed_readiness_evidence(evidence)
+
+    mismatched_evidence = copy.deepcopy(evidence)
+    mismatched_evidence["attachment_profile"] = "stylus_attachment"
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="reviewed readiness does not match the retained evidence",
+    ):
+        create_reviewed_collection_package(
+            evidence_document=mismatched_evidence,
+            readiness_document=readiness,
+            readiness_receipt_document=readiness_receipt,
+            training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+            held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+        )
+
+    crossed_evidence = copy.deepcopy(evidence)
+    crossed_evidence["campaign_id"] = "other-campaign"
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        create_reviewed_collection_package(
+            evidence_document=crossed_evidence,
+            readiness_document=readiness,
+            readiness_receipt_document=readiness_receipt,
+            training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+            held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
+        )
+
+    tampered_receipt = dict(readiness_receipt)
+    tampered_receipt["evidence_sha256"] = "f" * 64
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        create_reviewed_collection_package(
+            evidence_document=evidence,
+            readiness_document=readiness,
+            readiness_receipt_document=tampered_receipt,
+            training_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5)],
+            held_out_poses=[f"CAL_POSE_{ordinal:02d}" for ordinal in range(5, 8)],
         )
 
 
@@ -655,6 +733,48 @@ def test_file_workflow_prepares_from_exact_assessment_with_receipt(tmp_path):
             "--observations-output", str(tmp_path / "other-observations.json"),
             "--receipt-output", str(tmp_path / "other-receipt.json"),
         ])
+
+
+def test_file_workflow_prepares_from_reviewed_evidence_chain(tmp_path):
+    evidence = reviewed_evidence()
+    readiness, readiness_receipt = assess_reviewed_readiness_evidence(evidence)
+    evidence_path = tmp_path / "evidence.json"
+    readiness_path = tmp_path / "readiness.json"
+    readiness_receipt_path = tmp_path / "readiness-receipt.json"
+    plan_path = tmp_path / "plan.json"
+    observations_path = tmp_path / "observations.json"
+    receipt_path = tmp_path / "reviewed-preparation-receipt.json"
+    for path, value in (
+        (evidence_path, evidence),
+        (readiness_path, readiness),
+        (readiness_receipt_path, readiness_receipt),
+    ):
+        path.write_text(json.dumps(value), encoding="utf-8")
+    pose_args = []
+    for ordinal in range(5):
+        pose_args.extend(["--training-pose", f"CAL_POSE_{ordinal:02d}"])
+    for ordinal in range(5, 8):
+        pose_args.extend(["--held-out-pose", f"CAL_POSE_{ordinal:02d}"])
+
+    assert main([
+        "prepare-reviewed",
+        "--evidence", str(evidence_path),
+        "--readiness", str(readiness_path),
+        "--readiness-receipt", str(readiness_receipt_path),
+        *pose_args,
+        "--plan-output", str(plan_path),
+        "--observations-output", str(observations_path),
+        "--receipt-output", str(receipt_path),
+    ]) == 0
+
+    prepared_plan = json.loads(plan_path.read_bytes())
+    prepared_observations = json.loads(observations_path.read_bytes())
+    receipt = json.loads(receipt_path.read_bytes())
+    assert prepared_plan["dataset_id"] == evidence["campaign_id"]
+    assert prepared_plan["producer_id"] == evidence["producer_id"]
+    assert receipt["schema"] == REVIEWED_PREPARATION_RECEIPT_SCHEMA
+    assert receipt["plan_sha256"] == canonical_sha256(prepared_plan)
+    assert receipt["observations_sha256"] == canonical_sha256(prepared_observations)
 
 
 def test_file_workflow_writes_blocked_readiness_report_without_hardware(tmp_path):

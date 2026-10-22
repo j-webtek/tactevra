@@ -41,6 +41,9 @@ READINESS_EVIDENCE_SCHEMA = "rocell.position_vector_calibration_readiness_eviden
 READINESS_EVIDENCE_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_readiness_evidence_receipt.v1"
 )
+REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
+)
 SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
 TRUTH_METHODS = (
     "encoder_reference_fixture",
@@ -666,6 +669,57 @@ def create_assessed_collection_package(
     return plan, observations, receipt
 
 
+def create_reviewed_collection_package(
+    *,
+    evidence_document: Mapping[str, Any],
+    readiness_document: Mapping[str, Any],
+    readiness_receipt_document: Mapping[str, Any],
+    training_poses: list[str] | tuple[str, ...],
+    held_out_poses: list[str] | tuple[str, ...],
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Prepare directly from one exact reviewed-evidence assessment chain."""
+
+    expected_readiness, expected_readiness_receipt = assess_reviewed_readiness_evidence(
+        evidence_document
+    )
+    supplied_readiness = load_collection_readiness(readiness_document)
+    if supplied_readiness != expected_readiness:
+        raise PositionVectorCampaignError(
+            "reviewed readiness does not match the retained evidence"
+        )
+    supplied_readiness_receipt = _mapping(
+        readiness_receipt_document, "readiness_evidence_receipt"
+    )
+    if dict(supplied_readiness_receipt) != expected_readiness_receipt:
+        raise PositionVectorCampaignError(
+            "readiness evidence receipt does not reproduce"
+        )
+    evidence = _mapping(evidence_document, "readiness_evidence")
+    plan, observations, assessed_receipt = create_assessed_collection_package(
+        readiness_document=supplied_readiness,
+        dataset_id=evidence["campaign_id"],
+        producer_id=evidence["producer_id"],
+        training_poses=training_poses,
+        held_out_poses=held_out_poses,
+    )
+    receipt = {
+        "schema": REVIEWED_PREPARATION_RECEIPT_SCHEMA,
+        "status": "PREPARED_FROM_REVIEWED_EVIDENCE",
+        "campaign_id": evidence["campaign_id"],
+        "producer_id": evidence["producer_id"],
+        "evidence_sha256": expected_readiness_receipt["evidence_sha256"],
+        "readiness_evidence_receipt_sha256": canonical_sha256(
+            expected_readiness_receipt
+        ),
+        "readiness_sha256": canonical_sha256(supplied_readiness),
+        "assessed_preparation_receipt_sha256": canonical_sha256(assessed_receipt),
+        "plan_sha256": canonical_sha256(plan),
+        "observations_sha256": canonical_sha256(observations),
+        "authority": dict(plan["authority"]),
+    }
+    return plan, observations, receipt
+
+
 def load_collection_plan(document: Mapping[str, Any]) -> dict[str, Any]:
     """Strict-decode a frozen, offline collection plan."""
 
@@ -1065,6 +1119,18 @@ def main(argv: list[str] | None = None) -> int:
     assessed_parser.add_argument("--plan-output", required=True)
     assessed_parser.add_argument("--observations-output", required=True)
     assessed_parser.add_argument("--receipt-output", required=True)
+    reviewed_prepare_parser = commands.add_parser(
+        "prepare-reviewed",
+        help="prepare from one exact reviewed-evidence assessment chain",
+    )
+    reviewed_prepare_parser.add_argument("--evidence", required=True)
+    reviewed_prepare_parser.add_argument("--readiness", required=True)
+    reviewed_prepare_parser.add_argument("--readiness-receipt", required=True)
+    reviewed_prepare_parser.add_argument("--training-pose", action="append", required=True)
+    reviewed_prepare_parser.add_argument("--held-out-pose", action="append", required=True)
+    reviewed_prepare_parser.add_argument("--plan-output", required=True)
+    reviewed_prepare_parser.add_argument("--observations-output", required=True)
+    reviewed_prepare_parser.add_argument("--receipt-output", required=True)
     compile_parser = commands.add_parser(
         "compile", help="compile complete observations into the strict dataset"
     )
@@ -1160,6 +1226,29 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.observations_output, observations)
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "prepare-reviewed":
+        plan, observations, receipt = create_reviewed_collection_package(
+            evidence_document=_read_json(args.evidence),
+            readiness_document=_read_json(args.readiness),
+            readiness_receipt_document=_read_json(args.readiness_receipt),
+            training_poses=args.training_pose,
+            held_out_poses=args.held_out_pose,
+        )
+        output_paths = (
+            Path(args.plan_output),
+            Path(args.observations_output),
+            Path(args.receipt_output),
+        )
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias reviewed preparation output"
+            )
+        _write_new(args.plan_output, plan)
+        _write_new(args.observations_output, observations)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "compile":
         result = compile_planned_dataset(
             _read_json(args.plan), _read_json(args.observations)
@@ -1194,6 +1283,7 @@ __all__ = [
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
     "READINESS_SCHEMA",
+    "REVIEWED_PREPARATION_RECEIPT_SCHEMA",
     "REVIEW_SCHEMA",
     "SUPPORTED_ATTACHMENTS",
     "TRUTH_METHODS",
@@ -1208,6 +1298,7 @@ __all__ = [
     "compile_planned_dataset",
     "create_assessed_collection_package",
     "create_collection_plan",
+    "create_reviewed_collection_package",
     "fit_campaign_dataset",
     "load_campaign_dataset",
     "load_collection_readiness",
