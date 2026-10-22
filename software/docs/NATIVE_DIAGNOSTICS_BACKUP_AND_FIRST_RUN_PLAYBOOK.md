@@ -1,14 +1,16 @@
 # Native diagnostics: backup and first-run handoff
 
-Status: the single Stage A session authorized on 2026-10-22 was consumed and
-failed closed during flash identification. The controller entered the ESP32 ROM
-bootloader on COM4, but the first flash-ID response reported capacity code
-`0xff`; no flash dump was created and no retry, stub upload, persistent device
-write, erase, application start or reset-on-exit occurred. Offline inspection of
-esptool 4.6 then confirmed that its ROM-only command path must issue the volatile
-default-SPI attach command before flash identification. A new bootloader session
-requires a fresh physical-setup confirmation and explicit one-session approval.
-Firmware deployment and configuration/provisioning remain separately gated.
+Status: two exact Stage A sessions authorized on 2026-10-22 were consumed and
+failed closed. The first stopped at flash identification because the direct script
+omitted the volatile default-SPI attach required by esptool 4.6's ROM-only path.
+The corrected second session confirmed the expected ESP32 and MAC, 4 MB flash,
+disabled flash encryption and disabled secure boot, then stopped during the first
+ROM read on a transport CRC/checksum error. Neither session created a flash dump
+or performed a retry, stub upload, persistent device write, erase, application
+start or reset-on-exit. Another session requires fresh setup confirmation and
+explicit approval. A RAM-helper session also requires approval for its temporary
+code upload/execution. Firmware deployment and configuration/provisioning remain
+separately gated.
 
 ## Current evidence
 
@@ -30,8 +32,8 @@ Firmware deployment and configuration/provisioning remain separately gated.
 
 ## Stage A — separately authorized backup-only session
 
-The 2026-10-22 approval was consumed by the retained failed attempt. Bootloader
-entry resets/intercepts the controller and is not an ordinary feedback query.
+Both 2026-10-22 approvals were consumed by the retained failed attempts.
+Bootloader entry resets/intercepts the controller and is not an ordinary feedback query.
 Before another attempt, establish the Stage A setup and obtain a new exact
 one-session approval. No firmware/configuration write or erase is implied.
 
@@ -73,6 +75,26 @@ one-session approval. No firmware/configuration write or erase is implied.
 - Effects: one bootloader-entry session; zero firmware bytes read; zero persistent
   controller writes; zero erases; zero motion commands; zero retries; port closed
   without reset or application restart.
+
+### Retained 2026-10-22 corrected ROM-only attempt
+
+- Local sanitized checkpoint (under the intentionally untracked run directory):
+  `software/runs/operational-checkpoints/issue190-stage-a-readback-attempt-2-20261022.json`
+- Tooling: esptool 4.6 with pyserial 3.5, 115200 baud, one connection attempt,
+  direct ESP32 ROM loader, volatile default-SPI attach, no flasher stub.
+- Verified identity: ESP32-D0WD-V3 revision 3.1; MAC
+  `FC:E8:C0:F8:D5:38`; flash ID `0x164020`; 4 MB flash; flash encryption
+  disabled; secure boot disabled.
+- Result: the first 4 MB read stopped after about 7 minutes 49 seconds with
+  `CRC or checksum was invalid`. No complete flash buffer was returned, so no dump
+  file or installed-firmware SHA-256 was produced and the second read did not start.
+- Effects: one bootloader-entry session; zero published firmware bytes; zero
+  persistent controller writes; zero erases; zero motion commands; zero retries;
+  port closed without reset or application restart.
+- Next reviewed method: esptool's volatile RAM flasher helper can provide the
+  supported block-read protocol. Uploading and executing it is a new physical
+  effect and requires a fresh exact approval; it must still perform no persistent
+  flash/eFuse write and no reset/application restart afterward.
 
 Full flash may contain Wi-Fi credentials and private configuration. Keep raw dumps
 out of ordinary wizard diagnostic exports. Export only nonsecret metadata, hashes

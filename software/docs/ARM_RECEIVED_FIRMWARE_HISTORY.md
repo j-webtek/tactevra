@@ -36,3 +36,12 @@ checkpoint at
 the run directory is intentionally excluded from version control.
 A new attempt requires fresh Stage A setup confirmation and exact one-session
 approval; the consumed authorization must not be reused.
+
+The operator subsequently granted one corrected ROM-only session. It verified an
+ESP32-D0WD-V3 revision 3.1 with the expected MAC, flash ID `0x164020`, 4 MB flash,
+disabled flash encryption and disabled secure boot. The first full read stopped on
+a ROM transport CRC/checksum error before returning a complete buffer; no dump or
+installed binary hash was produced, no retry occurred and the second read did not
+start. The installed firmware SHA-256 therefore remains unknown. The next reviewed
+method uses esptool's temporary RAM helper and requires a new exact authorization
+because it uploads and executes volatile code.
