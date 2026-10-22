@@ -118,10 +118,12 @@ configurations and their independent truth procedure are defined. A
 `READY_TO_PREPARE` report means the inputs can be partitioned into a plan; it
 grants no physical authority.
 
-Use `prepare-assessed` for the governed handoff. It consumes one exact passing
-readiness report, requires the training and held-out labels to partition the
-same retained pose catalog, and creates three offline records before any
-physical collection begins:
+Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
+evidence assessment, requires the supplied readiness report and readiness
+receipt to reproduce exactly, and derives the dataset and producer identities
+from that reviewed evidence. It also requires the training and held-out labels
+to partition the same retained pose catalog and creates three offline records
+before any physical collection begins:
 
 - `rocell.position_vector_calibration_collection_plan.v1` freezes the exact
   controller and firmware binding, attachment profile, truth method, policy,
@@ -130,9 +132,10 @@ physical collection begins:
   authority was issued.
 - `rocell.position_vector_calibration_observations.v1` is a plan-hash-bound
   template with one empty evidence slot for every planned sample.
-- `rocell.position_vector_calibration_preparation_receipt.v1` binds the exact
-  readiness report, plan, and observation template by canonical SHA-256. It
-  also repeats the zero-authority declaration.
+- `rocell.position_vector_calibration_reviewed_preparation_receipt.v1` binds
+  the reviewed evidence, readiness-evidence receipt, readiness report,
+  assessed-preparation derivation, plan, and observation template by canonical
+  SHA-256. It also repeats the zero-authority declaration.
 
 Pose labels are campaign identities, not movement instructions. Preparing a
 plan cannot move the arm. Use distinct labels for every independently chosen
@@ -144,10 +147,10 @@ The example assumes `position-vector-readiness.json` is a passing report whose
 retained pose catalog is exactly the eight labels partitioned below.
 
 ```powershell
-python -m rocell.calibration.position_vector_campaign prepare-assessed `
+python -m rocell.calibration.position_vector_campaign prepare-reviewed `
+  --evidence position-vector-reviewed-evidence.json `
   --readiness position-vector-readiness.json `
-  --dataset-id installed-arm-count-campaign-01 `
-  --producer-id calibration-producer-01 `
+  --readiness-receipt position-vector-readiness-receipt.json `
   --training-pose CAL_TRAIN_01 --training-pose CAL_TRAIN_02 `
   --training-pose CAL_TRAIN_03 --training-pose CAL_TRAIN_04 `
   --training-pose CAL_TRAIN_05 `
@@ -158,11 +161,12 @@ python -m rocell.calibration.position_vector_campaign prepare-assessed `
   --receipt-output position-vector-preparation-receipt.json
 ```
 
-The lower-level `prepare` command remains available for compatibility and
-controlled test construction. Operational preparation should use
-`prepare-assessed` so controller, firmware, attachment, truth-method, and pose
-facts cannot drift between assessment and plan creation. Both paths are
-offline and refuse to replace existing outputs.
+The lower-level `prepare` and `prepare-assessed` commands remain available for
+compatibility and controlled test construction. Operational preparation should
+use `prepare-reviewed` so independent provenance, controller, firmware,
+attachment, truth-method, producer, campaign, and pose facts cannot drift
+between review, assessment, and plan creation. Every path is offline and
+refuses to replace existing outputs.
 
 Populate each observation slot only from its named stationary sample. Each slot
 requires seven retained raw counts, all six independent joint angles, a unique
