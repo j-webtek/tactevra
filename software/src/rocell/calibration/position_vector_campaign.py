@@ -44,6 +44,9 @@ READINESS_EVIDENCE_RECEIPT_SCHEMA = (
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
+REVIEWED_COMPILATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_reviewed_compilation_receipt.v1"
+)
 SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
 TRUTH_METHODS = (
     "encoder_reference_fixture",
@@ -857,6 +860,71 @@ def compile_planned_dataset(
     )
 
 
+def create_reviewed_dataset_package(
+    *,
+    evidence_document: Mapping[str, Any],
+    readiness_document: Mapping[str, Any],
+    readiness_receipt_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Compile observations only after reproducing their reviewed preparation chain."""
+
+    supplied_plan = load_collection_plan(plan_document)
+    training_poses = [
+        slot["source_pose"]
+        for slot in supplied_plan["slots"]
+        if slot["split"] == "TRAINING"
+    ]
+    held_out_poses = [
+        slot["source_pose"]
+        for slot in supplied_plan["slots"]
+        if slot["split"] == "HELD_OUT"
+    ]
+    expected_plan, _, expected_preparation_receipt = (
+        create_reviewed_collection_package(
+            evidence_document=evidence_document,
+            readiness_document=readiness_document,
+            readiness_receipt_document=readiness_receipt_document,
+            training_poses=training_poses,
+            held_out_poses=held_out_poses,
+        )
+    )
+    if supplied_plan != expected_plan:
+        raise PositionVectorCampaignError(
+            "collection plan does not reproduce from reviewed preparation"
+        )
+    supplied_preparation_receipt = _mapping(
+        preparation_receipt_document, "reviewed_preparation_receipt"
+    )
+    if dict(supplied_preparation_receipt) != expected_preparation_receipt:
+        raise PositionVectorCampaignError(
+            "reviewed preparation receipt does not reproduce"
+        )
+    observations = _mapping(observations_document, "observations")
+    dataset = compile_planned_dataset(supplied_plan, observations)
+    receipt = {
+        "schema": REVIEWED_COMPILATION_RECEIPT_SCHEMA,
+        "status": "COMPILED_FROM_REVIEWED_COLLECTION",
+        "campaign_id": expected_preparation_receipt["campaign_id"],
+        "producer_id": expected_preparation_receipt["producer_id"],
+        "evidence_sha256": expected_preparation_receipt["evidence_sha256"],
+        "readiness_evidence_receipt_sha256": expected_preparation_receipt[
+            "readiness_evidence_receipt_sha256"
+        ],
+        "readiness_sha256": expected_preparation_receipt["readiness_sha256"],
+        "reviewed_preparation_receipt_sha256": canonical_sha256(
+            expected_preparation_receipt
+        ),
+        "plan_sha256": canonical_sha256(supplied_plan),
+        "observations_sha256": canonical_sha256(observations),
+        "dataset_sha256": canonical_sha256(dataset),
+        "authority": dict(supplied_plan["authority"]),
+    }
+    return dataset, receipt
+
+
 def _linear_fit(points: list[tuple[int, float]], joint: str) -> tuple[float, float]:
     mean_x = sum(point[0] for point in points) / len(points)
     mean_y = sum(point[1] for point in points) / len(points)
@@ -1137,6 +1205,18 @@ def main(argv: list[str] | None = None) -> int:
     compile_parser.add_argument("--plan", required=True)
     compile_parser.add_argument("--observations", required=True)
     compile_parser.add_argument("--output", required=True)
+    reviewed_compile_parser = commands.add_parser(
+        "compile-reviewed",
+        help="compile observations from one exact reviewed preparation chain",
+    )
+    reviewed_compile_parser.add_argument("--evidence", required=True)
+    reviewed_compile_parser.add_argument("--readiness", required=True)
+    reviewed_compile_parser.add_argument("--readiness-receipt", required=True)
+    reviewed_compile_parser.add_argument("--preparation-receipt", required=True)
+    reviewed_compile_parser.add_argument("--plan", required=True)
+    reviewed_compile_parser.add_argument("--observations", required=True)
+    reviewed_compile_parser.add_argument("--output", required=True)
+    reviewed_compile_parser.add_argument("--receipt-output", required=True)
     fit_parser = commands.add_parser("fit", help="fit and validate a retained dataset")
     fit_parser.add_argument("--dataset", required=True)
     fit_parser.add_argument("--calibration-id", required=True)
@@ -1253,6 +1333,25 @@ def main(argv: list[str] | None = None) -> int:
         result = compile_planned_dataset(
             _read_json(args.plan), _read_json(args.observations)
         )
+    elif args.command == "compile-reviewed":
+        dataset, receipt = create_reviewed_dataset_package(
+            evidence_document=_read_json(args.evidence),
+            readiness_document=_read_json(args.readiness),
+            readiness_receipt_document=_read_json(args.readiness_receipt),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            plan_document=_read_json(args.plan),
+            observations_document=_read_json(args.observations),
+        )
+        output_paths = (Path(args.output), Path(args.receipt_output))
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias reviewed compilation output"
+            )
+        _write_new(args.output, dataset)
+        _write_new(args.receipt_output, receipt)
+        return 0
     elif args.command == "fit":
         policy = CampaignPolicy(
             minimum_training_samples=args.minimum_training_samples,
@@ -1283,6 +1382,7 @@ __all__ = [
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
     "READINESS_SCHEMA",
+    "REVIEWED_COMPILATION_RECEIPT_SCHEMA",
     "REVIEWED_PREPARATION_RECEIPT_SCHEMA",
     "REVIEW_SCHEMA",
     "SUPPORTED_ATTACHMENTS",
@@ -1298,6 +1398,7 @@ __all__ = [
     "compile_planned_dataset",
     "create_assessed_collection_package",
     "create_collection_plan",
+    "create_reviewed_dataset_package",
     "create_reviewed_collection_package",
     "fit_campaign_dataset",
     "load_campaign_dataset",
