@@ -37,6 +37,10 @@ READINESS_SCHEMA = "rocell.position_vector_calibration_collection_readiness.v1"
 PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_preparation_receipt.v1"
 )
+READINESS_EVIDENCE_SCHEMA = "rocell.position_vector_calibration_readiness_evidence.v1"
+READINESS_EVIDENCE_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_readiness_evidence_receipt.v1"
+)
 SUPPORTED_ATTACHMENTS = ("no_attachment", "stylus_attachment")
 TRUTH_METHODS = (
     "encoder_reference_fixture",
@@ -144,6 +148,16 @@ _READINESS_REQUIREMENT_FIELDS = frozenset(
         "minimum_held_out_samples",
         "minimum_unique_source_poses",
     }
+)
+_READINESS_EVIDENCE_FIELDS = frozenset(
+    {
+        "schema", "campaign_id", "producer_id", "controller_identity",
+        "installed_firmware_sha256", "firmware_evidence_sha256",
+        "firmware_verifier_id", "attachment_profile", "truth_method", "poses",
+    }
+)
+_REVIEWED_POSE_FIELDS = frozenset(
+    {"label", "truth_procedure_sha256", "reviewer_id"}
 )
 
 
@@ -302,6 +316,89 @@ def load_collection_readiness(document: Mapping[str, Any]) -> dict[str, Any]:
     if expected != dict(raw):
         raise PositionVectorCampaignError("collection readiness does not reproduce")
     return expected
+
+
+def assess_reviewed_readiness_evidence(
+    document: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Derive readiness from independently reviewed retained evidence."""
+
+    raw = _mapping(document, "readiness_evidence")
+    _exact(raw, _READINESS_EVIDENCE_FIELDS, "readiness_evidence")
+    if raw.get("schema") != READINESS_EVIDENCE_SCHEMA:
+        raise PositionVectorCampaignError("readiness evidence schema mismatch")
+    campaign_id = _identifier(raw.get("campaign_id"), "readiness_evidence.campaign_id")
+    producer_id = _identifier(raw.get("producer_id"), "readiness_evidence.producer_id")
+    verifier_id = _identifier(
+        raw.get("firmware_verifier_id"), "readiness_evidence.firmware_verifier_id"
+    )
+    if verifier_id == producer_id:
+        raise PositionVectorCampaignError("firmware verifier must be independent")
+    firmware = _digest(
+        raw.get("installed_firmware_sha256"),
+        "readiness_evidence.installed_firmware_sha256",
+    )
+    firmware_evidence = _digest(
+        raw.get("firmware_evidence_sha256"),
+        "readiness_evidence.firmware_evidence_sha256",
+    )
+    values = raw.get("poses")
+    if not isinstance(values, list):
+        raise PositionVectorCampaignError("readiness evidence poses must be an array")
+    poses = []
+    for index, value in enumerate(values):
+        label = f"readiness_evidence.poses[{index}]"
+        pose = _mapping(value, label)
+        _exact(pose, _REVIEWED_POSE_FIELDS, label)
+        reviewer_id = _identifier(pose.get("reviewer_id"), f"{label}.reviewer_id")
+        if reviewer_id == producer_id:
+            raise PositionVectorCampaignError("pose reviewer must be independent")
+        poses.append(
+            {
+                "label": _identifier(pose.get("label"), f"{label}.label"),
+                "truth_procedure_sha256": _digest(
+                    pose.get("truth_procedure_sha256"),
+                    f"{label}.truth_procedure_sha256",
+                ),
+                "reviewer_id": reviewer_id,
+            }
+        )
+    pose_labels = [pose["label"] for pose in poses]
+    procedure_hashes = [pose["truth_procedure_sha256"] for pose in poses]
+    if len(set(pose_labels)) != len(pose_labels):
+        raise PositionVectorCampaignError("reviewed pose labels must be unique")
+    if len(set(procedure_hashes)) != len(procedure_hashes):
+        raise PositionVectorCampaignError("pose truth procedure hashes must be unique")
+    normalized = {
+        "schema": READINESS_EVIDENCE_SCHEMA,
+        "campaign_id": campaign_id,
+        "producer_id": producer_id,
+        "controller_identity": dict(
+            _mapping(raw.get("controller_identity"), "readiness_evidence.controller_identity")
+        ),
+        "installed_firmware_sha256": firmware,
+        "firmware_evidence_sha256": firmware_evidence,
+        "firmware_verifier_id": verifier_id,
+        "attachment_profile": raw.get("attachment_profile"),
+        "truth_method": raw.get("truth_method"),
+        "poses": poses,
+    }
+    readiness = assess_collection_readiness(
+        controller_identity=normalized["controller_identity"],
+        installed_firmware_sha256=firmware,
+        attachment_profile=normalized["attachment_profile"],
+        truth_method=normalized["truth_method"],
+        retained_pose_labels=pose_labels,
+    )
+    receipt = {
+        "schema": READINESS_EVIDENCE_RECEIPT_SCHEMA,
+        "campaign_id": campaign_id,
+        "status": readiness["status"],
+        "evidence_sha256": canonical_sha256(normalized),
+        "readiness_sha256": canonical_sha256(readiness),
+        "authority": dict(readiness["authority"]),
+    }
+    return readiness, receipt
 
 
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
@@ -935,6 +1032,12 @@ def main(argv: list[str] | None = None) -> int:
     assess_parser.add_argument("--truth-method", choices=TRUTH_METHODS, required=True)
     assess_parser.add_argument("--retained-pose", action="append", default=[])
     assess_parser.add_argument("--output", required=True)
+    reviewed_assess_parser = commands.add_parser(
+        "assess-reviewed", help="derive readiness from reviewed retained evidence"
+    )
+    reviewed_assess_parser.add_argument("--evidence", required=True)
+    reviewed_assess_parser.add_argument("--readiness-output", required=True)
+    reviewed_assess_parser.add_argument("--receipt-output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -997,6 +1100,20 @@ def main(argv: list[str] | None = None) -> int:
             retained_pose_labels=args.retained_pose,
         )
         _write_new(args.output, result)
+        return 0
+    if args.command == "assess-reviewed":
+        readiness, receipt = assess_reviewed_readiness_evidence(
+            _read_json(args.evidence)
+        )
+        output_paths = (Path(args.readiness_output), Path(args.receipt_output))
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias reviewed readiness output"
+            )
+        _write_new(args.readiness_output, readiness)
+        _write_new(args.receipt_output, receipt)
         return 0
     if args.command == "prepare":
         plan = create_collection_plan(
@@ -1074,6 +1191,8 @@ __all__ = [
     "OBSERVATIONS_SCHEMA",
     "PLAN_SCHEMA",
     "PREPARATION_RECEIPT_SCHEMA",
+    "READINESS_EVIDENCE_RECEIPT_SCHEMA",
+    "READINESS_EVIDENCE_SCHEMA",
     "READINESS_SCHEMA",
     "REVIEW_SCHEMA",
     "SUPPORTED_ATTACHMENTS",
@@ -1081,6 +1200,7 @@ __all__ = [
     "CampaignPolicy",
     "PositionVectorCampaignError",
     "assess_collection_readiness",
+    "assess_reviewed_readiness_evidence",
     "build_calibration_artifact",
     "canonical_bytes",
     "canonical_sha256",

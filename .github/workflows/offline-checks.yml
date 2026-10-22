@@ -80,10 +80,10 @@ jobs:
     needs: [classify, policy]
     if: ${{ always() }}
     runs-on: ${{ matrix.runner }}
-    # The complete portable contract suite currently takes about 10 minutes on
-    # Windows and can exceed 10 minutes on Ubuntu. Keep a bounded job budget
-    # above the helper's 20-minute subprocess ceiling so cleanup can complete.
-    timeout-minutes: 25
+    # The complete portable contract suite can exceed 20 minutes on hosted
+    # Windows/Python 3.10 runners. Keep a bounded job budget above the helper's
+    # 30-minute subprocess ceiling so setup and cleanup can complete.
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:

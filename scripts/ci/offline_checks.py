@@ -9,7 +9,10 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-COMMAND_TIMEOUT_SECONDS = 1_200
+# The portable contract suite is intentionally broad. Windows/Python 3.10 can
+# take more than 20 minutes on hosted runners, so keep a finite ceiling with
+# enough headroom to distinguish a slow runner from a stalled subprocess.
+COMMAND_TIMEOUT_SECONDS = 1_800
 PYTHON = (
     ROOT
     / ".venv-ci"
