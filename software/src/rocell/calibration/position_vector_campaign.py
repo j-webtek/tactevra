@@ -102,6 +102,12 @@ QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA = (
 QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_deterministic_fit_assessment.v1"
 )
+QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_independent_fit_review.v1"
+)
+QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_independent_fit_review_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -235,6 +241,20 @@ _REVIEW_FIELDS = frozenset(
         "schema",
         "dataset_sha256",
         "fit_report_sha256",
+        "producer_id",
+        "reviewer_id",
+        "decision",
+        "reviewed_at",
+        "review_notes_sha256",
+    }
+)
+_QUALIFIED_INDEPENDENT_FIT_REVIEW_FIELDS = frozenset(
+    {
+        "schema",
+        "dataset_sha256",
+        "compilation_receipt_sha256",
+        "fit_report_sha256",
+        "fit_assessment_sha256",
         "producer_id",
         "reviewer_id",
         "decision",
@@ -3026,6 +3046,139 @@ def _policy(value: Any, *, label: str = "fit_report.policy") -> CampaignPolicy:
         raise PositionVectorCampaignError("fit report policy is invalid") from exc
 
 
+def accept_qualified_independent_fit_review(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    fit_assessment_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Accept an independent review of one exactly reproduced qualified fit."""
+
+    supplied_fit = _mapping(fit_report_document, "qualified_fit_report")
+    policy = _policy(supplied_fit.get("policy"), label="qualified_fit_report.policy")
+    calibration_id = _identifier(
+        supplied_fit.get("calibration_id"), "qualified_fit_report.calibration_id"
+    )
+    expected_fit, expected_assessment = assess_qualified_deterministic_fit(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+        dataset_document=dataset_document,
+        compilation_receipt_document=compilation_receipt_document,
+        calibration_id=calibration_id,
+        policy=policy,
+    )
+    if dict(supplied_fit) != expected_fit:
+        raise PositionVectorCampaignError("qualified fit report does not reproduce")
+    supplied_assessment = _mapping(
+        fit_assessment_document, "qualified_fit_assessment"
+    )
+    if dict(supplied_assessment) != expected_assessment:
+        raise PositionVectorCampaignError(
+            "qualified fit assessment does not reproduce"
+        )
+
+    review = _mapping(review_document, "qualified_independent_fit_review")
+    _exact(
+        review,
+        _QUALIFIED_INDEPENDENT_FIT_REVIEW_FIELDS,
+        "qualified_independent_fit_review",
+    )
+    if review.get("schema") != QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA:
+        raise PositionVectorCampaignError("qualified fit review schema mismatch")
+    dataset_hash = canonical_sha256(dataset_document)
+    compilation_receipt_hash = canonical_sha256(compilation_receipt_document)
+    fit_hash = canonical_sha256(expected_fit)
+    assessment_hash = canonical_sha256(expected_assessment)
+    expected_hashes = {
+        "dataset_sha256": dataset_hash,
+        "compilation_receipt_sha256": compilation_receipt_hash,
+        "fit_report_sha256": fit_hash,
+        "fit_assessment_sha256": assessment_hash,
+    }
+    for field, expected_hash in expected_hashes.items():
+        if review.get(field) != expected_hash:
+            raise PositionVectorCampaignError(
+                f"qualified fit review {field} mismatch"
+            )
+    producer_id = _identifier(expected_fit["producer_id"], "producer_id")
+    if review.get("producer_id") != producer_id:
+        raise PositionVectorCampaignError("qualified fit review producer mismatch")
+    reviewer_id = _identifier(review.get("reviewer_id"), "reviewer_id")
+    if reviewer_id == producer_id:
+        raise PositionVectorCampaignError(
+            "qualified fit reviewer must be independent of producer"
+        )
+    if review.get("decision") != "ACCEPT":
+        raise PositionVectorCampaignError(
+            "qualified fit review decision is not ACCEPT"
+        )
+    reviewed_at = review.get("reviewed_at")
+    if not isinstance(reviewed_at, str):
+        raise PositionVectorCampaignError("qualified fit reviewed_at is invalid")
+    try:
+        timestamp = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified fit reviewed_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified fit reviewed_at must include a UTC offset"
+        )
+    review_notes_sha256 = _digest(
+        review.get("review_notes_sha256"), "review_notes_sha256"
+    )
+    normalized_review = dict(review)
+    normalized_review["review_notes_sha256"] = review_notes_sha256
+
+    return {
+        "schema": QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_INDEPENDENT_FIT_REVIEW_ACCEPTED",
+        "calibration_id": expected_fit["calibration_id"],
+        "dataset_id": expected_fit["dataset_id"],
+        "attachment_profile": expected_fit["attachment_profile"],
+        **expected_hashes,
+        "review_sha256": canonical_sha256(normalized_review),
+        "producer_id": producer_id,
+        "reviewer_id": reviewer_id,
+        "reviewed_at": reviewed_at,
+        "review_notes_sha256": review_notes_sha256,
+        "next_required_gate": "QUALIFIED_CALIBRATION_ARTIFACT_BUILD",
+        "limitations": [
+            "This receipt records independent acceptance of the exact qualified "
+            "dataset, compilation receipt, fit report, and fit assessment.",
+            "Review acceptance does not build, install, select, or activate a "
+            "runtime calibration.",
+            "This gate opens no controller or camera and grants no command, motion, "
+            "activation, or physical authority.",
+        ],
+        "authority": dict(expected_assessment["authority"]),
+        "calibration_activation_authorized": False,
+    }
+
+
 def _review(
     document: Mapping[str, Any], *, dataset_sha256: str, fit_report_sha256: str,
     producer_id: str,
@@ -3347,6 +3500,29 @@ def main(argv: list[str] | None = None) -> int:
     qualified_fit_parser.add_argument(
         "--shoulder-runtime-tolerance-counts", type=int, default=24
     )
+    qualified_review_parser = commands.add_parser(
+        "accept-qualified-independent-fit-review",
+        help="accept an independent review of one exactly reproduced qualified fit",
+    )
+    qualified_review_parser.add_argument("--inventory", required=True)
+    qualified_review_parser.add_argument("--admission-receipt", required=True)
+    qualified_review_parser.add_argument("--training-split", required=True)
+    qualified_review_parser.add_argument("--collection-plan", required=True)
+    qualified_review_parser.add_argument("--observations", required=True)
+    qualified_review_parser.add_argument("--preparation-receipt", required=True)
+    qualified_review_parser.add_argument("--readiness-plan", required=True)
+    qualified_review_parser.add_argument("--readiness-evidence", required=True)
+    qualified_review_parser.add_argument("--readiness-assessment", required=True)
+    qualified_review_parser.add_argument("--readiness-handoff", required=True)
+    qualified_review_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    qualified_review_parser.add_argument("--dataset", required=True)
+    qualified_review_parser.add_argument("--compilation-receipt", required=True)
+    qualified_review_parser.add_argument("--fit-report", required=True)
+    qualified_review_parser.add_argument("--fit-assessment", required=True)
+    qualified_review_parser.add_argument("--review", required=True)
+    qualified_review_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -3676,6 +3852,29 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.fit_report_output, fit_report)
         _write_new(args.assessment_output, assessment)
         return 0
+    if args.command == "accept-qualified-independent-fit-review":
+        receipt = accept_qualified_independent_fit_review(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            fit_report_document=_read_json(args.fit_report),
+            fit_assessment_document=_read_json(args.fit_assessment),
+            review_document=_read_json(args.review),
+        )
+        _write_new(args.output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -3806,6 +4005,8 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA",
+    "QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA",
+    "QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA",
     "QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA",
     "QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA",
     "QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA",
@@ -3824,6 +4025,7 @@ __all__ = [
     "assess_qualified_collection_readiness_evidence",
     "assess_qualified_deterministic_fit",
     "assess_reviewed_readiness_evidence",
+    "accept_qualified_independent_fit_review",
     "build_calibration_artifact",
     "canonical_bytes",
     "canonical_sha256",
