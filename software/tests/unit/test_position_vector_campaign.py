@@ -30,6 +30,7 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
+    QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
     READINESS_EVIDENCE_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_SCHEMA,
@@ -57,6 +58,7 @@ from rocell.calibration.position_vector_campaign import (
     create_qualified_candidate_inventory_package,
     create_qualified_candidate_collection_package,
     create_qualified_collection_readiness_plan,
+    create_qualified_collection_readiness_handoff,
     evaluate_candidate_count_augmentation,
     fit_campaign_dataset,
     load_campaign_dataset,
@@ -1143,6 +1145,106 @@ def test_qualified_collection_readiness_assessment_rejects_invalid_evidence(
         )
 
 
+def test_qualified_collection_readiness_handoff_binds_complete_chain():
+    chain = qualified_collection_readiness_chain()
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+    assessment = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+    )
+
+    handoff = create_qualified_collection_readiness_handoff(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+        assessment_document=assessment,
+    )
+
+    assert handoff["schema"] == QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA
+    assert handoff["status"] == "QUALIFIED_COLLECTION_READINESS_HANDOFF_READY"
+    assert handoff["collection_plan_sha256"] == canonical_sha256(chain[3])
+    assert handoff["observations_sha256"] == canonical_sha256(chain[4])
+    assert handoff["readiness_assessment_sha256"] == canonical_sha256(assessment)
+    assert handoff["pose_labels"] == [
+        slot["source_pose"] for slot in chain[3]["slots"]
+    ]
+    assert len(handoff["accepted_evidence"]) == 8
+    assert handoff["next_required_gate"] == (
+        "RETAINED_STATIONARY_OBSERVATION_COLLECTION"
+    )
+    assert handoff["authority"]["commands_sent"] == 0
+    assert handoff["authority"]["physical_authority"] is False
+
+
+def test_qualified_collection_readiness_handoff_rejects_blocked_or_tampered_chain():
+    chain = qualified_collection_readiness_chain()
+    requirements = [
+        item["requirement"] for item in chain[-1]["evidence_requirements"]
+    ]
+    partial_evidence = qualified_collection_readiness_evidence(
+        chain[-1], requirements[:1]
+    )
+    blocked = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=partial_evidence,
+    )
+    with pytest.raises(PositionVectorCampaignError, match="is not complete"):
+        create_qualified_collection_readiness_handoff(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=chain[4],
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            evidence_document=partial_evidence,
+            assessment_document=blocked,
+        )
+
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+    complete = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+    )
+    tampered = copy.deepcopy(complete)
+    tampered["evidence_sha256"] = "0" * 64
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        create_qualified_collection_readiness_handoff(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=chain[4],
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            evidence_document=evidence,
+            assessment_document=tampered,
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -1538,6 +1640,61 @@ def test_file_workflow_assesses_qualified_collection_readiness_without_hardware(
     assert main(args) == 0
     assert json.loads(output_path.read_bytes())["status"] == (
         "QUALIFIED_COLLECTION_READINESS_COMPLETE"
+    )
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_creates_qualified_collection_readiness_handoff_without_hardware(
+    tmp_path,
+):
+    chain = qualified_collection_readiness_chain()
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+    assessment = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+    )
+    names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+    )
+    paths = {}
+    for name, document in zip(names, chain, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    paths["evidence"] = tmp_path / "evidence.json"
+    paths["evidence"].write_text(json.dumps(evidence), encoding="utf-8")
+    paths["assessment"] = tmp_path / "assessment.json"
+    paths["assessment"].write_text(json.dumps(assessment), encoding="utf-8")
+    output_path = tmp_path / "readiness-handoff.json"
+    args = [
+        "create-qualified-collection-readiness-handoff",
+        "--inventory", str(paths["inventory"]),
+        "--admission-receipt", str(paths["admission-receipt"]),
+        "--training-split", str(paths["training-split"]),
+        "--collection-plan", str(paths["collection-plan"]),
+        "--observations", str(paths["observations"]),
+        "--preparation-receipt", str(paths["preparation-receipt"]),
+        "--readiness-plan", str(paths["readiness-plan"]),
+        "--evidence", str(paths["evidence"]),
+        "--assessment", str(paths["assessment"]),
+        "--output", str(output_path),
+    ]
+
+    assert main(args) == 0
+    assert json.loads(output_path.read_bytes())["status"] == (
+        "QUALIFIED_COLLECTION_READINESS_HANDOFF_READY"
     )
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)

@@ -440,6 +440,35 @@ accepted declarations. This validates artifact bindings, decisions, and
 reviewer separation. It does not inspect the referenced evidence, prove the
 physical setup, or authorize hardware access, collection, or motion.
 
+Create the artifact-transfer boundary only after the assessment is complete:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign create-qualified-collection-readiness-handoff `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations proposed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --assessment proposed-position-vector-collection-readiness-assessment.json `
+  --output proposed-position-vector-collection-readiness-handoff.json
+```
+
+The command reproduces the entire chain and refuses blocked, crossed, or edited
+assessments. Its
+`rocell.position_vector_calibration_qualified_collection_readiness_handoff.v1`
+receipt binds the existing collection plan and empty observation template to
+the eight accepted evidence declarations and their independent reviewers. It
+preserves the ordered nine-pose catalog and identifies
+`RETAINED_STATIONARY_OBSERVATION_COLLECTION` as the next required gate.
+
+`QUALIFIED_COLLECTION_READINESS_HANDOFF_READY` describes artifact transfer.
+The receipt does not inspect the referenced evidence or authorize controller,
+camera, collection, or motion access. Physical collection remains subject to
+the separate operator and safety controls for the installed system.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
