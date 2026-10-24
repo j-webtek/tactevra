@@ -65,6 +65,9 @@ CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA = (
 CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA = (
     "rocell.position_vector_calibration_candidate_qualification_assessment.v1"
 )
+CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_qualification_handoff.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -1011,6 +1014,73 @@ def assess_candidate_qualification_evidence(
     }
 
 
+def create_candidate_qualification_handoff(
+    inventory_document: Mapping[str, Any],
+    candidate_document: Mapping[str, Any],
+    preflight_document: Mapping[str, Any],
+    plan_document: Mapping[str, Any],
+    evidence_document: Mapping[str, Any],
+    assessment_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Create a reproducible receipt for one complete qualification chain.
+
+    The receipt is an offline handoff boundary. It preserves the accepted
+    evidence order and exact upstream hashes, but grants no physical authority.
+    """
+
+    reproduced = assess_candidate_qualification_evidence(
+        inventory_document,
+        candidate_document,
+        preflight_document,
+        plan_document,
+        evidence_document,
+        policy,
+    )
+    supplied = _mapping(assessment_document, "candidate_qualification_assessment")
+    if dict(supplied) != reproduced:
+        raise PositionVectorCampaignError(
+            "candidate qualification assessment does not reproduce from its inputs"
+        )
+    if reproduced["status"] != "EVIDENCE_CHAIN_COMPLETE":
+        raise PositionVectorCampaignError(
+            "candidate qualification evidence chain is not complete"
+        )
+
+    evidence = _mapping(evidence_document, "candidate_qualification_evidence")
+    plan = _mapping(plan_document, "candidate_qualification_plan")
+    return {
+        "schema": CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA,
+        "status": "QUALIFICATION_HANDOFF_READY",
+        "inventory_id": plan["inventory_id"],
+        "inventory_sha256": reproduced["inventory_sha256"],
+        "candidate": dict(plan["candidate"]),
+        "candidate_sha256": reproduced["candidate_sha256"],
+        "attachment_profile": reproduced["attachment_profile"],
+        "qualification_plan_sha256": reproduced["qualification_plan_sha256"],
+        "evidence_sha256": reproduced["evidence_sha256"],
+        "qualification_assessment_sha256": canonical_sha256(reproduced),
+        "evidence_producer_id": evidence["producer_id"],
+        "accepted_evidence": [
+            {
+                "requirement": item["requirement"],
+                "evidence_sha256": item["evidence_sha256"],
+                "reviewer_id": item["reviewer_id"],
+            }
+            for item in reproduced["requirement_assessments"]
+        ],
+        "blockers": [],
+        "limitations": [
+            "This receipt reproduces and binds accepted evidence declarations; it "
+            "does not inspect the referenced evidence content.",
+            "QUALIFICATION_HANDOFF_READY is an artifact-transfer state, not proof "
+            "of physical correctness or safe motion.",
+            "This handoff does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(reproduced["authority"]),
+    }
+
+
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise PositionVectorCampaignError(f"{label} must be an object")
@@ -1801,6 +1871,17 @@ def main(argv: list[str] | None = None) -> int:
     candidate_assessment_parser.add_argument("--plan", required=True)
     candidate_assessment_parser.add_argument("--evidence", required=True)
     candidate_assessment_parser.add_argument("--output", required=True)
+    candidate_handoff_parser = commands.add_parser(
+        "create-candidate-qualification-handoff",
+        help="bind one complete candidate qualification chain into a receipt",
+    )
+    candidate_handoff_parser.add_argument("--inventory", required=True)
+    candidate_handoff_parser.add_argument("--candidate", required=True)
+    candidate_handoff_parser.add_argument("--preflight", required=True)
+    candidate_handoff_parser.add_argument("--plan", required=True)
+    candidate_handoff_parser.add_argument("--evidence", required=True)
+    candidate_handoff_parser.add_argument("--assessment", required=True)
+    candidate_handoff_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -1934,6 +2015,17 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "create-candidate-qualification-handoff":
+        result = create_candidate_qualification_handoff(
+            _read_json(args.inventory),
+            _read_json(args.candidate),
+            _read_json(args.preflight),
+            _read_json(args.plan),
+            _read_json(args.evidence),
+            _read_json(args.assessment),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2049,6 +2141,7 @@ def main(argv: list[str] | None = None) -> int:
 __all__ = [
     "CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA",
     "CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA",
+    "CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA",
     "CANDIDATE_QUALIFICATION_PLAN_SCHEMA",
     "DATASET_SCHEMA",
     "FIT_REPORT_SCHEMA",
@@ -2075,6 +2168,7 @@ __all__ = [
     "compile_planned_dataset",
     "create_assessed_collection_package",
     "create_candidate_qualification_plan",
+    "create_candidate_qualification_handoff",
     "create_collection_plan",
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",
