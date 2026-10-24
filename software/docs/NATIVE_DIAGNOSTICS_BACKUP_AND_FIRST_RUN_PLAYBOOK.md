@@ -1,16 +1,14 @@
 # Native diagnostics: backup and first-run handoff
 
-Status: two exact Stage A sessions authorized on 2026-10-22 were consumed and
-failed closed. The first stopped at flash identification because the direct script
-omitted the volatile default-SPI attach required by esptool 4.6's ROM-only path.
-The corrected second session confirmed the expected ESP32 and MAC, 4 MB flash,
-disabled flash encryption and disabled secure boot, then stopped during the first
-ROM read on a transport CRC/checksum error. Neither session created a flash dump
-or performed a retry, stub upload, persistent device write, erase, application
-start or reset-on-exit. Another session requires fresh setup confirmation and
-explicit approval. A RAM-helper session also requires approval for its temporary
-code upload/execution. Firmware deployment and configuration/provisioning remain
-separately gated.
+Status: Stage A backup is complete. On 2026-10-24, one exactly authorized esptool
+4.6 session used its temporary RAM helper at 115200 baud to read the full 4 MB
+flash twice. Both 4,194,304-byte copies have SHA-256
+`c800a24409d4e57f65d431b8341c872a8684144a9ed1c7a4af9c96e79a7d4cec`.
+The session verified the expected ESP32 and MAC, performed no persistent write or
+erase, did not retry, and closed without reset or application restart. Offline
+inspection verified the installed partition layout and the bootloader/app0 image
+checksums and appended hashes. Firmware deployment, configuration/provisioning,
+application restart and motor-power restoration remain separately gated.
 
 ## Current evidence
 
@@ -32,10 +30,10 @@ separately gated.
 
 ## Stage A — separately authorized backup-only session
 
-Both 2026-10-22 approvals were consumed by the retained failed attempts.
-Bootloader entry resets/intercepts the controller and is not an ordinary feedback query.
-Before another attempt, establish the Stage A setup and obtain a new exact
-one-session approval. No firmware/configuration write or erase is implied.
+Stage A completed on 2026-10-24 after the two retained 2026-10-22 failed-closed
+attempts. Bootloader entry resets/intercepts the controller and is not an ordinary
+feedback query. The completed backup grants no firmware/configuration write,
+erase, reset, application restart or deployment authority.
 
 1. Operator supports the arm against falling, removes external motor power, and
    leaves USB controller power connected. Do not force loaded joints. Keep the
@@ -96,14 +94,43 @@ one-session approval. No firmware/configuration write or erase is implied.
   effect and requires a fresh exact approval; it must still perform no persistent
   flash/eFuse write and no reset/application restart afterward.
 
+### Verified 2026-10-24 RAM-helper backup
+
+- Local sanitized checkpoint (under the intentionally untracked run directory):
+  `software/runs/operational-checkpoints/issue190-stage-a-readback-verified-20261024.json`
+- Tooling: isolated esptool 4.6 with pyserial 3.5, COM4 at 115200 baud, one
+  connection attempt and one temporary RAM-helper upload/execution.
+- Verified identity: ESP32-D0WD-V3 revision 3.1; MAC
+  `FC:E8:C0:F8:D5:38`; flash ID `0x164020`; 4 MB flash; flash encryption
+  disabled; secure boot disabled.
+- Result: two complete 4,194,304-byte reads matched at SHA-256
+  `c800a24409d4e57f65d431b8341c872a8684144a9ed1c7a4af9c96e79a7d4cec`.
+  Raw copies remain only in the access-restricted local backup directory.
+- Effects: one bootloader-entry session and one volatile RAM helper; zero
+  persistent controller writes; zero erases; zero motion commands; zero retries;
+  port closed without reset or application restart.
+- Offline partition parsing verified the installed layout: NVS 0x9000/0x5000;
+  OTA data 0xe000/0x2000; app0 0x10000/0x140000; app1
+  0x150000/0x140000; SPIFFS 0x290000/0x160000; coredump
+  0x3f0000/0x10000. The 0x8000..0x8c00 partition-table region has SHA-256
+  `148b959cbff1c38aa8e1d5c0ba9d612c54997b945e56a63f41223eef650653a1`.
+- Pinned esptool 4.6 validated the installed bootloader and app0 checksums and
+  appended hashes. Exact bootloader image SHA-256 is
+  `b22f373e6194a62505034bbcd2828ab5eaa0fba62f3e4198fb7ae677c1d2f6f7`;
+  exact app0 image SHA-256 is
+  `1b0589fa323a2714777f5c70453eeec6daa94bd8c92a481701689da82ce93fdc`.
+  App0 identifies version `769c168`, project `arduino-lib-builder`, IDF
+  `v5.1.4-972-g632e0c2a9f-dirty`, built `Oct 22 2024 21:30:11`.
+
 Full flash may contain Wi-Fi credentials and private configuration. Keep raw dumps
 out of ordinary wizard diagnostic exports. Export only nonsecret metadata, hashes
 and the reviewed partition summary; never print credential-containing regions.
 
 ## Stage B — offline compatibility/recovery review
 
-1. Parse the retained partition table and identify the actual app/filesystem/NVS
-   ranges. Compare against the candidate; do not assume the CSV above is installed.
+1. The retained partition table and actual app/filesystem/NVS ranges are now
+   parsed above. They materially differ from the candidate's huge-app layout;
+   preserve the installed table and rebuild against it.
 2. Establish flash/security settings, chip revision constraints and PSRAM support
    from authoritative evidence. A CP210x device name proves none of these.
 3. Inspect the backed-up application identity where possible. Recheck candidate
