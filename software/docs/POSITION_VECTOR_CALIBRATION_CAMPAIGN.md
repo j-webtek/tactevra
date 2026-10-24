@@ -215,6 +215,32 @@ collision clearance, cable or attachment clearance, independent joint truth,
 or five-pose training-subset coverage. The command imports no hardware layer,
 opens no controller or camera, and grants no collection or motion authority.
 
+For a proposal with that exact passing result, freeze the next review boundary
+as a qualification plan:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign prepare-candidate-qualification `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --candidate proposed-position-vector-candidate.json `
+  --preflight proposed-position-vector-preflight.json `
+  --output proposed-position-vector-qualification-plan.json
+```
+
+The command recomputes the preflight and rejects a stale, edited, crossed, or
+gap-leaving result. Its plan is bound to the inventory, candidate, attachment
+profile, and preflight hashes. It deliberately marks every evidence slot
+missing. The listed gates cover the calibrated count-to-joint mapping,
+kinematic reachability and joint limits, installed collision geometry, cable
+clearance, attachment and tool-center-point geometry, continuous swept-path
+screening, independent joint truth procedure, and independent engineering
+review.
+
+`QUALIFICATION_EVIDENCE_REQUIRED` is a blocker state. The plan is a checklist,
+not a reachability or safety assessment, and it cannot accept evidence or
+authorize hardware access, collection, or motion. The installed collision and
+cable geometry must come from the exact physical attachment profile; hashes or
+reviews from a different profile cannot satisfy those future gates.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

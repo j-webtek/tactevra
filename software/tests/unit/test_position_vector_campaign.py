@@ -16,6 +16,7 @@ from rocell.calibration.position_vector_campaign import (
     CANDIDATE_INVENTORY_SCHEMA,
     CANDIDATE_PREFLIGHT_SCHEMA,
     CANDIDATE_PROPOSAL_SCHEMA,
+    CANDIDATE_QUALIFICATION_PLAN_SCHEMA,
     DATASET_SCHEMA,
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
@@ -37,6 +38,7 @@ from rocell.calibration.position_vector_campaign import (
     collection_observations_template,
     compile_planned_dataset,
     create_assessed_collection_package,
+    create_candidate_qualification_plan,
     create_collection_plan,
     create_reviewed_collection_package,
     create_reviewed_dataset_package,
@@ -402,6 +404,48 @@ def test_candidate_preflight_retains_unclosed_gaps():
                    for row in report["requirement_evaluations"])
 
 
+def test_candidate_qualification_plan_binds_passing_preflight_and_lists_gates():
+    inventory = candidate_inventory()
+    proposal = candidate_proposal(inventory)
+    preflight = evaluate_candidate_count_augmentation(inventory, proposal)
+
+    plan = create_candidate_qualification_plan(inventory, proposal, preflight)
+
+    assert plan["schema"] == CANDIDATE_QUALIFICATION_PLAN_SCHEMA
+    assert plan["status"] == "QUALIFICATION_EVIDENCE_REQUIRED"
+    assert plan["candidate_sha256"] == preflight["candidate_sha256"]
+    assert plan["candidate_preflight_sha256"] == canonical_sha256(preflight)
+    assert len(plan["qualification_requirements"]) == 8
+    assert all(
+        item["status"] == "EVIDENCE_REQUIRED"
+        and item["accepted_evidence_sha256"] is None
+        for item in plan["qualification_requirements"]
+    )
+    assert "INSTALLED_COLLISION_GEOMETRY_EVIDENCE_REQUIRED" in plan["blockers"]
+    assert "ATTACHMENT_TCP_GEOMETRY_EVIDENCE_REQUIRED" in plan["blockers"]
+    assert "CONTINUOUS_SWEPT_PATH_SCREENING_EVIDENCE_REQUIRED" in plan["blockers"]
+    assert plan["authority"]["commands_sent"] == 0
+    assert plan["authority"]["physical_authority"] is False
+
+
+def test_candidate_qualification_plan_rejects_stale_or_failing_preflight():
+    inventory = candidate_inventory()
+    proposal = candidate_proposal(inventory)
+    preflight = evaluate_candidate_count_augmentation(inventory, proposal)
+    stale = copy.deepcopy(preflight)
+    stale["candidate"]["source_ref"] = "crossed-evidence"
+
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        create_candidate_qualification_plan(inventory, proposal, stale)
+
+    failing = candidate_proposal(
+        inventory, counts=[2174, 2200, 1895, 2400, 2250, 2040, 2047]
+    )
+    failing_preflight = evaluate_candidate_count_augmentation(inventory, failing)
+    with pytest.raises(PositionVectorCampaignError, match="does not close"):
+        create_candidate_qualification_plan(inventory, failing, failing_preflight)
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -452,6 +496,33 @@ def test_file_workflow_writes_candidate_preflight_without_hardware(tmp_path):
             "--candidate", str(candidate_path),
             "--output", str(output_path),
         ])
+
+
+def test_file_workflow_writes_candidate_qualification_plan_without_hardware(tmp_path):
+    inventory = candidate_inventory()
+    proposal = candidate_proposal(inventory)
+    preflight = evaluate_candidate_count_augmentation(inventory, proposal)
+    inventory_path = tmp_path / "inventory.json"
+    candidate_path = tmp_path / "candidate.json"
+    preflight_path = tmp_path / "preflight.json"
+    output_path = tmp_path / "qualification-plan.json"
+    inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+    candidate_path.write_text(json.dumps(proposal), encoding="utf-8")
+    preflight_path.write_text(json.dumps(preflight), encoding="utf-8")
+
+    args = [
+        "prepare-candidate-qualification",
+        "--inventory", str(inventory_path),
+        "--candidate", str(candidate_path),
+        "--preflight", str(preflight_path),
+        "--output", str(output_path),
+    ]
+    assert main(args) == 0
+    assert json.loads(output_path.read_bytes()) == create_candidate_qualification_plan(
+        inventory, proposal, preflight
+    )
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
 
 
 def test_retained_candidate_inventory_and_coverage_report_reproduce():

@@ -56,6 +56,9 @@ CANDIDATE_PROPOSAL_SCHEMA = (
 CANDIDATE_PREFLIGHT_SCHEMA = (
     "rocell.position_vector_calibration_candidate_preflight.v1"
 )
+CANDIDATE_QUALIFICATION_PLAN_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_qualification_plan.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -753,6 +756,103 @@ def evaluate_candidate_count_augmentation(
             "This preflight does not authorize hardware access, motion, or collection.",
         ],
         "authority": dict(augmentation["authority"]),
+    }
+
+
+def create_candidate_qualification_plan(
+    inventory_document: Mapping[str, Any],
+    candidate_document: Mapping[str, Any],
+    preflight_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Create the evidence checklist for one count-closing candidate.
+
+    The supplied preflight must reproduce exactly from the inventory and
+    proposal. The result contains no accepted evidence: it identifies the
+    independent physical and engineering reviews that still remain.
+    """
+
+    reproduced = evaluate_candidate_count_augmentation(
+        inventory_document, candidate_document, policy
+    )
+    supplied = _mapping(preflight_document, "candidate_preflight")
+    if dict(supplied) != reproduced:
+        raise PositionVectorCampaignError(
+            "candidate preflight does not reproduce from inventory and proposal"
+        )
+    if reproduced["status"] != "COUNT_VECTOR_CLOSES_CATALOG_GAPS":
+        raise PositionVectorCampaignError(
+            "candidate does not close every catalog count gap"
+        )
+
+    requirements = [
+        (
+            "CALIBRATED_COUNT_TO_JOINT_MAPPING",
+            "Accepted attachment-specific conversion from controller counts to "
+            "independently measured canonical joint angles.",
+        ),
+        (
+            "KINEMATIC_REACHABILITY_AND_JOINT_LIMIT_ASSESSMENT",
+            "Reviewed reachability and joint-limit result from a kinematic model "
+            "bound to the installed build.",
+        ),
+        (
+            "INSTALLED_COLLISION_GEOMETRY",
+            "Measured and accepted installed collision profile for the exact "
+            "attachment configuration.",
+        ),
+        (
+            "INSTALLED_CABLE_CLEARANCE_ENVELOPE",
+            "Reviewed cable routing and clearance evidence for the proposed pose.",
+        ),
+        (
+            "ATTACHMENT_TCP_GEOMETRY",
+            "Measured jaw, tool-center-point, and attachment geometry for the "
+            "selected attachment profile.",
+        ),
+        (
+            "CONTINUOUS_SWEPT_PATH_SCREENING",
+            "Reviewed continuous-path collision and clearance result for a qualified "
+            "route to and from the candidate.",
+        ),
+        (
+            "INDEPENDENT_JOINT_TRUTH_PROCEDURE",
+            "A retained independent procedure for measuring every canonical joint "
+            "at the stationary candidate pose.",
+        ),
+        (
+            "ENGINEERING_QUALIFICATION_REVIEW",
+            "Independent engineering acceptance of the exact evidence-bound pose.",
+        ),
+    ]
+    return {
+        "schema": CANDIDATE_QUALIFICATION_PLAN_SCHEMA,
+        "status": "QUALIFICATION_EVIDENCE_REQUIRED",
+        "inventory_id": reproduced["inventory_id"],
+        "inventory_sha256": reproduced["inventory_sha256"],
+        "attachment_profile": reproduced["attachment_profile"],
+        "candidate": dict(reproduced["candidate"]),
+        "candidate_sha256": reproduced["candidate_sha256"],
+        "candidate_preflight_sha256": canonical_sha256(reproduced),
+        "qualification_requirements": [
+            {
+                "requirement": requirement,
+                "description": description,
+                "status": "EVIDENCE_REQUIRED",
+                "accepted_evidence_sha256": None,
+            }
+            for requirement, description in requirements
+        ],
+        "blockers": [f"{requirement}_EVIDENCE_REQUIRED" for requirement, _ in requirements],
+        "limitations": [
+            "This plan inventories missing evidence; it does not assess or accept it.",
+            "A count-closing candidate is not thereby reachable, within joint limits, "
+            "or collision-free.",
+            "No cable, attachment, swept-path, or independent joint-truth evidence "
+            "has been supplied by this plan.",
+            "This plan does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(reproduced["authority"]),
     }
 
 
@@ -1528,6 +1628,14 @@ def main(argv: list[str] | None = None) -> int:
     candidate_preflight_parser.add_argument("--inventory", required=True)
     candidate_preflight_parser.add_argument("--candidate", required=True)
     candidate_preflight_parser.add_argument("--output", required=True)
+    candidate_qualification_parser = commands.add_parser(
+        "prepare-candidate-qualification",
+        help="prepare the missing-evidence checklist for one passing candidate",
+    )
+    candidate_qualification_parser.add_argument("--inventory", required=True)
+    candidate_qualification_parser.add_argument("--candidate", required=True)
+    candidate_qualification_parser.add_argument("--preflight", required=True)
+    candidate_qualification_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -1640,6 +1748,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "preflight-candidate-augmentation":
         result = evaluate_candidate_count_augmentation(
             _read_json(args.inventory), _read_json(args.candidate)
+        )
+        _write_new(args.output, result)
+        return 0
+    if args.command == "prepare-candidate-qualification":
+        result = create_candidate_qualification_plan(
+            _read_json(args.inventory),
+            _read_json(args.candidate),
+            _read_json(args.preflight),
         )
         _write_new(args.output, result)
         return 0
@@ -1756,6 +1872,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 __all__ = [
+    "CANDIDATE_QUALIFICATION_PLAN_SCHEMA",
     "DATASET_SCHEMA",
     "FIT_REPORT_SCHEMA",
     "OBSERVATIONS_SCHEMA",
@@ -1779,6 +1896,7 @@ __all__ = [
     "collection_observations_template",
     "compile_planned_dataset",
     "create_assessed_collection_package",
+    "create_candidate_qualification_plan",
     "create_collection_plan",
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",
