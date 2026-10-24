@@ -17,6 +17,8 @@ from rocell.calibration.position_vector_campaign import (
     CANDIDATE_PREFLIGHT_SCHEMA,
     CANDIDATE_PROPOSAL_SCHEMA,
     CANDIDATE_QUALIFICATION_PLAN_SCHEMA,
+    CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA,
+    CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA,
     DATASET_SCHEMA,
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
@@ -31,6 +33,7 @@ from rocell.calibration.position_vector_campaign import (
     CampaignPolicy,
     PositionVectorCampaignError,
     audit_candidate_count_coverage,
+    assess_candidate_qualification_evidence,
     assess_collection_readiness,
     assess_reviewed_readiness_evidence,
     build_calibration_artifact,
@@ -288,6 +291,40 @@ def candidate_proposal(inventory=None, counts=None, attachment="no_attachment"):
     }
 
 
+def candidate_qualification_chain():
+    inventory = candidate_inventory()
+    proposal = candidate_proposal(inventory)
+    preflight = evaluate_candidate_count_augmentation(inventory, proposal)
+    qualification_plan = create_candidate_qualification_plan(
+        inventory, proposal, preflight
+    )
+    return inventory, proposal, preflight, qualification_plan
+
+
+def candidate_qualification_evidence(qualification_plan, requirements=None):
+    requirements = requirements or [
+        item["requirement"]
+        for item in qualification_plan["qualification_requirements"]
+    ]
+    return {
+        "schema": CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA,
+        "qualification_plan_sha256": canonical_sha256(qualification_plan),
+        "inventory_sha256": qualification_plan["inventory_sha256"],
+        "candidate_sha256": qualification_plan["candidate_sha256"],
+        "attachment_profile": qualification_plan["attachment_profile"],
+        "producer_id": "qualification-producer-01",
+        "evidence": [
+            {
+                "requirement": requirement,
+                "evidence_sha256": hashlib.sha256(requirement.encode()).hexdigest(),
+                "reviewer_id": "qualification-reviewer-02",
+                "decision": "ACCEPT",
+            }
+            for requirement in requirements
+        ],
+    }
+
+
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
     report = audit_candidate_count_coverage(candidate_inventory())
 
@@ -446,6 +483,102 @@ def test_candidate_qualification_plan_rejects_stale_or_failing_preflight():
         create_candidate_qualification_plan(inventory, failing, failing_preflight)
 
 
+def test_candidate_qualification_assessment_accepts_complete_reviewed_chain():
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+
+    report = assess_candidate_qualification_evidence(
+        inventory, proposal, preflight, qualification_plan, evidence
+    )
+
+    assert report["schema"] == CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA
+    assert report["status"] == "EVIDENCE_CHAIN_COMPLETE"
+    assert report["blockers"] == []
+    assert all(
+        item["status"] == "EVIDENCE_ACCEPTED"
+        for item in report["requirement_assessments"]
+    )
+    assert report["qualification_plan_sha256"] == canonical_sha256(
+        qualification_plan
+    )
+    assert report["authority"]["commands_sent"] == 0
+    assert report["authority"]["physical_authority"] is False
+    assert any(
+        "does not itself establish physical correctness" in limitation
+        for limitation in report["limitations"]
+    )
+
+
+def test_candidate_qualification_assessment_reports_missing_and_rejected_gates():
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    required = [
+        item["requirement"]
+        for item in qualification_plan["qualification_requirements"]
+    ]
+    evidence = candidate_qualification_evidence(qualification_plan, required[:2])
+    evidence["evidence"][1]["decision"] = "REJECT"
+
+    report = assess_candidate_qualification_evidence(
+        inventory, proposal, preflight, qualification_plan, evidence
+    )
+
+    assert report["status"] == "EVIDENCE_CHAIN_BLOCKED"
+    assert report["blockers"][0] == f"{required[1]}_EVIDENCE_REJECTED"
+    assert report["blockers"][1:] == [
+        f"{requirement}_EVIDENCE_REQUIRED" for requirement in required[2:]
+    ]
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (
+            lambda value: value.update(qualification_plan_sha256="0" * 64),
+            "binding mismatch",
+        ),
+        (
+            lambda value: value["evidence"][0].update(
+                reviewer_id=value["producer_id"]
+            ),
+            "not independent",
+        ),
+        (
+            lambda value: value["evidence"].append(
+                copy.deepcopy(value["evidence"][0])
+            ),
+            "repeats a requirement",
+        ),
+        (
+            lambda value: value["evidence"][0].update(requirement="UNKNOWN_GATE"),
+            "requirement is unknown",
+        ),
+        (
+            lambda value: value["evidence"][0].update(decision="PENDING"),
+            "decision is invalid",
+        ),
+        (
+            lambda value: value["evidence"][0].update(evidence_sha256="0" * 63),
+            "lowercase SHA-256",
+        ),
+    ],
+)
+def test_candidate_qualification_assessment_rejects_invalid_evidence(mutate, match):
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+    mutate(evidence)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        assess_candidate_qualification_evidence(
+            inventory, proposal, preflight, qualification_plan, evidence
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -521,6 +654,39 @@ def test_file_workflow_writes_candidate_qualification_plan_without_hardware(tmp_
     assert json.loads(output_path.read_bytes()) == create_candidate_qualification_plan(
         inventory, proposal, preflight
     )
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_assesses_candidate_qualification_without_hardware(tmp_path):
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+    documents = {
+        "inventory": inventory,
+        "candidate": proposal,
+        "preflight": preflight,
+        "plan": qualification_plan,
+        "evidence": evidence,
+    }
+    paths = {}
+    for name, document in documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    output_path = tmp_path / "assessment.json"
+    args = [
+        "assess-candidate-qualification",
+        "--inventory", str(paths["inventory"]),
+        "--candidate", str(paths["candidate"]),
+        "--preflight", str(paths["preflight"]),
+        "--plan", str(paths["plan"]),
+        "--evidence", str(paths["evidence"]),
+        "--output", str(output_path),
+    ]
+
+    assert main(args) == 0
+    assert json.loads(output_path.read_bytes())["status"] == "EVIDENCE_CHAIN_COMPLETE"
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)
 
