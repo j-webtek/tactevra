@@ -298,6 +298,36 @@ full chain for audit.
 the proposal to the governed inventory, inspect the evidence files, establish
 physical correctness, or authorize hardware access, collection, or motion.
 
+To prepare a reviewable inventory revision from that handoff, run:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign admit-qualified-candidate `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --candidate proposed-position-vector-candidate.json `
+  --preflight proposed-position-vector-preflight.json `
+  --plan proposed-position-vector-qualification-plan.json `
+  --evidence proposed-position-vector-qualification-evidence.json `
+  --assessment proposed-position-vector-qualification-assessment.json `
+  --handoff proposed-position-vector-qualification-handoff.json `
+  --inventory-id bare-jaw-keyboard-chain-qualified-20261024 `
+  --inventory-output proposed-qualified-candidate-inventory.json `
+  --receipt-output proposed-qualified-candidate-admission-receipt.json
+```
+
+The command reproduces the complete chain and handoff, requires a fresh
+inventory identity, appends exactly one candidate in plan order, and reruns the
+coverage audit. It emits the proposed inventory and a
+`rocell.position_vector_calibration_candidate_inventory_admission_receipt.v1`
+record binding the source inventory, admitted inventory, candidate, handoff,
+attachment profile, and passing coverage report by canonical SHA-256. Existing
+or aliased output paths are refused.
+
+`QUALIFIED_CANDIDATE_INVENTORY_READY` means the proposed inventory artifact is
+ready for repository review. The appended entry remains a `PLANNED_GOAL`; it is
+not a stationary controller readback or independent joint-truth observation.
+The command does not replace the retained inventory automatically and grants no
+hardware, collection, or motion authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

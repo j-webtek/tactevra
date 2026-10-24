@@ -237,6 +237,16 @@ inputs, does not inspect referenced evidence content, and grants no hardware,
 collection, or motion authority. All byte, duplicate, and reduction limits
 remain unchanged.
 
+The qualified-candidate inventory-admission increment adds no governed paths
+and keeps the reviewed tracked-file ceiling at 6,614. It extends the existing
+campaign source, tests, and guide with a deterministic offline package that
+reproduces the full qualification chain, appends one planned candidate to a new
+inventory identity, reruns count-coverage validation, and binds both outputs in
+an admission receipt. It neither edits the retained inventory automatically nor
+converts the planned candidate into measured evidence, and it grants no
+hardware, collection, or motion authority. All byte, duplicate, and reduction
+limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
