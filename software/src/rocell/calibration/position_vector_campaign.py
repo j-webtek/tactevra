@@ -68,6 +68,9 @@ CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA = (
 CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA = (
     "rocell.position_vector_calibration_candidate_qualification_handoff.v1"
 )
+CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_inventory_admission_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -1081,6 +1084,92 @@ def create_candidate_qualification_handoff(
     }
 
 
+def create_qualified_candidate_inventory_package(
+    inventory_document: Mapping[str, Any],
+    candidate_document: Mapping[str, Any],
+    preflight_document: Mapping[str, Any],
+    plan_document: Mapping[str, Any],
+    evidence_document: Mapping[str, Any],
+    assessment_document: Mapping[str, Any],
+    handoff_document: Mapping[str, Any],
+    admitted_inventory_id: str,
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Append one qualified candidate to a new offline inventory artifact."""
+
+    reproduced_handoff = create_candidate_qualification_handoff(
+        inventory_document,
+        candidate_document,
+        preflight_document,
+        plan_document,
+        evidence_document,
+        assessment_document,
+        policy,
+    )
+    supplied_handoff = _mapping(
+        handoff_document, "candidate_qualification_handoff"
+    )
+    if dict(supplied_handoff) != reproduced_handoff:
+        raise PositionVectorCampaignError(
+            "candidate qualification handoff does not reproduce from its inputs"
+        )
+
+    source = _mapping(inventory_document, "candidate_inventory")
+    source_coverage = audit_candidate_count_coverage(source, policy)
+    new_inventory_id = _identifier(
+        admitted_inventory_id, "admitted_inventory_id"
+    )
+    if new_inventory_id == source_coverage["inventory_id"]:
+        raise PositionVectorCampaignError(
+            "admitted inventory id must differ from the source inventory id"
+        )
+    candidate = reproduced_handoff["candidate"]
+    admitted = {
+        "schema": CANDIDATE_INVENTORY_SCHEMA,
+        "inventory_id": new_inventory_id,
+        "controller_binding": dict(source["controller_binding"]),
+        "attachment_profile": source["attachment_profile"],
+        "count_kind": source["count_kind"],
+        "poses": [
+            *[dict(_mapping(item, "candidate_inventory.pose")) for item in source["poses"]],
+            {
+                "label": candidate["label"],
+                "raw_position_counts": list(candidate["raw_position_counts"]),
+                "source_ref": candidate["source_ref"],
+            },
+        ],
+    }
+    resulting_coverage = audit_candidate_count_coverage(admitted, policy)
+    if resulting_coverage["status"] != "CANDIDATE_COVERAGE_PASS":
+        raise PositionVectorCampaignError(
+            "qualified candidate inventory does not pass the coverage audit"
+        )
+
+    receipt = {
+        "schema": CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_CANDIDATE_INVENTORY_READY",
+        "source_inventory_id": source_coverage["inventory_id"],
+        "source_inventory_sha256": source_coverage["inventory_sha256"],
+        "admitted_inventory_id": new_inventory_id,
+        "admitted_inventory_sha256": canonical_sha256(admitted),
+        "candidate_sha256": reproduced_handoff["candidate_sha256"],
+        "attachment_profile": reproduced_handoff["attachment_profile"],
+        "qualification_handoff_sha256": canonical_sha256(reproduced_handoff),
+        "resulting_coverage_sha256": canonical_sha256(resulting_coverage),
+        "resulting_pose_count": resulting_coverage["pose_count"],
+        "blockers": [],
+        "limitations": [
+            "The admitted candidate remains a planned goal, not a stationary "
+            "controller readback or independent joint-truth observation.",
+            "The output is a proposed inventory artifact and does not replace a "
+            "retained inventory automatically.",
+            "This admission does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(reproduced_handoff["authority"]),
+    }
+    return admitted, receipt
+
+
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise PositionVectorCampaignError(f"{label} must be an object")
@@ -1882,6 +1971,20 @@ def main(argv: list[str] | None = None) -> int:
     candidate_handoff_parser.add_argument("--evidence", required=True)
     candidate_handoff_parser.add_argument("--assessment", required=True)
     candidate_handoff_parser.add_argument("--output", required=True)
+    candidate_admission_parser = commands.add_parser(
+        "admit-qualified-candidate",
+        help="append one qualified candidate to a new offline inventory",
+    )
+    candidate_admission_parser.add_argument("--inventory", required=True)
+    candidate_admission_parser.add_argument("--candidate", required=True)
+    candidate_admission_parser.add_argument("--preflight", required=True)
+    candidate_admission_parser.add_argument("--plan", required=True)
+    candidate_admission_parser.add_argument("--evidence", required=True)
+    candidate_admission_parser.add_argument("--assessment", required=True)
+    candidate_admission_parser.add_argument("--handoff", required=True)
+    candidate_admission_parser.add_argument("--inventory-id", required=True)
+    candidate_admission_parser.add_argument("--inventory-output", required=True)
+    candidate_admission_parser.add_argument("--receipt-output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2026,6 +2129,27 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "admit-qualified-candidate":
+        inventory, receipt = create_qualified_candidate_inventory_package(
+            _read_json(args.inventory),
+            _read_json(args.candidate),
+            _read_json(args.preflight),
+            _read_json(args.plan),
+            _read_json(args.evidence),
+            _read_json(args.assessment),
+            _read_json(args.handoff),
+            args.inventory_id,
+        )
+        output_paths = (Path(args.inventory_output), Path(args.receipt_output))
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias candidate admission output"
+            )
+        _write_new(args.inventory_output, inventory)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2140,6 +2264,7 @@ def main(argv: list[str] | None = None) -> int:
 
 __all__ = [
     "CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA",
+    "CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA",
     "CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA",
     "CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA",
     "CANDIDATE_QUALIFICATION_PLAN_SCHEMA",
@@ -2169,6 +2294,7 @@ __all__ = [
     "create_assessed_collection_package",
     "create_candidate_qualification_plan",
     "create_candidate_qualification_handoff",
+    "create_qualified_candidate_inventory_package",
     "create_collection_plan",
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",

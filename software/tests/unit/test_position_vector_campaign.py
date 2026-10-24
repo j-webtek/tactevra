@@ -13,6 +13,7 @@ from rocell.arm.position_vector_calibration import (
 from rocell.calibration.position_vector_campaign import (
     CANDIDATE_AUGMENTATION_SCHEMA,
     CANDIDATE_COVERAGE_SCHEMA,
+    CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA,
     CANDIDATE_INVENTORY_SCHEMA,
     CANDIDATE_PREFLIGHT_SCHEMA,
     CANDIDATE_PROPOSAL_SCHEMA,
@@ -47,6 +48,7 @@ from rocell.calibration.position_vector_campaign import (
     create_collection_plan,
     create_reviewed_collection_package,
     create_reviewed_dataset_package,
+    create_qualified_candidate_inventory_package,
     evaluate_candidate_count_augmentation,
     fit_campaign_dataset,
     load_campaign_dataset,
@@ -612,6 +614,95 @@ def test_candidate_qualification_handoff_rejects_blocked_or_stale_assessment():
         )
 
 
+def test_qualified_candidate_admission_creates_new_passing_inventory_and_receipt():
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+    assessment = assess_candidate_qualification_evidence(
+        inventory, proposal, preflight, qualification_plan, evidence
+    )
+    handoff = create_candidate_qualification_handoff(
+        inventory,
+        proposal,
+        preflight,
+        qualification_plan,
+        evidence,
+        assessment,
+    )
+
+    admitted, receipt = create_qualified_candidate_inventory_package(
+        inventory,
+        proposal,
+        preflight,
+        qualification_plan,
+        evidence,
+        assessment,
+        handoff,
+        "bare-jaw-keyboard-chain-qualified-20261024",
+    )
+
+    assert admitted["inventory_id"] == "bare-jaw-keyboard-chain-qualified-20261024"
+    assert admitted["count_kind"] == "PLANNED_GOAL"
+    assert admitted["poses"][-1] == {
+        "label": proposal["label"],
+        "raw_position_counts": proposal["raw_position_counts"],
+        "source_ref": proposal["source_ref"],
+    }
+    assert audit_candidate_count_coverage(admitted)["status"] == (
+        "CANDIDATE_COVERAGE_PASS"
+    )
+    assert receipt["schema"] == CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA
+    assert receipt["status"] == "QUALIFIED_CANDIDATE_INVENTORY_READY"
+    assert receipt["admitted_inventory_sha256"] == canonical_sha256(admitted)
+    assert receipt["qualification_handoff_sha256"] == canonical_sha256(handoff)
+    assert receipt["resulting_pose_count"] == 9
+    assert receipt["authority"]["physical_authority"] is False
+
+
+def test_qualified_candidate_admission_rejects_stale_handoff_or_reused_identity():
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+    assessment = assess_candidate_qualification_evidence(
+        inventory, proposal, preflight, qualification_plan, evidence
+    )
+    handoff = create_candidate_qualification_handoff(
+        inventory,
+        proposal,
+        preflight,
+        qualification_plan,
+        evidence,
+        assessment,
+    )
+    stale = copy.deepcopy(handoff)
+    stale["candidate_sha256"] = "0" * 64
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        create_qualified_candidate_inventory_package(
+            inventory,
+            proposal,
+            preflight,
+            qualification_plan,
+            evidence,
+            assessment,
+            stale,
+            "bare-jaw-keyboard-chain-qualified-20261024",
+        )
+
+    with pytest.raises(PositionVectorCampaignError, match="must differ"):
+        create_qualified_candidate_inventory_package(
+            inventory,
+            proposal,
+            preflight,
+            qualification_plan,
+            evidence,
+            assessment,
+            handoff,
+            inventory["inventory_id"],
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -809,6 +900,60 @@ def test_file_workflow_creates_candidate_qualification_handoff_without_hardware(
         "QUALIFICATION_HANDOFF_READY"
     )
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_admits_qualified_candidate_without_hardware(tmp_path):
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+    assessment = assess_candidate_qualification_evidence(
+        inventory, proposal, preflight, qualification_plan, evidence
+    )
+    handoff = create_candidate_qualification_handoff(
+        inventory,
+        proposal,
+        preflight,
+        qualification_plan,
+        evidence,
+        assessment,
+    )
+    documents = {
+        "inventory": inventory,
+        "candidate": proposal,
+        "preflight": preflight,
+        "plan": qualification_plan,
+        "evidence": evidence,
+        "assessment": assessment,
+        "handoff": handoff,
+    }
+    paths = {}
+    for name, document in documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    inventory_output = tmp_path / "qualified-inventory.json"
+    receipt_output = tmp_path / "admission-receipt.json"
+    args = [
+        "admit-qualified-candidate",
+        "--inventory", str(paths["inventory"]),
+        "--candidate", str(paths["candidate"]),
+        "--preflight", str(paths["preflight"]),
+        "--plan", str(paths["plan"]),
+        "--evidence", str(paths["evidence"]),
+        "--assessment", str(paths["assessment"]),
+        "--handoff", str(paths["handoff"]),
+        "--inventory-id", "bare-jaw-keyboard-chain-qualified-20261024",
+        "--inventory-output", str(inventory_output),
+        "--receipt-output", str(receipt_output),
+    ]
+
+    assert main(args) == 0
+    admitted = json.loads(inventory_output.read_bytes())
+    receipt = json.loads(receipt_output.read_bytes())
+    assert admitted["poses"][-1]["label"] == proposal["label"]
+    assert receipt["admitted_inventory_sha256"] == canonical_sha256(admitted)
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
         main(args)
 
 
