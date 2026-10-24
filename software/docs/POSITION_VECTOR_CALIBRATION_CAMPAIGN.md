@@ -781,6 +781,78 @@ record advances only to `CALIBRATION_INSTALLATION_EXECUTION_APPROVAL`. It does
 not copy, install, select, load, or activate the artifact and grants no
 hardware, command, motion, installation, or activation authority.
 
+After another independent approver accepts that exact review, retain an
+execution-approval record and verify it through the approval gate:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign approve-qualified-calibration-installation-execution `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --review-receipt qualified-position-vector-independent-fit-review-receipt.json `
+  --artifact qualified-position-vector-calibration.json `
+  --artifact-build-receipt qualified-position-vector-artifact-build-receipt.json `
+  --installation-review qualified-position-vector-installation-review.json `
+  --installation-review-receipt qualified-position-vector-installation-review-receipt.json `
+  --execution-approval qualified-position-vector-installation-execution-approval.json `
+  --output qualified-position-vector-installation-execution-approval-receipt.json
+```
+
+The retained approval has this strict shape:
+
+```json
+{
+  "schema": "rocell.position_vector_calibration_qualified_installation_execution_approval.v1",
+  "artifact_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "artifact_build_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "installation_review_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "installation_review_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "calibration_id": "installed-arm-count-fit-01",
+  "attachment_profile": "no_attachment",
+  "controller_binding_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "installation_profile_id": "installed-arm-no-attachment",
+  "destination_ref": "position-vector-calibration-primary",
+  "approver_id": "installation-approver-05",
+  "decision": "APPROVE",
+  "approved_at": "2026-10-24T16:00:00-04:00",
+  "approval_notes_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+
+The approver must differ from the dataset producer, independent fit reviewer,
+and installation reviewer. The command reproduces the complete installation
+review chain, rejects a crossed or modified review receipt, and requires every
+artifact, controller, attachment, profile, and destination binding to match.
+
+The resulting
+`rocell.position_vector_calibration_qualified_installation_execution_approval_receipt.v1`
+authorizes a later file installation only for that exact tuple and advances to
+`CALIBRATION_INSTALLATION_EXECUTION`. It does not perform the installation,
+select or load the artifact, activate a calibration, open a controller or
+camera, request feedback, send commands, or grant motion or physical authority.
+Calibration activation remains explicitly unauthorized.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
