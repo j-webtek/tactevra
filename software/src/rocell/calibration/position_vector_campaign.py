@@ -108,6 +108,9 @@ QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA = (
 QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_independent_fit_review_receipt.v1"
 )
+QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_artifact_build_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -3214,6 +3217,41 @@ def _review(
     return normalized
 
 
+def _build_calibration_artifact_from_verified_evidence(
+    dataset: Mapping[str, Any],
+    fit_report: Mapping[str, Any],
+    *,
+    independent_review_sha256: str,
+) -> dict[str, Any]:
+    dataset_hash = canonical_sha256(dataset)
+    fit_hash = canonical_sha256(fit_report)
+    review_hash = _digest(
+        independent_review_sha256, "independent_review_sha256"
+    )
+    if len({dataset_hash, fit_hash, review_hash}) != 3:
+        raise PositionVectorCampaignError("campaign evidence hashes are not distinct")
+    artifact = {
+        "schema": ARTIFACT_SCHEMA,
+        "calibration_id": fit_report["calibration_id"],
+        "response_profile": PROFILE,
+        "controller_binding": dataset["controller_binding"],
+        "position_order_servo_ids": list(SERVO_ORDER),
+        "joint_order": list(JOINT_ORDER),
+        "joints": [
+            {key: value for key, value in row.items() if key != "training_count_span"}
+            for row in fit_report["joints"]
+        ],
+        "shoulder_pair": fit_report["shoulder_pair"],
+        "evidence": {
+            "dataset_sha256": dataset_hash,
+            "fit_report_sha256": fit_hash,
+            "independent_review_sha256": review_hash,
+        },
+    }
+    load_position_vector_calibration(artifact)
+    return artifact
+
+
 def build_calibration_artifact(
     dataset_document: Mapping[str, Any],
     fit_report_document: Mapping[str, Any],
@@ -3230,37 +3268,105 @@ def build_calibration_artifact(
     )
     if canonical_bytes(fit) != canonical_bytes(expected):
         raise PositionVectorCampaignError("fit report does not reproduce from the dataset")
-    dataset_hash = canonical_sha256(dataset)
-    fit_hash = canonical_sha256(expected)
     review = _review(
         review_document,
-        dataset_sha256=dataset_hash,
-        fit_report_sha256=fit_hash,
+        dataset_sha256=canonical_sha256(dataset),
+        fit_report_sha256=canonical_sha256(expected),
         producer_id=dataset["producer_id"],
     )
-    review_hash = canonical_sha256(review)
-    if len({dataset_hash, fit_hash, review_hash}) != 3:
-        raise PositionVectorCampaignError("campaign evidence hashes are not distinct")
-    artifact = {
-        "schema": ARTIFACT_SCHEMA,
-        "calibration_id": expected["calibration_id"],
-        "response_profile": PROFILE,
-        "controller_binding": dataset["controller_binding"],
-        "position_order_servo_ids": list(SERVO_ORDER),
-        "joint_order": list(JOINT_ORDER),
-        "joints": [
-            {key: value for key, value in row.items() if key != "training_count_span"}
-            for row in expected["joints"]
+    return _build_calibration_artifact_from_verified_evidence(
+        dataset,
+        expected,
+        independent_review_sha256=canonical_sha256(review),
+    )
+
+
+def build_qualified_calibration_artifact(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    fit_assessment_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+    review_receipt_document: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build an uninstalled artifact from one reproduced qualified review chain."""
+
+    expected_review_receipt = accept_qualified_independent_fit_review(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+        dataset_document=dataset_document,
+        compilation_receipt_document=compilation_receipt_document,
+        fit_report_document=fit_report_document,
+        fit_assessment_document=fit_assessment_document,
+        review_document=review_document,
+    )
+    supplied_review_receipt = _mapping(
+        review_receipt_document, "qualified_independent_fit_review_receipt"
+    )
+    if dict(supplied_review_receipt) != expected_review_receipt:
+        raise PositionVectorCampaignError(
+            "qualified independent fit review receipt does not reproduce"
+        )
+
+    dataset = load_campaign_dataset(dataset_document)
+    fit_report = _mapping(fit_report_document, "qualified_fit_report")
+    artifact = _build_calibration_artifact_from_verified_evidence(
+        dataset,
+        fit_report,
+        independent_review_sha256=expected_review_receipt["review_sha256"],
+    )
+    receipt = {
+        "schema": QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_CALIBRATION_ARTIFACT_BUILT",
+        "calibration_id": artifact["calibration_id"],
+        "dataset_id": expected_review_receipt["dataset_id"],
+        "attachment_profile": expected_review_receipt["attachment_profile"],
+        "dataset_sha256": canonical_sha256(dataset),
+        "compilation_receipt_sha256": canonical_sha256(
+            compilation_receipt_document
+        ),
+        "fit_report_sha256": canonical_sha256(fit_report),
+        "fit_assessment_sha256": canonical_sha256(fit_assessment_document),
+        "independent_review_sha256": expected_review_receipt["review_sha256"],
+        "independent_review_receipt_sha256": canonical_sha256(
+            expected_review_receipt
+        ),
+        "artifact_sha256": canonical_sha256(artifact),
+        "next_required_gate": "CALIBRATION_INSTALLATION_REVIEW",
+        "limitations": [
+            "This receipt records deterministic construction of an uninstalled "
+            "runtime calibration artifact from an accepted qualified review chain.",
+            "Artifact construction does not install, select, load into an active "
+            "process, or activate the calibration.",
+            "This gate opens no controller or camera and grants no command, motion, "
+            "installation, activation, or physical authority.",
         ],
-        "shoulder_pair": expected["shoulder_pair"],
-        "evidence": {
-            "dataset_sha256": dataset_hash,
-            "fit_report_sha256": fit_hash,
-            "independent_review_sha256": review_hash,
-        },
+        "authority": dict(expected_review_receipt["authority"]),
+        "calibration_installation_authorized": False,
+        "calibration_activation_authorized": False,
     }
-    load_position_vector_calibration(artifact)
-    return artifact
+    return artifact, receipt
 
 
 def _read_json(path: str) -> Mapping[str, Any]:
@@ -3523,6 +3629,31 @@ def main(argv: list[str] | None = None) -> int:
     qualified_review_parser.add_argument("--fit-assessment", required=True)
     qualified_review_parser.add_argument("--review", required=True)
     qualified_review_parser.add_argument("--output", required=True)
+    qualified_build_parser = commands.add_parser(
+        "build-qualified-calibration-artifact",
+        help="build an uninstalled artifact from an accepted qualified review",
+    )
+    qualified_build_parser.add_argument("--inventory", required=True)
+    qualified_build_parser.add_argument("--admission-receipt", required=True)
+    qualified_build_parser.add_argument("--training-split", required=True)
+    qualified_build_parser.add_argument("--collection-plan", required=True)
+    qualified_build_parser.add_argument("--observations", required=True)
+    qualified_build_parser.add_argument("--preparation-receipt", required=True)
+    qualified_build_parser.add_argument("--readiness-plan", required=True)
+    qualified_build_parser.add_argument("--readiness-evidence", required=True)
+    qualified_build_parser.add_argument("--readiness-assessment", required=True)
+    qualified_build_parser.add_argument("--readiness-handoff", required=True)
+    qualified_build_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    qualified_build_parser.add_argument("--dataset", required=True)
+    qualified_build_parser.add_argument("--compilation-receipt", required=True)
+    qualified_build_parser.add_argument("--fit-report", required=True)
+    qualified_build_parser.add_argument("--fit-assessment", required=True)
+    qualified_build_parser.add_argument("--review", required=True)
+    qualified_build_parser.add_argument("--review-receipt", required=True)
+    qualified_build_parser.add_argument("--artifact-output", required=True)
+    qualified_build_parser.add_argument("--receipt-output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -3875,6 +4006,38 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, receipt)
         return 0
+    if args.command == "build-qualified-calibration-artifact":
+        artifact, receipt = build_qualified_calibration_artifact(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            fit_report_document=_read_json(args.fit_report),
+            fit_assessment_document=_read_json(args.fit_assessment),
+            review_document=_read_json(args.review),
+            review_receipt_document=_read_json(args.review_receipt),
+        )
+        output_paths = (Path(args.artifact_output), Path(args.receipt_output))
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias qualified artifact build output"
+            )
+        _write_new(args.artifact_output, artifact)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -4004,6 +4167,7 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
+    "QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA",
     "QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA",
     "QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA",
     "QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA",
@@ -4027,6 +4191,7 @@ __all__ = [
     "assess_reviewed_readiness_evidence",
     "accept_qualified_independent_fit_review",
     "build_calibration_artifact",
+    "build_qualified_calibration_artifact",
     "canonical_bytes",
     "canonical_sha256",
     "collection_observations_template",
