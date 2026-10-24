@@ -203,6 +203,15 @@ and gripper catalog gaps. It does not select a pose, assess mechanical safety,
 provide joint truth, open hardware, or grant motion authority. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The position-vector candidate-preflight increment adds no governed paths and
+keeps the reviewed tracked-file ceiling at 6,614. Existing campaign source,
+tests, and documentation are updated in place. The offline preflight binds a
+proposed seven-count vector to the exact inventory and attachment profile,
+then reports whether it closes the known full-catalog count gaps. It does not
+retain a proposed physical target, establish reachability or safety, open
+hardware, or grant collection or motion authority. All byte, duplicate, and
+reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
