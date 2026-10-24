@@ -185,6 +185,15 @@ artifact. It opens no hardware, grants no physical authority, and retains no
 new measurement corpus; all byte, duplicate, and reduction limits remain
 unchanged.
 
+The position-vector candidate-coverage increment adds two compact governed
+JSON paths: one historical named-goal inventory and one deterministic offline
+audit result. The reviewed tracked-file ceiling moves from 6,611 to the exact
+expected 6,613 files. Existing campaign source, tests, and documentation are
+updated in place. The retained result identifies base, wrist-roll, and gripper
+span blockers before physical collection; it adds no controller transcript,
+camera frame, independent joint truth, motion authority, or raw backup. All
+byte, duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
