@@ -33,6 +33,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
     QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA,
+    QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA,
+    QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA,
     QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA,
     QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA,
     QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA,
@@ -44,6 +46,7 @@ from rocell.calibration.position_vector_campaign import (
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
+    accept_qualified_independent_fit_review,
     audit_candidate_count_coverage,
     assess_candidate_qualification_evidence,
     assess_collection_readiness,
@@ -532,6 +535,84 @@ def qualified_compilation_package():
         ingestion_receipt_documents=receipts,
     )
     return chain, observations, receipts, compiled, compilation_receipt
+
+
+def qualified_fit_package():
+    chain, observations, receipts, compiled, compilation_receipt = (
+        qualified_compilation_package()
+    )
+    policy = CampaignPolicy(minimum_training_count_span=1)
+    fit_report, fit_assessment = assess_qualified_deterministic_fit(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        calibration_id="qualified-fit-01",
+        policy=policy,
+    )
+    return (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+    )
+
+
+def qualified_fit_review(compiled, compilation_receipt, fit_report, fit_assessment):
+    return {
+        "schema": QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA,
+        "dataset_sha256": canonical_sha256(compiled),
+        "compilation_receipt_sha256": canonical_sha256(compilation_receipt),
+        "fit_report_sha256": canonical_sha256(fit_report),
+        "fit_assessment_sha256": canonical_sha256(fit_assessment),
+        "producer_id": fit_report["producer_id"],
+        "reviewer_id": "independent-fit-reviewer-03",
+        "decision": "ACCEPT",
+        "reviewed_at": "2026-10-24T14:00:00-04:00",
+        "review_notes_sha256": "e" * 64,
+    }
+
+
+def accept_qualified_fit_review_package(package, review_document):
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+    ) = package
+    return accept_qualified_independent_fit_review(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        fit_report_document=fit_report,
+        fit_assessment_document=fit_assessment,
+        review_document=review_document,
+    )
 
 
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
@@ -1753,6 +1834,65 @@ def test_qualified_deterministic_fit_does_not_emit_pass_for_failed_policy():
         )
 
 
+def test_qualified_independent_fit_review_accepts_exact_reproduced_chain():
+    package = qualified_fit_package()
+    review_document = qualified_fit_review(*package[3:])
+
+    receipt = accept_qualified_fit_review_package(package, review_document)
+
+    assert receipt["schema"] == QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA
+    assert receipt["status"] == "QUALIFIED_INDEPENDENT_FIT_REVIEW_ACCEPTED"
+    assert receipt["review_sha256"] == canonical_sha256(review_document)
+    assert receipt["fit_assessment_sha256"] == canonical_sha256(package[6])
+    assert receipt["reviewer_id"] == review_document["reviewer_id"]
+    assert receipt["next_required_gate"] == "QUALIFIED_CALIBRATION_ARTIFACT_BUILD"
+    assert receipt["authority"]["commands_sent"] == 0
+    assert receipt["calibration_activation_authorized"] is False
+
+
+@pytest.mark.parametrize(
+    "updates,match",
+    [
+        ({"dataset_sha256": "0" * 64}, "dataset_sha256 mismatch"),
+        (
+            {"compilation_receipt_sha256": "1" * 64},
+            "compilation_receipt_sha256 mismatch",
+        ),
+        ({"fit_report_sha256": "2" * 64}, "fit_report_sha256 mismatch"),
+        ({"fit_assessment_sha256": "3" * 64}, "fit_assessment_sha256 mismatch"),
+        ({"producer_id": "another-producer"}, "producer mismatch"),
+        ({"reviewer_id": "calibration-producer-01"}, "independent"),
+        ({"decision": "REJECT"}, "not ACCEPT"),
+        ({"reviewed_at": "2026-10-24"}, "UTC offset"),
+        ({"review_notes_sha256": "invalid"}, "review_notes_sha256"),
+    ],
+)
+def test_qualified_independent_fit_review_rejects_invalid_review(updates, match):
+    package = qualified_fit_package()
+    review_document = qualified_fit_review(*package[3:])
+    review_document.update(updates)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        accept_qualified_fit_review_package(package, review_document)
+
+
+@pytest.mark.parametrize(
+    "index,match",
+    [
+        (5, "qualified fit report does not reproduce"),
+        (6, "qualified fit assessment does not reproduce"),
+    ],
+)
+def test_qualified_independent_fit_review_rejects_tampered_fit_artifact(index, match):
+    package = list(qualified_fit_package())
+    review_document = qualified_fit_review(*package[3:])
+    package[index] = copy.deepcopy(package[index])
+    package[index]["status"] = "TAMPERED"
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        accept_qualified_fit_review_package(tuple(package), review_document)
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -2401,6 +2541,70 @@ def test_file_workflow_assesses_qualified_deterministic_fit_without_hardware(
     assert assessment["fit_report_sha256"] == canonical_sha256(fit_report)
     assert assessment["status"] == "QUALIFIED_DETERMINISTIC_FIT_PASS"
     with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
+        main(args)
+
+
+def test_file_workflow_accepts_qualified_independent_fit_review_without_hardware(
+    tmp_path,
+):
+    package = qualified_fit_package()
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+    ) = package
+    review_document = qualified_fit_review(*package[3:])
+    names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    documents = (*chain[:4], observations, *chain[5:])
+    paths = {}
+    for name, document in zip(names, documents, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    receipt_paths = []
+    for index, receipt in enumerate(receipts):
+        path = tmp_path / f"ingestion-receipt-{index:02d}.json"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        receipt_paths.append(path)
+    downstream_documents = {
+        "dataset": compiled,
+        "compilation-receipt": compilation_receipt,
+        "fit-report": fit_report,
+        "fit-assessment": fit_assessment,
+        "review": review_document,
+    }
+    for name, document in downstream_documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    output = tmp_path / "independent-fit-review-receipt.json"
+    args = ["accept-qualified-independent-fit-review"]
+    for name in names:
+        args.extend((f"--{name}", str(paths[name])))
+    for path in receipt_paths:
+        args.extend(("--ingestion-receipt", str(path)))
+    for name in downstream_documents:
+        args.extend((f"--{name}", str(paths[name])))
+    args.extend(("--output", str(output)))
+
+    assert main(args) == 0
+    receipt = json.loads(output.read_bytes())
+    assert receipt["status"] == "QUALIFIED_INDEPENDENT_FIT_REVIEW_ACCEPTED"
+    assert receipt["review_sha256"] == canonical_sha256(review_document)
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)
 
 

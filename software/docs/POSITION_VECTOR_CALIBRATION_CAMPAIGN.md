@@ -599,6 +599,67 @@ to `INDEPENDENT_CALIBRATION_REVIEW`. It does not accept or activate the
 calibration and opens no controller or camera, requests no feedback, and sends
 no command or motion.
 
+After a separate reviewer inspects those exact outputs, retain a qualified
+review record and accept it through the independent-review gate:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign accept-qualified-independent-fit-review `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --output qualified-position-vector-independent-fit-review-receipt.json
+```
+
+The retained review has this strict shape:
+
+```json
+{
+  "schema": "rocell.position_vector_calibration_qualified_independent_fit_review.v1",
+  "dataset_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "compilation_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "fit_report_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "fit_assessment_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "producer_id": "calibration-producer-01",
+  "reviewer_id": "independent-fit-reviewer-03",
+  "decision": "ACCEPT",
+  "reviewed_at": "2026-10-24T14:00:00-04:00",
+  "review_notes_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+
+The reviewer must differ from the dataset producer. The gate infers the fit
+policy and calibration identity from the supplied fit report, reproduces the
+entire qualified compilation and deterministic assessment, and requires all
+four reviewed hashes to match. It rejects non-acceptance decisions, timestamps
+without a UTC offset, invalid note hashes, and crossed or modified artifacts.
+
+The resulting
+`rocell.position_vector_calibration_qualified_independent_fit_review_receipt.v1`
+record advances only to `QUALIFIED_CALIBRATION_ARTIFACT_BUILD`. It does not
+build, install, select, or activate a calibration and grants no hardware,
+command, or motion authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
