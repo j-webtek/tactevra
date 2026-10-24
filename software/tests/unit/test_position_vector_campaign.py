@@ -32,6 +32,7 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
+    QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA,
     QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA,
     QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA,
     QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA,
@@ -47,6 +48,7 @@ from rocell.calibration.position_vector_campaign import (
     assess_candidate_qualification_evidence,
     assess_collection_readiness,
     assess_qualified_collection_readiness_evidence,
+    assess_qualified_deterministic_fit,
     assess_reviewed_readiness_evidence,
     build_calibration_artifact,
     canonical_sha256,
@@ -512,6 +514,24 @@ def completed_qualified_observation_set():
         )
         receipts.append(receipt)
     return chain, observations, receipts
+
+
+def qualified_compilation_package():
+    chain, observations, receipts = completed_qualified_observation_set()
+    compiled, compilation_receipt = compile_qualified_observation_set(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+    )
+    return chain, observations, receipts, compiled, compilation_receipt
 
 
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
@@ -1631,6 +1651,108 @@ def test_qualified_observation_set_rejects_broken_receipt_chain(mutate, match):
         )
 
 
+def test_qualified_deterministic_fit_reproduces_chain_and_assesses_metrics():
+    chain, observations, receipts, compiled, compilation_receipt = (
+        qualified_compilation_package()
+    )
+    policy = CampaignPolicy(minimum_training_count_span=1)
+
+    fit_report, assessment = assess_qualified_deterministic_fit(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        calibration_id="qualified-fit-01",
+        policy=policy,
+    )
+
+    assert fit_report == fit_campaign_dataset(
+        compiled, calibration_id="qualified-fit-01", policy=policy
+    )
+    assert assessment["schema"] == QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA
+    assert assessment["status"] == "QUALIFIED_DETERMINISTIC_FIT_PASS"
+    assert assessment["compilation_receipt_sha256"] == canonical_sha256(
+        compilation_receipt
+    )
+    assert assessment["dataset_sha256"] == canonical_sha256(compiled)
+    assert assessment["fit_report_sha256"] == canonical_sha256(fit_report)
+    assert len(assessment["joint_assessments"]) == len(JOINTS)
+    assert assessment["next_required_gate"] == "INDEPENDENT_CALIBRATION_REVIEW"
+    assert assessment["authority"]["commands_sent"] == 0
+    assert assessment["calibration_activation_authorized"] is False
+
+
+@pytest.mark.parametrize(
+    "target,match",
+    [
+        ("dataset", "qualified dataset does not reproduce"),
+        ("receipt", "qualified compilation receipt does not reproduce"),
+    ],
+)
+def test_qualified_deterministic_fit_rejects_crossed_compilation(target, match):
+    chain, observations, receipts, compiled, compilation_receipt = (
+        qualified_compilation_package()
+    )
+    if target == "dataset":
+        compiled = copy.deepcopy(compiled)
+        compiled["dataset_id"] = "crossed-dataset"
+    else:
+        compilation_receipt = copy.deepcopy(compilation_receipt)
+        compilation_receipt["dataset_sha256"] = "0" * 64
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        assess_qualified_deterministic_fit(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=observations,
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            ingestion_receipt_documents=receipts,
+            dataset_document=compiled,
+            compilation_receipt_document=compilation_receipt,
+            calibration_id="qualified-fit-01",
+            policy=CampaignPolicy(minimum_training_count_span=1),
+        )
+
+
+def test_qualified_deterministic_fit_does_not_emit_pass_for_failed_policy():
+    chain, observations, receipts, compiled, compilation_receipt = (
+        qualified_compilation_package()
+    )
+
+    with pytest.raises(PositionVectorCampaignError, match="training count span"):
+        assess_qualified_deterministic_fit(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=observations,
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            ingestion_receipt_documents=receipts,
+            dataset_document=compiled,
+            compilation_receipt_document=compilation_receipt,
+            calibration_id="qualified-fit-01",
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -2210,6 +2332,74 @@ def test_file_workflow_compiles_qualified_observation_set_without_hardware(tmp_p
     assert json.loads(compilation_receipt_output.read_bytes())["status"] == (
         "QUALIFIED_OBSERVATION_SET_COMPILED"
     )
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
+        main(args)
+
+
+def test_file_workflow_assesses_qualified_deterministic_fit_without_hardware(
+    tmp_path,
+):
+    chain, observations, receipts, compiled, compilation_receipt = (
+        qualified_compilation_package()
+    )
+    names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    documents = (*chain[:4], observations, *chain[5:])
+    paths = {}
+    for name, document in zip(names, documents, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    receipt_paths = []
+    for index, receipt in enumerate(receipts):
+        path = tmp_path / f"ingestion-receipt-{index:02d}.json"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        receipt_paths.append(path)
+    paths["dataset"] = tmp_path / "dataset.json"
+    paths["dataset"].write_text(json.dumps(compiled), encoding="utf-8")
+    paths["compilation-receipt"] = tmp_path / "compilation-receipt.json"
+    paths["compilation-receipt"].write_text(
+        json.dumps(compilation_receipt), encoding="utf-8"
+    )
+    fit_output = tmp_path / "fit-report.json"
+    assessment_output = tmp_path / "fit-assessment.json"
+    args = ["assess-qualified-deterministic-fit"]
+    for name in names:
+        args.extend((f"--{name}", str(paths[name])))
+    for path in receipt_paths:
+        args.extend(("--ingestion-receipt", str(path)))
+    args.extend(
+        (
+            "--dataset",
+            str(paths["dataset"]),
+            "--compilation-receipt",
+            str(paths["compilation-receipt"]),
+            "--calibration-id",
+            "qualified-fit-01",
+            "--minimum-training-count-span",
+            "1",
+            "--fit-report-output",
+            str(fit_output),
+            "--assessment-output",
+            str(assessment_output),
+        )
+    )
+
+    assert main(args) == 0
+    fit_report = json.loads(fit_output.read_bytes())
+    assessment = json.loads(assessment_output.read_bytes())
+    assert fit_report["status"] == "PASS"
+    assert assessment["fit_report_sha256"] == canonical_sha256(fit_report)
+    assert assessment["status"] == "QUALIFIED_DETERMINISTIC_FIT_PASS"
     with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
         main(args)
 
