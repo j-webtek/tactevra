@@ -32,6 +32,7 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
+    QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA,
     QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA,
     QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_RECEIPT_SCHEMA,
@@ -51,6 +52,7 @@ from rocell.calibration.position_vector_campaign import (
     canonical_sha256,
     collection_observations_template,
     compile_planned_dataset,
+    compile_qualified_observation_set,
     create_assessed_collection_package,
     create_candidate_qualification_handoff,
     create_candidate_qualification_plan,
@@ -487,6 +489,29 @@ def qualified_stationary_observation_evidence(chain, observations, index=0):
         "motion_active": False,
         "trajectory_progress_permille": 1000,
     }
+
+
+def completed_qualified_observation_set():
+    chain = qualified_collection_readiness_handoff_chain()
+    observations = chain[4]
+    receipts = []
+    for index in range(len(chain[3]["slots"])):
+        evidence = qualified_stationary_observation_evidence(chain, observations, index)
+        observations, receipt = ingest_qualified_stationary_observation(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=observations,
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            observation_evidence_document=evidence,
+        )
+        receipts.append(receipt)
+    return chain, observations, receipts
 
 
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
@@ -1515,6 +1540,97 @@ def test_qualified_stationary_observation_rejects_refilling_slot():
         )
 
 
+def test_qualified_observation_set_compiles_complete_receipt_chain():
+    chain, observations, receipts = completed_qualified_observation_set()
+
+    dataset, receipt = compile_qualified_observation_set(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+    )
+
+    assert dataset == compile_planned_dataset(chain[3], observations)
+    assert receipt["schema"] == QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA
+    assert receipt["status"] == "QUALIFIED_OBSERVATION_SET_COMPILED"
+    assert receipt["dataset_sha256"] == canonical_sha256(dataset)
+    assert receipt["initial_observations_sha256"] == canonical_sha256(chain[4])
+    assert receipt["final_observations_sha256"] == canonical_sha256(observations)
+    assert len(receipt["ingestion_receipts"]) == len(chain[3]["slots"])
+    assert (receipt["training_sample_count"], receipt["held_out_sample_count"]) == (
+        5,
+        4,
+    )
+    assert receipt["next_required_gate"] == "DETERMINISTIC_CALIBRATION_FIT"
+    assert receipt["authority"]["commands_sent"] == 0
+    assert receipt["authority"]["camera_opened"] is False
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (lambda receipts: receipts.pop(), "does not cover every planned slot"),
+        (
+            lambda receipts: receipts.reverse(),
+            "observation hash chain is broken",
+        ),
+        (
+            lambda receipts: receipts[1].update(previous_observations_sha256="0" * 64),
+            "observation hash chain is broken",
+        ),
+        (
+            lambda receipts: receipts[1].update(
+                sample_id=receipts[0]["sample_id"],
+                source_pose=receipts[0]["source_pose"],
+                split=receipts[0]["split"],
+            ),
+            "repeat a sample",
+        ),
+        (
+            lambda receipts: receipts[-1].update(
+                resulting_observations_sha256="0" * 64
+            ),
+            "does not bind the supplied observations",
+        ),
+        (
+            lambda receipts: receipts[2].update(filled_sample_count=1),
+            "sample-count progression mismatch",
+        ),
+        (
+            lambda receipts: receipts[2].update(
+                truth_evidence_sha256=receipts[1]["truth_evidence_sha256"]
+            ),
+            "reuse per-sample evidence",
+        ),
+    ],
+)
+def test_qualified_observation_set_rejects_broken_receipt_chain(mutate, match):
+    chain, observations, receipts = completed_qualified_observation_set()
+    mutate(receipts)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        compile_qualified_observation_set(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=observations,
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            ingestion_receipt_documents=receipts,
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -2022,6 +2138,77 @@ def test_file_workflow_ingests_qualified_stationary_observation_without_hardware
     ] == observation_evidence["truth_evidence_sha256"]
     assert json.loads(receipt_output.read_bytes())["status"] == (
         "QUALIFIED_STATIONARY_OBSERVATION_INGESTED"
+    )
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
+        main(args)
+
+
+def test_file_workflow_compiles_qualified_observation_set_without_hardware(tmp_path):
+    chain, observations, receipts = completed_qualified_observation_set()
+    names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    documents = (*chain[:4], observations, *chain[5:])
+    paths = {}
+    for name, document in zip(names, documents, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    receipt_paths = []
+    for index, receipt in enumerate(receipts):
+        path = tmp_path / f"ingestion-receipt-{index:02d}.json"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        receipt_paths.append(path)
+    dataset_output = tmp_path / "dataset.json"
+    compilation_receipt_output = tmp_path / "compilation-receipt.json"
+    args = [
+        "compile-qualified-observation-set",
+        "--inventory",
+        str(paths["inventory"]),
+        "--admission-receipt",
+        str(paths["admission-receipt"]),
+        "--training-split",
+        str(paths["training-split"]),
+        "--collection-plan",
+        str(paths["collection-plan"]),
+        "--observations",
+        str(paths["observations"]),
+        "--preparation-receipt",
+        str(paths["preparation-receipt"]),
+        "--readiness-plan",
+        str(paths["readiness-plan"]),
+        "--readiness-evidence",
+        str(paths["readiness-evidence"]),
+        "--readiness-assessment",
+        str(paths["readiness-assessment"]),
+        "--readiness-handoff",
+        str(paths["readiness-handoff"]),
+    ]
+    for path in receipt_paths:
+        args.extend(("--ingestion-receipt", str(path)))
+    args.extend(
+        (
+            "--output",
+            str(dataset_output),
+            "--receipt-output",
+            str(compilation_receipt_output),
+        )
+    )
+
+    assert main(args) == 0
+    assert json.loads(dataset_output.read_bytes()) == compile_planned_dataset(
+        chain[3], observations
+    )
+    assert json.loads(compilation_receipt_output.read_bytes())["status"] == (
+        "QUALIFIED_OBSERVATION_SET_COMPILED"
     )
     with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
         main(args)

@@ -510,6 +510,48 @@ Ingestion validates retained declarations and hashes only. It does not open a
 camera or controller, request feedback, capture an image, command motion, or
 authorize physical collection.
 
+After every planned slot is filled, verify the ordered ingestion-receipt chain
+and compile the qualified dataset:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign compile-qualified-observation-set `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --output qualified-position-vector-dataset.json `
+  --receipt-output qualified-position-vector-compilation-receipt.json
+```
+
+Receipt arguments must follow ingestion order. The command reproduces the full
+readiness handoff, requires exactly one receipt for every planned sample, starts
+the hash chain at the original empty template, and requires every resulting
+hash to become the next receipt's previous hash. It also checks planned pose and
+split bindings, monotonic filled and remaining counts, independent truth review,
+unique per-sample evidence, final truth hashes, and the final observation hash.
+
+The
+`rocell.position_vector_calibration_qualified_observation_set_compilation_receipt.v1`
+record binds the complete receipt trace, final observations, strict dataset,
+upstream qualification chain, and zero-authority declaration. Its next gate is
+`DETERMINISTIC_CALIBRATION_FIT`. Compilation is an offline artifact operation;
+it performs no capture, feedback request, command, or motion.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

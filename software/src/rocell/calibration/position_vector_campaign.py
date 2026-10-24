@@ -96,6 +96,9 @@ QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA = (
 QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_stationary_observation_ingestion_receipt.v1"
 )
+QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_observation_set_compilation_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -171,6 +174,31 @@ _QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_FIELDS = frozenset(
         "stationary",
         "motion_active",
         "trajectory_progress_permille",
+    }
+)
+_QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_FIELDS = frozenset(
+    {
+        "schema",
+        "status",
+        "dataset_id",
+        "sample_id",
+        "source_pose",
+        "split",
+        "readiness_handoff_sha256",
+        "collection_plan_sha256",
+        "previous_observations_sha256",
+        "observation_evidence_sha256",
+        "resulting_observations_sha256",
+        "controller_feedback_evidence_sha256",
+        "camera_observation_receipt_sha256",
+        "truth_evidence_sha256",
+        "observation_producer_id",
+        "truth_reviewer_id",
+        "filled_sample_count",
+        "remaining_sample_count",
+        "next_required_gate",
+        "limitations",
+        "authority",
     }
 )
 _DATASET_FIELDS = frozenset(
@@ -2250,6 +2278,228 @@ def ingest_qualified_stationary_observation(
     return updated_observations, receipt
 
 
+def compile_qualified_observation_set(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Verify every ingestion receipt and compile the complete observation set."""
+
+    plan = load_collection_plan(collection_plan_document)
+    empty_observations = collection_observations_template(plan)
+    expected_handoff = create_qualified_collection_readiness_handoff(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=plan,
+        observations_document=empty_observations,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        evidence_document=readiness_evidence_document,
+        assessment_document=readiness_assessment_document,
+        policy=policy,
+    )
+    supplied_handoff = _mapping(
+        readiness_handoff_document, "qualified_collection_readiness_handoff"
+    )
+    if dict(supplied_handoff) != expected_handoff:
+        raise PositionVectorCampaignError(
+            "qualified collection readiness handoff does not reproduce"
+        )
+    if not isinstance(ingestion_receipt_documents, list):
+        raise PositionVectorCampaignError("ingestion receipts must be an array")
+    if len(ingestion_receipt_documents) != len(plan["slots"]):
+        raise PositionVectorCampaignError(
+            "ingestion receipt count does not cover every planned slot"
+        )
+
+    observations = _mapping(observations_document, "qualified_observations")
+    dataset = compile_planned_dataset(plan, observations)
+    final_observations_sha256 = canonical_sha256(observations)
+    expected_previous_sha256 = canonical_sha256(empty_observations)
+    expected_handoff_sha256 = canonical_sha256(expected_handoff)
+    expected_plan_sha256 = canonical_sha256(plan)
+    slots_by_sample = {slot["sample_id"]: slot for slot in plan["slots"]}
+    observations_by_sample = {
+        sample["sample_id"]: sample for sample in observations["samples"]
+    }
+    seen_samples: set[str] = set()
+    evidence_hashes: set[str] = set()
+    receipt_hashes: set[str] = set()
+    trace = []
+    expected_limitations = [
+        "This receipt validates retained declarations and hashes; it does not "
+        "perform camera capture or controller feedback requests.",
+        "The referenced camera, feedback, and joint-truth evidence remains "
+        "subject to its own retained-evidence review.",
+        "This ingestion grants no hardware, collection, or motion authority.",
+    ]
+    for index, document in enumerate(ingestion_receipt_documents):
+        label = f"ingestion_receipts[{index}]"
+        item = _mapping(document, label)
+        _exact(
+            item,
+            _QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_FIELDS,
+            label,
+        )
+        if (
+            item.get("schema")
+            != QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA
+        ):
+            raise PositionVectorCampaignError(f"{label} schema mismatch")
+        if item.get("status") != "QUALIFIED_STATIONARY_OBSERVATION_INGESTED":
+            raise PositionVectorCampaignError(f"{label} is not ingested")
+        sample_id = _identifier(item.get("sample_id"), f"{label}.sample_id")
+        if sample_id not in slots_by_sample:
+            raise PositionVectorCampaignError(f"{label} sample is not in the plan")
+        if sample_id in seen_samples:
+            raise PositionVectorCampaignError("ingestion receipts repeat a sample")
+        slot = slots_by_sample[sample_id]
+        if (
+            item.get("dataset_id") != plan["dataset_id"]
+            or item.get("source_pose") != slot["source_pose"]
+            or item.get("split") != slot["split"]
+        ):
+            raise PositionVectorCampaignError(f"{label} planned-slot binding mismatch")
+        if (
+            item.get("readiness_handoff_sha256") != expected_handoff_sha256
+            or item.get("collection_plan_sha256") != expected_plan_sha256
+        ):
+            raise PositionVectorCampaignError(f"{label} campaign binding mismatch")
+        if item.get("previous_observations_sha256") != expected_previous_sha256:
+            raise PositionVectorCampaignError(
+                "ingestion receipt observation hash chain is broken"
+            )
+        resulting_sha256 = _digest(
+            item.get("resulting_observations_sha256"),
+            f"{label}.resulting_observations_sha256",
+        )
+        expected_filled = index + 1
+        expected_remaining = len(plan["slots"]) - expected_filled
+        if (
+            item.get("filled_sample_count") != expected_filled
+            or item.get("remaining_sample_count") != expected_remaining
+        ):
+            raise PositionVectorCampaignError(
+                "ingestion receipt sample-count progression mismatch"
+            )
+        expected_gate = (
+            "QUALIFIED_OBSERVATION_SET_COMPILATION"
+            if expected_remaining == 0
+            else "RETAINED_STATIONARY_OBSERVATION_COLLECTION"
+        )
+        if item.get("next_required_gate") != expected_gate:
+            raise PositionVectorCampaignError(f"{label} next gate mismatch")
+        if item.get("authority") != expected_handoff["authority"]:
+            raise PositionVectorCampaignError(f"{label} grants physical authority")
+        if item.get("limitations") != expected_limitations:
+            raise PositionVectorCampaignError(f"{label} limitations mismatch")
+        producer_id = _identifier(
+            item.get("observation_producer_id"),
+            f"{label}.observation_producer_id",
+        )
+        reviewer_id = _identifier(
+            item.get("truth_reviewer_id"), f"{label}.truth_reviewer_id"
+        )
+        if producer_id == reviewer_id:
+            raise PositionVectorCampaignError(
+                f"{label} truth reviewer is not independent"
+            )
+        receipt_evidence_hashes = {
+            name: _digest(item.get(name), f"{label}.{name}")
+            for name in (
+                "observation_evidence_sha256",
+                "controller_feedback_evidence_sha256",
+                "camera_observation_receipt_sha256",
+                "truth_evidence_sha256",
+            )
+        }
+        if any(value in evidence_hashes for value in receipt_evidence_hashes.values()):
+            raise PositionVectorCampaignError(
+                "ingestion receipts reuse per-sample evidence"
+            )
+        evidence_hashes.update(receipt_evidence_hashes.values())
+        if (
+            observations_by_sample[sample_id]["truth_evidence_sha256"]
+            != receipt_evidence_hashes["truth_evidence_sha256"]
+        ):
+            raise PositionVectorCampaignError(
+                f"{label} truth evidence does not match final observations"
+            )
+        receipt_sha256 = canonical_sha256(item)
+        if receipt_sha256 in receipt_hashes:
+            raise PositionVectorCampaignError("ingestion receipt hash is reused")
+        receipt_hashes.add(receipt_sha256)
+        trace.append(
+            {
+                "sample_id": sample_id,
+                "source_pose": slot["source_pose"],
+                "split": slot["split"],
+                "ingestion_receipt_sha256": receipt_sha256,
+                **receipt_evidence_hashes,
+            }
+        )
+        seen_samples.add(sample_id)
+        expected_previous_sha256 = resulting_sha256
+
+    if seen_samples != set(slots_by_sample):
+        raise PositionVectorCampaignError(
+            "ingestion receipts do not cover every planned sample"
+        )
+    if expected_previous_sha256 != final_observations_sha256:
+        raise PositionVectorCampaignError(
+            "final ingestion receipt does not bind the supplied observations"
+        )
+
+    receipt = {
+        "schema": QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_OBSERVATION_SET_COMPILED",
+        "dataset_id": plan["dataset_id"],
+        "attachment_profile": plan["attachment_profile"],
+        "inventory_sha256": canonical_sha256(inventory_document),
+        "admission_receipt_sha256": canonical_sha256(admission_receipt_document),
+        "training_split_sha256": canonical_sha256(training_split_document),
+        "collection_plan_sha256": expected_plan_sha256,
+        "preparation_receipt_sha256": canonical_sha256(preparation_receipt_document),
+        "readiness_plan_sha256": canonical_sha256(readiness_plan_document),
+        "readiness_evidence_sha256": canonical_sha256(readiness_evidence_document),
+        "readiness_assessment_sha256": canonical_sha256(readiness_assessment_document),
+        "readiness_handoff_sha256": expected_handoff_sha256,
+        "initial_observations_sha256": canonical_sha256(empty_observations),
+        "final_observations_sha256": final_observations_sha256,
+        "ingestion_receipts": trace,
+        "dataset_sha256": canonical_sha256(dataset),
+        "sample_count": len(dataset["samples"]),
+        "training_sample_count": sum(
+            item["split"] == "TRAINING" for item in dataset["samples"]
+        ),
+        "held_out_sample_count": sum(
+            item["split"] == "HELD_OUT" for item in dataset["samples"]
+        ),
+        "next_required_gate": "DETERMINISTIC_CALIBRATION_FIT",
+        "limitations": [
+            "This receipt verifies the declared ingestion hash chain and retained "
+            "observation structure; it does not inspect referenced evidence content.",
+            "Compilation performs no camera capture, controller access, feedback "
+            "request, command, or motion.",
+            "The compiled dataset remains subject to deterministic fitting, held-out "
+            "validation, and independent acceptance review.",
+        ],
+        "authority": dict(expected_handoff["authority"]),
+    }
+    return dataset, receipt
+
+
 def create_assessed_collection_package(
     *,
     readiness_document: Mapping[str, Any],
@@ -2951,6 +3201,25 @@ def main(argv: list[str] | None = None) -> int:
     qualified_observation_parser.add_argument("--observation-evidence", required=True)
     qualified_observation_parser.add_argument("--observations-output", required=True)
     qualified_observation_parser.add_argument("--receipt-output", required=True)
+    qualified_compile_parser = commands.add_parser(
+        "compile-qualified-observation-set",
+        help="verify all ingestion receipts and compile the qualified dataset",
+    )
+    qualified_compile_parser.add_argument("--inventory", required=True)
+    qualified_compile_parser.add_argument("--admission-receipt", required=True)
+    qualified_compile_parser.add_argument("--training-split", required=True)
+    qualified_compile_parser.add_argument("--collection-plan", required=True)
+    qualified_compile_parser.add_argument("--observations", required=True)
+    qualified_compile_parser.add_argument("--preparation-receipt", required=True)
+    qualified_compile_parser.add_argument("--readiness-plan", required=True)
+    qualified_compile_parser.add_argument("--readiness-evidence", required=True)
+    qualified_compile_parser.add_argument("--readiness-assessment", required=True)
+    qualified_compile_parser.add_argument("--readiness-handoff", required=True)
+    qualified_compile_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    qualified_compile_parser.add_argument("--output", required=True)
+    qualified_compile_parser.add_argument("--receipt-output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -3212,6 +3481,32 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.observations_output, observations)
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "compile-qualified-observation-set":
+        dataset, receipt = compile_qualified_observation_set(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+        )
+        output_paths = (Path(args.output), Path(args.receipt_output))
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias qualified compilation output"
+            )
+        _write_new(args.output, dataset)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -3341,6 +3636,7 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
+    "QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA",
     "QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA",
     "QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
@@ -3362,6 +3658,7 @@ __all__ = [
     "canonical_sha256",
     "collection_observations_template",
     "compile_planned_dataset",
+    "compile_qualified_observation_set",
     "create_assessed_collection_package",
     "create_candidate_qualification_plan",
     "create_candidate_qualification_handoff",
