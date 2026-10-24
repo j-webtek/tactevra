@@ -205,6 +205,10 @@ proposal only in memory, and reruns the full-catalog coverage audit. It refuses
 crossed inventory hashes, crossed attachment profiles, duplicate labels,
 malformed counts, and existing output files.
 
+Keep an unevaluated proposal outside the retained calibration-candidate
+inventory. Add it to a governed inventory only after the separate mechanical
+and evidence reviews accept that exact attachment-specific configuration.
+
 `COUNT_VECTOR_CLOSES_CATALOG_GAPS` means only that the proposed numbers close
 the algebraic full-catalog spans. It does not prove reachability, joint limits,
 collision clearance, cable or attachment clearance, independent joint truth,
