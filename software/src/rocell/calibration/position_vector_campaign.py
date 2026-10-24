@@ -47,6 +47,9 @@ CANDIDATE_INVENTORY_SCHEMA = (
 CANDIDATE_COVERAGE_SCHEMA = (
     "rocell.position_vector_calibration_candidate_coverage.v1"
 )
+CANDIDATE_AUGMENTATION_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_augmentation.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -260,7 +263,9 @@ def assess_collection_readiness(
         for index, value in enumerate(retained_pose_labels)
     ]
     unique_poses = list(dict.fromkeys(poses))
-    required_pose_count = policy.minimum_training_samples + policy.minimum_held_out_samples
+    required_pose_count = (
+        policy.minimum_training_samples + policy.minimum_held_out_samples
+    )
     blockers = []
     firmware = None
     if installed_firmware_sha256 is None:
@@ -474,7 +479,9 @@ def audit_candidate_count_coverage(
 
     coverage = []
     blockers = []
-    required_pose_count = policy.minimum_training_samples + policy.minimum_held_out_samples
+    required_pose_count = (
+        policy.minimum_training_samples + policy.minimum_held_out_samples
+    )
     if len(poses) < required_pose_count:
         blockers.append(
             f"UNIQUE_SOURCE_POSE_COUNT_{len(poses)}_BELOW_{required_pose_count}"
@@ -535,6 +542,82 @@ def audit_candidate_count_coverage(
             "motion_authorized": False,
             "physical_authority": False,
         },
+    }
+
+
+def plan_candidate_count_augmentation(
+    document: Mapping[str, Any], policy: CampaignPolicy = CampaignPolicy()
+) -> dict[str, Any]:
+    """Derive algebraic count targets for gaps in a candidate inventory.
+
+    The ranges only describe counts that would make the full catalog span meet
+    policy. They do not select a pose, establish mechanical feasibility, or
+    authorize hardware access or motion.
+    """
+
+    coverage = audit_candidate_count_coverage(document, policy)
+    requirements = []
+    for row in coverage["joint_coverage"]:
+        if row["meets_minimum"]:
+            continue
+        minimum = row["minimum_count"]
+        maximum = row["maximum_count"]
+        ranges = []
+        if minimum is not None and maximum is not None:
+            lower_maximum = maximum - policy.minimum_training_count_span
+            upper_minimum = minimum + policy.minimum_training_count_span
+            if lower_maximum >= 0:
+                ranges.append({"minimum_count": 0, "maximum_count": lower_maximum})
+            if upper_minimum <= 4095:
+                ranges.append({"minimum_count": upper_minimum, "maximum_count": 4095})
+        requirements.append(
+            {
+                "joint": row["joint"],
+                "position_index": row["position_index"],
+                "current_minimum_count": minimum,
+                "current_maximum_count": maximum,
+                "current_span_counts": row["span_counts"],
+                "additional_span_needed_counts": max(
+                    0, policy.minimum_training_count_span - row["span_counts"]
+                ),
+                "catalog_span_closing_count_ranges": ranges,
+            }
+        )
+
+    required_pose_count = (
+        policy.minimum_training_samples + policy.minimum_held_out_samples
+    )
+    pose_deficit = max(0, required_pose_count - coverage["pose_count"])
+    algebraic_lower_bound = max(pose_deficit, 1 if requirements else 0)
+    return {
+        "schema": CANDIDATE_AUGMENTATION_SCHEMA,
+        "status": (
+            "CANDIDATE_AUGMENTATION_REQUIRED"
+            if coverage["blockers"]
+            else "NO_CANDIDATE_AUGMENTATION_REQUIRED"
+        ),
+        "inventory_id": coverage["inventory_id"],
+        "inventory_sha256": coverage["inventory_sha256"],
+        "coverage_sha256": canonical_sha256(coverage),
+        "attachment_profile": coverage["attachment_profile"],
+        "minimum_required_span_counts": policy.minimum_training_count_span,
+        "catalog_minimum_additional_pose_lower_bound": algebraic_lower_bound,
+        "joint_requirements": requirements,
+        "unresolved_blockers": list(coverage["blockers"]),
+        "limitations": [
+            "Each span-closing range is an algebraic full-catalog count target, "
+            "not a motion target.",
+            "The lower bound does not prove one pose can safely or physically "
+            "satisfy every range.",
+            "Candidate counts are not stationary observations or independent "
+            "joint-angle truth.",
+            "A passing augmented catalog does not prove a five-pose training "
+            "subset spans every joint.",
+            "Mechanical feasibility, collision clearance, cable clearance, and "
+            "attachment geometry remain unassessed.",
+            "This plan does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(coverage["authority"]),
     }
 
 
@@ -1297,6 +1380,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     candidate_audit_parser.add_argument("--inventory", required=True)
     candidate_audit_parser.add_argument("--output", required=True)
+    candidate_augmentation_parser = commands.add_parser(
+        "plan-candidate-augmentation",
+        help="derive zero-authority count ranges for candidate coverage gaps",
+    )
+    candidate_augmentation_parser.add_argument("--inventory", required=True)
+    candidate_augmentation_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -1400,6 +1489,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "audit-candidates":
         result = audit_candidate_count_coverage(_read_json(args.inventory))
+        _write_new(args.output, result)
+        return 0
+    if args.command == "plan-candidate-augmentation":
+        result = plan_candidate_count_augmentation(_read_json(args.inventory))
         _write_new(args.output, result)
         return 0
     if args.command == "prepare":

@@ -11,6 +11,7 @@ from rocell.arm.position_vector_calibration import (
     load_position_vector_calibration,
 )
 from rocell.calibration.position_vector_campaign import (
+    CANDIDATE_AUGMENTATION_SCHEMA,
     CANDIDATE_COVERAGE_SCHEMA,
     CANDIDATE_INVENTORY_SCHEMA,
     DATASET_SCHEMA,
@@ -42,6 +43,7 @@ from rocell.calibration.position_vector_campaign import (
     load_collection_readiness,
     load_collection_plan,
     main,
+    plan_candidate_count_augmentation,
 )
 
 
@@ -303,6 +305,47 @@ def test_candidate_audit_rejects_duplicate_labels():
         audit_candidate_count_coverage(inventory)
 
 
+def test_candidate_augmentation_derives_exact_gap_closing_ranges():
+    report = plan_candidate_count_augmentation(candidate_inventory())
+
+    assert report["schema"] == CANDIDATE_AUGMENTATION_SCHEMA
+    assert report["status"] == "CANDIDATE_AUGMENTATION_REQUIRED"
+    assert report["catalog_minimum_additional_pose_lower_bound"] == 1
+    assert report["coverage_sha256"] == canonical_sha256(
+        audit_candidate_count_coverage(candidate_inventory())
+    )
+    requirements = {row["joint"]: row for row in report["joint_requirements"]}
+    assert requirements["base"]["additional_span_needed_counts"] == 1
+    assert requirements["base"]["catalog_span_closing_count_ranges"] == [
+        {"minimum_count": 0, "maximum_count": 2046},
+        {"minimum_count": 2175, "maximum_count": 4095},
+    ]
+    assert requirements["wrist_roll"]["catalog_span_closing_count_ranges"] == [
+        {"minimum_count": 0, "maximum_count": 1912},
+        {"minimum_count": 2168, "maximum_count": 4095},
+    ]
+    assert requirements["gripper"]["catalog_span_closing_count_ranges"] == [
+        {"minimum_count": 0, "maximum_count": 1919},
+        {"minimum_count": 2175, "maximum_count": 4095},
+    ]
+    assert report["authority"]["commands_sent"] == 0
+    assert report["authority"]["physical_authority"] is False
+
+
+def test_candidate_augmentation_is_empty_for_passing_catalog():
+    inventory = candidate_inventory()
+    inventory["poses"][0]["raw_position_counts"][0] = 1900
+    inventory["poses"][0]["raw_position_counts"][5] = 1800
+    inventory["poses"][0]["raw_position_counts"][6] = 1800
+
+    report = plan_candidate_count_augmentation(inventory)
+
+    assert report["status"] == "NO_CANDIDATE_AUGMENTATION_REQUIRED"
+    assert report["catalog_minimum_additional_pose_lower_bound"] == 0
+    assert report["joint_requirements"] == []
+    assert report["unresolved_blockers"] == []
+
+
 def test_retained_candidate_inventory_and_coverage_report_reproduce():
     software_root = Path(__file__).resolve().parents[2]
     inventory = json.loads(
@@ -317,6 +360,34 @@ def test_retained_candidate_inventory_and_coverage_report_reproduce():
     )
 
     assert audit_candidate_count_coverage(inventory) == retained_report
+    retained_augmentation = json.loads(
+        (
+            software_root
+            / "config/calibration_candidates/position_vector_candidate_augmentation_20261024.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert plan_candidate_count_augmentation(inventory) == retained_augmentation
+
+
+def test_file_workflow_writes_candidate_augmentation_without_hardware(tmp_path):
+    inventory_path = tmp_path / "inventory.json"
+    output_path = tmp_path / "augmentation.json"
+    inventory_path.write_text(json.dumps(candidate_inventory()), encoding="utf-8")
+
+    assert main([
+        "plan-candidate-augmentation",
+        "--inventory", str(inventory_path),
+        "--output", str(output_path),
+    ]) == 0
+    assert json.loads(output_path.read_bytes()) == plan_candidate_count_augmentation(
+        candidate_inventory()
+    )
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main([
+            "plan-candidate-augmentation",
+            "--inventory", str(inventory_path),
+            "--output", str(output_path),
+        ])
 
 
 def test_reviewed_evidence_derives_hash_bound_ready_assessment():
