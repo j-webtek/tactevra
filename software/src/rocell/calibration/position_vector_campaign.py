@@ -75,6 +75,9 @@ CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA = (
 CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA = (
     "rocell.position_vector_calibration_candidate_training_split_plan.v1"
 )
+QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_collection_preparation_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -1519,6 +1522,74 @@ def create_collection_plan(
     )
 
 
+def create_qualified_candidate_collection_package(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    dataset_id: str,
+    producer_id: str,
+    truth_method: str,
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Prepare a zero-authority collection package from the qualified split."""
+
+    expected_split = plan_qualified_candidate_training_split(
+        inventory_document,
+        admission_receipt_document,
+        policy,
+    )
+    supplied_split = _mapping(training_split_document, "candidate_training_split")
+    if dict(supplied_split) != expected_split:
+        raise PositionVectorCampaignError(
+            "candidate training split does not reproduce from its inputs"
+        )
+    if expected_split["status"] != "TRAINING_SPLIT_READY":
+        raise PositionVectorCampaignError(
+            "candidate training split is blocked: "
+            + ", ".join(expected_split["blockers"])
+        )
+
+    inventory = _mapping(inventory_document, "candidate_inventory")
+    plan = create_collection_plan(
+        dataset_id=dataset_id,
+        producer_id=producer_id,
+        controller_binding=inventory["controller_binding"],
+        attachment_profile=expected_split["attachment_profile"],
+        training_poses=expected_split["training_pose_labels"],
+        held_out_poses=expected_split["held_out_pose_labels"],
+        truth_method=truth_method,
+        policy=policy,
+    )
+    observations = collection_observations_template(plan)
+    receipt = {
+        "schema": QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_COLLECTION_PACKAGE_PREPARED",
+        "dataset_id": plan["dataset_id"],
+        "producer_id": plan["producer_id"],
+        "inventory_sha256": expected_split["inventory_sha256"],
+        "admission_receipt_sha256": expected_split["admission_receipt_sha256"],
+        "training_split_sha256": canonical_sha256(expected_split),
+        "plan_sha256": canonical_sha256(plan),
+        "observations_sha256": canonical_sha256(observations),
+        "pose_count": len(plan["slots"]),
+        "training_count": len(expected_split["training_pose_labels"]),
+        "held_out_count": len(expected_split["held_out_pose_labels"]),
+        "next_required_gate": "REVIEWED_COLLECTION_READINESS",
+        "limitations": [
+            "The inventory entries remain planned goals, not stationary controller "
+            "readbacks or independent joint-truth observations.",
+            "The empty observation template cannot establish installed firmware, "
+            "camera, board, attachment, or truth-procedure readiness.",
+            "Reviewed collection readiness must bind this same controller, firmware, "
+            "attachment profile, truth method, and nine-pose catalog before collection.",
+            "This package does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(plan["authority"]),
+    }
+    return plan, observations, receipt
+
+
 def create_assessed_collection_package(
     *,
     readiness_document: Mapping[str, Any],
@@ -2142,6 +2213,21 @@ def main(argv: list[str] | None = None) -> int:
     candidate_split_parser.add_argument("--inventory", required=True)
     candidate_split_parser.add_argument("--admission-receipt", required=True)
     candidate_split_parser.add_argument("--output", required=True)
+    qualified_prepare_parser = commands.add_parser(
+        "prepare-qualified-candidate-collection",
+        help="prepare a collection package from an exact qualified inventory split",
+    )
+    qualified_prepare_parser.add_argument("--inventory", required=True)
+    qualified_prepare_parser.add_argument("--admission-receipt", required=True)
+    qualified_prepare_parser.add_argument("--training-split", required=True)
+    qualified_prepare_parser.add_argument("--dataset-id", required=True)
+    qualified_prepare_parser.add_argument("--producer-id", required=True)
+    qualified_prepare_parser.add_argument(
+        "--truth-method", choices=TRUTH_METHODS, required=True
+    )
+    qualified_prepare_parser.add_argument("--plan-output", required=True)
+    qualified_prepare_parser.add_argument("--observations-output", required=True)
+    qualified_prepare_parser.add_argument("--receipt-output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2314,6 +2400,30 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "prepare-qualified-candidate-collection":
+        plan, observations, receipt = create_qualified_candidate_collection_package(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            dataset_id=args.dataset_id,
+            producer_id=args.producer_id,
+            truth_method=args.truth_method,
+        )
+        output_paths = (
+            Path(args.plan_output),
+            Path(args.observations_output),
+            Path(args.receipt_output),
+        )
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias qualified collection output"
+            )
+        _write_new(args.plan_output, plan)
+        _write_new(args.observations_output, observations)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2438,6 +2548,7 @@ __all__ = [
     "OBSERVATIONS_SCHEMA",
     "PLAN_SCHEMA",
     "PREPARATION_RECEIPT_SCHEMA",
+    "QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
     "READINESS_SCHEMA",
@@ -2460,6 +2571,7 @@ __all__ = [
     "create_candidate_qualification_plan",
     "create_candidate_qualification_handoff",
     "create_qualified_candidate_inventory_package",
+    "create_qualified_candidate_collection_package",
     "create_collection_plan",
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",
