@@ -162,6 +162,30 @@ Every selected pose still needs its own independent truth procedure and all six
 measured canonical joint angles. The physical selection and collection require
 fresh authorization; this audit requests no movement.
 
+Derive the exact algebraic ranges that would close the full-catalog gaps:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign plan-candidate-augmentation `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --output config/calibration_candidates/position_vector_candidate_augmentation_20261024.json
+```
+
+The retained augmentation plan is bound to the inventory and coverage-report
+hashes. It shows that one additional candidate is the algebraic lower bound,
+provided that candidate can safely and physically meet one listed range for
+each deficient joint:
+
+- base: at most 2046 counts or at least 2175 counts;
+- wrist roll: at most 1912 counts or at least 2168 counts; and
+- gripper: at most 1919 counts or at least 2175 counts.
+
+These are count-range requirements, not a pose or movement command. The plan
+does not choose a direction, assert reachability, assess collision or cable
+clearance, or establish independent joint truth. A future physical session must
+first qualify a mechanically feasible configuration and attachment profile.
+After adding candidates, rerun the audit and verify that an exact five-pose
+training subset, rather than only the full catalog, spans every primary joint.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
