@@ -90,6 +90,12 @@ QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA = (
 QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA = (
     "rocell.position_vector_calibration_qualified_collection_readiness_handoff.v1"
 )
+QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_stationary_observation_evidence.v1"
+)
+QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_stationary_observation_ingestion_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -147,6 +153,25 @@ _QUALIFIED_COLLECTION_READINESS_EVIDENCE_FIELDS = frozenset(
 )
 _QUALIFIED_COLLECTION_READINESS_EVIDENCE_ITEM_FIELDS = frozenset(
     {"requirement", "evidence_sha256", "reviewer_id", "decision"}
+)
+_QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_FIELDS = frozenset(
+    {
+        "schema",
+        "readiness_handoff_sha256",
+        "current_observations_sha256",
+        "sample_id",
+        "source_pose",
+        "observation_producer_id",
+        "truth_reviewer_id",
+        "raw_position_counts",
+        "canonical_joints_rad",
+        "controller_feedback_evidence_sha256",
+        "camera_observation_receipt_sha256",
+        "truth_evidence_sha256",
+        "stationary",
+        "motion_active",
+        "trajectory_progress_permille",
+    }
 )
 _DATASET_FIELDS = frozenset(
     {
@@ -1968,6 +1993,263 @@ def create_qualified_collection_readiness_handoff(
     }
 
 
+def ingest_qualified_stationary_observation(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    observation_evidence_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Ingest one retained stationary observation into its exact empty slot.
+
+    This is a pure artifact operation. The caller supplies retained feedback,
+    camera, and independent truth hashes; this function neither opens hardware
+    nor performs capture or feedback requests.
+    """
+
+    expected_handoff = create_qualified_collection_readiness_handoff(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=collection_observations_template(
+            collection_plan_document
+        ),
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        evidence_document=readiness_evidence_document,
+        assessment_document=readiness_assessment_document,
+        policy=policy,
+    )
+    supplied_handoff = _mapping(
+        readiness_handoff_document, "qualified_collection_readiness_handoff"
+    )
+    if dict(supplied_handoff) != expected_handoff:
+        raise PositionVectorCampaignError(
+            "qualified collection readiness handoff does not reproduce"
+        )
+
+    plan = load_collection_plan(collection_plan_document)
+    observations = _mapping(observations_document, "qualified_observations")
+    _exact(observations, _OBSERVATIONS_FIELDS, "qualified_observations")
+    if observations.get("schema") != OBSERVATIONS_SCHEMA:
+        raise PositionVectorCampaignError("qualified observations schema mismatch")
+    if observations.get("plan_sha256") != canonical_sha256(plan):
+        raise PositionVectorCampaignError("qualified observations plan hash mismatch")
+    values = observations.get("samples")
+    if not isinstance(values, list) or len(values) != len(plan["slots"]):
+        raise PositionVectorCampaignError(
+            "qualified observations do not preserve every planned slot"
+        )
+
+    normalized_samples = []
+    filled_truth_hashes = []
+    empty_fields = _OBSERVATION_FIELDS - {"sample_id"}
+    for index, (value, slot) in enumerate(zip(values, plan["slots"], strict=True)):
+        label = f"qualified_observations.samples[{index}]"
+        observation = _mapping(value, label)
+        _exact(observation, _OBSERVATION_FIELDS, label)
+        if observation.get("sample_id") != slot["sample_id"]:
+            raise PositionVectorCampaignError(
+                "qualified observation sample order differs from plan"
+            )
+        if all(observation.get(name) is None for name in empty_fields):
+            normalized_samples.append(dict(observation))
+            continue
+        validated = _sample(
+            {
+                **dict(observation),
+                "split": slot["split"],
+                "source_pose": slot["source_pose"],
+                "truth_method": slot["truth_method"],
+            },
+            index,
+        )
+        normalized = {
+            name: validated[name] for name in _OBSERVATION_FIELDS
+        }
+        if normalized != dict(observation):
+            raise PositionVectorCampaignError(
+                "qualified observations do not reproduce after validation"
+            )
+        normalized_samples.append(normalized)
+        filled_truth_hashes.append(normalized["truth_evidence_sha256"])
+    if len(set(filled_truth_hashes)) != len(filled_truth_hashes):
+        raise PositionVectorCampaignError(
+            "qualified observation truth evidence hashes must be unique"
+        )
+    normalized_observations = {
+        "schema": OBSERVATIONS_SCHEMA,
+        "plan_sha256": canonical_sha256(plan),
+        "samples": normalized_samples,
+    }
+
+    raw = _mapping(
+        observation_evidence_document, "qualified_stationary_observation_evidence"
+    )
+    _exact(
+        raw,
+        _QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_FIELDS,
+        "qualified_stationary_observation_evidence",
+    )
+    if raw.get("schema") != QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA:
+        raise PositionVectorCampaignError(
+            "qualified stationary observation evidence schema mismatch"
+        )
+    if raw.get("readiness_handoff_sha256") != canonical_sha256(expected_handoff):
+        raise PositionVectorCampaignError(
+            "qualified stationary observation handoff binding mismatch"
+        )
+    current_hash = canonical_sha256(normalized_observations)
+    if raw.get("current_observations_sha256") != current_hash:
+        raise PositionVectorCampaignError(
+            "qualified stationary observation current-template binding mismatch"
+        )
+    sample_id = _identifier(
+        raw.get("sample_id"), "qualified_stationary_observation_evidence.sample_id"
+    )
+    matching_indexes = [
+        index for index, slot in enumerate(plan["slots"])
+        if slot["sample_id"] == sample_id
+    ]
+    if len(matching_indexes) != 1:
+        raise PositionVectorCampaignError(
+            "qualified stationary observation sample is not in the plan"
+        )
+    target_index = matching_indexes[0]
+    target_slot = plan["slots"][target_index]
+    if raw.get("source_pose") != target_slot["source_pose"]:
+        raise PositionVectorCampaignError(
+            "qualified stationary observation source pose mismatch"
+        )
+    if any(
+        normalized_samples[target_index].get(name) is not None
+        for name in empty_fields
+    ):
+        raise PositionVectorCampaignError(
+            "qualified stationary observation slot is already filled"
+        )
+
+    producer_id = _identifier(
+        raw.get("observation_producer_id"),
+        "qualified_stationary_observation_evidence.observation_producer_id",
+    )
+    reviewer_id = _identifier(
+        raw.get("truth_reviewer_id"),
+        "qualified_stationary_observation_evidence.truth_reviewer_id",
+    )
+    if reviewer_id == producer_id:
+        raise PositionVectorCampaignError(
+            "qualified stationary observation truth reviewer is not independent"
+        )
+    retained = _sample(
+        {
+            "sample_id": sample_id,
+            "split": target_slot["split"],
+            "source_pose": target_slot["source_pose"],
+            "raw_position_counts": raw.get("raw_position_counts"),
+            "canonical_joints_rad": raw.get("canonical_joints_rad"),
+            "truth_method": target_slot["truth_method"],
+            "truth_evidence_sha256": raw.get("truth_evidence_sha256"),
+            "stationary": raw.get("stationary"),
+            "motion_active": raw.get("motion_active"),
+            "trajectory_progress_permille": raw.get(
+                "trajectory_progress_permille"
+            ),
+        },
+        target_index,
+    )
+    if retained["truth_evidence_sha256"] in filled_truth_hashes:
+        raise PositionVectorCampaignError(
+            "qualified stationary observation truth evidence hash is reused"
+        )
+    controller_feedback_hash = _digest(
+        raw.get("controller_feedback_evidence_sha256"),
+        "qualified_stationary_observation_evidence.controller_feedback_evidence_sha256",
+    )
+    camera_receipt_hash = _digest(
+        raw.get("camera_observation_receipt_sha256"),
+        "qualified_stationary_observation_evidence.camera_observation_receipt_sha256",
+    )
+    normalized_evidence = {
+        "schema": QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA,
+        "readiness_handoff_sha256": canonical_sha256(expected_handoff),
+        "current_observations_sha256": current_hash,
+        "sample_id": sample_id,
+        "source_pose": target_slot["source_pose"],
+        "observation_producer_id": producer_id,
+        "truth_reviewer_id": reviewer_id,
+        "raw_position_counts": retained["raw_position_counts"],
+        "canonical_joints_rad": retained["canonical_joints_rad"],
+        "controller_feedback_evidence_sha256": controller_feedback_hash,
+        "camera_observation_receipt_sha256": camera_receipt_hash,
+        "truth_evidence_sha256": retained["truth_evidence_sha256"],
+        "stationary": True,
+        "motion_active": False,
+        "trajectory_progress_permille": 1000,
+    }
+    if normalized_evidence != dict(raw):
+        raise PositionVectorCampaignError(
+            "qualified stationary observation evidence does not reproduce"
+        )
+
+    updated_samples = [dict(item) for item in normalized_samples]
+    updated_samples[target_index] = {
+        name: retained[name] for name in _OBSERVATION_FIELDS
+    }
+    updated_observations = {
+        "schema": OBSERVATIONS_SCHEMA,
+        "plan_sha256": canonical_sha256(plan),
+        "samples": updated_samples,
+    }
+    filled_count = sum(
+        item["truth_evidence_sha256"] is not None for item in updated_samples
+    )
+    remaining_count = len(updated_samples) - filled_count
+    receipt = {
+        "schema": QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_STATIONARY_OBSERVATION_INGESTED",
+        "dataset_id": plan["dataset_id"],
+        "sample_id": sample_id,
+        "source_pose": target_slot["source_pose"],
+        "split": target_slot["split"],
+        "readiness_handoff_sha256": canonical_sha256(expected_handoff),
+        "collection_plan_sha256": canonical_sha256(plan),
+        "previous_observations_sha256": current_hash,
+        "observation_evidence_sha256": canonical_sha256(normalized_evidence),
+        "resulting_observations_sha256": canonical_sha256(updated_observations),
+        "controller_feedback_evidence_sha256": controller_feedback_hash,
+        "camera_observation_receipt_sha256": camera_receipt_hash,
+        "truth_evidence_sha256": retained["truth_evidence_sha256"],
+        "observation_producer_id": producer_id,
+        "truth_reviewer_id": reviewer_id,
+        "filled_sample_count": filled_count,
+        "remaining_sample_count": remaining_count,
+        "next_required_gate": (
+            "QUALIFIED_OBSERVATION_SET_COMPILATION"
+            if remaining_count == 0
+            else "RETAINED_STATIONARY_OBSERVATION_COLLECTION"
+        ),
+        "limitations": [
+            "This receipt validates retained declarations and hashes; it does not "
+            "perform camera capture or controller feedback requests.",
+            "The referenced camera, feedback, and joint-truth evidence remains "
+            "subject to its own retained-evidence review.",
+            "This ingestion grants no hardware, collection, or motion authority.",
+        ],
+        "authority": dict(expected_handoff["authority"]),
+    }
+    return updated_observations, receipt
+
+
 def create_assessed_collection_package(
     *,
     readiness_document: Mapping[str, Any],
@@ -2652,6 +2934,23 @@ def main(argv: list[str] | None = None) -> int:
     qualified_readiness_handoff_parser.add_argument("--evidence", required=True)
     qualified_readiness_handoff_parser.add_argument("--assessment", required=True)
     qualified_readiness_handoff_parser.add_argument("--output", required=True)
+    qualified_observation_parser = commands.add_parser(
+        "ingest-qualified-stationary-observation",
+        help="ingest one retained stationary observation into its planned slot",
+    )
+    qualified_observation_parser.add_argument("--inventory", required=True)
+    qualified_observation_parser.add_argument("--admission-receipt", required=True)
+    qualified_observation_parser.add_argument("--training-split", required=True)
+    qualified_observation_parser.add_argument("--collection-plan", required=True)
+    qualified_observation_parser.add_argument("--observations", required=True)
+    qualified_observation_parser.add_argument("--preparation-receipt", required=True)
+    qualified_observation_parser.add_argument("--readiness-plan", required=True)
+    qualified_observation_parser.add_argument("--readiness-evidence", required=True)
+    qualified_observation_parser.add_argument("--readiness-assessment", required=True)
+    qualified_observation_parser.add_argument("--readiness-handoff", required=True)
+    qualified_observation_parser.add_argument("--observation-evidence", required=True)
+    qualified_observation_parser.add_argument("--observations-output", required=True)
+    qualified_observation_parser.add_argument("--receipt-output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2886,6 +3185,33 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "ingest-qualified-stationary-observation":
+        observations, receipt = ingest_qualified_stationary_observation(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            observation_evidence_document=_read_json(args.observation_evidence),
+        )
+        output_paths = (
+            Path(args.observations_output),
+            Path(args.receipt_output),
+        )
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias qualified observation output"
+            )
+        _write_new(args.observations_output, observations)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -3015,6 +3341,8 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
+    "QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA",
+    "QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
     "READINESS_SCHEMA",
@@ -3045,6 +3373,7 @@ __all__ = [
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",
     "fit_campaign_dataset",
+    "ingest_qualified_stationary_observation",
     "load_campaign_dataset",
     "load_collection_readiness",
     "load_collection_plan",

@@ -469,6 +469,47 @@ The receipt does not inspect the referenced evidence or authorize controller,
 camera, collection, or motion access. Physical collection remains subject to
 the separate operator and safety controls for the installed system.
 
+After an authorized physical session has retained one stationary pose, ingest
+its artifacts into the exact planned slot without reopening any device:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign ingest-qualified-stationary-observation `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations current-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --observation-evidence retained-position-vector-observation-evidence.json `
+  --observations-output next-position-vector-observations.json `
+  --receipt-output retained-position-vector-observation-ingestion-receipt.json
+```
+
+The strict observation-evidence record binds the readiness handoff, current
+template hash, planned sample and pose, seven retained counts, all six canonical
+joint angles, an independent truth reviewer, retained controller-feedback
+evidence, a retained fixed-camera observation receipt, and joint-truth evidence.
+It must declare `stationary: true`, `motion_active: false`, and
+`trajectory_progress_permille: 1000`. A slot can be filled only once, truth
+evidence cannot be reused, and existing filled slots must reproduce exactly.
+
+The command writes a new observation document instead of replacing its input.
+Its
+`rocell.position_vector_calibration_qualified_stationary_observation_ingestion_receipt.v1`
+receipt hash-chains the previous and resulting templates and records both the
+filled and remaining sample counts. Repeat the command with the latest output
+for each planned pose. The last receipt advances the next gate to
+`QUALIFIED_OBSERVATION_SET_COMPILATION`; earlier receipts retain
+`RETAINED_STATIONARY_OBSERVATION_COLLECTION`.
+
+Ingestion validates retained declarations and hashes only. It does not open a
+camera or controller, request feedback, capture an image, command motion, or
+authorize physical collection.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
