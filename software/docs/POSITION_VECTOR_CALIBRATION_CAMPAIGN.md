@@ -96,15 +96,21 @@ hash must not be used as a substitute. The assessment also requires at least
 eight unique pose labels so the default five training and three held-out slots
 can remain disjoint.
 
-The current retained bare-jaw evidence is correctly `BLOCKED`: the exact
-installed firmware SHA-256 is unverified, and the reviewed A/B catalog contains
-only six unique poses (`A_CLEAR`, `A_HOVER`, `A_DOWN`, `B_CLEAR`, `B_HOVER`,
-`B_DOWN`). This is a readiness result, not a request to move the arm.
+The 2026-10-24 Stage A readback resolved the installed-firmware identity. Two
+matching 4 MiB reads have SHA-256
+`c800a24409d4e57f65d431b8341c872a8684144a9ed1c7a4af9c96e79a7d4cec`;
+the selected app0 image has SHA-256
+`1b0589fa323a2714777f5c70453eeec6daa94bd8c92a481701689da82ce93fdc`.
+The readiness binding uses the full installed-flash digest. The original A/B
+catalog still contains only six unique labels (`A_CLEAR`, `A_HOVER`, `A_DOWN`,
+`B_CLEAR`, `B_HOVER`, `B_DOWN`), so that six-label assessment remains blocked
+on pose count alone.
 
 ```powershell
 python -m rocell.calibration.position_vector_campaign assess `
   --vid 10c4 --pid ea60 `
   --unit-serial 52E4E1E8337FEF119E92181CEDD322A4 `
+  --firmware-sha256 c800a24409d4e57f65d431b8341c872a8684144a9ed1c7a4af9c96e79a7d4cec `
   --attachment-profile no_attachment `
   --truth-method link_fiducial_pose `
   --retained-pose A_CLEAR --retained-pose A_HOVER --retained-pose A_DOWN `
@@ -112,11 +118,49 @@ python -m rocell.calibration.position_vector_campaign assess `
   --output position-vector-readiness.json
 ```
 
-Add `--firmware-sha256` only after the exact installed image has independent
-evidence. Add two or more unique reviewed pose labels only after those physical
+The firmware argument above is supported by the verified readback checkpoint.
+Add two or more unique reviewed pose labels only after those physical
 configurations and their independent truth procedure are defined. A
 `READY_TO_PREPARE` report means the inputs can be partitioned into a plan; it
 grants no physical authority.
+
+## Candidate-pose coverage audit
+
+Historical repository evidence contains more than the six A/B labels. The
+recorded bare-jaw reverse chain has eight named goals from
+`KEYBOARD_FORWARD_CAL_1` through `KEYBOARD_FIELD_APPROACH_38`. Those names and
+goal counts are retained in
+`software/config/position_vector_candidate_pose_inventory_20261024.json`.
+They are candidates only: planned goals are not stationary observations and do
+not provide independent joint-angle truth.
+
+Run the pure offline audit before assigning training and held-out slots:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign audit-candidates `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --output config/calibration_candidates/position_vector_candidate_coverage_20261024.json
+```
+
+The audit maps the seven-position vector to the six primary joints and tests
+the largest possible span across the entire candidate catalog. If the complete
+catalog cannot reach the minimum span, no five-pose training subset can reach
+it either. It does not open hardware and cannot authorize collection or motion.
+
+The current eight-pose reverse chain is blocked despite satisfying the pose
+count:
+
+- base span is 127 counts, one count below the 128-count minimum;
+- wrist-roll span is zero because every historical goal holds servo 16 at 2040;
+- gripper span is zero because every historical goal holds servo 17 at 2047;
+- shoulder, elbow and wrist-pitch candidate spans exceed 128.
+
+Therefore these eight poses must not be frozen as the final campaign merely to
+clear the label-count gate. A future reviewed catalog needs safely qualified
+configurations that expand base, wrist-roll and gripper coverage.
+Every selected pose still needs its own independent truth procedure and all six
+measured canonical joint angles. The physical selection and collection require
+fresh authorization; this audit requests no movement.
 
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness

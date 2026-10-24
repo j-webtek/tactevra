@@ -2,6 +2,7 @@ import copy
 import hashlib
 import json
 import math
+from pathlib import Path
 
 import pytest
 
@@ -10,6 +11,8 @@ from rocell.arm.position_vector_calibration import (
     load_position_vector_calibration,
 )
 from rocell.calibration.position_vector_campaign import (
+    CANDIDATE_COVERAGE_SCHEMA,
+    CANDIDATE_INVENTORY_SCHEMA,
     DATASET_SCHEMA,
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
@@ -23,6 +26,7 @@ from rocell.calibration.position_vector_campaign import (
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
+    audit_candidate_count_coverage,
     assess_collection_readiness,
     assess_reviewed_readiness_evidence,
     build_calibration_artifact,
@@ -234,6 +238,85 @@ def reviewed_evidence():
             for ordinal in range(8)
         ],
     }
+
+
+def candidate_inventory():
+    counts = [
+        [2047, 2136, 1960, 2549, 2224, 2040, 2047],
+        [2105, 2180, 1916, 2473, 2257, 2040, 2047],
+        [2174, 2250, 1846, 2340, 2320, 2040, 2047],
+        [2174, 2271, 1825, 2362, 2277, 2040, 2047],
+        [2174, 2293, 1803, 2383, 2234, 2040, 2047],
+        [2174, 2305, 1791, 2393, 2213, 2040, 2047],
+        [2174, 2312, 1784, 2399, 2200, 2040, 2047],
+        [2174, 2337, 1759, 2416, 2158, 2040, 2047],
+    ]
+    return {
+        "schema": CANDIDATE_INVENTORY_SCHEMA,
+        "inventory_id": "bare-jaw-keyboard-chain-20261024",
+        "controller_binding": dict(CONTROLLER),
+        "attachment_profile": "no_attachment",
+        "count_kind": "PLANNED_GOAL",
+        "poses": [
+            {
+                "label": f"POSE_{index}",
+                "raw_position_counts": row,
+                "source_ref": f"source:{index}",
+            }
+            for index, row in enumerate(counts)
+        ],
+    }
+
+
+def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
+    report = audit_candidate_count_coverage(candidate_inventory())
+
+    assert report["schema"] == CANDIDATE_COVERAGE_SCHEMA
+    assert report["status"] == "CANDIDATE_COVERAGE_BLOCKED"
+    assert report["pose_count"] == 8
+    assert report["blockers"] == [
+        "CANDIDATE_COUNT_SPAN_BASE_127_BELOW_128",
+        "CANDIDATE_COUNT_SPAN_WRIST_ROLL_0_BELOW_128",
+        "CANDIDATE_COUNT_SPAN_GRIPPER_0_BELOW_128",
+    ]
+    assert report["authority"]["commands_sent"] == 0
+    assert report["authority"]["physical_authority"] is False
+
+
+def test_candidate_audit_passes_only_when_every_primary_joint_has_span():
+    inventory = candidate_inventory()
+    inventory["poses"][0]["raw_position_counts"][0] = 1900
+    inventory["poses"][0]["raw_position_counts"][5] = 1800
+    inventory["poses"][0]["raw_position_counts"][6] = 1800
+
+    report = audit_candidate_count_coverage(inventory)
+
+    assert report["status"] == "CANDIDATE_COVERAGE_PASS"
+    assert report["blockers"] == []
+
+
+def test_candidate_audit_rejects_duplicate_labels():
+    inventory = candidate_inventory()
+    inventory["poses"][1]["label"] = inventory["poses"][0]["label"]
+
+    with pytest.raises(PositionVectorCampaignError, match="pose labels must be unique"):
+        audit_candidate_count_coverage(inventory)
+
+
+def test_retained_candidate_inventory_and_coverage_report_reproduce():
+    software_root = Path(__file__).resolve().parents[2]
+    inventory = json.loads(
+        (software_root / "config/position_vector_candidate_pose_inventory_20261024.json")
+        .read_text(encoding="utf-8")
+    )
+    retained_report = json.loads(
+        (
+            software_root
+            / "config/calibration_candidates/position_vector_candidate_coverage_20261024.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert audit_candidate_count_coverage(inventory) == retained_report
 
 
 def test_reviewed_evidence_derives_hash_bound_ready_assessment():

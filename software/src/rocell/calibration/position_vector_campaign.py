@@ -41,6 +41,12 @@ READINESS_EVIDENCE_SCHEMA = "rocell.position_vector_calibration_readiness_eviden
 READINESS_EVIDENCE_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_readiness_evidence_receipt.v1"
 )
+CANDIDATE_INVENTORY_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_inventory.v1"
+)
+CANDIDATE_COVERAGE_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_coverage.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -164,6 +170,15 @@ _READINESS_EVIDENCE_FIELDS = frozenset(
 )
 _REVIEWED_POSE_FIELDS = frozenset(
     {"label", "truth_procedure_sha256", "reviewer_id"}
+)
+_CANDIDATE_INVENTORY_FIELDS = frozenset(
+    {
+        "schema", "inventory_id", "controller_binding", "attachment_profile",
+        "count_kind", "poses",
+    }
+)
+_CANDIDATE_POSE_FIELDS = frozenset(
+    {"label", "raw_position_counts", "source_ref"}
 )
 
 
@@ -405,6 +420,122 @@ def assess_reviewed_readiness_evidence(
         "authority": dict(readiness["authority"]),
     }
     return readiness, receipt
+
+
+def audit_candidate_count_coverage(
+    document: Mapping[str, Any], policy: CampaignPolicy = CampaignPolicy()
+) -> dict[str, Any]:
+    """Audit whether retained candidate counts can possibly meet fit coverage.
+
+    Candidate goals are planning evidence, not stationary observations or joint
+    truth.  This pure audit catches catalogs that are guaranteed to fail the
+    later training-span gate before a physical collection plan is frozen.
+    """
+
+    raw = _mapping(document, "candidate_inventory")
+    _exact(raw, _CANDIDATE_INVENTORY_FIELDS, "candidate_inventory")
+    if raw.get("schema") != CANDIDATE_INVENTORY_SCHEMA:
+        raise PositionVectorCampaignError("candidate inventory schema mismatch")
+    attachment = raw.get("attachment_profile")
+    if attachment not in SUPPORTED_ATTACHMENTS:
+        raise PositionVectorCampaignError("candidate inventory attachment profile is invalid")
+    if raw.get("count_kind") not in {"PLANNED_GOAL", "RETAINED_STATIONARY_READBACK"}:
+        raise PositionVectorCampaignError("candidate inventory count kind is invalid")
+    values = raw.get("poses")
+    if not isinstance(values, list):
+        raise PositionVectorCampaignError("candidate inventory poses must be an array")
+    poses = []
+    for index, value in enumerate(values):
+        label = f"candidate_inventory.poses[{index}]"
+        pose = _mapping(value, label)
+        _exact(pose, _CANDIDATE_POSE_FIELDS, label)
+        counts = pose.get("raw_position_counts")
+        if (
+            not isinstance(counts, list)
+            or len(counts) != len(SERVO_ORDER)
+            or any(
+                isinstance(item, bool)
+                or not isinstance(item, int)
+                or not 0 <= item <= 4095
+                for item in counts
+            )
+        ):
+            raise PositionVectorCampaignError(f"{label}.raw_position_counts is invalid")
+        poses.append(
+            {
+                "label": _identifier(pose.get("label"), f"{label}.label"),
+                "raw_position_counts": list(counts),
+                "source_ref": _identifier(pose.get("source_ref"), f"{label}.source_ref"),
+            }
+        )
+    labels = [pose["label"] for pose in poses]
+    if len(set(labels)) != len(labels):
+        raise PositionVectorCampaignError("candidate inventory pose labels must be unique")
+
+    coverage = []
+    blockers = []
+    required_pose_count = policy.minimum_training_samples + policy.minimum_held_out_samples
+    if len(poses) < required_pose_count:
+        blockers.append(
+            f"UNIQUE_SOURCE_POSE_COUNT_{len(poses)}_BELOW_{required_pose_count}"
+        )
+    for joint in JOINT_ORDER:
+        position_index = PRIMARY_INDEX[joint]
+        counts = [pose["raw_position_counts"][position_index] for pose in poses]
+        minimum = min(counts) if counts else None
+        maximum = max(counts) if counts else None
+        span = maximum - minimum if counts else 0
+        meets = span >= policy.minimum_training_count_span
+        coverage.append(
+            {
+                "joint": joint,
+                "position_index": position_index,
+                "minimum_count": minimum,
+                "maximum_count": maximum,
+                "span_counts": span,
+                "minimum_required_span_counts": policy.minimum_training_count_span,
+                "meets_minimum": meets,
+            }
+        )
+        if not meets:
+            blockers.append(
+                f"CANDIDATE_COUNT_SPAN_{joint.upper()}_{span}_BELOW_"
+                f"{policy.minimum_training_count_span}"
+            )
+
+    normalized = {
+        "schema": CANDIDATE_INVENTORY_SCHEMA,
+        "inventory_id": _identifier(raw.get("inventory_id"), "candidate_inventory.inventory_id"),
+        "controller_binding": _controller(raw.get("controller_binding")),
+        "attachment_profile": attachment,
+        "count_kind": raw.get("count_kind"),
+        "poses": poses,
+    }
+    return {
+        "schema": CANDIDATE_COVERAGE_SCHEMA,
+        "status": "CANDIDATE_COVERAGE_PASS" if not blockers else "CANDIDATE_COVERAGE_BLOCKED",
+        "inventory_id": normalized["inventory_id"],
+        "inventory_sha256": canonical_sha256(normalized),
+        "attachment_profile": attachment,
+        "pose_count": len(poses),
+        "position_order_servo_ids": list(SERVO_ORDER),
+        "joint_order": list(JOINT_ORDER),
+        "joint_coverage": coverage,
+        "blockers": blockers,
+        "limitations": [
+            "Candidate counts are not stationary observations.",
+            "Candidate counts do not provide independent joint-angle truth.",
+            "A passing full-catalog audit does not prove the selected training subset spans every joint.",
+            "A passing audit does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": {
+            "controller_opened": False,
+            "camera_opened": False,
+            "commands_sent": 0,
+            "motion_authorized": False,
+            "physical_authority": False,
+        },
+    }
 
 
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
@@ -1160,6 +1291,12 @@ def main(argv: list[str] | None = None) -> int:
     reviewed_assess_parser.add_argument("--evidence", required=True)
     reviewed_assess_parser.add_argument("--readiness-output", required=True)
     reviewed_assess_parser.add_argument("--receipt-output", required=True)
+    candidate_audit_parser = commands.add_parser(
+        "audit-candidates",
+        help="audit whether retained candidate counts can meet fit coverage",
+    )
+    candidate_audit_parser.add_argument("--inventory", required=True)
+    candidate_audit_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -1260,6 +1397,10 @@ def main(argv: list[str] | None = None) -> int:
             )
         _write_new(args.readiness_output, readiness)
         _write_new(args.receipt_output, receipt)
+        return 0
+    if args.command == "audit-candidates":
+        result = audit_candidate_count_coverage(_read_json(args.inventory))
+        _write_new(args.output, result)
         return 0
     if args.command == "prepare":
         plan = create_collection_plan(
