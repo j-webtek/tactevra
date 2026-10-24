@@ -1,0 +1,54 @@
+{
+  "schema": "rocell.position_vector_calibration_candidate_inventory.v1",
+  "inventory_id": "bare-jaw-keyboard-chain-20261024",
+  "controller_binding": {
+    "vid": "10c4",
+    "pid": "ea60",
+    "unit_serial": "52E4E1E8337FEF119E92181CEDD322A4",
+    "firmware_sha256": "c800a24409d4e57f65d431b8341c872a8684144a9ed1c7a4af9c96e79a7d4cec"
+  },
+  "attachment_profile": "no_attachment",
+  "count_kind": "PLANNED_GOAL",
+  "poses": [
+    {
+      "label": "KEYBOARD_FORWARD_CAL_1",
+      "raw_position_counts": [2047, 2136, 1960, 2549, 2224, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r109"
+    },
+    {
+      "label": "KEYBOARD_DIAGONAL_CAL_2",
+      "raw_position_counts": [2105, 2180, 1916, 2473, 2257, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r110"
+    },
+    {
+      "label": "KEYBOARD_FIELD_CAL_3",
+      "raw_position_counts": [2174, 2250, 1846, 2340, 2320, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r111"
+    },
+    {
+      "label": "KEYBOARD_FIELD_APPROACH_10",
+      "raw_position_counts": [2174, 2271, 1825, 2362, 2277, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r112"
+    },
+    {
+      "label": "KEYBOARD_FIELD_APPROACH_20",
+      "raw_position_counts": [2174, 2293, 1803, 2383, 2234, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r113"
+    },
+    {
+      "label": "KEYBOARD_FIELD_APPROACH_25",
+      "raw_position_counts": [2174, 2305, 1791, 2393, 2213, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r114"
+    },
+    {
+      "label": "KEYBOARD_FIELD_APPROACH_28",
+      "raw_position_counts": [2174, 2312, 1784, 2399, 2200, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r115"
+    },
+    {
+      "label": "KEYBOARD_FIELD_APPROACH_38",
+      "raw_position_counts": [2174, 2337, 1759, 2416, 2158, 2040, 2047],
+      "source_ref": "git:64348edd:stage_r117"
+    }
+  ]
+}
