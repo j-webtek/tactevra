@@ -87,6 +87,9 @@ QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA = (
 QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_collection_readiness_assessment.v1"
 )
+QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_collection_readiness_handoff.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -1872,6 +1875,99 @@ def assess_qualified_collection_readiness_evidence(
     }
 
 
+def create_qualified_collection_readiness_handoff(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    evidence_document: Mapping[str, Any],
+    assessment_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Create an artifact handoff for one complete readiness assessment.
+
+    This receipt binds the already prepared plan and observation template to
+    the accepted readiness declarations. It grants no collection or motion
+    authority and performs no hardware access.
+    """
+
+    reproduced = assess_qualified_collection_readiness_evidence(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        evidence_document=evidence_document,
+        policy=policy,
+    )
+    supplied = _mapping(
+        assessment_document, "qualified_collection_readiness_assessment"
+    )
+    if dict(supplied) != reproduced:
+        raise PositionVectorCampaignError(
+            "qualified collection readiness assessment does not reproduce"
+        )
+    if reproduced["status"] != "QUALIFIED_COLLECTION_READINESS_COMPLETE":
+        raise PositionVectorCampaignError(
+            "qualified collection readiness assessment is not complete"
+        )
+
+    readiness_plan = _mapping(
+        readiness_plan_document, "qualified_collection_readiness_plan"
+    )
+    evidence = _mapping(
+        evidence_document, "qualified_collection_readiness_evidence"
+    )
+    return {
+        "schema": QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
+        "status": "QUALIFIED_COLLECTION_READINESS_HANDOFF_READY",
+        "dataset_id": reproduced["dataset_id"],
+        "inventory_sha256": reproduced["inventory_sha256"],
+        "admission_receipt_sha256": readiness_plan[
+            "admission_receipt_sha256"
+        ],
+        "training_split_sha256": readiness_plan["training_split_sha256"],
+        "collection_plan_sha256": reproduced["collection_plan_sha256"],
+        "observations_sha256": readiness_plan["observations_sha256"],
+        "preparation_receipt_sha256": reproduced[
+            "preparation_receipt_sha256"
+        ],
+        "readiness_plan_sha256": reproduced["readiness_plan_sha256"],
+        "evidence_sha256": reproduced["evidence_sha256"],
+        "readiness_assessment_sha256": canonical_sha256(reproduced),
+        "controller_binding": dict(readiness_plan["controller_binding"]),
+        "attachment_profile": reproduced["attachment_profile"],
+        "truth_method": readiness_plan["truth_method"],
+        "pose_labels": list(readiness_plan["pose_labels"]),
+        "evidence_producer_id": evidence["producer_id"],
+        "accepted_evidence": [
+            {
+                "requirement": item["requirement"],
+                "evidence_sha256": item["evidence_sha256"],
+                "reviewer_id": item["reviewer_id"],
+            }
+            for item in reproduced["requirement_assessments"]
+        ],
+        "next_required_gate": "RETAINED_STATIONARY_OBSERVATION_COLLECTION",
+        "blockers": [],
+        "limitations": [
+            "This receipt reproduces and binds accepted evidence declarations; it "
+            "does not inspect the referenced evidence content.",
+            "QUALIFIED_COLLECTION_READINESS_HANDOFF_READY is an artifact-transfer "
+            "state, not authorization to access hardware or collect observations.",
+            "Physical collection still requires the separate operator and safety "
+            "controls applicable to the installed system.",
+        ],
+        "authority": dict(reproduced["authority"]),
+    }
+
+
 def create_assessed_collection_package(
     *,
     readiness_document: Mapping[str, Any],
@@ -2538,6 +2634,24 @@ def main(argv: list[str] | None = None) -> int:
     qualified_readiness_assess_parser.add_argument("--readiness-plan", required=True)
     qualified_readiness_assess_parser.add_argument("--evidence", required=True)
     qualified_readiness_assess_parser.add_argument("--output", required=True)
+    qualified_readiness_handoff_parser = commands.add_parser(
+        "create-qualified-collection-readiness-handoff",
+        help="create a handoff receipt for one complete readiness assessment",
+    )
+    qualified_readiness_handoff_parser.add_argument("--inventory", required=True)
+    qualified_readiness_handoff_parser.add_argument(
+        "--admission-receipt", required=True
+    )
+    qualified_readiness_handoff_parser.add_argument("--training-split", required=True)
+    qualified_readiness_handoff_parser.add_argument("--collection-plan", required=True)
+    qualified_readiness_handoff_parser.add_argument("--observations", required=True)
+    qualified_readiness_handoff_parser.add_argument(
+        "--preparation-receipt", required=True
+    )
+    qualified_readiness_handoff_parser.add_argument("--readiness-plan", required=True)
+    qualified_readiness_handoff_parser.add_argument("--evidence", required=True)
+    qualified_readiness_handoff_parser.add_argument("--assessment", required=True)
+    qualified_readiness_handoff_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2758,6 +2872,20 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "create-qualified-collection-readiness-handoff":
+        result = create_qualified_collection_readiness_handoff(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            evidence_document=_read_json(args.evidence),
+            assessment_document=_read_json(args.assessment),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2885,6 +3013,7 @@ __all__ = [
     "QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA",
+    "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
@@ -2911,6 +3040,7 @@ __all__ = [
     "create_qualified_candidate_inventory_package",
     "create_qualified_candidate_collection_package",
     "create_qualified_collection_readiness_plan",
+    "create_qualified_collection_readiness_handoff",
     "create_collection_plan",
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",

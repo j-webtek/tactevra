@@ -283,6 +283,15 @@ as ordered blockers, and records accepted declarations by canonical SHA-256.
 It inspects no referenced evidence, opens no hardware, and grants no collection
 or motion authority. All byte, duplicate, and reduction limits remain unchanged.
 
+The qualified-collection readiness-handoff increment adds no governed paths and
+keeps the reviewed tracked-file ceiling at 6,614. It extends the same campaign
+source, tests, and guide with a receipt that reproduces the complete assessment,
+requires all eight evidence gates to be accepted, and binds the prepared plan,
+empty observation template, ordered pose catalog, reviewers, and upstream
+hashes. The receipt names retained stationary observation collection as the
+next gate while granting no hardware, collection, or motion authority. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
