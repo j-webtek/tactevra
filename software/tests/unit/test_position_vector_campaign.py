@@ -27,6 +27,7 @@ from rocell.calibration.position_vector_campaign import (
     OBSERVATIONS_SCHEMA,
     PLAN_SCHEMA,
     PREPARATION_RECEIPT_SCHEMA,
+    QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_SCHEMA,
     READINESS_SCHEMA,
@@ -50,6 +51,7 @@ from rocell.calibration.position_vector_campaign import (
     create_reviewed_collection_package,
     create_reviewed_dataset_package,
     create_qualified_candidate_inventory_package,
+    create_qualified_candidate_collection_package,
     evaluate_candidate_count_augmentation,
     fit_campaign_dataset,
     load_campaign_dataset,
@@ -790,6 +792,81 @@ def test_qualified_inventory_split_rejects_crossed_admission_receipt():
         plan_qualified_candidate_training_split(admitted, receipt)
 
 
+def test_qualified_collection_package_binds_exact_inventory_split_and_outputs():
+    admitted, admission_receipt = qualified_candidate_inventory_package()
+    split = plan_qualified_candidate_training_split(admitted, admission_receipt)
+
+    plan, observations, receipt = create_qualified_candidate_collection_package(
+        inventory_document=admitted,
+        admission_receipt_document=admission_receipt,
+        training_split_document=split,
+        dataset_id="bare-jaw-position-vector-campaign-01",
+        producer_id="calibration-producer-01",
+        truth_method="link_fiducial_pose",
+    )
+
+    assert [slot["source_pose"] for slot in plan["slots"]] == (
+        split["training_pose_labels"] + split["held_out_pose_labels"]
+    )
+    assert [slot["split"] for slot in plan["slots"]] == (
+        ["TRAINING"] * 5 + ["HELD_OUT"] * 4
+    )
+    assert observations == collection_observations_template(plan)
+    assert receipt["schema"] == QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA
+    assert receipt["status"] == "QUALIFIED_COLLECTION_PACKAGE_PREPARED"
+    assert receipt["inventory_sha256"] == canonical_sha256(admitted)
+    assert receipt["training_split_sha256"] == canonical_sha256(split)
+    assert receipt["plan_sha256"] == canonical_sha256(plan)
+    assert receipt["observations_sha256"] == canonical_sha256(observations)
+    assert (receipt["pose_count"], receipt["training_count"], receipt["held_out_count"]) == (
+        9,
+        5,
+        4,
+    )
+    assert receipt["next_required_gate"] == "REVIEWED_COLLECTION_READINESS"
+    assert receipt["authority"]["physical_authority"] is False
+
+
+def test_qualified_collection_package_rejects_edited_or_blocked_split():
+    admitted, admission_receipt = qualified_candidate_inventory_package()
+    split = plan_qualified_candidate_training_split(admitted, admission_receipt)
+    edited = copy.deepcopy(split)
+    edited["training_pose_labels"].reverse()
+
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        create_qualified_candidate_collection_package(
+            inventory_document=admitted,
+            admission_receipt_document=admission_receipt,
+            training_split_document=edited,
+            dataset_id="bare-jaw-position-vector-campaign-01",
+            producer_id="calibration-producer-01",
+            truth_method="link_fiducial_pose",
+        )
+
+    constrained = copy.deepcopy(admitted)
+    constrained["poses"] = constrained["poses"][:8]
+    for pose in constrained["poses"]:
+        pose["raw_position_counts"] = [0] * 7
+    for pose_index, position_index in enumerate(INDEXES):
+        constrained["poses"][pose_index]["raw_position_counts"][position_index] = 128
+    coverage = audit_candidate_count_coverage(constrained)
+    bound_receipt = copy.deepcopy(admission_receipt)
+    bound_receipt["admitted_inventory_sha256"] = canonical_sha256(constrained)
+    bound_receipt["resulting_coverage_sha256"] = canonical_sha256(coverage)
+    bound_receipt["resulting_pose_count"] = len(constrained["poses"])
+    blocked = plan_qualified_candidate_training_split(constrained, bound_receipt)
+
+    with pytest.raises(PositionVectorCampaignError, match="split is blocked"):
+        create_qualified_candidate_collection_package(
+            inventory_document=constrained,
+            admission_receipt_document=bound_receipt,
+            training_split_document=blocked,
+            dataset_id="bare-jaw-position-vector-campaign-01",
+            producer_id="calibration-producer-01",
+            truth_method="link_fiducial_pose",
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -1061,6 +1138,45 @@ def test_file_workflow_plans_qualified_candidate_split_without_hardware(tmp_path
     assert main(args) == 0
     assert json.loads(output_path.read_bytes())["status"] == "TRAINING_SPLIT_READY"
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_prepares_qualified_collection_without_hardware(tmp_path):
+    admitted, admission_receipt = qualified_candidate_inventory_package()
+    split = plan_qualified_candidate_training_split(admitted, admission_receipt)
+    documents = {
+        "inventory": admitted,
+        "admission-receipt": admission_receipt,
+        "training-split": split,
+    }
+    paths = {}
+    for name, document in documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    plan_path = tmp_path / "collection-plan.json"
+    observations_path = tmp_path / "observations.json"
+    receipt_path = tmp_path / "preparation-receipt.json"
+    args = [
+        "prepare-qualified-candidate-collection",
+        "--inventory", str(paths["inventory"]),
+        "--admission-receipt", str(paths["admission-receipt"]),
+        "--training-split", str(paths["training-split"]),
+        "--dataset-id", "bare-jaw-position-vector-campaign-01",
+        "--producer-id", "calibration-producer-01",
+        "--truth-method", "link_fiducial_pose",
+        "--plan-output", str(plan_path),
+        "--observations-output", str(observations_path),
+        "--receipt-output", str(receipt_path),
+    ]
+
+    assert main(args) == 0
+    plan = json.loads(plan_path.read_bytes())
+    observations = json.loads(observations_path.read_bytes())
+    receipt = json.loads(receipt_path.read_bytes())
+    assert len(plan["slots"]) == 9
+    assert observations == collection_observations_template(plan)
+    assert receipt["plan_sha256"] == canonical_sha256(plan)
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
         main(args)
 
 

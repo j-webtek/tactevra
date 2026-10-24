@@ -354,6 +354,36 @@ conditioning, geometry, clearance, or measurement quality; the pose entries
 remain planned goals, and the command grants no hardware, collection, or motion
 authority.
 
+Freeze that exact qualified split into the existing collection-plan contract
+before gathering reviewed readiness evidence:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign prepare-qualified-candidate-collection `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --dataset-id bare-jaw-position-vector-campaign-01 `
+  --producer-id calibration-producer-01 `
+  --truth-method link_fiducial_pose `
+  --plan-output proposed-position-vector-collection-plan.json `
+  --observations-output proposed-position-vector-observations.json `
+  --receipt-output proposed-position-vector-qualified-preparation-receipt.json
+```
+
+The command reproduces the admission-bound split instead of trusting copied
+pose lists. It emits the established collection plan with five training and
+four held-out slots, its plan-hash-bound empty observation template, and a
+`rocell.position_vector_calibration_qualified_collection_preparation_receipt.v1`
+record binding the inventory, admission receipt, split, plan, and template by
+canonical SHA-256. Existing or aliased outputs are refused.
+
+`QUALIFIED_COLLECTION_PACKAGE_PREPARED` is an offline planning state. The
+receipt names `REVIEWED_COLLECTION_READINESS` as the next required gate. The
+planned counts are still goals rather than readbacks, the observation slots are
+empty, and the package does not establish installed firmware, camera, board,
+attachment, or independent truth-procedure readiness. It grants no hardware,
+collection, or motion authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
