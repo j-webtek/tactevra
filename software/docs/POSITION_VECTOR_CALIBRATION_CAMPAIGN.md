@@ -552,6 +552,53 @@ upstream qualification chain, and zero-authority declaration. Its next gate is
 `DETERMINISTIC_CALIBRATION_FIT`. Compilation is an offline artifact operation;
 it performs no capture, feedback request, command, or motion.
 
+Run the qualified deterministic fit gate against those exact outputs:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign assess-qualified-deterministic-fit `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --calibration-id installed-arm-count-fit-01 `
+  --fit-report-output qualified-position-vector-fit-report.json `
+  --assessment-output qualified-position-vector-fit-assessment.json
+```
+
+This command first reproduces the complete qualified compilation from its
+upstream artifacts. The supplied dataset and compilation receipt must match
+that reproduction exactly. It then runs the deterministic affine fit, checks
+the training count span for every primary joint, evaluates every held-out
+sample against the configured maximum error, and verifies the mirrored
+shoulder residual. Policy overrides use the same flags as the lower-level
+`fit` command and are recorded in both outputs.
+
+The fit report retains the numerical model and all training and held-out
+metrics. The
+`rocell.position_vector_calibration_qualified_deterministic_fit_assessment.v1`
+record binds the compilation receipt, dataset, fit report, policy, per-joint
+held-out results, and shoulder-pair result. A passing assessment advances only
+to `INDEPENDENT_CALIBRATION_REVIEW`. It does not accept or activate the
+calibration and opens no controller or camera, requests no feedback, and sends
+no command or motion.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

@@ -99,6 +99,9 @@ QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA = (
 QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_observation_set_compilation_receipt.v1"
 )
+QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_deterministic_fit_assessment.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -2922,6 +2925,97 @@ def fit_campaign_dataset(
     }
 
 
+def assess_qualified_deterministic_fit(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    calibration_id: str,
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Reproduce a qualified dataset and assess its deterministic fit offline."""
+
+    expected_dataset, expected_compilation_receipt = compile_qualified_observation_set(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+    )
+    supplied_dataset = _mapping(dataset_document, "qualified_dataset")
+    if dict(supplied_dataset) != expected_dataset:
+        raise PositionVectorCampaignError("qualified dataset does not reproduce")
+    supplied_receipt = _mapping(
+        compilation_receipt_document, "qualified_compilation_receipt"
+    )
+    if dict(supplied_receipt) != expected_compilation_receipt:
+        raise PositionVectorCampaignError(
+            "qualified compilation receipt does not reproduce"
+        )
+
+    fit_report = fit_campaign_dataset(
+        expected_dataset,
+        calibration_id=calibration_id,
+        policy=policy,
+    )
+    assessment = {
+        "schema": QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA,
+        "status": "QUALIFIED_DETERMINISTIC_FIT_PASS",
+        "calibration_id": fit_report["calibration_id"],
+        "dataset_id": fit_report["dataset_id"],
+        "attachment_profile": fit_report["attachment_profile"],
+        "compilation_receipt_sha256": canonical_sha256(
+            expected_compilation_receipt
+        ),
+        "dataset_sha256": canonical_sha256(expected_dataset),
+        "fit_report_sha256": canonical_sha256(fit_report),
+        "policy": policy.to_dict(),
+        "joint_assessments": [
+            {
+                "joint": row["joint"],
+                "training_count_span": row["training_count_span"],
+                "held_out_sample_count": row["held_out_sample_count"],
+                "held_out_max_abs_error_rad": row[
+                    "held_out_max_abs_error_rad"
+                ],
+                "accepted_max_abs_error_rad": row[
+                    "accepted_max_abs_error_rad"
+                ],
+            }
+            for row in fit_report["joints"]
+        ],
+        "shoulder_pair_assessment": dict(fit_report["shoulder_pair"]),
+        "next_required_gate": "INDEPENDENT_CALIBRATION_REVIEW",
+        "limitations": [
+            "This assessment reproduces retained artifacts and performs only "
+            "deterministic offline computation.",
+            "A passing fit is not an accepted or active runtime calibration; the "
+            "exact dataset and fit report require independent review.",
+            "This assessment opens no controller or camera and grants no command, "
+            "motion, activation, or physical authority.",
+        ],
+        "authority": dict(expected_compilation_receipt["authority"]),
+        "calibration_activation_authorized": False,
+    }
+    return fit_report, assessment
+
+
 def _policy(value: Any, *, label: str = "fit_report.policy") -> CampaignPolicy:
     raw = _mapping(value, label)
     if set(raw) != set(CampaignPolicy().to_dict()):
@@ -3220,6 +3314,39 @@ def main(argv: list[str] | None = None) -> int:
     )
     qualified_compile_parser.add_argument("--output", required=True)
     qualified_compile_parser.add_argument("--receipt-output", required=True)
+    qualified_fit_parser = commands.add_parser(
+        "assess-qualified-deterministic-fit",
+        help="reproduce the qualified compilation and assess its deterministic fit",
+    )
+    qualified_fit_parser.add_argument("--inventory", required=True)
+    qualified_fit_parser.add_argument("--admission-receipt", required=True)
+    qualified_fit_parser.add_argument("--training-split", required=True)
+    qualified_fit_parser.add_argument("--collection-plan", required=True)
+    qualified_fit_parser.add_argument("--observations", required=True)
+    qualified_fit_parser.add_argument("--preparation-receipt", required=True)
+    qualified_fit_parser.add_argument("--readiness-plan", required=True)
+    qualified_fit_parser.add_argument("--readiness-evidence", required=True)
+    qualified_fit_parser.add_argument("--readiness-assessment", required=True)
+    qualified_fit_parser.add_argument("--readiness-handoff", required=True)
+    qualified_fit_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    qualified_fit_parser.add_argument("--dataset", required=True)
+    qualified_fit_parser.add_argument("--compilation-receipt", required=True)
+    qualified_fit_parser.add_argument("--calibration-id", required=True)
+    qualified_fit_parser.add_argument("--fit-report-output", required=True)
+    qualified_fit_parser.add_argument("--assessment-output", required=True)
+    qualified_fit_parser.add_argument("--minimum-training-samples", type=int, default=5)
+    qualified_fit_parser.add_argument("--minimum-held-out-samples", type=int, default=3)
+    qualified_fit_parser.add_argument(
+        "--minimum-training-count-span", type=int, default=128
+    )
+    qualified_fit_parser.add_argument(
+        "--accepted-max-abs-error-rad", type=float, default=0.035
+    )
+    qualified_fit_parser.add_argument(
+        "--shoulder-runtime-tolerance-counts", type=int, default=24
+    )
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -3507,6 +3634,48 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.output, dataset)
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "assess-qualified-deterministic-fit":
+        policy = CampaignPolicy(
+            minimum_training_samples=args.minimum_training_samples,
+            minimum_held_out_samples=args.minimum_held_out_samples,
+            minimum_training_count_span=args.minimum_training_count_span,
+            accepted_max_abs_error_rad=args.accepted_max_abs_error_rad,
+            shoulder_runtime_tolerance_counts=(
+                args.shoulder_runtime_tolerance_counts
+            ),
+        )
+        fit_report, assessment = assess_qualified_deterministic_fit(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            calibration_id=args.calibration_id,
+            policy=policy,
+        )
+        output_paths = (
+            Path(args.fit_report_output),
+            Path(args.assessment_output),
+        )
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias qualified fit output"
+            )
+        _write_new(args.fit_report_output, fit_report)
+        _write_new(args.assessment_output, assessment)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -3636,6 +3805,7 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
+    "QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA",
     "QUALIFIED_OBSERVATION_SET_COMPILATION_RECEIPT_SCHEMA",
     "QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA",
     "QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA",
@@ -3652,6 +3822,7 @@ __all__ = [
     "assess_collection_readiness",
     "assess_candidate_qualification_evidence",
     "assess_qualified_collection_readiness_evidence",
+    "assess_qualified_deterministic_fit",
     "assess_reviewed_readiness_evidence",
     "build_calibration_artifact",
     "canonical_bytes",
