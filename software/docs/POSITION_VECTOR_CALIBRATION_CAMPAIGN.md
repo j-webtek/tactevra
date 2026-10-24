@@ -328,6 +328,32 @@ not a stationary controller readback or independent joint-truth observation.
 The command does not replace the retained inventory automatically and grants no
 hardware, collection, or motion authority.
 
+Before preparing a collection campaign, verify that a bounded training subset
+can satisfy count-span policy while reserving held-out poses:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign plan-qualified-candidate-split `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --output proposed-position-vector-training-split.json
+```
+
+The planner strictly validates the admission receipt against the inventory and
+its recomputed coverage report. It then enumerates pose combinations in stable
+inventory order, starting at the policy minimum training count, and chooses the
+first subset whose count span meets policy for every primary joint. Every
+remaining pose becomes held out, so the two lists are disjoint and partition
+the full admitted inventory. The default policy seeks at least five training
+and three held-out poses with at least 128 counts of training span per joint.
+
+`TRAINING_SPLIT_READY` means such a count-feasible partition exists.
+`TRAINING_SPLIT_BLOCKED` retains
+`NO_TRAINING_SUBSET_MEETS_COUNT_SPAN_POLICY` when the full inventory passes but
+no bounded training subset does. This combinatorial result does not optimize
+conditioning, geometry, clearance, or measurement quality; the pose entries
+remain planned goals, and the command grants no hardware, collection, or motion
+authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

@@ -12,6 +12,7 @@ import argparse
 from dataclasses import dataclass
 from datetime import datetime
 import hashlib
+from itertools import combinations
 import json
 import math
 from pathlib import Path
@@ -70,6 +71,9 @@ CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA = (
 )
 CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_candidate_inventory_admission_receipt.v1"
+)
+CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_training_split_plan.v1"
 )
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
@@ -218,6 +222,15 @@ _CANDIDATE_INVENTORY_FIELDS = frozenset(
 )
 _CANDIDATE_POSE_FIELDS = frozenset(
     {"label", "raw_position_counts", "source_ref"}
+)
+_CANDIDATE_INVENTORY_ADMISSION_RECEIPT_FIELDS = frozenset(
+    {
+        "schema", "status", "source_inventory_id", "source_inventory_sha256",
+        "admitted_inventory_id", "admitted_inventory_sha256", "candidate_sha256",
+        "attachment_profile", "qualification_handoff_sha256",
+        "resulting_coverage_sha256", "resulting_pose_count", "blockers",
+        "limitations", "authority",
+    }
 )
 
 
@@ -1170,6 +1183,143 @@ def create_qualified_candidate_inventory_package(
     return admitted, receipt
 
 
+def plan_qualified_candidate_training_split(
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Select the smallest count-spanning training subset deterministically."""
+
+    coverage = audit_candidate_count_coverage(inventory_document, policy)
+    receipt = _mapping(
+        admission_receipt_document, "candidate_inventory_admission_receipt"
+    )
+    _exact(
+        receipt,
+        _CANDIDATE_INVENTORY_ADMISSION_RECEIPT_FIELDS,
+        "candidate_inventory_admission_receipt",
+    )
+    if receipt.get("schema") != CANDIDATE_INVENTORY_ADMISSION_RECEIPT_SCHEMA:
+        raise PositionVectorCampaignError(
+            "candidate inventory admission receipt schema mismatch"
+        )
+    if receipt.get("status") != "QUALIFIED_CANDIDATE_INVENTORY_READY":
+        raise PositionVectorCampaignError(
+            "candidate inventory admission receipt is not ready"
+        )
+    expected_bindings = {
+        "admitted_inventory_id": coverage["inventory_id"],
+        "admitted_inventory_sha256": coverage["inventory_sha256"],
+        "attachment_profile": coverage["attachment_profile"],
+        "resulting_coverage_sha256": canonical_sha256(coverage),
+        "resulting_pose_count": coverage["pose_count"],
+    }
+    if any(receipt.get(name) != value for name, value in expected_bindings.items()):
+        raise PositionVectorCampaignError(
+            "candidate inventory admission receipt binding mismatch"
+        )
+    _identifier(
+        receipt.get("source_inventory_id"),
+        "candidate_inventory_admission_receipt.source_inventory_id",
+    )
+    for name in (
+        "source_inventory_sha256",
+        "candidate_sha256",
+        "qualification_handoff_sha256",
+    ):
+        _digest(
+            receipt.get(name),
+            f"candidate_inventory_admission_receipt.{name}",
+        )
+    if receipt.get("blockers") != []:
+        raise PositionVectorCampaignError(
+            "candidate inventory admission receipt has blockers"
+        )
+    if receipt.get("authority") != coverage["authority"]:
+        raise PositionVectorCampaignError(
+            "candidate inventory admission receipt grants physical authority"
+        )
+
+    inventory = _mapping(inventory_document, "candidate_inventory")
+    poses = inventory["poses"]
+    maximum_training = len(poses) - policy.minimum_held_out_samples
+    selected_indexes: tuple[int, ...] | None = None
+    selected_coverage: list[dict[str, Any]] = []
+    for training_count in range(policy.minimum_training_samples, maximum_training + 1):
+        for indexes in combinations(range(len(poses)), training_count):
+            joint_coverage = []
+            for joint in JOINT_ORDER:
+                position_index = PRIMARY_INDEX[joint]
+                counts = [poses[index]["raw_position_counts"][position_index]
+                          for index in indexes]
+                minimum = min(counts)
+                maximum = max(counts)
+                joint_coverage.append(
+                    {
+                        "joint": joint,
+                        "position_index": position_index,
+                        "minimum_count": minimum,
+                        "maximum_count": maximum,
+                        "span_counts": maximum - minimum,
+                        "minimum_required_span_counts": (
+                            policy.minimum_training_count_span
+                        ),
+                        "meets_minimum": (
+                            maximum - minimum
+                            >= policy.minimum_training_count_span
+                        ),
+                    }
+                )
+            if all(row["meets_minimum"] for row in joint_coverage):
+                selected_indexes = indexes
+                selected_coverage = joint_coverage
+                break
+        if selected_indexes is not None:
+            break
+
+    if selected_indexes is None:
+        training_labels: list[str] = []
+        held_out_labels = [pose["label"] for pose in poses]
+        blockers = ["NO_TRAINING_SUBSET_MEETS_COUNT_SPAN_POLICY"]
+        status = "TRAINING_SPLIT_BLOCKED"
+    else:
+        selected = set(selected_indexes)
+        training_labels = [
+            pose["label"] for index, pose in enumerate(poses) if index in selected
+        ]
+        held_out_labels = [
+            pose["label"] for index, pose in enumerate(poses) if index not in selected
+        ]
+        blockers = []
+        status = "TRAINING_SPLIT_READY"
+
+    return {
+        "schema": CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA,
+        "status": status,
+        "inventory_id": coverage["inventory_id"],
+        "inventory_sha256": coverage["inventory_sha256"],
+        "admission_receipt_sha256": canonical_sha256(receipt),
+        "attachment_profile": coverage["attachment_profile"],
+        "policy": {
+            "minimum_training_samples": policy.minimum_training_samples,
+            "minimum_held_out_samples": policy.minimum_held_out_samples,
+            "minimum_training_count_span": policy.minimum_training_count_span,
+        },
+        "training_pose_labels": training_labels,
+        "held_out_pose_labels": held_out_labels,
+        "training_joint_coverage": selected_coverage,
+        "blockers": blockers,
+        "limitations": [
+            "This split proves count-span coverage only; it does not provide "
+            "stationary observations or independent joint truth.",
+            "The deterministic first feasible subset is not an optimization of "
+            "conditioning, geometry, clearance, or measurement quality.",
+            "This plan does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(coverage["authority"]),
+    }
+
+
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise PositionVectorCampaignError(f"{label} must be an object")
@@ -1985,6 +2135,13 @@ def main(argv: list[str] | None = None) -> int:
     candidate_admission_parser.add_argument("--inventory-id", required=True)
     candidate_admission_parser.add_argument("--inventory-output", required=True)
     candidate_admission_parser.add_argument("--receipt-output", required=True)
+    candidate_split_parser = commands.add_parser(
+        "plan-qualified-candidate-split",
+        help="choose a deterministic count-spanning training and held-out split",
+    )
+    candidate_split_parser.add_argument("--inventory", required=True)
+    candidate_split_parser.add_argument("--admission-receipt", required=True)
+    candidate_split_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2150,6 +2307,13 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.inventory_output, inventory)
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "plan-qualified-candidate-split":
+        result = plan_qualified_candidate_training_split(
+            _read_json(args.inventory),
+            _read_json(args.admission_receipt),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2268,6 +2432,7 @@ __all__ = [
     "CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA",
     "CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA",
     "CANDIDATE_QUALIFICATION_PLAN_SCHEMA",
+    "CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA",
     "DATASET_SCHEMA",
     "FIT_REPORT_SCHEMA",
     "OBSERVATIONS_SCHEMA",
@@ -2303,6 +2468,7 @@ __all__ = [
     "load_collection_readiness",
     "load_collection_plan",
     "main",
+    "plan_qualified_candidate_training_split",
 ]
 
 
