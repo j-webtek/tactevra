@@ -32,6 +32,7 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
+    QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA,
     QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA,
     QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA,
     QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA,
@@ -54,6 +55,7 @@ from rocell.calibration.position_vector_campaign import (
     assess_qualified_deterministic_fit,
     assess_reviewed_readiness_evidence,
     build_calibration_artifact,
+    build_qualified_calibration_artifact,
     canonical_sha256,
     collection_observations_template,
     compile_planned_dataset,
@@ -612,6 +614,48 @@ def accept_qualified_fit_review_package(package, review_document):
         fit_report_document=fit_report,
         fit_assessment_document=fit_assessment,
         review_document=review_document,
+    )
+
+
+def qualified_review_package():
+    fit_package = qualified_fit_package()
+    review_document = qualified_fit_review(*fit_package[3:])
+    review_receipt = accept_qualified_fit_review_package(
+        fit_package, review_document
+    )
+    return (*fit_package, review_document, review_receipt)
+
+
+def build_qualified_review_package(package):
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+    ) = package
+    return build_qualified_calibration_artifact(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        fit_report_document=fit_report,
+        fit_assessment_document=fit_assessment,
+        review_document=review_document,
+        review_receipt_document=review_receipt,
     )
 
 
@@ -1893,6 +1937,37 @@ def test_qualified_independent_fit_review_rejects_tampered_fit_artifact(index, m
         accept_qualified_fit_review_package(tuple(package), review_document)
 
 
+def test_qualified_artifact_build_reproduces_review_and_emits_uninstalled_artifact():
+    package = qualified_review_package()
+
+    artifact, receipt = build_qualified_review_package(package)
+
+    loaded = load_position_vector_calibration(artifact)
+    assert loaded.calibration_id == package[5]["calibration_id"]
+    assert dict(loaded.evidence)["independent_review_sha256"] == package[8][
+        "review_sha256"
+    ]
+    assert receipt["schema"] == QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA
+    assert receipt["status"] == "QUALIFIED_CALIBRATION_ARTIFACT_BUILT"
+    assert receipt["artifact_sha256"] == canonical_sha256(artifact)
+    assert receipt["independent_review_receipt_sha256"] == canonical_sha256(
+        package[8]
+    )
+    assert receipt["next_required_gate"] == "CALIBRATION_INSTALLATION_REVIEW"
+    assert receipt["calibration_installation_authorized"] is False
+    assert receipt["calibration_activation_authorized"] is False
+    assert receipt["authority"]["commands_sent"] == 0
+
+
+def test_qualified_artifact_build_rejects_tampered_review_receipt():
+    package = list(qualified_review_package())
+    package[8] = copy.deepcopy(package[8])
+    package[8]["status"] = "TAMPERED"
+
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        build_qualified_review_package(tuple(package))
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -2605,6 +2680,84 @@ def test_file_workflow_accepts_qualified_independent_fit_review_without_hardware
     assert receipt["status"] == "QUALIFIED_INDEPENDENT_FIT_REVIEW_ACCEPTED"
     assert receipt["review_sha256"] == canonical_sha256(review_document)
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_builds_qualified_uninstalled_artifact_without_hardware(
+    tmp_path,
+):
+    package = qualified_review_package()
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+    ) = package
+    chain_names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    chain_documents = (*chain[:4], observations, *chain[5:])
+    paths = {}
+    for name, document in zip(chain_names, chain_documents, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    receipt_paths = []
+    for index, receipt in enumerate(receipts):
+        path = tmp_path / f"ingestion-receipt-{index:02d}.json"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        receipt_paths.append(path)
+    downstream_documents = {
+        "dataset": compiled,
+        "compilation-receipt": compilation_receipt,
+        "fit-report": fit_report,
+        "fit-assessment": fit_assessment,
+        "review": review_document,
+        "review-receipt": review_receipt,
+    }
+    for name, document in downstream_documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    artifact_output = tmp_path / "position-vector-calibration.json"
+    receipt_output = tmp_path / "qualified-artifact-build-receipt.json"
+    args = ["build-qualified-calibration-artifact"]
+    for name in chain_names:
+        args.extend((f"--{name}", str(paths[name])))
+    for path in receipt_paths:
+        args.extend(("--ingestion-receipt", str(path)))
+    for name in downstream_documents:
+        args.extend((f"--{name}", str(paths[name])))
+    args.extend(
+        (
+            "--artifact-output",
+            str(artifact_output),
+            "--receipt-output",
+            str(receipt_output),
+        )
+    )
+
+    assert main(args) == 0
+    artifact = json.loads(artifact_output.read_bytes())
+    receipt = json.loads(receipt_output.read_bytes())
+    assert load_position_vector_calibration(artifact).calibration_id == (
+        fit_report["calibration_id"]
+    )
+    assert receipt["artifact_sha256"] == canonical_sha256(artifact)
+    assert receipt["status"] == "QUALIFIED_CALIBRATION_ARTIFACT_BUILT"
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
         main(args)
 
 
