@@ -273,6 +273,31 @@ it does not inspect the referenced files or independently prove their physical
 claims. Completion therefore remains observation-only and grants no hardware,
 collection, or motion authority.
 
+Once the exact assessment is complete, create the compact downstream handoff:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign create-candidate-qualification-handoff `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --candidate proposed-position-vector-candidate.json `
+  --preflight proposed-position-vector-preflight.json `
+  --plan proposed-position-vector-qualification-plan.json `
+  --evidence proposed-position-vector-qualification-evidence.json `
+  --assessment proposed-position-vector-qualification-assessment.json `
+  --output proposed-position-vector-qualification-handoff.json
+```
+
+The command reproduces the proposal, preflight, plan, evidence assessment, and
+all bindings. It refuses a blocked or edited assessment. The resulting
+`rocell.position_vector_calibration_candidate_qualification_handoff.v1` receipt
+records the candidate, attachment profile, upstream hashes, evidence producer,
+and all eight accepted evidence hashes and reviewers in plan order. This lets a
+later inventory or campaign step verify one small receipt while retaining the
+full chain for audit.
+
+`QUALIFICATION_HANDOFF_READY` describes artifact transfer only. It does not add
+the proposal to the governed inventory, inspect the evidence files, establish
+physical correctness, or authorize hardware access, collection, or motion.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
