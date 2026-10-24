@@ -59,6 +59,12 @@ CANDIDATE_PREFLIGHT_SCHEMA = (
 CANDIDATE_QUALIFICATION_PLAN_SCHEMA = (
     "rocell.position_vector_calibration_candidate_qualification_plan.v1"
 )
+CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_qualification_evidence.v1"
+)
+CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_qualification_assessment.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -82,6 +88,15 @@ _CANDIDATE_PROPOSAL_FIELDS = frozenset(
         "schema", "inventory_sha256", "label", "attachment_profile",
         "raw_position_counts", "source_ref",
     }
+)
+_CANDIDATE_QUALIFICATION_EVIDENCE_FIELDS = frozenset(
+    {
+        "schema", "qualification_plan_sha256", "inventory_sha256",
+        "candidate_sha256", "attachment_profile", "producer_id", "evidence",
+    }
+)
+_CANDIDATE_QUALIFICATION_EVIDENCE_ITEM_FIELDS = frozenset(
+    {"requirement", "evidence_sha256", "reviewer_id", "decision"}
 )
 _DATASET_FIELDS = frozenset(
     {
@@ -853,6 +868,146 @@ def create_candidate_qualification_plan(
             "This plan does not authorize hardware access, motion, or collection.",
         ],
         "authority": dict(reproduced["authority"]),
+    }
+
+
+def assess_candidate_qualification_evidence(
+    inventory_document: Mapping[str, Any],
+    candidate_document: Mapping[str, Any],
+    preflight_document: Mapping[str, Any],
+    plan_document: Mapping[str, Any],
+    evidence_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Assess declared evidence for one exact candidate qualification plan.
+
+    This validates the chain, decisions, and independent reviewers. It does
+    not inspect the referenced evidence content or grant physical authority.
+    """
+
+    reproduced_plan = create_candidate_qualification_plan(
+        inventory_document, candidate_document, preflight_document, policy
+    )
+    supplied_plan = _mapping(plan_document, "candidate_qualification_plan")
+    if dict(supplied_plan) != reproduced_plan:
+        raise PositionVectorCampaignError(
+            "candidate qualification plan does not reproduce from its inputs"
+        )
+
+    raw = _mapping(evidence_document, "candidate_qualification_evidence")
+    _exact(
+        raw,
+        _CANDIDATE_QUALIFICATION_EVIDENCE_FIELDS,
+        "candidate_qualification_evidence",
+    )
+    if raw.get("schema") != CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA:
+        raise PositionVectorCampaignError(
+            "candidate qualification evidence schema mismatch"
+        )
+    plan_hash = canonical_sha256(reproduced_plan)
+    bindings = {
+        "qualification_plan_sha256": plan_hash,
+        "inventory_sha256": reproduced_plan["inventory_sha256"],
+        "candidate_sha256": reproduced_plan["candidate_sha256"],
+        "attachment_profile": reproduced_plan["attachment_profile"],
+    }
+    if any(raw.get(name) != expected for name, expected in bindings.items()):
+        raise PositionVectorCampaignError(
+            "candidate qualification evidence binding mismatch"
+        )
+    producer_id = _identifier(
+        raw.get("producer_id"), "candidate_qualification_evidence.producer_id"
+    )
+    evidence_items = raw.get("evidence")
+    if not isinstance(evidence_items, list):
+        raise PositionVectorCampaignError(
+            "candidate_qualification_evidence.evidence must be a list"
+        )
+
+    required = [
+        item["requirement"] for item in reproduced_plan["qualification_requirements"]
+    ]
+    supplied_by_requirement: dict[str, dict[str, str]] = {}
+    for index, value in enumerate(evidence_items):
+        label = f"candidate_qualification_evidence.evidence[{index}]"
+        item = _mapping(value, label)
+        _exact(item, _CANDIDATE_QUALIFICATION_EVIDENCE_ITEM_FIELDS, label)
+        requirement = item.get("requirement")
+        if requirement not in required:
+            raise PositionVectorCampaignError(f"{label}.requirement is unknown")
+        if requirement in supplied_by_requirement:
+            raise PositionVectorCampaignError(
+                "candidate qualification evidence repeats a requirement"
+            )
+        reviewer_id = _identifier(item.get("reviewer_id"), f"{label}.reviewer_id")
+        if reviewer_id == producer_id:
+            raise PositionVectorCampaignError(
+                f"{label}.reviewer_id is not independent of the producer"
+            )
+        decision = item.get("decision")
+        if decision not in {"ACCEPT", "REJECT"}:
+            raise PositionVectorCampaignError(f"{label}.decision is invalid")
+        supplied_by_requirement[requirement] = {
+            "requirement": requirement,
+            "evidence_sha256": _digest(
+                item.get("evidence_sha256"), f"{label}.evidence_sha256"
+            ),
+            "reviewer_id": reviewer_id,
+            "decision": decision,
+        }
+
+    assessments = []
+    blockers = []
+    normalized_items = []
+    for requirement in required:
+        item = supplied_by_requirement.get(requirement)
+        if item is None:
+            assessments.append(
+                {
+                    "requirement": requirement,
+                    "status": "EVIDENCE_MISSING",
+                    "evidence_sha256": None,
+                    "reviewer_id": None,
+                }
+            )
+            blockers.append(f"{requirement}_EVIDENCE_REQUIRED")
+            continue
+        normalized_items.append(item)
+        status = "EVIDENCE_ACCEPTED" if item["decision"] == "ACCEPT" else "EVIDENCE_REJECTED"
+        assessments.append(
+            {
+                "requirement": requirement,
+                "status": status,
+                "evidence_sha256": item["evidence_sha256"],
+                "reviewer_id": item["reviewer_id"],
+            }
+        )
+        if item["decision"] == "REJECT":
+            blockers.append(f"{requirement}_EVIDENCE_REJECTED")
+
+    normalized_evidence = {
+        "schema": CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA,
+        **bindings,
+        "producer_id": producer_id,
+        "evidence": normalized_items,
+    }
+    return {
+        "schema": CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA,
+        "status": (
+            "EVIDENCE_CHAIN_COMPLETE" if not blockers else "EVIDENCE_CHAIN_BLOCKED"
+        ),
+        **bindings,
+        "evidence_sha256": canonical_sha256(normalized_evidence),
+        "requirement_assessments": assessments,
+        "blockers": blockers,
+        "limitations": [
+            "This assessment validates declared hashes, decisions, and reviewer "
+            "independence; it does not inspect referenced evidence content.",
+            "EVIDENCE_CHAIN_COMPLETE does not itself establish physical correctness, "
+            "reachability, collision clearance, or safe motion.",
+            "This assessment does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(reproduced_plan["authority"]),
     }
 
 
@@ -1636,6 +1791,16 @@ def main(argv: list[str] | None = None) -> int:
     candidate_qualification_parser.add_argument("--candidate", required=True)
     candidate_qualification_parser.add_argument("--preflight", required=True)
     candidate_qualification_parser.add_argument("--output", required=True)
+    candidate_assessment_parser = commands.add_parser(
+        "assess-candidate-qualification",
+        help="assess the reviewed evidence chain for one candidate plan",
+    )
+    candidate_assessment_parser.add_argument("--inventory", required=True)
+    candidate_assessment_parser.add_argument("--candidate", required=True)
+    candidate_assessment_parser.add_argument("--preflight", required=True)
+    candidate_assessment_parser.add_argument("--plan", required=True)
+    candidate_assessment_parser.add_argument("--evidence", required=True)
+    candidate_assessment_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -1759,6 +1924,16 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "assess-candidate-qualification":
+        result = assess_candidate_qualification_evidence(
+            _read_json(args.inventory),
+            _read_json(args.candidate),
+            _read_json(args.preflight),
+            _read_json(args.plan),
+            _read_json(args.evidence),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -1872,6 +2047,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 __all__ = [
+    "CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA",
+    "CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA",
     "CANDIDATE_QUALIFICATION_PLAN_SCHEMA",
     "DATASET_SCHEMA",
     "FIT_REPORT_SCHEMA",
@@ -1889,6 +2066,7 @@ __all__ = [
     "CampaignPolicy",
     "PositionVectorCampaignError",
     "assess_collection_readiness",
+    "assess_candidate_qualification_evidence",
     "assess_reviewed_readiness_evidence",
     "build_calibration_artifact",
     "canonical_bytes",

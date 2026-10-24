@@ -241,6 +241,38 @@ authorize hardware access, collection, or motion. The installed collision and
 cable geometry must come from the exact physical attachment profile; hashes or
 reviews from a different profile cannot satisfy those future gates.
 
+As reviewed artifacts become available, record them in a
+`rocell.position_vector_calibration_candidate_qualification_evidence.v1`
+manifest. The manifest binds the exact qualification-plan, inventory,
+candidate, and attachment-profile hashes. Each supplied gate names its evidence
+SHA-256, reviewer, and `ACCEPT` or `REJECT` decision. The reviewer must differ
+from the manifest producer. A partial manifest is valid and preserves every
+unsupplied gate as an explicit blocker.
+
+Assess that chain without opening hardware:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign assess-candidate-qualification `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --candidate proposed-position-vector-candidate.json `
+  --preflight proposed-position-vector-preflight.json `
+  --plan proposed-position-vector-qualification-plan.json `
+  --evidence proposed-position-vector-qualification-evidence.json `
+  --output proposed-position-vector-qualification-assessment.json
+```
+
+The assessor reproduces the entire proposal, preflight, and plan chain. It
+rejects crossed bindings, unknown or duplicate gates, malformed hashes,
+unsupported decisions, and a reviewer who is also the evidence producer.
+Missing evidence produces `<GATE>_EVIDENCE_REQUIRED`; rejected evidence
+produces `<GATE>_EVIDENCE_REJECTED`.
+
+`EVIDENCE_CHAIN_COMPLETE` means all eight declared evidence records have an
+independent `ACCEPT` decision. The assessor validates the manifest and hashes;
+it does not inspect the referenced files or independently prove their physical
+claims. Completion therefore remains observation-only and grants no hardware,
+collection, or motion authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

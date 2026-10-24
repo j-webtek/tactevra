@@ -220,6 +220,14 @@ that evidence, convert the proposed count vector into a physical target, open
 hardware, or grant collection or motion authority. All byte, duplicate, and
 reduction limits remain unchanged.
 
+The candidate-qualification-assessment increment adds no governed paths and
+keeps the reviewed tracked-file ceiling at 6,614. It extends the existing
+campaign source, tests, and guide with an offline, hash-bound evidence-chain
+assessor. It validates declared decisions and independent reviewers while
+preserving missing or rejected gates as blockers. It does not inspect evidence
+content, open hardware, or grant collection or motion authority. All byte,
+duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
