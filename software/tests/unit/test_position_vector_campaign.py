@@ -33,6 +33,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
     QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_SCHEMA,
     QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA,
@@ -51,6 +53,7 @@ from rocell.calibration.position_vector_campaign import (
     PositionVectorCampaignError,
     accept_qualified_independent_fit_review,
     accept_qualified_calibration_installation_review,
+    approve_qualified_calibration_installation_execution,
     audit_candidate_count_coverage,
     assess_candidate_qualification_evidence,
     assess_collection_readiness,
@@ -722,6 +725,86 @@ def accept_qualified_installation_review_package(package, installation_review):
         artifact_document=artifact,
         artifact_build_receipt_document=build_receipt,
         installation_review_document=installation_review,
+    )
+
+
+def qualified_installation_review_package():
+    artifact_package = qualified_artifact_package()
+    installation_review = qualified_installation_review(
+        artifact_package[9], artifact_package[10]
+    )
+    installation_review_receipt = accept_qualified_installation_review_package(
+        artifact_package, installation_review
+    )
+    return (*artifact_package, installation_review, installation_review_receipt)
+
+
+def qualified_installation_execution_approval(package):
+    artifact = package[9]
+    build_receipt = package[10]
+    installation_review = package[11]
+    installation_review_receipt = package[12]
+    return {
+        "schema": QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
+        "artifact_sha256": canonical_sha256(artifact),
+        "artifact_build_receipt_sha256": canonical_sha256(build_receipt),
+        "installation_review_sha256": canonical_sha256(installation_review),
+        "installation_review_receipt_sha256": canonical_sha256(
+            installation_review_receipt
+        ),
+        "calibration_id": artifact["calibration_id"],
+        "attachment_profile": build_receipt["attachment_profile"],
+        "controller_binding_sha256": canonical_sha256(
+            artifact["controller_binding"]
+        ),
+        "installation_profile_id": installation_review["installation_profile_id"],
+        "destination_ref": installation_review["destination_ref"],
+        "approver_id": "installation-approver-05",
+        "decision": "APPROVE",
+        "approved_at": "2026-10-24T16:00:00-04:00",
+        "approval_notes_sha256": "a" * 64,
+    }
+
+
+def approve_qualified_installation_package(package, execution_approval):
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+        artifact,
+        build_receipt,
+        installation_review,
+        installation_review_receipt,
+    ) = package
+    return approve_qualified_calibration_installation_execution(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        fit_report_document=fit_report,
+        fit_assessment_document=fit_assessment,
+        review_document=review_document,
+        review_receipt_document=review_receipt,
+        artifact_document=artifact,
+        artifact_build_receipt_document=build_receipt,
+        installation_review_document=installation_review,
+        installation_review_receipt_document=installation_review_receipt,
+        execution_approval_document=execution_approval,
     )
 
 
@@ -2118,6 +2201,85 @@ def test_qualified_installation_review_rejects_tampered_build_output(index, matc
         )
 
 
+def test_qualified_installation_execution_approval_binds_reviewed_destination():
+    package = qualified_installation_review_package()
+    execution_approval = qualified_installation_execution_approval(package)
+
+    receipt = approve_qualified_installation_package(package, execution_approval)
+
+    assert (
+        receipt["schema"]
+        == QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA
+    )
+    assert (
+        receipt["status"]
+        == "QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVED"
+    )
+    assert receipt["execution_approval_sha256"] == canonical_sha256(
+        execution_approval
+    )
+    assert receipt["installation_review_receipt_sha256"] == canonical_sha256(
+        package[12]
+    )
+    assert receipt["next_required_gate"] == "CALIBRATION_INSTALLATION_EXECUTION"
+    assert receipt["calibration_installation_authorized"] is True
+    assert receipt["calibration_activation_authorized"] is False
+    assert receipt["authority"]["commands_sent"] == 0
+
+
+@pytest.mark.parametrize(
+    "updates,match",
+    [
+        ({"artifact_sha256": "0" * 64}, "artifact_sha256 mismatch"),
+        (
+            {"artifact_build_receipt_sha256": "0" * 64},
+            "artifact_build_receipt_sha256 mismatch",
+        ),
+        (
+            {"installation_review_sha256": "0" * 64},
+            "installation_review_sha256 mismatch",
+        ),
+        (
+            {"installation_review_receipt_sha256": "0" * 64},
+            "installation_review_receipt_sha256 mismatch",
+        ),
+        ({"calibration_id": "other-calibration"}, "calibration_id mismatch"),
+        ({"attachment_profile": "stylus_attachment"}, "attachment_profile mismatch"),
+        (
+            {"controller_binding_sha256": "0" * 64},
+            "controller_binding_sha256 mismatch",
+        ),
+        ({"installation_profile_id": "other-profile"}, "installation_profile_id"),
+        ({"destination_ref": "other-destination"}, "destination_ref mismatch"),
+        ({"approver_id": "calibration-producer-01"}, "not independent"),
+        ({"approver_id": "independent-fit-reviewer-03"}, "not independent"),
+        ({"approver_id": "installation-reviewer-04"}, "not independent"),
+        ({"decision": "PENDING"}, "decision is not APPROVE"),
+        ({"approved_at": "2026-10-24T16:00:00"}, "must include a UTC offset"),
+        ({"approval_notes_sha256": "invalid"}, "approval_notes_sha256"),
+    ],
+)
+def test_qualified_installation_execution_approval_rejects_invalid_record(
+    updates, match
+):
+    package = qualified_installation_review_package()
+    execution_approval = qualified_installation_execution_approval(package)
+    execution_approval.update(updates)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        approve_qualified_installation_package(package, execution_approval)
+
+
+def test_qualified_installation_execution_approval_rejects_tampered_review_receipt():
+    package = list(qualified_installation_review_package())
+    execution_approval = qualified_installation_execution_approval(package)
+    package[12] = copy.deepcopy(package[12])
+    package[12]["status"] = "TAMPERED"
+
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        approve_qualified_installation_package(tuple(package), execution_approval)
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -2982,6 +3144,89 @@ def test_file_workflow_accepts_qualified_installation_review_without_installing(
         installation_review
     )
     assert receipt["calibration_installation_authorized"] is False
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_approves_exact_qualified_installation_without_executing(
+    tmp_path,
+):
+    package = qualified_installation_review_package()
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+        artifact,
+        build_receipt,
+        installation_review,
+        installation_review_receipt,
+    ) = package
+    execution_approval = qualified_installation_execution_approval(package)
+    chain_names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    chain_documents = (*chain[:4], observations, *chain[5:])
+    paths = {}
+    for name, document in zip(chain_names, chain_documents, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    receipt_paths = []
+    for index, receipt in enumerate(receipts):
+        path = tmp_path / f"ingestion-receipt-{index:02d}.json"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        receipt_paths.append(path)
+    downstream_documents = {
+        "dataset": compiled,
+        "compilation-receipt": compilation_receipt,
+        "fit-report": fit_report,
+        "fit-assessment": fit_assessment,
+        "review": review_document,
+        "review-receipt": review_receipt,
+        "artifact": artifact,
+        "artifact-build-receipt": build_receipt,
+        "installation-review": installation_review,
+        "installation-review-receipt": installation_review_receipt,
+        "execution-approval": execution_approval,
+    }
+    for name, document in downstream_documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    output = tmp_path / "qualified-installation-execution-approval-receipt.json"
+    args = ["approve-qualified-calibration-installation-execution"]
+    for name in chain_names:
+        args.extend((f"--{name}", str(paths[name])))
+    for path in receipt_paths:
+        args.extend(("--ingestion-receipt", str(path)))
+    for name in downstream_documents:
+        args.extend((f"--{name}", str(paths[name])))
+    args.extend(("--output", str(output)))
+
+    assert main(args) == 0
+    receipt = json.loads(output.read_bytes())
+    assert (
+        receipt["status"]
+        == "QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVED"
+    )
+    assert receipt["execution_approval_sha256"] == canonical_sha256(
+        execution_approval
+    )
+    assert receipt["calibration_installation_authorized"] is True
+    assert receipt["calibration_activation_authorized"] is False
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)
 
