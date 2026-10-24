@@ -265,6 +265,15 @@ The receipt preserves reviewed collection readiness as the next required gate;
 it opens no hardware and grants no collection or motion authority. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The qualified-collection readiness-plan increment adds no governed paths and
+keeps the reviewed tracked-file ceiling at 6,614. It extends the existing
+campaign source, tests, and guide with an offline checklist that reproduces the
+qualified collection package and binds eight missing reviewed-evidence classes,
+including the fixed camera, board registration and geometry, attachment,
+collision envelope, firmware, truth procedures, and operator review. It accepts
+no evidence, opens no hardware, and grants no collection or motion authority.
+All byte, duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
