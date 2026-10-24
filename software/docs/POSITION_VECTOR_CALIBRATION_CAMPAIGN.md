@@ -384,6 +384,33 @@ empty, and the package does not establish installed firmware, camera, board,
 attachment, or independent truth-procedure readiness. It grants no hardware,
 collection, or motion authority.
 
+Turn that exact prepared package into a finite reviewed-readiness checklist:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign plan-qualified-collection-readiness `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations proposed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --output proposed-position-vector-collection-readiness-plan.json
+```
+
+The command reproduces the entire package and rejects crossed plans, templates,
+or receipts. Its
+`rocell.position_vector_calibration_qualified_collection_readiness_plan.v1`
+output binds the controller, attachment profile, truth method, ordered pose
+catalog, and every upstream artifact hash. It creates eight missing evidence
+slots: installed-firmware binding, fixed-camera intrinsics, camera-to-board
+registration, board geometry, attachment-profile geometry, collection collision
+envelope, independent truth procedures, and collection-operator review.
+
+`QUALIFIED_COLLECTION_READINESS_EVIDENCE_REQUIRED` is intentionally blocked.
+The checklist records what must be reviewed next; it neither accepts evidence
+nor treats a phone photograph or unrelated camera mode as fixed-camera evidence.
+It grants no hardware, collection, or motion authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

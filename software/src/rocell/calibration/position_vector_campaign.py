@@ -78,6 +78,9 @@ CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA = (
 QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_collection_preparation_receipt.v1"
 )
+QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_collection_readiness_plan.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -90,6 +93,16 @@ TRUTH_METHODS = (
     "link_fiducial_pose",
     "manufacturer_traceable_fixture",
     "mechanical_angle_fixture",
+)
+_QUALIFIED_COLLECTION_READINESS_REQUIREMENTS = (
+    ("INSTALLED_FIRMWARE_BINDING", "controller"),
+    ("FIXED_CAMERA_INTRINSICS", "camera"),
+    ("CAMERA_TO_BOARD_REGISTRATION", "camera_board"),
+    ("BOARD_GEOMETRY", "board"),
+    ("ATTACHMENT_PROFILE_GEOMETRY", "attachment"),
+    ("COLLECTION_COLLISION_ENVELOPE", "workspace"),
+    ("INDEPENDENT_TRUTH_PROCEDURES", "pose_catalog"),
+    ("COLLECTION_OPERATOR_REVIEW", "campaign"),
 )
 
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
@@ -1590,6 +1603,91 @@ def create_qualified_candidate_collection_package(
     return plan, observations, receipt
 
 
+def create_qualified_collection_readiness_plan(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Freeze the reviewed evidence still required before collection."""
+
+    supplied_plan = load_collection_plan(collection_plan_document)
+    truth_methods = {slot["truth_method"] for slot in supplied_plan["slots"]}
+    if len(truth_methods) != 1:
+        raise PositionVectorCampaignError(
+            "qualified collection plan must use one truth method"
+        )
+    expected_plan, expected_observations, expected_receipt = (
+        create_qualified_candidate_collection_package(
+            inventory_document=inventory_document,
+            admission_receipt_document=admission_receipt_document,
+            training_split_document=training_split_document,
+            dataset_id=supplied_plan["dataset_id"],
+            producer_id=supplied_plan["producer_id"],
+            truth_method=next(iter(truth_methods)),
+            policy=policy,
+        )
+    )
+    if supplied_plan != expected_plan:
+        raise PositionVectorCampaignError(
+            "qualified collection plan does not reproduce from its inputs"
+        )
+    supplied_observations = _mapping(
+        observations_document, "qualified_collection_observations"
+    )
+    if dict(supplied_observations) != expected_observations:
+        raise PositionVectorCampaignError(
+            "qualified collection observations do not reproduce from the plan"
+        )
+    supplied_receipt = _mapping(
+        preparation_receipt_document, "qualified_collection_preparation_receipt"
+    )
+    if dict(supplied_receipt) != expected_receipt:
+        raise PositionVectorCampaignError(
+            "qualified collection preparation receipt does not reproduce"
+        )
+
+    requirements = [
+        {"requirement": requirement, "scope": scope, "status": "MISSING"}
+        for requirement, scope in _QUALIFIED_COLLECTION_READINESS_REQUIREMENTS
+    ]
+    return {
+        "schema": QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
+        "status": "QUALIFIED_COLLECTION_READINESS_EVIDENCE_REQUIRED",
+        "dataset_id": supplied_plan["dataset_id"],
+        "producer_id": supplied_plan["producer_id"],
+        "inventory_sha256": expected_receipt["inventory_sha256"],
+        "admission_receipt_sha256": expected_receipt["admission_receipt_sha256"],
+        "training_split_sha256": expected_receipt["training_split_sha256"],
+        "collection_plan_sha256": canonical_sha256(expected_plan),
+        "observations_sha256": canonical_sha256(expected_observations),
+        "preparation_receipt_sha256": canonical_sha256(expected_receipt),
+        "controller_binding": dict(supplied_plan["controller_binding"]),
+        "attachment_profile": supplied_plan["attachment_profile"],
+        "truth_method": next(iter(truth_methods)),
+        "pose_labels": [slot["source_pose"] for slot in supplied_plan["slots"]],
+        "evidence_requirements": requirements,
+        "blockers": [
+            f"{requirement}_EVIDENCE_MISSING"
+            for requirement, _scope in _QUALIFIED_COLLECTION_READINESS_REQUIREMENTS
+        ],
+        "limitations": [
+            "This checklist identifies required evidence but does not inspect or "
+            "accept any referenced evidence.",
+            "Camera and board evidence must describe the fixed collection setup, "
+            "not a phone image or an unrelated camera mode.",
+            "Attachment, collision-envelope, and truth-procedure evidence must match "
+            "the exact controller-bound pose catalog.",
+            "This plan does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(supplied_plan["authority"]),
+    }
+
+
 def create_assessed_collection_package(
     *,
     readiness_document: Mapping[str, Any],
@@ -2228,6 +2326,17 @@ def main(argv: list[str] | None = None) -> int:
     qualified_prepare_parser.add_argument("--plan-output", required=True)
     qualified_prepare_parser.add_argument("--observations-output", required=True)
     qualified_prepare_parser.add_argument("--receipt-output", required=True)
+    qualified_readiness_parser = commands.add_parser(
+        "plan-qualified-collection-readiness",
+        help="freeze the reviewed evidence required before qualified collection",
+    )
+    qualified_readiness_parser.add_argument("--inventory", required=True)
+    qualified_readiness_parser.add_argument("--admission-receipt", required=True)
+    qualified_readiness_parser.add_argument("--training-split", required=True)
+    qualified_readiness_parser.add_argument("--collection-plan", required=True)
+    qualified_readiness_parser.add_argument("--observations", required=True)
+    qualified_readiness_parser.add_argument("--preparation-receipt", required=True)
+    qualified_readiness_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2424,6 +2533,17 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.observations_output, observations)
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "plan-qualified-collection-readiness":
+        result = create_qualified_collection_readiness_plan(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2549,6 +2669,7 @@ __all__ = [
     "PLAN_SCHEMA",
     "PREPARATION_RECEIPT_SCHEMA",
     "QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA",
+    "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
     "READINESS_SCHEMA",
@@ -2572,6 +2693,7 @@ __all__ = [
     "create_candidate_qualification_handoff",
     "create_qualified_candidate_inventory_package",
     "create_qualified_candidate_collection_package",
+    "create_qualified_collection_readiness_plan",
     "create_collection_plan",
     "create_reviewed_dataset_package",
     "create_reviewed_collection_package",
