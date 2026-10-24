@@ -14,6 +14,8 @@ from rocell.calibration.position_vector_campaign import (
     CANDIDATE_AUGMENTATION_SCHEMA,
     CANDIDATE_COVERAGE_SCHEMA,
     CANDIDATE_INVENTORY_SCHEMA,
+    CANDIDATE_PREFLIGHT_SCHEMA,
+    CANDIDATE_PROPOSAL_SCHEMA,
     DATASET_SCHEMA,
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
@@ -38,6 +40,7 @@ from rocell.calibration.position_vector_campaign import (
     create_collection_plan,
     create_reviewed_collection_package,
     create_reviewed_dataset_package,
+    evaluate_candidate_count_augmentation,
     fit_campaign_dataset,
     load_campaign_dataset,
     load_collection_readiness,
@@ -270,6 +273,19 @@ def candidate_inventory():
     }
 
 
+def candidate_proposal(inventory=None, counts=None, attachment="no_attachment"):
+    inventory = inventory or candidate_inventory()
+    return {
+        "schema": CANDIDATE_PROPOSAL_SCHEMA,
+        "inventory_sha256": canonical_sha256(inventory),
+        "label": "POSE_8",
+        "attachment_profile": attachment,
+        "raw_position_counts": counts
+        or [2175, 2200, 1895, 2400, 2250, 2168, 2175],
+        "source_ref": "offline:reviewed-proposal-8",
+    }
+
+
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
     report = audit_candidate_count_coverage(candidate_inventory())
 
@@ -344,6 +360,98 @@ def test_candidate_augmentation_is_empty_for_passing_catalog():
     assert report["catalog_minimum_additional_pose_lower_bound"] == 0
     assert report["joint_requirements"] == []
     assert report["unresolved_blockers"] == []
+
+
+def test_candidate_preflight_proves_only_catalog_count_gap_closure():
+    inventory = candidate_inventory()
+    report = evaluate_candidate_count_augmentation(
+        inventory, candidate_proposal(inventory)
+    )
+
+    assert report["schema"] == CANDIDATE_PREFLIGHT_SCHEMA
+    assert report["status"] == "COUNT_VECTOR_CLOSES_CATALOG_GAPS"
+    assert report["closes_all_catalog_count_gaps"] is True
+    assert report["remaining_blockers"] == []
+    assert all(
+        row["matches_catalog_span_closing_range"]
+        for row in report["requirement_evaluations"]
+    )
+    assert report["authority"]["commands_sent"] == 0
+    assert report["authority"]["physical_authority"] is False
+    assert any("does not establish reachability" in item
+               for item in report["limitations"])
+
+
+def test_candidate_preflight_retains_unclosed_gaps():
+    inventory = candidate_inventory()
+    report = evaluate_candidate_count_augmentation(
+        inventory,
+        candidate_proposal(
+            inventory, counts=[2174, 2200, 1895, 2400, 2250, 2040, 2047]
+        ),
+    )
+
+    assert report["status"] == "COUNT_VECTOR_LEAVES_CATALOG_GAPS"
+    assert report["closes_all_catalog_count_gaps"] is False
+    assert report["remaining_blockers"] == [
+        "CANDIDATE_COUNT_SPAN_BASE_127_BELOW_128",
+        "CANDIDATE_COUNT_SPAN_WRIST_ROLL_0_BELOW_128",
+        "CANDIDATE_COUNT_SPAN_GRIPPER_0_BELOW_128",
+    ]
+    assert not any(row["matches_catalog_span_closing_range"]
+                   for row in report["requirement_evaluations"])
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (lambda value: value.update(inventory_sha256="0" * 64), "does not bind"),
+        (
+            lambda value: value.update(attachment_profile="stylus_attachment"),
+            "attachment profile",
+        ),
+        (lambda value: value.update(label="POSE_0"), "already exists"),
+        (
+            lambda value: value.update(raw_position_counts=[2048] * 6),
+            "raw_position_counts",
+        ),
+    ],
+)
+def test_candidate_preflight_rejects_crossed_or_invalid_proposals(mutate, match):
+    inventory = candidate_inventory()
+    proposal = candidate_proposal(inventory)
+    mutate(proposal)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        evaluate_candidate_count_augmentation(inventory, proposal)
+
+
+def test_file_workflow_writes_candidate_preflight_without_hardware(tmp_path):
+    inventory = candidate_inventory()
+    inventory_path = tmp_path / "inventory.json"
+    candidate_path = tmp_path / "candidate.json"
+    output_path = tmp_path / "preflight.json"
+    inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+    candidate_path.write_text(
+        json.dumps(candidate_proposal(inventory)), encoding="utf-8"
+    )
+
+    assert main([
+        "preflight-candidate-augmentation",
+        "--inventory", str(inventory_path),
+        "--candidate", str(candidate_path),
+        "--output", str(output_path),
+    ]) == 0
+    assert json.loads(output_path.read_bytes())["status"] == (
+        "COUNT_VECTOR_CLOSES_CATALOG_GAPS"
+    )
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main([
+            "preflight-candidate-augmentation",
+            "--inventory", str(inventory_path),
+            "--candidate", str(candidate_path),
+            "--output", str(output_path),
+        ])
 
 
 def test_retained_candidate_inventory_and_coverage_report_reproduce():

@@ -50,6 +50,12 @@ CANDIDATE_COVERAGE_SCHEMA = (
 CANDIDATE_AUGMENTATION_SCHEMA = (
     "rocell.position_vector_calibration_candidate_augmentation.v1"
 )
+CANDIDATE_PROPOSAL_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_proposal.v1"
+)
+CANDIDATE_PREFLIGHT_SCHEMA = (
+    "rocell.position_vector_calibration_candidate_preflight.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -68,6 +74,12 @@ _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
 _DIGEST = re.compile(r"^[0-9a-f]{64}$")
 _HEX4 = re.compile(r"^[0-9a-f]{4}$")
 _CONTROLLER_FIELDS = frozenset({"vid", "pid", "unit_serial", "firmware_sha256"})
+_CANDIDATE_PROPOSAL_FIELDS = frozenset(
+    {
+        "schema", "inventory_sha256", "label", "attachment_profile",
+        "raw_position_counts", "source_ref",
+    }
+)
 _DATASET_FIELDS = frozenset(
     {
         "schema",
@@ -618,6 +630,129 @@ def plan_candidate_count_augmentation(
             "This plan does not authorize hardware access, motion, or collection.",
         ],
         "authority": dict(coverage["authority"]),
+    }
+
+
+def evaluate_candidate_count_augmentation(
+    inventory_document: Mapping[str, Any],
+    candidate_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Evaluate one proposed count vector against catalog coverage gaps.
+
+    This is an algebraic, offline preflight. A passing result says only that
+    appending the proposed vector closes the full-catalog count spans. It does
+    not establish that the pose is reachable, safe, measurable, or approved.
+    """
+
+    augmentation = plan_candidate_count_augmentation(inventory_document, policy)
+    raw = _mapping(candidate_document, "candidate_proposal")
+    _exact(raw, _CANDIDATE_PROPOSAL_FIELDS, "candidate_proposal")
+    if raw.get("schema") != CANDIDATE_PROPOSAL_SCHEMA:
+        raise PositionVectorCampaignError("candidate proposal schema mismatch")
+    if raw.get("inventory_sha256") != augmentation["inventory_sha256"]:
+        raise PositionVectorCampaignError(
+            "candidate proposal does not bind the assessed inventory"
+        )
+    attachment = raw.get("attachment_profile")
+    if attachment != augmentation["attachment_profile"]:
+        raise PositionVectorCampaignError(
+            "candidate proposal attachment profile does not match inventory"
+        )
+    label = _identifier(raw.get("label"), "candidate_proposal.label")
+    source_ref = _identifier(raw.get("source_ref"), "candidate_proposal.source_ref")
+    counts = raw.get("raw_position_counts")
+    if (
+        not isinstance(counts, list)
+        or len(counts) != len(SERVO_ORDER)
+        or any(isinstance(item, bool) or not isinstance(item, int)
+               or not 0 <= item <= 4095 for item in counts)
+    ):
+        raise PositionVectorCampaignError(
+            "candidate_proposal.raw_position_counts is invalid"
+        )
+
+    inventory = _mapping(inventory_document, "candidate_inventory")
+    existing_labels = {
+        _mapping(item, f"candidate_inventory.poses[{index}]").get("label")
+        for index, item in enumerate(inventory.get("poses", []))
+    }
+    if label in existing_labels:
+        raise PositionVectorCampaignError(
+            "candidate proposal label already exists in inventory"
+        )
+
+    normalized_candidate = {
+        "schema": CANDIDATE_PROPOSAL_SCHEMA,
+        "inventory_sha256": augmentation["inventory_sha256"],
+        "label": label,
+        "attachment_profile": attachment,
+        "raw_position_counts": list(counts),
+        "source_ref": source_ref,
+    }
+    evaluations = []
+    for requirement in augmentation["joint_requirements"]:
+        count = counts[requirement["position_index"]]
+        matches = [
+            range_index
+            for range_index, allowed in enumerate(
+                requirement["catalog_span_closing_count_ranges"]
+            )
+            if allowed["minimum_count"] <= count <= allowed["maximum_count"]
+        ]
+        evaluations.append(
+            {
+                "joint": requirement["joint"],
+                "position_index": requirement["position_index"],
+                "proposed_count": count,
+                "matches_catalog_span_closing_range": bool(matches),
+                "matching_range_indexes": matches,
+            }
+        )
+
+    augmented_inventory = dict(inventory)
+    augmented_inventory["poses"] = [
+        *inventory.get("poses", []),
+        {
+            "label": label,
+            "raw_position_counts": list(counts),
+            "source_ref": source_ref,
+        },
+    ]
+    resulting_coverage = audit_candidate_count_coverage(augmented_inventory, policy)
+    closes_all = not resulting_coverage["blockers"]
+    return {
+        "schema": CANDIDATE_PREFLIGHT_SCHEMA,
+        "status": (
+            "NO_AUGMENTATION_REQUIRED"
+            if not augmentation["joint_requirements"]
+            else (
+                "COUNT_VECTOR_CLOSES_CATALOG_GAPS"
+                if closes_all else "COUNT_VECTOR_LEAVES_CATALOG_GAPS"
+            )
+        ),
+        "inventory_id": augmentation["inventory_id"],
+        "inventory_sha256": augmentation["inventory_sha256"],
+        "augmentation_sha256": canonical_sha256(augmentation),
+        "attachment_profile": attachment,
+        "candidate": normalized_candidate,
+        "candidate_sha256": canonical_sha256(normalized_candidate),
+        "requirement_evaluations": evaluations,
+        "resulting_coverage_sha256": canonical_sha256(resulting_coverage),
+        "resulting_coverage_status": resulting_coverage["status"],
+        "remaining_blockers": list(resulting_coverage["blockers"]),
+        "closes_all_catalog_count_gaps": closes_all,
+        "limitations": [
+            "This preflight evaluates count-span algebra only.",
+            "The proposed vector is not a motion command or stationary observation.",
+            "A passing result does not establish reachability, joint limits, "
+            "collision clearance, cable clearance, attachment clearance, or "
+            "independent joint truth.",
+            "A passing full-catalog result does not prove a five-pose training "
+            "subset spans every joint.",
+            "This preflight does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(augmentation["authority"]),
     }
 
 
@@ -1386,6 +1521,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     candidate_augmentation_parser.add_argument("--inventory", required=True)
     candidate_augmentation_parser.add_argument("--output", required=True)
+    candidate_preflight_parser = commands.add_parser(
+        "preflight-candidate-augmentation",
+        help="evaluate one proposed count vector against catalog gaps offline",
+    )
+    candidate_preflight_parser.add_argument("--inventory", required=True)
+    candidate_preflight_parser.add_argument("--candidate", required=True)
+    candidate_preflight_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -1493,6 +1635,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "plan-candidate-augmentation":
         result = plan_candidate_count_augmentation(_read_json(args.inventory))
+        _write_new(args.output, result)
+        return 0
+    if args.command == "preflight-candidate-augmentation":
+        result = evaluate_candidate_count_augmentation(
+            _read_json(args.inventory), _read_json(args.candidate)
+        )
         _write_new(args.output, result)
         return 0
     if args.command == "prepare":

@@ -186,6 +186,35 @@ first qualify a mechanically feasible configuration and attachment profile.
 After adding candidates, rerun the audit and verify that an exact five-pose
 training subset, rather than only the full catalog, spans every primary joint.
 
+Before any proposed candidate is considered for mechanical review, bind its
+seven-count vector to the exact inventory hash in a
+`rocell.position_vector_calibration_candidate_proposal.v1` record and run the
+offline preflight:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign preflight-candidate-augmentation `
+  --inventory config/position_vector_candidate_pose_inventory_20261024.json `
+  --candidate proposed-position-vector-candidate.json `
+  --output proposed-position-vector-preflight.json
+```
+
+The proposal also names its attachment profile, so a bare-jaw candidate cannot
+be evaluated against a stylus inventory. The preflight recomputes the
+augmentation requirements, evaluates each deficient count index, appends the
+proposal only in memory, and reruns the full-catalog coverage audit. It refuses
+crossed inventory hashes, crossed attachment profiles, duplicate labels,
+malformed counts, and existing output files.
+
+Keep an unevaluated proposal outside the retained calibration-candidate
+inventory. Add it to a governed inventory only after the separate mechanical
+and evidence reviews accept that exact attachment-specific configuration.
+
+`COUNT_VECTOR_CLOSES_CATALOG_GAPS` means only that the proposed numbers close
+the algebraic full-catalog spans. It does not prove reachability, joint limits,
+collision clearance, cable or attachment clearance, independent joint truth,
+or five-pose training-subset coverage. The command imports no hardware layer,
+opens no controller or camera, and grants no collection or motion authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
