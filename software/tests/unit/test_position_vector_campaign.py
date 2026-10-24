@@ -32,6 +32,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
+    QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA,
+    QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_SCHEMA,
     READINESS_SCHEMA,
@@ -61,6 +63,7 @@ from rocell.calibration.position_vector_campaign import (
     create_qualified_collection_readiness_handoff,
     evaluate_candidate_count_augmentation,
     fit_campaign_dataset,
+    ingest_qualified_stationary_observation,
     load_campaign_dataset,
     load_collection_readiness,
     load_collection_plan,
@@ -424,6 +427,65 @@ def qualified_collection_readiness_evidence(readiness_plan, requirements=None):
             }
             for requirement in requirements
         ],
+    }
+
+
+def qualified_collection_readiness_handoff_chain():
+    chain = qualified_collection_readiness_chain()
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+    assessment = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+    )
+    handoff = create_qualified_collection_readiness_handoff(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+        assessment_document=assessment,
+    )
+    return (*chain, evidence, assessment, handoff)
+
+
+def qualified_stationary_observation_evidence(chain, observations, index=0):
+    plan = chain[3]
+    handoff = chain[9]
+    slot = plan["slots"][index]
+    return {
+        "schema": QUALIFIED_STATIONARY_OBSERVATION_EVIDENCE_SCHEMA,
+        "readiness_handoff_sha256": canonical_sha256(handoff),
+        "current_observations_sha256": canonical_sha256(observations),
+        "sample_id": slot["sample_id"],
+        "source_pose": slot["source_pose"],
+        "observation_producer_id": "observation-producer-01",
+        "truth_reviewer_id": "joint-truth-reviewer-02",
+        "raw_position_counts": [1800 + index] * 7,
+        "canonical_joints_rad": {
+            joint: 0.01 * (joint_index + index)
+            for joint_index, joint in enumerate(JOINTS)
+        },
+        "controller_feedback_evidence_sha256": hashlib.sha256(
+            f"feedback-{index}".encode()
+        ).hexdigest(),
+        "camera_observation_receipt_sha256": hashlib.sha256(
+            f"camera-{index}".encode()
+        ).hexdigest(),
+        "truth_evidence_sha256": hashlib.sha256(
+            f"joint-truth-{index}".encode()
+        ).hexdigest(),
+        "stationary": True,
+        "motion_active": False,
+        "trajectory_progress_permille": 1000,
     }
 
 
@@ -1245,6 +1307,214 @@ def test_qualified_collection_readiness_handoff_rejects_blocked_or_tampered_chai
         )
 
 
+def test_qualified_stationary_observation_ingests_one_exact_slot():
+    chain = qualified_collection_readiness_handoff_chain()
+    evidence = qualified_stationary_observation_evidence(chain, chain[4])
+
+    observations, receipt = ingest_qualified_stationary_observation(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        observation_evidence_document=evidence,
+    )
+
+    assert observations["samples"][0] == {
+        "sample_id": chain[3]["slots"][0]["sample_id"],
+        "raw_position_counts": evidence["raw_position_counts"],
+        "canonical_joints_rad": evidence["canonical_joints_rad"],
+        "truth_evidence_sha256": evidence["truth_evidence_sha256"],
+        "stationary": True,
+        "motion_active": False,
+        "trajectory_progress_permille": 1000,
+    }
+    assert all(
+        item["truth_evidence_sha256"] is None
+        for item in observations["samples"][1:]
+    )
+    assert receipt["schema"] == (
+        QUALIFIED_STATIONARY_OBSERVATION_INGESTION_RECEIPT_SCHEMA
+    )
+    assert receipt["status"] == "QUALIFIED_STATIONARY_OBSERVATION_INGESTED"
+    assert receipt["previous_observations_sha256"] == canonical_sha256(chain[4])
+    assert receipt["resulting_observations_sha256"] == canonical_sha256(
+        observations
+    )
+    assert (receipt["filled_sample_count"], receipt["remaining_sample_count"]) == (
+        1,
+        8,
+    )
+    assert receipt["next_required_gate"] == (
+        "RETAINED_STATIONARY_OBSERVATION_COLLECTION"
+    )
+    assert receipt["authority"]["commands_sent"] == 0
+
+
+def test_qualified_stationary_observation_supports_hash_chained_progress():
+    chain = qualified_collection_readiness_handoff_chain()
+    first_evidence = qualified_stationary_observation_evidence(chain, chain[4], 0)
+    first, _ = ingest_qualified_stationary_observation(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        observation_evidence_document=first_evidence,
+    )
+    second_evidence = qualified_stationary_observation_evidence(chain, first, 1)
+
+    second, receipt = ingest_qualified_stationary_observation(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=first,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        observation_evidence_document=second_evidence,
+    )
+
+    assert second["samples"][0] == first["samples"][0]
+    assert second["samples"][1]["sample_id"] == second_evidence["sample_id"]
+    assert receipt["previous_observations_sha256"] == canonical_sha256(first)
+    assert (receipt["filled_sample_count"], receipt["remaining_sample_count"]) == (
+        2,
+        7,
+    )
+
+
+def test_qualified_stationary_observation_completes_compilable_set():
+    chain = qualified_collection_readiness_handoff_chain()
+    observations = chain[4]
+    receipt = None
+    for index in range(len(chain[3]["slots"])):
+        evidence = qualified_stationary_observation_evidence(
+            chain, observations, index
+        )
+        observations, receipt = ingest_qualified_stationary_observation(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=observations,
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            observation_evidence_document=evidence,
+        )
+
+    assert receipt is not None
+    assert (receipt["filled_sample_count"], receipt["remaining_sample_count"]) == (
+        9,
+        0,
+    )
+    assert receipt["next_required_gate"] == (
+        "QUALIFIED_OBSERVATION_SET_COMPILATION"
+    )
+    compiled = compile_planned_dataset(chain[3], observations)
+    assert len(compiled["samples"]) == 9
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (
+            lambda value: value.update(current_observations_sha256="0" * 64),
+            "current-template binding mismatch",
+        ),
+        (
+            lambda value: value.update(source_pose="OTHER_POSE"),
+            "source pose mismatch",
+        ),
+        (
+            lambda value: value.update(
+                truth_reviewer_id=value["observation_producer_id"]
+            ),
+            "not independent",
+        ),
+        (
+            lambda value: value.update(stationary=False),
+            "not a stationary observation",
+        ),
+        (
+            lambda value: value.update(
+                camera_observation_receipt_sha256="0" * 63
+            ),
+            "lowercase SHA-256",
+        ),
+    ],
+)
+def test_qualified_stationary_observation_rejects_invalid_evidence(mutate, match):
+    chain = qualified_collection_readiness_handoff_chain()
+    evidence = qualified_stationary_observation_evidence(chain, chain[4])
+    mutate(evidence)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        ingest_qualified_stationary_observation(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=chain[4],
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            observation_evidence_document=evidence,
+        )
+
+
+def test_qualified_stationary_observation_rejects_refilling_slot():
+    chain = qualified_collection_readiness_handoff_chain()
+    evidence = qualified_stationary_observation_evidence(chain, chain[4])
+    observations, _ = ingest_qualified_stationary_observation(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        observation_evidence_document=evidence,
+    )
+    replacement = qualified_stationary_observation_evidence(chain, observations)
+
+    with pytest.raises(PositionVectorCampaignError, match="already filled"):
+        ingest_qualified_stationary_observation(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=observations,
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            readiness_evidence_document=chain[7],
+            readiness_assessment_document=chain[8],
+            readiness_handoff_document=chain[9],
+            observation_evidence_document=replacement,
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -1697,6 +1967,63 @@ def test_file_workflow_creates_qualified_collection_readiness_handoff_without_ha
         "QUALIFIED_COLLECTION_READINESS_HANDOFF_READY"
     )
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_ingests_qualified_stationary_observation_without_hardware(
+    tmp_path,
+):
+    chain = qualified_collection_readiness_handoff_chain()
+    observation_evidence = qualified_stationary_observation_evidence(
+        chain, chain[4]
+    )
+    names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    paths = {}
+    for name, document in zip(names, chain, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    paths["observation-evidence"] = tmp_path / "observation-evidence.json"
+    paths["observation-evidence"].write_text(
+        json.dumps(observation_evidence), encoding="utf-8"
+    )
+    observations_output = tmp_path / "updated-observations.json"
+    receipt_output = tmp_path / "ingestion-receipt.json"
+    args = [
+        "ingest-qualified-stationary-observation",
+        "--inventory", str(paths["inventory"]),
+        "--admission-receipt", str(paths["admission-receipt"]),
+        "--training-split", str(paths["training-split"]),
+        "--collection-plan", str(paths["collection-plan"]),
+        "--observations", str(paths["observations"]),
+        "--preparation-receipt", str(paths["preparation-receipt"]),
+        "--readiness-plan", str(paths["readiness-plan"]),
+        "--readiness-evidence", str(paths["readiness-evidence"]),
+        "--readiness-assessment", str(paths["readiness-assessment"]),
+        "--readiness-handoff", str(paths["readiness-handoff"]),
+        "--observation-evidence", str(paths["observation-evidence"]),
+        "--observations-output", str(observations_output),
+        "--receipt-output", str(receipt_output),
+    ]
+
+    assert main(args) == 0
+    assert json.loads(observations_output.read_bytes())["samples"][0][
+        "truth_evidence_sha256"
+    ] == observation_evidence["truth_evidence_sha256"]
+    assert json.loads(receipt_output.read_bytes())["status"] == (
+        "QUALIFIED_STATIONARY_OBSERVATION_INGESTED"
+    )
+    with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
         main(args)
 
 

@@ -292,6 +292,15 @@ hashes. The receipt names retained stationary observation collection as the
 next gate while granting no hardware, collection, or motion authority. All byte,
 duplicate, and reduction limits remain unchanged.
 
+The qualified stationary-observation ingestion increment adds no governed paths
+and keeps the reviewed tracked-file ceiling at 6,614. It extends the same
+campaign source, tests, and guide with one-slot offline ingestion that binds the
+readiness handoff, current template, retained controller feedback, fixed-camera
+observation receipt, and independently reviewed joint truth. Each receipt
+hash-chains the prior and resulting observation documents, forbids slot refill
+and truth-evidence reuse, and preserves zero hardware and motion authority. All
+byte, duplicate, and reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
