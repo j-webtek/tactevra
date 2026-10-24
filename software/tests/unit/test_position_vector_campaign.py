@@ -21,6 +21,7 @@ from rocell.calibration.position_vector_campaign import (
     CANDIDATE_QUALIFICATION_ASSESSMENT_SCHEMA,
     CANDIDATE_QUALIFICATION_EVIDENCE_SCHEMA,
     CANDIDATE_QUALIFICATION_HANDOFF_SCHEMA,
+    CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA,
     DATASET_SCHEMA,
     FIT_REPORT_SCHEMA,
     OBSERVATIONS_SCHEMA,
@@ -56,6 +57,7 @@ from rocell.calibration.position_vector_campaign import (
     load_collection_plan,
     main,
     plan_candidate_count_augmentation,
+    plan_qualified_candidate_training_split,
 )
 
 
@@ -327,6 +329,35 @@ def candidate_qualification_evidence(qualification_plan, requirements=None):
             for requirement in requirements
         ],
     }
+
+
+def qualified_candidate_inventory_package():
+    inventory, proposal, preflight, qualification_plan = (
+        candidate_qualification_chain()
+    )
+    evidence = candidate_qualification_evidence(qualification_plan)
+    assessment = assess_candidate_qualification_evidence(
+        inventory, proposal, preflight, qualification_plan, evidence
+    )
+    handoff = create_candidate_qualification_handoff(
+        inventory,
+        proposal,
+        preflight,
+        qualification_plan,
+        evidence,
+        assessment,
+    )
+    admitted, receipt = create_qualified_candidate_inventory_package(
+        inventory,
+        proposal,
+        preflight,
+        qualification_plan,
+        evidence,
+        assessment,
+        handoff,
+        "bare-jaw-keyboard-chain-qualified-20261024",
+    )
+    return admitted, receipt
 
 
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
@@ -703,6 +734,62 @@ def test_qualified_candidate_admission_rejects_stale_handoff_or_reused_identity(
         )
 
 
+def test_qualified_inventory_split_selects_smallest_feasible_training_partition():
+    admitted, receipt = qualified_candidate_inventory_package()
+
+    split = plan_qualified_candidate_training_split(admitted, receipt)
+
+    assert split["schema"] == CANDIDATE_TRAINING_SPLIT_PLAN_SCHEMA
+    assert split["status"] == "TRAINING_SPLIT_READY"
+    assert len(split["training_pose_labels"]) == 5
+    assert len(split["held_out_pose_labels"]) == 4
+    assert set(split["training_pose_labels"]).isdisjoint(
+        split["held_out_pose_labels"]
+    )
+    assert set(split["training_pose_labels"] + split["held_out_pose_labels"]) == {
+        pose["label"] for pose in admitted["poses"]
+    }
+    assert all(row["meets_minimum"] for row in split["training_joint_coverage"])
+    assert admitted["poses"][-1]["label"] in split["training_pose_labels"]
+    assert split["authority"]["physical_authority"] is False
+
+
+def test_qualified_inventory_split_reports_no_feasible_bounded_partition():
+    admitted, receipt = qualified_candidate_inventory_package()
+    constrained = copy.deepcopy(admitted)
+    constrained["poses"] = constrained["poses"][:8]
+    for pose in constrained["poses"]:
+        pose["raw_position_counts"] = [0] * 7
+    for pose_index, position_index in enumerate(INDEXES):
+        constrained["poses"][pose_index]["raw_position_counts"][
+            position_index
+        ] = 128
+    constrained_coverage = audit_candidate_count_coverage(constrained)
+    assert constrained_coverage["status"] == "CANDIDATE_COVERAGE_PASS"
+    bound_receipt = copy.deepcopy(receipt)
+    bound_receipt["admitted_inventory_sha256"] = canonical_sha256(constrained)
+    bound_receipt["resulting_coverage_sha256"] = canonical_sha256(
+        constrained_coverage
+    )
+    bound_receipt["resulting_pose_count"] = len(constrained["poses"])
+
+    split = plan_qualified_candidate_training_split(constrained, bound_receipt)
+
+    assert split["status"] == "TRAINING_SPLIT_BLOCKED"
+    assert split["training_pose_labels"] == []
+    assert split["blockers"] == [
+        "NO_TRAINING_SUBSET_MEETS_COUNT_SPAN_POLICY"
+    ]
+
+
+def test_qualified_inventory_split_rejects_crossed_admission_receipt():
+    admitted, receipt = qualified_candidate_inventory_package()
+    receipt["admitted_inventory_sha256"] = "0" * 64
+
+    with pytest.raises(PositionVectorCampaignError, match="binding mismatch"):
+        plan_qualified_candidate_training_split(admitted, receipt)
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -954,6 +1041,26 @@ def test_file_workflow_admits_qualified_candidate_without_hardware(tmp_path):
     assert admitted["poses"][-1]["label"] == proposal["label"]
     assert receipt["admitted_inventory_sha256"] == canonical_sha256(admitted)
     with pytest.raises(PositionVectorCampaignError, match="replace or alias"):
+        main(args)
+
+
+def test_file_workflow_plans_qualified_candidate_split_without_hardware(tmp_path):
+    admitted, receipt = qualified_candidate_inventory_package()
+    inventory_path = tmp_path / "qualified-inventory.json"
+    receipt_path = tmp_path / "admission-receipt.json"
+    output_path = tmp_path / "training-split.json"
+    inventory_path.write_text(json.dumps(admitted), encoding="utf-8")
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    args = [
+        "plan-qualified-candidate-split",
+        "--inventory", str(inventory_path),
+        "--admission-receipt", str(receipt_path),
+        "--output", str(output_path),
+    ]
+
+    assert main(args) == 0
+    assert json.loads(output_path.read_bytes())["status"] == "TRAINING_SPLIT_READY"
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)
 
 

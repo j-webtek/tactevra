@@ -247,6 +247,15 @@ converts the planned candidate into measured evidence, and it grants no
 hardware, collection, or motion authority. All byte, duplicate, and reduction
 limits remain unchanged.
 
+The qualified-inventory training-split increment adds no governed paths and
+keeps the reviewed tracked-file ceiling at 6,614. It extends the same campaign
+source, tests, and guide with a deterministic subset planner that verifies the
+admission receipt, finds the smallest inventory-ordered training subset meeting
+per-joint count-span policy, and reserves every other pose as held out. It does
+not convert planned goals into observations, evaluate physical geometry, open
+hardware, or grant collection or motion authority. All byte, duplicate, and
+reduction limits remain unchanged.
+
 The official per-link mesh-binding increment adds three net governed paths: one
 read-only probe, one compact retained receipt, and one evidence test. The
 reviewed tracked-file ceiling therefore moves only from 6,263 to the exact
