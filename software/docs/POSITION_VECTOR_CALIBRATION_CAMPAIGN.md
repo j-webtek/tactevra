@@ -411,6 +411,35 @@ The checklist records what must be reviewed next; it neither accepts evidence
 nor treats a phone photograph or unrelated camera mode as fixed-camera evidence.
 It grants no hardware, collection, or motion authority.
 
+Assess a partial or complete evidence manifest against that exact checklist:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign assess-qualified-collection-readiness `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations proposed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --output proposed-position-vector-collection-readiness-assessment.json
+```
+
+The strict
+`rocell.position_vector_calibration_qualified_collection_readiness_evidence.v1`
+manifest binds the readiness plan, inventory, collection plan, preparation
+receipt, and attachment profile. Each supplied gate names a retained evidence
+SHA-256, an independent reviewer, and an `ACCEPT` or `REJECT` decision. Evidence
+may be supplied incrementally; omitted gates stay `EVIDENCE_MISSING`, rejected
+gates stay `EVIDENCE_REJECTED`, and both remain explicit blockers in plan order.
+
+The assessment is
+`QUALIFIED_COLLECTION_READINESS_COMPLETE` only when all eight gates have
+accepted declarations. This validates artifact bindings, decisions, and
+reviewer separation. It does not inspect the referenced evidence, prove the
+physical setup, or authorize hardware access, collection, or motion.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

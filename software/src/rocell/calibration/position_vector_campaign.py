@@ -81,6 +81,12 @@ QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA = (
 QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA = (
     "rocell.position_vector_calibration_qualified_collection_readiness_plan.v1"
 )
+QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_collection_readiness_evidence.v1"
+)
+QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_collection_readiness_assessment.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -122,6 +128,21 @@ _CANDIDATE_QUALIFICATION_EVIDENCE_FIELDS = frozenset(
     }
 )
 _CANDIDATE_QUALIFICATION_EVIDENCE_ITEM_FIELDS = frozenset(
+    {"requirement", "evidence_sha256", "reviewer_id", "decision"}
+)
+_QUALIFIED_COLLECTION_READINESS_EVIDENCE_FIELDS = frozenset(
+    {
+        "schema",
+        "readiness_plan_sha256",
+        "inventory_sha256",
+        "collection_plan_sha256",
+        "preparation_receipt_sha256",
+        "attachment_profile",
+        "producer_id",
+        "evidence",
+    }
+)
+_QUALIFIED_COLLECTION_READINESS_EVIDENCE_ITEM_FIELDS = frozenset(
     {"requirement", "evidence_sha256", "reviewer_id", "decision"}
 )
 _DATASET_FIELDS = frozenset(
@@ -1688,6 +1709,169 @@ def create_qualified_collection_readiness_plan(
     }
 
 
+def assess_qualified_collection_readiness_evidence(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    evidence_document: Mapping[str, Any],
+    policy: CampaignPolicy = CampaignPolicy(),
+) -> dict[str, Any]:
+    """Assess reviewed evidence declared for one qualified collection package.
+
+    The assessment reproduces every upstream planning artifact, validates
+    independent review declarations, and preserves missing or rejected gates as
+    blockers. It does not inspect evidence content or grant physical authority.
+    """
+
+    reproduced_plan = create_qualified_collection_readiness_plan(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        policy=policy,
+    )
+    supplied_plan = _mapping(
+        readiness_plan_document, "qualified_collection_readiness_plan"
+    )
+    if dict(supplied_plan) != reproduced_plan:
+        raise PositionVectorCampaignError(
+            "qualified collection readiness plan does not reproduce from its inputs"
+        )
+
+    raw = _mapping(evidence_document, "qualified_collection_readiness_evidence")
+    _exact(
+        raw,
+        _QUALIFIED_COLLECTION_READINESS_EVIDENCE_FIELDS,
+        "qualified_collection_readiness_evidence",
+    )
+    if raw.get("schema") != QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA:
+        raise PositionVectorCampaignError(
+            "qualified collection readiness evidence schema mismatch"
+        )
+    bindings = {
+        "readiness_plan_sha256": canonical_sha256(reproduced_plan),
+        "inventory_sha256": reproduced_plan["inventory_sha256"],
+        "collection_plan_sha256": reproduced_plan["collection_plan_sha256"],
+        "preparation_receipt_sha256": reproduced_plan[
+            "preparation_receipt_sha256"
+        ],
+        "attachment_profile": reproduced_plan["attachment_profile"],
+    }
+    if any(raw.get(name) != expected for name, expected in bindings.items()):
+        raise PositionVectorCampaignError(
+            "qualified collection readiness evidence binding mismatch"
+        )
+    producer_id = _identifier(
+        raw.get("producer_id"),
+        "qualified_collection_readiness_evidence.producer_id",
+    )
+    evidence_items = raw.get("evidence")
+    if not isinstance(evidence_items, list):
+        raise PositionVectorCampaignError(
+            "qualified_collection_readiness_evidence.evidence must be a list"
+        )
+
+    required = [
+        item["requirement"] for item in reproduced_plan["evidence_requirements"]
+    ]
+    supplied_by_requirement: dict[str, dict[str, str]] = {}
+    for index, value in enumerate(evidence_items):
+        label = f"qualified_collection_readiness_evidence.evidence[{index}]"
+        item = _mapping(value, label)
+        _exact(item, _QUALIFIED_COLLECTION_READINESS_EVIDENCE_ITEM_FIELDS, label)
+        requirement = item.get("requirement")
+        if requirement not in required:
+            raise PositionVectorCampaignError(f"{label}.requirement is unknown")
+        if requirement in supplied_by_requirement:
+            raise PositionVectorCampaignError(
+                "qualified collection readiness evidence repeats a requirement"
+            )
+        reviewer_id = _identifier(item.get("reviewer_id"), f"{label}.reviewer_id")
+        if reviewer_id == producer_id:
+            raise PositionVectorCampaignError(
+                f"{label}.reviewer_id is not independent of the producer"
+            )
+        decision = item.get("decision")
+        if decision not in {"ACCEPT", "REJECT"}:
+            raise PositionVectorCampaignError(f"{label}.decision is invalid")
+        supplied_by_requirement[requirement] = {
+            "requirement": requirement,
+            "evidence_sha256": _digest(
+                item.get("evidence_sha256"), f"{label}.evidence_sha256"
+            ),
+            "reviewer_id": reviewer_id,
+            "decision": decision,
+        }
+
+    assessments = []
+    blockers = []
+    normalized_items = []
+    for requirement in required:
+        item = supplied_by_requirement.get(requirement)
+        if item is None:
+            assessments.append(
+                {
+                    "requirement": requirement,
+                    "status": "EVIDENCE_MISSING",
+                    "evidence_sha256": None,
+                    "reviewer_id": None,
+                }
+            )
+            blockers.append(f"{requirement}_EVIDENCE_REQUIRED")
+            continue
+        normalized_items.append(item)
+        status = (
+            "EVIDENCE_ACCEPTED"
+            if item["decision"] == "ACCEPT"
+            else "EVIDENCE_REJECTED"
+        )
+        assessments.append(
+            {
+                "requirement": requirement,
+                "status": status,
+                "evidence_sha256": item["evidence_sha256"],
+                "reviewer_id": item["reviewer_id"],
+            }
+        )
+        if item["decision"] == "REJECT":
+            blockers.append(f"{requirement}_EVIDENCE_REJECTED")
+
+    normalized_evidence = {
+        "schema": QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
+        **bindings,
+        "producer_id": producer_id,
+        "evidence": normalized_items,
+    }
+    return {
+        "schema": QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA,
+        "status": (
+            "QUALIFIED_COLLECTION_READINESS_COMPLETE"
+            if not blockers
+            else "QUALIFIED_COLLECTION_READINESS_BLOCKED"
+        ),
+        "dataset_id": reproduced_plan["dataset_id"],
+        **bindings,
+        "evidence_sha256": canonical_sha256(normalized_evidence),
+        "requirement_assessments": assessments,
+        "blockers": blockers,
+        "limitations": [
+            "This assessment validates declared hashes, decisions, and reviewer "
+            "independence; it does not inspect referenced evidence content.",
+            "QUALIFIED_COLLECTION_READINESS_COMPLETE does not itself prove physical "
+            "correctness, reachability, collision clearance, or safe motion.",
+            "This assessment does not authorize hardware access, motion, or collection.",
+        ],
+        "authority": dict(reproduced_plan["authority"]),
+    }
+
+
 def create_assessed_collection_package(
     *,
     readiness_document: Mapping[str, Any],
@@ -2337,6 +2521,23 @@ def main(argv: list[str] | None = None) -> int:
     qualified_readiness_parser.add_argument("--observations", required=True)
     qualified_readiness_parser.add_argument("--preparation-receipt", required=True)
     qualified_readiness_parser.add_argument("--output", required=True)
+    qualified_readiness_assess_parser = commands.add_parser(
+        "assess-qualified-collection-readiness",
+        help="assess reviewed evidence for one qualified collection package",
+    )
+    qualified_readiness_assess_parser.add_argument("--inventory", required=True)
+    qualified_readiness_assess_parser.add_argument(
+        "--admission-receipt", required=True
+    )
+    qualified_readiness_assess_parser.add_argument("--training-split", required=True)
+    qualified_readiness_assess_parser.add_argument("--collection-plan", required=True)
+    qualified_readiness_assess_parser.add_argument("--observations", required=True)
+    qualified_readiness_assess_parser.add_argument(
+        "--preparation-receipt", required=True
+    )
+    qualified_readiness_assess_parser.add_argument("--readiness-plan", required=True)
+    qualified_readiness_assess_parser.add_argument("--evidence", required=True)
+    qualified_readiness_assess_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -2544,6 +2745,19 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, result)
         return 0
+    if args.command == "assess-qualified-collection-readiness":
+        result = assess_qualified_collection_readiness_evidence(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            evidence_document=_read_json(args.evidence),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -2669,6 +2883,8 @@ __all__ = [
     "PLAN_SCHEMA",
     "PREPARATION_RECEIPT_SCHEMA",
     "QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA",
+    "QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA",
+    "QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "READINESS_EVIDENCE_RECEIPT_SCHEMA",
     "READINESS_EVIDENCE_SCHEMA",
@@ -2682,6 +2898,7 @@ __all__ = [
     "PositionVectorCampaignError",
     "assess_collection_readiness",
     "assess_candidate_qualification_evidence",
+    "assess_qualified_collection_readiness_evidence",
     "assess_reviewed_readiness_evidence",
     "build_calibration_artifact",
     "canonical_bytes",

@@ -28,6 +28,8 @@ from rocell.calibration.position_vector_campaign import (
     PLAN_SCHEMA,
     PREPARATION_RECEIPT_SCHEMA,
     QUALIFIED_COLLECTION_PREPARATION_RECEIPT_SCHEMA,
+    QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA,
+    QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
     READINESS_EVIDENCE_RECEIPT_SCHEMA,
     READINESS_EVIDENCE_SCHEMA,
@@ -40,6 +42,7 @@ from rocell.calibration.position_vector_campaign import (
     audit_candidate_count_coverage,
     assess_candidate_qualification_evidence,
     assess_collection_readiness,
+    assess_qualified_collection_readiness_evidence,
     assess_reviewed_readiness_evidence,
     build_calibration_artifact,
     canonical_sha256,
@@ -362,6 +365,64 @@ def qualified_candidate_inventory_package():
         "bare-jaw-keyboard-chain-qualified-20261024",
     )
     return admitted, receipt
+
+
+def qualified_collection_readiness_chain():
+    admitted, admission_receipt = qualified_candidate_inventory_package()
+    split = plan_qualified_candidate_training_split(admitted, admission_receipt)
+    plan, observations, preparation_receipt = (
+        create_qualified_candidate_collection_package(
+            inventory_document=admitted,
+            admission_receipt_document=admission_receipt,
+            training_split_document=split,
+            dataset_id="bare-jaw-position-vector-campaign-01",
+            producer_id="calibration-producer-01",
+            truth_method="link_fiducial_pose",
+        )
+    )
+    readiness_plan = create_qualified_collection_readiness_plan(
+        inventory_document=admitted,
+        admission_receipt_document=admission_receipt,
+        training_split_document=split,
+        collection_plan_document=plan,
+        observations_document=observations,
+        preparation_receipt_document=preparation_receipt,
+    )
+    return (
+        admitted,
+        admission_receipt,
+        split,
+        plan,
+        observations,
+        preparation_receipt,
+        readiness_plan,
+    )
+
+
+def qualified_collection_readiness_evidence(readiness_plan, requirements=None):
+    requirements = requirements or [
+        item["requirement"] for item in readiness_plan["evidence_requirements"]
+    ]
+    return {
+        "schema": QUALIFIED_COLLECTION_READINESS_EVIDENCE_SCHEMA,
+        "readiness_plan_sha256": canonical_sha256(readiness_plan),
+        "inventory_sha256": readiness_plan["inventory_sha256"],
+        "collection_plan_sha256": readiness_plan["collection_plan_sha256"],
+        "preparation_receipt_sha256": readiness_plan[
+            "preparation_receipt_sha256"
+        ],
+        "attachment_profile": readiness_plan["attachment_profile"],
+        "producer_id": "readiness-producer-01",
+        "evidence": [
+            {
+                "requirement": requirement,
+                "evidence_sha256": hashlib.sha256(requirement.encode()).hexdigest(),
+                "reviewer_id": "readiness-reviewer-02",
+                "decision": "ACCEPT",
+            }
+            for requirement in requirements
+        ],
+    }
 
 
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
@@ -968,6 +1029,120 @@ def test_qualified_collection_readiness_plan_rejects_crossed_package(
         )
 
 
+def test_qualified_collection_readiness_assessment_preserves_partial_blockers():
+    chain = qualified_collection_readiness_chain()
+    readiness_plan = chain[-1]
+    requirements = [
+        item["requirement"] for item in readiness_plan["evidence_requirements"]
+    ]
+    evidence = qualified_collection_readiness_evidence(
+        readiness_plan, requirements[:2]
+    )
+    evidence["evidence"][1]["decision"] = "REJECT"
+
+    result = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=readiness_plan,
+        evidence_document=evidence,
+    )
+
+    assert result["schema"] == QUALIFIED_COLLECTION_READINESS_ASSESSMENT_SCHEMA
+    assert result["status"] == "QUALIFIED_COLLECTION_READINESS_BLOCKED"
+    assert [item["status"] for item in result["requirement_assessments"]] == [
+        "EVIDENCE_ACCEPTED",
+        "EVIDENCE_REJECTED",
+        *(["EVIDENCE_MISSING"] * 6),
+    ]
+    assert result["blockers"] == [
+        f"{requirements[1]}_EVIDENCE_REJECTED",
+        *[f"{requirement}_EVIDENCE_REQUIRED" for requirement in requirements[2:]],
+    ]
+    assert result["authority"]["commands_sent"] == 0
+    assert result["authority"]["physical_authority"] is False
+
+
+def test_qualified_collection_readiness_assessment_accepts_complete_chain():
+    chain = qualified_collection_readiness_chain()
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+
+    result = assess_qualified_collection_readiness_evidence(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=chain[4],
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        evidence_document=evidence,
+    )
+
+    assert result["status"] == "QUALIFIED_COLLECTION_READINESS_COMPLETE"
+    assert result["blockers"] == []
+    assert all(
+        item["status"] == "EVIDENCE_ACCEPTED"
+        for item in result["requirement_assessments"]
+    )
+    assert result["evidence_sha256"] == canonical_sha256(evidence)
+
+
+@pytest.mark.parametrize(
+    "mutate,match",
+    [
+        (
+            lambda value: value.update(readiness_plan_sha256="0" * 64),
+            "binding mismatch",
+        ),
+        (
+            lambda value: value["evidence"][0].update(
+                reviewer_id=value["producer_id"]
+            ),
+            "not independent",
+        ),
+        (
+            lambda value: value["evidence"].append(
+                copy.deepcopy(value["evidence"][0])
+            ),
+            "repeats a requirement",
+        ),
+        (
+            lambda value: value["evidence"][0].update(requirement="UNKNOWN_GATE"),
+            "requirement is unknown",
+        ),
+        (
+            lambda value: value["evidence"][0].update(decision="PENDING"),
+            "decision is invalid",
+        ),
+        (
+            lambda value: value["evidence"][0].update(evidence_sha256="0" * 63),
+            "lowercase SHA-256",
+        ),
+    ],
+)
+def test_qualified_collection_readiness_assessment_rejects_invalid_evidence(
+    mutate, match
+):
+    chain = qualified_collection_readiness_chain()
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+    mutate(evidence)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        assess_qualified_collection_readiness_evidence(
+            inventory_document=chain[0],
+            admission_receipt_document=chain[1],
+            training_split_document=chain[2],
+            collection_plan_document=chain[3],
+            observations_document=chain[4],
+            preparation_receipt_document=chain[5],
+            readiness_plan_document=chain[6],
+            evidence_document=evidence,
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -1322,6 +1497,48 @@ def test_file_workflow_plans_qualified_collection_readiness_without_hardware(tmp
     result = json.loads(output_path.read_bytes())
     assert result["status"] == "QUALIFIED_COLLECTION_READINESS_EVIDENCE_REQUIRED"
     assert len(result["evidence_requirements"]) == 8
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(args)
+
+
+def test_file_workflow_assesses_qualified_collection_readiness_without_hardware(
+    tmp_path,
+):
+    chain = qualified_collection_readiness_chain()
+    evidence = qualified_collection_readiness_evidence(chain[-1])
+    names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+    )
+    paths = {}
+    for name, document in zip(names, chain, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    paths["evidence"] = tmp_path / "evidence.json"
+    paths["evidence"].write_text(json.dumps(evidence), encoding="utf-8")
+    output_path = tmp_path / "readiness-assessment.json"
+    args = [
+        "assess-qualified-collection-readiness",
+        "--inventory", str(paths["inventory"]),
+        "--admission-receipt", str(paths["admission-receipt"]),
+        "--training-split", str(paths["training-split"]),
+        "--collection-plan", str(paths["collection-plan"]),
+        "--observations", str(paths["observations"]),
+        "--preparation-receipt", str(paths["preparation-receipt"]),
+        "--readiness-plan", str(paths["readiness-plan"]),
+        "--evidence", str(paths["evidence"]),
+        "--output", str(output_path),
+    ]
+
+    assert main(args) == 0
+    assert json.loads(output_path.read_bytes())["status"] == (
+        "QUALIFIED_COLLECTION_READINESS_COMPLETE"
+    )
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)
 
