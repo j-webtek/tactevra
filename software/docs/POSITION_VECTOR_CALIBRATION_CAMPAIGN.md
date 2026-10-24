@@ -708,6 +708,79 @@ review receipt, and resulting artifact. Its next gate is
 load, or activate it and grants no hardware, command, motion, installation, or
 activation authority.
 
+Review the exact artifact for a declared logical destination before any
+installation work is considered:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign accept-qualified-calibration-installation-review `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --review-receipt qualified-position-vector-independent-fit-review-receipt.json `
+  --artifact qualified-position-vector-calibration.json `
+  --artifact-build-receipt qualified-position-vector-artifact-build-receipt.json `
+  --installation-review qualified-position-vector-installation-review.json `
+  --output qualified-position-vector-installation-review-receipt.json
+```
+
+The retained installation review has this strict shape:
+
+```json
+{
+  "schema": "rocell.position_vector_calibration_qualified_installation_review.v1",
+  "artifact_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "artifact_build_receipt_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "calibration_id": "installed-arm-count-fit-01",
+  "attachment_profile": "no_attachment",
+  "controller_binding_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "installation_profile_id": "installed-arm-no-attachment",
+  "destination_ref": "position-vector-calibration-primary",
+  "reviewer_id": "installation-reviewer-04",
+  "decision": "ACCEPT",
+  "reviewed_at": "2026-10-24T15:00:00-04:00",
+  "review_notes_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+
+`installation_profile_id` and `destination_ref` are bounded logical
+identifiers. They declare the intended profile and destination without
+granting a filesystem path or causing a copy. The installation reviewer must
+differ from both the dataset producer and the independent fit reviewer.
+
+The command reproduces the complete qualified build, requires the supplied
+artifact and build receipt to match byte-for-byte canonical content, and binds
+the artifact, build receipt, calibration, attachment profile, and controller
+identity into the review. It rejects modified or crossed artifacts, invalid
+destinations, non-independent reviewers, non-acceptance decisions, timestamps
+without a UTC offset, and invalid note hashes.
+
+The resulting
+`rocell.position_vector_calibration_qualified_installation_review_receipt.v1`
+record advances only to `CALIBRATION_INSTALLATION_EXECUTION_APPROVAL`. It does
+not copy, install, select, load, or activate the artifact and grants no
+hardware, command, motion, installation, or activation authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

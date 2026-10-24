@@ -111,6 +111,12 @@ QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA = (
 QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_artifact_build_receipt.v1"
 )
+QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_installation_review.v1"
+)
+QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_installation_review_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -259,6 +265,22 @@ _QUALIFIED_INDEPENDENT_FIT_REVIEW_FIELDS = frozenset(
         "fit_report_sha256",
         "fit_assessment_sha256",
         "producer_id",
+        "reviewer_id",
+        "decision",
+        "reviewed_at",
+        "review_notes_sha256",
+    }
+)
+_QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_FIELDS = frozenset(
+    {
+        "schema",
+        "artifact_sha256",
+        "artifact_build_receipt_sha256",
+        "calibration_id",
+        "attachment_profile",
+        "controller_binding_sha256",
+        "installation_profile_id",
+        "destination_ref",
         "reviewer_id",
         "decision",
         "reviewed_at",
@@ -3369,6 +3391,166 @@ def build_qualified_calibration_artifact(
     return artifact, receipt
 
 
+def accept_qualified_calibration_installation_review(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    fit_assessment_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+    review_receipt_document: Mapping[str, Any],
+    artifact_document: Mapping[str, Any],
+    artifact_build_receipt_document: Mapping[str, Any],
+    installation_review_document: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Accept an offline review of an artifact for one logical destination."""
+
+    expected_artifact, expected_build_receipt = build_qualified_calibration_artifact(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+        dataset_document=dataset_document,
+        compilation_receipt_document=compilation_receipt_document,
+        fit_report_document=fit_report_document,
+        fit_assessment_document=fit_assessment_document,
+        review_document=review_document,
+        review_receipt_document=review_receipt_document,
+    )
+    supplied_artifact = _mapping(artifact_document, "qualified_calibration_artifact")
+    if dict(supplied_artifact) != expected_artifact:
+        raise PositionVectorCampaignError(
+            "qualified calibration artifact does not reproduce"
+        )
+    supplied_build_receipt = _mapping(
+        artifact_build_receipt_document,
+        "qualified_calibration_artifact_build_receipt",
+    )
+    if dict(supplied_build_receipt) != expected_build_receipt:
+        raise PositionVectorCampaignError(
+            "qualified calibration artifact build receipt does not reproduce"
+        )
+
+    review = _mapping(
+        installation_review_document,
+        "qualified_calibration_installation_review",
+    )
+    _exact(
+        review,
+        _QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_FIELDS,
+        "qualified_calibration_installation_review",
+    )
+    if review.get("schema") != QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_SCHEMA:
+        raise PositionVectorCampaignError(
+            "qualified calibration installation review schema mismatch"
+        )
+    artifact_hash = canonical_sha256(expected_artifact)
+    build_receipt_hash = canonical_sha256(expected_build_receipt)
+    controller_binding_hash = canonical_sha256(
+        expected_artifact["controller_binding"]
+    )
+    expected_bindings = {
+        "artifact_sha256": artifact_hash,
+        "artifact_build_receipt_sha256": build_receipt_hash,
+        "calibration_id": expected_artifact["calibration_id"],
+        "attachment_profile": expected_build_receipt["attachment_profile"],
+        "controller_binding_sha256": controller_binding_hash,
+    }
+    for field, expected_value in expected_bindings.items():
+        if review.get(field) != expected_value:
+            raise PositionVectorCampaignError(
+                f"qualified calibration installation review {field} mismatch"
+            )
+    installation_profile_id = _identifier(
+        review.get("installation_profile_id"), "installation_profile_id"
+    )
+    destination_ref = _identifier(review.get("destination_ref"), "destination_ref")
+    reviewer_id = _identifier(review.get("reviewer_id"), "reviewer_id")
+    fit_report = _mapping(fit_report_document, "qualified_fit_report")
+    fit_review_receipt = _mapping(
+        review_receipt_document, "qualified_independent_fit_review_receipt"
+    )
+    excluded_reviewers = {
+        _identifier(fit_report.get("producer_id"), "producer_id"),
+        _identifier(fit_review_receipt.get("reviewer_id"), "fit_reviewer_id"),
+    }
+    if reviewer_id in excluded_reviewers:
+        raise PositionVectorCampaignError(
+            "qualified calibration installation reviewer is not independent"
+        )
+    if review.get("decision") != "ACCEPT":
+        raise PositionVectorCampaignError(
+            "qualified calibration installation review decision is not ACCEPT"
+        )
+    reviewed_at = review.get("reviewed_at")
+    if not isinstance(reviewed_at, str):
+        raise PositionVectorCampaignError(
+            "qualified calibration installation reviewed_at is invalid"
+        )
+    try:
+        timestamp = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibration installation reviewed_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibration installation reviewed_at must include a UTC offset"
+        )
+    review_notes_sha256 = _digest(
+        review.get("review_notes_sha256"), "review_notes_sha256"
+    )
+    normalized_review = dict(review)
+    normalized_review["review_notes_sha256"] = review_notes_sha256
+
+    return {
+        "schema": QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_ACCEPTED",
+        "calibration_id": expected_artifact["calibration_id"],
+        "dataset_id": expected_build_receipt["dataset_id"],
+        "attachment_profile": expected_build_receipt["attachment_profile"],
+        "artifact_sha256": artifact_hash,
+        "artifact_build_receipt_sha256": build_receipt_hash,
+        "controller_binding_sha256": controller_binding_hash,
+        "installation_review_sha256": canonical_sha256(normalized_review),
+        "installation_profile_id": installation_profile_id,
+        "destination_ref": destination_ref,
+        "reviewer_id": reviewer_id,
+        "reviewed_at": reviewed_at,
+        "review_notes_sha256": review_notes_sha256,
+        "next_required_gate": "CALIBRATION_INSTALLATION_EXECUTION_APPROVAL",
+        "limitations": [
+            "This receipt records an independent offline review of the exact "
+            "artifact and its declared logical installation destination.",
+            "Review acceptance does not copy, install, select, load, or activate "
+            "the calibration.",
+            "This gate opens no controller or camera and grants no command, motion, "
+            "installation, activation, or physical authority.",
+        ],
+        "authority": dict(expected_build_receipt["authority"]),
+        "calibration_installation_authorized": False,
+        "calibration_activation_authorized": False,
+    }
+
+
 def _read_json(path: str) -> Mapping[str, Any]:
     try:
         value = json.loads(Path(path).read_bytes())
@@ -3654,6 +3836,33 @@ def main(argv: list[str] | None = None) -> int:
     qualified_build_parser.add_argument("--review-receipt", required=True)
     qualified_build_parser.add_argument("--artifact-output", required=True)
     qualified_build_parser.add_argument("--receipt-output", required=True)
+    installation_review_parser = commands.add_parser(
+        "accept-qualified-calibration-installation-review",
+        help="accept an offline review of an artifact for a logical destination",
+    )
+    installation_review_parser.add_argument("--inventory", required=True)
+    installation_review_parser.add_argument("--admission-receipt", required=True)
+    installation_review_parser.add_argument("--training-split", required=True)
+    installation_review_parser.add_argument("--collection-plan", required=True)
+    installation_review_parser.add_argument("--observations", required=True)
+    installation_review_parser.add_argument("--preparation-receipt", required=True)
+    installation_review_parser.add_argument("--readiness-plan", required=True)
+    installation_review_parser.add_argument("--readiness-evidence", required=True)
+    installation_review_parser.add_argument("--readiness-assessment", required=True)
+    installation_review_parser.add_argument("--readiness-handoff", required=True)
+    installation_review_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    installation_review_parser.add_argument("--dataset", required=True)
+    installation_review_parser.add_argument("--compilation-receipt", required=True)
+    installation_review_parser.add_argument("--fit-report", required=True)
+    installation_review_parser.add_argument("--fit-assessment", required=True)
+    installation_review_parser.add_argument("--review", required=True)
+    installation_review_parser.add_argument("--review-receipt", required=True)
+    installation_review_parser.add_argument("--artifact", required=True)
+    installation_review_parser.add_argument("--artifact-build-receipt", required=True)
+    installation_review_parser.add_argument("--installation-review", required=True)
+    installation_review_parser.add_argument("--output", required=True)
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -4038,6 +4247,35 @@ def main(argv: list[str] | None = None) -> int:
         _write_new(args.artifact_output, artifact)
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "accept-qualified-calibration-installation-review":
+        receipt = accept_qualified_calibration_installation_review(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            fit_report_document=_read_json(args.fit_report),
+            fit_assessment_document=_read_json(args.fit_assessment),
+            review_document=_read_json(args.review),
+            review_receipt_document=_read_json(args.review_receipt),
+            artifact_document=_read_json(args.artifact),
+            artifact_build_receipt_document=_read_json(
+                args.artifact_build_receipt
+            ),
+            installation_review_document=_read_json(args.installation_review),
+        )
+        _write_new(args.output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -4168,6 +4406,8 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_SCHEMA",
     "QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA",
     "QUALIFIED_INDEPENDENT_FIT_REVIEW_RECEIPT_SCHEMA",
     "QUALIFIED_INDEPENDENT_FIT_REVIEW_SCHEMA",
@@ -4190,6 +4430,7 @@ __all__ = [
     "assess_qualified_deterministic_fit",
     "assess_reviewed_readiness_evidence",
     "accept_qualified_independent_fit_review",
+    "accept_qualified_calibration_installation_review",
     "build_calibration_artifact",
     "build_qualified_calibration_artifact",
     "canonical_bytes",
