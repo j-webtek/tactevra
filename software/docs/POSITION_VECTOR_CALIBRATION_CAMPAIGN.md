@@ -853,6 +853,74 @@ select or load the artifact, activate a calibration, open a controller or
 camera, request feedback, send commands, or grant motion or physical authority.
 Calibration activation remains explicitly unauthorized.
 
+Once that exact approval receipt has been retained, an independent installer
+may perform the bounded file installation:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign execute-qualified-calibration-installation `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --review-receipt qualified-position-vector-independent-fit-review-receipt.json `
+  --artifact qualified-position-vector-calibration.json `
+  --artifact-build-receipt qualified-position-vector-artifact-build-receipt.json `
+  --installation-review qualified-position-vector-installation-review.json `
+  --installation-review-receipt qualified-position-vector-installation-review-receipt.json `
+  --execution-approval qualified-position-vector-installation-execution-approval.json `
+  --execution-approval-receipt qualified-position-vector-installation-execution-approval-receipt.json `
+  --installation-root inactive-position-vector-calibrations `
+  --installer-id installation-operator-06 `
+  --installed-at 2026-10-24T17:00:00-04:00 `
+  --receipt-output qualified-position-vector-installation-receipt.json
+```
+
+The command reproduces the entire evidence, fit, review, build, installation
+review, and approval chain before writing anything. It derives the destination
+only from the approved bounded identifiers and writes canonical artifact bytes
+to:
+
+```text
+<installation-root>/<installation-profile-id>/<destination-ref>.json
+```
+
+The installer must differ from the execution approver. The installation root,
+profile directory, and target cannot be symbolic links or escape the declared
+root. An existing target is never replaced. A successful command rereads the
+installed bytes, verifies their SHA-256, and emits a
+`rocell.position_vector_calibration_qualified_installation_receipt.v1` record.
+
+Keep each physical configuration in a separate approved installation profile.
+For example, the retained `no_attachment` artifact belongs under its approved
+no-attachment profile. A later stylus artifact must pass its own complete
+qualification and approval chain and use its separately approved stylus
+profile. The command does not infer offsets between those profiles.
+
+This installation remains inactive. It does not select, load, or activate the
+artifact, open a controller or camera, request feedback, send commands, or
+grant motion or physical authority. The receipt advances only to
+`CALIBRATION_ACTIVATION_REVIEW`; activation requires a later explicit gate.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

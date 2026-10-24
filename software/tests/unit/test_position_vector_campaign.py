@@ -35,6 +35,7 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
+    QUALIFIED_CALIBRATION_INSTALLATION_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_REVIEW_SCHEMA,
     QUALIFIED_DETERMINISTIC_FIT_ASSESSMENT_SCHEMA,
@@ -54,6 +55,7 @@ from rocell.calibration.position_vector_campaign import (
     accept_qualified_independent_fit_review,
     accept_qualified_calibration_installation_review,
     approve_qualified_calibration_installation_execution,
+    execute_qualified_calibration_installation,
     audit_candidate_count_coverage,
     assess_candidate_qualification_evidence,
     assess_collection_readiness,
@@ -62,6 +64,7 @@ from rocell.calibration.position_vector_campaign import (
     assess_reviewed_readiness_evidence,
     build_calibration_artifact,
     build_qualified_calibration_artifact,
+    canonical_bytes,
     canonical_sha256,
     collection_observations_template,
     compile_planned_dataset,
@@ -805,6 +808,69 @@ def approve_qualified_installation_package(package, execution_approval):
         installation_review_document=installation_review,
         installation_review_receipt_document=installation_review_receipt,
         execution_approval_document=execution_approval,
+    )
+
+
+def qualified_installation_approval_package():
+    review_package = qualified_installation_review_package()
+    execution_approval = qualified_installation_execution_approval(review_package)
+    execution_approval_receipt = approve_qualified_installation_package(
+        review_package, execution_approval
+    )
+    return (*review_package, execution_approval, execution_approval_receipt)
+
+
+def execute_qualified_installation_package(
+    package,
+    installation_root,
+    *,
+    installer_id="installation-operator-06",
+    installed_at="2026-10-24T17:00:00-04:00",
+):
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+        artifact,
+        build_receipt,
+        installation_review,
+        installation_review_receipt,
+        execution_approval,
+        execution_approval_receipt,
+    ) = package
+    return execute_qualified_calibration_installation(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        fit_report_document=fit_report,
+        fit_assessment_document=fit_assessment,
+        review_document=review_document,
+        review_receipt_document=review_receipt,
+        artifact_document=artifact,
+        artifact_build_receipt_document=build_receipt,
+        installation_review_document=installation_review,
+        installation_review_receipt_document=installation_review_receipt,
+        execution_approval_document=execution_approval,
+        execution_approval_receipt_document=execution_approval_receipt,
+        installation_root=installation_root,
+        installer_id=installer_id,
+        installed_at=installed_at,
     )
 
 
@@ -2280,6 +2346,75 @@ def test_qualified_installation_execution_approval_rejects_tampered_review_recei
         approve_qualified_installation_package(tuple(package), execution_approval)
 
 
+def test_qualified_calibration_installation_writes_inactive_immutable_artifact(
+    tmp_path,
+):
+    package = qualified_installation_approval_package()
+    installation_root = tmp_path / "inactive-position-vector-calibrations"
+
+    receipt = execute_qualified_installation_package(package, installation_root)
+
+    installed_path = (
+        installation_root
+        / "installed-arm-no-attachment"
+        / "position-vector-calibration-primary.json"
+    )
+    assert installed_path.read_bytes() == canonical_bytes(package[9]) + b"\n"
+    assert receipt["schema"] == QUALIFIED_CALIBRATION_INSTALLATION_RECEIPT_SCHEMA
+    assert receipt["status"] == "QUALIFIED_CALIBRATION_INSTALLED_INACTIVE"
+    assert receipt["installed_relative_path"] == (
+        "installed-arm-no-attachment/position-vector-calibration-primary.json"
+    )
+    assert receipt["artifact_sha256"] == canonical_sha256(package[9])
+    assert receipt["execution_approval_receipt_sha256"] == canonical_sha256(
+        package[14]
+    )
+    assert receipt["next_required_gate"] == "CALIBRATION_ACTIVATION_REVIEW"
+    assert receipt["calibration_installation_authorized"] is True
+    assert receipt["calibration_activation_authorized"] is False
+    assert receipt["authority"]["commands_sent"] == 0
+
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        execute_qualified_installation_package(package, installation_root)
+    assert installed_path.read_bytes() == canonical_bytes(package[9]) + b"\n"
+
+
+def test_qualified_calibration_installation_rejects_tampered_approval_receipt(
+    tmp_path,
+):
+    package = list(qualified_installation_approval_package())
+    package[14] = copy.deepcopy(package[14])
+    package[14]["status"] = "TAMPERED"
+
+    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+        execute_qualified_installation_package(tuple(package), tmp_path / "install")
+    assert not (tmp_path / "install").exists()
+
+
+@pytest.mark.parametrize(
+    "installer_id,installed_at,match",
+    [
+        ("installation-approver-05", "2026-10-24T17:00:00-04:00", "independent"),
+        ("invalid/operator", "2026-10-24T17:00:00-04:00", "installer_id"),
+        ("installation-operator-06", "2026-10-24T17:00:00", "UTC offset"),
+        ("installation-operator-06", "invalid", "installed_at is invalid"),
+    ],
+)
+def test_qualified_calibration_installation_rejects_invalid_execution_identity(
+    tmp_path, installer_id, installed_at, match
+):
+    package = qualified_installation_approval_package()
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        execute_qualified_installation_package(
+            package,
+            tmp_path / "install",
+            installer_id=installer_id,
+            installed_at=installed_at,
+        )
+    assert not (tmp_path / "install").exists()
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -3229,6 +3364,111 @@ def test_file_workflow_approves_exact_qualified_installation_without_executing(
     assert receipt["calibration_activation_authorized"] is False
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(args)
+
+
+def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
+    package = qualified_installation_approval_package()
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+        artifact,
+        build_receipt,
+        installation_review,
+        installation_review_receipt,
+        execution_approval,
+        execution_approval_receipt,
+    ) = package
+    chain_names = (
+        "inventory",
+        "admission-receipt",
+        "training-split",
+        "collection-plan",
+        "observations",
+        "preparation-receipt",
+        "readiness-plan",
+        "readiness-evidence",
+        "readiness-assessment",
+        "readiness-handoff",
+    )
+    chain_documents = (*chain[:4], observations, *chain[5:])
+    paths = {}
+    for name, document in zip(chain_names, chain_documents, strict=True):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    receipt_paths = []
+    for index, receipt in enumerate(receipts):
+        path = tmp_path / f"ingestion-receipt-{index:02d}.json"
+        path.write_text(json.dumps(receipt), encoding="utf-8")
+        receipt_paths.append(path)
+    downstream_documents = {
+        "dataset": compiled,
+        "compilation-receipt": compilation_receipt,
+        "fit-report": fit_report,
+        "fit-assessment": fit_assessment,
+        "review": review_document,
+        "review-receipt": review_receipt,
+        "artifact": artifact,
+        "artifact-build-receipt": build_receipt,
+        "installation-review": installation_review,
+        "installation-review-receipt": installation_review_receipt,
+        "execution-approval": execution_approval,
+        "execution-approval-receipt": execution_approval_receipt,
+    }
+    for name, document in downstream_documents.items():
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(document), encoding="utf-8")
+    installation_root = tmp_path / "inactive-position-vector-calibrations"
+    receipt_output = tmp_path / "qualified-installation-receipt.json"
+    args = ["execute-qualified-calibration-installation"]
+    for name in chain_names:
+        args.extend((f"--{name}", str(paths[name])))
+    for path in receipt_paths:
+        args.extend(("--ingestion-receipt", str(path)))
+    for name in downstream_documents:
+        args.extend((f"--{name}", str(paths[name])))
+    args.extend((
+        "--installation-root", str(installation_root),
+        "--installer-id", "installation-operator-06",
+        "--installed-at", "2026-10-24T17:00:00-04:00",
+        "--receipt-output", str(receipt_output),
+    ))
+
+    missing_receipt_args = list(args)
+    missing_receipt_args[-1] = str(tmp_path / "missing" / "receipt.json")
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="receipt output directory does not exist",
+    ):
+        main(missing_receipt_args)
+    assert not installation_root.exists()
+
+    assert main(args) == 0
+    installed_path = (
+        installation_root
+        / "installed-arm-no-attachment"
+        / "position-vector-calibration-primary.json"
+    )
+    assert installed_path.read_bytes() == canonical_bytes(artifact) + b"\n"
+    receipt = json.loads(receipt_output.read_bytes())
+    assert receipt["status"] == "QUALIFIED_CALIBRATION_INSTALLED_INACTIVE"
+    assert receipt["installed_relative_path"] == (
+        "installed-arm-no-attachment/position-vector-calibration-primary.json"
+    )
+    assert receipt["calibration_activation_authorized"] is False
+
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="existing installation receipt output",
+    ):
+        main(args)
+    assert installed_path.read_bytes() == canonical_bytes(artifact) + b"\n"
 
 
 def test_retained_candidate_inventory_and_coverage_report_reproduce():
