@@ -27,6 +27,8 @@ from rocell.arm.position_vector_calibration import (
     PROFILE,
     SCHEMA as ARTIFACT_SCHEMA,
     SERVO_ORDER,
+    PositionVectorCalibrationError,
+    convert_position_vector_feedback,
     load_position_vector_calibration,
 )
 
@@ -181,6 +183,12 @@ QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_SCHEMA = (
 )
 QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_feedback_runtime_load_receipt.v1"
+)
+QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_feedback_runtime_session_validation.v1"
+)
+QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_feedback_runtime_session_validation_receipt.v1"
 )
 CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT = {
     "schema": "rocell.calibrated_position_vector_feedback_integration_contract.v1",
@@ -677,6 +685,41 @@ _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_FIELDS = frozenset(
         "calibrated_feedback_integration_authorized",
         "calibrated_feedback_runtime_loading_authorized",
         "calibrated_feedback_runtime_loaded",
+        "calibrated_feedback_requests_authorized",
+    }
+)
+_QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_FIELDS = frozenset(
+    {
+        "schema", "status", "runtime_session_id", "runtime_session_sha256",
+        "runtime_session_payload_sha256", "runtime_load_receipt_sha256",
+        "dataset_sha256", "artifact_sha256", "installed_payload_sha256",
+        "active_selection_sha256", "integration_sha256",
+        "integration_payload_sha256", "integration_contract_sha256",
+        "calibration_id", "attachment_profile", "controller_binding_sha256",
+        "installation_profile_id", "destination_ref", "response_profile",
+        "calibration_loader", "feedback_converter", "validator_id",
+        "validated_at", "held_out_sample_count", "held_out_sample_results",
+        "joint_results", "shoulder_runtime_tolerance_counts",
+        "observed_max_shoulder_residual_counts", "all_conversions_accepted",
+        "authority",
+    }
+)
+_QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_FIELDS = frozenset(
+    {
+        "schema", "status", "runtime_session_id", "runtime_session_sha256",
+        "runtime_session_payload_sha256", "runtime_load_receipt_sha256",
+        "runtime_session_validation_sha256", "dataset_sha256", "artifact_sha256",
+        "installed_payload_sha256", "active_selection_sha256", "integration_sha256",
+        "integration_payload_sha256", "integration_contract_sha256",
+        "calibration_id", "attachment_profile", "controller_binding_sha256",
+        "installation_profile_id", "destination_ref", "response_profile",
+        "calibration_loader", "feedback_converter", "validator_id", "validated_at",
+        "held_out_sample_count", "next_required_gate", "limitations", "authority",
+        "calibration_installation_authorized", "calibration_activation_authorized",
+        "calibrated_feedback_integration_authorized",
+        "calibrated_feedback_runtime_loading_authorized",
+        "calibrated_feedback_runtime_loaded",
+        "calibrated_feedback_runtime_session_validated",
         "calibrated_feedback_requests_authorized",
     }
 )
@@ -6713,6 +6756,229 @@ def execute_qualified_calibrated_feedback_runtime_load(
         )
     return receipt
 
+
+def validate_qualified_calibrated_feedback_runtime_session(
+    *, runtime_session_document: Mapping[str, Any],
+    runtime_load_receipt_document: Mapping[str, Any], validator_id: str,
+    validated_at: str, **runtime_load_arguments: Any,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Replay held-out observations through one exact loaded offline session."""
+
+    runtime_session = _mapping(
+        runtime_session_document, "qualified_calibrated_feedback_runtime_session"
+    )
+    _exact(
+        runtime_session,
+        _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_FIELDS,
+        "qualified_calibrated_feedback_runtime_session",
+    )
+    supplied_load_receipt = _mapping(
+        runtime_load_receipt_document,
+        "qualified_calibrated_feedback_runtime_load_receipt",
+    )
+    _exact(
+        supplied_load_receipt,
+        _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_FIELDS,
+        "qualified_calibrated_feedback_runtime_load_receipt",
+    )
+    expected_load_receipt = execute_qualified_calibrated_feedback_runtime_load(
+        _publish=False,
+        _expected_session_document=runtime_session,
+        _expected_receipt_document=supplied_load_receipt,
+        **runtime_load_arguments,
+    )
+    validator = _identifier(validator_id, "validator_id")
+    if validator == runtime_session["loader_id"]:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validator must be independent of loader"
+        )
+    if not isinstance(validated_at, str):
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validated_at is invalid"
+        )
+    try:
+        timestamp = datetime.fromisoformat(validated_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validated_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validated_at must include a UTC offset"
+        )
+
+    dataset = load_campaign_dataset(runtime_load_arguments["dataset_document"])
+    artifact = _mapping(
+        runtime_load_arguments["artifact_document"], "qualified calibration artifact"
+    )
+    loaded_calibration = load_position_vector_calibration(artifact)
+    dataset_sha256 = canonical_sha256(dataset)
+    if artifact["evidence"]["dataset_sha256"] != dataset_sha256:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validation dataset is not bound to artifact"
+        )
+    if canonical_sha256(artifact["controller_binding"]) != runtime_session[
+        "controller_binding_sha256"
+    ]:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validation controller binding mismatch"
+        )
+    held_out = [sample for sample in dataset["samples"] if sample["split"] == "HELD_OUT"]
+    if not held_out:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime validation requires held-out samples"
+        )
+
+    joint_limits = {
+        row["joint"]: row["accepted_max_abs_error_rad"] for row in artifact["joints"]
+    }
+    maximum_joint_errors = {joint: 0.0 for joint in JOINT_ORDER}
+    maximum_shoulder_residual = 0
+    sample_results: list[dict[str, Any]] = []
+    for sample in held_out:
+        message = {
+            "T": 1051,
+            "p": list(sample["raw_position_counts"]),
+            "pose": sample["source_pose"],
+            "motion_active": sample["motion_active"],
+            "trajectory_progress_permille": sample["trajectory_progress_permille"],
+        }
+        try:
+            converted = convert_position_vector_feedback(
+                message, artifact, artifact["controller_binding"]
+            )
+        except PositionVectorCalibrationError as exc:
+            raise PositionVectorCampaignError(
+                "qualified calibrated feedback runtime held-out conversion failed for "
+                + sample["sample_id"]
+            ) from exc
+        errors = {
+            joint: abs(
+                converted["canonical_joints_rad"][joint]
+                - sample["canonical_joints_rad"][joint]
+            )
+            for joint in JOINT_ORDER
+        }
+        for joint, error in errors.items():
+            maximum_joint_errors[joint] = max(maximum_joint_errors[joint], error)
+            if error > joint_limits[joint]:
+                raise PositionVectorCampaignError(
+                    f"{joint} runtime held-out error exceeds accepted limit"
+                )
+        residual = converted["shoulder_pair_residual_counts"]
+        maximum_shoulder_residual = max(maximum_shoulder_residual, residual)
+        sample_results.append(
+            {
+                "sample_id": sample["sample_id"],
+                "source_pose": sample["source_pose"],
+                "converted_feedback_sha256": canonical_sha256(converted),
+                "maximum_abs_error_rad": max(errors.values()),
+                "shoulder_pair_residual_counts": residual,
+                "accepted": True,
+            }
+        )
+
+    validation = {
+        "schema": QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA,
+        "status": "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATED_OFFLINE",
+        "runtime_session_id": runtime_session["runtime_session_id"],
+        "runtime_session_sha256": expected_load_receipt["runtime_session_sha256"],
+        "runtime_session_payload_sha256": expected_load_receipt[
+            "runtime_session_payload_sha256"
+        ],
+        "runtime_load_receipt_sha256": canonical_sha256(expected_load_receipt),
+        "dataset_sha256": dataset_sha256,
+        "artifact_sha256": runtime_session["artifact_sha256"],
+        "installed_payload_sha256": runtime_session["installed_payload_sha256"],
+        "active_selection_sha256": runtime_session["active_selection_sha256"],
+        "integration_sha256": runtime_session["integration_sha256"],
+        "integration_payload_sha256": runtime_session["integration_payload_sha256"],
+        "integration_contract_sha256": runtime_session["integration_contract_sha256"],
+        "calibration_id": runtime_session["calibration_id"],
+        "attachment_profile": runtime_session["attachment_profile"],
+        "controller_binding_sha256": runtime_session["controller_binding_sha256"],
+        "installation_profile_id": runtime_session["installation_profile_id"],
+        "destination_ref": runtime_session["destination_ref"],
+        "response_profile": runtime_session["response_profile"],
+        "calibration_loader": runtime_session["calibration_loader"],
+        "feedback_converter": runtime_session["feedback_converter"],
+        "validator_id": validator,
+        "validated_at": validated_at,
+        "held_out_sample_count": len(held_out),
+        "held_out_sample_results": sample_results,
+        "joint_results": [
+            {
+                "joint": joint,
+                "observed_max_abs_error_rad": maximum_joint_errors[joint],
+                "accepted_max_abs_error_rad": joint_limits[joint],
+                "accepted": True,
+            }
+            for joint in JOINT_ORDER
+        ],
+        "shoulder_runtime_tolerance_counts": (
+            loaded_calibration.shoulder_runtime_tolerance_counts
+        ),
+        "observed_max_shoulder_residual_counts": maximum_shoulder_residual,
+        "all_conversions_accepted": True,
+        "authority": dict(expected_load_receipt["authority"]),
+    }
+    _exact(
+        validation,
+        _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_FIELDS,
+        "qualified_calibrated_feedback_runtime_session_validation",
+    )
+    receipt = {
+        "schema": (
+            QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_SCHEMA
+        ),
+        "status": "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_ACCEPTED",
+        "runtime_session_id": runtime_session["runtime_session_id"],
+        "runtime_session_sha256": validation["runtime_session_sha256"],
+        "runtime_session_payload_sha256": validation[
+            "runtime_session_payload_sha256"
+        ],
+        "runtime_load_receipt_sha256": validation["runtime_load_receipt_sha256"],
+        "runtime_session_validation_sha256": canonical_sha256(validation),
+        "dataset_sha256": dataset_sha256,
+        "artifact_sha256": validation["artifact_sha256"],
+        "installed_payload_sha256": validation["installed_payload_sha256"],
+        "active_selection_sha256": validation["active_selection_sha256"],
+        "integration_sha256": validation["integration_sha256"],
+        "integration_payload_sha256": validation["integration_payload_sha256"],
+        "integration_contract_sha256": validation["integration_contract_sha256"],
+        "calibration_id": validation["calibration_id"],
+        "attachment_profile": validation["attachment_profile"],
+        "controller_binding_sha256": validation["controller_binding_sha256"],
+        "installation_profile_id": validation["installation_profile_id"],
+        "destination_ref": validation["destination_ref"],
+        "response_profile": validation["response_profile"],
+        "calibration_loader": validation["calibration_loader"],
+        "feedback_converter": validation["feedback_converter"],
+        "validator_id": validator,
+        "validated_at": validated_at,
+        "held_out_sample_count": len(held_out),
+        "next_required_gate": "CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_ADMISSION_REVIEW",
+        "limitations": [
+            "This receipt proves deterministic offline conversion of the retained held-out observations through the exact runtime binding.",
+            "Retained observations do not prove a fresh controller response or current physical arm state.",
+            "This gate opens no controller or camera and grants no command, motion, feedback-request, or physical authority.",
+        ],
+        "authority": dict(expected_load_receipt["authority"]),
+        "calibration_installation_authorized": True,
+        "calibration_activation_authorized": True,
+        "calibrated_feedback_integration_authorized": True,
+        "calibrated_feedback_runtime_loading_authorized": True,
+        "calibrated_feedback_runtime_loaded": True,
+        "calibrated_feedback_runtime_session_validated": True,
+        "calibrated_feedback_requests_authorized": False,
+    }
+    _exact(
+        receipt,
+        _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_FIELDS,
+        "qualified_calibrated_feedback_runtime_session_validation_receipt",
+    )
+    return validation, receipt
+
 def _read_json(path: str) -> Mapping[str, Any]:
     try:
         value = json.loads(Path(path).read_bytes())
@@ -7406,6 +7672,32 @@ def main(argv: list[str] | None = None) -> int:
     ):
         feedback_runtime_load_execution_parser.add_argument(f"--{argument}", required=True)
     feedback_runtime_load_execution_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    feedback_runtime_validation_parser = commands.add_parser(
+        "validate-qualified-calibrated-feedback-runtime-session",
+        help="replay retained held-out observations through one exact offline runtime session",
+    )
+    for argument in (
+        "inventory", "admission-receipt", "training-split", "collection-plan",
+        "observations", "preparation-receipt", "readiness-plan", "readiness-evidence",
+        "readiness-assessment", "readiness-handoff", "dataset", "compilation-receipt",
+        "fit-report", "fit-assessment", "review", "review-receipt", "artifact",
+        "artifact-build-receipt", "installation-review", "installation-review-receipt",
+        "execution-approval", "execution-approval-receipt", "installation-receipt",
+        "installation-root", "activation-review", "activation-review-receipt",
+        "activation-execution-approval", "activation-execution-approval-receipt",
+        "activation-root", "active-selection", "activation-receipt", "integration-review",
+        "integration-review-receipt", "integration-execution-approval",
+        "integration-execution-approval-receipt", "integration-root", "integrator-id",
+        "integrated-at", "integration", "integration-receipt", "runtime-admission-review",
+        "runtime-admission-review-receipt", "runtime-load-execution-approval",
+        "runtime-load-execution-approval-receipt", "runtime-root", "runtime-session-id",
+        "loader-id", "loaded-at", "runtime-session", "runtime-load-receipt",
+        "validator-id", "validated-at", "validation-output", "receipt-output",
+    ):
+        feedback_runtime_validation_parser.add_argument(f"--{argument}", required=True)
+    feedback_runtime_validation_parser.add_argument(
         "--ingestion-receipt", action="append", required=True
     )
     prepare_parser = commands.add_parser(
@@ -8353,6 +8645,64 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "validate-qualified-calibrated-feedback-runtime-session":
+        output_paths = tuple(
+            Path(value).absolute().resolve(strict=False)
+            for value in (args.validation_output, args.receipt_output)
+        )
+        if len(set(output_paths)) != len(output_paths) or any(
+            path.exists() for path in output_paths
+        ):
+            raise PositionVectorCampaignError(
+                "refusing to replace or alias feedback runtime validation output"
+            )
+        if any(not path.parent.is_dir() for path in output_paths):
+            raise PositionVectorCampaignError(
+                "feedback runtime validation output directory does not exist"
+            )
+        for output_path in output_paths:
+            for forbidden_root, message in (
+                (Path(args.installation_root).absolute().resolve(strict=False), "installation root"),
+                (Path(args.activation_root).absolute().resolve(strict=False), "activation root"),
+                (Path(args.integration_root).absolute().resolve(strict=False), "integration root"),
+                (Path(args.runtime_root).absolute().resolve(strict=False), "runtime root"),
+            ):
+                try:
+                    output_path.relative_to(forbidden_root)
+                except ValueError:
+                    pass
+                else:
+                    raise PositionVectorCampaignError(
+                        "feedback runtime validation output must remain outside " + message
+                    )
+        validation, receipt = validate_qualified_calibrated_feedback_runtime_session(
+            runtime_session_document=_read_json(args.runtime_session),
+            runtime_load_receipt_document=_read_json(args.runtime_load_receipt),
+            validator_id=args.validator_id,
+            validated_at=args.validated_at,
+            integration_document=_read_json(args.integration),
+            integration_receipt_document=_read_json(args.integration_receipt),
+            runtime_admission_review_document=_read_json(
+                args.runtime_admission_review
+            ),
+            runtime_admission_review_receipt_document=_read_json(
+                args.runtime_admission_review_receipt
+            ),
+            runtime_load_execution_approval_document=_read_json(
+                args.runtime_load_execution_approval
+            ),
+            runtime_load_execution_approval_receipt_document=_read_json(
+                args.runtime_load_execution_approval_receipt
+            ),
+            runtime_root=args.runtime_root,
+            runtime_session_id=args.runtime_session_id,
+            loader_id=args.loader_id,
+            loaded_at=args.loaded_at,
+            **_qualified_feedback_integration_cli_arguments(args),
+        )
+        _write_new(args.validation_output, validation)
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "execute-qualified-calibrated-feedback-integration":
         receipt_output = Path(args.receipt_output).absolute()
         for forbidden_root, message in (
@@ -8593,6 +8943,8 @@ __all__ = [
     "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_SCHEMA",
     "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA",
+    "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_SCHEMA",
     "CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT",
     "QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA",
@@ -8626,6 +8978,7 @@ __all__ = [
     "accept_qualified_calibrated_feedback_runtime_admission_review",
     "approve_qualified_calibrated_feedback_runtime_load_execution",
     "execute_qualified_calibrated_feedback_runtime_load",
+    "validate_qualified_calibrated_feedback_runtime_session",
     "assess_reviewed_readiness_evidence",
     "accept_qualified_independent_fit_review",
     "accept_qualified_calibration_installation_review",

@@ -1396,6 +1396,43 @@ feedback converter, sends no command, and grants no motion or physical
 authority. Feedback requests remain unauthorized. Execute a distinct chain and
 runtime profile for `no_attachment` and `stylus_attachment`.
 
+To validate the exact loaded session offline, invoke
+`validate-qualified-calibrated-feedback-runtime-session` with every input used
+by the runtime-load command. Remove that command's `--receipt-output` option
+and add:
+
+```powershell
+--runtime-session calibrated-position-vector-feedback-runtime/installed-arm-no-attachment/calibrated-position-vector-feedback-runtime-session.json `
+--runtime-load-receipt qualified-position-vector-feedback-runtime-load-receipt.json `
+--validator-id feedback-runtime-validator-16 `
+--validated-at 2026-10-25T11:30:00-04:00 `
+--validation-output qualified-position-vector-feedback-runtime-session-validation.json `
+--receipt-output qualified-position-vector-feedback-runtime-session-validation-receipt.json
+```
+
+The command replays the complete load chain, requires the immutable runtime
+session and its load receipt to reproduce exactly, and requires a validator
+independent of the loader. It then selects only the retained `HELD_OUT`
+observations and passes each exact T=1051 position vector through
+`convert_position_vector_feedback` with the artifact's exact controller
+binding. Every converted joint must remain within that joint's accepted
+absolute error, and every mirrored shoulder residual must remain within the
+loaded runtime tolerance. The validation output retains one result hash per
+held-out sample and the observed maximum for every joint.
+
+Successful validation emits
+`rocell.position_vector_calibration_qualified_feedback_runtime_session_validation.v1`
+and
+`rocell.position_vector_calibration_qualified_feedback_runtime_session_validation_receipt.v1`.
+The receipt advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_ADMISSION_REVIEW`. Validation
+uses retained observations: it does not claim a fresh controller response or
+the arm's current state. It opens no controller or camera, requests no
+feedback, sends no command, and grants no motion or physical authority. Both
+outputs remain outside the installation, activation, integration, and runtime
+roots and are never replaced. Validate `no_attachment` and
+`stylus_attachment` as separate profile chains.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
