@@ -49,6 +49,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_SCHEMA,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4617,6 +4619,84 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
     assert runtime_load_approval_receipt["authority"]["commands_sent"] == 0
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(runtime_load_approval_args)
+
+    runtime_root = tmp_path / "calibrated-feedback-runtime"
+    runtime_load_receipt_output = tmp_path / "feedback-runtime-load-receipt.json"
+    runtime_load_args = list(runtime_load_approval_args[:-2])
+    runtime_load_args[0] = "execute-qualified-calibrated-feedback-runtime-load"
+    runtime_load_args.extend((
+        "--runtime-load-execution-approval-receipt", str(runtime_load_approval_output),
+        "--runtime-root", str(runtime_root),
+        "--runtime-session-id", "runtime-session-no-attachment-15",
+        "--loader-id", "feedback-runtime-loader-15",
+        "--loaded-at", "2026-10-25T11:00:00-04:00",
+        "--receipt-output", str(runtime_load_receipt_output),
+    ))
+    nested_runtime_load_receipt_args = list(runtime_load_args)
+    nested_runtime_load_receipt_args[-1] = str(runtime_root / "runtime-load-receipt.json")
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime load receipt output must remain outside runtime root",
+    ):
+        main(nested_runtime_load_receipt_args)
+    assert not runtime_root.exists()
+
+    nonindependent_runtime_loader_args = list(runtime_load_args)
+    nonindependent_runtime_loader_args[
+        nonindependent_runtime_loader_args.index("--loader-id") + 1
+    ] = "feedback-runtime-load-approver-14"
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime loader must be independent of approver",
+    ):
+        main(nonindependent_runtime_loader_args)
+    assert not runtime_root.exists()
+
+    tampered_runtime_load_approval_receipt = dict(runtime_load_approval_receipt)
+    tampered_runtime_load_approval_receipt["artifact_sha256"] = "0" * 64
+    tampered_runtime_load_approval_receipt_path = (
+        tmp_path / "tampered-feedback-runtime-load-approval-receipt.json"
+    )
+    tampered_runtime_load_approval_receipt_path.write_text(
+        json.dumps(tampered_runtime_load_approval_receipt), encoding="utf-8"
+    )
+    tampered_runtime_load_args = list(runtime_load_args)
+    tampered_runtime_load_args[
+        tampered_runtime_load_args.index("--runtime-load-execution-approval-receipt") + 1
+    ] = str(tampered_runtime_load_approval_receipt_path)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime load execution approval receipt does not reproduce",
+    ):
+        main(tampered_runtime_load_args)
+    assert not runtime_root.exists()
+
+    assert main(runtime_load_args) == 0
+    runtime_session_path = (
+        runtime_root / "installed-arm-no-attachment"
+        / "calibrated-position-vector-feedback-runtime-session.json"
+    )
+    runtime_session = json.loads(runtime_session_path.read_bytes())
+    assert runtime_session["schema"] == QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_SCHEMA
+    assert runtime_session["status"] == "CALIBRATED_FEEDBACK_RUNTIME_LOADED_OFFLINE"
+    assert runtime_session["attachment_profile"] == "no_attachment"
+    assert runtime_session["loaded_joint_count"] == 6
+    assert runtime_session_path.read_bytes() == canonical_bytes(runtime_session) + b"\n"
+    runtime_load_receipt = json.loads(runtime_load_receipt_output.read_bytes())
+    assert runtime_load_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_SCHEMA
+    )
+    assert runtime_load_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_SESSION_VALIDATION"
+    )
+    assert runtime_load_receipt["calibrated_feedback_runtime_loaded"] is True
+    assert runtime_load_receipt["calibrated_feedback_requests_authorized"] is False
+    assert runtime_load_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace existing feedback runtime load receipt output",
+    ):
+        main(runtime_load_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)

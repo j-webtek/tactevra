@@ -1359,6 +1359,43 @@ runtime session, opens no controller or camera, requests no feedback, sends no
 command, and authorizes no motion or physical action. Approval chains remain
 separate for `no_attachment` and `stylus_attachment`.
 
+To perform that exact offline load, invoke
+`execute-qualified-calibrated-feedback-runtime-load` with every complete-chain,
+integration-execution, admission-review, and runtime-load approval input above.
+Replace the approval command's `--output` option with these execution-specific
+options:
+
+```powershell
+--runtime-load-execution-approval-receipt qualified-position-vector-feedback-runtime-load-execution-approval-receipt.json `
+--runtime-root calibrated-position-vector-feedback-runtime `
+--runtime-session-id runtime-session-no-attachment-15 `
+--loader-id feedback-runtime-loader-15 `
+--loaded-at 2026-10-25T11:00:00-04:00 `
+--receipt-output qualified-position-vector-feedback-runtime-load-receipt.json
+```
+
+The execution replays the complete chain and requires the supplied approval
+receipt to reproduce exactly. It rereads the profile-scoped installed artifact,
+checks its stored bytes and hashes, requires the integration's loader and
+converter references to name the strict position-vector functions, and invokes
+`load_position_vector_calibration`. The loader must differ from the execution
+approver. The runtime root must remain outside the installation, activation,
+and integration roots, while the receipt must remain outside all four roots.
+Existing runtime sessions and receipts are never replaced.
+
+The immutable session has schema
+`rocell.position_vector_calibration_qualified_feedback_runtime_session.v1` and
+is stored under the approved installation profile as
+`calibrated-position-vector-feedback-runtime-session.json`. Its receipt has
+schema
+`rocell.position_vector_calibration_qualified_feedback_runtime_load_receipt.v1`
+and advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_SESSION_VALIDATION`. The load is
+offline: it opens no controller or camera, consumes no feedback, invokes no
+feedback converter, sends no command, and grants no motion or physical
+authority. Feedback requests remain unauthorized. Execute a distinct chain and
+runtime profile for `no_attachment` and `stylus_attachment`.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
