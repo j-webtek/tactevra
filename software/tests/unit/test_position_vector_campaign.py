@@ -53,6 +53,9 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_RECEIPT_SCHEMA,
+    CALIBRATED_FEEDBACK_REQUEST_CONTRACT,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4798,6 +4801,116 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
         match="refusing to replace or alias feedback runtime validation output",
     ):
         main(runtime_validation_args)
+
+    request_admission_review = {
+        "schema": QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_SCHEMA,
+        "runtime_session_validation_sha256": canonical_sha256(runtime_validation),
+        "runtime_session_validation_receipt_sha256": canonical_sha256(
+            runtime_validation_receipt
+        ),
+        **{
+            key: runtime_validation[key]
+            for key in (
+                "runtime_session_sha256", "runtime_session_payload_sha256",
+                "runtime_load_receipt_sha256", "dataset_sha256", "artifact_sha256",
+                "installed_payload_sha256", "active_selection_sha256",
+                "integration_sha256", "integration_payload_sha256",
+                "integration_contract_sha256", "calibration_id", "attachment_profile",
+                "controller_binding_sha256", "installation_profile_id",
+                "destination_ref", "response_profile", "calibration_loader",
+                "feedback_converter",
+            )
+        },
+        "request_contract": dict(CALIBRATED_FEEDBACK_REQUEST_CONTRACT),
+        "reviewer_id": "feedback-request-reviewer-17",
+        "decision": "ACCEPT",
+        "reviewed_at": "2026-10-25T11:45:00-04:00",
+        "review_notes_sha256": hashlib.sha256(
+            b"one fixed T105; bounded T1051; no automatic retry"
+        ).hexdigest(),
+    }
+    request_admission_review_path = tmp_path / "feedback-request-admission-review.json"
+    request_admission_review_path.write_text(
+        json.dumps(request_admission_review), encoding="utf-8"
+    )
+    request_admission_receipt_output = (
+        tmp_path / "feedback-request-admission-review-receipt.json"
+    )
+    request_admission_args = list(runtime_validation_args[:-4])
+    request_admission_args[0] = (
+        "review-qualified-calibrated-feedback-request-admission"
+    )
+    request_admission_args.extend((
+        "--runtime-session-validation", str(runtime_validation_output),
+        "--runtime-session-validation-receipt", str(runtime_validation_receipt_output),
+        "--feedback-request-admission-review", str(request_admission_review_path),
+        "--output", str(request_admission_receipt_output),
+    ))
+    nested_request_admission_args = list(request_admission_args)
+    nested_request_admission_args[
+        nested_request_admission_args.index("--output") + 1
+    ] = str(runtime_root / "feedback-request-admission-review-receipt.json")
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="request admission review output must remain outside runtime root",
+    ):
+        main(nested_request_admission_args)
+
+    nonindependent_request_review = dict(request_admission_review)
+    nonindependent_request_review["reviewer_id"] = "feedback-runtime-validator-16"
+    request_admission_review_path.write_text(
+        json.dumps(nonindependent_request_review), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="request admission reviewer must be independent",
+    ):
+        main(request_admission_args)
+
+    tampered_request_review = copy.deepcopy(request_admission_review)
+    tampered_request_review["request_contract"]["automatic_retries"] = 1
+    request_admission_review_path.write_text(
+        json.dumps(tampered_request_review), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback request contract is not exact",
+    ):
+        main(request_admission_args)
+
+    request_admission_review_path.write_text(
+        json.dumps(request_admission_review), encoding="utf-8"
+    )
+    assert main(request_admission_args) == 0
+    request_admission_receipt = json.loads(
+        request_admission_receipt_output.read_bytes()
+    )
+    assert request_admission_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_RECEIPT_SCHEMA
+    )
+    assert request_admission_receipt["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_ACCEPTED"
+    )
+    assert request_admission_receipt["request_contract"]["request_type"] == 105
+    assert request_admission_receipt["request_contract"]["response_type"] == 1051
+    assert request_admission_receipt["request_contract"]["maximum_requests"] == 1
+    assert request_admission_receipt["request_contract"]["automatic_retries"] == 0
+    assert request_admission_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_EXECUTION_APPROVAL"
+    )
+    assert request_admission_receipt[
+        "calibrated_feedback_request_admission_reviewed"
+    ] is True
+    assert request_admission_receipt[
+        "calibrated_feedback_request_execution_authorized"
+    ] is False
+    assert request_admission_receipt["calibrated_feedback_requests_authorized"] is False
+    assert request_admission_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace feedback request admission review output",
+    ):
+        main(request_admission_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)

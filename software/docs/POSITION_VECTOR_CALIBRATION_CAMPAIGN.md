@@ -1433,6 +1433,42 @@ outputs remain outside the installation, activation, integration, and runtime
 roots and are never replaced. Validate `no_attachment` and
 `stylus_attachment` as separate profile chains.
 
+To review admission of the first calibrated feedback request, retain a
+separate record with schema
+`rocell.position_vector_calibration_qualified_feedback_request_admission_review.v1`.
+Invoke `review-qualified-calibrated-feedback-request-admission` with every
+runtime-validation input above. Remove `--validation-output` and
+`--receipt-output`, then add:
+
+```powershell
+--runtime-session-validation qualified-position-vector-feedback-runtime-session-validation.json `
+--runtime-session-validation-receipt qualified-position-vector-feedback-runtime-session-validation-receipt.json `
+--feedback-request-admission-review qualified-position-vector-feedback-request-admission-review.json `
+--output qualified-position-vector-feedback-request-admission-review-receipt.json
+```
+
+The review must bind the exact validation and receipt, runtime session and load
+receipt, dataset, installed artifact, active selection, integration, controller,
+attachment profile, loader, and converter. It must reproduce the fixed request
+contract exactly: one ten-byte `{"T":105}` line with LF, one bounded T=1051
+response, one-second read and write timeouts, a 65,536-byte maximum response
+line, at most one request, and zero automatic retries. The contract also lists
+the operator-present, adapter-powered, USB-connected, arm-secured,
+arm-stationary, clear-area, and unchanged-firmware prerequisites that a later
+execution gate must freshly establish. The reviewer must differ from the
+runtime validator and loader.
+
+An accepted review emits
+`rocell.position_vector_calibration_qualified_feedback_request_admission_review_receipt.v1`
+and advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_EXECUTION_APPROVAL`. It does not
+claim that any listed physical prerequisite is currently true. It opens no
+controller or camera, writes zero bytes, requests no feedback, permits no
+retry, and grants no motion or physical authority. The output remains outside
+the installation, activation, integration, and runtime roots and is never
+replaced. Keep `no_attachment` and `stylus_attachment` admission chains
+separate; a later attachment change requires the corresponding profile chain.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
