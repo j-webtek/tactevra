@@ -1736,8 +1736,23 @@ child's immutable manifest. Both the result and export explicitly deny retry,
 motion, connection, and physical authority. Import-audit and unit tests are
 hardware-incapable, and no public live command was added.
 
-The next dependency is application orchestration: redeem one still-fresh
-approved execution request and prerequisite record, run this private worker
-once, and feed the verified exchange evidence into the existing calibrated
-execution review. Any future physical use needs a new current operator and
-hardware-state confirmation.
+## Owned application orchestration (2026-10-25)
+
+The private application boundary now splits execution into preparation and
+completion. Preparation reproduces the approval receipt, checks the fresh
+physical-prerequisite interval, loads the selected calibration and controller
+binding, and freezes the exact T105 request before any child may start. Staging
+then creates an exclusive per-attempt directory and durable application claim;
+that directory is never reused, including after a child or retention failure.
+
+The host rechecks cancellation, context, and monotonic lifetime immediately
+before its exact dispatch authorizer runs. It supervises the source-pinned
+child once, verifies the child's request-associated immutable journal export,
+and passes only a successful verified exchange into calibrated conversion.
+Terminal child evidence is retained without a receipt or retry. No public live
+command or hardware run was added by this increment.
+
+The next dependency is the calibrated execution review gate: independently
+accept or reject the completed receipt and its retained child journal before
+any downstream state consumer can use the observation. Any future physical
+use still needs a new current operator and hardware-state confirmation.

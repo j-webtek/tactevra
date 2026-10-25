@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import hashlib
 import re
+import copy
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Mapping
 
@@ -116,6 +118,18 @@ _RECEIPT_FIELDS = frozenset(
 
 class CalibratedFeedbackExecutionError(ValueError):
     """The approved one-shot execution boundary was not satisfied."""
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedCalibratedFeedbackRequest:
+    """Validated immutable-by-copy inputs for one exact feedback exchange."""
+
+    approval_receipt: Mapping[str, Any]
+    prerequisites: Mapping[str, Any]
+    calibration: Mapping[str, Any]
+    controller_binding: Mapping[str, Any]
+    request: Mapping[str, Any]
+    approval_arguments: Mapping[str, Any]
 
 
 def _mapping(value: Any, label: str) -> Mapping[str, Any]:
@@ -283,25 +297,15 @@ def _validate_exchange(
     return evidence, message
 
 
-def execute_qualified_calibrated_feedback_request(
+def prepare_qualified_calibrated_feedback_request(
     *,
     feedback_request_execution_approval_receipt_document: Mapping[str, Any],
     execution_prerequisites_document: Mapping[str, Any],
     calibration_document: Mapping[str, Any],
-    executed_at: str,
-    exchange: Callable[[Mapping[str, Any]], Mapping[str, Any]],
+    prepared_at: str,
     approval_arguments: Mapping[str, Any],
-) -> dict[str, Any]:
-    """Execute one approved request through one explicit injected exchange.
-
-    ``exchange`` receives a closed request containing only the attempt ID and
-    immutable request contract.  This function calls it exactly once and has no
-    retry branch.  A live adapter must durably retain its own partial evidence
-    before returning or raising.
-    """
-
-    if not callable(exchange):
-        raise CalibratedFeedbackExecutionError("an explicit exchange is required")
+) -> PreparedCalibratedFeedbackRequest:
+    """Validate and freeze one request before an exchange can be dispatched."""
     arguments = _mapping(approval_arguments, "approval arguments")
     expected_approval_receipt = (
         approve_qualified_calibrated_feedback_request_execution(**arguments)
@@ -333,7 +337,7 @@ def execute_qualified_calibrated_feedback_request(
     prerequisites = _validate_prerequisites(
         execution_prerequisites_document,
         approval_receipt=supplied_approval_receipt,
-        executed_at=executed_at,
+        executed_at=prepared_at,
     )
     calibration = _mapping(calibration_document, "calibration document")
     loaded_calibration = load_position_vector_calibration(calibration)
@@ -360,14 +364,51 @@ def execute_qualified_calibrated_feedback_request(
         "execution_prerequisites_sha256": canonical_sha256(prerequisites),
         "request_contract": dict(CALIBRATED_FEEDBACK_REQUEST_CONTRACT),
     }
+    return PreparedCalibratedFeedbackRequest(
+        copy.deepcopy(dict(supplied_approval_receipt)),
+        copy.deepcopy(dict(prerequisites)),
+        copy.deepcopy(dict(calibration)),
+        copy.deepcopy(controller_binding),
+        copy.deepcopy(request),
+        copy.deepcopy(dict(arguments)),
+    )
+
+
+def complete_qualified_calibrated_feedback_request(
+    prepared: PreparedCalibratedFeedbackRequest,
+    *,
+    exchange_evidence_document: Mapping[str, Any],
+    executed_at: str,
+) -> dict[str, Any]:
+    """Accept verified exchange evidence and produce the calibrated receipt."""
+
+    if type(prepared) is not PreparedCalibratedFeedbackRequest:
+        raise CalibratedFeedbackExecutionError("exact prepared request is required")
+    reproduced = prepare_qualified_calibrated_feedback_request(
+        feedback_request_execution_approval_receipt_document=(
+            prepared.approval_receipt
+        ),
+        execution_prerequisites_document=prepared.prerequisites,
+        calibration_document=prepared.calibration,
+        prepared_at=executed_at,
+        approval_arguments=prepared.approval_arguments,
+    )
+    if (
+        reproduced.request != prepared.request
+        or reproduced.controller_binding != prepared.controller_binding
+    ):
+        raise CalibratedFeedbackExecutionError("prepared request changed")
+    prerequisites = reproduced.prerequisites
+    supplied_approval_receipt = reproduced.approval_receipt
+    attempt_id = prerequisites["attempt_id"]
     exchange_evidence, response_message = _validate_exchange(
-        exchange(request),
+        exchange_evidence_document,
         attempt_id=attempt_id,
         confirmed_at=prerequisites["confirmed_at"],
         executed_at=executed_at,
     )
     calibrated_feedback = convert_position_vector_feedback(
-        response_message, calibration, controller_binding
+        response_message, reproduced.calibration, reproduced.controller_binding
     )
     response_line = exchange_evidence["response_line_utf8"].encode("utf-8")
     receipt = {
@@ -421,10 +462,43 @@ def execute_qualified_calibrated_feedback_request(
     return receipt
 
 
+def execute_qualified_calibrated_feedback_request(
+    *,
+    feedback_request_execution_approval_receipt_document: Mapping[str, Any],
+    execution_prerequisites_document: Mapping[str, Any],
+    calibration_document: Mapping[str, Any],
+    executed_at: str,
+    exchange: Callable[[Mapping[str, Any]], Mapping[str, Any]],
+    approval_arguments: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Execute one approved request through one explicit injected exchange."""
+
+    if not callable(exchange):
+        raise CalibratedFeedbackExecutionError("an explicit exchange is required")
+    prepared = prepare_qualified_calibrated_feedback_request(
+        feedback_request_execution_approval_receipt_document=(
+            feedback_request_execution_approval_receipt_document
+        ),
+        execution_prerequisites_document=execution_prerequisites_document,
+        calibration_document=calibration_document,
+        prepared_at=executed_at,
+        approval_arguments=approval_arguments,
+    )
+    evidence = exchange(dict(prepared.request))
+    return complete_qualified_calibrated_feedback_request(
+        prepared,
+        exchange_evidence_document=evidence,
+        executed_at=executed_at,
+    )
+
+
 __all__ = [
     "CalibratedFeedbackExecutionError",
+    "PreparedCalibratedFeedbackRequest",
     "EXCHANGE_EVIDENCE_SCHEMA",
     "EXECUTION_RECEIPT_SCHEMA",
     "PREREQUISITES_SCHEMA",
+    "complete_qualified_calibrated_feedback_request",
     "execute_qualified_calibrated_feedback_request",
+    "prepare_qualified_calibrated_feedback_request",
 ]
