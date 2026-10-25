@@ -1175,3 +1175,13 @@ closed feedback request, and verifies the child's immutable journal export
 against every retained byte. It adds no public live CLI, performs no hardware
 access in tests, permits no automatic retry or motion, and leaves all byte,
 duplicate, and reduction limits unchanged.
+
+The calibrated position-vector application-orchestration increment adds two
+governed paths: one private application module and one focused unit-test
+module. The file-count ceiling advances from 6,628 to the exact expected 6,630
+files. The application validates and freezes the approved request before
+staging, creates a durable exclusive attempt claim, supervises the owned child
+once, verifies the retained journal, and only then completes the calibrated
+execution receipt. It adds no public live CLI, performs no hardware access in
+tests, permits no automatic retry or motion, and leaves all byte, duplicate,
+and reduction limits unchanged.
