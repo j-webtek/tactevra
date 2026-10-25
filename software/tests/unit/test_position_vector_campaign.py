@@ -41,6 +41,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_SCHEMA,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4158,6 +4160,122 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
     assert integration_receipt["authority"]["commands_sent"] == 0
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(integration_args)
+
+    integration_execution_approval = {
+        "schema": (
+            QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_SCHEMA
+        ),
+        "integration_review_sha256": canonical_sha256(integration_review),
+        "integration_review_receipt_sha256": canonical_sha256(
+            integration_receipt
+        ),
+        "activation_receipt_sha256": canonical_sha256(activation_receipt),
+        "active_selection_sha256": canonical_sha256(active_selection),
+        "integration_contract_sha256": canonical_sha256(
+            CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT
+        ),
+        "artifact_sha256": canonical_sha256(artifact),
+        "installed_payload_sha256": receipt["installed_payload_sha256"],
+        "calibration_id": artifact["calibration_id"],
+        "attachment_profile": "no_attachment",
+        "controller_binding_sha256": canonical_sha256(
+            artifact["controller_binding"]
+        ),
+        "installation_profile_id": "installed-arm-no-attachment",
+        "destination_ref": "position-vector-calibration-primary",
+        "response_profile": "POSITION_VECTOR_NAMED_POSE",
+        "approver_id": "feedback-integration-approver-11",
+        "decision": "APPROVE",
+        "approved_at": "2026-10-24T22:00:00-04:00",
+        "approval_notes_sha256": "a" * 64,
+    }
+    integration_execution_approval_path = (
+        tmp_path / "feedback-integration-execution-approval.json"
+    )
+    integration_execution_approval_path.write_text(
+        json.dumps(integration_execution_approval), encoding="utf-8"
+    )
+    integration_approval_output = (
+        tmp_path / "feedback-integration-execution-approval-receipt.json"
+    )
+    integration_approval_args = list(integration_args[:-2])
+    integration_approval_args[0] = (
+        "approve-qualified-calibrated-feedback-integration-execution"
+    )
+    integration_approval_args.extend((
+        "--integration-review-receipt", str(integration_review_output),
+        "--integration-execution-approval",
+        str(integration_execution_approval_path),
+        "--output", str(integration_approval_output),
+    ))
+
+    nested_integration_approval_args = list(integration_approval_args)
+    nested_integration_approval_args[-1] = str(
+        activation_root / "integration-execution-approval-receipt.json"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match=(
+            "feedback integration execution approval output must remain outside "
+            "activation root"
+        ),
+    ):
+        main(nested_integration_approval_args)
+
+    tampered_integration_receipt = dict(integration_receipt)
+    tampered_integration_receipt["active_selection_sha256"] = "0" * 64
+    tampered_integration_receipt_path = (
+        tmp_path / "tampered-feedback-integration-review-receipt.json"
+    )
+    tampered_integration_receipt_path.write_text(
+        json.dumps(tampered_integration_receipt), encoding="utf-8"
+    )
+    tampered_integration_approval_args = list(integration_approval_args)
+    tampered_integration_approval_args[
+        tampered_integration_approval_args.index(
+            "--integration-review-receipt"
+        ) + 1
+    ] = str(tampered_integration_receipt_path)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback integration review receipt does not reproduce",
+    ):
+        main(tampered_integration_approval_args)
+
+    assert main(integration_approval_args) == 0
+    integration_approval_receipt = json.loads(
+        integration_approval_output.read_bytes()
+    )
+    assert integration_approval_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA
+    )
+    assert integration_approval_receipt["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVED"
+    )
+    assert integration_approval_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_INTEGRATION_EXECUTION"
+    )
+    assert (
+        integration_approval_receipt[
+            "calibrated_feedback_integration_authorized"
+        ]
+        is True
+    )
+    assert integration_approval_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(integration_approval_args)
+
+    integration_approval_output.unlink()
+    nonindependent_approval = dict(integration_execution_approval)
+    nonindependent_approval["approver_id"] = "feedback-integration-reviewer-10"
+    integration_execution_approval_path.write_text(
+        json.dumps(nonindependent_approval), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback integration execution approver is not independent",
+    ):
+        main(integration_approval_args)
 
     integration_review_output.unlink()
     nonindependent_review = dict(integration_review)

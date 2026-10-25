@@ -1189,6 +1189,73 @@ not load a runtime session, open the controller or camera, request feedback,
 send commands, or authorize motion. Each attachment profile still requires its
 own active selection and review chain.
 
+To approve later execution of that exact reviewed integration, retain a
+separate approval record and run:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign approve-qualified-calibrated-feedback-integration-execution `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --review-receipt qualified-position-vector-independent-fit-review-receipt.json `
+  --artifact qualified-position-vector-calibration.json `
+  --artifact-build-receipt qualified-position-vector-artifact-build-receipt.json `
+  --installation-review qualified-position-vector-installation-review.json `
+  --installation-review-receipt qualified-position-vector-installation-review-receipt.json `
+  --execution-approval qualified-position-vector-installation-execution-approval.json `
+  --execution-approval-receipt qualified-position-vector-installation-execution-approval-receipt.json `
+  --installation-receipt qualified-position-vector-installation-receipt.json `
+  --installation-root inactive-position-vector-calibrations `
+  --activation-review qualified-position-vector-activation-review.json `
+  --activation-review-receipt qualified-position-vector-activation-review-receipt.json `
+  --activation-execution-approval qualified-position-vector-activation-execution-approval.json `
+  --activation-execution-approval-receipt qualified-position-vector-activation-execution-approval-receipt.json `
+  --activation-root active-position-vector-calibrations `
+  --active-selection active-position-vector-calibrations/installed-arm-no-attachment/active-position-vector-calibration.json `
+  --activation-receipt qualified-position-vector-activation-receipt.json `
+  --integration-review qualified-position-vector-feedback-integration-review.json `
+  --integration-review-receipt qualified-position-vector-feedback-integration-review-receipt.json `
+  --integration-execution-approval qualified-position-vector-feedback-integration-execution-approval.json `
+  --output qualified-position-vector-feedback-integration-execution-approval-receipt.json
+```
+
+The approval record has schema
+`rocell.position_vector_calibration_qualified_feedback_integration_execution_approval.v1`.
+It binds the accepted integration review and receipt plus every activation,
+selection, payload, controller, profile, destination, response profile, and
+conversion contract identity. The approver must be independent of the producer
+and every earlier reviewer, approver, installer, and activator.
+
+The command reproduces the complete chain before emitting
+`rocell.position_vector_calibration_qualified_feedback_integration_execution_approval_receipt.v1`.
+The receipt advances to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_INTEGRATION_EXECUTION` and authorizes only
+that later exact integration execution. It does not load a runtime session,
+open the controller or camera, request feedback, send a command, or authorize
+motion. Output remains outside the installation and activation roots and is
+never replaced.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
