@@ -140,6 +140,12 @@ QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA = (
 QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_activation_execution_approval_receipt.v1"
 )
+QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_active_selection.v1"
+)
+QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_activation_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -384,6 +390,24 @@ _QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_FIELDS = frozenset(
         "decision",
         "approved_at",
         "approval_notes_sha256",
+    }
+)
+_QUALIFIED_CALIBRATION_ACTIVE_SELECTION_FIELDS = frozenset(
+    {
+        "schema",
+        "status",
+        "calibration_id",
+        "attachment_profile",
+        "controller_binding_sha256",
+        "installation_profile_id",
+        "destination_ref",
+        "installed_relative_path",
+        "artifact_sha256",
+        "installed_payload_sha256",
+        "activation_execution_approval_receipt_sha256",
+        "activator_id",
+        "activated_at",
+        "authority",
     }
 )
 _PLAN_FIELDS = frozenset(
@@ -4524,6 +4548,282 @@ def approve_qualified_calibration_activation_execution(
     }
 
 
+def _qualified_activation_target(
+    activation_root: str | Path,
+    *,
+    installation_root: str | Path,
+    installation_profile_id: str,
+) -> tuple[Path, str]:
+    requested_root = Path(activation_root).absolute()
+    if requested_root.is_symlink():
+        raise PositionVectorCampaignError(
+            "qualified calibration activation root cannot be a symlink"
+        )
+    installation = Path(installation_root).absolute().resolve(strict=True)
+    try:
+        if requested_root.exists():
+            resolved_requested = requested_root.resolve(strict=True)
+            resolved_requested.relative_to(installation)
+        else:
+            requested_root.resolve(strict=False).relative_to(installation)
+    except ValueError:
+        pass
+    except OSError as exc:
+        raise PositionVectorCampaignError(
+            "cannot resolve qualified calibration activation root"
+        ) from exc
+    else:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation root must remain outside "
+            "installation root"
+        )
+    try:
+        requested_root.mkdir(parents=True, exist_ok=True)
+        root = requested_root.resolve(strict=True)
+    except OSError as exc:
+        raise PositionVectorCampaignError(
+            "cannot create qualified calibration activation root"
+        ) from exc
+    if not root.is_dir():
+        raise PositionVectorCampaignError(
+            "qualified calibration activation root is not a directory"
+        )
+
+    profile = _identifier(installation_profile_id, "installation_profile_id")
+    profile_root = root / profile
+    if profile_root.is_symlink():
+        raise PositionVectorCampaignError(
+            "qualified calibration activation profile cannot be a symlink"
+        )
+    try:
+        profile_root.mkdir(exist_ok=True)
+        resolved_profile_root = profile_root.resolve(strict=True)
+        resolved_profile_root.relative_to(root)
+    except (OSError, ValueError) as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation profile escapes its root"
+        ) from exc
+    if not resolved_profile_root.is_dir():
+        raise PositionVectorCampaignError(
+            "qualified calibration activation profile is not a directory"
+        )
+    target = resolved_profile_root / "active-position-vector-calibration.json"
+    return target, f"{profile}/active-position-vector-calibration.json"
+
+
+def _write_immutable_active_selection(
+    path: Path, selection: Mapping[str, Any]
+) -> None:
+    if path.is_symlink():
+        raise PositionVectorCampaignError(
+            "qualified calibration active selection cannot be a symlink"
+        )
+    payload = canonical_bytes(selection) + b"\n"
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    try:
+        with temporary.open("xb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            os.link(temporary, path)
+        except FileExistsError as exc:
+            raise PositionVectorCampaignError(
+                "refusing to replace existing qualified calibration active selection"
+            ) from exc
+        except OSError as exc:
+            raise PositionVectorCampaignError(
+                "cannot publish qualified calibration active selection"
+            ) from exc
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def execute_qualified_calibration_activation(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    fit_assessment_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+    review_receipt_document: Mapping[str, Any],
+    artifact_document: Mapping[str, Any],
+    artifact_build_receipt_document: Mapping[str, Any],
+    installation_review_document: Mapping[str, Any],
+    installation_review_receipt_document: Mapping[str, Any],
+    execution_approval_document: Mapping[str, Any],
+    execution_approval_receipt_document: Mapping[str, Any],
+    installation_receipt_document: Mapping[str, Any],
+    installation_root: str | Path,
+    activation_review_document: Mapping[str, Any],
+    activation_review_receipt_document: Mapping[str, Any],
+    activation_execution_approval_document: Mapping[str, Any],
+    activation_execution_approval_receipt_document: Mapping[str, Any],
+    activation_root: str | Path,
+    activator_id: str,
+    activated_at: str,
+) -> dict[str, Any]:
+    """Publish one immutable profile-scoped active-selection record offline."""
+
+    expected_approval_receipt = approve_qualified_calibration_activation_execution(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+        dataset_document=dataset_document,
+        compilation_receipt_document=compilation_receipt_document,
+        fit_report_document=fit_report_document,
+        fit_assessment_document=fit_assessment_document,
+        review_document=review_document,
+        review_receipt_document=review_receipt_document,
+        artifact_document=artifact_document,
+        artifact_build_receipt_document=artifact_build_receipt_document,
+        installation_review_document=installation_review_document,
+        installation_review_receipt_document=installation_review_receipt_document,
+        execution_approval_document=execution_approval_document,
+        execution_approval_receipt_document=execution_approval_receipt_document,
+        installation_receipt_document=installation_receipt_document,
+        installation_root=installation_root,
+        activation_review_document=activation_review_document,
+        activation_review_receipt_document=activation_review_receipt_document,
+        activation_execution_approval_document=(
+            activation_execution_approval_document
+        ),
+    )
+    supplied_approval_receipt = _mapping(
+        activation_execution_approval_receipt_document,
+        "qualified_calibration_activation_execution_approval_receipt",
+    )
+    if dict(supplied_approval_receipt) != expected_approval_receipt:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approval receipt "
+            "does not reproduce"
+        )
+
+    installation_receipt = _mapping(
+        installation_receipt_document,
+        "qualified_calibration_installation_receipt",
+    )
+    activator = _identifier(activator_id, "activator_id")
+    if activator == expected_approval_receipt["approver_id"]:
+        raise PositionVectorCampaignError(
+            "qualified calibration activator must be independent of approver"
+        )
+    if not isinstance(activated_at, str):
+        raise PositionVectorCampaignError(
+            "qualified calibration activated_at is invalid"
+        )
+    try:
+        timestamp = datetime.fromisoformat(activated_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibration activated_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibration activated_at must include a UTC offset"
+        )
+
+    target, active_relative_path = _qualified_activation_target(
+        activation_root,
+        installation_root=installation_root,
+        installation_profile_id=expected_approval_receipt[
+            "installation_profile_id"
+        ],
+    )
+    selection = {
+        "schema": QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA,
+        "status": "ACTIVE",
+        "calibration_id": expected_approval_receipt["calibration_id"],
+        "attachment_profile": expected_approval_receipt["attachment_profile"],
+        "controller_binding_sha256": expected_approval_receipt[
+            "controller_binding_sha256"
+        ],
+        "installation_profile_id": expected_approval_receipt[
+            "installation_profile_id"
+        ],
+        "destination_ref": expected_approval_receipt["destination_ref"],
+        "installed_relative_path": installation_receipt[
+            "installed_relative_path"
+        ],
+        "artifact_sha256": expected_approval_receipt["artifact_sha256"],
+        "installed_payload_sha256": expected_approval_receipt[
+            "installed_payload_sha256"
+        ],
+        "activation_execution_approval_receipt_sha256": canonical_sha256(
+            expected_approval_receipt
+        ),
+        "activator_id": activator,
+        "activated_at": activated_at,
+        "authority": dict(expected_approval_receipt["authority"]),
+    }
+    _exact(
+        selection,
+        _QUALIFIED_CALIBRATION_ACTIVE_SELECTION_FIELDS,
+        "qualified_calibration_active_selection",
+    )
+    _write_immutable_active_selection(target, selection)
+    selected_payload = target.read_bytes()
+    expected_payload = canonical_bytes(selection) + b"\n"
+    if selected_payload != expected_payload:
+        raise PositionVectorCampaignError(
+            "qualified calibration active selection bytes do not reproduce"
+        )
+
+    return {
+        "schema": QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_CALIBRATION_ACTIVATED",
+        "calibration_id": selection["calibration_id"],
+        "attachment_profile": selection["attachment_profile"],
+        "controller_binding_sha256": selection["controller_binding_sha256"],
+        "installation_profile_id": selection["installation_profile_id"],
+        "destination_ref": selection["destination_ref"],
+        "installed_relative_path": selection["installed_relative_path"],
+        "active_selection_relative_path": active_relative_path,
+        "artifact_sha256": selection["artifact_sha256"],
+        "installed_payload_sha256": selection["installed_payload_sha256"],
+        "active_selection_sha256": canonical_sha256(selection),
+        "activation_execution_approval_receipt_sha256": selection[
+            "activation_execution_approval_receipt_sha256"
+        ],
+        "activator_id": activator,
+        "activated_at": activated_at,
+        "next_required_gate": (
+            "CALIBRATED_POSITION_VECTOR_FEEDBACK_INTEGRATION_REVIEW"
+        ),
+        "limitations": [
+            "Activation publishes only an immutable profile-scoped selection "
+            "record for the exact installed calibration bytes.",
+            "The installed calibration artifact remains immutable and separate "
+            "from the active selection record.",
+            "This gate opens no controller or camera, loads no runtime session, "
+            "and grants no command, motion, feedback-request, or physical authority.",
+        ],
+        "authority": dict(expected_approval_receipt["authority"]),
+        "calibration_installation_authorized": True,
+        "calibration_activation_authorized": True,
+        "calibrated_feedback_integration_authorized": False,
+    }
+
 def _read_json(path: str) -> Mapping[str, Any]:
     try:
         value = json.loads(Path(path).read_bytes())
@@ -4964,6 +5264,30 @@ def main(argv: list[str] | None = None) -> int:
     ):
         activation_approval_parser.add_argument(f"--{argument}", required=True)
     activation_approval_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    activation_execution_parser = commands.add_parser(
+        "execute-qualified-calibration-activation",
+        help=(
+            "publish one immutable profile-scoped active calibration selection "
+            "without hardware access"
+        ),
+    )
+    for argument in (
+        "inventory", "admission-receipt", "training-split", "collection-plan",
+        "observations", "preparation-receipt", "readiness-plan",
+        "readiness-evidence", "readiness-assessment", "readiness-handoff",
+        "dataset", "compilation-receipt", "fit-report", "fit-assessment",
+        "review", "review-receipt", "artifact", "artifact-build-receipt",
+        "installation-review", "installation-review-receipt",
+        "execution-approval", "execution-approval-receipt",
+        "installation-receipt", "installation-root", "activation-review",
+        "activation-review-receipt", "activation-execution-approval",
+        "activation-execution-approval-receipt", "activation-root",
+        "activator-id", "activated-at", "receipt-output",
+    ):
+        activation_execution_parser.add_argument(f"--{argument}", required=True)
+    activation_execution_parser.add_argument(
         "--ingestion-receipt", action="append", required=True
     )
     prepare_parser = commands.add_parser(
@@ -5580,6 +5904,84 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, receipt)
         return 0
+    if args.command == "execute-qualified-calibration-activation":
+        receipt_output = Path(args.receipt_output).absolute()
+        installation_root = Path(args.installation_root).absolute().resolve(
+            strict=False
+        )
+        activation_root = Path(args.activation_root).absolute().resolve(
+            strict=False
+        )
+        for forbidden_root, message in (
+            (installation_root, "installation root"),
+            (activation_root, "activation root"),
+        ):
+            try:
+                receipt_output.resolve(strict=False).relative_to(forbidden_root)
+            except ValueError:
+                pass
+            else:
+                raise PositionVectorCampaignError(
+                    "activation receipt output must remain outside " + message
+                )
+        if receipt_output.exists():
+            raise PositionVectorCampaignError(
+                "refusing to replace existing activation receipt output"
+            )
+        if not receipt_output.parent.is_dir():
+            raise PositionVectorCampaignError(
+                "activation receipt output directory does not exist"
+            )
+        receipt = execute_qualified_calibration_activation(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            fit_report_document=_read_json(args.fit_report),
+            fit_assessment_document=_read_json(args.fit_assessment),
+            review_document=_read_json(args.review),
+            review_receipt_document=_read_json(args.review_receipt),
+            artifact_document=_read_json(args.artifact),
+            artifact_build_receipt_document=_read_json(
+                args.artifact_build_receipt
+            ),
+            installation_review_document=_read_json(args.installation_review),
+            installation_review_receipt_document=_read_json(
+                args.installation_review_receipt
+            ),
+            execution_approval_document=_read_json(args.execution_approval),
+            execution_approval_receipt_document=_read_json(
+                args.execution_approval_receipt
+            ),
+            installation_receipt_document=_read_json(args.installation_receipt),
+            installation_root=args.installation_root,
+            activation_review_document=_read_json(args.activation_review),
+            activation_review_receipt_document=_read_json(
+                args.activation_review_receipt
+            ),
+            activation_execution_approval_document=_read_json(
+                args.activation_execution_approval
+            ),
+            activation_execution_approval_receipt_document=_read_json(
+                args.activation_execution_approval_receipt
+            ),
+            activation_root=args.activation_root,
+            activator_id=args.activator_id,
+            activated_at=args.activated_at,
+        )
+        _write_new(args.receipt_output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -5711,6 +6113,8 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA",
@@ -5764,6 +6168,7 @@ __all__ = [
     "create_reviewed_collection_package",
     "fit_campaign_dataset",
     "execute_qualified_calibration_installation",
+    "execute_qualified_calibration_activation",
     "ingest_qualified_stationary_observation",
     "load_campaign_dataset",
     "load_collection_readiness",
