@@ -35,6 +35,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA,
+    QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA,
     QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
@@ -3940,6 +3942,116 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
     assert activation_approval_receipt["authority"]["commands_sent"] == 0
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(activation_approval_args)
+
+    activation_root = tmp_path / "active-position-vector-calibrations"
+    activation_receipt_output = tmp_path / "qualified-activation-receipt.json"
+    activation_execution_args = list(activation_approval_args[:-2])
+    activation_execution_args[0] = "execute-qualified-calibration-activation"
+    activation_execution_args.extend((
+        "--activation-execution-approval-receipt",
+        str(activation_approval_receipt_output),
+        "--activation-root", str(activation_root),
+        "--activator-id", "activation-operator-09",
+        "--activated-at", "2026-10-24T20:00:00-04:00",
+        "--receipt-output", str(activation_receipt_output),
+    ))
+
+    nested_activation_receipt_args = list(activation_execution_args)
+    nested_activation_receipt_args[-1] = str(
+        activation_root / "activation-receipt.json"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="activation receipt output must remain outside activation root",
+    ):
+        main(nested_activation_receipt_args)
+    assert not activation_root.exists()
+
+    nonindependent_args = list(activation_execution_args)
+    nonindependent_args[nonindependent_args.index("--activator-id") + 1] = (
+        "activation-approver-08"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="activator must be independent of approver",
+    ):
+        main(nonindependent_args)
+    assert not activation_root.exists()
+
+    nested_root_args = list(activation_execution_args)
+    nested_root_args[nested_root_args.index("--activation-root") + 1] = str(
+        installation_root
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="activation root must remain outside installation root",
+    ):
+        main(nested_root_args)
+    assert not activation_root.exists()
+
+    tampered_approval_receipt = dict(activation_approval_receipt)
+    tampered_approval_receipt["installed_payload_sha256"] = "0" * 64
+    tampered_approval_receipt_path = (
+        tmp_path / "tampered-activation-approval-receipt.json"
+    )
+    tampered_approval_receipt_path.write_text(
+        json.dumps(tampered_approval_receipt), encoding="utf-8"
+    )
+    tampered_args = list(activation_execution_args)
+    tampered_args[
+        tampered_args.index("--activation-execution-approval-receipt") + 1
+    ] = str(tampered_approval_receipt_path)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="activation execution approval receipt does not reproduce",
+    ):
+        main(tampered_args)
+    assert not activation_root.exists()
+
+    assert main(activation_execution_args) == 0
+    active_selection_path = (
+        activation_root
+        / "installed-arm-no-attachment"
+        / "active-position-vector-calibration.json"
+    )
+    active_selection = json.loads(active_selection_path.read_bytes())
+    assert active_selection["schema"] == (
+        QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA
+    )
+    assert active_selection["status"] == "ACTIVE"
+    assert active_selection["attachment_profile"] == "no_attachment"
+    assert active_selection["installed_relative_path"] == (
+        "installed-arm-no-attachment/position-vector-calibration-primary.json"
+    )
+    assert active_selection["installed_payload_sha256"] == receipt[
+        "installed_payload_sha256"
+    ]
+    activation_receipt = json.loads(activation_receipt_output.read_bytes())
+    assert activation_receipt["schema"] == (
+        QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA
+    )
+    assert activation_receipt["status"] == "QUALIFIED_CALIBRATION_ACTIVATED"
+    assert activation_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_INTEGRATION_REVIEW"
+    )
+    assert activation_receipt["calibrated_feedback_integration_authorized"] is False
+    assert activation_receipt["authority"]["commands_sent"] == 0
+    assert (
+        active_selection_path.read_bytes()
+        == canonical_bytes(active_selection) + b"\n"
+    )
+
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace existing activation receipt output",
+    ):
+        main(activation_execution_args)
+    activation_receipt_output.unlink()
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace existing qualified calibration active selection",
+    ):
+        main(activation_execution_args)
 
 
 def test_retained_candidate_inventory_and_coverage_report_reproduce():
