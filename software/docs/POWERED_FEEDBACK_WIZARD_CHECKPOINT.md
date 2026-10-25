@@ -496,3 +496,25 @@ collection boundary.
 This addition performed no hardware access. The retained observation remains
 `CALIBRATION_REQUIRED`; a physical campaign still requires fresh authorization
 and independent measurements.
+
+## Calibrated position-vector execution seam (2026-10-25)
+
+The qualified calibration campaign now reaches a bounded application execution
+seam. The seam reproduces the exact offline execution approval, requires fresh
+operator and physical prerequisites valid for no more than five minutes, checks
+the installed calibration and controller binding, and invokes one injected
+exchange with no retry branch. It accepts only one exact T=105 request, one
+installed position-vector T=1051 response, zero motion commands, and confirmed
+cleanup before converting the raw counts with the approved calibration.
+
+The resulting receipt advances only to calibrated execution review and grants
+no motion, contact, persistent connection, or physical authority. This resolves
+the application-level response-profile mismatch that caused the original
+full-Waveshare worker to reject the received unit's valid position vector. It
+does not alter that worker or broaden its qualification contract.
+
+No controller, camera, or hardware was accessed for this increment. The next
+implementation dependency is a reviewed native position-vector adapter that
+durably records partial attempts and returns the execution seam's exact evidence
+schema. A later live attempt still requires newly confirmed physical state; the
+earlier unplugged or powered state is not reused.

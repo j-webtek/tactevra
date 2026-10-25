@@ -1502,6 +1502,41 @@ authority. The output remains outside the installation, activation,
 integration, and runtime roots and is never replaced. Approve `no_attachment`
 and `stylus_attachment` through separate chains.
 
+### One-shot calibrated feedback execution boundary
+
+`application/calibrated_position_vector_feedback_execution.py` joins an exact
+execution-approval receipt to one injected transport exchange. Before invoking
+the exchange it reproduces the complete approval chain, reloads the installed
+calibration artifact, and rechecks its controller binding. The caller must also
+supply a fresh
+`rocell.position_vector_calibration_qualified_feedback_request_execution_prerequisites.v1`
+record. That record is valid for at most five minutes and requires the operator,
+adapter power, USB connection, secured and stationary arm, clear area, and
+unchanged firmware to be confirmed for the same runtime session.
+
+The boundary calls the injected exchange exactly once with the fixed ten-byte
+`{"T":105}` request contract. It accepts only immutable exchange evidence that
+records one write, one response, zero retries, zero motion commands, successful
+cleanup, and an installed `POSITION_VECTOR_NAMED_POSE` T=1051 response. It then
+uses the approved calibration artifact to convert the seven raw counts into the
+six bounded canonical joint observations.
+
+Success emits
+`rocell.position_vector_calibration_qualified_feedback_request_execution_receipt.v1`
+and advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_EXECUTION_REVIEW`. The receipt
+binds the approval, fresh prerequisites, exchange evidence, response bytes,
+controller identity, attachment profile, and calibrated observation by
+canonical SHA-256. It grants no motion, contact, retry, persistent connection,
+or physical authority. Another feedback request requires another approval and
+new physical prerequisites.
+
+This application boundary deliberately has no native serial adapter or live
+CLI. A native adapter must durably retain its attempt and partial evidence before
+returning or raising, then produce the exact exchange-evidence schema above.
+Until that reviewed adapter is joined, this change is offline implementation
+evidence and does not authorize or claim a live calibrated observation.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

@@ -1160,6 +1160,13 @@ from .virtual_pixel_vision import (
     VirtualPixelVisionStage,
     virtual_pixel_vision_attempt_ledger_from_dict,
 )
+from .calibrated_position_vector_feedback_execution import (
+    EXCHANGE_EVIDENCE_SCHEMA as CALIBRATED_FEEDBACK_EXCHANGE_EVIDENCE_SCHEMA,
+    EXECUTION_RECEIPT_SCHEMA as CALIBRATED_FEEDBACK_EXECUTION_RECEIPT_SCHEMA,
+    PREREQUISITES_SCHEMA as CALIBRATED_FEEDBACK_EXECUTION_PREREQUISITES_SCHEMA,
+    CalibratedFeedbackExecutionError,
+    execute_qualified_calibrated_feedback_request,
+)
 
 __all__ = [
     "FIRST_POWER_ON_CHECKPOINT_SCHEMA",
@@ -2118,4 +2125,9 @@ __all__ = [
     "QualificationCaseSpec",
     "default_qualification_case_specs",
     "run_prehardware_qualification",
+    "CALIBRATED_FEEDBACK_EXCHANGE_EVIDENCE_SCHEMA",
+    "CALIBRATED_FEEDBACK_EXECUTION_PREREQUISITES_SCHEMA",
+    "CALIBRATED_FEEDBACK_EXECUTION_RECEIPT_SCHEMA",
+    "CalibratedFeedbackExecutionError",
+    "execute_qualified_calibrated_feedback_request",
 ]
