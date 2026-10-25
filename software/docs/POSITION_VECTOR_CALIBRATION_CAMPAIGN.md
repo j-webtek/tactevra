@@ -1469,6 +1469,39 @@ the installation, activation, integration, and runtime roots and is never
 replaced. Keep `no_attachment` and `stylus_attachment` admission chains
 separate; a later attachment change requires the corresponding profile chain.
 
+To approve execution of that reviewed request, retain a separate approval with
+schema
+`rocell.position_vector_calibration_qualified_feedback_request_execution_approval.v1`.
+Invoke `approve-qualified-calibrated-feedback-request-execution` with every
+request-admission input above. Remove the admission command's `--output` option
+and add:
+
+```powershell
+--feedback-request-admission-review-receipt qualified-position-vector-feedback-request-admission-review-receipt.json `
+--feedback-request-execution-approval qualified-position-vector-feedback-request-execution-approval.json `
+--output qualified-position-vector-feedback-request-execution-approval-receipt.json
+```
+
+The approval must bind the exact admission review and receipt, runtime session,
+offline validation, dataset, installed artifact, active selection, integration,
+controller, attachment profile, loader, converter, and fixed request contract.
+Its approver must be independent of the admission reviewer, runtime validator,
+runtime loader, integrator, and every earlier campaign actor. The approved
+contract still permits only one ten-byte `{"T":105}` line with LF, one bounded
+T=1051 response, and zero automatic retries.
+
+An accepted approval emits
+`rocell.position_vector_calibration_qualified_feedback_request_execution_approval_receipt.v1`
+and advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_EXECUTION`. Approval does not
+establish the live execution prerequisites: operator presence, adapter power,
+USB connection, secured and stationary arm, clear area, and unchanged firmware
+must be checked again at execution. This offline gate opens no controller or
+camera, sends zero bytes, receives no response, and grants no motion or physical
+authority. The output remains outside the installation, activation,
+integration, and runtime roots and is never replaced. Approve `no_attachment`
+and `stylus_attachment` through separate chains.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
