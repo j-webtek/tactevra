@@ -220,6 +220,16 @@ that evidence, convert the proposed count vector into a physical target, open
 hardware, or grant collection or motion authority. All byte, duplicate, and
 reduction limits remain unchanged.
 
+The calibrated position-vector feedback execution increment adds two governed
+paths: one fail-closed application execution boundary and one focused unit-test
+module. The reviewed tracked-file ceiling moves from 6,614 to the exact expected
+6,616 files. Existing campaign and powered-feedback documentation is updated in
+place. The boundary joins an exact offline approval to fresh physical
+prerequisites and one injected, zero-retry T=105 exchange, but adds no native
+adapter, controller transcript, measurement export, camera frame, motion
+authority, or physical qualification. All byte, duplicate, and reduction limits
+remain unchanged.
+
 The candidate-qualification-assessment increment adds no governed paths and
 keeps the reviewed tracked-file ceiling at 6,614. It extends the existing
 campaign source, tests, and guide with an offline, hash-bound evidence-chain
