@@ -47,6 +47,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_SCHEMA,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4509,6 +4511,112 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
     assert runtime_admission_receipt["authority"]["commands_sent"] == 0
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(runtime_admission_args)
+
+    runtime_load_execution_approval = {
+        "schema": QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_SCHEMA,
+        "runtime_admission_review_sha256": canonical_sha256(runtime_admission_review),
+        "runtime_admission_review_receipt_sha256": canonical_sha256(
+            runtime_admission_receipt
+        ),
+        "integration_receipt_sha256": runtime_admission_receipt[
+            "integration_receipt_sha256"
+        ],
+        "integration_sha256": runtime_admission_receipt["integration_sha256"],
+        "integration_payload_sha256": runtime_admission_receipt[
+            "integration_payload_sha256"
+        ],
+        "integration_contract_sha256": runtime_admission_receipt[
+            "integration_contract_sha256"
+        ],
+        "artifact_sha256": runtime_admission_receipt["artifact_sha256"],
+        "installed_payload_sha256": runtime_admission_receipt[
+            "installed_payload_sha256"
+        ],
+        "active_selection_sha256": runtime_admission_receipt[
+            "active_selection_sha256"
+        ],
+        "calibration_id": runtime_admission_receipt["calibration_id"],
+        "attachment_profile": runtime_admission_receipt["attachment_profile"],
+        "controller_binding_sha256": runtime_admission_receipt[
+            "controller_binding_sha256"
+        ],
+        "installation_profile_id": runtime_admission_receipt[
+            "installation_profile_id"
+        ],
+        "destination_ref": runtime_admission_receipt["destination_ref"],
+        "response_profile": runtime_admission_receipt["response_profile"],
+        "calibration_loader": runtime_admission_receipt["calibration_loader"],
+        "feedback_converter": runtime_admission_receipt["feedback_converter"],
+        "approver_id": "feedback-runtime-load-approver-14",
+        "decision": "APPROVE",
+        "approved_at": "2026-10-25T10:30:00-04:00",
+        "approval_notes_sha256": "e" * 64,
+    }
+    runtime_load_execution_approval_path = tmp_path / "feedback-runtime-load-execution-approval.json"
+    runtime_load_execution_approval_path.write_text(
+        json.dumps(runtime_load_execution_approval), encoding="utf-8"
+    )
+    runtime_load_approval_output = tmp_path / "feedback-runtime-load-execution-approval-receipt.json"
+    runtime_load_approval_args = list(runtime_admission_args[:-2])
+    runtime_load_approval_args[0] = (
+        "approve-qualified-calibrated-feedback-runtime-load-execution"
+    )
+    runtime_load_approval_args.extend((
+        "--runtime-admission-review-receipt", str(runtime_admission_output),
+        "--runtime-load-execution-approval", str(runtime_load_execution_approval_path),
+        "--output", str(runtime_load_approval_output),
+    ))
+
+    nested_runtime_load_approval_args = list(runtime_load_approval_args)
+    nested_runtime_load_approval_args[-1] = str(
+        integration_root / "runtime-load-approval-receipt.json"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime load execution approval output must remain outside integration root",
+    ):
+        main(nested_runtime_load_approval_args)
+
+    nonindependent_runtime_load_approval = dict(runtime_load_execution_approval)
+    nonindependent_runtime_load_approval["approver_id"] = "feedback-runtime-admission-reviewer-13"
+    runtime_load_execution_approval_path.write_text(
+        json.dumps(nonindependent_runtime_load_approval), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime load execution approver is not independent",
+    ):
+        main(runtime_load_approval_args)
+
+    mismatched_runtime_load_approval = dict(runtime_load_execution_approval)
+    mismatched_runtime_load_approval["integration_sha256"] = "0" * 64
+    runtime_load_execution_approval_path.write_text(
+        json.dumps(mismatched_runtime_load_approval), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime load execution approval integration_sha256 mismatch",
+    ):
+        main(runtime_load_approval_args)
+
+    runtime_load_execution_approval_path.write_text(
+        json.dumps(runtime_load_execution_approval), encoding="utf-8"
+    )
+    assert main(runtime_load_approval_args) == 0
+    runtime_load_approval_receipt = json.loads(runtime_load_approval_output.read_bytes())
+    assert runtime_load_approval_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_RECEIPT_SCHEMA
+    )
+    assert runtime_load_approval_receipt["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVED"
+    )
+    assert runtime_load_approval_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_LOAD_EXECUTION"
+    )
+    assert runtime_load_approval_receipt["calibrated_feedback_runtime_loading_authorized"] is True
+    assert runtime_load_approval_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(runtime_load_approval_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)

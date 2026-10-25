@@ -1326,6 +1326,39 @@ motion or physical action. Run the complete review independently for
 `no_attachment` and `stylus_attachment`; hashes and profile directories cannot
 cross between them.
 
+To approve a later runtime-load execution, retain a separate approval record
+with schema
+`rocell.position_vector_calibration_qualified_feedback_runtime_load_execution_approval.v1`.
+Invoke `approve-qualified-calibrated-feedback-runtime-load-execution` with
+every complete-chain, integration-execution, and runtime-admission input above.
+Replace the admission command's `--output` option with these approval-specific
+options:
+
+```powershell
+--runtime-admission-review-receipt qualified-position-vector-feedback-runtime-admission-review-receipt.json `
+--runtime-load-execution-approval qualified-position-vector-feedback-runtime-load-execution-approval.json `
+--output qualified-position-vector-feedback-runtime-load-execution-approval-receipt.json
+```
+
+The approval binds the accepted admission review and receipt, immutable
+integration descriptor and stored bytes, conversion contract, calibration
+artifact, installed payload, active selection, controller, attachment profile,
+destination, response profile, and strict loader and converter references. The
+approver must be independent of the fit producer and every earlier reviewer,
+approver, installer, activator, integrator, and admission reviewer. The command
+replays the complete chain and requires the supplied admission receipt to
+reproduce exactly. Its output remains outside the installation, activation,
+and integration roots and is never replaced.
+
+An accepted approval emits
+`rocell.position_vector_calibration_qualified_feedback_runtime_load_execution_approval_receipt.v1`
+and advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_LOAD_EXECUTION`. The receipt
+authorizes a later exact load, while this approval command itself creates no
+runtime session, opens no controller or camera, requests no feedback, sends no
+command, and authorizes no motion or physical action. Approval chains remain
+separate for `no_attachment` and `stylus_attachment`.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
