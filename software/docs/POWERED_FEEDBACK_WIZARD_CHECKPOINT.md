@@ -513,8 +513,15 @@ the application-level response-profile mismatch that caused the original
 full-Waveshare worker to reject the received unit's valid position vector. It
 does not alter that worker or broaden its qualification contract.
 
-No controller, camera, or hardware was accessed for this increment. The next
-implementation dependency is a reviewed native position-vector adapter that
-durably records partial attempts and returns the execution seam's exact evidence
-schema. A later live attempt still requires newly confirmed physical state; the
-earlier unplugged or powered state is not reused.
+No controller, camera, or hardware was accessed for this increment. The separate
+native position-vector serial adapter now exists alongside this seam. It keeps
+the full-Waveshare worker unchanged, journals intent before transport creation,
+records every open/write/response/close stage, and emits the seam's exact
+exchange evidence only after one installed-profile response and confirmed
+cleanup. Partial or interrupted attempts remain terminal with retry forbidden.
+
+The remaining implementation dependency is the reviewed production composition:
+pin the new adapter to the existing non-purging Windows connection, exact
+controller identity, owned-process supervisor, and governed evidence export.
+There is still no public live CLI. A later physical attempt requires newly
+confirmed physical state; the earlier unplugged or powered state is not reused.

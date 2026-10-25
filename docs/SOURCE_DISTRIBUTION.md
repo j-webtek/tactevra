@@ -230,6 +230,15 @@ adapter, controller transcript, measurement export, camera frame, motion
 authority, or physical qualification. All byte, duplicate, and reduction limits
 remain unchanged.
 
+The calibrated position-vector native serial adapter increment adds two governed
+paths: one Windows provider adapter with a durable no-replay attempt journal and
+one focused hardware-incapable unit-test module. The reviewed tracked-file
+ceiling moves from 6,616 to the exact expected 6,618 files. The adapter performs
+one fixed T=105 write, accepts only one installed position-vector response, and
+returns exact application exchange evidence only after confirmed cleanup. It
+adds no public live CLI, controller transcript, motion authority, or physical
+qualification. All byte, duplicate, and reduction limits remain unchanged.
+
 The candidate-qualification-assessment increment adds no governed paths and
 keeps the reviewed tracked-file ceiling at 6,614. It extends the existing
 campaign source, tests, and guide with an offline, hash-bound evidence-chain
