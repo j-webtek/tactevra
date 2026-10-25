@@ -43,6 +43,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_SCHEMA,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4264,6 +4266,132 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
     assert integration_approval_receipt["authority"]["commands_sent"] == 0
     with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
         main(integration_approval_args)
+
+    integration_root = tmp_path / "calibrated-feedback-integrations"
+    integration_execution_receipt_output = (
+        tmp_path / "calibrated-feedback-integration-receipt.json"
+    )
+    integration_execution_args = list(integration_approval_args[:-2])
+    integration_execution_args[0] = (
+        "execute-qualified-calibrated-feedback-integration"
+    )
+    integration_execution_args.extend((
+        "--integration-execution-approval-receipt",
+        str(integration_approval_output),
+        "--integration-root", str(integration_root),
+        "--integrator-id", "feedback-integration-operator-12",
+        "--integrated-at", "2026-10-24T23:00:00-04:00",
+        "--receipt-output", str(integration_execution_receipt_output),
+    ))
+
+    nested_integration_receipt_args = list(integration_execution_args)
+    nested_integration_receipt_args[-1] = str(
+        integration_root / "integration-receipt.json"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback integration receipt output must remain outside integration root",
+    ):
+        main(nested_integration_receipt_args)
+    assert not integration_root.exists()
+
+    nonindependent_integration_args = list(integration_execution_args)
+    nonindependent_integration_args[
+        nonindependent_integration_args.index("--integrator-id") + 1
+    ] = "feedback-integration-approver-11"
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback integrator must be independent of approver",
+    ):
+        main(nonindependent_integration_args)
+    assert not integration_root.exists()
+
+    nested_integration_root_args = list(integration_execution_args)
+    nested_integration_root_args[
+        nested_integration_root_args.index("--integration-root") + 1
+    ] = str(activation_root)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback integration root must remain outside activation root",
+    ):
+        main(nested_integration_root_args)
+    assert not integration_root.exists()
+
+    tampered_integration_approval_receipt = dict(integration_approval_receipt)
+    tampered_integration_approval_receipt["integration_contract_sha256"] = (
+        "0" * 64
+    )
+    tampered_integration_approval_receipt_path = (
+        tmp_path / "tampered-feedback-integration-approval-receipt.json"
+    )
+    tampered_integration_approval_receipt_path.write_text(
+        json.dumps(tampered_integration_approval_receipt), encoding="utf-8"
+    )
+    tampered_integration_execution_args = list(integration_execution_args)
+    tampered_integration_execution_args[
+        tampered_integration_execution_args.index(
+            "--integration-execution-approval-receipt"
+        ) + 1
+    ] = str(tampered_integration_approval_receipt_path)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="integration execution approval receipt does not reproduce",
+    ):
+        main(tampered_integration_execution_args)
+    assert not integration_root.exists()
+
+    assert main(integration_execution_args) == 0
+    integration_path = (
+        integration_root
+        / "installed-arm-no-attachment"
+        / "calibrated-position-vector-feedback-integration.json"
+    )
+    integrated_binding = json.loads(integration_path.read_bytes())
+    assert integrated_binding["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_SCHEMA
+    )
+    assert integrated_binding["status"] == "INTEGRATED_OFFLINE"
+    assert integrated_binding["attachment_profile"] == "no_attachment"
+    assert integrated_binding["integration_contract"] == (
+        CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT
+    )
+    assert integrated_binding["calibration_loader"].endswith(
+        ":load_position_vector_calibration"
+    )
+    assert integrated_binding["feedback_converter"].endswith(
+        ":convert_position_vector_feedback"
+    )
+    assert integration_path.read_bytes() == (
+        canonical_bytes(integrated_binding) + b"\n"
+    )
+    integration_execution_receipt = json.loads(
+        integration_execution_receipt_output.read_bytes()
+    )
+    assert integration_execution_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_SCHEMA
+    )
+    assert integration_execution_receipt["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATED_OFFLINE"
+    )
+    assert integration_execution_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_ADMISSION_REVIEW"
+    )
+    assert (
+        integration_execution_receipt[
+            "calibrated_feedback_runtime_loading_authorized"
+        ]
+        is False
+    )
+    assert integration_execution_receipt["authority"]["commands_sent"] == 0
+    assert integration_execution_receipt["integration_relative_path"] == (
+        "installed-arm-no-attachment/"
+        "calibrated-position-vector-feedback-integration.json"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace existing feedback integration receipt output",
+    ):
+        main(integration_execution_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)
