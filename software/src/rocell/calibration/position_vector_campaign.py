@@ -146,6 +146,24 @@ QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA = (
 QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_activation_receipt.v1"
 )
+QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_feedback_integration_review.v1"
+)
+QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_feedback_integration_review_receipt.v1"
+)
+CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT = {
+    "schema": "rocell.calibrated_position_vector_feedback_integration_contract.v1",
+    "input_response_profile": PROFILE,
+    "calibration_schema": ARTIFACT_SCHEMA,
+    "output_schema": "rocell.calibrated_position_vector_feedback.v1",
+    "position_order_servo_ids": list(SERVO_ORDER),
+    "canonical_joint_order": list(JOINT_ORDER),
+    "requires_exact_controller_binding": True,
+    "requires_shoulder_pair_runtime_check": True,
+    "motion_authorized": False,
+    "physical_authority": False,
+}
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -408,6 +426,51 @@ _QUALIFIED_CALIBRATION_ACTIVE_SELECTION_FIELDS = frozenset(
         "activator_id",
         "activated_at",
         "authority",
+    }
+)
+_QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_FIELDS = frozenset(
+    {
+        "schema",
+        "status",
+        "calibration_id",
+        "attachment_profile",
+        "controller_binding_sha256",
+        "installation_profile_id",
+        "destination_ref",
+        "installed_relative_path",
+        "active_selection_relative_path",
+        "artifact_sha256",
+        "installed_payload_sha256",
+        "active_selection_sha256",
+        "activation_execution_approval_receipt_sha256",
+        "activator_id",
+        "activated_at",
+        "next_required_gate",
+        "limitations",
+        "authority",
+        "calibration_installation_authorized",
+        "calibration_activation_authorized",
+        "calibrated_feedback_integration_authorized",
+    }
+)
+_QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_FIELDS = frozenset(
+    {
+        "schema",
+        "activation_receipt_sha256",
+        "active_selection_sha256",
+        "integration_contract_sha256",
+        "artifact_sha256",
+        "installed_payload_sha256",
+        "calibration_id",
+        "attachment_profile",
+        "controller_binding_sha256",
+        "installation_profile_id",
+        "destination_ref",
+        "response_profile",
+        "reviewer_id",
+        "decision",
+        "reviewed_at",
+        "review_notes_sha256",
     }
 )
 _PLAN_FIELDS = frozenset(
@@ -4553,6 +4616,7 @@ def _qualified_activation_target(
     *,
     installation_root: str | Path,
     installation_profile_id: str,
+    create: bool = True,
 ) -> tuple[Path, str]:
     requested_root = Path(activation_root).absolute()
     if requested_root.is_symlink():
@@ -4578,7 +4642,8 @@ def _qualified_activation_target(
             "installation root"
         )
     try:
-        requested_root.mkdir(parents=True, exist_ok=True)
+        if create:
+            requested_root.mkdir(parents=True, exist_ok=True)
         root = requested_root.resolve(strict=True)
     except OSError as exc:
         raise PositionVectorCampaignError(
@@ -4596,7 +4661,8 @@ def _qualified_activation_target(
             "qualified calibration activation profile cannot be a symlink"
         )
     try:
-        profile_root.mkdir(exist_ok=True)
+        if create:
+            profile_root.mkdir(exist_ok=True)
         resolved_profile_root = profile_root.resolve(strict=True)
         resolved_profile_root.relative_to(root)
     except (OSError, ValueError) as exc:
@@ -4819,6 +4885,352 @@ def execute_qualified_calibration_activation(
             "and grants no command, motion, feedback-request, or physical authority.",
         ],
         "authority": dict(expected_approval_receipt["authority"]),
+        "calibration_installation_authorized": True,
+        "calibration_activation_authorized": True,
+        "calibrated_feedback_integration_authorized": False,
+    }
+
+
+def accept_qualified_calibrated_feedback_integration_review(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    fit_assessment_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+    review_receipt_document: Mapping[str, Any],
+    artifact_document: Mapping[str, Any],
+    artifact_build_receipt_document: Mapping[str, Any],
+    installation_review_document: Mapping[str, Any],
+    installation_review_receipt_document: Mapping[str, Any],
+    execution_approval_document: Mapping[str, Any],
+    execution_approval_receipt_document: Mapping[str, Any],
+    installation_receipt_document: Mapping[str, Any],
+    installation_root: str | Path,
+    activation_review_document: Mapping[str, Any],
+    activation_review_receipt_document: Mapping[str, Any],
+    activation_execution_approval_document: Mapping[str, Any],
+    activation_execution_approval_receipt_document: Mapping[str, Any],
+    activation_root: str | Path,
+    active_selection_document: Mapping[str, Any],
+    activation_receipt_document: Mapping[str, Any],
+    integration_review_document: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Accept an offline review that binds one active selection to conversion."""
+
+    expected_approval_receipt = approve_qualified_calibration_activation_execution(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+        dataset_document=dataset_document,
+        compilation_receipt_document=compilation_receipt_document,
+        fit_report_document=fit_report_document,
+        fit_assessment_document=fit_assessment_document,
+        review_document=review_document,
+        review_receipt_document=review_receipt_document,
+        artifact_document=artifact_document,
+        artifact_build_receipt_document=artifact_build_receipt_document,
+        installation_review_document=installation_review_document,
+        installation_review_receipt_document=installation_review_receipt_document,
+        execution_approval_document=execution_approval_document,
+        execution_approval_receipt_document=execution_approval_receipt_document,
+        installation_receipt_document=installation_receipt_document,
+        installation_root=installation_root,
+        activation_review_document=activation_review_document,
+        activation_review_receipt_document=activation_review_receipt_document,
+        activation_execution_approval_document=(
+            activation_execution_approval_document
+        ),
+    )
+    supplied_approval_receipt = _mapping(
+        activation_execution_approval_receipt_document,
+        "qualified_calibration_activation_execution_approval_receipt",
+    )
+    if dict(supplied_approval_receipt) != expected_approval_receipt:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approval receipt "
+            "does not reproduce"
+        )
+
+    artifact = _mapping(artifact_document, "qualified_calibration_artifact")
+    calibration = load_position_vector_calibration(artifact)
+    installation_receipt = _mapping(
+        installation_receipt_document,
+        "qualified_calibration_installation_receipt",
+    )
+    active_selection = _mapping(
+        active_selection_document,
+        "qualified_calibration_active_selection",
+    )
+    _exact(
+        active_selection,
+        _QUALIFIED_CALIBRATION_ACTIVE_SELECTION_FIELDS,
+        "qualified_calibration_active_selection",
+    )
+    if (
+        active_selection.get("schema")
+        != QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA
+        or active_selection.get("status") != "ACTIVE"
+    ):
+        raise PositionVectorCampaignError(
+            "qualified calibration active selection schema or status mismatch"
+        )
+    expected_selection = {
+        "schema": QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA,
+        "status": "ACTIVE",
+        "calibration_id": expected_approval_receipt["calibration_id"],
+        "attachment_profile": expected_approval_receipt["attachment_profile"],
+        "controller_binding_sha256": expected_approval_receipt[
+            "controller_binding_sha256"
+        ],
+        "installation_profile_id": expected_approval_receipt[
+            "installation_profile_id"
+        ],
+        "destination_ref": expected_approval_receipt["destination_ref"],
+        "installed_relative_path": installation_receipt[
+            "installed_relative_path"
+        ],
+        "artifact_sha256": expected_approval_receipt["artifact_sha256"],
+        "installed_payload_sha256": expected_approval_receipt[
+            "installed_payload_sha256"
+        ],
+        "activation_execution_approval_receipt_sha256": canonical_sha256(
+            expected_approval_receipt
+        ),
+        "activator_id": active_selection.get("activator_id"),
+        "activated_at": active_selection.get("activated_at"),
+        "authority": dict(expected_approval_receipt["authority"]),
+    }
+    activator_id = _identifier(expected_selection["activator_id"], "activator_id")
+    if activator_id == expected_approval_receipt["approver_id"]:
+        raise PositionVectorCampaignError(
+            "qualified calibration activator must be independent of approver"
+        )
+    activated_at = expected_selection["activated_at"]
+    if not isinstance(activated_at, str):
+        raise PositionVectorCampaignError("qualified calibration activated_at is invalid")
+    try:
+        timestamp = datetime.fromisoformat(activated_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibration activated_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibration activated_at must include a UTC offset"
+        )
+    if dict(active_selection) != expected_selection:
+        raise PositionVectorCampaignError(
+            "qualified calibration active selection does not reproduce"
+        )
+
+    active_target, active_relative_path = _qualified_activation_target(
+        activation_root,
+        installation_root=installation_root,
+        installation_profile_id=expected_approval_receipt[
+            "installation_profile_id"
+        ],
+        create=False,
+    )
+    if active_target.is_symlink() or not active_target.is_file():
+        raise PositionVectorCampaignError(
+            "qualified calibration active selection is missing or invalid"
+        )
+    try:
+        active_payload = active_target.read_bytes()
+    except OSError as exc:
+        raise PositionVectorCampaignError(
+            "cannot read qualified calibration active selection"
+        ) from exc
+    if active_payload != canonical_bytes(expected_selection) + b"\n":
+        raise PositionVectorCampaignError(
+            "qualified calibration active selection bytes do not reproduce"
+        )
+
+    activation_receipt = _mapping(
+        activation_receipt_document,
+        "qualified_calibration_activation_receipt",
+    )
+    _exact(
+        activation_receipt,
+        _QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_FIELDS,
+        "qualified_calibration_activation_receipt",
+    )
+    expected_activation_receipt = {
+        "schema": QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_CALIBRATION_ACTIVATED",
+        "calibration_id": expected_selection["calibration_id"],
+        "attachment_profile": expected_selection["attachment_profile"],
+        "controller_binding_sha256": expected_selection[
+            "controller_binding_sha256"
+        ],
+        "installation_profile_id": expected_selection["installation_profile_id"],
+        "destination_ref": expected_selection["destination_ref"],
+        "installed_relative_path": expected_selection["installed_relative_path"],
+        "active_selection_relative_path": active_relative_path,
+        "artifact_sha256": expected_selection["artifact_sha256"],
+        "installed_payload_sha256": expected_selection[
+            "installed_payload_sha256"
+        ],
+        "active_selection_sha256": canonical_sha256(expected_selection),
+        "activation_execution_approval_receipt_sha256": expected_selection[
+            "activation_execution_approval_receipt_sha256"
+        ],
+        "activator_id": activator_id,
+        "activated_at": activated_at,
+        "next_required_gate": (
+            "CALIBRATED_POSITION_VECTOR_FEEDBACK_INTEGRATION_REVIEW"
+        ),
+        "limitations": [
+            "Activation publishes only an immutable profile-scoped selection "
+            "record for the exact installed calibration bytes.",
+            "The installed calibration artifact remains immutable and separate "
+            "from the active selection record.",
+            "This gate opens no controller or camera, loads no runtime session, "
+            "and grants no command, motion, feedback-request, or physical authority.",
+        ],
+        "authority": dict(expected_approval_receipt["authority"]),
+        "calibration_installation_authorized": True,
+        "calibration_activation_authorized": True,
+        "calibrated_feedback_integration_authorized": False,
+    }
+    if dict(activation_receipt) != expected_activation_receipt:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation receipt does not reproduce"
+        )
+
+    integration_review = _mapping(
+        integration_review_document,
+        "qualified_calibrated_feedback_integration_review",
+    )
+    _exact(
+        integration_review,
+        _QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_FIELDS,
+        "qualified_calibrated_feedback_integration_review",
+    )
+    if (
+        integration_review.get("schema")
+        != QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_SCHEMA
+    ):
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration review schema mismatch"
+        )
+    expected_bindings = {
+        "activation_receipt_sha256": canonical_sha256(
+            expected_activation_receipt
+        ),
+        "active_selection_sha256": canonical_sha256(expected_selection),
+        "integration_contract_sha256": canonical_sha256(
+            CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT
+        ),
+        "artifact_sha256": canonical_sha256(artifact),
+        "installed_payload_sha256": expected_selection[
+            "installed_payload_sha256"
+        ],
+        "calibration_id": calibration.calibration_id,
+        "attachment_profile": expected_selection["attachment_profile"],
+        "controller_binding_sha256": canonical_sha256(
+            dict(calibration.controller_binding)
+        ),
+        "installation_profile_id": expected_selection["installation_profile_id"],
+        "destination_ref": expected_selection["destination_ref"],
+        "response_profile": PROFILE,
+    }
+    for field, expected_value in expected_bindings.items():
+        if integration_review.get(field) != expected_value:
+            raise PositionVectorCampaignError(
+                "qualified calibrated feedback integration review "
+                f"{field} mismatch"
+            )
+
+    reviewer_id = _identifier(integration_review.get("reviewer_id"), "reviewer_id")
+    excluded_reviewers = {
+        _identifier(fit_report_document.get("producer_id"), "producer_id"),
+        _identifier(review_receipt_document.get("reviewer_id"), "fit_reviewer_id"),
+        _identifier(
+            installation_review_receipt_document.get("reviewer_id"),
+            "installation_reviewer_id",
+        ),
+        _identifier(execution_approval_receipt_document.get("approver_id"), "approver_id"),
+        _identifier(installation_receipt.get("installer_id"), "installer_id"),
+        _identifier(
+            activation_review_receipt_document.get("reviewer_id"),
+            "activation_reviewer_id",
+        ),
+        _identifier(expected_approval_receipt.get("approver_id"), "activation_approver_id"),
+        activator_id,
+    }
+    if reviewer_id in excluded_reviewers:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration reviewer is not independent"
+        )
+    if integration_review.get("decision") != "ACCEPT":
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration review decision is not ACCEPT"
+        )
+    reviewed_at = integration_review.get("reviewed_at")
+    if not isinstance(reviewed_at, str):
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration reviewed_at is invalid"
+        )
+    try:
+        timestamp = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration reviewed_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration reviewed_at must include "
+            "a UTC offset"
+        )
+    review_notes_sha256 = _digest(
+        integration_review.get("review_notes_sha256"), "review_notes_sha256"
+    )
+    normalized_review = dict(integration_review)
+    normalized_review["review_notes_sha256"] = review_notes_sha256
+
+    return {
+        "schema": (
+            QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_RECEIPT_SCHEMA
+        ),
+        "status": "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_ACCEPTED",
+        **expected_bindings,
+        "integration_review_sha256": canonical_sha256(normalized_review),
+        "reviewer_id": reviewer_id,
+        "reviewed_at": reviewed_at,
+        "review_notes_sha256": review_notes_sha256,
+        "next_required_gate": (
+            "CALIBRATED_POSITION_VECTOR_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL"
+        ),
+        "limitations": [
+            "This receipt reviews one exact active selection, installed payload, "
+            "controller binding, attachment profile, and conversion contract.",
+            "Review acceptance does not load the calibration into a runtime session "
+            "or request controller feedback.",
+            "This gate opens no controller or camera and grants no command, motion, "
+            "feedback-request, or physical authority.",
+        ],
+        "authority": dict(expected_activation_receipt["authority"]),
         "calibration_installation_authorized": True,
         "calibration_activation_authorized": True,
         "calibrated_feedback_integration_authorized": False,
@@ -5288,6 +5700,32 @@ def main(argv: list[str] | None = None) -> int:
     ):
         activation_execution_parser.add_argument(f"--{argument}", required=True)
     activation_execution_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    feedback_integration_review_parser = commands.add_parser(
+        "review-qualified-calibrated-feedback-integration",
+        help=(
+            "review one active calibration selection against the offline "
+            "position-vector conversion contract"
+        ),
+    )
+    for argument in (
+        "inventory", "admission-receipt", "training-split", "collection-plan",
+        "observations", "preparation-receipt", "readiness-plan",
+        "readiness-evidence", "readiness-assessment", "readiness-handoff",
+        "dataset", "compilation-receipt", "fit-report", "fit-assessment",
+        "review", "review-receipt", "artifact", "artifact-build-receipt",
+        "installation-review", "installation-review-receipt",
+        "execution-approval", "execution-approval-receipt",
+        "installation-receipt", "installation-root", "activation-review",
+        "activation-review-receipt", "activation-execution-approval",
+        "activation-execution-approval-receipt", "activation-root",
+        "active-selection", "activation-receipt", "integration-review", "output",
+    ):
+        feedback_integration_review_parser.add_argument(
+            f"--{argument}", required=True
+        )
+    feedback_integration_review_parser.add_argument(
         "--ingestion-receipt", action="append", required=True
     )
     prepare_parser = commands.add_parser(
@@ -5982,6 +6420,74 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.receipt_output, receipt)
         return 0
+    if args.command == "review-qualified-calibrated-feedback-integration":
+        output = Path(args.output).absolute()
+        for forbidden_root, message in (
+            (Path(args.installation_root).absolute().resolve(strict=False),
+             "installation root"),
+            (Path(args.activation_root).absolute().resolve(strict=False),
+             "activation root"),
+        ):
+            try:
+                output.resolve(strict=False).relative_to(forbidden_root)
+            except ValueError:
+                pass
+            else:
+                raise PositionVectorCampaignError(
+                    "feedback integration review output must remain outside "
+                    + message
+                )
+        receipt = accept_qualified_calibrated_feedback_integration_review(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            fit_report_document=_read_json(args.fit_report),
+            fit_assessment_document=_read_json(args.fit_assessment),
+            review_document=_read_json(args.review),
+            review_receipt_document=_read_json(args.review_receipt),
+            artifact_document=_read_json(args.artifact),
+            artifact_build_receipt_document=_read_json(
+                args.artifact_build_receipt
+            ),
+            installation_review_document=_read_json(args.installation_review),
+            installation_review_receipt_document=_read_json(
+                args.installation_review_receipt
+            ),
+            execution_approval_document=_read_json(args.execution_approval),
+            execution_approval_receipt_document=_read_json(
+                args.execution_approval_receipt
+            ),
+            installation_receipt_document=_read_json(args.installation_receipt),
+            installation_root=args.installation_root,
+            activation_review_document=_read_json(args.activation_review),
+            activation_review_receipt_document=_read_json(
+                args.activation_review_receipt
+            ),
+            activation_execution_approval_document=_read_json(
+                args.activation_execution_approval
+            ),
+            activation_execution_approval_receipt_document=_read_json(
+                args.activation_execution_approval_receipt
+            ),
+            activation_root=args.activation_root,
+            active_selection_document=_read_json(args.active_selection),
+            activation_receipt_document=_read_json(args.activation_receipt),
+            integration_review_document=_read_json(args.integration_review),
+        )
+        _write_new(args.output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -6114,6 +6620,9 @@ __all__ = [
     "QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_SCHEMA",
+    "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_REVIEW_RECEIPT_SCHEMA",
+    "CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT",
     "QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA",
@@ -6147,6 +6656,7 @@ __all__ = [
     "accept_qualified_independent_fit_review",
     "accept_qualified_calibration_installation_review",
     "accept_qualified_calibration_activation_review",
+    "accept_qualified_calibrated_feedback_integration_review",
     "approve_qualified_calibration_activation_execution",
     "approve_qualified_calibration_installation_execution",
     "build_calibration_artifact",
