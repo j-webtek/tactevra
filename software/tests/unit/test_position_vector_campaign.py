@@ -45,6 +45,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4392,6 +4394,121 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
         match="refusing to replace existing feedback integration receipt output",
     ):
         main(integration_execution_args)
+
+    runtime_admission_review = {
+        "schema": QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA,
+        "integration_receipt_sha256": canonical_sha256(
+            integration_execution_receipt
+        ),
+        "integration_sha256": canonical_sha256(integrated_binding),
+        "integration_payload_sha256": integration_execution_receipt[
+            "integration_payload_sha256"
+        ],
+        "integration_contract_sha256": integrated_binding[
+            "integration_contract_sha256"
+        ],
+        "artifact_sha256": integrated_binding["artifact_sha256"],
+        "installed_payload_sha256": integrated_binding[
+            "installed_payload_sha256"
+        ],
+        "active_selection_sha256": integrated_binding[
+            "active_selection_sha256"
+        ],
+        "calibration_id": integrated_binding["calibration_id"],
+        "attachment_profile": integrated_binding["attachment_profile"],
+        "controller_binding_sha256": integrated_binding[
+            "controller_binding_sha256"
+        ],
+        "installation_profile_id": integrated_binding[
+            "installation_profile_id"
+        ],
+        "destination_ref": integrated_binding["destination_ref"],
+        "response_profile": integrated_binding["response_profile"],
+        "calibration_loader": integrated_binding["calibration_loader"],
+        "feedback_converter": integrated_binding["feedback_converter"],
+        "reviewer_id": "feedback-runtime-admission-reviewer-13",
+        "decision": "ACCEPT",
+        "reviewed_at": "2026-10-24T23:30:00-04:00",
+        "review_notes_sha256": "d" * 64,
+    }
+    runtime_admission_review_path = tmp_path / "feedback-runtime-admission-review.json"
+    runtime_admission_review_path.write_text(
+        json.dumps(runtime_admission_review), encoding="utf-8"
+    )
+    runtime_admission_output = tmp_path / "feedback-runtime-admission-receipt.json"
+    runtime_admission_args = list(integration_execution_args[:-2])
+    runtime_admission_args[0] = (
+        "review-qualified-calibrated-feedback-runtime-admission"
+    )
+    runtime_admission_args.extend((
+        "--integration", str(integration_path),
+        "--integration-receipt", str(integration_execution_receipt_output),
+        "--runtime-admission-review", str(runtime_admission_review_path),
+        "--output", str(runtime_admission_output),
+    ))
+
+    nested_runtime_admission_args = list(runtime_admission_args)
+    nested_runtime_admission_args[-1] = str(
+        integration_root / "runtime-admission-receipt.json"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime admission review output must remain outside integration root",
+    ):
+        main(nested_runtime_admission_args)
+
+    nonindependent_runtime_review = dict(runtime_admission_review)
+    nonindependent_runtime_review["reviewer_id"] = (
+        "feedback-integration-operator-12"
+    )
+    runtime_admission_review_path.write_text(
+        json.dumps(nonindependent_runtime_review), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime admission reviewer is not independent",
+    ):
+        main(runtime_admission_args)
+    runtime_admission_review_path.write_text(
+        json.dumps(runtime_admission_review), encoding="utf-8"
+    )
+
+    tampered_integration = dict(integrated_binding)
+    tampered_integration["feedback_converter"] = "invalid:converter"
+    tampered_integration_path = tmp_path / "tampered-feedback-integration.json"
+    tampered_integration_path.write_text(
+        json.dumps(tampered_integration), encoding="utf-8"
+    )
+    tampered_runtime_admission_args = list(runtime_admission_args)
+    tampered_runtime_admission_args[
+        tampered_runtime_admission_args.index("--integration") + 1
+    ] = str(tampered_integration_path)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="feedback integration does not reproduce",
+    ):
+        main(tampered_runtime_admission_args)
+
+    assert main(runtime_admission_args) == 0
+    runtime_admission_receipt = json.loads(runtime_admission_output.read_bytes())
+    assert runtime_admission_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_SCHEMA
+    )
+    assert runtime_admission_receipt["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_ACCEPTED"
+    )
+    assert runtime_admission_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL"
+    )
+    assert (
+        runtime_admission_receipt[
+            "calibrated_feedback_runtime_loading_authorized"
+        ]
+        is False
+    )
+    assert runtime_admission_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(runtime_admission_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)
