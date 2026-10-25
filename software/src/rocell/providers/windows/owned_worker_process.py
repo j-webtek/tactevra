@@ -12,7 +12,6 @@ from dataclasses import asdict, dataclass, field, replace
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
 import re
 import sys
@@ -288,6 +287,11 @@ class OwnedWorkerRequest:
 
             validate_payload(payload)
             return
+        if payload.get("schema") == "rocell.calibrated_position_vector_native_handoff.v1":
+            from .calibrated_position_vector_owned_protocol import validate_payload
+
+            validate_payload(payload)
+            return
         if (
             payload.get("schema")
             == "rocell.owned_powered_feedback_rehearsal_payload.v1"
@@ -484,6 +488,8 @@ class OwnedWindowsWorker:
         native_absolute_wrist_payload = None
         native_correction_payload = None
         native_campaign_payload = None
+        native_position_vector_payload = None
+        position_vector_wire = None
         correction_wire = None
         native_start_ns = started
         powered_rehearsal_payload = None
@@ -628,6 +634,19 @@ class OwnedWindowsWorker:
                     "POWERED_EXACT_DEADLINE_REQUIRED",
                 )
                 verify_native_powered_entry()
+            elif reg.request_schema == "rocell.owned_calibrated_position_vector_request.v1":
+                from .calibrated_position_vector_native_registration import validate_registration
+                from .calibrated_position_vector_owned_protocol import decode_request
+
+                native_position_vector_payload = validate_registration(reg, request)
+                _require(
+                    deadline_ns == request.expires_at_ns,
+                    "POSITION_VECTOR_EXACT_DEADLINE_REQUIRED",
+                )
+                position_vector_wire, request_sha = owned_request_wire(
+                    reg, request, deadline_ns=deadline_ns
+                )
+                decode_request(position_vector_wire)
             elif reg.request_schema == "rocell.owned_passive_native_request.v1":
                 from .passive_native_registration import validate_registration
 
@@ -645,7 +664,8 @@ class OwnedWindowsWorker:
             if (native_passive_payload is not None or native_powered_payload is not None
                     or native_endpoint_payload is not None or native_first_motion_payload is not None
                     or native_observational_payload is not None or native_absolute_wrist_payload is not None
-                    or native_correction_payload is not None or native_campaign_payload is not None):
+                    or native_correction_payload is not None or native_campaign_payload is not None
+                    or native_position_vector_payload is not None):
                 pass  # Exact registration and consumed originals checked above.
             elif (
                 reg.request_schema
@@ -725,6 +745,7 @@ class OwnedWindowsWorker:
                     or native_absolute_wrist_payload is not None
                     or native_correction_payload is not None
                     or native_campaign_payload is not None
+                    or native_position_vector_payload is not None
                     else WindowsOwnedProcess()
                 )
             else:
@@ -782,6 +803,10 @@ class OwnedWindowsWorker:
                 if native_campaign_payload is not None:
                     verify_native_campaign_entry()
                     _require(self._clock() < run_deadline, 'TIMED_OUT')
+                if native_position_vector_payload is not None:
+                    from .calibrated_position_vector_owned_protocol import decode_request
+                    decode_request(position_vector_wire)
+                    _require(self._clock() < run_deadline, "TIMED_OUT")
 
             native_start_ns = self._clock()
             native.start(reg, wire, check=before_execution)
@@ -802,6 +827,18 @@ class OwnedWindowsWorker:
             if native_campaign_payload is not None:
                 from .positional_campaign_native_protocol import decode_result
                 parsed = decode_result(native.stdout, request_raw=wire)
+            elif native_position_vector_payload is not None:
+                from .calibrated_position_vector_owned_protocol import (
+                    decode_request,
+                    verify_exported_journal,
+                )
+
+                parsed = decode_owned_json(native.stdout, maximum=reg.budget.stdout_bytes)
+                verify_exported_journal(
+                    parsed,
+                    wire=decode_request(position_vector_wire),
+                    working_directory=reg.working_directory,
+                )
             elif native_correction_payload is not None:
                 from .wrist_correction_native_result import decode_result
                 # Full reconstruction happens only after process cleanup and

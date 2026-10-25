@@ -15,10 +15,15 @@ from .calibrated_position_vector_native_composition import (
     execute_owned_calibrated_position_vector_exchange,
     export_position_vector_serial_attempt,
 )
+from .calibrated_position_vector_owned_supervisor import (
+    StagedCalibratedPositionVectorWorker,
+    stage_calibrated_position_vector_worker,
+)
 
 __all__ = [
     "CalibratedPositionVectorBinding",
     "PositionVectorSerialAdapterError",
+    "StagedCalibratedPositionVectorWorker",
     "WindowsNativeT102SerialTransportError",
     "WindowsNativeT102SerialTransportV1",
     "build_calibrated_position_vector_connection",
@@ -26,4 +31,5 @@ __all__ = [
     "execute_position_vector_serial_exchange",
     "export_position_vector_serial_attempt",
     "load_position_vector_serial_attempt",
+    "stage_calibrated_position_vector_worker",
 ]

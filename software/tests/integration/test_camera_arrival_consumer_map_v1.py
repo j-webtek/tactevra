@@ -14,7 +14,7 @@ from rocell.application.camera_arrival_kit_v1 import REQUIRED_SLOT_IDS
 ROOT = Path(__file__).resolve().parents[3]
 RETAINED = ROOT / "software/ai/eval/camera_arrival_consumer_map_dry_run_v1.json"
 RETAINED_FILE_SHA256 = (
-    "d234aa3e54f33e840b90ea88922ea7a111728257b3bbff3a350a4db5a9e2ca6b"
+    "1a0aaab5452236f46490badde8882e3ff2a54323b23eca8d5c225f37ddb382bd"
 )
 
 

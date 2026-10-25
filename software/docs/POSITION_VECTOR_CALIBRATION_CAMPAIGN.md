@@ -1718,3 +1718,26 @@ for `no_attachment` and `stylus_attachment`; observations cannot cross their
 plan hashes. The current single T1051 response remains
 `CALIBRATION_REQUIRED`; it is useful as retained evidence but cannot satisfy the
 campaign on its own.
+
+## Owned native feedback supervisor (2026-10-25)
+
+The calibrated position-vector adapter now has a private, source-pinned parent
+and child process composition. Staging creates a deterministic dependency
+archive, pins the exact Python executable and child entry, reconstructs the
+reviewed controller and fresh identical USB identity, and binds the installed
+firmware, closed request, runtime hash, and original monotonic deadline into a
+single request. The generic Windows owner supplies the one-use dispatch lock,
+bounded process, stdin/stdout limits, timeout, and cleanup receipt.
+
+The child performs one fixed T105 feedback exchange and exports its durable
+journal into its assigned directory. The parent accepts a result only when its
+request and binding hashes match and every retained journal file reproduces the
+child's immutable manifest. Both the result and export explicitly deny retry,
+motion, connection, and physical authority. Import-audit and unit tests are
+hardware-incapable, and no public live command was added.
+
+The next dependency is application orchestration: redeem one still-fresh
+approved execution request and prerequisite record, run this private worker
+once, and feed the verified exchange evidence into the existing calibrated
+execution review. Any future physical use needs a new current operator and
+hardware-state confirmation.
