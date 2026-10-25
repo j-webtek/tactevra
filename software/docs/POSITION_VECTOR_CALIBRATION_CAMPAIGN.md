@@ -1292,6 +1292,40 @@ leaves runtime loading unauthorized. This execution creates no runtime session,
 opens no controller or camera, requests no feedback, sends no command, and
 authorizes no motion or physical action.
 
+To review the immutable integration for later runtime admission, retain a
+separate review record with schema
+`rocell.position_vector_calibration_qualified_feedback_runtime_admission_review.v1`.
+Invoke `review-qualified-calibrated-feedback-runtime-admission` with every
+complete-chain and execution-specific input above. Replace `--receipt-output`
+with these review-specific options:
+
+```powershell
+--integration calibrated-position-vector-feedback-integrations/installed-arm-no-attachment/calibrated-position-vector-feedback-integration.json `
+--integration-receipt qualified-position-vector-feedback-integration-receipt.json `
+--runtime-admission-review qualified-position-vector-feedback-runtime-admission-review.json `
+--output qualified-position-vector-feedback-runtime-admission-review-receipt.json
+```
+
+The review record binds the exact integration descriptor and receipt, the
+descriptor bytes, conversion contract, artifact, installed payload, active
+selection, controller, attachment profile, destination, response profile, and
+stable loader and converter references. The reviewer must be independent of
+the fit producer and every earlier reviewer, approver, installer, activator,
+and integrator. The command replays the complete chain, rereads the immutable
+descriptor from its profile directory, and requires all supplied documents and
+stored bytes to reproduce exactly. The review output must remain outside the
+installation, activation, and integration roots and is never replaced.
+
+An accepted review emits
+`rocell.position_vector_calibration_qualified_feedback_runtime_admission_review_receipt.v1`
+and advances only to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL`. Runtime
+loading remains unauthorized. This gate creates no runtime session, opens no
+controller or camera, requests no feedback, sends no command, and authorizes no
+motion or physical action. Run the complete review independently for
+`no_attachment` and `stylus_attachment`; hashes and profile directories cannot
+cross between them.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

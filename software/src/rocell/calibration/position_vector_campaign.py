@@ -164,6 +164,12 @@ QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_SCHEMA = (
 QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_feedback_integration_receipt.v1"
 )
+QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_feedback_runtime_admission_review.v1"
+)
+QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_feedback_runtime_admission_review_receipt.v1"
+)
 CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT = {
     "schema": "rocell.calibrated_position_vector_feedback_integration_contract.v1",
     "input_response_profile": PROFILE,
@@ -558,6 +564,35 @@ _QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_FIELDS = frozenset(
         "limitations",
         "authority",
         "calibration_installation_authorized",
+        "calibration_activation_authorized",
+        "calibrated_feedback_integration_authorized",
+        "calibrated_feedback_runtime_loading_authorized",
+    }
+)
+_QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_FIELDS = frozenset(
+    {
+        "schema", "integration_receipt_sha256", "integration_sha256",
+        "integration_payload_sha256", "integration_contract_sha256",
+        "artifact_sha256", "installed_payload_sha256",
+        "active_selection_sha256", "calibration_id", "attachment_profile",
+        "controller_binding_sha256", "installation_profile_id",
+        "destination_ref", "response_profile", "calibration_loader",
+        "feedback_converter", "reviewer_id", "decision", "reviewed_at",
+        "review_notes_sha256",
+    }
+)
+_QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_FIELDS = frozenset(
+    {
+        "schema", "status", "integration_receipt_sha256",
+        "integration_sha256", "integration_payload_sha256",
+        "integration_contract_sha256", "artifact_sha256",
+        "installed_payload_sha256", "active_selection_sha256",
+        "calibration_id", "attachment_profile", "controller_binding_sha256",
+        "installation_profile_id", "destination_ref", "response_profile",
+        "calibration_loader", "feedback_converter",
+        "runtime_admission_review_sha256", "reviewer_id", "reviewed_at",
+        "review_notes_sha256", "next_required_gate", "limitations",
+        "authority", "calibration_installation_authorized",
         "calibration_activation_authorized",
         "calibrated_feedback_integration_authorized",
         "calibrated_feedback_runtime_loading_authorized",
@@ -5577,6 +5612,7 @@ def _qualified_feedback_integration_target(
     installation_root: str | Path,
     activation_root: str | Path,
     installation_profile_id: str,
+    create: bool = True,
 ) -> tuple[Path, str]:
     requested_root = Path(integration_root).absolute()
     if requested_root.is_symlink():
@@ -5605,7 +5641,8 @@ def _qualified_feedback_integration_target(
                 f"outside {label} root"
             )
     try:
-        requested_root.mkdir(parents=True, exist_ok=True)
+        if create:
+            requested_root.mkdir(parents=True, exist_ok=True)
         root = requested_root.resolve(strict=True)
     except OSError as exc:
         raise PositionVectorCampaignError(
@@ -5623,7 +5660,8 @@ def _qualified_feedback_integration_target(
             "qualified calibrated feedback integration profile cannot be a symlink"
         )
     try:
-        profile_root.mkdir(exist_ok=True)
+        if create:
+            profile_root.mkdir(exist_ok=True)
         resolved_profile_root = profile_root.resolve(strict=True)
         resolved_profile_root.relative_to(root)
     except (OSError, ValueError) as exc:
@@ -5709,6 +5747,9 @@ def execute_qualified_calibrated_feedback_integration(
     integration_root: str | Path,
     integrator_id: str,
     integrated_at: str,
+    _publish: bool = True,
+    _expected_integration_document: Mapping[str, Any] | None = None,
+    _expected_receipt_document: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Publish an immutable offline binding for the calibrated converter."""
 
@@ -5857,14 +5898,29 @@ def execute_qualified_calibrated_feedback_integration(
         installation_root=installation_root,
         activation_root=activation_root,
         installation_profile_id=integration["installation_profile_id"],
+        create=_publish,
     )
-    _write_immutable_feedback_integration(target, integration)
+    if _publish:
+        _write_immutable_feedback_integration(target, integration)
+    elif not target.is_file() or target.is_symlink():
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback integration is not an immutable file"
+        )
     payload = target.read_bytes()
     expected_payload = canonical_bytes(integration) + b"\n"
     if payload != expected_payload:
         raise PositionVectorCampaignError(
             "qualified calibrated feedback integration bytes do not reproduce"
         )
+    if _expected_integration_document is not None:
+        supplied_integration = _mapping(
+            _expected_integration_document,
+            "qualified_calibrated_feedback_integration",
+        )
+        if dict(supplied_integration) != integration:
+            raise PositionVectorCampaignError(
+                "qualified calibrated feedback integration does not reproduce"
+            )
 
     receipt = {
         "schema": QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_SCHEMA,
@@ -5915,6 +5971,163 @@ def execute_qualified_calibrated_feedback_integration(
         _QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_FIELDS,
         "qualified_calibrated_feedback_integration_receipt",
     )
+    if _expected_receipt_document is not None:
+        supplied_receipt = _mapping(
+            _expected_receipt_document,
+            "qualified_calibrated_feedback_integration_receipt",
+        )
+        if dict(supplied_receipt) != receipt:
+            raise PositionVectorCampaignError(
+                "qualified calibrated feedback integration receipt does not reproduce"
+            )
+    return receipt
+
+
+def accept_qualified_calibrated_feedback_runtime_admission_review(
+    *,
+    integration_document: Mapping[str, Any],
+    integration_receipt_document: Mapping[str, Any],
+    runtime_admission_review_document: Mapping[str, Any],
+    **integration_execution_arguments: Any,
+) -> dict[str, Any]:
+    """Accept an exact offline integration for a later runtime-load approval."""
+
+    expected_receipt = execute_qualified_calibrated_feedback_integration(
+        _publish=False,
+        _expected_integration_document=integration_document,
+        _expected_receipt_document=integration_receipt_document,
+        **integration_execution_arguments,
+    )
+    integration = _mapping(
+        integration_document, "qualified_calibrated_feedback_integration"
+    )
+    review = _mapping(
+        runtime_admission_review_document,
+        "qualified_calibrated_feedback_runtime_admission_review",
+    )
+    _exact(
+        review,
+        _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_FIELDS,
+        "qualified_calibrated_feedback_runtime_admission_review",
+    )
+    if review.get("schema") != (
+        QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA
+    ):
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime admission review schema mismatch"
+        )
+    expected_bindings = {
+        "integration_receipt_sha256": canonical_sha256(expected_receipt),
+        "integration_sha256": canonical_sha256(integration),
+        "integration_payload_sha256": expected_receipt[
+            "integration_payload_sha256"
+        ],
+        "integration_contract_sha256": integration[
+            "integration_contract_sha256"
+        ],
+        "artifact_sha256": integration["artifact_sha256"],
+        "installed_payload_sha256": integration["installed_payload_sha256"],
+        "active_selection_sha256": integration["active_selection_sha256"],
+        "calibration_id": integration["calibration_id"],
+        "attachment_profile": integration["attachment_profile"],
+        "controller_binding_sha256": integration["controller_binding_sha256"],
+        "installation_profile_id": integration["installation_profile_id"],
+        "destination_ref": integration["destination_ref"],
+        "response_profile": integration["response_profile"],
+        "calibration_loader": integration["calibration_loader"],
+        "feedback_converter": integration["feedback_converter"],
+    }
+    for field, expected_value in expected_bindings.items():
+        if review.get(field) != expected_value:
+            raise PositionVectorCampaignError(
+                "qualified calibrated feedback runtime admission review "
+                f"{field} mismatch"
+            )
+
+    reviewer_id = _identifier(review.get("reviewer_id"), "reviewer_id")
+    actor_fields = (
+        ("fit_report_document", "producer_id"),
+        ("review_receipt_document", "reviewer_id"),
+        ("installation_review_receipt_document", "reviewer_id"),
+        ("execution_approval_receipt_document", "approver_id"),
+        ("installation_receipt_document", "installer_id"),
+        ("activation_review_receipt_document", "reviewer_id"),
+        ("activation_execution_approval_receipt_document", "approver_id"),
+        ("active_selection_document", "activator_id"),
+        ("integration_review_receipt_document", "reviewer_id"),
+        ("integration_execution_approval_receipt_document", "approver_id"),
+    )
+    excluded_reviewers = {
+        _identifier(
+            _mapping(integration_execution_arguments[document], document).get(field),
+            field,
+        )
+        for document, field in actor_fields
+    }
+    excluded_reviewers.add(
+        _identifier(integration.get("integrator_id"), "integrator_id")
+    )
+    if reviewer_id in excluded_reviewers:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime admission reviewer is not independent"
+        )
+    if review.get("decision") != "ACCEPT":
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime admission review decision is not ACCEPT"
+        )
+    reviewed_at = review.get("reviewed_at")
+    if not isinstance(reviewed_at, str):
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime admission reviewed_at is invalid"
+        )
+    try:
+        timestamp = datetime.fromisoformat(reviewed_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime admission reviewed_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibrated feedback runtime admission reviewed_at must include "
+            "a UTC offset"
+        )
+    review_notes_sha256 = _digest(
+        review.get("review_notes_sha256"), "review_notes_sha256"
+    )
+    normalized_review = dict(review)
+    normalized_review["reviewer_id"] = reviewer_id
+    normalized_review["review_notes_sha256"] = review_notes_sha256
+
+    receipt = {
+        "schema": QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_SCHEMA,
+        "status": "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_ACCEPTED",
+        **expected_bindings,
+        "runtime_admission_review_sha256": canonical_sha256(normalized_review),
+        "reviewer_id": reviewer_id,
+        "reviewed_at": reviewed_at,
+        "review_notes_sha256": review_notes_sha256,
+        "next_required_gate": (
+            "CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL"
+        ),
+        "limitations": [
+            "This receipt accepts only the exact immutable offline integration "
+            "descriptor for a later runtime-load execution approval.",
+            "Admission review does not load a runtime session or request controller "
+            "feedback.",
+            "This gate opens no controller or camera and grants no command, motion, "
+            "feedback-request, runtime-loading, or physical authority.",
+        ],
+        "authority": dict(expected_receipt["authority"]),
+        "calibration_installation_authorized": True,
+        "calibration_activation_authorized": True,
+        "calibrated_feedback_integration_authorized": True,
+        "calibrated_feedback_runtime_loading_authorized": False,
+    }
+    _exact(
+        receipt,
+        _QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_FIELDS,
+        "qualified_calibrated_feedback_runtime_admission_review_receipt",
+    )
     return receipt
 
 def _read_json(path: str) -> Mapping[str, Any]:
@@ -5931,6 +6144,68 @@ def _write_new(path: str, value: Mapping[str, Any]) -> None:
             stream.write(canonical_bytes(value) + b"\n")
     except FileExistsError as exc:
         raise PositionVectorCampaignError(f"refusing to replace existing output {path}") from exc
+
+
+def _qualified_feedback_integration_cli_arguments(args: Any) -> dict[str, Any]:
+    return {
+        "inventory_document": _read_json(args.inventory),
+        "admission_receipt_document": _read_json(args.admission_receipt),
+        "training_split_document": _read_json(args.training_split),
+        "collection_plan_document": _read_json(args.collection_plan),
+        "observations_document": _read_json(args.observations),
+        "preparation_receipt_document": _read_json(args.preparation_receipt),
+        "readiness_plan_document": _read_json(args.readiness_plan),
+        "readiness_evidence_document": _read_json(args.readiness_evidence),
+        "readiness_assessment_document": _read_json(args.readiness_assessment),
+        "readiness_handoff_document": _read_json(args.readiness_handoff),
+        "ingestion_receipt_documents": [
+            _read_json(path) for path in args.ingestion_receipt
+        ],
+        "dataset_document": _read_json(args.dataset),
+        "compilation_receipt_document": _read_json(args.compilation_receipt),
+        "fit_report_document": _read_json(args.fit_report),
+        "fit_assessment_document": _read_json(args.fit_assessment),
+        "review_document": _read_json(args.review),
+        "review_receipt_document": _read_json(args.review_receipt),
+        "artifact_document": _read_json(args.artifact),
+        "artifact_build_receipt_document": _read_json(args.artifact_build_receipt),
+        "installation_review_document": _read_json(args.installation_review),
+        "installation_review_receipt_document": _read_json(
+            args.installation_review_receipt
+        ),
+        "execution_approval_document": _read_json(args.execution_approval),
+        "execution_approval_receipt_document": _read_json(
+            args.execution_approval_receipt
+        ),
+        "installation_receipt_document": _read_json(args.installation_receipt),
+        "installation_root": args.installation_root,
+        "activation_review_document": _read_json(args.activation_review),
+        "activation_review_receipt_document": _read_json(
+            args.activation_review_receipt
+        ),
+        "activation_execution_approval_document": _read_json(
+            args.activation_execution_approval
+        ),
+        "activation_execution_approval_receipt_document": _read_json(
+            args.activation_execution_approval_receipt
+        ),
+        "activation_root": args.activation_root,
+        "active_selection_document": _read_json(args.active_selection),
+        "activation_receipt_document": _read_json(args.activation_receipt),
+        "integration_review_document": _read_json(args.integration_review),
+        "integration_review_receipt_document": _read_json(
+            args.integration_review_receipt
+        ),
+        "integration_execution_approval_document": _read_json(
+            args.integration_execution_approval
+        ),
+        "integration_execution_approval_receipt_document": _read_json(
+            args.integration_execution_approval_receipt
+        ),
+        "integration_root": args.integration_root,
+        "integrator_id": args.integrator_id,
+        "integrated_at": args.integrated_at,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -6462,6 +6737,36 @@ def main(argv: list[str] | None = None) -> int:
             f"--{argument}", required=True
         )
     feedback_integration_execution_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
+    feedback_runtime_admission_parser = commands.add_parser(
+        "review-qualified-calibrated-feedback-runtime-admission",
+        help=(
+            "review one immutable offline calibrated-feedback integration for "
+            "later runtime-load approval"
+        ),
+    )
+    for argument in (
+        "inventory", "admission-receipt", "training-split", "collection-plan",
+        "observations", "preparation-receipt", "readiness-plan",
+        "readiness-evidence", "readiness-assessment", "readiness-handoff",
+        "dataset", "compilation-receipt", "fit-report", "fit-assessment",
+        "review", "review-receipt", "artifact", "artifact-build-receipt",
+        "installation-review", "installation-review-receipt",
+        "execution-approval", "execution-approval-receipt",
+        "installation-receipt", "installation-root", "activation-review",
+        "activation-review-receipt", "activation-execution-approval",
+        "activation-execution-approval-receipt", "activation-root",
+        "active-selection", "activation-receipt", "integration-review",
+        "integration-review-receipt", "integration-execution-approval",
+        "integration-execution-approval-receipt", "integration-root",
+        "integrator-id", "integrated-at", "integration", "integration-receipt",
+        "runtime-admission-review", "output",
+    ):
+        feedback_runtime_admission_parser.add_argument(
+            f"--{argument}", required=True
+        )
+    feedback_runtime_admission_parser.add_argument(
         "--ingestion-receipt", action="append", required=True
     )
     prepare_parser = commands.add_parser(
@@ -7304,6 +7609,32 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, receipt)
         return 0
+    if args.command == "review-qualified-calibrated-feedback-runtime-admission":
+        output = Path(args.output).absolute()
+        for forbidden_root, message in (
+            (Path(args.installation_root).absolute().resolve(strict=False), "installation root"),
+            (Path(args.activation_root).absolute().resolve(strict=False), "activation root"),
+            (Path(args.integration_root).absolute().resolve(strict=False), "integration root"),
+        ):
+            try:
+                output.resolve(strict=False).relative_to(forbidden_root)
+            except ValueError:
+                pass
+            else:
+                raise PositionVectorCampaignError(
+                    "feedback runtime admission review output must remain outside "
+                    + message
+                )
+        result = accept_qualified_calibrated_feedback_runtime_admission_review(
+            integration_document=_read_json(args.integration),
+            integration_receipt_document=_read_json(args.integration_receipt),
+            runtime_admission_review_document=_read_json(
+                args.runtime_admission_review
+            ),
+            **_qualified_feedback_integration_cli_arguments(args),
+        )
+        _write_new(args.output, result)
+        return 0
     if args.command == "execute-qualified-calibrated-feedback-integration":
         receipt_output = Path(args.receipt_output).absolute()
         for forbidden_root, message in (
@@ -7538,6 +7869,8 @@ __all__ = [
     "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_SCHEMA",
     "QUALIFIED_CALIBRATED_FEEDBACK_INTEGRATION_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_SCHEMA",
+    "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_ADMISSION_REVIEW_RECEIPT_SCHEMA",
     "CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT",
     "QUALIFIED_CALIBRATION_ACTIVE_SELECTION_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA",
@@ -7568,6 +7901,7 @@ __all__ = [
     "assess_candidate_qualification_evidence",
     "assess_qualified_collection_readiness_evidence",
     "assess_qualified_deterministic_fit",
+    "accept_qualified_calibrated_feedback_runtime_admission_review",
     "assess_reviewed_readiness_evidence",
     "accept_qualified_independent_fit_review",
     "accept_qualified_calibration_installation_review",
