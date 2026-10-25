@@ -1531,11 +1531,24 @@ canonical SHA-256. It grants no motion, contact, retry, persistent connection,
 or physical authority. Another feedback request requires another approval and
 new physical prerequisites.
 
-This application boundary deliberately has no native serial adapter or live
-CLI. A native adapter must durably retain its attempt and partial evidence before
-returning or raising, then produce the exact exchange-evidence schema above.
-Until that reviewed adapter is joined, this change is offline implementation
-evidence and does not authorize or claim a live calibrated observation.
+`providers/windows/calibrated_position_vector_serial_adapter.py` now supplies
+the matching one-shot serial adapter without changing the older full-Waveshare
+worker. It creates a unique attempt journal before constructing or opening the
+transport, confirms a quiet receive buffer without purging it, commits the write
+attempt before sending the fixed ten bytes, accepts only one installed
+position-vector response, and records close/cleanup before returning the exact
+exchange-evidence schema above. A short write, startup input, malformed or wrong
+profile response, timeout, close uncertainty, interrupted journal, or reused
+attempt is terminal and cannot be retried.
+
+The adapter has no public CLI and this increment performs no live access. Its
+transport is injected so the complete lifecycle can be tested against a sealed,
+hardware-incapable implementation. The next integration boundary must compose
+it with the already reviewed non-purging Windows connection and owned-process
+supervisor, pin that composition to the calibrated approval and controller
+identity, and retain the journal directory in the governed evidence export.
+Only after that production composition is independently reviewed may a newly
+confirmed physical attempt be considered.
 
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
