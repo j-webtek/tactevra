@@ -1165,3 +1165,13 @@ an exact non-replanning request only when the authoritative toolchain lock is
 selected. The current lock remains unselected, so it emits a named blocker and
 no replay request. It opens no simulator or hardware and grants no physical
 authority; byte, duplicate, and reduction limits remain unchanged.
+
+The calibrated position-vector owned-supervisor increment adds six governed
+paths: a deterministic native package, exact registration, strict request and
+result protocol, inert staging helper, isolated child entry, and focused unit
+tests. The file-count ceiling advances from 6,622 to the exact expected 6,628
+files. The owner pins the source package and process identity, supervises one
+closed feedback request, and verifies the child's immutable journal export
+against every retained byte. It adds no public live CLI, performs no hardware
+access in tests, permits no automatic retry or motion, and leaves all byte,
+duplicate, and reduction limits unchanged.

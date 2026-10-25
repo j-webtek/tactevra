@@ -520,11 +520,14 @@ records every open/write/response/close stage, and emits the seam's exact
 exchange evidence only after one installed-profile response and confirmed
 cleanup. Partial or interrupted attempts remain terminal with retry forbidden.
 
-The remaining implementation dependency is the reviewed production composition:
-pin the new adapter to the existing non-purging Windows connection, exact
-controller identity, owned-process supervisor, and governed evidence export.
-There is still no public live CLI. A later physical attempt requires newly
-confirmed physical state; the earlier unplugged or powered state is not reused.
+The reviewed production composition is now implemented behind the private owned
+process boundary. The parent pins the interpreter, deterministic child archive,
+exact controller and firmware binding, request, runtime, PID, and original
+deadline. It supervises one request/result exchange, verifies the returned
+immutable journal export byte-for-byte, and retains the no-retry and no-motion
+claims. There is still no public live CLI. A later physical attempt requires
+newly confirmed physical state; the earlier unplugged or powered state is not
+reused.
 
 ## Calibrated native child composition (2026-10-25)
 
@@ -539,5 +542,9 @@ The same boundary verifies and retains terminal or interrupted journals as an
 immutable evidence export with hashes for every original byte stream. It does
 not provide a CLI, invoke hardware in tests, authorize motion, or treat an
 interrupted attempt as retryable. Parent-side source-pinned package,
-registration, wire, supervision, and result/export association are the next
-implementation increment before any fresh physical attempt.
+registration, wire, supervision, and result/export association are now present.
+The next increment is parent application orchestration that consumes the
+existing approved request and fresh prerequisites, invokes this private worker
+once, and submits the verified exchange evidence to the calibrated execution
+review seam. Route execution continues to require separately qualified
+`no_attachment` or `stylus_attachment` geometry.
