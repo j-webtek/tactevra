@@ -55,6 +55,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_ADMISSION_REVIEW_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_EXECUTION_APPROVAL_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     CALIBRATED_FEEDBACK_REQUEST_CONTRACT,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
@@ -4911,6 +4913,118 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
         match="refusing to replace feedback request admission review output",
     ):
         main(request_admission_args)
+
+    request_execution_approval = {
+        "schema": QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_EXECUTION_APPROVAL_SCHEMA,
+        "admission_review_sha256": canonical_sha256(request_admission_review),
+        "admission_review_receipt_sha256": canonical_sha256(
+            request_admission_receipt
+        ),
+        **{
+            key: request_admission_receipt[key]
+            for key in (
+                "runtime_session_id", "runtime_session_sha256",
+                "runtime_session_payload_sha256", "runtime_load_receipt_sha256",
+                "runtime_session_validation_sha256",
+                "runtime_session_validation_receipt_sha256", "dataset_sha256",
+                "artifact_sha256", "installed_payload_sha256",
+                "active_selection_sha256", "integration_sha256",
+                "integration_payload_sha256", "integration_contract_sha256",
+                "calibration_id", "attachment_profile", "controller_binding_sha256",
+                "installation_profile_id", "destination_ref", "response_profile",
+                "calibration_loader", "feedback_converter", "request_contract_sha256",
+            )
+        },
+        "approver_id": "feedback-request-approver-18",
+        "decision": "APPROVE",
+        "approved_at": "2026-10-25T12:15:00-04:00",
+        "approval_notes_sha256": hashlib.sha256(
+            b"approve one later exact T105; preconditions remain execution-time"
+        ).hexdigest(),
+    }
+    request_execution_approval_path = (
+        tmp_path / "feedback-request-execution-approval.json"
+    )
+    request_execution_approval_path.write_text(
+        json.dumps(request_execution_approval), encoding="utf-8"
+    )
+    request_execution_approval_output = (
+        tmp_path / "feedback-request-execution-approval-receipt.json"
+    )
+    request_execution_approval_args = list(request_admission_args[:-2])
+    request_execution_approval_args[0] = (
+        "approve-qualified-calibrated-feedback-request-execution"
+    )
+    request_execution_approval_args.extend((
+        "--feedback-request-admission-review-receipt",
+        str(request_admission_receipt_output),
+        "--feedback-request-execution-approval",
+        str(request_execution_approval_path),
+        "--output", str(request_execution_approval_output),
+    ))
+    nested_request_execution_approval_args = list(request_execution_approval_args)
+    nested_request_execution_approval_args[
+        nested_request_execution_approval_args.index("--output") + 1
+    ] = str(runtime_root / "feedback-request-execution-approval-receipt.json")
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="request execution approval output must remain outside runtime root",
+    ):
+        main(nested_request_execution_approval_args)
+
+    nonindependent_request_approval = dict(request_execution_approval)
+    nonindependent_request_approval["approver_id"] = "feedback-request-reviewer-17"
+    request_execution_approval_path.write_text(
+        json.dumps(nonindependent_request_approval), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="request execution approver must be independent",
+    ):
+        main(request_execution_approval_args)
+
+    tampered_request_approval = dict(request_execution_approval)
+    tampered_request_approval["request_contract_sha256"] = "0" * 64
+    request_execution_approval_path.write_text(
+        json.dumps(tampered_request_approval), encoding="utf-8"
+    )
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="request execution approval binding mismatch: request_contract_sha256",
+    ):
+        main(request_execution_approval_args)
+
+    request_execution_approval_path.write_text(
+        json.dumps(request_execution_approval), encoding="utf-8"
+    )
+    assert main(request_execution_approval_args) == 0
+    request_execution_approval_receipt = json.loads(
+        request_execution_approval_output.read_bytes()
+    )
+    assert request_execution_approval_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_EXECUTION_APPROVAL_RECEIPT_SCHEMA
+    )
+    assert request_execution_approval_receipt["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_REQUEST_EXECUTION_APPROVED"
+    )
+    assert request_execution_approval_receipt["request_contract"] == (
+        CALIBRATED_FEEDBACK_REQUEST_CONTRACT
+    )
+    assert request_execution_approval_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_EXECUTION"
+    )
+    assert request_execution_approval_receipt[
+        "calibrated_feedback_request_execution_authorized"
+    ] is True
+    assert request_execution_approval_receipt[
+        "calibrated_feedback_requests_authorized"
+    ] is True
+    assert request_execution_approval_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace feedback request execution approval output",
+    ):
+        main(request_execution_approval_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)
