@@ -134,6 +134,12 @@ QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA = (
 QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_qualified_activation_review_receipt.v1"
 )
+QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_activation_execution_approval.v1"
+)
+QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA = (
+    "rocell.position_vector_calibration_qualified_activation_execution_approval_receipt.v1"
+)
 REVIEWED_PREPARATION_RECEIPT_SCHEMA = (
     "rocell.position_vector_calibration_reviewed_preparation_receipt.v1"
 )
@@ -359,6 +365,25 @@ _QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_FIELDS = frozenset(
         "decision",
         "reviewed_at",
         "review_notes_sha256",
+    }
+)
+_QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_FIELDS = frozenset(
+    {
+        "schema",
+        "activation_review_sha256",
+        "activation_review_receipt_sha256",
+        "installation_receipt_sha256",
+        "installed_payload_sha256",
+        "artifact_sha256",
+        "calibration_id",
+        "attachment_profile",
+        "controller_binding_sha256",
+        "installation_profile_id",
+        "destination_ref",
+        "approver_id",
+        "decision",
+        "approved_at",
+        "approval_notes_sha256",
     }
 )
 _PLAN_FIELDS = frozenset(
@@ -4287,6 +4312,218 @@ def accept_qualified_calibration_activation_review(
     }
 
 
+def approve_qualified_calibration_activation_execution(
+    *,
+    inventory_document: Mapping[str, Any],
+    admission_receipt_document: Mapping[str, Any],
+    training_split_document: Mapping[str, Any],
+    collection_plan_document: Mapping[str, Any],
+    observations_document: Mapping[str, Any],
+    preparation_receipt_document: Mapping[str, Any],
+    readiness_plan_document: Mapping[str, Any],
+    readiness_evidence_document: Mapping[str, Any],
+    readiness_assessment_document: Mapping[str, Any],
+    readiness_handoff_document: Mapping[str, Any],
+    ingestion_receipt_documents: list[Mapping[str, Any]],
+    dataset_document: Mapping[str, Any],
+    compilation_receipt_document: Mapping[str, Any],
+    fit_report_document: Mapping[str, Any],
+    fit_assessment_document: Mapping[str, Any],
+    review_document: Mapping[str, Any],
+    review_receipt_document: Mapping[str, Any],
+    artifact_document: Mapping[str, Any],
+    artifact_build_receipt_document: Mapping[str, Any],
+    installation_review_document: Mapping[str, Any],
+    installation_review_receipt_document: Mapping[str, Any],
+    execution_approval_document: Mapping[str, Any],
+    execution_approval_receipt_document: Mapping[str, Any],
+    installation_receipt_document: Mapping[str, Any],
+    installation_root: str | Path,
+    activation_review_document: Mapping[str, Any],
+    activation_review_receipt_document: Mapping[str, Any],
+    activation_execution_approval_document: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Approve a later activation step for one exact reviewed installation."""
+
+    expected_activation_review_receipt = accept_qualified_calibration_activation_review(
+        inventory_document=inventory_document,
+        admission_receipt_document=admission_receipt_document,
+        training_split_document=training_split_document,
+        collection_plan_document=collection_plan_document,
+        observations_document=observations_document,
+        preparation_receipt_document=preparation_receipt_document,
+        readiness_plan_document=readiness_plan_document,
+        readiness_evidence_document=readiness_evidence_document,
+        readiness_assessment_document=readiness_assessment_document,
+        readiness_handoff_document=readiness_handoff_document,
+        ingestion_receipt_documents=ingestion_receipt_documents,
+        dataset_document=dataset_document,
+        compilation_receipt_document=compilation_receipt_document,
+        fit_report_document=fit_report_document,
+        fit_assessment_document=fit_assessment_document,
+        review_document=review_document,
+        review_receipt_document=review_receipt_document,
+        artifact_document=artifact_document,
+        artifact_build_receipt_document=artifact_build_receipt_document,
+        installation_review_document=installation_review_document,
+        installation_review_receipt_document=installation_review_receipt_document,
+        execution_approval_document=execution_approval_document,
+        execution_approval_receipt_document=execution_approval_receipt_document,
+        installation_receipt_document=installation_receipt_document,
+        installation_root=installation_root,
+        activation_review_document=activation_review_document,
+    )
+    supplied_activation_review_receipt = _mapping(
+        activation_review_receipt_document,
+        "qualified_calibration_activation_review_receipt",
+    )
+    if dict(supplied_activation_review_receipt) != expected_activation_review_receipt:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation review receipt does not reproduce"
+        )
+
+    approval = _mapping(
+        activation_execution_approval_document,
+        "qualified_calibration_activation_execution_approval",
+    )
+    _exact(
+        approval,
+        _QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_FIELDS,
+        "qualified_calibration_activation_execution_approval",
+    )
+    if approval.get("schema") != (
+        QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA
+    ):
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approval schema mismatch"
+        )
+
+    activation_review = _mapping(
+        activation_review_document,
+        "qualified_calibration_activation_review",
+    )
+    expected_bindings = {
+        "activation_review_sha256": canonical_sha256(activation_review),
+        "activation_review_receipt_sha256": canonical_sha256(
+            expected_activation_review_receipt
+        ),
+        "installation_receipt_sha256": expected_activation_review_receipt[
+            "installation_receipt_sha256"
+        ],
+        "installed_payload_sha256": expected_activation_review_receipt[
+            "installed_payload_sha256"
+        ],
+        "artifact_sha256": expected_activation_review_receipt["artifact_sha256"],
+        "calibration_id": expected_activation_review_receipt["calibration_id"],
+        "attachment_profile": expected_activation_review_receipt[
+            "attachment_profile"
+        ],
+        "controller_binding_sha256": expected_activation_review_receipt[
+            "controller_binding_sha256"
+        ],
+        "installation_profile_id": expected_activation_review_receipt[
+            "installation_profile_id"
+        ],
+        "destination_ref": expected_activation_review_receipt["destination_ref"],
+    }
+    for field, expected_value in expected_bindings.items():
+        if approval.get(field) != expected_value:
+            raise PositionVectorCampaignError(
+                "qualified calibration activation execution approval "
+                f"{field} mismatch"
+            )
+
+    approver_id = _identifier(approval.get("approver_id"), "approver_id")
+    fit_report = _mapping(fit_report_document, "qualified_fit_report")
+    fit_review_receipt = _mapping(
+        review_receipt_document, "qualified_independent_fit_review_receipt"
+    )
+    installation_review_receipt = _mapping(
+        installation_review_receipt_document,
+        "qualified_calibration_installation_review_receipt",
+    )
+    installation_approval_receipt = _mapping(
+        execution_approval_receipt_document,
+        "qualified_calibration_installation_execution_approval_receipt",
+    )
+    installation_receipt = _mapping(
+        installation_receipt_document,
+        "qualified_calibration_installation_receipt",
+    )
+    excluded_approvers = {
+        _identifier(fit_report.get("producer_id"), "producer_id"),
+        _identifier(fit_review_receipt.get("reviewer_id"), "fit_reviewer_id"),
+        _identifier(
+            installation_review_receipt.get("reviewer_id"),
+            "installation_reviewer_id",
+        ),
+        _identifier(
+            installation_approval_receipt.get("approver_id"),
+            "installation_approver_id",
+        ),
+        _identifier(installation_receipt.get("installer_id"), "installer_id"),
+        _identifier(
+            expected_activation_review_receipt.get("reviewer_id"),
+            "activation_reviewer_id",
+        ),
+    }
+    if approver_id in excluded_approvers:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approver is not independent"
+        )
+    if approval.get("decision") != "APPROVE":
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution decision is not APPROVE"
+        )
+    approved_at = approval.get("approved_at")
+    if not isinstance(approved_at, str):
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approved_at is invalid"
+        )
+    try:
+        timestamp = datetime.fromisoformat(approved_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approved_at is invalid"
+        ) from exc
+    if timestamp.tzinfo is None:
+        raise PositionVectorCampaignError(
+            "qualified calibration activation execution approved_at must include "
+            "a UTC offset"
+        )
+    approval_notes_sha256 = _digest(
+        approval.get("approval_notes_sha256"), "approval_notes_sha256"
+    )
+    normalized_approval = dict(approval)
+    normalized_approval["approval_notes_sha256"] = approval_notes_sha256
+
+    return {
+        "schema": (
+            QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA
+        ),
+        "status": "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVED",
+        **expected_bindings,
+        "activation_execution_approval_sha256": canonical_sha256(
+            normalized_approval
+        ),
+        "approver_id": approver_id,
+        "approved_at": approved_at,
+        "approval_notes_sha256": approval_notes_sha256,
+        "next_required_gate": "CALIBRATION_ACTIVATION_EXECUTION",
+        "limitations": [
+            "This receipt authorizes a later activation execution only for the "
+            "exact reviewed installed payload, profile, controller, and destination "
+            "it binds.",
+            "Approval does not select, load, or activate the calibration.",
+            "This gate opens no controller or camera and grants no command, motion, "
+            "or physical authority.",
+        ],
+        "authority": dict(expected_activation_review_receipt["authority"]),
+        "calibration_installation_authorized": True,
+        "calibration_activation_authorized": True,
+    }
+
+
 def _read_json(path: str) -> Mapping[str, Any]:
     try:
         value = json.loads(Path(path).read_bytes())
@@ -4710,6 +4947,25 @@ def main(argv: list[str] | None = None) -> int:
     activation_review_parser.add_argument("--installation-root", required=True)
     activation_review_parser.add_argument("--activation-review", required=True)
     activation_review_parser.add_argument("--output", required=True)
+    activation_approval_parser = commands.add_parser(
+        "approve-qualified-calibration-activation-execution",
+        help="approve a later activation step for one exact reviewed installation",
+    )
+    for argument in (
+        "inventory", "admission-receipt", "training-split", "collection-plan",
+        "observations", "preparation-receipt", "readiness-plan",
+        "readiness-evidence", "readiness-assessment", "readiness-handoff",
+        "dataset", "compilation-receipt", "fit-report", "fit-assessment",
+        "review", "review-receipt", "artifact", "artifact-build-receipt",
+        "installation-review", "installation-review-receipt",
+        "execution-approval", "execution-approval-receipt",
+        "installation-receipt", "installation-root", "activation-review",
+        "activation-review-receipt", "activation-execution-approval", "output",
+    ):
+        activation_approval_parser.add_argument(f"--{argument}", required=True)
+    activation_approval_parser.add_argument(
+        "--ingestion-receipt", action="append", required=True
+    )
     prepare_parser = commands.add_parser(
         "prepare", help="freeze a collection plan and empty observation template"
     )
@@ -5266,6 +5522,64 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_new(args.output, receipt)
         return 0
+    if args.command == "approve-qualified-calibration-activation-execution":
+        approval_output = Path(args.output).absolute()
+        installation_root = Path(args.installation_root).absolute().resolve(
+            strict=False
+        )
+        try:
+            approval_output.resolve(strict=False).relative_to(installation_root)
+        except ValueError:
+            pass
+        else:
+            raise PositionVectorCampaignError(
+                "activation execution approval output must remain outside "
+                "installation root"
+            )
+        receipt = approve_qualified_calibration_activation_execution(
+            inventory_document=_read_json(args.inventory),
+            admission_receipt_document=_read_json(args.admission_receipt),
+            training_split_document=_read_json(args.training_split),
+            collection_plan_document=_read_json(args.collection_plan),
+            observations_document=_read_json(args.observations),
+            preparation_receipt_document=_read_json(args.preparation_receipt),
+            readiness_plan_document=_read_json(args.readiness_plan),
+            readiness_evidence_document=_read_json(args.readiness_evidence),
+            readiness_assessment_document=_read_json(args.readiness_assessment),
+            readiness_handoff_document=_read_json(args.readiness_handoff),
+            ingestion_receipt_documents=[
+                _read_json(path) for path in args.ingestion_receipt
+            ],
+            dataset_document=_read_json(args.dataset),
+            compilation_receipt_document=_read_json(args.compilation_receipt),
+            fit_report_document=_read_json(args.fit_report),
+            fit_assessment_document=_read_json(args.fit_assessment),
+            review_document=_read_json(args.review),
+            review_receipt_document=_read_json(args.review_receipt),
+            artifact_document=_read_json(args.artifact),
+            artifact_build_receipt_document=_read_json(
+                args.artifact_build_receipt
+            ),
+            installation_review_document=_read_json(args.installation_review),
+            installation_review_receipt_document=_read_json(
+                args.installation_review_receipt
+            ),
+            execution_approval_document=_read_json(args.execution_approval),
+            execution_approval_receipt_document=_read_json(
+                args.execution_approval_receipt
+            ),
+            installation_receipt_document=_read_json(args.installation_receipt),
+            installation_root=args.installation_root,
+            activation_review_document=_read_json(args.activation_review),
+            activation_review_receipt_document=_read_json(
+                args.activation_review_receipt
+            ),
+            activation_execution_approval_document=_read_json(
+                args.activation_execution_approval
+            ),
+        )
+        _write_new(args.output, receipt)
+        return 0
     if args.command == "prepare":
         plan = create_collection_plan(
             dataset_id=args.dataset_id,
@@ -5396,6 +5710,8 @@ __all__ = [
     "QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA",
     "QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA",
     "QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA",
+    "QUALIFIED_CALIBRATION_ACTIVATION_EXECUTION_APPROVAL_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA",
     "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA",
     "QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA",
@@ -5427,6 +5743,7 @@ __all__ = [
     "accept_qualified_independent_fit_review",
     "accept_qualified_calibration_installation_review",
     "accept_qualified_calibration_activation_review",
+    "approve_qualified_calibration_activation_execution",
     "approve_qualified_calibration_installation_execution",
     "build_calibration_artifact",
     "build_qualified_calibration_artifact",

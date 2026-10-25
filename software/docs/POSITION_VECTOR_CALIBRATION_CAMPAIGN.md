@@ -982,6 +982,68 @@ record advances only to `CALIBRATION_ACTIVATION_EXECUTION_APPROVAL`. Review
 acceptance does not select, load, or activate the file and grants no controller,
 camera, command, motion, activation, or physical authority.
 
+For activation execution approval, retain a separate approval record and run:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign approve-qualified-calibration-activation-execution `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --review-receipt qualified-position-vector-independent-fit-review-receipt.json `
+  --artifact qualified-position-vector-calibration.json `
+  --artifact-build-receipt qualified-position-vector-artifact-build-receipt.json `
+  --installation-review qualified-position-vector-installation-review.json `
+  --installation-review-receipt qualified-position-vector-installation-review-receipt.json `
+  --execution-approval qualified-position-vector-installation-execution-approval.json `
+  --execution-approval-receipt qualified-position-vector-installation-execution-approval-receipt.json `
+  --installation-receipt qualified-position-vector-installation-receipt.json `
+  --installation-root inactive-position-vector-calibrations `
+  --activation-review qualified-position-vector-activation-review.json `
+  --activation-review-receipt qualified-position-vector-activation-review-receipt.json `
+  --activation-execution-approval qualified-position-vector-activation-execution-approval.json `
+  --output qualified-position-vector-activation-execution-approval-receipt.json
+```
+
+The approval record has schema
+`rocell.position_vector_calibration_qualified_activation_execution_approval.v1`.
+It binds the exact activation review and review receipt, installation receipt,
+installed payload, artifact, calibration, attachment profile, controller,
+installation profile, and destination. It also contains the approver,
+`APPROVE` decision, offset-aware approval time, and notes hash.
+
+The command replays the complete chain and rereads the installed canonical
+bytes before accepting the approval. The activation execution approver must
+differ from the dataset producer, fit reviewer, installation reviewer,
+installation execution approver, installer, and activation reviewer. The
+resulting
+`rocell.position_vector_calibration_qualified_activation_execution_approval_receipt.v1`
+record advances to `CALIBRATION_ACTIVATION_EXECUTION` for that one exact
+configuration. It does not select, load, or activate a calibration, access the
+controller or camera, send a command, or grant motion or physical authority.
+The no-attachment and stylus-attachment profiles require separate chains and
+cannot be substituted for each other.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
