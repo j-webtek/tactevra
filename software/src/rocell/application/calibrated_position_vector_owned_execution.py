@@ -53,10 +53,10 @@ class CalibratedPositionVectorOwnedExecutionOutcome:
     physical_authority: bool = False
 
 
-def _publish_claim(path: Path, claim: Mapping[str, Any]) -> None:
-    """Create one durable exclusive claim; an existing claim is never reused."""
+def _publish_document(path: Path, value: Mapping[str, Any] | bytes) -> None:
+    """Create one durable attempt document; an existing file is never reused."""
 
-    raw = canonical(claim) + b"\n"
+    raw = value if type(value) is bytes else canonical(value) + b"\n"
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     try:
         with os.fdopen(descriptor, "wb", closefd=False) as stream:
@@ -156,7 +156,8 @@ def run_owned_qualified_calibrated_feedback_request(
             "motion_authorized": False,
             "physical_authority": False,
         }
-        _publish_claim(working / "application-claim.json", claim)
+        _publish_document(working / "application-claim.json", claim)
+        _publish_document(working / "supervisor-request.json", staged.wire)
         _, request_digest = owned_request_wire(
             staged.registration,
             staged.request,
@@ -186,6 +187,7 @@ def run_owned_qualified_calibrated_feedback_request(
         stage = "RETENTION"
         if type(owned) is not OwnedWorkerResult or type(owned.parsed_result) is not dict:
             raise ValueError("exact owned position-vector result required")
+        _publish_document(working / "supervisor-result.json", owned.parsed_result)
         verified = verify_exported_journal(
             owned.parsed_result,
             wire=decoded_wire,

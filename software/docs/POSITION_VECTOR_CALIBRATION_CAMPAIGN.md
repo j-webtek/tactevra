@@ -1752,7 +1752,30 @@ and passes only a successful verified exchange into calibrated conversion.
 Terminal child evidence is retained without a receipt or retry. No public live
 command or hardware run was added by this increment.
 
-The next dependency is the calibrated execution review gate: independently
-accept or reject the completed receipt and its retained child journal before
-any downstream state consumer can use the observation. Any future physical
-use still needs a new current operator and hardware-state confirmation.
+The attempt directory also retains canonical `supervisor-request.json` and
+`supervisor-result.json` documents with exclusive creation semantics. These
+copies let a later process reproduce the request, result, and exported journal
+associations without trusting process memory or reopening the controller.
+
+## Independent calibrated execution review (2026-10-25)
+
+The private review gate now loads those retained supervisor documents, the
+exclusive application claim, and the child journal manifest. It reruns the
+closed protocol and file-digest checks, matches the exact request and exchange
+evidence to the execution receipt, reloads the selected calibration, and
+reproduces the calibrated feedback from the retained response line. A review
+record is accepted only when all six content bindings match and the reviewer
+is distinct from the physical operator.
+
+Both `ACCEPT` and `REJECT` decisions produce a deterministic review receipt.
+Only acceptance carries the reproduced observation forward, and even then its
+next required gate is
+`CALIBRATED_POSITION_VECTOR_OBSERVATION_STATE_ADMISSION`. Rejection carries no
+calibrated observation. Neither branch retries, opens hardware, or grants
+motion, connection, contact, or physical authority. No public live command or
+additional hardware run was added.
+
+The next dependency is the observation state-admission gate: bind one accepted
+review receipt to an explicit downstream consumer and freshness policy before
+that consumer may use the calibrated observation. Any future physical use
+still needs a new current operator and hardware-state confirmation.

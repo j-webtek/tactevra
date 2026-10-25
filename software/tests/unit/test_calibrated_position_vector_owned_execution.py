@@ -1,8 +1,9 @@
-from datetime import datetime
+import hashlib
 import json
 import threading
 
 from rocell.application import calibrated_position_vector_feedback_execution as execution
+from rocell.application import calibrated_position_vector_execution_review as review
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -15,6 +16,10 @@ from rocell.calibration.position_vector_campaign import (
     canonical_sha256,
 )
 from rocell.providers.windows.arm_feedback_worker import ReviewedControllerBinding
+from rocell.providers.windows.calibrated_position_vector_owned_protocol import (
+    canonical,
+    decode_request,
+)
 from rocell.providers.windows.owned_worker_process import OwnedWorkerResult
 
 
@@ -144,15 +149,71 @@ def worker_factory(child_status="SUCCEEDED"):
 
         def run(self, request, *, cancellation, deadline_ns):
             from rocell.providers.windows.owned_worker_process import owned_request_wire
-            _, digest = owned_request_wire(self.registration, request, deadline_ns=deadline_ns)
+            wire, digest = owned_request_wire(
+                self.registration, request, deadline_ns=deadline_ns
+            )
             self.authorizer(self.registration, request, digest)
             calls.append(request)
+            decoded = decode_request(wire)
+            export_directory = (
+                self.registration.working_directory
+                / "exports" / ("position-vector-feedback-" + request.attempt_id)
+            )
+            export_directory.mkdir()
+            files = []
+            for name, raw in (
+                ("header.json", b"{}\n"),
+                ("events.jsonl", b"{}\n"),
+                ("result.json", b"{}\n"),
+            ):
+                (export_directory / name).write_bytes(raw)
+                files.append(
+                    {"name": name, "bytes": len(raw),
+                     "sha256": hashlib.sha256(raw).hexdigest()}
+                )
+            journal_export = {
+                "schema": "rocell.position_vector_feedback_serial_attempt_export.v1",
+                "attempt_directory_name": (
+                    "position-vector-feedback-" + request.attempt_id
+                ),
+                "recovery_disposition": "TERMINAL_NO_REPLAY",
+                "request_sha256": hashlib.sha256(
+                    canonical(decoded["payload"]["binding"]["request"])
+                ).hexdigest(),
+                "event_count": 1,
+                "files": files,
+                "automatic_retry_allowed": False,
+                "motion_authorized": False,
+                "physical_authority": False,
+            }
+            (export_directory / "manifest.json").write_bytes(
+                canonical(journal_export) + b"\n"
+            )
             parsed = {
+                "schema": "rocell.owned_calibrated_position_vector_result.v1",
+                "attempt_id": request.attempt_id,
+                "request_sha256": digest,
                 "child_result": {
+                    "schema": (
+                        "rocell.calibrated_position_vector_native_child_result.v1"
+                    ),
                     "status": child_status,
                     "error": None if child_status == "SUCCEEDED" else "SHORT_WRITE_NO_RETRY",
                     "exchange_evidence": evidence() if child_status == "SUCCEEDED" else None,
-                }
+                    "binding_sha256": request.operation_sha256,
+                    "journal_export": {
+                        **journal_export,
+                        "export_directory": str(export_directory.resolve()),
+                    },
+                    "physical_authority": False,
+                    "motion_authorized": False,
+                    "automatic_retry_allowed": False,
+                    "connected": False,
+                },
+                "physical_authority": False,
+                "motion_authorized": False,
+                "automatic_retry_allowed": False,
+                "connected": False,
             }
             return OwnedWorkerResult(
                 "SUCCEEDED" if child_status == "SUCCEEDED" else "FAILED",
@@ -196,6 +257,8 @@ def test_runs_once_retains_claim_and_completes_calibrated_receipt(tmp_path, monk
     claim = json.loads((result.working_directory / "application-claim.json").read_text())
     assert claim["schema"] == subject.CLAIM_SCHEMA
     assert claim["automatic_retry_allowed"] is False
+    assert (result.working_directory / "supervisor-request.json").is_file()
+    assert (result.working_directory / "supervisor-result.json").is_file()
 
 
 def test_terminal_child_failure_is_retained_without_retry_or_receipt(tmp_path, monkeypatch):
@@ -236,3 +299,103 @@ def test_stale_prerequisites_fail_before_staging_or_dispatch(tmp_path, monkeypat
     assert result.stage == "PREPARATION_FAILED"
     assert result.working_directory is None
     assert calls == []
+
+
+def test_independent_review_reproduces_retained_execution(tmp_path, monkeypatch):
+    result, _ = run(tmp_path, monkeypatch)
+    artifact = calibration()
+    basis = review.build_calibrated_position_vector_execution_review_basis(
+        result.working_directory,
+        execution_receipt_document=result.execution_receipt,
+        calibration_document=artifact,
+    )
+    review_document = {
+        "schema": review.REVIEW_SCHEMA,
+        "decision": "ACCEPT",
+        "reviewer_id": "independent-reviewer-01",
+        "reviewed_at": "2026-10-25T14:02:00-04:00",
+        **{field: basis[field] for field in (
+            "execution_receipt_sha256", "application_claim_sha256",
+            "supervisor_request_sha256", "supervisor_result_sha256",
+            "journal_manifest_sha256", "calibration_sha256",
+        )},
+        "review_notes_sha256": "9" * 64,
+    }
+
+    receipt = review.review_calibrated_position_vector_execution(
+        result.working_directory,
+        execution_receipt_document=result.execution_receipt,
+        calibration_document=artifact,
+        review_document=review_document,
+    )
+
+    assert receipt["status"] == (
+        "CALIBRATED_POSITION_VECTOR_EXECUTION_REVIEW_ACCEPTED"
+    )
+    assert receipt["calibrated_feedback"] == result.execution_receipt[
+        "calibrated_feedback"
+    ]
+    assert receipt["calibrated_feedback_observation_accepted"] is True
+    assert receipt["motion_authorized"] is False
+
+    review_document["decision"] = "REJECT"
+    rejected = review.review_calibrated_position_vector_execution(
+        result.working_directory,
+        execution_receipt_document=result.execution_receipt,
+        calibration_document=artifact,
+        review_document=review_document,
+    )
+    assert rejected["status"] == (
+        "CALIBRATED_POSITION_VECTOR_EXECUTION_REVIEW_REJECTED"
+    )
+    assert rejected["calibrated_feedback"] is None
+    assert rejected["calibrated_feedback_observation_accepted"] is False
+
+
+def test_execution_review_rejects_crossed_or_nonindependent_evidence(
+    tmp_path, monkeypatch
+):
+    result, _ = run(tmp_path, monkeypatch)
+    artifact = calibration()
+    basis = review.build_calibrated_position_vector_execution_review_basis(
+        result.working_directory,
+        execution_receipt_document=result.execution_receipt,
+        calibration_document=artifact,
+    )
+    document = {
+        "schema": review.REVIEW_SCHEMA,
+        "decision": "REJECT",
+        "reviewer_id": result.execution_receipt["operator_id"],
+        "reviewed_at": "2026-10-25T14:02:00-04:00",
+        **{field: basis[field] for field in (
+            "execution_receipt_sha256", "application_claim_sha256",
+            "supervisor_request_sha256", "supervisor_result_sha256",
+            "journal_manifest_sha256", "calibration_sha256",
+        )},
+        "review_notes_sha256": "9" * 64,
+    }
+    try:
+        review.review_calibrated_position_vector_execution(
+            result.working_directory,
+            execution_receipt_document=result.execution_receipt,
+            calibration_document=artifact,
+            review_document=document,
+        )
+    except review.CalibratedPositionVectorExecutionReviewError as error:
+        assert "independent" in str(error)
+    else:
+        raise AssertionError("operator was accepted as independent reviewer")
+
+    document["reviewer_id"] = "independent-reviewer-01"
+    document["supervisor_result_sha256"] = "0" * 64
+    try:
+        review.review_calibrated_position_vector_execution(
+            result.working_directory,
+            execution_receipt_document=result.execution_receipt,
+            calibration_document=artifact,
+            review_document=document,
+        )
+    except review.CalibratedPositionVectorExecutionReviewError as error:
+        assert "supervisor_result_sha256" in str(error)
+    else:
+        raise AssertionError("crossed retained result was accepted")
