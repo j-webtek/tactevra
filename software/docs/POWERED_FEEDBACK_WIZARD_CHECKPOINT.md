@@ -525,3 +525,19 @@ pin the new adapter to the existing non-purging Windows connection, exact
 controller identity, owned-process supervisor, and governed evidence export.
 There is still no public live CLI. A later physical attempt requires newly
 confirmed physical state; the earlier unplugged or powered state is not reused.
+
+## Calibrated native child composition (2026-10-25)
+
+The calibrated adapter is now joined to the non-purging Windows connection at a
+private child-side boundary. Admission requires the exact reviewed controller,
+a fresh identical identity, the installed calibration controller/firmware
+binding, closed request, pinned runtime, current child PID, and original
+deadline. Construction and status are inert; the admitted facade has one open
+attempt and preserves the adapter's fixed T105/no-retry lifecycle.
+
+The same boundary verifies and retains terminal or interrupted journals as an
+immutable evidence export with hashes for every original byte stream. It does
+not provide a CLI, invoke hardware in tests, authorize motion, or treat an
+interrupted attempt as retryable. Parent-side source-pinned package,
+registration, wire, supervision, and result/export association are the next
+implementation increment before any fresh physical attempt.
