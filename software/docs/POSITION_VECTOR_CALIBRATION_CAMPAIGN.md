@@ -1256,6 +1256,42 @@ open the controller or camera, request feedback, send a command, or authorize
 motion. Output remains outside the installation and activation roots and is
 never replaced.
 
+To execute that approval offline, invoke
+`execute-qualified-calibrated-feedback-integration` with every complete-chain
+input used by the approval command. Replace its `--output` option with these
+execution-specific options:
+
+```powershell
+--integration-execution-approval-receipt qualified-position-vector-feedback-integration-execution-approval-receipt.json `
+--integration-root calibrated-position-vector-feedback-integrations `
+--integrator-id feedback-integration-operator-12 `
+--integrated-at 2026-10-24T23:00:00-04:00 `
+--receipt-output qualified-position-vector-feedback-integration-receipt.json
+```
+
+The command replays the full evidence, fit, installation, activation, review,
+and approval chain before creating anything. The integrator must differ from
+the integration execution approver. The integration root must remain outside
+the installation and activation roots, and the receipt must remain outside all
+three roots. Existing integration descriptors and receipts are never replaced.
+
+The immutable descriptor has schema
+`rocell.position_vector_calibration_qualified_feedback_integration.v1` and is
+published under the approved installation profile as
+`calibrated-position-vector-feedback-integration.json`. It binds the installed
+artifact and active selection hashes, controller and attachment profile,
+conversion contract, response profile, and stable strict loader and converter
+references. This keeps `no_attachment` and `stylus_attachment` integrations in
+separate profile directories.
+
+The resulting
+`rocell.position_vector_calibration_qualified_feedback_integration_receipt.v1`
+advances to
+`CALIBRATED_POSITION_VECTOR_FEEDBACK_RUNTIME_ADMISSION_REVIEW`. It explicitly
+leaves runtime loading unauthorized. This execution creates no runtime session,
+opens no controller or camera, requests no feedback, sends no command, and
+authorizes no motion or physical action.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
