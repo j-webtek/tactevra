@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import hashlib
+import json
 from threading import RLock
 from typing import Any
 
@@ -61,6 +62,7 @@ class NonPurgingSerialConnection:
     ) -> None:
         passive = False
         powered = False
+        calibrated_position_vector = False
         if type(binding) is not ReviewedControllerBinding:
             # Lazy import preserves the closed legacy feedback child package.
             # A passive selection must never be disguised as firmware evidence.
@@ -72,7 +74,15 @@ class NonPurgingSerialConnection:
                 from .powered_feedback_binding import PoweredFeedbackBinding
 
                 powered = type(binding) is PoweredFeedbackBinding
-            if not passive and not powered:
+                if not powered:
+                    from .calibrated_position_vector_binding import (
+                        CalibratedPositionVectorBinding,
+                    )
+
+                    calibrated_position_vector = (
+                        type(binding) is CalibratedPositionVectorBinding
+                    )
+            if not passive and not powered and not calibrated_position_vector:
                 raise NativeSerialError("REVIEWED_BINDING_REQUIRED", "construction")
             binding.__post_init__()
         allowed_apis = (IncapableWin32SerialApi, WindowsNativeSerialApi)
@@ -88,6 +98,29 @@ class NonPurgingSerialConnection:
                     "POWERED_FEEDBACK_PHYSICAL_HELD", "construction"
                 )
             allowed_apis = (WindowsPoweredFeedbackSerialApi,)
+        if calibrated_position_vector:
+            from .calibrated_position_vector_serial_api import (
+                WindowsCalibratedPositionVectorSerialApi,
+            )
+
+            if (
+                type(api) is not WindowsCalibratedPositionVectorSerialApi
+                or api.admitted_request_sha256
+                != hashlib.sha256(
+                    json.dumps(
+                        dict(binding.request),
+                        sort_keys=True,
+                        separators=(",", ":"),
+                        ensure_ascii=True,
+                        allow_nan=False,
+                    ).encode("utf-8")
+                ).hexdigest()
+                or api.expected_path != "\\\\.\\" + binding.identity.port_name
+            ):
+                raise NativeSerialError(
+                    "CALIBRATED_POSITION_VECTOR_PHYSICAL_HELD", "construction"
+                )
+            allowed_apis = (WindowsCalibratedPositionVectorSerialApi,)
         if passive:
             from .passive_serial_api import WindowsPassiveSerialApi
 
@@ -112,6 +145,7 @@ class NonPurgingSerialConnection:
         self._binding = binding
         self._passive = passive
         self._powered = powered
+        self._calibrated_position_vector = calibrated_position_vector
         self._api: Win32SerialApi = WindowsNativeSerialApi() if api is None else api
         self._incapable = incapable
         self._lock = RLock()
@@ -164,6 +198,12 @@ class NonPurgingSerialConnection:
                 and self._api.status().get("powered_admission")
                 == "LIVE_CHILD_CLAIM_CONSUMED"
             )
+            calibrated_admitted = (
+                self._calibrated_position_vector
+                and not self._incapable
+                and self._api.status().get("calibrated_position_vector_admission")
+                == "OWNED_PROCESS_BINDING_MATCHED"
+            )
             return {
                 "schema": "rocell.nonpurging_serial_lifecycle.v1",
                 "phase": self._phase,
@@ -171,12 +211,16 @@ class NonPurgingSerialConnection:
                     "HARDWARE_INCAPABLE_REHEARSAL"
                     if self._incapable
                     else (
-                        "WINDOWS_POWERED_FEEDBACK_ENGINEERING"
-                        if powered_admitted
+                        "WINDOWS_CALIBRATED_POSITION_VECTOR_ENGINEERING"
+                        if calibrated_admitted
                         else (
-                            "WINDOWS_PASSIVE_SERIAL_ENGINEERING"
-                            if passive_admitted
-                            else "WINDOWS_NONPURGING_SERIAL_PHYSICAL_HELD"
+                            "WINDOWS_POWERED_FEEDBACK_ENGINEERING"
+                            if powered_admitted
+                            else (
+                                "WINDOWS_PASSIVE_SERIAL_ENGINEERING"
+                                if passive_admitted
+                                else "WINDOWS_NONPURGING_SERIAL_PHYSICAL_HELD"
+                            )
                         )
                     )
                 ),
@@ -186,7 +230,11 @@ class NonPurgingSerialConnection:
                 "physical_hold": (
                     "COMMAND_COMMISSIONING_REQUIRED"
                     if passive_admitted or powered_admitted
-                    else NATIVE_HOLD
+                    else (
+                        "CALIBRATED_FEEDBACK_REQUEST_ONLY"
+                        if calibrated_admitted
+                        else NATIVE_HOLD
+                    )
                 ),
                 "hardware_accessed_by_status": False,
                 "arm_connected": False,

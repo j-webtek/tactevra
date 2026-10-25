@@ -157,6 +157,14 @@ def _validate_request(value: Mapping[str, Any]) -> dict[str, Any]:
     return request
 
 
+def validate_position_vector_serial_request(
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Return the canonical closed request used by native composition layers."""
+
+    return _validate_request(value)
+
+
 @dataclass(slots=True)
 class _AttemptJournal:
     directory: Path
@@ -487,4 +495,5 @@ __all__ = [
     "PositionVectorSerialTransport",
     "execute_position_vector_serial_exchange",
     "load_position_vector_serial_attempt",
+    "validate_position_vector_serial_request",
 ]

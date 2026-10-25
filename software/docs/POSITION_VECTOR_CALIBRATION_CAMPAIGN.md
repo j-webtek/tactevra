@@ -1550,6 +1550,27 @@ identity, and retain the journal directory in the governed evidence export.
 Only after that production composition is independently reviewed may a newly
 confirmed physical attempt be considered.
 
+The child-side production boundary is now installed. A
+`CalibratedPositionVectorBinding` admits only an exact physical reviewed
+controller, a freshly reproduced identical OS identity, the calibration's exact
+VID/PID/unit/firmware binding, the closed application request, a pinned runtime
+hash, the current child PID, and the original monotonic deadline. The admitted
+Win32 facade remains inert until `open()` and can issue only the existing fixed
+T105 payload through `NonPurgingSerialConnection`. Status performs no hardware
+access and grants no motion authority.
+
+Every terminal or interrupted adapter journal can now be verified and copied
+byte-for-byte into a unique immutable evidence directory. Its canonical
+manifest records each original file's byte count and SHA-256, request identity,
+event count, recovery disposition, and explicit no-retry/no-motion authority.
+Tampered journals fail before export; incomplete exports retain their partial
+bytes and cannot be silently replaced.
+
+This remains private child-side composition with no CLI and performed no live
+access. The next dependency is the parent-side source-pinned archive,
+registration, wire codec, and owned-process result validation that invokes this
+boundary and retains its journal export.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities

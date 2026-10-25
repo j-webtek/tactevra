@@ -239,6 +239,15 @@ returns exact application exchange evidence only after confirmed cleanup. It
 adds no public live CLI, controller transcript, motion authority, or physical
 qualification. All byte, duplicate, and reduction limits remain unchanged.
 
+The calibrated position-vector native child composition adds four governed
+paths: an exact controller/runtime binding, a one-open admitted Win32 facade, a
+private non-purging child composition with immutable journal export, and one
+focused hardware-incapable unit-test module. The reviewed tracked-file ceiling
+moves from 6,618 to the exact expected 6,622 files. It adds no public live CLI,
+controller transcript, automatic retry, or motion authority. Parent-side pinned
+package and owned-process registration remain separately gated; all byte,
+duplicate, and reduction limits remain unchanged.
+
 The candidate-qualification-assessment increment adds no governed paths and
 keeps the reviewed tracked-file ceiling at 6,614. It extends the existing
 campaign source, tests, and guide with an offline, hash-bound evidence-chain
