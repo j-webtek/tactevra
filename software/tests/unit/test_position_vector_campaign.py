@@ -33,6 +33,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_COLLECTION_READINESS_HANDOFF_SCHEMA,
     QUALIFIED_COLLECTION_READINESS_PLAN_SCHEMA,
     QUALIFIED_CALIBRATION_ARTIFACT_BUILD_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_RECEIPT_SCHEMA,
@@ -52,6 +54,7 @@ from rocell.calibration.position_vector_campaign import (
     REVIEW_SCHEMA,
     CampaignPolicy,
     PositionVectorCampaignError,
+    accept_qualified_calibration_activation_review,
     accept_qualified_independent_fit_review,
     accept_qualified_calibration_installation_review,
     approve_qualified_calibration_installation_execution,
@@ -874,6 +877,85 @@ def execute_qualified_installation_package(
     )
 
 
+def qualified_activation_review(package, installation_receipt):
+    artifact = package[9]
+    execution_approval_receipt = package[14]
+    return {
+        "schema": QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_SCHEMA,
+        "installation_receipt_sha256": canonical_sha256(installation_receipt),
+        "installed_payload_sha256": installation_receipt[
+            "installed_payload_sha256"
+        ],
+        "artifact_sha256": canonical_sha256(artifact),
+        "calibration_id": artifact["calibration_id"],
+        "attachment_profile": execution_approval_receipt["attachment_profile"],
+        "controller_binding_sha256": canonical_sha256(
+            artifact["controller_binding"]
+        ),
+        "installation_profile_id": execution_approval_receipt[
+            "installation_profile_id"
+        ],
+        "destination_ref": execution_approval_receipt["destination_ref"],
+        "reviewer_id": "activation-reviewer-07",
+        "decision": "ACCEPT",
+        "reviewed_at": "2026-10-24T18:00:00-04:00",
+        "review_notes_sha256": "7" * 64,
+    }
+
+
+def accept_qualified_activation_review_package(
+    package,
+    installation_root,
+    installation_receipt,
+    activation_review,
+):
+    (
+        chain,
+        observations,
+        receipts,
+        compiled,
+        compilation_receipt,
+        fit_report,
+        fit_assessment,
+        review_document,
+        review_receipt,
+        artifact,
+        build_receipt,
+        installation_review,
+        installation_review_receipt,
+        execution_approval,
+        execution_approval_receipt,
+    ) = package
+    return accept_qualified_calibration_activation_review(
+        inventory_document=chain[0],
+        admission_receipt_document=chain[1],
+        training_split_document=chain[2],
+        collection_plan_document=chain[3],
+        observations_document=observations,
+        preparation_receipt_document=chain[5],
+        readiness_plan_document=chain[6],
+        readiness_evidence_document=chain[7],
+        readiness_assessment_document=chain[8],
+        readiness_handoff_document=chain[9],
+        ingestion_receipt_documents=receipts,
+        dataset_document=compiled,
+        compilation_receipt_document=compilation_receipt,
+        fit_report_document=fit_report,
+        fit_assessment_document=fit_assessment,
+        review_document=review_document,
+        review_receipt_document=review_receipt,
+        artifact_document=artifact,
+        artifact_build_receipt_document=build_receipt,
+        installation_review_document=installation_review,
+        installation_review_receipt_document=installation_review_receipt,
+        execution_approval_document=execution_approval,
+        execution_approval_receipt_document=execution_approval_receipt,
+        installation_receipt_document=installation_receipt,
+        installation_root=installation_root,
+        activation_review_document=activation_review,
+    )
+
+
 def test_candidate_audit_catches_catalog_that_cannot_meet_training_span():
     report = audit_candidate_count_coverage(candidate_inventory())
 
@@ -1021,7 +1103,10 @@ def test_candidate_qualification_plan_rejects_stale_or_failing_preflight():
     stale = copy.deepcopy(preflight)
     stale["candidate"]["source_ref"] = "crossed-evidence"
 
-    with pytest.raises(PositionVectorCampaignError, match="does not reproduce"):
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="does not reproduce",
+    ):
         create_candidate_qualification_plan(inventory, proposal, stale)
 
     failing = candidate_proposal(
@@ -2415,6 +2500,134 @@ def test_qualified_calibration_installation_rejects_invalid_execution_identity(
     assert not (tmp_path / "install").exists()
 
 
+def test_qualified_activation_review_verifies_exact_inactive_installation(tmp_path):
+    package = qualified_installation_approval_package()
+    installation_root = tmp_path / "inactive-position-vector-calibrations"
+    installation_receipt = execute_qualified_installation_package(
+        package,
+        installation_root,
+    )
+    activation_review = qualified_activation_review(
+        package,
+        installation_receipt,
+    )
+
+    receipt = accept_qualified_activation_review_package(
+        package,
+        installation_root,
+        installation_receipt,
+        activation_review,
+    )
+
+    assert (
+        receipt["schema"]
+        == QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_RECEIPT_SCHEMA
+    )
+    assert receipt["status"] == "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_ACCEPTED"
+    assert receipt["installation_receipt_sha256"] == canonical_sha256(
+        installation_receipt
+    )
+    assert receipt["installed_payload_sha256"] == installation_receipt[
+        "installed_payload_sha256"
+    ]
+    assert receipt["activation_review_sha256"] == canonical_sha256(
+        activation_review
+    )
+    assert receipt["next_required_gate"] == (
+        "CALIBRATION_ACTIVATION_EXECUTION_APPROVAL"
+    )
+    assert receipt["calibration_installation_authorized"] is True
+    assert receipt["calibration_activation_authorized"] is False
+    assert receipt["authority"]["commands_sent"] == 0
+
+
+def test_qualified_activation_review_rejects_modified_installed_bytes(tmp_path):
+    package = qualified_installation_approval_package()
+    installation_root = tmp_path / "inactive-position-vector-calibrations"
+    installation_receipt = execute_qualified_installation_package(
+        package,
+        installation_root,
+    )
+    activation_review = qualified_activation_review(
+        package,
+        installation_receipt,
+    )
+    installed_path = installation_root / installation_receipt[
+        "installed_relative_path"
+    ]
+    installed_path.write_bytes(b"{}\n")
+
+    with pytest.raises(PositionVectorCampaignError, match="bytes do not reproduce"):
+        accept_qualified_activation_review_package(
+            package,
+            installation_root,
+            installation_receipt,
+            activation_review,
+        )
+
+
+def test_qualified_activation_review_rejects_tampered_installation_receipt(tmp_path):
+    package = qualified_installation_approval_package()
+    installation_root = tmp_path / "inactive-position-vector-calibrations"
+    installation_receipt = execute_qualified_installation_package(
+        package,
+        installation_root,
+    )
+    activation_review = qualified_activation_review(
+        package,
+        installation_receipt,
+    )
+    installation_receipt = copy.deepcopy(installation_receipt)
+    installation_receipt["installed_at"] = "2026-10-24T17:01:00-04:00"
+
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="installation_receipt_sha256 mismatch",
+    ):
+        accept_qualified_activation_review_package(
+            package,
+            installation_root,
+            installation_receipt,
+            activation_review,
+        )
+
+
+@pytest.mark.parametrize(
+    "updates,match",
+    [
+        ({"reviewer_id": "calibration-producer-01"}, "not independent"),
+        ({"reviewer_id": "independent-fit-reviewer-03"}, "not independent"),
+        ({"reviewer_id": "installation-reviewer-04"}, "not independent"),
+        ({"reviewer_id": "installation-approver-05"}, "not independent"),
+        ({"reviewer_id": "installation-operator-06"}, "not independent"),
+        ({"decision": "PENDING"}, "decision is not ACCEPT"),
+        ({"reviewed_at": "2026-10-24T18:00:00"}, "must include a UTC offset"),
+        ({"review_notes_sha256": "invalid"}, "review_notes_sha256"),
+        ({"artifact_sha256": "0" * 64}, "artifact_sha256 mismatch"),
+    ],
+)
+def test_qualified_activation_review_rejects_invalid_review(tmp_path, updates, match):
+    package = qualified_installation_approval_package()
+    installation_root = tmp_path / "inactive-position-vector-calibrations"
+    installation_receipt = execute_qualified_installation_package(
+        package,
+        installation_root,
+    )
+    activation_review = qualified_activation_review(
+        package,
+        installation_receipt,
+    )
+    activation_review.update(updates)
+
+    with pytest.raises(PositionVectorCampaignError, match=match):
+        accept_qualified_activation_review_package(
+            package,
+            installation_root,
+            installation_receipt,
+            activation_review,
+        )
+
+
 @pytest.mark.parametrize(
     "mutate,match",
     [
@@ -3469,6 +3682,47 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
     ):
         main(args)
     assert installed_path.read_bytes() == canonical_bytes(artifact) + b"\n"
+
+    activation_review = qualified_activation_review(package, receipt)
+    activation_review_path = tmp_path / "qualified-activation-review.json"
+    activation_review_path.write_text(
+        json.dumps(activation_review),
+        encoding="utf-8",
+    )
+    activation_receipt_output = tmp_path / "qualified-activation-review-receipt.json"
+    activation_args = ["review-qualified-calibration-activation"]
+    for name in chain_names:
+        activation_args.extend((f"--{name}", str(paths[name])))
+    for path in receipt_paths:
+        activation_args.extend(("--ingestion-receipt", str(path)))
+    for name in downstream_documents:
+        activation_args.extend((f"--{name}", str(paths[name])))
+    activation_args.extend((
+        "--installation-receipt", str(receipt_output),
+        "--installation-root", str(installation_root),
+        "--activation-review", str(activation_review_path),
+        "--output", str(activation_receipt_output),
+    ))
+
+    nested_output_args = list(activation_args)
+    nested_output_args[-1] = str(installation_root / "review-receipt.json")
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="activation review output must remain outside",
+    ):
+        main(nested_output_args)
+
+    assert main(activation_args) == 0
+    activation_receipt = json.loads(activation_receipt_output.read_bytes())
+    assert activation_receipt["status"] == (
+        "QUALIFIED_CALIBRATION_ACTIVATION_REVIEW_ACCEPTED"
+    )
+    assert activation_receipt["next_required_gate"] == (
+        "CALIBRATION_ACTIVATION_EXECUTION_APPROVAL"
+    )
+    assert activation_receipt["calibration_activation_authorized"] is False
+    with pytest.raises(PositionVectorCampaignError, match="refusing to replace"):
+        main(activation_args)
 
 
 def test_retained_candidate_inventory_and_coverage_report_reproduce():

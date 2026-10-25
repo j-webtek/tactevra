@@ -921,6 +921,67 @@ artifact, open a controller or camera, request feedback, send commands, or
 grant motion or physical authority. The receipt advances only to
 `CALIBRATION_ACTIVATION_REVIEW`; activation requires a later explicit gate.
 
+For the activation review, retain a strict review record that binds the exact
+installation receipt and installed payload hash, then run:
+
+```powershell
+python -m rocell.calibration.position_vector_campaign review-qualified-calibration-activation `
+  --inventory proposed-qualified-candidate-inventory.json `
+  --admission-receipt proposed-qualified-candidate-admission-receipt.json `
+  --training-split proposed-position-vector-training-split.json `
+  --collection-plan proposed-position-vector-collection-plan.json `
+  --observations completed-position-vector-observations.json `
+  --preparation-receipt proposed-position-vector-qualified-preparation-receipt.json `
+  --readiness-plan proposed-position-vector-collection-readiness-plan.json `
+  --readiness-evidence reviewed-position-vector-collection-readiness-evidence.json `
+  --readiness-assessment proposed-position-vector-collection-readiness-assessment.json `
+  --readiness-handoff proposed-position-vector-collection-readiness-handoff.json `
+  --ingestion-receipt ingestion-receipt-01.json `
+  --ingestion-receipt ingestion-receipt-02.json `
+  --ingestion-receipt ingestion-receipt-03.json `
+  --ingestion-receipt ingestion-receipt-04.json `
+  --ingestion-receipt ingestion-receipt-05.json `
+  --ingestion-receipt ingestion-receipt-06.json `
+  --ingestion-receipt ingestion-receipt-07.json `
+  --ingestion-receipt ingestion-receipt-08.json `
+  --ingestion-receipt ingestion-receipt-09.json `
+  --dataset qualified-position-vector-dataset.json `
+  --compilation-receipt qualified-position-vector-compilation-receipt.json `
+  --fit-report qualified-position-vector-fit-report.json `
+  --fit-assessment qualified-position-vector-fit-assessment.json `
+  --review qualified-position-vector-independent-fit-review.json `
+  --review-receipt qualified-position-vector-independent-fit-review-receipt.json `
+  --artifact qualified-position-vector-calibration.json `
+  --artifact-build-receipt qualified-position-vector-artifact-build-receipt.json `
+  --installation-review qualified-position-vector-installation-review.json `
+  --installation-review-receipt qualified-position-vector-installation-review-receipt.json `
+  --execution-approval qualified-position-vector-installation-execution-approval.json `
+  --execution-approval-receipt qualified-position-vector-installation-execution-approval-receipt.json `
+  --installation-receipt qualified-position-vector-installation-receipt.json `
+  --installation-root inactive-position-vector-calibrations `
+  --activation-review qualified-position-vector-activation-review.json `
+  --output qualified-position-vector-activation-review-receipt.json
+```
+
+The activation review has schema
+`rocell.position_vector_calibration_qualified_activation_review.v1` and contains
+only the exact installation-receipt hash, installed-payload hash, artifact,
+calibration, attachment, controller, profile and destination bindings, plus the
+reviewer, `ACCEPT` decision, offset-aware review time, and notes hash.
+
+This command replays the complete approval chain, resolves the installed path
+from the approved profile and destination, and reads the inactive file without
+creating or modifying it. The file must equal the canonical approved artifact
+bytes exactly, and the supplied installation receipt must reproduce from those
+verified bytes. The activation reviewer must differ from the dataset producer,
+fit reviewer, installation reviewer, execution approver, and installer.
+
+The resulting
+`rocell.position_vector_calibration_qualified_activation_review_receipt.v1`
+record advances only to `CALIBRATION_ACTIVATION_EXECUTION_APPROVAL`. Review
+acceptance does not select, load, or activate the file and grants no controller,
+camera, command, motion, activation, or physical authority.
+
 Use `prepare-reviewed` for the governed handoff. It recomputes the reviewed
 evidence assessment, requires the supplied readiness report and readiness
 receipt to reproduce exactly, and derives the dataset and producer identities
