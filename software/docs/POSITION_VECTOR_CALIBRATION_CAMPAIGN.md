@@ -1779,3 +1779,25 @@ The next dependency is the observation state-admission gate: bind one accepted
 review receipt to an explicit downstream consumer and freshness policy before
 that consumer may use the calibrated observation. Any future physical use
 still needs a new current operator and hardware-state confirmation.
+
+## Calibrated observation state admission (2026-10-25)
+
+The private state-admission gate now binds one accepted independent review back
+to the exact execution receipt and its original observation time. Admission
+also freezes the current calibration, controller binding, attachment profile,
+attempt, runtime session, named consumer, and consumer-context digest. Crossed,
+rejected, stale, differently configured, or incompletely bound evidence fails
+closed.
+
+Freshness is explicit and bounded twice: the observation age may be no more
+than five minutes, and the issued consumer window may be no more than one
+minute. The caller may choose tighter limits. A successful receipt carries the
+reviewed calibrated feedback only to that named state consumer and requires
+use before `valid_until`. It grants no retry, motion, connection, contact, or
+physical authority, and any future physical use still requires a new current
+operator and hardware-state confirmation. No hardware was opened and no live
+command was added.
+
+The next dependency is named-consumer redemption: verify the admitted receipt,
+consumer context, and freshness again at use, then durably prevent a second
+consumer use of the same admission.

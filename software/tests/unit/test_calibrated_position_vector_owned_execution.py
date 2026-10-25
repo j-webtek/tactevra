@@ -4,6 +4,7 @@ import threading
 
 from rocell.application import calibrated_position_vector_feedback_execution as execution
 from rocell.application import calibrated_position_vector_execution_review as review
+from rocell.application import calibrated_position_vector_observation_admission as admission
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -31,6 +32,11 @@ CONTROLLER = {
     "pid": "ea60",
     "unit_serial": "52E4E1E8337FEF119E92181CEDD322A4",
     "firmware_sha256": FIRMWARE_SHA,
+}
+CONSUMER_CONTEXT = {
+    "schema": "rocell.test_joint_state_consumer_context.v1",
+    "consumer_id": "joint-state-estimator-01",
+    "state_epoch": "state-epoch-01",
 }
 
 
@@ -399,3 +405,182 @@ def test_execution_review_rejects_crossed_or_nonindependent_evidence(
         assert "supervisor_result_sha256" in str(error)
     else:
         raise AssertionError("crossed retained result was accepted")
+
+
+def accepted_review_receipt(tmp_path, monkeypatch):
+    result, _ = run(tmp_path, monkeypatch)
+    artifact = calibration()
+    basis = review.build_calibrated_position_vector_execution_review_basis(
+        result.working_directory,
+        execution_receipt_document=result.execution_receipt,
+        calibration_document=artifact,
+    )
+    document = {
+        "schema": review.REVIEW_SCHEMA,
+        "decision": "ACCEPT",
+        "reviewer_id": "independent-reviewer-01",
+        "reviewed_at": "2026-10-25T14:02:00-04:00",
+        **{field: basis[field] for field in (
+            "execution_receipt_sha256", "application_claim_sha256",
+            "supervisor_request_sha256", "supervisor_result_sha256",
+            "journal_manifest_sha256", "calibration_sha256",
+        )},
+        "review_notes_sha256": "9" * 64,
+    }
+    receipt = review.review_calibrated_position_vector_execution(
+        result.working_directory,
+        execution_receipt_document=result.execution_receipt,
+        calibration_document=artifact,
+        review_document=document,
+    )
+    return result.execution_receipt, receipt
+
+
+def admission_document(execution_receipt, review_receipt):
+    return {
+        "schema": admission.ADMISSION_SCHEMA,
+        "consumer_id": "joint-state-estimator-01",
+        "consumer_context_sha256": canonical_sha256(CONSUMER_CONTEXT),
+        "admitted_at": "2026-10-25T14:02:10-04:00",
+        "valid_until": "2026-10-25T14:03:00-04:00",
+        "review_receipt_sha256": canonical_sha256(review_receipt),
+        "execution_receipt_sha256": canonical_sha256(execution_receipt),
+        "calibration_sha256": review_receipt["calibration_sha256"],
+        "controller_binding_sha256": execution_receipt[
+            "controller_binding_sha256"
+        ],
+        "attempt_id": execution_receipt["attempt_id"],
+        "runtime_session_id": execution_receipt["runtime_session_id"],
+        "calibration_id": execution_receipt["calibration_id"],
+        "attachment_profile": execution_receipt["attachment_profile"],
+        "freshness_policy": {
+            "maximum_observation_age_seconds": 180,
+            "maximum_admission_lifetime_seconds": 60,
+        },
+    }
+
+
+def test_admits_reviewed_observation_to_one_named_consumer(tmp_path, monkeypatch):
+    execution_receipt, review_receipt = accepted_review_receipt(
+        tmp_path, monkeypatch
+    )
+    document = admission_document(execution_receipt, review_receipt)
+
+    receipt = admission.admit_calibrated_position_vector_observation(
+        execution_receipt_document=execution_receipt,
+        review_receipt_document=review_receipt,
+        admission_document=document,
+        consumer_context_document=CONSUMER_CONTEXT,
+        current_calibration_document=calibration(),
+        current_controller_binding_document=CONTROLLER,
+        current_attachment_profile="no_attachment",
+    )
+
+    assert receipt["status"] == (
+        "CALIBRATED_POSITION_VECTOR_OBSERVATION_STATE_ADMITTED"
+    )
+    assert receipt["consumer_id"] == "joint-state-estimator-01"
+    assert receipt["calibrated_feedback"] == execution_receipt[
+        "calibrated_feedback"
+    ]
+    assert receipt["named_consumer_state_use_authorized"] is True
+    assert receipt["motion_authorized"] is False
+    assert receipt["physical_authority"] is False
+
+
+def test_admission_rejects_stale_crossed_or_rejected_review(tmp_path, monkeypatch):
+    execution_receipt, review_receipt = accepted_review_receipt(
+        tmp_path, monkeypatch
+    )
+    document = admission_document(execution_receipt, review_receipt)
+    document["admitted_at"] = "2026-10-25T14:05:00-04:00"
+    document["valid_until"] = "2026-10-25T14:05:01-04:00"
+    try:
+        admission.admit_calibrated_position_vector_observation(
+            execution_receipt_document=execution_receipt,
+            review_receipt_document=review_receipt,
+            admission_document=document,
+            consumer_context_document=CONSUMER_CONTEXT,
+            current_calibration_document=calibration(),
+            current_controller_binding_document=CONTROLLER,
+            current_attachment_profile="no_attachment",
+        )
+    except admission.CalibratedPositionVectorObservationAdmissionError as error:
+        assert "stale" in str(error)
+    else:
+        raise AssertionError("stale observation was admitted")
+
+    document = admission_document(execution_receipt, review_receipt)
+    document["execution_receipt_sha256"] = "0" * 64
+    try:
+        admission.admit_calibrated_position_vector_observation(
+            execution_receipt_document=execution_receipt,
+            review_receipt_document=review_receipt,
+            admission_document=document,
+            consumer_context_document=CONSUMER_CONTEXT,
+            current_calibration_document=calibration(),
+            current_controller_binding_document=CONTROLLER,
+            current_attachment_profile="no_attachment",
+        )
+    except admission.CalibratedPositionVectorObservationAdmissionError as error:
+        assert "execution_receipt_sha256" in str(error)
+    else:
+        raise AssertionError("crossed execution receipt was admitted")
+
+    document = admission_document(execution_receipt, review_receipt)
+    changed_consumer_context = {**CONSUMER_CONTEXT, "state_epoch": "state-epoch-02"}
+    try:
+        admission.admit_calibrated_position_vector_observation(
+            execution_receipt_document=execution_receipt,
+            review_receipt_document=review_receipt,
+            admission_document=document,
+            consumer_context_document=changed_consumer_context,
+            current_calibration_document=calibration(),
+            current_controller_binding_document=CONTROLLER,
+            current_attachment_profile="no_attachment",
+        )
+    except admission.CalibratedPositionVectorObservationAdmissionError as error:
+        assert "consumer_context_sha256" in str(error)
+    else:
+        raise AssertionError("changed consumer context was admitted")
+
+    document = admission_document(execution_receipt, review_receipt)
+    changed_controller = {**CONTROLLER, "unit_serial": "DIFFERENT-CONTROLLER"}
+    try:
+        admission.admit_calibrated_position_vector_observation(
+            execution_receipt_document=execution_receipt,
+            review_receipt_document=review_receipt,
+            admission_document=document,
+            consumer_context_document=CONSUMER_CONTEXT,
+            current_calibration_document=calibration(),
+            current_controller_binding_document=changed_controller,
+            current_attachment_profile="no_attachment",
+        )
+    except admission.CalibratedPositionVectorObservationAdmissionError as error:
+        assert "controller_binding_sha256" in str(error)
+    else:
+        raise AssertionError("changed controller was admitted")
+
+    rejected = dict(review_receipt)
+    rejected["status"] = "CALIBRATED_POSITION_VECTOR_EXECUTION_REVIEW_REJECTED"
+    rejected["decision"] = "REJECT"
+    rejected["calibrated_feedback_observation_accepted"] = False
+    rejected["calibrated_feedback"] = None
+    rejected["next_required_gate"] = (
+        "CALIBRATED_POSITION_VECTOR_EXECUTION_REVIEW_REMEDIATION"
+    )
+    document = admission_document(execution_receipt, rejected)
+    try:
+        admission.admit_calibrated_position_vector_observation(
+            execution_receipt_document=execution_receipt,
+            review_receipt_document=rejected,
+            admission_document=document,
+            consumer_context_document=CONSUMER_CONTEXT,
+            current_calibration_document=calibration(),
+            current_controller_binding_document=CONTROLLER,
+            current_attachment_profile="no_attachment",
+        )
+    except admission.CalibratedPositionVectorObservationAdmissionError as error:
+        assert "not accepted" in str(error)
+    else:
+        raise AssertionError("rejected observation was admitted")
