@@ -51,6 +51,8 @@ from rocell.calibration.position_vector_campaign import (
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_EXECUTION_APPROVAL_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_LOAD_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_SCHEMA,
+    QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA,
     CALIBRATED_FEEDBACK_INTEGRATION_CONTRACT,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_RECEIPT_SCHEMA,
     QUALIFIED_CALIBRATION_INSTALLATION_EXECUTION_APPROVAL_SCHEMA,
@@ -4697,6 +4699,105 @@ def test_file_workflow_installs_exact_approved_calibration_inactive(tmp_path):
         match="refusing to replace existing feedback runtime load receipt output",
     ):
         main(runtime_load_args)
+
+    runtime_validation_output = tmp_path / "feedback-runtime-session-validation.json"
+    runtime_validation_receipt_output = (
+        tmp_path / "feedback-runtime-session-validation-receipt.json"
+    )
+    runtime_validation_args = list(runtime_load_args[:-2])
+    runtime_validation_args[0] = (
+        "validate-qualified-calibrated-feedback-runtime-session"
+    )
+    runtime_validation_args.extend((
+        "--runtime-session", str(runtime_session_path),
+        "--runtime-load-receipt", str(runtime_load_receipt_output),
+        "--validator-id", "feedback-runtime-validator-16",
+        "--validated-at", "2026-10-25T11:30:00-04:00",
+        "--validation-output", str(runtime_validation_output),
+        "--receipt-output", str(runtime_validation_receipt_output),
+    ))
+    nested_runtime_validation_args = list(runtime_validation_args)
+    nested_runtime_validation_args[
+        nested_runtime_validation_args.index("--validation-output") + 1
+    ] = str(runtime_root / "validation.json")
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime validation output must remain outside runtime root",
+    ):
+        main(nested_runtime_validation_args)
+    assert not runtime_validation_output.exists()
+    assert not runtime_validation_receipt_output.exists()
+
+    aliased_runtime_validation_args = list(runtime_validation_args)
+    aliased_runtime_validation_args[
+        aliased_runtime_validation_args.index("--receipt-output") + 1
+    ] = str(runtime_validation_output)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace or alias feedback runtime validation output",
+    ):
+        main(aliased_runtime_validation_args)
+
+    nonindependent_runtime_validator_args = list(runtime_validation_args)
+    nonindependent_runtime_validator_args[
+        nonindependent_runtime_validator_args.index("--validator-id") + 1
+    ] = "feedback-runtime-loader-15"
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime validator must be independent of loader",
+    ):
+        main(nonindependent_runtime_validator_args)
+
+    tampered_runtime_session = dict(runtime_session)
+    tampered_runtime_session["loaded_joint_count"] = 5
+    tampered_runtime_session_path = tmp_path / "tampered-runtime-session.json"
+    tampered_runtime_session_path.write_text(
+        json.dumps(tampered_runtime_session), encoding="utf-8"
+    )
+    tampered_runtime_validation_args = list(runtime_validation_args)
+    tampered_runtime_validation_args[
+        tampered_runtime_validation_args.index("--runtime-session") + 1
+    ] = str(tampered_runtime_session_path)
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="runtime session does not reproduce",
+    ):
+        main(tampered_runtime_validation_args)
+
+    assert main(runtime_validation_args) == 0
+    runtime_validation = json.loads(runtime_validation_output.read_bytes())
+    assert runtime_validation["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_SCHEMA
+    )
+    assert runtime_validation["status"] == (
+        "QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATED_OFFLINE"
+    )
+    assert runtime_validation["held_out_sample_count"] == 4
+    assert len(runtime_validation["held_out_sample_results"]) == 4
+    assert len(runtime_validation["joint_results"]) == 6
+    assert runtime_validation["all_conversions_accepted"] is True
+    assert all(row["accepted"] for row in runtime_validation["joint_results"])
+    runtime_validation_receipt = json.loads(
+        runtime_validation_receipt_output.read_bytes()
+    )
+    assert runtime_validation_receipt["schema"] == (
+        QUALIFIED_CALIBRATED_FEEDBACK_RUNTIME_SESSION_VALIDATION_RECEIPT_SCHEMA
+    )
+    assert runtime_validation_receipt["next_required_gate"] == (
+        "CALIBRATED_POSITION_VECTOR_FEEDBACK_REQUEST_ADMISSION_REVIEW"
+    )
+    assert runtime_validation_receipt[
+        "calibrated_feedback_runtime_session_validated"
+    ] is True
+    assert runtime_validation_receipt[
+        "calibrated_feedback_requests_authorized"
+    ] is False
+    assert runtime_validation_receipt["authority"]["commands_sent"] == 0
+    with pytest.raises(
+        PositionVectorCampaignError,
+        match="refusing to replace or alias feedback runtime validation output",
+    ):
+        main(runtime_validation_args)
 
     integration_approval_output.unlink()
     nonindependent_approval = dict(integration_execution_approval)
