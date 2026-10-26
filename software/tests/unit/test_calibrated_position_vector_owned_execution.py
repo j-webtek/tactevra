@@ -6,6 +6,7 @@ from rocell.application import calibrated_position_vector_feedback_execution as 
 from rocell.application import calibrated_position_vector_execution_review as review
 from rocell.application import calibrated_position_vector_observation_admission as admission
 from rocell.application import calibrated_position_vector_observation_redemption as redemption
+from rocell.application import calibrated_position_vector_state_ingestion as ingestion
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -478,6 +479,19 @@ def admitted_receipt(tmp_path, monkeypatch):
     )
 
 
+def redeemed_receipt(tmp_path, monkeypatch):
+    admitted = admitted_receipt(tmp_path, monkeypatch)
+    redemption_root = tmp_path / "redemptions"
+    redemption_root.mkdir()
+    return redemption.redeem_calibrated_position_vector_observation(
+        redemption_root.resolve(),
+        admission_receipt_document=admitted,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        redeemed_at="2026-10-25T14:02:20-04:00",
+    )
+
+
 def test_admits_reviewed_observation_to_one_named_consumer(tmp_path, monkeypatch):
     execution_receipt, review_receipt = accepted_review_receipt(
         tmp_path, monkeypatch
@@ -723,3 +737,162 @@ def test_named_consumer_redemption_rejects_stale_or_changed_context(
         raise AssertionError("crossed consumer admission was redeemed")
 
     assert not list(redemption_root.iterdir())
+
+
+def test_named_consumer_state_ingestion_is_idempotent(tmp_path, monkeypatch):
+    redeemed = redeemed_receipt(tmp_path, monkeypatch)
+    state_root = tmp_path / "consumer-state"
+    state_root.mkdir()
+
+    first = ingestion.ingest_calibrated_position_vector_state(
+        state_root.resolve(),
+        redemption_receipt_document=redeemed,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        ingested_at="2026-10-25T14:02:21-04:00",
+    )
+    repeated = ingestion.ingest_calibrated_position_vector_state(
+        state_root.resolve(),
+        redemption_receipt_document=redeemed,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        ingested_at="2026-10-25T15:00:00-04:00",
+    )
+
+    assert repeated == first
+    assert first["status"] == "CALIBRATED_POSITION_VECTOR_STATE_INGESTED"
+    assert first["calibrated_feedback"] == redeemed["calibrated_feedback"]
+    assert first["duplicate_delivery_idempotent"] is True
+    assert first["motion_authorized"] is False
+    retained = list(state_root.iterdir())
+    assert len(retained) == 1
+    assert json.loads(retained[0].read_text(encoding="utf-8")) == first
+
+
+def test_named_consumer_state_ingestion_converges_under_concurrency(
+    tmp_path, monkeypatch
+):
+    redeemed = redeemed_receipt(tmp_path, monkeypatch)
+    state_root = tmp_path / "consumer-state"
+    state_root.mkdir()
+    barrier = threading.Barrier(2)
+    receipts = []
+    errors = []
+
+    def ingest(observed_at: str) -> None:
+        barrier.wait()
+        try:
+            receipts.append(
+                ingestion.ingest_calibrated_position_vector_state(
+                    state_root.resolve(),
+                    redemption_receipt_document=redeemed,
+                    consumer_id="joint-state-estimator-01",
+                    consumer_context_document=CONSUMER_CONTEXT,
+                    ingested_at=observed_at,
+                )
+            )
+        except ingestion.CalibratedPositionVectorStateIngestionError as error:
+            errors.append(error)
+
+    threads = [
+        threading.Thread(
+            target=ingest, args=(f"2026-10-25T14:02:2{index}-04:00",)
+        )
+        for index in (1, 2)
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert not errors
+    assert len(receipts) == 2
+    assert receipts[0] == receipts[1]
+    assert len(list(state_root.iterdir())) == 1
+
+
+def test_named_consumer_state_ingestion_rejects_changed_or_stale_delivery(
+    tmp_path, monkeypatch
+):
+    redeemed = redeemed_receipt(tmp_path, monkeypatch)
+    state_root = tmp_path / "consumer-state"
+    state_root.mkdir()
+
+    try:
+        ingestion.ingest_calibrated_position_vector_state(
+            state_root.resolve(),
+            redemption_receipt_document=redeemed,
+            consumer_id="joint-state-estimator-01",
+            consumer_context_document=CONSUMER_CONTEXT,
+            ingested_at="2026-10-25T14:03:00-04:00",
+        )
+    except ingestion.CalibratedPositionVectorStateIngestionError as error:
+        assert "not fresh" in str(error)
+    else:
+        raise AssertionError("stale redemption was first-ingested")
+
+    original = ingestion.ingest_calibrated_position_vector_state(
+        state_root.resolve(),
+        redemption_receipt_document=redeemed,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        ingested_at="2026-10-25T14:02:21-04:00",
+    )
+    changed = dict(redeemed)
+    changed["calibrated_feedback"] = {
+        **redeemed["calibrated_feedback"], "pose": "CHANGED"
+    }
+    try:
+        ingestion.ingest_calibrated_position_vector_state(
+            state_root.resolve(),
+            redemption_receipt_document=changed,
+            consumer_id="joint-state-estimator-01",
+            consumer_context_document=CONSUMER_CONTEXT,
+            ingested_at="2026-10-25T14:02:22-04:00",
+        )
+    except ingestion.CalibratedPositionVectorStateIngestionError as error:
+        assert "different payload" in str(error)
+    else:
+        raise AssertionError("changed payload reused an ingested redemption_id")
+
+    assert ingestion.ingest_calibrated_position_vector_state(
+        state_root.resolve(),
+        redemption_receipt_document=redeemed,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        ingested_at="2026-10-25T14:02:22-04:00",
+    ) == original
+
+    try:
+        ingestion.ingest_calibrated_position_vector_state(
+            state_root.resolve(),
+            redemption_receipt_document=redeemed,
+            consumer_id="joint-state-estimator-01",
+            consumer_context_document={
+                **CONSUMER_CONTEXT, "state_epoch": "state-epoch-02"
+            },
+            ingested_at="2026-10-25T14:02:22-04:00",
+        )
+    except ingestion.CalibratedPositionVectorStateIngestionError as error:
+        assert "consumer context differs" in str(error)
+    else:
+        raise AssertionError("changed consumer context read stored state")
+
+    retained = next(state_root.iterdir())
+    tampered = json.loads(retained.read_text(encoding="utf-8"))
+    tampered["calibrated_feedback"] = {
+        **tampered["calibrated_feedback"], "pose": "TAMPERED"
+    }
+    retained.write_bytes(canonical(tampered) + b"\n")
+    try:
+        ingestion.ingest_calibrated_position_vector_state(
+            state_root.resolve(),
+            redemption_receipt_document=redeemed,
+            consumer_id="joint-state-estimator-01",
+            consumer_context_document=CONSUMER_CONTEXT,
+            ingested_at="2026-10-25T14:02:23-04:00",
+        )
+    except ingestion.CalibratedPositionVectorStateIngestionError as error:
+        assert "differs from the original result" in str(error)
+    else:
+        raise AssertionError("tampered stored state was returned")

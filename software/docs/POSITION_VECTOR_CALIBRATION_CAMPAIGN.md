@@ -1822,3 +1822,23 @@ The next dependency is idempotent named-consumer state ingestion. The consumer
 state store must use `redemption_id` as its deduplication key, apply the
 observation at most once, and make a repeated delivery return the original
 state result without applying the observation again.
+
+## Idempotent named-consumer state ingestion (2026-10-25)
+
+The named consumer now has an immutable state-event store keyed by the exact
+`redemption_id`. The first fresh delivery is written and synchronized before it
+is returned. Simultaneous identical deliveries converge on one stored result,
+and any later identical delivery returns that original receipt without applying
+the observation again. A different payload that claims the same key, an altered
+consumer context, unsafe storage, or a stale first delivery fails closed.
+
+The stored event preserves the execution, review, admission, redemption,
+calibration, controller, attachment profile, and consumer bindings. It remains
+an observation record rather than a mutable current-state pointer and grants no
+retry, motion, connection, contact, or physical authority. This increment opens
+no hardware and adds no live command.
+
+The next dependency is calibrated-state snapshot read admission. That boundary
+must select a stored immutable event, recheck the named reader and current
+profile context, and expose a typed snapshot to later camera-feedback and motion
+planning without turning observation data into movement authority.
