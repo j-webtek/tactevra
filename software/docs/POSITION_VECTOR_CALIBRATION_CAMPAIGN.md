@@ -1887,3 +1887,29 @@ The next dependency is fused camera/state planning admission. That boundary
 must select a target from the admitted observation, revalidate collision and
 clearance evidence for the active attachment profile, and produce a bounded
 plan candidate without granting execution authority.
+
+## Fused camera/state planning admission (2026-10-25)
+
+The fused camera and calibrated-state receipt can now be admitted to one named
+planning context. The gate selects one exact key from the complete board-space
+candidate set and joins it to the corresponding robot-frame localization
+candidate. It requires matching target-profile lineage, the same active
+attachment profile, and the exact camera/state fusion and board-registration
+digests.
+
+The selected profile must also reproduce the robot-localization candidate hash
+carried by the reviewed installed-clearance intake. Bare-jaw and stylus inputs
+remain separate. The receipt carries the installed collision-profile and
+clearance-policy digests into the plan candidate, bounds requested hover
+clearance and waypoint count, and expires within both fifteen seconds and the
+source fusion lifetime.
+
+This boundary deliberately stops before trajectory construction. Installed
+collision evidence is accepted only as an input to the next screen; continuous
+clearance remains unverified. The receipt emits no trajectory or controller
+command and grants no retry, motion, contact, or physical authority.
+
+The next dependency is profile-specific trajectory construction and collision
+qualification. It must construct a bounded route from the admitted calibrated
+start state through hover and target waypoints, then prove the exact route
+against the selected installed collision profile before any execution review.
