@@ -1801,3 +1801,24 @@ command was added.
 The next dependency is named-consumer redemption: verify the admitted receipt,
 consumer context, and freshness again at use, then durably prevent a second
 consumer use of the same admission.
+
+## Named-consumer observation redemption (2026-10-25)
+
+The private redemption gate now verifies the exact state-admission receipt,
+named consumer, actual consumer-context digest, timestamp ordering, and both
+freshness ceilings again at the instant of use. It derives a stable redemption
+identity from the complete admission receipt and exclusively creates one
+durable record before returning the calibrated observation. A concurrent or
+later attempt for the same admission fails closed; an interrupted publication
+also leaves that admission terminal rather than permitting an uncertain retry.
+
+The redemption receipt is the observation handoff to the named consumer. It
+preserves the execution, review, calibration, controller, attachment, and
+consumer bindings and explicitly denies replay, automatic retry, motion,
+connection, contact, and physical authority. This increment opens no hardware
+and adds no live command.
+
+The next dependency is idempotent named-consumer state ingestion. The consumer
+state store must use `redemption_id` as its deduplication key, apply the
+observation at most once, and make a repeated delivery return the original
+state result without applying the observation again.
