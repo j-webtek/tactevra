@@ -1913,3 +1913,28 @@ The next dependency is profile-specific trajectory construction and collision
 qualification. It must construct a bounded route from the admitted calibrated
 start state through hover and target waypoints, then prove the exact route
 against the selected installed collision profile before any execution review.
+
+## Fused target exact-route qualification admission (2026-10-26)
+
+The admitted fused-camera target can now be joined to the existing deterministic
+typing trajectory and installed-geometry collision pipeline. The gate parses the
+exact execution plan, verifies the selected key coordinates and requested hover
+clearance, and confirms that every matching action has the expected hover,
+contact, and retract waypoints in the sealed trajectory plan.
+
+That target lineage must continue through the profile-separated route-screen and
+collision-partition manifests into a ready route-bound collision qualification.
+The active bare-jaw or stylus profile, trajectory hash, partition digest, route
+envelope, and installed collision-profile digest must all agree. Crossed
+profiles, stale planning receipts, altered coordinates, modified waypoints,
+incomplete collision evidence, or rejected routes fail closed.
+
+This reuses the reviewed route machinery instead of creating a second planner.
+It proves that the camera-selected key belongs to the exact route that completed
+offline IK and installed-geometry collision qualification. It does not claim
+that the arm is currently at that route's entry state. The result contains no
+controller command or physical authority.
+
+The next dependency is route-bound fresh observed-entry qualification. A fresh
+arm observation must be proven compatible with the exact qualified route before
+any later execution review may consider movement.
