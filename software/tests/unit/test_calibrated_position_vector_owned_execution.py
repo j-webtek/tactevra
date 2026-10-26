@@ -9,6 +9,7 @@ from rocell.application import calibrated_position_vector_observation_redemption
 from rocell.application import calibrated_position_vector_state_ingestion as ingestion
 from rocell.application import calibrated_position_vector_state_snapshot_read_admission as snapshot_read
 from rocell.application import camera_feedback_state_fusion_admission as fusion
+from rocell.application import fused_camera_state_planning_admission as planning
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -47,6 +48,12 @@ READER_CONTEXT = {
     "reader_id": "camera-state-fusion-01",
     "pipeline_epoch": "fusion-epoch-01",
     "purpose": "camera_feedback_state_fusion",
+}
+PLANNING_CONTEXT = {
+    "schema": "rocell.test_fused_camera_state_planning_context.v1",
+    "planner_id": "keyboard-plan-candidate-01",
+    "fusion_consumer_id": "camera-state-fusion-01",
+    "planning_epoch": "planning-epoch-01",
 }
 
 
@@ -1118,8 +1125,16 @@ def _board_registration():
         "schema": fusion.BOARD_REGISTRATION_SCHEMA,
         "status": "ABSOLUTE_KEYBOARD_TO_BOARD_LOCALIZATION_READY",
         "profile": "no_attachment",
+        "target_profile_sha256": "4" * 64,
         "absolute_keyboard_to_board_transform_verified": True,
         "board_space_key_candidates_emitted": True,
+        "board_space_key_candidates": [
+            {
+                "key_id": f"K{index:02d}",
+                "board_xy_mm": [10.0 + index, 20.0],
+            }
+            for index in range(46)
+        ],
         "motion_targets_emitted": False,
         "motion_authorized": False,
         "contact_authorized": False,
@@ -1239,3 +1254,209 @@ def test_fusion_rejects_failed_quality_tampering_and_time_skew(
             assert expected in str(error)
         else:
             raise AssertionError("unsafe fusion evidence was admitted")
+
+
+def _robot_localization():
+    profiles = {}
+    for profile, offset in (("no_attachment", 0.0), ("stylus_attachment", 5.0)):
+        profiles[profile] = {
+            "profile": profile,
+            "board_to_robot_transform_verified": True,
+            "robot_frame_localization_candidates_emitted": True,
+            "robot_frame_localization_candidates": [
+                {
+                    "key_id": f"K{index:02d}",
+                    "robot_xyz_mm": [110.0 + index, 220.0, 90.0 + offset],
+                }
+                for index in range(46)
+            ],
+            "motion_targets_emitted": False,
+            "physical_clearance_verified": False,
+            "motion_authorized": False,
+            "contact_authorized": False,
+        }
+    return {
+        "schema": planning.ROBOT_LOCALIZATION_SCHEMA,
+        "status": "ROBOT_FRAME_LOCALIZATION_CANDIDATES_READY",
+        "target_profile_sha256": "4" * 64,
+        "board_to_robot_transform_verified": True,
+        "profiles": profiles,
+        "profile_separation_preserved": True,
+        "motion_targets_emitted": False,
+        "physical_clearance_verified": False,
+        "motion_authorized": False,
+        "contact_authorized": False,
+    }
+
+
+def _clearance_intake(localization=None):
+    localization = localization or _robot_localization()
+    profiles = {}
+    for index, profile in enumerate(("no_attachment", "stylus_attachment")):
+        candidates = localization["profiles"][profile][
+            "robot_frame_localization_candidates"
+        ]
+        profiles[profile] = {
+            "profile": profile,
+            "robot_frame_localization_candidates_sha256": canonical_sha256(candidates),
+            "route_construction_ready": True,
+            "collision_screening_executed": False,
+            "continuous_clearance_verified": False,
+            "installed_collision_profile_content_sha256": str(index + 5) * 64,
+            "clearance_policy_sha256": str(index + 7) * 64,
+        }
+    return {
+        "schema": planning.CLEARANCE_INTAKE_SCHEMA,
+        "status": "READY_FOR_PROFILE_SPECIFIC_ROUTE_CONSTRUCTION",
+        "robot_localization_sha256": canonical_sha256(localization),
+        "profiles": profiles,
+        "profile_separation_preserved": True,
+        "trajectory_generated": False,
+        "collision_screening_executed": False,
+        "continuous_clearance_verified": False,
+        "controller_commands": [],
+        "hardware_commands_generated": 0,
+        "hardware_access": False,
+        "motion_authorized": False,
+        "contact_authorized": False,
+        "physical_authority": False,
+    }
+
+
+def _planning_admission(fusion_receipt, localization=None, clearance=None):
+    localization = localization or _robot_localization()
+    clearance = clearance or _clearance_intake(localization)
+    return {
+        "schema": planning.PLANNING_ADMISSION_SCHEMA,
+        "planner_id": "keyboard-plan-candidate-01",
+        "planning_context_sha256": canonical_sha256(PLANNING_CONTEXT),
+        "fusion_receipt_sha256": canonical_sha256(fusion_receipt),
+        "board_registration_sha256": canonical_sha256(_board_registration()),
+        "robot_localization_sha256": canonical_sha256(localization),
+        "clearance_intake_sha256": canonical_sha256(clearance),
+        "attachment_profile": "no_attachment",
+        "target_key_id": "K00",
+        "admitted_at": "2026-10-25T14:02:32-04:00",
+        "valid_until": "2026-10-25T14:02:40-04:00",
+        "maximum_planning_lifetime_seconds": 10,
+        "maximum_waypoint_count": 64,
+        "requested_hover_clearance_mm": 20.0,
+    }
+
+
+def _admit_planning(fusion_receipt, document=None, **overrides):
+    localization = overrides.pop("robot_localization_document", _robot_localization())
+    clearance = overrides.pop(
+        "clearance_intake_document", _clearance_intake(localization)
+    )
+    values = {
+        "fusion_receipt_document": fusion_receipt,
+        "board_registration_document": _board_registration(),
+        "robot_localization_document": localization,
+        "clearance_intake_document": clearance,
+        "admission_document": document or _planning_admission(
+            fusion_receipt, localization, clearance
+        ),
+        "planning_context_document": PLANNING_CONTEXT,
+        "current_attachment_profile": "no_attachment",
+    }
+    values.update(overrides)
+    return planning.admit_fused_camera_state_planning(**values)
+
+
+def test_admits_exact_fused_state_to_bounded_plan_candidate(tmp_path, monkeypatch):
+    fused = _admit_fusion(_snapshot_receipt(tmp_path, monkeypatch))
+    receipt = _admit_planning(fused)
+
+    assert receipt["status"] == "FUSED_CAMERA_STATE_PLANNING_ADMITTED"
+    assert receipt["plan_candidate"] == {
+        "target_key_id": "K00",
+        "attachment_profile": "no_attachment",
+        "board_xy_mm": [10.0, 20.0],
+        "robot_xyz_mm": [110.0, 220.0, 90.0],
+        "requested_hover_clearance_mm": 20.0,
+        "maximum_waypoint_count": 64,
+        "installed_collision_profile_content_sha256": "5" * 64,
+        "clearance_policy_sha256": "7" * 64,
+    }
+    assert receipt["plan_candidate_emitted"] is True
+    assert receipt["trajectory_generated"] is False
+    assert receipt["collision_screening_executed"] is False
+    assert receipt["motion_authorized"] is False
+    assert receipt["physical_authority"] is False
+
+
+def test_planning_rejects_crossed_target_profile_context_or_attachment(
+    tmp_path, monkeypatch
+):
+    fused = _admit_fusion(_snapshot_receipt(tmp_path, monkeypatch))
+    localization = _robot_localization()
+    clearance = _clearance_intake(localization)
+    cases = (
+        (
+            {"planning_context_document": {
+                **PLANNING_CONTEXT, "planning_epoch": "planning-epoch-02"
+            }},
+            "planning context differs",
+        ),
+        (
+            {"current_attachment_profile": "stylus_attachment"},
+            "attachment profile differs",
+        ),
+        (
+            {"board_registration_document": {
+                **_board_registration(), "target_profile_sha256": "0" * 64
+            }},
+            "board_registration_sha256 mismatch",
+        ),
+        (
+            {"robot_localization_document": {
+                **localization, "target_profile_sha256": "0" * 64
+            }},
+            "target profiles differ",
+        ),
+        (
+            {"clearance_intake_document": {
+                **clearance, "robot_localization_sha256": "0" * 64
+            }},
+            "clearance intake is not bound",
+        ),
+    )
+    for overrides, expected in cases:
+        try:
+            _admit_planning(fused, **overrides)
+        except planning.FusedCameraStatePlanningAdmissionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("crossed planning evidence was admitted")
+
+
+def test_planning_rejects_missing_target_unsafe_clearance_or_stale_fusion(
+    tmp_path, monkeypatch
+):
+    fused = _admit_fusion(_snapshot_receipt(tmp_path, monkeypatch))
+    missing_target = _planning_admission(fused)
+    missing_target["target_key_id"] = "ABSENT"
+    unsafe_clearance = _clearance_intake()
+    unsafe_clearance["motion_authorized"] = True
+    unsafe_document = _planning_admission(
+        fused, _robot_localization(), unsafe_clearance
+    )
+    expired = _planning_admission(fused)
+    expired["valid_until"] = "2026-10-25T14:02:46-04:00"
+
+    cases = (
+        ({"document": missing_target}, "target key is absent"),
+        ({
+            "document": unsafe_document,
+            "clearance_intake_document": unsafe_clearance,
+        }, "clearance intake authority is invalid"),
+        ({"document": expired}, "source lifetime"),
+    )
+    for overrides, expected in cases:
+        try:
+            _admit_planning(fused, **overrides)
+        except planning.FusedCameraStatePlanningAdmissionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("unsafe planning evidence was admitted")
