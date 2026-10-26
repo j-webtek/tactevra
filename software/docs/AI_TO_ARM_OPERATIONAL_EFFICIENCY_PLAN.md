@@ -1026,6 +1026,17 @@ capture once, analyze once, and reuse the content-addressed qualification. The
 bounded sampling result intentionally retains the continuous-tracking blocker
 and grants no dispatch or retry authority.
 
+ARM-156 joins the qualified camera/state route entry to one exact action before
+the existing execution-review boundary. It reuses the retained continuous
+clearance, measured dynamics, and dense telemetry qualification, then requires
+a fresh current-operator confirmation, an independently approved physical
+effect-verifier binding, and a matching single-use per-action review policy.
+The five-second route-entry window and exact target action index prevent a
+stale or crossed route from reaching review. The result remains zero-authority:
+`single_action_execution_review_v1` must still authenticate its controller,
+collision-policy, T102, contact-envelope, and configuration inputs, and only
+the safety supervisor may issue a permit.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

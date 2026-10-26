@@ -1962,3 +1962,29 @@ that independent execution release gates have passed. A later execution review
 must still consume this receipt and satisfy its own current operator,
 freshness, dynamics, verifier, and per-action policy requirements before any
 physical request can be considered.
+
+## Fused route action-review admission (2026-10-26)
+
+The fresh camera/state route-entry receipt can now select one exact action from
+the camera-selected route and cross the final zero-authority seam into the
+existing single-action execution-review pipeline. The adapter independently
+rechecks the exact route and route-entry hashes, installed collision profile,
+route envelope, attachment profile, runtime session, continuous entry and route
+clearance, measured entry dynamics, and retained telemetry coverage. The route
+entry must be consumed within five seconds, and the selected action index must
+belong to the target action set sealed by the exact-route admission.
+
+Admission additionally requires three separately sealed records. A current
+operator confirmation is valid for at most thirty seconds and affirms operator
+presence, reachable shutdown, a clear area, and a secured stationary arm. An
+independently approved physical effect-verifier binding identifies the exact
+expected result and remains valid for at most five minutes. A per-action policy
+binds that verifier, expected effect, interaction, route, profile, and action
+while requiring single-use review and prohibiting automatic retry.
+
+The resulting receipt is ready only for
+`single_action_execution_review_v1`. It does not create that review, issue or
+consume a permit, encode a wire command, open hardware, authorize contact, or
+grant physical authority. The existing review boundary must still authenticate
+its controller, collision-policy, T102, contact-envelope, and configuration
+inputs; the safety supervisor remains the only permit issuer.
