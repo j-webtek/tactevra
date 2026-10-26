@@ -8,6 +8,7 @@ from rocell.application import calibrated_position_vector_observation_admission 
 from rocell.application import calibrated_position_vector_observation_redemption as redemption
 from rocell.application import calibrated_position_vector_state_ingestion as ingestion
 from rocell.application import calibrated_position_vector_state_snapshot_read_admission as snapshot_read
+from rocell.application import camera_feedback_state_fusion_admission as fusion
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -1065,3 +1066,176 @@ def test_snapshot_read_rejects_stale_crossed_or_tampered_state(
         assert "differs from the selected receipt" in str(error)
     else:
         raise AssertionError("tampered stored state was admitted for reading")
+
+
+def _snapshot_receipt(tmp_path, monkeypatch):
+    state_root, ingested = ingested_receipt(tmp_path, monkeypatch)
+    return snapshot_read.admit_calibrated_state_snapshot_read(
+        state_root.resolve(),
+        state_ingestion_receipt_document=ingested,
+        admission_document=snapshot_admission_document(ingested),
+        reader_context_document=READER_CONTEXT,
+        current_consumer_context_document=CONSUMER_CONTEXT,
+        current_calibration_document=calibration(),
+        current_controller_binding_document=CONTROLLER,
+        current_attachment_profile="no_attachment",
+    )
+
+
+def _camera_observation():
+    return {
+        "schema": fusion.CAMERA_OBSERVATION_SCHEMA,
+        "source_hashes": {
+            "camera_intrinsics_sha256": "8" * 64,
+            "tag_map_sha256": "9" * 64,
+        },
+        "quality": {"passed": True},
+        "authority": {
+            "physical_authority": "NONE",
+            "physical_commands_generated": 0,
+            "can_authorize_motion": False,
+            "can_release_physical_gates": False,
+        },
+        "board_pose": {"translation_mm": [10.0, 20.0, 0.0]},
+    }
+
+
+def _camera_calibration(registration=None):
+    registration = registration or _board_registration()
+    return {
+        "schema": "rocell.camera_fusion_calibration_binding.v1",
+        "status": "CAMERA_FUSION_CALIBRATION_READY",
+        "camera_intrinsics_sha256": "8" * 64,
+        "tag_map_sha256": "9" * 64,
+        "board_registration_sha256": canonical_sha256(registration),
+        "safe_for_runtime_observation_fusion": True,
+        "motion_authorized": False,
+    }
+
+
+def _board_registration():
+    return {
+        "schema": fusion.BOARD_REGISTRATION_SCHEMA,
+        "status": "ABSOLUTE_KEYBOARD_TO_BOARD_LOCALIZATION_READY",
+        "profile": "no_attachment",
+        "absolute_keyboard_to_board_transform_verified": True,
+        "board_space_key_candidates_emitted": True,
+        "motion_targets_emitted": False,
+        "motion_authorized": False,
+        "contact_authorized": False,
+    }
+
+
+def _fusion_admission(snapshot):
+    observation = _camera_observation()
+    registration = _board_registration()
+    camera_calibration = _camera_calibration(registration)
+    return {
+        "schema": fusion.FUSION_ADMISSION_SCHEMA,
+        "fusion_consumer_id": "camera-state-fusion-01",
+        "fusion_context_sha256": canonical_sha256(READER_CONTEXT),
+        "snapshot_read_receipt_sha256": canonical_sha256(snapshot),
+        "camera_observation_sha256": canonical_sha256(observation),
+        "camera_calibration_sha256": canonical_sha256(camera_calibration),
+        "board_registration_sha256": canonical_sha256(registration),
+        "attachment_profile": "no_attachment",
+        "camera_observed_at": snapshot["executed_at"],
+        "fused_at": "2026-10-25T14:02:31-04:00",
+        "valid_until": "2026-10-25T14:02:45-04:00",
+        "maximum_camera_state_skew_seconds": 1,
+        "maximum_fusion_lifetime_seconds": 20,
+    }
+
+
+def _admit_fusion(snapshot, document=None, **overrides):
+    values = {
+        "snapshot_read_receipt_document": snapshot,
+        "camera_observation_document": _camera_observation(),
+        "camera_calibration_document": _camera_calibration(),
+        "board_registration_document": _board_registration(),
+        "admission_document": document or _fusion_admission(snapshot),
+        "fusion_context_document": READER_CONTEXT,
+        "current_attachment_profile": "no_attachment",
+    }
+    values.update(overrides)
+    return fusion.admit_camera_feedback_state_fusion(**values)
+
+
+def test_admits_camera_observation_and_exact_state_snapshot_for_fusion(
+    tmp_path, monkeypatch
+):
+    snapshot = _snapshot_receipt(tmp_path, monkeypatch)
+    receipt = _admit_fusion(snapshot)
+
+    assert receipt["status"] == "CAMERA_FEEDBACK_STATE_FUSION_ADMITTED"
+    assert receipt["snapshot_id"] == snapshot["snapshot_id"]
+    assert receipt["calibrated_feedback"] == snapshot["calibrated_feedback"]
+    assert receipt["camera_observation"] == _camera_observation()
+    assert receipt["next_required_gate"] == (
+        "FUSED_CAMERA_STATE_PLANNING_ADMISSION"
+    )
+    assert receipt["planning_authorized"] is False
+    assert receipt["motion_authorized"] is False
+    assert receipt["physical_authority"] is False
+
+
+def test_fusion_rejects_crossed_camera_calibration_registration_or_snapshot(
+    tmp_path, monkeypatch
+):
+    snapshot = _snapshot_receipt(tmp_path, monkeypatch)
+    cases = (
+        (
+            {"camera_calibration_document": {
+                **_camera_calibration(), "camera_intrinsics_sha256": "0" * 64
+            }},
+            "intrinsics differ",
+        ),
+        (
+            {"camera_calibration_document": {
+                **_camera_calibration(), "tag_map_sha256": "0" * 64
+            }},
+            "tag map differ",
+        ),
+        (
+            {"fusion_context_document": {
+                **READER_CONTEXT, "pipeline_epoch": "fusion-epoch-02"
+            }},
+            "fusion context differs",
+        ),
+        (
+            {"current_attachment_profile": "stylus_attachment"},
+            "attachment profile differs",
+        ),
+    )
+    for overrides, expected in cases:
+        try:
+            _admit_fusion(snapshot, **overrides)
+        except fusion.CameraFeedbackStateFusionAdmissionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("crossed fusion evidence was admitted")
+
+
+def test_fusion_rejects_failed_quality_tampering_and_time_skew(
+    tmp_path, monkeypatch
+):
+    snapshot = _snapshot_receipt(tmp_path, monkeypatch)
+    failed = _camera_observation()
+    failed["quality"] = {"passed": False}
+    crossed = _fusion_admission(snapshot)
+    crossed["camera_observation_sha256"] = "0" * 64
+    skewed = _fusion_admission(snapshot)
+    skewed["camera_observed_at"] = "2026-10-25T14:02:20-04:00"
+
+    cases = (
+        ({"camera_observation_document": failed}, "quality failed"),
+        ({"document": crossed}, "camera_observation_sha256 mismatch"),
+        ({"document": skewed}, "exceed the admitted skew"),
+    )
+    for overrides, expected in cases:
+        try:
+            _admit_fusion(snapshot, **overrides)
+        except fusion.CameraFeedbackStateFusionAdmissionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("unsafe fusion evidence was admitted")
