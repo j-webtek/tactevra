@@ -1938,3 +1938,27 @@ controller command or physical authority.
 The next dependency is route-bound fresh observed-entry qualification. A fresh
 arm observation must be proven compatible with the exact qualified route before
 any later execution review may consider movement.
+
+## Fused state to route-entry admission (2026-10-26)
+
+The fresh calibrated arm snapshot is now joined all the way to the existing
+route-bound entry qualification. The gate verifies the immutable snapshot,
+camera/state fusion, planning receipt, and exact-route admission digests in
+order. All four stages must retain the same active bare-jaw or stylus profile,
+remain within their original validity windows, and preserve zero authority.
+
+The passing route-entry qualification must name the same route-bound collision
+receipt, route envelope, installed collision profile, and observed-entry
+document as the camera-selected route. The snapshot runtime session must also
+match the observed entry's controller session. Finally, the six-joint
+calibrated position vector is projected into the five canonical arm-planning
+joints and compared exactly with the observed entry's retained start state.
+This prevents a valid camera target and a separately valid route entry from
+being combined when they came from different physical observations.
+
+This completes the read-only camera/state-to-route-entry evidence chain. It
+does not authorize motion or contact, emit a command, open hardware, or imply
+that independent execution release gates have passed. A later execution review
+must still consume this receipt and satisfy its own current operator,
+freshness, dynamics, verifier, and per-action policy requirements before any
+physical request can be considered.
