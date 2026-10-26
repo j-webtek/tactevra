@@ -1842,3 +1842,23 @@ The next dependency is calibrated-state snapshot read admission. That boundary
 must select a stored immutable event, recheck the named reader and current
 profile context, and expose a typed snapshot to later camera-feedback and motion
 planning without turning observation data into movement authority.
+
+## Calibrated-state snapshot read admission (2026-10-25)
+
+The stored calibrated state can now be selected for one separately named
+read-only consumer. The admission gate reloads the canonical immutable event,
+binds its digest to the exact reader context, and rechecks the current consumer
+epoch, calibration, controller, and attachment profile before exposing the
+typed snapshot. Changed, crossed, stale, noncanonical, missing, or tampered
+state fails closed.
+
+Snapshot age is bounded to five minutes and each read admission can remain valid
+for no more than one minute; callers may choose tighter limits. The receipt
+preserves the complete observation provenance while granting only the named
+reader access to calibrated feedback. It grants no retry, controller write,
+motion, connection, contact, or physical authority. This increment opens no
+hardware and adds no live command.
+
+The next dependency is camera-feedback state-fusion admission. It must bind one
+camera observation, its camera calibration and board registration, and this
+exact state snapshot before any fused estimate can reach planning.
