@@ -7,6 +7,7 @@ from rocell.application import calibrated_position_vector_execution_review as re
 from rocell.application import calibrated_position_vector_observation_admission as admission
 from rocell.application import calibrated_position_vector_observation_redemption as redemption
 from rocell.application import calibrated_position_vector_state_ingestion as ingestion
+from rocell.application import calibrated_position_vector_state_snapshot_read_admission as snapshot_read
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -39,6 +40,12 @@ CONSUMER_CONTEXT = {
     "schema": "rocell.test_joint_state_consumer_context.v1",
     "consumer_id": "joint-state-estimator-01",
     "state_epoch": "state-epoch-01",
+}
+READER_CONTEXT = {
+    "schema": "rocell.test_camera_state_fusion_reader_context.v1",
+    "reader_id": "camera-state-fusion-01",
+    "pipeline_epoch": "fusion-epoch-01",
+    "purpose": "camera_feedback_state_fusion",
 }
 
 
@@ -492,6 +499,41 @@ def redeemed_receipt(tmp_path, monkeypatch):
     )
 
 
+def ingested_receipt(tmp_path, monkeypatch):
+    redeemed = redeemed_receipt(tmp_path, monkeypatch)
+    state_root = tmp_path / "consumer-state"
+    state_root.mkdir()
+    receipt = ingestion.ingest_calibrated_position_vector_state(
+        state_root.resolve(),
+        redemption_receipt_document=redeemed,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        ingested_at="2026-10-25T14:02:21-04:00",
+    )
+    return state_root, receipt
+
+
+def snapshot_admission_document(ingested):
+    return {
+        "schema": snapshot_read.SNAPSHOT_READ_ADMISSION_SCHEMA,
+        "reader_id": "camera-state-fusion-01",
+        "reader_context_sha256": canonical_sha256(READER_CONTEXT),
+        "consumer_id": "joint-state-estimator-01",
+        "consumer_context_sha256": canonical_sha256(CONSUMER_CONTEXT),
+        "state_ingestion_receipt_sha256": canonical_sha256(ingested),
+        "calibration_sha256": canonical_sha256(calibration()),
+        "controller_binding_sha256": canonical_sha256(CONTROLLER),
+        "calibration_id": calibration()["calibration_id"],
+        "attachment_profile": "no_attachment",
+        "admitted_at": "2026-10-25T14:02:30-04:00",
+        "valid_until": "2026-10-25T14:02:50-04:00",
+        "freshness_policy": {
+            "maximum_snapshot_age_seconds": 180,
+            "maximum_read_lifetime_seconds": 30,
+        },
+    }
+
+
 def test_admits_reviewed_observation_to_one_named_consumer(tmp_path, monkeypatch):
     execution_receipt, review_receipt = accepted_review_receipt(
         tmp_path, monkeypatch
@@ -896,3 +938,130 @@ def test_named_consumer_state_ingestion_rejects_changed_or_stale_delivery(
         assert "differs from the original result" in str(error)
     else:
         raise AssertionError("tampered stored state was returned")
+
+
+def test_admits_stored_state_snapshot_to_one_named_reader(tmp_path, monkeypatch):
+    state_root, ingested = ingested_receipt(tmp_path, monkeypatch)
+    receipt = snapshot_read.admit_calibrated_state_snapshot_read(
+        state_root.resolve(),
+        state_ingestion_receipt_document=ingested,
+        admission_document=snapshot_admission_document(ingested),
+        reader_context_document=READER_CONTEXT,
+        current_consumer_context_document=CONSUMER_CONTEXT,
+        current_calibration_document=calibration(),
+        current_controller_binding_document=CONTROLLER,
+        current_attachment_profile="no_attachment",
+    )
+
+    assert receipt["status"] == "CALIBRATED_STATE_SNAPSHOT_READ_ADMITTED"
+    assert receipt["reader_id"] == "camera-state-fusion-01"
+    assert receipt["calibrated_feedback"] == ingested["calibrated_feedback"]
+    assert receipt["named_reader_snapshot_use_authorized"] is True
+    assert receipt["next_required_gate"] == (
+        "CAMERA_FEEDBACK_STATE_FUSION_ADMISSION"
+    )
+    assert receipt["motion_authorized"] is False
+    assert receipt["physical_authority"] is False
+
+
+def test_snapshot_read_rejects_changed_reader_or_current_profile(
+    tmp_path, monkeypatch
+):
+    state_root, ingested = ingested_receipt(tmp_path, monkeypatch)
+    document = snapshot_admission_document(ingested)
+    cases = (
+        (
+            {**READER_CONTEXT, "pipeline_epoch": "fusion-epoch-02"},
+            CONSUMER_CONTEXT, calibration(), CONTROLLER, "no_attachment",
+            "reader context differs",
+        ),
+        (
+            READER_CONTEXT,
+            {**CONSUMER_CONTEXT, "state_epoch": "state-epoch-02"},
+            calibration(), CONTROLLER, "no_attachment",
+            "consumer context differs",
+        ),
+        (
+            READER_CONTEXT, CONSUMER_CONTEXT,
+            {**calibration(), "calibration_id": "different-calibration"},
+            CONTROLLER, "no_attachment", "calibration differs",
+        ),
+        (
+            READER_CONTEXT, CONSUMER_CONTEXT, calibration(),
+            {**CONTROLLER, "unit_serial": "DIFFERENT-CONTROLLER"},
+            "no_attachment", "controller binding differs",
+        ),
+        (
+            READER_CONTEXT, CONSUMER_CONTEXT, calibration(), CONTROLLER,
+            "stylus_attachment", "attachment profile differs",
+        ),
+    )
+    for reader_context, consumer_context, artifact, controller, profile, expected in cases:
+        try:
+            snapshot_read.admit_calibrated_state_snapshot_read(
+                state_root.resolve(),
+                state_ingestion_receipt_document=ingested,
+                admission_document=document,
+                reader_context_document=reader_context,
+                current_consumer_context_document=consumer_context,
+                current_calibration_document=artifact,
+                current_controller_binding_document=controller,
+                current_attachment_profile=profile,
+            )
+        except snapshot_read.CalibratedStateSnapshotReadAdmissionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("changed reader or current profile was admitted")
+
+
+def test_snapshot_read_rejects_stale_crossed_or_tampered_state(
+    tmp_path, monkeypatch
+):
+    state_root, ingested = ingested_receipt(tmp_path, monkeypatch)
+    stale = snapshot_admission_document(ingested)
+    stale["admitted_at"] = "2026-10-25T14:10:00-04:00"
+    stale["valid_until"] = "2026-10-25T14:10:20-04:00"
+    crossed = snapshot_admission_document(ingested)
+    crossed["state_ingestion_receipt_sha256"] = "0" * 64
+
+    for document, expected in (
+        (stale, "freshness policy"),
+        (crossed, "state_ingestion_receipt_sha256"),
+    ):
+        try:
+            snapshot_read.admit_calibrated_state_snapshot_read(
+                state_root.resolve(),
+                state_ingestion_receipt_document=ingested,
+                admission_document=document,
+                reader_context_document=READER_CONTEXT,
+                current_consumer_context_document=CONSUMER_CONTEXT,
+                current_calibration_document=calibration(),
+                current_controller_binding_document=CONTROLLER,
+                current_attachment_profile="no_attachment",
+            )
+        except snapshot_read.CalibratedStateSnapshotReadAdmissionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("stale or crossed snapshot read was admitted")
+
+    retained = next(state_root.iterdir())
+    tampered = json.loads(retained.read_text(encoding="utf-8"))
+    tampered["calibrated_feedback"] = {
+        **tampered["calibrated_feedback"], "pose": "TAMPERED"
+    }
+    retained.write_bytes(canonical(tampered) + b"\n")
+    try:
+        snapshot_read.admit_calibrated_state_snapshot_read(
+            state_root.resolve(),
+            state_ingestion_receipt_document=ingested,
+            admission_document=snapshot_admission_document(ingested),
+            reader_context_document=READER_CONTEXT,
+            current_consumer_context_document=CONSUMER_CONTEXT,
+            current_calibration_document=calibration(),
+            current_controller_binding_document=CONTROLLER,
+            current_attachment_profile="no_attachment",
+        )
+    except snapshot_read.CalibratedStateSnapshotReadAdmissionError as error:
+        assert "differs from the selected receipt" in str(error)
+    else:
+        raise AssertionError("tampered stored state was admitted for reading")
