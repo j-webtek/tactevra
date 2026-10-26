@@ -5,6 +5,7 @@ import threading
 from rocell.application import calibrated_position_vector_feedback_execution as execution
 from rocell.application import calibrated_position_vector_execution_review as review
 from rocell.application import calibrated_position_vector_observation_admission as admission
+from rocell.application import calibrated_position_vector_observation_redemption as redemption
 from rocell.application import calibrated_position_vector_owned_execution as subject
 from rocell.application.physical_connection_contracts import (
     EvidenceOrigin,
@@ -460,6 +461,23 @@ def admission_document(execution_receipt, review_receipt):
     }
 
 
+def admitted_receipt(tmp_path, monkeypatch):
+    execution_receipt, review_receipt = accepted_review_receipt(
+        tmp_path, monkeypatch
+    )
+    return admission.admit_calibrated_position_vector_observation(
+        execution_receipt_document=execution_receipt,
+        review_receipt_document=review_receipt,
+        admission_document=admission_document(
+            execution_receipt, review_receipt
+        ),
+        consumer_context_document=CONSUMER_CONTEXT,
+        current_calibration_document=calibration(),
+        current_controller_binding_document=CONTROLLER,
+        current_attachment_profile="no_attachment",
+    )
+
+
 def test_admits_reviewed_observation_to_one_named_consumer(tmp_path, monkeypatch):
     execution_receipt, review_receipt = accepted_review_receipt(
         tmp_path, monkeypatch
@@ -584,3 +602,124 @@ def test_admission_rejects_stale_crossed_or_rejected_review(tmp_path, monkeypatc
         assert "not accepted" in str(error)
     else:
         raise AssertionError("rejected observation was admitted")
+
+
+def test_named_consumer_redeems_admitted_observation_once(tmp_path, monkeypatch):
+    admitted = admitted_receipt(tmp_path, monkeypatch)
+    redemption_root = tmp_path / "redemptions"
+    redemption_root.mkdir()
+
+    receipt = redemption.redeem_calibrated_position_vector_observation(
+        redemption_root.resolve(),
+        admission_receipt_document=admitted,
+        consumer_id="joint-state-estimator-01",
+        consumer_context_document=CONSUMER_CONTEXT,
+        redeemed_at="2026-10-25T14:02:20-04:00",
+    )
+
+    assert receipt["status"] == (
+        "CALIBRATED_POSITION_VECTOR_OBSERVATION_REDEEMED"
+    )
+    assert receipt["calibrated_feedback"] == admitted["calibrated_feedback"]
+    assert receipt["calibrated_feedback_observation_redeemed_once"] is True
+    assert receipt["redemption_replay_allowed"] is False
+    assert receipt["motion_authorized"] is False
+    retained = list(redemption_root.iterdir())
+    assert len(retained) == 1
+    assert json.loads(retained[0].read_text(encoding="utf-8")) == receipt
+
+    try:
+        redemption.redeem_calibrated_position_vector_observation(
+            redemption_root.resolve(),
+            admission_receipt_document=admitted,
+            consumer_id="joint-state-estimator-01",
+            consumer_context_document=CONSUMER_CONTEXT,
+            redeemed_at="2026-10-25T14:02:21-04:00",
+        )
+    except redemption.CalibratedPositionVectorObservationRedemptionError as error:
+        assert "already redeemed" in str(error)
+    else:
+        raise AssertionError("admission was redeemed twice")
+
+
+def test_named_consumer_redemption_is_exclusive_under_concurrency(
+    tmp_path, monkeypatch
+):
+    admitted = admitted_receipt(tmp_path, monkeypatch)
+    redemption_root = tmp_path / "redemptions"
+    redemption_root.mkdir()
+    barrier = threading.Barrier(2)
+    receipts = []
+    errors = []
+
+    def redeem() -> None:
+        barrier.wait()
+        try:
+            receipts.append(
+                redemption.redeem_calibrated_position_vector_observation(
+                    redemption_root.resolve(),
+                    admission_receipt_document=admitted,
+                    consumer_id="joint-state-estimator-01",
+                    consumer_context_document=CONSUMER_CONTEXT,
+                    redeemed_at="2026-10-25T14:02:20-04:00",
+                )
+            )
+        except redemption.CalibratedPositionVectorObservationRedemptionError as error:
+            errors.append(error)
+
+    threads = [threading.Thread(target=redeem) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert len(receipts) == 1
+    assert len(errors) == 1
+    assert "already redeemed" in str(errors[0])
+    assert len(list(redemption_root.iterdir())) == 1
+
+
+def test_named_consumer_redemption_rejects_stale_or_changed_context(
+    tmp_path, monkeypatch
+):
+    admitted = admitted_receipt(tmp_path, monkeypatch)
+    redemption_root = tmp_path / "redemptions"
+    redemption_root.mkdir()
+
+    for context, consumed_at, expected in (
+        (
+            {**CONSUMER_CONTEXT, "state_epoch": "state-epoch-02"},
+            "2026-10-25T14:02:20-04:00",
+            "consumer context differs",
+        ),
+        (CONSUMER_CONTEXT, "2026-10-25T14:03:00-04:00", "not fresh"),
+    ):
+        try:
+            redemption.redeem_calibrated_position_vector_observation(
+                redemption_root.resolve(),
+                admission_receipt_document=admitted,
+                consumer_id="joint-state-estimator-01",
+                consumer_context_document=context,
+                redeemed_at=consumed_at,
+            )
+        except redemption.CalibratedPositionVectorObservationRedemptionError as error:
+            assert expected in str(error)
+        else:
+            raise AssertionError("ineligible admission was redeemed")
+
+    crossed = dict(admitted)
+    crossed["consumer_id"] = "different-consumer"
+    try:
+        redemption.redeem_calibrated_position_vector_observation(
+            redemption_root.resolve(),
+            admission_receipt_document=crossed,
+            consumer_id="joint-state-estimator-01",
+            consumer_context_document=CONSUMER_CONTEXT,
+            redeemed_at="2026-10-25T14:02:20-04:00",
+        )
+    except redemption.CalibratedPositionVectorObservationRedemptionError as error:
+        assert "consumer_id mismatch" in str(error)
+    else:
+        raise AssertionError("crossed consumer admission was redeemed")
+
+    assert not list(redemption_root.iterdir())
