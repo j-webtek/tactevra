@@ -1862,3 +1862,28 @@ hardware and adds no live command.
 The next dependency is camera-feedback state-fusion admission. It must bind one
 camera observation, its camera calibration and board registration, and this
 exact state snapshot before any fused estimate can reach planning.
+
+## Camera-feedback state-fusion admission (2026-10-25)
+
+One qualified fixed-camera board-pose observation can now be bound to one exact
+calibrated-state snapshot for a separately named fusion consumer. The gate
+rechecks the snapshot reader and fusion epoch, the observation quality and
+zero-authority flags, camera-intrinsics binding, tag-map binding, keyboard-to-
+board registration, and the active attachment profile. Every source document
+is bound by its canonical SHA-256 digest.
+
+Camera and arm-state timestamps may differ by no more than two seconds, and a
+fusion receipt can remain valid for no more than thirty seconds; callers may
+choose tighter limits. The receipt carries the qualified camera observation
+and calibrated feedback together so later planning cannot silently combine
+records from different captures, calibrations, tag maps, reader epochs, or
+attachment profiles.
+
+This is a read-only provenance and freshness gate. It does not estimate missing
+geometry, certify clearance, emit a target or trajectory, authorize contact,
+open hardware, retry an operation, or grant physical authority.
+
+The next dependency is fused camera/state planning admission. That boundary
+must select a target from the admitted observation, revalidate collision and
+clearance evidence for the active attachment profile, and produce a bounded
+plan candidate without granting execution authority.
