@@ -1988,3 +1988,27 @@ consume a permit, encode a wire command, open hardware, authorize contact, or
 grant physical authority. The existing review boundary must still authenticate
 its controller, collision-policy, T102, contact-envelope, and configuration
 inputs; the safety supervisor remains the only permit issuer.
+
+## Fused admission to single-action execution review (2026-10-27)
+
+The exact fused action admission can now create the existing single-use
+execution review without reconstructing or bypassing its safety evidence. The
+admission carries a sealed `valid_until` equal to the earliest expiry of the
+fresh route entry, operator confirmation, and independent effect verifier. The
+bridge rejects a delayed call and also rejects a review whose monotonic lifetime
+would extend beyond the remaining admission window.
+
+The camera-selected key, action index, interaction, controller session, and
+installed collision profile must match the model proposal, measured trajectory,
+contact envelope, and installed collision-policy qualification. The existing
+review builder then independently rechecks batch/proposal/trajectory lineage,
+continuous collision and contact policy, installed controller evidence, T102
+target and settings, configuration epoch, session, and every evidence expiry.
+Its resulting review digest includes the fused admission digest, preserving the
+camera, operator, verifier, and route lineage through one-time consumption and
+later supervisor consideration.
+
+This is still a zero-authority boundary. It does not consume the review, issue a
+permit, open hardware, encode or write a command, authorize contact, retry an
+action, or move the arm. The safety supervisor remains the only permit issuer,
+and the sole-writer and settlement lifecycle remain downstream requirements.

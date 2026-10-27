@@ -70,6 +70,7 @@ TESTS = (
     "software/tests/unit/test_fused_camera_state_route_qualification_admission.py",
     "software/tests/unit/test_fused_camera_state_route_entry_admission.py",
     "software/tests/unit/test_fused_camera_state_action_review_admission.py",
+    "software/tests/unit/test_fused_camera_state_single_action_execution_review_v1.py",
     "software/tests/unit/test_route_bound_entry_isaac_replay_handoff_v1.py",
     "software/tests/integration/test_joint_schedule_replay_bundle.py",
     "software/tests/unit/test_immutable_camera_replay_v1.py",

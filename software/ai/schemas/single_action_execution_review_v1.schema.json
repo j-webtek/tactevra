@@ -61,6 +61,7 @@
     "hardware_access": {"const": false},
     "physical_authority": {"const": false},
     "contact_authority": {"const": false},
+    "fused_camera_state_action_review_admission_sha256": {"$ref": "#/$defs/hash"},
     "review_sha256": {"$ref": "#/$defs/hash"}
   },
   "$defs": {"hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
