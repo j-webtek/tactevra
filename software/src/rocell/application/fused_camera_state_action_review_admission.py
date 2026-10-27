@@ -384,6 +384,11 @@ def admit_fused_camera_state_action_review(
         "entry dynamics, coverage, continuity, or collision evidence is incomplete",
     )
     route_entry_time = _timestamp(route_entry.get("consumed_at"), "route entry consumed_at")
+    valid_until = min(
+        route_entry_time + timedelta(seconds=MAX_ROUTE_ENTRY_AGE_SECONDS),
+        _timestamp(operator.get("valid_until"), "operator valid_until"),
+        _timestamp(verifier.get("valid_until"), "verifier valid_until"),
+    )
     _require(
         route_entry_time <= consumed
         <= route_entry_time + timedelta(seconds=MAX_ROUTE_ENTRY_AGE_SECONDS),
@@ -443,6 +448,7 @@ def admit_fused_camera_state_action_review(
             "observed_route_entry_coverage_sha256"
         ],
         "consumed_at": consumed_at,
+        "valid_until": valid_until.isoformat(),
         "fresh_route_entry_verified": True,
         "entry_dynamics_and_coverage_verified": True,
         "current_operator_verified": True,

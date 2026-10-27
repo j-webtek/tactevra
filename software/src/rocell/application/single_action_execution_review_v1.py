@@ -270,6 +270,7 @@ class SingleActionExecutionReviewV1:
     controller_session_id: str
     issued_monotonic_ns: int
     deadline_monotonic_ns: int
+    fused_camera_state_action_review_admission_sha256: str | None = None
     schema: str = REVIEW_SCHEMA
 
     def __post_init__(self) -> None:
@@ -288,6 +289,11 @@ class SingleActionExecutionReviewV1:
             "configuration_epoch_sha256",
         ):
             _digest(getattr(self, field), field)
+        if self.fused_camera_state_action_review_admission_sha256 is not None:
+            _digest(
+                self.fused_camera_state_action_review_admission_sha256,
+                "fused_camera_state_action_review_admission_sha256",
+            )
         if not isinstance(self.reviewed_t102_goal, Mapping):
             raise SingleActionExecutionReviewError("reviewed T102 goal is required")
         goal = dict(self.reviewed_t102_goal)
@@ -315,7 +321,7 @@ class SingleActionExecutionReviewV1:
                 "execution review lifetime is invalid or too long")
 
     def unsigned_dict(self) -> dict[str, Any]:
-        return {
+        document = {
             "schema": self.schema,
             "status": "REVIEWED_FOR_SINGLE_USE_DOWNSTREAM_PERMIT",
             "review_id": self.review_id,
@@ -349,6 +355,11 @@ class SingleActionExecutionReviewV1:
             "physical_authority": False,
             "contact_authority": False,
         }
+        if self.fused_camera_state_action_review_admission_sha256 is not None:
+            document["fused_camera_state_action_review_admission_sha256"] = (
+                self.fused_camera_state_action_review_admission_sha256
+            )
+        return document
 
     @property
     def review_sha256(self) -> str:
@@ -371,6 +382,7 @@ def build_single_action_execution_review_v1(
     review_id: str,
     issued_monotonic_ns: int,
     deadline_monotonic_ns: int,
+    fused_camera_state_action_review_admission_sha256: str | None = None,
 ) -> SingleActionExecutionReviewV1:
     """Bind all exact lineages for later one-time permit consideration."""
 
@@ -529,6 +541,9 @@ def build_single_action_execution_review_v1(
         controller_session_id=envelope.measured_envelope.controller_session_id,
         issued_monotonic_ns=now,
         deadline_monotonic_ns=deadline_monotonic_ns,
+        fused_camera_state_action_review_admission_sha256=(
+            fused_camera_state_action_review_admission_sha256
+        ),
     )
 
 

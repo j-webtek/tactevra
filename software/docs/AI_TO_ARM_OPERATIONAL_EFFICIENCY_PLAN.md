@@ -1037,6 +1037,20 @@ stale or crossed route from reaching review. The result remains zero-authority:
 collision-policy, T102, contact-envelope, and configuration inputs, and only
 the safety supervisor may issue a permit.
 
+ARM-157 closes that seam without weakening the established execution review.
+The fused action admission now seals the earliest expiry of its fresh route
+entry, current operator confirmation, and independent effect verifier. A new
+adapter authenticates that receipt, binds its exact target, action, interaction,
+controller session, and installed collision profile to the model proposal and
+trajectory, and requires the review lifetime to fit inside the remaining
+admission lifetime. It then delegates to `single_action_execution_review_v1`,
+which remains authoritative for controller qualification, continuous collision
+and contact policy, T102 settings, configuration epoch, and exact trajectory.
+The admission digest becomes part of the review digest, so review consumption
+and any later supervisor permit remain transitively bound to the camera-selected
+action and its operator/verifier policy. This stage still grants no permit,
+contact, hardware access, command, retry, or physical authority.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

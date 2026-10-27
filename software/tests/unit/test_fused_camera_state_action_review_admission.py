@@ -227,6 +227,7 @@ def test_admits_one_exact_fresh_action_to_existing_review_boundary(monkeypatch):
     assert result["entry_dynamics_and_coverage_verified"] is True
     assert result["current_operator_verified"] is True
     assert result["independent_effect_verifier_verified"] is True
+    assert result["valid_until"] == "2026-10-26T18:00:05+00:00"
     assert result["next_required_gate"] == subject.NEXT_REQUIRED_GATE
     assert result["authority"] == subject.ZERO_AUTHORITY
     core = dict(result)
