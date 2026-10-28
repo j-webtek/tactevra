@@ -298,6 +298,15 @@ permit remains unspent. External signed authority, native transport, authentic
 controller feedback, physical settling, and independent key-effect evidence
 remain unresolved.
 
+ARM-162 now admits machine-verified external authority directly against that
+exact fused writer claim. The adapter binds the signed review, claim, frame,
+wire bytes, endpoint, writer, controller session, configuration, and encoding
+identities and requires authority expiry to fit within both frame and permit
+lifetimes. Admission leaves the authority and permit unconsumed and creates no
+attempt journal, transport open, or physical write. Durable attempt start,
+single-use consumption, native I/O, authentic feedback, physical settling, and
+independent key-effect evidence remain unresolved.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled

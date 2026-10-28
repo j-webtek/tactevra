@@ -104,6 +104,20 @@ authorizes no transport open, performs no command write, and does not consume
 the permit. External signed authority must bind to this exact claim before the
 existing production transport boundary can be considered.
 
+## External native authority admission
+
+A machine-verified external authority record can now be admitted through the
+fused path only when it binds the exact claimed handoff, reviewed action,
+runtime frame, pinned endpoint, writer, controller session, configuration, and
+encoding profile. Its signed lifetime must fit inside both the frame lifetime
+and the fused motion-permit lifetime.
+
+Admission does not consume the external authority or motion permit. It creates
+no production-attempt journal, opens no transport, writes no controller bytes,
+and claims no physical result. The existing production boundary remains
+responsible for durably starting an attempt before it atomically consumes the
+authority and permit and invokes any native transport.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single
@@ -139,3 +153,7 @@ callers to the hardware-incapable runtime rehearsal.
 Removing the fused claim entry point leaves already claimed journals readable.
 Those claims remain retry-forbidden ambiguity records and must not be converted
 back into cancellation-safe prepared handoffs.
+
+Removing the fused authority-admission adapter returns callers to the generic
+machine-verification boundary. It does not revoke or consume authority records
+that were already admitted in memory, and it changes no durable journal format.

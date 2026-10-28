@@ -1,10 +1,12 @@
-"""Issue one exact supervisor permit from one fused camera-state review.
+"""Carry one fused camera-state review to the native pretransport boundary.
 
 This orchestration boundary owns the transition from a fused, zero-authority
 execution review to the existing safety supervisor.  It derives the capability
 from the review, uses one monotonic clock for consumption and authorization,
-and prevents a permit from outliving the review that justified it.  It performs
-no transport access and writes no controller command.
+and prevents a permit from outliving the review that justified it. It can
+prepare and claim the durable native handoff and admit externally signed
+authority for that exact claim. It performs no transport access and writes no
+controller command.
 """
 
 from __future__ import annotations
@@ -26,6 +28,12 @@ from .native_t102_handoff_journal_v1 import (
     DurableNativeT102HandoffV1,
     NativeT102HandoffPhase,
     NativeT102HandoffSnapshotV1,
+)
+from .native_t102_production_transport_v1 import (
+    AdmittedExternalNativeT102AuthorityV1,
+    ExternalNativeT102AuthorityRecordV1,
+    PinnedNativeT102EndpointV1,
+    admit_external_native_t102_authority_v1,
 )
 from .production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
@@ -339,6 +347,88 @@ def claim_fused_camera_state_native_t102_writer_v1(
     return snapshot
 
 
+def admit_fused_camera_state_native_t102_authority_v1(
+    result: FusedCameraStateReviewedMotionPermitResultV1,
+    frame: RuntimeCommandFrameV1,
+    handoff: DurableNativeT102HandoffV1,
+    authority_record: ExternalNativeT102AuthorityRecordV1,
+    endpoint: PinnedNativeT102EndpointV1,
+    *,
+    adapter_candidate_sha256: str,
+) -> AdmittedExternalNativeT102AuthorityV1:
+    """Admit signed authority for one exact fused claim without consuming it."""
+
+    if not isinstance(result, FusedCameraStateReviewedMotionPermitResultV1):
+        raise TypeError(
+            "result must be a FusedCameraStateReviewedMotionPermitResultV1"
+        )
+    if not isinstance(frame, RuntimeCommandFrameV1):
+        raise TypeError("frame must be a RuntimeCommandFrameV1")
+    if not isinstance(handoff, DurableNativeT102HandoffV1):
+        raise TypeError("handoff must be a DurableNativeT102HandoffV1")
+    if not isinstance(authority_record, ExternalNativeT102AuthorityRecordV1):
+        raise TypeError(
+            "authority_record must be an ExternalNativeT102AuthorityRecordV1"
+        )
+    if not isinstance(endpoint, PinnedNativeT102EndpointV1):
+        raise TypeError("endpoint must be a PinnedNativeT102EndpointV1")
+
+    fused_digest = (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    permit_expiry_ns = round(
+        result.admission.permit_expires_at_monotonic * 1_000_000_000
+    )
+    snapshot = handoff.verify_claimed_inputs(
+        frame,
+        result.admission,
+        adapter_candidate_sha256=adapter_candidate_sha256,
+        now_monotonic_ns=authority_record.issued_monotonic_ns,
+    )
+    if (
+        result.lifecycle.snapshot().get("phase") != "ACCEPTED"
+        or result.permit.remaining_uses != 1
+        or fused_digest is None
+        or snapshot.phase is not NativeT102HandoffPhase.WRITER_CLAIMED
+        or snapshot.claim_sha256 is None
+        or snapshot.fused_camera_state_action_review_admission_sha256
+        != fused_digest
+        or snapshot.review_consumption_sha256
+        != result.admission.consumption_sha256
+        or authority_record.review_sha256 != result.admission.review_sha256
+        or authority_record.claim_sha256 != snapshot.claim_sha256
+        or authority_record.frame_sha256 != frame.frame_sha256
+        or authority_record.wire_bytes_sha256 != frame.wire_bytes_sha256
+        or authority_record.endpoint_sha256 != endpoint.endpoint_sha256
+        or authority_record.writer_instance_id != frame.writer_instance_id
+        or authority_record.controller_session_id
+        != frame.controller_session_id
+        or authority_record.configuration_epoch_sha256
+        != frame.configuration_epoch_sha256
+        or authority_record.encoding_profile_sha256
+        != frame.encoding_profile_sha256
+        or authority_record.expires_monotonic_ns > frame.expires_monotonic_ns
+        or authority_record.expires_monotonic_ns > permit_expiry_ns
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "external authority does not bind the exact fused writer claim"
+        )
+
+    admitted = admit_external_native_t102_authority_v1(authority_record)
+    if (
+        admitted.record is not authority_record
+        or admitted.verification.approved is not True
+        or admitted.verification.signed_payload_sha256
+        != authority_record.signed_payload_sha256
+        or result.permit.remaining_uses != 1
+        or result.lifecycle.snapshot().get("phase") != "ACCEPTED"
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "admitted external authority did not preserve fused lineage"
+        )
+    return admitted
+
+
 def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
     result: FusedCameraStateReviewedMotionPermitResultV1,
     frame: RuntimeCommandFrameV1,
@@ -406,6 +496,7 @@ def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
 
 
 __all__ = [
+    "admit_fused_camera_state_native_t102_authority_v1",
     "claim_fused_camera_state_native_t102_writer_v1",
     "FusedCameraStateReviewedMotionPermitError",
     "FusedCameraStateReviewedMotionPermitResultV1",

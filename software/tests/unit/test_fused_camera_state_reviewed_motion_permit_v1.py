@@ -12,9 +12,16 @@ from rocell.application.context import load_simulation_context
 from rocell.application.fused_camera_state_reviewed_motion_permit_v1 import (
     FusedCameraStateReviewedMotionPermitError,
     FusedCameraStateReviewedMotionPermitSessionV1,
+    admit_fused_camera_state_native_t102_authority_v1,
     claim_fused_camera_state_native_t102_writer_v1,
     execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1,
     prepare_fused_camera_state_native_t102_handoff_v1,
+)
+import rocell.application.native_t102_production_transport_v1 as production_module
+from rocell.application.native_t102_production_transport_v1 import (
+    ExternalAuthorityVerificationV1,
+    ExternalNativeT102AuthorityRecordV1,
+    PinnedNativeT102EndpointV1,
 )
 from rocell.application.production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
@@ -47,6 +54,8 @@ from test_safety_core import (
 
 WORKSPACE = Path(__file__).resolve().parents[3]
 ADAPTER = "f" * 64
+APPROVAL = "9" * 64
+VERIFIER_BUILD = "8" * 64
 
 
 @pytest.fixture(autouse=True)
@@ -129,6 +138,56 @@ def _feedback(goal, captured_monotonic_ns):
                        (goal[name] for name in JOINT_FIELDS))),
         }),
     }
+
+
+class _AuthorityVerifier:
+    def __init__(self, *, approved: bool = True) -> None:
+        self.approved = approved
+        self.calls = 0
+
+    def verify_external_native_t102_authority(self, record, now_monotonic_ns):
+        self.calls += 1
+        return ExternalAuthorityVerificationV1(
+            approved=self.approved,
+            signed_payload_sha256=record.signed_payload_sha256,
+            verifier_id="fused-external-reviewer",
+            verifier_build_sha256=VERIFIER_BUILD,
+            verified_monotonic_ns=1_690,
+            decision_code=(
+                "APPROVED_EXACT_SINGLE_ACTION" if self.approved else "DENIED"
+            ),
+        )
+
+
+def _endpoint():
+    return PinnedNativeT102EndpointV1(
+        port_name="COM7",
+        usb_vid="10C4",
+        usb_pid="EA60",
+        usb_serial_number="ARM162UNIT001",
+    )
+
+
+def _authority_record(result, frame, journal, endpoint, **changes):
+    values = {
+        "authority_id": "arm162-authority-1",
+        "approval_record_sha256": APPROVAL,
+        "review_sha256": result.admission.review_sha256,
+        "claim_sha256": journal.snapshot().claim_sha256,
+        "frame_sha256": frame.frame_sha256,
+        "wire_bytes_sha256": frame.wire_bytes_sha256,
+        "endpoint_sha256": endpoint.endpoint_sha256,
+        "writer_instance_id": frame.writer_instance_id,
+        "controller_session_id": frame.controller_session_id,
+        "configuration_epoch_sha256": frame.configuration_epoch_sha256,
+        "encoding_profile_sha256": frame.encoding_profile_sha256,
+        "issued_monotonic_ns": 1_675,
+        "expires_monotonic_ns": 1_850,
+        "issuer_key_id": "outside-authority-key-1",
+        "detached_signature": "TEST-SIGNATURE-NOT-A-PRODUCTION-KEY",
+    }
+    values.update(changes)
+    return ExternalNativeT102AuthorityRecordV1(**values)
 
 
 def test_fused_review_issues_one_exact_bound_supervisor_permit(
@@ -436,6 +495,171 @@ def test_expired_fused_native_writer_claim_rejects_before_commit(
     assert {item.name for item in journal.directory.iterdir()} == {
         "prepared.json"
     }
+    assert result.permit.remaining_uses == 1
+
+
+def test_fused_writer_claim_admits_exact_external_authority_without_consuming(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+    claim_fused_camera_state_native_t102_writer_v1(
+        result,
+        frame,
+        journal,
+        adapter_candidate_sha256=ADAPTER,
+        claimed_monotonic_ns=1_650,
+    )
+    endpoint = _endpoint()
+    record = _authority_record(result, frame, journal, endpoint)
+    verifier = _AuthorityVerifier()
+    monkeypatch.setattr(production_module, "_machine_verifier", lambda: verifier)
+    monkeypatch.setattr(
+        production_module, "_trusted_monotonic_ns", lambda: 1_700
+    )
+
+    admitted = admit_fused_camera_state_native_t102_authority_v1(
+        result,
+        frame,
+        journal,
+        record,
+        endpoint,
+        adapter_candidate_sha256=ADAPTER,
+    )
+
+    assert admitted.record is record
+    assert admitted.verification.approved is True
+    assert admitted.verification.signed_payload_sha256 == (
+        record.signed_payload_sha256
+    )
+    assert verifier.calls == 1
+    assert {item.name for item in journal.directory.iterdir()} == {
+        "prepared.json", "claim.json"
+    }
+    assert result.permit.remaining_uses == 1
+    assert result.lifecycle.snapshot()["phase"] == "ACCEPTED"
+    for name, value in (
+        ("external_native_t102_authority_v1.schema.json", record.to_dict()),
+        (
+            "external_native_t102_authority_verification_v1.schema.json",
+            admitted.verification.to_dict(),
+        ),
+    ):
+        schema = json.loads(
+            (WORKSPACE / "software/ai/schemas" / name).read_text(
+                encoding="utf-8"
+            )
+        )
+        jsonschema.Draft202012Validator(schema).validate(value)
+
+    admitted.consume(
+        claim_sha256=journal.snapshot().claim_sha256,
+        frame=frame,
+        endpoint=endpoint,
+        now_monotonic_ns=1_750,
+    )
+
+
+def test_crossed_fused_external_authority_rejects_before_verification(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+    claim_fused_camera_state_native_t102_writer_v1(
+        result,
+        frame,
+        journal,
+        adapter_candidate_sha256=ADAPTER,
+        claimed_monotonic_ns=1_650,
+    )
+    endpoint = _endpoint()
+    record = _authority_record(
+        result, frame, journal, endpoint, review_sha256="7" * 64
+    )
+    verifier = _AuthorityVerifier()
+    monkeypatch.setattr(production_module, "_machine_verifier", lambda: verifier)
+
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError,
+        match="does not bind the exact fused writer claim",
+    ):
+        admit_fused_camera_state_native_t102_authority_v1(
+            result,
+            frame,
+            journal,
+            record,
+            endpoint,
+            adapter_candidate_sha256=ADAPTER,
+        )
+    assert verifier.calls == 0
+    assert result.permit.remaining_uses == 1
+
+
+def test_external_authority_cannot_outlive_fused_permit_or_frame(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+    claim_fused_camera_state_native_t102_writer_v1(
+        result,
+        frame,
+        journal,
+        adapter_candidate_sha256=ADAPTER,
+        claimed_monotonic_ns=1_650,
+    )
+    endpoint = _endpoint()
+    record = _authority_record(
+        result, frame, journal, endpoint, expires_monotonic_ns=1_950
+    )
+    verifier = _AuthorityVerifier()
+    monkeypatch.setattr(production_module, "_machine_verifier", lambda: verifier)
+
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError,
+        match="does not bind the exact fused writer claim",
+    ):
+        admit_fused_camera_state_native_t102_authority_v1(
+            result,
+            frame,
+            journal,
+            record,
+            endpoint,
+            adapter_candidate_sha256=ADAPTER,
+        )
+    assert verifier.calls == 0
     assert result.permit.remaining_uses == 1
 
 
