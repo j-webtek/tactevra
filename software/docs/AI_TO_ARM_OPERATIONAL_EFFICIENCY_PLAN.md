@@ -1077,6 +1077,16 @@ motion. This qualifies the composed state and evidence path only: the sink has
 no transport API, all controller receipts are modeled, physical command writes
 remain zero, and independent effect verification is still required.
 
+ARM-160 prepares the existing durable native T=102 handoff directly from the
+typed fused permit result. The adapter rejects crossed or expired frames before
+publishing anything and seals the fused action-admission and review-consumption
+digests into the immutable prepared record and restart snapshot. It stops before
+the writer claim, leaving the permit unspent and the handoff cancellation-safe;
+transport opens and physical writes remain zero. This removes caller-side
+lineage reconstruction while keeping external authority, the exclusive writer
+claim, native transport, authenticated controller feedback, physical settling,
+and independent effect verification as explicit downstream gates.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

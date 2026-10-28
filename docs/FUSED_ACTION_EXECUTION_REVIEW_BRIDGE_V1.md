@@ -72,6 +72,23 @@ zero physical writes, does not claim an authentic controller receipt, and does
 not verify the keyboard effect. Native transport, independently acquired
 feedback, physical settling, and effect verification remain downstream gates.
 
+## Durable native handoff preparation
+
+The accepted fused permit result can now prepare the existing durable native
+T=102 handoff without callers separating its permit and admission. Preparation
+rechecks the exact T=102 goal and requires the runtime frame and preparation
+instant to remain inside the permit lifetime. The immutable prepared record and
+its snapshot carry the fused action-admission digest and review-consumption
+digest alongside the permit, frame, writer, controller-session, configuration,
+encoding-profile, and adapter-candidate bindings.
+
+Preparation deliberately stops before the writer claim. The permit remains
+unspent, the lifecycle remains `ACCEPTED`, recovery remains cancellation and
+fresh replanning, and transport-open and physical-write counts remain zero.
+External native authority, exclusive writer claim, native transport, authentic
+feedback, observed settling, and independent effect verification are still
+required downstream.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single
@@ -98,3 +115,8 @@ The runtime wrapper is also an explicit call. Removing it returns callers to
 the generic hardware-incapable T=102 rehearsal. The optional fused lineage
 fields preserve the legacy report shape and hash when the admission did not
 originate from the fused camera path.
+
+The native handoff additions are optional. Legacy admissions retain their prior
+prepared-record and snapshot shapes and hashes. Rolling back the fused handoff
+entry point leaves existing immutable journals readable and returns fused
+callers to the hardware-incapable runtime rehearsal.

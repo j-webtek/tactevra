@@ -278,6 +278,16 @@ all acknowledgment and feedback evidence is modeled; native transport,
 authenticated feedback, physical settling, and independent key-effect evidence
 remain unresolved.
 
+ARM-160 now prepares the existing durable native T=102 handoff directly from
+the typed fused permit result. Crossed or expired frames reject before a journal
+is published. The immutable prepared record and restart snapshot preserve the
+fused action-admission, review-consumption, permit, frame, writer, controller
+session, configuration, encoding, and adapter lineage. Preparation stops before
+the writer claim: the permit remains unspent, cancellation and fresh replanning
+remain available, and transport opens and physical writes stay at zero.
+External authority, native execution, authentic controller feedback, physical
+settling, and independent key-effect evidence remain unresolved.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled

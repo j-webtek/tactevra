@@ -162,7 +162,7 @@ def _prepared_core(
     ):
         raise NativeT102HandoffJournalError(
             "frame, reviewed goal, or preparation time differs")
-    return {
+    core = {
         "schema": PREPARED_SCHEMA,
         "status": "PREPARED_BEFORE_NATIVE_OPEN",
         "review_sha256": admission.review_sha256,
@@ -186,6 +186,12 @@ def _prepared_core(
         "transport_open_count": 0,
         "physical_command_writes": 0,
     }
+    if admission.fused_camera_state_action_review_admission_sha256 is not None:
+        core["fused_camera_state_action_review_admission_sha256"] = (
+            admission.fused_camera_state_action_review_admission_sha256
+        )
+        core["review_consumption_sha256"] = admission.consumption_sha256
+    return core
 
 
 def _validate_prepared(value: Mapping[str, Any]) -> dict[str, Any]:
@@ -201,7 +207,12 @@ def _validate_prepared(value: Mapping[str, Any]) -> dict[str, Any]:
         "physical_command_writes", "prepared_sha256",
     }
     copy = dict(value)
-    if set(copy) != required:
+    optional = {
+        "fused_camera_state_action_review_admission_sha256",
+        "review_consumption_sha256",
+    }
+    present_optional = set(copy) & optional
+    if set(copy) - optional != required or present_optional not in (set(), optional):
         raise NativeT102HandoffJournalError("prepared fields are not exact")
     for field in (
         "review_sha256", "permit_binding_sha256", "goal_sha256",
@@ -209,6 +220,8 @@ def _validate_prepared(value: Mapping[str, Any]) -> dict[str, Any]:
         "encoding_profile_sha256", "adapter_candidate_sha256",
         "prepared_sha256",
     ):
+        _digest(copy.get(field), field)
+    for field in present_optional:
         _digest(copy.get(field), field)
     for field in (
         "correlation_id", "writer_instance_id", "controller_session_id",
@@ -292,6 +305,19 @@ class NativeT102HandoffSnapshotV1:
     frame_sha256: str
     permit_binding_sha256: str
     claim_sha256: str | None
+    fused_camera_state_action_review_admission_sha256: str | None = None
+    review_consumption_sha256: str | None = None
+
+    def __post_init__(self) -> None:
+        fused = self.fused_camera_state_action_review_admission_sha256
+        consumption = self.review_consumption_sha256
+        if (fused is None) != (consumption is None):
+            raise NativeT102HandoffJournalError(
+                "fused handoff lineage must be present together"
+            )
+        if fused is not None:
+            _digest(fused, "fused_camera_state_action_review_admission_sha256")
+            _digest(consumption, "review_consumption_sha256")
 
     @property
     def recovery_disposition(self) -> NativeT102RecoveryDisposition:
@@ -314,6 +340,11 @@ class NativeT102HandoffSnapshotV1:
             "transport_open_count": 0,
             "physical_command_writes": 0,
         }
+        if self.fused_camera_state_action_review_admission_sha256 is not None:
+            core["fused_camera_state_action_review_admission_sha256"] = (
+                self.fused_camera_state_action_review_admission_sha256
+            )
+            core["review_consumption_sha256"] = self.review_consumption_sha256
         return {**core, "snapshot_sha256": _hash(core)}
 
 
@@ -339,6 +370,10 @@ def load_native_t102_handoff_v1(
         frame_sha256=prepared["frame_sha256"],
         permit_binding_sha256=prepared["permit_binding_sha256"],
         claim_sha256=claim["claim_sha256"] if claim else None,
+        fused_camera_state_action_review_admission_sha256=prepared.get(
+            "fused_camera_state_action_review_admission_sha256"
+        ),
+        review_consumption_sha256=prepared.get("review_consumption_sha256"),
     )
 
 

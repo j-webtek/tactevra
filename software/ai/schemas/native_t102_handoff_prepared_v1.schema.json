@@ -20,6 +20,8 @@
     "status": {"const": "PREPARED_BEFORE_NATIVE_OPEN"},
     "review_sha256": {"$ref": "#/$defs/hash"},
     "permit_binding_sha256": {"$ref": "#/$defs/hash"},
+    "fused_camera_state_action_review_admission_sha256": {"$ref": "#/$defs/hash"},
+    "review_consumption_sha256": {"$ref": "#/$defs/hash"},
     "goal_sha256": {"$ref": "#/$defs/hash"},
     "frame_sha256": {"$ref": "#/$defs/hash"},
     "wire_bytes_sha256": {"$ref": "#/$defs/hash"},
@@ -39,6 +41,10 @@
     "transport_open_count": {"const": 0},
     "physical_command_writes": {"const": 0},
     "prepared_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "dependentRequired": {
+    "fused_camera_state_action_review_admission_sha256": ["review_consumption_sha256"],
+    "review_consumption_sha256": ["fused_camera_state_action_review_admission_sha256"]
   },
   "$defs": {
     "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
