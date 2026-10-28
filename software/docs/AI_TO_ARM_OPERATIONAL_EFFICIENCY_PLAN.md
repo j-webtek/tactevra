@@ -1087,6 +1087,16 @@ lineage reconstruction while keeping external authority, the exclusive writer
 claim, native transport, authenticated controller feedback, physical settling,
 and independent effect verification as explicit downstream gates.
 
+ARM-161 composes that prepared fused handoff with the existing durable native
+writer claim. It verifies the accepted lifecycle, unspent single-use permit,
+exact fused and review-consumption lineage, and live frame and permit windows
+before committing the claim. The transition deliberately changes recovery from
+cancellation-safe replanning to retry-forbidden dispatch uncertainty. It still
+opens no transport, performs no physical write, grants no physical authority,
+and leaves the permit unspent. External signed authority, native transport,
+authenticated controller feedback, observed settling, and independent effect
+verification remain downstream gates.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

@@ -12,6 +12,7 @@ from rocell.application.context import load_simulation_context
 from rocell.application.fused_camera_state_reviewed_motion_permit_v1 import (
     FusedCameraStateReviewedMotionPermitError,
     FusedCameraStateReviewedMotionPermitSessionV1,
+    claim_fused_camera_state_native_t102_writer_v1,
     execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1,
     prepare_fused_camera_state_native_t102_handoff_v1,
 )
@@ -330,6 +331,111 @@ def test_crossed_fused_native_handoff_rejects_before_publishing(
             created_monotonic_ns=1_600,
         )
     assert tuple(handoff_root.iterdir()) == ()
+    assert result.permit.remaining_uses == 1
+
+
+def test_fused_native_handoff_commits_one_zero_authority_writer_claim(
+    context, released_snapshot, tmp_path,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+
+    snapshot = claim_fused_camera_state_native_t102_writer_v1(
+        result,
+        frame,
+        journal,
+        adapter_candidate_sha256=ADAPTER,
+        claimed_monotonic_ns=1_650,
+    )
+
+    document = snapshot.to_dict()
+    claim = json.loads(
+        (journal.directory / "claim.json").read_text(encoding="utf-8")
+    )
+    assert document["phase"] == "WRITER_CLAIMED"
+    assert document["recovery_disposition"] == (
+        "RETRY_FORBIDDEN_DISPATCH_UNCERTAIN"
+    )
+    assert document["fused_camera_state_action_review_admission_sha256"] == (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    assert document["review_consumption_sha256"] == (
+        result.admission.consumption_sha256
+    )
+    assert claim["status"] == "WRITER_CLAIM_COMMITTED_BEFORE_NATIVE_OPEN"
+    assert claim["transport_open_authorized"] is False
+    assert claim["physical_authority"] is False
+    assert claim["automatic_retry_allowed"] is False
+    assert claim["transport_open_count"] == 0
+    assert claim["physical_command_writes"] == 0
+    assert result.permit.remaining_uses == 1
+    assert result.lifecycle.snapshot()["phase"] == "ACCEPTED"
+    for name, value in (
+        ("native_t102_handoff_snapshot_v1.schema.json", document),
+        ("native_t102_writer_claim_v1.schema.json", claim),
+    ):
+        schema = json.loads(
+            (WORKSPACE / "software/ai/schemas" / name).read_text(
+                encoding="utf-8"
+            )
+        )
+        jsonschema.Draft202012Validator(schema).validate(value)
+
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError, match="not available"
+    ):
+        claim_fused_camera_state_native_t102_writer_v1(
+            result,
+            frame,
+            journal,
+            adapter_candidate_sha256=ADAPTER,
+            claimed_monotonic_ns=1_700,
+        )
+    assert result.permit.remaining_uses == 1
+
+
+def test_expired_fused_native_writer_claim_rejects_before_commit(
+    context, released_snapshot, tmp_path,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError,
+        match="outside the authorized lifetime",
+    ):
+        claim_fused_camera_state_native_t102_writer_v1(
+            result,
+            frame,
+            journal,
+            adapter_candidate_sha256=ADAPTER,
+            claimed_monotonic_ns=1_900,
+        )
+    assert {item.name for item in journal.directory.iterdir()} == {
+        "prepared.json"
+    }
     assert result.permit.remaining_uses == 1
 
 

@@ -25,6 +25,7 @@ from rocell.safety.supervisor import SafetySupervisor
 from .native_t102_handoff_journal_v1 import (
     DurableNativeT102HandoffV1,
     NativeT102HandoffPhase,
+    NativeT102HandoffSnapshotV1,
 )
 from .production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
@@ -257,6 +258,87 @@ def prepare_fused_camera_state_native_t102_handoff_v1(
     return journal
 
 
+def claim_fused_camera_state_native_t102_writer_v1(
+    result: FusedCameraStateReviewedMotionPermitResultV1,
+    frame: RuntimeCommandFrameV1,
+    handoff: DurableNativeT102HandoffV1,
+    *,
+    adapter_candidate_sha256: str,
+    claimed_monotonic_ns: int,
+) -> NativeT102HandoffSnapshotV1:
+    """Commit the sole-writer ambiguity boundary for one fused handoff.
+
+    The durable claim forbids automatic retry after recovery, but it still
+    grants no transport-open or physical authority and does not consume the
+    motion permit.  Callers must therefore make this transition only when the
+    external-authority workflow is ready to continue from the exact claim.
+    """
+
+    if not isinstance(result, FusedCameraStateReviewedMotionPermitResultV1):
+        raise TypeError(
+            "result must be a FusedCameraStateReviewedMotionPermitResultV1"
+        )
+    if not isinstance(frame, RuntimeCommandFrameV1):
+        raise TypeError("frame must be a RuntimeCommandFrameV1")
+    if not isinstance(handoff, DurableNativeT102HandoffV1):
+        raise TypeError("handoff must be a DurableNativeT102HandoffV1")
+    claimed = _positive_ns(claimed_monotonic_ns, "claimed_monotonic_ns")
+    before = handoff.snapshot()
+    fused_digest = (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    permit_expiry_ns = round(
+        result.admission.permit_expires_at_monotonic * 1_000_000_000
+    )
+    if (
+        result.lifecycle.snapshot().get("phase") != "ACCEPTED"
+        or result.permit.remaining_uses != 1
+        or fused_digest is None
+        or before.phase is not NativeT102HandoffPhase.PREPARED
+        or before.permit_binding_sha256
+        != result.admission.permit_binding_sha256
+        or before.fused_camera_state_action_review_admission_sha256
+        != fused_digest
+        or before.review_consumption_sha256
+        != result.admission.consumption_sha256
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "fused native handoff is not available for writer claim"
+        )
+    if not (
+        frame.issued_monotonic_ns <= claimed < frame.expires_monotonic_ns
+        and claimed < permit_expiry_ns
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "fused native writer claim is outside the authorized lifetime"
+        )
+
+    snapshot = handoff.claim_writer(
+        frame,
+        result.admission,
+        adapter_candidate_sha256=adapter_candidate_sha256,
+        claimed_monotonic_ns=claimed,
+    )
+    document = snapshot.to_dict()
+    if (
+        snapshot.phase is not NativeT102HandoffPhase.WRITER_CLAIMED
+        or snapshot.permit_binding_sha256
+        != result.admission.permit_binding_sha256
+        or snapshot.fused_camera_state_action_review_admission_sha256
+        != fused_digest
+        or snapshot.review_consumption_sha256
+        != result.admission.consumption_sha256
+        or document.get("transport_open_count") != 0
+        or document.get("physical_command_writes") != 0
+        or result.permit.remaining_uses != 1
+        or result.lifecycle.snapshot().get("phase") != "ACCEPTED"
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "claimed native handoff did not preserve fused lineage"
+        )
+    return snapshot
+
+
 def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
     result: FusedCameraStateReviewedMotionPermitResultV1,
     frame: RuntimeCommandFrameV1,
@@ -324,6 +406,7 @@ def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
 
 
 __all__ = [
+    "claim_fused_camera_state_native_t102_writer_v1",
     "FusedCameraStateReviewedMotionPermitError",
     "FusedCameraStateReviewedMotionPermitResultV1",
     "FusedCameraStateReviewedMotionPermitSessionV1",

@@ -89,6 +89,21 @@ External native authority, exclusive writer claim, native transport, authentic
 feedback, observed settling, and independent effect verification are still
 required downstream.
 
+## Durable native writer claim
+
+The prepared fused handoff can now cross the exclusive-writer ambiguity
+boundary without callers reconstructing its authority objects. The claim path
+requires the lifecycle to remain `ACCEPTED`, the permit to retain its one use,
+the fused action-admission and review-consumption lineage to match, and the
+claim instant to remain inside both the command frame and permit lifetimes.
+
+The immutable claim is committed before any future transport open. From that
+point recovery is `RETRY_FORBIDDEN_DISPATCH_UNCERTAIN`; cancellation and blind
+resend are no longer safe. The claim itself grants no physical authority,
+authorizes no transport open, performs no command write, and does not consume
+the permit. External signed authority must bind to this exact claim before the
+existing production transport boundary can be considered.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single
@@ -120,3 +135,7 @@ The native handoff additions are optional. Legacy admissions retain their prior
 prepared-record and snapshot shapes and hashes. Rolling back the fused handoff
 entry point leaves existing immutable journals readable and returns fused
 callers to the hardware-incapable runtime rehearsal.
+
+Removing the fused claim entry point leaves already claimed journals readable.
+Those claims remain retry-forbidden ambiguity records and must not be converted
+back into cancellation-safe prepared handoffs.
