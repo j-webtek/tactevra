@@ -2125,3 +2125,18 @@ scripted transport and modeled accepted-once/T=1051 evidence; no concrete serial
 provider or hardware handle is used. The settled result remains explicitly
 unqualified and does not prove authentic controller feedback, physical motion,
 installed settling, or an independent key effect.
+
+## Fused Windows provider composition (2026-10-28)
+
+The complete fused production-candidate path now composes through the actual
+Windows one-shot transport class in an offline fixture. The fixture injects an
+in-memory serial connection and exact pinned endpoint inventory, allowing the
+provider's real execution-grant, identity, canonical-write, feedback-request,
+bounded-read, and close logic to run without pyserial discovery or an OS handle.
+
+The readback is exact: one T=102 write, two T=105 requests, two settled T=1051
+samples, one open, one close, one spent permit, and one terminal no-replay
+receipt. The receipt continues to state that the transport implementation is
+unqualified, controller evidence is unauthenticated, and physical movement is
+unverified. Installed provider qualification and independently captured
+controller, settling, and key-effect evidence remain downstream dependencies.

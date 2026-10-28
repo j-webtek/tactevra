@@ -44,6 +44,9 @@ import rocell.application.t102_machine_ledger_v1 as ledger_module
 from rocell.application.t102_machine_ledger_v1 import T102MachineLedgerError
 from rocell.arm.all_joint_command import JOINT_FIELDS
 from rocell.arm.protocol import encode_line
+from rocell.providers.windows.native_t102_serial_transport_v1 import (
+    WindowsNativeT102SerialTransportV1,
+)
 from rocell.rc03.build_snapshot import Capability
 from rocell.safety.supervisor import AuthorizationError, SafetySupervisor
 
@@ -261,6 +264,46 @@ class _ProductionTransport(NativeT102ProductionTransportV1):
         self._close = 1
         if self.fault == "close":
             raise OSError("scripted close uncertainty")
+
+
+class _WindowsPortInfo:
+    device = "COM7"
+    vid = 0x10C4
+    pid = 0xEA60
+    serial_number = "ARM162UNIT001"
+
+
+class _WindowsSerial:
+    """In-memory pyserial shape; no OS handle or device is reachable."""
+
+    def __init__(self, frame, goal):
+        response = _feedback(goal, 1_750)["response_bytes"]
+        acknowledgment = encode_line({
+            "T": 1021,
+            "status": "ACCEPTED_ONCE",
+            "ordinal": frame.sequence,
+        })
+        self.lines = [acknowledgment, response, response]
+        self.is_open = False
+        self.in_waiting = 0
+        self.writes = []
+        self.opens = 0
+        self.closes = 0
+
+    def open(self):
+        self.opens += 1
+        self.is_open = True
+
+    def close(self):
+        self.closes += 1
+        self.is_open = False
+
+    def write(self, payload):
+        self.writes.append(payload)
+        return len(payload)
+
+    def readline(self, maximum):
+        return self.lines.pop(0)[:maximum]
 
 
 def _production_candidate(
@@ -838,6 +881,61 @@ def test_exact_fused_production_candidate_seals_one_terminal_receipt(
     ) == (1, 1, 1, 1)
     assert result.permit.remaining_uses == 0
     assert result.lifecycle.snapshot()["phase"] == "ACCEPTED"
+
+
+def test_fused_candidate_composes_through_real_windows_provider_class(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    (
+        result,
+        goal,
+        frame,
+        handoff,
+        authority,
+        endpoint,
+        receipt_root,
+        _,
+    ) = _production_candidate(
+        context, released_snapshot, tmp_path, monkeypatch
+    )
+    serial = _WindowsSerial(frame, goal)
+    ticks = iter((1_750, 1_780))
+    transport = WindowsNativeT102SerialTransportV1(
+        serial_factory=lambda: serial,
+        port_inventory=lambda: [_WindowsPortInfo()],
+        monotonic_ns=lambda: next(ticks),
+    )
+
+    journal, receipt, terminal = (
+        execute_fused_camera_state_native_t102_production_candidate_v1(
+            result,
+            frame,
+            handoff,
+            authority,
+            endpoint,
+            transport,
+            receipt_root,
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_720,
+            assessment_monotonic_ns=1_800,
+            completed_monotonic_ns=1_825,
+        )
+    )
+
+    document = receipt.to_dict()
+    assert receipt.status == "CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED"
+    assert terminal.recovery_disposition is ProductionAttemptRecovery.TERMINAL_NO_REPLAY
+    assert journal.snapshot() == terminal
+    assert serial.writes == [
+        frame.wire_bytes,
+        b'{"T":105}\n',
+        b'{"T":105}\n',
+    ]
+    assert serial.opens == serial.closes == 1
+    assert document["transport_implementation_qualified"] is False
+    assert document["authentic_controller_receipt_claimed"] is False
+    assert document["physical_movement_verified"] is False
+    assert result.permit.remaining_uses == 0
 
 
 def test_crossed_endpoint_rejects_fused_candidate_before_transport(

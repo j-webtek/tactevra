@@ -318,6 +318,15 @@ scripted transport: the passing evidence remains settled-but-unqualified and
 does not establish a concrete serial provider, authentic controller feedback,
 physical movement, keyboard effect, or installed-system qualification.
 
+ARM-164 now proves that the complete fused production-candidate path composes
+through the actual Windows one-shot transport class. The offline fixture injects
+an in-memory serial backend and pinned inventory, then verifies the exact T=102
+write, two T=105 feedback requests, one open, one close, permit consumption, and
+terminal no-replay receipt. No OS device handle or physical controller is
+reachable in the test. The receipt deliberately keeps transport qualification,
+authentic-controller, and physical-movement claims false, so installed provider
+qualification and independently captured outcome evidence remain required.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled
