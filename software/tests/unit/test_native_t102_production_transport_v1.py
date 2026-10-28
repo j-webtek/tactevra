@@ -609,7 +609,8 @@ def test_reconstructed_authority_cannot_replay_with_another_receipt_root(
             completed_monotonic_ns=1_251,
         )
     assert second_transport.open_attempts == 0
-    assert len(tuple(machine_ledger.iterdir())) == 3
+    assert len(tuple(machine_ledger.iterdir())) == 4
+    assert tuple(machine_ledger.glob("review-digest-*.json"))
 
 
 def test_rehashed_impossible_terminal_receipt_fails_closed(tmp_path):

@@ -1051,6 +1051,18 @@ and any later supervisor permit remain transitively bound to the camera-selected
 action and its operator/verifier policy. This stage still grants no permit,
 contact, hardware access, command, retry, or physical authority.
 
+ARM-158 makes that fused review consumable by the existing supervisor permit
+path without adding a parallel authority mechanism. A fused-only session
+derives capability from the frozen interaction, uses the same monotonic instant
+for review consumption and current-condition evaluation, and requires the
+permit expiry to fit inside the review deadline. The issued admission carries
+the fused action digest through to the exact-goal permit and lifecycle. A
+machine-wide review-digest reservation closes reconstruction through a second
+timestamped consumption receipt and remains spent after failed preflight. This
+reduces runtime integration work while preserving the existing sole supervisor,
+single-use, no-automatic-retry contract; transport, movement, and independent
+effect verification remain downstream.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

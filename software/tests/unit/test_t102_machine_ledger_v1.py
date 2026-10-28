@@ -45,7 +45,7 @@ ledger.spend_execution(sys.argv[3], 'a'*64, 'b'*64, 'authority-1',
     )
 
 
-def test_authority_spent_before_crash_rejects_alternate_receipt_in_new_process(
+def test_review_reservation_rejects_alternate_receipt_after_crash(
     tmp_path, monkeypatch,
 ):
     root = tmp_path / "machine-ledger"
@@ -58,10 +58,8 @@ def test_authority_spent_before_crash_rejects_alternate_receipt_in_new_process(
     assert len(tuple(root.glob("authority-*.json"))) == 1
     assert not tuple(root.glob("execution-*.json"))
 
-    ledger.reserve_review(SECOND, REVIEW, GOAL)
-    replay = _spend_in_child(root, SECOND, crash_after_authority=False)
-    assert replay.returncode != 0
-    assert "already spent" in replay.stderr
+    with pytest.raises(ledger.T102MachineLedgerError, match="already spent"):
+        ledger.reserve_review(SECOND, REVIEW, GOAL)
     assert not tuple(root.glob("execution-*.json"))
 
 

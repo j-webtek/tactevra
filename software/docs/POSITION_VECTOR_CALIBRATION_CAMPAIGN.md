@@ -2012,3 +2012,24 @@ This is still a zero-authority boundary. It does not consume the review, issue a
 permit, open hardware, encode or write a command, authorize contact, retry an
 action, or move the arm. The safety supervisor remains the only permit issuer,
 and the sole-writer and settlement lifecycle remain downstream requirements.
+
+## Fused execution review to supervisor permit (2026-10-28)
+
+The fused execution review now has one explicit runtime entry into the existing
+safety-supervisor permit path. The session accepts only a review containing the
+fused action-admission digest, derives keyboard-contact or hover capability from
+the review, consumes it once, and evaluates current calibration, interlocks,
+runtime health, and released build state at the same monotonic instant. Permit
+expiry cannot extend beyond the review deadline.
+
+The permit admission retains the fused action-admission digest and creates the
+existing hash-chained action lifecycle in `ACCEPTED`. A process-independent
+machine reservation keyed by review digest prevents a reconstructed review gate
+from obtaining another permit through a newly timestamped receipt. Reservation
+precedes supervisor evaluation, so a failed preflight burns the review and does
+not create a retry path.
+
+Only `SafetySupervisor` can create the short-lived exact-goal permit. This
+orchestrator performs no serial access, command encoding, controller write,
+movement, contact, settling check, or effect verification. Those physical and
+outcome boundaries remain required after admission.

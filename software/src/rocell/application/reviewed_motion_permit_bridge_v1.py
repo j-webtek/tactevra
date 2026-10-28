@@ -77,6 +77,7 @@ class ReviewedMotionPermitAdmissionV1:
     ordered_goal_sha256: tuple[str, ...]
     permit_expires_at_monotonic: float
     permit_binding_sha256: str
+    fused_camera_state_action_review_admission_sha256: str | None = None
 
     def __post_init__(self) -> None:
         for field in (
@@ -84,6 +85,11 @@ class ReviewedMotionPermitAdmissionV1:
             "permit_binding_sha256",
         ):
             _digest(getattr(self, field), field)
+        if self.fused_camera_state_action_review_admission_sha256 is not None:
+            _digest(
+                self.fused_camera_state_action_review_admission_sha256,
+                "fused_camera_state_action_review_admission_sha256",
+            )
         if not isinstance(self.capability, Capability):
             raise ReviewedMotionPermitBridgeError("capability must be typed")
         if not self.ordered_goal_sha256:
@@ -95,7 +101,7 @@ class ReviewedMotionPermitAdmissionV1:
             or not math.isfinite(self.permit_expires_at_monotonic)
         ):
             raise ReviewedMotionPermitBridgeError("permit expiry must be float")
-        expected = _sha256({
+        binding = {
             "review_sha256": self.review_sha256,
             "consumption_sha256": self.consumption_sha256,
             "capability": self.capability.value,
@@ -103,12 +109,17 @@ class ReviewedMotionPermitAdmissionV1:
             "plan_hash": self.review_sha256,
             "ordered_goal_sha256": list(self.ordered_goal_sha256),
             "permit_expires_at_monotonic": self.permit_expires_at_monotonic,
-        })
+        }
+        if self.fused_camera_state_action_review_admission_sha256 is not None:
+            binding["fused_camera_state_action_review_admission_sha256"] = (
+                self.fused_camera_state_action_review_admission_sha256
+            )
+        expected = _sha256(binding)
         if expected != self.permit_binding_sha256:
             raise ReviewedMotionPermitBridgeError("permit binding hash is invalid")
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        document = {
             "schema": ADMISSION_SCHEMA,
             "status": "MOTION_PERMIT_ISSUED_BY_SAFETY_SUPERVISOR",
             "review_sha256": self.review_sha256,
@@ -123,6 +134,11 @@ class ReviewedMotionPermitAdmissionV1:
             "hardware_access": False,
             "physical_authority": True,
         }
+        if self.fused_camera_state_action_review_admission_sha256 is not None:
+            document["fused_camera_state_action_review_admission_sha256"] = (
+                self.fused_camera_state_action_review_admission_sha256
+            )
+        return document
 
 
 class ReviewedMotionDispatchReceiptV1:
@@ -300,10 +316,17 @@ def issue_reviewed_motion_permit_v1(
         "ordered_goal_sha256": list(goal_hashes),
         "permit_expires_at_monotonic": permit.expires_at_monotonic,
     }
+    fused_admission_sha256 = (
+        review.fused_camera_state_action_review_admission_sha256
+    )
+    if fused_admission_sha256 is not None:
+        unsigned["fused_camera_state_action_review_admission_sha256"] = (
+            fused_admission_sha256
+        )
     admission = ReviewedMotionPermitAdmissionV1(
         review.review_sha256, consumption_sha256, capability,
         permit.snapshot_hash, goal_hashes, permit.expires_at_monotonic,
-        _sha256(unsigned),
+        _sha256(unsigned), fused_admission_sha256,
     )
     return permit, admission
 
