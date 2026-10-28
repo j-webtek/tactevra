@@ -10,24 +10,30 @@ no transport access and writes no controller command.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
+from rocell.arm.protocol import decode_line
 from rocell.calibration.artifacts import CalibrationResolution
 from rocell.rc03.build_snapshot import Capability
 from rocell.safety.interlocks import InterlockSnapshot
-from rocell.safety.permit import MotionPermit
+from rocell.safety.permit import MotionPermit, goal_hash
 from rocell.safety.preflight import RuntimeStatus
 from rocell.safety.supervisor import SafetySupervisor
 
-from .reviewed_motion_permit_bridge_v1 import (
-    ReviewedActionLifecycleV1,
-    ReviewedMotionPermitAdmissionV1,
-    issue_reviewed_motion_permit_v1,
+from .native_t102_handoff_journal_v1 import (
+    DurableNativeT102HandoffV1,
+    NativeT102HandoffPhase,
 )
 from .production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
     RuntimeCommandFrameV1,
+)
+from .reviewed_motion_permit_bridge_v1 import (
+    ReviewedActionLifecycleV1,
+    ReviewedMotionPermitAdmissionV1,
+    issue_reviewed_motion_permit_v1,
 )
 from .reviewed_motion_sole_writer_v1 import IncapableReviewedMotionIoV1
 from .reviewed_t102_runtime_bridge_v1 import (
@@ -174,6 +180,83 @@ class FusedCameraStateReviewedMotionPermitSessionV1:
         )
 
 
+def prepare_fused_camera_state_native_t102_handoff_v1(
+    result: FusedCameraStateReviewedMotionPermitResultV1,
+    frame: RuntimeCommandFrameV1,
+    handoff_root: Path,
+    *,
+    adapter_candidate_sha256: str,
+    created_monotonic_ns: int,
+) -> DurableNativeT102HandoffV1:
+    """Persist one fused permit as a cancellation-safe native handoff.
+
+    This stops at the prepared phase.  It neither consumes the motion permit nor
+    claims a writer, opens a transport, captures feedback, or creates physical
+    authority.
+    """
+
+    if not isinstance(result, FusedCameraStateReviewedMotionPermitResultV1):
+        raise TypeError(
+            "result must be a FusedCameraStateReviewedMotionPermitResultV1"
+        )
+    if not isinstance(frame, RuntimeCommandFrameV1):
+        raise TypeError("frame must be a RuntimeCommandFrameV1")
+    created = _positive_ns(created_monotonic_ns, "created_monotonic_ns")
+    lifecycle = result.lifecycle.snapshot()
+    fused_digest = (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    receipt = dict(result.consumption_receipt)
+    if (
+        lifecycle.get("phase") != "ACCEPTED"
+        or fused_digest is None
+        or receipt.get("consumption_sha256")
+        != result.admission.consumption_sha256
+        or result.permit.remaining_uses != 1
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "fused permit is not available for native handoff preparation"
+        )
+    try:
+        message = decode_line(frame.wire_bytes)
+    except Exception as exc:
+        raise FusedCameraStateReviewedMotionPermitError(
+            "native handoff frame is not a canonical command"
+        ) from exc
+    permit_expiry_ns = round(
+        result.admission.permit_expires_at_monotonic * 1_000_000_000
+    )
+    if (
+        goal_hash(message) not in result.admission.ordered_goal_sha256
+        or frame.expires_monotonic_ns > permit_expiry_ns
+        or created >= permit_expiry_ns
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "native handoff frame differs from or outlives the fused permit"
+        )
+    journal = DurableNativeT102HandoffV1.prepare(
+        handoff_root,
+        frame,
+        result.admission,
+        adapter_candidate_sha256=adapter_candidate_sha256,
+        created_monotonic_ns=created,
+    )
+    snapshot = journal.snapshot()
+    if (
+        snapshot.phase is not NativeT102HandoffPhase.PREPARED
+        or snapshot.permit_binding_sha256
+        != result.admission.permit_binding_sha256
+        or snapshot.fused_camera_state_action_review_admission_sha256
+        != fused_digest
+        or snapshot.review_consumption_sha256
+        != result.admission.consumption_sha256
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "prepared native handoff did not preserve fused lineage"
+        )
+    return journal
+
+
 def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
     result: FusedCameraStateReviewedMotionPermitResultV1,
     frame: RuntimeCommandFrameV1,
@@ -245,4 +328,5 @@ __all__ = [
     "FusedCameraStateReviewedMotionPermitResultV1",
     "FusedCameraStateReviewedMotionPermitSessionV1",
     "execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1",
+    "prepare_fused_camera_state_native_t102_handoff_v1",
 ]

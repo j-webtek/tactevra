@@ -17,6 +17,8 @@
     "prepared_sha256": {"$ref": "#/$defs/hash"},
     "frame_sha256": {"$ref": "#/$defs/hash"},
     "permit_binding_sha256": {"$ref": "#/$defs/hash"},
+    "fused_camera_state_action_review_admission_sha256": {"$ref": "#/$defs/hash"},
+    "review_consumption_sha256": {"$ref": "#/$defs/hash"},
     "claim_sha256": {
       "oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]
     },
@@ -32,6 +34,10 @@
     "transport_open_count": {"const": 0},
     "physical_command_writes": {"const": 0},
     "snapshot_sha256": {"$ref": "#/$defs/hash"}
+  },
+  "dependentRequired": {
+    "fused_camera_state_action_review_admission_sha256": ["review_consumption_sha256"],
+    "review_consumption_sha256": ["fused_camera_state_action_review_admission_sha256"]
   },
   "allOf": [
     {

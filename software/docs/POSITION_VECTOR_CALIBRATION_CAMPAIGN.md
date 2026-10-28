@@ -2057,3 +2057,20 @@ a port or reach the controller, its acknowledgment and feedback are supplied
 test evidence, and its physical write count is always zero. Native sole-writer
 transport, authenticated controller feedback, observed physical settling, and
 independent keyboard-effect verification remain separate release gates.
+
+## Fused permit to durable native handoff (2026-10-28)
+
+The accepted fused permit result can now publish the existing immutable native
+T=102 prepared handoff without unpacking and reconstructing its authority
+objects. The exact command goal and frame lifetime are checked against the
+reviewed permit before publication. The prepared record and restart snapshot
+retain the fused action-admission digest, review-consumption digest, permit
+binding, command frame, writer, controller session, configuration epoch,
+encoding profile, and adapter candidate.
+
+This stage intentionally does not claim the native writer. The permit retains
+its one use, the reviewed lifecycle remains accepted, the journal can still be
+cancelled and replanned with fresh authority, and both transport-open and
+physical-command-write counts remain zero. External authority and the later
+writer claim must still precede any native attempt; authentic feedback,
+physical settling, and independent key-effect evidence remain unresolved.

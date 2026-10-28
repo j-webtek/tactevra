@@ -117,11 +117,16 @@ def test_prepared_handoff_is_durable_cancellable_and_has_no_authority(tmp_path):
     assert document["automatic_retry_allowed"] is False
     assert document["transport_open_count"] == 0
     assert document["physical_command_writes"] == 0
+    assert "fused_camera_state_action_review_admission_sha256" not in document
+    assert "review_consumption_sha256" not in document
+    prepared = json.loads((journal.directory / "prepared.json").read_text(
+        encoding="utf-8"))
+    assert "fused_camera_state_action_review_admission_sha256" not in prepared
+    assert "review_consumption_sha256" not in prepared
     jsonschema.Draft202012Validator(_schema()).validate(document)
     jsonschema.Draft202012Validator(_schema(
         "native_t102_handoff_prepared_v1.schema.json"
-    )).validate(json.loads((journal.directory / "prepared.json").read_text(
-        encoding="utf-8")))
+    )).validate(prepared)
 
 
 def test_claim_is_exclusive_persistent_and_restart_forbids_retry(tmp_path):

@@ -13,6 +13,7 @@ from rocell.application.fused_camera_state_reviewed_motion_permit_v1 import (
     FusedCameraStateReviewedMotionPermitError,
     FusedCameraStateReviewedMotionPermitSessionV1,
     execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1,
+    prepare_fused_camera_state_native_t102_handoff_v1,
 )
 from rocell.application.production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
@@ -44,6 +45,7 @@ from test_safety_core import (
 
 
 WORKSPACE = Path(__file__).resolve().parents[3]
+ADAPTER = "f" * 64
 
 
 @pytest.fixture(autouse=True)
@@ -246,6 +248,89 @@ def test_fused_permit_rehearses_one_t102_write_ack_and_settlement(
         )
     )
     jsonschema.Draft202012Validator(schema).validate(report)
+
+
+def test_fused_permit_prepares_cancellable_native_handoff_without_claim(
+    context, released_snapshot, tmp_path,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+
+    snapshot = journal.snapshot()
+    document = snapshot.to_dict()
+    prepared = json.loads(
+        (journal.directory / "prepared.json").read_text(encoding="utf-8")
+    )
+    assert document["phase"] == "PREPARED"
+    assert document["recovery_disposition"] == (
+        "CANCEL_AND_REPLAN_WITH_FRESH_AUTHORITY"
+    )
+    assert document["fused_camera_state_action_review_admission_sha256"] == (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    assert document["review_consumption_sha256"] == (
+        result.admission.consumption_sha256
+    )
+    assert prepared["permit_binding_sha256"] == (
+        result.admission.permit_binding_sha256
+    )
+    assert prepared["fused_camera_state_action_review_admission_sha256"] == (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    assert prepared["review_consumption_sha256"] == (
+        result.admission.consumption_sha256
+    )
+    assert {item.name for item in journal.directory.iterdir()} == {
+        "prepared.json"
+    }
+    assert document["transport_open_count"] == 0
+    assert document["physical_command_writes"] == 0
+    assert result.permit.remaining_uses == 1
+    assert result.lifecycle.snapshot()["phase"] == "ACCEPTED"
+    for name, value in (
+        ("native_t102_handoff_snapshot_v1.schema.json", document),
+        ("native_t102_handoff_prepared_v1.schema.json", prepared),
+    ):
+        schema = json.loads(
+            (WORKSPACE / "software/ai/schemas" / name).read_text(
+                encoding="utf-8"
+            )
+        )
+        jsonschema.Draft202012Validator(schema).validate(value)
+
+
+def test_crossed_fused_native_handoff_rejects_before_publishing(
+    context, released_snapshot, tmp_path,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, _ = _runtime_frame(context, offset=0.1)
+    handoff_root = tmp_path / "handoffs"
+    handoff_root.mkdir()
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError, match="differs"
+    ):
+        prepare_fused_camera_state_native_t102_handoff_v1(
+            result,
+            frame,
+            handoff_root,
+            adapter_candidate_sha256=ADAPTER,
+            created_monotonic_ns=1_600,
+        )
+    assert tuple(handoff_root.iterdir()) == ()
+    assert result.permit.remaining_uses == 1
 
 
 def test_fused_runtime_write_uncertainty_is_terminal_without_retry(
