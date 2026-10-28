@@ -1097,6 +1097,15 @@ and leaves the permit unspent. External signed authority, native transport,
 authenticated controller feedback, observed settling, and independent effect
 verification remain downstream gates.
 
+ARM-162 composes the fused claimed handoff with the existing machine-pinned
+external-authority verifier. Before admission it binds the signed record to the
+exact review, claim, frame, endpoint, writer, controller session,
+configuration, and encoding profile and requires its expiry to fit within both
+the frame and permit lifetimes. The admitted authority remains unconsumed and
+no transport or durable production attempt is started. Native attempt start,
+single-use authority and permit consumption, transport, authenticated feedback,
+physical settling, and independent effect verification remain downstream.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

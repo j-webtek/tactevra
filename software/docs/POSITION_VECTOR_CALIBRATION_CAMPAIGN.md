@@ -2088,3 +2088,18 @@ cancellable. It does not open a transport, issue a physical command, consume
 the permit, or grant physical authority. External signed authority bound to the
 claim, native transport, authentic feedback, physical settling, and independent
 keyboard-effect evidence remain required.
+
+## Fused external native authority admission (2026-10-28)
+
+The exact fused writer claim can now accept a machine-verified external native
+authority record through the production authority contract. Admission checks
+the claimed handoff and fused review-consumption lineage, the unspent permit,
+the full runtime frame, pinned endpoint, writer, controller session,
+configuration epoch, and encoding profile. The authority expiry may not exceed
+the frame or permit expiry.
+
+This remains a pretransport step. The authority and permit remain unconsumed,
+no production-attempt record is created, transport-open and physical-write
+counts remain zero, and no physical result is claimed. Durable attempt start,
+native I/O, authentic controller feedback, observed settling, and independent
+keyboard-effect evidence remain required.
