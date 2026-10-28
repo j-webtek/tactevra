@@ -110,7 +110,17 @@ def reserve_review(
     consumption = _digest(consumption_sha256, "consumption_sha256")
     review = _digest(review_sha256, "review_sha256")
     goal = _digest(goal_sha256, "goal_sha256")
-    _write_new(_root() / f"review-{consumption}.json", {
+    root = _root()
+    # The consumption digest includes its timestamp, so it cannot by itself
+    # prove that a copied review was not consumed again with a different clock.
+    # Reserve the review digest first.  A crash after this write remains
+    # fail-closed and prevents any reconstructed receipt from minting authority.
+    _write_new(root / f"review-digest-{review}.json", {
+        "schema": "rocell.t102_machine_review_digest_reservation.v1",
+        "review_sha256": review,
+        "goal_sha256": goal,
+    })
+    _write_new(root / f"review-{consumption}.json", {
         "schema": "rocell.t102_machine_review_reservation.v1",
         "consumption_sha256": consumption,
         "review_sha256": review,

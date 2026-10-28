@@ -156,7 +156,7 @@ completed capabilities.
 | Conservative route collision evaluation | Robot poses are FK-derived at bounded samples; rigid motion is enclosed by URDF-derived margins, each adjacent pair requires a profile-bound cable envelope, and one exact contact allowance can be bound to a sealed no-write envelope | Synthetic fixtures test clear, collision, crossed-identity, contact-policy, and resource cases; installed engineering evidence and physical qualification still block release |
 | Controller-command preview | Sealed synthetic trajectories can be encoded into Waveshare T=102 bytes and a proposed dispatch schedule | Offline encoding and published schemas are tested; the preview has no transport and sends nothing to the arm |
 | Execution lifecycle rehearsal | Ownership, single-use reservations, fault handling, and restart reconciliation are modeled | Tests exercise no-retry and fault rules without device I/O; this is not an installed live execution service |
-| Reviewed permit bridge | A consumed single-action review can be bound to the existing safety supervisor and an exact-goal motion permit with hash-chained lifecycle acknowledgments | Portable tests cover accepted, started, completed, failed, and uncertain records; there is still no controller transport, physical execution, or independent outcome evidence |
+| Reviewed permit bridge | A fused camera-selected single-action review can be consumed once and bound through the existing safety supervisor to an exact-goal motion permit with transitive lineage and hash-chained lifecycle acknowledgments | Portable tests cover replay rejection plus accepted, started, completed, failed, and uncertain records; there is still no controller transport, physical execution, settling, or independent outcome evidence |
 | Sole-writer dispatch rehearsal | One-use permit consumption, an exact encoded-write attempt, receipt hashing, and ordered settling checks | The passing fixture is hardware-incapable and in-memory; it does not establish native transport, independently acquired feedback, physical movement, or task outcome |
 | Controller evidence gate | Required controller identity, mapping, protocol, freshness, and review fields are checked | Modeled records test rejection behavior; even a passing record grants no transport or execution authority, and no physical originals were qualified |
 | Installed-controller compatibility | A passive r96 observation is recorded; an offline assessment checks the installed application's command surface | r96 lacks the required generic production command/feedback interface and remains blocked; its identity evidence is not independently qualified |
@@ -258,6 +258,14 @@ hash-chained lifecycle acknowledgments. Terminal results prohibit automatic
 retry and follow-on movement. This makes the offline handoff more explicit; it
 does not add a native controller writer, authenticated feedback, settling,
 contact qualification, or independent device-input verification.
+
+ARM-158 now connects the fused camera-selected execution review to that same
+permit boundary. It preserves the fused route, operator, verifier, trajectory,
+and review lineage in the permit admission, uses a single monotonic clock, and
+prevents the permit from outliving its review. A machine-wide review-digest
+reservation closes replay through a reconstructed timestamped receipt and stays
+spent after failed preflight. The increment performs no transport access or
+movement; dispatch, settling, and independent effect evidence remain required.
 
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
