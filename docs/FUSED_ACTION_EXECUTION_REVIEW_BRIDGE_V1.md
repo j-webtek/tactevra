@@ -118,6 +118,31 @@ and claims no physical result. The existing production boundary remains
 responsible for durably starting an attempt before it atomically consumes the
 authority and permit and invokes any native transport.
 
+## Durable production candidate composition
+
+The fused path can now delegate one exact claimed handoff and admitted external
+authority to the existing durable production-candidate lifecycle. Before that
+delegation, it rechecks the accepted fused lifecycle, unspent permit, fused
+action-admission and review-consumption digests, claimed handoff, command frame,
+wire bytes, pinned endpoint, writer, controller session, configuration epoch,
+encoding profile, signed authority lifetime, and exact approval decision.
+
+The production lifecycle remains the sole owner of the irreversible ordering:
+it spends the machine-ledger execution reservation, flushes the durable start,
+consumes the external authority and motion permit once, binds the transport
+grant, makes at most one open/write/capture/close attempt, and commits a terminal
+receipt that forbids replay. The fused wrapper then verifies that the permit is
+spent and the terminal receipt preserves the complete claim lineage.
+
+This API accepts an abstract transport supplied by its caller; it neither
+discovers nor constructs a serial provider. Repository tests use a scripted
+implementation with no device handle. Their success status is explicitly
+`CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED`: it does not authenticate a
+controller, prove physical movement, qualify the installed setup, or verify a
+keyboard effect. The existing reviewed lifecycle remains `ACCEPTED` because its
+event contract accepts rehearsal dispatch receipts, not native production
+receipts; the durable native terminal snapshot is authoritative for this path.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single
@@ -157,3 +182,8 @@ back into cancellation-safe prepared handoffs.
 Removing the fused authority-admission adapter returns callers to the generic
 machine-verification boundary. It does not revoke or consume authority records
 that were already admitted in memory, and it changes no durable journal format.
+
+Removing the fused production-candidate wrapper leaves the generic production
+boundary and every existing durable attempt readable. Any attempt whose durable
+start exists remains retry-forbidden even if this optional composition entry
+point is rolled back.

@@ -2103,3 +2103,25 @@ no production-attempt record is created, transport-open and physical-write
 counts remain zero, and no physical result is claimed. Durable attempt start,
 native I/O, authentic controller feedback, observed settling, and independent
 keyboard-effect evidence remain required.
+
+## Fused durable production candidate composition (2026-10-28)
+
+The exact fused writer claim and admitted external authority can now enter the
+existing durable production-candidate lifecycle without callers separating or
+reconstructing their lineage. Immediately before delegation, the wrapper
+rechecks the fused admission, review consumption, unspent permit, claimed
+handoff, frame and wire identities, pinned endpoint, sole writer, controller
+session, configuration epoch, encoding profile, signed authority lifetime, and
+machine-verifier approval.
+
+The generic production sink remains responsible for the irreversible sequence:
+it spends the execution ledger, flushes a durable start, consumes authority and
+permit, binds one transport grant, permits at most one open/write/capture/close
+attempt, and commits a terminal no-replay receipt. The wrapper verifies that the
+terminal receipt is bound to the exact fused claim and that the permit is spent.
+
+The qualification here is software composition only. Tests supply an abstract
+scripted transport and modeled accepted-once/T=1051 evidence; no concrete serial
+provider or hardware handle is used. The settled result remains explicitly
+unqualified and does not prove authentic controller feedback, physical motion,
+installed settling, or an independent key effect.

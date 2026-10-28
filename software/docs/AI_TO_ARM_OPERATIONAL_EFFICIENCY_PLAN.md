@@ -1106,6 +1106,19 @@ no transport or durable production attempt is started. Native attempt start,
 single-use authority and permit consumption, transport, authenticated feedback,
 physical settling, and independent effect verification remain downstream.
 
+ARM-163 composes the admitted fused authority with the existing durable native
+production-candidate lifecycle. The wrapper rechecks every fused, review,
+permit, claim, frame, wire, endpoint, writer, controller, configuration,
+encoding, authority-lifetime, and approval binding before one delegation. The
+existing production sink then preserves its ordering: spend the machine-wide
+execution reservation, flush the durable start, consume authority and permit,
+bind the transport grant, attempt open/write/capture/close at most once, and
+seal a terminal no-replay receipt. Scripted tests cover exact settled evidence,
+crossed-endpoint rejection before transport, and terminal open uncertainty.
+They do not invoke a concrete provider; their evidence is explicitly
+unqualified and does not prove authentic controller feedback, physical motion,
+installed settling, or an independent keyboard effect.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact
