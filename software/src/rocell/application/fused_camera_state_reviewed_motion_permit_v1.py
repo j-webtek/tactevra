@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 from rocell.calibration.artifacts import CalibrationResolution
 from rocell.rc03.build_snapshot import Capability
@@ -24,6 +24,15 @@ from .reviewed_motion_permit_bridge_v1 import (
     ReviewedActionLifecycleV1,
     ReviewedMotionPermitAdmissionV1,
     issue_reviewed_motion_permit_v1,
+)
+from .production_controller_runtime_contract_v1 import (
+    ProductionControllerRuntimeContractV1,
+    RuntimeCommandFrameV1,
+)
+from .reviewed_motion_sole_writer_v1 import IncapableReviewedMotionIoV1
+from .reviewed_t102_runtime_bridge_v1 import (
+    JointSettlementPolicyV1,
+    execute_reviewed_t102_runtime_rehearsal_v1,
 )
 from .single_action_execution_review_v1 import (
     SingleActionExecutionReviewV1,
@@ -165,8 +174,75 @@ class FusedCameraStateReviewedMotionPermitSessionV1:
         )
 
 
+def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
+    result: FusedCameraStateReviewedMotionPermitResultV1,
+    frame: RuntimeCommandFrameV1,
+    runtime: ProductionControllerRuntimeContractV1,
+    io: IncapableReviewedMotionIoV1,
+    acknowledgment_bytes: bytes,
+    feedback_samples: Iterable[Mapping[str, Any]] = (),
+    *,
+    writer_instance_id: str,
+    dispatch_monotonic_ns: int,
+    assessment_monotonic_ns: int,
+    settlement_policy: JointSettlementPolicyV1 = JointSettlementPolicyV1(),
+) -> dict[str, Any]:
+    """Rehearse one fused permit through the hardware-incapable T=102 boundary."""
+
+    if not isinstance(result, FusedCameraStateReviewedMotionPermitResultV1):
+        raise TypeError(
+            "result must be a FusedCameraStateReviewedMotionPermitResultV1"
+        )
+    fused_digest = (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    if fused_digest is None:
+        raise FusedCameraStateReviewedMotionPermitError(
+            "fused camera-state action review lineage is required"
+        )
+    dispatch_ns = _positive_ns(
+        dispatch_monotonic_ns, "dispatch_monotonic_ns"
+    )
+    assessment_ns = _positive_ns(
+        assessment_monotonic_ns, "assessment_monotonic_ns"
+    )
+    if result.lifecycle.snapshot().get("phase") != "ACCEPTED":
+        raise FusedCameraStateReviewedMotionPermitError(
+            "fused reviewed motion lifecycle is not accepted"
+        )
+
+    report = execute_reviewed_t102_runtime_rehearsal_v1(
+        frame,
+        result.permit,
+        result.admission,
+        result.lifecycle,
+        runtime,
+        io,
+        acknowledgment_bytes,
+        feedback_samples,
+        writer_instance_id=writer_instance_id,
+        now_monotonic=dispatch_ns / 1_000_000_000,
+        dispatch_monotonic_ns=dispatch_ns,
+        assessment_monotonic_ns=assessment_ns,
+        settlement_policy=settlement_policy,
+    )
+    if (
+        report.get("fused_camera_state_action_review_admission_sha256")
+        != fused_digest
+        or report.get("review_consumption_sha256")
+        != result.admission.consumption_sha256
+        or report.get("permit_binding_sha256")
+        != result.admission.permit_binding_sha256
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "fused runtime rehearsal lineage was not preserved"
+        )
+    return report
+
+
 __all__ = [
     "FusedCameraStateReviewedMotionPermitError",
     "FusedCameraStateReviewedMotionPermitResultV1",
     "FusedCameraStateReviewedMotionPermitSessionV1",
+    "execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1",
 ]

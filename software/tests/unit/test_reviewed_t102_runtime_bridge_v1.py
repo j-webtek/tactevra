@@ -155,6 +155,8 @@ def _schema(name):
 def test_exact_t102_ack_and_fresh_joint_settling_complete(context, released_snapshot):
     report, permit, runtime = _run(context, released_snapshot)
     assert report["status"] == "COMPLETED"
+    assert "fused_camera_state_action_review_admission_sha256" not in report
+    assert "review_consumption_sha256" not in report
     assert report["dispatch"]["status"] == "REPLAY_WRITE_CONFIRMED"
     assert report["acknowledgment"]["status"] == "ACCEPTED_ONCE"
     assert report["acknowledgment"]["authentic_physical_receipt"] is False

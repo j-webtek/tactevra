@@ -12,12 +12,24 @@ from rocell.application.context import load_simulation_context
 from rocell.application.fused_camera_state_reviewed_motion_permit_v1 import (
     FusedCameraStateReviewedMotionPermitError,
     FusedCameraStateReviewedMotionPermitSessionV1,
+    execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1,
+)
+from rocell.application.production_controller_runtime_contract_v1 import (
+    ProductionControllerRuntimeContractV1,
+    ProductionControllerRuntimeManifestV1,
+    RuntimeCommandFrameV1,
+)
+from rocell.application.reviewed_motion_sole_writer_v1 import (
+    IncapableReviewedMotionIoV1,
+    IncapableWriteFault,
 )
 from rocell.application.single_action_execution_review_v1 import (
     SingleActionExecutionReviewError,
 )
 import rocell.application.t102_machine_ledger_v1 as ledger_module
 from rocell.application.t102_machine_ledger_v1 import T102MachineLedgerError
+from rocell.arm.all_joint_command import JOINT_FIELDS
+from rocell.arm.protocol import encode_line
 from rocell.rc03.build_snapshot import Capability
 from rocell.safety.supervisor import AuthorizationError, SafetySupervisor
 
@@ -70,6 +82,50 @@ def _supervisor(released_snapshot):
     supervisor = SafetySupervisor(released_snapshot)
     _advance_to_armed(supervisor)
     return supervisor
+
+
+def _runtime_frame(context, *, offset: float = 0.0):
+    inputs = execution_review._inputs(context)
+    measured = inputs[2].measured_envelope
+    goal = execution_review._t102_goal(context)
+    if offset:
+        goal = {**goal, "base": goal["base"] + offset}
+    manifest = ProductionControllerRuntimeManifestV1(
+        runtime_id="arm-159-fused-runtime",
+        candidate_app_sha256="a" * 64,
+        protocol_source_sha256="b" * 64,
+        controller_joint_mapping_sha256="c" * 64,
+        configuration_epoch_sha256=measured.configuration_epoch_sha256,
+        expected_encoding_profile_sha256="3" * 64,
+        controller_session_id=measured.controller_session_id,
+    )
+    frame = RuntimeCommandFrameV1(
+        sequence=1,
+        correlation_id="arm-159-fused-action-0",
+        writer_instance_id="arm-159-writer",
+        controller_session_id=manifest.controller_session_id,
+        configuration_epoch_sha256=manifest.configuration_epoch_sha256,
+        encoding_profile_sha256=manifest.expected_encoding_profile_sha256,
+        issued_monotonic_ns=1_550,
+        expires_monotonic_ns=1_900,
+        wire_bytes=encode_line(goal),
+    )
+    return goal, frame, ProductionControllerRuntimeContractV1(manifest)
+
+
+def _ack():
+    return encode_line({"T": 1021, "status": "ACCEPTED_ONCE", "ordinal": 1})
+
+
+def _feedback(goal, captured_monotonic_ns):
+    return {
+        "captured_monotonic_ns": captured_monotonic_ns,
+        "response_bytes": encode_line({
+            "T": 1051,
+            **dict(zip(("b", "s", "e", "t", "r", "g"),
+                       (goal[name] for name in JOINT_FIELDS))),
+        }),
+    }
 
 
 def test_fused_review_issues_one_exact_bound_supervisor_permit(
@@ -147,3 +203,99 @@ def test_preflight_failure_burns_reconstructed_review(
         _session(context).issue(_supervisor(released_snapshot), **blocked)
     with pytest.raises(T102MachineLedgerError, match="already spent"):
         _session(context).issue(_supervisor(released_snapshot), **_arguments())
+
+
+def test_fused_permit_rehearses_one_t102_write_ack_and_settlement(
+    context, released_snapshot,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    goal, frame, runtime = _runtime_frame(context)
+    report = execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
+        result,
+        frame,
+        runtime,
+        IncapableReviewedMotionIoV1(),
+        _ack(),
+        [_feedback(goal, 1_700), _feedback(goal, 1_750)],
+        writer_instance_id="arm-159-writer",
+        dispatch_monotonic_ns=1_600,
+        assessment_monotonic_ns=1_800,
+    )
+
+    assert report["status"] == "COMPLETED"
+    assert report["fused_camera_state_action_review_admission_sha256"] == (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    assert report["review_consumption_sha256"] == (
+        result.consumption_receipt["consumption_sha256"]
+    )
+    assert report["dispatch"]["write_attempts"] == 1
+    assert report["acknowledgment"]["status"] == "ACCEPTED_ONCE"
+    assert report["settlement"]["status"] == (
+        "OBSERVED_SETTLED_JOINT_ARRIVAL"
+    )
+    assert report["automatic_retry_allowed"] is False
+    assert report["physical_command_writes"] == 0
+    assert result.permit.remaining_uses == 0
+    schema = json.loads(
+        (WORKSPACE / "software/ai/schemas/"
+         "reviewed_t102_runtime_execution_rehearsal_v1.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    jsonschema.Draft202012Validator(schema).validate(report)
+
+
+def test_fused_runtime_write_uncertainty_is_terminal_without_retry(
+    context, released_snapshot,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, runtime = _runtime_frame(context)
+    io = IncapableReviewedMotionIoV1(IncapableWriteFault.PARTIAL_WRITE)
+    report = execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
+        result,
+        frame,
+        runtime,
+        io,
+        _ack(),
+        (),
+        writer_instance_id="arm-159-writer",
+        dispatch_monotonic_ns=1_600,
+        assessment_monotonic_ns=1_800,
+    )
+
+    assert report["status"] == "UNCERTAIN"
+    assert report["acknowledgment"] is None
+    assert report["settlement"] is None
+    assert report["automatic_retry_allowed"] is False
+    assert report["follow_on_movement_authorized"] is False
+    assert io.write_attempts == 1
+    assert result.permit.remaining_uses == 0
+
+
+def test_crossed_fused_t102_goal_rejects_before_consumption_or_write(
+    context, released_snapshot,
+) -> None:
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    _, frame, runtime = _runtime_frame(context, offset=0.1)
+    io = IncapableReviewedMotionIoV1()
+    with pytest.raises(ValueError, match="identity differs"):
+        execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
+            result,
+            frame,
+            runtime,
+            io,
+            _ack(),
+            (),
+            writer_instance_id="arm-159-writer",
+            dispatch_monotonic_ns=1_600,
+            assessment_monotonic_ns=1_800,
+        )
+    assert io.write_attempts == 0
+    assert result.permit.remaining_uses == 1

@@ -2033,3 +2033,27 @@ Only `SafetySupervisor` can create the short-lived exact-goal permit. This
 orchestrator performs no serial access, command encoding, controller write,
 movement, contact, settling check, or effect verification. Those physical and
 outcome boundaries remain required after admission.
+
+## Fused permit to sole-writer settlement rehearsal (2026-10-28)
+
+The typed fused permit result can now enter the existing production-shaped
+T=102 runtime rehearsal without callers separating or replacing its permit,
+admission, and lifecycle. The exact decoded T=102 target must be one of the
+reviewed goals, and its frame must match the sole writer, controller session,
+configuration epoch, and encoding profile. The dispatch instant is also the
+final permit-consumption instant, preventing a second caller-controlled clock
+from widening the authority window.
+
+The terminal report now exposes the fused action-admission digest and exact
+review-consumption digest in addition to the permit binding. One modeled write,
+one correlated accepted-once acknowledgment, and consecutive fresh T=1051
+joint samples can close the lifecycle as settled. A crossed target rejects
+before permit consumption or any write attempt. Zero, partial, disconnected,
+unacknowledged, stale, or unsettled outcomes close as failed or uncertain and
+never authorize retry or successor movement.
+
+This remains a hardware-incapable contract rehearsal. Its byte sink cannot open
+a port or reach the controller, its acknowledgment and feedback are supplied
+test evidence, and its physical write count is always zero. Native sole-writer
+transport, authenticated controller feedback, observed physical settling, and
+independent keyboard-effect verification remain separate release gates.

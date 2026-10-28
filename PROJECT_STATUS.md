@@ -267,6 +267,17 @@ reservation closes replay through a reconstructed timestamped receipt and stays
 spent after failed preflight. The increment performs no transport access or
 movement; dispatch, settling, and independent effect evidence remain required.
 
+ARM-159 now carries that typed fused permit result through the existing
+production-shaped T=102 sole-writer and settlement rehearsal. The exact frame,
+writer, controller session, configuration epoch, encoding profile, permit,
+fused action admission, review consumption, dispatch receipt, acknowledgment,
+feedback samples, and terminal lifecycle remain in one transitive chain.
+Crossed goals reject before consumption or write, and every uncertain outcome
+is terminal without retry. The composed sink is still hardware-incapable and
+all acknowledgment and feedback evidence is modeled; native transport,
+authenticated feedback, physical settling, and independent key-effect evidence
+remain unresolved.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled

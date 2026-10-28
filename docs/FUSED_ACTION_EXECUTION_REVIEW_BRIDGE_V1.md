@@ -52,6 +52,26 @@ transport, encode or write a command, move the arm, retry an action, or verify
 an effect. Dispatch, settling, and independent effect verification remain
 downstream requirements.
 
+## Sole-writer and settlement rehearsal
+
+The typed fused permit result can enter the existing production-shaped T=102
+runtime rehearsal without callers separating or replacing its permit,
+admission, and lifecycle. The exact decoded target, sole writer, controller
+session, configuration epoch, and encoding profile are rechecked at the final
+boundary, and the dispatch timestamp is also used to consume the permit.
+
+The terminal execution report explicitly carries the fused action-admission
+digest and review-consumption digest alongside the permit binding. A modeled
+accepted-once acknowledgment and consecutive fresh T=1051 joint samples may
+close the lifecycle as settled. Crossed identities reject before the write
+boundary; zero, partial, ambiguous, unacknowledged, stale, or unsettled results
+are terminal and cannot retry or authorize a successor action.
+
+The rehearsal sink has no serial, socket, callback, or device API. It records
+zero physical writes, does not claim an authentic controller receipt, and does
+not verify the keyboard effect. Native transport, independently acquired
+feedback, physical settling, and effect verification remain downstream gates.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single
@@ -73,3 +93,8 @@ is involved.
 The permit orchestrator is an explicit module import and does not replace the
 legacy permit bridge. Rolling it back removes the fused-only entry point; the
 machine ledger remains append-only, so already reserved reviews stay spent.
+
+The runtime wrapper is also an explicit call. Removing it returns callers to
+the generic hardware-incapable T=102 rehearsal. The optional fused lineage
+fields preserve the legacy report shape and hash when the admission did not
+originate from the fused camera path.
