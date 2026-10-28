@@ -288,6 +288,16 @@ remain available, and transport opens and physical writes stay at zero.
 External authority, native execution, authentic controller feedback, physical
 settling, and independent key-effect evidence remain unresolved.
 
+ARM-161 now commits the existing exclusive native writer claim directly from
+that typed fused result and its exact prepared handoff. The composition rechecks
+the accepted lifecycle, unspent permit, fused review-consumption lineage, frame
+lifetime, and permit lifetime before publishing the immutable claim. Recovery
+then becomes retry-forbidden dispatch uncertainty, while transport-open and
+physical-write counts remain zero, physical authority remains false, and the
+permit remains unspent. External signed authority, native transport, authentic
+controller feedback, physical settling, and independent key-effect evidence
+remain unresolved.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled

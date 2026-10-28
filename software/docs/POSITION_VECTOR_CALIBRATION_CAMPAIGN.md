@@ -2074,3 +2074,17 @@ cancelled and replanned with fresh authority, and both transport-open and
 physical-command-write counts remain zero. External authority and the later
 writer claim must still precede any native attempt; authentic feedback,
 physical settling, and independent key-effect evidence remain unresolved.
+
+## Fused durable native writer claim (2026-10-28)
+
+The fused orchestration path can now commit the exclusive writer claim for its
+exact prepared handoff. Before the immutable claim is published, it rechecks
+the accepted lifecycle, unspent permit, fused action-admission and
+review-consumption lineage, and both command-frame and permit lifetimes.
+
+The claim is the durable ambiguity boundary: recovery becomes retry-forbidden
+dispatch uncertainty and the action may no longer be treated as safely
+cancellable. It does not open a transport, issue a physical command, consume
+the permit, or grant physical authority. External signed authority bound to the
+claim, native transport, authentic feedback, physical settling, and independent
+keyboard-effect evidence remain required.
