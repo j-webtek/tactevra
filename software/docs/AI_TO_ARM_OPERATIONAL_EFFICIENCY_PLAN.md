@@ -1063,6 +1063,20 @@ reduces runtime integration work while preserving the existing sole supervisor,
 single-use, no-automatic-retry contract; transport, movement, and independent
 effect verification remain downstream.
 
+ARM-159 composes the accepted fused permit result with the existing
+production-shaped T=102 sole-writer rehearsal. The adapter accepts the typed
+permit result rather than separately supplied permit, admission, and lifecycle
+objects; uses the dispatch timestamp as the final permit-consumption clock;
+binds the exact T=102 frame to the reviewed goal, controller session,
+configuration epoch, encoding profile, and sole writer; and carries the fused
+action-admission and review-consumption digests into the terminal execution
+report. A modeled accepted-once acknowledgment and fresh ordered T=1051 samples
+can complete the hardware-incapable settlement lifecycle. Zero, partial,
+ambiguous, or unsettled outcomes remain terminal with no retry or follow-on
+motion. This qualifies the composed state and evidence path only: the sink has
+no transport API, all controller receipts are modeled, physical command writes
+remain zero, and independent effect verification is still required.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

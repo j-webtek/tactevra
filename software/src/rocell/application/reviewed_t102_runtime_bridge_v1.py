@@ -343,6 +343,11 @@ def execute_reviewed_t102_runtime_rehearsal_v1(
             "NO_INDEPENDENT_TASK_OUTCOME",
         ],
     }
+    if admission.fused_camera_state_action_review_admission_sha256 is not None:
+        unsigned["fused_camera_state_action_review_admission_sha256"] = (
+            admission.fused_camera_state_action_review_admission_sha256
+        )
+        unsigned["review_consumption_sha256"] = admission.consumption_sha256
     return {**unsigned, "execution_sha256": _sha256(unsigned)}
 
 
