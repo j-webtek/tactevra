@@ -156,7 +156,7 @@ completed capabilities.
 | Conservative route collision evaluation | Robot poses are FK-derived at bounded samples; rigid motion is enclosed by URDF-derived margins, each adjacent pair requires a profile-bound cable envelope, and one exact contact allowance can be bound to a sealed no-write envelope | Synthetic fixtures test clear, collision, crossed-identity, contact-policy, and resource cases; installed engineering evidence and physical qualification still block release |
 | Controller-command preview | Sealed synthetic trajectories can be encoded into Waveshare T=102 bytes and a proposed dispatch schedule | Offline encoding and published schemas are tested; the preview has no transport and sends nothing to the arm |
 | Execution lifecycle rehearsal | Ownership, single-use reservations, fault handling, and restart reconciliation are modeled | Tests exercise no-retry and fault rules without device I/O; this is not an installed live execution service |
-| Reviewed permit bridge | A fused camera-selected single-action review can be consumed once and bound through the existing safety supervisor to an exact-goal motion permit with transitive lineage and hash-chained lifecycle acknowledgments | Portable tests cover replay rejection plus accepted, started, completed, failed, and uncertain records; there is still no controller transport, physical execution, settling, or independent outcome evidence |
+| Reviewed permit bridge | A fused camera-selected single-action review can be consumed once and bound through the existing safety supervisor, durable native handoff, external authority, and production-candidate receipt with transitive lineage | Portable tests use an abstract scripted transport to cover exact terminal evidence, pretransport rejection, and no-replay uncertainty; no concrete transport was invoked, the evidence is not authentic controller evidence, and physical settling and independent outcome evidence remain unresolved |
 | Sole-writer dispatch rehearsal | One-use permit consumption, an exact encoded-write attempt, receipt hashing, and ordered settling checks | The passing fixture is hardware-incapable and in-memory; it does not establish native transport, independently acquired feedback, physical movement, or task outcome |
 | Controller evidence gate | Required controller identity, mapping, protocol, freshness, and review fields are checked | Modeled records test rejection behavior; even a passing record grants no transport or execution authority, and no physical originals were qualified |
 | Installed-controller compatibility | A passive r96 observation is recorded; an offline assessment checks the installed application's command surface | r96 lacks the required generic production command/feedback interface and remains blocked; its identity evidence is not independently qualified |
@@ -306,6 +306,17 @@ lifetimes. Admission leaves the authority and permit unconsumed and creates no
 attempt journal, transport open, or physical write. Durable attempt start,
 single-use consumption, native I/O, authentic feedback, physical settling, and
 independent key-effect evidence remain unresolved.
+
+ARM-163 now composes that exact fused claim and admitted authority with the
+existing durable production-candidate lifecycle. The final wrapper rechecks the
+fused admission, review consumption, permit, claim, frame, wire bytes, endpoint,
+writer, controller session, configuration, encoding, authority lifetime, and
+verification decision before delegating once. The existing sink durably records
+the start before consuming authority and permit, seals every outcome as terminal
+with no replay, and returns a lineage-checked receipt. Tests use only an abstract
+scripted transport: the passing evidence remains settled-but-unqualified and
+does not establish a concrete serial provider, authentic controller feedback,
+physical movement, keyboard effect, or installed-system qualification.
 
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also

@@ -14,6 +14,7 @@ from rocell.application.fused_camera_state_reviewed_motion_permit_v1 import (
     FusedCameraStateReviewedMotionPermitSessionV1,
     admit_fused_camera_state_native_t102_authority_v1,
     claim_fused_camera_state_native_t102_writer_v1,
+    execute_fused_camera_state_native_t102_production_candidate_v1,
     execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1,
     prepare_fused_camera_state_native_t102_handoff_v1,
 )
@@ -21,7 +22,11 @@ import rocell.application.native_t102_production_transport_v1 as production_modu
 from rocell.application.native_t102_production_transport_v1 import (
     ExternalAuthorityVerificationV1,
     ExternalNativeT102AuthorityRecordV1,
+    NativeT102ControllerCaptureV1,
+    NativeT102FeedbackSampleV1,
+    NativeT102ProductionTransportV1,
     PinnedNativeT102EndpointV1,
+    ProductionAttemptRecovery,
 )
 from rocell.application.production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
@@ -188,6 +193,130 @@ def _authority_record(result, frame, journal, endpoint, **changes):
     }
     values.update(changes)
     return ExternalNativeT102AuthorityRecordV1(**values)
+
+
+class _ProductionTransport(NativeT102ProductionTransportV1):
+    """Scripted abstract transport; it owns no port or external handle."""
+
+    def __init__(self, frame, goal, *, fault=None):
+        self.frame = frame
+        self.goal = goal
+        self.fault = fault
+        self._open = self._write = self._capture = self._close = 0
+
+    @property
+    def open_attempts(self):
+        return self._open
+
+    @property
+    def write_attempts(self):
+        return self._write
+
+    @property
+    def capture_attempts(self):
+        return self._capture
+
+    @property
+    def close_attempts(self):
+        return self._close
+
+    def open_once(self, endpoint):
+        if self._open:
+            raise AssertionError("scripted transport reopened")
+        self._open = 1
+        if self.fault == "open":
+            raise OSError("scripted open uncertainty")
+        return endpoint
+
+    def write_once(self, payload):
+        if self._write:
+            raise AssertionError("scripted transport rewrote")
+        self._write = 1
+        if payload != self.frame.wire_bytes:
+            raise AssertionError("crossed scripted payload")
+        if self.fault == "write":
+            raise OSError("scripted write uncertainty")
+        return len(payload)
+
+    def capture_once(self):
+        if self._capture:
+            raise AssertionError("scripted transport recaptured")
+        self._capture = 1
+        if self.fault == "capture":
+            raise OSError("scripted capture uncertainty")
+        samples = tuple(
+            NativeT102FeedbackSampleV1(
+                item["captured_monotonic_ns"], item["response_bytes"]
+            )
+            for item in (
+                _feedback(self.goal, 1_750),
+                _feedback(self.goal, 1_780),
+            )
+        )
+        return NativeT102ControllerCaptureV1(_ack(), samples)
+
+    def close_once(self):
+        if self._close:
+            return
+        self._close = 1
+        if self.fault == "close":
+            raise OSError("scripted close uncertainty")
+
+
+def _production_candidate(
+    context, released_snapshot, tmp_path, monkeypatch, *, fault=None
+):
+    result = _session(context).issue(
+        _supervisor(released_snapshot), **_arguments()
+    )
+    goal, frame, _ = _runtime_frame(context)
+    handoff_root = tmp_path / "handoffs"
+    receipt_root = tmp_path / "receipts"
+    handoff_root.mkdir()
+    receipt_root.mkdir()
+    journal = prepare_fused_camera_state_native_t102_handoff_v1(
+        result,
+        frame,
+        handoff_root,
+        adapter_candidate_sha256=ADAPTER,
+        created_monotonic_ns=1_600,
+    )
+    claim_fused_camera_state_native_t102_writer_v1(
+        result,
+        frame,
+        journal,
+        adapter_candidate_sha256=ADAPTER,
+        claimed_monotonic_ns=1_650,
+    )
+    endpoint = _endpoint()
+    verifier = _AuthorityVerifier()
+    monkeypatch.setattr(production_module, "_machine_verifier", lambda: verifier)
+    monkeypatch.setattr(
+        production_module, "_trusted_monotonic_ns", lambda: 1_700
+    )
+    monkeypatch.setattr(
+        production_module,
+        "_verify_machine_authority_at_sink",
+        lambda record, now: None,
+    )
+    authority = admit_fused_camera_state_native_t102_authority_v1(
+        result,
+        frame,
+        journal,
+        _authority_record(result, frame, journal, endpoint),
+        endpoint,
+        adapter_candidate_sha256=ADAPTER,
+    )
+    return (
+        result,
+        goal,
+        frame,
+        journal,
+        authority,
+        endpoint,
+        receipt_root,
+        _ProductionTransport(frame, goal, fault=fault),
+    )
 
 
 def test_fused_review_issues_one_exact_bound_supervisor_permit(
@@ -661,6 +790,164 @@ def test_external_authority_cannot_outlive_fused_permit_or_frame(
         )
     assert verifier.calls == 0
     assert result.permit.remaining_uses == 1
+
+
+def test_exact_fused_production_candidate_seals_one_terminal_receipt(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    (
+        result,
+        _,
+        frame,
+        handoff,
+        authority,
+        endpoint,
+        receipt_root,
+        transport,
+    ) = _production_candidate(
+        context, released_snapshot, tmp_path, monkeypatch
+    )
+
+    journal, receipt, terminal = (
+        execute_fused_camera_state_native_t102_production_candidate_v1(
+            result,
+            frame,
+            handoff,
+            authority,
+            endpoint,
+            transport,
+            receipt_root,
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_720,
+            assessment_monotonic_ns=1_800,
+            completed_monotonic_ns=1_825,
+        )
+    )
+
+    assert receipt.status == "CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED"
+    assert receipt.claim_sha256 == handoff.snapshot().claim_sha256
+    assert receipt.authority_sha256 == authority.record.signed_payload_sha256
+    assert receipt.endpoint_sha256 == endpoint.endpoint_sha256
+    assert terminal.recovery_disposition is ProductionAttemptRecovery.TERMINAL_NO_REPLAY
+    assert journal.snapshot() == terminal
+    assert (
+        transport.open_attempts,
+        transport.write_attempts,
+        transport.capture_attempts,
+        transport.close_attempts,
+    ) == (1, 1, 1, 1)
+    assert result.permit.remaining_uses == 0
+    assert result.lifecycle.snapshot()["phase"] == "ACCEPTED"
+
+
+def test_crossed_endpoint_rejects_fused_candidate_before_transport(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    (
+        result,
+        _,
+        frame,
+        handoff,
+        authority,
+        _,
+        receipt_root,
+        transport,
+    ) = _production_candidate(
+        context, released_snapshot, tmp_path, monkeypatch
+    )
+    crossed_endpoint = PinnedNativeT102EndpointV1(
+        port_name="COM8",
+        usb_vid="10C4",
+        usb_pid="EA60",
+        usb_serial_number="ARM162UNIT002",
+    )
+
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError,
+        match="does not bind the exact fused writer claim",
+    ):
+        execute_fused_camera_state_native_t102_production_candidate_v1(
+            result,
+            frame,
+            handoff,
+            authority,
+            crossed_endpoint,
+            transport,
+            receipt_root,
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_720,
+            assessment_monotonic_ns=1_800,
+            completed_monotonic_ns=1_825,
+        )
+
+    assert (
+        transport.open_attempts,
+        transport.write_attempts,
+        transport.capture_attempts,
+        transport.close_attempts,
+    ) == (0, 0, 0, 0)
+    assert tuple(receipt_root.iterdir()) == ()
+    assert result.permit.remaining_uses == 1
+
+
+def test_fused_open_uncertainty_is_terminal_and_cannot_replay(
+    context, released_snapshot, tmp_path, monkeypatch,
+) -> None:
+    (
+        result,
+        goal,
+        frame,
+        handoff,
+        authority,
+        endpoint,
+        receipt_root,
+        transport,
+    ) = _production_candidate(
+        context, released_snapshot, tmp_path, monkeypatch, fault="open"
+    )
+
+    journal, receipt, terminal = (
+        execute_fused_camera_state_native_t102_production_candidate_v1(
+            result,
+            frame,
+            handoff,
+            authority,
+            endpoint,
+            transport,
+            receipt_root,
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_720,
+            assessment_monotonic_ns=1_800,
+            completed_monotonic_ns=1_825,
+        )
+    )
+
+    assert receipt.status == "NOT_OPENED_AUTHORITY_CONSUMED_NO_RETRY"
+    assert receipt.error_code == "OPEN_FAILURE"
+    assert terminal.recovery_disposition is ProductionAttemptRecovery.TERMINAL_NO_REPLAY
+    assert journal.snapshot() == terminal
+    assert (transport.open_attempts, transport.write_attempts) == (1, 0)
+    assert result.permit.remaining_uses == 0
+
+    replay_transport = _ProductionTransport(frame, goal)
+    with pytest.raises(
+        FusedCameraStateReviewedMotionPermitError,
+        match="does not bind the exact fused writer claim",
+    ):
+        execute_fused_camera_state_native_t102_production_candidate_v1(
+            result,
+            frame,
+            handoff,
+            authority,
+            endpoint,
+            replay_transport,
+            receipt_root,
+            adapter_candidate_sha256=ADAPTER,
+            started_monotonic_ns=1_730,
+            assessment_monotonic_ns=1_810,
+            completed_monotonic_ns=1_830,
+        )
+    assert replay_transport.open_attempts == 0
 
 
 def test_fused_runtime_write_uncertainty_is_terminal_without_retry(

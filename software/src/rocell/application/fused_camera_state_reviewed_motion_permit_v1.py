@@ -31,9 +31,15 @@ from .native_t102_handoff_journal_v1 import (
 )
 from .native_t102_production_transport_v1 import (
     AdmittedExternalNativeT102AuthorityV1,
+    DurableNativeT102ProductionAttemptV1,
     ExternalNativeT102AuthorityRecordV1,
+    NativeT102ProductionTransportReceiptV1,
+    NativeT102ProductionTransportV1,
     PinnedNativeT102EndpointV1,
+    ProductionAttemptRecovery,
+    ProductionAttemptSnapshotV1,
     admit_external_native_t102_authority_v1,
+    execute_native_t102_production_candidate_v1,
 )
 from .production_controller_runtime_contract_v1 import (
     ProductionControllerRuntimeContractV1,
@@ -429,6 +435,128 @@ def admit_fused_camera_state_native_t102_authority_v1(
     return admitted
 
 
+def execute_fused_camera_state_native_t102_production_candidate_v1(
+    result: FusedCameraStateReviewedMotionPermitResultV1,
+    frame: RuntimeCommandFrameV1,
+    handoff: DurableNativeT102HandoffV1,
+    authority: AdmittedExternalNativeT102AuthorityV1,
+    endpoint: PinnedNativeT102EndpointV1,
+    transport: NativeT102ProductionTransportV1,
+    receipt_root: Path,
+    *,
+    adapter_candidate_sha256: str,
+    started_monotonic_ns: int,
+    assessment_monotonic_ns: int,
+    completed_monotonic_ns: int,
+    settlement_tolerance_rad: float = 0.04,
+) -> tuple[
+    DurableNativeT102ProductionAttemptV1,
+    NativeT102ProductionTransportReceiptV1,
+    ProductionAttemptSnapshotV1,
+]:
+    """Compose one exact fused claim with the durable production candidate.
+
+    This boundary does not select or construct a transport.  It revalidates
+    the complete fused lineage and then delegates once to the existing native
+    production lifecycle, which owns durable start, single-use consumption,
+    abstract transport access, and terminal no-replay recording.
+    """
+
+    if not isinstance(result, FusedCameraStateReviewedMotionPermitResultV1):
+        raise TypeError(
+            "result must be a FusedCameraStateReviewedMotionPermitResultV1"
+        )
+    if not isinstance(frame, RuntimeCommandFrameV1):
+        raise TypeError("frame must be a RuntimeCommandFrameV1")
+    if not isinstance(handoff, DurableNativeT102HandoffV1):
+        raise TypeError("handoff must be a DurableNativeT102HandoffV1")
+    if not isinstance(authority, AdmittedExternalNativeT102AuthorityV1):
+        raise TypeError("authority must be admitted externally")
+    if not isinstance(endpoint, PinnedNativeT102EndpointV1):
+        raise TypeError("endpoint must be a PinnedNativeT102EndpointV1")
+    if not isinstance(transport, NativeT102ProductionTransportV1):
+        raise TypeError("transport must implement NativeT102ProductionTransportV1")
+
+    started = _positive_ns(started_monotonic_ns, "started_monotonic_ns")
+    fused_digest = (
+        result.admission.fused_camera_state_action_review_admission_sha256
+    )
+    permit_expiry_ns = round(
+        result.admission.permit_expires_at_monotonic * 1_000_000_000
+    )
+    snapshot = handoff.verify_claimed_inputs(
+        frame,
+        result.admission,
+        adapter_candidate_sha256=adapter_candidate_sha256,
+        now_monotonic_ns=started,
+    )
+    record = authority.record
+    verification = authority.verification
+    if (
+        result.lifecycle.snapshot().get("phase") != "ACCEPTED"
+        or result.permit.remaining_uses != 1
+        or fused_digest is None
+        or snapshot.phase is not NativeT102HandoffPhase.WRITER_CLAIMED
+        or snapshot.claim_sha256 is None
+        or snapshot.fused_camera_state_action_review_admission_sha256
+        != fused_digest
+        or snapshot.review_consumption_sha256
+        != result.admission.consumption_sha256
+        or record.review_sha256 != result.admission.review_sha256
+        or record.claim_sha256 != snapshot.claim_sha256
+        or record.frame_sha256 != frame.frame_sha256
+        or record.wire_bytes_sha256 != frame.wire_bytes_sha256
+        or record.endpoint_sha256 != endpoint.endpoint_sha256
+        or record.writer_instance_id != frame.writer_instance_id
+        or record.controller_session_id != frame.controller_session_id
+        or record.configuration_epoch_sha256
+        != frame.configuration_epoch_sha256
+        or record.encoding_profile_sha256 != frame.encoding_profile_sha256
+        or record.expires_monotonic_ns > frame.expires_monotonic_ns
+        or record.expires_monotonic_ns > permit_expiry_ns
+        or verification.approved is not True
+        or verification.decision_code != "APPROVED_EXACT_SINGLE_ACTION"
+        or verification.signed_payload_sha256 != record.signed_payload_sha256
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "production candidate does not bind the exact fused writer claim"
+        )
+
+    journal, receipt, terminal = execute_native_t102_production_candidate_v1(
+        receipt_root,
+        handoff,
+        frame,
+        result.admission,
+        authority,
+        endpoint,
+        transport,
+        motion_permit=result.permit,
+        adapter_candidate_sha256=adapter_candidate_sha256,
+        started_monotonic_ns=started,
+        assessment_monotonic_ns=assessment_monotonic_ns,
+        completed_monotonic_ns=completed_monotonic_ns,
+        settlement_tolerance_rad=settlement_tolerance_rad,
+    )
+    if (
+        result.permit.remaining_uses != 0
+        or result.lifecycle.snapshot().get("phase") != "ACCEPTED"
+        or receipt.authority_sha256 != record.signed_payload_sha256
+        or receipt.verification_sha256 != verification.verification_sha256
+        or receipt.claim_sha256 != snapshot.claim_sha256
+        or receipt.prepared_sha256 != snapshot.prepared_sha256
+        or receipt.frame_sha256 != frame.frame_sha256
+        or receipt.wire_bytes_sha256 != frame.wire_bytes_sha256
+        or receipt.endpoint_sha256 != endpoint.endpoint_sha256
+        or terminal.recovery_disposition
+        is not ProductionAttemptRecovery.TERMINAL_NO_REPLAY
+        or journal.snapshot() != terminal
+    ):
+        raise FusedCameraStateReviewedMotionPermitError(
+            "terminal production candidate did not preserve fused lineage"
+        )
+    return journal, receipt, terminal
+
+
 def execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1(
     result: FusedCameraStateReviewedMotionPermitResultV1,
     frame: RuntimeCommandFrameV1,
@@ -501,6 +629,7 @@ __all__ = [
     "FusedCameraStateReviewedMotionPermitError",
     "FusedCameraStateReviewedMotionPermitResultV1",
     "FusedCameraStateReviewedMotionPermitSessionV1",
+    "execute_fused_camera_state_native_t102_production_candidate_v1",
     "execute_fused_camera_state_reviewed_t102_runtime_rehearsal_v1",
     "prepare_fused_camera_state_native_t102_handoff_v1",
 ]
