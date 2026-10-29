@@ -1119,6 +1119,16 @@ They do not invoke a concrete provider; their evidence is explicitly
 unqualified and does not prove authentic controller feedback, physical motion,
 installed settling, or an independent keyboard effect.
 
+ARM-164 closes the source-level provider-composition seam by running that full
+fused wrapper through `WindowsNativeT102SerialTransportV1`. An injected
+in-memory serial backend and pinned inventory exercise the provider's real
+grant, endpoint-identity, canonical-write, feedback-request, bounded-read, and
+one-shot close logic. The test verifies one exact T=102 write, two T=105
+requests, terminal no-replay state, and permit consumption without importing a
+default serial backend or opening an OS device. This does not promote the
+provider: qualification, authentic controller evidence, physical movement,
+settling, and independent keyboard-effect evidence remain false or unresolved.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact

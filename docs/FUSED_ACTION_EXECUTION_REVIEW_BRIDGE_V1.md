@@ -143,6 +143,23 @@ keyboard effect. The existing reviewed lifecycle remains `ACCEPTED` because its
 event contract accepts rehearsal dispatch receipts, not native production
 receipts; the durable native terminal snapshot is authoritative for this path.
 
+## Windows provider composition evidence
+
+The repository now exercises this fused wrapper through the actual
+`WindowsNativeT102SerialTransportV1` class. The test supplies an in-memory
+pyserial-shaped connection and exact pinned inventory, so the provider runs its
+normal endpoint verification, execution-grant, canonical T=102, quiescent
+buffer, bounded read, T=105 request, and one-shot counter logic without loading
+pyserial or reaching an OS device.
+
+The composed fixture observes one open, one exact T=102 write, two exact T=105
+requests, two settled T=1051 samples, and one close. It also verifies durable
+terminal/no-replay state and single-use permit consumption. This is source-level
+composition evidence only: the resulting receipt keeps
+`transport_implementation_qualified`, `authentic_controller_receipt_claimed`,
+and `physical_movement_verified` false. Installed transport qualification and
+independently acquired controller and keyboard-effect evidence remain required.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single
