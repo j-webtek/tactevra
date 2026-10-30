@@ -1201,3 +1201,13 @@ exchange materializes the already pinned packet, a hash-bound reviewer
 procedure, and a canonical manifest without adding a decision or any endpoint,
 transport, execution, hardware, or physical authority. Logical-byte,
 duplicate-byte, and reduction limits remain unchanged.
+
+The current-provider returned-decision intake increment adds six governed
+paths: one closed decision module, two strict JSON schemas, one offline intake
+command, and two focused unit-test modules. The reviewed file-count ceiling
+advances from 6,652 to the exact expected 6,658 files. It retains exact packet,
+manifest, commit, provider-source, checklist, provenance, and expiry bindings
+while keeping synthetic evidence quarantined. Acceptance grants only eligibility
+for a later read-only endpoint qualification intake; no endpoint, transport,
+execution, hardware, or physical authority is added. Logical-byte,
+duplicate-byte, and reduction limits remain unchanged.

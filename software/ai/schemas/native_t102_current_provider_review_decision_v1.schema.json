@@ -1,0 +1,377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/native_t102_current_provider_review_decision_v1.schema.json",
+  "title": "RoCell external ARM-165 current-provider review decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "decision_id",
+    "reviewer_id",
+    "reviewer_affiliation",
+    "reviewer_attestation_sha256",
+    "review_started_utc",
+    "review_completed_utc",
+    "decision_valid_until_utc",
+    "reviewed_packet_sha256",
+    "reviewed_manifest_sha256",
+    "reviewed_candidate_commit",
+    "reviewed_provider_source_sha256",
+    "evidence_origin",
+    "reviewed_packet_status",
+    "reviewer_independence_asserted",
+    "reviewer_was_implementation_author",
+    "checks",
+    "findings",
+    "disposition",
+    "endpoint_open_authorized",
+    "controller_start_authorized",
+    "execution_authorized",
+    "physical_authority",
+    "decision_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "rocell.native_t102_current_provider_review_decision.v1"
+    },
+    "decision_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "reviewer_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "reviewer_affiliation": {
+      "$ref": "#/$defs/identifier"
+    },
+    "reviewer_attestation_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "review_started_utc": {
+      "$ref": "#/$defs/utc"
+    },
+    "review_completed_utc": {
+      "$ref": "#/$defs/utc"
+    },
+    "decision_valid_until_utc": {
+      "$ref": "#/$defs/utc"
+    },
+    "reviewed_packet_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "reviewed_manifest_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "reviewed_candidate_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "evidence_origin": {
+      "enum": [
+        "EXTERNAL_INDEPENDENT",
+        "SYNTHETIC_TEST_ONLY"
+      ]
+    },
+    "reviewed_packet_status": {
+      "const": "AWAITING_EXTERNAL_INDEPENDENT_REVIEW"
+    },
+    "reviewer_independence_asserted": {
+      "type": "boolean"
+    },
+    "reviewer_was_implementation_author": {
+      "type": "boolean"
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/check00"
+        },
+        {
+          "$ref": "#/$defs/check01"
+        },
+        {
+          "$ref": "#/$defs/check02"
+        },
+        {
+          "$ref": "#/$defs/check03"
+        },
+        {
+          "$ref": "#/$defs/check04"
+        },
+        {
+          "$ref": "#/$defs/check05"
+        },
+        {
+          "$ref": "#/$defs/check06"
+        },
+        {
+          "$ref": "#/$defs/check07"
+        },
+        {
+          "$ref": "#/$defs/check08"
+        },
+        {
+          "$ref": "#/$defs/check09"
+        },
+        {
+          "$ref": "#/$defs/check10"
+        },
+        {
+          "$ref": "#/$defs/check11"
+        },
+        {
+          "$ref": "#/$defs/check12"
+        }
+      ],
+      "items": false
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    },
+    "disposition": {
+      "enum": [
+        "INDEPENDENTLY_APPROVED",
+        "REJECTED"
+      ]
+    },
+    "endpoint_open_authorized": {
+      "const": false
+    },
+    "controller_start_authorized": {
+      "const": false
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "physical_authority": {
+      "const": false
+    },
+    "decision_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "reviewed_provider_source_sha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,191}$"
+    },
+    "utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "passed"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string"
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "check00": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "closed_packet_membership"
+            }
+          }
+        }
+      ]
+    },
+    "check01": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "member_hashes"
+            }
+          }
+        }
+      ]
+    },
+    "check02": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "current_provider_source_inspection"
+            }
+          }
+        }
+      ]
+    },
+    "check03": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "execution_grant_required_before_open"
+            }
+          }
+        }
+      ]
+    },
+    "check04": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "grant_binds_endpoint_and_canonical_t102_bytes"
+            }
+          }
+        }
+      ]
+    },
+    "check05": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "grant_consumed_before_movement_write"
+            }
+          }
+        }
+      ]
+    },
+    "check06": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "pre_post_open_identity"
+            }
+          }
+        }
+      ]
+    },
+    "check07": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "serial_settings_and_timeouts"
+            }
+          }
+        }
+      ]
+    },
+    "check08": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "single_t102_write"
+            }
+          }
+        }
+      ]
+    },
+    "check09": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "bounded_t1021_t1051_capture"
+            }
+          }
+        }
+      ]
+    },
+    "check10": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "no_fallback_reopen_resend_purge_retry"
+            }
+          }
+        }
+      ]
+    },
+    "check11": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "fused_durable_start_authority_permit_consumption_and_terminal_no_replay"
+            }
+          }
+        }
+      ]
+    },
+    "check12": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/check"
+        },
+        {
+          "properties": {
+            "check_id": {
+              "const": "unqualified_flags_retained"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

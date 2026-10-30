@@ -344,6 +344,20 @@ ARM-054 decision schema remains excluded because its identities bind another
 candidate. External review, returned-decision intake, transport qualification,
 endpoint access, execution, and physical authority remain unresolved.
 
+ARM-167 adds the strict returned-decision boundary for that current-provider
+packet without modifying the historical ARM-054 intake. The closed decision
+schema binds the exact packet, packet manifest, candidate commit, and provider
+source, and requires all 13 current lifecycle checks in order. The offline
+intake rejects duplicate fields, oversized or mutable inputs, invalid hashes,
+expired decisions, incomplete checks, implementation-author conflicts, and
+synthetic evidence presented as independent. A valid external decision becomes
+eligible only for later read-only endpoint qualification intake; it opens no
+endpoint, starts no controller, performs no hardware I/O, and grants no
+execution or physical authority. Reviewer authentication and custody remain an
+external responsibility.
+The governed hardware-free matrix passes 1,087 tests with ARM-167 included;
+six Windows symlink cases are skipped where symlink creation is unavailable.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled

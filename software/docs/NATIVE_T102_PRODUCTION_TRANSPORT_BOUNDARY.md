@@ -110,6 +110,12 @@ ARM-166 adds the offline exchange command that materializes that exact packet,
 a hash-bound reviewer procedure, and a canonical exchange manifest in a new
 directory. The builder refuses overwrite and keeps every qualification,
 endpoint, execution, hardware, and physical-authority claim false.
+ARM-167 adds a separate strict decision contract and offline intake for that
+current packet. It binds the packet, packet manifest, candidate commit, provider
+source, reviewer assertions, validity window, and all 13 current lifecycle
+checks. Synthetic decisions remain rehearsal-only. Even an accepted external
+decision grants only eligibility for a later read-only endpoint qualification
+intake and cannot open an endpoint or authorize execution.
 It is not composed with an authority issuer, CLI command, startup service, or
 physical test path. Therefore the passing outcome remains
 named `CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED`: it proves the
@@ -157,8 +163,23 @@ and the canonical exchange-manifest SHA-256 is
 `146dc2135cdb97c8bb04602f09a0de9f8d24a96551c52e64ca9fd20cceafdb54`.
 
 An external independent reviewer must assess the exact ARM-165 packet and issue
-a separately authenticated decision. Only that decision may feed the existing
-owner-acceptance and read-only endpoint qualification chain. Qualification must:
+a separately authenticated decision. Retain that returned JSON unchanged, then
+assess it offline into a new directory:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/assess_current_native_t102_provider_review_decision.py `
+  <returned-decision.json> <new-assessment-directory> `
+  --assessment-utc <whole-second-UTC>
+```
+
+The command refuses overwrite, symlinks, duplicate JSON fields, oversized input,
+identity drift, incomplete checks, expired decisions, and synthetic evidence as
+independent proof. It retains the normalized decision, assessment report, and
+intake summary. JSON content cannot itself authenticate the reviewer or prove
+custody; those controls remain external. Only an accepted, separately
+authenticated decision may feed the existing owner-acceptance and read-only
+endpoint qualification chain. Qualification must:
 
 - resolve and re-read the exact endpoint identity after obtaining exclusive
   ownership;
