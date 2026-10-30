@@ -101,6 +101,11 @@ candidate under `software/native/review/arm054-candidate/`. The current serial
 provider has since gained an execution-grant gate and is deliberately rejected
 by that historical verification; it needs fresh independent review before
 physical qualification.
+ARM-165 supplies a new deterministic review packet that pins the current
+execution-grant-aware provider, its direct tests, native and fused composition
+tests, and a closed boundary checklist. Any changed candidate byte is
+rejected until the packet is explicitly refreshed. This closes the stale-packet
+gap but does not complete or impersonate the required independent review.
 It is not composed with an authority issuer, CLI command, startup service, or
 physical test path. Therefore the passing outcome remains
 named `CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED`: it proves the
@@ -126,8 +131,9 @@ lifecycle.
 
 ## Next reviewable increment
 
-The ARM-054 adapter must be independently reviewed and physically qualified.
-Qualification must:
+An external independent reviewer must assess the exact ARM-165 packet and issue
+a separately authenticated decision. Only that decision may feed the existing
+owner-acceptance and read-only endpoint qualification chain. Qualification must:
 
 - resolve and re-read the exact endpoint identity after obtaining exclusive
   ownership;

@@ -327,6 +327,15 @@ reachable in the test. The receipt deliberately keeps transport qualification,
 authentic-controller, and physical-movement claims false, so installed provider
 qualification and independently captured outcome evidence remain required.
 
+ARM-165 refreshes the independent-review handoff for that current provider.
+The closed deterministic packet pins the execution-grant-aware provider, its
+direct unit tests, the native and fused composition tests, and both transport
+review boundaries at merge commit `9f64afd2`. Any changed byte requires an
+explicit packet refresh. Its offline verification records 40 focused tests and
+14 GitHub checks while fixing endpoint opens, OS handles, hardware writes, and
+physical movements at zero. The packet remains awaiting an external independent
+review and cannot claim transport qualification or authorize execution.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled

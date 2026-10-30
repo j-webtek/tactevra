@@ -2140,3 +2140,17 @@ receipt. The receipt continues to state that the transport implementation is
 unqualified, controller evidence is unauthenticated, and physical movement is
 unverified. Installed provider qualification and independently captured
 controller, settling, and key-effect evidence remain downstream dependencies.
+
+## Current Windows provider review packet (2026-10-30)
+
+ARM-165 refreshes the independent-review subject after the Windows provider's
+execution-grant change. The deterministic packet pins the exact provider,
+direct unit coverage, native and fused composition coverage, and both transport
+review boundaries at commit `9f64afd2e6976624ff380c3770413a44c64a41c0`.
+It rejects any changed member byte and requires a separate authenticated external
+review.
+
+Retained verification is limited to 40 focused offline passes and 14 GitHub
+checks. Endpoint opens, OS device handles, hardware writes, and physical
+movements remain zero. The packet grants no endpoint, execution, transport, or
+physical authority and does not satisfy installed provider qualification.
