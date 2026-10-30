@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/native_t102_current_provider_review_decision_report_v1.schema.json",
+  "title": "RoCell ARM-165 current-provider review decision assessment v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "decision_sha256",
+    "assessment_utc",
+    "blockers",
+    "ready_for_read_only_endpoint_qualification_intake",
+    "synthetic_rehearsal_ready",
+    "endpoint_open_authorized",
+    "controller_start_authorized",
+    "execution_authorized",
+    "hardware_access",
+    "physical_authority",
+    "report_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "rocell.native_t102_current_provider_review_decision_report.v1"
+    },
+    "status": {
+      "enum": [
+        "BLOCKED",
+        "INDEPENDENT_REVIEW_ACCEPTED",
+        "SYNTHETIC_REHEARSAL_ACCEPTED"
+      ]
+    },
+    "decision_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "assessment_utc": {
+      "$ref": "#/$defs/utc"
+    },
+    "blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "SYNTHETIC_EVIDENCE_NOT_INDEPENDENT",
+          "DECISION_NOT_APPROVED",
+          "PACKET_IDENTITY_MISMATCH",
+          "MANIFEST_IDENTITY_MISMATCH",
+          "CANDIDATE_COMMIT_MISMATCH",
+          "PROVIDER_SOURCE_IDENTITY_MISMATCH",
+          "INDEPENDENCE_NOT_ASSERTED",
+          "IMPLEMENTATION_AUTHOR_CONFLICT",
+          "CHECKLIST_INCOMPLETE",
+          "APPROVAL_HAS_OPEN_FINDINGS",
+          "ASSESSMENT_PREDATES_REVIEW",
+          "DECISION_EXPIRED"
+        ]
+      }
+    },
+    "ready_for_read_only_endpoint_qualification_intake": {
+      "type": "boolean"
+    },
+    "synthetic_rehearsal_ready": {
+      "type": "boolean"
+    },
+    "endpoint_open_authorized": {
+      "const": false
+    },
+    "controller_start_authorized": {
+      "const": false
+    },
+    "execution_authorized": {
+      "const": false
+    },
+    "hardware_access": {
+      "const": false
+    },
+    "physical_authority": {
+      "const": false
+    },
+    "report_sha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    }
+  }
+}

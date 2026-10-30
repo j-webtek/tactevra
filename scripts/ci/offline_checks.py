@@ -43,6 +43,8 @@ TESTS = (
     "software/tests/unit/test_native_t102_adapter_review_packet_v1.py",
     "software/tests/unit/test_native_t102_current_provider_review_packet_v1.py",
     "software/tests/unit/test_build_current_native_t102_provider_review_exchange.py",
+    "software/tests/unit/test_native_t102_current_provider_review_decision_v1.py",
+    "software/tests/unit/test_current_native_t102_provider_review_decision_intake.py",
     "software/tests/unit/test_native_t102_adapter_review_decision_v1.py",
     "software/tests/unit/test_arm054_adapter_review_exchange_cli.py",
     "software/tests/unit/test_native_t102_owner_ai_review_acceptance_v1.py",
