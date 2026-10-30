@@ -106,6 +106,10 @@ execution-grant-aware provider, its direct tests, native and fused composition
 tests, and a closed boundary checklist. Any changed candidate byte is
 rejected until the packet is explicitly refreshed. This closes the stale-packet
 gap but does not complete or impersonate the required independent review.
+ARM-166 adds the offline exchange command that materializes that exact packet,
+a hash-bound reviewer procedure, and a canonical exchange manifest in a new
+directory. The builder refuses overwrite and keeps every qualification,
+endpoint, execution, hardware, and physical-authority claim false.
 It is not composed with an authority issuer, CLI command, startup service, or
 physical test path. Therefore the passing outcome remains
 named `CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED`: it proves the
@@ -130,6 +134,27 @@ screening, trajectory sealing, T=102 encoding, and this final transport
 lifecycle.
 
 ## Next reviewable increment
+
+Build a fresh exchange directory from the repository root:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/build_current_native_t102_provider_review_exchange.py `
+  <new-output-directory>
+```
+
+The directory contains no decision and must be transferred unchanged. The
+reviewer returns a separately authenticated decision through an independently
+controlled channel. The historical ARM-054 decision schema must not be reused
+because it is bound to a different packet, manifest, commit, and provider
+source hash.
+
+For the exact ARM-165 candidate, the deterministic packet SHA-256 is
+`0cd3f42229efcd3ec54d9470e7bce5114aa7eed3570a13f9edb41c81df11e764`,
+its packet-manifest SHA-256 is
+`2bc394a5c0c9ef255251945cdc36c8938cb2a8fd7d7518fcb913994c51e7f54b`,
+and the canonical exchange-manifest SHA-256 is
+`146dc2135cdb97c8bb04602f09a0de9f8d24a96551c52e64ca9fd20cceafdb54`.
 
 An external independent reviewer must assess the exact ARM-165 packet and issue
 a separately authenticated decision. Only that decision may feed the existing
