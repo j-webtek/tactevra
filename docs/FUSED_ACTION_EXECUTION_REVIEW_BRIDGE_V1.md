@@ -160,6 +160,15 @@ composition evidence only: the resulting receipt keeps
 and `physical_movement_verified` false. Installed transport qualification and
 independently acquired controller and keyboard-effect evidence remain required.
 
+ARM-165 makes this current composition reviewable without promoting it. A
+deterministic closed packet pins the exact Windows provider, its direct tests,
+this fused composition test, and the applicable transport boundaries at commit
+`9f64afd2`. Offline verification records 40 focused passes and 14 GitHub checks
+with zero endpoint opens, device handles, hardware writes, or movements. Any
+candidate-byte change invalidates the packet. The result remains awaiting an
+external independent review and keeps all transport, execution, and physical
+authority claims false.
+
 ## Compatibility and migration
 
 The schema addition is optional. Existing callers may continue to build single

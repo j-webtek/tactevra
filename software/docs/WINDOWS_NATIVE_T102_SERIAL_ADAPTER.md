@@ -43,6 +43,21 @@ joint samples within the declared settlement tolerance.
 - malformed, truncated, overlong, reset-banner, wrong-type, or timed-out
   responses fail the attempt.
 
+## Current-provider review packet
+
+The historical ARM-054 review archive predates the execution-grant gate and is
+retained only as historical evidence. ARM-165 adds a deterministic packet for
+the current provider at commit `9f64afd2e6976624ff380c3770413a44c64a41c0`.
+It binds the current provider source plus direct, native-composition, and fused
+composition tests. Its closed instructions identify the transport boundaries.
+The independent review checklist explicitly covers the sink-issued execution grant, exact
+endpoint/payload consumption, and the fused durable no-replay lifecycle.
+
+The packet is review input only. Its verification is offline, opens no endpoint,
+uses no OS device handle, writes no hardware command, and leaves independent
+review, transport qualification, execution authority, and physical authority
+false.
+
 ## Deliberate non-claims
 
 Offline tests use a memory-only pyserial-shaped fixture. They prove adapter

@@ -1129,6 +1129,15 @@ default serial backend or opening an OS device. This does not promote the
 provider: qualification, authentic controller evidence, physical movement,
 settling, and independent keyboard-effect evidence remain false or unresolved.
 
+ARM-165 removes the stale-review-packet blocker created when the Windows
+provider gained its execution-grant gate. A deterministic packet now pins the
+current provider, direct and composed tests, fused lifecycle test, and a closed
+transport review checklist at the ARM-164 merge. The packet rejects changed
+bytes and cannot promote offline evidence: independent review, transport qualification, endpoint
+authority, execution authority, and physical authority remain false. This gives
+the external reviewer an exact current subject before any installed-system
+qualification is considered.
+
 ## Completion definition
 
 This plan is complete only when the supported AI path can produce an exact
