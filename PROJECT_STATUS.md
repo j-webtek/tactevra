@@ -336,6 +336,14 @@ explicit packet refresh. Its offline verification records 40 focused tests and
 physical movements at zero. The packet remains awaiting an external independent
 review and cannot claim transport qualification or authorize execution.
 
+ARM-166 makes that review input transferable without changing its authority.
+The deterministic offline exchange contains the exact ARM-165 packet, a
+hash-bound closed reviewer procedure, and a canonical manifest; it refuses to
+overwrite an existing directory and contains no review decision. The obsolete
+ARM-054 decision schema remains excluded because its identities bind another
+candidate. External review, returned-decision intake, transport qualification,
+endpoint access, execution, and physical authority remain unresolved.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled
