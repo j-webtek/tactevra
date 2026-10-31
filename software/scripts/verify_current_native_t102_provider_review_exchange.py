@@ -101,10 +101,20 @@ def _read_closed_directory(exchange_dir: Path) -> dict[str, bytes]:
     return payloads
 
 
-def verify(exchange_dir: Path) -> dict[str, Any]:
-    """Verify the closed exchange and packet without extracting or executing."""
+def verify_payloads(payloads: dict[str, bytes]) -> dict[str, Any]:
+    """Verify exact in-memory exchange members without writing or executing."""
 
-    payloads = _read_closed_directory(exchange_dir)
+    if set(payloads) != set(MEMBERS):
+        raise CurrentNativeT102ProviderReviewExchangeError(
+            "exchange payload membership differs")
+    if any(
+        type(payload) is not bytes
+        or not payload
+        or len(payload) > MAX_MEMBER_BYTES
+        for payload in payloads.values()
+    ):
+        raise CurrentNativeT102ProviderReviewExchangeError(
+            "exchange payload member size or type is invalid")
     manifest_bytes = payloads[MANIFEST_NAME]
     manifest = _strict_json(manifest_bytes)
     if manifest_bytes != _canonical(manifest):
@@ -168,6 +178,12 @@ def verify(exchange_dir: Path) -> dict[str, Any]:
         "hardware_access": False,
         "physical_authority": False,
     }
+
+
+def verify(exchange_dir: Path) -> dict[str, Any]:
+    """Verify the closed exchange and packet without extracting or executing."""
+
+    return verify_payloads(_read_closed_directory(exchange_dir))
 
 
 def main() -> int:
