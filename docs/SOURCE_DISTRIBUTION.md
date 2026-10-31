@@ -1249,3 +1249,13 @@ owner's decision that human review is not required for the owner-governed path.
 The stricter external-review route remains intact. Endpoint-open, controller-
 start, transport-write, execution, hardware, and physical authority remain
 false; logical-byte, duplicate-byte, and reduction limits remain unchanged.
+
+The owner-governed current-provider read-only-intake increment adds five
+governed paths: one hardware-incapable intake module, one strict JSON schema,
+one retained-record builder, one retained intake, and one focused unit-test
+module. The reviewed file-count ceiling advances from 6,672 to the exact
+expected 6,677 files. It binds the exact ARM-171 acceptance to historical
+zero-I/O checkpoint evidence and one pinned endpoint while requiring later
+pre/post-open live identity verification. It enumerates and opens no port and
+adds no endpoint, transport, execution, hardware, or physical authority;
+logical-byte, duplicate-byte, and reduction limits remain unchanged.
