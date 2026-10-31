@@ -1220,3 +1220,11 @@ valid independent decision to one exact endpoint and a passive zero-write plan
 without enumerating or opening a port. Endpoint-open, controller-start,
 transport-write, execution, hardware, and physical authority remain false;
 logical-byte, duplicate-byte, and reduction limits remain unchanged.
+
+The current-provider exchange-verification increment adds two governed paths:
+one recipient-side zero-I/O verifier and one focused unit-test module. The
+reviewed file-count ceiling advances from 6,663 to the exact expected 6,665
+files. It verifies the exact closed exchange, canonical manifest, member hashes,
+and embedded packet without extracting files or creating a review decision.
+Endpoint, execution, hardware, and physical authority remain false; all byte,
+duplicate, and reduction limits remain unchanged.

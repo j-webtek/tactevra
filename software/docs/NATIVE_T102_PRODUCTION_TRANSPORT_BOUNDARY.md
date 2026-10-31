@@ -163,6 +163,21 @@ controlled channel. The historical ARM-054 decision schema must not be reused
 because it is bound to a different packet, manifest, commit, and provider
 source hash.
 
+Before review, the recipient can verify the transferred directory without
+extracting its packet or creating any output:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/verify_current_native_t102_provider_review_exchange.py `
+  <transferred-exchange-directory>
+```
+
+The ARM-169 verifier requires the exact closed exchange membership, canonical
+manifest bytes, pinned manifest and member hashes, and a valid closed ARM-165
+packet. A pass means only that the review input is byte-identical and
+authority-free; it does not authenticate the recipient, complete the review,
+or authorize endpoint access.
+
 For the exact ARM-165 candidate, the deterministic packet SHA-256 is
 `0cd3f42229efcd3ec54d9470e7bce5114aa7eed3570a13f9edb41c81df11e764`,
 its packet-manifest SHA-256 is

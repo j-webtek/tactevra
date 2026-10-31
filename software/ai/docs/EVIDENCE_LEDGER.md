@@ -8693,3 +8693,35 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: retain real reviewed installed-profile evidence and a fresh
   authenticated read-only start, produce the exact outer handoff, and run this
   admission on the selected native runner before the separate replay process.
+
+### E-20261031-ARM-169 — recipient verifies current-provider review exchange
+
+- Stage: S4
+- Lane: ARM
+- Change: added a standalone recipient-side verifier for the deterministic
+  ARM-166 current-provider review exchange. It requires exact directory
+  membership, regular non-symlink files, bounded member sizes, strict canonical
+  JSON, the pinned exchange-manifest digest, exact procedure and packet member
+  identities, and a successful closed inspection of the embedded ARM-165
+  packet.
+- Result: the verifier accepts the unchanged materialized exchange and rejects
+  changed procedure or packet bytes, noncanonical or duplicate-field manifests,
+  extra files, and directory symlinks. It performs no extraction and writes no
+  output.
+- Artifacts:
+  `software/scripts/verify_current_native_t102_provider_review_exchange.py`
+  and
+  `software/tests/unit/test_verify_current_native_t102_provider_review_exchange.py`.
+- Focused verification: 7 exchange build/verification tests passed; one Windows
+  directory-symlink case was skipped where symlink creation is unavailable.
+- Evidence status: deterministic repository and filesystem evidence only. The
+  pass proves unchanged review input, not reviewer identity, custody,
+  independence, or a review decision.
+- Hardware writes: 0
+- Physical movements: 0
+- Limitations: no external decision is present. Endpoint open, controller
+  start, execution, transport qualification, hardware access, and physical
+  authority remain false.
+- Next dependency: an independent non-author reviewer verifies the exchange,
+  completes the closed review, and returns a separately authenticated ARM-167
+  decision through an independently controlled channel.
