@@ -176,6 +176,14 @@ read-only endpoint-qualification intake. It preserves that no human review or
 external independence is claimed. Read-only intake eligibility is not endpoint
 open authority: controller startup, transport writes, execution, hardware
 access, and physical authority remain false.
+The [current-provider read-only endpoint intake](native_t102_current_provider_read_only_intake_v1.schema.json)
+is the successor boundary for the exact ARM-165/ARM-167 review subject. It
+requires a currently valid independently accepted decision and binds that
+decision, its assessment, reviewer attestation, current provider identities,
+one pinned endpoint, and a finite passive-read plan. It performs no discovery
+or I/O and fixes all writes, active requests, movement, torque, retries,
+fallback, purges, and control-line assertions at zero. Read-only endpoint
+access still requires later separate authorization naming the intake hash.
 The [read-only endpoint intake](native_t102_read_only_endpoint_intake_v1.schema.json)
 binds that exact acceptance to one explicitly pinned serial identity and one
 bounded passive observation plan. It is a hardware-incapable prerequisite

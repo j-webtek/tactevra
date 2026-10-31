@@ -1211,3 +1211,12 @@ while keeping synthetic evidence quarantined. Acceptance grants only eligibility
 for a later read-only endpoint qualification intake; no endpoint, transport,
 execution, hardware, or physical authority is added. Logical-byte,
 duplicate-byte, and reduction limits remain unchanged.
+
+The current-provider read-only endpoint-intake increment adds five governed
+paths: one hardware-incapable intake module, one strict JSON schema, one offline
+builder, and two focused unit-test modules. The reviewed file-count ceiling
+advances from 6,658 to the exact expected 6,663 files. It binds a currently
+valid independent decision to one exact endpoint and a passive zero-write plan
+without enumerating or opening a port. Endpoint-open, controller-start,
+transport-write, execution, hardware, and physical authority remain false;
+logical-byte, duplicate-byte, and reduction limits remain unchanged.

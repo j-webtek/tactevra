@@ -358,6 +358,19 @@ external responsibility.
 The governed hardware-free matrix passes 1,087 tests with ARM-167 included;
 six Windows symlink cases are skipped where symlink creation is unavailable.
 
+ARM-168 adds the hardware-incapable bridge from one currently valid ARM-167
+independent decision to one pinned endpoint and one closed passive observation
+plan. The intake reassesses the exact decision at creation time, rejects
+synthetic, blocked, or expired decisions, and binds the packet, manifest,
+candidate commit, provider source, reviewer attestation, endpoint identity,
+and finite read limits. Its policy fixes transport writes, active requests,
+movement, torque, retries, fallback, purges, and control-line assertions at
+zero. A successful record is ready only for a later, separately authorized
+read-only endpoint observation; it neither enumerates nor opens a port and
+grants no controller, transport, execution, hardware, or physical authority.
+The governed hardware-free matrix passes 1,103 tests with ARM-168 included;
+the same six Windows symlink cases remain skipped where creation is unavailable.
+
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
 models conservative terminal outcomes for zero, partial, ambiguous, or unsettled
