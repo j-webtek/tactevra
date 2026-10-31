@@ -116,6 +116,14 @@ source, reviewer assertions, validity window, and all 13 current lifecycle
 checks. Synthetic decisions remain rehearsal-only. Even an accepted external
 decision grants only eligibility for a later read-only endpoint qualification
 intake and cannot open an endpoint or authorize execution.
+ARM-168 supplies that later intake contract without performing the observation.
+It accepts only a currently valid independent ARM-167 decision, reassesses the
+decision at intake creation, and binds it to one exact pinned endpoint and a
+finite passive-read policy. The retained plan permits one open, one close, and
+bounded passive reads while fixing every write, active request, movement,
+torque, retry, fallback, purge, and DTR/RTS assertion counter at zero. Building
+the intake performs no endpoint discovery or access. A later operator action
+must separately authorize the exact intake hash before any endpoint may open.
 It is not composed with an authority issuer, CLI command, startup service, or
 physical test path. Therefore the passing outcome remains
 named `CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED`: it proves the
@@ -172,6 +180,21 @@ python software/scripts/assess_current_native_t102_provider_review_decision.py `
   <returned-decision.json> <new-assessment-directory> `
   --assessment-utc <whole-second-UTC>
 ```
+
+After acceptance, build the non-authorizing read-only proposal with the pinned
+identity obtained through the separately governed host inventory process:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/build_current_native_t102_read_only_endpoint_intake.py `
+  <returned-decision.json> <new-output-directory> `
+  --intake-id <bounded-id> --host-id <pseudonymous-host-id> `
+  --created-utc <whole-second-UTC> --port-name <COMn> `
+  --usb-vid <VID> --usb-pid <PID> --usb-serial-number <serial>
+```
+
+This command is offline. It does not enumerate ports, open an endpoint, transmit
+bytes, start a controller, or authorize the later passive observation.
 
 The command refuses overwrite, symlinks, duplicate JSON fields, oversized input,
 identity drift, incomplete checks, expired decisions, and synthetic evidence as
