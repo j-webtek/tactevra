@@ -1237,3 +1237,15 @@ fixed-metadata archive. The verifier pins the complete transfer identity and
 checks the nested exchange in memory without extraction. It creates no review
 decision and adds no endpoint, execution, hardware, or physical authority;
 logical-byte, duplicate-byte, and reduction limits remain unchanged.
+
+The current-provider owner-AI review-acceptance increment adds five governed
+paths: one closed acceptance module, one JSON schema, one deterministic builder,
+one retained acceptance record, and one focused unit-test module. The reviewed
+file-count ceiling advances from 6,667 to the exact expected 6,672 files. The
+record binds the exact ARM-165 packet, manifest, candidate, provider source,
+blocked internal AI decision, and assessment. It preserves synthetic,
+non-independent, and implementation-author provenance, while recording the
+owner's decision that human review is not required for the owner-governed path.
+The stricter external-review route remains intact. Endpoint-open, controller-
+start, transport-write, execution, hardware, and physical authority remain
+false; logical-byte, duplicate-byte, and reduction limits remain unchanged.

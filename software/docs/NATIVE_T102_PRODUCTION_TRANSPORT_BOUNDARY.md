@@ -204,6 +204,17 @@ and requires its fixed root, member order, timestamps, permissions, storage
 mode, and nested ARM-169 result. A pass proves unchanged packaging and review
 input only; it does not establish custody or independent review.
 
+ARM-171 records the owner's separately stated governance choice to accept the
+exact internal AI technical review for an owner-governed path. The source review
+passes the closed technical checklist but remains `BLOCKED` by
+`SYNTHETIC_EVIDENCE_NOT_INDEPENDENT`, `INDEPENDENCE_NOT_ASSERTED`, and
+`IMPLEMENTATION_AUTHOR_CONFLICT`. The acceptance does not relabel that evidence:
+`human_review_claimed=false` and `external_independence_claimed=false`. The
+ARM-167 external-decision route remains available as the stricter path. ARM-171
+only makes a later owner-governed read-only intake eligible; it does not open an
+endpoint, start a controller, write transport bytes, authorize execution, or
+grant hardware or physical authority.
+
 For the exact ARM-165 candidate, the deterministic packet SHA-256 is
 `0cd3f42229efcd3ec54d9470e7bce5114aa7eed3570a13f9edb41c81df11e764`,
 its packet-manifest SHA-256 is

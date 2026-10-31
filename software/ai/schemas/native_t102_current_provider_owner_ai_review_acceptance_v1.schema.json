@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rocell.local/schemas/native_t102_current_provider_owner_ai_review_acceptance_v1.schema.json",
+  "title": "RoCell current native T=102 provider owner AI-review acceptance v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "status", "acceptance_id", "owner_id", "accepted_utc",
+    "source_ai_decision_sha256", "source_ai_report_sha256",
+    "source_ai_review_status", "source_ai_review_blockers",
+    "reviewed_packet_sha256", "reviewed_manifest_sha256",
+    "reviewed_candidate_commit", "reviewed_provider_source_sha256",
+    "governance_caveat", "technical_checks_passed",
+    "reviewer_participated_in_implementation_chain", "human_review_required",
+    "human_review_claimed", "external_independence_claimed",
+    "owner_governance_override",
+    "ready_for_owner_governed_read_only_endpoint_intake",
+    "endpoint_open_authorized", "controller_start_authorized",
+    "transport_write_authorized", "execution_authorized", "hardware_access",
+    "physical_authority", "acceptance_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "rocell.native_t102_current_provider_owner_ai_review_acceptance.v1"
+    },
+    "status": {"const": "OWNER_ACCEPTED_AI_REVIEW_GOVERNANCE_OVERRIDE"},
+    "acceptance_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "owner_id": {"type": "string", "minLength": 1, "maxLength": 192},
+    "accepted_utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+    "source_ai_decision_sha256": {"$ref": "#/$defs/sha256"},
+    "source_ai_report_sha256": {"$ref": "#/$defs/sha256"},
+    "source_ai_review_status": {"const": "BLOCKED"},
+    "source_ai_review_blockers": {
+      "const": [
+        "SYNTHETIC_EVIDENCE_NOT_INDEPENDENT",
+        "INDEPENDENCE_NOT_ASSERTED",
+        "IMPLEMENTATION_AUTHOR_CONFLICT"
+      ]
+    },
+    "reviewed_packet_sha256": {"$ref": "#/$defs/sha256"},
+    "reviewed_manifest_sha256": {"$ref": "#/$defs/sha256"},
+    "reviewed_candidate_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reviewed_provider_source_sha256": {"$ref": "#/$defs/sha256"},
+    "governance_caveat": {"const": "OWNER_ACCEPTED_NONINDEPENDENT_AI_TECHNICAL_REVIEW"},
+    "technical_checks_passed": {"const": true},
+    "reviewer_participated_in_implementation_chain": {"const": true},
+    "human_review_required": {"const": false},
+    "human_review_claimed": {"const": false},
+    "external_independence_claimed": {"const": false},
+    "owner_governance_override": {"const": true},
+    "ready_for_owner_governed_read_only_endpoint_intake": {"const": true},
+    "endpoint_open_authorized": {"const": false},
+    "controller_start_authorized": {"const": false},
+    "transport_write_authorized": {"const": false},
+    "execution_authorized": {"const": false},
+    "hardware_access": {"const": false},
+    "physical_authority": {"const": false},
+    "acceptance_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

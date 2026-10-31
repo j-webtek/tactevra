@@ -235,6 +235,14 @@ partial evidence intake so every missing component and binding remains visible.
 Only a complete, current, physical-original, owner-AI-accepted eight-component
 draft receives a configuration-epoch hash. Even that result permits only an
 epoch-bound build proposal and grants no hardware authority.
+The [current-provider owner AI-review acceptance](native_t102_current_provider_owner_ai_review_acceptance_v1.schema.json)
+applies the same provenance-preserving governance pattern to the exact ARM-165
+native T=102 provider review. It binds a technically passing internal AI review
+whose production assessment remains blocked by synthetic evidence, absent
+independence, and implementation-author participation. Owner acceptance keeps
+those blockers explicit, leaves the external-review path available, and grants
+eligibility only for a later owner-governed read-only intake with every hardware
+authority false.
 The [software-build evidence](software_build_epoch_evidence_v1.schema.json) and
 [owner-AI review](software_build_owner_ai_review_v1.schema.json) close the
 first owner-governed epoch component from tracked source and reviewed r97
