@@ -1,7 +1,7 @@
 # Tactevra project status
 
-Reviewed October 31, 2026 through the ARM-169 recipient-side current-provider
-review-exchange verification boundary,
+Reviewed October 31, 2026 through the ARM-170 deterministic current-provider
+review-transfer archive boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
 ARM-125 bounded shadow service,
@@ -382,6 +382,18 @@ packet, and retains every endpoint, execution, hardware, and physical-authority
 claim as false. The governed Windows hardware-free matrix passes 1,108 tests
 with ARM-169 included; seven symlink cases are skipped where creation is
 unavailable.
+
+ARM-170 closes the outer-transfer gap without changing the review boundary.
+The deterministic ZIP builder first verifies the exact ARM-166 directory, then
+uses one fixed root, member order, timestamps, permissions, and stored entries.
+The recipient verifier pins the complete outer ZIP SHA-256 and validates its
+metadata and nested ARM-169 exchange entirely in memory without extracting it.
+Changed bytes, paths, order, metadata, compression, extra members, symlinks,
+and overwrite attempts fail closed. No external decision is created; reviewer
+identity, custody, independence, transport qualification, endpoint access,
+execution, hardware, and physical authority remain unresolved. The governed
+Windows hardware-free matrix passes 1,112 tests with ARM-170 included; eight
+symlink cases are skipped where creation is unavailable.
 
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also

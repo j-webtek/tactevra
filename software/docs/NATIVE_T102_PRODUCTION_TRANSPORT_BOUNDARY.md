@@ -124,6 +124,10 @@ bounded passive reads while fixing every write, active request, movement,
 torque, retry, fallback, purge, and DTR/RTS assertion counter at zero. Building
 the intake performs no endpoint discovery or access. A later operator action
 must separately authorize the exact intake hash before any endpoint may open.
+ARM-169 adds recipient-side verification of the exact unpacked exchange without
+writing output or extracting the nested packet. ARM-170 adds a deterministic
+outer transfer ZIP and direct recipient verification of that ZIP entirely in
+memory. Neither increment authenticates a reviewer or creates a decision.
 It is not composed with an authority issuer, CLI command, startup service, or
 physical test path. Therefore the passing outcome remains
 named `CONTROLLER_EVIDENCE_CAPTURED_SETTLED_UNQUALIFIED`: it proves the
@@ -177,6 +181,28 @@ manifest bytes, pinned manifest and member hashes, and a valid closed ARM-165
 packet. A pass means only that the review input is byte-identical and
 authority-free; it does not authenticate the recipient, complete the review,
 or authorize endpoint access.
+
+Create the deterministic outer transfer file only after that directory passes:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/build_current_native_t102_provider_review_transfer.py `
+  build <verified-exchange-directory> <new-transfer.zip>
+```
+
+The recipient can verify the transfer ZIP directly without extracting it:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/build_current_native_t102_provider_review_transfer.py `
+  verify <transferred-archive.zip>
+```
+
+ARM-170 pins the complete archive at SHA-256
+`be2b4aa1c30ea94d84f84b05fbf90aed6639c6507e8a25dbd1e597bbd49b397d`
+and requires its fixed root, member order, timestamps, permissions, storage
+mode, and nested ARM-169 result. A pass proves unchanged packaging and review
+input only; it does not establish custody or independent review.
 
 For the exact ARM-165 candidate, the deterministic packet SHA-256 is
 `0cd3f42229efcd3ec54d9470e7bce5114aa7eed3570a13f9edb41c81df11e764`,

@@ -1228,3 +1228,12 @@ files. It verifies the exact closed exchange, canonical manifest, member hashes,
 and embedded packet without extracting files or creating a review decision.
 Endpoint, execution, hardware, and physical authority remain false; all byte,
 duplicate, and reduction limits remain unchanged.
+
+The current-provider deterministic-transfer increment adds two governed paths:
+one direct outer-ZIP builder/verifier and one focused unit-test module. The
+reviewed file-count ceiling advances from 6,665 to the exact expected 6,667
+files. The builder verifies the closed exchange before exclusively creating a
+fixed-metadata archive. The verifier pins the complete transfer identity and
+checks the nested exchange in memory without extraction. It creates no review
+decision and adds no endpoint, execution, hardware, or physical authority;
+logical-byte, duplicate-byte, and reduction limits remain unchanged.

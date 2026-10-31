@@ -3173,7 +3173,7 @@ rewriting history. New entries must use a unique evidence ID.
 - Result: `ACTIVE_FEEDBACK_FAILED_TERMINAL`. Identity matched before and after;
   open succeeded once; the receive buffer was empty; all ten authorized bytes
   were written once; one 17-byte line was read; close was confirmed once.
-  The response was exactly `FAULT:NOT_READY\r\n`, not T=1051. No retry ran.
+  The response was exactly `FAULT:NOT_READY\n`, not T=1051. No retry ran.
 - Artifact:
   `software/ai/eval/arm064_active_feedback_qualification_20260927.json`, file
   SHA-256
@@ -8725,3 +8725,37 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: an independent non-author reviewer verifies the exchange,
   completes the closed review, and returns a separately authenticated ARM-167
   decision through an independently controlled channel.
+
+### E-20261031-ARM-170 — deterministic outer review-transfer archive
+
+- Stage: S4
+- Lane: ARM
+- Change: added a deterministic outer-ZIP builder and recipient verifier for
+  the unchanged ARM-166 exchange. The builder requires a passing ARM-169
+  directory verification before creating one exclusive output with a fixed
+  root, member order, timestamps, regular-file permissions, and stored entries.
+- Result: repeated builds are byte-identical at SHA-256
+  `be2b4aa1c30ea94d84f84b05fbf90aed6639c6507e8a25dbd1e597bbd49b397d`.
+  The verifier rejects changed archive bytes and symlink inputs, validates the
+  complete outer identity and ZIP metadata, and reuses the strict ARM-169
+  payload verification entirely in memory without extraction.
+- Artifacts:
+  `software/scripts/build_current_native_t102_provider_review_transfer.py`,
+  `software/scripts/verify_current_native_t102_provider_review_exchange.py`,
+  and
+  `software/tests/unit/test_build_current_native_t102_provider_review_transfer.py`.
+- Focused verification: 11 current-provider exchange and transfer tests passed;
+  two Windows symlink cases were skipped where symlink creation is unavailable.
+- Governed Windows hardware-free matrix: 1,112 passed with 8 expected symlink
+  skips.
+- Evidence status: deterministic repository and filesystem evidence only. The
+  transfer pass proves unchanged review input and packaging, not reviewer
+  identity, custody, independence, or a decision.
+- Hardware writes: 0
+- Physical movements: 0
+- Limitations: no external decision is present. Endpoint open, controller
+  start, execution, transport qualification, hardware access, and physical
+  authority remain false.
+- Next dependency: transfer the verified archive to an independent non-author
+  reviewer through an independently controlled channel and intake that
+  reviewer's separately authenticated ARM-167 decision.
