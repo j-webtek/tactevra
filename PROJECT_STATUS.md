@@ -1,6 +1,7 @@
 # Tactevra project status
 
-Reviewed October 6, 2026 through the ARM-132 shadow-service reuse campaign,
+Reviewed October 31, 2026 through the ARM-169 recipient-side current-provider
+review-exchange verification boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
 ARM-125 bounded shadow service,
@@ -370,6 +371,17 @@ read-only endpoint observation; it neither enumerates nor opens a port and
 grants no controller, transport, execution, hardware, or physical authority.
 The governed hardware-free matrix passes 1,103 tests with ARM-168 included;
 the same six Windows symlink cases remain skipped where creation is unavailable.
+
+ARM-169 closes the recipient-side integrity gap for the transferable ARM-166
+exchange without creating or impersonating an independent decision. The
+standalone verifier requires the exact three regular non-symlink files, strict
+canonical manifest bytes, the pinned exchange-manifest identity, exact member
+sizes and hashes, and a successful closed inspection of the embedded ARM-165
+packet. It writes and extracts nothing, cannot accept an altered procedure or
+packet, and retains every endpoint, execution, hardware, and physical-authority
+claim as false. The governed Windows hardware-free matrix passes 1,108 tests
+with ARM-169 included; seven symlink cases are skipped where creation is
+unavailable.
 
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
