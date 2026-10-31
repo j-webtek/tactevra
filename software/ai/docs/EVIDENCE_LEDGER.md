@@ -8796,3 +8796,40 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: build a separate owner-governed read-only endpoint intake
   bound to this acceptance and one pinned endpoint identity; retain the existing
   external ARM-167 path unchanged.
+
+### E-20261031-ARM-172 — owner-governed current-provider read-only intake
+
+- Stage: S4
+- Lane: ARM
+- Change: added a closed, zero-I/O proposal binding the exact ARM-171 owner
+  acceptance to one pseudonymous host, the exact ARM-165 subject, one retained
+  issue-190 diagnostic checkpoint, and the stable controller USB identity under
+  its retained `COM4` alias.
+- Result: the retained intake SHA-256 is
+  `0cb2bfbe7c8162248f39c585dc93f0f581b8b8e2bf0ec565aeca9cc6d0a4b7db`.
+  It marks retained identity as historical rather than live verification and
+  requires exact pre/post-open identity checks for any later separately
+  authorized passive observation. The bounded plan permits one open, at most
+  four passive lines in one second, and one close; every write, active request,
+  movement, torque command, retry, fallback, purge, and control-line assertion
+  remains prohibited.
+- Artifacts:
+  `software/src/rocell/application/native_t102_current_provider_owner_read_only_intake_v1.py`,
+  `software/ai/schemas/native_t102_current_provider_owner_read_only_intake_v1.schema.json`,
+  `software/scripts/build_arm172_current_provider_owner_read_only_intake.py`,
+  `software/ai/eval/arm172_current_provider_owner_read_only_intake.json`, and
+  `software/tests/unit/test_native_t102_current_provider_owner_read_only_intake_v1.py`.
+- Focused verification: the new intake plus ARM-171 acceptance scope passes 19
+  tests; Ruff passes.
+- Governed Windows hardware-free matrix: 1,131 passed with 8 expected symlink
+  skips.
+- Evidence status: owner-governed proposal based on retained zero-I/O identity
+  evidence. It is not a current live endpoint observation or external review.
+- Hardware writes: 0
+- Physical movements: 0
+- Limitations: read-only endpoint access is not authorized. Endpoint open,
+  controller start, transport write, execution, hardware access, and physical
+  authority remain false. The external ARM-167/168 route remains unchanged.
+- Next dependency: create a separate one-attempt read-only authorization that
+  requires fresh exact identity verification and preserves the zero-write,
+  no-retry boundary before any endpoint access.

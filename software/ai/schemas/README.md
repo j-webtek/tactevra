@@ -243,6 +243,13 @@ independence, and implementation-author participation. Owner acceptance keeps
 those blockers explicit, leaves the external-review path available, and grants
 eligibility only for a later owner-governed read-only intake with every hardware
 authority false.
+The [owner-governed current-provider read-only intake](native_t102_current_provider_owner_read_only_intake_v1.schema.json)
+binds that exact acceptance to one retained zero-I/O checkpoint, pseudonymous
+host, stable USB identity, and pinned endpoint. Retained identity is explicitly
+not represented as live verification; any later separately authorized passive
+observation must verify the exact identity before and after its single open.
+The record itself performs no enumeration or I/O and grants no endpoint,
+transport, execution, hardware, or physical authority.
 The [software-build evidence](software_build_epoch_evidence_v1.schema.json) and
 [owner-AI review](software_build_owner_ai_review_v1.schema.json) close the
 first owner-governed epoch component from tracked source and reviewed r97

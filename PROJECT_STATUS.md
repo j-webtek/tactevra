@@ -1,6 +1,7 @@
 # Tactevra project status
 
-Reviewed October 31, 2026 through the ARM-171 current-provider owner-AI review
+Reviewed October 31, 2026 through the ARM-172 owner-governed current-provider
+read-only intake
 acceptance boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
@@ -406,6 +407,21 @@ endpoint intake; endpoint open, controller start, transport write, execution,
 hardware access, and physical authority remain false. The focused current-
 provider scope passes 81 tests with one expected Windows symlink skip.
 The governed Windows hardware-free matrix passes 1,117 tests with eight expected
+symlink skips.
+
+ARM-172 converts that exact ARM-171 governance choice into a separate,
+hardware-incapable read-only endpoint proposal. The record pins the owner
+acceptance, exact ARM-165 provider identities, pseudonymous host, retained
+zero-I/O controller checkpoint, metadata session and hashes, and the stable USB
+unit observed under the retained `COM4` alias. It explicitly marks retained
+identity as historical rather than live verification and requires exact identity
+checks before and after any later single open. Its passive policy permits at most
+four bounded lines with a one-second timeout and fixes writes, active requests,
+movement, torque, retries, fallback, purge, and control-line assertions at zero.
+No read-only observation is authorized by this intake; endpoint open, controller
+start, transport write, execution, hardware access, and physical authority remain
+false. The stricter ARM-167/168 external-review route remains unchanged.
+The governed Windows hardware-free matrix passes 1,131 tests with eight expected
 symlink skips.
 
 The merged ARM-048 increment replaces caller-authored lifecycle start records

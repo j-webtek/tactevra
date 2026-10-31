@@ -215,6 +215,31 @@ only makes a later owner-governed read-only intake eligible; it does not open an
 endpoint, start a controller, write transport bytes, authorize execution, or
 grant hardware or physical authority.
 
+ARM-172 supplies that separate owner-governed intake without touching hardware.
+It binds acceptance SHA-256
+`29bf06b863b3f9a5124a25c57e7aac5ffd4ed1ef41f4cf0b17bb28a9971a0b0a`
+to the retained zero-I/O issue-190 checkpoint, its diagnostic metadata hashes,
+the pseudonymous host, and the exact stable USB unit observed under retained
+alias `COM4`. The record states that retained identity is not live verification.
+A later authorization must verify the pinned identity before and after one open,
+read at most four bounded passive lines within one second, and close once. The
+proposal permits no write, active request, movement, torque, retry, fallback,
+purge, or DTR/RTS assertion. It does not itself authorize the open or read.
+
+The deterministic offline record can be rebuilt from the retained inputs:
+
+```powershell
+$env:PYTHONPATH='software/src'
+python software/scripts/build_arm172_current_provider_owner_read_only_intake.py `
+  software/ai/eval/arm171_current_provider_owner_ai_review_acceptance.json `
+  software/runs/operational-checkpoints/issue190-20261020.json `
+  <new-output.json>
+```
+
+The command refuses overwrite, symlink inputs, duplicate JSON fields, changed
+checkpoint hashes, non-zero checkpoint I/O counts, and crossed persistent USB
+identity. It performs no endpoint enumeration or access.
+
 For the exact ARM-165 candidate, the deterministic packet SHA-256 is
 `0cd3f42229efcd3ec54d9470e7bce5114aa7eed3570a13f9edb41c81df11e764`,
 its packet-manifest SHA-256 is
