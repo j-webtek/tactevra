@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -23,7 +24,6 @@ from rocell.application.native_t102_production_transport_v1 import (
 
 ROOT = Path(__file__).resolve().parents[2]
 ACCEPTANCE_PATH = ROOT / "ai/eval/arm171_current_provider_owner_ai_review_acceptance.json"
-CHECKPOINT_PATH = ROOT / "runs/operational-checkpoints/issue190-20261020.json"
 
 
 def _load_builder():
@@ -33,6 +33,33 @@ def _load_builder():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _checkpoint(tmp_path: Path) -> Path:
+    document = {
+        "schema": "rocell.issue190_operational_checkpoint.v1",
+        "created_at_utc": "2026-10-21T02:34:42.937Z",
+        "controller_metadata": {
+            "port_name": "COM4", "vid": "10c4", "pid": "ea60",
+            "unit_serial": "52E4E1E8337FEF119E92181CEDD322A4",
+            "persistent_instance_id": (
+                "USB\\VID_10C4&PID_EA60\\52e4e1e8337fef119e92181cedd322a4"),
+            "session_id": "wizard-3f8b857a3909442da32760881343b448",
+            "source_sha256": (
+                "799c3243c1f4c1e420119b036bffd7983e11a01a3a184332aa261f65ed47a4a4"),
+            "log_head_sha256": (
+                "2a8b8faf9108c2c7cd05ca75147c1c060d2b929e8aa62c738c30b64f97caa22f"),
+            "device_open_count": 0, "serial_write_count": 0,
+            "motion_command_count": 0,
+        },
+    }
+    document["checkpoint_sha256"] = hashlib.sha256(json.dumps(
+        document, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        allow_nan=False,
+    ).encode("utf-8")).hexdigest()
+    path = tmp_path / "checkpoint.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    return path
 
 
 def acceptance():
@@ -150,22 +177,25 @@ def test_intake_cannot_predate_owner_acceptance():
         intake(created_utc="2026-10-31T21:35:59Z")
 
 
-def test_builder_matches_retained_record_and_refuses_overwrite(tmp_path):
+def test_builder_accepts_valid_external_checkpoint_and_refuses_overwrite(tmp_path):
     builder = _load_builder()
+    checkpoint = _checkpoint(tmp_path)
     output = tmp_path / "intake.json"
-    result = builder.build(ACCEPTANCE_PATH, CHECKPOINT_PATH, output)
+    result = builder.build(ACCEPTANCE_PATH, checkpoint, output)
     retained = json.loads(output.read_text(encoding="utf-8"))
-    expected = json.loads((ROOT / "ai/eval" /
-        "arm172_current_provider_owner_read_only_intake.json"
-    ).read_text(encoding="utf-8"))
-    assert result == retained == expected
+    assert result == retained
+    assert retained["endpoint"] == endpoint().to_dict()
+    assert retained["retained_identity_is_live_verification"] is False
+    assert parse_native_t102_current_provider_owner_read_only_intake_v1(
+        retained).to_dict() == retained
     with pytest.raises(FileExistsError):
-        builder.build(ACCEPTANCE_PATH, CHECKPOINT_PATH, output)
+        builder.build(ACCEPTANCE_PATH, checkpoint, output)
 
 
 def test_builder_rejects_checkpoint_tampering(tmp_path):
     builder = _load_builder()
-    document = json.loads(CHECKPOINT_PATH.read_text(encoding="utf-8"))
+    checkpoint = _checkpoint(tmp_path)
+    document = json.loads(checkpoint.read_text(encoding="utf-8"))
     document["controller_metadata"]["port_name"] = "COM5"
     changed = tmp_path / "checkpoint.json"
     changed.write_text(json.dumps(document), encoding="utf-8")

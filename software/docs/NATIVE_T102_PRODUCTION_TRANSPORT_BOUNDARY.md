@@ -232,7 +232,7 @@ The deterministic offline record can be rebuilt from the retained inputs:
 $env:PYTHONPATH='software/src'
 python software/scripts/build_arm172_current_provider_owner_read_only_intake.py `
   software/ai/eval/arm171_current_provider_owner_ai_review_acceptance.json `
-  software/runs/operational-checkpoints/issue190-20261020.json `
+  <retained-issue190-checkpoint.json> `
   <new-output.json>
 ```
 

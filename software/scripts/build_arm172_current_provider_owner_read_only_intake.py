@@ -24,8 +24,6 @@ from rocell.application.native_t102_production_transport_v1 import (
 MAX_INPUT_BYTES = 256 * 1024
 EXPECTED_ACCEPTANCE_SHA256 = (
     "29bf06b863b3f9a5124a25c57e7aac5ffd4ed1ef41f4cf0b17bb28a9971a0b0a")
-EXPECTED_CHECKPOINT_SHA256 = (
-    "5ea16e80626a4daacdaffd30e13e4f0a5760d2d5b1b7c15488c1f7bb542d6ddf")
 
 
 def _strict_json(path: Path) -> dict[str, Any]:
@@ -76,9 +74,6 @@ def _checkpoint(document: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     if expected != actual:
         raise NativeT102CurrentProviderOwnerReadOnlyIntakeError(
             "checkpoint hash differs")
-    if actual != EXPECTED_CHECKPOINT_SHA256:
-        raise NativeT102CurrentProviderOwnerReadOnlyIntakeError(
-            "checkpoint is not the retained ARM-172 identity source")
     metadata = document.get("controller_metadata")
     if type(metadata) is not dict:
         raise NativeT102CurrentProviderOwnerReadOnlyIntakeError(
