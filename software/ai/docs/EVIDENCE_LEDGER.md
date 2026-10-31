@@ -8759,3 +8759,40 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: transfer the verified archive to an independent non-author
   reviewer through an independently controlled channel and intake that
   reviewer's separately authenticated ARM-167 decision.
+
+### E-20261031-ARM-171 — owner accepts current-provider AI review with caveat
+
+- Stage: S4
+- Lane: ARM
+- Change: added a closed governance override for the exact ARM-165 current
+  native T=102 provider. The bound internal AI decision passes all 13 technical
+  checks and has no open technical findings, while its production assessment
+  remains blocked by synthetic evidence, independence not asserted, and
+  implementation-author conflict.
+- Result: the owner acceptance pins the AI decision and report hashes, packet,
+  manifest, candidate commit, and provider source. It records
+  `human_review_required=false`, `human_review_claimed=false`,
+  `external_independence_claimed=false`, and `owner_governance_override=true`.
+  The stricter ARM-167 external-review route remains unchanged and available.
+- Artifacts:
+  `software/src/rocell/application/native_t102_current_provider_owner_ai_review_acceptance_v1.py`,
+  `software/ai/schemas/native_t102_current_provider_owner_ai_review_acceptance_v1.schema.json`,
+  `software/scripts/build_arm171_current_provider_owner_ai_acceptance.py`,
+  `software/ai/eval/arm171_current_provider_owner_ai_review_acceptance.json`,
+  and
+  `software/tests/unit/test_native_t102_current_provider_owner_ai_review_acceptance_v1.py`.
+- Focused verification: 81 current-provider transport, composition, packet,
+  decision, intake, and owner-acceptance tests passed; one Windows symlink case
+  was skipped where symlink creation is unavailable. Ruff passed.
+- Governed Windows hardware-free matrix: 1,117 passed with 8 expected symlink
+  skips.
+- Evidence status: owner-approved, non-independent AI technical review with
+  explicit provenance caveat. This is not a human or external review.
+- Hardware writes: 0
+- Physical movements: 0
+- Limitations: the acceptance grants no endpoint open, controller start,
+  transport write, execution, hardware access, or physical authority. It does
+  not qualify the installed transport or controller.
+- Next dependency: build a separate owner-governed read-only endpoint intake
+  bound to this acceptance and one pinned endpoint identity; retain the existing
+  external ARM-167 path unchanged.

@@ -1,7 +1,7 @@
 # Tactevra project status
 
-Reviewed October 31, 2026 through the ARM-170 deterministic current-provider
-review-transfer archive boundary,
+Reviewed October 31, 2026 through the ARM-171 current-provider owner-AI review
+acceptance boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
 ARM-125 bounded shadow service,
@@ -394,6 +394,19 @@ identity, custody, independence, transport qualification, endpoint access,
 execution, hardware, and physical authority remain unresolved. The governed
 Windows hardware-free matrix passes 1,112 tests with ARM-170 included; eight
 symlink cases are skipped where creation is unavailable.
+
+ARM-171 records the owner's approval to use the exact current-provider internal
+AI technical review as a governance override. The retained review passes the
+closed 13-check technical scope while preserving all three provenance blockers:
+synthetic evidence, independence not asserted, and implementation-author
+conflict. The acceptance therefore sets human and external-independence claims
+false and leaves the stricter ARM-167 external-review route intact. It makes the
+exact ARM-165 candidate eligible only for a later owner-governed read-only
+endpoint intake; endpoint open, controller start, transport write, execution,
+hardware access, and physical authority remain false. The focused current-
+provider scope passes 81 tests with one expected Windows symlink skip.
+The governed Windows hardware-free matrix passes 1,117 tests with eight expected
+symlink skips.
 
 The merged ARM-048 increment replaces caller-authored lifecycle start records
 with a hash-bound dispatch receipt at one exact encoded-write boundary. It also
