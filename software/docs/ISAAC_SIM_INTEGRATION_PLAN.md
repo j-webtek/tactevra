@@ -25,8 +25,11 @@ the current deterministic simulators intentionally simplify:
 
 The first integration target is a bare-gripper, noncontact keyboard hover. A
 representative key-contact model follows only after transform and collision
-parity pass. Full keyboard mechanics, ROS 2, MoveIt, learned control, and live
-hardware dispatch are later options, not prerequisites.
+parity pass. The follow-on physics, automated demonstration-generation, and
+bounded imitation-learning sequence is defined in the
+[learned motion generation plan](ISAAC_SIM_LEARNED_MOTION_GENERATION_PLAN.md).
+ROS 2, MoveIt, and live hardware dispatch remain later options, not
+prerequisites.
 
 ## Non-goals
 
@@ -409,6 +412,20 @@ changing the authoritative Tactevra request/receipt contracts.
 - comparisons preserve equivalent start state, target, constraints, collision
   scene, and evaluation metrics;
 - no ROS node exposes or receives live-arm credentials in the simulation job.
+
+## Learned motion generation follow-on
+
+After the WP3 drive-controlled physics baseline begins, the project will apply
+the ScheduleGen pattern to the single-arm keyboard task: preserve
+object-relative contact skills, replan free-space transitions, enforce ordered
+phase and collision constraints, accept demonstrations only after physics
+replay, and train bounded imitation policies from the retained successes. The
+complete work packages, parameter-provenance rules, metrics, and staged
+sim-to-real sequence are maintained in
+[ISAAC_SIM_LEARNED_MOTION_GENERATION_PLAN.md](ISAAC_SIM_LEARNED_MOTION_GENERATION_PLAN.md).
+
+This follow-on does not let a learned policy own collision policy, controller
+encoding, transport, or execution authority.
 
 ## Failure taxonomy
 
