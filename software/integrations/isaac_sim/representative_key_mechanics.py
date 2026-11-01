@@ -27,6 +27,9 @@ TCP_IK_SCREEN_SCHEMA = "tactevra.isaac_lm1_robot_tcp_cartesian_ik_screen.v1"
 TCP_COLLISION_REPLAY_REQUEST_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v1"
 )
+TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -1025,6 +1028,426 @@ def build_robot_tcp_collision_replay_request(
     return request
 
 
+def admit_robot_tcp_collision_diagnostic(
+    request: dict[str, Any],
+    ik_receipt: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    virtual_profile_bytes: bytes,
+    robot_usd_bytes: bytes,
+    import_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate all native collision inputs before Isaac or a GPU can start."""
+    claimed_request_hash = request.get("request_sha256")
+    unsigned_request = dict(request)
+    unsigned_request.pop("request_sha256", None)
+    if claimed_request_hash != _canonical_sha256(unsigned_request):
+        raise MechanicsContractError("collision diagnostic request hash mismatch")
+    if (
+        request.get("schema") != TCP_COLLISION_REPLAY_REQUEST_SCHEMA
+        or request.get("status") != "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC"
+        or request.get("diagnostic_only") is not True
+        or request.get("installed_collision_qualified") is not False
+        or request.get("continuous_collision_proven") is not False
+        or request.get("native_contact_replay_authorized") is not False
+    ):
+        raise MechanicsContractError("collision diagnostic request boundary changed")
+    for document, label in (
+        (request, "collision request"),
+        (ik_receipt, "IK receipt"),
+        (import_receipt, "robot import receipt"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("physical_authority") is not False
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed the zero-authority boundary")
+    if (
+        collision_candidate.get("physical_authority") is not False
+        or collision_candidate.get("hardware_write_count") != 0
+        or collision_candidate.get("physical_movement_count") != 0
+        or collision_candidate.get("commands") != []
+    ):
+        raise MechanicsContractError("collision candidate crossed the zero-authority boundary")
+
+    claimed_ik_hash = ik_receipt.get("receipt_sha256")
+    unsigned_ik = dict(ik_receipt)
+    unsigned_ik.pop("receipt_sha256", None)
+    if claimed_ik_hash != _canonical_sha256(unsigned_ik):
+        raise MechanicsContractError("collision diagnostic IK receipt hash mismatch")
+    if (
+        request.get("source_ik_receipt_sha256") != claimed_ik_hash
+        or request.get("source_request_sha256") != ik_receipt.get("source_request_sha256")
+        or request.get("source_bundle_sha256") != ik_receipt.get("source_bundle_sha256")
+    ):
+        raise MechanicsContractError("collision request and IK lineage differ")
+
+    claimed_candidate_hash = collision_candidate.get("candidate_sha256")
+    unsigned_candidate = dict(collision_candidate)
+    unsigned_candidate.pop("candidate_sha256", None)
+    if claimed_candidate_hash != _canonical_sha256(unsigned_candidate):
+        raise MechanicsContractError("collision diagnostic candidate hash mismatch")
+    if (
+        request.get("collision_candidate_sha256") != claimed_candidate_hash
+        or collision_candidate.get("schema") != "tactevra.simulation_collision_candidate.v1"
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+        or request.get("collision_candidate_blockers") != collision_candidate.get("blockers")
+    ):
+        raise MechanicsContractError("collision request and candidate boundary differ")
+
+    samples = request.get("bounded_samples")
+    joint_order = request.get("joint_order")
+    if (
+        not isinstance(samples, list)
+        or not samples
+        or len(samples) != request.get("bounded_sample_count")
+        or len(samples) > 256
+        or not isinstance(joint_order, list)
+        or len(joint_order) != 5
+        or [sample.get("sample_sequence") for sample in samples]
+        != list(range(len(samples)))
+    ):
+        raise MechanicsContractError("bounded collision samples are invalid")
+    for sample in samples:
+        positions = sample.get("joint_positions_rad")
+        if not isinstance(positions, dict) or list(positions) != joint_order:
+            raise MechanicsContractError("bounded collision joint order changed")
+        for name in joint_order:
+            _finite_number(positions.get(name), f"bounded sample joint {name}")
+
+    if hashlib.sha256(virtual_profile_bytes).hexdigest() != ik_receipt.get(
+        "virtual_profile_sha256"
+    ):
+        raise MechanicsContractError("virtual profile differs from the accepted IK receipt")
+    profile = json.loads(virtual_profile_bytes)
+    placement = profile.get("study_input", {}).get("physical_placement_input")
+    matrix = placement.get("matrix_row_major") if isinstance(placement, dict) else None
+    if not isinstance(matrix, list) or len(matrix) != 16:
+        raise MechanicsContractError("virtual profile lacks the governed robot placement")
+    for value in matrix:
+        _finite_number(value, "robot placement matrix value")
+
+    claimed_import_hash = import_receipt.get("receipt_sha256")
+    unsigned_import = dict(import_receipt)
+    unsigned_import.pop("receipt_sha256", None)
+    if claimed_import_hash != _canonical_sha256(unsigned_import):
+        raise MechanicsContractError("robot import receipt hash mismatch")
+    external_files = import_receipt.get("external_files")
+    robot_usd_hash = hashlib.sha256(robot_usd_bytes).hexdigest()
+    if (
+        import_receipt.get("schema") != "tactevra.isaac_sim_urdf_import.v1"
+        or not isinstance(external_files, list)
+        or len(external_files) != 1
+        or external_files[0].get("sha256") != robot_usd_hash
+        or external_files[0].get("size_bytes") != len(robot_usd_bytes)
+    ):
+        raise MechanicsContractError("robot USD differs from its governed import receipt")
+    normalization = import_receipt.get("articulation_root_normalization")
+    expected_dofs = joint_order + ["link5_to_gripper_link"]
+    if not isinstance(normalization, dict) or normalization.get(
+        "expected_live_dof_order"
+    ) != expected_dofs:
+        raise MechanicsContractError("robot import articulation order changed")
+
+    robot_bodies = collision_candidate.get("robot_bodies")
+    workcell_bodies = collision_candidate.get("workcell_bodies")
+    if not isinstance(robot_bodies, list) or not robot_bodies \
+            or not isinstance(workcell_bodies, list) or not workcell_bodies:
+        raise MechanicsContractError("collision candidate body coverage is absent")
+    for body in robot_bodies + workcell_bodies:
+        primitives = body.get("primitives") if isinstance(body, dict) else None
+        if not isinstance(primitives, list) or not primitives:
+            raise MechanicsContractError("collision candidate body lacks primitives")
+        for primitive in primitives:
+            if (
+                primitive.get("kind") != "oriented_box"
+                or primitive.get("rotation_row_major")
+                != [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+                or len(primitive.get("center_mm", [])) != 3
+                or len(primitive.get("half_extents_mm", [])) != 3
+            ):
+                raise MechanicsContractError(
+                    "native diagnostic currently requires axis-aligned candidate boxes"
+                )
+            for value in primitive["center_mm"]:
+                _finite_number(value, "collision box center")
+            for value in primitive["half_extents_mm"]:
+                if _finite_number(value, "collision box half extent") <= 0.0:
+                    raise MechanicsContractError("collision box half extent must be positive")
+
+    admission: dict[str, Any] = {
+        "schema": "tactevra.isaac_lm1_robot_tcp_collision_admission.v1",
+        "status": "READY_TO_START_SELECTED_ISAAC_COLLISION_DIAGNOSTIC",
+        "request_sha256": claimed_request_hash,
+        "ik_receipt_sha256": claimed_ik_hash,
+        "collision_candidate_sha256": claimed_candidate_hash,
+        "virtual_profile_sha256": hashlib.sha256(virtual_profile_bytes).hexdigest(),
+        "robot_import_receipt_sha256": claimed_import_hash,
+        "robot_usd_sha256": robot_usd_hash,
+        "toolchain_lock_sha256": request.get("toolchain_lock_sha256"),
+        "bounded_sample_count": len(samples),
+        "robot_body_count": len(robot_bodies),
+        "workcell_body_count": len(workcell_bodies),
+        "robot_placement_matrix_row_major": matrix,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "exploratory_uninstalled_collision_candidate_only",
+            "discrete_overlap_queries_are_not_continuous_collision_proof",
+            "candidate_blockers_remain_unresolved",
+            "no_native_contact_or_physical_authority",
+        ],
+    }
+    admission["admission_sha256"] = _canonical_sha256(admission)
+    return admission
+
+
+def run_robot_tcp_collision_diagnostic(
+    *,
+    request_path: Path,
+    ik_receipt_path: Path,
+    collision_candidate_path: Path,
+    virtual_profile_path: Path,
+    robot_usd_path: Path,
+    import_receipt_path: Path,
+    output_path: Path,
+    status_path: Path,
+) -> dict[str, Any]:
+    """Run discrete Isaac overlap queries with no controller or hardware authority."""
+    request = json.loads(request_path.resolve(strict=True).read_bytes())
+    ik_receipt = json.loads(ik_receipt_path.resolve(strict=True).read_bytes())
+    collision_candidate = json.loads(
+        collision_candidate_path.resolve(strict=True).read_bytes()
+    )
+    virtual_profile_bytes = virtual_profile_path.resolve(strict=True).read_bytes()
+    robot_usd = robot_usd_path.resolve(strict=True)
+    robot_usd_bytes = robot_usd.read_bytes()
+    import_receipt = json.loads(import_receipt_path.resolve(strict=True).read_bytes())
+    admission = admit_robot_tcp_collision_diagnostic(
+        request,
+        ik_receipt,
+        collision_candidate,
+        virtual_profile_bytes,
+        robot_usd_bytes,
+        import_receipt,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    app = None
+    try:
+        from isaacsim import SimulationApp
+
+        app = SimulationApp({"headless": True, "multi_gpu": False})
+        import omni.timeline
+        import omni.usd
+        from isaacsim.core.experimental.prims import Articulation
+        from isaacsim.core.simulation_manager import SimulationManager
+        from omni.physx import get_physx_scene_query_interface
+        from pxr import Gf, PhysicsSchemaTools, UsdGeom, UsdPhysics
+
+        if not omni.usd.get_context().open_stage(str(robot_usd)):
+            raise RuntimeError("Isaac could not open the governed robot USD")
+        for _ in range(5):
+            app.update()
+        stage = omni.usd.get_context().get_stage()
+
+        prim_by_name: dict[str, Any] = {}
+        for prim in stage.Traverse():
+            prim_by_name.setdefault(prim.GetName(), prim)
+        collision_path_to_body: dict[str, str] = {}
+        query_paths: list[tuple[str, str]] = []
+
+        def author_box(path: str, body_id: str, primitive: dict[str, Any]) -> None:
+            cube = UsdGeom.Cube.Define(stage, path)
+            cube.CreateSizeAttr(1.0)
+            xform = UsdGeom.Xformable(cube)
+            center = primitive["center_mm"]
+            half = primitive["half_extents_mm"]
+            xform.AddTranslateOp().Set(Gf.Vec3d(*(value / 1000.0 for value in center)))
+            xform.AddScaleOp().Set(Gf.Vec3d(*(2.0 * value / 1000.0 for value in half)))
+            UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
+            collision_path_to_body[path] = body_id
+
+        for body_index, body in enumerate(collision_candidate["robot_bodies"]):
+            parent = prim_by_name.get(body["parent_frame"])
+            if parent is None or not parent.IsValid():
+                raise RuntimeError(
+                    f"robot collision parent frame is unavailable: {body['parent_frame']}"
+                )
+            root = f"{parent.GetPath()}/TactevraCollisionDiagnostic_{body_index:02d}"
+            UsdGeom.Xform.Define(stage, root)
+            for primitive_index, primitive in enumerate(body["primitives"]):
+                path = f"{root}/box_{primitive_index:02d}"
+                author_box(path, body["body_id"], primitive)
+                query_paths.append((path, body["body_id"]))
+
+        workcell_root = "/TactevraCollisionDiagnostic/Workcell"
+        UsdGeom.Xform.Define(stage, workcell_root)
+        for body_index, body in enumerate(collision_candidate["workcell_bodies"]):
+            root = f"{workcell_root}/body_{body_index:02d}"
+            UsdGeom.Xform.Define(stage, root)
+            for primitive_index, primitive in enumerate(body["primitives"]):
+                path = f"{root}/box_{primitive_index:02d}"
+                author_box(path, body["body_id"], primitive)
+
+        SimulationManager.initialize_physics()
+        for _ in range(10):
+            app.update()
+        articulation = Articulation("/roarm_m3")
+        expected_dofs = request["joint_order"] + ["link5_to_gripper_link"]
+        if list(articulation.dof_names) != expected_dofs:
+            raise RuntimeError("Isaac articulation DOF order differs from the request")
+        if not articulation.is_physics_tensor_entity_valid():
+            raise RuntimeError("Isaac physics articulation view is unavailable")
+
+        matrix = admission["robot_placement_matrix_row_major"]
+        yaw = math.atan2(matrix[4], matrix[0])
+        base_translation = [matrix[3] / 1000.0, matrix[7] / 1000.0, matrix[11] / 1000.0]
+        base_quaternion_wxyz = [math.cos(yaw / 2.0), 0.0, 0.0, math.sin(yaw / 2.0)]
+        timeline = omni.timeline.get_timeline_interface()
+        timeline.play()
+        app.update()
+        scene_query = get_physx_scene_query_interface()
+        observed_samples = []
+        all_pairs: set[tuple[str, str]] = set()
+        for sample in request["bounded_samples"]:
+            desired = [
+                sample["joint_positions_rad"][name] for name in request["joint_order"]
+            ] + [0.0]
+            articulation.set_world_poses([base_translation], [base_quaternion_wxyz])
+            articulation.set_dof_positions([desired])
+            app.update()
+            sample_pairs: set[tuple[str, str]] = set()
+            for query_path, query_body in query_paths:
+                hits: list[str] = []
+
+                def report_hit(hit: Any) -> bool:
+                    collision_path = str(getattr(hit, "collision", ""))
+                    rigid_path = str(getattr(hit, "rigid_body", ""))
+                    other = collision_path_to_body.get(collision_path)
+                    if other is None:
+                        other = collision_path_to_body.get(rigid_path)
+                    if other is not None and other != query_body:
+                        hits.append(other)
+                    return True
+
+                encoded = PhysicsSchemaTools.encodeSdfPath(query_path)
+                scene_query.overlap_shape(encoded[0], encoded[1], report_hit, False)
+                for other_body in hits:
+                    sample_pairs.add(tuple(sorted((query_body, other_body))))
+            all_pairs.update(sample_pairs)
+            observed_samples.append({
+                "sample_sequence": sample["sample_sequence"],
+                "sample_id": sample["sample_id"],
+                "source_segment_index": sample["source_segment_index"],
+                "joint_positions_rad": sample["joint_positions_rad"],
+                "collision_pair_count": len(sample_pairs),
+                "collision_pairs": [list(pair) for pair in sorted(sample_pairs)],
+            })
+        timeline.stop()
+
+        adjacent_pairs = {
+            tuple(sorted(pair)) for pair in (
+                ("robot:base_link", "robot:link1"),
+                ("robot:link1", "robot:link2"),
+                ("robot:link2", "robot:link3"),
+                ("robot:link3", "robot:link4"),
+                ("robot:link5", "robot:gripper"),
+            )
+        }
+        pair_sample_counts = {
+            pair: sum(pair in {
+                tuple(item) for item in sample["collision_pairs"]
+            } for sample in observed_samples)
+            for pair in all_pairs
+        }
+        pair_observations = [
+            {
+                "body_pair": list(pair),
+                "sample_count": pair_sample_counts[pair],
+                "persistent_across_all_samples": (
+                    pair_sample_counts[pair] == len(observed_samples)
+                ),
+                "classification": (
+                    "KINEMATIC_NEIGHBOR_EXCLUSION_REVIEW_REQUIRED"
+                    if pair in adjacent_pairs
+                    else "UNREVIEWED_COLLISION_OBSERVATION"
+                ),
+            }
+            for pair in sorted(all_pairs)
+        ]
+
+        receipt: dict[str, Any] = {
+            "schema": TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            "status": (
+                "DIAGNOSTIC_OVERLAPS_OBSERVED"
+                if all_pairs else "DIAGNOSTIC_NO_OVERLAPS_OBSERVED"
+            ),
+            "evidence_class": "NATIVE_ISAAC_EXPLORATORY_COLLISION_DIAGNOSTIC_ONLY",
+            "admission_sha256": admission["admission_sha256"],
+            "source_bindings": {
+                key: admission[key] for key in (
+                    "request_sha256",
+                    "ik_receipt_sha256",
+                    "collision_candidate_sha256",
+                    "virtual_profile_sha256",
+                    "robot_import_receipt_sha256",
+                    "robot_usd_sha256",
+                    "toolchain_lock_sha256",
+                )
+            },
+            "bounded_sample_count": len(observed_samples),
+            "samples_with_overlaps": sum(
+                item["collision_pair_count"] > 0 for item in observed_samples
+            ),
+            "unique_collision_pair_count": len(all_pairs),
+            "unique_collision_pairs": [list(pair) for pair in sorted(all_pairs)],
+            "pair_observations": pair_observations,
+            "samples": observed_samples,
+            "collision_screening_executed": True,
+            "installed_collision_qualified": False,
+            "continuous_collision_proven": False,
+            "native_contact_replay_authorized": False,
+            "candidate_blockers": collision_candidate["blockers"],
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "gate_promotions": [],
+            "limitations": admission["limitations"] + [
+                "adjacent_link_pairs_are_retained_without_policy_exclusion",
+                "overlap_results_do_not_measure_clearance_distance",
+            ],
+        }
+        receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        output_path.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        status_path.write_text(json.dumps({
+            "status": receipt["status"],
+            "receipt_sha256": receipt["receipt_sha256"],
+            "bounded_sample_count": receipt["bounded_sample_count"],
+            "samples_with_overlaps": receipt["samples_with_overlaps"],
+            "unique_collision_pair_count": receipt["unique_collision_pair_count"],
+        }, sort_keys=True) + "\n", encoding="utf-8")
+        return receipt
+    except BaseException as exc:
+        status_path.write_text(json.dumps({
+            "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
+        }, sort_keys=True) + "\n", encoding="utf-8")
+        raise
+    finally:
+        if app is not None:
+            app.close()
+
+
 def assess_native_key_trace(
     profile: dict[str, Any],
     native_samples: Iterable[dict[str, Any]],
@@ -1272,6 +1695,15 @@ def main() -> int:
         type=Path,
         help="selected zero-authority Isaac runner lock for the diagnostic",
     )
+    parser.add_argument(
+        "--run-collision-diagnostic",
+        action="store_true",
+        help="run the bounded request through native Isaac overlap queries",
+    )
+    parser.add_argument("--collision-request", type=Path)
+    parser.add_argument("--virtual-profile", type=Path)
+    parser.add_argument("--robot-usd", type=Path)
+    parser.add_argument("--import-receipt", type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -1289,12 +1721,12 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening requires both --cartesian-request and --ik-source-bundle"
             )
-        collision_arguments = (
+        request_collision_arguments = (
             args.ik_receipt, args.collision_candidate, args.toolchain_lock
         )
-        if any(item is not None for item in collision_arguments) and not all(
-            item is not None for item in collision_arguments
-        ):
+        if not args.run_collision_diagnostic and any(
+            item is not None for item in request_collision_arguments
+        ) and not all(item is not None for item in request_collision_arguments):
             raise MechanicsContractError(
                 "collision request requires --ik-receipt, --collision-candidate, and --toolchain-lock"
             )
@@ -1305,7 +1737,40 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.ik_receipt is not None:
+        if args.run_collision_diagnostic:
+            native_arguments = (
+                args.collision_request,
+                args.ik_receipt,
+                args.collision_candidate,
+                args.virtual_profile,
+                args.robot_usd,
+                args.import_receipt,
+            )
+            if not all(item is not None for item in native_arguments):
+                raise MechanicsContractError(
+                    "native collision diagnostic requires --collision-request, --ik-receipt, "
+                    "--collision-candidate, --virtual-profile, --robot-usd, and --import-receipt"
+                )
+            if (
+                args.toolchain_lock is not None
+                or args.native_h_probe
+                or args.robot_tcp_bundle is not None
+                or args.cartesian_request is not None
+            ):
+                raise MechanicsContractError(
+                    "native collision diagnostic is mutually exclusive with generation modes"
+                )
+            result = run_robot_tcp_collision_diagnostic(
+                request_path=args.collision_request,
+                ik_receipt_path=args.ik_receipt,
+                collision_candidate_path=args.collision_candidate,
+                virtual_profile_path=args.virtual_profile,
+                robot_usd_path=args.robot_usd,
+                import_receipt_path=args.import_receipt,
+                output_path=args.output,
+                status_path=args.status_output,
+            )
+        elif args.ik_receipt is not None:
             if args.native_h_probe or args.robot_tcp_bundle is not None:
                 raise MechanicsContractError(
                     "collision request is mutually exclusive with native and binding modes"
@@ -1353,6 +1818,7 @@ def main() -> int:
             "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY",
             "READY_FOR_IK_QUALIFICATION", "READY_FOR_COLLISION_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC",
+            "DIAGNOSTIC_OVERLAPS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({

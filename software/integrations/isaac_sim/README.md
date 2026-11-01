@@ -892,6 +892,52 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
+ARM-191 consumes that request in the selected Isaac 6.1 runtime. Before Isaac
+starts, a deterministic admission step revalidates the request, accepted IK
+receipt, exploratory candidate, virtual placement profile, robot import
+receipt, robot USD, articulation order, and all zero-authority fields. The
+native stage then attaches the candidate boxes to their robot-link frames,
+authors the static workcell boxes in board coordinates, and performs discrete
+PhysX overlap queries at all 149 bounded configurations.
+
+The retained external receipt is
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-diagnostic-002\receipt.json`.
+Its canonical receipt SHA-256 is
+`68ba26f6b99c7a5b4a2167f1227324eef8fb7d11422b0521f07d6c3954aee59c`.
+All 149 configurations were queried; all contained at least one overlap, and 18
+unique body pairs were retained. Five adjacent robot pairs persist in every
+sample, as expected before a reviewed self-collision exclusion policy. The
+remaining workcell overlaps vary by configuration and identify where the
+conservative candidate/profile must be corrected. This is not a clearance
+pass: the candidate remains uninstalled, overlap queries do not measure
+clearance distance, and discrete samples do not prove continuous motion.
+
+Reproduce the native diagnostic with:
+
+```powershell
+$env:PYTHONPATH = 'C:\icq7\software\src'
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-collision-diagnostic-002'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --workspace C:\icq7 `
+  --run-collision-diagnostic `
+  --collision-request C:\IsaacSim\artifacts\issue190\lm1-h-collision-request-001\request.json `
+  --ik-receipt C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001\receipt.json `
+  --collision-candidate C:\IsaacSim\evidence\issue190\simulation_program\collision_candidate_v1.json `
+  --virtual-profile software\config\virtual_commissioning_profile.json `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --import-receipt C:\IsaacSim\evidence\urdf_import_003.json `
+  --output "$artifactDir\receipt.json" `
+  --status-output "$artifactDir\status.json"
+```
+
+The next collision step is evidence-driven: review and codify only the five
+kinematically adjacent self-collision exclusions, then separate true robot-to-
+workcell geometry from overlapping station/safe-region envelopes. Missing
+clamp, cable, ranged tool, and arm-camera bodies remain blockers throughout.
+
 Run its focused tests with:
 
 ```powershell

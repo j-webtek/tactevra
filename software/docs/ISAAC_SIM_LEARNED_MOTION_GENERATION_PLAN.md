@@ -322,6 +322,23 @@ unbound, and bounded samples do not prove continuous clearance. The next run
 must retain per-sample pair evidence from the selected Isaac runner while
 keeping native contact replay denied.
 
+ARM-191 executes that handoff in the pinned Isaac 6.1 runtime without crossing
+the zero-authority boundary. A pre-start admission binds the request, IK
+receipt, exploratory geometry, virtual placement, import receipt, robot USD,
+and articulation order. PhysX then evaluates all 149 bounded configurations
+and retains each observed body pair. The canonical diagnostic receipt at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-diagnostic-002\receipt.json`
+has SHA-256
+`68ba26f6b99c7a5b4a2167f1227324eef8fb7d11422b0521f07d6c3954aee59c`.
+It records overlaps in all 149 samples and 18 unique pairs. Five are persistent
+adjacent-link pairs; the remaining configuration-dependent workcell pairs show
+that the conservative uninstalled candidate and station-envelope vocabulary
+cannot yet serve as clearance geometry. The next dependency is a reviewed
+adjacent-pair policy plus separation of physical workcell solids from planning
+envelopes, followed by a fresh diagnostic. Clamp, cable, ranged tool, and
+arm-camera coverage still block installed collision qualification, and no
+continuous or physical gate is promoted.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;

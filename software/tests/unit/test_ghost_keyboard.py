@@ -1,4 +1,5 @@
 import json
+import hashlib
 import importlib.util
 from pathlib import Path
 import pytest
@@ -399,3 +400,73 @@ def test_robot_tcp_collision_request_binds_exact_ik_and_bounded_samples():
     candidate['blockers'].append('TAMPER')
     with pytest.raises(mechanics.MechanicsContractError,match='candidate hash mismatch'):
         mechanics.build_robot_tcp_collision_replay_request(ik,candidate,lock)
+
+
+def test_robot_tcp_collision_diagnostic_admission_binds_native_inputs():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    cartesian=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    ik=mechanics.screen_robot_tcp_cartesian_schedule_ik(
+        cartesian,bundle,profile,workspace=ROOT,
+    )
+    box={
+        'kind':'oriented_box','center_mm':[0.0,0.0,0.0],
+        'half_extents_mm':[1.0,2.0,3.0],
+        'rotation_row_major':[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0],
+    }
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'scope':'SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY',
+        'status':'EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_FAMILY',
+        'installed':False,'installed_profile_eligible':False,
+        'robot_bodies':[
+            {'body_id':'robot:base_link','parent_frame':'base_link','primitives':[box]},
+        ],
+        'workcell_bodies':[
+            {'body_id':'workcell:keyboard','parent_frame':'board','primitives':[box]},
+        ],
+        'blockers':['MOVING_CABLE_GEOMETRY_UNMEASURED'],
+        'simulation_diagnostic_ready':False,
+        'hardware_write_count':0,'physical_movement_count':0,
+        'commands':[],'physical_authority':False,
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    lock=json.loads((ROOT/'software/config/isaac_sim_toolchain_lock.json').read_bytes())
+    request=mechanics.build_robot_tcp_collision_replay_request(ik,candidate,lock)
+    virtual_bytes=(ROOT/'software/config/virtual_commissioning_profile.json').read_bytes()
+    usd_bytes=b'synthetic governed USD bytes'
+    import_receipt={
+        'schema':'tactevra.isaac_sim_urdf_import.v1',
+        'external_files':[{
+            'path':'robot.usda','sha256':hashlib.sha256(usd_bytes).hexdigest(),
+            'size_bytes':len(usd_bytes),
+        }],
+        'articulation_root_normalization':{
+            'expected_live_dof_order':request['joint_order']+['link5_to_gripper_link'],
+        },
+        'hardware_access':False,'physical_authority':False,
+        'wire_commands':[],'hardware_writes':0,'physical_movements':0,
+    }
+    import_receipt['receipt_sha256']=mechanics._canonical_sha256(import_receipt)
+    admission=mechanics.admit_robot_tcp_collision_diagnostic(
+        request,ik,candidate,virtual_bytes,usd_bytes,import_receipt,
+    )
+    assert admission['status']=='READY_TO_START_SELECTED_ISAAC_COLLISION_DIAGNOSTIC'
+    assert admission['bounded_sample_count']==request['bounded_sample_count']
+    assert admission['request_sha256']==request['request_sha256']
+    assert admission['collision_candidate_sha256']==candidate['candidate_sha256']
+    assert admission['robot_body_count']==admission['workcell_body_count']==1
+    assert admission['hardware_access'] is admission['physical_authority'] is False
+    assert admission['controller_commands']==[] and admission['gate_promotions']==[]
+    unsigned={key:value for key,value in admission.items() if key!='admission_sha256'}
+    assert admission['admission_sha256']==mechanics._canonical_sha256(unsigned)
+
+    request['bounded_samples'][0]['joint_positions_rad'][request['joint_order'][0]]+=0.1
+    with pytest.raises(mechanics.MechanicsContractError,match='request hash mismatch'):
+        mechanics.admit_robot_tcp_collision_diagnostic(
+            request,ik,candidate,virtual_bytes,usd_bytes,import_receipt,
+        )
