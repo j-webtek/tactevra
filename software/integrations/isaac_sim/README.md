@@ -708,3 +708,18 @@ Retained artifacts:
 - [`independent_joint_excitation_20261101.json`](evidence/independent_joint_excitation_20261101.json)
 - [`independent_joint_excitation_sysid_20261101.csv`](evidence/independent_joint_excitation_sysid_20261101.csv)
 - [`independent_joint_excitation_telemetry_20261101.csv`](evidence/independent_joint_excitation_telemetry_20261101.csv)
+
+The fixed-frequency campaign's large DOF-4 residual was subsequently tested
+with a smooth, independently windowed chirp on every joint. In the retained
+2,880-sample chirp run, all six command/response correlations exceed `0.999`.
+The inferred common lag is `0.0866067950984508 s`, while the maximum residual
+spread falls from about 100 samples to `0.24795217120968438` samples. This
+demonstrates that the earlier one-cycle wrist offset was a periodic correlation
+alias rather than evidence of a one-second wrist actuator delay.
+
+The next bounded fit should load
+[`independent_joint_chirp_sysid_20261101.csv`](evidence/independent_joint_chirp_sysid_20261101.csv)
+with `telemetry.command_alignment_seconds = 0.0866067950984508`; actuator-delay
+identification, if later enabled, must operate only on the small per-joint
+residual after that common alignment. The retained chirp receipt is
+[`independent_joint_chirp_20261101.json`](evidence/independent_joint_chirp_20261101.json).

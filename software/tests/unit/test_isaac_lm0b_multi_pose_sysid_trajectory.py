@@ -43,6 +43,20 @@ def test_independent_sine_sequence_excites_every_joint_separately():
         assert min(row[5] for row in segment["targets_rad"]) >= 0.0
 
 
+def test_independent_chirp_sequence_is_smooth_bounded_and_nonperiodic():
+    sequence = MODULE.select_pose_sequence(json.loads(BUNDLE.read_text(encoding="utf-8")))
+    segments = MODULE.build_independent_chirp_sequence(sequence[1]["target_rad"], steps_per_joint=480, dt=1 / 120)
+    assert [row["joint_index"] for row in segments] == list(range(6))
+    for segment in segments:
+        targets = segment["targets_rad"]
+        joint = segment["joint_index"]
+        assert len(targets) == 480
+        assert targets[0][joint] == targets[-1][joint]
+        assert max(abs(targets[i + 1][joint] - targets[i][joint]) for i in range(419)) < 0.03
+        assert segment["frequency_hz"]["end"] > segment["frequency_hz"]["start"]
+        assert min(row[5] for row in targets) >= 0.0
+
+
 def test_retained_multi_pose_receipt_and_csv_outputs_are_bound():
     receipt = json.loads((EVIDENCE / "geometry_prior_multi_pose_sysid_trajectory_20261101.json").read_text(encoding="utf-8"))
     claimed = receipt.pop("receipt_sha256")
@@ -101,5 +115,26 @@ def test_retained_independent_excitation_covers_all_six_joints():
     assert receipt["physical_authority"] is False
     telemetry = EVIDENCE / "independent_joint_excitation_telemetry_20261101.csv"
     sysid = EVIDENCE / "independent_joint_excitation_sysid_20261101.csv"
+    assert MODULE._digest(telemetry.read_bytes()) == receipt["outputs"]["rich_telemetry_csv_sha256"]
+    assert MODULE._digest(sysid.read_bytes()) == receipt["outputs"]["isaac_sysid_csv_sha256"]
+
+
+def test_retained_chirp_disambiguates_common_lag_from_periodic_alias():
+    receipt = json.loads((EVIDENCE / "independent_joint_chirp_20261101.json").read_text(encoding="utf-8"))
+    claimed = receipt.pop("receipt_sha256")
+    assert claimed == MODULE._digest(MODULE._canonical(receipt))
+    assert receipt["status"] == "PASS"
+    assert receipt["trajectory"] == "independent-chirp"
+    assert receipt["samples"] == 2880
+    quality = receipt["telemetry_quality"]
+    assert quality["weak_excitation_joint_indices"] == []
+    assert quality["error_count"] == 0
+    lag = quality["command_lag"]
+    assert 0.08 < lag["common_mode_lag_seconds"] < 0.095
+    assert lag["residual_spread_samples"] < 0.3
+    assert all(row["correlation_peak"] > 0.999 for row in lag["joints"])
+    assert receipt["maximum_final_joint_error_rad"] < receipt["threshold_rad"]
+    telemetry = EVIDENCE / "independent_joint_chirp_telemetry_20261101.csv"
+    sysid = EVIDENCE / "independent_joint_chirp_sysid_20261101.csv"
     assert MODULE._digest(telemetry.read_bytes()) == receipt["outputs"]["rich_telemetry_csv_sha256"]
     assert MODULE._digest(sysid.read_bytes()) == receipt["outputs"]["isaac_sysid_csv_sha256"]

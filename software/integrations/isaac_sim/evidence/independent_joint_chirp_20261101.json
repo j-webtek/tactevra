@@ -1,0 +1,427 @@
+{
+  "controller_commands": [],
+  "effort_semantics": {
+    "applied_actuation_force_nm": "ISAAC_EXPLICIT_ACTUATION_FORCE_NOT_INTERNAL_DRIVE_OUTPUT",
+    "physical_t1051_load": "NOT_CAPTURED_OR_CALIBRATED",
+    "projected_joint_force_nm": "ISAAC_LINK_INCOMING_FORCE_PROJECTED_ON_DOF"
+  },
+  "evidence_class": "PROVISIONAL_SIM_TO_SIM_SYSID_TRAJECTORY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "geometry_derived_provisional_mass_properties",
+    "provisional_mass_distribution_and_drive_parameters",
+    "sim_to_sim_trajectory_does_not_validate_physical_parameters",
+    "internal_position_drive_effort_is_not_exposed_by_applied_actuation_force_channel",
+    "no_collision_or_contact_geometry",
+    "t1051_raw_load_is_not_si_torque"
+  ],
+  "maximum_final_joint_error_rad": 2.220528706931013e-05,
+  "outputs": {
+    "isaac_sysid_csv_layout": "time,q1..q6,dq1..dq6,cmd1..cmd6",
+    "isaac_sysid_csv_sha256": "934494c1eb62c1802da582ff8b0e288a03d53c1c748ebcc6a91f68575ca4d965",
+    "isaac_sysid_loader_readback": {
+      "commands_shape": [
+        2880,
+        6
+      ],
+      "duration_s": 23.991666666666667,
+      "extension": "isaacsim.robot_setup.sysid",
+      "num_joints": 6,
+      "positions_shape": [
+        2880,
+        6
+      ],
+      "samples": 2880
+    },
+    "rich_telemetry_csv_sha256": "c34b0e141a1afedf779bfe5a8e65f6c373d2a53b39b512219bf703522a152eb1"
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_dt_s": 0.008333333333333333,
+  "physics_steps": 2910,
+  "pose_order": [
+    "CHIRP_J1",
+    "CHIRP_J2",
+    "CHIRP_J3",
+    "CHIRP_J4",
+    "CHIRP_J5",
+    "CHIRP_J6"
+  ],
+  "pose_summaries": [
+    {
+      "amplitude_rad": 0.18,
+      "excited_joint_index": 0,
+      "final_rad": [
+        -0.15741762518882751,
+        0.6841274499893188,
+        1.9374898672103882,
+        -1.0508031845092773,
+        1.0037042030841548e-10,
+        0.3999968469142914
+      ],
+      "frequency_hz": {
+        "end": 1.1,
+        "start": 0.2
+      },
+      "maximum_final_joint_error_rad": 2.101319417380232e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        0.04998448118567467,
+        0.13511671125888824,
+        0.09519246965646744,
+        0.03287563845515251,
+        0.002584874862805009,
+        0.019199222326278687
+      ],
+      "pose_id": "CHIRP_J1",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.4
+      ]
+    },
+    {
+      "amplitude_rad": 0.14,
+      "excited_joint_index": 1,
+      "final_rad": [
+        -0.15741491317749023,
+        0.6841351389884949,
+        1.9375089406967163,
+        -1.0508332252502441,
+        -1.397374577161159e-10,
+        0.3999975025653839
+      ],
+      "frequency_hz": {
+        "end": 1.1800000000000002,
+        "start": 0.2
+      },
+      "maximum_final_joint_error_rad": 1.1301918995343385e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        4.239844929543324e-05,
+        0.003871323773637414,
+        0.005553652066737413,
+        0.0016775873955339193,
+        1.0112731615663506e-05,
+        4.733242531074211e-05
+      ],
+      "pose_id": "CHIRP_J2",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.4
+      ]
+    },
+    {
+      "amplitude_rad": 0.14,
+      "excited_joint_index": 2,
+      "final_rad": [
+        -0.15741649270057678,
+        0.6841240525245667,
+        1.9375224113464355,
+        -1.0508142709732056,
+        -1.496193946515234e-09,
+        0.4000001847743988
+      ],
+      "frequency_hz": {
+        "end": 1.26,
+        "start": 0.2
+      },
+      "maximum_final_joint_error_rad": 2.2049421548153703e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        6.182857759995386e-05,
+        0.006360447965562344,
+        0.021411022171378136,
+        0.0060693612322211266,
+        5.0029750127578154e-05,
+        0.00022775436809752136
+      ],
+      "pose_id": "CHIRP_J3",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.4
+      ]
+    },
+    {
+      "amplitude_rad": 0.14,
+      "excited_joint_index": 3,
+      "final_rad": [
+        -0.1574147343635559,
+        0.6841250658035278,
+        1.937509536743164,
+        -1.0508019924163818,
+        -6.423363507757074e-10,
+        0.3999994099140167
+      ],
+      "frequency_hz": {
+        "end": 1.34,
+        "start": 0.2
+      },
+      "maximum_final_joint_error_rad": 2.220528706931013e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        2.330576353415381e-05,
+        0.0022397618740797043,
+        0.006880363915115595,
+        0.004266291856765747,
+        5.439893720904365e-05,
+        4.0460832678945735e-05
+      ],
+      "pose_id": "CHIRP_J4",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.4
+      ]
+    },
+    {
+      "amplitude_rad": 0.24,
+      "excited_joint_index": 4,
+      "final_rad": [
+        -0.157414972782135,
+        0.6841238141059875,
+        1.937506079673767,
+        -1.0508214235305786,
+        1.0788520512505784e-06,
+        0.40000104904174805
+      ],
+      "frequency_hz": {
+        "end": 1.4200000000000002,
+        "start": 0.2
+      },
+      "maximum_final_joint_error_rad": 5.717748879696671e-06,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        7.039222964522196e-06,
+        2.5645606001489796e-05,
+        0.00010200963879469782,
+        0.00010287609620718285,
+        0.00040991380228661,
+        3.145831578876823e-05
+      ],
+      "pose_id": "CHIRP_J5",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.4
+      ]
+    },
+    {
+      "amplitude_rad": 0.22,
+      "excited_joint_index": 5,
+      "final_rad": [
+        -0.15741613507270813,
+        0.6841228604316711,
+        1.9375029802322388,
+        -1.0508285760879517,
+        9.734042460962655e-10,
+        0.39999455213546753
+      ],
+      "frequency_hz": {
+        "end": 1.5,
+        "start": 0.2
+      },
+      "maximum_final_joint_error_rad": 5.447864532492908e-06,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        3.388418190297671e-05,
+        0.00015757222718093544,
+        0.0006565097719430923,
+        9.075409616343677e-05,
+        8.069800969678909e-06,
+        0.0004971011658199131
+      ],
+      "pose_id": "CHIRP_J6",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.4
+      ]
+    }
+  ],
+  "profile_schema": "tactevra.isaac_lm0b_geometry_prior_profile.v1",
+  "receipt_sha256": "8099b87b087f6bf82e2b452d90a58723c399bcf02fc3c719921f0014e1113de4",
+  "samples": 2880,
+  "schema": "tactevra.isaac_lm0b_independent_joint_chirp.v1",
+  "source_bindings": {
+    "bundle_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42",
+    "profile_file_sha256": "768829bc8c131efe41e8866b6a18900a24b3f77e2ef97b367b55cffbfcf9881a",
+    "usd_sha256": "50097b9c7652942bf121892b2dbbbefd9bc3805bdf7cacbe80c97804ab275a3c"
+  },
+  "state_teleports_after_initialization": 0,
+  "status": "PASS",
+  "telemetry_quality": {
+    "channels": {
+      "command": true,
+      "contact_force": false,
+      "end_effector_pose": false,
+      "position": true,
+      "torque": false,
+      "velocity": true
+    },
+    "chunk_coverage_fraction": 0.998263285863147,
+    "command_lag": {
+      "common_mode_lag_samples": 10.392815411814688,
+      "common_mode_lag_seconds": 0.0866067950984508,
+      "dt_seconds": 0.00833333333333286,
+      "joints": [
+        {
+          "correlation_peak": 0.9998778580398455,
+          "joint_index": 0,
+          "lag_samples": 10.437466025046131,
+          "lag_seconds": 0.08697888354204615,
+          "residual_samples": 0.04465061323144326
+        },
+        {
+          "correlation_peak": 0.9996224254453135,
+          "joint_index": 1,
+          "lag_samples": 10.447180083001756,
+          "lag_seconds": 0.08705983402500969,
+          "residual_samples": 0.054364671187068225
+        },
+        {
+          "correlation_peak": 0.999587915744649,
+          "joint_index": 2,
+          "lag_samples": 10.3159500849179,
+          "lag_seconds": 0.08596625070764427,
+          "residual_samples": -0.07686532689678849
+        },
+        {
+          "correlation_peak": 0.9996585774256,
+          "joint_index": 3,
+          "lag_samples": 10.274444718364528,
+          "lag_seconds": 0.08562037265303286,
+          "residual_samples": -0.11837069345016005
+        },
+        {
+          "correlation_peak": 0.9994856953622338,
+          "joint_index": 4,
+          "lag_samples": 10.640767583024372,
+          "lag_seconds": 0.08867306319186473,
+          "residual_samples": 0.24795217120968438
+        },
+        {
+          "correlation_peak": 0.9993758703006185,
+          "joint_index": 5,
+          "lag_samples": 10.348164798583245,
+          "lag_seconds": 0.08623470665485547,
+          "residual_samples": -0.04465061323144326
+        }
+      ],
+      "max_lag_samples": 120,
+      "residual_spread_samples": 0.24795217120968438,
+      "suggested_command_alignment_seconds": 0.0866067950984508
+    },
+    "command_matches_position": false,
+    "dt_max": 0.008333333333336412,
+    "dt_median": 0.00833333333333286,
+    "dt_min": 0.00833333333333286,
+    "duration_seconds": 23.991666666666667,
+    "error_count": 0,
+    "excitation_range_by_joint": [
+      0.3890601024031639,
+      0.4495915174484253,
+      1.364207923412323,
+      1.0569204688072205,
+      0.39123986661434174,
+      0.5510552190244198
+    ],
+    "excitation_velocity_rms_by_joint": [
+      0.15146247515588218,
+      0.16505984641886895,
+      0.3272198265294401,
+      0.2819946984188035,
+      0.17402576367215872,
+      0.22729179701788652
+    ],
+    "finite": {
+      "command": true,
+      "contact_force": true,
+      "end_effector_pose": true,
+      "position": true,
+      "time": true,
+      "torque": true,
+      "velocity": true
+    },
+    "issues": [
+      {
+        "code": "command_lag_common_mode",
+        "message": "Measured response lags commands by a common-mode 10.4 samples (~87 ms) uniformly across joints \u2014 typically trajectory-generator smoothing/lookahead in the recording, not a robot property. Set telemetry.command_alignment_seconds = 0.0866 to realign the command series at load; uncorrected, the solve mis-attributes the delay to drive gains, damping, and friction. The per-joint residual spread after removing the common mode (0.25 samples) is actuator latency for actuator-model identification, not part of this correction.",
+        "severity": "warning"
+      }
+    ],
+    "nominal_sample_rate_hz": 120.0,
+    "num_joints": 6,
+    "sample_count": 2880,
+    "timestamp_jitter_ratio": 1.0225760509703703e-13,
+    "train_chunk_count": 5,
+    "validation_chunk_count": 1,
+    "warning_count": 1,
+    "weak_excitation_joint_indices": []
+  },
+  "threshold_rad": 0.001,
+  "trajectory": "independent-chirp"
+}

@@ -196,6 +196,12 @@ bounded preflight. The run also measures an approximately `83 ms` common lag
 and an outlying DOF-4 residual lag. Command alignment and actuator-delay
 separation must therefore precede the expanded solve; otherwise the optimizer
 would incorrectly absorb timing error into drive gains.
+The follow-up independent chirp resolves that ambiguity: every joint's
+command/response correlation exceeds `0.999`, the common lag is
+`0.0866067950984508 s`, and residual spread is below `0.25` sample. The earlier
+DOF-4 one-cycle offset was therefore a fixed-frequency alias, not evidence of a
+large wrist-specific delay. The next expanded preflight may apply the measured
+common alignment while keeping per-joint actuator delay disabled.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent
