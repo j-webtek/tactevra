@@ -101,6 +101,14 @@ python software/integrations/isaac_sim/drive_controlled_hover_campaign.py `
   --status-output C:\IsaacSim\evidence\lm0-campaign.status.json
 ```
 
+The same probe accepts the separately bound
+[`../../config/isaac_lm0b_gravity_characterization_profile.json`](../../config/isaac_lm0b_gravity_characterization_profile.json)
+to exercise the noncontact hover at standard gravity. Its retained result is a
+control-path characterization only: the profile deliberately marks every
+center of mass as a link-origin placeholder. A lower tracking error than LM0A
+does not imply a better physical model. Geometry-derived mass properties and
+measured physical traces are required before parameter fitting.
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment

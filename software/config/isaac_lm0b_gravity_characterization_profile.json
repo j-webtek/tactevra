@@ -1,0 +1,42 @@
+{
+  "schema": "tactevra.isaac_lm0b_gravity_characterization_profile.v1",
+  "status": "PROVISIONAL_SIMULATION_ONLY",
+  "simulation_only": true,
+  "physical_authority": false,
+  "gravity_m_s2": 9.80665,
+  "physics_dt_s": 0.008333333333333333,
+  "initial_settle_steps": 30,
+  "target_steps": 240,
+  "maximum_final_joint_error_rad": 0.001,
+  "dof": {
+    "stiffness": 100.0,
+    "damping": 10.0,
+    "maximum_effort": 100.0,
+    "maximum_velocity_rad_s": 2.0
+  },
+  "rigid_body_mass_kg": {
+    "/roarm_m3/Geometry/world/base_link": 0.18,
+    "/roarm_m3/Geometry/world/base_link/link1": 0.12,
+    "/roarm_m3/Geometry/world/base_link/link1/link2": 0.24,
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3": 0.16,
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4": 0.12,
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5": 0.12,
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/gripper_link": 0.081
+  },
+  "diagonal_inertia_kg_m2": [0.001, 0.001, 0.001],
+  "provenance": {
+    "mass_total_kg": {
+      "value": 1.021,
+      "class": "UPSTREAM",
+      "note": "Published product mass distributed provisionally across links."
+    },
+    "mass_distribution": {"class": "PROVISIONAL_RANGE"},
+    "center_of_mass": {
+      "class": "PLACEHOLDER",
+      "note": "All centers remain at link origins; LM0B must replace these with geometry priors before system identification."
+    },
+    "inertia": {"class": "PROVISIONAL_RANGE"},
+    "drive_gains": {"class": "PROVISIONAL_RANGE"},
+    "gravity": {"class": "SI_DEFINED"}
+  }
+}
