@@ -19,8 +19,10 @@ from typing import Any, Iterable
 PROFILE_SCHEMA = "tactevra.isaac_lm1_representative_key_mechanics.v1"
 RECEIPT_SCHEMA = "tactevra.isaac_lm1_key_mechanics_contract_receipt.v1"
 NATIVE_RECEIPT_SCHEMA = "tactevra.isaac_lm1_native_h_key_replay.v1"
+TCP_BINDING_SCHEMA = "tactevra.isaac_lm1_robot_tcp_key_binding.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
+NATIVE_H_PRESS_DEPTH_MM = 2.7
 DISPOSITIONS = (
     "ACCEPTED",
     "SHALLOW_PRESS",
@@ -382,7 +384,7 @@ def build_native_tip_trajectory(
     if rest_top_z_m <= 0 or tip_radius_m <= 0 or dt <= 0:
         raise MechanicsContractError("native trajectory dimensions and time step must be positive")
     hover_z = rest_top_z_m + tip_radius_m + 0.002
-    pressed_z = rest_top_z_m + tip_radius_m - 0.0027
+    pressed_z = rest_top_z_m + tip_radius_m - NATIVE_H_PRESS_DEPTH_MM / 1000.0
     segments = ((60, hover_z, hover_z), (180, hover_z, pressed_z),
                 (60, pressed_z, pressed_z), (180, pressed_z, hover_z),
                 (120, hover_z, hover_z))
@@ -394,6 +396,128 @@ def build_native_tip_trajectory(
             smooth = fraction * fraction * (3.0 - 2.0 * fraction)
             result.append({"step": step, "time_s": step * dt, "tip_z_m": start + (end - start) * smooth})
             step += 1
+    return result
+
+
+def bind_robot_tcp_contact_requirement(
+    profile: dict[str, Any],
+    bundle: dict[str, Any],
+    *,
+    key_id: str = "H",
+    press_depth_mm: float = NATIVE_H_PRESS_DEPTH_MM,
+) -> dict[str, Any]:
+    """Bind a replay schedule endpoint to the proven key-mechanics stroke.
+
+    This is deliberately a zero-authority planning contract.  It does not
+    invent joint angles: an insufficient endpoint produces the corrected
+    board-frame TCP target that the governed IK/schedule pipeline must solve
+    and replay before native robot/key contact can be claimed.
+    """
+    if profile.get("schema") != PROFILE_SCHEMA:
+        raise MechanicsContractError("unexpected mechanics profile schema")
+    expected_profile_hash = profile.get("profile_sha256")
+    unsigned_profile = {
+        name: value for name, value in profile.items() if name != "profile_sha256"
+    }
+    if expected_profile_hash != _canonical_sha256(unsigned_profile):
+        raise MechanicsContractError("mechanics profile hash mismatch")
+    if key_id not in profile.get("regions", {}):
+        raise MechanicsContractError("robot TCP binding requires a representative key")
+
+    depth = _finite_number(press_depth_mm, "press depth")
+    activation = _finite_number(
+        profile["mechanics_prior"]["activation_mm"]["nominal"], "activation depth"
+    )
+    travel = _finite_number(
+        profile["mechanics_prior"]["travel_mm"]["nominal"], "key travel"
+    )
+    if not activation <= depth <= travel:
+        raise MechanicsContractError("press depth must be inside activation and travel bounds")
+
+    if bundle.get("schema") not in {
+        "tactevra.arm_joint_schedule_replay_bundle.v1",
+        "tactevra.arm_joint_schedule_replay_bundle.v2",
+    }:
+        raise MechanicsContractError("unsupported replay bundle schema")
+    claimed_bundle_hash = bundle.get("bundle_sha256")
+    unsigned_bundle = dict(bundle)
+    unsigned_bundle.pop("bundle_sha256", None)
+    if claimed_bundle_hash != _canonical_sha256(unsigned_bundle):
+        raise MechanicsContractError("replay bundle hash mismatch")
+    if (
+        bundle.get("hardware_access") is not False
+        or bundle.get("physical_authority") is not False
+        or bundle.get("controller_commands") != []
+        or bundle.get("hardware_writes") != 0
+        or bundle.get("physical_movements") != 0
+    ):
+        raise MechanicsContractError("replay bundle crossed the zero-authority boundary")
+
+    endpoints = [
+        item
+        for item in bundle.get("samples", [])
+        if item.get("target_id") == key_id
+        and item.get("phase") == "CONTACT"
+        and item.get("phase_endpoint") is True
+    ]
+    if not endpoints:
+        raise MechanicsContractError("replay bundle lacks the requested contact endpoint")
+    targets = [item.get("expected_tool_tip_board_mm") for item in endpoints]
+    if any(not isinstance(target, list) or len(target) != 3 for target in targets):
+        raise MechanicsContractError("contact endpoint lacks a board-frame TCP target")
+    parsed_targets = [
+        [_finite_number(value, "contact endpoint coordinate") for value in target]
+        for target in targets
+    ]
+    if any(
+        not math.isclose(value, parsed_targets[0][axis], abs_tol=1e-9)
+        for target in parsed_targets[1:]
+        for axis, value in enumerate(target)
+    ):
+        raise MechanicsContractError("repeated key contact endpoints disagree")
+
+    center = profile["regions"][key_id]["center_board_xy_mm"]
+    source_target = parsed_targets[0]
+    if not all(
+        math.isclose(source_target[axis], center[axis], abs_tol=1e-6)
+        for axis in range(2)
+    ):
+        raise MechanicsContractError("contact endpoint is not centered on the selected key")
+    target_plane = _finite_number(profile["target_plane_z_board_mm"], "target plane")
+    scheduled_compression = max(0.0, target_plane - source_target[2])
+    corrected_target = [center[0], center[1], target_plane - depth]
+    sufficient = activation <= scheduled_compression <= travel
+    result: dict[str, Any] = {
+        "schema": TCP_BINDING_SCHEMA,
+        "status": (
+            "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY"
+            if sufficient
+            else "BLOCKED_CONTACT_ENDPOINT_REQUIRES_OVERTRAVEL"
+        ),
+        "key_id": key_id,
+        "source_bundle_sha256": claimed_bundle_hash,
+        "profile_sha256": expected_profile_hash,
+        "source_contact_endpoint_count": len(endpoints),
+        "source_contact_target_board_mm": source_target,
+        "source_scheduled_compression_mm": scheduled_compression,
+        "activation_depth_mm": activation,
+        "travel_limit_mm": travel,
+        "required_press_depth_mm": depth,
+        "required_contact_target_board_mm": corrected_target,
+        "joint_schedule_regeneration_required": not sufficient,
+        "ik_qualification_required": True,
+        "native_replay_required": True,
+        "authority": dict(profile["authority"]),
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "limitations": [
+            "corrected_target_is_cartesian_input_not_an_ik_solution",
+            "mechanics_are_synthetic_bounded_priors_not_physical_measurements",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    result["binding_sha256"] = _canonical_sha256(result)
     return result
 
 
@@ -609,24 +733,44 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--status-output", type=Path, required=True)
     parser.add_argument("--native-h-probe", action="store_true")
+    parser.add_argument(
+        "--robot-tcp-bundle",
+        type=Path,
+        help="audit a zero-authority replay bundle against the H-key mechanics stroke",
+    )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.status_output.parent.mkdir(parents=True, exist_ok=True)
     try:
+        if args.native_h_probe and args.robot_tcp_bundle is not None:
+            raise MechanicsContractError(
+                "native H probe and robot TCP binding audit are mutually exclusive"
+            )
         if args.native_h_probe:
             result = run_native_h_probe(
                 args.layout.resolve(strict=True),
                 output_path=args.output,
                 status_path=args.status_output,
             )
+        elif args.robot_tcp_bundle is not None:
+            profile = build_profile(args.layout.resolve(strict=True))
+            result = bind_robot_tcp_contact_requirement(
+                profile,
+                json.loads(args.robot_tcp_bundle.resolve(strict=True).read_bytes()),
+            )
         else:
             result = run_contract_campaign(args.layout.resolve(strict=True))
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        evidence_sha256 = result.get("receipt_sha256", result.get("binding_sha256"))
+        if not isinstance(evidence_sha256, str):
+            raise MechanicsContractError("result lacks an evidence digest")
         args.status_output.write_text(json.dumps({
             "status": result["status"],
-            "receipt_sha256": result["receipt_sha256"],
+            "receipt_sha256": evidence_sha256,
         }, sort_keys=True) + "\n", encoding="utf-8")
-        return 0 if result["status"] == "PASS" else 2
+        return 0 if result["status"] in {
+            "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY"
+        } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({
             "status": "ERROR", "type": type(exc).__name__, "message": str(exc),

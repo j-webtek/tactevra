@@ -277,6 +277,16 @@ key, disables gravity to represent the keyboard's preloaded return mechanism,
 and grants zero physical or motion authority. The next LM1 increment must bind
 the same key and evaluator to the drive-controlled robot TCP.
 
+ARM-187 establishes the robot-TCP/mechanics handoff. The retained shared-emitter
+schedule terminates `H` CONTACT at the `21.0 mm` key rest plane, so it commands
+no mechanism compression. A hash-bound, zero-authority contract now rejects
+that endpoint and derives the next governed Cartesian input:
+`[216.55, 154.0, 18.3] mm`, corresponding to the `2.7 mm` stroke accepted by
+the ARM-186 native replay. This does not qualify IK or contact. It makes those
+missing steps explicit: regenerate the schedule, pass the existing IK and
+collision gates, then replay the drive-controlled robot TCP against the same
+native key and evaluator.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;
