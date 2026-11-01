@@ -808,6 +808,30 @@ Exit code `2` with `BLOCKED_CONTACT_ENDPOINT_REQUIRES_OVERTRAVEL` is expected
 for the retained bundle. It is a useful fail-closed planning result, not an
 Isaac or infrastructure failure.
 
+ARM-188 converts that governed target into a fresh Cartesian schedule request.
+The request preserves all 133 source samples, their timestamps, semantic
+phases, action indices, and target order. Only the two `H` CONTACT endpoints
+(sequences `35` and `38`) change to `[216.55, 154.0, 18.3] mm`. Source joint
+positions are intentionally omitted because they solve the old `21.0 mm`
+surface endpoint. The external request at
+`C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001` has SHA-256
+`0237336223feca90f830c4162cb6cac1606f0438636802e8aa082f65c08601f7` and
+status `READY_FOR_IK_QUALIFICATION`. It is not an IK, collision, or contact
+pass.
+
+Reproduce it with:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001'
+New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --robot-tcp-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --regenerate-cartesian-schedule `
+  --output "$artifactDir\request.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 Run its focused tests with:
 
 ```powershell
