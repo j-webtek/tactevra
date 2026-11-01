@@ -202,6 +202,16 @@ command/response correlation exceeds `0.999`, the common lag is
 DOF-4 one-cycle offset was therefore a fixed-frequency alias, not evidence of a
 large wrist-specific delay. The next expanded preflight may apply the measured
 common alignment while keeping per-joint actuator delay disabled.
+That aligned expanded rehearsal is now complete. It fits stiffness and damping
+for all six joints against five independent chirp chunks and validates on the
+sixth. All 12 selected terms are identifiable, the telemetry-quality check has
+no weak joints, and the accepted candidate reaches `0.028078358620405197`
+training normalized cost and `0.0036708096663157145` held-out normalized cost.
+The solve writes neither parameters nor USD. Its `warn` assessment and
+simulation-only provenance deliberately prevent promotion: the next evidence
+gain must come from a distinct validation excitation family and, later, a
+calibrated physical trace rather than additional optimization on the same
+chirp family.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

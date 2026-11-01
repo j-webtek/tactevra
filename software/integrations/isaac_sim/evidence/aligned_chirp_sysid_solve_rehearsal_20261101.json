@@ -1,0 +1,59 @@
+{
+  "bindings": {
+    "nvidia_solve_report_sha256": "8635f32708d39df7e7a63f33bfe907f4c5302b2af116e1bb39e7bbc644ab0dd5",
+    "run_spec_sha256": "d5aa75f535ec1fabb13ebb8817d1747708f653d5c254983415d1a28048d7dc2d"
+  },
+  "hardware_access": false,
+  "identifiability": {
+    "condition": 41.47387318684005,
+    "identifiable_count": 12,
+    "selected_count": 12,
+    "weak_excitation_dof_indices": []
+  },
+  "limitations": [
+    "simulation-generated telemetry is not physical robot telemetry",
+    "stiffness and damping columns remain highly correlated",
+    "no calibrated link-side torque is available for inertial fitting",
+    "candidate parameters are not applied to the USD",
+    "common command alignment is derived from simulation-to-simulation chirp evidence"
+  ],
+  "parameters_written": false,
+  "physical_authority": false,
+  "receipt_sha256": "58a7eeb3affc2b64b8088990aa912076686719b083bf6abf35abac0ac9aa0678",
+  "schema": "tactevra.isaac_lm0b_aligned_chirp_sysid_rehearsal.v1",
+  "selected_candidate": {
+    "accepted": true,
+    "iteration": 1,
+    "source": "last_accepted",
+    "theta": [
+      0.9905217289924622,
+      0.9984173774719238,
+      1.0021249055862427,
+      1.0016369819641113,
+      1.000901699066162,
+      1.0013831853866577,
+      1.0032626390457153,
+      0.995782732963562,
+      1.0036803483963013,
+      0.99850994348526,
+      0.9976037740707397,
+      1.0000512599945068
+    ],
+    "training_normalized_cost": 0.028078358620405197
+  },
+  "stage_saved": false,
+  "status": "PASS_ALIGNED_CHIRP_SYSID_REHEARSAL_WITH_WARNINGS",
+  "tuning_assessment": {
+    "issue_codes": [
+      "limited_excitation_coverage"
+    ],
+    "status": "warn",
+    "validation_to_training_cost_ratio": 0.13073448188128958
+  },
+  "validation": {
+    "chunk_count": 1,
+    "normalized_cost": 0.0036708096663157145,
+    "position_rmse_rad": 0.031947098672389984,
+    "velocity_rmse_rad_s": 0.16530349850654602
+  }
+}
