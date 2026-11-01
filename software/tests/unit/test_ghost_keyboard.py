@@ -287,3 +287,60 @@ def test_robot_tcp_cartesian_regeneration_rejects_noncontiguous_source():
     bundle['bundle_sha256']=mechanics._canonical_sha256(unsigned)
     with pytest.raises(mechanics.MechanicsContractError,match='not contiguous'):
         mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+
+
+def test_robot_tcp_cartesian_schedule_passes_canonical_ik_screen():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    request=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    result=mechanics.screen_robot_tcp_cartesian_schedule_ik(
+        request,bundle,profile,workspace=ROOT,
+    )
+    assert result['status']=='READY_FOR_COLLISION_QUALIFICATION'
+    assert result['sample_count']==result['evaluated_sample_count']==133
+    assert result['ik_all_samples_accepted'] is True
+    assert [
+        row['waypoint_sequence'] for row in result['modified_contact_results']
+    ]==[35,38]
+    for row in result['modified_contact_results']:
+        assert row['accepted'] is True
+        assert row['position_error_mm']<0.001
+        assert row['minimum_normalized_arm_joint_margin']>0.15
+        assert row['maximum_joint_delta_rad']<0.04
+    assert result['collision_screening_executed'] is False
+    assert result['continuous_collision_proven'] is False
+    assert result['hardware_access'] is False
+    assert result['physical_authority'] is False
+    assert result['hardware_writes']==result['physical_movements']==0
+    unsigned={key:value for key,value in result.items() if key!='receipt_sha256'}
+    assert result['receipt_sha256']==mechanics._canonical_sha256(unsigned)
+
+
+def test_robot_tcp_cartesian_ik_screen_rejects_request_hash_tamper():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    request=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    request['samples'][35]['expected_tool_tip_board_mm'][2]=18.2
+    with pytest.raises(mechanics.MechanicsContractError,match='request hash mismatch'):
+        mechanics.screen_robot_tcp_cartesian_schedule_ik(
+            request,bundle,profile,workspace=ROOT,
+        )
+
+    request=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    request['required_contact_target_board_mm'][2]=18.2
+    for sequence in request['modified_contact_sequences']:
+        request['samples'][sequence]['expected_tool_tip_board_mm'][2]=18.2
+    unsigned={key:value for key,value in request.items() if key!='request_sha256'}
+    request['request_sha256']=mechanics._canonical_sha256(unsigned)
+    with pytest.raises(mechanics.MechanicsContractError,match='governed mechanics'):
+        mechanics.screen_robot_tcp_cartesian_schedule_ik(
+            request,bundle,profile,workspace=ROOT,
+        )

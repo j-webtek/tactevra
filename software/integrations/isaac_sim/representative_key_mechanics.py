@@ -23,6 +23,7 @@ TCP_BINDING_SCHEMA = "tactevra.isaac_lm1_robot_tcp_key_binding.v1"
 TCP_CARTESIAN_SCHEDULE_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_cartesian_schedule_request.v1"
 )
+TCP_IK_SCREEN_SCHEMA = "tactevra.isaac_lm1_robot_tcp_cartesian_ik_screen.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -624,6 +625,260 @@ def build_robot_tcp_cartesian_schedule_request(
     return result
 
 
+def screen_robot_tcp_cartesian_schedule_ik(
+    request: dict[str, Any],
+    source_bundle: dict[str, Any],
+    profile: dict[str, Any],
+    *,
+    workspace: Path,
+) -> dict[str, Any]:
+    """Solve a regenerated Cartesian request with the canonical IK gates."""
+    if request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA:
+        raise MechanicsContractError("unexpected Cartesian schedule request schema")
+    claimed_request_hash = request.get("request_sha256")
+    unsigned_request = dict(request)
+    unsigned_request.pop("request_sha256", None)
+    if claimed_request_hash != _canonical_sha256(unsigned_request):
+        raise MechanicsContractError("Cartesian schedule request hash mismatch")
+    claimed_bundle_hash = source_bundle.get("bundle_sha256")
+    unsigned_bundle = dict(source_bundle)
+    unsigned_bundle.pop("bundle_sha256", None)
+    if claimed_bundle_hash != _canonical_sha256(unsigned_bundle):
+        raise MechanicsContractError("IK source bundle hash mismatch")
+    if request.get("source_bundle_sha256") != claimed_bundle_hash:
+        raise MechanicsContractError("Cartesian request and IK source bundle differ")
+    expected_request = build_robot_tcp_cartesian_schedule_request(
+        profile, source_bundle
+    )
+    if expected_request.get("request_sha256") != claimed_request_hash:
+        raise MechanicsContractError(
+            "Cartesian request differs from the governed mechanics regeneration"
+        )
+    for document, label in ((request, "request"), (source_bundle, "source bundle")):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed the zero-authority boundary")
+
+    samples = request.get("samples")
+    source_samples = source_bundle.get("samples")
+    if (
+        not isinstance(samples, list)
+        or not isinstance(source_samples, list)
+        or not samples
+        or len(samples) != len(source_samples)
+        or len(samples) > 256
+    ):
+        raise MechanicsContractError("IK sample count is absent, crossed, or out of bounds")
+    modified = request.get("modified_contact_sequences")
+    if not isinstance(modified, list) or not modified:
+        raise MechanicsContractError("IK request lacks modified contact sequences")
+    modified_set = set(modified)
+    if len(modified_set) != len(modified):
+        raise MechanicsContractError("modified contact sequences are not unique")
+    for sequence, (sample, source) in enumerate(zip(samples, source_samples)):
+        if sample.get("sequence") != sequence or source.get("sequence") != sequence:
+            raise MechanicsContractError("IK sample sequence is not contiguous")
+        for field in (
+            "time_from_start_ns", "phase", "phase_endpoint", "action_index", "target_id"
+        ):
+            if sample.get(field) != source.get(field):
+                raise MechanicsContractError("Cartesian request changed source semantics")
+        if sequence not in modified_set and (
+            sample.get("expected_tool_tip_board_mm")
+            != source.get("expected_tool_tip_board_mm")
+        ):
+            raise MechanicsContractError("Cartesian request changed an unselected endpoint")
+        if sequence in modified_set and (
+            sample.get("expected_tool_tip_board_mm")
+            != request.get("required_contact_target_board_mm")
+        ):
+            raise MechanicsContractError("modified contact target differs from the request")
+
+    try:
+        from rocell.application._pinned_model import load_pinned_urdf
+        from rocell.application.context import load_simulation_context
+        from rocell.application.trajectory_simulation import (
+            CartesianRouteWaypoint,
+            TrajectorySimulationPolicy,
+            evaluate_joint_trajectory_solution,
+        )
+        from rocell.application.typing_trajectory_ik_screen_v1 import (
+            canonicalize_typing_ik_evidence_v1,
+        )
+        from rocell.geometry import JointPosition, Point3Mm
+        from rocell.kinematics import (
+            ARM_JOINT_NAMES,
+            BoardToolTipTarget,
+            IkOptions,
+            RoArmM3NumericalIk,
+        )
+        from rocell.motion import MotionPhase
+        from rocell.simulation.virtual_profile import load_virtual_commissioning_profile
+    except ImportError as exc:
+        raise MechanicsContractError(
+            "canonical IK runtime is unavailable; include software/src on PYTHONPATH"
+        ) from exc
+
+    root = workspace.resolve(strict=True)
+    context = load_simulation_context(
+        root, root / "software/config/system_manifest.json"
+    )
+    virtual_profile = load_virtual_commissioning_profile(context)
+    expected_virtual_hash = source_bundle.get("source", {}).get(
+        "virtual_profile_sha256"
+    )
+    if virtual_profile.source_sha256 != expected_virtual_hash:
+        raise MechanicsContractError("virtual commissioning profile lineage changed")
+    tool_length_mm = float(
+        virtual_profile.study_input.keyboard_tool_length_mm
+    )
+    scenario = context.scenario
+    model = load_pinned_urdf(scenario.model_path, scenario.model_sha256).model
+    initial_seed = source_samples[0].get("joint_positions_rad")
+    if not isinstance(initial_seed, dict) or tuple(initial_seed) != ARM_JOINT_NAMES:
+        raise MechanicsContractError("source bundle lacks the canonical initial joint seed")
+    previous = {
+        name: _finite_number(initial_seed[name], f"initial seed {name}")
+        for name in ARM_JOINT_NAMES
+    }
+    bounds = scenario.controller_joint_intersection_rad
+    solver = RoArmM3NumericalIk(
+        model=model,
+        board_T_world=virtual_profile.study_input.board_T_vendor_world,
+        hand_tcp_to_tip_z_mm=-tool_length_mm,
+        fixed_gripper_position=scenario.fixed_gripper_position,
+        ready_arm_joint_positions={
+            name: JointPosition.radians(value) for name, value in previous.items()
+        },
+        gripper_bounds_rad=scenario.controller_gripper_intersection_rad,
+        options=IkOptions(
+            max_attempts=scenario.ik_policy.max_attempts,
+            max_iterations_per_attempt=scenario.ik_policy.max_iterations_per_attempt,
+        ),
+        joint_bounds_rad=bounds,
+    )
+    policy = TrajectorySimulationPolicy(
+        maximum_cartesian_step_mm=30.0,
+        maximum_joint_step_rad=0.35,
+        minimum_normalized_arm_joint_margin=0.01,
+        maximum_refinement_rounds=0,
+        maximum_waypoints_per_round=256,
+        maximum_total_ik_solves=256,
+        maximum_route_targets=len(request["ordered_target_ids"]),
+    )
+    results: list[dict[str, Any]] = []
+    previous_point = None
+    for sample in samples:
+        point = Point3Mm("board", *sample["expected_tool_tip_board_mm"])
+        distance = (
+            0.0
+            if previous_point is None
+            else math.dist(
+                (previous_point.x, previous_point.y, previous_point.z),
+                (point.x, point.y, point.z),
+            )
+        )
+        waypoint = CartesianRouteWaypoint(
+            sequence=sample["sequence"],
+            phase=MotionPhase(sample["phase"]),
+            action_index=sample["action_index"],
+            semantic_target=sample["target_id"],
+            point_board=point,
+            distance_from_previous_mm=distance,
+            source_geometric_sequence=sample["sequence"],
+            source_check_id=claimed_request_hash,
+            source_path_check_passed=True,
+            inherited_collision_ids=(),
+            phase_endpoint=sample["phase_endpoint"],
+        )
+        solved = solver.solve(
+            BoardToolTipTarget(point),
+            seed_joint_positions=({
+                name: JointPosition.radians(value)
+                for name, value in previous.items()
+            },),
+        )
+        evaluated = evaluate_joint_trajectory_solution(
+            waypoint, solved, solver, bounds, previous, policy
+        )
+        canonical = canonicalize_typing_ik_evidence_v1(evaluated.to_dict())
+        results.append(canonical)
+        if not evaluated.accepted:
+            break
+        previous = dict(evaluated.solution_arm_joint_positions_rad)
+        previous_point = point
+
+    all_accepted = len(results) == len(samples) and all(
+        item["accepted"] for item in results
+    )
+    accepted = [item for item in results if item["accepted"]]
+    result: dict[str, Any] = {
+        "schema": TCP_IK_SCREEN_SCHEMA,
+        "status": (
+            "READY_FOR_COLLISION_QUALIFICATION"
+            if all_accepted
+            else "BLOCKED_CANONICAL_IK_OR_CONTINUITY"
+        ),
+        "source_request_sha256": claimed_request_hash,
+        "source_bundle_sha256": claimed_bundle_hash,
+        "virtual_profile_sha256": virtual_profile.source_sha256,
+        "build_snapshot_sha256": context.snapshot.snapshot_hash,
+        "kinematic_model_sha256": scenario.model_sha256,
+        "tool_length_mm": tool_length_mm,
+        "initial_seed_source": "SOURCE_BUNDLE_SAMPLE_0_ONLY",
+        "initial_seed_joint_positions_rad": {
+            name: float(initial_seed[name]) for name in ARM_JOINT_NAMES
+        },
+        "policy": policy.to_dict(),
+        "sample_count": len(samples),
+        "evaluated_sample_count": len(results),
+        "ik_all_samples_accepted": all_accepted,
+        "joint_results": results,
+        "modified_contact_results": [
+            results[index] for index in modified if index < len(results)
+        ],
+        "metrics": {
+            "maximum_position_error_mm": max(
+                (item["position_error_mm"] for item in accepted), default=None
+            ),
+            "minimum_normalized_arm_joint_margin": min(
+                (
+                    item["minimum_normalized_arm_joint_margin"]
+                    for item in accepted
+                ),
+                default=None,
+            ),
+            "maximum_adjacent_joint_delta_rad": max(
+                (item["maximum_joint_delta_rad"] for item in accepted), default=None
+            ),
+        },
+        "collision_screening_executed": False,
+        "continuous_collision_proven": False,
+        "next_required_stage": (
+            "SCREEN_EXACT_JOINT_RESULTS_AGAINST_COLLISION_GEOMETRY"
+            if all_accepted
+            else "CORRECT_IK_COMPATIBILITY_OR_ROUTE_CONTINUITY"
+        ),
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "limitations": [
+            "virtual_profile_is_an_unmeasured_simulation_only_overlay",
+            "collision_and_native_contact_are_not_yet_qualified",
+            "initial_seed_is_retained_source_evidence_not_controller_feedback",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    result["receipt_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def assess_native_key_trace(
     profile: dict[str, Any],
     native_samples: Iterable[dict[str, Any]],
@@ -846,6 +1101,17 @@ def main() -> int:
         action="store_true",
         help="emit a mechanics-compatible Cartesian request for fresh IK qualification",
     )
+    parser.add_argument(
+        "--cartesian-request",
+        type=Path,
+        help="screen a regenerated Cartesian request through canonical IK gates",
+    )
+    parser.add_argument(
+        "--ik-source-bundle",
+        type=Path,
+        help="retained bundle supplying lineage and the sample-0 synthetic seed",
+    )
+    parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.status_output.parent.mkdir(parents=True, exist_ok=True)
@@ -858,7 +1124,25 @@ def main() -> int:
             raise MechanicsContractError(
                 "Cartesian regeneration requires --robot-tcp-bundle"
             )
-        if args.native_h_probe:
+        if (args.cartesian_request is None) != (args.ik_source_bundle is None):
+            raise MechanicsContractError(
+                "IK screening requires both --cartesian-request and --ik-source-bundle"
+            )
+        if args.cartesian_request is not None and (
+            args.native_h_probe or args.robot_tcp_bundle is not None
+        ):
+            raise MechanicsContractError(
+                "IK screening is mutually exclusive with native and binding modes"
+            )
+        if args.cartesian_request is not None:
+            profile = build_profile(args.layout.resolve(strict=True))
+            result = screen_robot_tcp_cartesian_schedule_ik(
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
+                profile,
+                workspace=args.workspace,
+            )
+        elif args.native_h_probe:
             result = run_native_h_probe(
                 args.layout.resolve(strict=True),
                 output_path=args.output,
@@ -886,7 +1170,7 @@ def main() -> int:
         }, sort_keys=True) + "\n", encoding="utf-8")
         return 0 if result["status"] in {
             "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY",
-            "READY_FOR_IK_QUALIFICATION",
+            "READY_FOR_IK_QUALIFICATION", "READY_FOR_COLLISION_QUALIFICATION",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({
