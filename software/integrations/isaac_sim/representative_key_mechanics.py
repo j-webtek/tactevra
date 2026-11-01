@@ -20,6 +20,9 @@ PROFILE_SCHEMA = "tactevra.isaac_lm1_representative_key_mechanics.v1"
 RECEIPT_SCHEMA = "tactevra.isaac_lm1_key_mechanics_contract_receipt.v1"
 NATIVE_RECEIPT_SCHEMA = "tactevra.isaac_lm1_native_h_key_replay.v1"
 TCP_BINDING_SCHEMA = "tactevra.isaac_lm1_robot_tcp_key_binding.v1"
+TCP_CARTESIAN_SCHEDULE_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_cartesian_schedule_request.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -521,6 +524,106 @@ def bind_robot_tcp_contact_requirement(
     return result
 
 
+def build_robot_tcp_cartesian_schedule_request(
+    profile: dict[str, Any],
+    bundle: dict[str, Any],
+    *,
+    key_id: str = "H",
+    press_depth_mm: float = NATIVE_H_PRESS_DEPTH_MM,
+) -> dict[str, Any]:
+    """Regenerate Cartesian key-contact inputs without reusing stale IK.
+
+    The retained replay bundle is useful for ordered semantics and timing, but
+    its joint positions solve the old surface-only contact endpoint. This
+    contract therefore copies only Cartesian samples, replaces each selected
+    CONTACT endpoint with the mechanics-compatible target, and makes fresh IK
+    and collision qualification mandatory.
+    """
+    binding = bind_robot_tcp_contact_requirement(
+        profile, bundle, key_id=key_id, press_depth_mm=press_depth_mm
+    )
+    source_samples = bundle.get("samples")
+    if not isinstance(source_samples, list) or not source_samples:
+        raise MechanicsContractError("replay bundle samples are missing")
+
+    regenerated_samples: list[dict[str, Any]] = []
+    modified_sequences: list[int] = []
+    for sequence, source in enumerate(source_samples):
+        if not isinstance(source, dict) or source.get("sequence") != sequence:
+            raise MechanicsContractError("replay bundle sample sequence is not contiguous")
+        point = source.get("expected_tool_tip_board_mm")
+        if not isinstance(point, list) or len(point) != 3:
+            raise MechanicsContractError("replay bundle sample lacks a Cartesian target")
+        target = [
+            _finite_number(value, f"sample {sequence} Cartesian coordinate")
+            for value in point
+        ]
+        if (
+            source.get("target_id") == key_id
+            and source.get("phase") == "CONTACT"
+            and source.get("phase_endpoint") is True
+        ):
+            target = list(binding["required_contact_target_board_mm"])
+            if target != point:
+                modified_sequences.append(sequence)
+        regenerated_samples.append({
+            "sequence": sequence,
+            "time_from_start_ns": source.get("time_from_start_ns"),
+            "phase": source.get("phase"),
+            "phase_endpoint": source.get("phase_endpoint"),
+            "action_index": source.get("action_index"),
+            "target_id": source.get("target_id"),
+            "expected_tool_tip_board_mm": target,
+        })
+
+    if len(modified_sequences) != binding["source_contact_endpoint_count"]:
+        raise MechanicsContractError(
+            "Cartesian regeneration did not replace every selected contact endpoint"
+        )
+    contact_order = [
+        sample["target_id"]
+        for sample in regenerated_samples
+        if sample["phase"] == "CONTACT" and sample["phase_endpoint"] is True
+    ]
+    if contact_order != bundle.get("ordered_target_ids"):
+        raise MechanicsContractError("Cartesian regeneration changed target order or repetitions")
+
+    result: dict[str, Any] = {
+        "schema": TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        "status": "READY_FOR_IK_QUALIFICATION",
+        "source_bundle_sha256": bundle["bundle_sha256"],
+        "source_binding_sha256": binding["binding_sha256"],
+        "profile_sha256": profile["profile_sha256"],
+        "key_id": key_id,
+        "sample_count": len(regenerated_samples),
+        "total_time_ns": bundle.get("total_time_ns"),
+        "ordered_target_ids": list(bundle.get("ordered_target_ids", [])),
+        "modified_contact_sequences": modified_sequences,
+        "required_contact_target_board_mm": list(
+            binding["required_contact_target_board_mm"]
+        ),
+        "samples": regenerated_samples,
+        "joint_positions_included": False,
+        "source_joint_positions_reused": False,
+        "ik_qualification_required": True,
+        "collision_qualification_required": True,
+        "native_replay_required": True,
+        "authority": dict(profile["authority"]),
+        "hardware_access": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "limitations": [
+            "cartesian_schedule_is_not_an_ik_solution",
+            "source_joint_positions_are_intentionally_excluded",
+            "collision_and_native_contact_are_not_yet_qualified",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    result["request_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def assess_native_key_trace(
     profile: dict[str, Any],
     native_samples: Iterable[dict[str, Any]],
@@ -738,6 +841,11 @@ def main() -> int:
         type=Path,
         help="audit a zero-authority replay bundle against the H-key mechanics stroke",
     )
+    parser.add_argument(
+        "--regenerate-cartesian-schedule",
+        action="store_true",
+        help="emit a mechanics-compatible Cartesian request for fresh IK qualification",
+    )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.status_output.parent.mkdir(parents=True, exist_ok=True)
@@ -745,6 +853,10 @@ def main() -> int:
         if args.native_h_probe and args.robot_tcp_bundle is not None:
             raise MechanicsContractError(
                 "native H probe and robot TCP binding audit are mutually exclusive"
+            )
+        if args.regenerate_cartesian_schedule and args.robot_tcp_bundle is None:
+            raise MechanicsContractError(
+                "Cartesian regeneration requires --robot-tcp-bundle"
             )
         if args.native_h_probe:
             result = run_native_h_probe(
@@ -754,14 +866,18 @@ def main() -> int:
             )
         elif args.robot_tcp_bundle is not None:
             profile = build_profile(args.layout.resolve(strict=True))
-            result = bind_robot_tcp_contact_requirement(
-                profile,
-                json.loads(args.robot_tcp_bundle.resolve(strict=True).read_bytes()),
-            )
+            bundle = json.loads(args.robot_tcp_bundle.resolve(strict=True).read_bytes())
+            if args.regenerate_cartesian_schedule:
+                result = build_robot_tcp_cartesian_schedule_request(profile, bundle)
+            else:
+                result = bind_robot_tcp_contact_requirement(profile, bundle)
         else:
             result = run_contract_campaign(args.layout.resolve(strict=True))
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        evidence_sha256 = result.get("receipt_sha256", result.get("binding_sha256"))
+        evidence_sha256 = result.get(
+            "receipt_sha256",
+            result.get("binding_sha256", result.get("request_sha256")),
+        )
         if not isinstance(evidence_sha256, str):
             raise MechanicsContractError("result lacks an evidence digest")
         args.status_output.write_text(json.dumps({
@@ -769,7 +885,8 @@ def main() -> int:
             "receipt_sha256": evidence_sha256,
         }, sort_keys=True) + "\n", encoding="utf-8")
         return 0 if result["status"] in {
-            "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY"
+            "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY",
+            "READY_FOR_IK_QUALIFICATION",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({

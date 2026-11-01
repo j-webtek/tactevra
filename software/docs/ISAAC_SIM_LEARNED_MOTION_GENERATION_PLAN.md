@@ -287,6 +287,15 @@ missing steps explicit: regenerate the schedule, pass the existing IK and
 collision gates, then replay the drive-controlled robot TCP against the same
 native key and evaluator.
 
+ARM-188 completes the Cartesian regeneration step without laundering the old
+IK result. A hash-bound request preserves all 133 source timestamps and
+semantic samples, changes only the two `H` CONTACT endpoints (sequences `35`
+and `38`) to `[216.55, 154.0, 18.3] mm`, and excludes every source joint
+position. The external request hash is
+`0237336223feca90f830c4162cb6cac1606f0438636802e8aa082f65c08601f7`.
+Its `READY_FOR_IK_QUALIFICATION` status means the canonical IK and collision
+gates are now the next dependency; it does not claim reachability or contact.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;

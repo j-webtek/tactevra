@@ -237,3 +237,53 @@ def test_robot_tcp_binding_fails_closed_on_authority_or_hash_tamper():
     source['bundle_sha256']=mechanics._canonical_sha256(unsigned)
     with pytest.raises(mechanics.MechanicsContractError,match='zero-authority'):
         mechanics.bind_robot_tcp_contact_requirement(profile,source)
+
+
+def test_robot_tcp_cartesian_regeneration_replaces_only_h_contact_endpoints():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    result=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    assert result['status']=='READY_FOR_IK_QUALIFICATION'
+    assert result['sample_count']==len(bundle['samples'])==133
+    assert len(result['modified_contact_sequences'])==2
+    assert result['required_contact_target_board_mm']==pytest.approx([216.55,154.0,18.3])
+    assert result['joint_positions_included'] is False
+    assert result['source_joint_positions_reused'] is False
+    assert result['ik_qualification_required'] is True
+    assert result['collision_qualification_required'] is True
+    assert result['native_replay_required'] is True
+    modified=set(result['modified_contact_sequences'])
+    for source,regenerated in zip(bundle['samples'],result['samples']):
+        assert regenerated['sequence']==source['sequence']
+        assert regenerated['time_from_start_ns']==source['time_from_start_ns']
+        assert regenerated['phase']==source['phase']
+        assert regenerated['target_id']==source['target_id']
+        assert 'joint_positions_rad' not in regenerated
+        if source['sequence'] in modified:
+            assert regenerated['expected_tool_tip_board_mm']==pytest.approx([216.55,154.0,18.3])
+        else:
+            assert regenerated['expected_tool_tip_board_mm']==source['expected_tool_tip_board_mm']
+    assert [
+        row['target_id'] for row in result['samples']
+        if row['phase']=='CONTACT' and row['phase_endpoint'] is True
+    ]==bundle['ordered_target_ids']
+    unsigned={key:value for key,value in result.items() if key!='request_sha256'}
+    assert result['request_sha256']==mechanics._canonical_sha256(unsigned)
+
+
+def test_robot_tcp_cartesian_regeneration_rejects_noncontiguous_source():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    bundle['samples'][2]['sequence']=99
+    unsigned={key:value for key,value in bundle.items() if key!='bundle_sha256'}
+    bundle['bundle_sha256']=mechanics._canonical_sha256(unsigned)
+    with pytest.raises(mechanics.MechanicsContractError,match='not contiguous'):
+        mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
