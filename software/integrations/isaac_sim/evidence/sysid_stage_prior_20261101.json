@@ -1,0 +1,30 @@
+{
+  "drive_prior": {
+    "damping": 10.0,
+    "maximum_effort": 100.0,
+    "stiffness": 100.0,
+    "type": "force"
+  },
+  "drive_property_count": 6,
+  "evidence_class": "PROVISIONAL_SIMULATION_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "geometry_derived_provisional_mass_properties",
+    "provisional_mass_distribution_and_drive_parameters",
+    "derived_stage_is_not_a_physical_fit",
+    "no_collision_or_contact_geometry"
+  ],
+  "output_usd_sha256": "50097b9c7652942bf121892b2dbbbefd9bc3805bdf7cacbe80c97804ab275a3c",
+  "physical_authority": false,
+  "physical_movements": 0,
+  "receipt_sha256": "c851fb19f440106ec92c28fdbaf47356025dc2ca5f20b85c861205f6b444215e",
+  "rigid_body_property_count": 7,
+  "schema": "tactevra.isaac_lm0b_sysid_stage_prior.v1",
+  "source_bindings": {
+    "profile_file_sha256": "768829bc8c131efe41e8866b6a18900a24b3f77e2ef97b367b55cffbfcf9881a",
+    "source_usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
+  },
+  "source_usd_modified": false,
+  "status": "PASS_PROVISIONAL_SYSID_STAGE_PRIOR"
+}
