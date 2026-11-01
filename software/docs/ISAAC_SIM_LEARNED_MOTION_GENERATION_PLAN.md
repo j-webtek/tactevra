@@ -176,6 +176,19 @@ then reports 8 identifiable parameters instead of zero, exposing the remaining
 work directly: narrow fitting to the excited stiffness/damping terms, define a
 validation holdout, and add wrist/gripper excitation before broadening the
 parameter space.
+That narrow rehearsal is now implemented. The official Isaac schema generates
+and round-trips a bounded eight-parameter run spec: stiffness and damping for
+DOF indices `0..3`, trained on the `H` and `1` motion segments with `PERIOD`
+held out for validation. A three-iteration native solve accepted one finite
+candidate, reported all eight selected terms identifiable, hit no parameter
+bounds, and evaluated the held-out segment. It intentionally wrote neither
+parameters nor the stage. Its assessment remains `warn` because the simulated
+trajectory has only one excitation family, stiffness/damping columns are
+correlated, DOF indices `4..5` remain weakly excited, and no calibrated
+link-side torque exists. The next LM0B experiment is therefore independent
+wrist/gripper excitation and, separately, a physically calibrated torque
+channel before inertial fitting; the provisional candidate is not promoted to
+the simulator prior yet.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

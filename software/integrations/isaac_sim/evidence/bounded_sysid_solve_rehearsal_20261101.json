@@ -1,0 +1,59 @@
+{
+  "bindings": {
+    "nvidia_solve_report_sha256": "b236addb2db85f3e12754a30a5bcd4aae8d6f894bc14985f10c1cd9a1197e77e",
+    "run_spec_sha256": "282fec710c4078124dc9916b066e3247386eb6daa62d41c99aae053c8bed60cf"
+  },
+  "hardware_access": false,
+  "identifiability": {
+    "condition": 145.84111926703488,
+    "identifiable_count": 8,
+    "selected_count": 8,
+    "weak_excitation_dof_indices": [
+      4,
+      5
+    ]
+  },
+  "limitations": [
+    "simulation-generated telemetry is not physical robot telemetry",
+    "stiffness and damping columns remain highly correlated",
+    "DOF indices 4 and 5 lack sufficient excitation",
+    "no calibrated link-side torque is available for inertial fitting",
+    "candidate parameters are not applied to the USD"
+  ],
+  "parameters_written": false,
+  "physical_authority": false,
+  "receipt_sha256": "82fc7776bc9ffe446c09fe5b1c396b424acb3e23b67f6ea2f0bbd5c1ea32024a",
+  "schema": "tactevra.isaac_lm0b_bounded_sysid_rehearsal.v1",
+  "selected_candidate": {
+    "accepted": true,
+    "iteration": 1,
+    "source": "last_accepted",
+    "theta": [
+      0.5691438317298889,
+      1.0831378698349,
+      0.915894627571106,
+      0.7228308916091919,
+      1.5269567966461182,
+      0.9204515814781189,
+      1.2185815572738647,
+      0.7450072765350342
+    ],
+    "training_normalized_cost": 0.07235567271709442
+  },
+  "stage_saved": false,
+  "status": "PASS_BOUNDED_SYSID_REHEARSAL_WITH_WARNINGS",
+  "tuning_assessment": {
+    "issue_codes": [
+      "limited_excitation_coverage",
+      "telemetry_quality_warnings"
+    ],
+    "status": "warn",
+    "validation_to_training_cost_ratio": 0.23794930041742807
+  },
+  "validation": {
+    "chunk_count": 1,
+    "normalized_cost": 0.017216981704265003,
+    "position_rmse_rad": 0.1839226484298706,
+    "velocity_rmse_rad_s": 0.26472774147987366
+  }
+}
