@@ -761,3 +761,32 @@ Retained cross-excitation artifacts:
 - [`cross_excitation_sysid_run_spec_20261101.json`](evidence/cross_excitation_sysid_run_spec_20261101.json)
 - [`cross_excitation_sysid_run_spec_receipt_20261101.json`](evidence/cross_excitation_sysid_run_spec_receipt_20261101.json)
 - [`cross_excitation_sysid_validation_20261101.json`](evidence/cross_excitation_sysid_validation_20261101.json)
+
+## Provisional representative-key mechanics contract
+
+[`representative_key_mechanics.py`](representative_key_mechanics.py) starts LM1
+with a deterministic contract for `H`, `1`, `SPACE`, `ENTER`, and `PERIOD`.
+It derives board-frame key geometry from the governed nominal target profile
+rather than duplicating measurements. All keyboard regions remain explicitly
+`SIMULATION_ONLY_NOMINAL_UNMEASURED`.
+
+The evaluator resolves the contacted key from tip geometry and compression; it
+does not accept a requested key name as evidence of activation. A key activates
+only on a rising crossing of the provisional activation depth and re-arms only
+after reaching the release depth. Center safety, neighboring-key contact,
+travel, spring/damping force estimates, double activation, and complete release
+are evaluated separately. The deterministic campaign accepts one centered
+press on each representative key and distinctly rejects shallow, off-center,
+excessive-travel, double, neighboring-key, and incomplete-release cases.
+
+All mechanics values are bounded synthetic priors, not Perixx specifications or
+measurements. This first contract slice is not a native Isaac contact replay and
+grants no hardware, motion, controller, or physical-keyboard authority. Its
+purpose is to define the mechanism-state boundary that native Isaac contact
+telemetry must satisfy next.
+
+Run its focused tests with:
+
+```powershell
+python -m pytest software/tests/unit/test_ghost_keyboard.py -q
+```

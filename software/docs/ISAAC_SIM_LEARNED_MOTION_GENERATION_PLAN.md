@@ -258,6 +258,14 @@ Add explicit mechanics for `H`, `1`, `SPACE`, `ENTER`, and one punctuation
 key. Model keycap geometry, travel, activation, release, spring/damping, and
 neighboring-key contact.
 
+The initial ARM-185 contract derives all five representative regions and their
+neighbor guards from the governed nominal keyboard profile. It supplies bounded
+synthetic travel, activation, release, stiffness, damping, and mass priors; a
+geometry-derived activation state machine; and deterministic positive and
+negative cases. It remains provisional contract logic rather than native Isaac
+contact evidence. The next LM1 increment must implement these mechanisms in the
+Isaac stage and replay a single `H` press against the same dispositions.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;

@@ -1,4 +1,5 @@
 import json
+import importlib.util
 from pathlib import Path
 import pytest
 from rocell.application import ghost_keyboard as ghost
@@ -7,6 +8,15 @@ from test_arrival_wizard_service import make_service, _run
 from test_movement_campaign_ui import render
 
 ROOT=Path(__file__).resolve().parents[3]
+
+
+def _load_key_mechanics():
+    path=ROOT/'software/integrations/isaac_sim/representative_key_mechanics.py'
+    spec=importlib.util.spec_from_file_location('representative_key_mechanics',path)
+    module=importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
 @pytest.mark.parametrize('text',['a','aba','abc','cba','aaaaaaaa'])
@@ -70,3 +80,70 @@ def test_wizard_and_export_are_camera_free(make_service,mode):
     assert export['status']=='SUCCEEDED'
     path=Path(export['result']['receipt']['path'])/f"attachment-result-{op['operation_id'].removeprefix('operation-')}.json"
     assert json.loads(path.read_bytes())==op['result']
+
+
+def test_representative_key_mechanics_derive_reviewed_layout_and_zero_authority():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    assert profile['representative_keys']==['H','1','SPACE','ENTER','PERIOD']
+    assert profile['regions']['H']['center_board_xy_mm']==pytest.approx([216.55,154.0])
+    assert profile['regions']['1']['center_board_xy_mm']==pytest.approx([107.0,196.0])
+    assert profile['regions']['SPACE']['center_board_xy_mm']==pytest.approx([224.0,112.0])
+    assert profile['status']=='PROVISIONAL_SIMULATION_ONLY'
+    assert profile['provenance']['state']=='SYNTHETIC_BOUNDED_PRIOR_NOT_PRODUCT_SPECIFICATION'
+    assert not any(profile['authority'].values())
+    assert profile==mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+
+
+def test_representative_key_mechanics_campaign_distinguishes_failure_classes():
+    mechanics=_load_key_mechanics()
+    receipt=mechanics.run_contract_campaign(ROOT/'software/config/nominal_target_profiles.json')
+    assert receipt['status']=='PASS'
+    assert receipt['case_count']==11
+    assert receipt['passed_case_count']==11
+    results={case['name']:case['result'] for case in receipt['cases']}
+    for key in ('h','1','space','enter','period'):
+        assert results[f'nominal_{key}']['disposition']=='ACCEPTED'
+    assert {results[name]['disposition'] for name in (
+        'shallow_h','off_center_h','excessive_h','double_h',
+        'incomplete_release_h','neighbor_h_j',
+    )}=={
+        'SHALLOW_PRESS','OFF_CENTER_PRESS','EXCESSIVE_TRAVEL',
+        'DOUBLE_ACTIVATION','INCOMPLETE_RELEASE','NEIGHBORING_KEY_CONTACT',
+    }
+    assert not receipt['authority']['hardware']
+    assert receipt==mechanics.run_contract_campaign(ROOT/'software/config/nominal_target_profiles.json')
+
+
+def test_representative_key_activation_is_geometry_derived_not_caller_named():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    center=profile['regions']['1']['center_board_xy_mm']
+    result=mechanics.evaluate_trace(profile,[
+        {'time_s':0.00,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':0.0},
+        {'time_s':0.02,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':2.2},
+        {'time_s':0.04,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':0.0},
+    ])
+    assert result['accepted']
+    assert result['resolved_key']=='1'
+    assert result['activation_count']==1
+
+
+def test_representative_key_mechanics_reject_tampered_layout_and_profile(tmp_path):
+    mechanics=_load_key_mechanics()
+    source=ROOT/'software/config/nominal_target_profiles.json'
+    data=json.loads(source.read_bytes())
+    data['status']='MEASURED'
+    path=tmp_path/'nominal_target_profiles.json'
+    path.write_text(json.dumps(data))
+    with pytest.raises(mechanics.MechanicsContractError,match='status changed'):
+        mechanics.build_profile(path)
+
+    profile=mechanics.build_profile(source)
+    profile['mechanics_prior']['activation_mm']['nominal']=99.0
+    center=profile['regions']['H']['center_board_xy_mm']
+    with pytest.raises(mechanics.MechanicsContractError,match='hash mismatch'):
+        mechanics.evaluate_trace(profile,[
+            {'time_s':0.0,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':0.0},
+            {'time_s':0.1,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':0.0},
+        ])
