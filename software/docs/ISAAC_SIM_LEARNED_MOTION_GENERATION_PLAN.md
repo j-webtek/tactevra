@@ -164,6 +164,12 @@ centers and principal inertias derived from the official link meshes. Its
 native gravity-on hover passes at `2.2443705648411694e-05 rad` maximum final
 joint error. This is a stronger simulation prior, not a physical fit: internal
 servo, electronics, and fastener mass distributions remain unmeasured.
+That prior now also drives a retained four-pose trajectory through `PARK`,
+`H`, `1`, and `PERIOD`. The run records 960 consecutive physics samples and
+emits a CSV read back successfully by the installed Isaac Sim 6.1 SysID
+loader. This establishes the simulation telemetry and optimizer-input path. It
+does not identify physical mass, inertia, drive, or raw T1051 load semantics;
+those remain later LM0B measurement and calibration work.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent
