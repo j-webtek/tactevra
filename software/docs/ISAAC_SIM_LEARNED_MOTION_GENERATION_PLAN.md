@@ -262,9 +262,20 @@ The initial ARM-185 contract derives all five representative regions and their
 neighbor guards from the governed nominal keyboard profile. It supplies bounded
 synthetic travel, activation, release, stiffness, damping, and mass priors; a
 geometry-derived activation state machine; and deterministic positive and
-negative cases. It remains provisional contract logic rather than native Isaac
-contact evidence. The next LM1 increment must implement these mechanisms in the
-Isaac stage and replay a single `H` press against the same dispositions.
+negative cases.
+
+ARM-186 now clears the first native LM1 increment. A headless Isaac 6.1 scene
+replayed a smooth 600-sample virtual-tip trajectory against a prismatic `H` key
+at 120 Hz. Native mechanism state produced one accepted `H` activation at
+`2.69999820739031 mm` maximum compression and returned to effectively zero
+compression. The receipt hash is
+`9583a62f8c89220f7211acff3d449c9def6f21ac87146f309ad843c9cbc88768`,
+retained externally under
+`C:\IsaacSim\artifacts\issue190\lm1-native-h-key-005`. No acceptance threshold
+was relaxed. The replay remains provisional: it isolates a virtual tip and one
+key, disables gravity to represent the keyboard's preloaded return mechanism,
+and grants zero physical or motion authority. The next LM1 increment must bind
+the same key and evaluator to the drive-controlled robot TCP.
 
 **Exit gate**
 
@@ -371,7 +382,8 @@ ScheduleGen. Neither is a physical success rate.
    physics-replay receipt; implement drive-controlled `H` hover replay.
 2. **LM0 retained run:** execute repeated headless Isaac runs and classify
    tracking, settling, and contact behavior.
-3. **LM1 mechanics:** add representative key physics and a single `H` press.
+3. **LM1 mechanics:** native representative-key physics and an isolated `H`
+   press are complete; next integrate the drive-controlled robot TCP.
 4. **LM2 generator:** adapt the `H` skill to the representative target set.
 5. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 6. **LM4 baseline:** train and evaluate a state-based imitation policy.

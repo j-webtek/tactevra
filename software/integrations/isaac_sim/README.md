@@ -780,13 +780,56 @@ press on each representative key and distinctly rejects shallow, off-center,
 excessive-travel, double, neighboring-key, and incomplete-release cases.
 
 All mechanics values are bounded synthetic priors, not Perixx specifications or
-measurements. This first contract slice is not a native Isaac contact replay and
-grants no hardware, motion, controller, or physical-keyboard authority. Its
-purpose is to define the mechanism-state boundary that native Isaac contact
-telemetry must satisfy next.
+measurements. The contract and native replay grant no hardware, motion,
+controller, or physical-keyboard authority.
 
 Run its focused tests with:
 
 ```powershell
 python -m pytest software/tests/unit/test_ghost_keyboard.py -q
 ```
+
+### Native H-key contact replay
+
+ARM-186 implements the first native Isaac contact slice with the same governed
+`H` region and acceptance contract. The headless scene contains a single
+prismatic key with bounded mass, travel, stiffness, and damping priors plus a
+kinematic spherical virtual tip. The tip follows a smooth 600-sample
+settle/press/hold/retract path at 120 Hz. After initialization, it advances only
+through PhysX kinematic targets; the key moves only through contact, its joint,
+and physics stepping.
+
+The retained passing artifact is external because the repository source archive
+is at its tracked-file ceiling:
+
+- path: `C:\IsaacSim\artifacts\issue190\lm1-native-h-key-005\native_h_key_replay.json`
+- receipt SHA-256: `9583a62f8c89220f7211acff3d449c9def6f21ac87146f309ad843c9cbc88768`
+- result: one `H` activation, `2.69999820739031 mm` maximum compression,
+  `1.48828043602407 N` maximum estimated force, and complete release
+- contact observation: 259 of 600 trace samples
+- authority: zero hardware access, writes, physical movement, and motion authority
+
+The diagnostic lineage is intentionally retained beside it. Run `002` exposed
+gravity sag to the lower travel stop, run `003` stabilized the preloaded key
+mechanism, and run `004` proved that pose teleportation did not transfer contact
+force. Run `005` replaced post-initialization teleports with solver-consumed
+kinematic targets and passed without weakening the shared acceptance criteria.
+
+Reproduce the passing probe with:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-native-h-key-005'
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --native-h-probe `
+  --output "$artifactDir\native_h_key_replay.json" `
+  --status-output "$artifactDir\status.json"
+```
+
+This is an isolated virtual tip and representative key, not yet the full robot
+contact path. Gravity is disabled for the one-dimensional key mechanism to
+represent a preloaded keyboard return pending measured preload data. The next
+LM1 boundary is to replace the virtual tip with the drive-controlled robot TCP
+while retaining this exact mechanism-state evaluator and zero-authority receipt.
