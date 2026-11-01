@@ -26,6 +26,23 @@ def test_selects_one_governed_endpoint_for_each_pose():
     assert len({tuple(row["target_rad"]) for row in sequence}) == 4
 
 
+def test_independent_sine_sequence_excites_every_joint_separately():
+    sequence = MODULE.select_pose_sequence(json.loads(BUNDLE.read_text(encoding="utf-8")))
+    segments = MODULE.build_independent_sine_sequence(sequence[1]["target_rad"], steps_per_joint=360, dt=1 / 120)
+    assert [row["joint_index"] for row in segments] == list(range(6))
+    assert all(len(row["targets_rad"]) == 360 for row in segments)
+    for segment in segments:
+        varying = {
+            index
+            for index in range(6)
+            if max(row[index] for row in segment["targets_rad"])
+            - min(row[index] for row in segment["targets_rad"])
+            > 1e-6
+        }
+        assert varying == {segment["joint_index"]}
+        assert min(row[5] for row in segment["targets_rad"]) >= 0.0
+
+
 def test_retained_multi_pose_receipt_and_csv_outputs_are_bound():
     receipt = json.loads((EVIDENCE / "geometry_prior_multi_pose_sysid_trajectory_20261101.json").read_text(encoding="utf-8"))
     claimed = receipt.pop("receipt_sha256")
@@ -64,3 +81,25 @@ def test_retained_multi_pose_receipt_and_csv_outputs_are_bound():
     assert len(rows) == receipt["samples"] + 1
     timestamps = [float(row[0]) for row in rows[1:]]
     assert all(right > left for left, right in zip(timestamps, timestamps[1:]))
+
+
+def test_retained_independent_excitation_covers_all_six_joints():
+    receipt = json.loads((EVIDENCE / "independent_joint_excitation_20261101.json").read_text(encoding="utf-8"))
+    claimed = receipt.pop("receipt_sha256")
+    assert claimed == MODULE._digest(MODULE._canonical(receipt))
+    assert receipt["status"] == "PASS"
+    assert receipt["trajectory"] == "independent-sine"
+    assert receipt["samples"] == 2160
+    assert receipt["pose_order"] == [f"SINE_J{i}" for i in range(1, 7)]
+    assert receipt["telemetry_quality"]["weak_excitation_joint_indices"] == []
+    assert receipt["telemetry_quality"]["error_count"] == 0
+    assert receipt["telemetry_quality"]["train_chunk_count"] == 5
+    assert receipt["telemetry_quality"]["validation_chunk_count"] == 1
+    assert min(receipt["telemetry_quality"]["excitation_range_by_joint"]) > 0.38
+    assert receipt["maximum_final_joint_error_rad"] < receipt["threshold_rad"]
+    assert receipt["hardware_access"] is False
+    assert receipt["physical_authority"] is False
+    telemetry = EVIDENCE / "independent_joint_excitation_telemetry_20261101.csv"
+    sysid = EVIDENCE / "independent_joint_excitation_sysid_20261101.csv"
+    assert MODULE._digest(telemetry.read_bytes()) == receipt["outputs"]["rich_telemetry_csv_sha256"]
+    assert MODULE._digest(sysid.read_bytes()) == receipt["outputs"]["isaac_sysid_csv_sha256"]
