@@ -783,6 +783,31 @@ All mechanics values are bounded synthetic priors, not Perixx specifications or
 measurements. The contract and native replay grant no hardware, motion,
 controller, or physical-keyboard authority.
 
+ARM-187 starts the robot-TCP binding without hiding a trajectory mismatch. The
+retained actual-emitter bundle places both `H` CONTACT endpoints at board
+`z=21.0 mm`, exactly the representative key's rest surface, and therefore
+schedules `0.0 mm` compression. The ARM-186 native replay accepted a `2.7 mm`
+press. The zero-authority binding contract consequently derives the next
+governed IK input as `[216.55, 154.0, 18.3] mm`, blocks the retained
+surface-only schedule, and requires schedule regeneration, IK qualification,
+and native replay. It does not invent replacement joint angles.
+
+Run that boundary check with:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-robot-tcp-binding-001'
+New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --robot-tcp-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --output "$artifactDir\receipt.json" `
+  --status-output "$artifactDir\status.json"
+```
+
+Exit code `2` with `BLOCKED_CONTACT_ENDPOINT_REQUIRES_OVERTRAVEL` is expected
+for the retained bundle. It is a useful fail-closed planning result, not an
+Isaac or infrastructure failure.
+
 Run its focused tests with:
 
 ```powershell

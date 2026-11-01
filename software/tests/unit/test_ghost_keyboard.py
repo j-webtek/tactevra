@@ -175,3 +175,65 @@ def test_native_h_displacement_is_assessed_by_shared_contract():
     assert result['resolved_key']=='H'
     assert result['native_contact_observed']
     assert result['native_contact_step_count']==4
+
+
+def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    result=mechanics.bind_robot_tcp_contact_requirement(profile,bundle)
+    assert result['status']=='BLOCKED_CONTACT_ENDPOINT_REQUIRES_OVERTRAVEL'
+    assert result['source_contact_endpoint_count']==2
+    assert result['source_contact_target_board_mm']==pytest.approx([216.55,154.0,21.0])
+    assert result['source_scheduled_compression_mm']==pytest.approx(0.0)
+    assert result['required_press_depth_mm']==pytest.approx(2.7)
+    assert result['required_contact_target_board_mm']==pytest.approx([216.55,154.0,18.3])
+    assert result['joint_schedule_regeneration_required'] is True
+    assert result['ik_qualification_required'] is True
+    assert result['native_replay_required'] is True
+    assert result['authority']=={
+        'hardware':False,'motion':False,'physical_keyboard_qualification':False,
+    }
+    assert result['hardware_writes']==0
+    assert result['physical_movements']==0
+
+
+def test_robot_tcp_binding_accepts_mechanics_compatible_endpoint():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    source=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    bundle=json.loads(json.dumps(source))
+    for sample in bundle['samples']:
+        if sample.get('target_id')=='H' and sample.get('phase')=='CONTACT' and sample.get('phase_endpoint') is True:
+            sample['expected_tool_tip_board_mm'][2]=18.3
+    unsigned={key:value for key,value in bundle.items() if key!='bundle_sha256'}
+    bundle['bundle_sha256']=mechanics._canonical_sha256(unsigned)
+    result=mechanics.bind_robot_tcp_contact_requirement(profile,bundle)
+    assert result['status']=='READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY'
+    assert result['source_scheduled_compression_mm']==pytest.approx(2.7)
+    assert result['joint_schedule_regeneration_required'] is False
+
+
+def test_robot_tcp_binding_fails_closed_on_authority_or_hash_tamper():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    source=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    hash_tampered=json.loads(json.dumps(source))
+    hash_tampered['samples'][0]['phase']='CONTACT'
+    with pytest.raises(mechanics.MechanicsContractError,match='hash mismatch'):
+        mechanics.bind_robot_tcp_contact_requirement(profile,hash_tampered)
+
+    source['physical_authority']=True
+    unsigned={key:value for key,value in source.items() if key!='bundle_sha256'}
+    source['bundle_sha256']=mechanics._canonical_sha256(unsigned)
+    with pytest.raises(mechanics.MechanicsContractError,match='zero-authority'):
+        mechanics.bind_robot_tcp_contact_requirement(profile,source)
