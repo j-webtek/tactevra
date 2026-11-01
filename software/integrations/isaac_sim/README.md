@@ -819,7 +819,36 @@ surface endpoint. The external request at
 status `READY_FOR_IK_QUALIFICATION`. It is not an IK, collision, or contact
 pass.
 
-Reproduce it with:
+ARM-189 passes that exact request through the canonical numerical arm IK and
+public trajectory-acceptance gates using the request's retained virtual-board
+lineage and `120 mm` keyboard tool. All 133 samples pass. The two modified
+`H` contacts (sequences `35` and `38`) each solve with `0.000119 mm` position
+error, `0.153653` minimum normalized joint margin, `0.037258 rad` maximum
+adjacent-joint delta, and full local solver-weighted Jacobian column rank. The
+whole route's maximum position error is `0.076911 mm` and maximum adjacent
+joint delta is `0.092435 rad`. The external receipt at
+`C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001` has SHA-256
+`278ef3ff6d5ca94150e4e2423e68ed9dd736300713a471621bf6b4badcd678f2` and
+status `READY_FOR_COLLISION_QUALIFICATION`.
+
+This proves virtual reachability and discrete joint continuity for the deeper
+contact schedule; it does not prove collision clearance, continuous-segment
+safety, native robot/key contact, or physical execution. Reproduce it with:
+
+```powershell
+$env:PYTHONPATH = 'software/src'
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001'
+New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --ik-source-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --workspace . `
+  --output "$artifactDir\receipt.json" `
+  --status-output "$artifactDir\status.json"
+```
+
+If the ARM-188 input request is not already present, reproduce it with:
 
 ```powershell
 $artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001'

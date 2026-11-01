@@ -296,6 +296,20 @@ position. The external request hash is
 Its `READY_FOR_IK_QUALIFICATION` status means the canonical IK and collision
 gates are now the next dependency; it does not claim reachability or contact.
 
+ARM-189 completes the canonical IK and discrete-continuity screen for that
+regenerated schedule. All 133 samples pass under the hash-bound retained
+virtual-board transform and `120 mm` keyboard tool. The modified `H` contacts
+at sequences `35` and `38` each reach `[216.55, 154.0, 18.3] mm` with
+`0.000119 mm` position error, `0.153653` minimum normalized joint margin,
+`0.037258 rad` maximum adjacent-joint delta, and full local solver-weighted
+Jacobian column rank. The zero-authority external receipt is
+`C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001\receipt.json`, SHA-256
+`278ef3ff6d5ca94150e4e2423e68ed9dd736300713a471621bf6b4badcd678f2`.
+Its `READY_FOR_COLLISION_QUALIFICATION` status proves virtual reachability and
+discrete continuity only. Exact joint results must next pass installed-geometry
+collision screening before the drive-controlled robot TCP is replayed against
+the native key mechanism.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;
@@ -401,12 +415,15 @@ ScheduleGen. Neither is a physical success rate.
    physics-replay receipt; implement drive-controlled `H` hover replay.
 2. **LM0 retained run:** execute repeated headless Isaac runs and classify
    tracking, settling, and contact behavior.
-3. **LM1 mechanics:** native representative-key physics and an isolated `H`
-   press are complete; next integrate the drive-controlled robot TCP.
-4. **LM2 generator:** adapt the `H` skill to the representative target set.
-5. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
-6. **LM4 baseline:** train and evaluate a state-based imitation policy.
-7. Expand only after each predecessor produces reviewable evidence.
+3. **LM1 collision:** native representative-key physics, Cartesian
+   regeneration, and canonical IK are complete; next screen the exact 133
+   joint results against installed collision geometry and continuous segments.
+4. **LM1 robot/key replay:** after collision qualification, bind the
+   drive-controlled robot TCP to the same native `H` mechanism and evaluator.
+5. **LM2 generator:** adapt the `H` skill to the representative target set.
+6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
+7. **LM4 baseline:** train and evaluate a state-based imitation policy.
+8. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
