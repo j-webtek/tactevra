@@ -344,3 +344,58 @@ def test_robot_tcp_cartesian_ik_screen_rejects_request_hash_tamper():
         mechanics.screen_robot_tcp_cartesian_schedule_ik(
             request,bundle,profile,workspace=ROOT,
         )
+
+
+def test_robot_tcp_collision_request_binds_exact_ik_and_bounded_samples():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    cartesian=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    ik=mechanics.screen_robot_tcp_cartesian_schedule_ik(
+        cartesian,bundle,profile,workspace=ROOT,
+    )
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'scope':'SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY',
+        'status':'EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_FAMILY',
+        'installed':False,
+        'installed_profile_eligible':False,
+        'robot_bodies':[{'body_id':'robot:base_link'}],
+        'workcell_bodies':[{'body_id':'workcell:keyboard'}],
+        'blockers':['MOVING_CABLE_GEOMETRY_UNMEASURED'],
+        'simulation_diagnostic_ready':False,
+        'hardware_write_count':0,
+        'physical_movement_count':0,
+        'commands':[],
+        'physical_authority':False,
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    lock=json.loads((ROOT/'software/config/isaac_sim_toolchain_lock.json').read_bytes())
+    result=mechanics.build_robot_tcp_collision_replay_request(ik,candidate,lock)
+    assert result['status']=='READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC'
+    assert result['source_ik_receipt_sha256']==ik['receipt_sha256']
+    assert result['source_joint_result_count']==133
+    assert 133 <= result['bounded_sample_count'] <= 256
+    assert result['bounded_samples'][0]['sample_sequence']==0
+    assert result['bounded_samples'][-1]['source_segment_index']==132
+    assert max(
+        max(
+            abs(later['joint_positions_rad'][name]-earlier['joint_positions_rad'][name])
+            for name in result['joint_order']
+        )
+        for earlier,later in zip(result['bounded_samples'],result['bounded_samples'][1:])
+    ) <= 0.05 + 1e-12
+    assert result['diagnostic_only'] is True
+    assert result['installed_collision_qualified'] is False
+    assert result['native_contact_replay_authorized'] is False
+    assert result['hardware_access'] is result['physical_authority'] is False
+    assert result['controller_commands']==[]
+    unsigned={key:value for key,value in result.items() if key!='request_sha256'}
+    assert result['request_sha256']==mechanics._canonical_sha256(unsigned)
+
+    candidate['blockers'].append('TAMPER')
+    with pytest.raises(mechanics.MechanicsContractError,match='candidate hash mismatch'):
+        mechanics.build_robot_tcp_collision_replay_request(ik,candidate,lock)

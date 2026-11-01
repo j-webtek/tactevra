@@ -861,6 +861,37 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
+ARM-190 begins collision qualification without misclassifying the retained
+exploratory geometry as an installed profile. It binds the exact ARM-189
+receipt, the selected Isaac 6.1 toolchain lock, and the external simulation
+collision candidate into one zero-authority replay request. The 133 accepted IK
+endpoints expand to 149 deterministic configurations with a maximum per-joint
+step of `0.05 rad`. The external request is retained at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-request-001\request.json` with
+SHA-256 `4288f11667ac1713536ca808e1608150f2241ca7dfdaea41b75c307d14344dbd`.
+
+The request status is `READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC`, not a
+clearance pass. The candidate remains uninstalled and explicitly retains its
+missing clamp, moving-cable, contact-tool range, and arm-camera-frame blockers.
+Bounded sampling is also not a continuous swept-volume proof. Any native
+diagnostic must report pair identities and geometry provenance, and cannot
+authorize contact replay or promote an installed/physical gate.
+
+Reproduce the request with:
+
+```powershell
+$env:PYTHONPATH = 'software/src'
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-collision-request-001'
+New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --ik-receipt C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001\receipt.json `
+  --collision-candidate C:\IsaacSim\evidence\issue190\simulation_program\collision_candidate_v1.json `
+  --toolchain-lock software\config\isaac_sim_toolchain_lock.json `
+  --output "$artifactDir\request.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 Run its focused tests with:
 
 ```powershell
