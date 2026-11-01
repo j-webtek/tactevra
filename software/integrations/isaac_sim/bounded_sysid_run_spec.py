@@ -38,6 +38,37 @@ CHIRP_CHUNK_PLAN = tuple(
     }
     for index in range(6)
 )
+CROSS_EXCITATION_CHUNK_PLAN = tuple(
+    {
+        "name": f"CHIRP_J{index + 1}",
+        "role": "train",
+        "excitation": "chirp",
+        "start": index * 4.0 + 0.008333333333333333,
+        "end": (index + 1) * 4.0,
+        "weight": 1.0,
+    }
+    for index in range(6)
+) + tuple(
+    {
+        "name": f"SINE_J{index + 1}",
+        "role": "validation",
+        "excitation": "sine",
+        "start": 24.0 + index * 3.0 + 0.008333333333333333,
+        "end": 24.0 + (index + 1) * 3.0,
+        "weight": 1.0,
+    }
+    for index in range(6)
+)
+
+
+def _campaign_chunks(campaign: str) -> tuple[dict[str, Any], ...]:
+    if campaign == "multi-pose-8":
+        return CHUNK_PLAN
+    if campaign == "aligned-chirp-12":
+        return CHIRP_CHUNK_PLAN
+    if campaign == "cross-excitation-12":
+        return CROSS_EXCITATION_CHUNK_PLAN
+    raise ValueError(f"unsupported campaign: {campaign}")
 
 
 def _canonical(value: object) -> bytes:
@@ -61,7 +92,7 @@ def validate_bounded_payload(payload: dict[str, Any], *, campaign: str = "multi-
     if addresses != expected:
         raise ValueError(f"bounded parameter addresses differ: {addresses!r}")
     chunks = payload["telemetry"]["chunks"]
-    expected_chunks = CHUNK_PLAN if campaign == "multi-pose-8" else CHIRP_CHUNK_PLAN
+    expected_chunks = _campaign_chunks(campaign)
     if chunks != list(expected_chunks):
         raise ValueError("bounded telemetry chunks differ from the governed train/validation split")
     expected_alignment = 0.0 if campaign == "multi-pose-8" else CHIRP_ALIGNMENT_SECONDS
@@ -83,10 +114,15 @@ def summarize_solve_result(result: dict[str, Any], *, result_sha256: str, run_sp
     check = result["extra"]["check_report"]
     verdicts = check["parameter_verdicts"]
     expected_count = len(result["run_spec"]["parameters"]["selected"])
-    aligned_chirp = expected_count == 12
+    excitations = {row["excitation"] for row in result["run_spec"]["telemetry"]["chunks"]}
+    cross_excitation = excitations == {"chirp", "sine"}
+    aligned_chirp = expected_count == 12 and not cross_excitation
     if result["parameters_written"] is not False:
         raise ValueError("bounded rehearsal unexpectedly wrote parameters")
-    if selected.get("accepted") is not True or selected.get("source") != "last_accepted":
+    if cross_excitation:
+        if selected.get("source") not in ("initial_fallback", "last_accepted"):
+            raise ValueError("cross-excitation validation produced an unsupported candidate source")
+    elif selected.get("accepted") is not True or selected.get("source") != "last_accepted":
         raise ValueError("bounded rehearsal produced no accepted candidate")
     if expected_count not in (8, 12):
         raise ValueError(f"unsupported bounded rehearsal parameter count: {expected_count}")
@@ -97,14 +133,26 @@ def summarize_solve_result(result: dict[str, Any], *, result_sha256: str, run_sp
     validation = result["validation_summary"]["overall"]
     receipt = {
         "schema": (
-            "tactevra.isaac_lm0b_aligned_chirp_sysid_rehearsal.v1"
-            if aligned_chirp
-            else "tactevra.isaac_lm0b_bounded_sysid_rehearsal.v1"
+            "tactevra.isaac_lm0b_cross_excitation_sysid_rehearsal.v1"
+            if cross_excitation
+            else (
+                "tactevra.isaac_lm0b_aligned_chirp_sysid_rehearsal.v1"
+                if aligned_chirp
+                else "tactevra.isaac_lm0b_bounded_sysid_rehearsal.v1"
+            )
         ),
         "status": (
-            "PASS_ALIGNED_CHIRP_SYSID_REHEARSAL_WITH_WARNINGS"
-            if aligned_chirp
-            else "PASS_BOUNDED_SYSID_REHEARSAL_WITH_WARNINGS"
+            (
+                "PASS_CROSS_EXCITATION_SYSID_REHEARSAL_WITH_WARNINGS"
+                if selected.get("accepted") is True
+                else "PASS_CROSS_EXCITATION_BASELINE_WITH_NO_ACCEPTED_UPDATE"
+            )
+            if cross_excitation
+            else (
+                "PASS_ALIGNED_CHIRP_SYSID_REHEARSAL_WITH_WARNINGS"
+                if aligned_chirp
+                else "PASS_BOUNDED_SYSID_REHEARSAL_WITH_WARNINGS"
+            )
         ),
         "hardware_access": False,
         "physical_authority": False,
@@ -143,7 +191,7 @@ def summarize_solve_result(result: dict[str, Any], *, result_sha256: str, run_sp
             "candidate parameters are not applied to the USD",
         ] + (
             ["common command alignment is derived from simulation-to-simulation chirp evidence"]
-            if aligned_chirp
+            if aligned_chirp or cross_excitation
             else ["DOF indices 4 and 5 lack sufficient excitation"]
         ),
         "bindings": {
@@ -164,7 +212,11 @@ def main() -> int:
     parser.add_argument("--status-output", type=Path, required=True)
     parser.add_argument("--solve-result", type=Path)
     parser.add_argument("--solve-receipt", type=Path)
-    parser.add_argument("--campaign", choices=("multi-pose-8", "aligned-chirp-12"), default="multi-pose-8")
+    parser.add_argument(
+        "--campaign",
+        choices=("multi-pose-8", "aligned-chirp-12", "cross-excitation-12"),
+        default="multi-pose-8",
+    )
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -226,7 +278,7 @@ def main() -> int:
             for dof_index in dof_indices
             for parameter_type in OBSERVABLE_PARAMETER_TYPES
         ]
-        chunk_plan = CHUNK_PLAN if args.campaign == "multi-pose-8" else CHIRP_CHUNK_PLAN
+        chunk_plan = _campaign_chunks(args.campaign)
         spec.telemetry.chunks = [TelemetryChunkRunSpec.from_dict(row) for row in chunk_plan]
         spec.telemetry.auto_split = False
         spec.telemetry.command_alignment_seconds = (
@@ -265,7 +317,7 @@ def main() -> int:
             "observable_dof_indices": list(dof_indices),
             "parameter_types": list(OBSERVABLE_PARAMETER_TYPES),
             "train_chunk_count": sum(row["role"] == "train" for row in chunk_plan),
-            "validation_chunk_count": 1,
+            "validation_chunk_count": sum(row["role"] == "validation" for row in chunk_plan),
             "stationary_park_excluded": args.campaign == "multi-pose-8",
             "weak_dof_indices_excluded": [4, 5] if args.campaign == "multi-pose-8" else [],
             "uncalibrated_torque_excluded": True,

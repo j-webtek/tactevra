@@ -212,6 +212,17 @@ simulation-only provenance deliberately prevent promotion: the next evidence
 gain must come from a distinct validation excitation family and, later, a
 calibrated physical trace rather than additional optimization on the same
 chirp family.
+The distinct-family check is now retained: all six chirp chunks train the
+12-term model while all six independent-sine chunks are validation-only. The
+two bounded optimizer updates were rejected and the unchanged baseline was
+selected, preventing a false improvement claim. Its sine validation cost is
+`0.028266899857992005` versus `0.024019965901970863` on chirp training
+(`1.176808492291518` ratio), with no weak joints and two excitation families
+recognized by Isaac. This clears the same-family validation limitation while
+showing that further simulation-only optimizer iterations are not the next
+information gain. The next identification improvement requires calibrated
+physical command/feedback timing and telemetry; learning-policy work may use
+the baseline as a domain-randomization center, not as a physical truth value.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

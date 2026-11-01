@@ -102,3 +102,42 @@ def test_retained_aligned_chirp_receipts_are_hash_bound_and_nonphysical():
     assert solve_receipt["tuning_assessment"]["status"] == "warn"
     assert solve_receipt["parameters_written"] is False
     assert solve_receipt["stage_saved"] is False
+
+
+def test_retained_cross_excitation_spec_separates_train_and_validation_families():
+    evidence = ROOT / "software" / "integrations" / "isaac_sim" / "evidence"
+    payload = json.loads(
+        (evidence / "cross_excitation_sysid_run_spec_20261101.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    MODULE.validate_bounded_payload(payload, campaign="cross-excitation-12")
+    chunks = payload["telemetry"]["chunks"]
+    assert len(payload["parameters"]["selected"]) == 12
+    assert len(chunks) == 12
+    assert {chunk["excitation"] for chunk in chunks if chunk["role"] == "train"} == {"chirp"}
+    assert {chunk["excitation"] for chunk in chunks if chunk["role"] == "validation"} == {"sine"}
+    assert sum(chunk["role"] == "train" for chunk in chunks) == 6
+    assert sum(chunk["role"] == "validation" for chunk in chunks) == 6
+    assert payload["outputs"]["apply_parameters_to_usd"] is False
+
+
+def test_retained_cross_excitation_validation_keeps_unmodified_baseline():
+    evidence = ROOT / "software" / "integrations" / "isaac_sim" / "evidence"
+    receipt = json.loads(
+        (evidence / "cross_excitation_sysid_validation_20261101.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    claimed = receipt.pop("receipt_sha256")
+    assert claimed == MODULE._digest(MODULE._canonical(receipt))
+    assert receipt["status"] == "PASS_CROSS_EXCITATION_BASELINE_WITH_NO_ACCEPTED_UPDATE"
+    assert receipt["selected_candidate"]["source"] == "initial_fallback"
+    assert receipt["selected_candidate"]["accepted"] is False
+    assert receipt["selected_candidate"]["theta"] == [1.0] * 12
+    assert receipt["validation"]["chunk_count"] == 6
+    assert receipt["identifiability"]["identifiable_count"] == 12
+    assert receipt["identifiability"]["weak_excitation_dof_indices"] == []
+    assert receipt["tuning_assessment"]["issue_codes"] == ["no_accepted_update"]
+    assert receipt["parameters_written"] is False
+    assert receipt["stage_saved"] is False
