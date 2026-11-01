@@ -649,3 +649,39 @@ observations, the joints were teleported without dynamics, and the retained
 14.400834977 mm localization uncertainty still exceeds the 7 mm safe-region
 margin. This evidence grants no camera, collision, controller, hardware, or
 physical authority.
+
+## Bounded LM0B SysID rehearsal
+
+The retained multi-pose trajectory now feeds a validation-aware, deliberately
+bounded NVIDIA SysID rehearsal. The generated run specification selects only
+joint stiffness and damping for DOF indices `0..3` (eight terms total), trains
+on the `H` and `1` segments, and holds out `PERIOD` for validation. The
+stationary `PARK` segment and weakly excited DOF indices `4..5` are excluded.
+Raw torque has zero residual weight because the dataset has no calibrated
+link-side torque channel.
+
+[`bounded_sysid_run_spec_20261101.json`](evidence/bounded_sysid_run_spec_20261101.json)
+is validated and round-tripped by Isaac Sim's installed schema API. The compact
+[`bounded_sysid_solve_rehearsal_20261101.json`](evidence/bounded_sysid_solve_rehearsal_20261101.json)
+records the first three-iteration solve: all eight selected terms were reported
+identifiable, one candidate was accepted, one validation chunk was evaluated,
+and neither the stage nor its parameters were written. The retained status is
+`PASS_BOUNDED_SYSID_REHEARSAL_WITH_WARNINGS`; it is not a physical parameter
+identification claim because the telemetry is simulated, stiffness/damping are
+correlated, wrist excitation is weak, and calibrated link-side torque is absent.
+
+Regenerate the run spec and both receipts with Isaac Sim Python after producing
+the verbose NVIDIA solve report externally:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA='YES'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\bounded_sysid_run_spec.py `
+  --stage C:\IsaacSim\artifacts\issue190\lm0b-sysid-prior-001\roarm_m3_sysid_prior.usda `
+  --telemetry software\integrations\isaac_sim\evidence\geometry_prior_multi_pose_sysid_20261101.csv `
+  --output software\integrations\isaac_sim\evidence\bounded_sysid_run_spec_20261101.json `
+  --receipt software\integrations\isaac_sim\evidence\bounded_sysid_run_spec_receipt_20261101.json `
+  --solve-result tmp\bounded_sysid_solve_result.json `
+  --solve-receipt software\integrations\isaac_sim\evidence\bounded_sysid_solve_rehearsal_20261101.json `
+  --status-output tmp\bounded_sysid_run_spec_status.json
+```
