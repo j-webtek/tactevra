@@ -154,7 +154,11 @@ post-initialization teleports and settled the retained `H` hover below the
 `1e-3 rad` joint-error threshold. Three independent native processes produced
 byte-identical receipts at `0.00020575953078338927 rad` final maximum joint
 error and zero observed drift. `drive_controlled_hover_campaign.py` now checks
-and seals that repeatability result. Gravity-on identification remains LM0B.
+and seals that repeatability result. The first LM0B gravity-on characterization
+also reaches the same noncontact hover through 270 physics steps, but all
+centers of mass remain placeholder link origins. It therefore validates only
+the gravity-on execution path; geometry-derived mass properties and subsequent
+physical-trace fitting remain required before any system-identification claim.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

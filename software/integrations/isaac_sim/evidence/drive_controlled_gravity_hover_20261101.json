@@ -1,0 +1,94 @@
+{
+  "controller_commands": [],
+  "evidence_class": "PROVISIONAL_GRAVITY_ON_DRIVE_CONTROL_CHARACTERIZATION",
+  "final": [
+    -0.1574123203754425,
+    0.6841351389884949,
+    1.9374791383743286,
+    -1.0508019924163818,
+    1.7058746082376786e-10,
+    3.932366585135405e-12
+  ],
+  "gravity_m_s2": 9.80665,
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "center_of_mass_at_link_origins",
+    "provisional_mass_inertia_and_drive_parameters",
+    "no_collision_or_contact_geometry",
+    "not_physical_timing_torque_or_safety_evidence"
+  ],
+  "maximum_final_joint_error_rad": 2.220528706931013e-05,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_steps": 270,
+  "profile_schema": "tactevra.isaac_lm0b_gravity_characterization_profile.v1",
+  "receipt_sha256": "4982e8773ff083678aa0878b25c3830de6d2d472b96340cae3a8da047c87b223",
+  "schema": "tactevra.isaac_lm0b_gravity_hover_characterization.v1",
+  "source_bindings": {
+    "bundle_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42",
+    "profile_file_sha256": "317bf7cebc76b922db89d96dc6038f1847d86a3f7b19479135898e3be5397173",
+    "usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
+  },
+  "state_teleports_after_initialization": 0,
+  "status": "PASS",
+  "target": [
+    -0.15741496358879978,
+    0.6841238370694995,
+    1.9375003619248874,
+    -1.0508241977034511,
+    1.7784032309096887e-10,
+    0.0
+  ],
+  "threshold_rad": 0.001,
+  "trace": [
+    {
+      "maximum_joint_error_rad": 0.9515036387498386,
+      "step": 20
+    },
+    {
+      "maximum_joint_error_rad": 0.6181217474992282,
+      "step": 40
+    },
+    {
+      "maximum_joint_error_rad": 0.28502107096266815,
+      "step": 60
+    },
+    {
+      "maximum_joint_error_rad": 0.05729341936659882,
+      "step": 80
+    },
+    {
+      "maximum_joint_error_rad": 0.010684852128744815,
+      "step": 100
+    },
+    {
+      "maximum_joint_error_rad": 0.0019925875718600494,
+      "step": 120
+    },
+    {
+      "maximum_joint_error_rad": 0.00037169886183807677,
+      "step": 140
+    },
+    {
+      "maximum_joint_error_rad": 6.75959641940338e-05,
+      "step": 160
+    },
+    {
+      "maximum_joint_error_rad": 2.220528706931013e-05,
+      "step": 180
+    },
+    {
+      "maximum_joint_error_rad": 2.220528706931013e-05,
+      "step": 200
+    },
+    {
+      "maximum_joint_error_rad": 2.220528706931013e-05,
+      "step": 220
+    },
+    {
+      "maximum_joint_error_rad": 2.220528706931013e-05,
+      "step": 240
+    }
+  ]
+}

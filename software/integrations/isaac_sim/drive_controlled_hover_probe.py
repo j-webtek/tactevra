@@ -11,6 +11,11 @@ from typing import Any
 
 
 SCHEMA = "tactevra.isaac_lm0_drive_controlled_hover.v1"
+GRAVITY_SCHEMA = "tactevra.isaac_lm0b_gravity_hover_characterization.v1"
+PROFILE_GRAVITY = {
+    "tactevra.isaac_lm0_dynamic_profile.v1": 0.0,
+    "tactevra.isaac_lm0b_gravity_characterization_profile.v1": 9.80665,
+}
 EXPECTED_DOFS = [
     "base_link_to_link1", "link1_to_link2", "link2_to_link3",
     "link3_to_link4", "link4_to_link5", "link5_to_gripper_link",
@@ -28,12 +33,15 @@ def _digest(value: bytes) -> str:
 def load_profile(path: Path) -> tuple[dict[str, Any], bytes]:
     raw = path.read_bytes()
     value = json.loads(raw)
-    if value.get("schema") != "tactevra.isaac_lm0_dynamic_profile.v1":
+    schema = value.get("schema")
+    if schema not in PROFILE_GRAVITY:
         raise ValueError("unsupported LM0 profile")
     if value.get("status") != "PROVISIONAL_SIMULATION_ONLY" or value.get("simulation_only") is not True:
         raise ValueError("LM0 profile must remain provisional and simulation-only")
-    if value.get("physical_authority") is not False or value.get("gravity_m_s2") != 0.0:
-        raise ValueError("LM0A profile crossed its zero-authority gravity-off boundary")
+    if value.get("physical_authority") is not False:
+        raise ValueError("LM0 profile crossed its zero-hardware-authority boundary")
+    if not math.isclose(value.get("gravity_m_s2"), PROFILE_GRAVITY[schema], abs_tol=1e-12):
+        raise ValueError("LM0 profile gravity does not match its declared phase")
     masses = value.get("rigid_body_mass_kg")
     if not isinstance(masses, dict) or not math.isclose(sum(masses.values()), 1.021, abs_tol=1e-9):
         raise ValueError("LM0A provisional masses must total 1.021 kg")
@@ -126,10 +134,17 @@ def main() -> int:
         final = articulation.get_dof_positions().numpy().tolist()[0]
         max_error = max(abs(final[i] - hover[i]) for i in range(6))
         passed = max_error <= profile["maximum_final_joint_error_rad"]
+        gravity_on = profile["gravity_m_s2"] > 0.0
         result: dict[str, Any] = {
-            "schema": SCHEMA,
+            "schema": GRAVITY_SCHEMA if gravity_on else SCHEMA,
             "status": "PASS" if passed else "BLOCKED_TRACKING_ERROR",
-            "evidence_class": "PROVISIONAL_GRAVITY_OFF_DRIVE_CONTROL_DIAGNOSTIC",
+            "evidence_class": (
+                "PROVISIONAL_GRAVITY_ON_DRIVE_CONTROL_CHARACTERIZATION"
+                if gravity_on
+                else "PROVISIONAL_GRAVITY_OFF_DRIVE_CONTROL_DIAGNOSTIC"
+            ),
+            "profile_schema": profile["schema"],
+            "gravity_m_s2": profile["gravity_m_s2"],
             "source_bindings": {"usd_sha256": _digest(usd.read_bytes()), "bundle_file_sha256": _digest(bundle_raw), "profile_file_sha256": _digest(profile_raw)},
             "physics_steps": profile["initial_settle_steps"] + profile["target_steps"],
             "state_teleports_after_initialization": 0,
@@ -143,7 +158,8 @@ def main() -> int:
             "controller_commands": [],
             "hardware_writes": 0,
             "physical_movements": 0,
-            "limitations": ["gravity_disabled", "provisional_mass_inertia_and_drive_parameters", "no_collision_or_contact_geometry", "not_physical_timing_torque_or_safety_evidence"],
+            "limitations": (["center_of_mass_at_link_origins"] if gravity_on else ["gravity_disabled"])
+            + ["provisional_mass_inertia_and_drive_parameters", "no_collision_or_contact_geometry", "not_physical_timing_torque_or_safety_evidence"],
         }
         result["receipt_sha256"] = _digest(_canonical(result))
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
