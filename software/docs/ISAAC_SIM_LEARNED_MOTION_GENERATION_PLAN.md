@@ -170,6 +170,12 @@ emits a CSV read back successfully by the installed Isaac Sim 6.1 SysID
 loader. This establishes the simulation telemetry and optimizer-input path. It
 does not identify physical mass, inertia, drive, or raw T1051 load semantics;
 those remain later LM0B measurement and calibration work.
+The imported USD's invalid mass placeholders and zero authored drive gains are
+now replaced only in a hashed derived SysID stage. NVIDIA's default preflight
+then reports 8 identifiable parameters instead of zero, exposing the remaining
+work directly: narrow fitting to the excited stiffness/damping terms, define a
+validation holdout, and add wrist/gripper excitation before broadening the
+parameter space.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

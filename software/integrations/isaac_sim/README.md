@@ -163,6 +163,32 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe `
   --status-output C:\IsaacSim\evidence\geometry_prior_multi_pose_sysid_trajectory.status.json
 ```
 
+The imported USD itself still contains invalid importer placeholders for mass
+and zero-valued authored drives. Passing that raw stage to the SysID quick-start
+made all 100 default parameters unidentifiable. Use
+[`sysid_stage_prior_probe.py`](sysid_stage_prior_probe.py) to create a separate
+derived stage with the seven geometry-prior mass properties and six nonzero
+drive priors authored into USD. The probe refuses to overwrite the imported
+source and hashes both inputs and the derived output.
+
+A scratch NVIDIA preflight against the derived stage improved the default
+100-parameter report to 8 identifiable, 4 weak, and 88 unidentifiable. This is
+diagnostic progress, not permission to run the broad optimizer: joints 5 and 6
+remain weakly excited, no validation chunk is configured, inertial fitting has
+no measured link-side torque, and the default parameter set is unnecessarily
+broad. The next run spec must select only the excited joint stiffness/damping
+terms and reserve a validation segment.
+
+```powershell
+C:\IsaacSim\env_6_1_0\Scripts\python.exe `
+  software\integrations\isaac_sim\sysid_stage_prior_probe.py `
+  --input-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --profile software\config\isaac_lm0b_geometry_prior_profile.json `
+  --output-usd C:\IsaacSim\artifacts\issue190\lm0b-sysid-prior-001\roarm_m3_sysid_prior.usda `
+  --receipt C:\IsaacSim\evidence\sysid_stage_prior.json `
+  --status-output C:\IsaacSim\evidence\sysid_stage_prior.status.json
+```
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
