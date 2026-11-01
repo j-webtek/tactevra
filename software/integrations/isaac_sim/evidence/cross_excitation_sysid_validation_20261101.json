@@ -1,0 +1,59 @@
+{
+  "bindings": {
+    "nvidia_solve_report_sha256": "d940010787cdee8590657ce0aca1928a819967b31a3fa882e42ea1b38c130603",
+    "run_spec_sha256": "7d55eb1c5deed81930d0b287e37947e44fc61fd6409e1408909af95b6c759ce2"
+  },
+  "hardware_access": false,
+  "identifiability": {
+    "condition": 25.070974953523322,
+    "identifiable_count": 12,
+    "selected_count": 12,
+    "weak_excitation_dof_indices": []
+  },
+  "limitations": [
+    "simulation-generated telemetry is not physical robot telemetry",
+    "stiffness and damping columns remain highly correlated",
+    "no calibrated link-side torque is available for inertial fitting",
+    "candidate parameters are not applied to the USD",
+    "common command alignment is derived from simulation-to-simulation chirp evidence"
+  ],
+  "parameters_written": false,
+  "physical_authority": false,
+  "receipt_sha256": "f2317d86dfd74b28b31c6658e0410f17db5e8d74d11cfb116faa76f71dc2d263",
+  "schema": "tactevra.isaac_lm0b_cross_excitation_sysid_rehearsal.v1",
+  "selected_candidate": {
+    "accepted": false,
+    "iteration": 2,
+    "source": "initial_fallback",
+    "theta": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "training_normalized_cost": 0.024019965901970863
+  },
+  "stage_saved": false,
+  "status": "PASS_CROSS_EXCITATION_BASELINE_WITH_NO_ACCEPTED_UPDATE",
+  "tuning_assessment": {
+    "issue_codes": [
+      "no_accepted_update"
+    ],
+    "status": "warn",
+    "validation_to_training_cost_ratio": 1.176808492291518
+  },
+  "validation": {
+    "chunk_count": 6,
+    "normalized_cost": 0.028266899857992005,
+    "position_rmse_rad": 0.14005315893640122,
+    "velocity_rmse_rad_s": 0.2578493182857831
+  }
+}

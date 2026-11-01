@@ -1,0 +1,28 @@
+{
+  "hardware_access": false,
+  "output": {
+    "sample_count": 5040,
+    "sha256": "a7fef93125f49cc1fcbd3c8dee71860b8f41b54b00816031004286e6e5f93d0b"
+  },
+  "physical_authority": false,
+  "receipt_sha256": "b1342318e382564533216045c5276c8954f300358bb51fad3fbb82bf4b2065b8",
+  "sample_period_seconds": 0.008333333333333333,
+  "schema": "tactevra.isaac_lm0b_cross_excitation_telemetry.v1",
+  "status": "PASS_CROSS_EXCITATION_TELEMETRY_COMPOSITION",
+  "train": {
+    "end_seconds": 24.0,
+    "excitation": "chirp",
+    "sample_count": 2880,
+    "sha256": "934494c1eb62c1802da582ff8b0e288a03d53c1c748ebcc6a91f68575ca4d965",
+    "start_seconds": 0.008333333333333333
+  },
+  "validation": {
+    "composed_end_seconds": 42.0,
+    "composed_start_seconds": 24.008333333333333,
+    "excitation": "sine",
+    "sample_count": 2160,
+    "sha256": "47802c77a7f0ed26427d23ff7d5bb1e6f3c4664247eb48326c1d0daea18537e2",
+    "source_end_seconds": 18.0,
+    "source_start_seconds": 0.008333333333333333
+  }
+}

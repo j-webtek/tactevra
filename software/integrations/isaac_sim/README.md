@@ -738,3 +738,26 @@ Retained expanded-fit artifacts:
 Actuator-delay identification, if later enabled, must operate only on the
 small per-joint residual after the common alignment. The retained chirp receipt
 is [`independent_joint_chirp_20261101.json`](evidence/independent_joint_chirp_20261101.json).
+
+The next validation campaign deliberately changes excitation family. The
+deterministic composer binds and concatenates the 2,880-sample chirp trace for
+training with the 2,160-sample independent-sine trace for validation. The
+result has continuous 120 Hz timestamps and exact hashes for both sources.
+The official run spec trains on all six chirp chunks and validates on all six
+sine chunks. Both bounded optimizer updates were rejected, so the selected
+result is the unchanged 12-value baseline rather than a claimed fit. That
+baseline records `0.024019965901970863` training normalized cost and
+`0.028266899857992005` validation normalized cost, a ratio of
+`1.176808492291518`; sine validation position RMSE is
+`0.14005315893640122 rad`. Excitation coverage, telemetry quality, and all 12
+identifiability checks pass. The result is useful evidence that the baseline
+generalizes across these simulated waveforms, but it does not justify parameter
+promotion or a physical-model claim.
+
+Retained cross-excitation artifacts:
+
+- [`cross_excitation_sysid_20261101.csv`](evidence/cross_excitation_sysid_20261101.csv)
+- [`cross_excitation_sysid_20261101.json`](evidence/cross_excitation_sysid_20261101.json)
+- [`cross_excitation_sysid_run_spec_20261101.json`](evidence/cross_excitation_sysid_run_spec_20261101.json)
+- [`cross_excitation_sysid_run_spec_receipt_20261101.json`](evidence/cross_excitation_sysid_run_spec_receipt_20261101.json)
+- [`cross_excitation_sysid_validation_20261101.json`](evidence/cross_excitation_sysid_validation_20261101.json)
