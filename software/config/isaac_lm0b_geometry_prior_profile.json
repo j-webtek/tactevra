@@ -1,0 +1,178 @@
+{
+  "dof": {
+    "damping": 10.0,
+    "maximum_effort": 100.0,
+    "maximum_velocity_rad_s": 2.0,
+    "stiffness": 100.0
+  },
+  "gravity_m_s2": 9.80665,
+  "initial_settle_steps": 30,
+  "maximum_final_joint_error_rad": 0.001,
+  "physical_authority": false,
+  "physics_dt_s": 0.008333333333333333,
+  "provenance": {
+    "center_of_mass_and_inertia": {
+      "class": "GEOMETRY_DERIVED_PROVISIONAL",
+      "convex_hull_closure_count": 2,
+      "watertight_mesh_count": 5
+    },
+    "drive_gains": {
+      "class": "PROVISIONAL_RANGE"
+    },
+    "gravity": {
+      "class": "SI_DEFINED"
+    },
+    "mass_distribution": {
+      "class": "PROVISIONAL_RANGE"
+    },
+    "mass_total_kg": {
+      "class": "UPSTREAM",
+      "note": "Published product mass distributed provisionally across links.",
+      "value": 1.021
+    }
+  },
+  "rigid_body_properties": {
+    "/roarm_m3/Geometry/world/base_link": {
+      "center_of_mass_m": [
+        -0.006589301706,
+        0.0,
+        -0.047378454506
+      ],
+      "diagonal_inertia_kg_m2": [
+        0.000129105917,
+        0.00017100179,
+        0.000206553549
+      ],
+      "mass_kg": 0.18,
+      "principal_axes_wxyz": [
+        0.991647940856,
+        0.0,
+        -0.128974266409,
+        -0.0
+      ]
+    },
+    "/roarm_m3/Geometry/world/base_link/link1": {
+      "center_of_mass_m": [
+        -1.098e-09,
+        -2.73476e-07,
+        0.031074113598
+      ],
+      "diagonal_inertia_kg_m2": [
+        5.251667e-05,
+        7.0264966e-05,
+        7.9696208e-05
+      ],
+      "mass_kg": 0.12,
+      "principal_axes_wxyz": [
+        0.499992551268,
+        -0.500007448619,
+        -0.499992374599,
+        0.500007625288
+      ]
+    },
+    "/roarm_m3/Geometry/world/base_link/link1/link2": {
+      "center_of_mass_m": [
+        0.122022544526,
+        6.6117501e-05,
+        -9.5031836e-05
+      ],
+      "diagonal_inertia_kg_m2": [
+        7.0685664e-05,
+        0.001058191421,
+        0.00110426046
+      ],
+      "mass_kg": 0.24,
+      "principal_axes_wxyz": [
+        0.706902703143,
+        -0.707265126713,
+        -0.005735030891,
+        0.005631895397
+      ]
+    },
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3": {
+      "center_of_mass_m": [
+        -0.001131196282,
+        -0.070980939873,
+        0.000252970961
+      ],
+      "diagonal_inertia_kg_m2": [
+        2.2046358e-05,
+        0.00048527329,
+        0.000490768482
+      ],
+      "mass_kg": 0.16,
+      "principal_axes_wxyz": [
+        0.500546823575,
+        0.496600912186,
+        0.501173698629,
+        0.501662571086
+      ]
+    },
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4": {
+      "center_of_mass_m": [
+        0.001737752068,
+        -0.032807232013,
+        1.99726e-07
+      ],
+      "diagonal_inertia_kg_m2": [
+        2.5354846e-05,
+        2.9998945e-05,
+        3.5519823e-05
+      ],
+      "mass_kg": 0.12,
+      "principal_axes_wxyz": [
+        0.993621394902,
+        1.497e-09,
+        -1.892e-09,
+        0.112767564451
+      ]
+    },
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5": {
+      "center_of_mass_m": [
+        -0.005787357789,
+        -0.000549189778,
+        0.051195767397
+      ],
+      "diagonal_inertia_kg_m2": [
+        2.3066233e-05,
+        0.000113009775,
+        0.000114024464
+      ],
+      "mass_kg": 0.12,
+      "principal_axes_wxyz": [
+        0.587925314055,
+        -0.265214343609,
+        -0.699447962384,
+        -0.307859911249
+      ]
+    },
+    "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/gripper_link": {
+      "center_of_mass_m": [
+        0.028114672737,
+        -0.000959942488,
+        -0.018933567242
+      ],
+      "diagonal_inertia_kg_m2": [
+        2.5176384e-05,
+        3.2609684e-05,
+        5.1942043e-05
+      ],
+      "mass_kg": 0.081,
+      "principal_axes_wxyz": [
+        0.706046980418,
+        -0.706046765942,
+        0.038702064817,
+        -0.038701110107
+      ]
+    }
+  },
+  "schema": "tactevra.isaac_lm0b_geometry_prior_profile.v1",
+  "simulation_only": true,
+  "source_bindings": {
+    "base_profile_file_sha256": "317bf7cebc76b922db89d96dc6038f1847d86a3f7b19479135898e3be5397173",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
+  },
+  "status": "PROVISIONAL_SIMULATION_ONLY",
+  "target_steps": 240
+}

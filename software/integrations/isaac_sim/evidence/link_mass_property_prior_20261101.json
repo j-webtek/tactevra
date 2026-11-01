@@ -1,0 +1,187 @@
+{
+  "evidence_class": "GEOMETRY_DERIVED_SIMULATION_PRIOR_ONLY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "mesh_geometry_omits_internal_servo_electronics_and_fastener_mass_distribution",
+    "link1_and_link5_use_convex_hull_closure",
+    "link_masses_remain_provisional_allocations_of_published_total_mass",
+    "not_physical_system_identification_torque_timing_contact_or_safety_evidence"
+  ],
+  "link_properties": [
+    {
+      "center_of_mass_m": [
+        -0.006589301706,
+        0.0,
+        -0.047378454506
+      ],
+      "closure_method": "SOURCE_WATERTIGHT_VOLUME",
+      "diagonal_inertia_kg_m2": [
+        0.000129105917,
+        0.00017100179,
+        0.000206553549
+      ],
+      "link_name": "base_link",
+      "mass_kg": 0.18,
+      "prim_path": "/roarm_m3/Geometry/world/base_link",
+      "principal_axes_wxyz": [
+        0.991647940856,
+        0.0,
+        -0.128974266409,
+        -0.0
+      ],
+      "source_mesh_sha256": "55cbfcc2cfb995ab11d8a6ce7c2132283721b9c69cd05b4c7b9d6404e9d8fded"
+    },
+    {
+      "center_of_mass_m": [
+        -1.098e-09,
+        -2.73476e-07,
+        0.031074113598
+      ],
+      "closure_method": "CONVEX_HULL_CLOSURE",
+      "diagonal_inertia_kg_m2": [
+        5.251667e-05,
+        7.0264966e-05,
+        7.9696208e-05
+      ],
+      "link_name": "link1",
+      "mass_kg": 0.12,
+      "prim_path": "/roarm_m3/Geometry/world/base_link/link1",
+      "principal_axes_wxyz": [
+        0.499992551268,
+        -0.500007448619,
+        -0.499992374599,
+        0.500007625288
+      ],
+      "source_mesh_sha256": "022fdd2df4fa57748f56337fb1b3b3cce81dd116e0f608ccab51d6f1eacb552c"
+    },
+    {
+      "center_of_mass_m": [
+        0.122022544526,
+        6.6117501e-05,
+        -9.5031836e-05
+      ],
+      "closure_method": "SOURCE_WATERTIGHT_VOLUME",
+      "diagonal_inertia_kg_m2": [
+        7.0685664e-05,
+        0.001058191421,
+        0.00110426046
+      ],
+      "link_name": "link2",
+      "mass_kg": 0.24,
+      "prim_path": "/roarm_m3/Geometry/world/base_link/link1/link2",
+      "principal_axes_wxyz": [
+        0.706902703143,
+        -0.707265126713,
+        -0.005735030891,
+        0.005631895397
+      ],
+      "source_mesh_sha256": "5acd32a9f662221deb58ea2ca338c5d6726cbcd7664e7dcdb93bac722820b025"
+    },
+    {
+      "center_of_mass_m": [
+        -0.001131196282,
+        -0.070980939873,
+        0.000252970961
+      ],
+      "closure_method": "SOURCE_WATERTIGHT_VOLUME",
+      "diagonal_inertia_kg_m2": [
+        2.2046358e-05,
+        0.00048527329,
+        0.000490768482
+      ],
+      "link_name": "link3",
+      "mass_kg": 0.16,
+      "prim_path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3",
+      "principal_axes_wxyz": [
+        0.500546823575,
+        0.496600912186,
+        0.501173698629,
+        0.501662571086
+      ],
+      "source_mesh_sha256": "80c4e9b1084bf1c7d975398eb11e7ba4e7dc69e62ff4adefcac38a0e0f5a4069"
+    },
+    {
+      "center_of_mass_m": [
+        0.001737752068,
+        -0.032807232013,
+        1.99726e-07
+      ],
+      "closure_method": "SOURCE_WATERTIGHT_VOLUME",
+      "diagonal_inertia_kg_m2": [
+        2.5354846e-05,
+        2.9998945e-05,
+        3.5519823e-05
+      ],
+      "link_name": "link4",
+      "mass_kg": 0.12,
+      "prim_path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4",
+      "principal_axes_wxyz": [
+        0.993621394902,
+        1.497e-09,
+        -1.892e-09,
+        0.112767564451
+      ],
+      "source_mesh_sha256": "bb334cafafa5f5adeedb4d430b325b436eafa833fa851ea782d9c785698f8c09"
+    },
+    {
+      "center_of_mass_m": [
+        -0.005787357789,
+        -0.000549189778,
+        0.051195767397
+      ],
+      "closure_method": "CONVEX_HULL_CLOSURE",
+      "diagonal_inertia_kg_m2": [
+        2.3066233e-05,
+        0.000113009775,
+        0.000114024464
+      ],
+      "link_name": "link5",
+      "mass_kg": 0.12,
+      "prim_path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5",
+      "principal_axes_wxyz": [
+        0.587925314055,
+        -0.265214343609,
+        -0.699447962384,
+        -0.307859911249
+      ],
+      "source_mesh_sha256": "1d63f374a78c1419b21eec63fa8efeef40d0d42ca89c5de3ceb0d86476d9c7eb"
+    },
+    {
+      "center_of_mass_m": [
+        0.028114672737,
+        -0.000959942488,
+        -0.018933567242
+      ],
+      "closure_method": "SOURCE_WATERTIGHT_VOLUME",
+      "diagonal_inertia_kg_m2": [
+        2.5176384e-05,
+        3.2609684e-05,
+        5.1942043e-05
+      ],
+      "link_name": "gripper_link",
+      "mass_kg": 0.081,
+      "prim_path": "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5/gripper_link",
+      "principal_axes_wxyz": [
+        0.706046980418,
+        -0.706046765942,
+        0.038702064817,
+        -0.038701110107
+      ],
+      "source_mesh_sha256": "7946a374e24a2f467a0581b4946e0ec41b1b86a92f070bc00aa9bced1bf65a56"
+    }
+  ],
+  "physical_authority": false,
+  "physical_movements": 0,
+  "profile_file_sha256": "768829bc8c131efe41e8866b6a18900a24b3f77e2ef97b367b55cffbfcf9881a",
+  "receipt_sha256": "95ad61adc81eaa64464e37cad46077648346fe26bf900363d615b23cfb3ba418",
+  "schema": "tactevra.isaac_lm0b_geometry_mass_prior.v1",
+  "source_bindings": {
+    "base_profile_file_sha256": "317bf7cebc76b922db89d96dc6038f1847d86a3f7b19479135898e3be5397173",
+    "mesh_receipt_file_sha256": "8408214ddc9bec69ffb65a4928e22bbdd83f99c6590576ff6a4ef61599c3703d",
+    "mesh_receipt_sha256": "dbb8b56a602ac4c2b69073af23d61700aee12c0153080bdf58b7f5990b92646e",
+    "upstream_commit": "40dbd84b553695212fab713e8465f817ba95454d"
+  },
+  "status": "PASS_PROVISIONAL_GEOMETRY_PRIOR",
+  "total_mass_kg": 1.021
+}

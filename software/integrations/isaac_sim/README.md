@@ -109,6 +109,27 @@ center of mass as a link-origin placeholder. A lower tracking error than LM0A
 does not imply a better physical model. Geometry-derived mass properties and
 measured physical traces are required before parameter fitting.
 
+[`link_mass_property_prior_probe.py`](link_mass_property_prior_probe.py)
+replaces the link-origin center-of-mass placeholders with a deterministic
+geometry prior. It reads the seven exact meshes from the pinned upstream Git
+commit, uses source volume for the five watertight meshes and labelled convex
+hulls for open `link1` and `link5`, scales each inertia tensor to the existing
+provisional link mass, and emits principal-axis properties. The retained
+gravity-on replay passes, but the geometry omits internal servo, electronics,
+and fastener mass distribution, so this remains a simulation prior rather than
+physical identification.
+
+```powershell
+C:\IsaacSim\env_6_1_0\Scripts\python.exe `
+  software\integrations\isaac_sim\link_mass_property_prior_probe.py `
+  --upstream-repo C:\IsaacSim\sources\roarm_ws-40dbd84 `
+  --mesh-receipt software\integrations\isaac_sim\evidence\roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --base-profile software\config\isaac_lm0b_gravity_characterization_profile.json `
+  --profile-output C:\IsaacSim\evidence\isaac_lm0b_geometry_prior_profile.json `
+  --receipt-output C:\IsaacSim\evidence\link_mass_property_prior.json `
+  --status-output C:\IsaacSim\evidence\link_mass_property_prior.status.json
+```
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
