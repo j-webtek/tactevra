@@ -310,6 +310,18 @@ discrete continuity only. Exact joint results must next pass installed-geometry
 collision screening before the drive-controlled robot TCP is replayed against
 the native key mechanism.
 
+ARM-190 now creates the exact native collision-diagnostic handoff. It binds the
+ARM-189 receipt, the selected Isaac 6.1 runner, and the retained exploratory
+collision candidate, then expands 133 IK endpoints to 149 configurations with
+at most `0.05 rad` change per joint. The external request at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-request-001\request.json` has
+SHA-256 `4288f11667ac1713536ca808e1608150f2241ca7dfdaea41b75c307d14344dbd`.
+This closes the schedule-to-collision-request plumbing, not the collision gate:
+the candidate is uninstalled, several attachment/environment bodies remain
+unbound, and bounded samples do not prove continuous clearance. The next run
+must retain per-sample pair evidence from the selected Isaac runner while
+keeping native contact replay denied.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;
@@ -416,8 +428,9 @@ ScheduleGen. Neither is a physical success rate.
 2. **LM0 retained run:** execute repeated headless Isaac runs and classify
    tracking, settling, and contact behavior.
 3. **LM1 collision:** native representative-key physics, Cartesian
-   regeneration, and canonical IK are complete; next screen the exact 133
-   joint results against installed collision geometry and continuous segments.
+   regeneration, canonical IK, and the exact 149-sample collision diagnostic
+   request are complete; next run the selected Isaac diagnostic, retain
+   pair-specific results, and separately satisfy installed continuous geometry.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

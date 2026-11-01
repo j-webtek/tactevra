@@ -24,6 +24,9 @@ TCP_CARTESIAN_SCHEDULE_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_cartesian_schedule_request.v1"
 )
 TCP_IK_SCREEN_SCHEMA = "tactevra.isaac_lm1_robot_tcp_cartesian_ik_screen.v1"
+TCP_COLLISION_REPLAY_REQUEST_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -879,6 +882,149 @@ def screen_robot_tcp_cartesian_schedule_ik(
     return result
 
 
+def build_robot_tcp_collision_replay_request(
+    ik_receipt: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    toolchain_lock: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind accepted IK results to bounded zero-authority collision samples.
+
+    The retained candidate geometry is deliberately simulation-only and
+    uninstalled.  This request can drive an Isaac diagnostic, but cannot clear
+    installed-geometry or physical-motion gates.
+    """
+    if ik_receipt.get("schema") != TCP_IK_SCREEN_SCHEMA:
+        raise MechanicsContractError("unexpected IK receipt schema")
+    claimed_ik_hash = ik_receipt.get("receipt_sha256")
+    unsigned_ik = dict(ik_receipt)
+    unsigned_ik.pop("receipt_sha256", None)
+    if claimed_ik_hash != _canonical_sha256(unsigned_ik):
+        raise MechanicsContractError("IK receipt hash mismatch")
+    if (
+        ik_receipt.get("status") != "READY_FOR_COLLISION_QUALIFICATION"
+        or ik_receipt.get("ik_all_samples_accepted") is not True
+        or ik_receipt.get("evaluated_sample_count") != ik_receipt.get("sample_count")
+    ):
+        raise MechanicsContractError("collision replay requires an all-accepted IK receipt")
+    for document, label in ((ik_receipt, "IK receipt"), (collision_candidate, "collision candidate")):
+        if (
+            document.get("physical_authority") is not False
+            or document.get("hardware_access", False) is not False
+            or document.get("hardware_write_count", document.get("hardware_writes")) != 0
+            or document.get("physical_movement_count", document.get("physical_movements")) != 0
+            or document.get("commands", document.get("controller_commands")) != []
+        ):
+            raise MechanicsContractError(f"{label} crossed the zero-authority boundary")
+
+    claimed_candidate_hash = collision_candidate.get("candidate_sha256")
+    unsigned_candidate = dict(collision_candidate)
+    unsigned_candidate.pop("candidate_sha256", None)
+    if claimed_candidate_hash != _canonical_sha256(unsigned_candidate):
+        raise MechanicsContractError("collision candidate hash mismatch")
+    if (
+        collision_candidate.get("schema")
+        != "tactevra.simulation_collision_candidate.v1"
+        or collision_candidate.get("scope")
+        != "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+    ):
+        raise MechanicsContractError("collision candidate boundary changed")
+
+    if (
+        toolchain_lock.get("schema") != "rocell.isaac_sim_toolchain_lock.v1"
+        or toolchain_lock.get("selection_status") != "SELECTED"
+        or toolchain_lock.get("hardware_access") is not False
+        or toolchain_lock.get("physical_authority") is not False
+        or toolchain_lock.get("wire_commands") != []
+    ):
+        raise MechanicsContractError("Isaac toolchain lock is not selected zero-authority")
+
+    try:
+        from rocell.application.bounded_segment_collision_qualification import (
+            BoundedSegmentSamplingPolicy,
+            build_bounded_joint_sample_plan_from_results,
+        )
+        from rocell.kinematics import ARM_JOINT_NAMES
+    except ImportError as exc:
+        raise MechanicsContractError(
+            "bounded collision runtime is unavailable; include software/src on PYTHONPATH"
+        ) from exc
+
+    joint_results = ik_receipt.get("joint_results")
+    if not isinstance(joint_results, list):
+        raise MechanicsContractError("IK receipt joint results are absent")
+    policy = BoundedSegmentSamplingPolicy(
+        maximum_joint_step_rad=0.05,
+        maximum_samples=256,
+    )
+    plan = build_bounded_joint_sample_plan_from_results(
+        ik_receipt.get("initial_seed_joint_positions_rad"),
+        joint_results,
+        policy,
+    )
+    candidate_blockers = collision_candidate.get("blockers")
+    if (
+        not isinstance(candidate_blockers, list)
+        or not candidate_blockers
+        or not all(isinstance(item, str) and item for item in candidate_blockers)
+    ):
+        raise MechanicsContractError("collision candidate blockers are absent")
+    bodies = collision_candidate.get("robot_bodies")
+    workcell = collision_candidate.get("workcell_bodies")
+    if not isinstance(bodies, list) or not bodies or not isinstance(workcell, list) or not workcell:
+        raise MechanicsContractError("collision candidate body coverage is absent")
+
+    request: dict[str, Any] = {
+        "schema": TCP_COLLISION_REPLAY_REQUEST_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC",
+        "source_ik_receipt_sha256": claimed_ik_hash,
+        "source_request_sha256": ik_receipt["source_request_sha256"],
+        "source_bundle_sha256": ik_receipt["source_bundle_sha256"],
+        "collision_candidate_sha256": claimed_candidate_hash,
+        "collision_candidate_status": collision_candidate["status"],
+        "collision_candidate_installed": False,
+        "collision_candidate_blockers": list(candidate_blockers),
+        "toolchain_lock_sha256": _canonical_sha256(toolchain_lock),
+        "toolchain": {
+            name: toolchain_lock[name]
+            for name in (
+                "isaac_sim_version", "installation_sha256",
+                "extension_lock_sha256", "settings_profile_sha256",
+                "runner_platform", "launch_method",
+            )
+        },
+        "joint_order": list(ARM_JOINT_NAMES),
+        "source_joint_result_count": len(joint_results),
+        "bounded_sample_count": len(plan),
+        "bounded_sampling_policy": policy.to_dict(),
+        "bounded_samples": [item.to_dict() for item in plan],
+        "collision_scopes": [
+            "ROBOT_SELF_COLLISION",
+            "ROBOT_TO_WORKCELL",
+            "ROBOT_TOOL_CAMERA_SUPPORT_DIAGNOSTIC_WHERE_BOUND",
+        ],
+        "diagnostic_only": True,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "native_contact_replay_authorized": False,
+        "next_required_stage": "RUN_SELECTED_ISAAC_COLLISION_DIAGNOSTIC_AND_RETAIN_PAIR_EVIDENCE",
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "limitations": [
+            "exploratory_collision_candidate_is_uninstalled",
+            "bounded_sampling_is_not_continuous_swept_volume_proof",
+            "missing_candidate_bodies_remain_explicit_blockers",
+            "diagnostic_result_cannot_promote_installed_or_physical_gates",
+        ],
+    }
+    request["request_sha256"] = _canonical_sha256(request)
+    return request
+
+
 def assess_native_key_trace(
     profile: dict[str, Any],
     native_samples: Iterable[dict[str, Any]],
@@ -1111,6 +1257,21 @@ def main() -> int:
         type=Path,
         help="retained bundle supplying lineage and the sample-0 synthetic seed",
     )
+    parser.add_argument(
+        "--ik-receipt",
+        type=Path,
+        help="emit a bounded collision-diagnostic request from accepted IK evidence",
+    )
+    parser.add_argument(
+        "--collision-candidate",
+        type=Path,
+        help="simulation-only collision candidate for the bounded diagnostic",
+    )
+    parser.add_argument(
+        "--toolchain-lock",
+        type=Path,
+        help="selected zero-authority Isaac runner lock for the diagnostic",
+    )
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -1128,13 +1289,33 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening requires both --cartesian-request and --ik-source-bundle"
             )
+        collision_arguments = (
+            args.ik_receipt, args.collision_candidate, args.toolchain_lock
+        )
+        if any(item is not None for item in collision_arguments) and not all(
+            item is not None for item in collision_arguments
+        ):
+            raise MechanicsContractError(
+                "collision request requires --ik-receipt, --collision-candidate, and --toolchain-lock"
+            )
         if args.cartesian_request is not None and (
             args.native_h_probe or args.robot_tcp_bundle is not None
+            or args.ik_receipt is not None
         ):
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.cartesian_request is not None:
+        if args.ik_receipt is not None:
+            if args.native_h_probe or args.robot_tcp_bundle is not None:
+                raise MechanicsContractError(
+                    "collision request is mutually exclusive with native and binding modes"
+                )
+            result = build_robot_tcp_collision_replay_request(
+                json.loads(args.ik_receipt.resolve(strict=True).read_bytes()),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(args.toolchain_lock.resolve(strict=True).read_bytes()),
+            )
+        elif args.cartesian_request is not None:
             profile = build_profile(args.layout.resolve(strict=True))
             result = screen_robot_tcp_cartesian_schedule_ik(
                 json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
@@ -1171,6 +1352,7 @@ def main() -> int:
         return 0 if result["status"] in {
             "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY",
             "READY_FOR_IK_QUALIFICATION", "READY_FOR_COLLISION_QUALIFICATION",
+            "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({
