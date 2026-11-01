@@ -1,9 +1,10 @@
-"""Build the first bounded, validation-aware Isaac SysID run specification.
+"""Build bounded, validation-aware Isaac SysID run specifications.
 
 This utility uses Isaac Sim's installed SysID recipe and schema APIs.  It then
-narrows the generated manipulator parameter space to the eight drive terms that
-the retained sensitivity rehearsal found observable.  It never accesses robot
-hardware and it never modifies the source or derived USD stage.
+narrows the generated manipulator parameter space to either the first eight
+observable drive terms or the aligned twelve-term independent-chirp campaign.
+It never accesses robot hardware and it never modifies the source or derived
+USD stage.
 """
 
 from __future__ import annotations
@@ -25,6 +26,18 @@ CHUNK_PLAN = (
     {"name": "1 excitation", "role": "train", "excitation": "custom", "start": 4.008333333333334, "end": 6.0, "weight": 1.0},
     {"name": "PERIOD holdout", "role": "validation", "excitation": "custom", "start": 6.008333333333334, "end": 7.991666666666666, "weight": 1.0},
 )
+CHIRP_ALIGNMENT_SECONDS = 0.0866067950984508
+CHIRP_CHUNK_PLAN = tuple(
+    {
+        "name": f"CHIRP_J{index + 1}",
+        "role": "validation" if index == 5 else "train",
+        "excitation": "chirp",
+        "start": index * 4.0 + 0.008333333333333333,
+        "end": (index + 1) * 4.0,
+        "weight": 1.0,
+    }
+    for index in range(6)
+)
 
 
 def _canonical(value: object) -> bytes:
@@ -35,25 +48,31 @@ def _digest(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def validate_bounded_payload(payload: dict[str, Any]) -> None:
+def validate_bounded_payload(payload: dict[str, Any], *, campaign: str = "multi-pose-8") -> None:
     """Enforce the project-specific boundary on an official SysIdRunSpec payload."""
     selected = payload["parameters"]["selected"]
     addresses = [(row["param_type"], int(row["dof_index"])) for row in selected]
+    dof_indices = OBSERVABLE_DOF_INDICES if campaign == "multi-pose-8" else tuple(range(6))
     expected = [
         (parameter_type, dof_index)
-        for dof_index in OBSERVABLE_DOF_INDICES
+        for dof_index in dof_indices
         for parameter_type in OBSERVABLE_PARAMETER_TYPES
     ]
     if addresses != expected:
         raise ValueError(f"bounded parameter addresses differ: {addresses!r}")
     chunks = payload["telemetry"]["chunks"]
-    if chunks != list(CHUNK_PLAN):
+    expected_chunks = CHUNK_PLAN if campaign == "multi-pose-8" else CHIRP_CHUNK_PLAN
+    if chunks != list(expected_chunks):
         raise ValueError("bounded telemetry chunks differ from the governed train/validation split")
+    expected_alignment = 0.0 if campaign == "multi-pose-8" else CHIRP_ALIGNMENT_SECONDS
+    if payload["telemetry"]["command_alignment_seconds"] != expected_alignment:
+        raise ValueError("bounded telemetry command alignment differs from the governed campaign")
     if payload["residuals"]["torque_weight"] != 0.0:
         raise ValueError("uncalibrated torque must not contribute to this fit")
     if payload["outputs"]["apply_parameters_to_usd"] is not False:
         raise ValueError("first bounded rehearsal must not apply parameters to USD")
-    if payload["solver"]["max_iterations"] > 3 or payload["solver"]["max_rollout_steps"] > 240:
+    rollout_ceiling = 240 if campaign == "multi-pose-8" else 480
+    if payload["solver"]["max_iterations"] > 3 or payload["solver"]["max_rollout_steps"] > rollout_ceiling:
         raise ValueError("first bounded rehearsal exceeded its solver budget")
 
 
@@ -63,16 +82,30 @@ def summarize_solve_result(result: dict[str, Any], *, result_sha256: str, run_sp
     assessment = result["tuning_assessment"]
     check = result["extra"]["check_report"]
     verdicts = check["parameter_verdicts"]
+    expected_count = len(result["run_spec"]["parameters"]["selected"])
+    aligned_chirp = expected_count == 12
     if result["parameters_written"] is not False:
         raise ValueError("bounded rehearsal unexpectedly wrote parameters")
     if selected.get("accepted") is not True or selected.get("source") != "last_accepted":
         raise ValueError("bounded rehearsal produced no accepted candidate")
-    if len(verdicts) != 8 or any(row.get("verdict") != "identifiable" for row in verdicts):
-        raise ValueError("bounded rehearsal did not retain eight identifiable terms")
+    if expected_count not in (8, 12):
+        raise ValueError(f"unsupported bounded rehearsal parameter count: {expected_count}")
+    if len(verdicts) != expected_count or any(row.get("verdict") != "identifiable" for row in verdicts):
+        raise ValueError(
+            f"bounded rehearsal did not retain {expected_count} identifiable terms"
+        )
     validation = result["validation_summary"]["overall"]
     receipt = {
-        "schema": "tactevra.isaac_lm0b_bounded_sysid_rehearsal.v1",
-        "status": "PASS_BOUNDED_SYSID_REHEARSAL_WITH_WARNINGS",
+        "schema": (
+            "tactevra.isaac_lm0b_aligned_chirp_sysid_rehearsal.v1"
+            if aligned_chirp
+            else "tactevra.isaac_lm0b_bounded_sysid_rehearsal.v1"
+        ),
+        "status": (
+            "PASS_ALIGNED_CHIRP_SYSID_REHEARSAL_WITH_WARNINGS"
+            if aligned_chirp
+            else "PASS_BOUNDED_SYSID_REHEARSAL_WITH_WARNINGS"
+        ),
         "hardware_access": False,
         "physical_authority": False,
         "parameters_written": False,
@@ -106,10 +139,13 @@ def summarize_solve_result(result: dict[str, Any], *, result_sha256: str, run_sp
         "limitations": [
             "simulation-generated telemetry is not physical robot telemetry",
             "stiffness and damping columns remain highly correlated",
-            "DOF indices 4 and 5 lack sufficient excitation",
             "no calibrated link-side torque is available for inertial fitting",
             "candidate parameters are not applied to the USD",
-        ],
+        ] + (
+            ["common command alignment is derived from simulation-to-simulation chirp evidence"]
+            if aligned_chirp
+            else ["DOF indices 4 and 5 lack sufficient excitation"]
+        ),
         "bindings": {
             "run_spec_sha256": run_spec_sha256,
             "nvidia_solve_report_sha256": result_sha256,
@@ -128,6 +164,7 @@ def main() -> int:
     parser.add_argument("--status-output", type=Path, required=True)
     parser.add_argument("--solve-result", type=Path)
     parser.add_argument("--solve-receipt", type=Path)
+    parser.add_argument("--campaign", choices=("multi-pose-8", "aligned-chirp-12"), default="multi-pose-8")
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
@@ -183,15 +220,20 @@ def main() -> int:
             num_links=7,
         )
         by_address = {(row.param_type, row.dof_index): row for row in spec.parameters.selected}
+        dof_indices = OBSERVABLE_DOF_INDICES if args.campaign == "multi-pose-8" else tuple(range(6))
         spec.parameters.selected = [
             by_address[(parameter_type, dof_index)]
-            for dof_index in OBSERVABLE_DOF_INDICES
+            for dof_index in dof_indices
             for parameter_type in OBSERVABLE_PARAMETER_TYPES
         ]
-        spec.telemetry.chunks = [TelemetryChunkRunSpec.from_dict(row) for row in CHUNK_PLAN]
+        chunk_plan = CHUNK_PLAN if args.campaign == "multi-pose-8" else CHIRP_CHUNK_PLAN
+        spec.telemetry.chunks = [TelemetryChunkRunSpec.from_dict(row) for row in chunk_plan]
         spec.telemetry.auto_split = False
-        spec.solver.max_iterations = 3
-        spec.solver.max_rollout_steps = 240
+        spec.telemetry.command_alignment_seconds = (
+            0.0 if args.campaign == "multi-pose-8" else CHIRP_ALIGNMENT_SECONDS
+        )
+        spec.solver.max_iterations = 3 if args.campaign == "multi-pose-8" else 2
+        spec.solver.max_rollout_steps = 240 if args.campaign == "multi-pose-8" else 480
         spec.residuals.position_weight = 1.0
         spec.residuals.velocity_weight = 0.5
         spec.residuals.torque_weight = 0.0
@@ -203,7 +245,7 @@ def main() -> int:
         spec.outputs.compute_parameter_confidence = False
 
         payload = spec.to_dict()
-        validate_bounded_payload(payload)
+        validate_bounded_payload(payload, campaign=args.campaign)
         roundtrip = SysIdRunSpec.from_dict(payload).to_dict()
         if roundtrip != payload:
             raise RuntimeError("official SysIdRunSpec roundtrip changed the bounded payload")
@@ -219,14 +261,19 @@ def main() -> int:
             "physical_authority": False,
             "source_usd_modified": False,
             "parameter_count": len(spec.parameters.selected),
-            "observable_dof_indices": list(OBSERVABLE_DOF_INDICES),
+            "campaign": args.campaign,
+            "observable_dof_indices": list(dof_indices),
             "parameter_types": list(OBSERVABLE_PARAMETER_TYPES),
-            "train_chunk_count": 2,
+            "train_chunk_count": sum(row["role"] == "train" for row in chunk_plan),
             "validation_chunk_count": 1,
-            "stationary_park_excluded": True,
-            "weak_dof_indices_excluded": [4, 5],
+            "stationary_park_excluded": args.campaign == "multi-pose-8",
+            "weak_dof_indices_excluded": [4, 5] if args.campaign == "multi-pose-8" else [],
             "uncalibrated_torque_excluded": True,
-            "solver_budget": {"max_iterations": 3, "max_rollout_steps": 240},
+            "command_alignment_seconds": spec.telemetry.command_alignment_seconds,
+            "solver_budget": {
+                "max_iterations": spec.solver.max_iterations,
+                "max_rollout_steps": spec.solver.max_rollout_steps,
+            },
             "official_schema_issue_count": len(issues),
             "official_recipe": "manipulator",
             "official_recipe_notes": notes,

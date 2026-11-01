@@ -717,9 +717,24 @@ spread falls from about 100 samples to `0.24795217120968438` samples. This
 demonstrates that the earlier one-cycle wrist offset was a periodic correlation
 alias rather than evidence of a one-second wrist actuator delay.
 
-The next bounded fit should load
+The expanded bounded fit now loads
 [`independent_joint_chirp_sysid_20261101.csv`](evidence/independent_joint_chirp_sysid_20261101.csv)
-with `telemetry.command_alignment_seconds = 0.0866067950984508`; actuator-delay
-identification, if later enabled, must operate only on the small per-joint
-residual after that common alignment. The retained chirp receipt is
-[`independent_joint_chirp_20261101.json`](evidence/independent_joint_chirp_20261101.json).
+with `telemetry.command_alignment_seconds = 0.0866067950984508`. It selects
+stiffness and damping for all six joints (12 terms), trains on the first five
+independent chirps, and holds out the sixth. All 12 terms pass the installed
+identifiability check and no joint is weakly excited. The accepted candidate's
+training normalized cost is `0.028078358620405197`; its held-out normalized
+cost is `0.0036708096663157145`, with `0.031947098672389984 rad` position RMSE.
+No parameter or USD was written. The assessment remains `warn` because chirp
+is still the only excitation family and the evidence is simulation-generated,
+so this candidate is retained for comparison rather than promoted.
+
+Retained expanded-fit artifacts:
+
+- [`aligned_chirp_sysid_run_spec_20261101.json`](evidence/aligned_chirp_sysid_run_spec_20261101.json)
+- [`aligned_chirp_sysid_run_spec_receipt_20261101.json`](evidence/aligned_chirp_sysid_run_spec_receipt_20261101.json)
+- [`aligned_chirp_sysid_solve_rehearsal_20261101.json`](evidence/aligned_chirp_sysid_solve_rehearsal_20261101.json)
+
+Actuator-delay identification, if later enabled, must operate only on the
+small per-joint residual after the common alignment. The retained chirp receipt
+is [`independent_joint_chirp_20261101.json`](evidence/independent_joint_chirp_20261101.json).

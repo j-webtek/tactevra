@@ -1,0 +1,279 @@
+{
+  "outputs": {
+    "apply_parameters_to_usd": false,
+    "compute_parameter_confidence": false,
+    "export_provenance_sidecar": false,
+    "parameter_confidence_rollout_budget": 2000000,
+    "provenance_path": "",
+    "remove_clones_after_run": true,
+    "render_validation_animation": false,
+    "validation_animation_fps": 24,
+    "validation_animation_max_frames": 240,
+    "validation_animation_path": "",
+    "write_usd_provenance": false
+  },
+  "parameters": {
+    "selected": [
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 0,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 10.0,
+        "min": 0.01,
+        "param_type": "joint_stiffness"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 0,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 100.0,
+        "min": 0.0,
+        "param_type": "joint_damping"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 1,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 10.0,
+        "min": 0.01,
+        "param_type": "joint_stiffness"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 1,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 100.0,
+        "min": 0.0,
+        "param_type": "joint_damping"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 2,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 10.0,
+        "min": 0.01,
+        "param_type": "joint_stiffness"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 2,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 100.0,
+        "min": 0.0,
+        "param_type": "joint_damping"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 3,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 10.0,
+        "min": 0.01,
+        "param_type": "joint_stiffness"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 3,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 100.0,
+        "min": 0.0,
+        "param_type": "joint_damping"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 4,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 10.0,
+        "min": 0.01,
+        "param_type": "joint_stiffness"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 4,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 100.0,
+        "min": 0.0,
+        "param_type": "joint_damping"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 5,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 10.0,
+        "min": 0.01,
+        "param_type": "joint_stiffness"
+      },
+      {
+        "category": "calibration",
+        "component_index": 0,
+        "dof_index": 5,
+        "initial": 1.0,
+        "link_index": -1,
+        "max": 100.0,
+        "min": 0.0,
+        "param_type": "joint_damping"
+      }
+    ],
+    "space": {
+      "include_basic": true,
+      "include_com_offsets": true,
+      "include_command_delay": false,
+      "include_inertia_log_cholesky": true,
+      "include_joint_limit_scales": true,
+      "include_per_link_mass": false
+    }
+  },
+  "residuals": {
+    "contact_force_weight": 0.0,
+    "end_effector_link_index": -1,
+    "end_effector_pose_weight": 0.0,
+    "position_weight": 1.0,
+    "sample_weights": null,
+    "torque_weight": 0.0,
+    "velocity_weight": 0.5
+  },
+  "sampling": {
+    "auto_dt_ratio_threshold": 2.0,
+    "auto_jitter_threshold": 0.1,
+    "command_interpolation": "zero_order_hold",
+    "max_resampled_steps": 0,
+    "measured_interpolation": "linear",
+    "mode": "auto",
+    "target_dt_mode": "physics_dt_capped"
+  },
+  "schema_version": 2,
+  "simulation": {
+    "actuator_runtime": "auto",
+    "co_locate_clones": true,
+    "engine": "isaac_sim",
+    "env_paths_root": "/World/envs/env",
+    "explicit_actuator_policy": "authored_only",
+    "fabric_clones": false,
+    "newton": {
+      "actuator_dt_mode": "physics_dt",
+      "actuator_source": "drive_defaults",
+      "controller": "pd",
+      "cuda_graph_capture": true,
+      "device": "cpu",
+      "effort_clamp": "max_effort",
+      "featherstone_substeps": 4,
+      "feedforward": "none",
+      "solver": "mujoco"
+    },
+    "offline_stepping": true,
+    "parallel_clones": false,
+    "physics_backend": "auto",
+    "robot_prim_path": "/roarm_m3",
+    "source_env_path": "/World/envs/env_0"
+  },
+  "solver": {
+    "bo_batch_size": 4,
+    "bo_candidate_count": 64,
+    "bo_initial_samples": 5,
+    "bo_seed": 0,
+    "cma_batch_size": null,
+    "cma_population_size": null,
+    "cma_seed": 0,
+    "cma_sigma": 0.3,
+    "damping_initial": 0.01,
+    "epsilon": 0.0001,
+    "gd_learning_rate": 0.05,
+    "gd_num_restarts": 1,
+    "gd_seed": 0,
+    "max_iterations": 2,
+    "max_rollout_steps": 480,
+    "optimizer": "levenberg_marquardt",
+    "use_analytical_jacobian": true,
+    "use_analytical_presolve": false
+  },
+  "stage": {
+    "input_path": "C:\\IsaacSim\\artifacts\\issue190\\lm0b-sysid-prior-001\\roarm_m3_sysid_prior.usda"
+  },
+  "telemetry": {
+    "auto_split": false,
+    "auto_split_min_chunk_seconds": 1.0,
+    "auto_split_train_fraction": 0.8,
+    "chunk_manifest_path": "",
+    "chunks": [
+      {
+        "end": 4.0,
+        "excitation": "chirp",
+        "name": "CHIRP_J1",
+        "role": "train",
+        "start": 0.008333333333333333,
+        "weight": 1.0
+      },
+      {
+        "end": 8.0,
+        "excitation": "chirp",
+        "name": "CHIRP_J2",
+        "role": "train",
+        "start": 4.008333333333334,
+        "weight": 1.0
+      },
+      {
+        "end": 12.0,
+        "excitation": "chirp",
+        "name": "CHIRP_J3",
+        "role": "train",
+        "start": 8.008333333333333,
+        "weight": 1.0
+      },
+      {
+        "end": 16.0,
+        "excitation": "chirp",
+        "name": "CHIRP_J4",
+        "role": "train",
+        "start": 12.008333333333333,
+        "weight": 1.0
+      },
+      {
+        "end": 20.0,
+        "excitation": "chirp",
+        "name": "CHIRP_J5",
+        "role": "train",
+        "start": 16.008333333333333,
+        "weight": 1.0
+      },
+      {
+        "end": 24.0,
+        "excitation": "chirp",
+        "name": "CHIRP_J6",
+        "role": "validation",
+        "start": 20.008333333333333,
+        "weight": 1.0
+      }
+    ],
+    "command_alignment_seconds": 0.0866067950984508,
+    "lerobot_episode_index": 0,
+    "mapping_path": "",
+    "source_path": "C:\\icq7\\software\\integrations\\isaac_sim\\evidence\\independent_joint_chirp_sysid_20261101.csv",
+    "source_type": "csv",
+    "time_window": {
+      "end": 0.0,
+      "start": 0.0
+    }
+  },
+  "telemetry_quality": {}
+}

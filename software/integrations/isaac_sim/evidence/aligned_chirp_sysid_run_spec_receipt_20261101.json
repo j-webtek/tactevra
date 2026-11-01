@@ -1,0 +1,47 @@
+{
+  "bindings": {
+    "run_spec_sha256": "d5aa75f535ec1fabb13ebb8817d1747708f653d5c254983415d1a28048d7dc2d",
+    "stage_sha256": "50097b9c7652942bf121892b2dbbbefd9bc3805bdf7cacbe80c97804ab275a3c",
+    "telemetry_sha256": "934494c1eb62c1802da582ff8b0e288a03d53c1c748ebcc6a91f68575ca4d965"
+  },
+  "campaign": "aligned-chirp-12",
+  "command_alignment_seconds": 0.0866067950984508,
+  "hardware_access": false,
+  "observable_dof_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "official_recipe": "manipulator",
+  "official_recipe_notes": [
+    "Torque residual disabled: telemetry has no torque channel.",
+    "End-effector pose residual disabled: telemetry has no end-effector pose channel.",
+    "Use excitation trajectories that avoid joint limits for the first pass.",
+    "Enable end-effector residuals when external tracking is available.",
+    "Parallel clones disabled; provide a clone source environment to enable them.",
+    "Synthesized parameter bounds are registry defaults; edit the saved run spec to tune them."
+  ],
+  "official_schema_issue_count": 0,
+  "parameter_count": 12,
+  "parameter_types": [
+    "joint_stiffness",
+    "joint_damping"
+  ],
+  "physical_authority": false,
+  "receipt_sha256": "9f01af0c7561d78e5fd1a8d1f776e0ac6900cac6865c5cd9e873a7489cedecd3",
+  "schema": "tactevra.isaac_lm0b_bounded_sysid_run_spec.v1",
+  "solver_budget": {
+    "max_iterations": 2,
+    "max_rollout_steps": 480
+  },
+  "source_usd_modified": false,
+  "stationary_park_excluded": false,
+  "status": "PASS_BOUNDED_SYSID_RUN_SPEC",
+  "train_chunk_count": 5,
+  "uncalibrated_torque_excluded": true,
+  "validation_chunk_count": 1,
+  "weak_dof_indices_excluded": []
+}
