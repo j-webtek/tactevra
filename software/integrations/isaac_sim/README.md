@@ -938,6 +938,32 @@ kinematically adjacent self-collision exclusions, then separate true robot-to-
 workcell geometry from overlapping station/safe-region envelopes. Missing
 clamp, cable, ranged tool, and arm-camera bodies remain blockers throughout.
 
+ARM-192 turns those observations into an explicit, unapplied review proposal.
+The external proposal at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-proposal-001\proposal.json`
+has canonical SHA-256
+`c9665938e0ab5d138079203fc5665333ec137a796ad7c2369070cc8c22793e61`.
+It classifies all 18 observed pairs: five directly connected robot pairs are
+proposed kinematic-neighbor exclusions, seven robot-to-board/device pairs stay
+physical-solid collision observations, and six robot-to-station pairs stay
+planning-envelope route blockers. `policy_applied` and
+`installed_profile_eligible` remain false. The proposal cannot suppress an
+observation until reviewed and hash-bound into a later diagnostic request.
+
+Reproduce the proposal with:
+
+```powershell
+$env:PYTHONPATH = 'software/src'
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-proposal-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --propose-collision-pair-policy `
+  --collision-diagnostic-receipt C:\IsaacSim\artifacts\issue190\lm1-h-collision-diagnostic-002\receipt.json `
+  --collision-candidate C:\IsaacSim\evidence\issue190\simulation_program\collision_candidate_v1.json `
+  --output "$artifactDir\proposal.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 Run its focused tests with:
 
 ```powershell

@@ -339,6 +339,19 @@ envelopes, followed by a fresh diagnostic. Clamp, cable, ranged tool, and
 arm-camera coverage still block installed collision qualification, and no
 continuous or physical gate is promoted.
 
+ARM-192 converts the 18 retained pairs into a hash-bound but unapplied policy
+proposal. Its external artifact at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-proposal-001\proposal.json`
+has canonical SHA-256
+`c9665938e0ab5d138079203fc5665333ec137a796ad7c2369070cc8c22793e61`.
+Five directly connected robot pairs are proposed for kinematic-neighbor
+exclusion, seven board/device pairs remain physical collision observations,
+and six station pairs remain planning-envelope route blockers. No pair is
+silently discarded: the proposal is review-required, `policy_applied` is
+false, and installed/continuous/physical gates remain denied. The next stage
+must review this exact proposal, bind the accepted policy hash into a new
+diagnostic request, and rerun the native overlap evidence.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;
