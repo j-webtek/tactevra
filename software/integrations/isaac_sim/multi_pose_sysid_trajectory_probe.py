@@ -18,6 +18,7 @@ from drive_controlled_hover_probe import EXPECTED_DOFS, _canonical, _digest, loa
 
 SCHEMA = "tactevra.isaac_lm0b_multi_pose_sysid_trajectory.v1"
 INDEPENDENT_SCHEMA = "tactevra.isaac_lm0b_independent_joint_excitation.v1"
+INDEPENDENT_CHIRP_SCHEMA = "tactevra.isaac_lm0b_independent_joint_chirp.v1"
 POSE_IDS = ("PARK", "H", "1", "PERIOD")
 EXCITATION_AMPLITUDES_RAD = (0.18, 0.14, 0.14, 0.14, 0.24, 0.22)
 EXCITATION_FREQUENCIES_HZ = (0.40, 0.80, 1.20, 0.80, 1.20, 0.40)
@@ -109,6 +110,44 @@ def build_independent_sine_sequence(
     return segments
 
 
+def build_independent_chirp_sequence(
+    h_target: list[float], *, steps_per_joint: int, dt: float
+) -> list[dict[str, Any]]:
+    """Create smooth nonperiodic chirps that disambiguate delay from sine aliases."""
+    settle_steps = 60
+    if len(h_target) != 6 or steps_per_joint <= settle_steps + 1 or dt <= 0.0:
+        raise ValueError("independent chirp requires six joints, positive dt, and room for settling")
+    center = list(map(float, h_target))
+    center[5] = 0.40
+    active_steps = steps_per_joint - settle_steps
+    duration = (active_steps - 1) * dt
+    start_hz = 0.20
+    segments: list[dict[str, Any]] = []
+    for joint_index, amplitude in enumerate(EXCITATION_AMPLITUDES_RAD):
+        end_hz = 1.10 + 0.08 * joint_index
+        sweep = (end_hz - start_hz) / duration
+        targets = []
+        for step in range(active_steps):
+            time_s = step * dt
+            phase = 2.0 * math.pi * (start_hz * time_s + 0.5 * sweep * time_s * time_s)
+            envelope = math.sin(math.pi * time_s / duration) ** 2
+            target = center.copy()
+            target[joint_index] += amplitude * envelope * math.sin(phase)
+            targets.append(target)
+        targets.extend([center.copy() for _ in range(settle_steps)])
+        segments.append(
+            {
+                "pose_id": f"CHIRP_J{joint_index + 1}",
+                "target_rad": targets[-1],
+                "targets_rad": targets,
+                "joint_index": joint_index,
+                "amplitude_rad": amplitude,
+                "frequency_hz": {"start": start_hz, "end": end_hz},
+            }
+        )
+    return segments
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--usd", type=Path, required=True)
@@ -118,7 +157,11 @@ def main() -> int:
     parser.add_argument("--sysid-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--status-output", type=Path, required=True)
-    parser.add_argument("--trajectory", choices=("multi-pose", "independent-sine"), default="multi-pose")
+    parser.add_argument(
+        "--trajectory",
+        choices=("multi-pose", "independent-sine", "independent-chirp"),
+        default="multi-pose",
+    )
     parser.add_argument("--steps-per-joint", type=int, default=360)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -132,15 +175,20 @@ def main() -> int:
         if profile["schema"] != "tactevra.isaac_lm0b_geometry_prior_profile.v1":
             raise ValueError("multi-pose telemetry requires the geometry-prior profile")
         governed_poses = select_pose_sequence(bundle)
-        poses = (
-            build_independent_sine_sequence(
+        if args.trajectory == "independent-sine":
+            poses = build_independent_sine_sequence(
                 governed_poses[1]["target_rad"],
                 steps_per_joint=args.steps_per_joint,
                 dt=float(profile["physics_dt_s"]),
             )
-            if args.trajectory == "independent-sine"
-            else governed_poses
-        )
+        elif args.trajectory == "independent-chirp":
+            poses = build_independent_chirp_sequence(
+                governed_poses[1]["target_rad"],
+                steps_per_joint=args.steps_per_joint,
+                dt=float(profile["physics_dt_s"]),
+            )
+        else:
+            poses = governed_poses
 
         from isaacsim import SimulationApp
 
@@ -278,7 +326,11 @@ def main() -> int:
                 TelemetryChunkRunSpec(
                     name=pose["pose_id"],
                     role="validation" if index == len(poses) - 1 else "train",
-                    excitation="sine" if args.trajectory == "independent-sine" else "custom",
+                    excitation=(
+                        "sine"
+                        if args.trajectory == "independent-sine"
+                        else "chirp" if args.trajectory == "independent-chirp" else "custom"
+                    ),
                     start=cursor,
                     end=end,
                     weight=1.0,
@@ -289,7 +341,11 @@ def main() -> int:
         maximum_error = max(row["maximum_final_joint_error_rad"] for row in summaries)
         passed = maximum_error <= profile["maximum_final_joint_error_rad"]
         result: dict[str, Any] = {
-            "schema": INDEPENDENT_SCHEMA if args.trajectory == "independent-sine" else SCHEMA,
+            "schema": (
+                INDEPENDENT_SCHEMA
+                if args.trajectory == "independent-sine"
+                else INDEPENDENT_CHIRP_SCHEMA if args.trajectory == "independent-chirp" else SCHEMA
+            ),
             "status": "PASS" if passed else "BLOCKED_TRACKING_ERROR",
             "evidence_class": "PROVISIONAL_SIM_TO_SIM_SYSID_TRAJECTORY",
             "profile_schema": profile["schema"],
@@ -304,7 +360,7 @@ def main() -> int:
                 "isaac_sysid_csv_layout": "time,q1..q6,dq1..dq6,cmd1..cmd6",
                 "isaac_sysid_loader_readback": loader_readback,
             },
-            **({"telemetry_quality": quality.to_dict()} if args.trajectory == "independent-sine" else {}),
+            **({"telemetry_quality": quality.to_dict()} if args.trajectory != "multi-pose" else {}),
             **({"trajectory": args.trajectory} if args.trajectory != "multi-pose" else {}),
             "pose_order": [pose["pose_id"] for pose in poses],
             "samples": len(sysid_rows),
