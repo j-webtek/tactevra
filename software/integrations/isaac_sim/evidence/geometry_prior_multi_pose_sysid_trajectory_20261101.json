@@ -1,0 +1,207 @@
+{
+  "controller_commands": [],
+  "effort_semantics": {
+    "applied_actuation_force_nm": "ISAAC_EXPLICIT_ACTUATION_FORCE_NOT_INTERNAL_DRIVE_OUTPUT",
+    "physical_t1051_load": "NOT_CAPTURED_OR_CALIBRATED",
+    "projected_joint_force_nm": "ISAAC_LINK_INCOMING_FORCE_PROJECTED_ON_DOF"
+  },
+  "evidence_class": "PROVISIONAL_SIM_TO_SIM_SYSID_TRAJECTORY",
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "geometry_derived_provisional_mass_properties",
+    "provisional_mass_distribution_and_drive_parameters",
+    "sim_to_sim_trajectory_does_not_validate_physical_parameters",
+    "internal_position_drive_effort_is_not_exposed_by_applied_actuation_force_channel",
+    "no_collision_or_contact_geometry",
+    "t1051_raw_load_is_not_si_torque"
+  ],
+  "maximum_final_joint_error_rad": 2.2587313047051083e-05,
+  "outputs": {
+    "isaac_sysid_csv_layout": "time,q1..q6,dq1..dq6,cmd1..cmd6",
+    "isaac_sysid_csv_sha256": "251916df704c63f86c3daa33abc4a0dea699928750c6b1c36a03c32383f06217",
+    "isaac_sysid_loader_readback": {
+      "commands_shape": [
+        960,
+        6
+      ],
+      "duration_s": 7.991666666666666,
+      "extension": "isaacsim.robot_setup.sysid",
+      "num_joints": 6,
+      "positions_shape": [
+        960,
+        6
+      ],
+      "samples": 960
+    },
+    "rich_telemetry_csv_sha256": "4301dad5d478fbe2db86da8acf199a6425aa59596c98582cd600114c1cf7d90e"
+  },
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_dt_s": 0.008333333333333333,
+  "physics_steps": 990,
+  "pose_order": [
+    "PARK",
+    "H",
+    "1",
+    "PERIOD"
+  ],
+  "pose_summaries": [
+    {
+      "final_rad": [
+        0.08178098499774933,
+        1.021726131439209,
+        0.6524073481559753,
+        -0.10333354026079178,
+        -2.270119335567866e-11,
+        4.070774170055163e-16
+      ],
+      "maximum_final_joint_error_rad": 4.674890941025467e-08,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        3.054624053699939e-10,
+        7.501989784941543e-08,
+        4.489984561928395e-08,
+        3.797532244220747e-08,
+        7.282212055592652e-10,
+        2.26692664639927e-10
+      ],
+      "pose_id": "PARK",
+      "target_rad": [
+        0.0817809840033888,
+        1.0217261781881184,
+        0.6524073503892807,
+        -0.10333354262067762,
+        -1.3482053734464556e-11,
+        0.0
+      ]
+    },
+    {
+      "final_rad": [
+        -0.15741242468357086,
+        0.6841347813606262,
+        1.9374785423278809,
+        -1.0508017539978027,
+        1.532342031040912e-10,
+        2.4335980279566183e-13
+      ],
+      "maximum_final_joint_error_rad": 2.2443705648411694e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        0.049100954085588455,
+        0.13466551899909973,
+        0.09532903879880905,
+        0.032234616577625275,
+        0.002336422447115183,
+        0.0009784935973584652
+      ],
+      "pose_id": "H",
+      "target_rad": [
+        -0.15741496358879978,
+        0.6841238370694995,
+        1.9375003619248874,
+        -1.0508241977034511,
+        1.7784032309096887e-10,
+        0.0
+      ]
+    },
+    {
+      "final_rad": [
+        -0.42940667271614075,
+        0.7356913089752197,
+        1.770227074623108,
+        -0.9351180195808411,
+        1.4876222476090106e-09,
+        -3.546375975001237e-13
+      ],
+      "maximum_final_joint_error_rad": 2.2056248123014655e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        0.04607785493135452,
+        0.21764180064201355,
+        0.8712870478630066,
+        0.14849154651165009,
+        0.0033543086610734463,
+        0.0020751934498548508
+      ],
+      "pose_id": "1",
+      "target_rad": [
+        -0.4294121093817144,
+        0.7357020980428174,
+        1.770205018374985,
+        -0.935107117392573,
+        1.54399294150743e-09,
+        0.0
+      ]
+    },
+    {
+      "final_rad": [
+        0.01199448574334383,
+        0.6797669529914856,
+        1.952435851097107,
+        -1.0613912343978882,
+        -1.1841447267180172e-10,
+        -4.027506952074267e-13
+      ],
+      "maximum_final_joint_error_rad": 2.2587313047051083e-05,
+      "peak_applied_actuation_force_nm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak_projected_joint_force_nm": [
+        0.04268515855073929,
+        0.225886732339859,
+        0.8739134669303894,
+        0.15793044865131378,
+        0.0035378604661673307,
+        0.0019176030764356256
+      ],
+      "pose_id": "PERIOD",
+      "target_rad": [
+        0.011994657632744102,
+        0.6797559860171147,
+        1.952457837143542,
+        -1.0614138217109352,
+        -1.556913926552635e-11,
+        0.0
+      ]
+    }
+  ],
+  "profile_schema": "tactevra.isaac_lm0b_geometry_prior_profile.v1",
+  "receipt_sha256": "325e068a758a547835a5aafad90cfbd9a526663e8f8659486ceac745a74a2ef5",
+  "samples": 960,
+  "schema": "tactevra.isaac_lm0b_multi_pose_sysid_trajectory.v1",
+  "source_bindings": {
+    "bundle_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42",
+    "profile_file_sha256": "768829bc8c131efe41e8866b6a18900a24b3f77e2ef97b367b55cffbfcf9881a",
+    "usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
+  },
+  "state_teleports_after_initialization": 0,
+  "status": "PASS",
+  "threshold_rad": 0.001
+}

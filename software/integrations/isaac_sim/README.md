@@ -130,6 +130,39 @@ C:\IsaacSim\env_6_1_0\Scripts\python.exe `
   --status-output C:\IsaacSim\evidence\link_mass_property_prior.status.json
 ```
 
+[`multi_pose_sysid_trajectory_probe.py`](multi_pose_sysid_trajectory_probe.py)
+extends that gravity-on model through the governed `PARK`, `H`, `1`, and
+`PERIOD` endpoints without a post-initialization state teleport. It records 960
+physics samples of positions, velocities, commands, explicitly applied
+actuation force, and projected joint force. The compact SysID CSV uses the
+installed Isaac Sim 6.1 loader's supported
+`time,q1..q6,dq1..dq6,cmd1..cmd6` layout; a native loader readback confirms six
+joints, 960 samples, and a 7.991666666666666-second duration. The richer CSV
+preserves channel semantics that the compact loader does not carry. A second
+independent native process produced byte-identical rich CSV, compact CSV, and
+receipt outputs.
+
+The retained run passes all four final-pose checks at a worst error of
+`2.2587313047051083e-05` rad. Its applied-actuation-force channel is zero
+because the motion is produced by internal position drives; it must not be
+misreported as drive output torque. Projected joint force is nonzero and is the
+useful simulation load-side reference. Neither channel calibrates the
+controller's raw T1051 load fields, and this sim-to-sim trajectory cannot prove
+physical parameters or physical fit quality.
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+C:\IsaacSim\env_6_1_0\Scripts\python.exe `
+  software\integrations\isaac_sim\multi_pose_sysid_trajectory_probe.py `
+  --usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --profile software\config\isaac_lm0b_geometry_prior_profile.json `
+  --telemetry-output C:\IsaacSim\evidence\geometry_prior_multi_pose_telemetry.csv `
+  --sysid-output C:\IsaacSim\evidence\geometry_prior_multi_pose_sysid.csv `
+  --output C:\IsaacSim\evidence\geometry_prior_multi_pose_sysid_trajectory.json `
+  --status-output C:\IsaacSim\evidence\geometry_prior_multi_pose_sysid_trajectory.status.json
+```
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
