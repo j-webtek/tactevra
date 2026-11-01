@@ -8,6 +8,7 @@ they are not measurements or product specifications.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
@@ -17,6 +18,7 @@ from typing import Any, Iterable
 
 PROFILE_SCHEMA = "tactevra.isaac_lm1_representative_key_mechanics.v1"
 RECEIPT_SCHEMA = "tactevra.isaac_lm1_key_mechanics_contract_receipt.v1"
+NATIVE_RECEIPT_SCHEMA = "tactevra.isaac_lm1_native_h_key_replay.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 DISPOSITIONS = (
@@ -371,3 +373,266 @@ def run_contract_campaign(layout_path: Path) -> dict[str, Any]:
     }
     receipt["receipt_sha256"] = _canonical_sha256(receipt)
     return receipt
+
+
+def build_native_tip_trajectory(
+    *, rest_top_z_m: float, tip_radius_m: float, dt: float
+) -> list[dict[str, float]]:
+    """Build a smooth settle/press/hold/retract trajectory for native replay."""
+    if rest_top_z_m <= 0 or tip_radius_m <= 0 or dt <= 0:
+        raise MechanicsContractError("native trajectory dimensions and time step must be positive")
+    hover_z = rest_top_z_m + tip_radius_m + 0.002
+    pressed_z = rest_top_z_m + tip_radius_m - 0.0027
+    segments = ((60, hover_z, hover_z), (180, hover_z, pressed_z),
+                (60, pressed_z, pressed_z), (180, pressed_z, hover_z),
+                (120, hover_z, hover_z))
+    result: list[dict[str, float]] = []
+    step = 0
+    for count, start, end in segments:
+        for index in range(count):
+            fraction = 1.0 if count == 1 else index / (count - 1)
+            smooth = fraction * fraction * (3.0 - 2.0 * fraction)
+            result.append({"step": step, "time_s": step * dt, "tip_z_m": start + (end - start) * smooth})
+            step += 1
+    return result
+
+
+def assess_native_key_trace(
+    profile: dict[str, Any],
+    native_samples: Iterable[dict[str, Any]],
+    *,
+    rest_key_z_m: float | None = None,
+) -> dict[str, Any]:
+    """Convert native key displacement into the shared mechanism-state contract."""
+    rows = list(native_samples)
+    if len(rows) < 2:
+        raise MechanicsContractError("native trace must contain at least two samples")
+    rest_z = _finite_number(
+        rows[0].get("key_center_z_m") if rest_key_z_m is None else rest_key_z_m,
+        "native rest key z",
+    )
+    h_center = profile["regions"]["H"]["center_board_xy_mm"]
+    contract_trace = []
+    native_contact_steps = 0
+    for index, row in enumerate(rows):
+        key_z = _finite_number(row.get("key_center_z_m"), f"native sample {index} key z")
+        separation = _finite_number(row.get("tip_key_separation_m"), f"native sample {index} separation")
+        if separation <= 0.00005:
+            native_contact_steps += 1
+        contract_trace.append({
+            "time_s": _finite_number(row.get("time_s"), f"native sample {index} time"),
+            "tip_x_board_mm": h_center[0],
+            "tip_y_board_mm": h_center[1],
+            "compression_mm": max(0.0, (rest_z - key_z) * 1000.0),
+        })
+    result = evaluate_trace(profile, contract_trace)
+    result["native_contact_step_count"] = native_contact_steps
+    result["native_contact_observed"] = native_contact_steps > 0
+    result["native_trace_sample_count"] = len(rows)
+    result["result_sha256"] = _canonical_sha256(
+        {key: value for key, value in result.items() if key != "result_sha256"}
+    )
+    return result
+
+
+def run_native_h_probe(
+    layout_path: Path, *, output_path: Path | None = None, status_path: Path | None = None
+) -> dict[str, Any]:
+    """Run a zero-authority native Isaac prismatic-key contact replay."""
+    profile = build_profile(layout_path)
+    h_region = profile["regions"]["H"]
+    prior = profile["mechanics_prior"]
+    dt = 1.0 / 120.0
+    key_half_x_m = h_region["half_extent_mm"][0] / 1000.0
+    key_half_y_m = h_region["half_extent_mm"][1] / 1000.0
+    key_half_z_m = 0.003
+    key_top_z_m = profile["target_plane_z_board_mm"] / 1000.0
+    key_center_z_m = key_top_z_m - key_half_z_m
+    tip_radius_m = prior["tip_radius_mm"] / 1000.0
+    trajectory = build_native_tip_trajectory(
+        rest_top_z_m=key_top_z_m, tip_radius_m=tip_radius_m, dt=dt
+    )
+    app = None
+    try:
+        from isaacsim import SimulationApp
+
+        app = SimulationApp({"headless": True, "multi_gpu": False})
+        import omni.usd
+        import warp as wp
+        from isaacsim.core.experimental.prims import RigidPrim
+        from isaacsim.core.simulation_manager import SimulationManager
+        from pxr import Gf, Sdf, UsdGeom, UsdPhysics
+
+        omni.usd.get_context().new_stage()
+        for _ in range(5):
+            app.update()
+        stage = omni.usd.get_context().get_stage()
+        UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+        UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
+        scene = UsdPhysics.Scene.Define(stage, "/World/physicsScene")
+        scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, -1.0))
+        # The provisional key mechanism represents the keyboard's preloaded
+        # dome/scissor return, not a free keycap.  Isolate that one-dimensional
+        # response from gravity until measured preload data is available.
+        scene.CreateGravityMagnitudeAttr().Set(0.0)
+
+        key_path = "/World/HKey"
+        key_geom = UsdGeom.Cube.Define(stage, key_path)
+        key_geom.CreateSizeAttr(2.0)
+        key_xform = UsdGeom.Xformable(key_geom.GetPrim())
+        key_xform.AddTranslateOp().Set(Gf.Vec3d(
+            h_region["center_board_xy_mm"][0] / 1000.0,
+            h_region["center_board_xy_mm"][1] / 1000.0,
+            key_center_z_m,
+        ))
+        key_xform.AddScaleOp().Set(Gf.Vec3f(key_half_x_m, key_half_y_m, key_half_z_m))
+        key_prim = key_geom.GetPrim()
+        UsdPhysics.CollisionAPI.Apply(key_prim)
+        UsdPhysics.RigidBodyAPI.Apply(key_prim)
+        mass = UsdPhysics.MassAPI.Apply(key_prim)
+        mass.CreateMassAttr().Set(prior["keycap_mass_kg"]["nominal"])
+
+        joint = UsdPhysics.PrismaticJoint.Define(stage, "/World/HKeyJoint")
+        joint.CreateBody1Rel().SetTargets([Sdf.Path(key_path)])
+        joint.CreateAxisAttr().Set(UsdPhysics.Tokens.z)
+        joint.CreateLocalPos0Attr().Set(Gf.Vec3f(
+            h_region["center_board_xy_mm"][0] / 1000.0,
+            h_region["center_board_xy_mm"][1] / 1000.0,
+            key_center_z_m,
+        ))
+        joint.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+        joint.CreateLowerLimitAttr().Set(-prior["travel_mm"]["nominal"] / 1000.0)
+        joint.CreateUpperLimitAttr().Set(0.0)
+        drive = UsdPhysics.DriveAPI.Apply(joint.GetPrim(), "linear")
+        drive.CreateTypeAttr().Set("force")
+        drive.CreateTargetPositionAttr().Set(0.0)
+        drive.CreateStiffnessAttr().Set(prior["stiffness_n_per_mm"]["nominal"] * 1000.0)
+        drive.CreateDampingAttr().Set(prior["damping_n_s_per_mm"]["nominal"] * 1000.0)
+
+        tip_path = "/World/VirtualTip"
+        tip_geom = UsdGeom.Sphere.Define(stage, tip_path)
+        tip_geom.CreateRadiusAttr().Set(tip_radius_m)
+        tip_prim = tip_geom.GetPrim()
+        UsdPhysics.CollisionAPI.Apply(tip_prim)
+        tip_body = UsdPhysics.RigidBodyAPI.Apply(tip_prim)
+        tip_body.CreateKinematicEnabledAttr().Set(True)
+        UsdPhysics.MassAPI.Apply(tip_prim).CreateMassAttr().Set(0.02)
+
+        SimulationManager.set_physics_dt(dt)
+        SimulationManager.initialize_physics()
+        key_view = RigidPrim(key_path)
+        tip_view = RigidPrim(tip_path)
+        x_m = h_region["center_board_xy_mm"][0] / 1000.0
+        y_m = h_region["center_board_xy_mm"][1] / 1000.0
+        tip_view.set_world_poses([[x_m, y_m, trajectory[0]["tip_z_m"]]], [[1.0, 0.0, 0.0, 0.0]])
+        SimulationManager.step(steps=30)
+        settled_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
+        tip_device = tip_view._physics_rigid_body_view.get_transforms().device  # noqa: SLF001
+        tip_indices = wp.array([0], dtype=wp.uint32, device=tip_device)
+
+        native_samples = []
+        for command in trajectory:
+            # A kinematic target is consumed by the solver and therefore
+            # transfers contact force.  set_world_poses would teleport the
+            # sphere and can overlap the key without producing an impulse.
+            tip_targets = wp.array(
+                [[x_m, y_m, command["tip_z_m"], 0.0, 0.0, 0.0, 1.0]],
+                dtype=wp.float32,
+                device=tip_device,
+            )
+            tip_view._physics_rigid_body_view.set_kinematic_targets(  # noqa: SLF001
+                tip_targets, tip_indices
+            )
+            SimulationManager.step(steps=1)
+            observed_key_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
+            key_top = observed_key_z + key_half_z_m
+            tip_bottom = command["tip_z_m"] - tip_radius_m
+            native_samples.append({
+                "step": command["step"],
+                "time_s": command["time_s"],
+                "tip_center_z_m": command["tip_z_m"],
+                "key_center_z_m": observed_key_z,
+                "tip_key_separation_m": tip_bottom - key_top,
+            })
+        assessment = assess_native_key_trace(
+            profile, native_samples, rest_key_z_m=settled_z
+        )
+        passed = assessment["accepted"] and assessment["resolved_key"] == "H" and assessment["native_contact_observed"]
+        receipt: dict[str, Any] = {
+            "schema": NATIVE_RECEIPT_SCHEMA,
+            "status": "PASS" if passed else "BLOCKED_NATIVE_KEY_MECHANICS",
+            "evidence_class": "PROVISIONAL_NATIVE_ISAAC_KEY_MECHANICS",
+            "profile_sha256": profile["profile_sha256"],
+            "layout_sha256": profile["provenance"]["layout_sha256"],
+            "physics_dt_s": dt,
+            "physics_steps": 30 + len(native_samples),
+            "state_teleports_after_initialization": 0,
+            "commanded_key": "H",
+            "assessment": assessment,
+            "native_trace": native_samples,
+            "authority": dict(profile["authority"]),
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "limitations": [
+                "isolated_native_key_and_virtual_tip_not_full_robot_contact",
+                "gravity_disabled_to_model_preloaded_keyboard_return_mechanism",
+                "synthetic_bounded_mechanics_priors_not_product_measurements",
+                "no_physical_keyboard_controller_timing_torque_or_safety_authority",
+            ],
+        }
+        receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        if output_path is not None:
+            output_path.write_text(
+                json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
+        if status_path is not None:
+            status_path.write_text(json.dumps({
+                "status": receipt["status"],
+                "receipt_sha256": receipt["receipt_sha256"],
+            }, sort_keys=True) + "\n", encoding="utf-8")
+        return receipt
+    except BaseException as exc:
+        if status_path is not None:
+            status_path.write_text(json.dumps({
+                "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
+            }, sort_keys=True) + "\n", encoding="utf-8")
+        raise
+    finally:
+        if app is not None:
+            app.close()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--layout", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--status-output", type=Path, required=True)
+    parser.add_argument("--native-h-probe", action="store_true")
+    args = parser.parse_args()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.status_output.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if args.native_h_probe:
+            result = run_native_h_probe(
+                args.layout.resolve(strict=True),
+                output_path=args.output,
+                status_path=args.status_output,
+            )
+        else:
+            result = run_contract_campaign(args.layout.resolve(strict=True))
+        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        args.status_output.write_text(json.dumps({
+            "status": result["status"],
+            "receipt_sha256": result["receipt_sha256"],
+        }, sort_keys=True) + "\n", encoding="utf-8")
+        return 0 if result["status"] == "PASS" else 2
+    except BaseException as exc:
+        args.status_output.write_text(json.dumps({
+            "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
+        }, sort_keys=True) + "\n", encoding="utf-8")
+        raise
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

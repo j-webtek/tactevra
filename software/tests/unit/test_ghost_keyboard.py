@@ -147,3 +147,31 @@ def test_representative_key_mechanics_reject_tampered_layout_and_profile(tmp_pat
             {'time_s':0.0,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':0.0},
             {'time_s':0.1,'tip_x_board_mm':center[0],'tip_y_board_mm':center[1],'compression_mm':0.0},
         ])
+
+
+def test_native_h_tip_trajectory_is_smooth_bounded_and_retracts():
+    mechanics=_load_key_mechanics()
+    rows=mechanics.build_native_tip_trajectory(rest_top_z_m=0.021,tip_radius_m=0.001,dt=1/120)
+    assert len(rows)==600
+    assert [row['step'] for row in rows]==list(range(600))
+    assert rows[0]['tip_z_m']==pytest.approx(0.024)
+    assert rows[-1]['tip_z_m']==pytest.approx(0.024)
+    assert min(row['tip_z_m'] for row in rows)==pytest.approx(0.0193)
+    assert max(abs(rows[i+1]['tip_z_m']-rows[i]['tip_z_m']) for i in range(599))<0.00005
+
+
+def test_native_h_displacement_is_assessed_by_shared_contract():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    compressions=[0.0,1.0,2.2,3.0,1.2,0.0]
+    rows=[{
+        'time_s':index*0.02,
+        'key_center_z_m':0.018-compression/1000,
+        'tip_key_separation_m':-0.0001 if compression else 0.001,
+    } for index,compression in enumerate(compressions)]
+    rows[0]['key_center_z_m']=0.0179
+    result=mechanics.assess_native_key_trace(profile,rows,rest_key_z_m=0.018)
+    assert result['accepted']
+    assert result['resolved_key']=='H'
+    assert result['native_contact_observed']
+    assert result['native_contact_step_count']==4
