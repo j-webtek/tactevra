@@ -147,6 +147,12 @@ trajectory sealing, and execution authority remain outside the policy.
 
 ### LM0 - drive-controlled physics baseline
 
+Implementation status: the LM0A gravity-off control-path baseline is now
+implemented by `drive_controlled_hover_probe.py` with its provisional dynamic
+profile. A native Isaac 6.1 run completed 270 physics steps with zero
+post-initialization teleports and settled the retained `H` hover below the
+`1e-3 rad` joint-error threshold. Gravity-on identification remains LM0B.
+
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent
 motion must result from drives and stepping.

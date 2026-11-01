@@ -72,6 +72,13 @@ The ScheduleGen-inspired path from drive-controlled physics through automated
 demonstration generation and bounded imitation learning is maintained in the
 [learned motion generation plan](../../docs/ISAAC_SIM_LEARNED_MOTION_GENERATION_PLAN.md).
 
+The LM0A executable baseline is
+[`drive_controlled_hover_probe.py`](drive_controlled_hover_probe.py), driven by
+[`../../config/isaac_lm0_dynamic_profile.json`](../../config/isaac_lm0_dynamic_profile.json).
+It performs a gravity-off, physics-stepped PARK-to-`H`-hover diagnostic with
+explicit provisional mass, inertia, and drive parameters. It never accesses
+hardware and is not evidence for physical timing, torque, contact, or safety.
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment
