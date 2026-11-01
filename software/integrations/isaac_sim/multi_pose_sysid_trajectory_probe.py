@@ -17,7 +17,10 @@ from drive_controlled_hover_probe import EXPECTED_DOFS, _canonical, _digest, loa
 
 
 SCHEMA = "tactevra.isaac_lm0b_multi_pose_sysid_trajectory.v1"
+INDEPENDENT_SCHEMA = "tactevra.isaac_lm0b_independent_joint_excitation.v1"
 POSE_IDS = ("PARK", "H", "1", "PERIOD")
+EXCITATION_AMPLITUDES_RAD = (0.18, 0.14, 0.14, 0.14, 0.24, 0.22)
+EXCITATION_FREQUENCIES_HZ = (0.40, 0.80, 1.20, 0.80, 1.20, 0.40)
 
 
 def select_pose_sequence(bundle: dict[str, Any]) -> list[dict[str, Any]]:
@@ -73,6 +76,39 @@ def _numbers(values: list[float]) -> list[str]:
     return [format(float(value), ".17g") for value in values]
 
 
+def build_independent_sine_sequence(
+    h_target: list[float], *, steps_per_joint: int, dt: float
+) -> list[dict[str, Any]]:
+    """Create six one-joint-at-a-time sine segments around a noncontact pose."""
+    settle_steps = 60
+    if len(h_target) != 6 or steps_per_joint <= settle_steps or dt <= 0.0:
+        raise ValueError("independent excitation requires six joints, positive dt, and room for settling")
+    center = list(map(float, h_target))
+    center[5] = 0.40
+    segments: list[dict[str, Any]] = []
+    for joint_index, (amplitude, frequency) in enumerate(
+        zip(EXCITATION_AMPLITUDES_RAD, EXCITATION_FREQUENCIES_HZ, strict=True)
+    ):
+        targets = []
+        for step in range(steps_per_joint - settle_steps):
+            phase = 2.0 * math.pi * frequency * step * dt
+            target = center.copy()
+            target[joint_index] += amplitude * math.sin(phase)
+            targets.append(target)
+        targets.extend([center.copy() for _ in range(settle_steps)])
+        segments.append(
+            {
+                "pose_id": f"SINE_J{joint_index + 1}",
+                "target_rad": targets[-1],
+                "targets_rad": targets,
+                "joint_index": joint_index,
+                "amplitude_rad": amplitude,
+                "frequency_hz": frequency,
+            }
+        )
+    return segments
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--usd", type=Path, required=True)
@@ -82,6 +118,8 @@ def main() -> int:
     parser.add_argument("--sysid-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--status-output", type=Path, required=True)
+    parser.add_argument("--trajectory", choices=("multi-pose", "independent-sine"), default="multi-pose")
+    parser.add_argument("--steps-per-joint", type=int, default=360)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.status_output.parent.mkdir(parents=True, exist_ok=True)
@@ -93,7 +131,16 @@ def main() -> int:
         profile, profile_raw = load_profile(args.profile.resolve(strict=True))
         if profile["schema"] != "tactevra.isaac_lm0b_geometry_prior_profile.v1":
             raise ValueError("multi-pose telemetry requires the geometry-prior profile")
-        poses = select_pose_sequence(bundle)
+        governed_poses = select_pose_sequence(bundle)
+        poses = (
+            build_independent_sine_sequence(
+                governed_poses[1]["target_rad"],
+                steps_per_joint=args.steps_per_joint,
+                dt=float(profile["physics_dt_s"]),
+            )
+            if args.trajectory == "independent-sine"
+            else governed_poses
+        )
 
         from isaacsim import SimulationApp
 
@@ -135,7 +182,7 @@ def main() -> int:
         articulation.set_dof_max_efforts([[dof["maximum_effort"]] * 6])
         articulation.set_dof_max_velocities([[dof["maximum_velocity_rad_s"]] * 6])
 
-        park = poses[0]["target_rad"]
+        park = governed_poses[0]["target_rad"]
         articulation.set_world_poses([[0.0, 0.0, 0.0]], [[1.0, 0.0, 0.0, 0.0]])
         articulation.set_dof_positions([park])
         articulation.set_dof_velocities([[0.0] * 6])
@@ -147,11 +194,11 @@ def main() -> int:
         summaries = []
         global_step = 0
         for pose in poses:
-            target = pose["target_rad"]
-            articulation.set_dof_position_targets([target])
+            targets = pose.get("targets_rad") or [pose["target_rad"]] * profile["target_steps"]
             peak_effort = [0.0] * 6
             peak_projected = [0.0] * 6
-            for local_step in range(1, profile["target_steps"] + 1):
+            for local_step, target in enumerate(targets, start=1):
+                articulation.set_dof_position_targets([target])
                 SimulationManager.step(steps=1)
                 global_step += 1
                 positions = articulation.get_dof_positions().numpy().tolist()[0]
@@ -170,14 +217,24 @@ def main() -> int:
                 )
                 sysid_rows.append([format(time_s, ".17g")] + _numbers(positions + velocities + target))
             final = articulation.get_dof_positions().numpy().tolist()[0]
+            final_target = targets[-1]
             summaries.append(
                 {
                     "pose_id": pose["pose_id"],
-                    "target_rad": target,
+                    "target_rad": final_target,
                     "final_rad": final,
-                    "maximum_final_joint_error_rad": max(abs(final[i] - target[i]) for i in range(6)),
+                    "maximum_final_joint_error_rad": max(abs(final[i] - final_target[i]) for i in range(6)),
                     "peak_applied_actuation_force_nm": peak_effort,
                     "peak_projected_joint_force_nm": peak_projected,
+                    **(
+                        {
+                            "excited_joint_index": pose["joint_index"],
+                            "amplitude_rad": pose["amplitude_rad"],
+                            "frequency_hz": pose["frequency_hz"],
+                        }
+                        if "joint_index" in pose
+                        else {}
+                    ),
                 }
             )
 
@@ -197,7 +254,9 @@ def main() -> int:
         extension_name = "isaacsim.robot_setup.sysid"
         extension_manager = omni.kit.app.get_app().get_extension_manager()
         extension_manager.set_extension_enabled_immediate(extension_name, True)
+        from isaacsim.robot_setup.sysid.telemetry_quality import build_telemetry_quality_report
         from isaacsim.robot_setup.sysid.trajectory_csv import load_sysid_trajectory_csv
+        from isaacsim.robot_setup.sysid.trajectory_segments import TelemetryChunkRunSpec
 
         dataset = load_sysid_trajectory_csv(str(args.sysid_output.resolve()))
         if dataset.num_joints != 6 or len(dataset.times) != len(sysid_rows):
@@ -210,10 +269,27 @@ def main() -> int:
             "positions_shape": list(dataset.positions.shape),
             "commands_shape": list(dataset.commands.shape),
         }
+        chunk_specs = []
+        cursor = dt
+        for index, pose in enumerate(poses):
+            segment_samples = len(pose.get("targets_rad") or [None] * profile["target_steps"])
+            end = cursor + (segment_samples - 1) * dt
+            chunk_specs.append(
+                TelemetryChunkRunSpec(
+                    name=pose["pose_id"],
+                    role="validation" if index == len(poses) - 1 else "train",
+                    excitation="sine" if args.trajectory == "independent-sine" else "custom",
+                    start=cursor,
+                    end=end,
+                    weight=1.0,
+                )
+            )
+            cursor = end + dt
+        quality = build_telemetry_quality_report(dataset, chunk_specs)
         maximum_error = max(row["maximum_final_joint_error_rad"] for row in summaries)
         passed = maximum_error <= profile["maximum_final_joint_error_rad"]
         result: dict[str, Any] = {
-            "schema": SCHEMA,
+            "schema": INDEPENDENT_SCHEMA if args.trajectory == "independent-sine" else SCHEMA,
             "status": "PASS" if passed else "BLOCKED_TRACKING_ERROR",
             "evidence_class": "PROVISIONAL_SIM_TO_SIM_SYSID_TRAJECTORY",
             "profile_schema": profile["schema"],
@@ -228,7 +304,9 @@ def main() -> int:
                 "isaac_sysid_csv_layout": "time,q1..q6,dq1..dq6,cmd1..cmd6",
                 "isaac_sysid_loader_readback": loader_readback,
             },
-            "pose_order": list(POSE_IDS),
+            **({"telemetry_quality": quality.to_dict()} if args.trajectory == "independent-sine" else {}),
+            **({"trajectory": args.trajectory} if args.trajectory != "multi-pose" else {}),
+            "pose_order": [pose["pose_id"] for pose in poses],
             "samples": len(sysid_rows),
             "physics_dt_s": dt,
             "physics_steps": profile["initial_settle_steps"] + global_step,

@@ -685,3 +685,26 @@ $env:OMNI_KIT_ACCEPT_EULA='YES'
   --solve-receipt software\integrations\isaac_sim\evidence\bounded_sysid_solve_rehearsal_20261101.json `
   --status-output tmp\bounded_sysid_run_spec_status.json
 ```
+
+## Independent six-joint excitation
+
+The bounded rehearsal exposed weak excitation on DOF indices `4..5`, so the
+same drive-controlled probe now supports `--trajectory independent-sine`.
+This mode holds the arm around the governed noncontact `H` pose and excites one
+joint at a time, including a gripper-centered waveform that remains above its
+zero lower limit. Each segment ends with a fixed settling interval.
+
+The retained native run records 2,160 samples across six segments. Isaac's
+telemetry-quality API reports no weakly excited joints, no nonfinite channels,
+and more than `0.38 rad` observed range on every joint. The arm settles below
+the existing `0.001 rad` threshold after every segment. The same report detects
+an approximately `83 ms` common command/response lag and a large residual lag
+on DOF index `4`; these are inputs to the next alignment/actuator-model step,
+not values silently folded into damping. The run remains simulation-only and
+does not promote any fitted parameter.
+
+Retained artifacts:
+
+- [`independent_joint_excitation_20261101.json`](evidence/independent_joint_excitation_20261101.json)
+- [`independent_joint_excitation_sysid_20261101.csv`](evidence/independent_joint_excitation_sysid_20261101.csv)
+- [`independent_joint_excitation_telemetry_20261101.csv`](evidence/independent_joint_excitation_telemetry_20261101.csv)

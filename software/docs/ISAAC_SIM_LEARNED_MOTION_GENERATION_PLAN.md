@@ -189,6 +189,13 @@ link-side torque exists. The next LM0B experiment is therefore independent
 wrist/gripper excitation and, separately, a physically calibrated torque
 channel before inertial fitting; the provisional candidate is not promoted to
 the simulator prior yet.
+The independent-excitation follow-up now drives all six joints separately over
+2,160 physics samples. Isaac's telemetry-quality report no longer identifies
+any weak joint, so the wrist/gripper coverage blocker is cleared for the next
+bounded preflight. The run also measures an approximately `83 ms` common lag
+and an outlying DOF-4 residual lag. Command alignment and actuator-delay
+separation must therefore precede the expanded solve; otherwise the optimizer
+would incorrectly absorb timing error into drive gains.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent
