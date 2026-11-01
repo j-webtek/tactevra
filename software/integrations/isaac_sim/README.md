@@ -68,6 +68,10 @@ For a reader-oriented explanation of how Isaac Sim relates to Tactevra's
 deterministic simulators and the proposed MuJoCo Warp lane, see the
 [simulation overview](../../../docs/SIMULATION.md).
 
+The ScheduleGen-inspired path from drive-controlled physics through automated
+demonstration generation and bounded imitation learning is maintained in the
+[learned motion generation plan](../../docs/ISAAC_SIM_LEARNED_MOTION_GENERATION_PLAN.md).
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment

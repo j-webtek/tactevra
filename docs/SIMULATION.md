@@ -95,6 +95,7 @@ artifacts by identity and record their limitations.
 
 - [Isaac Sim implementation and retained evidence](../software/integrations/isaac_sim/README.md)
 - [Isaac Sim work-package plan](../software/docs/ISAAC_SIM_INTEGRATION_PLAN.md)
+- [Isaac Sim learned motion generation plan](../software/docs/ISAAC_SIM_LEARNED_MOTION_GENERATION_PLAN.md)
 - [Runtime architecture](../software/docs/ARCHITECTURE.md)
 - [Project status](../PROJECT_STATUS.md)
 - [Issue #190: pinned simulation oracle](https://github.com/j-webtek/tactevra/issues/190)
