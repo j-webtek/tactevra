@@ -159,6 +159,11 @@ also reaches the same noncontact hover through 270 physics steps, but all
 centers of mass remain placeholder link origins. It therefore validates only
 the gravity-on execution path; geometry-derived mass properties and subsequent
 physical-trace fitting remain required before any system-identification claim.
+The next LM0B slice now replaces those origin placeholders with source-bound
+centers and principal inertias derived from the official link meshes. Its
+native gravity-on hover passes at `2.2443705648411694e-05 rad` maximum final
+joint error. This is a stronger simulation prior, not a physical fit: internal
+servo, electronics, and fastener mass distributions remain unmeasured.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

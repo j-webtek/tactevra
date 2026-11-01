@@ -15,6 +15,7 @@ GRAVITY_SCHEMA = "tactevra.isaac_lm0b_gravity_hover_characterization.v1"
 PROFILE_GRAVITY = {
     "tactevra.isaac_lm0_dynamic_profile.v1": 0.0,
     "tactevra.isaac_lm0b_gravity_characterization_profile.v1": 9.80665,
+    "tactevra.isaac_lm0b_geometry_prior_profile.v1": 9.80665,
 }
 EXPECTED_DOFS = [
     "base_link_to_link1", "link1_to_link2", "link2_to_link3",
@@ -42,7 +43,29 @@ def load_profile(path: Path) -> tuple[dict[str, Any], bytes]:
         raise ValueError("LM0 profile crossed its zero-hardware-authority boundary")
     if not math.isclose(value.get("gravity_m_s2"), PROFILE_GRAVITY[schema], abs_tol=1e-12):
         raise ValueError("LM0 profile gravity does not match its declared phase")
-    masses = value.get("rigid_body_mass_kg")
+    properties = value.get("rigid_body_properties")
+    if properties is not None:
+        if not isinstance(properties, dict) or not properties:
+            raise ValueError("LM0 geometry prior requires rigid-body properties")
+        expected = {"mass_kg", "center_of_mass_m", "diagonal_inertia_kg_m2", "principal_axes_wxyz"}
+        for prim_path, row in properties.items():
+            if not isinstance(prim_path, str) or not isinstance(row, dict) or set(row) != expected:
+                raise ValueError("LM0 geometry-prior property shape is invalid")
+            for name, length in (("center_of_mass_m", 3), ("diagonal_inertia_kg_m2", 3), ("principal_axes_wxyz", 4)):
+                vector = row[name]
+                if not isinstance(vector, list) or len(vector) != length or not all(isinstance(item, (int, float)) and math.isfinite(item) for item in vector):
+                    raise ValueError(f"{prim_path} has an invalid {name}")
+            if not isinstance(row["mass_kg"], (int, float)) or row["mass_kg"] <= 0.0:
+                raise ValueError(f"{prim_path} has an invalid mass")
+            if not all(item > 0.0 for item in row["diagonal_inertia_kg_m2"]):
+                raise ValueError(f"{prim_path} has nonpositive principal inertia")
+            if not math.isclose(sum(item * item for item in row["principal_axes_wxyz"]), 1.0, abs_tol=1e-9):
+                raise ValueError(f"{prim_path} has a non-unit principal-axis quaternion")
+    masses = (
+        {path: row.get("mass_kg") for path, row in properties.items()}
+        if isinstance(properties, dict)
+        else value.get("rigid_body_mass_kg")
+    )
     if not isinstance(masses, dict) or not math.isclose(sum(masses.values()), 1.021, abs_tol=1e-9):
         raise ValueError("LM0A provisional masses must total 1.021 kg")
     return value, raw
@@ -95,16 +118,25 @@ def main() -> int:
         scene = UsdPhysics.Scene.Define(stage, "/World/physicsScene")
         scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, -1.0))
         scene.CreateGravityMagnitudeAttr().Set(profile["gravity_m_s2"])
-        inertia = Gf.Vec3f(*profile["diagonal_inertia_kg_m2"])
-        for prim_path, mass in profile["rigid_body_mass_kg"].items():
+        rigid_properties = profile.get("rigid_body_properties")
+        masses = (
+            {path: row["mass_kg"] for path, row in rigid_properties.items()}
+            if rigid_properties is not None
+            else profile["rigid_body_mass_kg"]
+        )
+        for prim_path, mass in masses.items():
             prim = stage.GetPrimAtPath(prim_path)
             if not prim.IsValid():
                 raise RuntimeError(f"missing rigid body {prim_path}")
             api = UsdPhysics.MassAPI.Apply(prim)
             api.CreateMassAttr().Set(mass)
-            api.CreateCenterOfMassAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
-            api.CreateDiagonalInertiaAttr().Set(inertia)
-            api.CreatePrincipalAxesAttr().Set(Gf.Quatf(1.0, 0.0, 0.0, 0.0))
+            row = rigid_properties.get(prim_path) if rigid_properties is not None else None
+            center = row["center_of_mass_m"] if row is not None else [0.0, 0.0, 0.0]
+            inertia = row["diagonal_inertia_kg_m2"] if row is not None else profile["diagonal_inertia_kg_m2"]
+            axes = row["principal_axes_wxyz"] if row is not None else [1.0, 0.0, 0.0, 0.0]
+            api.CreateCenterOfMassAttr().Set(Gf.Vec3f(*center))
+            api.CreateDiagonalInertiaAttr().Set(Gf.Vec3f(*inertia))
+            api.CreatePrincipalAxesAttr().Set(Gf.Quatf(axes[0], axes[1], axes[2], axes[3]))
 
         SimulationManager.set_physics_dt(profile["physics_dt_s"])
         SimulationManager.initialize_physics()
@@ -158,7 +190,10 @@ def main() -> int:
             "controller_commands": [],
             "hardware_writes": 0,
             "physical_movements": 0,
-            "limitations": (["center_of_mass_at_link_origins"] if gravity_on else ["gravity_disabled"])
+            "limitations": (
+                (["geometry_derived_provisional_mass_properties"] if rigid_properties is not None else ["center_of_mass_at_link_origins"])
+                if gravity_on else ["gravity_disabled"]
+            )
             + ["provisional_mass_inertia_and_drive_parameters", "no_collision_or_contact_geometry", "not_physical_timing_torque_or_safety_evidence"],
         }
         result["receipt_sha256"] = _digest(_canonical(result))
