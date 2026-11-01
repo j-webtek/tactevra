@@ -79,6 +79,28 @@ It performs a gravity-off, physics-stepped PARK-to-`H`-hover diagnostic with
 explicit provisional mass, inertia, and drive parameters. It never accesses
 hardware and is not evidence for physical timing, torque, contact, or safety.
 
+Independent LM0A receipts are checked and summarized by
+[`drive_controlled_hover_campaign.py`](drive_controlled_hover_campaign.py).
+The retained three-process campaign requires intact receipt digests, identical
+asset/schedule/profile bindings, zero post-initialization teleports, zero
+hardware authority, passing per-run tracking, and final-error spread no greater
+than `1e-9 rad`. This closes only the gravity-off control-path repeatability
+slice; it does not qualify the provisional dynamics or the physical robot.
+
+After independently producing at least three native receipts, seal the
+campaign with ordinary Python (this command does not import Isaac or access
+hardware):
+
+```powershell
+python software/integrations/isaac_sim/drive_controlled_hover_campaign.py `
+  C:\IsaacSim\evidence\lm0-repeat-1.json `
+  C:\IsaacSim\evidence\lm0-repeat-2.json `
+  C:\IsaacSim\evidence\lm0-repeat-3.json `
+  --maximum-error-spread-rad 1e-9 `
+  --output C:\IsaacSim\evidence\lm0-campaign.json `
+  --status-output C:\IsaacSim\evidence\lm0-campaign.status.json
+```
+
 ## Initial Windows runner candidate installed 2026-09-29
 
 The designated host now has a dedicated `C:\IsaacSim\env_6_1_0` environment

@@ -151,7 +151,10 @@ Implementation status: the LM0A gravity-off control-path baseline is now
 implemented by `drive_controlled_hover_probe.py` with its provisional dynamic
 profile. A native Isaac 6.1 run completed 270 physics steps with zero
 post-initialization teleports and settled the retained `H` hover below the
-`1e-3 rad` joint-error threshold. Gravity-on identification remains LM0B.
+`1e-3 rad` joint-error threshold. Three independent native processes produced
+byte-identical receipts at `0.00020575953078338927 rad` final maximum joint
+error and zero observed drift. `drive_controlled_hover_campaign.py` now checks
+and seals that repeatability result. Gravity-on identification remains LM0B.
 
 Replay the retained schedule through articulation position targets and physics
 steps. Initialization may set the starting configuration once; all subsequent

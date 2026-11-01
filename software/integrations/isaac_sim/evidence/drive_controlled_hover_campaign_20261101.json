@@ -1,0 +1,65 @@
+{
+  "byte_identical_trial_outputs": true,
+  "campaign_receipt_sha256": "bbc1727a29af9448e3101f9655254a94cc3f98f5ce790035d03f670ee06b0323",
+  "controller_commands": [],
+  "evidence_class": "PROVISIONAL_GRAVITY_OFF_DRIVE_CONTROL_REPEATABILITY",
+  "final_joint_error_spread_rad": 0.0,
+  "hardware_access": false,
+  "hardware_writes": 0,
+  "limitations": [
+    "three_trial_campaign_only",
+    "gravity_disabled",
+    "provisional_mass_inertia_and_drive_parameters",
+    "no_collision_or_contact_geometry",
+    "not_physical_timing_torque_safety_or_repeatability_evidence"
+  ],
+  "maximum_allowed_error_spread_rad": 1e-09,
+  "maximum_final_joint_error_rad": 0.00020575953078338927,
+  "minimum_final_joint_error_rad": 0.00020575953078338927,
+  "minimum_trial_count": 3,
+  "physical_authority": false,
+  "physical_movements": 0,
+  "physics_steps_per_trial": 270,
+  "schema": "tactevra.isaac_lm0_drive_controlled_hover_campaign.v1",
+  "shared_source_bindings": {
+    "bundle_file_sha256": "6a59ce143f5527c7a9ced09b08d5515644ea4fb859dd69691e08483eb020ee42",
+    "profile_file_sha256": "dbd8cbaed890a2fd153ce490f0afd8a3b99bca54d51695e12fff2ce1b3621560",
+    "usd_sha256": "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
+  },
+  "state_teleports_after_initialization": 0,
+  "status": "PASS_REPEATABLE_GRAVITY_OFF_DRIVE_CONTROL",
+  "target": [
+    -0.15741496358879978,
+    0.6841238370694995,
+    1.9375003619248874,
+    -1.0508241977034511,
+    1.7784032309096887e-10,
+    0.0
+  ],
+  "threshold_rad": 0.001,
+  "trial_count": 3,
+  "trial_receipts": [
+    {
+      "file_sha256": "551277e66f56196f8274d8738554100cd3f2d5de807828c466d1600f44ed791d",
+      "input_name": "lm0-repeat-1.json",
+      "maximum_final_joint_error_rad": 0.00020575953078338927,
+      "ordinal": 1,
+      "receipt_sha256": "56be59e771e264ffe05ca37089eac03d7bcf0eeb74e83b3c414a70176189d982"
+    },
+    {
+      "file_sha256": "551277e66f56196f8274d8738554100cd3f2d5de807828c466d1600f44ed791d",
+      "input_name": "lm0-repeat-2.json",
+      "maximum_final_joint_error_rad": 0.00020575953078338927,
+      "ordinal": 2,
+      "receipt_sha256": "56be59e771e264ffe05ca37089eac03d7bcf0eeb74e83b3c414a70176189d982"
+    },
+    {
+      "file_sha256": "551277e66f56196f8274d8738554100cd3f2d5de807828c466d1600f44ed791d",
+      "input_name": "lm0-repeat-3.json",
+      "maximum_final_joint_error_rad": 0.00020575953078338927,
+      "ordinal": 3,
+      "receipt_sha256": "56be59e771e264ffe05ca37089eac03d7bcf0eeb74e83b3c414a70176189d982"
+    }
+  ],
+  "unique_trial_receipt_count": 1
+}
