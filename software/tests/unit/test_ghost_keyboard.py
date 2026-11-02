@@ -416,7 +416,7 @@ def test_robot_tcp_collision_diagnostic_admission_binds_native_inputs():
     box={
         'kind':'oriented_box','center_mm':[0.0,0.0,0.0],
         'half_extents_mm':[1.0,2.0,3.0],
-        'rotation_row_major':[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0],
+        'rotation_row_major':[0.0,-1.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0],
     }
     candidate={
         'schema':'tactevra.simulation_collision_candidate.v1',
@@ -464,6 +464,20 @@ def test_robot_tcp_collision_diagnostic_admission_binds_native_inputs():
     assert admission['controller_commands']==[] and admission['gate_promotions']==[]
     unsigned={key:value for key,value in admission.items() if key!='admission_sha256'}
     assert admission['admission_sha256']==mechanics._canonical_sha256(unsigned)
+
+    reflected=json.loads(json.dumps(candidate))
+    reflected['robot_bodies'][0]['primitives'][0]['rotation_row_major']=[
+        1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,-1.0,
+    ]
+    reflected.pop('candidate_sha256')
+    reflected['candidate_sha256']=mechanics._canonical_sha256(reflected)
+    reflected_request=mechanics.build_robot_tcp_collision_replay_request(
+        ik,reflected,lock,
+    )
+    with pytest.raises(mechanics.MechanicsContractError,match='right-handed'):
+        mechanics.admit_robot_tcp_collision_diagnostic(
+            reflected_request,ik,reflected,virtual_bytes,usd_bytes,import_receipt,
+        )
 
     request['bounded_samples'][0]['joint_positions_rad'][request['joint_order'][0]]+=0.1
     with pytest.raises(mechanics.MechanicsContractError,match='request hash mismatch'):
