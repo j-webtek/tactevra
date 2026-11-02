@@ -970,6 +970,65 @@ Run its focused tests with:
 python -m pytest software/tests/unit/test_ghost_keyboard.py -q
 ```
 
+ARM-193 accepts only the five reviewed directly connected robot-body pairs for
+zero-authority diagnostic reporting. The accepted policy is retained at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-001\policy.json`
+with canonical SHA-256
+`ede8b946a85e754eec1698365bd16bec3b332d5d6cb8c9ef4634a9b61abeca87`.
+The policy excludes no physical solid or station envelope, is ineligible for an
+installed profile, and grants no contact or physical authority. Its hash-bound
+v2 request is retained at
+`C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\request.json`
+with canonical SHA-256
+`0eff9c8170d9ddf78af3bd96880acc43c8d96a4f875b35199aa3950ccb13e83b`.
+
+The selected Isaac 6.1 rerun preserves all 18 raw overlap pairs across the 149
+samples and applies the accepted policy only to blocker classification. The v2
+receipt at
+`C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-diagnostic-001\receipt.json`
+has canonical SHA-256
+`8e511e3203984fea32b9726d5cd37c465369b0ecc8d632f60fd71b0b1e327b4d`
+and file SHA-256
+`a0bda5a2732babead28a72f9c64c35f463ab95c2e06f40c697f52cebb87b377f`.
+It reports five accepted adjacent-link reporting exclusions, seven
+physical-solid blockers, six planning-envelope route blockers, and zero
+unreviewed pairs. Status `DIAGNOSTIC_BLOCKERS_OBSERVED` is intentionally not a
+clearance pass.
+
+Reproduce acceptance, binding, and the policy-bound diagnostic with:
+
+```powershell
+$env:PYTHONPATH = 'software/src'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --accept-collision-pair-policy `
+  --collision-pair-policy-proposal C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-proposal-001\proposal.json `
+  --output C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-001\policy.json `
+  --status-output C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-001\status.json
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --bind-collision-pair-policy `
+  --collision-request C:\IsaacSim\artifacts\issue190\lm1-h-collision-request-001\request.json `
+  --accepted-collision-pair-policy C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-001\policy.json `
+  --output C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\request.json `
+  --status-output C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\status.json
+$env:PYTHONPATH = 'C:\icq7\software\src'
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --run-collision-diagnostic `
+  --collision-request C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\request.json `
+  --accepted-collision-pair-policy C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-001\policy.json `
+  --ik-receipt C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001\receipt.json `
+  --collision-candidate C:\IsaacSim\evidence\issue190\simulation_program\collision_candidate_v1.json `
+  --virtual-profile software\config\virtual_commissioning_profile.json `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --import-receipt C:\IsaacSim\evidence\urdf_import_003.json `
+  --output C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-diagnostic-001\receipt.json `
+  --status-output C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-diagnostic-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
