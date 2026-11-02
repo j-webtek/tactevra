@@ -8833,3 +8833,36 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: create a separate one-attempt read-only authorization that
   requires fresh exact identity verification and preserves the zero-write,
   no-retry boundary before any endpoint access.
+
+### E-20261101-ARM-196 — link 5 refinement rejected; native OBB support retained
+
+- Stage: LM1 zero-authority collision diagnosis.
+- Lane: ARM / Isaac simulation.
+- Change: generalized the triangle-preserving refinement probe to arbitrary
+  links, whole-link source scope, deterministic connected-component merging,
+  unapplied candidate binding, and oriented box fitting. Extended native
+  collision admission and USD authoring to validated proper box rotations.
+- Result: the historical link 2 receipt remains byte-identical. The selected
+  32-box link 5 candidate covers every source triangle with zero serialized
+  vertex overflow and has zero observed false negatives in the 49-pose CPU
+  differential. Its 149-sample native replay retains all 18 body pairs and the
+  same 130 link 5 primitive-pair observations as the axis-aligned clustered
+  candidate. Link 5 subdivision is therefore rejected as a correction for the
+  current route blockers.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm196-link5-components-obb-32` and
+  `C:\IsaacSim\artifacts\issue190\arm196-link5-components-obb-native-32`.
+  The native canonical/file SHA-256 values are
+  `e1a6ddc7c52ec5acda2eee9e0ae628d705a44d85ca4f9db009a67b80a6e8b7b` /
+  `578b9f8f18c4dd3d8e5524492869bb613e74cd3b7f0a539aeb542bc66feb83dc`.
+- Focused verification: 32 collision contract tests pass; the default link 2
+  receipt reproduces at
+  `cf887206e9afdadb46a20263db56406eabfe90a78c3f9d1e5ad0e8dc3fbc6469`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: finite samples are not continuous collision proof. The
+  candidates are unapplied and do not authorize collision queries, contact,
+  controller execution, or physical motion.
+- Next dependency: preserve physical board/device solids, move station planning
+  regions to explicit route-predicate semantics, and revalidate measured
+  placement before a fresh native diagnostic.

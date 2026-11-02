@@ -1123,6 +1123,44 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
+ARM-196 tests whether link 5's whole-link fallback box causes those localized
+route blockers. The generalized triangle partition probe preserves every
+source triangle exactly once, supports deterministic connected-component
+clustering, can bind the result into an unapplied collision candidate, and can
+fit either axis-aligned or oriented boxes. Its historical link 2 default
+remains byte-compatible at receipt SHA-256
+`cf887206e9afdadb46a20263db56406eabfe90a78c3f9d1e5ad0e8dc3fbc6469`.
+
+The selected 32-box oriented link 5 experiment is retained externally at
+`C:\IsaacSim\artifacts\issue190\arm196-link5-components-obb-32`. Its
+refinement receipt SHA-256 is
+`b75da3fa395fd39fdf2cb026e3f4e54152ea33ccf66571f3916af37d44c9c95f`
+and its unapplied candidate SHA-256 is
+`c26fa2ff7920b29d5f24c7d79dcbb518b576b52f0ef02ba18e34b2775f7f3be5`.
+All source triangles are covered with zero serialized vertex overflow. The
+same 49-pose CPU differential reports zero observed false negatives, but it
+does not improve the existing link 2/gripper false positive.
+
+The native diagnostic now validates finite, orthonormal, right-handed box
+rotations and authors them into USD. The 149-sample result at
+`C:\IsaacSim\artifacts\issue190\arm196-link5-components-obb-native-32`
+has canonical receipt SHA-256
+`e1a6ddc7c52ec5acda2eee9e0ae628d705a44d85ca4f9db009a67b80a6e8b7b`
+and file SHA-256
+`578b9f8f18c4dd3d8e5524492869bb613e74cd3b7f0a539aeb542bc66feb83dc`.
+It preserves all 18 body-level pairs and produces the same 130 link 5
+primitive-pair observations as the axis-aligned component candidate. The
+earlier whole-mesh centroid partition also preserved all body-level blockers
+while increasing primitive overlap multiplicity.
+
+These are retained negative results, not a promoted collision profile. They
+show that further link 5 box subdivision is not the correction for this route.
+The next experiment must address measured placement and workcell-envelope
+semantics: physical board/device solids stay collision geometry, while station
+planning regions require an explicit route predicate rather than PhysX-solid
+suppression. No candidate in this experiment is installed or grants collision,
+contact, controller, or physical authority.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

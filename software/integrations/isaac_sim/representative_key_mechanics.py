@@ -1229,15 +1229,41 @@ def admit_robot_tcp_collision_diagnostic(
         if not isinstance(primitives, list) or not primitives:
             raise MechanicsContractError("collision candidate body lacks primitives")
         for primitive in primitives:
+            rotation = primitive.get("rotation_row_major")
             if (
                 primitive.get("kind") != "oriented_box"
-                or primitive.get("rotation_row_major")
-                != [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+                or not isinstance(rotation, list)
+                or len(rotation) != 9
                 or len(primitive.get("center_mm", [])) != 3
                 or len(primitive.get("half_extents_mm", [])) != 3
             ):
                 raise MechanicsContractError(
-                    "native diagnostic currently requires axis-aligned candidate boxes"
+                    "native diagnostic requires governed oriented-box primitives"
+                )
+            rotation = [
+                _finite_number(value, "collision box rotation")
+                for value in rotation
+            ]
+            rows = [rotation[index:index + 3] for index in range(0, 9, 3)]
+            for row_index, row in enumerate(rows):
+                for other_index, other in enumerate(rows):
+                    dot = sum(left * right for left, right in zip(row, other))
+                    expected = 1.0 if row_index == other_index else 0.0
+                    if abs(dot - expected) > 1e-6:
+                        raise MechanicsContractError(
+                            "collision box rotation must be orthonormal"
+                        )
+            determinant = (
+                rotation[0]
+                * (rotation[4] * rotation[8] - rotation[5] * rotation[7])
+                - rotation[1]
+                * (rotation[3] * rotation[8] - rotation[5] * rotation[6])
+                + rotation[2]
+                * (rotation[3] * rotation[7] - rotation[4] * rotation[6])
+            )
+            if abs(determinant - 1.0) > 1e-6:
+                raise MechanicsContractError(
+                    "collision box rotation must be right-handed"
                 )
             for value in primitive["center_mm"]:
                 _finite_number(value, "collision box center")
@@ -1360,7 +1386,13 @@ def run_robot_tcp_collision_diagnostic(
             xform = UsdGeom.Xformable(cube)
             center = primitive["center_mm"]
             half = primitive["half_extents_mm"]
+            rotation = primitive["rotation_row_major"]
             xform.AddTranslateOp().Set(Gf.Vec3d(*(value / 1000.0 for value in center)))
+            rotation_matrix = Gf.Matrix4d(1.0)
+            rotation_matrix.SetRotateOnly(Gf.Matrix3d(*rotation))
+            xform.AddOrientOp().Set(
+                Gf.Quatf(rotation_matrix.ExtractRotationQuat())
+            )
             xform.AddScaleOp().Set(Gf.Vec3d(*(2.0 * value / 1000.0 for value in half)))
             UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
             collision_path_to_primitive[path] = (body_id, primitive_index)
