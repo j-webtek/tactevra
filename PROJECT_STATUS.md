@@ -1,8 +1,9 @@
 # Tactevra project status
 
-Reviewed November 2, 2026 through the ARM-197 station route-predicate
-qualification, the ARM-196 link 5 collision-refinement negative result and
-native oriented-box diagnostic boundary,
+Reviewed November 2, 2026 through the ARM-198 physical-blocker experiment
+plan, ARM-197 station route-predicate qualification, the ARM-196 link 5
+collision-refinement negative result and native oriented-box diagnostic
+boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
 ARM-125 bounded shadow service,

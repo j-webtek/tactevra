@@ -1180,6 +1180,41 @@ the collision result; it does not prove the route collision-free. The next
 experiment must correct measured board/keyboard placement or the route against
 those physical solids, then separately satisfy continuous-geometry evidence.
 
+ARM-198 turns that result into a hash-bound, zero-authority experiment plan
+without changing the route or any collision solid. The planner verifies the
+exact Cartesian request, collision candidate, native diagnostic, blocker
+localization, and raw virtual-profile file hashes. It then separates implicated
+`TRANSIT` samples from `CONTACT`, `HOVER`, and `RETRACT` endpoint blockers.
+
+The retained plan is at
+`C:\IsaacSim\artifacts\issue190\arm198-physical-blocker-experiment-plan-001`.
+Its plan SHA-256 is
+`a681306a075f79526d3296b1202b5f6726fa7718ad019b1b98f867632b09a096`.
+The physical workcell top is `21 mm`; an explicit `49 mm` simulation margin
+therefore proposes a `70 mm` transit-height hypothesis for 71 implicated
+Cartesian sequences. All seven physical body pairs also occur at one or more
+endpoint phases and remain assigned to separate placement/TCP/geometry work.
+The source placement remains `UNMEASURED_SENSITIVITY_OVERLAY`; the plan applies
+no route variant, changes no geometry, and grants no hardware or motion
+authority.
+
+Reproduce the experiment plan with:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\arm198-physical-blocker-experiment-plan-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --plan-physical-blocker-experiment `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --collision-candidate C:\IsaacSim\artifacts\issue190\arm196-link5-components-obb-32\collision_candidate.json `
+  --collision-diagnostic-receipt C:\IsaacSim\artifacts\issue190\arm197-station-route-predicate-001\native_receipt.json `
+  --blocker-localization C:\IsaacSim\artifacts\issue190\arm197-station-route-predicate-001\localization.json `
+  --virtual-profile software\config\virtual_commissioning_profile.json `
+  --clearance-margin-mm 49 `
+  --output "$artifactDir\plan.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

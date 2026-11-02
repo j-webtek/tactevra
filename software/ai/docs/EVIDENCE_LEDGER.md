@@ -8898,3 +8898,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: correct measured board/keyboard placement and/or regenerate
   the route to clear the seven physical blockers, then qualify continuous
   geometry separately.
+
+### E-20261102-ARM-198 — physical blocker experiment plan separates transit and endpoints
+
+- Stage: LM1 zero-authority route correction planning.
+- Lane: ARM / Isaac simulation.
+- Change: added a fail-closed planner that binds the exact Cartesian request,
+  collision candidate, native diagnostic, blocker localization, and raw
+  virtual-profile file digest. It computes the physical workcell top and
+  separates transit samples from contact, hover, and retract endpoint work.
+- Result: the retained plan identifies a 21 mm physical top and applies an
+  explicit 49 mm simulation-only margin, producing a 70 mm transit-height
+  hypothesis for 71 Cartesian sequences. All seven physical blocker pairs also
+  occur at endpoint phases and remain classified for separate placement,
+  TCP, or geometry correction.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm198-physical-blocker-experiment-plan-001`.
+  Plan SHA-256:
+  `a681306a075f79526d3296b1202b5f6726fa7718ad019b1b98f867632b09a096`.
+- Focused verification: 34 collision-contract tests pass; Ruff passes.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the source placement remains
+  `UNMEASURED_SENSITIVITY_OVERLAY`; the margin is an experiment hypothesis,
+  not a physical allowance. No route variant or geometry change is applied,
+  and finite samples are not continuous collision proof.
+- Next dependency: generate the proposed 70 mm transit route variant, rerun IK
+  and native collision diagnostics, and compare transit blockers while keeping
+  endpoint qualification separate.
