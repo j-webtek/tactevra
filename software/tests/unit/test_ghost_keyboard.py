@@ -578,3 +578,112 @@ def test_collision_pair_policy_proposal_is_classified_but_unapplied():
     })
     with pytest.raises(mechanics.MechanicsContractError,match='sample count'):
         mechanics.build_collision_pair_policy_proposal(receipt,candidate)
+
+
+def test_collision_blockers_localize_to_retained_cartesian_context():
+    mechanics=_load_key_mechanics()
+    cartesian={
+        'schema':'tactevra.isaac_lm1_robot_tcp_cartesian_schedule_request.v1',
+        'status':'READY_FOR_IK_QUALIFICATION',
+        'sample_count':3,
+        'samples':[
+            {
+                'sequence':0,'action_index':0,'phase':'approach',
+                'target_id':'H','phase_endpoint':False,
+                'expected_tool_tip_board_mm':[210.0,150.0,35.0],
+            },
+            {
+                'sequence':1,'action_index':0,'phase':'transition',
+                'target_id':'H','phase_endpoint':True,
+                'expected_tool_tip_board_mm':[216.0,154.0,20.0],
+            },
+            {
+                'sequence':2,'action_index':1,'phase':'retract',
+                'target_id':'SPACE','phase_endpoint':True,
+                'expected_tool_tip_board_mm':[224.0,112.0,35.0],
+            },
+        ],
+        'hardware_access':False,'hardware_writes':0,'physical_movements':0,
+    }
+    cartesian['request_sha256']=mechanics._canonical_sha256(cartesian)
+    joints=[
+        {'joint1':0.1,'joint2':0.2},
+        {'joint1':0.2,'joint2':0.3},
+        {'joint1':0.3,'joint2':0.4},
+    ]
+    bounded=[
+        {
+            'sample_sequence':index,'sample_id':f'sample-{index:03d}',
+            'source_segment_index':index,'interpolation_ratio':1.0,
+            'subdivision_count':1,'subdivision_index':1,
+            'joint_positions_rad':joint,
+        }
+        for index,joint in enumerate(joints)
+    ]
+    request={
+        'schema':'tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2',
+        'status':'READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC',
+        'source_request_sha256':cartesian['request_sha256'],
+        'bounded_sample_count':len(bounded),'bounded_samples':bounded,
+        'diagnostic_only':True,'installed_collision_qualified':False,
+        'continuous_collision_proven':False,
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    physical=['robot:link4','workcell:keyboard']
+    planning=['robot:gripper','workcell:station:keyboard_left']
+    observed=[]
+    for index,row in enumerate(bounded):
+        observed.append({
+            'sample_sequence':index,'sample_id':row['sample_id'],
+            'source_segment_index':row['source_segment_index'],
+            'joint_positions_rad':row['joint_positions_rad'],
+            'physical_solid_blocker_pairs':[physical] if index < 2 else [],
+            'planning_envelope_blocker_pairs':[planning] if index > 0 else [],
+            'unreviewed_blocker_pairs':[],
+        })
+    receipt={
+        'schema':'tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v2',
+        'status':'DIAGNOSTIC_BLOCKERS_OBSERVED',
+        'source_bindings':{'request_sha256':request['request_sha256']},
+        'bounded_sample_count':len(observed),'samples':observed,
+        'physical_solid_blocker_pairs':[physical],
+        'physical_solid_blocker_pair_count':1,
+        'planning_envelope_blocker_pairs':[planning],
+        'planning_envelope_blocker_pair_count':1,
+        'unreviewed_blocker_pairs':[],
+        'unreviewed_blocker_pair_count':0,
+        'collision_pair_policy_applied':True,
+        'installed_collision_qualified':False,
+        'continuous_collision_proven':False,'gate_promotions':[],
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+
+    proposal=mechanics.build_collision_blocker_localization(
+        receipt,request,cartesian,
+    )
+    assert proposal['status']=='REVIEW_REQUIRED_COLLISION_BLOCKER_REMEDIATION'
+    assert proposal['localized_blocker_pair_count']==2
+    assert proposal['physical_solid_blocker_pair_count']==1
+    assert proposal['planning_envelope_blocker_pair_count']==1
+    assert proposal['unreviewed_blocker_pair_count']==0
+    assert proposal['physical_geometry_refinement_robot_bodies']==['robot:link4']
+    assert proposal['planning_region_bodies']==[
+        'workcell:station:keyboard_left'
+    ]
+    rows={tuple(row['body_pair']):row for row in proposal['blocker_localizations']}
+    assert rows[tuple(physical)]['sample_sequence_ranges']==[{'start':0,'end':1}]
+    assert rows[tuple(physical)]['phase_counts']=={'approach':1,'transition':1}
+    assert rows[tuple(planning)]['source_segment_ranges']==[{'start':1,'end':2}]
+    assert rows[tuple(planning)]['target_counts']=={'H':1,'SPACE':1}
+    assert proposal['proposal_applied'] is False
+    assert proposal['hardware_access'] is proposal['physical_authority'] is False
+    assert proposal['gate_promotions']==[]
+    unsigned={key:value for key,value in proposal.items() if key!='proposal_sha256'}
+    assert proposal['proposal_sha256']==mechanics._canonical_sha256(unsigned)
+
+    receipt['samples'][0]['source_segment_index']=1
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='sample lineage'):
+        mechanics.build_collision_blocker_localization(receipt,request,cartesian)

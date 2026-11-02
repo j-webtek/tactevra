@@ -37,6 +37,9 @@ TCP_COLLISION_POLICY_SCHEMA = "tactevra.isaac_lm1_collision_pair_policy.v1"
 TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2"
 )
+TCP_COLLISION_BLOCKER_LOCALIZATION_SCHEMA = (
+    "tactevra.isaac_lm1_collision_blocker_localization.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -1929,6 +1932,261 @@ def bind_collision_pair_policy_request(
     return bound
 
 
+def _contiguous_integer_ranges(values: Iterable[int]) -> list[dict[str, int]]:
+    ordered = sorted(set(values))
+    if not ordered:
+        return []
+    ranges: list[dict[str, int]] = []
+    start = previous = ordered[0]
+    for value in ordered[1:]:
+        if value != previous + 1:
+            ranges.append({"start": start, "end": previous})
+            start = value
+        previous = value
+    ranges.append({"start": start, "end": previous})
+    return ranges
+
+
+def build_collision_blocker_localization(
+    diagnostic_receipt: dict[str, Any],
+    collision_request: dict[str, Any],
+    cartesian_request: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind remaining collision blockers to their exact trajectory context."""
+    documents = (
+        (diagnostic_receipt, "receipt_sha256", "collision diagnostic receipt"),
+        (collision_request, "request_sha256", "collision request"),
+        (cartesian_request, "request_sha256", "Cartesian request"),
+    )
+    claimed_hashes: dict[str, str] = {}
+    for document, hash_field, label in documents:
+        claimed = document.get(hash_field)
+        unsigned = dict(document)
+        unsigned.pop(hash_field, None)
+        if claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} hash mismatch")
+        claimed_hashes[label] = claimed
+    if (
+        diagnostic_receipt.get("schema")
+        != TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+        or diagnostic_receipt.get("status") != "DIAGNOSTIC_BLOCKERS_OBSERVED"
+        or diagnostic_receipt.get("collision_pair_policy_applied") is not True
+        or diagnostic_receipt.get("installed_collision_qualified") is not False
+        or diagnostic_receipt.get("continuous_collision_proven") is not False
+        or diagnostic_receipt.get("gate_promotions") != []
+    ):
+        raise MechanicsContractError("collision diagnostic localization boundary changed")
+    if (
+        collision_request.get("schema") != TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA
+        or collision_request.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC"
+        or collision_request.get("diagnostic_only") is not True
+        or collision_request.get("installed_collision_qualified") is not False
+        or collision_request.get("continuous_collision_proven") is not False
+        or diagnostic_receipt.get("source_bindings", {}).get("request_sha256")
+        != claimed_hashes["collision request"]
+    ):
+        raise MechanicsContractError("diagnostic and collision request differ")
+    if (
+        cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or cartesian_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or collision_request.get("source_request_sha256")
+        != claimed_hashes["Cartesian request"]
+        or cartesian_request.get("hardware_access") is not False
+        or cartesian_request.get("hardware_writes") != 0
+        or cartesian_request.get("physical_movements") != 0
+    ):
+        raise MechanicsContractError("collision and Cartesian request lineage differs")
+
+    bounded_samples = collision_request.get("bounded_samples")
+    observed_samples = diagnostic_receipt.get("samples")
+    cartesian_samples = cartesian_request.get("samples")
+    if (
+        not isinstance(bounded_samples, list)
+        or not isinstance(observed_samples, list)
+        or not isinstance(cartesian_samples, list)
+        or len(bounded_samples) != collision_request.get("bounded_sample_count")
+        or len(observed_samples) != diagnostic_receipt.get("bounded_sample_count")
+        or len(bounded_samples) != len(observed_samples)
+        or len(cartesian_samples) != cartesian_request.get("sample_count")
+    ):
+        raise MechanicsContractError("collision localization sample coverage differs")
+
+    pair_samples: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    pair_classes: dict[tuple[str, str], str] = {}
+    for sequence, (bounded, observed) in enumerate(zip(
+        bounded_samples, observed_samples, strict=True
+    )):
+        if (
+            bounded.get("sample_sequence") != sequence
+            or observed.get("sample_sequence") != sequence
+            or observed.get("sample_id") != bounded.get("sample_id")
+            or observed.get("source_segment_index")
+            != bounded.get("source_segment_index")
+            or observed.get("joint_positions_rad")
+            != bounded.get("joint_positions_rad")
+        ):
+            raise MechanicsContractError("diagnostic sample lineage differs")
+        segment_index = bounded.get("source_segment_index")
+        if (
+            not isinstance(segment_index, int)
+            or isinstance(segment_index, bool)
+            or segment_index < 0
+            or segment_index >= len(cartesian_samples)
+        ):
+            raise MechanicsContractError("collision source segment is invalid")
+        context = cartesian_samples[segment_index]
+        for field in ("sequence", "phase", "expected_tool_tip_board_mm"):
+            if field not in context:
+                raise MechanicsContractError("Cartesian sample context is incomplete")
+        if context["sequence"] != segment_index:
+            raise MechanicsContractError("Cartesian sample sequence differs")
+        for field, blocker_class in (
+            ("physical_solid_blocker_pairs", "PHYSICAL_SOLID_COLLISION_BLOCKER"),
+            ("planning_envelope_blocker_pairs", "PLANNING_ENVELOPE_ROUTE_BLOCKER"),
+            ("unreviewed_blocker_pairs", "UNREVIEWED_COLLISION_BLOCKER"),
+        ):
+            pairs = observed.get(field)
+            if not isinstance(pairs, list):
+                raise MechanicsContractError("diagnostic blocker sample field is absent")
+            seen_sample_pairs: set[tuple[str, str]] = set()
+            for body_pair in pairs:
+                if not isinstance(body_pair, list) or len(body_pair) != 2:
+                    raise MechanicsContractError("diagnostic blocker pair is invalid")
+                pair = tuple(sorted(body_pair))
+                if pair in seen_sample_pairs:
+                    raise MechanicsContractError("diagnostic sample duplicates a blocker pair")
+                seen_sample_pairs.add(pair)
+                previous_class = pair_classes.setdefault(pair, blocker_class)
+                if previous_class != blocker_class:
+                    raise MechanicsContractError("diagnostic blocker class changed by sample")
+                pair_samples.setdefault(pair, []).append({
+                    "sample_sequence": sequence,
+                    "sample_id": bounded["sample_id"],
+                    "source_segment_index": segment_index,
+                    "interpolation_ratio": bounded["interpolation_ratio"],
+                    "cartesian_sequence": context["sequence"],
+                    "action_index": context.get("action_index"),
+                    "phase": context["phase"],
+                    "target_id": context.get("target_id"),
+                    "phase_endpoint": context.get("phase_endpoint"),
+                    "expected_tool_tip_board_mm": context[
+                        "expected_tool_tip_board_mm"
+                    ],
+                })
+
+    expected_pairs: dict[tuple[str, str], str] = {}
+    for field, blocker_class in (
+        ("physical_solid_blocker_pairs", "PHYSICAL_SOLID_COLLISION_BLOCKER"),
+        ("planning_envelope_blocker_pairs", "PLANNING_ENVELOPE_ROUTE_BLOCKER"),
+        ("unreviewed_blocker_pairs", "UNREVIEWED_COLLISION_BLOCKER"),
+    ):
+        pairs = diagnostic_receipt.get(field)
+        if not isinstance(pairs, list):
+            raise MechanicsContractError("diagnostic blocker summary is absent")
+        for body_pair in pairs:
+            pair = tuple(sorted(body_pair))
+            if pair in expected_pairs:
+                raise MechanicsContractError("diagnostic blocker summary duplicates a pair")
+            expected_pairs[pair] = blocker_class
+        count_field = field.removesuffix("_pairs") + "_pair_count"
+        if diagnostic_receipt.get(count_field) != len(pairs):
+            raise MechanicsContractError("diagnostic blocker summary count differs")
+    if expected_pairs != pair_classes or not pair_samples:
+        raise MechanicsContractError("diagnostic blocker summary and samples differ")
+
+    localizations = []
+    for pair in sorted(pair_samples):
+        rows = pair_samples[pair]
+        phase_counts: dict[str, int] = {}
+        target_counts: dict[str, int] = {}
+        for row in rows:
+            phase = row["phase"]
+            phase_counts[phase] = phase_counts.get(phase, 0) + 1
+            target = row["target_id"] if row["target_id"] is not None else "NONE"
+            target_counts[target] = target_counts.get(target, 0) + 1
+        blocker_class = pair_classes[pair]
+        localizations.append({
+            "body_pair": list(pair),
+            "blocker_class": blocker_class,
+            "sample_count": len(rows),
+            "sample_sequence_ranges": _contiguous_integer_ranges(
+                row["sample_sequence"] for row in rows
+            ),
+            "source_segment_ranges": _contiguous_integer_ranges(
+                row["source_segment_index"] for row in rows
+            ),
+            "phase_counts": dict(sorted(phase_counts.items())),
+            "target_counts": dict(sorted(target_counts.items())),
+            "samples": rows,
+            "proposed_remediation": (
+                "REFINE_CONSERVATIVE_ROBOT_GEOMETRY_THEN_REPLAN_IF_OVERLAP_PERSISTS"
+                if blocker_class == "PHYSICAL_SOLID_COLLISION_BLOCKER"
+                else "SEPARATE_PLANNING_REGION_FROM_PHYSX_SOLIDS_AND_ADD_ROUTE_PREDICATE"
+                if blocker_class == "PLANNING_ENVELOPE_ROUTE_BLOCKER"
+                else "REVIEW_BODY_SEMANTICS_AND_GEOMETRY_BEFORE_RERUN"
+            ),
+        })
+
+    physical_robot_bodies = sorted({
+        body for pair, blocker_class in pair_classes.items()
+        if blocker_class == "PHYSICAL_SOLID_COLLISION_BLOCKER"
+        for body in pair if body.startswith("robot:")
+    })
+    planning_regions = sorted({
+        body for pair, blocker_class in pair_classes.items()
+        if blocker_class == "PLANNING_ENVELOPE_ROUTE_BLOCKER"
+        for body in pair if body.startswith("workcell:station:")
+    })
+    proposal: dict[str, Any] = {
+        "schema": TCP_COLLISION_BLOCKER_LOCALIZATION_SCHEMA,
+        "status": "REVIEW_REQUIRED_COLLISION_BLOCKER_REMEDIATION",
+        "source_diagnostic_receipt_sha256": claimed_hashes[
+            "collision diagnostic receipt"
+        ],
+        "source_collision_request_sha256": claimed_hashes["collision request"],
+        "source_cartesian_request_sha256": claimed_hashes["Cartesian request"],
+        "bounded_sample_count": len(observed_samples),
+        "localized_blocker_pair_count": len(localizations),
+        "physical_solid_blocker_pair_count": sum(
+            item["blocker_class"] == "PHYSICAL_SOLID_COLLISION_BLOCKER"
+            for item in localizations
+        ),
+        "planning_envelope_blocker_pair_count": sum(
+            item["blocker_class"] == "PLANNING_ENVELOPE_ROUTE_BLOCKER"
+            for item in localizations
+        ),
+        "unreviewed_blocker_pair_count": sum(
+            item["blocker_class"] == "UNREVIEWED_COLLISION_BLOCKER"
+            for item in localizations
+        ),
+        "physical_geometry_refinement_robot_bodies": physical_robot_bodies,
+        "planning_region_bodies": planning_regions,
+        "blocker_localizations": localizations,
+        "proposal_applied": False,
+        "installed_profile_eligible": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "next_required_stage": (
+            "REVIEW_GEOMETRY_REFINEMENT_AND_PLANNING_REGION_SEPARATION_THEN_RERUN"
+        ),
+        "limitations": [
+            "localization_uses_discrete_overlap_samples_not_continuous_clearance",
+            "physical_overlap_may_reflect_conservative_axis_aligned_robot_boxes",
+            "planning_regions_are_not_yet_evaluated_by_a_route_predicate",
+            "proposal_does_not_change_geometry_route_or_collision_results",
+        ],
+    }
+    proposal["proposal_sha256"] = _canonical_sha256(proposal)
+    return proposal
+
+
 def assess_native_key_trace(
     profile: dict[str, Any],
     native_samples: Iterable[dict[str, Any]],
@@ -2191,6 +2449,14 @@ def main() -> int:
         help="classify native overlap evidence into an unapplied review proposal",
     )
     parser.add_argument("--collision-diagnostic-receipt", type=Path)
+    parser.add_argument(
+        "--localize-collision-blockers",
+        action="store_true",
+        help=(
+            "bind policy-bound collision blockers to retained Cartesian trajectory "
+            "samples without changing geometry, routes, or authority"
+        ),
+    )
     parser.add_argument("--accept-collision-pair-policy", action="store_true")
     parser.add_argument("--collision-pair-policy-proposal", type=Path)
     parser.add_argument("--bind-collision-pair-policy", action="store_true")
@@ -2208,7 +2474,9 @@ def main() -> int:
             raise MechanicsContractError(
                 "Cartesian regeneration requires --robot-tcp-bundle"
             )
-        if (args.cartesian_request is None) != (args.ik_source_bundle is None):
+        if not args.localize_collision_blockers and (
+            (args.cartesian_request is None) != (args.ik_source_bundle is None)
+        ):
             raise MechanicsContractError(
                 "IK screening requires both --cartesian-request and --ik-source-bundle"
             )
@@ -2221,14 +2489,58 @@ def main() -> int:
             raise MechanicsContractError(
                 "collision request requires --ik-receipt, --collision-candidate, and --toolchain-lock"
             )
-        if args.cartesian_request is not None and (
-            args.native_h_probe or args.robot_tcp_bundle is not None
-            or args.ik_receipt is not None
+        if (
+            not args.localize_collision_blockers
+            and args.cartesian_request is not None
+            and (
+                args.native_h_probe
+                or args.robot_tcp_bundle is not None
+                or args.ik_receipt is not None
+            )
         ):
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.accept_collision_pair_policy:
+        if args.localize_collision_blockers:
+            if (
+                args.collision_diagnostic_receipt is None
+                or args.collision_request is None
+                or args.cartesian_request is None
+            ):
+                raise MechanicsContractError(
+                    "blocker localization requires --collision-diagnostic-receipt, "
+                    "--collision-request, and --cartesian-request"
+                )
+            if any((
+                args.accept_collision_pair_policy,
+                args.bind_collision_pair_policy,
+                args.propose_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.regenerate_cartesian_schedule,
+                args.ik_source_bundle is not None,
+                args.ik_receipt is not None,
+                args.collision_candidate is not None,
+                args.toolchain_lock is not None,
+                args.virtual_profile is not None,
+                args.robot_usd is not None,
+                args.import_receipt is not None,
+                args.collision_pair_policy_proposal is not None,
+                args.accepted_collision_pair_policy is not None,
+            )):
+                raise MechanicsContractError(
+                    "blocker localization is mutually exclusive with generation, "
+                    "execution, and policy-change modes"
+                )
+            result = build_collision_blocker_localization(
+                json.loads(
+                    args.collision_diagnostic_receipt.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.collision_request.resolve(strict=True).read_bytes()),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+            )
+        elif args.accept_collision_pair_policy:
             if args.collision_pair_policy_proposal is None:
                 raise MechanicsContractError(
                     "policy acceptance requires --collision-pair-policy-proposal"
@@ -2401,6 +2713,7 @@ def main() -> int:
             "DIAGNOSTIC_OVERLAPS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED",
             "DIAGNOSTIC_BLOCKERS_OBSERVED",
             "REVIEW_REQUIRED_COLLISION_PAIR_POLICY",
+            "REVIEW_REQUIRED_COLLISION_BLOCKER_REMEDIATION",
             "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY",
         } else 2
     except BaseException as exc:

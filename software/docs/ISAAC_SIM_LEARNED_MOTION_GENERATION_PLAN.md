@@ -370,6 +370,29 @@ dependency is correcting the exploratory physical geometry and planning route,
 then separately adding the missing installed bodies and continuous-segment
 screening before robot/key contact replay.
 
+ARM-194 turns that classified baseline into exact trajectory-localized repair
+evidence. The external unapplied report at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-blocker-localization-001\proposal.json`
+has canonical SHA-256
+`8a3c8bb8df99c22383efb618d43f9d0e32b9f8aec443ce9525ef5393f2a0198b`.
+It binds every one of the 13 remaining blocker pairs to the relevant subset of
+the 149 bounded collision samples and, through each sample's source segment,
+to the original Cartesian phase, action, target, and expected TCP pose. The
+seven physical-solid pairs involve the gripper and links 2 through 5; the six
+planning-envelope pairs involve the gripper, link 4, link 5, and the two
+keyboard station regions. No pair is unreviewed. Most observations occur in
+`TRANSIT`; station-envelope observations cluster around the `H` and `1`
+portions, whereas board-solid observations extend through later `1` and
+`PERIOD` portions.
+
+The report applies no remediation and promotes no gate. It establishes two
+separate next experiments: first refine the conservative physical robot-link
+geometry and retest actual solid overlaps; separately remove station planning
+envelopes from PhysX-solid semantics and enforce them through an explicit route
+predicate. Only a fresh policy-bound native replay may show whether either
+correction cleared its blocker class. Installed attachment coverage and
+continuous-segment screening remain later prerequisites.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;
@@ -477,9 +500,10 @@ ScheduleGen. Neither is a physical success rate.
    tracking, settling, and contact behavior.
 3. **LM1 collision:** native representative-key physics, Cartesian
    regeneration, canonical IK, the exact 149-sample diagnostic, reviewed
-   adjacent-link policy, and policy-bound rerun are complete. Next correct the
-   seven physical-solid and six station-envelope blockers, then separately
-   satisfy installed continuous geometry.
+   adjacent-link policy, policy-bound rerun, and exact blocker localization are
+   complete. Next refine the conservative robot-link physical geometry and
+   separate station envelopes into an explicit route predicate, rerun both
+   blocker classes, then separately satisfy installed continuous geometry.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.
