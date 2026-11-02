@@ -526,9 +526,13 @@ ScheduleGen. Neither is a physical success rate.
 3. **LM1 collision:** native representative-key physics, Cartesian
    regeneration, canonical IK, the exact 149-sample diagnostic, reviewed
    adjacent-link policy, policy-bound rerun, and exact blocker localization are
-   complete. Next refine the conservative robot-link physical geometry and
-   separate station envelopes into an explicit route predicate, rerun both
-   blocker classes, then separately satisfy installed continuous geometry.
+   complete. The explicit station route predicate is also complete: contact
+   endpoints are target-bound, planning regions are excluded from PhysX, and
+   physical board/device solids remain active. The retained rerun has zero
+   station-envelope blockers and seven physical board/keyboard body-pair
+   blockers. Next correct measured workcell placement and/or regenerate the
+   route against those physical solids, then separately satisfy installed
+   continuous geometry.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

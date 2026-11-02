@@ -1,7 +1,8 @@
 # Tactevra project status
 
-Reviewed November 1, 2026 through the ARM-196 link 5 collision-refinement
-negative result and native oriented-box diagnostic boundary,
+Reviewed November 2, 2026 through the ARM-197 station route-predicate
+qualification, the ARM-196 link 5 collision-refinement negative result and
+native oriented-box diagnostic boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
 ARM-125 bounded shadow service,
@@ -166,7 +167,7 @@ completed capabilities.
 | Synthetic model-to-controller lineage | Exact synthetic review and epoch identities now bind through actual AI-assembler bytes, arm ingress and freshness checks, the measured planner blocker, a sealed synthetic trajectory, T=102 profile, and zero-write preview receipt | Crossed identities reject and one encoded command is reviewable, but the real planner stops for missing calibration, production dispatch remains explicitly blocked, and no bytes are sent |
 | Arm control research | Documented supervised noncontact movement and joint-feedback checks | Specific lab sequences were completed; controller feedback does not measure key-contact accuracy |
 | Hardware | RC03 workcell design and step-by-step assembly package | Design and print resources exist, with their own measurement and print-readiness requirements |
-| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, first noncontact H-hover prefix, and finite collision differentials are retained on `main` | This is advisory simulation evidence only; the runner lock is `UNSELECTED`, MJWarp has no merged physics replay, and installed geometry, dynamics, contact, continuous clearance, and physical qualification remain open |
+| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; station route predicates now separate target-bound planning regions from physical board/device solids | This is advisory simulation evidence only; the retained route still has seven physical board/keyboard blocker pairs, and installed geometry, dynamics, continuous clearance, and physical qualification remain open |
 
 ### Recent progress, in plain language
 

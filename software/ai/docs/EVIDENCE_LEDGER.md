@@ -8866,3 +8866,35 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: preserve physical board/device solids, move station planning
   regions to explicit route-predicate semantics, and revalidate measured
   placement before a fresh native diagnostic.
+
+### E-20261102-ARM-197 — station route predicate separates planning regions from PhysX solids
+
+- Stage: LM1 zero-authority collision diagnosis.
+- Lane: ARM / Isaac simulation.
+- Change: added a hash-bound station route predicate that verifies exact
+  Cartesian-request and collision-candidate lineage, requires contact endpoints
+  to occupy an explicitly target-bound station, records transit occupancy, and
+  carries zero installation or physical authority. Native admission requires
+  the predicate together with the accepted adjacent-link diagnostic policy and
+  authors only physical workcell bodies into PhysX.
+- Result: the retained `H -> H -> 1 -> PERIOD` predicate passes all 133
+  Cartesian samples. Its 149-sample native replay excludes the three station
+  planning regions, retains board, keyboard, and phone solids, and reports zero
+  station-envelope blockers. Seven physical board/keyboard body-pair blockers
+  remain, with zero unreviewed blockers.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm197-station-route-predicate-001`.
+  The predicate/native receipt/localization SHA-256 values are
+  `80a8091343ff4d297cc91e62440cb241107abe9aa0468433187266b606fd55f1` /
+  `0c7a13f2dec6cda0d2a38274f7917eba6efab6670e5d140c5c903278d0ef35eb` /
+  `ad33b46659a17344703b310cafa304ddc7bdae0b99c0318dbcbf71a7cfbd76d9`.
+- Focused verification: 33 collision-contract tests pass; Ruff passes. The
+  native Isaac run and blocker localization both completed successfully.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: the finite route predicate is not continuous collision proof,
+  does not waive any physical solid, and grants no contact, controller,
+  execution, or physical authority.
+- Next dependency: correct measured board/keyboard placement and/or regenerate
+  the route to clear the seven physical blockers, then qualify continuous
+  geometry separately.

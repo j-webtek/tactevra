@@ -1155,11 +1155,30 @@ while increasing primitive overlap multiplicity.
 
 These are retained negative results, not a promoted collision profile. They
 show that further link 5 box subdivision is not the correction for this route.
-The next experiment must address measured placement and workcell-envelope
-semantics: physical board/device solids stay collision geometry, while station
-planning regions require an explicit route predicate rather than PhysX-solid
-suppression. No candidate in this experiment is installed or grants collision,
-contact, controller, or physical authority.
+No candidate in this experiment is installed or grants collision, contact,
+controller, or physical authority.
+
+ARM-197 implements the next boundary as a hash-bound station route predicate.
+Contact endpoints must lie inside a station explicitly bound to their target;
+transit occupancy is recorded but is not treated as contact. The native runner
+admits that predicate only with the exact Cartesian request, collision
+candidate, and an accepted adjacent-link diagnostic policy. When admitted, it
+authors board, keyboard, and phone bodies as physical collision solids while
+excluding `workcell:station:*` planning regions from PhysX.
+
+The retained zero-authority run is at
+`C:\IsaacSim\artifacts\issue190\arm197-station-route-predicate-001`. The
+predicate SHA-256 is
+`80a8091343ff4d297cc91e62440cb241107abe9aa0468433187266b606fd55f1`;
+the native receipt SHA-256 is
+`0c7a13f2dec6cda0d2a38274f7917eba6efab6670e5d140c5c903278d0ef35eb`.
+Across the exact 149-sample route, the result contains zero station-envelope
+blockers and seven physical blockers: five robot-link/board pairs plus
+two keyboard pairs (`gripper/keyboard` and `link5/keyboard`), consolidated by
+body pair. This proves that station semantics are no longer contaminating
+the collision result; it does not prove the route collision-free. The next
+experiment must correct measured board/keyboard placement or the route against
+those physical solids, then separately satisfy continuous-geometry evidence.
 
 ### Native H-key contact replay
 
