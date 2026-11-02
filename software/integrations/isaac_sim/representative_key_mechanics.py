@@ -49,6 +49,9 @@ TCP_COLLISION_BLOCKER_LOCALIZATION_SCHEMA = (
 STATION_ROUTE_PREDICATE_SCHEMA = (
     "tactevra.isaac_lm1_station_route_predicate.v1"
 )
+PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_physical_blocker_experiment_plan.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -328,6 +331,182 @@ def build_station_route_predicate(
         ],
     }
     result["predicate_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def build_physical_blocker_experiment_plan(
+    cartesian_request: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    diagnostic_receipt: dict[str, Any],
+    localization: dict[str, Any],
+    virtual_profile: dict[str, Any],
+    *,
+    clearance_margin_mm: float,
+    virtual_profile_sha256: str,
+) -> dict[str, Any]:
+    """Classify physical blockers before generating a route or placement variant."""
+    margin = _finite_number(clearance_margin_mm, "clearance margin")
+    if margin <= 0.0 or margin > 150.0:
+        raise MechanicsContractError("clearance margin must be within (0, 150] mm")
+    documents = (
+        (cartesian_request, "request_sha256", "Cartesian request"),
+        (diagnostic_receipt, "receipt_sha256", "diagnostic receipt"),
+        (localization, "proposal_sha256", "blocker localization"),
+    )
+    for document, hash_field, label in documents:
+        claimed = document.get(hash_field)
+        unsigned = dict(document)
+        unsigned.pop(hash_field, None)
+        if claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} hash mismatch")
+    physical_bodies, _ = _validated_collision_candidate_partition(
+        collision_candidate
+    )
+    if (
+        not isinstance(virtual_profile_sha256, str)
+        or len(virtual_profile_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in virtual_profile_sha256)
+    ):
+        raise MechanicsContractError("virtual profile SHA-256 is invalid")
+    profile_hash = virtual_profile_sha256
+    source_bindings = diagnostic_receipt.get("source_bindings", {})
+    if (
+        localization.get("source_cartesian_request_sha256")
+        != cartesian_request.get("request_sha256")
+        or localization.get("source_diagnostic_receipt_sha256")
+        != diagnostic_receipt.get("receipt_sha256")
+        or source_bindings.get("collision_candidate_sha256")
+        != collision_candidate.get("candidate_sha256")
+        or source_bindings.get("virtual_profile_sha256") != profile_hash
+        or diagnostic_receipt.get("station_route_predicate_applied") is not True
+        or localization.get("physical_solid_blocker_pair_count") <= 0
+        or localization.get("planning_envelope_blocker_pair_count") != 0
+        or localization.get("unreviewed_blocker_pair_count") != 0
+    ):
+        raise MechanicsContractError("physical blocker experiment lineage changed")
+    for document, label in (
+        (cartesian_request, "Cartesian request"),
+        (diagnostic_receipt, "diagnostic receipt"),
+        (localization, "blocker localization"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    physical_top_z_mm = -math.inf
+    for body in physical_bodies:
+        for primitive in body["primitives"]:
+            if primitive.get("kind") != "oriented_box":
+                raise MechanicsContractError("physical workcell primitive must be a box")
+            center = primitive.get("center_mm")
+            half = primitive.get("half_extents_mm")
+            rotation = primitive.get("rotation_row_major")
+            if (
+                not isinstance(center, list)
+                or len(center) != 3
+                or not isinstance(half, list)
+                or len(half) != 3
+                or not isinstance(rotation, list)
+                or len(rotation) != 9
+            ):
+                raise MechanicsContractError(
+                    "physical workcell box geometry is invalid: "
+                    f"center={type(center).__name__}/"
+                    f"{len(center) if isinstance(center, list) else 'NA'}, "
+                    f"half={type(half).__name__}/"
+                    f"{len(half) if isinstance(half, list) else 'NA'}, "
+                    f"rotation={type(rotation).__name__}/"
+                    f"{len(rotation) if isinstance(rotation, list) else 'NA'}"
+                )
+            center_z = _finite_number(center[2], "physical box center z")
+            half_values = [_finite_number(value, "physical box half extent") for value in half]
+            rotation_values = [_finite_number(value, "physical box rotation") for value in rotation]
+            world_z_extent = sum(
+                abs(rotation_values[6 + axis]) * half_values[axis]
+                for axis in range(3)
+            )
+            physical_top_z_mm = max(physical_top_z_mm, center_z + world_z_extent)
+
+    transit_sequences: set[int] = set()
+    endpoint_pairs: set[tuple[str, str]] = set()
+    blocker_summaries = []
+    for blocker in localization.get("blocker_localizations", []):
+        pair = blocker.get("body_pair")
+        samples = blocker.get("samples")
+        if not isinstance(pair, list) or len(pair) != 2 or not isinstance(samples, list):
+            raise MechanicsContractError("physical blocker localization is invalid")
+        transit = sorted({
+            sample["cartesian_sequence"] for sample in samples
+            if sample.get("phase") == "TRANSIT"
+        })
+        endpoint_phases = sorted({
+            sample.get("phase") for sample in samples
+            if sample.get("phase") in {"CONTACT", "HOVER", "RETRACT"}
+        })
+        transit_sequences.update(transit)
+        if endpoint_phases:
+            endpoint_pairs.add((pair[0], pair[1]))
+        blocker_summaries.append({
+            "body_pair": pair,
+            "sample_count": blocker.get("sample_count"),
+            "transit_cartesian_sequences": transit,
+            "endpoint_phases": endpoint_phases,
+            "experiment_class": (
+                "TRANSIT_LIFT_AND_ENDPOINT_GEOMETRY"
+                if transit and endpoint_phases
+                else "TRANSIT_LIFT_ONLY"
+                if transit
+                else "ENDPOINT_GEOMETRY_ONLY"
+            ),
+        })
+
+    placement = virtual_profile.get("study_input", {}).get(
+        "physical_placement_input", {}
+    )
+    result: dict[str, Any] = {
+        "schema": PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION",
+        "source_cartesian_request_sha256": cartesian_request["request_sha256"],
+        "source_collision_candidate_sha256": collision_candidate["candidate_sha256"],
+        "source_diagnostic_receipt_sha256": diagnostic_receipt["receipt_sha256"],
+        "source_localization_sha256": localization["proposal_sha256"],
+        "source_virtual_profile_sha256": profile_hash,
+        "source_placement_classification": virtual_profile.get("status"),
+        "source_study_input_id": virtual_profile.get("study_input", {}).get(
+            "study_input_id"
+        ),
+        "source_robot_placement_matrix_row_major": placement.get(
+            "matrix_row_major"
+        ),
+        "physical_workcell_top_z_mm": physical_top_z_mm,
+        "clearance_margin_mm": margin,
+        "proposed_transit_z_mm": physical_top_z_mm + margin,
+        "transit_lift_cartesian_sequences": sorted(transit_sequences),
+        "endpoint_geometry_body_pairs": [list(pair) for pair in sorted(endpoint_pairs)],
+        "blocker_experiments": blocker_summaries,
+        "placement_hypothesis_required": True,
+        "route_variant_applied": False,
+        "collision_geometry_changed": False,
+        "installed_profile_eligible": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "source_robot_placement_is_an_unmeasured_sensitivity_overlay",
+            "clearance_margin_is_an_explicit_simulation_hypothesis_not_a_physical_allowance",
+            "transit_lift_does_not_resolve_contact_hover_or_retract_geometry",
+            "no_collision_solid_is_removed_or_resized",
+        ],
+    }
+    result["plan_sha256"] = _canonical_sha256(result)
     return result
 
 
@@ -3037,6 +3216,13 @@ def main() -> int:
             "physical workcell solids"
         ),
     )
+    parser.add_argument(
+        "--plan-physical-blocker-experiment",
+        action="store_true",
+        help="classify retained physical blockers before generating variants",
+    )
+    parser.add_argument("--blocker-localization", type=Path)
+    parser.add_argument("--clearance-margin-mm", type=float)
     parser.add_argument("--target-station-bindings", type=Path)
     parser.add_argument("--accept-collision-pair-policy", action="store_true")
     parser.add_argument("--collision-pair-policy-proposal", type=Path)
@@ -3066,6 +3252,7 @@ def main() -> int:
         if (
             not args.localize_collision_blockers
             and not args.build_station_route_predicate
+            and not args.plan_physical_blocker_experiment
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -3081,6 +3268,7 @@ def main() -> int:
             not args.run_collision_diagnostic
             and not args.propose_collision_pair_policy
             and not args.build_station_route_predicate
+            and not args.plan_physical_blocker_experiment
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -3099,7 +3287,53 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.build_station_route_predicate:
+        if args.plan_physical_blocker_experiment:
+            required = (
+                args.cartesian_request,
+                args.collision_candidate,
+                args.collision_diagnostic_receipt,
+                args.blocker_localization,
+                args.virtual_profile,
+                args.clearance_margin_mm,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "physical blocker experiment planning requires --cartesian-request, "
+                    "--collision-candidate, --collision-diagnostic-receipt, "
+                    "--blocker-localization, --virtual-profile, and "
+                    "--clearance-margin-mm"
+                )
+            if any((
+                args.build_station_route_predicate,
+                args.localize_collision_blockers,
+                args.accept_collision_pair_policy,
+                args.bind_collision_pair_policy,
+                args.propose_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.ik_receipt is not None,
+                args.ik_source_bundle is not None,
+            )):
+                raise MechanicsContractError(
+                    "physical blocker experiment planning is mutually exclusive "
+                    "with other modes"
+                )
+            virtual_profile_bytes = args.virtual_profile.resolve(strict=True).read_bytes()
+            result = build_physical_blocker_experiment_plan(
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.collision_diagnostic_receipt.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.blocker_localization.resolve(strict=True).read_bytes()),
+                json.loads(virtual_profile_bytes),
+                clearance_margin_mm=args.clearance_margin_mm,
+                virtual_profile_sha256=hashlib.sha256(
+                    virtual_profile_bytes
+                ).hexdigest(),
+            )
+        elif args.build_station_route_predicate:
             if (
                 args.cartesian_request is None
                 or args.collision_candidate is None
@@ -3322,7 +3556,8 @@ def main() -> int:
                     result.get(
                         "proposal_sha256",
                         result.get(
-                            "policy_sha256", result.get("predicate_sha256")
+                            "policy_sha256",
+                            result.get("predicate_sha256", result.get("plan_sha256")),
                         ),
                     ),
                 ),
@@ -3340,6 +3575,8 @@ def main() -> int:
             status_record["policy_sha256"] = result["policy_sha256"]
         if "predicate_sha256" in result:
             status_record["predicate_sha256"] = result["predicate_sha256"]
+        if "plan_sha256" in result:
+            status_record["plan_sha256"] = result["plan_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -3352,6 +3589,7 @@ def main() -> int:
             "REVIEW_REQUIRED_COLLISION_PAIR_POLICY",
             "REVIEW_REQUIRED_COLLISION_BLOCKER_REMEDIATION",
             "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY",
+            "READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({

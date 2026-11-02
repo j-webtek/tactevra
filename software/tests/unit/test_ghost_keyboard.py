@@ -702,6 +702,106 @@ def test_station_route_predicate_separates_regions_from_physical_solids():
         )
 
 
+def test_physical_blocker_plan_separates_transit_and_endpoint_experiments():
+    mechanics=_load_key_mechanics()
+    identity=[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]
+    def body(body_id,center,half):
+        return {'body_id':body_id,'parent_frame':'board','primitives':[{
+            'kind':'oriented_box','center_mm':center,'half_extents_mm':half,
+            'rotation_row_major':identity,
+        }]}
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'installed':False,'installed_profile_eligible':False,
+        'physical_authority':False,'hardware_write_count':0,
+        'physical_movement_count':0,'commands':[],
+        'workcell_bodies':[
+            body('workcell:board_solid',[305.0,228.5,-9.0],[305.0,228.5,9.0]),
+            body('workcell:keyboard',[242.5,158.5,10.5],[157.5,73.5,10.5]),
+            body('workcell:phone',[538.15,166.4,7.95],[38.95,82.2,3.95]),
+            body('workcell:station:keyboard_left',[172.25,168.0,17.5],[92.25,96.0,17.5]),
+        ],
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    request={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'hardware_access':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    profile={
+        'status':'UNMEASURED_SENSITIVITY_OVERLAY',
+        'study_input':{
+            'study_input_id':'reach-test',
+            'physical_placement_input':{'matrix_row_major':[
+                1.0,0.0,0.0,385.0,0.0,1.0,0.0,532.0,
+                0.0,0.0,1.0,70.1,0.0,0.0,0.0,1.0,
+            ]},
+        },
+    }
+    profile_sha256='a'*64
+    receipt={
+        'station_route_predicate_applied':True,
+        'source_bindings':{
+            'collision_candidate_sha256':candidate['candidate_sha256'],
+            'virtual_profile_sha256':profile_sha256,
+        },
+        'hardware_access':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    localization={
+        'source_cartesian_request_sha256':request['request_sha256'],
+        'source_diagnostic_receipt_sha256':receipt['receipt_sha256'],
+        'physical_solid_blocker_pair_count':2,
+        'planning_envelope_blocker_pair_count':0,
+        'unreviewed_blocker_pair_count':0,
+        'blocker_localizations':[
+            {
+                'body_pair':['robot:gripper','workcell:keyboard'],
+                'sample_count':2,
+                'samples':[
+                    {'phase':'CONTACT','cartesian_sequence':3},
+                    {'phase':'TRANSIT','cartesian_sequence':4},
+                ],
+            },
+            {
+                'body_pair':['robot:link2','workcell:board_solid'],
+                'sample_count':1,
+                'samples':[{'phase':'TRANSIT','cartesian_sequence':4}],
+            },
+        ],
+        'hardware_access':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,
+    }
+    localization['proposal_sha256']=mechanics._canonical_sha256(localization)
+    plan=mechanics.build_physical_blocker_experiment_plan(
+        request,candidate,receipt,localization,profile,clearance_margin_mm=49.0,
+        virtual_profile_sha256=profile_sha256,
+    )
+    assert plan['status']=='READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION'
+    assert plan['physical_workcell_top_z_mm']==pytest.approx(21.0)
+    assert plan['proposed_transit_z_mm']==pytest.approx(70.0)
+    assert plan['transit_lift_cartesian_sequences']==[4]
+    assert plan['endpoint_geometry_body_pairs']==[
+        ['robot:gripper','workcell:keyboard']
+    ]
+    assert [item['experiment_class'] for item in plan['blocker_experiments']]==[
+        'TRANSIT_LIFT_AND_ENDPOINT_GEOMETRY','TRANSIT_LIFT_ONLY',
+    ]
+    assert plan['route_variant_applied'] is False
+    assert plan['collision_geometry_changed'] is False
+    assert plan['hardware_access'] is plan['physical_authority'] is False
+    unsigned={key:value for key,value in plan.items() if key!='plan_sha256'}
+    assert plan['plan_sha256']==mechanics._canonical_sha256(unsigned)
+    with pytest.raises(mechanics.MechanicsContractError,match='within'):
+        mechanics.build_physical_blocker_experiment_plan(
+            request,candidate,receipt,localization,profile,
+            clearance_margin_mm=0.0,
+            virtual_profile_sha256=profile_sha256,
+        )
+
+
 def test_collision_blockers_localize_to_retained_cartesian_context():
     mechanics=_load_key_mechanics()
     cartesian={
