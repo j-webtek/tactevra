@@ -1029,6 +1029,40 @@ $env:OMNI_KIT_ACCEPT_EULA = 'YES'
   --status-output C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-diagnostic-001\status.json
 ```
 
+ARM-194 localizes every remaining blocker back to the exact bounded replay
+sample and its source Cartesian phase, action, target, and expected TCP pose.
+The unapplied report at
+`C:\IsaacSim\artifacts\issue190\lm1-h-collision-blocker-localization-001\proposal.json`
+has canonical SHA-256
+`8a3c8bb8df99c22383efb618d43f9d0e32b9f8aec443ce9525ef5393f2a0198b`.
+It covers all 149 bounded samples and all 13 blockers: seven physical-solid
+pairs involving the gripper and links 2 through 5, and six station-envelope
+pairs involving the gripper, link 4, link 5, and the left/right keyboard
+regions. No blocker is unreviewed. Most observations occur during `TRANSIT`;
+station-envelope blockers are concentrated around the `H` and `1` portions,
+while board-solid blockers continue into the later `1` and `PERIOD` portions.
+
+This is a diagnosis, not a clearance result. It changes no collision geometry,
+route, pair policy, or authority. The next correction must keep the two classes
+separate: refine the conservative robot-link geometry for physical-solid
+overlaps, and move station envelopes out of PhysX solid semantics while adding
+an explicit route predicate for them. Both changes then require a fresh native
+diagnostic with the same lineage checks.
+
+Reproduce the localization report without starting Isaac or touching hardware:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-collision-blocker-localization-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --localize-collision-blockers `
+  --collision-diagnostic-receipt C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-diagnostic-001\receipt.json `
+  --collision-request C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\request.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --output "$artifactDir\proposal.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
