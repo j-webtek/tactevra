@@ -681,6 +681,62 @@ def test_collision_blockers_localize_to_retained_cartesian_context():
     unsigned={key:value for key,value in proposal.items() if key!='proposal_sha256'}
     assert proposal['proposal_sha256']==mechanics._canonical_sha256(unsigned)
 
+    receipt['schema']='tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v3'
+    receipt['source_bindings']['collision_candidate_sha256']='candidate-sha'
+    for index,sample in enumerate(receipt['samples']):
+        primitive_pairs=[]
+        if index < 2:
+            primitive_pairs.append({
+                'body_pair':physical,'primitive_indices':[0,0],
+            })
+        if index > 0:
+            primitive_pairs.append({
+                'body_pair':planning,'primitive_indices':[1,0],
+            })
+        sample['raw_collision_primitive_pair_count']=len(primitive_pairs)
+        sample['raw_collision_primitive_pairs']=primitive_pairs
+        sample['raw_collision_pairs']=[
+            item['body_pair'] for item in primitive_pairs
+        ]
+    receipt['unique_collision_primitive_pair_count']=2
+    receipt['unique_collision_primitive_pairs']=[
+        {'body_pair':physical,'primitive_indices':[0,0]},
+        {'body_pair':planning,'primitive_indices':[1,0]},
+    ]
+    receipt['primitive_pair_observations']=[
+        {
+            'body_pair':physical,'primitive_indices':[0,0],
+            'sample_count':2,'persistent_across_all_samples':False,
+        },
+        {
+            'body_pair':planning,'primitive_indices':[1,0],
+            'sample_count':2,'persistent_across_all_samples':False,
+        },
+    ]
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    attributed=mechanics.build_collision_blocker_localization(
+        receipt,request,cartesian,
+    )
+    assert attributed['primitive_attribution_available'] is True
+    assert attributed['localized_blocker_primitive_pair_count']==2
+    assert attributed['source_collision_candidate_sha256']=='candidate-sha'
+    attributed_rows={
+        tuple(row['body_pair']):row
+        for row in attributed['blocker_localizations']
+    }
+    assert attributed_rows[tuple(physical)]['primitive_localizations']==[{
+        'primitive_indices':[0,0],
+        'sample_count':2,
+        'sample_sequence_ranges':[{'start':0,'end':1}],
+    }]
+    assert attributed_rows[tuple(planning)]['primitive_localizations']==[{
+        'primitive_indices':[1,0],
+        'sample_count':2,
+        'sample_sequence_ranges':[{'start':1,'end':2}],
+    }]
+
     receipt['samples'][0]['source_segment_index']=1
     receipt['receipt_sha256']=mechanics._canonical_sha256({
         key:value for key,value in receipt.items() if key!='receipt_sha256'

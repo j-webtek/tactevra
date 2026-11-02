@@ -393,6 +393,31 @@ predicate. Only a fresh policy-bound native replay may show whether either
 correction cleared its blocker class. Installed attachment coverage and
 continuous-segment screening remain later prerequisites.
 
+ARM-195 extends the exact same native replay with primitive-level attribution.
+The external v3 receipt at
+`C:\IsaacSim\artifacts\issue190\lm1-h-primitive-attributed-collision-diagnostic-001\receipt.json`
+has canonical SHA-256
+`7f3941b7e6538d57bdb8cdfd2fa74da05973eb8649901a746f0ca0f2f44a3741`.
+It preserves the body-level result exactly: 149 samples, 18 raw pairs, five
+accepted adjacent-link reporting exclusions, seven physical-solid blockers,
+six planning-envelope blockers, and zero unreviewed pairs. Its additive v3
+evidence identifies 27 raw primitive pairs. The derived unapplied report at
+`C:\IsaacSim\artifacts\issue190\lm1-h-primitive-blocker-localization-001\proposal.json`
+has canonical SHA-256
+`c1050eea1c9f049629f7126a2d1d7b0371b4653edd53faa7ff31ad832e4325a7`
+and attributes the 13 blocker body pairs to 20 blocker primitive pairs and
+their exact sample ranges.
+
+Every primitive belonging to an implicated multi-box robot body participates:
+both link 2 boxes, all four link 3 boxes, and both link 4 boxes. Link 5 and the
+gripper each currently have one box, and each participates as well. The
+evidence therefore rejects a simple stray-primitive deletion. The next
+physical-solid experiment must source-preservingly refine the entire
+conservative body representation, beginning with link 5's whole-link fallback
+box, then rerun the same hash-bound diagnostic. Station-envelope semantics
+remain a separate explicit route-predicate change. ARM-195 changes no geometry,
+route, policy, authority, or gate and grants no hardware action.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;

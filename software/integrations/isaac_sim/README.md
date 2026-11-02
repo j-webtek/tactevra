@@ -1063,6 +1063,66 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
+ARM-195 adds primitive-level attribution without changing the accepted pair
+policy, trajectory, collision geometry, or body-level result. The native Isaac
+6.1 v3 receipt at
+`C:\IsaacSim\artifacts\issue190\lm1-h-primitive-attributed-collision-diagnostic-001\receipt.json`
+has canonical SHA-256
+`7f3941b7e6538d57bdb8cdfd2fa74da05973eb8649901a746f0ca0f2f44a3741`
+and file SHA-256
+`b637848377a9b234eef42052104479f023094f023c5ccd669dfda32c146b68ce`.
+It retains the same 149 samples, 18 raw body pairs, five accepted adjacent-link
+reporting exclusions, seven physical-solid blockers, six planning-envelope
+route blockers, and zero unreviewed pairs. It additionally identifies 27 raw
+primitive pairs.
+
+The corresponding unapplied localization report at
+`C:\IsaacSim\artifacts\issue190\lm1-h-primitive-blocker-localization-001\proposal.json`
+has canonical SHA-256
+`c1050eea1c9f049629f7126a2d1d7b0371b4653edd53faa7ff31ad832e4325a7`
+and file SHA-256
+`b80122b2031c709227c95e8e67f4c67ba9f650dbc6fc8764d91808fbc1e616ca`.
+It resolves the 13 blocker body pairs into 20 blocker primitive pairs with
+exact sample ranges. Both boxes for link 2, all four boxes for link 3, both
+boxes for link 4, and the single boxes for link 5 and the gripper participate
+in at least one blocker. Therefore the evidence does not justify deleting an
+isolated primitive. The next physical-geometry experiment must refine the
+whole conservative representation while preserving source-mesh containment,
+starting with link 5's whole-link fallback box. Moving station planning
+envelopes out of PhysX-solid semantics remains a separate route-predicate
+experiment.
+
+Reproduce the primitive-attributed replay and localization with zero hardware
+authority:
+
+```powershell
+$env:PYTHONPATH = 'C:\icq7\software\src'
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --run-collision-diagnostic `
+  --collision-request C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\request.json `
+  --accepted-collision-pair-policy C:\IsaacSim\artifacts\issue190\lm1-h-collision-pair-policy-001\policy.json `
+  --ik-receipt C:\IsaacSim\artifacts\issue190\lm1-h-ik-screen-001\receipt.json `
+  --collision-candidate C:\IsaacSim\evidence\issue190\simulation_program\collision_candidate_v1.json `
+  --virtual-profile software\config\virtual_commissioning_profile.json `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --import-receipt C:\IsaacSim\evidence\urdf_import_003.json `
+  --output C:\IsaacSim\artifacts\issue190\lm1-h-primitive-attributed-collision-diagnostic-001\receipt.json `
+  --status-output C:\IsaacSim\artifacts\issue190\lm1-h-primitive-attributed-collision-diagnostic-001\status.json
+
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\lm1-h-primitive-blocker-localization-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --localize-collision-blockers `
+  --collision-diagnostic-receipt C:\IsaacSim\artifacts\issue190\lm1-h-primitive-attributed-collision-diagnostic-001\receipt.json `
+  --collision-request C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-request-001\request.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --output "$artifactDir\proposal.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

@@ -33,6 +33,9 @@ TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
 TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v2"
 )
+TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v3"
+)
 TCP_COLLISION_POLICY_SCHEMA = "tactevra.isaac_lm1_collision_pair_policy.v1"
 TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2"
@@ -1343,10 +1346,15 @@ def run_robot_tcp_collision_diagnostic(
         prim_by_name: dict[str, Any] = {}
         for prim in stage.Traverse():
             prim_by_name.setdefault(prim.GetName(), prim)
-        collision_path_to_body: dict[str, str] = {}
-        query_paths: list[tuple[str, str]] = []
+        collision_path_to_primitive: dict[str, tuple[str, int]] = {}
+        query_paths: list[tuple[str, str, int]] = []
 
-        def author_box(path: str, body_id: str, primitive: dict[str, Any]) -> None:
+        def author_box(
+            path: str,
+            body_id: str,
+            primitive_index: int,
+            primitive: dict[str, Any],
+        ) -> None:
             cube = UsdGeom.Cube.Define(stage, path)
             cube.CreateSizeAttr(1.0)
             xform = UsdGeom.Xformable(cube)
@@ -1355,7 +1363,7 @@ def run_robot_tcp_collision_diagnostic(
             xform.AddTranslateOp().Set(Gf.Vec3d(*(value / 1000.0 for value in center)))
             xform.AddScaleOp().Set(Gf.Vec3d(*(2.0 * value / 1000.0 for value in half)))
             UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
-            collision_path_to_body[path] = body_id
+            collision_path_to_primitive[path] = (body_id, primitive_index)
 
         for body_index, body in enumerate(collision_candidate["robot_bodies"]):
             parent = prim_by_name.get(body["parent_frame"])
@@ -1367,8 +1375,8 @@ def run_robot_tcp_collision_diagnostic(
             UsdGeom.Xform.Define(stage, root)
             for primitive_index, primitive in enumerate(body["primitives"]):
                 path = f"{root}/box_{primitive_index:02d}"
-                author_box(path, body["body_id"], primitive)
-                query_paths.append((path, body["body_id"]))
+                author_box(path, body["body_id"], primitive_index, primitive)
+                query_paths.append((path, body["body_id"], primitive_index))
 
         workcell_root = "/TactevraCollisionDiagnostic/Workcell"
         UsdGeom.Xform.Define(stage, workcell_root)
@@ -1377,7 +1385,7 @@ def run_robot_tcp_collision_diagnostic(
             UsdGeom.Xform.Define(stage, root)
             for primitive_index, primitive in enumerate(body["primitives"]):
                 path = f"{root}/box_{primitive_index:02d}"
-                author_box(path, body["body_id"], primitive)
+                author_box(path, body["body_id"], primitive_index, primitive)
 
         SimulationManager.initialize_physics()
         for _ in range(10):
@@ -1399,6 +1407,9 @@ def run_robot_tcp_collision_diagnostic(
         scene_query = get_physx_scene_query_interface()
         observed_samples = []
         all_pairs: set[tuple[str, str]] = set()
+        all_primitive_pairs: set[
+            tuple[tuple[str, int], tuple[str, int]]
+        ] = set()
         for sample in request["bounded_samples"]:
             desired = [
                 sample["joint_positions_rad"][name] for name in request["joint_order"]
@@ -1407,24 +1418,32 @@ def run_robot_tcp_collision_diagnostic(
             articulation.set_dof_positions([desired])
             app.update()
             sample_pairs: set[tuple[str, str]] = set()
-            for query_path, query_body in query_paths:
-                hits: list[str] = []
+            sample_primitive_pairs: set[
+                tuple[tuple[str, int], tuple[str, int]]
+            ] = set()
+            for query_path, query_body, query_primitive_index in query_paths:
+                hits: list[tuple[str, int]] = []
 
                 def report_hit(hit: Any) -> bool:
                     collision_path = str(getattr(hit, "collision", ""))
                     rigid_path = str(getattr(hit, "rigid_body", ""))
-                    other = collision_path_to_body.get(collision_path)
+                    other = collision_path_to_primitive.get(collision_path)
                     if other is None:
-                        other = collision_path_to_body.get(rigid_path)
-                    if other is not None and other != query_body:
+                        other = collision_path_to_primitive.get(rigid_path)
+                    if other is not None and other[0] != query_body:
                         hits.append(other)
                     return True
 
                 encoded = PhysicsSchemaTools.encodeSdfPath(query_path)
                 scene_query.overlap_shape(encoded[0], encoded[1], report_hit, False)
-                for other_body in hits:
+                for other_body, other_primitive_index in hits:
                     sample_pairs.add(tuple(sorted((query_body, other_body))))
+                    sample_primitive_pairs.add(tuple(sorted((
+                        (query_body, query_primitive_index),
+                        (other_body, other_primitive_index),
+                    ))))
             all_pairs.update(sample_pairs)
+            all_primitive_pairs.update(sample_primitive_pairs)
             observed_samples.append({
                 "sample_sequence": sample["sample_sequence"],
                 "sample_id": sample["sample_id"],
@@ -1432,6 +1451,14 @@ def run_robot_tcp_collision_diagnostic(
                 "joint_positions_rad": sample["joint_positions_rad"],
                 "collision_pair_count": len(sample_pairs),
                 "collision_pairs": [list(pair) for pair in sorted(sample_pairs)],
+                "collision_primitive_pair_count": len(sample_primitive_pairs),
+                "collision_primitive_pairs": [
+                    {
+                        "body_pair": [item[0] for item in pair],
+                        "primitive_indices": [item[1] for item in pair],
+                    }
+                    for pair in sorted(sample_primitive_pairs)
+                ],
             })
         timeline.stop()
 
@@ -1479,6 +1506,12 @@ def run_robot_tcp_collision_diagnostic(
                     "collision_pair_count"
                 )
                 sample["raw_collision_pairs"] = sample.pop("collision_pairs")
+                sample["raw_collision_primitive_pair_count"] = sample.pop(
+                    "collision_primitive_pair_count"
+                )
+                sample["raw_collision_primitive_pairs"] = sample.pop(
+                    "collision_primitive_pairs"
+                )
                 sample["policy_excluded_pair_count"] = len(
                     raw_pairs & accepted_exclusion_pairs
                 )
@@ -1533,10 +1566,37 @@ def run_robot_tcp_collision_diagnostic(
             }
             for pair in sorted(all_pairs)
         ]
+        primitive_pair_sample_counts = {
+            pair: sum(
+                any(
+                    tuple(zip(
+                        item["body_pair"], item["primitive_indices"], strict=True
+                    )) == pair
+                    for item in sample[
+                        "raw_collision_primitive_pairs"
+                        if accepted_pair_policy is not None
+                        else "collision_primitive_pairs"
+                    ]
+                )
+                for sample in observed_samples
+            )
+            for pair in all_primitive_pairs
+        }
+        primitive_pair_observations = [
+            {
+                "body_pair": [item[0] for item in pair],
+                "primitive_indices": [item[1] for item in pair],
+                "sample_count": primitive_pair_sample_counts[pair],
+                "persistent_across_all_samples": (
+                    primitive_pair_sample_counts[pair] == len(observed_samples)
+                ),
+            }
+            for pair in sorted(all_primitive_pairs)
+        ]
 
         receipt: dict[str, Any] = {
             "schema": (
-                TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if accepted_pair_policy is not None
                 else TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
             ),
@@ -1575,6 +1635,15 @@ def run_robot_tcp_collision_diagnostic(
             "unique_collision_pair_count": len(all_pairs),
             "unique_collision_pairs": [list(pair) for pair in sorted(all_pairs)],
             "pair_observations": pair_observations,
+            "unique_collision_primitive_pair_count": len(all_primitive_pairs),
+            "unique_collision_primitive_pairs": [
+                {
+                    "body_pair": [item[0] for item in pair],
+                    "primitive_indices": [item[1] for item in pair],
+                }
+                for pair in sorted(all_primitive_pairs)
+            ],
+            "primitive_pair_observations": primitive_pair_observations,
             "samples": observed_samples,
             "collision_screening_executed": True,
             "installed_collision_qualified": False,
@@ -1967,8 +2036,10 @@ def build_collision_blocker_localization(
             raise MechanicsContractError(f"{label} hash mismatch")
         claimed_hashes[label] = claimed
     if (
-        diagnostic_receipt.get("schema")
-        != TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+        diagnostic_receipt.get("schema") not in {
+            TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        }
         or diagnostic_receipt.get("status") != "DIAGNOSTIC_BLOCKERS_OBSERVED"
         or diagnostic_receipt.get("collision_pair_policy_applied") is not True
         or diagnostic_receipt.get("installed_collision_qualified") is not False
@@ -2014,6 +2085,13 @@ def build_collision_blocker_localization(
 
     pair_samples: dict[tuple[str, str], list[dict[str, Any]]] = {}
     pair_classes: dict[tuple[str, str], str] = {}
+    primitive_attribution = (
+        diagnostic_receipt["schema"]
+        == TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+    )
+    pair_primitive_samples: dict[
+        tuple[str, str], dict[tuple[int, int], list[int]]
+    ] = {}
     for sequence, (bounded, observed) in enumerate(zip(
         bounded_samples, observed_samples, strict=True
     )):
@@ -2041,6 +2119,53 @@ def build_collision_blocker_localization(
                 raise MechanicsContractError("Cartesian sample context is incomplete")
         if context["sequence"] != segment_index:
             raise MechanicsContractError("Cartesian sample sequence differs")
+        if primitive_attribution:
+            primitive_pairs = observed.get("raw_collision_primitive_pairs")
+            raw_body_pairs = observed.get("raw_collision_pairs")
+            if (
+                not isinstance(primitive_pairs, list)
+                or observed.get("raw_collision_primitive_pair_count")
+                != len(primitive_pairs)
+                or not isinstance(raw_body_pairs, list)
+            ):
+                raise MechanicsContractError(
+                    "diagnostic primitive attribution coverage differs"
+                )
+            seen_primitive_pairs: set[
+                tuple[tuple[str, str], tuple[int, int]]
+            ] = set()
+            for primitive_pair in primitive_pairs:
+                body_pair = primitive_pair.get("body_pair")
+                indices = primitive_pair.get("primitive_indices")
+                if (
+                    not isinstance(body_pair, list)
+                    or len(body_pair) != 2
+                    or body_pair != sorted(body_pair)
+                    or not isinstance(indices, list)
+                    or len(indices) != 2
+                    or any(
+                        not isinstance(value, int)
+                        or isinstance(value, bool)
+                        or value < 0
+                        for value in indices
+                    )
+                ):
+                    raise MechanicsContractError(
+                        "diagnostic primitive attribution is invalid"
+                    )
+                key = (tuple(body_pair), tuple(indices))
+                if body_pair not in raw_body_pairs:
+                    raise MechanicsContractError(
+                        "primitive attribution lacks its body-pair observation"
+                    )
+                if key in seen_primitive_pairs:
+                    raise MechanicsContractError(
+                        "diagnostic sample duplicates a primitive pair"
+                    )
+                seen_primitive_pairs.add(key)
+                pair_primitive_samples.setdefault(tuple(body_pair), {}).setdefault(
+                    tuple(indices), []
+                ).append(sequence)
         for field, blocker_class in (
             ("physical_solid_blocker_pairs", "PHYSICAL_SOLID_COLLISION_BLOCKER"),
             ("planning_envelope_blocker_pairs", "PLANNING_ENVELOPE_ROUTE_BLOCKER"),
@@ -2094,6 +2219,62 @@ def build_collision_blocker_localization(
             raise MechanicsContractError("diagnostic blocker summary count differs")
     if expected_pairs != pair_classes or not pair_samples:
         raise MechanicsContractError("diagnostic blocker summary and samples differ")
+    if primitive_attribution:
+        unique_primitive_pairs = diagnostic_receipt.get(
+            "unique_collision_primitive_pairs"
+        )
+        primitive_observations = diagnostic_receipt.get(
+            "primitive_pair_observations"
+        )
+        if (
+            not isinstance(unique_primitive_pairs, list)
+            or diagnostic_receipt.get("unique_collision_primitive_pair_count")
+            != len(unique_primitive_pairs)
+            or not isinstance(primitive_observations, list)
+        ):
+            raise MechanicsContractError(
+                "diagnostic primitive attribution summary differs"
+            )
+
+        def primitive_key(item: dict[str, Any]) -> tuple[tuple[str, str], tuple[int, int]]:
+            body_pair = item.get("body_pair")
+            indices = item.get("primitive_indices")
+            if (
+                not isinstance(body_pair, list)
+                or len(body_pair) != 2
+                or body_pair != sorted(body_pair)
+                or not isinstance(indices, list)
+                or len(indices) != 2
+                or any(
+                    not isinstance(value, int)
+                    or isinstance(value, bool)
+                    or value < 0
+                    for value in indices
+                )
+            ):
+                raise MechanicsContractError(
+                    "diagnostic primitive attribution summary is invalid"
+                )
+            return tuple(body_pair), tuple(indices)
+
+        derived_primitive_counts = {
+            (body_pair, indices): len(sample_sequences)
+            for body_pair, index_rows in pair_primitive_samples.items()
+            for indices, sample_sequences in index_rows.items()
+        }
+        summary_keys = [primitive_key(item) for item in unique_primitive_pairs]
+        observation_counts = {
+            primitive_key(item): item.get("sample_count")
+            for item in primitive_observations
+        }
+        if (
+            len(set(summary_keys)) != len(summary_keys)
+            or set(summary_keys) != set(derived_primitive_counts)
+            or observation_counts != derived_primitive_counts
+        ):
+            raise MechanicsContractError(
+                "diagnostic primitive attribution and samples differ"
+            )
 
     localizations = []
     for pair in sorted(pair_samples):
@@ -2106,7 +2287,23 @@ def build_collision_blocker_localization(
             target = row["target_id"] if row["target_id"] is not None else "NONE"
             target_counts[target] = target_counts.get(target, 0) + 1
         blocker_class = pair_classes[pair]
-        localizations.append({
+        primitive_localizations = [
+            {
+                "primitive_indices": list(indices),
+                "sample_count": len(sample_sequences),
+                "sample_sequence_ranges": _contiguous_integer_ranges(
+                    sample_sequences
+                ),
+            }
+            for indices, sample_sequences in sorted(
+                pair_primitive_samples.get(pair, {}).items()
+            )
+        ]
+        if primitive_attribution and not primitive_localizations:
+            raise MechanicsContractError(
+                "blocker lacks diagnostic primitive attribution"
+            )
+        localization = {
             "body_pair": list(pair),
             "blocker_class": blocker_class,
             "sample_count": len(rows),
@@ -2126,7 +2323,10 @@ def build_collision_blocker_localization(
                 if blocker_class == "PLANNING_ENVELOPE_ROUTE_BLOCKER"
                 else "REVIEW_BODY_SEMANTICS_AND_GEOMETRY_BEFORE_RERUN"
             ),
-        })
+        }
+        if primitive_attribution:
+            localization["primitive_localizations"] = primitive_localizations
+        localizations.append(localization)
 
     physical_robot_bodies = sorted({
         body for pair, blocker_class in pair_classes.items()
@@ -2183,6 +2383,16 @@ def build_collision_blocker_localization(
             "proposal_does_not_change_geometry_route_or_collision_results",
         ],
     }
+    if primitive_attribution:
+        proposal.update({
+            "source_collision_candidate_sha256": diagnostic_receipt[
+                "source_bindings"
+            ].get("collision_candidate_sha256"),
+            "primitive_attribution_available": True,
+            "localized_blocker_primitive_pair_count": sum(
+                len(item["primitive_localizations"]) for item in localizations
+            ),
+        })
     proposal["proposal_sha256"] = _canonical_sha256(proposal)
     return proposal
 
