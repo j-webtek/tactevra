@@ -1,8 +1,7 @@
 # Tactevra project status
 
-Reviewed October 31, 2026 through the ARM-172 owner-governed current-provider
-read-only intake
-acceptance boundary,
+Reviewed November 1, 2026 through the ARM-196 link 5 collision-refinement
+negative result and native oriented-box diagnostic boundary,
 the ARM-128 retained endpoint-atlas campaign,
 the ARM-126 retained service fault campaign,
 ARM-125 bounded shadow service,
