@@ -470,3 +470,78 @@ def test_robot_tcp_collision_diagnostic_admission_binds_native_inputs():
         mechanics.admit_robot_tcp_collision_diagnostic(
             request,ik,candidate,virtual_bytes,usd_bytes,import_receipt,
         )
+
+
+def test_collision_pair_policy_proposal_is_classified_but_unapplied():
+    mechanics=_load_key_mechanics()
+    robot_ids=['base_link','link1','link2','link3','link4','link5','gripper']
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'installed':False,'installed_profile_eligible':False,
+        'robot_bodies':[{'body_id':f'robot:{name}'} for name in robot_ids],
+        'workcell_bodies':[
+            {'body_id':'workcell:keyboard'},
+            {'body_id':'workcell:station:keyboard_left'},
+        ],
+        'blockers':['MOVING_CABLE_GEOMETRY_UNMEASURED'],
+        'hardware_write_count':0,'physical_movement_count':0,
+        'commands':[],'physical_authority':False,
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    pairs=[
+        ('robot:base_link','robot:link1',149),
+        ('robot:link1','robot:link2',149),
+        ('robot:link2','robot:link3',149),
+        ('robot:link3','robot:link4',149),
+        ('robot:gripper','robot:link5',149),
+        ('robot:link5','workcell:keyboard',20),
+        ('robot:link4','workcell:station:keyboard_left',21),
+    ]
+    receipt={
+        'schema':'tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v1',
+        'status':'DIAGNOSTIC_OVERLAPS_OBSERVED',
+        'source_bindings':{
+            'collision_candidate_sha256':candidate['candidate_sha256'],
+        },
+        'bounded_sample_count':149,
+        'unique_collision_pair_count':len(pairs),
+        'pair_observations':[
+            {
+                'body_pair':list(pair[:2]),'sample_count':pair[2],
+                'persistent_across_all_samples':pair[2]==149,
+            }
+            for pair in pairs
+        ],
+        'collision_screening_executed':True,
+        'installed_collision_qualified':False,
+        'continuous_collision_proven':False,
+        'gate_promotions':[],
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    proposal=mechanics.build_collision_pair_policy_proposal(receipt,candidate)
+    assert proposal['status']=='REVIEW_REQUIRED_COLLISION_PAIR_POLICY'
+    assert proposal['proposed_exclusion_count']==5
+    assert proposal['policy_applied'] is False
+    assert proposal['installed_profile_eligible'] is False
+    assert proposal['installed_collision_qualified'] is False
+    assert proposal['gate_promotions']==[]
+    dispositions={
+        tuple(row['body_pair']):row['proposed_disposition']
+        for row in proposal['pair_classifications']
+    }
+    assert dispositions[('robot:link5','workcell:keyboard')]==(
+        'PHYSICAL_SOLID_COLLISION_OBSERVATION'
+    )
+    assert dispositions[('robot:link4','workcell:station:keyboard_left')]==(
+        'PLANNING_ENVELOPE_ROUTE_BLOCKER'
+    )
+    unsigned={key:value for key,value in proposal.items() if key!='proposal_sha256'}
+    assert proposal['proposal_sha256']==mechanics._canonical_sha256(unsigned)
+
+    proposal_pair=receipt['pair_observations'][0]
+    proposal_pair['sample_count']=150
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='sample count'):
+        mechanics.build_collision_pair_policy_proposal(receipt,candidate)

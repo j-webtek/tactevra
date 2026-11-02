@@ -1448,6 +1448,139 @@ def run_robot_tcp_collision_diagnostic(
             app.close()
 
 
+def build_collision_pair_policy_proposal(
+    diagnostic_receipt: dict[str, Any],
+    collision_candidate: dict[str, Any],
+) -> dict[str, Any]:
+    """Classify retained overlaps without applying an exclusion policy."""
+    claimed_receipt_hash = diagnostic_receipt.get("receipt_sha256")
+    unsigned_receipt = dict(diagnostic_receipt)
+    unsigned_receipt.pop("receipt_sha256", None)
+    if claimed_receipt_hash != _canonical_sha256(unsigned_receipt):
+        raise MechanicsContractError("collision diagnostic receipt hash mismatch")
+    if (
+        diagnostic_receipt.get("schema") != TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+        or diagnostic_receipt.get("status") != "DIAGNOSTIC_OVERLAPS_OBSERVED"
+        or diagnostic_receipt.get("collision_screening_executed") is not True
+        or diagnostic_receipt.get("installed_collision_qualified") is not False
+        or diagnostic_receipt.get("continuous_collision_proven") is not False
+        or diagnostic_receipt.get("gate_promotions") != []
+    ):
+        raise MechanicsContractError("collision diagnostic receipt boundary changed")
+    claimed_candidate_hash = collision_candidate.get("candidate_sha256")
+    unsigned_candidate = dict(collision_candidate)
+    unsigned_candidate.pop("candidate_sha256", None)
+    if claimed_candidate_hash != _canonical_sha256(unsigned_candidate):
+        raise MechanicsContractError("pair-policy collision candidate hash mismatch")
+    if (
+        diagnostic_receipt.get("source_bindings", {}).get(
+            "collision_candidate_sha256"
+        ) != claimed_candidate_hash
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+    ):
+        raise MechanicsContractError("diagnostic and collision candidate differ")
+
+    observations = diagnostic_receipt.get("pair_observations")
+    if (
+        not isinstance(observations, list)
+        or len(observations) != diagnostic_receipt.get("unique_collision_pair_count")
+        or not observations
+    ):
+        raise MechanicsContractError("diagnostic pair observations are absent")
+    adjacent_pairs = {
+        tuple(sorted(pair)) for pair in (
+            ("robot:base_link", "robot:link1"),
+            ("robot:link1", "robot:link2"),
+            ("robot:link2", "robot:link3"),
+            ("robot:link3", "robot:link4"),
+            ("robot:link5", "robot:gripper"),
+        )
+    }
+    candidate_ids = {
+        body["body_id"]
+        for body in collision_candidate["robot_bodies"]
+        + collision_candidate["workcell_bodies"]
+    }
+    classified = []
+    seen: set[tuple[str, str]] = set()
+    for observation in observations:
+        body_pair = observation.get("body_pair")
+        if not isinstance(body_pair, list) or len(body_pair) != 2:
+            raise MechanicsContractError("diagnostic body pair is invalid")
+        pair = tuple(sorted(body_pair))
+        if pair in seen or any(body not in candidate_ids for body in pair):
+            raise MechanicsContractError("diagnostic body pair coverage is invalid")
+        seen.add(pair)
+        sample_count = observation.get("sample_count")
+        if (
+            not isinstance(sample_count, int)
+            or isinstance(sample_count, bool)
+            or sample_count < 1
+            or sample_count > diagnostic_receipt["bounded_sample_count"]
+        ):
+            raise MechanicsContractError("diagnostic pair sample count is invalid")
+        if pair in adjacent_pairs:
+            disposition = "PROPOSED_KINEMATIC_NEIGHBOR_EXCLUSION"
+            justification = "DIRECTLY_CONNECTED_URDF_BODIES"
+        elif any(body.startswith("workcell:station:") for body in pair):
+            disposition = "PLANNING_ENVELOPE_ROUTE_BLOCKER"
+            justification = "STATION_AABB_IS_A_PLANNING_ENVELOPE_NOT_A_PHYSICAL_SOLID"
+        elif any(body.startswith("workcell:") for body in pair):
+            disposition = "PHYSICAL_SOLID_COLLISION_OBSERVATION"
+            justification = "BOARD_DEVICE_OR_OTHER_PHYSICAL_WORKCELL_SOLID"
+        else:
+            disposition = "UNREVIEWED_SELF_COLLISION_OBSERVATION"
+            justification = "NONADJACENT_ROBOT_PAIR_REQUIRES_GEOMETRY_REVIEW"
+        classified.append({
+            "body_pair": list(pair),
+            "sample_count": sample_count,
+            "persistent_across_all_samples": (
+                sample_count == diagnostic_receipt["bounded_sample_count"]
+            ),
+            "proposed_disposition": disposition,
+            "justification": justification,
+        })
+    if not adjacent_pairs.issubset(seen):
+        raise MechanicsContractError("diagnostic lacks a required adjacent-link observation")
+
+    proposal: dict[str, Any] = {
+        "schema": "tactevra.isaac_lm1_collision_pair_policy_proposal.v1",
+        "status": "REVIEW_REQUIRED_COLLISION_PAIR_POLICY",
+        "source_diagnostic_receipt_sha256": claimed_receipt_hash,
+        "collision_candidate_sha256": claimed_candidate_hash,
+        "bounded_sample_count": diagnostic_receipt["bounded_sample_count"],
+        "classified_pair_count": len(classified),
+        "pair_classifications": sorted(classified, key=lambda item: item["body_pair"]),
+        "proposed_exclusion_pairs": [
+            list(pair) for pair in sorted(adjacent_pairs)
+        ],
+        "proposed_exclusion_count": len(adjacent_pairs),
+        "policy_applied": False,
+        "installed_profile_eligible": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "candidate_blockers": collision_candidate["blockers"],
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "next_required_stage": (
+            "REVIEW_PAIR_DISPOSITIONS_THEN_RERUN_NATIVE_DIAGNOSTIC_WITH_HASH_BOUND_POLICY"
+        ),
+        "limitations": [
+            "proposal_is_unapplied_and_cannot_suppress_any_collision_observation",
+            "station_envelopes_remain_route_blockers_even_when_not_physical_solids",
+            "physical_solid_observations_remain_collision_blockers",
+            "missing_candidate_geometry_and_continuous_clearance_remain_blockers",
+        ],
+    }
+    proposal["proposal_sha256"] = _canonical_sha256(proposal)
+    return proposal
+
+
 def assess_native_key_trace(
     profile: dict[str, Any],
     native_samples: Iterable[dict[str, Any]],
@@ -1704,6 +1837,12 @@ def main() -> int:
     parser.add_argument("--virtual-profile", type=Path)
     parser.add_argument("--robot-usd", type=Path)
     parser.add_argument("--import-receipt", type=Path)
+    parser.add_argument(
+        "--propose-collision-pair-policy",
+        action="store_true",
+        help="classify native overlap evidence into an unapplied review proposal",
+    )
+    parser.add_argument("--collision-diagnostic-receipt", type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -1724,7 +1863,7 @@ def main() -> int:
         request_collision_arguments = (
             args.ik_receipt, args.collision_candidate, args.toolchain_lock
         )
-        if not args.run_collision_diagnostic and any(
+        if not args.run_collision_diagnostic and not args.propose_collision_pair_policy and any(
             item is not None for item in request_collision_arguments
         ) and not all(item is not None for item in request_collision_arguments):
             raise MechanicsContractError(
@@ -1737,7 +1876,34 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.run_collision_diagnostic:
+        if args.propose_collision_pair_policy:
+            if (
+                args.collision_diagnostic_receipt is None
+                or args.collision_candidate is None
+            ):
+                raise MechanicsContractError(
+                    "pair-policy proposal requires --collision-diagnostic-receipt "
+                    "and --collision-candidate"
+                )
+            conflicting = (
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.cartesian_request is not None,
+                args.ik_receipt is not None,
+                args.toolchain_lock is not None,
+            )
+            if any(conflicting):
+                raise MechanicsContractError(
+                    "pair-policy proposal is mutually exclusive with execution modes"
+                )
+            result = build_collision_pair_policy_proposal(
+                json.loads(
+                    args.collision_diagnostic_receipt.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+            )
+        elif args.run_collision_diagnostic:
             native_arguments = (
                 args.collision_request,
                 args.ik_receipt,
@@ -1806,19 +1972,28 @@ def main() -> int:
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         evidence_sha256 = result.get(
             "receipt_sha256",
-            result.get("binding_sha256", result.get("request_sha256")),
+            result.get(
+                "binding_sha256",
+                result.get("request_sha256", result.get("proposal_sha256")),
+            ),
         )
         if not isinstance(evidence_sha256, str):
             raise MechanicsContractError("result lacks an evidence digest")
-        args.status_output.write_text(json.dumps({
+        status_record = {
             "status": result["status"],
             "receipt_sha256": evidence_sha256,
-        }, sort_keys=True) + "\n", encoding="utf-8")
+        }
+        if "proposal_sha256" in result:
+            status_record["proposal_sha256"] = result["proposal_sha256"]
+        args.status_output.write_text(
+            json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
+        )
         return 0 if result["status"] in {
             "PASS", "READY_FOR_DRIVE_CONTROLLED_NATIVE_REPLAY",
             "READY_FOR_IK_QUALIFICATION", "READY_FOR_COLLISION_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC",
             "DIAGNOSTIC_OVERLAPS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED",
+            "REVIEW_REQUIRED_COLLISION_PAIR_POLICY",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({
