@@ -594,6 +594,114 @@ def test_collision_pair_policy_proposal_is_classified_but_unapplied():
         mechanics.build_collision_pair_policy_proposal(receipt,candidate)
 
 
+def test_station_route_predicate_separates_regions_from_physical_solids():
+    mechanics=_load_key_mechanics()
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'installed':False,'installed_profile_eligible':False,
+        'physical_authority':False,'hardware_write_count':0,
+        'physical_movement_count':0,'commands':[],
+        'workcell_bodies':[],
+    }
+    identity=[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]
+    def body(body_id,center,half):
+        return {
+            'body_id':body_id,'parent_frame':'board','primitives':[{
+                'kind':'oriented_box','center_mm':center,
+                'half_extents_mm':half,'rotation_row_major':identity,
+            }],
+        }
+    candidate['workcell_bodies']=[
+        body('workcell:board_solid',[305.0,228.5,-9.0],[305.0,228.5,9.0]),
+        body('workcell:keyboard',[242.5,158.5,10.5],[157.5,73.5,10.5]),
+        body('workcell:phone',[538.15,166.4,7.95],[38.95,82.2,3.95]),
+        body('workcell:station:keyboard_left',[172.25,168.0,17.5],[92.25,96.0,17.5]),
+        body('workcell:station:keyboard_right',[323.75,168.0,17.5],[81.25,96.0,17.5]),
+        body('workcell:station:phone_tcp',[504.15,166.4,17.5],[93.15,86.4,17.5]),
+    ]
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    samples=[
+        {'sequence':0,'action_index':None,'phase':'PARK','target_id':None,
+         'phase_endpoint':True,'expected_tool_tip_board_mm':[290.0,10.0,70.0]},
+        {'sequence':1,'action_index':0,'phase':'TRANSIT','target_id':'H',
+         'phase_endpoint':False,'expected_tool_tip_board_mm':[230.0,100.0,40.0]},
+        {'sequence':2,'action_index':0,'phase':'HOVER','target_id':'H',
+         'phase_endpoint':True,'expected_tool_tip_board_mm':[216.55,154.0,26.0]},
+        {'sequence':3,'action_index':0,'phase':'CONTACT','target_id':'H',
+         'phase_endpoint':True,'expected_tool_tip_board_mm':[216.55,154.0,18.3]},
+        {'sequence':4,'action_index':1,'phase':'CONTACT','target_id':'PERIOD',
+         'phase_endpoint':True,'expected_tool_tip_board_mm':[283.2,133.0,21.0]},
+    ]
+    request={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'status':'READY_FOR_IK_QUALIFICATION','sample_count':len(samples),
+        'samples':samples,'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    result=mechanics.build_station_route_predicate(
+        request,candidate,{
+            'H':['workcell:station:keyboard_left'],
+            'PERIOD':['workcell:station:keyboard_right'],
+        },
+    )
+    assert result['status']=='PASS'
+    assert result['violation_count']==0
+    assert result['physical_workcell_body_ids']==[
+        'workcell:board_solid','workcell:keyboard','workcell:phone',
+    ]
+    assert result['physx_excluded_station_region_ids']==[
+        'workcell:station:keyboard_left','workcell:station:keyboard_right',
+        'workcell:station:phone_tcp',
+    ]
+    assert result['samples'][3]['occupied_station_regions']==[
+        'workcell:station:keyboard_left'
+    ]
+    assert result['samples'][4]['occupied_station_regions']==[
+        'workcell:station:keyboard_right'
+    ]
+    assert result['installed_profile_eligible'] is False
+    assert result['hardware_access'] is result['physical_authority'] is False
+    unsigned={key:value for key,value in result.items() if key!='predicate_sha256'}
+    assert result['predicate_sha256']==mechanics._canonical_sha256(unsigned)
+
+    rotated={
+        'kind':'oriented_box','center_mm':[0.0,0.0,0.0],
+        'half_extents_mm':[2.0,0.5,1.0],
+        'rotation_row_major':[
+            0.7071067811865476,-0.7071067811865476,0.0,
+            0.7071067811865476,0.7071067811865476,0.0,
+            0.0,0.0,1.0,
+        ],
+    }
+    assert mechanics._point_inside_oriented_box(
+        [1.0,1.0,0.0],rotated,label='rotated station'
+    )
+    assert not mechanics._point_inside_oriented_box(
+        [1.0,-1.0,0.0],rotated,label='rotated station'
+    )
+
+    wrong=mechanics.build_station_route_predicate(
+        request,candidate,{
+            'H':['workcell:station:keyboard_right'],
+            'PERIOD':['workcell:station:keyboard_right'],
+        },
+    )
+    assert wrong['status']=='FAIL'
+    assert wrong['violation_count']==1
+    assert wrong['samples'][3]['violations']==[
+        'CONTACT_OUTSIDE_BOUND_STATION_REGION',
+    ]
+
+    missing=dict(request)
+    missing.pop('request_sha256')
+    missing['request_sha256']=mechanics._canonical_sha256(missing)
+    with pytest.raises(mechanics.MechanicsContractError,match='coverage differs'):
+        mechanics.build_station_route_predicate(
+            missing,candidate,{'H':['workcell:station:keyboard_left']},
+        )
+
+
 def test_collision_blockers_localize_to_retained_cartesian_context():
     mechanics=_load_key_mechanics()
     cartesian={

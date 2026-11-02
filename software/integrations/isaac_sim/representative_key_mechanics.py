@@ -36,12 +36,18 @@ TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
 TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v3"
 )
+TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v4"
+)
 TCP_COLLISION_POLICY_SCHEMA = "tactevra.isaac_lm1_collision_pair_policy.v1"
 TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2"
 )
 TCP_COLLISION_BLOCKER_LOCALIZATION_SCHEMA = (
     "tactevra.isaac_lm1_collision_blocker_localization.v1"
+)
+STATION_ROUTE_PREDICATE_SCHEMA = (
+    "tactevra.isaac_lm1_station_route_predicate.v1"
 )
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -83,6 +89,245 @@ def _finite_number(value: Any, name: str) -> float:
     result = float(value)
     if not math.isfinite(result):
         raise MechanicsContractError(f"{name} must be finite")
+    return result
+
+
+def _validated_collision_candidate_partition(
+    collision_candidate: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Separate physical workcell solids from non-solid station regions."""
+    claimed_hash = collision_candidate.get("candidate_sha256")
+    unsigned = dict(collision_candidate)
+    unsigned.pop("candidate_sha256", None)
+    if claimed_hash != _canonical_sha256(unsigned):
+        raise MechanicsContractError("collision candidate hash mismatch")
+    if (
+        collision_candidate.get("schema")
+        != "tactevra.simulation_collision_candidate.v1"
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+        or collision_candidate.get("physical_authority") is not False
+        or collision_candidate.get("hardware_write_count") != 0
+        or collision_candidate.get("physical_movement_count") != 0
+        or collision_candidate.get("commands") != []
+    ):
+        raise MechanicsContractError("collision candidate boundary changed")
+    bodies = collision_candidate.get("workcell_bodies")
+    if not isinstance(bodies, list) or not bodies:
+        raise MechanicsContractError("collision candidate workcell bodies are absent")
+    physical: list[dict[str, Any]] = []
+    stations: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for body in bodies:
+        body_id = body.get("body_id") if isinstance(body, dict) else None
+        if not isinstance(body_id, str) or not body_id or body_id in seen:
+            raise MechanicsContractError("collision candidate workcell body id is invalid")
+        seen.add(body_id)
+        primitives = body.get("primitives")
+        if not isinstance(primitives, list) or not primitives:
+            raise MechanicsContractError("collision candidate workcell body lacks primitives")
+        (stations if body_id.startswith("workcell:station:") else physical).append(body)
+    required_physical = {
+        "workcell:board_solid", "workcell:keyboard", "workcell:phone",
+    }
+    if not required_physical.issubset({body["body_id"] for body in physical}):
+        raise MechanicsContractError("required physical workcell solids are absent")
+    if not stations:
+        raise MechanicsContractError("station planning regions are absent")
+    return physical, stations
+
+
+def _point_inside_oriented_box(
+    point_mm: list[float], primitive: dict[str, Any], *, label: str,
+) -> bool:
+    if primitive.get("kind") != "oriented_box":
+        raise MechanicsContractError(f"{label} must be an oriented box")
+    center = primitive.get("center_mm")
+    half = primitive.get("half_extents_mm")
+    rotation = primitive.get("rotation_row_major")
+    if (
+        not isinstance(center, list) or len(center) != 3
+        or not isinstance(half, list) or len(half) != 3
+        or not isinstance(rotation, list) or len(rotation) != 9
+    ):
+        raise MechanicsContractError(
+            f"{label} geometry is invalid: "
+            f"center={type(center).__name__}/{len(center) if isinstance(center, list) else 'NA'}, "
+            f"half={type(half).__name__}/{len(half) if isinstance(half, list) else 'NA'}, "
+            f"rotation={type(rotation).__name__}/{len(rotation) if isinstance(rotation, list) else 'NA'}"
+        )
+    center_values = [_finite_number(value, f"{label} center") for value in center]
+    half_values = [_finite_number(value, f"{label} half extent") for value in half]
+    if min(half_values) <= 0.0:
+        raise MechanicsContractError(f"{label} half extents must be positive")
+    rotation_values = [
+        _finite_number(value, f"{label} rotation") for value in rotation
+    ]
+    rows = [rotation_values[index:index + 3] for index in range(0, 9, 3)]
+    for row_index, row in enumerate(rows):
+        for other_index, other in enumerate(rows):
+            dot = sum(left * right for left, right in zip(row, other))
+            expected = 1.0 if row_index == other_index else 0.0
+            if abs(dot - expected) > 1e-6:
+                raise MechanicsContractError(f"{label} rotation must be orthonormal")
+    determinant = (
+        rotation_values[0]
+        * (
+            rotation_values[4] * rotation_values[8]
+            - rotation_values[5] * rotation_values[7]
+        )
+        - rotation_values[1]
+        * (
+            rotation_values[3] * rotation_values[8]
+            - rotation_values[5] * rotation_values[6]
+        )
+        + rotation_values[2]
+        * (
+            rotation_values[3] * rotation_values[7]
+            - rotation_values[4] * rotation_values[6]
+        )
+    )
+    if abs(determinant - 1.0) > 1e-6:
+        raise MechanicsContractError(f"{label} rotation must be right-handed")
+    offset = [point_mm[index] - center_values[index] for index in range(3)]
+    local = [
+        sum(
+            rotation_values[row_index * 3 + axis] * offset[row_index]
+            for row_index in range(3)
+        )
+        for axis in range(3)
+    ]
+    return all(abs(value) <= extent + 1e-9 for value, extent in zip(local, half_values))
+
+
+def build_station_route_predicate(
+    cartesian_request: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    target_station_bindings: dict[str, list[str]],
+) -> dict[str, Any]:
+    """Evaluate station planning regions without treating them as PhysX solids."""
+    claimed_request_hash = cartesian_request.get("request_sha256")
+    unsigned_request = dict(cartesian_request)
+    unsigned_request.pop("request_sha256", None)
+    if claimed_request_hash != _canonical_sha256(unsigned_request):
+        raise MechanicsContractError("Cartesian request hash mismatch")
+    if (
+        cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or cartesian_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or cartesian_request.get("hardware_access") is not False
+        or cartesian_request.get("controller_commands") != []
+        or cartesian_request.get("hardware_writes") != 0
+        or cartesian_request.get("physical_movements") != 0
+    ):
+        raise MechanicsContractError("Cartesian request boundary changed")
+    samples = cartesian_request.get("samples")
+    if (
+        not isinstance(samples, list) or not samples
+        or cartesian_request.get("sample_count") != len(samples)
+        or [sample.get("sequence") for sample in samples]
+        != list(range(len(samples)))
+    ):
+        raise MechanicsContractError("Cartesian request samples are invalid")
+
+    physical_bodies, station_bodies = _validated_collision_candidate_partition(
+        collision_candidate
+    )
+    station_ids = {body["body_id"] for body in station_bodies}
+    target_ids = {
+        sample.get("target_id") for sample in samples
+        if sample.get("target_id") is not None
+    }
+    if set(target_station_bindings) != target_ids:
+        raise MechanicsContractError("target-to-station binding coverage differs")
+    normalized_bindings: dict[str, list[str]] = {}
+    for target_id in sorted(target_ids):
+        if not isinstance(target_id, str) or not target_id:
+            raise MechanicsContractError("Cartesian target id is invalid")
+        bindings = target_station_bindings.get(target_id)
+        if (
+            not isinstance(bindings, list) or not bindings
+            or not all(isinstance(item, str) and item in station_ids for item in bindings)
+            or len(bindings) != len(set(bindings))
+        ):
+            raise MechanicsContractError("target-to-station binding is invalid")
+        normalized_bindings[target_id] = sorted(bindings)
+
+    evaluations = []
+    violation_count = 0
+    for sample in samples:
+        point = sample.get("expected_tool_tip_board_mm")
+        if not isinstance(point, list) or len(point) != 3:
+            raise MechanicsContractError("Cartesian sample tool-tip point is invalid")
+        point_values = [_finite_number(value, "Cartesian tool-tip point") for value in point]
+        occupied = []
+        for body in station_bodies:
+            if any(
+                _point_inside_oriented_box(
+                    point_values,
+                    primitive,
+                    label=f"station region {body['body_id']}",
+                )
+                for primitive in body["primitives"]
+            ):
+                occupied.append(body["body_id"])
+        target_id = sample.get("target_id")
+        allowed = normalized_bindings.get(target_id, [])
+        unexpected = sorted(set(occupied) - set(allowed))
+        contact_missing_bound_station = (
+            sample.get("phase") == "CONTACT"
+            and sample.get("phase_endpoint") is True
+            and not set(occupied).intersection(allowed)
+        )
+        violations = []
+        if contact_missing_bound_station:
+            violations.append("CONTACT_OUTSIDE_BOUND_STATION_REGION")
+        violation_count += len(violations)
+        evaluations.append({
+            "sequence": sample["sequence"],
+            "action_index": sample.get("action_index"),
+            "phase": sample.get("phase"),
+            "target_id": target_id,
+            "tool_tip_board_mm": point_values,
+            "allowed_station_regions": allowed,
+            "occupied_station_regions": sorted(occupied),
+            "unexpected_station_regions": unexpected,
+            "violations": violations,
+        })
+
+    result: dict[str, Any] = {
+        "schema": STATION_ROUTE_PREDICATE_SCHEMA,
+        "status": "PASS" if violation_count == 0 else "FAIL",
+        "source_cartesian_request_sha256": claimed_request_hash,
+        "source_collision_candidate_sha256": collision_candidate["candidate_sha256"],
+        "predicate_semantics": (
+            "CONTACT_ENDPOINT_MUST_OCCUPY_A_TARGET_BOUND_STATION_REGION;"
+            "NONCONTACT_REGION_OCCUPANCY_IS_RECORDED_NOT_REJECTED"
+        ),
+        "physical_workcell_body_ids": sorted(
+            body["body_id"] for body in physical_bodies
+        ),
+        "physx_excluded_station_region_ids": sorted(station_ids),
+        "target_station_bindings": normalized_bindings,
+        "sample_count": len(evaluations),
+        "violation_count": violation_count,
+        "samples": evaluations,
+        "installed_profile_eligible": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "discrete_tcp_point_predicate_is_not_continuous_swept_volume_proof",
+            "physical_workcell_bodies_remain_collision_solids",
+            "station_regions_are_planning_semantics_not_physical_clearance",
+            "source_candidate_placement_requires_separate_measurement_qualification",
+        ],
+    }
+    result["predicate_sha256"] = _canonical_sha256(result)
     return result
 
 
@@ -1049,6 +1294,7 @@ def admit_robot_tcp_collision_diagnostic(
     robot_usd_bytes: bytes,
     import_receipt: dict[str, Any],
     accepted_pair_policy: dict[str, Any] | None = None,
+    station_route_predicate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Validate all native collision inputs before Isaac or a GPU can start."""
     claimed_request_hash = request.get("request_sha256")
@@ -1119,6 +1365,10 @@ def admit_robot_tcp_collision_diagnostic(
         ):
             if accepted_pair_policy.get(field) != expected:
                 raise MechanicsContractError("collision pair policy crossed zero authority")
+    if station_route_predicate is not None and accepted_pair_policy is None:
+        raise MechanicsContractError(
+            "station route predicate requires the accepted diagnostic pair policy"
+        )
     for document, label in (
         (request, "collision request"),
         (ik_receipt, "IK receipt"),
@@ -1271,6 +1521,39 @@ def admit_robot_tcp_collision_diagnostic(
                 if _finite_number(value, "collision box half extent") <= 0.0:
                     raise MechanicsContractError("collision box half extent must be positive")
 
+    if station_route_predicate is not None:
+        claimed_predicate_hash = station_route_predicate.get("predicate_sha256")
+        unsigned_predicate = dict(station_route_predicate)
+        unsigned_predicate.pop("predicate_sha256", None)
+        if claimed_predicate_hash != _canonical_sha256(unsigned_predicate):
+            raise MechanicsContractError("station route predicate hash mismatch")
+        physical_bodies, station_bodies = _validated_collision_candidate_partition(
+            collision_candidate
+        )
+        if (
+            station_route_predicate.get("schema") != STATION_ROUTE_PREDICATE_SCHEMA
+            or station_route_predicate.get("status") != "PASS"
+            or station_route_predicate.get("violation_count") != 0
+            or station_route_predicate.get("source_cartesian_request_sha256")
+            != request.get("source_request_sha256")
+            or station_route_predicate.get("source_collision_candidate_sha256")
+            != claimed_candidate_hash
+            or station_route_predicate.get("physical_workcell_body_ids")
+            != sorted(body["body_id"] for body in physical_bodies)
+            or station_route_predicate.get("physx_excluded_station_region_ids")
+            != sorted(body["body_id"] for body in station_bodies)
+            or station_route_predicate.get("installed_profile_eligible") is not False
+            or station_route_predicate.get("installed_collision_qualified") is not False
+            or station_route_predicate.get("continuous_collision_proven") is not False
+            or station_route_predicate.get("hardware_access") is not False
+            or station_route_predicate.get("physical_authority") is not False
+            or station_route_predicate.get("controller_commands") != []
+            or station_route_predicate.get("hardware_writes") != 0
+            or station_route_predicate.get("physical_movements") != 0
+            or station_route_predicate.get("gate_promotions") != []
+        ):
+            raise MechanicsContractError("station route predicate boundary changed")
+
     admission: dict[str, Any] = {
         "schema": "tactevra.isaac_lm1_robot_tcp_collision_admission.v1",
         "status": "READY_TO_START_SELECTED_ISAAC_COLLISION_DIAGNOSTIC",
@@ -1309,6 +1592,22 @@ def admit_robot_tcp_collision_diagnostic(
         admission["limitations"].append(
             "pair_policy_changes_classification_only_and_preserves_raw_overlaps"
         )
+    if station_route_predicate is not None:
+        admission.update({
+            "station_route_predicate_sha256": station_route_predicate[
+                "predicate_sha256"
+            ],
+            "station_route_predicate_applied": True,
+            "physx_excluded_station_region_ids": station_route_predicate[
+                "physx_excluded_station_region_ids"
+            ],
+            "physical_workcell_body_ids": station_route_predicate[
+                "physical_workcell_body_ids"
+            ],
+        })
+        admission["limitations"].append(
+            "station_route_predicate_is_discrete_and_zero_authority"
+        )
     admission["admission_sha256"] = _canonical_sha256(admission)
     return admission
 
@@ -1324,6 +1623,7 @@ def run_robot_tcp_collision_diagnostic(
     output_path: Path,
     status_path: Path,
     accepted_pair_policy_path: Path | None = None,
+    station_route_predicate_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run discrete Isaac overlap queries with no controller or hardware authority."""
     request = json.loads(request_path.resolve(strict=True).read_bytes())
@@ -1340,6 +1640,11 @@ def run_robot_tcp_collision_diagnostic(
         if accepted_pair_policy_path is not None
         else None
     )
+    station_route_predicate = (
+        json.loads(station_route_predicate_path.resolve(strict=True).read_bytes())
+        if station_route_predicate_path is not None
+        else None
+    )
     admission = admit_robot_tcp_collision_diagnostic(
         request,
         ik_receipt,
@@ -1348,6 +1653,7 @@ def run_robot_tcp_collision_diagnostic(
         robot_usd_bytes,
         import_receipt,
         accepted_pair_policy,
+        station_route_predicate,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1412,7 +1718,15 @@ def run_robot_tcp_collision_diagnostic(
 
         workcell_root = "/TactevraCollisionDiagnostic/Workcell"
         UsdGeom.Xform.Define(stage, workcell_root)
-        for body_index, body in enumerate(collision_candidate["workcell_bodies"]):
+        authored_workcell_bodies = (
+            [
+                body for body in collision_candidate["workcell_bodies"]
+                if body["body_id"] in admission["physical_workcell_body_ids"]
+            ]
+            if station_route_predicate is not None
+            else collision_candidate["workcell_bodies"]
+        )
+        for body_index, body in enumerate(authored_workcell_bodies):
             root = f"{workcell_root}/body_{body_index:02d}"
             UsdGeom.Xform.Define(stage, root)
             for primitive_index, primitive in enumerate(body["primitives"]):
@@ -1628,7 +1942,9 @@ def run_robot_tcp_collision_diagnostic(
 
         receipt: dict[str, Any] = {
             "schema": (
-                TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                if station_route_predicate is not None
+                else TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if accepted_pair_policy is not None
                 else TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
             ),
@@ -1720,6 +2036,19 @@ def run_robot_tcp_collision_diagnostic(
                 "unreviewed_blocker_pair_count": len(remaining_unreviewed_pairs),
                 "unreviewed_blocker_pairs": [
                     list(pair) for pair in sorted(remaining_unreviewed_pairs)
+                ],
+            })
+        if station_route_predicate is not None:
+            receipt["source_bindings"]["station_route_predicate_sha256"] = admission[
+                "station_route_predicate_sha256"
+            ]
+            receipt.update({
+                "station_route_predicate_applied": True,
+                "physx_excluded_station_region_ids": admission[
+                    "physx_excluded_station_region_ids"
+                ],
+                "physical_workcell_body_ids": admission[
+                    "physical_workcell_body_ids"
                 ],
             })
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
@@ -2071,6 +2400,7 @@ def build_collision_blocker_localization(
         diagnostic_receipt.get("schema") not in {
             TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
             TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
         }
         or diagnostic_receipt.get("status") != "DIAGNOSTIC_BLOCKERS_OBSERVED"
         or diagnostic_receipt.get("collision_pair_policy_applied") is not True
@@ -2699,10 +3029,27 @@ def main() -> int:
             "samples without changing geometry, routes, or authority"
         ),
     )
+    parser.add_argument(
+        "--build-station-route-predicate",
+        action="store_true",
+        help=(
+            "evaluate explicit target-to-station route bindings while preserving "
+            "physical workcell solids"
+        ),
+    )
+    parser.add_argument("--target-station-bindings", type=Path)
     parser.add_argument("--accept-collision-pair-policy", action="store_true")
     parser.add_argument("--collision-pair-policy-proposal", type=Path)
     parser.add_argument("--bind-collision-pair-policy", action="store_true")
     parser.add_argument("--accepted-collision-pair-policy", type=Path)
+    parser.add_argument(
+        "--station-route-predicate",
+        type=Path,
+        help=(
+            "passing zero-authority station route predicate used to keep planning "
+            "regions out of PhysX solid authoring"
+        ),
+    )
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -2716,8 +3063,13 @@ def main() -> int:
             raise MechanicsContractError(
                 "Cartesian regeneration requires --robot-tcp-bundle"
             )
-        if not args.localize_collision_blockers and (
-            (args.cartesian_request is None) != (args.ik_source_bundle is None)
+        if (
+            not args.localize_collision_blockers
+            and not args.build_station_route_predicate
+            and (
+                (args.cartesian_request is None)
+                != (args.ik_source_bundle is None)
+            )
         ):
             raise MechanicsContractError(
                 "IK screening requires both --cartesian-request and --ik-source-bundle"
@@ -2725,9 +3077,13 @@ def main() -> int:
         request_collision_arguments = (
             args.ik_receipt, args.collision_candidate, args.toolchain_lock
         )
-        if not args.run_collision_diagnostic and not args.propose_collision_pair_policy and any(
-            item is not None for item in request_collision_arguments
-        ) and not all(item is not None for item in request_collision_arguments):
+        if (
+            not args.run_collision_diagnostic
+            and not args.propose_collision_pair_policy
+            and not args.build_station_route_predicate
+            and any(item is not None for item in request_collision_arguments)
+            and not all(item is not None for item in request_collision_arguments)
+        ):
             raise MechanicsContractError(
                 "collision request requires --ik-receipt, --collision-candidate, and --toolchain-lock"
             )
@@ -2743,7 +3099,38 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.localize_collision_blockers:
+        if args.build_station_route_predicate:
+            if (
+                args.cartesian_request is None
+                or args.collision_candidate is None
+                or args.target_station_bindings is None
+            ):
+                raise MechanicsContractError(
+                    "station route predicate requires --cartesian-request, "
+                    "--collision-candidate, and --target-station-bindings"
+                )
+            if any((
+                args.localize_collision_blockers,
+                args.accept_collision_pair_policy,
+                args.bind_collision_pair_policy,
+                args.propose_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.ik_receipt is not None,
+                args.ik_source_bundle is not None,
+            )):
+                raise MechanicsContractError(
+                    "station route predicate is mutually exclusive with other modes"
+                )
+            result = build_station_route_predicate(
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.target_station_bindings.resolve(strict=True).read_bytes()
+                ),
+            )
+        elif args.localize_collision_blockers:
             if (
                 args.collision_diagnostic_receipt is None
                 or args.collision_request is None
@@ -2890,6 +3277,7 @@ def main() -> int:
                 output_path=args.output,
                 status_path=args.status_output,
                 accepted_pair_policy_path=args.accepted_collision_pair_policy,
+                station_route_predicate_path=args.station_route_predicate,
             )
         elif args.ik_receipt is not None:
             if args.native_h_probe or args.robot_tcp_bundle is not None:
@@ -2931,7 +3319,12 @@ def main() -> int:
                 "binding_sha256",
                 result.get(
                     "request_sha256",
-                    result.get("proposal_sha256", result.get("policy_sha256")),
+                    result.get(
+                        "proposal_sha256",
+                        result.get(
+                            "policy_sha256", result.get("predicate_sha256")
+                        ),
+                    ),
                 ),
             ),
         )
@@ -2945,6 +3338,8 @@ def main() -> int:
             status_record["proposal_sha256"] = result["proposal_sha256"]
         if "policy_sha256" in result:
             status_record["policy_sha256"] = result["policy_sha256"]
+        if "predicate_sha256" in result:
+            status_record["predicate_sha256"] = result["predicate_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
