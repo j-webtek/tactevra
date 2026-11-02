@@ -30,6 +30,13 @@ TCP_COLLISION_REPLAY_REQUEST_SCHEMA = (
 TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v1"
 )
+TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v2"
+)
+TCP_COLLISION_POLICY_SCHEMA = "tactevra.isaac_lm1_collision_pair_policy.v1"
+TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -1035,6 +1042,7 @@ def admit_robot_tcp_collision_diagnostic(
     virtual_profile_bytes: bytes,
     robot_usd_bytes: bytes,
     import_receipt: dict[str, Any],
+    accepted_pair_policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Validate all native collision inputs before Isaac or a GPU can start."""
     claimed_request_hash = request.get("request_sha256")
@@ -1042,8 +1050,12 @@ def admit_robot_tcp_collision_diagnostic(
     unsigned_request.pop("request_sha256", None)
     if claimed_request_hash != _canonical_sha256(unsigned_request):
         raise MechanicsContractError("collision diagnostic request hash mismatch")
+    request_schema = request.get("schema")
     if (
-        request.get("schema") != TCP_COLLISION_REPLAY_REQUEST_SCHEMA
+        request_schema not in (
+            TCP_COLLISION_REPLAY_REQUEST_SCHEMA,
+            TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA,
+        )
         or request.get("status") != "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC"
         or request.get("diagnostic_only") is not True
         or request.get("installed_collision_qualified") is not False
@@ -1051,6 +1063,56 @@ def admit_robot_tcp_collision_diagnostic(
         or request.get("native_contact_replay_authorized") is not False
     ):
         raise MechanicsContractError("collision diagnostic request boundary changed")
+    if request_schema == TCP_COLLISION_REPLAY_REQUEST_SCHEMA:
+        if accepted_pair_policy is not None:
+            raise MechanicsContractError("unbound collision request cannot use a pair policy")
+    else:
+        if accepted_pair_policy is None:
+            raise MechanicsContractError("policy-bound collision request lacks its pair policy")
+        claimed_policy_hash = accepted_pair_policy.get("policy_sha256")
+        unsigned_policy = dict(accepted_pair_policy)
+        unsigned_policy.pop("policy_sha256", None)
+        if claimed_policy_hash != _canonical_sha256(unsigned_policy):
+            raise MechanicsContractError("collision pair policy hash mismatch")
+        expected_pairs = {
+            tuple(sorted(pair)) for pair in (
+                ("robot:base_link", "robot:link1"),
+                ("robot:link1", "robot:link2"),
+                ("robot:link2", "robot:link3"),
+                ("robot:link3", "robot:link4"),
+                ("robot:link5", "robot:gripper"),
+            )
+        }
+        accepted_pairs = {
+            tuple(sorted(pair))
+            for pair in accepted_pair_policy.get("accepted_exclusion_pairs", [])
+        }
+        if (
+            accepted_pair_policy.get("schema") != TCP_COLLISION_POLICY_SCHEMA
+            or accepted_pair_policy.get("status")
+            != "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY"
+            or accepted_pair_policy.get("diagnostic_policy_active") is not True
+            or accepted_pair_policy.get("installed_profile_active") is not False
+            or accepted_pair_policy.get("installed_profile_eligible") is not False
+            or accepted_pair_policy.get("physical_solid_pairs_excluded") != []
+            or accepted_pair_policy.get("planning_envelope_pairs_excluded") != []
+            or accepted_pair_policy.get("gate_promotions") != []
+            or accepted_pairs != expected_pairs
+            or accepted_pair_policy.get("accepted_exclusion_count") != len(expected_pairs)
+            or request.get("collision_pair_policy_sha256") != claimed_policy_hash
+            or request.get("collision_pair_policy_scope") != "DIAGNOSTIC_REPORTING_ONLY"
+            or request.get("collision_candidate_sha256")
+            != accepted_pair_policy.get("collision_candidate_sha256")
+        ):
+            raise MechanicsContractError("collision pair policy boundary changed")
+        for field, expected in (
+            ("hardware_access", False),
+            ("physical_authority", False),
+            ("hardware_writes", 0),
+            ("physical_movements", 0),
+        ):
+            if accepted_pair_policy.get(field) != expected:
+                raise MechanicsContractError("collision pair policy crossed zero authority")
     for document, label in (
         (request, "collision request"),
         (ik_receipt, "IK receipt"),
@@ -1204,6 +1266,17 @@ def admit_robot_tcp_collision_diagnostic(
             "no_native_contact_or_physical_authority",
         ],
     }
+    if accepted_pair_policy is not None:
+        admission.update({
+            "collision_pair_policy_sha256": accepted_pair_policy["policy_sha256"],
+            "collision_pair_policy_scope": "DIAGNOSTIC_REPORTING_ONLY",
+            "accepted_exclusion_pairs": accepted_pair_policy[
+                "accepted_exclusion_pairs"
+            ],
+        })
+        admission["limitations"].append(
+            "pair_policy_changes_classification_only_and_preserves_raw_overlaps"
+        )
     admission["admission_sha256"] = _canonical_sha256(admission)
     return admission
 
@@ -1218,6 +1291,7 @@ def run_robot_tcp_collision_diagnostic(
     import_receipt_path: Path,
     output_path: Path,
     status_path: Path,
+    accepted_pair_policy_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run discrete Isaac overlap queries with no controller or hardware authority."""
     request = json.loads(request_path.resolve(strict=True).read_bytes())
@@ -1229,6 +1303,11 @@ def run_robot_tcp_collision_diagnostic(
     robot_usd = robot_usd_path.resolve(strict=True)
     robot_usd_bytes = robot_usd.read_bytes()
     import_receipt = json.loads(import_receipt_path.resolve(strict=True).read_bytes())
+    accepted_pair_policy = (
+        json.loads(accepted_pair_policy_path.resolve(strict=True).read_bytes())
+        if accepted_pair_policy_path is not None
+        else None
+    )
     admission = admit_robot_tcp_collision_diagnostic(
         request,
         ik_receipt,
@@ -1236,6 +1315,7 @@ def run_robot_tcp_collision_diagnostic(
         virtual_profile_bytes,
         robot_usd_bytes,
         import_receipt,
+        accepted_pair_policy,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1361,9 +1441,67 @@ def run_robot_tcp_collision_diagnostic(
                 ("robot:link5", "robot:gripper"),
             )
         }
+        accepted_exclusion_pairs = (
+            {
+                tuple(sorted(pair))
+                for pair in accepted_pair_policy["accepted_exclusion_pairs"]
+            }
+            if accepted_pair_policy is not None
+            else set()
+        )
+        physical_solid_pairs = {
+            pair for pair in all_pairs
+            if pair not in accepted_exclusion_pairs
+            and any(
+                body.startswith("workcell:")
+                and not body.startswith("workcell:station:")
+                for body in pair
+            )
+        }
+        planning_envelope_pairs = {
+            pair for pair in all_pairs
+            if pair not in accepted_exclusion_pairs
+            and any(body.startswith("workcell:station:") for body in pair)
+        }
+        remaining_unreviewed_pairs = (
+            all_pairs
+            - accepted_exclusion_pairs
+            - physical_solid_pairs
+            - planning_envelope_pairs
+        )
+        if accepted_pair_policy is not None:
+            for sample in observed_samples:
+                raw_pairs = {tuple(pair) for pair in sample["collision_pairs"]}
+                sample["raw_collision_pair_count"] = sample.pop(
+                    "collision_pair_count"
+                )
+                sample["raw_collision_pairs"] = sample.pop("collision_pairs")
+                sample["policy_excluded_pair_count"] = len(
+                    raw_pairs & accepted_exclusion_pairs
+                )
+                sample["policy_excluded_pairs"] = [
+                    list(pair) for pair in sorted(raw_pairs & accepted_exclusion_pairs)
+                ]
+                sample["physical_solid_blocker_pairs"] = [
+                    list(pair) for pair in sorted(raw_pairs & physical_solid_pairs)
+                ]
+                sample["planning_envelope_blocker_pairs"] = [
+                    list(pair) for pair in sorted(raw_pairs & planning_envelope_pairs)
+                ]
+                sample["unreviewed_blocker_pairs"] = [
+                    list(pair) for pair in sorted(raw_pairs & remaining_unreviewed_pairs)
+                ]
+                sample["remaining_blocker_pair_count"] = len(
+                    raw_pairs - accepted_exclusion_pairs
+                )
+        sample_pair_field = (
+            "raw_collision_pairs"
+            if accepted_pair_policy is not None
+            else "collision_pairs"
+        )
         pair_sample_counts = {
             pair: sum(pair in {
-                tuple(item) for item in sample["collision_pairs"]
+                tuple(item) for item in sample[sample_pair_field]
             } for sample in observed_samples)
             for pair in all_pairs
         }
@@ -1376,17 +1514,37 @@ def run_robot_tcp_collision_diagnostic(
                 ),
                 "classification": (
                     "KINEMATIC_NEIGHBOR_EXCLUSION_REVIEW_REQUIRED"
-                    if pair in adjacent_pairs
+                    if accepted_pair_policy is None and pair in adjacent_pairs
                     else "UNREVIEWED_COLLISION_OBSERVATION"
+                    if accepted_pair_policy is None
+                    else "ACCEPTED_DIAGNOSTIC_KINEMATIC_NEIGHBOR_EXCLUSION"
+                    if pair in accepted_exclusion_pairs
+                    else "KINEMATIC_NEIGHBOR_EXCLUSION_REVIEW_REQUIRED"
+                    if pair in adjacent_pairs
+                    else "PHYSICAL_SOLID_COLLISION_BLOCKER"
+                    if pair in physical_solid_pairs
+                    else "PLANNING_ENVELOPE_ROUTE_BLOCKER"
+                    if pair in planning_envelope_pairs
+                    else "UNREVIEWED_COLLISION_BLOCKER"
                 ),
             }
             for pair in sorted(all_pairs)
         ]
 
         receipt: dict[str, Any] = {
-            "schema": TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            "schema": (
+                TCP_POLICY_BOUND_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                if accepted_pair_policy is not None
+                else TCP_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+            ),
             "status": (
-                "DIAGNOSTIC_OVERLAPS_OBSERVED"
+                "DIAGNOSTIC_BLOCKERS_OBSERVED"
+                if accepted_pair_policy is not None and (
+                    physical_solid_pairs
+                    or planning_envelope_pairs
+                    or remaining_unreviewed_pairs
+                )
+                else "DIAGNOSTIC_OVERLAPS_OBSERVED"
                 if all_pairs else "DIAGNOSTIC_NO_OVERLAPS_OBSERVED"
             ),
             "evidence_class": "NATIVE_ISAAC_EXPLORATORY_COLLISION_DIAGNOSTIC_ONLY",
@@ -1404,7 +1562,12 @@ def run_robot_tcp_collision_diagnostic(
             },
             "bounded_sample_count": len(observed_samples),
             "samples_with_overlaps": sum(
-                item["collision_pair_count"] > 0 for item in observed_samples
+                item[
+                    "raw_collision_pair_count"
+                    if accepted_pair_policy is not None
+                    else "collision_pair_count"
+                ] > 0
+                for item in observed_samples
             ),
             "unique_collision_pair_count": len(all_pairs),
             "unique_collision_pairs": [list(pair) for pair in sorted(all_pairs)],
@@ -1422,10 +1585,39 @@ def run_robot_tcp_collision_diagnostic(
             "physical_movements": 0,
             "gate_promotions": [],
             "limitations": admission["limitations"] + [
-                "adjacent_link_pairs_are_retained_without_policy_exclusion",
+                (
+                    "accepted_adjacent_link_pairs_are_excluded_from_blocker_counts_only"
+                    if accepted_pair_policy is not None
+                    else "adjacent_link_pairs_are_retained_without_policy_exclusion"
+                ),
                 "overlap_results_do_not_measure_clearance_distance",
             ],
         }
+        if accepted_pair_policy is not None:
+            receipt["source_bindings"]["collision_pair_policy_sha256"] = admission[
+                "collision_pair_policy_sha256"
+            ]
+            receipt.update({
+                "collision_pair_policy_applied": True,
+                "policy_excluded_pair_count": len(accepted_exclusion_pairs),
+                "policy_excluded_pairs": [
+                    list(pair) for pair in sorted(accepted_exclusion_pairs)
+                ],
+                "physical_solid_blocker_pair_count": len(physical_solid_pairs),
+                "physical_solid_blocker_pairs": [
+                    list(pair) for pair in sorted(physical_solid_pairs)
+                ],
+                "planning_envelope_blocker_pair_count": len(
+                    planning_envelope_pairs
+                ),
+                "planning_envelope_blocker_pairs": [
+                    list(pair) for pair in sorted(planning_envelope_pairs)
+                ],
+                "unreviewed_blocker_pair_count": len(remaining_unreviewed_pairs),
+                "unreviewed_blocker_pairs": [
+                    list(pair) for pair in sorted(remaining_unreviewed_pairs)
+                ],
+            })
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
         output_path.write_text(
             json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -1436,6 +1628,13 @@ def run_robot_tcp_collision_diagnostic(
             "bounded_sample_count": receipt["bounded_sample_count"],
             "samples_with_overlaps": receipt["samples_with_overlaps"],
             "unique_collision_pair_count": receipt["unique_collision_pair_count"],
+            "policy_excluded_pair_count": receipt.get("policy_excluded_pair_count", 0),
+            "physical_solid_blocker_pair_count": receipt.get(
+                "physical_solid_blocker_pair_count", 0
+            ),
+            "planning_envelope_blocker_pair_count": receipt.get(
+                "planning_envelope_blocker_pair_count", 0
+            ),
         }, sort_keys=True) + "\n", encoding="utf-8")
         return receipt
     except BaseException as exc:
@@ -1579,6 +1778,155 @@ def build_collision_pair_policy_proposal(
     }
     proposal["proposal_sha256"] = _canonical_sha256(proposal)
     return proposal
+
+
+def accept_collision_pair_policy_proposal(
+    proposal: dict[str, Any],
+) -> dict[str, Any]:
+    """Accept only the proposed directly connected pairs for diagnostics."""
+    claimed_proposal_hash = proposal.get("proposal_sha256")
+    unsigned_proposal = dict(proposal)
+    unsigned_proposal.pop("proposal_sha256", None)
+    if claimed_proposal_hash != _canonical_sha256(unsigned_proposal):
+        raise MechanicsContractError("collision pair proposal hash mismatch")
+    if (
+        proposal.get("schema")
+        != "tactevra.isaac_lm1_collision_pair_policy_proposal.v1"
+        or proposal.get("status") != "REVIEW_REQUIRED_COLLISION_PAIR_POLICY"
+        or proposal.get("policy_applied") is not False
+        or proposal.get("installed_profile_eligible") is not False
+        or proposal.get("gate_promotions") != []
+    ):
+        raise MechanicsContractError("collision pair proposal boundary changed")
+    expected_pairs = {
+        tuple(sorted(pair)) for pair in (
+            ("robot:base_link", "robot:link1"),
+            ("robot:link1", "robot:link2"),
+            ("robot:link2", "robot:link3"),
+            ("robot:link3", "robot:link4"),
+            ("robot:link5", "robot:gripper"),
+        )
+    }
+    proposed_pairs = {
+        tuple(sorted(pair)) for pair in proposal.get("proposed_exclusion_pairs", [])
+    }
+    if proposed_pairs != expected_pairs or proposal.get(
+        "proposed_exclusion_count"
+    ) != len(expected_pairs):
+        raise MechanicsContractError("proposal changed the direct-neighbor exclusion set")
+    classifications = proposal.get("pair_classifications")
+    if not isinstance(classifications, list) or len(classifications) != proposal.get(
+        "classified_pair_count"
+    ):
+        raise MechanicsContractError("proposal pair classifications are absent")
+    for row in classifications:
+        pair = tuple(sorted(row.get("body_pair", [])))
+        disposition = row.get("proposed_disposition")
+        if pair in expected_pairs:
+            if (
+                disposition != "PROPOSED_KINEMATIC_NEIGHBOR_EXCLUSION"
+                or row.get("justification") != "DIRECTLY_CONNECTED_URDF_BODIES"
+                or row.get("persistent_across_all_samples") is not True
+            ):
+                raise MechanicsContractError("adjacent-pair proposal evidence changed")
+        elif disposition == "PROPOSED_KINEMATIC_NEIGHBOR_EXCLUSION":
+            raise MechanicsContractError("proposal attempts to exclude a nonadjacent pair")
+
+    policy: dict[str, Any] = {
+        "schema": TCP_COLLISION_POLICY_SCHEMA,
+        "status": "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY",
+        "source_proposal_sha256": claimed_proposal_hash,
+        "source_diagnostic_receipt_sha256": proposal[
+            "source_diagnostic_receipt_sha256"
+        ],
+        "collision_candidate_sha256": proposal["collision_candidate_sha256"],
+        "accepted_exclusion_pairs": [list(pair) for pair in sorted(expected_pairs)],
+        "accepted_exclusion_count": len(expected_pairs),
+        "acceptance_basis": (
+            "USER_AUTHORIZED_NEXT_SIMULATION_STEPS_AFTER_REVIEW_SUMMARY"
+        ),
+        "diagnostic_policy_active": True,
+        "installed_profile_active": False,
+        "installed_profile_eligible": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "physical_solid_pairs_excluded": [],
+        "planning_envelope_pairs_excluded": [],
+        "candidate_blockers": proposal["candidate_blockers"],
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "accepted_exclusions_are_limited_to_directly_connected_robot_bodies",
+            "policy_is_active_only_for_zero_authority_diagnostic_reporting",
+            "physical_solid_and_planning_envelope_observations_remain_blockers",
+            "policy_does_not_install_geometry_or_prove_continuous_clearance",
+        ],
+    }
+    policy["policy_sha256"] = _canonical_sha256(policy)
+    return policy
+
+
+def bind_collision_pair_policy_request(
+    request: dict[str, Any], policy: dict[str, Any]
+) -> dict[str, Any]:
+    """Bind an accepted diagnostic-only pair policy to the exact sample request."""
+    claimed_request_hash = request.get("request_sha256")
+    unsigned_request = dict(request)
+    unsigned_request.pop("request_sha256", None)
+    if claimed_request_hash != _canonical_sha256(unsigned_request):
+        raise MechanicsContractError("collision request hash mismatch")
+    if (
+        request.get("schema") != TCP_COLLISION_REPLAY_REQUEST_SCHEMA
+        or request.get("status") != "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC"
+        or request.get("diagnostic_only") is not True
+        or request.get("installed_collision_qualified") is not False
+    ):
+        raise MechanicsContractError("collision request cannot accept a pair policy")
+    claimed_policy_hash = policy.get("policy_sha256")
+    unsigned_policy = dict(policy)
+    unsigned_policy.pop("policy_sha256", None)
+    if claimed_policy_hash != _canonical_sha256(unsigned_policy):
+        raise MechanicsContractError("accepted collision pair policy hash mismatch")
+    if (
+        policy.get("schema") != TCP_COLLISION_POLICY_SCHEMA
+        or policy.get("status") != "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY"
+        or policy.get("diagnostic_policy_active") is not True
+        or policy.get("installed_profile_active") is not False
+        or policy.get("installed_profile_eligible") is not False
+        or policy.get("physical_solid_pairs_excluded") != []
+        or policy.get("planning_envelope_pairs_excluded") != []
+        or policy.get("gate_promotions") != []
+    ):
+        raise MechanicsContractError("accepted pair policy boundary changed")
+    if request.get("collision_candidate_sha256") != policy.get(
+        "collision_candidate_sha256"
+    ):
+        raise MechanicsContractError("pair policy and collision candidate differ")
+
+    bound = dict(unsigned_request)
+    bound.update({
+        "schema": TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA,
+        "source_unfiltered_request_sha256": claimed_request_hash,
+        "collision_pair_policy_sha256": claimed_policy_hash,
+        "collision_pair_policy_scope": "DIAGNOSTIC_REPORTING_ONLY",
+        "diagnostic_only": True,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "native_contact_replay_authorized": False,
+        "next_required_stage": (
+            "RUN_SELECTED_ISAAC_POLICY_BOUND_DIAGNOSTIC_AND_RETAIN_RAW_AND_FILTERED_PAIRS"
+        ),
+        "limitations": request["limitations"] + [
+            "pair_policy_changes_diagnostic_classification_not_raw_overlap_observations",
+            "physical_solid_and_planning_envelope_observations_remain_blockers",
+        ],
+    })
+    bound["request_sha256"] = _canonical_sha256(bound)
+    return bound
 
 
 def assess_native_key_trace(
@@ -1843,6 +2191,10 @@ def main() -> int:
         help="classify native overlap evidence into an unapplied review proposal",
     )
     parser.add_argument("--collision-diagnostic-receipt", type=Path)
+    parser.add_argument("--accept-collision-pair-policy", action="store_true")
+    parser.add_argument("--collision-pair-policy-proposal", type=Path)
+    parser.add_argument("--bind-collision-pair-policy", action="store_true")
+    parser.add_argument("--accepted-collision-pair-policy", type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -1876,7 +2228,55 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.propose_collision_pair_policy:
+        if args.accept_collision_pair_policy:
+            if args.collision_pair_policy_proposal is None:
+                raise MechanicsContractError(
+                    "policy acceptance requires --collision-pair-policy-proposal"
+                )
+            if any((
+                args.propose_collision_pair_policy,
+                args.bind_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.cartesian_request is not None,
+                args.ik_receipt is not None,
+                args.collision_candidate is not None,
+            )):
+                raise MechanicsContractError(
+                    "policy acceptance is mutually exclusive with other modes"
+                )
+            result = accept_collision_pair_policy_proposal(json.loads(
+                args.collision_pair_policy_proposal.resolve(strict=True).read_bytes()
+            ))
+        elif args.bind_collision_pair_policy:
+            if (
+                args.collision_request is None
+                or args.accepted_collision_pair_policy is None
+            ):
+                raise MechanicsContractError(
+                    "policy binding requires --collision-request and "
+                    "--accepted-collision-pair-policy"
+                )
+            if any((
+                args.propose_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.cartesian_request is not None,
+                args.ik_receipt is not None,
+                args.collision_candidate is not None,
+            )):
+                raise MechanicsContractError(
+                    "policy binding is mutually exclusive with other modes"
+                )
+            result = bind_collision_pair_policy_request(
+                json.loads(args.collision_request.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.accepted_collision_pair_policy.resolve(strict=True).read_bytes()
+                ),
+            )
+        elif args.propose_collision_pair_policy:
             if (
                 args.collision_diagnostic_receipt is None
                 or args.collision_candidate is None
@@ -1935,6 +2335,7 @@ def main() -> int:
                 import_receipt_path=args.import_receipt,
                 output_path=args.output,
                 status_path=args.status_output,
+                accepted_pair_policy_path=args.accepted_collision_pair_policy,
             )
         elif args.ik_receipt is not None:
             if args.native_h_probe or args.robot_tcp_bundle is not None:
@@ -1974,7 +2375,10 @@ def main() -> int:
             "receipt_sha256",
             result.get(
                 "binding_sha256",
-                result.get("request_sha256", result.get("proposal_sha256")),
+                result.get(
+                    "request_sha256",
+                    result.get("proposal_sha256", result.get("policy_sha256")),
+                ),
             ),
         )
         if not isinstance(evidence_sha256, str):
@@ -1985,6 +2389,8 @@ def main() -> int:
         }
         if "proposal_sha256" in result:
             status_record["proposal_sha256"] = result["proposal_sha256"]
+        if "policy_sha256" in result:
+            status_record["policy_sha256"] = result["policy_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -1993,7 +2399,9 @@ def main() -> int:
             "READY_FOR_IK_QUALIFICATION", "READY_FOR_COLLISION_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC",
             "DIAGNOSTIC_OVERLAPS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED",
+            "DIAGNOSTIC_BLOCKERS_OBSERVED",
             "REVIEW_REQUIRED_COLLISION_PAIR_POLICY",
+            "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({

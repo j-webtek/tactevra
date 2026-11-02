@@ -352,6 +352,24 @@ false, and installed/continuous/physical gates remain denied. The next stage
 must review this exact proposal, bind the accepted policy hash into a new
 diagnostic request, and rerun the native overlap evidence.
 
+ARM-193 completes that review-bound rerun without suppressing source evidence.
+The accepted diagnostic-only policy SHA-256 is
+`ede8b946a85e754eec1698365bd16bec3b332d5d6cb8c9ef4634a9b61abeca87`;
+the policy-bound v2 request SHA-256 is
+`0eff9c8170d9ddf78af3bd96880acc43c8d96a4f875b35199aa3950ccb13e83b`.
+The selected Isaac 6.1 replay retains all 18 raw pairs at all 149 evaluated
+configurations, classifies the five reviewed adjacent-link pairs as diagnostic
+reporting exclusions, and leaves seven physical-solid plus six station-envelope
+pairs as blockers. No pair remains unreviewed. The external v2 receipt at
+`C:\IsaacSim\artifacts\issue190\lm1-h-policy-bound-collision-diagnostic-001\receipt.json`
+has canonical SHA-256
+`8e511e3203984fea32b9726d5cd37c465369b0ecc8d632f60fd71b0b1e327b4d`
+and status `DIAGNOSTIC_BLOCKERS_OBSERVED`. This establishes a trustworthy
+classification baseline; it does not qualify collision clearance. The next
+dependency is correcting the exploratory physical geometry and planning route,
+then separately adding the missing installed bodies and continuous-segment
+screening before robot/key contact replay.
+
 **Exit gate**
 
 - activation derives from simulated mechanism state, never target name;
@@ -458,9 +476,10 @@ ScheduleGen. Neither is a physical success rate.
 2. **LM0 retained run:** execute repeated headless Isaac runs and classify
    tracking, settling, and contact behavior.
 3. **LM1 collision:** native representative-key physics, Cartesian
-   regeneration, canonical IK, and the exact 149-sample collision diagnostic
-   request are complete; next run the selected Isaac diagnostic, retain
-   pair-specific results, and separately satisfy installed continuous geometry.
+   regeneration, canonical IK, the exact 149-sample diagnostic, reviewed
+   adjacent-link policy, and policy-bound rerun are complete. Next correct the
+   seven physical-solid and six station-envelope blockers, then separately
+   satisfy installed continuous geometry.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

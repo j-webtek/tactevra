@@ -538,6 +538,39 @@ def test_collision_pair_policy_proposal_is_classified_but_unapplied():
     unsigned={key:value for key,value in proposal.items() if key!='proposal_sha256'}
     assert proposal['proposal_sha256']==mechanics._canonical_sha256(unsigned)
 
+    policy=mechanics.accept_collision_pair_policy_proposal(proposal)
+    assert policy['status']=='ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY'
+    assert policy['accepted_exclusion_count']==5
+    assert policy['diagnostic_policy_active'] is True
+    assert policy['installed_profile_active'] is False
+    assert policy['physical_solid_pairs_excluded']==[]
+    assert policy['planning_envelope_pairs_excluded']==[]
+    assert policy['gate_promotions']==[]
+    policy_unsigned={key:value for key,value in policy.items() if key!='policy_sha256'}
+    assert policy['policy_sha256']==mechanics._canonical_sha256(policy_unsigned)
+
+    request={
+        'schema':'tactevra.isaac_lm1_robot_tcp_collision_replay_request.v1',
+        'status':'READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC',
+        'collision_candidate_sha256':candidate['candidate_sha256'],
+        'diagnostic_only':True,
+        'installed_collision_qualified':False,
+        'continuous_collision_proven':False,
+        'native_contact_replay_authorized':False,
+        'limitations':['exploratory_collision_candidate_is_uninstalled'],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    bound=mechanics.bind_collision_pair_policy_request(request,policy)
+    assert bound['schema']=='tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2'
+    assert bound['source_unfiltered_request_sha256']==request['request_sha256']
+    assert bound['collision_pair_policy_sha256']==policy['policy_sha256']
+    assert bound['collision_pair_policy_scope']=='DIAGNOSTIC_REPORTING_ONLY'
+    assert bound['installed_collision_qualified'] is False
+    bound_unsigned={key:value for key,value in bound.items() if key!='request_sha256'}
+    assert bound['request_sha256']==mechanics._canonical_sha256(bound_unsigned)
+
     proposal_pair=receipt['pair_observations'][0]
     proposal_pair['sample_count']=150
     receipt['receipt_sha256']=mechanics._canonical_sha256({
