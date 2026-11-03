@@ -9054,3 +9054,47 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: deterministically materialize all nine routes, execute fresh
   canonical IK and exact full-link collision scoring, retain every rejection,
   and replay only the predeclared shortlist in native Isaac.
+
+### E-20261103-ARM-201 — fixed route-shape campaign is materialized and screened
+
+- Stage: LM1 zero-authority route-shape execution and native handoff.
+- Lane: ARM / Isaac simulation.
+- Change: deterministically materialized every ARM-200 candidate without
+  changing the candidate family, selected placement/TCP, physical solids,
+  sample count, timing, or any of the 14 non-TRANSIT endpoints. Corrected the
+  public trajectory-evaluator boundary so a failed canonical `IkResult` with
+  its required empty joint solution is retained as
+  `IK_NO_CONVERGED_SOLUTION` instead of being replaced by a generic evidence-
+  shape exception.
+- IK result: six candidates pass all 133 canonical IK/continuity samples. The
+  three `X_THEN_Y` candidates are retained as unreachable-IK rejections at
+  samples 9, 7, and 6 for 70, 90, and 110 mm respectively. No candidate was
+  changed or retried after observing the result.
+- Offline collision result: the exact exploratory full-link OBB evaluator
+  reports zero TRANSIT and zero endpoint physical-blocker pairs for all six IK
+  survivors. Because ARM-199 showed this offline evaluator can disagree with
+  native PhysX, zero offline blockers are ranking evidence only, not clearance.
+- Shortlist: the fixed ranking selects, in order, `Y_THEN_X/110`,
+  `DIRECT_LINEAR/110`, `Y_THEN_X/70`, and `DIRECT_LINEAR/90`. Exact Cartesian,
+  IK, raw collision-request, and policy-bound collision-request inputs are
+  retained for those four routes.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm201-route-shape-materialization-001`,
+  `C:\IsaacSim\artifacts\issue190\arm201-route-shape-screen-001` (screen
+  SHA-256
+  `d1bee840796d434d3a69902a116219ab6fc3c30eee501368112ef2f1f848d511`),
+  and
+  `C:\IsaacSim\artifacts\issue190\arm201-route-shape-native-shortlist-001`
+  (manifest SHA-256
+  `e7aff82d77e731e1ba7b1e11784cdceb209e3b32cb961bb11e60acb09c7eb9e6`).
+- Hardware writes: 0.
+- Physical movements: 0.
+- Gate promotions: 0.
+- Limitations: the shortlist has not been replayed in native Isaac; discrete
+  samples are not continuous-clearance proof; no route, collision geometry, or
+  profile is installed; no controller, contact, or physical authority is
+  granted.
+- Next dependency: execute the four retained policy-bound requests in native
+  Isaac without changing the shortlist, retain all raw overlap evidence, then
+  compare each result with the ARM-199 seven-pair control before deciding
+  whether any route-shape hypothesis is a diagnostic improvement.

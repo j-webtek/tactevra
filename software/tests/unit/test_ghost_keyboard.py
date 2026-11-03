@@ -1293,6 +1293,201 @@ def test_route_shape_campaign_plan_is_bounded_and_preserves_endpoints():
         )
 
 
+def test_route_shape_materialization_changes_only_declared_transit_domain():
+    mechanics=_load_key_mechanics()
+    samples=[
+        {'sequence':0,'phase':'PARK','time_from_start_ns':0,
+         'expected_tool_tip_board_mm':[0.0,0.0,10.0]},
+        {'sequence':1,'phase':'TRANSIT','time_from_start_ns':1,
+         'expected_tool_tip_board_mm':[1.0,1.0,30.0]},
+        {'sequence':2,'phase':'TRANSIT','time_from_start_ns':2,
+         'expected_tool_tip_board_mm':[2.0,2.0,40.0]},
+        {'sequence':3,'phase':'HOVER','time_from_start_ns':3,
+         'expected_tool_tip_board_mm':[10.0,20.0,20.0]},
+    ]
+    source={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'route_variant_applied':True,'collision_geometry_changed':False,
+        'samples':samples,'limitations':[],
+        'hardware_access':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,
+    }
+    source['request_sha256']=mechanics._canonical_sha256(source)
+
+    def candidate(topology,height,source_exact=False):
+        value={
+            'candidate_classification':('CONTROL' if source_exact else 'VARIANT'),
+            'xy_corridor_topology':topology,
+            'corridor_height_board_mm':height,
+            'corridor_height_ramp_fraction':None if source_exact else 0.25,
+            'transit_resampling':('SOURCE_REQUEST_EXACT' if source_exact else
+                'ARC_LENGTH_PIECEWISE_LINEAR_WITH_SYMMETRIC_Z_RAMPS'),
+            'source_request_reused_exactly':source_exact,
+            'non_transit_endpoints_changed':False,
+            'sample_count_changed':False,'timing_changed':False,
+        }
+        value['candidate_id']='route-shape-'+mechanics._canonical_sha256(value)[:16]
+        return value
+
+    control=candidate('DIRECT_LINEAR',70.0,True)
+    direct=candidate('DIRECT_LINEAR',90.0)
+    dogleg=candidate('X_THEN_Y',90.0)
+    plan={
+        'schema':mechanics.ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING',
+        'source_route_variant_request_sha256':source['request_sha256'],
+        'source_sample_count':4,
+        'source_transit_sequences':[1,2],
+        'preserved_endpoint_sequences':[0,3],
+        'candidates':[control,direct,dogleg],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+
+    retained=mechanics.materialize_route_shape_candidate(
+        plan,source,control['candidate_id'])
+    assert retained['samples']==samples
+    assert retained['changed_cartesian_sequences']==[]
+
+    materialized=mechanics.materialize_route_shape_candidate(
+        plan,source,direct['candidate_id'])
+    assert materialized['samples'][0]==samples[0]
+    assert materialized['samples'][3]==samples[3]
+    assert materialized['samples'][1]['expected_tool_tip_board_mm']==pytest.approx(
+        [10.0/3.0,20.0/3.0,90.0]
+    )
+    assert materialized['samples'][2]['expected_tool_tip_board_mm']==pytest.approx(
+        [20.0/3.0,40.0/3.0,90.0]
+    )
+    assert materialized['changed_cartesian_sequences']==[1,2]
+    assert materialized['non_transit_endpoints_changed'] is False
+    assert materialized['placement_tcp_changed'] is False
+    assert materialized['collision_geometry_changed'] is False
+
+    orthogonal=mechanics.materialize_route_shape_candidate(
+        plan,source,dogleg['candidate_id'])
+    assert orthogonal['samples'][1]['expected_tool_tip_board_mm']==pytest.approx(
+        [10.0,0.0,90.0]
+    )
+    assert orthogonal['samples'][2]['expected_tool_tip_board_mm']==pytest.approx(
+        [10.0,10.0,90.0]
+    )
+
+    changed=dict(plan)
+    changed.pop('plan_sha256')
+    changed['source_transit_sequences']=[2]
+    changed['plan_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='transit domain'):
+        mechanics.materialize_route_shape_candidate(
+            changed,source,direct['candidate_id']
+        )
+
+
+def test_route_shape_ranking_keeps_transit_and_endpoint_blockers_separate():
+    mechanics=_load_key_mechanics()
+
+    def outcome(candidate_id,transit_pairs,transit_samples,endpoint_pairs,
+                margin,error):
+        return {
+            'candidate_id':candidate_id,
+            'transit_physical_blocker_pair_count':transit_pairs,
+            'transit_blocked_sample_count':transit_samples,
+            'endpoint_physical_blocker_pair_count':endpoint_pairs,
+            'ik_metrics':{
+                'minimum_normalized_arm_joint_margin':margin,
+                'maximum_position_error_mm':error,
+            },
+        }
+
+    endpoint_only=outcome('endpoint-only',0,0,1,0.5,0.01)
+    transit_blocked=outcome('transit-blocked',1,1,0,0.9,0.001)
+    lower_margin=outcome('lower-margin',0,0,0,0.2,0.01)
+    higher_margin=outcome('higher-margin',0,0,0,0.3,0.02)
+    ranked=sorted(
+        [transit_blocked,endpoint_only,lower_margin,higher_margin],
+        key=mechanics._route_shape_candidate_rank_key,
+    )
+    assert [item['candidate_id'] for item in ranked]==[
+        'higher-margin','lower-margin','endpoint-only','transit-blocked'
+    ]
+
+
+def test_route_shape_shortlist_materializes_exact_retained_evidence(
+    tmp_path,monkeypatch
+):
+    mechanics=_load_key_mechanics()
+    candidate_id='route-shape-shortlisted'
+    candidate={'candidate_id':candidate_id,
+               'candidate_classification':'VARIANT'}
+    plan={
+        'schema':mechanics.ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING',
+        'candidates':[candidate],'maximum_native_shortlist_count':4,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+    request={'route_shape_candidate_id':candidate_id}
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    ik={
+        'route_shape_candidate_id':candidate_id,
+        'ik_all_samples_accepted':True,
+    }
+    ik['receipt_sha256']=mechanics._canonical_sha256(ik)
+    screen={
+        'schema':mechanics.ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA,
+        'status':'READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY',
+        'source_campaign_plan_sha256':plan['plan_sha256'],
+        'native_shortlist_candidate_ids':[candidate_id],
+        'outcomes':[{
+            'candidate_id':candidate_id,
+            'request_sha256':request['request_sha256'],
+            'ik_receipt_sha256':ik['receipt_sha256'],
+        }],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    screen['screen_sha256']=mechanics._canonical_sha256(screen)
+    collision={'candidate_sha256':'c'*64}
+    policy={'policy_sha256':'p'*64}
+    toolchain={'schema':'toolchain'}
+    raw={'request_sha256':'r'*64}
+    bound={'request_sha256':'b'*64}
+    monkeypatch.setattr(
+        mechanics,'build_robot_tcp_collision_replay_request',
+        lambda actual_ik,actual_collision,actual_lock:raw,
+    )
+    monkeypatch.setattr(
+        mechanics,'bind_collision_pair_policy_request',
+        lambda actual_request,actual_policy:bound,
+    )
+
+    manifest=mechanics.materialize_route_shape_native_shortlist(
+        plan,screen,{candidate_id:(request,ik)},collision,policy,toolchain,
+        output_dir=tmp_path,
+    )
+    assert manifest['schema']==mechanics.ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA
+    assert manifest['shortlist_count']==1
+    assert manifest['entries'][0]['candidate_id']==candidate_id
+    assert manifest['entries'][0]['document_hashes']=={
+        'cartesian_request.json':request['request_sha256'],
+        'ik_receipt.json':ik['receipt_sha256'],
+        'collision_request.json':raw['request_sha256'],
+        'policy_bound_collision_request.json':bound['request_sha256'],
+    }
+    assert set(path.name for path in (tmp_path/candidate_id).iterdir())=={
+        'cartesian_request.json','ik_receipt.json','collision_request.json',
+        'policy_bound_collision_request.json',
+    }
+    unsigned={key:value for key,value in manifest.items()
+              if key!='manifest_sha256'}
+    assert manifest['manifest_sha256']==mechanics._canonical_sha256(unsigned)
+
+
 def test_collision_blockers_localize_to_retained_cartesian_context():
     mechanics=_load_key_mechanics()
     cartesian={
