@@ -9133,3 +9133,35 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: plan a corrected v4 replay that binds the exact ARM-197
   pair policy and station-route predicate before process start. Do not reinterpret
   ARM-202 as clearance or silently retry its failed attempt.
+
+### E-20261103-ARM-203 — corrected v4 replay remains incomplete and blocked
+
+- Stage: separately governed LM1 route-predicate replay correction.
+- Lane: ARM / Isaac simulation.
+- Change: generated a request-bound station predicate for each fixed ARM-201
+  shortlist entry and required v4 receipts for every completed native result.
+- Attempts: rank one retained its one predicate-boundary admission failure.
+  Rank two stopped during legacy Isaac 4.2 viewport initialization with a
+  Windows access violation and produced no receipt. Neither attempt was
+  retried. Ranks three and four completed once in the governed Isaac 6.1
+  environment.
+- Native result: `Y_THEN_X/70` and `DIRECT_LINEAR/90` overlap at all `170/170`
+  and `165/165` bounded samples. Both retain seven physical-solid blocker
+  pairs, zero planning-envelope blocker pairs, and five policy exclusions.
+  Neither improves on the ARM-199 seven-pair physical control.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm203-route-shape-v4-native-replay-001`
+  and
+  `C:\IsaacSim\artifacts\issue190\arm203-route-shape-v4-native-selection-001`.
+  The selection has canonical SHA-256
+  `db4d0812f541fb9445b6cbf09d1f12425768a79598c9dd4d096f65495ae7d186`
+  and file SHA-256
+  `fe055795d45d232ce40201e68c3a2ebba5a3f4fbbf81e3e60bdb49aba8f11b99`.
+- Status: `INCOMPLETE_V4_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: the four-attempt campaign is incomplete, both completed routes
+  still collide at every bounded sample, and discrete replay is not continuous
+  clearance proof. No route, profile, controller access, or physical authority
+  is installed or granted.
+- Next dependency: preserve this outcome and design a new, independently
+  governed route/placement correction before any further native execution.

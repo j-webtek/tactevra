@@ -1595,6 +1595,18 @@ def test_route_shape_native_selection_retains_mixed_one_attempt_outcome():
               if key!='selection_sha256'}
     assert result['selection_sha256']==mechanics._canonical_sha256(unsigned)
 
+    v4_result=mechanics.retain_route_shape_native_results(
+        plan,screen,manifest,control,{failed:error,completed:native},
+        require_route_predicate_receipts=True,
+    )
+    assert v4_result['schema']==mechanics.ROUTE_SHAPE_V4_NATIVE_SELECTION_SCHEMA
+    assert v4_result['status']==(
+        'INCOMPLETE_V4_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED'
+    )
+    assert v4_result['retained_results'][0][
+        'station_route_predicate_applied'
+    ] is True
+
 
 def test_collision_blockers_localize_to_retained_cartesian_context():
     mechanics=_load_key_mechanics()
