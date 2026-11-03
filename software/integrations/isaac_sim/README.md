@@ -1372,6 +1372,27 @@ Retained ARM-201 evidence:
   manifest SHA-256
   `e7aff82d77e731e1ba7b1e11784cdceb209e3b32cb961bb11e60acb09c7eb9e6`.
 
+ARM-202 preserves the first fixed native attempt exactly, including its setup
+errors. The rank-one `Y_THEN_X/110` invocation stopped before Isaac admission
+with `collision pair policy boundary changed`; no automatic retry occurred.
+The remaining `DIRECT_LINEAR/110`, `Y_THEN_X/70`, and `DIRECT_LINEAR/90`
+attempts completed as v3 primitive-attributed diagnostics. They omitted the
+separate station-route-predicate argument, so they are not the complete v4
+replay requested by ARM-201. Physical and planning pairs remain separately
+reported: every bounded sample overlaps (`169/169`, `170/170`, and `165/165`),
+and every completed attempt retains seven physical blocker pairs, six planning
+envelope pairs, five policy exclusions, and zero unreviewed pairs. The physical
+pair count therefore does not improve on the ARM-199 control.
+
+The retained mixed-outcome selection is
+`C:\IsaacSim\artifacts\issue190\arm202-route-shape-native-selection-001\selection.json`.
+Its canonical selection SHA-256 is
+`07d91503a2a6507dd4b997da5b19ff415f09644f4b0a2b04250560b0ac2a1858`
+and its file SHA-256 is
+`c87cf97120ced00cee40c6aa9e0b8026776b52acdf345a56c886ee315e11610a`.
+Status `INCOMPLETE_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED` installs nothing,
+promotes no gate, and grants no physical authority.
+
 Reproduce the aggregate screen after materializing and IK-screening all nine
 candidate directories:
 
@@ -1391,8 +1412,8 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$root\arm201-route-shape-screen-001\status.json"
 ```
 
-Native replay, retained native comparison against the seven-pair ARM-199
-control, and separate continuous-clearance qualification remain required. No
+A corrected separately planned v4 route-predicate replay and separate
+continuous-clearance qualification remain required. No
 ARM-201 artifact installs a route or grants physical authority.
 
 ### Native H-key contact replay

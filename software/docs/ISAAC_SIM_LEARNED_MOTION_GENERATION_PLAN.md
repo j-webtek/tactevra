@@ -554,9 +554,15 @@ ScheduleGen. Neither is a physical success rate.
    the six survivors, but the prior ARM-199 offline/native discrepancy prevents
    treating that as clearance. The fixed ranking retains four exact native
    replay inputs (`Y_THEN_X/110`, `DIRECT_LINEAR/110`, `Y_THEN_X/70`, and
-   `DIRECT_LINEAR/90`). Next, replay that unchanged shortlist in native Isaac
-   and compare its raw blockers against the seven-pair control. Installed
-   continuous geometry remains a separate dependency.
+   `DIRECT_LINEAR/90`). ARM-202 attempted that unchanged shortlist once in
+   rank order. `Y_THEN_X/110` stopped before admission because the invocation
+   selected a policy artifact whose boundary did not match the bound request;
+   it was not retried. The other three v3 diagnostics completed without the
+   separate station-route-predicate input and overlap at every one of their
+   169/170/165 bounded samples. Each retains the same seven physical blocker
+   pairs as the ARM-199 control, so no route-shape improvement is selected.
+   A separately planned corrected route-predicate replay and installed
+   continuous geometry remain dependencies.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

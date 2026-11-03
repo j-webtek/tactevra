@@ -71,6 +71,9 @@ ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA = (
 ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA = (
     "tactevra.isaac_lm1_route_shape_native_shortlist.v1"
 )
+ROUTE_SHAPE_NATIVE_SELECTION_SCHEMA = (
+    "tactevra.isaac_lm1_route_shape_native_selection.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -3615,6 +3618,232 @@ def retain_placement_tcp_native_results(
     return result
 
 
+def retain_route_shape_native_results(
+    campaign_plan: dict[str, Any],
+    campaign_screen: dict[str, Any],
+    shortlist_manifest: dict[str, Any],
+    control_receipt: dict[str, Any],
+    native_evidence: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Retain the fixed ARM-202 native attempts, including admission failures."""
+
+    def verified(document: dict[str, Any], digest_field: str, label: str) -> str:
+        claimed = document.get(digest_field)
+        unsigned = dict(document)
+        unsigned.pop(digest_field, None)
+        if not isinstance(claimed, str) or claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} digest is invalid")
+        return claimed
+
+    plan_hash = verified(campaign_plan, "plan_sha256", "campaign plan")
+    screen_hash = verified(campaign_screen, "screen_sha256", "campaign screen")
+    manifest_hash = verified(
+        shortlist_manifest, "manifest_sha256", "shortlist manifest"
+    )
+    control_hash = verified(control_receipt, "receipt_sha256", "control receipt")
+    if (
+        campaign_plan.get("schema") != ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA
+        or campaign_screen.get("schema") != ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA
+        or shortlist_manifest.get("schema") != ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA
+        or campaign_screen.get("source_campaign_plan_sha256") != plan_hash
+        or shortlist_manifest.get("source_campaign_plan_sha256") != plan_hash
+        or shortlist_manifest.get("source_campaign_screen_sha256") != screen_hash
+        or shortlist_manifest.get("status")
+        != "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY"
+        or control_receipt.get("schema")
+        != TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+    ):
+        raise MechanicsContractError("route-shape native selection lineage is invalid")
+    for document, label in (
+        (campaign_plan, "campaign plan"),
+        (campaign_screen, "campaign screen"),
+        (shortlist_manifest, "shortlist manifest"),
+        (control_receipt, "control receipt"),
+    ):
+        if (
+            document.get("hardware_access", False) is not False
+            or document.get("physical_authority", False) is not False
+            or document.get("controller_commands", []) != []
+            or document.get("hardware_writes", 0) != 0
+            or document.get("physical_movements", 0) != 0
+            or document.get("gate_promotions", []) != []
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    entries = shortlist_manifest.get("entries")
+    if not isinstance(entries, list) or not entries:
+        raise MechanicsContractError("route-shape shortlist manifest has no entries")
+    entry_ids = [entry.get("candidate_id") for entry in entries]
+    if (
+        len(entry_ids) != len(set(entry_ids))
+        or set(entry_ids) != set(native_evidence)
+        or entry_ids != campaign_screen.get("native_shortlist_candidate_ids")
+    ):
+        raise MechanicsContractError("route-shape native attempt coverage changed")
+
+    baseline_pairs = control_receipt.get("physical_solid_blocker_pairs")
+    baseline_count = control_receipt.get("physical_solid_blocker_pair_count")
+    if (
+        control_receipt.get("status") != "DIAGNOSTIC_BLOCKERS_OBSERVED"
+        or not isinstance(baseline_pairs, list)
+        or len(baseline_pairs) != baseline_count
+        or not isinstance(control_receipt.get("samples"), list)
+    ):
+        raise MechanicsContractError("ARM-199 native control is not admissible")
+
+    retained: list[dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
+    for entry in entries:
+        candidate_id = entry["candidate_id"]
+        evidence = native_evidence[candidate_id]
+        if evidence.get("status") == "ERROR":
+            if (
+                not isinstance(evidence.get("message"), str)
+                or not isinstance(evidence.get("type"), str)
+            ):
+                raise MechanicsContractError(
+                    f"native failure {candidate_id} is not explicit"
+                )
+            failures.append({
+                "candidate_id": candidate_id,
+                "rank": entry["rank"],
+                "attempt_status": "PRE_ADMISSION_ERROR",
+                "error_type": evidence["type"],
+                "error_message": evidence["message"],
+                "status_sha256": _canonical_sha256(evidence),
+                "automatic_retry_performed": False,
+            })
+            continue
+
+        receipt_hash = verified(evidence, "receipt_sha256", "native receipt")
+        if (
+            evidence.get("schema")
+            not in {
+                TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+                TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            }
+            or evidence.get("status")
+            not in {"DIAGNOSTIC_BLOCKERS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED"}
+            or evidence.get("hardware_access") is not False
+            or evidence.get("physical_authority") is not False
+            or evidence.get("controller_commands") != []
+            or evidence.get("hardware_writes") != 0
+            or evidence.get("physical_movements") != 0
+            or evidence.get("gate_promotions") != []
+            or evidence.get("source_bindings", {}).get("ik_receipt_sha256")
+            != entry.get("document_hashes", {}).get("ik_receipt.json")
+            or evidence.get("source_bindings", {}).get("request_sha256")
+            != entry.get("document_hashes", {}).get(
+                "policy_bound_collision_request.json"
+            )
+            or not isinstance(evidence.get("samples"), list)
+            or len(evidence["samples"]) != evidence.get("bounded_sample_count")
+            or len(evidence.get("physical_solid_blocker_pairs", []))
+            != evidence.get("physical_solid_blocker_pair_count")
+        ):
+            raise MechanicsContractError(
+                f"route-shape native receipt {candidate_id} is not admissible"
+            )
+        physical_count = int(evidence["physical_solid_blocker_pair_count"])
+        retained.append({
+            "candidate_id": candidate_id,
+            "candidate": entry["candidate"],
+            "shortlist_rank": entry["rank"],
+            "native_receipt_sha256": receipt_hash,
+            "native_receipt_schema": evidence["schema"],
+            "station_route_predicate_applied": evidence["schema"]
+            == TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            "native_status": evidence["status"],
+            "bounded_sample_count": evidence["bounded_sample_count"],
+            "samples_with_overlaps": evidence["samples_with_overlaps"],
+            "physical_solid_blocker_pair_count": physical_count,
+            "physical_solid_blocker_pairs": evidence[
+                "physical_solid_blocker_pairs"
+            ],
+            "planning_envelope_blocker_pair_count": evidence[
+                "planning_envelope_blocker_pair_count"
+            ],
+            "planning_envelope_blocker_pairs": evidence[
+                "planning_envelope_blocker_pairs"
+            ],
+            "policy_excluded_pair_count": evidence["policy_excluded_pair_count"],
+            "unreviewed_blocker_pair_count": evidence[
+                "unreviewed_blocker_pair_count"
+            ],
+            "improves_physical_pair_count_over_control": physical_count
+            < int(baseline_count),
+            "raw_native_samples": evidence["samples"],
+        })
+
+    retained.sort(
+        key=lambda item: (
+            int(item["physical_solid_blocker_pair_count"]),
+            float(item["samples_with_overlaps"])
+            / float(item["bounded_sample_count"]),
+            int(item["shortlist_rank"]),
+            str(item["candidate_id"]),
+        )
+    )
+    for rank, item in enumerate(retained, start=1):
+        item["native_rank"] = rank
+    improvements = [
+        item for item in retained
+        if item["improves_physical_pair_count_over_control"]
+    ]
+    selected_id = improvements[0]["candidate_id"] if improvements else None
+    result: dict[str, Any] = {
+        "schema": ROUTE_SHAPE_NATIVE_SELECTION_SCHEMA,
+        "status": (
+            "NATIVE_ROUTE_SHAPE_IMPROVEMENT_RETAINED"
+            if selected_id is not None
+            else (
+                "INCOMPLETE_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED"
+                if failures
+                else "NO_NATIVE_ROUTE_SHAPE_IMPROVEMENT_RETAINED"
+            )
+        ),
+        "source_campaign_plan_sha256": plan_hash,
+        "source_campaign_screen_sha256": screen_hash,
+        "source_shortlist_manifest_sha256": manifest_hash,
+        "source_control_receipt_sha256": control_hash,
+        "control_physical_solid_blocker_pair_count": baseline_count,
+        "control_physical_solid_blocker_pairs": baseline_pairs,
+        "attempted_candidate_count": len(entry_ids),
+        "completed_native_replay_count": len(retained),
+        "failed_pre_admission_count": len(failures),
+        "native_improvement_over_control": selected_id is not None,
+        "selected_candidate_id": selected_id,
+        "rank_order": [item["candidate_id"] for item in retained],
+        "ranking_rule": [
+            "physical_solid_blocker_pair_count ASC",
+            "samples_with_overlaps / bounded_sample_count ASC",
+            "shortlist_rank ASC",
+            "candidate_id ASC",
+        ],
+        "retained_results": retained,
+        "failed_attempts": failures,
+        "automatic_retries_performed": 0,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "One fixed candidate stopped at pre-admission and was not retried.",
+            "Completed attempts used v3 primitive-attributed diagnostics without "
+            "the separate station-route-predicate input; physical and planning "
+            "pairs remain separate, but route-predicate replay is incomplete.",
+            "Completed native replays remain diagnostic, not continuous-clearance proof.",
+            "No route shape is installed and ARM-202 grants no physical authority.",
+        ],
+    }
+    result["selection_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def build_robot_tcp_collision_replay_request(
     ik_receipt: dict[str, Any],
     collision_candidate: dict[str, Any],
@@ -5599,11 +5828,18 @@ def main() -> int:
         action="store_true",
         help="retain native replay inputs for the ARM-201 ranked shortlist",
     )
+    parser.add_argument(
+        "--retain-route-shape-native-results",
+        action="store_true",
+        help="retain fixed ARM-202 native results and explicit attempt failures",
+    )
     parser.add_argument("--route-shape-campaign-plan", type=Path)
     parser.add_argument("--route-shape-campaign-screen", type=Path)
     parser.add_argument("--route-shape-candidate-id")
     parser.add_argument("--route-shape-evidence-dir", type=Path)
     parser.add_argument("--route-shape-shortlist-output-dir", type=Path)
+    parser.add_argument("--route-shape-native-replay-dir", type=Path)
+    parser.add_argument("--route-shape-native-control-receipt", type=Path)
     parser.add_argument("--placement-tcp-native-selection", type=Path)
     parser.add_argument("--physical-blocker-experiment-plan", type=Path)
     parser.add_argument(
@@ -5652,6 +5888,7 @@ def main() -> int:
             and not args.materialize_route_shape_candidate
             and not args.screen_route_shape_campaign
             and not args.materialize_route_shape_shortlist
+            and not args.retain_route_shape_native_results
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -5676,6 +5913,7 @@ def main() -> int:
             and not args.materialize_route_shape_candidate
             and not args.screen_route_shape_campaign
             and not args.materialize_route_shape_shortlist
+            and not args.retain_route_shape_native_results
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -5694,7 +5932,53 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.materialize_route_shape_shortlist:
+        if args.retain_route_shape_native_results:
+            required = (
+                args.route_shape_campaign_plan,
+                args.route_shape_campaign_screen,
+                args.route_shape_shortlist_output_dir,
+                args.route_shape_native_replay_dir,
+                args.route_shape_native_control_receipt,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "route-shape native retention requires its plan, screen, "
+                    "shortlist manifest, replay directory, and control receipt"
+                )
+            campaign_plan = json.loads(
+                args.route_shape_campaign_plan.resolve(strict=True).read_bytes()
+            )
+            campaign_screen = json.loads(
+                args.route_shape_campaign_screen.resolve(strict=True).read_bytes()
+            )
+            shortlist_manifest = json.loads(
+                (
+                    args.route_shape_shortlist_output_dir.resolve(strict=True)
+                    / "manifest.json"
+                ).read_bytes()
+            )
+            replay_root = args.route_shape_native_replay_dir.resolve(strict=True)
+            native_evidence: dict[str, dict[str, Any]] = {}
+            for entry in shortlist_manifest.get("entries", []):
+                candidate_dir = replay_root / entry["candidate_id"]
+                receipt_path = candidate_dir / "receipt.json"
+                status_path = candidate_dir / "status.json"
+                evidence_path = receipt_path if receipt_path.is_file() else status_path
+                native_evidence[entry["candidate_id"]] = json.loads(
+                    evidence_path.resolve(strict=True).read_bytes()
+                )
+            result = retain_route_shape_native_results(
+                campaign_plan,
+                campaign_screen,
+                shortlist_manifest,
+                json.loads(
+                    args.route_shape_native_control_receipt.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                native_evidence,
+            )
+        elif args.materialize_route_shape_shortlist:
             required = (
                 args.route_shape_campaign_plan,
                 args.route_shape_campaign_screen,
