@@ -56,6 +56,12 @@ PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA = (
 PLACEMENT_TCP_SEARCH_PLAN_SCHEMA = (
     "tactevra.isaac_lm1_placement_tcp_search_plan.v1"
 )
+PLACEMENT_TCP_SEARCH_SCREEN_SCHEMA = (
+    "tactevra.isaac_lm1_placement_tcp_search_screen.v1"
+)
+PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA = (
+    "tactevra.isaac_lm1_placement_tcp_native_selection.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -1500,6 +1506,7 @@ def screen_robot_tcp_cartesian_schedule_ik(
     workspace: Path,
     experiment_plan: dict[str, Any] | None = None,
     source_cartesian_request: dict[str, Any] | None = None,
+    placement_tcp_candidate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Solve a regenerated Cartesian request with the canonical IK gates."""
     if request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA:
@@ -1621,7 +1628,13 @@ def screen_robot_tcp_cartesian_schedule_ik(
         from rocell.application.typing_trajectory_ik_screen_v1 import (
             canonicalize_typing_ik_evidence_v1,
         )
-        from rocell.geometry import JointPosition, Point3Mm
+        from rocell.geometry import (
+            JointPosition,
+            Point3Mm,
+            RigidTransform,
+            Rotation3,
+            Vec3,
+        )
         from rocell.kinematics import (
             ARM_JOINT_NAMES,
             BoardToolTipTarget,
@@ -1645,11 +1658,69 @@ def screen_robot_tcp_cartesian_schedule_ik(
     )
     if virtual_profile.source_sha256 != expected_virtual_hash:
         raise MechanicsContractError("virtual commissioning profile lineage changed")
-    tool_length_mm = float(
-        virtual_profile.study_input.keyboard_tool_length_mm
-    )
+    tool_length_mm = float(virtual_profile.study_input.keyboard_tool_length_mm)
+    board_t_world = virtual_profile.study_input.board_T_vendor_world
+    if placement_tcp_candidate is not None:
+        candidate_id = placement_tcp_candidate.get("candidate_id")
+        matrix = placement_tcp_candidate.get("robot_placement_matrix_row_major")
+        if (
+            not isinstance(candidate_id, str)
+            or not candidate_id.startswith("placement-tcp-")
+            or not isinstance(matrix, list)
+            or len(matrix) != 16
+        ):
+            raise MechanicsContractError("placement/TCP candidate is invalid")
+        matrix = [
+            _finite_number(value, "placement/TCP candidate matrix")
+            for value in matrix
+        ]
+        expected_matrix = [
+            matrix[0], matrix[1], matrix[2], matrix[3],
+            matrix[4], matrix[5], matrix[6], matrix[7],
+            matrix[8], matrix[9], matrix[10], matrix[11],
+            0.0, 0.0, 0.0, 1.0,
+        ]
+        if matrix != expected_matrix:
+            raise MechanicsContractError(
+                "placement/TCP candidate matrix is not a rigid affine matrix"
+            )
+        try:
+            board_t_world = RigidTransform(
+                "board",
+                "base_link",
+                Rotation3(tuple(
+                    matrix[index]
+                    for index in (0, 1, 2, 4, 5, 6, 8, 9, 10)
+                )),
+                Vec3(matrix[3], matrix[7], matrix[11]),
+            )
+        except (TypeError, ValueError) as exc:
+            raise MechanicsContractError(
+                "placement/TCP candidate matrix is not a rigid transform"
+            ) from exc
+        tool_length_mm = _finite_number(
+            placement_tcp_candidate.get("keyboard_tcp_length_mm"),
+            "placement/TCP keyboard tool length",
+        )
+        if tool_length_mm <= 0.0:
+            raise MechanicsContractError(
+                "placement/TCP keyboard tool length must be positive"
+            )
     scenario = context.scenario
     model = load_pinned_urdf(scenario.model_path, scenario.model_sha256).model
+    if placement_tcp_candidate is not None:
+        fixed = model.joint("world_to_base_link")
+        if (
+            fixed.joint_type != "fixed"
+            or fixed.parent_link != model.root_link
+            or fixed.child_link != "base_link"
+        ):
+            raise MechanicsContractError(
+                "pinned vendor world-to-base transform changed"
+            )
+        # The candidate matrix is B_T_Ru while the IK model is rooted at Wv.
+        # Derive B_T_Wv exactly as the governed virtual-profile loader does.
+        board_t_world = board_t_world.compose(fixed.transform_at(None).inverse())
     initial_seed = source_samples[0].get("joint_positions_rad")
     if not isinstance(initial_seed, dict) or tuple(initial_seed) != ARM_JOINT_NAMES:
         raise MechanicsContractError("source bundle lacks the canonical initial joint seed")
@@ -1660,7 +1731,7 @@ def screen_robot_tcp_cartesian_schedule_ik(
     bounds = scenario.controller_joint_intersection_rad
     solver = RoArmM3NumericalIk(
         model=model,
-        board_T_world=virtual_profile.study_input.board_T_vendor_world,
+        board_T_world=board_t_world,
         hand_tcp_to_tip_z_mm=-tool_length_mm,
         fixed_gripper_position=scenario.fixed_gripper_position,
         ready_arm_joint_positions={
@@ -1802,7 +1873,696 @@ def screen_robot_tcp_cartesian_schedule_ik(
                 "route_variant_classification"
             ],
         })
+    if placement_tcp_candidate is not None:
+        result.update({
+            "placement_tcp_candidate_id": placement_tcp_candidate["candidate_id"],
+            "robot_placement_matrix_row_major": list(
+                placement_tcp_candidate["robot_placement_matrix_row_major"]
+            ),
+            "placement_tcp_candidate_classification": placement_tcp_candidate[
+                "candidate_classification"
+            ],
+        })
     result["receipt_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def _placement_tcp_candidate_rank_key(
+    result: dict[str, Any],
+) -> tuple[int, int, float, float, str]:
+    """Return the exact predeclared ARM-199 deterministic ranking key."""
+    metrics = result["ik_metrics"]
+    return (
+        int(result["physical_blocker_pair_count"]),
+        int(result["blocked_sample_count"]),
+        -float(metrics["minimum_normalized_arm_joint_margin"]),
+        float(metrics["maximum_position_error_mm"]),
+        str(result["candidate_id"]),
+    )
+
+
+def execute_placement_tcp_search(
+    search_plan: dict[str, Any],
+    route_variant_request: dict[str, Any],
+    source_bundle: dict[str, Any],
+    profile: dict[str, Any],
+    experiment_plan: dict[str, Any],
+    source_cartesian_request: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    collision_pair_policy: dict[str, Any],
+    station_route_predicate: dict[str, Any],
+    *,
+    workspace: Path,
+) -> dict[str, Any]:
+    """Run bounded canonical IK and exact OBB screening for every plan candidate.
+
+    This is an exploratory, zero-authority screen.  It deliberately does not
+    install the digital collision candidate, prove continuous clearance, run
+    native Isaac, or create any controller command.
+    """
+    claimed_plan_hash = search_plan.get("plan_sha256")
+    unsigned_plan = dict(search_plan)
+    unsigned_plan.pop("plan_sha256", None)
+    if (
+        search_plan.get("schema") != PLACEMENT_TCP_SEARCH_PLAN_SCHEMA
+        or search_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING"
+        or claimed_plan_hash != _canonical_sha256(unsigned_plan)
+    ):
+        raise MechanicsContractError("placement/TCP search plan is invalid")
+    candidates = search_plan.get("candidates")
+    if (
+        not isinstance(candidates, list)
+        or not candidates
+        or len(candidates) != search_plan.get("candidate_count")
+        or len(candidates) > 128
+    ):
+        raise MechanicsContractError("placement/TCP candidate collection is invalid")
+    if len({item.get("candidate_id") for item in candidates}) != len(candidates):
+        raise MechanicsContractError("placement/TCP candidate ids are not unique")
+
+    candidate_hash = collision_candidate.get("candidate_sha256")
+    candidate_unsigned = dict(collision_candidate)
+    candidate_unsigned.pop("candidate_sha256", None)
+    policy_hash = collision_pair_policy.get("policy_sha256")
+    policy_unsigned = dict(collision_pair_policy)
+    policy_unsigned.pop("policy_sha256", None)
+    predicate_hash = station_route_predicate.get("predicate_sha256")
+    predicate_unsigned = dict(station_route_predicate)
+    predicate_unsigned.pop("predicate_sha256", None)
+    if (
+        candidate_hash != _canonical_sha256(candidate_unsigned)
+        or policy_hash != _canonical_sha256(policy_unsigned)
+        or predicate_hash != _canonical_sha256(predicate_unsigned)
+        or candidate_hash != search_plan.get("source_collision_candidate_sha256")
+        or policy_hash != search_plan.get("source_collision_pair_policy_sha256")
+        or predicate_hash != search_plan.get("source_station_route_predicate_sha256")
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+        or collision_pair_policy.get("status")
+        != "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY"
+        or station_route_predicate.get("status") != "PASS"
+    ):
+        raise MechanicsContractError("placement/TCP collision lineage changed")
+    for document, label in (
+        (search_plan, "search plan"),
+        (route_variant_request, "route variant"),
+        (experiment_plan, "experiment plan"),
+        (collision_candidate, "collision candidate"),
+        (collision_pair_policy, "collision pair policy"),
+        (station_route_predicate, "station route predicate"),
+    ):
+        if (
+            document.get("physical_authority", False) is not False
+            or document.get("hardware_access", False) is not False
+            or document.get("controller_commands", []) != []
+            or document.get("hardware_writes", 0) != 0
+            or document.get("hardware_write_count", 0) != 0
+            or document.get("physical_movements", 0) != 0
+            or document.get("physical_movement_count", 0) != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    try:
+        from rocell.application._pinned_model import load_pinned_urdf
+        from rocell.application.context import load_simulation_context
+        from rocell.application.trajectory_simulation import TrajectorySimulationError
+        from rocell.geometry import JointPosition, RigidTransform, Rotation3, Vec3
+        from rocell.kinematics import ARM_JOINT_NAMES
+        from rocell.simulation.collision import (
+            CollisionBindingMode,
+            CollisionBody,
+            CollisionBodyRequirement,
+            CollisionBodyRole,
+            CollisionClearanceEvidenceState,
+            CollisionClearancePolicy,
+            CollisionEvaluationPolicy,
+            CollisionEvaluationStatus,
+            CollisionEvidenceState,
+            CollisionExclusionEvidenceState,
+            CollisionExclusionScope,
+            CollisionGeometryContract,
+            CollisionPairExclusion,
+            CollisionPose,
+            OrientedBoxMm,
+            evaluate_collision_pose,
+        )
+    except ImportError as exc:
+        raise MechanicsContractError(
+            "offline collision runtime is unavailable; include software/src on PYTHONPATH"
+        ) from exc
+
+    physical_ids = station_route_predicate.get("physical_workcell_body_ids")
+    if not isinstance(physical_ids, list) or not physical_ids:
+        raise MechanicsContractError("station predicate lacks physical workcell ids")
+    physical_id_set = set(physical_ids)
+    robot_documents = collision_candidate.get("robot_bodies")
+    workcell_documents = collision_candidate.get("workcell_bodies")
+    if not isinstance(robot_documents, list) or not isinstance(workcell_documents, list):
+        raise MechanicsContractError("collision candidate body collections are invalid")
+    selected_documents = [
+        *robot_documents,
+        *(item for item in workcell_documents if item.get("body_id") in physical_id_set),
+    ]
+    if {item.get("body_id") for item in selected_documents if item in workcell_documents} != physical_id_set:
+        raise MechanicsContractError("physical workcell body coverage changed")
+
+    def primitive(document: dict[str, Any]) -> OrientedBoxMm:
+        if document.get("kind") != "oriented_box":
+            raise MechanicsContractError("ARM-199 requires oriented-box primitives")
+        return OrientedBoxMm(
+            Vec3.from_iterable(document["center_mm"]),
+            Vec3.from_iterable(document["half_extents_mm"]),
+            Rotation3(tuple(document["rotation_row_major"])),
+        )
+
+    requirements = []
+    bodies = []
+    for document in selected_documents:
+        is_static = document["body_id"] in physical_id_set
+        role = (
+            CollisionBodyRole.STATIC_ENVIRONMENT
+            if is_static else CollisionBodyRole.ROBOT_LINK
+        )
+        mode = (
+            CollisionBindingMode.STATIC_ROOT
+            if is_static else CollisionBindingMode.RIGID_FRAME
+        )
+        requirements.append(CollisionBodyRequirement(
+            document["body_id"], document["parent_frame"], role, mode,
+            "ARM-199 exact exploratory full-link OBB screen",
+        ))
+        bodies.append(CollisionBody(
+            document["body_id"], document["parent_frame"], role,
+            CollisionEvidenceState.PINNED_DIGITAL,
+            tuple(primitive(item) for item in document["primitives"]),
+            mode,
+            f"collision candidate {candidate_hash}",
+        ))
+    exclusions = tuple(
+        CollisionPairExclusion(
+            pair[0], pair[1],
+            CollisionExclusionScope.URDF_ADJACENT_DIAGNOSTIC,
+            CollisionExclusionEvidenceState.PINNED_KINEMATIC_DIAGNOSTIC,
+            "accepted directly connected diagnostic pair",
+            f"collision pair policy {policy_hash}",
+        )
+        for pair in collision_pair_policy.get("accepted_exclusion_pairs", [])
+    )
+    contract = CollisionGeometryContract(
+        "TACTEVRA-ARM199-EXPLORATORY-OBB-V1", "board",
+        tuple(requirements), tuple(bodies), exclusions,
+    )
+    # The primitive kernel requires a positive policy.  One picometre is used
+    # only to make touching count as blocked without claiming measured clearance.
+    clearance = CollisionClearancePolicy(
+        1e-9, 0.0, 0.0, CollisionClearanceEvidenceState.PINNED_DIGITAL,
+        "ARM-199 numerical touching threshold; not measured clearance",
+    )
+    evaluation_policy = CollisionEvaluationPolicy(clearance_policy=clearance)
+    root = workspace.resolve(strict=True)
+    context = load_simulation_context(root, root / "software/config/system_manifest.json")
+    model = load_pinned_urdf(
+        context.scenario.model_path, context.scenario.model_sha256
+    ).model
+    remaining = set(model.movable_joint_names) - set(ARM_JOINT_NAMES)
+    if len(remaining) != 1:
+        raise MechanicsContractError("pinned robot gripper joint topology changed")
+    gripper_joint = next(iter(remaining))
+
+    outcomes: list[dict[str, Any]] = []
+    for candidate in candidates:
+        try:
+            ik = screen_robot_tcp_cartesian_schedule_ik(
+                route_variant_request,
+                source_bundle,
+                profile,
+                workspace=root,
+                experiment_plan=experiment_plan,
+                source_cartesian_request=source_cartesian_request,
+                placement_tcp_candidate=candidate,
+            )
+        except TrajectorySimulationError as exc:
+            outcomes.append({
+                "candidate_id": candidate["candidate_id"],
+                "candidate_classification": candidate["candidate_classification"],
+                "candidate": candidate,
+                "ik_receipt_sha256": None,
+                "ik_status": "BLOCKED_CANONICAL_IK_OR_CONTINUITY",
+                "ik_all_samples_accepted": False,
+                "evaluated_sample_count": 0,
+                "ik_metrics": {
+                    "maximum_position_error_mm": None,
+                    "minimum_normalized_arm_joint_margin": None,
+                    "maximum_adjacent_joint_delta_rad": None,
+                },
+                "collision_screening_executed": False,
+                "rejection_reasons": [
+                    "CANONICAL_IK_EVIDENCE_SHAPE_REJECTED"
+                ],
+                "rejection_detail": str(exc),
+            })
+            continue
+        outcome: dict[str, Any] = {
+            "candidate_id": candidate["candidate_id"],
+            "candidate_classification": candidate["candidate_classification"],
+            "candidate": candidate,
+            "ik_receipt_sha256": ik["receipt_sha256"],
+            "ik_status": ik["status"],
+            "ik_all_samples_accepted": ik["ik_all_samples_accepted"],
+            "evaluated_sample_count": ik["evaluated_sample_count"],
+            "ik_metrics": ik["metrics"],
+            "collision_screening_executed": False,
+            "rejection_reasons": [],
+        }
+        if not ik["ik_all_samples_accepted"]:
+            outcome["rejection_reasons"] = ["CANONICAL_IK_OR_CONTINUITY_REJECTED"]
+            outcomes.append(outcome)
+            continue
+
+        matrix = candidate["robot_placement_matrix_row_major"]
+        board_t_base = RigidTransform(
+            "board", "base_link",
+            Rotation3(tuple(
+                matrix[index] for index in (0, 1, 2, 4, 5, 6, 8, 9, 10)
+            )),
+            Vec3(matrix[3], matrix[7], matrix[11]),
+        )
+        fixed = model.joint("world_to_base_link")
+        board_t_world = board_t_base.compose(fixed.transform_at(None).inverse())
+        blocked_samples = 0
+        physical_pairs: set[tuple[str, str]] = set()
+        all_pairs: set[tuple[str, str]] = set()
+        sample_reports: list[dict[str, Any]] = []
+        for index, joint_result in enumerate(ik["joint_results"]):
+            positions = {
+                name: JointPosition.radians(
+                    joint_result["solution_arm_joint_positions_rad"][name]
+                ) for name in ARM_JOINT_NAMES
+            }
+            positions[gripper_joint] = context.scenario.fixed_gripper_position
+            base_transforms = model.forward_kinematics(positions)
+            board_transforms = {
+                frame: board_t_world.compose(transform)
+                for frame, transform in base_transforms.items()
+            }
+            pose = CollisionPose(
+                f"{candidate['candidate_id']}-sample-{index:04d}",
+                "board",
+                {
+                    body["parent_frame"]: board_transforms[body["parent_frame"]]
+                    for body in robot_documents
+                },
+            )
+            evaluated = evaluate_collision_pose(contract, pose, evaluation_policy)
+            pairs = {
+                tuple(sorted((item.first_body_id, item.second_body_id)))
+                for item in evaluated.collisions
+            }
+            sample_physical = {
+                pair for pair in pairs if any(item in physical_id_set for item in pair)
+            }
+            all_pairs.update(pairs)
+            physical_pairs.update(sample_physical)
+            if evaluated.status is CollisionEvaluationStatus.COLLISION_DETECTED:
+                blocked_samples += 1
+            sample_reports.append({
+                "sample_sequence": index,
+                "collision_report_sha256": evaluated.report_hash,
+                "status": evaluated.status.value,
+                "collision_pairs": [list(pair) for pair in sorted(pairs)],
+                "physical_blocker_pairs": [
+                    list(pair) for pair in sorted(sample_physical)
+                ],
+            })
+        outcome.update({
+            "collision_screening_executed": True,
+            "collision_contract_sha256": contract.content_hash,
+            "collision_policy_sha256": evaluation_policy.content_hash,
+            "blocked_sample_count": blocked_samples,
+            "physical_blocker_pair_count": len(physical_pairs),
+            "physical_blocker_pairs": [list(pair) for pair in sorted(physical_pairs)],
+            "all_collision_pair_count": len(all_pairs),
+            "all_collision_pairs": [list(pair) for pair in sorted(all_pairs)],
+            "sample_reports": sample_reports,
+            "rejection_reasons": (
+                ["DISCRETE_FULL_LINK_COLLISION_BLOCKED"]
+                if blocked_samples else []
+            ),
+        })
+        outcomes.append(outcome)
+
+    ranked = sorted(
+        (item for item in outcomes if item["collision_screening_executed"]),
+        key=_placement_tcp_candidate_rank_key,
+    )
+    shortlist_count = min(
+        int(search_plan["maximum_native_shortlist_count"]), len(ranked)
+    )
+    shortlist = [item["candidate_id"] for item in ranked[:shortlist_count]]
+    result: dict[str, Any] = {
+        "schema": PLACEMENT_TCP_SEARCH_SCREEN_SCHEMA,
+        "status": (
+            "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY"
+            if shortlist else "BLOCKED_NO_IK_ACCEPTED_CANDIDATES"
+        ),
+        "source_search_plan_sha256": claimed_plan_hash,
+        "source_route_variant_request_sha256": route_variant_request[
+            "request_sha256"
+        ],
+        "source_collision_candidate_sha256": candidate_hash,
+        "source_collision_pair_policy_sha256": policy_hash,
+        "source_station_route_predicate_sha256": predicate_hash,
+        "candidate_count": len(candidates),
+        "ik_accepted_candidate_count": len(ranked),
+        "ik_rejected_candidate_count": len(candidates) - len(ranked),
+        "collision_screened_candidate_count": len(ranked),
+        "outcomes": outcomes,
+        "ranked_candidate_ids": [item["candidate_id"] for item in ranked],
+        "native_shortlist_candidate_ids": shortlist,
+        "native_shortlist_count": len(shortlist),
+        "maximum_native_shortlist_count": search_plan[
+            "maximum_native_shortlist_count"
+        ],
+        "ranking_order": list(search_plan["ranking_order"]),
+        "exact_obb_collision_kernel_used": True,
+        "collision_geometry_changed": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "native_isaac_replay_executed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "exploratory_uninstalled_collision_candidate_only",
+            "discrete_samples_do_not_prove_continuous_clearance",
+            "one_picometre_touching_threshold_is_not_measured_clearance",
+            "native_isaac_replay_is_limited_to_the_retained_shortlist",
+        ],
+    }
+    result["screen_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def materialize_placement_tcp_native_shortlist(
+    search_plan: dict[str, Any],
+    search_screen: dict[str, Any],
+    route_variant_request: dict[str, Any],
+    source_bundle: dict[str, Any],
+    profile: dict[str, Any],
+    experiment_plan: dict[str, Any],
+    source_cartesian_request: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    collision_pair_policy: dict[str, Any],
+    toolchain_lock: dict[str, Any],
+    *,
+    workspace: Path,
+    output_dir: Path,
+) -> dict[str, Any]:
+    """Reproduce and retain exact native inputs for the selected shortlist."""
+    plan_hash = search_plan.get("plan_sha256")
+    unsigned_plan = dict(search_plan)
+    unsigned_plan.pop("plan_sha256", None)
+    screen_hash = search_screen.get("screen_sha256")
+    unsigned_screen = dict(search_screen)
+    unsigned_screen.pop("screen_sha256", None)
+    if (
+        plan_hash != _canonical_sha256(unsigned_plan)
+        or screen_hash != _canonical_sha256(unsigned_screen)
+        or search_screen.get("schema") != PLACEMENT_TCP_SEARCH_SCREEN_SCHEMA
+        or search_screen.get("source_search_plan_sha256") != plan_hash
+        or search_screen.get("status")
+        != "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY"
+    ):
+        raise MechanicsContractError("placement/TCP shortlist lineage is invalid")
+    shortlist = search_screen.get("native_shortlist_candidate_ids")
+    if (
+        not isinstance(shortlist, list)
+        or not shortlist
+        or len(shortlist) > search_plan.get("maximum_native_shortlist_count", 0)
+        or len(shortlist) != len(set(shortlist))
+    ):
+        raise MechanicsContractError("placement/TCP native shortlist is invalid")
+    candidates = {
+        item["candidate_id"]: item for item in search_plan.get("candidates", [])
+    }
+    outcomes = {
+        item["candidate_id"]: item for item in search_screen.get("outcomes", [])
+    }
+    if any(item not in candidates or item not in outcomes for item in shortlist):
+        raise MechanicsContractError("shortlist references an unknown candidate")
+
+    root = output_dir.resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    entries: list[dict[str, Any]] = []
+    for rank, candidate_id in enumerate(shortlist, start=1):
+        candidate = candidates[candidate_id]
+        expected = outcomes[candidate_id]
+        ik = screen_robot_tcp_cartesian_schedule_ik(
+            route_variant_request,
+            source_bundle,
+            profile,
+            workspace=workspace,
+            experiment_plan=experiment_plan,
+            source_cartesian_request=source_cartesian_request,
+            placement_tcp_candidate=candidate,
+        )
+        if (
+            ik.get("receipt_sha256") != expected.get("ik_receipt_sha256")
+            or ik.get("ik_all_samples_accepted") is not True
+        ):
+            raise MechanicsContractError(
+                f"shortlist candidate {candidate_id} did not reproduce exact IK"
+            )
+        raw_request = build_robot_tcp_collision_replay_request(
+            ik, collision_candidate, toolchain_lock
+        )
+        bound_request = bind_collision_pair_policy_request(
+            raw_request, collision_pair_policy
+        )
+        candidate_dir = root / candidate_id
+        candidate_dir.mkdir(parents=True, exist_ok=True)
+        documents = (
+            ("ik_receipt.json", ik, "receipt_sha256"),
+            ("collision_request.json", raw_request, "request_sha256"),
+            (
+                "policy_bound_collision_request.json",
+                bound_request,
+                "request_sha256",
+            ),
+        )
+        paths: dict[str, str] = {}
+        hashes: dict[str, str] = {}
+        for filename, document, hash_field in documents:
+            path = candidate_dir / filename
+            path.write_text(
+                json.dumps(document, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            paths[filename] = str(path)
+            hashes[filename] = document[hash_field]
+        entries.append({
+            "rank": rank,
+            "candidate_id": candidate_id,
+            "candidate": candidate,
+            "paths": paths,
+            "document_hashes": hashes,
+        })
+    manifest: dict[str, Any] = {
+        "schema": "tactevra.isaac_lm1_placement_tcp_native_shortlist.v1",
+        "status": "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY",
+        "source_search_plan_sha256": plan_hash,
+        "source_search_screen_sha256": screen_hash,
+        "shortlist_count": len(entries),
+        "entries": entries,
+        "native_isaac_replay_executed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    manifest["manifest_sha256"] = _canonical_sha256(manifest)
+    return manifest
+
+
+def retain_placement_tcp_native_results(
+    search_plan: dict[str, Any],
+    search_screen: dict[str, Any],
+    shortlist_manifest: dict[str, Any],
+    native_receipts: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Retain and rank ARM-199 native results without granting authority.
+
+    The retained evidence intentionally includes every native sample and raw
+    collision pair.  A lower-ranked hypothesis is evidence too: it prevents a
+    later campaign from presenting a known-worse placement as unexplored.
+    """
+    def verified(document: dict[str, Any], digest_field: str, label: str) -> str:
+        claimed = document.get(digest_field)
+        unsigned = dict(document)
+        unsigned.pop(digest_field, None)
+        if not isinstance(claimed, str) or claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} digest is invalid")
+        return claimed
+
+    plan_hash = verified(search_plan, "plan_sha256", "search plan")
+    screen_hash = verified(search_screen, "screen_sha256", "search screen")
+    manifest_hash = verified(
+        shortlist_manifest, "manifest_sha256", "shortlist manifest"
+    )
+    if (
+        search_plan.get("schema") != PLACEMENT_TCP_SEARCH_PLAN_SCHEMA
+        or search_screen.get("schema") != PLACEMENT_TCP_SEARCH_SCREEN_SCHEMA
+        or shortlist_manifest.get("schema")
+        != "tactevra.isaac_lm1_placement_tcp_native_shortlist.v1"
+        or search_screen.get("source_search_plan_sha256") != plan_hash
+        or shortlist_manifest.get("source_search_plan_sha256") != plan_hash
+        or shortlist_manifest.get("source_search_screen_sha256") != screen_hash
+        or shortlist_manifest.get("status")
+        != "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY"
+    ):
+        raise MechanicsContractError("native result selection lineage is invalid")
+    for document, label in (
+        (search_plan, "search plan"),
+        (search_screen, "search screen"),
+        (shortlist_manifest, "shortlist manifest"),
+    ):
+        if (
+            document.get("hardware_access", False) is not False
+            or document.get("physical_authority", False) is not False
+            or document.get("controller_commands", []) != []
+            or document.get("hardware_writes", 0) != 0
+            or document.get("physical_movements", 0) != 0
+            or document.get("gate_promotions", []) != []
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    manifest_entries = shortlist_manifest.get("entries")
+    if not isinstance(manifest_entries, list) or not manifest_entries:
+        raise MechanicsContractError("shortlist manifest has no entries")
+    entry_ids = [item.get("candidate_id") for item in manifest_entries]
+    if (
+        len(entry_ids) != len(set(entry_ids))
+        or set(entry_ids) != set(native_receipts)
+        or entry_ids != search_screen.get("native_shortlist_candidate_ids")
+    ):
+        raise MechanicsContractError("native receipt candidate coverage changed")
+    outcomes = {
+        item.get("candidate_id"): item for item in search_screen.get("outcomes", [])
+    }
+    candidates = {
+        item.get("candidate_id"): item for item in search_plan.get("candidates", [])
+    }
+    retained: list[dict[str, Any]] = []
+    for entry in manifest_entries:
+        candidate_id = entry["candidate_id"]
+        receipt = native_receipts[candidate_id]
+        receipt_hash = verified(receipt, "receipt_sha256", "native receipt")
+        if (
+            candidate_id not in outcomes
+            or candidate_id not in candidates
+            or receipt.get("schema")
+            != TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+            or receipt.get("status")
+            not in {"DIAGNOSTIC_BLOCKERS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED"}
+            or receipt.get("hardware_access") is not False
+            or receipt.get("physical_authority") is not False
+            or receipt.get("controller_commands") != []
+            or receipt.get("hardware_writes") != 0
+            or receipt.get("physical_movements") != 0
+            or receipt.get("gate_promotions") != []
+            or receipt.get("source_bindings", {}).get("ik_receipt_sha256")
+            != entry.get("document_hashes", {}).get("ik_receipt.json")
+            or receipt.get("source_bindings", {}).get("request_sha256")
+            != entry.get("document_hashes", {}).get(
+                "policy_bound_collision_request.json"
+            )
+            or not isinstance(receipt.get("samples"), list)
+            or len(receipt["samples"]) != receipt.get("bounded_sample_count")
+            or len(receipt.get("physical_solid_blocker_pairs", []))
+            != receipt.get("physical_solid_blocker_pair_count")
+        ):
+            raise MechanicsContractError(
+                f"native receipt {candidate_id} is not admissible"
+            )
+        metrics = outcomes[candidate_id].get("ik_metrics")
+        if not isinstance(metrics, dict):
+            raise MechanicsContractError(f"candidate {candidate_id} lacks IK metrics")
+        retained.append({
+            "candidate_id": candidate_id,
+            "candidate": candidates[candidate_id],
+            "native_receipt_sha256": receipt_hash,
+            "native_status": receipt["status"],
+            "bounded_sample_count": receipt["bounded_sample_count"],
+            "samples_with_overlaps": receipt["samples_with_overlaps"],
+            "physical_solid_blocker_pair_count": receipt[
+                "physical_solid_blocker_pair_count"
+            ],
+            "physical_solid_blocker_pairs": receipt[
+                "physical_solid_blocker_pairs"
+            ],
+            "ik_metrics": metrics,
+            "raw_native_samples": receipt["samples"],
+        })
+
+    def native_rank(item: dict[str, Any]) -> tuple[int, int, float, float, str]:
+        return (
+            int(item["physical_solid_blocker_pair_count"]),
+            int(item["samples_with_overlaps"]),
+            -float(item["ik_metrics"]["minimum_normalized_arm_joint_margin"]),
+            float(item["ik_metrics"]["maximum_position_error_mm"]),
+            str(item["candidate_id"]),
+        )
+
+    retained.sort(key=native_rank)
+    for rank, item in enumerate(retained, start=1):
+        item["native_rank"] = rank
+    control_id = search_plan.get("control_candidate_id")
+    if control_id not in native_receipts:
+        raise MechanicsContractError("native result selection lacks the control")
+    selected_id = retained[0]["candidate_id"]
+    improved = selected_id != control_id
+    result: dict[str, Any] = {
+        "schema": PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA,
+        "status": (
+            "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED"
+            if improved else "NO_NATIVE_IMPROVEMENT_RETAINED"
+        ),
+        "source_search_plan_sha256": plan_hash,
+        "source_search_screen_sha256": screen_hash,
+        "source_shortlist_manifest_sha256": manifest_hash,
+        "control_candidate_id": control_id,
+        "selected_candidate_id": selected_id,
+        "native_improvement_over_control": improved,
+        "rank_order": [item["candidate_id"] for item in retained],
+        "ranking_rule": [
+            "physical_solid_blocker_pair_count ASC",
+            "samples_with_overlaps ASC",
+            "minimum_normalized_arm_joint_margin DESC",
+            "maximum_position_error_mm ASC",
+            "candidate_id ASC",
+        ],
+        "retained_results": retained,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "Native results are diagnostic and do not establish continuous clearance.",
+            "No placement or TCP candidate is installed by this selection.",
+            "The native control remains blocked; ARM-199 does not authorize motion.",
+        ],
+    }
+    result["selection_sha256"] = _canonical_sha256(result)
     return result
 
 
@@ -1945,6 +2705,23 @@ def build_robot_tcp_collision_replay_request(
             "diagnostic_result_cannot_promote_installed_or_physical_gates",
         ],
     }
+    if "placement_tcp_candidate_id" in ik_receipt:
+        matrix = ik_receipt.get("robot_placement_matrix_row_major")
+        if not isinstance(matrix, list) or len(matrix) != 16:
+            raise MechanicsContractError(
+                "placement/TCP IK receipt lacks its placement matrix"
+            )
+        request.update({
+            "placement_tcp_candidate_id": ik_receipt["placement_tcp_candidate_id"],
+            "robot_placement_matrix_row_major": list(matrix),
+            "keyboard_tcp_length_mm": ik_receipt["tool_length_mm"],
+            "placement_tcp_candidate_classification": ik_receipt[
+                "placement_tcp_candidate_classification"
+            ],
+        })
+        request["limitations"].append(
+            "candidate_placement_and_tcp_are_plan_bound_simulation_hypotheses"
+        )
     request["request_sha256"] = _canonical_sha256(request)
     return request
 
@@ -2104,11 +2881,24 @@ def admit_robot_tcp_collision_diagnostic(
         raise MechanicsContractError("virtual profile differs from the accepted IK receipt")
     profile = json.loads(virtual_profile_bytes)
     placement = profile.get("study_input", {}).get("physical_placement_input")
-    matrix = placement.get("matrix_row_major") if isinstance(placement, dict) else None
+    profile_matrix = (
+        placement.get("matrix_row_major") if isinstance(placement, dict) else None
+    )
+    matrix = request.get("robot_placement_matrix_row_major", profile_matrix)
     if not isinstance(matrix, list) or len(matrix) != 16:
         raise MechanicsContractError("virtual profile lacks the governed robot placement")
     for value in matrix:
         _finite_number(value, "robot placement matrix value")
+    candidate_id = request.get("placement_tcp_candidate_id")
+    if candidate_id is not None and (
+        not isinstance(candidate_id, str)
+        or candidate_id != ik_receipt.get("placement_tcp_candidate_id")
+        or matrix != ik_receipt.get("robot_placement_matrix_row_major")
+        or request.get("keyboard_tcp_length_mm") != ik_receipt.get("tool_length_mm")
+    ):
+        raise MechanicsContractError(
+            "collision request and placement/TCP IK evidence differ"
+        )
 
     claimed_import_hash = import_receipt.get("receipt_sha256")
     unsigned_import = dict(import_receipt)
@@ -2244,6 +3034,9 @@ def admit_robot_tcp_collision_diagnostic(
             "no_native_contact_or_physical_authority",
         ],
     }
+    if candidate_id is not None:
+        admission["placement_tcp_candidate_id"] = candidate_id
+        admission["keyboard_tcp_length_mm"] = request["keyboard_tcp_length_mm"]
     if accepted_pair_policy is not None:
         admission.update({
             "collision_pair_policy_sha256": accepted_pair_policy["policy_sha256"],
@@ -3718,6 +4511,25 @@ def main() -> int:
             "campaign"
         ),
     )
+    parser.add_argument(
+        "--run-placement-tcp-search",
+        action="store_true",
+        help="execute the plan-bound zero-authority IK and exact OBB screen",
+    )
+    parser.add_argument("--placement-tcp-search-plan", type=Path)
+    parser.add_argument(
+        "--materialize-placement-tcp-shortlist",
+        action="store_true",
+        help="reproduce and retain native replay inputs for the selected shortlist",
+    )
+    parser.add_argument("--placement-tcp-search-screen", type=Path)
+    parser.add_argument("--shortlist-output-dir", type=Path)
+    parser.add_argument(
+        "--retain-placement-tcp-native-results",
+        action="store_true",
+        help="retain and deterministically rank completed ARM-199 native replays",
+    )
+    parser.add_argument("--placement-tcp-shortlist-manifest", type=Path)
     parser.add_argument("--physical-blocker-experiment-plan", type=Path)
     parser.add_argument(
         "--source-cartesian-request",
@@ -3758,6 +4570,9 @@ def main() -> int:
             and not args.plan_physical_blocker_experiment
             and not args.generate_physical_blocker_route_variant
             and not args.plan_placement_tcp_search
+            and not args.run_placement_tcp_search
+            and not args.materialize_placement_tcp_shortlist
+            and not args.retain_placement_tcp_native_results
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -3775,6 +4590,9 @@ def main() -> int:
             and not args.build_station_route_predicate
             and not args.plan_physical_blocker_experiment
             and not args.plan_placement_tcp_search
+            and not args.run_placement_tcp_search
+            and not args.materialize_placement_tcp_shortlist
+            and not args.retain_placement_tcp_native_results
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -3793,7 +4611,133 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.plan_placement_tcp_search:
+        if args.retain_placement_tcp_native_results:
+            required = (
+                args.placement_tcp_search_plan,
+                args.placement_tcp_search_screen,
+                args.placement_tcp_shortlist_manifest,
+                args.shortlist_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "native result retention requires its plan, screen, shortlist "
+                    "manifest, and shortlist directory"
+                )
+            search_plan = json.loads(
+                args.placement_tcp_search_plan.resolve(strict=True).read_bytes()
+            )
+            search_screen = json.loads(
+                args.placement_tcp_search_screen.resolve(strict=True).read_bytes()
+            )
+            shortlist_manifest = json.loads(
+                args.placement_tcp_shortlist_manifest.resolve(strict=True).read_bytes()
+            )
+            native_receipts = {
+                entry["candidate_id"]: json.loads(
+                    (
+                        args.shortlist_output_dir.resolve(strict=True)
+                        / entry["candidate_id"]
+                        / "native_receipt.json"
+                    ).read_bytes()
+                )
+                for entry in shortlist_manifest.get("entries", [])
+            }
+            result = retain_placement_tcp_native_results(
+                search_plan, search_screen, shortlist_manifest, native_receipts
+            )
+        elif args.materialize_placement_tcp_shortlist:
+            required = (
+                args.placement_tcp_search_plan,
+                args.placement_tcp_search_screen,
+                args.shortlist_output_dir,
+                args.cartesian_request,
+                args.ik_source_bundle,
+                args.physical_blocker_experiment_plan,
+                args.source_cartesian_request,
+                args.collision_candidate,
+                args.accepted_collision_pair_policy,
+                args.toolchain_lock,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "shortlist materialization requires its plan, screen, output "
+                    "directory, route and source inputs, collision candidate, pair "
+                    "policy, and toolchain lock"
+                )
+            profile = build_profile(args.layout.resolve(strict=True))
+            result = materialize_placement_tcp_native_shortlist(
+                json.loads(
+                    args.placement_tcp_search_plan.resolve(strict=True).read_bytes()
+                ),
+                json.loads(
+                    args.placement_tcp_search_screen.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
+                profile,
+                json.loads(
+                    args.physical_blocker_experiment_plan.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.source_cartesian_request.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.accepted_collision_pair_policy.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.toolchain_lock.resolve(strict=True).read_bytes()),
+                workspace=args.workspace,
+                output_dir=args.shortlist_output_dir,
+            )
+        elif args.run_placement_tcp_search:
+            required = (
+                args.placement_tcp_search_plan,
+                args.cartesian_request,
+                args.ik_source_bundle,
+                args.physical_blocker_experiment_plan,
+                args.source_cartesian_request,
+                args.collision_candidate,
+                args.accepted_collision_pair_policy,
+                args.station_route_predicate,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "placement/TCP execution requires its plan, route variant, "
+                    "IK source bundle, experiment plan, source Cartesian request, "
+                    "collision candidate, accepted pair policy, and station predicate"
+                )
+            profile = build_profile(args.layout.resolve(strict=True))
+            result = execute_placement_tcp_search(
+                json.loads(
+                    args.placement_tcp_search_plan.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
+                profile,
+                json.loads(
+                    args.physical_blocker_experiment_plan.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.source_cartesian_request.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.accepted_collision_pair_policy.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.station_route_predicate.resolve(strict=True).read_bytes()
+                ),
+                workspace=args.workspace,
+            )
+        elif args.plan_placement_tcp_search:
             required = (
                 args.cartesian_request,
                 args.physical_blocker_experiment_plan,
@@ -4171,7 +5115,19 @@ def main() -> int:
                         "proposal_sha256",
                         result.get(
                             "policy_sha256",
-                            result.get("predicate_sha256", result.get("plan_sha256")),
+                            result.get(
+                                "predicate_sha256",
+                                result.get(
+                                    "plan_sha256",
+                                    result.get(
+                                        "screen_sha256",
+                                        result.get(
+                                            "manifest_sha256",
+                                            result.get("selection_sha256"),
+                                        ),
+                                    ),
+                                ),
+                            ),
                         ),
                     ),
                 ),
@@ -4191,6 +5147,12 @@ def main() -> int:
             status_record["predicate_sha256"] = result["predicate_sha256"]
         if "plan_sha256" in result:
             status_record["plan_sha256"] = result["plan_sha256"]
+        if "screen_sha256" in result:
+            status_record["screen_sha256"] = result["screen_sha256"]
+        if "manifest_sha256" in result:
+            status_record["manifest_sha256"] = result["manifest_sha256"]
+        if "selection_sha256" in result:
+            status_record["selection_sha256"] = result["selection_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -4205,6 +5167,9 @@ def main() -> int:
             "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY",
             "READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION",
             "READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING",
+            "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY",
+            "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
+            "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({

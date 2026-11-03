@@ -1276,6 +1276,38 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
+ARM-199 execution is now retained as a negative native result. Canonical IK
+accepted only three of the 82 candidates. The deterministic shortlist was the
+ARM-198 control (`385 mm`, `75 mm`, `-105 degrees`, `120 mm TCP`) and two
+`305 mm` / `100 mm` / `80 mm TCP` hypotheses at `-90` and `-105 degrees`.
+The native control exactly reproduced the ARM-198 collision baseline: all 179
+bounded samples overlap and the same seven physical blocker pairs remain. The
+two alternatives were worse: all `188/188` and `189/189` samples overlap and
+each adds `robot:link4` / `workcell:keyboard` as an eighth physical blocker.
+
+The offline exact-OBB screen reported no physical blockers for all three IK
+survivors, while native PhysX reported seven or eight. That disagreement is
+retained as an evaluator discrepancy; the offline result is not a clearance
+claim. The native result selection therefore keeps the control, installs
+nothing, promotes no gate, and records `NO_NATIVE_IMPROVEMENT_RETAINED`.
+
+External evidence:
+
+- offline screen:
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-offline-screen-001\screen.json`,
+  SHA-256 `106aecaf8e187dec18a84b73d21f7c090203a8eb7a02f9ed500aac6f7568b15c`;
+- native shortlist manifest:
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-native-shortlist-002\manifest.json`,
+  SHA-256 `9aa01abeb0bd4bf078801ef7ee56b3ca54a506f1371b8821ac31c6ca54072866`;
+- retained native selection:
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-native-selection-001\selection.json`,
+  SHA-256 `3e05cd9f7073911ef33a2d9d453948f2305d1ae07ce256f92e4e0ab459f67611`.
+
+The selection artifact preserves every native sample and raw collision pair.
+Its next dependency is a separately planned, source-bound full-link route-shape
+campaign; repeating this coarse placement/TCP grid is not justified by the
+retained evidence.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

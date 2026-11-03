@@ -536,12 +536,14 @@ ScheduleGen. Neither is a physical success rate.
    canonical IK for all 133 samples, but its 179-configuration native replay
    still retains all seven physical blocker pairs and zero station-envelope
    blockers. This rejects a uniform TCP-height lift as the complete route
-   correction. ARM-199 now fixes the next experiment before screening: one
-   retained control plus 81 documented placement/yaw/keyboard-TCP hypotheses,
-   deterministic rejection and ranking rules, and at most eight native Isaac
-   replays. Next execute that bounded campaign through the same IK and full-link
-   collision boundaries. Generate route-shape hypotheses only if the campaign
-   shows placement/TCP sensitivity cannot clear the blockers. Preserve endpoint
+   correction. ARM-199 fixed and executed the next experiment: one retained
+   control plus 81 documented placement/yaw/keyboard-TCP hypotheses. Only three
+   candidates passed canonical IK. Native replay reproduced seven blocker pairs
+   at all 179 control samples; both alternatives were worse, adding an eighth
+   blocker while overlapping at all 188 or 189 samples. The retained result is
+   `NO_NATIVE_IMPROVEMENT_RETAINED`, so coarse placement/TCP sensitivity is not
+   the next correction. Plan a separately hash-bound full-link route-shape
+   campaign through the same native collision boundary. Preserve endpoint
    qualification as a separate objective; installed continuous geometry remains
    a separate dependency.
 4. **LM1 robot/key replay:** after collision qualification, bind the

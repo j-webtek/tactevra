@@ -322,6 +322,65 @@ def test_robot_tcp_cartesian_schedule_passes_canonical_ik_screen():
     assert result['receipt_sha256']==mechanics._canonical_sha256(unsigned)
 
 
+def test_placement_tcp_control_reproduces_profile_ik_and_propagates_matrix():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    request=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    baseline=mechanics.screen_robot_tcp_cartesian_schedule_ik(
+        request,bundle,profile,workspace=ROOT,
+    )
+    virtual=json.loads(
+        (ROOT/'software/config/virtual_commissioning_profile.json').read_bytes()
+    )
+    placement=virtual['study_input']['physical_placement_input']
+    candidate={
+        'candidate_id':'placement-tcp-control-test',
+        'candidate_classification':'RETAINED_ARM198_CONTROL',
+        'keyboard_tcp_length_mm':virtual['study_input']['route_tool_lengths_mm'][
+            'keyboard'
+        ],
+        'robot_placement_matrix_row_major':placement['matrix_row_major'],
+    }
+    screened=mechanics.screen_robot_tcp_cartesian_schedule_ik(
+        request,bundle,profile,workspace=ROOT,placement_tcp_candidate=candidate,
+    )
+    assert screened['joint_results']==baseline['joint_results']
+    assert screened['metrics']['maximum_position_error_mm']==pytest.approx(
+        baseline['metrics']['maximum_position_error_mm']
+    )
+    assert screened['metrics']['minimum_normalized_arm_joint_margin']==pytest.approx(
+        baseline['metrics']['minimum_normalized_arm_joint_margin']
+    )
+    assert screened['placement_tcp_candidate_id']==candidate['candidate_id']
+    assert screened['robot_placement_matrix_row_major']==placement['matrix_row_major']
+
+    collision_candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'scope':'SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY',
+        'status':'EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_FAMILY',
+        'installed':False,'installed_profile_eligible':False,
+        'robot_bodies':[{'body_id':'robot:base_link'}],
+        'workcell_bodies':[{'body_id':'workcell:keyboard'}],
+        'blockers':['EXPLORATORY_GEOMETRY_UNINSTALLED'],
+        'simulation_diagnostic_ready':False,
+        'hardware_write_count':0,'physical_movement_count':0,
+        'commands':[],'physical_authority':False,
+    }
+    collision_candidate['candidate_sha256']=mechanics._canonical_sha256(
+        collision_candidate
+    )
+    lock=json.loads((ROOT/'software/config/isaac_sim_toolchain_lock.json').read_bytes())
+    replay=mechanics.build_robot_tcp_collision_replay_request(
+        screened,collision_candidate,lock
+    )
+    assert replay['placement_tcp_candidate_id']==candidate['candidate_id']
+    assert replay['robot_placement_matrix_row_major']==placement['matrix_row_major']
+
+
 def test_robot_tcp_cartesian_ik_screen_rejects_request_hash_tamper():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
@@ -1030,6 +1089,116 @@ def test_placement_tcp_search_plan_is_bounded_and_retains_control():
         mechanics.build_placement_tcp_search_plan(
             plan,route,receipt,tampered,profile,
             virtual_profile_sha256=profile_sha256,
+        )
+
+
+def test_native_placement_tcp_selection_retains_raw_negative_result():
+    mechanics=_load_key_mechanics()
+    control='placement-tcp-control'
+    alternative='placement-tcp-alternative'
+    candidates=[
+        {'candidate_id':control,'candidate_classification':'RETAINED_ARM198_CONTROL'},
+        {'candidate_id':alternative,'candidate_classification':'HYPOTHESIS'},
+    ]
+    plan={
+        'schema':mechanics.PLACEMENT_TCP_SEARCH_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING',
+        'control_candidate_id':control,'candidates':candidates,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+    metrics={
+        control:{'minimum_normalized_arm_joint_margin':0.2,
+                 'maximum_position_error_mm':0.1},
+        alternative:{'minimum_normalized_arm_joint_margin':0.3,
+                     'maximum_position_error_mm':0.05},
+    }
+    screen={
+        'schema':mechanics.PLACEMENT_TCP_SEARCH_SCREEN_SCHEMA,
+        'status':'READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY',
+        'source_search_plan_sha256':plan['plan_sha256'],
+        'native_shortlist_candidate_ids':[control,alternative],
+        'outcomes':[{'candidate_id':item,'ik_metrics':metrics[item]}
+                    for item in (control,alternative)],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    screen['screen_sha256']=mechanics._canonical_sha256(screen)
+    entries=[]
+    for item in (control,alternative):
+        entries.append({
+            'candidate_id':item,
+            'document_hashes':{
+                'ik_receipt.json':('a' if item==control else 'b')*64,
+                'policy_bound_collision_request.json':(
+                    'c' if item==control else 'd'
+                )*64,
+            },
+        })
+    manifest={
+        'schema':'tactevra.isaac_lm1_placement_tcp_native_shortlist.v1',
+        'status':'READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY',
+        'source_search_plan_sha256':plan['plan_sha256'],
+        'source_search_screen_sha256':screen['screen_sha256'],
+        'entries':entries,'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    manifest['manifest_sha256']=mechanics._canonical_sha256(manifest)
+
+    receipts={}
+    for index,item in enumerate((control,alternative)):
+        pair_count=7+index
+        pairs=[[f'robot:link{number}','workcell:keyboard']
+               for number in range(pair_count)]
+        samples=[{
+            'sample_id':f'{item}-sample-0',
+            'raw_collision_pairs':pairs,
+            'physical_solid_blocker_pairs':pairs,
+        }]
+        native={
+            'schema':mechanics.TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            'status':'DIAGNOSTIC_BLOCKERS_OBSERVED',
+            'source_bindings':{
+                'ik_receipt_sha256':entries[index]['document_hashes'][
+                    'ik_receipt.json'
+                ],
+                'request_sha256':entries[index]['document_hashes'][
+                    'policy_bound_collision_request.json'
+                ],
+            },
+            'bounded_sample_count':1,'samples_with_overlaps':1,
+            'physical_solid_blocker_pair_count':pair_count,
+            'physical_solid_blocker_pairs':pairs,'samples':samples,
+            'hardware_access':False,'physical_authority':False,
+            'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+            'gate_promotions':[],
+        }
+        native['receipt_sha256']=mechanics._canonical_sha256(native)
+        receipts[item]=native
+
+    result=mechanics.retain_placement_tcp_native_results(
+        plan,screen,manifest,receipts
+    )
+    assert result['status']=='NO_NATIVE_IMPROVEMENT_RETAINED'
+    assert result['selected_candidate_id']==control
+    assert result['native_improvement_over_control'] is False
+    assert result['rank_order']==[control,alternative]
+    assert result['retained_results'][1]['physical_solid_blocker_pair_count']==8
+    assert result['retained_results'][1]['raw_native_samples']==receipts[alternative][
+        'samples'
+    ]
+    assert result['gate_promotions']==[]
+    unsigned={key:value for key,value in result.items() if key!='selection_sha256'}
+    assert result['selection_sha256']==mechanics._canonical_sha256(unsigned)
+
+    receipts[alternative]['samples'][0]['sample_id']='tampered'
+    with pytest.raises(mechanics.MechanicsContractError,match='digest is invalid'):
+        mechanics.retain_placement_tcp_native_results(
+            plan,screen,manifest,receipts
         )
 
 

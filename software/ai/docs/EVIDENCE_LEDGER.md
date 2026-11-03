@@ -8987,3 +8987,40 @@ rewriting history. New entries must use a unique evidence ID.
   for all candidates, retain every rejection, and run native Isaac only for the
   predeclared shortlist. If placement/TCP sensitivity cannot clear the blockers,
   generate a separate source-bound full-link route-shape campaign.
+
+### E-20261102-ARM-199B — native placement/TCP shortlist retains no improvement
+
+- Stage: LM1 zero-authority physical-blocker attribution execution.
+- Lane: ARM / Isaac simulation.
+- Change: executed all 82 predeclared candidates through canonical IK, retained
+  all 79 IK rejections, screened the three survivors with the exact exploratory
+  OBB evaluator, materialized their native inputs, and replayed all three in
+  native Isaac. Added deterministic native-result retention with full raw
+  sample/pair preservation and control-first regression coverage.
+- Result: the ARM-198 control exactly reproduces seven physical blocker pairs
+  across `179/179` overlapping bounded samples. The two alternatives retain
+  eight physical pairs across `188/188` and `189/189` samples; both add the
+  `robot:link4` / `workcell:keyboard` blocker. The retained selection status is
+  `NO_NATIVE_IMPROVEMENT_RETAINED`; the control remains selected only as the
+  least-bad diagnostic baseline, not as a motion-qualified configuration.
+- Evaluator discrepancy: offline OBB screening reported zero physical blockers
+  for the three IK survivors, while native PhysX reported seven or eight. The
+  offline output is therefore not accepted as clearance evidence.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-offline-screen-001`
+  (screen SHA-256
+  `106aecaf8e187dec18a84b73d21f7c090203a8eb7a02f9ed500aac6f7568b15c`),
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-native-shortlist-002`
+  (manifest SHA-256
+  `9aa01abeb0bd4bf078801ef7ee56b3ca54a506f1371b8821ac31c6ca54072866`),
+  and
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-native-selection-001`
+  (selection SHA-256
+  `3e05cd9f7073911ef33a2d9d453948f2305d1ae07ce256f92e4e0ab459f67611`).
+- Hardware writes: 0.
+- Physical movements: 0.
+- Gate promotions: 0.
+- Limitations: no candidate is installed, finite sampling is not continuous
+  collision proof, and all native candidates remain blocked.
+- Next dependency: plan a separately hash-bound full-link route-shape campaign
+  that preserves the physical solids and endpoint qualification boundary.
