@@ -1437,6 +1437,49 @@ Status `INCOMPLETE_V4_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED` installs no
 route, proves no continuous clearance, promotes no gate, and grants no
 physical authority.
 
+ARM-204 explains why the portable OBB screen and the retained v4 native
+diagnostics disagreed before another route search is attempted. It fixes three
+samples per completed ARM-203 candidate (first physical onset, peak physical
+pair count, and first later physical-clear sample), captures every collision
+primitive in board coordinates, and compares the native and portable poses
+without changing geometry, placement, or route.
+
+All 18 static workcell primitive comparisons match exactly. All 270 robot
+primitive comparisons instead share a sample-specific rigid translation: X/Y
+remain within `0.02 mm`, while native-minus-portable Z grows from roughly
+`-120 mm` to `-343 mm`. The robot base primitive has the same displacement as
+the distal links, so this is an articulation-root Z drift signature rather
+than a local OBB approximation error. The capture also exposed a separate
+Isaac `Gf` row/column rotation serialization convention that must be
+canonicalized in the corrected replay.
+
+The retained ARM-203 v4 collision conclusions are therefore not usable for a
+fixed-base route comparison. They remain immutable diagnostic history, but
+their seven physical blocker pairs must not drive more route or placement
+search. The next bounded action is a corrected static-geometry native replay
+with an explicitly fixed base, a per-sample root-pose invariant, canonical
+rotation serialization, and fresh parity comparison. It grants no hardware or
+motion authority.
+
+Retained external ARM-204 evidence:
+
+- plan:
+  `C:\IsaacSim\artifacts\issue190\arm204-collision-geometry-parity-plan-001\plan.json`,
+  canonical SHA-256
+  `c4b6798d94b1a908d762b77812fdc96d06e1836e891fbfcaebf56690775a2e26`;
+- merged native capture:
+  `C:\IsaacSim\artifacts\issue190\arm204-collision-geometry-native-capture-001\capture.json`,
+  canonical SHA-256
+  `506071c41a4fb4cbc7c71022c41d754097869e8e41e1746d0041b1c7c8216703`;
+- portable capture:
+  `C:\IsaacSim\artifacts\issue190\arm204-collision-geometry-offline-capture-001\capture.json`,
+  canonical SHA-256
+  `6e51e2c75246db907cc01db10c9887e63247c4ffa9f8386b7665a5a2c494331f`;
+- classified report:
+  `C:\IsaacSim\artifacts\issue190\arm204-collision-geometry-parity-report-001\report.json`,
+  canonical SHA-256
+  `089d3f633d9103f7f7ae668f940e99f730b3d1450b89d5e1087869174aadf51e`.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
