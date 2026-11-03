@@ -1,6 +1,7 @@
 import json
 import hashlib
 import importlib.util
+import math
 from pathlib import Path
 import pytest
 from rocell.application import ghost_keyboard as ghost
@@ -908,6 +909,128 @@ def test_physical_blocker_route_variant_changes_only_selected_transit_z():
     invalid_plan['plan_sha256']=mechanics._canonical_sha256(invalid_plan)
     with pytest.raises(mechanics.MechanicsContractError,match='non-transit endpoint'):
         mechanics.build_physical_blocker_route_variant(request,invalid_plan)
+
+
+def test_placement_tcp_search_plan_is_bounded_and_retains_control():
+    mechanics=_load_key_mechanics()
+    profile_sha256='a'*64
+    collision_candidate_sha256='b'*64
+    pair_policy_sha256='c'*64
+    station_predicate_sha256='d'*64
+    toolchain_sha256='e'*64
+    plan={
+        'schema':mechanics.PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION',
+        'source_virtual_profile_sha256':profile_sha256,
+        'source_collision_candidate_sha256':collision_candidate_sha256,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+    route={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'source_physical_blocker_experiment_plan_sha256':plan['plan_sha256'],
+        'route_variant_applied':True,'collision_geometry_changed':False,
+        'hardware_access':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,
+    }
+    route['request_sha256']=mechanics._canonical_sha256(route)
+    receipt={
+        'schema':mechanics.TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        'status':'DIAGNOSTIC_BLOCKERS_OBSERVED',
+        'station_route_predicate_applied':True,
+        'collision_pair_policy_applied':True,
+        'source_bindings':{
+            'virtual_profile_sha256':profile_sha256,
+            'collision_candidate_sha256':collision_candidate_sha256,
+            'collision_pair_policy_sha256':pair_policy_sha256,
+            'station_route_predicate_sha256':station_predicate_sha256,
+            'toolchain_lock_sha256':toolchain_sha256,
+        },
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    pairs=[
+        ['robot:gripper','workcell:board_solid'],
+        ['robot:gripper','workcell:keyboard'],
+        ['robot:link2','workcell:board_solid'],
+        ['robot:link3','workcell:board_solid'],
+        ['robot:link4','workcell:board_solid'],
+        ['robot:link5','workcell:board_solid'],
+        ['robot:link5','workcell:keyboard'],
+    ]
+    localization={
+        'schema':mechanics.TCP_COLLISION_BLOCKER_LOCALIZATION_SCHEMA,
+        'source_cartesian_request_sha256':route['request_sha256'],
+        'source_diagnostic_receipt_sha256':receipt['receipt_sha256'],
+        'physical_solid_blocker_pair_count':7,
+        'planning_envelope_blocker_pair_count':0,
+        'unreviewed_blocker_pair_count':0,
+        'blocker_localizations':[
+            {'body_pair':pair,'samples':[]} for pair in reversed(pairs)
+        ],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    localization['proposal_sha256']=mechanics._canonical_sha256(localization)
+    yaw_rad=math.radians(-105.0)
+    profile={
+        'schema':'rocell.virtual_commissioning_profile.v1',
+        'status':'UNMEASURED_SENSITIVITY_OVERLAY',
+        'simulation_only':True,'physical_release_effect':'NONE',
+        'selection':{'source_mission_route_coverage_hash':'f'*64},
+        'study_input':{
+            'physical_placement_input':{
+                'rear_clamp_contact_x_board_mm':385.0,
+                'clamp_to_base_axis_x_mm':0.0,
+                'rear_edge_to_base_axis_y_mm':75.0,
+                'base_link_z_board_mm':70.1,
+                'base_yaw_board_rad':yaw_rad,
+                'matrix_row_major':[
+                    math.cos(yaw_rad),-math.sin(yaw_rad),0.0,385.0,
+                    math.sin(yaw_rad),math.cos(yaw_rad),0.0,532.0,
+                    0.0,0.0,1.0,70.1,0.0,0.0,0.0,1.0,
+                ],
+            },
+            'route_tool_lengths_mm':{'keyboard':120.0,'phone':100.0},
+        },
+    }
+    search=mechanics.build_placement_tcp_search_plan(
+        plan,route,receipt,localization,profile,
+        virtual_profile_sha256=profile_sha256,
+    )
+    assert search['status']=='READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING'
+    assert search['candidate_count']==82
+    assert search['control_candidate_count']==1
+    assert search['coarse_candidate_count']==81
+    assert search['maximum_native_shortlist_count']==8
+    assert len({item['candidate_id'] for item in search['candidates']})==82
+    control=search['candidates'][0]
+    assert control['candidate_id']==search['control_candidate_id']
+    assert control['candidate_classification']=='RETAINED_ARM198_CONTROL'
+    assert control['rear_edge_to_base_axis_y_mm']==75.0
+    assert control['robot_placement_matrix_row_major']==pytest.approx(
+        profile['study_input']['physical_placement_input']['matrix_row_major']
+    )
+    assert search['physical_blocker_pairs']==pairs
+    assert search['collision_geometry_changed'] is False
+    assert search['route_shape_changed'] is False
+    assert search['hardware_access'] is search['physical_authority'] is False
+    unsigned={key:value for key,value in search.items() if key!='plan_sha256'}
+    assert search['plan_sha256']==mechanics._canonical_sha256(unsigned)
+
+    tampered=dict(localization)
+    tampered.pop('proposal_sha256')
+    tampered['physical_solid_blocker_pair_count']=6
+    tampered['proposal_sha256']=mechanics._canonical_sha256(tampered)
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.build_placement_tcp_search_plan(
+            plan,route,receipt,tampered,profile,
+            virtual_profile_sha256=profile_sha256,
+        )
 
 
 def test_collision_blockers_localize_to_retained_cartesian_context():

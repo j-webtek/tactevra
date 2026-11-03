@@ -1241,6 +1241,41 @@ also remain blocked. The next route correction must jointly evaluate measured
 placement/TCP hypotheses and full-link trajectories; it must not remove or
 resize physical solids or treat a raised TCP as whole-arm clearance proof.
 
+ARM-199 begins that attribution without inventing new dimensions after seeing
+the collision result. Its hash-bound plan contains one retained ARM-198 control
+plus the 81 keyboard-relevant combinations from the already documented
+pre-hardware sensitivity grid: rear-clamp X `225/305/385 mm`, rear-axis Y
+`0/50/100 mm`, base yaw `-105/-90/-75 degrees`, and keyboard TCP
+`80/100/120 mm`. The retained `75 mm` rear-axis control remains separate from
+the coarse grid. Candidate rejection recording and the ranking order are fixed
+before screening, and no more than eight deterministically selected candidates
+may enter native Isaac replay.
+
+The retained plan is at
+`C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-search-plan-001`.
+It contains 82 unique candidates and has plan SHA-256
+`9053512e8b57e326368bb61eabb7af074c12e15658a66832d522e3a7280b91f7`.
+Every candidate remains an unmeasured, simulation-only sensitivity hypothesis.
+Board and keyboard solids, route shape, pair policy, station predicate, and
+toolchain identity are unchanged; endpoint and continuous-clearance gates stay
+separate.
+
+Reproduce the plan with:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-search-plan-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --plan-placement-tcp-search `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\arm198-transit-route-variant-001\request.json `
+  --physical-blocker-experiment-plan C:\IsaacSim\artifacts\issue190\arm198-physical-blocker-experiment-plan-001\plan.json `
+  --collision-diagnostic-receipt C:\IsaacSim\artifacts\issue190\arm198-transit-route-variant-001\native_receipt.json `
+  --blocker-localization C:\IsaacSim\artifacts\issue190\arm198-transit-route-variant-001\localization.json `
+  --virtual-profile software\config\virtual_commissioning_profile.json `
+  --output "$artifactDir\plan.json" `
+  --status-output "$artifactDir\status.json"
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

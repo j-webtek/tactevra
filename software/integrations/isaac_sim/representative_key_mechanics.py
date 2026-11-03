@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from itertools import product
 import json
 import math
 from pathlib import Path
@@ -51,6 +52,9 @@ STATION_ROUTE_PREDICATE_SCHEMA = (
 )
 PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA = (
     "tactevra.isaac_lm1_physical_blocker_experiment_plan.v1"
+)
+PLACEMENT_TCP_SEARCH_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_placement_tcp_search_plan.v1"
 )
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -634,6 +638,299 @@ def build_physical_blocker_route_variant(
         ],
     })
     result["request_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def build_placement_tcp_search_plan(
+    experiment_plan: dict[str, Any],
+    route_variant_request: dict[str, Any],
+    diagnostic_receipt: dict[str, Any],
+    localization: dict[str, Any],
+    virtual_profile: dict[str, Any],
+    *,
+    virtual_profile_sha256: str,
+) -> dict[str, Any]:
+    """Plan a bounded placement/TCP attribution campaign without running it."""
+    hashed_documents = (
+        (experiment_plan, "plan_sha256", "physical blocker experiment plan"),
+        (route_variant_request, "request_sha256", "route variant request"),
+        (diagnostic_receipt, "receipt_sha256", "diagnostic receipt"),
+        (localization, "proposal_sha256", "blocker localization"),
+    )
+    for document, hash_field, label in hashed_documents:
+        claimed = document.get(hash_field)
+        unsigned = dict(document)
+        unsigned.pop(hash_field, None)
+        if claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} hash mismatch")
+    if (
+        not isinstance(virtual_profile_sha256, str)
+        or len(virtual_profile_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in virtual_profile_sha256
+        )
+    ):
+        raise MechanicsContractError("virtual profile SHA-256 is invalid")
+
+    source_bindings = diagnostic_receipt.get("source_bindings")
+    if not isinstance(source_bindings, dict):
+        raise MechanicsContractError("diagnostic source bindings are absent")
+    if (
+        experiment_plan.get("schema") != PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA
+        or experiment_plan.get("source_virtual_profile_sha256")
+        != virtual_profile_sha256
+        or route_variant_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or route_variant_request.get("source_physical_blocker_experiment_plan_sha256")
+        != experiment_plan.get("plan_sha256")
+        or route_variant_request.get("route_variant_applied") is not True
+        or route_variant_request.get("collision_geometry_changed") is not False
+        or diagnostic_receipt.get("schema")
+        != TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+        or diagnostic_receipt.get("status") != "DIAGNOSTIC_BLOCKERS_OBSERVED"
+        or diagnostic_receipt.get("station_route_predicate_applied") is not True
+        or diagnostic_receipt.get("collision_pair_policy_applied") is not True
+        or source_bindings.get("virtual_profile_sha256")
+        != virtual_profile_sha256
+        or source_bindings.get("collision_candidate_sha256")
+        != experiment_plan.get("source_collision_candidate_sha256")
+        or localization.get("schema")
+        != TCP_COLLISION_BLOCKER_LOCALIZATION_SCHEMA
+        or localization.get("source_cartesian_request_sha256")
+        != route_variant_request.get("request_sha256")
+        or localization.get("source_diagnostic_receipt_sha256")
+        != diagnostic_receipt.get("receipt_sha256")
+        or localization.get("physical_solid_blocker_pair_count") != 7
+        or localization.get("planning_envelope_blocker_pair_count") != 0
+        or localization.get("unreviewed_blocker_pair_count") != 0
+    ):
+        raise MechanicsContractError("placement/TCP search-plan lineage changed")
+
+    for document, label in (
+        (experiment_plan, "physical blocker experiment plan"),
+        (route_variant_request, "route variant request"),
+        (diagnostic_receipt, "diagnostic receipt"),
+        (localization, "blocker localization"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+    if (
+        diagnostic_receipt.get("physical_authority") is not False
+        or diagnostic_receipt.get("gate_promotions") != []
+        or localization.get("physical_authority") is not False
+        or localization.get("gate_promotions") != []
+    ):
+        raise MechanicsContractError("placement/TCP source evidence gained authority")
+
+    if (
+        virtual_profile.get("schema") != "rocell.virtual_commissioning_profile.v1"
+        or virtual_profile.get("status") != "UNMEASURED_SENSITIVITY_OVERLAY"
+        or virtual_profile.get("simulation_only") is not True
+        or virtual_profile.get("physical_release_effect") != "NONE"
+    ):
+        raise MechanicsContractError("virtual profile boundary changed")
+    selection = virtual_profile.get("selection")
+    mission_coverage_hash = (
+        selection.get("source_mission_route_coverage_hash")
+        if isinstance(selection, dict)
+        else None
+    )
+    if (
+        not isinstance(mission_coverage_hash, str)
+        or len(mission_coverage_hash) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in mission_coverage_hash
+        )
+    ):
+        raise MechanicsContractError("mission-route coverage hash is invalid")
+    study = virtual_profile.get("study_input")
+    placement = study.get("physical_placement_input") if isinstance(study, dict) else None
+    tool_lengths = study.get("route_tool_lengths_mm") if isinstance(study, dict) else None
+    if not isinstance(placement, dict) or not isinstance(tool_lengths, dict):
+        raise MechanicsContractError("virtual profile placement/TCP inputs are absent")
+    source_matrix = placement.get("matrix_row_major")
+    if not isinstance(source_matrix, list) or len(source_matrix) != 16:
+        raise MechanicsContractError("virtual profile placement matrix is invalid")
+    source_matrix = [
+        _finite_number(value, "virtual profile placement matrix")
+        for value in source_matrix
+    ]
+    source_x = _finite_number(
+        placement.get("rear_clamp_contact_x_board_mm"), "source rear clamp x"
+    )
+    clamp_to_axis_x = _finite_number(
+        placement.get("clamp_to_base_axis_x_mm"), "source clamp-to-axis x"
+    )
+    source_y = _finite_number(
+        placement.get("rear_edge_to_base_axis_y_mm"), "source rear-axis y"
+    )
+    source_z = _finite_number(
+        placement.get("base_link_z_board_mm"), "source base z"
+    )
+    source_yaw_rad = _finite_number(
+        placement.get("base_yaw_board_rad"), "source base yaw"
+    )
+    source_tcp = _finite_number(
+        tool_lengths.get("keyboard"), "source keyboard TCP length"
+    )
+    board_rear_edge_y = source_matrix[7] - source_y
+    if (
+        abs(source_matrix[3] - (source_x + clamp_to_axis_x)) > 1e-9
+        or abs(source_matrix[11] - source_z) > 1e-9
+        or abs(source_matrix[0] - math.cos(source_yaw_rad)) > 1e-9
+        or abs(source_matrix[1] + math.sin(source_yaw_rad)) > 1e-9
+        or abs(source_matrix[4] - math.sin(source_yaw_rad)) > 1e-9
+        or abs(source_matrix[5] - math.cos(source_yaw_rad)) > 1e-9
+    ):
+        raise MechanicsContractError("virtual profile placement fields disagree")
+
+    coarse_axes = {
+        "rear_clamp_contact_x_board_mm": [225.0, 305.0, 385.0],
+        "rear_edge_to_base_axis_y_mm": [0.0, 50.0, 100.0],
+        "base_yaw_board_deg": [-105.0, -90.0, -75.0],
+        "keyboard_tcp_length_mm": [80.0, 100.0, 120.0],
+    }
+
+    def candidate(
+        rear_clamp_x: float,
+        rear_axis_y: float,
+        yaw_deg: float,
+        keyboard_tcp: float,
+        *,
+        candidate_classification: str,
+    ) -> dict[str, Any]:
+        yaw_rad = math.radians(yaw_deg)
+        matrix = [
+            math.cos(yaw_rad), -math.sin(yaw_rad), 0.0,
+            rear_clamp_x + clamp_to_axis_x,
+            math.sin(yaw_rad), math.cos(yaw_rad), 0.0,
+            board_rear_edge_y + rear_axis_y,
+            0.0, 0.0, 1.0, source_z,
+            0.0, 0.0, 0.0, 1.0,
+        ]
+        hypothesis = {
+            "candidate_classification": candidate_classification,
+            "rear_clamp_contact_x_board_mm": rear_clamp_x,
+            "rear_edge_to_base_axis_y_mm": rear_axis_y,
+            "base_yaw_board_deg": yaw_deg,
+            "keyboard_tcp_length_mm": keyboard_tcp,
+            "robot_placement_matrix_row_major": matrix,
+        }
+        hypothesis["candidate_id"] = (
+            f"placement-tcp-{_canonical_sha256(hypothesis)[:16]}"
+        )
+        return hypothesis
+
+    control = candidate(
+        source_x,
+        source_y,
+        math.degrees(source_yaw_rad),
+        source_tcp,
+        candidate_classification="RETAINED_ARM198_CONTROL",
+    )
+    control["robot_placement_matrix_row_major"] = source_matrix
+    control_unsigned = {
+        key: value for key, value in control.items() if key != "candidate_id"
+    }
+    control["candidate_id"] = (
+        f"placement-tcp-{_canonical_sha256(control_unsigned)[:16]}"
+    )
+    coarse = [
+        candidate(
+            rear_clamp_x,
+            rear_axis_y,
+            yaw_deg,
+            keyboard_tcp,
+            candidate_classification="DOCUMENTED_COARSE_SENSITIVITY_HYPOTHESIS",
+        )
+        for rear_clamp_x, rear_axis_y, yaw_deg, keyboard_tcp in product(
+            coarse_axes["rear_clamp_contact_x_board_mm"],
+            coarse_axes["rear_edge_to_base_axis_y_mm"],
+            coarse_axes["base_yaw_board_deg"],
+            coarse_axes["keyboard_tcp_length_mm"],
+        )
+    ]
+    candidates = [control, *coarse]
+    if len({item["candidate_id"] for item in candidates}) != len(candidates):
+        raise MechanicsContractError("placement/TCP candidate ids are not unique")
+
+    blocker_pairs = sorted(
+        localization.get("blocker_localizations", []),
+        key=lambda item: tuple(item.get("body_pair", [])),
+    )
+    result: dict[str, Any] = {
+        "schema": PLACEMENT_TCP_SEARCH_PLAN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING",
+        "source_physical_blocker_experiment_plan_sha256": experiment_plan[
+            "plan_sha256"
+        ],
+        "source_route_variant_request_sha256": route_variant_request[
+            "request_sha256"
+        ],
+        "source_diagnostic_receipt_sha256": diagnostic_receipt["receipt_sha256"],
+        "source_localization_sha256": localization["proposal_sha256"],
+        "source_virtual_profile_sha256": virtual_profile_sha256,
+        "source_collision_candidate_sha256": source_bindings[
+            "collision_candidate_sha256"
+        ],
+        "source_collision_pair_policy_sha256": source_bindings[
+            "collision_pair_policy_sha256"
+        ],
+        "source_station_route_predicate_sha256": source_bindings[
+            "station_route_predicate_sha256"
+        ],
+        "source_toolchain_lock_sha256": source_bindings["toolchain_lock_sha256"],
+        "source_mission_route_coverage_sha256": mission_coverage_hash,
+        "hypothesis_source": (
+            "PREHARDWARE_MISSION_COVERAGE_DOCUMENTED_SENSITIVITY_GRID"
+        ),
+        "coarse_axes": coarse_axes,
+        "control_candidate_id": control["candidate_id"],
+        "control_candidate_count": 1,
+        "coarse_candidate_count": len(coarse),
+        "candidate_count": len(candidates),
+        "candidates": candidates,
+        "physical_blocker_pairs": [item["body_pair"] for item in blocker_pairs],
+        "screening_stages": [
+            "CANONICAL_IK_AND_DISCRETE_CONTINUITY",
+            "EXACT_FULL_LINK_COLLISION_EVALUATOR",
+            "DETERMINISTIC_SHORTLIST_SELECTION",
+            "SELECTED_NATIVE_ISAAC_REPLAY",
+        ],
+        "candidate_rejection_recording_required": True,
+        "ranking_order": [
+            "physical_blocker_pair_count:ASC",
+            "blocked_sample_count:ASC",
+            "minimum_normalized_arm_joint_margin:DESC",
+            "maximum_position_error_mm:ASC",
+            "candidate_id:ASC",
+        ],
+        "maximum_native_shortlist_count": 8,
+        "collision_geometry_changed": False,
+        "route_shape_changed": False,
+        "installed_profile_eligible": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "all_candidates_are_unmeasured_simulation_sensitivity_hypotheses",
+            "candidate_values_are_not_installation_tolerances_or_allowances",
+            "discrete_collision_screening_is_not_continuous_clearance_proof",
+            "physical_board_and_keyboard_solids_are_preserved",
+            "endpoint_and_route_shape_qualification_remain_separate",
+        ],
+    }
+    result["plan_sha256"] = _canonical_sha256(result)
     return result
 
 
@@ -3413,6 +3710,14 @@ def main() -> int:
         action="store_true",
         help="apply a retained plan's transit-height hypothesis to its source request",
     )
+    parser.add_argument(
+        "--plan-placement-tcp-search",
+        action="store_true",
+        help=(
+            "plan a bounded placement/yaw/keyboard-TCP blocker-attribution "
+            "campaign"
+        ),
+    )
     parser.add_argument("--physical-blocker-experiment-plan", type=Path)
     parser.add_argument(
         "--source-cartesian-request",
@@ -3452,6 +3757,7 @@ def main() -> int:
             and not args.build_station_route_predicate
             and not args.plan_physical_blocker_experiment
             and not args.generate_physical_blocker_route_variant
+            and not args.plan_placement_tcp_search
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -3468,6 +3774,7 @@ def main() -> int:
             and not args.propose_collision_pair_policy
             and not args.build_station_route_predicate
             and not args.plan_physical_blocker_experiment
+            and not args.plan_placement_tcp_search
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -3486,7 +3793,62 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.generate_physical_blocker_route_variant:
+        if args.plan_placement_tcp_search:
+            required = (
+                args.cartesian_request,
+                args.physical_blocker_experiment_plan,
+                args.collision_diagnostic_receipt,
+                args.blocker_localization,
+                args.virtual_profile,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "placement/TCP search planning requires --cartesian-request, "
+                    "--physical-blocker-experiment-plan, "
+                    "--collision-diagnostic-receipt, --blocker-localization, "
+                    "and --virtual-profile"
+                )
+            if any((
+                args.generate_physical_blocker_route_variant,
+                args.plan_physical_blocker_experiment,
+                args.build_station_route_predicate,
+                args.localize_collision_blockers,
+                args.accept_collision_pair_policy,
+                args.bind_collision_pair_policy,
+                args.propose_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.ik_receipt is not None,
+                args.ik_source_bundle is not None,
+                args.source_cartesian_request is not None,
+            )):
+                raise MechanicsContractError(
+                    "placement/TCP search planning is mutually exclusive with "
+                    "other modes"
+                )
+            virtual_profile_bytes = args.virtual_profile.resolve(
+                strict=True
+            ).read_bytes()
+            result = build_placement_tcp_search_plan(
+                json.loads(
+                    args.physical_blocker_experiment_plan.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.collision_diagnostic_receipt.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.blocker_localization.resolve(strict=True).read_bytes()),
+                json.loads(virtual_profile_bytes),
+                virtual_profile_sha256=hashlib.sha256(
+                    virtual_profile_bytes
+                ).hexdigest(),
+            )
+        elif args.generate_physical_blocker_route_variant:
             if (
                 args.cartesian_request is None
                 or args.physical_blocker_experiment_plan is None
@@ -3842,6 +4204,7 @@ def main() -> int:
             "REVIEW_REQUIRED_COLLISION_BLOCKER_REMEDIATION",
             "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY",
             "READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION",
+            "READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING",
         } else 2
     except BaseException as exc:
         args.status_output.write_text(json.dumps({

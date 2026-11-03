@@ -8959,3 +8959,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: search bounded placement/TCP and full-link route hypotheses
   through the same exact IK/collision evaluator instead of assuming TCP height
   alone represents whole-arm clearance.
+
+### E-20261102-ARM-199 — placement/TCP campaign is fixed before screening
+
+- Stage: LM1 zero-authority physical-blocker attribution plan.
+- Lane: ARM / Isaac simulation.
+- Change: added deterministic generation of one retained ARM-198 control plus
+  the 81 keyboard-relevant combinations from the documented pre-hardware
+  placement/yaw/TCP grid. The plan binds the ARM-198 experiment, exact route
+  variant, native diagnostic, localization, virtual profile, collision
+  candidate, accepted pair policy, station predicate, and toolchain hashes.
+- Result: the retained plan contains 82 unique candidates, requires complete
+  rejection records, fixes its collision-first ranking order, and limits native
+  Isaac replay to at most eight deterministically selected candidates.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-search-plan-001`.
+  Plan SHA-256:
+  `9053512e8b57e326368bb61eabb7af074c12e15658a66832d522e3a7280b91f7`.
+- Focused verification: 37 ghost-keyboard/collision-contract tests pass.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: candidates are unmeasured simulation sensitivity hypotheses,
+  not installation tolerances. No candidate has been screened, no native replay
+  has been selected, route shape and collision solids are unchanged, and finite
+  screening cannot prove continuous clearance.
+- Next dependency: execute canonical IK and exact full-link collision scoring
+  for all candidates, retain every rejection, and run native Isaac only for the
+  predeclared shortlist. If placement/TCP sensitivity cannot clear the blockers,
+  generate a separate source-bound full-link route-shape campaign.
