@@ -510,6 +510,133 @@ def build_physical_blocker_experiment_plan(
     return result
 
 
+def build_physical_blocker_route_variant(
+    cartesian_request: dict[str, Any],
+    experiment_plan: dict[str, Any],
+) -> dict[str, Any]:
+    """Apply only the plan-bound transit-height hypothesis to a request."""
+    claimed_request_hash = cartesian_request.get("request_sha256")
+    unsigned_request = dict(cartesian_request)
+    unsigned_request.pop("request_sha256", None)
+    if claimed_request_hash != _canonical_sha256(unsigned_request):
+        raise MechanicsContractError("source Cartesian request hash mismatch")
+    claimed_plan_hash = experiment_plan.get("plan_sha256")
+    unsigned_plan = dict(experiment_plan)
+    unsigned_plan.pop("plan_sha256", None)
+    if claimed_plan_hash != _canonical_sha256(unsigned_plan):
+        raise MechanicsContractError("physical blocker experiment plan hash mismatch")
+    if (
+        cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or cartesian_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or experiment_plan.get("schema") != PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA
+        or experiment_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION"
+        or experiment_plan.get("source_cartesian_request_sha256")
+        != claimed_request_hash
+    ):
+        raise MechanicsContractError("physical blocker route-variant lineage changed")
+    for document, label in (
+        (cartesian_request, "source Cartesian request"),
+        (experiment_plan, "physical blocker experiment plan"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed the zero-authority boundary")
+    if (
+        experiment_plan.get("physical_authority") is not False
+        or experiment_plan.get("route_variant_applied") is not False
+        or experiment_plan.get("collision_geometry_changed") is not False
+    ):
+        raise MechanicsContractError("physical blocker experiment boundary changed")
+
+    samples = cartesian_request.get("samples")
+    if (
+        not isinstance(samples, list)
+        or not samples
+        or cartesian_request.get("sample_count") != len(samples)
+        or [sample.get("sequence") for sample in samples]
+        != list(range(len(samples)))
+    ):
+        raise MechanicsContractError("source Cartesian request samples are invalid")
+    sequences = experiment_plan.get("transit_lift_cartesian_sequences")
+    if (
+        not isinstance(sequences, list)
+        or not sequences
+        or sequences != sorted(sequences)
+        or len(sequences) != len(set(sequences))
+        or any(
+            isinstance(sequence, bool)
+            or not isinstance(sequence, int)
+            or sequence < 0
+            or sequence >= len(samples)
+            for sequence in sequences
+        )
+    ):
+        raise MechanicsContractError("transit-lift sequence selection is invalid")
+    proposed_z = _finite_number(
+        experiment_plan.get("proposed_transit_z_mm"), "proposed transit z"
+    )
+    physical_top_z = _finite_number(
+        experiment_plan.get("physical_workcell_top_z_mm"), "physical workcell top z"
+    )
+    if proposed_z <= physical_top_z:
+        raise MechanicsContractError("proposed transit z does not clear the workcell top")
+
+    selected = set(sequences)
+    variant_samples: list[dict[str, Any]] = []
+    for sequence, sample in enumerate(samples):
+        if not isinstance(sample, dict):
+            raise MechanicsContractError("source Cartesian sample is invalid")
+        point = sample.get("expected_tool_tip_board_mm")
+        if not isinstance(point, list) or len(point) != 3:
+            raise MechanicsContractError("source Cartesian sample point is invalid")
+        normalized_point = [
+            _finite_number(value, f"sample {sequence} Cartesian coordinate")
+            for value in point
+        ]
+        variant_sample = dict(sample)
+        if sequence in selected:
+            if sample.get("phase") != "TRANSIT" or sample.get("phase_endpoint") is not False:
+                raise MechanicsContractError(
+                    "transit-lift selection includes a non-transit endpoint"
+                )
+            if normalized_point[2] == proposed_z:
+                raise MechanicsContractError(
+                    "transit-lift selection includes an unchanged sample"
+                )
+            variant_sample["expected_tool_tip_board_mm"] = [
+                point[0], point[1], proposed_z,
+            ]
+        variant_samples.append(variant_sample)
+
+    result = dict(cartesian_request)
+    result.pop("request_sha256", None)
+    result.update({
+        "source_cartesian_request_sha256": claimed_request_hash,
+        "source_physical_blocker_experiment_plan_sha256": claimed_plan_hash,
+        "route_variant_classification": (
+            "ZERO_AUTHORITY_TRANSIT_HEIGHT_HYPOTHESIS"
+        ),
+        "modified_transit_sequences": sequences,
+        "proposed_transit_z_mm": proposed_z,
+        "route_variant_applied": True,
+        "collision_geometry_changed": False,
+        "installed_profile_eligible": False,
+        "samples": variant_samples,
+        "limitations": list(cartesian_request.get("limitations", [])) + [
+            "transit_height_is_a_plan_bound_simulation_hypothesis",
+            "contact_hover_and_retract_endpoints_are_unchanged",
+            "route_variant_requires_fresh_ik_and_collision_qualification",
+        ],
+    })
+    result["request_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def load_keyboard_layout(path: Path) -> dict[str, Any]:
     """Load the governed nominal profile and derive board-frame key regions."""
     raw = json.loads(path.read_bytes())
@@ -1074,6 +1201,8 @@ def screen_robot_tcp_cartesian_schedule_ik(
     profile: dict[str, Any],
     *,
     workspace: Path,
+    experiment_plan: dict[str, Any] | None = None,
+    source_cartesian_request: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Solve a regenerated Cartesian request with the canonical IK gates."""
     if request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA:
@@ -1090,12 +1219,32 @@ def screen_robot_tcp_cartesian_schedule_ik(
         raise MechanicsContractError("IK source bundle hash mismatch")
     if request.get("source_bundle_sha256") != claimed_bundle_hash:
         raise MechanicsContractError("Cartesian request and IK source bundle differ")
-    expected_request = build_robot_tcp_cartesian_schedule_request(
+    governed_source_request = build_robot_tcp_cartesian_schedule_request(
         profile, source_bundle
     )
+    if (experiment_plan is None) != (source_cartesian_request is None):
+        raise MechanicsContractError(
+            "route-variant IK requires both its experiment plan and source request"
+        )
+    route_variant = (
+        experiment_plan is not None and source_cartesian_request is not None
+    )
+    if experiment_plan is not None and source_cartesian_request is not None:
+        if (
+            source_cartesian_request.get("request_sha256")
+            != governed_source_request.get("request_sha256")
+        ):
+            raise MechanicsContractError(
+                "route-variant source differs from governed mechanics regeneration"
+            )
+        expected_request = build_physical_blocker_route_variant(
+            source_cartesian_request, experiment_plan
+        )
+    else:
+        expected_request = governed_source_request
     if expected_request.get("request_sha256") != claimed_request_hash:
         raise MechanicsContractError(
-            "Cartesian request differs from the governed mechanics regeneration"
+            "Cartesian request differs from its governed mechanics regeneration"
         )
     for document, label in ((request, "request"), (source_bundle, "source bundle")):
         if (
@@ -1122,6 +1271,15 @@ def screen_robot_tcp_cartesian_schedule_ik(
     modified_set = set(modified)
     if len(modified_set) != len(modified):
         raise MechanicsContractError("modified contact sequences are not unique")
+    modified_transit = request.get("modified_transit_sequences", [])
+    if not isinstance(modified_transit, list):
+        raise MechanicsContractError("modified transit sequences are invalid")
+    modified_transit_set = set(modified_transit)
+    if len(modified_transit_set) != len(modified_transit):
+        raise MechanicsContractError("modified transit sequences are not unique")
+    if route_variant != bool(modified_transit):
+        raise MechanicsContractError("route-variant transit selection is absent or unexpected")
+    changed_set = modified_set | modified_transit_set
     for sequence, (sample, source) in enumerate(zip(samples, source_samples)):
         if sample.get("sequence") != sequence or source.get("sequence") != sequence:
             raise MechanicsContractError("IK sample sequence is not contiguous")
@@ -1130,7 +1288,7 @@ def screen_robot_tcp_cartesian_schedule_ik(
         ):
             if sample.get(field) != source.get(field):
                 raise MechanicsContractError("Cartesian request changed source semantics")
-        if sequence not in modified_set and (
+        if sequence not in changed_set and (
             sample.get("expected_tool_tip_board_mm")
             != source.get("expected_tool_tip_board_mm")
         ):
@@ -1140,6 +1298,20 @@ def screen_robot_tcp_cartesian_schedule_ik(
             != request.get("required_contact_target_board_mm")
         ):
             raise MechanicsContractError("modified contact target differs from the request")
+        if sequence in modified_transit_set:
+            source_point = source.get("expected_tool_tip_board_mm")
+            point = sample.get("expected_tool_tip_board_mm")
+            if (
+                not isinstance(source_point, list)
+                or len(source_point) != 3
+                or not isinstance(point, list)
+                or len(point) != 3
+                or point[:2] != source_point[:2]
+                or point[2] != request.get("proposed_transit_z_mm")
+                or sample.get("phase") != "TRANSIT"
+                or sample.get("phase_endpoint") is not False
+            ):
+                raise MechanicsContractError("modified transit sample changed beyond z")
 
     try:
         from rocell.application._pinned_model import load_pinned_urdf
@@ -1284,6 +1456,9 @@ def screen_robot_tcp_cartesian_schedule_ik(
         "modified_contact_results": [
             results[index] for index in modified if index < len(results)
         ],
+        "modified_transit_results": [
+            results[index] for index in modified_transit if index < len(results)
+        ],
         "metrics": {
             "maximum_position_error_mm": max(
                 (item["position_error_mm"] for item in accepted), default=None
@@ -1318,6 +1493,18 @@ def screen_robot_tcp_cartesian_schedule_ik(
             "no_hardware_motion_or_physical_keyboard_authority",
         ],
     }
+    if route_variant:
+        result.update({
+            "source_cartesian_request_sha256": request[
+                "source_cartesian_request_sha256"
+            ],
+            "source_physical_blocker_experiment_plan_sha256": request[
+                "source_physical_blocker_experiment_plan_sha256"
+            ],
+            "route_variant_classification": request[
+                "route_variant_classification"
+            ],
+        })
     result["receipt_sha256"] = _canonical_sha256(result)
     return result
 
@@ -3221,6 +3408,17 @@ def main() -> int:
         action="store_true",
         help="classify retained physical blockers before generating variants",
     )
+    parser.add_argument(
+        "--generate-physical-blocker-route-variant",
+        action="store_true",
+        help="apply a retained plan's transit-height hypothesis to its source request",
+    )
+    parser.add_argument("--physical-blocker-experiment-plan", type=Path)
+    parser.add_argument(
+        "--source-cartesian-request",
+        type=Path,
+        help="original governed request required to admit a route variant to IK",
+    )
     parser.add_argument("--blocker-localization", type=Path)
     parser.add_argument("--clearance-margin-mm", type=float)
     parser.add_argument("--target-station-bindings", type=Path)
@@ -3253,6 +3451,7 @@ def main() -> int:
             not args.localize_collision_blockers
             and not args.build_station_route_predicate
             and not args.plan_physical_blocker_experiment
+            and not args.generate_physical_blocker_route_variant
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -3287,7 +3486,42 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.plan_physical_blocker_experiment:
+        if args.generate_physical_blocker_route_variant:
+            if (
+                args.cartesian_request is None
+                or args.physical_blocker_experiment_plan is None
+            ):
+                raise MechanicsContractError(
+                    "physical blocker route generation requires --cartesian-request "
+                    "and --physical-blocker-experiment-plan"
+                )
+            if any((
+                args.plan_physical_blocker_experiment,
+                args.build_station_route_predicate,
+                args.localize_collision_blockers,
+                args.accept_collision_pair_policy,
+                args.bind_collision_pair_policy,
+                args.propose_collision_pair_policy,
+                args.run_collision_diagnostic,
+                args.native_h_probe,
+                args.robot_tcp_bundle is not None,
+                args.ik_receipt is not None,
+                args.ik_source_bundle is not None,
+                args.source_cartesian_request is not None,
+            )):
+                raise MechanicsContractError(
+                    "physical blocker route generation is mutually exclusive "
+                    "with other modes"
+                )
+            result = build_physical_blocker_route_variant(
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.physical_blocker_experiment_plan.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+            )
+        elif args.plan_physical_blocker_experiment:
             required = (
                 args.cartesian_request,
                 args.collision_candidate,
@@ -3525,11 +3759,29 @@ def main() -> int:
             )
         elif args.cartesian_request is not None:
             profile = build_profile(args.layout.resolve(strict=True))
+            experiment_plan = (
+                None
+                if args.physical_blocker_experiment_plan is None
+                else json.loads(
+                    args.physical_blocker_experiment_plan.resolve(
+                        strict=True
+                    ).read_bytes()
+                )
+            )
+            source_cartesian_request = (
+                None
+                if args.source_cartesian_request is None
+                else json.loads(
+                    args.source_cartesian_request.resolve(strict=True).read_bytes()
+                )
+            )
             result = screen_robot_tcp_cartesian_schedule_ik(
                 json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
                 json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
                 profile,
                 workspace=args.workspace,
+                experiment_plan=experiment_plan,
+                source_cartesian_request=source_cartesian_request,
             )
         elif args.native_h_probe:
             result = run_native_h_probe(

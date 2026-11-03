@@ -1215,6 +1215,32 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
+The follow-on ARM-198 route-variant experiment applies that plan without
+silently turning it into ordinary mechanics regeneration. The variant is
+admitted only when the original Cartesian request and experiment plan both
+reproduce their canonical digests. It changes Z to `70 mm` for exactly the 71
+plan-selected `TRANSIT` samples; X/Y, timing, phases, targets, all endpoints,
+and collision geometry remain unchanged.
+
+The retained artifact is
+`C:\IsaacSim\artifacts\issue190\arm198-transit-route-variant-001`. The variant
+request SHA-256 is
+`7f95dfb7d50d5b1f9789f8faf5d412ad34d254da8caf6c5bd473c5404d5d438d`.
+Canonical IK accepts all 133 samples (receipt SHA-256
+`e93569d4226a64c35c5c1045f1ae8d88d3c566666958fcbd99c8c4d347bb67f6`).
+The policy-bound native diagnostic then evaluates 179 bounded configurations
+and retains seven physical board/keyboard blocker pairs, zero station-envelope
+blockers, and five policy-excluded adjacent-link pairs. Its receipt SHA-256 is
+`f31a97dc341502199ddba7bd80ecad83d62cd49d8520382b1edaccb2e0c4be0b`;
+the localization SHA-256 is
+`f421afd8335f18533970861bb978bd141a44e24bfe75a23229d2c3c593472327`.
+
+This is a useful negative result. The uniform tip-height lift is reachable, but
+it changes rather than clears the full-link collision pattern. Endpoint phases
+also remain blocked. The next route correction must jointly evaluate measured
+placement/TCP hypotheses and full-link trajectories; it must not remove or
+resize physical solids or treat a raised TCP as whole-arm clearance proof.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

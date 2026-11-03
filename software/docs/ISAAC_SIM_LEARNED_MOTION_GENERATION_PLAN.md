@@ -530,13 +530,16 @@ ScheduleGen. Neither is a physical success rate.
    endpoints are target-bound, planning regions are excluded from PhysX, and
    physical board/device solids remain active. The retained rerun has zero
    station-envelope blockers and seven physical board/keyboard body-pair
-   blockers. A hash-bound ARM-198 experiment plan now separates 71 implicated
+   blockers. A hash-bound ARM-198 experiment plan separates 71 implicated
    transit samples from endpoint geometry work and proposes a 70 mm
-   zero-authority transit-height hypothesis. Next generate that route variant,
-   repeat IK and native collision screening, and retain the comparison. Do not
-   interpret a transit improvement as resolution of endpoint blockers; measured
-   workcell placement/TCP geometry and installed continuous geometry remain
-   separate dependencies.
+   zero-authority transit-height hypothesis. The exact variant now passes
+   canonical IK for all 133 samples, but its 179-configuration native replay
+   still retains all seven physical blocker pairs and zero station-envelope
+   blockers. This rejects a uniform TCP-height lift as the complete route
+   correction. Next generate bounded placement/TCP and full-link trajectory
+   hypotheses, score each through the same IK and collision boundaries, and
+   preserve endpoint qualification as a separate objective. Installed
+   continuous geometry remains a separate dependency.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

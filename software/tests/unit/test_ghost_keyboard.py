@@ -347,6 +347,41 @@ def test_robot_tcp_cartesian_ik_screen_rejects_request_hash_tamper():
         )
 
 
+def test_route_variant_ik_admission_rejects_resealed_plan_divergence():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    source=mechanics.build_robot_tcp_cartesian_schedule_request(profile,bundle)
+    sequence=next(
+        sample['sequence'] for sample in source['samples']
+        if sample['phase']=='TRANSIT' and sample['phase_endpoint'] is False
+        and sample['expected_tool_tip_board_mm'][2]!=70.0
+    )
+    plan={
+        'schema':mechanics.PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION',
+        'source_cartesian_request_sha256':source['request_sha256'],
+        'physical_workcell_top_z_mm':21.0,'proposed_transit_z_mm':70.0,
+        'transit_lift_cartesian_sequences':[sequence],
+        'route_variant_applied':False,'collision_geometry_changed':False,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+    variant=mechanics.build_physical_blocker_route_variant(source,plan)
+    variant['samples'][sequence]['expected_tool_tip_board_mm'][0]+=1.0
+    unsigned={key:value for key,value in variant.items() if key!='request_sha256'}
+    variant['request_sha256']=mechanics._canonical_sha256(unsigned)
+    with pytest.raises(mechanics.MechanicsContractError,match='governed mechanics'):
+        mechanics.screen_robot_tcp_cartesian_schedule_ik(
+            variant,bundle,profile,workspace=ROOT,
+            experiment_plan=plan,source_cartesian_request=source,
+        )
+
+
 def test_robot_tcp_collision_request_binds_exact_ik_and_bounded_samples():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
@@ -800,6 +835,79 @@ def test_physical_blocker_plan_separates_transit_and_endpoint_experiments():
             clearance_margin_mm=0.0,
             virtual_profile_sha256=profile_sha256,
         )
+
+
+def test_physical_blocker_route_variant_changes_only_selected_transit_z():
+    mechanics=_load_key_mechanics()
+    samples=[
+        {
+            'sequence':0,'time_from_start_ns':0,'phase':'PARK',
+            'phase_endpoint':True,'action_index':0,'target_id':None,
+            'expected_tool_tip_board_mm':[290.0,10.0,70.0],
+        },
+        {
+            'sequence':1,'time_from_start_ns':1,'phase':'TRANSIT',
+            'phase_endpoint':False,'action_index':0,'target_id':'H',
+            'expected_tool_tip_board_mm':[250.0,100.0,32.0],
+        },
+        {
+            'sequence':2,'time_from_start_ns':2,'phase':'TRANSIT',
+            'phase_endpoint':False,'action_index':0,'target_id':'H',
+            'expected_tool_tip_board_mm':[240.0,120.0,28.0],
+        },
+        {
+            'sequence':3,'time_from_start_ns':3,'phase':'CONTACT',
+            'phase_endpoint':True,'action_index':0,'target_id':'H',
+            'expected_tool_tip_board_mm':[230.0,130.0,16.0],
+        },
+    ]
+    request={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'status':'READY_FOR_IK_QUALIFICATION','source_bundle_sha256':'a'*64,
+        'source_binding_sha256':'b'*64,'profile_sha256':'c'*64,'key_id':'H',
+        'sample_count':len(samples),'total_time_ns':3,'ordered_target_ids':['H'],
+        'modified_contact_sequences':[3],
+        'required_contact_target_board_mm':[230.0,130.0,16.0],
+        'samples':samples,'joint_positions_included':False,
+        'source_joint_positions_reused':False,'ik_qualification_required':True,
+        'collision_qualification_required':True,'native_replay_required':True,
+        'authority':{'physical_motion':False},'hardware_access':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'limitations':['source limitation'],
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    plan={
+        'schema':mechanics.PHYSICAL_BLOCKER_EXPERIMENT_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION',
+        'source_cartesian_request_sha256':request['request_sha256'],
+        'physical_workcell_top_z_mm':21.0,'proposed_transit_z_mm':70.0,
+        'transit_lift_cartesian_sequences':[1],
+        'route_variant_applied':False,'collision_geometry_changed':False,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+
+    variant=mechanics.build_physical_blocker_route_variant(request,plan)
+    assert variant['source_cartesian_request_sha256']==request['request_sha256']
+    assert variant['source_physical_blocker_experiment_plan_sha256']==plan['plan_sha256']
+    assert variant['modified_transit_sequences']==[1]
+    assert variant['samples'][1]['expected_tool_tip_board_mm']==[250.0,100.0,70.0]
+    assert variant['samples'][0]==request['samples'][0]
+    assert variant['samples'][2]==request['samples'][2]
+    assert variant['samples'][3]==request['samples'][3]
+    assert variant['route_variant_applied'] is True
+    assert variant['collision_geometry_changed'] is False
+    assert variant['installed_profile_eligible'] is False
+    unsigned={key:value for key,value in variant.items() if key!='request_sha256'}
+    assert variant['request_sha256']==mechanics._canonical_sha256(unsigned)
+
+    invalid_plan=dict(plan)
+    invalid_plan.pop('plan_sha256')
+    invalid_plan['transit_lift_cartesian_sequences']=[3]
+    invalid_plan['plan_sha256']=mechanics._canonical_sha256(invalid_plan)
+    with pytest.raises(mechanics.MechanicsContractError,match='non-transit endpoint'):
+        mechanics.build_physical_blocker_route_variant(request,invalid_plan)
 
 
 def test_collision_blockers_localize_to_retained_cartesian_context():
