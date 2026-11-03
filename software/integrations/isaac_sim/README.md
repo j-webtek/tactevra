@@ -1344,9 +1344,56 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output "$artifactDir\status.json"
 ```
 
-This is a zero-authority plan, not a route result. Candidate materialization,
-fresh canonical IK, exact full-link collision screening, native replay, and
-separate continuous-clearance qualification remain required.
+ARM-201 executes the fixed portion of that plan. All nine Cartesian requests
+were materialized exactly. Six candidates pass all 133 canonical IK and
+discrete-continuity samples. The three `X_THEN_Y` routes reject with
+`IK_NO_CONVERGED_SOLUTION` at their first unreachable samples (9, 7, and 6 for
+70, 90, and 110 mm); those failed results retain empty joint solutions as the
+IK contract requires rather than being lost to an evidence-shape exception.
+
+The exact offline full-link OBB evaluator reports zero physical blocker pairs
+in both the 119-sample TRANSIT domain and the 14 preserved endpoints for all
+six IK survivors. That does **not** establish clearance: ARM-199 already showed
+that this offline evaluator can report zero while native PhysX reports seven or
+eight blocker pairs. The fixed ranking therefore creates only a native replay
+shortlist, in order: `Y_THEN_X/110`, `DIRECT_LINEAR/110`, `Y_THEN_X/70`, and
+`DIRECT_LINEAR/90`.
+
+Retained ARM-201 evidence:
+
+- materialized requests and IK receipts:
+  `C:\IsaacSim\artifacts\issue190\arm201-route-shape-materialization-001`;
+- aggregate screen:
+  `C:\IsaacSim\artifacts\issue190\arm201-route-shape-screen-001\screen.json`,
+  screen SHA-256
+  `d1bee840796d434d3a69902a116219ab6fc3c30eee501368112ef2f1f848d511`;
+- four-candidate native handoff:
+  `C:\IsaacSim\artifacts\issue190\arm201-route-shape-native-shortlist-001\manifest.json`,
+  manifest SHA-256
+  `e7aff82d77e731e1ba7b1e11784cdceb209e3b32cb961bb11e60acb09c7eb9e6`.
+
+Reproduce the aggregate screen after materializing and IK-screening all nine
+candidate directories:
+
+```powershell
+$root = 'C:\IsaacSim\artifacts\issue190'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --screen-route-shape-campaign `
+  --route-shape-campaign-plan "$root\arm200-route-shape-campaign-plan-001\plan.json" `
+  --route-shape-evidence-dir "$root\arm201-route-shape-materialization-001" `
+  --cartesian-request "$root\arm198-transit-route-variant-001\request.json" `
+  --collision-candidate "$root\arm196-link5-components-obb-32\collision_candidate.json" `
+  --accepted-collision-pair-policy "$root\arm197-station-route-predicate-001\pair_policy.json" `
+  --station-route-predicate "$root\arm198-transit-route-variant-001\station_route_predicate.json" `
+  --workspace . `
+  --output "$root\arm201-route-shape-screen-001\screen.json" `
+  --status-output "$root\arm201-route-shape-screen-001\status.json"
+```
+
+Native replay, retained native comparison against the seven-pair ARM-199
+control, and separate continuous-clearance qualification remain required. No
+ARM-201 artifact installs a route or grants physical authority.
 
 ### Native H-key contact replay
 

@@ -547,10 +547,16 @@ ScheduleGen. Neither is a physical success rate.
    predeclared direct/orthogonal XY corridor variants at bounded 70/90/110 mm
    heights. It preserves all 14 non-transit endpoints, physical solids,
    placement/TCP, timing, and policy/toolchain bindings, and limits native
-   replay to four deterministic finalists. Next, materialize and screen all
-   nine candidates through canonical IK and exact full-link collision scoring,
-   retaining transit and endpoint blockers separately. Installed continuous
-   geometry remains a separate dependency.
+   replay to four deterministic finalists. ARM-201 has now materialized all
+   nine candidates: six pass all 133 canonical IK/continuity samples and all
+   three `X_THEN_Y` variants retain explicit unreachable-IK rejections. The
+   offline full-link evaluator reports zero transit and endpoint blockers for
+   the six survivors, but the prior ARM-199 offline/native discrepancy prevents
+   treating that as clearance. The fixed ranking retains four exact native
+   replay inputs (`Y_THEN_X/110`, `DIRECT_LINEAR/110`, `Y_THEN_X/70`, and
+   `DIRECT_LINEAR/90`). Next, replay that unchanged shortlist in native Isaac
+   and compare its raw blockers against the seven-pair control. Installed
+   continuous geometry remains a separate dependency.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

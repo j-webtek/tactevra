@@ -65,6 +65,12 @@ PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA = (
 ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA = (
     "tactevra.isaac_lm1_route_shape_campaign_plan.v1"
 )
+ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA = (
+    "tactevra.isaac_lm1_route_shape_campaign_screen.v1"
+)
+ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA = (
+    "tactevra.isaac_lm1_route_shape_native_shortlist.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -1173,6 +1179,612 @@ def build_route_shape_campaign_plan(
     return result
 
 
+def materialize_route_shape_candidate(
+    campaign_plan: dict[str, Any],
+    source_request: dict[str, Any],
+    candidate_id: str,
+) -> dict[str, Any]:
+    """Materialize one predeclared ARM-200 route without changing endpoints."""
+    for document, hash_field, label in (
+        (campaign_plan, "plan_sha256", "route-shape campaign plan"),
+        (source_request, "request_sha256", "source route request"),
+    ):
+        claimed = document.get(hash_field)
+        unsigned = dict(document)
+        unsigned.pop(hash_field, None)
+        if claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} hash mismatch")
+    candidates = campaign_plan.get("candidates")
+    matches = [
+        item for item in candidates or [] if item.get("candidate_id") == candidate_id
+    ]
+    if (
+        campaign_plan.get("schema") != ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA
+        or campaign_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING"
+        or campaign_plan.get("source_route_variant_request_sha256")
+        != source_request.get("request_sha256")
+        or len(matches) != 1
+    ):
+        raise MechanicsContractError("route-shape materialization lineage changed")
+    for document, label in (
+        (campaign_plan, "route-shape campaign plan"),
+        (source_request, "source route request"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    candidate = matches[0]
+    samples = source_request.get("samples")
+    if not isinstance(samples, list) or len(samples) != campaign_plan.get(
+        "source_sample_count"
+    ):
+        raise MechanicsContractError("route-shape source sample count changed")
+    if any(
+        not isinstance(sample, dict) or sample.get("sequence") != sequence
+        for sequence, sample in enumerate(samples)
+    ):
+        raise MechanicsContractError("route-shape source sequence is not contiguous")
+
+    materialized_samples = json.loads(json.dumps(samples))
+    topology = candidate.get("xy_corridor_topology")
+    corridor_z = _finite_number(
+        candidate.get("corridor_height_board_mm"), "route corridor height"
+    )
+    source_exact = candidate.get("source_request_reused_exactly") is True
+    if source_exact:
+        if (
+            candidate.get("transit_resampling") != "SOURCE_REQUEST_EXACT"
+            or candidate.get("corridor_height_ramp_fraction") is not None
+        ):
+            raise MechanicsContractError("route-shape control definition changed")
+    else:
+        if (
+            topology not in {"DIRECT_LINEAR", "X_THEN_Y", "Y_THEN_X"}
+            or candidate.get("transit_resampling")
+            != "ARC_LENGTH_PIECEWISE_LINEAR_WITH_SYMMETRIC_Z_RAMPS"
+            or candidate.get("corridor_height_ramp_fraction") != 0.25
+        ):
+            raise MechanicsContractError("route-shape variant definition changed")
+
+    def point(sample: dict[str, Any]) -> list[float]:
+        value = sample.get("expected_tool_tip_board_mm")
+        if not isinstance(value, list) or len(value) != 3:
+            raise MechanicsContractError("route-shape sample lacks Cartesian point")
+        return [_finite_number(item, "route coordinate") for item in value]
+
+    def xy_at(start: list[float], end: list[float], progress: float) -> list[float]:
+        if topology == "DIRECT_LINEAR":
+            return [
+                start[0] + progress * (end[0] - start[0]),
+                start[1] + progress * (end[1] - start[1]),
+            ]
+        corner = (
+            [end[0], start[1]]
+            if topology == "X_THEN_Y"
+            else [start[0], end[1]]
+        )
+        lengths = [
+            math.hypot(corner[0] - start[0], corner[1] - start[1]),
+            math.hypot(end[0] - corner[0], end[1] - corner[1]),
+        ]
+        total = sum(lengths)
+        if total <= 0:
+            return start[:2]
+        distance = progress * total
+        if distance <= lengths[0] and lengths[0] > 0:
+            fraction = distance / lengths[0]
+            return [
+                start[0] + fraction * (corner[0] - start[0]),
+                start[1] + fraction * (corner[1] - start[1]),
+            ]
+        if lengths[1] <= 0:
+            return corner
+        fraction = (distance - lengths[0]) / lengths[1]
+        return [
+            corner[0] + fraction * (end[0] - corner[0]),
+            corner[1] + fraction * (end[1] - corner[1]),
+        ]
+
+    changed_sequences: list[int] = []
+    if not source_exact:
+        index = 0
+        while index < len(samples):
+            if samples[index].get("phase") != "TRANSIT":
+                index += 1
+                continue
+            run_start = index
+            while index < len(samples) and samples[index].get("phase") == "TRANSIT":
+                index += 1
+            run_end = index
+            if run_start == 0 or run_end >= len(samples):
+                raise MechanicsContractError("transit run lacks preserved endpoints")
+            start = point(samples[run_start - 1])
+            end = point(samples[run_end])
+            count = run_end - run_start
+            for offset, sequence in enumerate(range(run_start, run_end)):
+                progress = (offset + 1) / (count + 1)
+                xy = xy_at(start, end, progress)
+                if progress <= 0.25:
+                    z = start[2] + progress / 0.25 * (corridor_z - start[2])
+                elif progress >= 0.75:
+                    z = corridor_z + (progress - 0.75) / 0.25 * (
+                        end[2] - corridor_z
+                    )
+                else:
+                    z = corridor_z
+                replacement = [xy[0], xy[1], z]
+                if replacement != point(samples[sequence]):
+                    changed_sequences.append(sequence)
+                materialized_samples[sequence][
+                    "expected_tool_tip_board_mm"
+                ] = replacement
+
+    endpoint_sequences = campaign_plan.get("preserved_endpoint_sequences")
+    if any(
+        materialized_samples[sequence] != samples[sequence]
+        for sequence in endpoint_sequences
+    ):
+        raise MechanicsContractError("route-shape materialization changed an endpoint")
+    if [
+        sample["sequence"]
+        for sample in materialized_samples
+        if sample.get("phase") == "TRANSIT"
+    ] != campaign_plan.get("source_transit_sequences"):
+        raise MechanicsContractError("route-shape transit domain changed")
+
+    result = dict(source_request)
+    result.pop("request_sha256", None)
+    result.update({
+        "status": "READY_FOR_IK_QUALIFICATION",
+        "source_route_shape_campaign_plan_sha256": campaign_plan["plan_sha256"],
+        "route_shape_candidate_id": candidate_id,
+        "route_shape_candidate": candidate,
+        "source_route_variant_request_sha256": source_request["request_sha256"],
+        "route_shape_materialized": True,
+        "route_shape_domain_sequences": list(
+            campaign_plan["source_transit_sequences"]
+        ),
+        "changed_cartesian_sequences": changed_sequences,
+        "non_transit_endpoints_changed": False,
+        "placement_tcp_changed": False,
+        "collision_geometry_changed": False,
+        "installed_profile_eligible": False,
+        "samples": materialized_samples,
+        "limitations": list(source_request.get("limitations", [])) + [
+            "route_shape_is_a_plan_bound_simulation_hypothesis",
+            "all_non_transit_endpoints_are_preserved_exactly",
+            "fresh_ik_and_collision_qualification_are_required",
+        ],
+    })
+    result["request_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def screen_route_shape_campaign(
+    campaign_plan: dict[str, Any],
+    source_request: dict[str, Any],
+    candidate_evidence: dict[str, tuple[dict[str, Any], dict[str, Any]]],
+    collision_candidate: dict[str, Any],
+    collision_pair_policy: dict[str, Any],
+    station_route_predicate: dict[str, Any],
+    *,
+    workspace: Path,
+) -> dict[str, Any]:
+    """Aggregate fixed ARM-200 IK evidence and exact full-link OBB scores."""
+    plan_hash = campaign_plan.get("plan_sha256")
+    unsigned_plan = dict(campaign_plan)
+    unsigned_plan.pop("plan_sha256", None)
+    candidates = campaign_plan.get("candidates")
+    if (
+        campaign_plan.get("schema") != ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA
+        or campaign_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING"
+        or plan_hash != _canonical_sha256(unsigned_plan)
+        or not isinstance(candidates, list)
+        or len(candidates) != campaign_plan.get("candidate_count")
+    ):
+        raise MechanicsContractError("route-shape campaign plan is invalid")
+    candidate_ids = [item.get("candidate_id") for item in candidates]
+    if (
+        any(not isinstance(item, str) for item in candidate_ids)
+        or len(set(candidate_ids)) != len(candidate_ids)
+        or set(candidate_evidence) != set(candidate_ids)
+    ):
+        raise MechanicsContractError("route-shape candidate evidence coverage changed")
+    source_hash = source_request.get("request_sha256")
+    unsigned_source = dict(source_request)
+    unsigned_source.pop("request_sha256", None)
+    if (
+        source_hash != _canonical_sha256(unsigned_source)
+        or source_hash != campaign_plan.get("source_route_variant_request_sha256")
+    ):
+        raise MechanicsContractError("route-shape source request lineage changed")
+
+    candidate_hash = collision_candidate.get("candidate_sha256")
+    candidate_unsigned = dict(collision_candidate)
+    candidate_unsigned.pop("candidate_sha256", None)
+    policy_hash = collision_pair_policy.get("policy_sha256")
+    policy_unsigned = dict(collision_pair_policy)
+    policy_unsigned.pop("policy_sha256", None)
+    predicate_hash = station_route_predicate.get("predicate_sha256")
+    predicate_unsigned = dict(station_route_predicate)
+    predicate_unsigned.pop("predicate_sha256", None)
+    if (
+        candidate_hash != _canonical_sha256(candidate_unsigned)
+        or policy_hash != _canonical_sha256(policy_unsigned)
+        or predicate_hash != _canonical_sha256(predicate_unsigned)
+        or candidate_hash != campaign_plan.get("source_collision_candidate_sha256")
+        or policy_hash != campaign_plan.get("source_collision_pair_policy_sha256")
+        or predicate_hash != campaign_plan.get("source_station_route_predicate_sha256")
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+        or collision_pair_policy.get("status")
+        != "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY"
+        or station_route_predicate.get("status") != "PASS"
+    ):
+        raise MechanicsContractError("route-shape collision lineage changed")
+    for document, label in (
+        (campaign_plan, "route-shape campaign plan"),
+        (source_request, "route-shape source request"),
+        (collision_candidate, "collision candidate"),
+        (collision_pair_policy, "collision pair policy"),
+        (station_route_predicate, "station route predicate"),
+    ):
+        if (
+            document.get("physical_authority", False) is not False
+            or document.get("hardware_access", False) is not False
+            or document.get("controller_commands", []) != []
+            or document.get("hardware_writes", 0) != 0
+            or document.get("hardware_write_count", 0) != 0
+            or document.get("physical_movements", 0) != 0
+            or document.get("physical_movement_count", 0) != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    try:
+        from rocell.application._pinned_model import load_pinned_urdf
+        from rocell.application.context import load_simulation_context
+        from rocell.geometry import JointPosition, RigidTransform, Rotation3, Vec3
+        from rocell.kinematics import ARM_JOINT_NAMES
+        from rocell.simulation.collision import (
+            CollisionBindingMode,
+            CollisionBody,
+            CollisionBodyRequirement,
+            CollisionBodyRole,
+            CollisionClearanceEvidenceState,
+            CollisionClearancePolicy,
+            CollisionEvaluationPolicy,
+            CollisionEvidenceState,
+            CollisionExclusionEvidenceState,
+            CollisionExclusionScope,
+            CollisionGeometryContract,
+            CollisionPairExclusion,
+            CollisionPose,
+            OrientedBoxMm,
+            evaluate_collision_pose,
+        )
+    except ImportError as exc:
+        raise MechanicsContractError(
+            "offline collision runtime is unavailable; include software/src on PYTHONPATH"
+        ) from exc
+
+    physical_ids = station_route_predicate.get("physical_workcell_body_ids")
+    if not isinstance(physical_ids, list) or not physical_ids:
+        raise MechanicsContractError("station predicate lacks physical workcell ids")
+    physical_id_set = set(physical_ids)
+    robot_documents = collision_candidate.get("robot_bodies")
+    workcell_documents = collision_candidate.get("workcell_bodies")
+    if not isinstance(robot_documents, list) or not isinstance(workcell_documents, list):
+        raise MechanicsContractError("collision candidate body collections are invalid")
+    selected_documents = [
+        *robot_documents,
+        *(
+            item
+            for item in workcell_documents
+            if item.get("body_id") in physical_id_set
+        ),
+    ]
+    selected_static_ids = {
+        item.get("body_id")
+        for item in selected_documents
+        if item in workcell_documents
+    }
+    if selected_static_ids != physical_id_set:
+        raise MechanicsContractError("physical workcell body coverage changed")
+
+    def primitive(document: dict[str, Any]) -> OrientedBoxMm:
+        if document.get("kind") != "oriented_box":
+            raise MechanicsContractError("ARM-201 requires oriented-box primitives")
+        return OrientedBoxMm(
+            Vec3.from_iterable(document["center_mm"]),
+            Vec3.from_iterable(document["half_extents_mm"]),
+            Rotation3(tuple(document["rotation_row_major"])),
+        )
+
+    requirements = []
+    bodies = []
+    for document in selected_documents:
+        is_static = document["body_id"] in physical_id_set
+        role = (
+            CollisionBodyRole.STATIC_ENVIRONMENT
+            if is_static
+            else CollisionBodyRole.ROBOT_LINK
+        )
+        mode = (
+            CollisionBindingMode.STATIC_ROOT
+            if is_static
+            else CollisionBindingMode.RIGID_FRAME
+        )
+        requirements.append(
+            CollisionBodyRequirement(
+                document["body_id"],
+                document["parent_frame"],
+                role,
+                mode,
+                "ARM-201 exact exploratory full-link OBB screen",
+            )
+        )
+        bodies.append(
+            CollisionBody(
+                document["body_id"],
+                document["parent_frame"],
+                role,
+                CollisionEvidenceState.PINNED_DIGITAL,
+                tuple(primitive(item) for item in document["primitives"]),
+                mode,
+                f"collision candidate {candidate_hash}",
+            )
+        )
+    exclusions = tuple(
+        CollisionPairExclusion(
+            pair[0],
+            pair[1],
+            CollisionExclusionScope.URDF_ADJACENT_DIAGNOSTIC,
+            CollisionExclusionEvidenceState.PINNED_KINEMATIC_DIAGNOSTIC,
+            "accepted directly connected diagnostic pair",
+            f"collision pair policy {policy_hash}",
+        )
+        for pair in collision_pair_policy.get("accepted_exclusion_pairs", [])
+    )
+    contract = CollisionGeometryContract(
+        "TACTEVRA-ARM201-EXPLORATORY-OBB-V1",
+        "board",
+        tuple(requirements),
+        tuple(bodies),
+        exclusions,
+    )
+    clearance = CollisionClearancePolicy(
+        1e-9,
+        0.0,
+        0.0,
+        CollisionClearanceEvidenceState.PINNED_DIGITAL,
+        "ARM-201 numerical touching threshold; not measured clearance",
+    )
+    evaluation_policy = CollisionEvaluationPolicy(clearance_policy=clearance)
+    root = workspace.resolve(strict=True)
+    context = load_simulation_context(
+        root, root / "software/config/system_manifest.json"
+    )
+    model = load_pinned_urdf(
+        context.scenario.model_path, context.scenario.model_sha256
+    ).model
+    remaining = set(model.movable_joint_names) - set(ARM_JOINT_NAMES)
+    if len(remaining) != 1:
+        raise MechanicsContractError("pinned robot gripper joint topology changed")
+    gripper_joint = next(iter(remaining))
+    placement = campaign_plan.get("selected_placement_tcp_candidate")
+    matrix = placement.get("robot_placement_matrix_row_major") if isinstance(
+        placement, dict
+    ) else None
+    if not isinstance(matrix, list) or len(matrix) != 16:
+        raise MechanicsContractError("route-shape placement/TCP candidate is invalid")
+    board_t_base = RigidTransform(
+        "board",
+        "base_link",
+        Rotation3(
+            tuple(matrix[index] for index in (0, 1, 2, 4, 5, 6, 8, 9, 10))
+        ),
+        Vec3(matrix[3], matrix[7], matrix[11]),
+    )
+    fixed = model.joint("world_to_base_link")
+    board_t_world = board_t_base.compose(fixed.transform_at(None).inverse())
+
+    outcomes: list[dict[str, Any]] = []
+    for candidate in candidates:
+        candidate_id = candidate["candidate_id"]
+        request, ik = candidate_evidence[candidate_id]
+        expected_request = materialize_route_shape_candidate(
+            campaign_plan, source_request, candidate_id
+        )
+        if request != expected_request:
+            raise MechanicsContractError(
+                f"route-shape request {candidate_id} is not canonical"
+            )
+        receipt_hash = ik.get("receipt_sha256")
+        unsigned_receipt = dict(ik)
+        unsigned_receipt.pop("receipt_sha256", None)
+        if (
+            ik.get("schema") != TCP_IK_SCREEN_SCHEMA
+            or receipt_hash != _canonical_sha256(unsigned_receipt)
+            or ik.get("source_request_sha256") != request["request_sha256"]
+            or ik.get("source_route_shape_campaign_plan_sha256") != plan_hash
+            or ik.get("route_shape_candidate_id") != candidate_id
+            or ik.get("hardware_access") is not False
+            or ik.get("controller_commands") != []
+            or ik.get("hardware_writes") != 0
+            or ik.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(
+                f"route-shape IK receipt {candidate_id} is invalid"
+            )
+        outcome: dict[str, Any] = {
+            "candidate_id": candidate_id,
+            "candidate_classification": candidate["candidate_classification"],
+            "candidate": candidate,
+            "request_sha256": request["request_sha256"],
+            "ik_receipt_sha256": receipt_hash,
+            "ik_status": ik["status"],
+            "ik_all_samples_accepted": ik["ik_all_samples_accepted"],
+            "evaluated_sample_count": ik["evaluated_sample_count"],
+            "ik_metrics": ik["metrics"],
+            "collision_screening_executed": False,
+            "rejection_reasons": [],
+        }
+        if not ik["ik_all_samples_accepted"]:
+            failure = ik["joint_results"][-1]
+            outcome.update({
+                "rejection_reasons": ["CANONICAL_IK_OR_CONTINUITY_REJECTED"],
+                "first_rejected_sample_sequence": failure["waypoint_sequence"],
+                "first_rejection_reason": failure["failure_reason"],
+            })
+            outcomes.append(outcome)
+            continue
+        if len(ik["joint_results"]) != len(request["samples"]):
+            raise MechanicsContractError("accepted route-shape IK receipt is incomplete")
+
+        transit_pairs: set[tuple[str, str]] = set()
+        endpoint_pairs: set[tuple[str, str]] = set()
+        all_pairs: set[tuple[str, str]] = set()
+        transit_blocked = 0
+        endpoint_blocked = 0
+        sample_reports: list[dict[str, Any]] = []
+        for sample, joint_result in zip(request["samples"], ik["joint_results"]):
+            positions = {
+                name: JointPosition.radians(
+                    joint_result["solution_arm_joint_positions_rad"][name]
+                )
+                for name in ARM_JOINT_NAMES
+            }
+            positions[gripper_joint] = context.scenario.fixed_gripper_position
+            base_transforms = model.forward_kinematics(positions)
+            board_transforms = {
+                frame: board_t_world.compose(transform)
+                for frame, transform in base_transforms.items()
+            }
+            pose = CollisionPose(
+                f"{candidate_id}-sample-{sample['sequence']:04d}",
+                "board",
+                {
+                    body["parent_frame"]: board_transforms[body["parent_frame"]]
+                    for body in robot_documents
+                },
+            )
+            evaluated = evaluate_collision_pose(contract, pose, evaluation_policy)
+            pairs = {
+                tuple(sorted((item.first_body_id, item.second_body_id)))
+                for item in evaluated.collisions
+            }
+            physical_pairs = {
+                pair
+                for pair in pairs
+                if any(item in physical_id_set for item in pair)
+            }
+            is_transit = sample["phase"] == "TRANSIT"
+            if is_transit:
+                transit_pairs.update(physical_pairs)
+                transit_blocked += int(bool(physical_pairs))
+            else:
+                endpoint_pairs.update(physical_pairs)
+                endpoint_blocked += int(bool(physical_pairs))
+            all_pairs.update(pairs)
+            sample_reports.append({
+                "sample_sequence": sample["sequence"],
+                "phase": sample["phase"],
+                "collision_report_sha256": evaluated.report_hash,
+                "collision_pairs": [list(pair) for pair in sorted(pairs)],
+                "physical_blocker_pairs": [
+                    list(pair) for pair in sorted(physical_pairs)
+                ],
+            })
+        outcome.update({
+            "collision_screening_executed": True,
+            "collision_contract_sha256": contract.content_hash,
+            "collision_policy_sha256": evaluation_policy.content_hash,
+            "transit_blocked_sample_count": transit_blocked,
+            "transit_physical_blocker_pair_count": len(transit_pairs),
+            "transit_physical_blocker_pairs": [
+                list(pair) for pair in sorted(transit_pairs)
+            ],
+            "endpoint_blocked_sample_count": endpoint_blocked,
+            "endpoint_physical_blocker_pair_count": len(endpoint_pairs),
+            "endpoint_physical_blocker_pairs": [
+                list(pair) for pair in sorted(endpoint_pairs)
+            ],
+            "all_collision_pair_count": len(all_pairs),
+            "all_collision_pairs": [list(pair) for pair in sorted(all_pairs)],
+            "sample_reports": sample_reports,
+            "rejection_reasons": (
+                ["DISCRETE_FULL_LINK_PHYSICAL_BLOCKERS_OBSERVED"]
+                if transit_blocked or endpoint_blocked
+                else []
+            ),
+        })
+        outcomes.append(outcome)
+
+    ranked = sorted(
+        (item for item in outcomes if item["collision_screening_executed"]),
+        key=_route_shape_candidate_rank_key,
+    )
+    shortlist_count = min(
+        int(campaign_plan["maximum_native_shortlist_count"]), len(ranked)
+    )
+    shortlist = [item["candidate_id"] for item in ranked[:shortlist_count]]
+    result: dict[str, Any] = {
+        "schema": ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA,
+        "status": (
+            "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY"
+            if shortlist
+            else "BLOCKED_NO_IK_ACCEPTED_ROUTE_SHAPES"
+        ),
+        "source_campaign_plan_sha256": plan_hash,
+        "source_route_variant_request_sha256": source_hash,
+        "source_collision_candidate_sha256": candidate_hash,
+        "source_collision_pair_policy_sha256": policy_hash,
+        "source_station_route_predicate_sha256": predicate_hash,
+        "candidate_count": len(candidates),
+        "ik_accepted_candidate_count": len(ranked),
+        "ik_rejected_candidate_count": len(candidates) - len(ranked),
+        "collision_screened_candidate_count": len(ranked),
+        "outcomes": outcomes,
+        "ranked_candidate_ids": [item["candidate_id"] for item in ranked],
+        "native_shortlist_candidate_ids": shortlist,
+        "native_shortlist_count": len(shortlist),
+        "maximum_native_shortlist_count": campaign_plan[
+            "maximum_native_shortlist_count"
+        ],
+        "ranking_order": list(campaign_plan["ranking_order"]),
+        "endpoint_scoring_separate": True,
+        "exact_obb_collision_kernel_used": True,
+        "placement_tcp_changed": False,
+        "collision_geometry_changed": False,
+        "non_transit_endpoints_changed": False,
+        "installed_profile_eligible": False,
+        "continuous_collision_proven": False,
+        "native_isaac_replay_executed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "exploratory_uninstalled_collision_candidate_only",
+            "discrete_samples_do_not_prove_continuous_clearance",
+            "one_picometre_touching_threshold_is_not_measured_clearance",
+            "native_isaac_replay_is_limited_to_the_retained_shortlist",
+            "no_candidate_grants_hardware_motion_or_contact_authority",
+        ],
+    }
+    result["screen_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def load_keyboard_layout(path: Path) -> dict[str, Any]:
     """Load the governed nominal profile and derive board-frame key regions."""
     raw = json.loads(path.read_bytes())
@@ -1740,6 +2352,8 @@ def screen_robot_tcp_cartesian_schedule_ik(
     experiment_plan: dict[str, Any] | None = None,
     source_cartesian_request: dict[str, Any] | None = None,
     placement_tcp_candidate: dict[str, Any] | None = None,
+    route_shape_plan: dict[str, Any] | None = None,
+    route_shape_candidate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Solve a regenerated Cartesian request with the canonical IK gates."""
     if request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA:
@@ -1766,6 +2380,13 @@ def screen_robot_tcp_cartesian_schedule_ik(
     route_variant = (
         experiment_plan is not None and source_cartesian_request is not None
     )
+    if (route_shape_plan is None) != (route_shape_candidate is None):
+        raise MechanicsContractError(
+            "route-shape IK requires both its plan and candidate"
+        )
+    route_shape = route_shape_plan is not None and route_shape_candidate is not None
+    if route_shape and not route_variant:
+        raise MechanicsContractError("route-shape IK requires its governed route variant")
     if experiment_plan is not None and source_cartesian_request is not None:
         if (
             source_cartesian_request.get("request_sha256")
@@ -1779,6 +2400,13 @@ def screen_robot_tcp_cartesian_schedule_ik(
         )
     else:
         expected_request = governed_source_request
+    if route_shape and route_shape_plan is not None and route_shape_candidate is not None:
+        candidate_id = route_shape_candidate.get("candidate_id")
+        expected_request = materialize_route_shape_candidate(
+            route_shape_plan, expected_request, candidate_id
+        )
+        if expected_request.get("route_shape_candidate") != route_shape_candidate:
+            raise MechanicsContractError("route-shape candidate differs from its plan")
     if expected_request.get("request_sha256") != claimed_request_hash:
         raise MechanicsContractError(
             "Cartesian request differs from its governed mechanics regeneration"
@@ -1816,7 +2444,15 @@ def screen_robot_tcp_cartesian_schedule_ik(
         raise MechanicsContractError("modified transit sequences are not unique")
     if route_variant != bool(modified_transit):
         raise MechanicsContractError("route-variant transit selection is absent or unexpected")
-    changed_set = modified_set | modified_transit_set
+    route_shape_domain = request.get("route_shape_domain_sequences", [])
+    if not isinstance(route_shape_domain, list):
+        raise MechanicsContractError("route-shape domain is invalid")
+    route_shape_domain_set = set(route_shape_domain)
+    if len(route_shape_domain_set) != len(route_shape_domain):
+        raise MechanicsContractError("route-shape domain sequences are not unique")
+    if route_shape != bool(route_shape_domain):
+        raise MechanicsContractError("route-shape domain is absent or unexpected")
+    changed_set = modified_set | modified_transit_set | route_shape_domain_set
     for sequence, (sample, source) in enumerate(zip(samples, source_samples)):
         if sample.get("sequence") != sequence or source.get("sequence") != sequence:
             raise MechanicsContractError("IK sample sequence is not contiguous")
@@ -1835,7 +2471,10 @@ def screen_robot_tcp_cartesian_schedule_ik(
             != request.get("required_contact_target_board_mm")
         ):
             raise MechanicsContractError("modified contact target differs from the request")
-        if sequence in modified_transit_set:
+        if sequence in route_shape_domain_set:
+            if sample.get("phase") != "TRANSIT" or sample.get("phase_endpoint") is not False:
+                raise MechanicsContractError("route-shape domain contains a non-transit sample")
+        elif sequence in modified_transit_set:
             source_point = source.get("expected_tool_tip_board_mm")
             point = sample.get("expected_tool_tip_board_mm")
             if (
@@ -2116,6 +2755,17 @@ def screen_robot_tcp_cartesian_schedule_ik(
                 "candidate_classification"
             ],
         })
+    if route_shape and route_shape_plan is not None and route_shape_candidate is not None:
+        result.update({
+            "source_route_shape_campaign_plan_sha256": route_shape_plan[
+                "plan_sha256"
+            ],
+            "route_shape_candidate_id": route_shape_candidate["candidate_id"],
+            "route_shape_candidate": route_shape_candidate,
+            "route_shape_domain_sequences": list(
+                request["route_shape_domain_sequences"]
+            ),
+        })
     result["receipt_sha256"] = _canonical_sha256(result)
     return result
 
@@ -2128,6 +2778,21 @@ def _placement_tcp_candidate_rank_key(
     return (
         int(result["physical_blocker_pair_count"]),
         int(result["blocked_sample_count"]),
+        -float(metrics["minimum_normalized_arm_joint_margin"]),
+        float(metrics["maximum_position_error_mm"]),
+        str(result["candidate_id"]),
+    )
+
+
+def _route_shape_candidate_rank_key(
+    result: dict[str, Any],
+) -> tuple[int, int, int, float, float, str]:
+    """Return the exact predeclared ARM-200 deterministic ranking key."""
+    metrics = result["ik_metrics"]
+    return (
+        int(result["transit_physical_blocker_pair_count"]),
+        int(result["transit_blocked_sample_count"]),
+        int(result["endpoint_physical_blocker_pair_count"]),
         -float(metrics["minimum_normalized_arm_joint_margin"]),
         float(metrics["maximum_position_error_mm"]),
         str(result["candidate_id"]),
@@ -2612,6 +3277,157 @@ def materialize_placement_tcp_native_shortlist(
         "shortlist_count": len(entries),
         "entries": entries,
         "native_isaac_replay_executed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    manifest["manifest_sha256"] = _canonical_sha256(manifest)
+    return manifest
+
+
+def materialize_route_shape_native_shortlist(
+    campaign_plan: dict[str, Any],
+    campaign_screen: dict[str, Any],
+    candidate_evidence: dict[str, tuple[dict[str, Any], dict[str, Any]]],
+    collision_candidate: dict[str, Any],
+    collision_pair_policy: dict[str, Any],
+    toolchain_lock: dict[str, Any],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    """Retain exact native replay inputs for the ranked ARM-201 shortlist."""
+
+    def verified(
+        document: dict[str, Any], digest_field: str, label: str
+    ) -> str:
+        claimed = document.get(digest_field)
+        unsigned = dict(document)
+        unsigned.pop(digest_field, None)
+        if not isinstance(claimed, str) or claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} digest is invalid")
+        return claimed
+
+    plan_hash = verified(campaign_plan, "plan_sha256", "route-shape plan")
+    screen_hash = verified(
+        campaign_screen, "screen_sha256", "route-shape screen"
+    )
+    if (
+        campaign_plan.get("schema") != ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA
+        or campaign_screen.get("schema") != ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA
+        or campaign_screen.get("source_campaign_plan_sha256") != plan_hash
+        or campaign_screen.get("status")
+        != "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY"
+    ):
+        raise MechanicsContractError("route-shape shortlist lineage is invalid")
+    for document, label in (
+        (campaign_plan, "route-shape plan"),
+        (campaign_screen, "route-shape screen"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("physical_authority") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+            or document.get("gate_promotions") != []
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+    shortlist = campaign_screen.get("native_shortlist_candidate_ids")
+    if (
+        not isinstance(shortlist, list)
+        or not shortlist
+        or len(shortlist) > campaign_plan.get("maximum_native_shortlist_count", 0)
+        or len(shortlist) != len(set(shortlist))
+    ):
+        raise MechanicsContractError("route-shape native shortlist is invalid")
+    candidates = {
+        item["candidate_id"]: item
+        for item in campaign_plan.get("candidates", [])
+    }
+    outcomes = {
+        item["candidate_id"]: item
+        for item in campaign_screen.get("outcomes", [])
+    }
+    if any(
+        candidate_id not in candidates
+        or candidate_id not in outcomes
+        or candidate_id not in candidate_evidence
+        for candidate_id in shortlist
+    ):
+        raise MechanicsContractError("shortlist references an unknown candidate")
+
+    root = output_dir.resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    entries: list[dict[str, Any]] = []
+    for rank, candidate_id in enumerate(shortlist, start=1):
+        request, ik = candidate_evidence[candidate_id]
+        outcome = outcomes[candidate_id]
+        if (
+            request.get("request_sha256") != outcome.get("request_sha256")
+            or ik.get("receipt_sha256") != outcome.get("ik_receipt_sha256")
+            or ik.get("ik_all_samples_accepted") is not True
+            or ik.get("route_shape_candidate_id") != candidate_id
+        ):
+            raise MechanicsContractError(
+                f"shortlist candidate {candidate_id} evidence changed"
+            )
+        verified(request, "request_sha256", f"{candidate_id} request")
+        verified(ik, "receipt_sha256", f"{candidate_id} IK receipt")
+        raw_request = build_robot_tcp_collision_replay_request(
+            ik, collision_candidate, toolchain_lock
+        )
+        bound_request = bind_collision_pair_policy_request(
+            raw_request, collision_pair_policy
+        )
+        candidate_dir = root / candidate_id
+        candidate_dir.mkdir(parents=True, exist_ok=True)
+        documents = (
+            ("cartesian_request.json", request, "request_sha256"),
+            ("ik_receipt.json", ik, "receipt_sha256"),
+            ("collision_request.json", raw_request, "request_sha256"),
+            (
+                "policy_bound_collision_request.json",
+                bound_request,
+                "request_sha256",
+            ),
+        )
+        paths: dict[str, str] = {}
+        hashes: dict[str, str] = {}
+        for filename, document, hash_field in documents:
+            path = candidate_dir / filename
+            path.write_text(
+                json.dumps(document, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            paths[filename] = str(path)
+            hashes[filename] = document[hash_field]
+        entries.append({
+            "rank": rank,
+            "candidate_id": candidate_id,
+            "candidate": candidates[candidate_id],
+            "paths": paths,
+            "document_hashes": hashes,
+        })
+    manifest: dict[str, Any] = {
+        "schema": ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA,
+        "status": "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY",
+        "source_campaign_plan_sha256": plan_hash,
+        "source_campaign_screen_sha256": screen_hash,
+        "source_collision_candidate_sha256": collision_candidate[
+            "candidate_sha256"
+        ],
+        "source_collision_pair_policy_sha256": collision_pair_policy[
+            "policy_sha256"
+        ],
+        "source_toolchain_lock_sha256": _canonical_sha256(toolchain_lock),
+        "shortlist_count": len(entries),
+        "entries": entries,
+        "native_isaac_replay_executed": False,
+        "installed_profile_eligible": False,
+        "continuous_collision_proven": False,
         "hardware_access": False,
         "physical_authority": False,
         "controller_commands": [],
@@ -4768,6 +5584,26 @@ def main() -> int:
         action="store_true",
         help="plan the source-bound ARM-200 full-link route-shape campaign",
     )
+    parser.add_argument(
+        "--materialize-route-shape-candidate",
+        action="store_true",
+        help="materialize one predeclared ARM-200 route candidate",
+    )
+    parser.add_argument(
+        "--screen-route-shape-campaign",
+        action="store_true",
+        help="aggregate ARM-201 IK evidence and exact full-link OBB scores",
+    )
+    parser.add_argument(
+        "--materialize-route-shape-shortlist",
+        action="store_true",
+        help="retain native replay inputs for the ARM-201 ranked shortlist",
+    )
+    parser.add_argument("--route-shape-campaign-plan", type=Path)
+    parser.add_argument("--route-shape-campaign-screen", type=Path)
+    parser.add_argument("--route-shape-candidate-id")
+    parser.add_argument("--route-shape-evidence-dir", type=Path)
+    parser.add_argument("--route-shape-shortlist-output-dir", type=Path)
     parser.add_argument("--placement-tcp-native-selection", type=Path)
     parser.add_argument("--physical-blocker-experiment-plan", type=Path)
     parser.add_argument(
@@ -4813,6 +5649,9 @@ def main() -> int:
             and not args.materialize_placement_tcp_shortlist
             and not args.retain_placement_tcp_native_results
             and not args.plan_route_shape_campaign
+            and not args.materialize_route_shape_candidate
+            and not args.screen_route_shape_campaign
+            and not args.materialize_route_shape_shortlist
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -4834,6 +5673,9 @@ def main() -> int:
             and not args.materialize_placement_tcp_shortlist
             and not args.retain_placement_tcp_native_results
             and not args.plan_route_shape_campaign
+            and not args.materialize_route_shape_candidate
+            and not args.screen_route_shape_campaign
+            and not args.materialize_route_shape_shortlist
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -4852,7 +5694,129 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.plan_route_shape_campaign:
+        if args.materialize_route_shape_shortlist:
+            required = (
+                args.route_shape_campaign_plan,
+                args.route_shape_campaign_screen,
+                args.route_shape_evidence_dir,
+                args.route_shape_shortlist_output_dir,
+                args.collision_candidate,
+                args.accepted_collision_pair_policy,
+                args.toolchain_lock,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "route-shape shortlist materialization requires its plan, "
+                    "screen, evidence and output directories, collision candidate, "
+                    "accepted pair policy, and toolchain lock"
+                )
+            campaign_plan = json.loads(
+                args.route_shape_campaign_plan.resolve(strict=True).read_bytes()
+            )
+            evidence_root = args.route_shape_evidence_dir.resolve(strict=True)
+            candidate_evidence = {
+                item["candidate_id"]: (
+                    json.loads(
+                        (
+                            evidence_root / item["candidate_id"] / "request.json"
+                        ).read_bytes()
+                    ),
+                    json.loads(
+                        (
+                            evidence_root
+                            / item["candidate_id"]
+                            / "ik_receipt.json"
+                        ).read_bytes()
+                    ),
+                )
+                for item in campaign_plan.get("candidates", [])
+            }
+            result = materialize_route_shape_native_shortlist(
+                campaign_plan,
+                json.loads(
+                    args.route_shape_campaign_screen.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                candidate_evidence,
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.accepted_collision_pair_policy.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.toolchain_lock.resolve(strict=True).read_bytes()),
+                output_dir=args.route_shape_shortlist_output_dir,
+            )
+        elif args.screen_route_shape_campaign:
+            required = (
+                args.route_shape_campaign_plan,
+                args.route_shape_evidence_dir,
+                args.cartesian_request,
+                args.collision_candidate,
+                args.accepted_collision_pair_policy,
+                args.station_route_predicate,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "route-shape screening requires its plan, evidence directory, "
+                    "source route request, collision candidate, accepted pair "
+                    "policy, and station predicate"
+                )
+            campaign_plan = json.loads(
+                args.route_shape_campaign_plan.resolve(strict=True).read_bytes()
+            )
+            evidence_root = args.route_shape_evidence_dir.resolve(strict=True)
+            candidate_evidence = {
+                item["candidate_id"]: (
+                    json.loads(
+                        (
+                            evidence_root / item["candidate_id"] / "request.json"
+                        ).read_bytes()
+                    ),
+                    json.loads(
+                        (
+                            evidence_root
+                            / item["candidate_id"]
+                            / "ik_receipt.json"
+                        ).read_bytes()
+                    ),
+                )
+                for item in campaign_plan.get("candidates", [])
+            }
+            result = screen_route_shape_campaign(
+                campaign_plan,
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                candidate_evidence,
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.accepted_collision_pair_policy.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.station_route_predicate.resolve(strict=True).read_bytes()
+                ),
+                workspace=args.workspace,
+            )
+        elif args.materialize_route_shape_candidate:
+            if (
+                args.route_shape_campaign_plan is None
+                or args.cartesian_request is None
+                or not args.route_shape_candidate_id
+            ):
+                raise MechanicsContractError(
+                    "route-shape materialization requires its plan, source "
+                    "Cartesian request, and candidate id"
+                )
+            result = materialize_route_shape_candidate(
+                json.loads(
+                    args.route_shape_campaign_plan.resolve(strict=True).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                args.route_shape_candidate_id,
+            )
+        elif args.plan_route_shape_campaign:
             required = (
                 args.placement_tcp_search_plan,
                 args.placement_tcp_native_selection,
@@ -5344,6 +6308,30 @@ def main() -> int:
                     args.source_cartesian_request.resolve(strict=True).read_bytes()
                 )
             )
+            route_shape_plan = (
+                None
+                if args.route_shape_campaign_plan is None
+                else json.loads(
+                    args.route_shape_campaign_plan.resolve(strict=True).read_bytes()
+                )
+            )
+            route_shape_candidate = None
+            placement_tcp_candidate = None
+            if route_shape_plan is not None:
+                route_shape_candidate = next(
+                    (
+                        item for item in route_shape_plan.get("candidates", [])
+                        if item.get("candidate_id") == args.route_shape_candidate_id
+                    ),
+                    None,
+                )
+                if route_shape_candidate is None:
+                    raise MechanicsContractError(
+                        "route-shape IK candidate is absent from its plan"
+                    )
+                placement_tcp_candidate = route_shape_plan.get(
+                    "selected_placement_tcp_candidate"
+                )
             result = screen_robot_tcp_cartesian_schedule_ik(
                 json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
                 json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
@@ -5351,6 +6339,9 @@ def main() -> int:
                 workspace=args.workspace,
                 experiment_plan=experiment_plan,
                 source_cartesian_request=source_cartesian_request,
+                placement_tcp_candidate=placement_tcp_candidate,
+                route_shape_plan=route_shape_plan,
+                route_shape_candidate=route_shape_candidate,
             )
         elif args.native_h_probe:
             result = run_native_h_probe(

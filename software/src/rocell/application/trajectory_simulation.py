@@ -1265,16 +1265,21 @@ def evaluate_joint_trajectory_solution(
         )
     )
     solution_items = tuple(solved.solution_arm_joint_positions)
-    if len(solution_items) != len(ARM_JOINT_NAMES) or tuple(
-        item.name for item in solution_items
-    ) != ARM_JOINT_NAMES:
-        raise TrajectorySimulationError(
-            "IK solution must use the exact canonical arm-joint order"
+    if solved.converged:
+        if len(solution_items) != len(ARM_JOINT_NAMES) or tuple(
+            item.name for item in solution_items
+        ) != ARM_JOINT_NAMES:
+            raise TrajectorySimulationError(
+                "converged IK solution must use the exact canonical arm-joint order"
+            )
+        _validated_arm_joint_values(
+            {item.name: item.position.value for item in solution_items},
+            label="IK solution",
         )
-    _validated_arm_joint_values(
-        {item.name: item.position.value for item in solution_items},
-        label="IK solution",
-    )
+    elif solution_items:
+        raise TrajectorySimulationError(
+            "failed IK result must not expose joint solutions"
+        )
     return _evaluate_joint_trajectory_solution(
         waypoint,
         solved,

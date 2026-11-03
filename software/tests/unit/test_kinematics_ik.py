@@ -7,6 +7,11 @@ from pathlib import Path
 
 import pytest
 
+from rocell.application.trajectory_simulation import (
+    CartesianRouteWaypoint,
+    TrajectorySimulationPolicy,
+    evaluate_joint_trajectory_solution,
+)
 from rocell.geometry import (
     JointPosition,
     Point3Mm,
@@ -26,6 +31,7 @@ from rocell.kinematics import (
     IkStatus,
     RoArmM3NumericalIk,
 )
+from rocell.motion import MotionPhase
 
 
 PINNED_URDF = (
@@ -160,6 +166,43 @@ def test_unreachable_target_fails_closed_without_exposing_joint_solution() -> No
     assert result.simulation_only is True
     assert result.live_motion_authorized is False
     assert all(not attempt.converged for attempt in result.attempts)
+
+
+def test_public_trajectory_evaluator_retains_failed_ik_as_rejection() -> None:
+    solver = _solver(options=IkOptions(max_attempts=4, max_iterations_per_attempt=45))
+    point = Point3Mm("board", 5000, -5000, 5000)
+    result = solver.solve(BoardToolTipTarget(point))
+    bounds = {}
+    for name in ARM_JOINT_NAMES:
+        limit = solver.model.joint(name).limit
+        assert limit is not None and limit.lower is not None and limit.upper is not None
+        bounds[name] = (limit.lower.value, limit.upper.value)
+
+    evaluated = evaluate_joint_trajectory_solution(
+        CartesianRouteWaypoint(
+            sequence=0,
+            phase=MotionPhase.PARK,
+            action_index=None,
+            semantic_target=None,
+            point_board=point,
+            distance_from_previous_mm=0.0,
+            source_geometric_sequence=0,
+            source_check_id="failed-ik-regression",
+            source_path_check_passed=True,
+            inherited_collision_ids=(),
+            phase_endpoint=True,
+        ),
+        result,
+        solver,
+        bounds,
+        None,
+        TrajectorySimulationPolicy(),
+    )
+
+    assert evaluated.accepted is False
+    assert evaluated.failure_reason == "IK_NO_CONVERGED_SOLUTION"
+    assert evaluated.solution_arm_joint_positions_rad == ()
+    assert evaluated.controller_intersection_passed is False
 
 
 def test_solver_is_repeatable_for_same_model_transform_target_and_seeds() -> None:
