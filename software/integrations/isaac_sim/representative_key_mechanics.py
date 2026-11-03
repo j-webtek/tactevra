@@ -4385,6 +4385,8 @@ def run_robot_tcp_collision_diagnostic(
     status_path: Path,
     accepted_pair_policy_path: Path | None = None,
     station_route_predicate_path: Path | None = None,
+    geometry_capture_plan_path: Path | None = None,
+    geometry_capture_output_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run discrete Isaac overlap queries with no controller or hardware authority."""
     request = json.loads(request_path.resolve(strict=True).read_bytes())
@@ -4406,6 +4408,10 @@ def run_robot_tcp_collision_diagnostic(
         if station_route_predicate_path is not None
         else None
     )
+    if (geometry_capture_plan_path is None) != (geometry_capture_output_path is None):
+        raise MechanicsContractError(
+            "geometry capture plan and output must be supplied together"
+        )
     admission = admit_robot_tcp_collision_diagnostic(
         request,
         ik_receipt,
@@ -4416,6 +4422,45 @@ def run_robot_tcp_collision_diagnostic(
         accepted_pair_policy,
         station_route_predicate,
     )
+    geometry_capture_plan = None
+    geometry_capture_candidate = None
+    geometry_capture_sequences: set[int] = set()
+    if geometry_capture_plan_path is not None:
+        geometry_capture_plan = json.loads(
+            geometry_capture_plan_path.resolve(strict=True).read_bytes()
+        )
+        claimed_plan_hash = geometry_capture_plan.get("plan_sha256")
+        unsigned_plan = dict(geometry_capture_plan)
+        unsigned_plan.pop("plan_sha256", None)
+        if (
+            geometry_capture_plan.get("schema")
+            != "tactevra.isaac_lm1_collision_geometry_parity_plan.v1"
+            or claimed_plan_hash != _canonical_sha256(unsigned_plan)
+            or geometry_capture_plan.get("source_collision_candidate_sha256")
+            != collision_candidate["candidate_sha256"]
+            or geometry_capture_plan.get("hardware_access") is not False
+            or geometry_capture_plan.get("physical_authority") is not False
+            or geometry_capture_plan.get("controller_commands") != []
+            or geometry_capture_plan.get("hardware_writes") != 0
+            or geometry_capture_plan.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError("collision geometry capture plan is invalid")
+        matches = [
+            item
+            for item in geometry_capture_plan.get("candidate_captures", [])
+            if item.get("request_sha256") == request.get("source_request_sha256")
+        ]
+        if len(matches) != 1:
+            raise MechanicsContractError(
+                "collision geometry capture request binding is invalid"
+            )
+        geometry_capture_candidate = matches[0]
+        geometry_capture_sequences = {
+            item["sample_sequence"]
+            for item in geometry_capture_candidate.get("capture_samples", [])
+        }
+        if not geometry_capture_sequences:
+            raise MechanicsContractError("collision geometry capture samples are absent")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
     app = None
@@ -4441,6 +4486,8 @@ def run_robot_tcp_collision_diagnostic(
             prim_by_name.setdefault(prim.GetName(), prim)
         collision_path_to_primitive: dict[str, tuple[str, int]] = {}
         query_paths: list[tuple[str, str, int]] = []
+        geometry_path_by_primitive: dict[tuple[str, int], str] = {}
+        primitive_document_by_key: dict[tuple[str, int], dict[str, Any]] = {}
 
         def author_box(
             path: str,
@@ -4463,6 +4510,8 @@ def run_robot_tcp_collision_diagnostic(
             xform.AddScaleOp().Set(Gf.Vec3d(*(2.0 * value / 1000.0 for value in half)))
             UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
             collision_path_to_primitive[path] = (body_id, primitive_index)
+            geometry_path_by_primitive[(body_id, primitive_index)] = path
+            primitive_document_by_key[(body_id, primitive_index)] = primitive
 
         for body_index, body in enumerate(collision_candidate["robot_bodies"]):
             parent = prim_by_name.get(body["parent_frame"])
@@ -4513,6 +4562,7 @@ def run_robot_tcp_collision_diagnostic(
         app.update()
         scene_query = get_physx_scene_query_interface()
         observed_samples = []
+        geometry_capture_samples = []
         all_pairs: set[tuple[str, str]] = set()
         all_primitive_pairs: set[
             tuple[tuple[str, int], tuple[str, int]]
@@ -4524,6 +4574,49 @@ def run_robot_tcp_collision_diagnostic(
             articulation.set_world_poses([base_translation], [base_quaternion_wxyz])
             articulation.set_dof_positions([desired])
             app.update()
+            if sample["sample_sequence"] in geometry_capture_sequences:
+                primitive_records = []
+                for key in sorted(geometry_path_by_primitive):
+                    path = geometry_path_by_primitive[key]
+                    primitive = primitive_document_by_key[key]
+                    world = UsdGeom.Xformable(
+                        stage.GetPrimAtPath(path)
+                    ).ComputeLocalToWorldTransform(0.0)
+                    rigid_world = world.RemoveScaleShear()
+                    translation = rigid_world.ExtractTranslation()
+                    rotation = rigid_world.ExtractRotationMatrix()
+                    primitive_records.append({
+                        "body_id": key[0],
+                        "primitive_index": key[1],
+                        "kind": primitive["kind"],
+                        "half_extents_mm": primitive["half_extents_mm"],
+                        "local_center_mm": primitive["center_mm"],
+                        "local_rotation_row_major": primitive["rotation_row_major"],
+                        "world_matrix_row_major": [
+                            float(rotation[0][0]),
+                            float(rotation[0][1]),
+                            float(rotation[0][2]),
+                            float(translation[0]) * 1000.0,
+                            float(rotation[1][0]),
+                            float(rotation[1][1]),
+                            float(rotation[1][2]),
+                            float(translation[1]) * 1000.0,
+                            float(rotation[2][0]),
+                            float(rotation[2][1]),
+                            float(rotation[2][2]),
+                            float(translation[2]) * 1000.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                        ],
+                    })
+                geometry_capture_samples.append({
+                    "candidate_id": geometry_capture_candidate["candidate_id"],
+                    "sample_sequence": sample["sample_sequence"],
+                    "sample_id": sample["sample_id"],
+                    "primitives": primitive_records,
+                })
             sample_pairs: set[tuple[str, str]] = set()
             sample_primitive_pairs: set[
                 tuple[tuple[str, int], tuple[str, int]]
@@ -4813,6 +4906,37 @@ def run_robot_tcp_collision_diagnostic(
                 ],
             })
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        if geometry_capture_plan is not None:
+            if (
+                receipt["receipt_sha256"]
+                != geometry_capture_candidate["native_receipt_sha256"]
+                or {item["sample_sequence"] for item in geometry_capture_samples}
+                != geometry_capture_sequences
+            ):
+                raise MechanicsContractError(
+                    "collision geometry capture does not reproduce the retained receipt"
+                )
+            geometry_capture: dict[str, Any] = {
+                "schema": "tactevra.isaac_lm1_collision_geometry_capture.v1",
+                "source": "NATIVE_PHYSX",
+                "source_plan_sha256": geometry_capture_plan["plan_sha256"],
+                "source_native_receipt_sha256": receipt["receipt_sha256"],
+                "source_collision_candidate_sha256": collision_candidate[
+                    "candidate_sha256"
+                ],
+                "samples": geometry_capture_samples,
+                "hardware_access": False,
+                "physical_authority": False,
+                "controller_commands": [],
+                "hardware_writes": 0,
+                "physical_movements": 0,
+            }
+            geometry_capture["capture_sha256"] = _canonical_sha256(geometry_capture)
+            geometry_capture_output_path.parent.mkdir(parents=True, exist_ok=True)
+            geometry_capture_output_path.write_text(
+                json.dumps(geometry_capture, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
         output_path.write_text(
             json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -5894,6 +6018,16 @@ def main() -> int:
             "regions out of PhysX solid authoring"
         ),
     )
+    parser.add_argument(
+        "--geometry-capture-plan",
+        type=Path,
+        help="fixed ARM-204 parity capture plan for an unchanged native diagnostic",
+    )
+    parser.add_argument(
+        "--geometry-capture-output",
+        type=Path,
+        help="zero-authority native primitive transform sidecar",
+    )
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -6607,6 +6741,8 @@ def main() -> int:
                 status_path=args.status_output,
                 accepted_pair_policy_path=args.accepted_collision_pair_policy,
                 station_route_predicate_path=args.station_route_predicate,
+                geometry_capture_plan_path=args.geometry_capture_plan,
+                geometry_capture_output_path=args.geometry_capture_output,
             )
         elif args.ik_receipt is not None:
             if args.native_h_probe or args.robot_tcp_bundle is not None:
