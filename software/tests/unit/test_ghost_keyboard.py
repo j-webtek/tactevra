@@ -1488,6 +1488,114 @@ def test_route_shape_shortlist_materializes_exact_retained_evidence(
     assert manifest['manifest_sha256']==mechanics._canonical_sha256(unsigned)
 
 
+def test_route_shape_native_selection_retains_mixed_one_attempt_outcome():
+    mechanics=_load_key_mechanics()
+    failed='route-shape-failed'
+    completed='route-shape-completed'
+    candidates=[
+        {'candidate_id':failed,'candidate_classification':'VARIANT'},
+        {'candidate_id':completed,'candidate_classification':'VARIANT'},
+    ]
+    plan={
+        'schema':mechanics.ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING',
+        'candidates':candidates,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    plan['plan_sha256']=mechanics._canonical_sha256(plan)
+    screen={
+        'schema':mechanics.ROUTE_SHAPE_CAMPAIGN_SCREEN_SCHEMA,
+        'status':'READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY',
+        'source_campaign_plan_sha256':plan['plan_sha256'],
+        'native_shortlist_candidate_ids':[failed,completed],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    screen['screen_sha256']=mechanics._canonical_sha256(screen)
+    entries=[]
+    for rank,candidate in enumerate(candidates,start=1):
+        entries.append({
+            'candidate_id':candidate['candidate_id'],'candidate':candidate,
+            'rank':rank,
+            'document_hashes':{
+                'ik_receipt.json':str(rank)*64,
+                'policy_bound_collision_request.json':str(rank+2)*64,
+            },
+        })
+    manifest={
+        'schema':mechanics.ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA,
+        'status':'READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY',
+        'source_campaign_plan_sha256':plan['plan_sha256'],
+        'source_campaign_screen_sha256':screen['screen_sha256'],
+        'entries':entries,
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    manifest['manifest_sha256']=mechanics._canonical_sha256(manifest)
+    pairs=[[f'robot:link{number}','workcell:board_solid']
+           for number in range(7)]
+    control={
+        'schema':mechanics.TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        'status':'DIAGNOSTIC_BLOCKERS_OBSERVED',
+        'physical_solid_blocker_pair_count':7,
+        'physical_solid_blocker_pairs':pairs,'samples':[{'sample_id':'control'}],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    control['receipt_sha256']=mechanics._canonical_sha256(control)
+    native={
+        'schema':mechanics.TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        'status':'DIAGNOSTIC_BLOCKERS_OBSERVED',
+        'source_bindings':{
+            'ik_receipt_sha256':entries[1]['document_hashes']['ik_receipt.json'],
+            'request_sha256':entries[1]['document_hashes'][
+                'policy_bound_collision_request.json'
+            ],
+        },
+        'bounded_sample_count':1,'samples_with_overlaps':1,
+        'physical_solid_blocker_pair_count':7,
+        'physical_solid_blocker_pairs':pairs,
+        'planning_envelope_blocker_pair_count':1,
+        'planning_envelope_blocker_pairs':[
+            ['robot:link4','workcell:station:keyboard_left']
+        ],
+        'policy_excluded_pair_count':5,'unreviewed_blocker_pair_count':0,
+        'samples':[{'sample_id':'native','raw_collision_pairs':pairs}],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    native['receipt_sha256']=mechanics._canonical_sha256(native)
+    error={
+        'status':'ERROR','type':'MechanicsContractError',
+        'message':'collision pair policy boundary changed',
+    }
+
+    result=mechanics.retain_route_shape_native_results(
+        plan,screen,manifest,control,{failed:error,completed:native}
+    )
+    assert result['status']==(
+        'INCOMPLETE_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED'
+    )
+    assert result['attempted_candidate_count']==2
+    assert result['completed_native_replay_count']==1
+    assert result['failed_pre_admission_count']==1
+    assert result['native_improvement_over_control'] is False
+    assert result['selected_candidate_id'] is None
+    assert result['automatic_retries_performed']==0
+    assert result['failed_attempts'][0]['candidate_id']==failed
+    assert result['failed_attempts'][0]['automatic_retry_performed'] is False
+    assert result['retained_results'][0]['raw_native_samples']==native['samples']
+    unsigned={key:value for key,value in result.items()
+              if key!='selection_sha256'}
+    assert result['selection_sha256']==mechanics._canonical_sha256(unsigned)
+
+
 def test_collision_blockers_localize_to_retained_cartesian_context():
     mechanics=_load_key_mechanics()
     cartesian={

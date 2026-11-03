@@ -9098,3 +9098,38 @@ rewriting history. New entries must use a unique evidence ID.
   Isaac without changing the shortlist, retain all raw overlap evidence, then
   compare each result with the ARM-199 seven-pair control before deciding
   whether any route-shape hypothesis is a diagnostic improvement.
+
+### E-20261103-ARM-202 — fixed native route-shape attempt retains no improvement
+
+- Stage: LM1 zero-authority native route-shape attempt and comparison.
+- Lane: ARM / Isaac simulation.
+- Change: invoked the four ARM-201 shortlist entries once in fixed rank order.
+  Rank one stopped before admission with an explicit collision-pair-policy
+  boundary mismatch and was not retried. The remaining three attempts completed
+  as v3 primitive-attributed diagnostics; the separate station-route-predicate
+  input was omitted and that limitation is retained rather than concealed.
+- Native result: `DIRECT_LINEAR/110`, `Y_THEN_X/70`, and `DIRECT_LINEAR/90`
+  overlap at all `169/169`, `170/170`, and `165/165` bounded samples. Each
+  retains seven physical-solid blocker pairs, six planning-envelope pairs,
+  five accepted policy exclusions, and zero unreviewed pairs. None improves
+  the ARM-199 seven-pair physical control.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm202-route-shape-native-replay-001`
+  and
+  `C:\IsaacSim\artifacts\issue190\arm202-route-shape-native-selection-001`.
+  The retained selection has canonical SHA-256
+  `07d91503a2a6507dd4b997da5b19ff415f09644f4b0a2b04250560b0ac2a1858`
+  and file SHA-256
+  `c87cf97120ced00cee40c6aa9e0b8026776b52acdf345a56c886ee315e11610a`.
+- Status: `INCOMPLETE_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Gate promotions: 0.
+- Limitations: one candidate did not reach native admission, completed attempts
+  are v3 rather than route-predicate-bound v4, all completed samples overlap,
+  and discrete diagnostics are not continuous-clearance proof. No route,
+  collision geometry, profile, controller access, contact authority, or
+  physical authority is installed or granted.
+- Next dependency: plan a corrected v4 replay that binds the exact ARM-197
+  pair policy and station-route predicate before process start. Do not reinterpret
+  ARM-202 as clearance or silently retry its failed attempt.
