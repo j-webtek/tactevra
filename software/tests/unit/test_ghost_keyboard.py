@@ -1202,6 +1202,97 @@ def test_native_placement_tcp_selection_retains_raw_negative_result():
         )
 
 
+def test_route_shape_campaign_plan_is_bounded_and_preserves_endpoints():
+    mechanics=_load_key_mechanics()
+    control='placement-tcp-control'
+    placement_plan={
+        'schema':mechanics.PLACEMENT_TCP_SEARCH_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING',
+        'source_route_variant_request_sha256':'a'*64,
+        'source_collision_candidate_sha256':'b'*64,
+        'source_collision_pair_policy_sha256':'c'*64,
+        'source_station_route_predicate_sha256':'d'*64,
+        'source_toolchain_lock_sha256':'e'*64,
+        'control_candidate_id':control,
+        'route_shape_changed':False,
+        'candidates':[{ 'candidate_id':control,
+            'candidate_classification':'RETAINED_ARM198_CONTROL'}],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    placement_plan['plan_sha256']=mechanics._canonical_sha256(placement_plan)
+    selection={
+        'schema':mechanics.PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA,
+        'status':'NO_NATIVE_IMPROVEMENT_RETAINED',
+        'source_search_plan_sha256':placement_plan['plan_sha256'],
+        'native_improvement_over_control':False,
+        'selected_candidate_id':control,
+        'retained_results':[{ 'candidate_id':control,
+            'physical_solid_blocker_pair_count':7}],
+        'hardware_access':False,'physical_authority':False,
+        'controller_commands':[],'hardware_writes':0,'physical_movements':0,
+        'gate_promotions':[],
+    }
+    selection['selection_sha256']=mechanics._canonical_sha256(selection)
+    route={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'route_variant_applied':True,'collision_geometry_changed':False,
+        'samples':[
+            {'sequence':0,'phase':'PARK'},
+            {'sequence':1,'phase':'TRANSIT'},
+            {'sequence':2,'phase':'TRANSIT'},
+            {'sequence':3,'phase':'HOVER'},
+            {'sequence':4,'phase':'CONTACT'},
+            {'sequence':5,'phase':'RETRACT'},
+        ],
+        'hardware_access':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,
+    }
+    route['request_sha256']=mechanics._canonical_sha256(route)
+    placement_plan.pop('plan_sha256')
+    placement_plan['source_route_variant_request_sha256']=route['request_sha256']
+    placement_plan['plan_sha256']=mechanics._canonical_sha256(placement_plan)
+    selection.pop('selection_sha256')
+    selection['source_search_plan_sha256']=placement_plan['plan_sha256']
+    selection['selection_sha256']=mechanics._canonical_sha256(selection)
+
+    plan=mechanics.build_route_shape_campaign_plan(
+        placement_plan,selection,route
+    )
+    assert plan['status']=='READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING'
+    assert plan['candidate_count']==9
+    assert plan['control_candidate_count']==1
+    assert plan['variant_candidate_count']==8
+    assert plan['maximum_native_shortlist_count']==4
+    assert plan['source_transit_sequences']==[1,2]
+    assert plan['preserved_endpoint_sequences']==[0,3,4,5]
+    assert plan['endpoint_scoring_separate'] is True
+    assert plan['placement_tcp_changed'] is False
+    assert plan['collision_geometry_changed'] is False
+    assert plan['non_transit_endpoints_changed'] is False
+    assert len({item['candidate_id'] for item in plan['candidates']})==9
+    control_route=plan['candidates'][0]
+    assert control_route['candidate_id']==plan['control_candidate_id']
+    assert control_route['source_request_reused_exactly'] is True
+    assert control_route['xy_corridor_topology']=='DIRECT_LINEAR'
+    assert control_route['corridor_height_board_mm']==70.0
+    assert control_route['corridor_height_ramp_fraction'] is None
+    assert control_route['transit_resampling']=='SOURCE_REQUEST_EXACT'
+    assert plan['hardware_access'] is plan['physical_authority'] is False
+    unsigned={key:value for key,value in plan.items() if key!='plan_sha256'}
+    assert plan['plan_sha256']==mechanics._canonical_sha256(unsigned)
+
+    tampered=dict(selection)
+    tampered.pop('selection_sha256')
+    tampered['native_improvement_over_control']=True
+    tampered['selection_sha256']=mechanics._canonical_sha256(tampered)
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.build_route_shape_campaign_plan(
+            placement_plan,tampered,route
+        )
+
+
 def test_collision_blockers_localize_to_retained_cartesian_context():
     mechanics=_load_key_mechanics()
     cartesian={

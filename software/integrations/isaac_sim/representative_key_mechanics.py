@@ -62,6 +62,9 @@ PLACEMENT_TCP_SEARCH_SCREEN_SCHEMA = (
 PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA = (
     "tactevra.isaac_lm1_placement_tcp_native_selection.v1"
 )
+ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_route_shape_campaign_plan.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -934,6 +937,236 @@ def build_placement_tcp_search_plan(
             "discrete_collision_screening_is_not_continuous_clearance_proof",
             "physical_board_and_keyboard_solids_are_preserved",
             "endpoint_and_route_shape_qualification_remain_separate",
+        ],
+    }
+    result["plan_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def build_route_shape_campaign_plan(
+    placement_search_plan: dict[str, Any],
+    native_selection: dict[str, Any],
+    route_variant_request: dict[str, Any],
+) -> dict[str, Any]:
+    """Plan the bounded ARM-200 route-shape campaign without screening it."""
+    for document, hash_field, label in (
+        (placement_search_plan, "plan_sha256", "placement/TCP search plan"),
+        (native_selection, "selection_sha256", "native selection"),
+        (route_variant_request, "request_sha256", "route variant request"),
+    ):
+        claimed = document.get(hash_field)
+        unsigned = dict(document)
+        unsigned.pop(hash_field, None)
+        if claimed != _canonical_sha256(unsigned):
+            raise MechanicsContractError(f"{label} hash mismatch")
+
+    control_id = placement_search_plan.get("control_candidate_id")
+    selected_id = native_selection.get("selected_candidate_id")
+    candidates = placement_search_plan.get("candidates")
+    retained = native_selection.get("retained_results")
+    if (
+        placement_search_plan.get("schema") != PLACEMENT_TCP_SEARCH_PLAN_SCHEMA
+        or placement_search_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING"
+        or placement_search_plan.get("route_shape_changed") is not False
+        or native_selection.get("schema") != PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA
+        or native_selection.get("status") != "NO_NATIVE_IMPROVEMENT_RETAINED"
+        or native_selection.get("source_search_plan_sha256")
+        != placement_search_plan.get("plan_sha256")
+        or native_selection.get("native_improvement_over_control") is not False
+        or selected_id != control_id
+        or not isinstance(candidates, list)
+        or not isinstance(retained, list)
+        or route_variant_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or route_variant_request.get("request_sha256")
+        != placement_search_plan.get("source_route_variant_request_sha256")
+        or route_variant_request.get("route_variant_applied") is not True
+        or route_variant_request.get("collision_geometry_changed") is not False
+    ):
+        raise MechanicsContractError("route-shape campaign lineage changed")
+
+    selected_candidates = [
+        item for item in candidates if item.get("candidate_id") == selected_id
+    ]
+    selected_results = [
+        item for item in retained if item.get("candidate_id") == selected_id
+    ]
+    if (
+        len(selected_candidates) != 1
+        or len(selected_results) != 1
+        or selected_candidates[0].get("candidate_classification")
+        != "RETAINED_ARM198_CONTROL"
+        or selected_results[0].get("physical_solid_blocker_pair_count") != 7
+    ):
+        raise MechanicsContractError("route-shape control evidence changed")
+
+    for document, label in (
+        (placement_search_plan, "placement/TCP search plan"),
+        (native_selection, "native selection"),
+        (route_variant_request, "route variant request"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+    if (
+        placement_search_plan.get("physical_authority") is not False
+        or native_selection.get("physical_authority") is not False
+        or placement_search_plan.get("gate_promotions") != []
+        or native_selection.get("gate_promotions") != []
+    ):
+        raise MechanicsContractError("route-shape source evidence gained authority")
+
+    samples = route_variant_request.get("samples")
+    if not isinstance(samples, list) or not samples:
+        raise MechanicsContractError("route-shape source samples are absent")
+    if any(
+        not isinstance(sample, dict) or sample.get("sequence") != sequence
+        for sequence, sample in enumerate(samples)
+    ):
+        raise MechanicsContractError("route-shape source sequence is not contiguous")
+    transit_sequences = [
+        sample["sequence"] for sample in samples if sample.get("phase") == "TRANSIT"
+    ]
+    endpoint_sequences = [
+        sample["sequence"] for sample in samples if sample.get("phase") != "TRANSIT"
+    ]
+    if not transit_sequences or not endpoint_sequences:
+        raise MechanicsContractError("route-shape source lacks transit or endpoints")
+
+    topologies = ["DIRECT_LINEAR", "X_THEN_Y", "Y_THEN_X"]
+    corridor_heights = [70.0, 90.0, 110.0]
+
+    def route_candidate(
+        topology: str,
+        corridor_height_mm: float,
+        *,
+        classification: str,
+        source_request_reused: bool,
+    ) -> dict[str, Any]:
+        candidate: dict[str, Any] = {
+            "candidate_classification": classification,
+            "xy_corridor_topology": topology,
+            "corridor_height_board_mm": corridor_height_mm,
+            "corridor_height_ramp_fraction": (
+                None if source_request_reused else 0.25
+            ),
+            "transit_resampling": (
+                "SOURCE_REQUEST_EXACT"
+                if source_request_reused
+                else "ARC_LENGTH_PIECEWISE_LINEAR_WITH_SYMMETRIC_Z_RAMPS"
+            ),
+            "source_request_reused_exactly": source_request_reused,
+            "non_transit_endpoints_changed": False,
+            "sample_count_changed": False,
+            "timing_changed": False,
+        }
+        candidate["candidate_id"] = (
+            f"route-shape-{_canonical_sha256(candidate)[:16]}"
+        )
+        return candidate
+
+    control = route_candidate(
+        "DIRECT_LINEAR",
+        70.0,
+        classification="RETAINED_ARM198_ARM199_CONTROL",
+        source_request_reused=True,
+    )
+    variants = [
+        route_candidate(
+            topology,
+            height,
+            classification="PREDECLARED_TRANSIT_CORRIDOR_HYPOTHESIS",
+            source_request_reused=False,
+        )
+        for topology, height in product(topologies, corridor_heights)
+        if not (topology == "DIRECT_LINEAR" and height == 70.0)
+    ]
+    route_candidates = [control, *variants]
+    if len({item["candidate_id"] for item in route_candidates}) != 9:
+        raise MechanicsContractError("route-shape candidate ids are not unique")
+
+    result: dict[str, Any] = {
+        "schema": ROUTE_SHAPE_CAMPAIGN_PLAN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_ROUTE_SHAPE_SCREENING",
+        "source_placement_tcp_search_plan_sha256": placement_search_plan[
+            "plan_sha256"
+        ],
+        "source_placement_tcp_native_selection_sha256": native_selection[
+            "selection_sha256"
+        ],
+        "source_route_variant_request_sha256": route_variant_request[
+            "request_sha256"
+        ],
+        "source_collision_candidate_sha256": placement_search_plan[
+            "source_collision_candidate_sha256"
+        ],
+        "source_collision_pair_policy_sha256": placement_search_plan[
+            "source_collision_pair_policy_sha256"
+        ],
+        "source_station_route_predicate_sha256": placement_search_plan[
+            "source_station_route_predicate_sha256"
+        ],
+        "source_toolchain_lock_sha256": placement_search_plan[
+            "source_toolchain_lock_sha256"
+        ],
+        "selected_placement_tcp_candidate": selected_candidates[0],
+        "control_native_physical_blocker_pair_count": 7,
+        "route_shape_axes": {
+            "xy_corridor_topology": topologies,
+            "corridor_height_board_mm": corridor_heights,
+            "corridor_height_ramp_fraction": [0.25],
+        },
+        "control_candidate_id": control["candidate_id"],
+        "control_candidate_count": 1,
+        "variant_candidate_count": len(variants),
+        "candidate_count": len(route_candidates),
+        "candidates": route_candidates,
+        "source_sample_count": len(samples),
+        "source_transit_sequence_count": len(transit_sequences),
+        "source_transit_sequences": transit_sequences,
+        "preserved_endpoint_sequence_count": len(endpoint_sequences),
+        "preserved_endpoint_sequences": endpoint_sequences,
+        "endpoint_scoring_separate": True,
+        "candidate_rejection_recording_required": True,
+        "screening_stages": [
+            "DETERMINISTIC_ROUTE_MATERIALIZATION",
+            "CANONICAL_IK_AND_DISCRETE_CONTINUITY",
+            "EXACT_FULL_LINK_COLLISION_EVALUATOR",
+            "TRANSIT_AND_ENDPOINT_BLOCKER_SEPARATION",
+            "DETERMINISTIC_SHORTLIST_SELECTION",
+            "SELECTED_NATIVE_ISAAC_REPLAY",
+        ],
+        "ranking_order": [
+            "transit_physical_blocker_pair_count:ASC",
+            "transit_blocked_sample_count:ASC",
+            "endpoint_physical_blocker_pair_count:ASC",
+            "minimum_normalized_arm_joint_margin:DESC",
+            "maximum_position_error_mm:ASC",
+            "candidate_id:ASC",
+        ],
+        "maximum_native_shortlist_count": 4,
+        "placement_tcp_changed": False,
+        "collision_geometry_changed": False,
+        "non_transit_endpoints_changed": False,
+        "installed_profile_eligible": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "route_candidates_are_simulation_only_transit_hypotheses",
+            "contact_hover_retract_and_park_endpoints_are_unchanged",
+            "endpoint_blockers_are_reported_separately_not_waived",
+            "physical_board_and_keyboard_solids_are_preserved",
+            "discrete_collision_screening_is_not_continuous_clearance_proof",
+            "no_candidate_grants_hardware_motion_or_contact_authority",
         ],
     }
     result["plan_sha256"] = _canonical_sha256(result)
@@ -4530,6 +4763,12 @@ def main() -> int:
         help="retain and deterministically rank completed ARM-199 native replays",
     )
     parser.add_argument("--placement-tcp-shortlist-manifest", type=Path)
+    parser.add_argument(
+        "--plan-route-shape-campaign",
+        action="store_true",
+        help="plan the source-bound ARM-200 full-link route-shape campaign",
+    )
+    parser.add_argument("--placement-tcp-native-selection", type=Path)
     parser.add_argument("--physical-blocker-experiment-plan", type=Path)
     parser.add_argument(
         "--source-cartesian-request",
@@ -4573,6 +4812,7 @@ def main() -> int:
             and not args.run_placement_tcp_search
             and not args.materialize_placement_tcp_shortlist
             and not args.retain_placement_tcp_native_results
+            and not args.plan_route_shape_campaign
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -4593,6 +4833,7 @@ def main() -> int:
             and not args.run_placement_tcp_search
             and not args.materialize_placement_tcp_shortlist
             and not args.retain_placement_tcp_native_results
+            and not args.plan_route_shape_campaign
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -4611,7 +4852,29 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.retain_placement_tcp_native_results:
+        if args.plan_route_shape_campaign:
+            required = (
+                args.placement_tcp_search_plan,
+                args.placement_tcp_native_selection,
+                args.cartesian_request,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "route-shape planning requires the ARM-199 plan, native "
+                    "selection, and route-variant request"
+                )
+            result = build_route_shape_campaign_plan(
+                json.loads(
+                    args.placement_tcp_search_plan.resolve(strict=True).read_bytes()
+                ),
+                json.loads(
+                    args.placement_tcp_native_selection.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+            )
+        elif args.retain_placement_tcp_native_results:
             required = (
                 args.placement_tcp_search_plan,
                 args.placement_tcp_search_screen,
