@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-202 incomplete native route-shape
+Reviewed November 3, 2026 through the ARM-203 corrected v4 route-shape
 attempt and retained no-improvement comparison, the ARM-201 bounded
 route-shape campaign screen and native shortlist, the ARM-200 campaign plan, the ARM-198 plan-bound
 transit-route experiment, ARM-197 station
@@ -171,7 +171,7 @@ completed capabilities.
 | Synthetic model-to-controller lineage | Exact synthetic review and epoch identities now bind through actual AI-assembler bytes, arm ingress and freshness checks, the measured planner blocker, a sealed synthetic trajectory, T=102 profile, and zero-write preview receipt | Crossed identities reject and one encoded command is reviewable, but the real planner stops for missing calibration, production dispatch remains explicitly blocked, and no bytes are sent |
 | Arm control research | Documented supervised noncontact movement and joint-feedback checks | Specific lab sequences were completed; controller feedback does not measure key-contact accuracy |
 | Hardware | RC03 workcell design and step-by-step assembly package | Design and print resources exist, with their own measurement and print-readiness requirements |
-| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-201 materializes the fixed four-route shortlist, and ARM-202 retains one explicit pre-admission failure plus three one-attempt native v3 diagnostics | This is advisory simulation evidence only. All three completed ARM-202 attempts overlap at every bounded sample and retain the same seven physical blocker pairs as the ARM-199 control; the top-ranked route did not reach admission, and the completed attempts omitted the separate station-route-predicate input. No improvement, clearance, installation, or physical authority is retained; a corrected separately authorized replay and continuous-clearance qualification remain open |
+| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-201 materializes the fixed four-route shortlist, ARM-202 retains its mixed v3 outcome, and ARM-203 adds request-specific station predicates plus two completed v4 diagnostics | This is advisory simulation evidence only. ARM-203 retains two pre-receipt failures without retry and two v4 attempts that overlap at every bounded sample with the same seven physical blocker pairs as the ARM-199 control. No improvement, clearance, installation, or physical authority is retained; a new independently governed route/placement correction and continuous-clearance qualification remain open |
 
 ### Recent progress, in plain language
 

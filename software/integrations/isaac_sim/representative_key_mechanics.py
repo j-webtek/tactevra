@@ -74,6 +74,9 @@ ROUTE_SHAPE_NATIVE_SHORTLIST_SCHEMA = (
 ROUTE_SHAPE_NATIVE_SELECTION_SCHEMA = (
     "tactevra.isaac_lm1_route_shape_native_selection.v1"
 )
+ROUTE_SHAPE_V4_NATIVE_SELECTION_SCHEMA = (
+    "tactevra.isaac_lm1_route_shape_v4_native_selection.v1"
+)
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -3624,8 +3627,10 @@ def retain_route_shape_native_results(
     shortlist_manifest: dict[str, Any],
     control_receipt: dict[str, Any],
     native_evidence: dict[str, dict[str, Any]],
+    *,
+    require_route_predicate_receipts: bool = False,
 ) -> dict[str, Any]:
-    """Retain the fixed ARM-202 native attempts, including admission failures."""
+    """Retain fixed native attempts, including explicit pre-receipt failures."""
 
     def verified(document: dict[str, Any], digest_field: str, label: str) -> str:
         claimed = document.get(digest_field)
@@ -3707,7 +3712,9 @@ def retain_route_shape_native_results(
             failures.append({
                 "candidate_id": candidate_id,
                 "rank": entry["rank"],
-                "attempt_status": "PRE_ADMISSION_ERROR",
+                "attempt_status": evidence.get(
+                    "attempt_status", "PRE_ADMISSION_ERROR"
+                ),
                 "error_type": evidence["type"],
                 "error_message": evidence["message"],
                 "status_sha256": _canonical_sha256(evidence),
@@ -3716,12 +3723,14 @@ def retain_route_shape_native_results(
             continue
 
         receipt_hash = verified(evidence, "receipt_sha256", "native receipt")
+        allowed_receipt_schemas = {
+            TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        } if require_route_predicate_receipts else {
+            TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+            TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        }
         if (
-            evidence.get("schema")
-            not in {
-                TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
-                TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
-            }
+            evidence.get("schema") not in allowed_receipt_schemas
             or evidence.get("status")
             not in {"DIAGNOSTIC_BLOCKERS_OBSERVED", "DIAGNOSTIC_NO_OVERLAPS_OBSERVED"}
             or evidence.get("hardware_access") is not False
@@ -3791,13 +3800,22 @@ def retain_route_shape_native_results(
         if item["improves_physical_pair_count_over_control"]
     ]
     selected_id = improvements[0]["candidate_id"] if improvements else None
+    incomplete_status = (
+        "INCOMPLETE_V4_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED"
+        if require_route_predicate_receipts
+        else "INCOMPLETE_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED"
+    )
     result: dict[str, Any] = {
-        "schema": ROUTE_SHAPE_NATIVE_SELECTION_SCHEMA,
+        "schema": (
+            ROUTE_SHAPE_V4_NATIVE_SELECTION_SCHEMA
+            if require_route_predicate_receipts
+            else ROUTE_SHAPE_NATIVE_SELECTION_SCHEMA
+        ),
         "status": (
             "NATIVE_ROUTE_SHAPE_IMPROVEMENT_RETAINED"
             if selected_id is not None
             else (
-                "INCOMPLETE_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED"
+                incomplete_status
                 if failures
                 else "NO_NATIVE_ROUTE_SHAPE_IMPROVEMENT_RETAINED"
             )
@@ -3831,14 +3849,23 @@ def retain_route_shape_native_results(
         "hardware_writes": 0,
         "physical_movements": 0,
         "gate_promotions": [],
-        "limitations": [
-            "One fixed candidate stopped at pre-admission and was not retried.",
-            "Completed attempts used v3 primitive-attributed diagnostics without "
-            "the separate station-route-predicate input; physical and planning "
-            "pairs remain separate, but route-predicate replay is incomplete.",
-            "Completed native replays remain diagnostic, not continuous-clearance proof.",
-            "No route shape is installed and ARM-202 grants no physical authority.",
-        ],
+        "limitations": (
+            [
+                f"{len(failures)} fixed candidates stopped before producing a receipt and were not retried.",
+                "Completed attempts are v4 route-predicate diagnostics, but the fixed campaign is incomplete.",
+                "Completed native replays remain diagnostic, not continuous-clearance proof.",
+                "No route shape is installed and ARM-203 grants no physical authority.",
+            ]
+            if require_route_predicate_receipts
+            else [
+                "One fixed candidate stopped at pre-admission and was not retried.",
+                "Completed attempts used v3 primitive-attributed diagnostics without "
+                "the separate station-route-predicate input; physical and planning "
+                "pairs remain separate, but route-predicate replay is incomplete.",
+                "Completed native replays remain diagnostic, not continuous-clearance proof.",
+                "No route shape is installed and ARM-202 grants no physical authority.",
+            ]
+        ),
     }
     result["selection_sha256"] = _canonical_sha256(result)
     return result
@@ -5833,6 +5860,11 @@ def main() -> int:
         action="store_true",
         help="retain fixed ARM-202 native results and explicit attempt failures",
     )
+    parser.add_argument(
+        "--require-route-predicate-receipts",
+        action="store_true",
+        help="require completed route-shape native receipts to use the v4 route-predicate schema",
+    )
     parser.add_argument("--route-shape-campaign-plan", type=Path)
     parser.add_argument("--route-shape-campaign-screen", type=Path)
     parser.add_argument("--route-shape-candidate-id")
@@ -5962,8 +5994,17 @@ def main() -> int:
             for entry in shortlist_manifest.get("entries", []):
                 candidate_dir = replay_root / entry["candidate_id"]
                 receipt_path = candidate_dir / "receipt.json"
+                native_receipt_path = candidate_dir / "native_receipt.json"
                 status_path = candidate_dir / "status.json"
-                evidence_path = receipt_path if receipt_path.is_file() else status_path
+                evidence_path = (
+                    receipt_path
+                    if receipt_path.is_file()
+                    else (
+                        native_receipt_path
+                        if native_receipt_path.is_file()
+                        else status_path
+                    )
+                )
                 native_evidence[entry["candidate_id"]] = json.loads(
                     evidence_path.resolve(strict=True).read_bytes()
                 )
@@ -5977,6 +6018,9 @@ def main() -> int:
                     ).read_bytes()
                 ),
                 native_evidence,
+                require_route_predicate_receipts=(
+                    args.require_route_predicate_receipts
+                ),
             )
         elif args.materialize_route_shape_shortlist:
             required = (

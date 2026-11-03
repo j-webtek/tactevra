@@ -1416,6 +1416,27 @@ A corrected separately planned v4 route-predicate replay and separate
 continuous-clearance qualification remain required. No
 ARM-201 artifact installs a route or grants physical authority.
 
+ARM-203 performed that separately governed correction without changing or
+retrying ARM-202. Each route shape received a station predicate generated from
+its own Cartesian request. Two fixed attempts stopped before producing a
+receipt: rank one retained the predicate-boundary error, and rank two retained
+a legacy Isaac 4.2 initialization access violation. Neither was retried. The
+remaining `Y_THEN_X/70` and `DIRECT_LINEAR/90` attempts completed in the
+governed Isaac 6.1 runtime with v4 route-predicate receipts. All bounded samples
+still overlap (`170/170` and `165/165`), and each result retains seven physical
+solid blocker pairs, zero planning-envelope blocker pairs, and five
+policy-excluded pairs. Neither improves on the seven-pair ARM-199 control.
+
+The retained selection is
+`C:\IsaacSim\artifacts\issue190\arm203-route-shape-v4-native-selection-001\selection.json`.
+Its canonical selection SHA-256 is
+`db4d0812f541fb9445b6cbf09d1f12425768a79598c9dd4d096f65495ae7d186`
+and its file SHA-256 is
+`fe055795d45d232ce40201e68c3a2ebba5a3f4fbbf81e3e60bdb49aba8f11b99`.
+Status `INCOMPLETE_V4_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED` installs no
+route, proves no continuous clearance, promotes no gate, and grants no
+physical authority.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
