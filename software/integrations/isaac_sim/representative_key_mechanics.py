@@ -95,6 +95,12 @@ DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA = (
 DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_drive_controlled_robot_h_replay_receipt.v1"
 )
+FEEDBACK_ADAPTED_ROBOT_H_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_feedback_adapted_robot_h_replay_plan.v1"
+)
+FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_feedback_adapted_robot_h_replay_receipt.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -398,6 +404,176 @@ def build_drive_controlled_robot_h_replay_plan(
             "no_hardware_motion_timing_torque_or_safety_authority",
         ],
     }
+    plan["plan_sha256"] = _canonical_sha256(plan)
+    return plan
+
+
+def build_feedback_adapted_robot_h_replay_plan(
+    source_plan: dict[str, Any],
+    source_receipt: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Adapt H contact depth and release dwell from the retained ARM-207 trace."""
+
+    source_plan_hash = _require_canonical_hash(
+        source_plan, "plan_sha256", "ARM-207 replay plan"
+    )
+    source_receipt_hash = _require_canonical_hash(
+        source_receipt, "receipt_sha256", "ARM-207 replay receipt"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    assessments = source_receipt.get("action_assessments")
+    targets = source_plan.get("joint_targets")
+    if (
+        source_plan.get("schema") != DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        or source_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY"
+        or source_plan.get("h_contact_endpoint_sequences") != [35, 38]
+        or not isinstance(targets, list)
+        or source_plan.get("sample_count") != len(targets)
+        or source_plan.get("source_bindings", {}).get(
+            "key_mechanics_profile_sha256"
+        )
+        != profile_hash
+        or source_receipt.get("schema")
+        != DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+        or source_receipt.get("status") != "BLOCKED_NATIVE_ROBOT_H_REPLAY"
+        or source_receipt.get("source_plan_sha256") != source_plan_hash
+        or source_receipt.get("state_teleports_after_initialization") != 0
+        or not isinstance(assessments, list)
+        or len(assessments) != 2
+        or any(source_plan.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+        or any(source_receipt.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError("ARM-207 feedback boundary changed")
+
+    by_action = {row.get("action_index"): row.get("assessment") for row in assessments}
+    release_mm = mechanics_profile["mechanics_prior"]["release_mm"]["nominal"]
+    if (
+        set(by_action) != {0, 1}
+        or any(not isinstance(row, dict) for row in by_action.values())
+        or any(row.get("profile_sha256") != profile_hash for row in by_action.values())
+        or any(row.get("disposition") != "EXCESSIVE_TRAVEL" for row in by_action.values())
+        or any(row.get("native_contact_observed") is not True for row in by_action.values())
+        or by_action[0].get("activation_count") != 1
+        or by_action[1].get("activation_count") != 0
+        or any(
+            _finite_number(row.get("final_compression_mm"), "final compression")
+            <= release_mm
+            for row in by_action.values()
+        )
+    ):
+        raise MechanicsContractError("ARM-207 failure evidence changed")
+
+    source_depth_mm = NATIVE_H_PRESS_DEPTH_MM
+    observed_max_mm = max(
+        _finite_number(row.get("max_compression_mm"), "maximum compression")
+        for row in by_action.values()
+    )
+    correction_mm = observed_max_mm - source_depth_mm
+    adapted_depth_mm = source_depth_mm - correction_mm
+    if correction_mm <= 0.0 or not 0.0 < adapted_depth_mm < source_depth_mm:
+        raise MechanicsContractError("ARM-207 feedback does not support bounded adaptation")
+    interpolation_ratio = adapted_depth_mm / source_depth_mm
+    physics_dt_s = _finite_number(source_receipt.get("physics_dt_s"), "physics dt")
+    if physics_dt_s <= 0.0:
+        raise MechanicsContractError("ARM-207 physics dt is invalid")
+    release_dwell_s = 2.0
+    release_dwell_steps = math.ceil(release_dwell_s / physics_dt_s)
+
+    adapted_targets = json.loads(json.dumps(targets))
+    contact_sequences = set(source_plan["h_contact_endpoint_sequences"])
+    adapted_contact_sequences = []
+    release_sequences = []
+    for sequence in contact_sequences:
+        contact = adapted_targets[sequence]
+        action_index = contact.get("action_index")
+        hover_rows = [
+            row for row in adapted_targets[:sequence]
+            if row.get("action_index") == action_index
+            and row.get("target_id") == "H"
+            and row.get("phase") == "HOVER"
+        ]
+        retract_rows = [
+            row for row in adapted_targets[sequence + 1:]
+            if row.get("action_index") == action_index
+            and row.get("target_id") == "H"
+            and row.get("phase") == "RETRACT"
+        ]
+        if (
+            contact.get("sequence") != sequence
+            or contact.get("phase") != "CONTACT"
+            or contact.get("target_id") != "H"
+            or len(hover_rows) != 1
+            or len(retract_rows) != 1
+        ):
+            raise MechanicsContractError("ARM-207 H phase ordering changed")
+        hover = hover_rows[0]
+        source_contact = contact["joint_position_target_rad"]
+        hover_target = hover["joint_position_target_rad"]
+        if len(source_contact) != 6 or len(hover_target) != 6:
+            raise MechanicsContractError("ARM-207 H joint target changed")
+        contact["joint_position_target_rad"] = [
+            float(hover_target[index])
+            + interpolation_ratio
+            * (float(source_contact[index]) - float(hover_target[index]))
+            for index in range(6)
+        ]
+        adapted_contact_sequences.append(sequence)
+        retract = retract_rows[0]
+        retract["additional_hold_steps"] = release_dwell_steps
+        release_sequences.append(retract["sequence"])
+
+    for row in adapted_targets:
+        row.setdefault("additional_hold_steps", 0)
+    if sorted(adapted_contact_sequences) != [35, 38] or sorted(release_sequences) != [36, 39]:
+        raise MechanicsContractError("ARM-207 H adaptation coverage changed")
+
+    plan = json.loads(json.dumps(source_plan))
+    plan.pop("plan_sha256", None)
+    plan.update({
+        "schema": FEEDBACK_ADAPTED_ROBOT_H_REPLAY_PLAN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY",
+        "joint_targets": adapted_targets,
+        "source_bindings": {
+            **source_plan["source_bindings"],
+            "arm207_replay_plan_sha256": source_plan_hash,
+            "arm207_replay_receipt_sha256": source_receipt_hash,
+        },
+        "feedback_adaptation": {
+            "method": "ADDITIVE_COMPRESSION_ERROR_AND_RELEASE_DWELL",
+            "source_commanded_depth_mm": source_depth_mm,
+            "observed_max_compression_mm": observed_max_mm,
+            "target_max_compression_mm": NATIVE_H_PRESS_DEPTH_MM,
+            "compression_error_mm": correction_mm,
+            "adapted_commanded_depth_mm": adapted_depth_mm,
+            "contact_interpolation_ratio": interpolation_ratio,
+            "adapted_contact_sequences": sorted(adapted_contact_sequences),
+            "release_dwell_s": release_dwell_s,
+            "release_dwell_steps": release_dwell_steps,
+            "release_dwell_sequences": sorted(release_sequences),
+            "maximum_joint_tracking_error_rad": 0.05,
+            "spatial_route_changed": False,
+            "mechanics_thresholds_changed": False,
+        },
+        "limitations": source_plan["limitations"] + [
+            "feedback_adaptation_is_a_single_bounded_simulation_only_update",
+            "contact_targets_are_interpolated_in_joint_space_on_the_selected_route",
+        ],
+    })
+    plan["execution_contract"].update({
+        "feedback_adaptation_applied": True,
+        "additional_release_dwell_allowed_only_at_sequences": [36, 39],
+        "maximum_joint_tracking_error_rad": 0.05,
+    })
     plan["plan_sha256"] = _canonical_sha256(plan)
     return plan
 
@@ -6451,16 +6627,24 @@ def run_drive_controlled_robot_h_replay(
     """Replay the selected joint targets against the native H key in Isaac."""
 
     plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
-    plan_hash = _require_canonical_hash(plan, "plan_sha256", "ARM-207 replay plan")
+    plan_hash = _require_canonical_hash(plan, "plan_sha256", "robot H replay plan")
     profile = build_profile(layout_path.resolve(strict=True))
     drive_raw = drive_profile_path.resolve(strict=True).read_bytes()
     drive_profile = json.loads(drive_raw)
     robot_usd = robot_usd_path.resolve(strict=True)
     robot_usd_bytes = robot_usd.read_bytes()
     bindings = plan.get("source_bindings", {})
+    source_plan = (
+        plan.get("schema") == DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        and plan.get("status") == "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY"
+    )
+    adapted_plan = (
+        plan.get("schema") == FEEDBACK_ADAPTED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        and plan.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY"
+    )
     if (
-        plan.get("schema") != DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA
-        or plan.get("status") != "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY"
+        not (source_plan or adapted_plan)
         or plan.get("sample_count") != len(plan.get("joint_targets", []))
         or plan.get("h_contact_endpoint_sequences") != [35, 38]
         or bindings.get("key_mechanics_profile_sha256") != profile["profile_sha256"]
@@ -6476,7 +6660,33 @@ def run_drive_controlled_robot_h_replay(
             "physical_movements", "controller_commands", "gate_promotions",
         ))
     ):
-        raise MechanicsContractError("ARM-207 replay plan boundary changed")
+        raise MechanicsContractError("robot H replay plan boundary changed")
+    if adapted_plan:
+        feedback = plan.get("feedback_adaptation", {})
+        allowed_dwell = plan.get("execution_contract", {}).get(
+            "additional_release_dwell_allowed_only_at_sequences"
+        )
+        targets = plan["joint_targets"]
+        dwell_rows = [
+            row for row in targets if row.get("additional_hold_steps", 0) != 0
+        ]
+        if (
+            feedback.get("method")
+            != "ADDITIVE_COMPRESSION_ERROR_AND_RELEASE_DWELL"
+            or feedback.get("adapted_contact_sequences") != [35, 38]
+            or feedback.get("release_dwell_sequences") != [36, 39]
+            or feedback.get("spatial_route_changed") is not False
+            or feedback.get("mechanics_thresholds_changed") is not False
+            or allowed_dwell != [36, 39]
+            or [row.get("sequence") for row in dwell_rows] != allowed_dwell
+            or any(
+                not isinstance(row.get("additional_hold_steps"), int)
+                or isinstance(row.get("additional_hold_steps"), bool)
+                or row.get("additional_hold_steps") < 0
+                for row in targets
+            )
+        ):
+            raise MechanicsContractError("feedback adaptation boundary changed")
     dt = _finite_number(drive_profile.get("physics_dt_s"), "physics dt")
     if (
         drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
@@ -6639,7 +6849,15 @@ def run_drive_controlled_robot_h_replay(
             desired = target["joint_position_target_rad"]
             articulation.set_dof_position_targets([desired])
             target_ns = int(target["time_from_start_ns"])
-            steps = max(1, round((target_ns - previous_ns) / 1e9 / dt))
+            scheduled_steps = max(1, round((target_ns - previous_ns) / 1e9 / dt))
+            additional_hold_steps = target.get("additional_hold_steps", 0)
+            if (
+                not isinstance(additional_hold_steps, int)
+                or isinstance(additional_hold_steps, bool)
+                or additional_hold_steps < 0
+            ):
+                raise MechanicsContractError("additional hold steps are invalid")
+            steps = scheduled_steps + additional_hold_steps
             previous_ns = target_ns
             for _ in range(steps):
                 SimulationManager.step(steps=1)
@@ -6685,13 +6903,29 @@ def run_drive_controlled_robot_h_replay(
             assessment = assess_native_key_trace(profile, rows, rest_key_z_m=settled_z)
             action_assessments.append({"action_index": action_index, "assessment": assessment})
         maximum_tracking_error = max(row["maximum_joint_error_rad"] for row in tracking)
+        maximum_tracking_error_allowed = (
+            _finite_number(
+                plan["execution_contract"].get("maximum_joint_tracking_error_rad"),
+                "maximum joint tracking error",
+            )
+            if adapted_plan
+            else None
+        )
         passed = (
             all(item["assessment"]["accepted"] for item in action_assessments)
             and all(item["assessment"]["native_contact_observed"] for item in action_assessments)
             and all(item["passed"] for item in root_records)
+            and (
+                maximum_tracking_error_allowed is None
+                or maximum_tracking_error <= maximum_tracking_error_allowed
+            )
         )
         receipt: dict[str, Any] = {
-            "schema": DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA,
+            "schema": (
+                FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                if adapted_plan
+                else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+            ),
             "status": "PASS" if passed else "BLOCKED_NATIVE_ROBOT_H_REPLAY",
             "evidence_class": "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT",
             "source_plan_sha256": plan_hash,
@@ -6718,6 +6952,11 @@ def run_drive_controlled_robot_h_replay(
                 "tool_tip_collision_surface_is_governed_hand_tcp_minus_120_mm_endpoint",
             ],
         }
+        if adapted_plan:
+            receipt["maximum_joint_tracking_error_allowed_rad"] = (
+                maximum_tracking_error_allowed
+            )
+            receipt["feedback_adaptation"] = plan["feedback_adaptation"]
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
         output_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         status_path.write_text(json.dumps({
@@ -6923,11 +7162,17 @@ def main() -> int:
         help="compile the selected ARM-206 route into the strict ARM-207 replay plan",
     )
     parser.add_argument(
+        "--build-feedback-adapted-robot-h-replay-plan",
+        action="store_true",
+        help="adapt ARM-207 H depth and release dwell from its retained native trace",
+    )
+    parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
         action="store_true",
         help="execute the strict ARM-207 plan in native Isaac physics",
     )
     parser.add_argument("--replay-plan", type=Path)
+    parser.add_argument("--source-replay-receipt", type=Path)
     parser.add_argument("--learning-baseline-selection", type=Path)
     parser.add_argument("--fixed-base-receipt", type=Path)
     parser.add_argument("--native-h-receipt", type=Path)
@@ -6960,6 +7205,7 @@ def main() -> int:
             and not args.materialize_route_shape_shortlist
             and not args.retain_route_shape_native_results
             and not args.build_drive_controlled_robot_h_replay_plan
+            and not args.build_feedback_adapted_robot_h_replay_plan
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -6986,6 +7232,7 @@ def main() -> int:
             and not args.materialize_route_shape_shortlist
             and not args.retain_route_shape_native_results
             and not args.build_drive_controlled_robot_h_replay_plan
+            and not args.build_feedback_adapted_robot_h_replay_plan
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -6995,6 +7242,7 @@ def main() -> int:
         if (
             not args.localize_collision_blockers
             and not args.build_drive_controlled_robot_h_replay_plan
+            and not args.build_feedback_adapted_robot_h_replay_plan
             and args.cartesian_request is not None
             and (
                 args.native_h_probe
@@ -7018,6 +7266,16 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.build_feedback_adapted_robot_h_replay_plan:
+            if args.replay_plan is None or args.source_replay_receipt is None:
+                raise MechanicsContractError(
+                    "ARM-208 planning requires --replay-plan and --source-replay-receipt"
+                )
+            result = build_feedback_adapted_robot_h_replay_plan(
+                json.loads(args.replay_plan.resolve(strict=True).read_bytes()),
+                json.loads(args.source_replay_receipt.resolve(strict=True).read_bytes()),
+                build_profile(args.layout.resolve(strict=True)),
             )
         elif args.build_drive_controlled_robot_h_replay_plan:
             required = (
@@ -7842,6 +8100,8 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_VARIANT_GENERATION",
             "READY_FOR_ZERO_AUTHORITY_PLACEMENT_TCP_SCREENING",
             "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY",
+            "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY",
+            "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

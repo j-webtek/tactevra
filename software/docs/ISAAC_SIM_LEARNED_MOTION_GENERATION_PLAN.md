@@ -277,6 +277,18 @@ key, disables gravity to represent the keyboard's preloaded return mechanism,
 and grants zero physical or motion authority. The next LM1 increment must bind
 the same key and evaluator to the drive-controlled robot TCP.
 
+ARM-207 binds that mechanism to the selected full robot route and proves native
+contact, but fails on about `3.78 mm` peak compression and incomplete release.
+ARM-208 then closes the first feedback loop: it derives smaller contact targets
+from that receipt, adds a two-second retract hold, enforces a `0.05 rad`
+tracking limit, and replays the unchanged evaluator. Tracking and every
+fixed-root check pass, but peak compression remains about `3.66 mm` and release
+still fails. The trace shows the missing model explicitly: the nominal H hover
+already preloads the key by about `2.6 mm`, so timing cannot solve the geometry
+error. The next LM1 increment must lift and requalify the H approach, hover,
+and retract targets from the retained native trace before another contact
+replay. It must not weaken mechanics limits or grant physical authority.
+
 ARM-187 establishes the robot-TCP/mechanics handoff. The retained shared-emitter
 schedule terminates `H` CONTACT at the `21.0 mm` key rest plane, so it commands
 no mechanism compression. A hash-bound, zero-authority contract now rejects
@@ -584,9 +596,13 @@ ScheduleGen. Neither is a physical success rate.
    are observed, but the retained run fails unchanged mechanics acceptance:
    the provisional drive response overshoots the key travel and the original
    timing does not allow complete release before the second `H` action. The
-   next learning input is therefore concrete: adapt contact approach and
-   release dwell in simulation, without changing authority or weakening the
-   evaluator, and re-run the same native boundary.
+   ARM-208 applies that first feedback update and re-runs the same native
+   boundary. It reduces peak compression to about `3.66 mm`, preserves the
+   tracking and root invariants, and confirms that added dwell does not release
+   the key because the H hover/retract target itself remains in contact. The
+   next learning input is now more precise: derive a lifted approach/hover/
+   retract geometry from the native trace, then replay without changing
+   authority or weakening the evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.

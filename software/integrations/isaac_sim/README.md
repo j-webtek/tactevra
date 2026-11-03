@@ -1582,6 +1582,54 @@ teleport occurred. The next bounded action is to produce a simulation-only
 drive/timing adaptation that adds a verified release dwell and limits contact
 overshoot, then replay it through this same admission and evaluator.
 
+ARM-208 performs exactly one feedback-derived adaptation without weakening the
+mechanics evaluator. It binds the ARM-207 plan and blocked native receipt,
+reduces only the two H contact targets, adds 240 physics steps (two seconds) of
+hold at each retract target, and adds a `0.05 rad` maximum tracking-error gate.
+The retained plan is
+`C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-plan-001\plan.json`
+with canonical SHA-256
+`def0bc128bf7b61741d1d6fa96825039583eb723fe0e8e031d1eff43f73d5d1f`.
+
+The native result remains blocked, but it localizes the next correction. The
+receipt at
+`C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-001\receipt.json`
+has canonical SHA-256
+`604592c27a58ac288d3f3b0b46bdbfe4ca54f266a8673f2a19289fb391755d9d`.
+All 133 root checks pass and maximum joint tracking error is
+`0.037722640842437705 rad`, below the new bound. Peak H compression falls from
+about `3.78` to `3.66 mm`, but both actions still fail excessive-travel and
+release checks. The trace explains why: sequence 34, the nominal H hover,
+already moves the key from its `18 mm` rest center to about `15.39 mm`, and the
+unchanged retract settles near `15.63 mm`. Extra dwell cannot release a key
+whose nominal hover/retract geometry continues to hold it down. The next
+bounded simulation action must derive and requalify a lifted H approach,
+hover, and retract path from this trace; it must preserve the same mechanics
+thresholds, fixed-root checks, tracking gate, and zero authority.
+
+Reproduce the plan and native result with:
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-feedback-adapted-robot-h-replay-plan `
+  --replay-plan C:\IsaacSim\artifacts\issue190\arm207-drive-controlled-robot-h-replay-plan-001\plan.json `
+  --source-replay-receipt C:\IsaacSim\artifacts\issue190\arm207-drive-controlled-robot-h-replay-002\receipt.json `
+  --output C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-plan-001\plan.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-plan-001\status.json
+$env:PYTHONPATH = 'C:\icq7\software\src'
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --run-drive-controlled-robot-h-replay `
+  --replay-plan C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-plan-001\plan.json `
+  --drive-profile software\config\isaac_lm0b_geometry_prior_profile.json `
+  --robot-usd C:\IsaacSim\artifacts\issue190\wp1-import-003\roarm_m3_kinematic_40dbd84\roarm_m3_kinematic_40dbd84.usda `
+  --output C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-001\receipt.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

@@ -1,7 +1,7 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-207 drive-controlled native
-robot-to-key replay, the ARM-206 zero-authority key-mechanics comparison and
+Reviewed November 3, 2026 through the ARM-208 feedback-adapted native
+robot-to-key replay, the ARM-207 drive-controlled native replay, the ARM-206 zero-authority key-mechanics comparison and
 learning-baseline selection, the ARM-205 corrected fixed-base
 collision replay, the ARM-204 robot-root-drift diagnosis, the ARM-203 corrected
 v4 route-shape attempt and retained no-improvement comparison, the ARM-201 bounded
@@ -174,7 +174,7 @@ completed capabilities.
 | Synthetic model-to-controller lineage | Exact synthetic review and epoch identities now bind through actual AI-assembler bytes, arm ingress and freshness checks, the measured planner blocker, a sealed synthetic trajectory, T=102 profile, and zero-write preview receipt | Crossed identities reject and one encoded command is reviewable, but the real planner stops for missing calibration, production dispatch remains explicitly blocked, and no bytes are sent |
 | Arm control research | Documented supervised noncontact movement and joint-feedback checks | Specific lab sequences were completed; controller feedback does not measure key-contact accuracy |
 | Hardware | RC03 workcell design and step-by-step assembly package | Design and print resources exist, with their own measurement and print-readiness requirements |
-| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, and ARM-207 drives that baseline into the native `H` mechanism | This is advisory simulation evidence only. Native contact and all 133 fixed-root checks pass, but unchanged mechanics acceptance rejects about `3.78 mm` overshoot and incomplete inter-press release. Continuous clearance, installed collision qualification, and physical authority remain open |
+| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, ARM-207 drives that baseline into the native `H` mechanism, and ARM-208 performs one feedback-derived depth/dwell replay | This is advisory simulation evidence only. ARM-208 preserves all 133 fixed-root checks and the `0.05 rad` tracking bound, but the approach/hover geometry already preloads the key by about `2.6 mm`; peak compression remains about `3.66 mm` and dwell cannot release a key held down by geometry. The next simulation change must lift and requalify the H approach/hover/retract path. Continuous clearance, installed collision qualification, and physical authority remain open |
 
 ### Recent progress, in plain language
 
@@ -190,8 +190,14 @@ selects `DIRECT_LINEAR/90` for the next drive-controlled robot-to-key replay.
 This selection has zero hardware authority and is not continuous-clearance,
 native-contact, or installed-collision evidence. ARM-207 now performs that
 native replay: contact and fixed-root behavior pass, while the unchanged key
-gate rejects drive overshoot and missing inter-press release. Bounded
-simulation timing adaptation is therefore the next dependency.
+gate rejects drive overshoot and missing inter-press release. ARM-208 then
+applies one hash-bound feedback update: smaller contact endpoints and a
+two-second post-press hold. The replay remains fail-closed. Peak compression
+falls only to about `3.66 mm`, and trace attribution shows the nominal H hover
+itself compresses the key by about `2.6 mm`. Timing alone cannot release a key
+that geometry continues to hold down. The next bounded correction is therefore
+an evidence-derived lift of the H approach, hover, and retract geometry,
+followed by the same native evaluator; no mechanics limit is weakened.
 
 The latest collision increments derive robot and attachment poses from exact
 accepted joint solutions, insert bounded joint-space samples, and build
