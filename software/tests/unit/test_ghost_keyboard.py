@@ -222,6 +222,7 @@ def _arm207_plan_fixture(mechanics):
     profile=signed({
         'schema':mechanics.PROFILE_SCHEMA,
         'authority':{'hardware':False,'motion':False,'physical_keyboard_qualification':False},
+        'mechanics_prior':{'release_mm':{'nominal':1.2}},
     },'profile_sha256')
     request=signed({
         'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
@@ -335,6 +336,118 @@ def test_arm207_plan_rejects_authority_escalation():
     values[0]['selection_sha256']=mechanics._canonical_sha256({k:v for k,v in values[0].items() if k!='selection_sha256'})
     with pytest.raises(mechanics.MechanicsContractError,match='selection boundary'):
         mechanics.build_drive_controlled_robot_h_replay_plan(*values)
+
+
+def _arm208_feedback_fixture(mechanics):
+    def signed(document, field):
+        document[field]=mechanics._canonical_sha256(document)
+        return document
+
+    profile=signed({
+        'schema':mechanics.PROFILE_SCHEMA,
+        'mechanics_prior':{'release_mm':{'nominal':1.2}},
+    },'profile_sha256')
+    targets=[]
+    for sequence in range(40):
+        row={
+            'sequence':sequence,'time_from_start_ns':sequence*100_000_000,
+            'phase':'TRANSIT','target_id':None,'action_index':None,
+            'phase_endpoint':False,'joint_position_target_rad':[0.0]*6,
+        }
+        targets.append(row)
+    phases={
+        34:('HOVER',0,[0.0]*6),
+        35:('CONTACT',0,[0.0,0.27,0.09,-0.36,0.0,0.0]),
+        36:('RETRACT',0,[0.0]*6),
+        37:('HOVER',1,[0.0]*6),
+        38:('CONTACT',1,[0.0,0.27,0.09,-0.36,0.0,0.0]),
+        39:('RETRACT',1,[0.0]*6),
+    }
+    for sequence,(phase,action,target) in phases.items():
+        targets[sequence].update({
+            'phase':phase,'target_id':'H','action_index':action,
+            'phase_endpoint':True,'joint_position_target_rad':target,
+        })
+    plan=signed({
+        'schema':mechanics.DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY',
+        'selected_candidate_id':'route-a','joint_order':['j0','j1','j2','j3','j4','j5'],
+        'sample_count':len(targets),'h_contact_endpoint_sequences':[35,38],
+        'joint_targets':targets,'robot_placement_matrix_row_major':[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+        'source_bindings':{'key_mechanics_profile_sha256':profile['profile_sha256']},
+        'execution_contract':{
+            'initial_joint_state_placement_count':1,
+            'post_initialization_state_teleports':0,
+            'subsequent_joint_commands':'ARTICULATION_POSITION_TARGETS_ONLY',
+            'key_motion_source':'NATIVE_CONTACT_ONLY',
+            'root_pose_invariant_required_after_every_sample':True,
+        },
+        'hardware_access':False,'physical_authority':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,'gate_promotions':[],
+        'limitations':['simulation_only'],
+    },'plan_sha256')
+    receipt=signed({
+        'schema':mechanics.DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA,
+        'status':'BLOCKED_NATIVE_ROBOT_H_REPLAY','source_plan_sha256':plan['plan_sha256'],
+        'physics_dt_s':1/120,'state_teleports_after_initialization':0,
+        'action_assessments':[
+            {'action_index':0,'assessment':{
+                'profile_sha256':profile['profile_sha256'],'disposition':'EXCESSIVE_TRAVEL',
+                'native_contact_observed':True,'activation_count':1,
+                'final_compression_mm':2.36,'max_compression_mm':3.78,
+            }},
+            {'action_index':1,'assessment':{
+                'profile_sha256':profile['profile_sha256'],'disposition':'EXCESSIVE_TRAVEL',
+                'native_contact_observed':True,'activation_count':0,
+                'final_compression_mm':2.37,'max_compression_mm':3.75,
+            }},
+        ],
+        'hardware_access':False,'physical_authority':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,'gate_promotions':[],
+    },'receipt_sha256')
+    return plan,receipt,profile
+
+
+def test_arm208_feedback_adapter_changes_only_contact_depth_and_release_dwell():
+    mechanics=_load_key_mechanics()
+    plan,receipt,profile=_arm208_feedback_fixture(mechanics)
+    adapted=mechanics.build_feedback_adapted_robot_h_replay_plan(plan,receipt,profile)
+    assert adapted['status']=='READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY'
+    assert adapted['feedback_adaptation']['adapted_contact_sequences']==[35,38]
+    assert adapted['feedback_adaptation']['release_dwell_sequences']==[36,39]
+    assert adapted['feedback_adaptation']['adapted_commanded_depth_mm']==pytest.approx(1.62)
+    assert adapted['feedback_adaptation']['release_dwell_steps']==240
+    ratio=1.62/2.7
+    assert adapted['joint_targets'][35]['joint_position_target_rad']==pytest.approx([
+        0.0,0.27*ratio,0.09*ratio,-0.36*ratio,0.0,0.0,
+    ])
+    assert adapted['joint_targets'][38]['joint_position_target_rad']==pytest.approx(
+        adapted['joint_targets'][35]['joint_position_target_rad']
+    )
+    assert adapted['joint_targets'][36]['additional_hold_steps']==240
+    assert adapted['joint_targets'][39]['additional_hold_steps']==240
+    assert all(
+        adapted['joint_targets'][index]['joint_position_target_rad']
+        == plan['joint_targets'][index]['joint_position_target_rad']
+        for index in range(40) if index not in (35,38)
+    )
+    assert adapted['controller_commands']==[] and adapted['hardware_writes']==0
+
+
+def test_arm208_feedback_adapter_rejects_tampering_and_authority_escalation():
+    mechanics=_load_key_mechanics()
+    plan,receipt,profile=_arm208_feedback_fixture(mechanics)
+    receipt['action_assessments'][0]['assessment']['max_compression_mm']=3.0
+    with pytest.raises(mechanics.MechanicsContractError,match='receipt hash'):
+        mechanics.build_feedback_adapted_robot_h_replay_plan(plan,receipt,profile)
+
+    plan,receipt,profile=_arm208_feedback_fixture(mechanics)
+    receipt['physical_authority']=True
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='feedback boundary'):
+        mechanics.build_feedback_adapted_robot_h_replay_plan(plan,receipt,profile)
 
 
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():

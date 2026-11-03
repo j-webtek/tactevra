@@ -9247,3 +9247,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: adapt approach and release timing in simulation, preserving
   the selected spatial route and unchanged native mechanics gate, then replay
   before dataset generation.
+
+### E-20261103-ARM-208 — feedback adaptation exposes H hover preload
+
+- Stage: LM1 feedback-adapted drive-controlled native robot/key replay.
+- Lane: ARM / Isaac simulation and AI/model preparation.
+- Change: binds the exact ARM-207 plan and blocked receipt, derives smaller H
+  contact targets, adds 240 physics steps (`2.0 s`) at each retract, and adds a
+  `0.05 rad` maximum joint-tracking-error gate. The native executor preserves
+  the original route, one initialization placement, drive-only subsequent
+  motion, fixed-root checks, and unchanged key-mechanics acceptance limits.
+- Result: fail-closed native evidence. All 133 root checks pass and maximum
+  joint tracking error is `0.037722640842437705 rad`. Peak compression improves
+  only to `3.652293235063553 mm` and `3.66076547652483 mm`; both actions remain
+  `EXCESSIVE_TRAVEL`, and the key finishes around `2.37 mm` compressed. Trace
+  attribution shows sequence 34 (nominal H hover) alone lowers the key center
+  from `18 mm` rest to about `15.39 mm`. Dwell therefore cannot produce release
+  while the retract geometry remains in contact.
+- External evidence: adapted-plan canonical SHA-256
+  `def0bc128bf7b61741d1d6fa96825039583eb723fe0e8e031d1eff43f73d5d1f`;
+  native receipt canonical SHA-256
+  `604592c27a58ac288d3f3b0b46bdbfe4ca54f266a8673f2a19289fb391755d9d`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: provisional drive/key parameters, one representative key, and
+  discrete trace attribution do not prove continuous clearance or physical
+  qualification. This negative replay is not a successful demonstration.
+- Next dependency: derive a hash-bound lifted H approach/hover/retract path
+  from the retained native trace, re-run canonical IK/collision admission as
+  needed, and replay through the same native evaluator and tracking/root gates.
