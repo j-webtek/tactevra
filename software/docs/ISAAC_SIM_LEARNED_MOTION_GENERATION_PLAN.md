@@ -579,6 +579,14 @@ ScheduleGen. Neither is a physical success rate.
    remain separate dependencies.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
+   ARM-207 now supplies the strict selected-route compiler and the first full
+   drive-controlled robot/key replay. Native contact and fixed-root behavior
+   are observed, but the retained run fails unchanged mechanics acceptance:
+   the provisional drive response overshoots the key travel and the original
+   timing does not allow complete release before the second `H` action. The
+   next learning input is therefore concrete: adapt contact approach and
+   release dwell in simulation, without changing authority or weakening the
+   evaluator, and re-run the same native boundary.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.

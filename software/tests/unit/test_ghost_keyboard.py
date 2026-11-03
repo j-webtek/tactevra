@@ -214,6 +214,129 @@ def test_native_h_displacement_is_assessed_by_shared_contract():
     assert result['native_contact_step_count']==4
 
 
+def _arm207_plan_fixture(mechanics):
+    def signed(document, field):
+        document[field]=mechanics._canonical_sha256(document)
+        return document
+
+    profile=signed({
+        'schema':mechanics.PROFILE_SCHEMA,
+        'authority':{'hardware':False,'motion':False,'physical_keyboard_qualification':False},
+    },'profile_sha256')
+    request=signed({
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'status':'READY_FOR_IK_QUALIFICATION','route_shape_candidate_id':'route-a',
+        'profile_sha256':profile['profile_sha256'],'sample_count':3,
+        'samples':[
+            {'sequence':0,'time_from_start_ns':0,'phase':'CONTACT','target_id':'H','action_index':0,'phase_endpoint':True},
+            {'sequence':1,'time_from_start_ns':1,'phase':'RETRACT','target_id':'H','action_index':0,'phase_endpoint':True},
+            {'sequence':2,'time_from_start_ns':2,'phase':'CONTACT','target_id':'H','action_index':1,'phase_endpoint':True},
+        ],
+        'authority':{'hardware':False,'motion':False,'physical_keyboard_qualification':False},
+        'hardware_access':False,'hardware_writes':0,'physical_movements':0,'controller_commands':[],
+    },'request_sha256')
+    joints=['base_link_to_link1','link1_to_link2','link2_to_link3','link3_to_link4','link4_to_link5']
+    results=[]
+    for sample in request['samples']:
+        results.append({
+            'accepted':True,'phase':sample['phase'],'action_index':sample['action_index'],
+            'solution_arm_joint_positions_rad':{name:index/10 for index,name in enumerate(joints)},
+        })
+    ik=signed({
+        'schema':mechanics.TCP_IK_SCREEN_SCHEMA,'status':'READY_FOR_COLLISION_QUALIFICATION',
+        'source_request_sha256':request['request_sha256'],'route_shape_candidate_id':'route-a',
+        'sample_count':3,'joint_results':results,'placement_tcp_candidate_id':'place-a',
+        'robot_placement_matrix_row_major':[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+        'hardware_access':False,'hardware_writes':0,'physical_authority':False,
+        'physical_movements':0,'controller_commands':[],
+    },'receipt_sha256')
+    fixed_plan=signed({
+        'schema':mechanics.FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA,
+        'status':'READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY',
+        'candidates':[{'candidate_id':'route-a','source_request_sha256':request['request_sha256']}],
+    },'plan_sha256')
+    usd=b'governed-usd'
+    imported=signed({
+        'schema':'tactevra.isaac_sim_urdf_import.v1',
+        'external_files':[{'sha256':hashlib.sha256(usd).hexdigest(),'size_bytes':len(usd)}],
+        'articulation_root_normalization':{'expected_live_dof_order':joints+['link5_to_gripper_link']},
+    },'receipt_sha256')
+    fixed=signed({
+        'schema':mechanics.TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA,
+        'fixed_base_mechanism':'USD_FIXED_JOINT_TO_WORLD',
+        'source_bindings':{
+            'ik_receipt_sha256':ik['receipt_sha256'],
+            'fixed_base_replay_plan_sha256':fixed_plan['plan_sha256'],
+            'robot_import_receipt_sha256':imported['receipt_sha256'],
+            'robot_usd_sha256':hashlib.sha256(usd).hexdigest(),
+        },
+        'root_pose_invariant':{'observation_count':1,'expected_observation_count':1,'observations':[{'passed':True}]},
+        'hardware_access':False,'hardware_writes':0,'physical_authority':False,
+        'physical_movements':0,'controller_commands':[],'gate_promotions':[],
+    },'receipt_sha256')
+    placement=signed({
+        'schema':mechanics.PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA,
+        'selected_candidate_id':'place-a','control_candidate_id':'place-a',
+        'hardware_access':False,'physical_authority':False,
+    },'selection_sha256')
+    native=signed({
+        'schema':mechanics.NATIVE_RECEIPT_SCHEMA,'status':'PASS',
+        'profile_sha256':profile['profile_sha256'],
+        'assessment':{'resolved_key':'H','accepted':True,'native_contact_observed':True},
+    },'receipt_sha256')
+    drive={'schema':mechanics.GEOMETRY_PRIOR_PROFILE_SCHEMA,'status':'PROVISIONAL_SIMULATION_ONLY','simulation_only':True,'physical_authority':False}
+    drive_raw=json.dumps(drive,sort_keys=True).encode()
+    selected={
+        'candidate_id':'route-a','learning_baseline_rank':1,
+        'fixed_base_collision_passed':True,'key_mechanics_passed':True,
+        'source_cartesian_request_sha256':request['request_sha256'],
+        'source_ik_receipt_sha256':ik['receipt_sha256'],
+        'source_fixed_base_v5_receipt_sha256':fixed['receipt_sha256'],
+    }
+    selection=signed({
+        'schema':mechanics.KEY_MECHANICS_LEARNING_BASELINE_SELECTION_SCHEMA,
+        'status':'SELECTED_ZERO_AUTHORITY_SIMULATION_LEARNING_BASELINE',
+        'selection_scope':'SIMULATION_LEARNING_BASELINE_ONLY',
+        'next_action':'RUN_DRIVE_CONTROLLED_ROBOT_H_KEY_REPLAY_FOR_SELECTED_BASELINE',
+        'selected_candidate_id':'route-a','selected_candidate_rank':1,
+        'ranked_candidates':[selected],
+        'source_key_mechanics_profile_sha256':profile['profile_sha256'],
+        'hardware_access':False,'hardware_writes':0,'physical_authority':False,
+        'physical_movements':0,'controller_commands':[],'gate_promotions':[],
+    },'selection_sha256')
+    return [selection,request,ik,fixed,fixed_plan,placement,profile,native,drive,drive_raw,usd,imported]
+
+
+def test_arm207_plan_binds_selected_targets_and_zero_authority():
+    mechanics=_load_key_mechanics()
+    plan=mechanics.build_drive_controlled_robot_h_replay_plan(*_arm207_plan_fixture(mechanics))
+    assert plan['status']=='READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY'
+    assert plan['selected_candidate_id']=='route-a'
+    assert plan['sample_count']==3
+    assert plan['h_contact_endpoint_sequences']==[0,2]
+    assert plan['joint_targets'][0]['joint_position_target_rad']==pytest.approx([0,.1,.2,.3,.4,0])
+    assert plan['execution_contract']['post_initialization_state_teleports']==0
+    assert plan['controller_commands']==[] and plan['hardware_writes']==0
+
+
+def test_arm207_plan_rejects_nonselected_or_tampered_evidence():
+    mechanics=_load_key_mechanics()
+    values=_arm207_plan_fixture(mechanics)
+    values[1]['route_shape_candidate_id']='other'
+    values[1]['request_sha256']=mechanics._canonical_sha256({k:v for k,v in values[1].items() if k!='request_sha256'})
+    with pytest.raises(mechanics.MechanicsContractError):
+        mechanics.build_drive_controlled_robot_h_replay_plan(*values)
+
+
+def test_arm207_plan_rejects_authority_escalation():
+    mechanics=_load_key_mechanics()
+    values=_arm207_plan_fixture(mechanics)
+    values[0]['physical_authority']=True
+    values[0]['selection_sha256']=mechanics._canonical_sha256({k:v for k,v in values[0].items() if k!='selection_sha256'})
+    with pytest.raises(mechanics.MechanicsContractError,match='selection boundary'):
+        mechanics.build_drive_controlled_robot_h_replay_plan(*values)
+
+
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')

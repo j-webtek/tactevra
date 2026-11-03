@@ -1267,3 +1267,11 @@ and evidence ledger. Full comparison receipts remain external and hash-bound.
 The selector performs no hardware access and grants no controller, contact,
 installed-collision, continuous-clearance, or physical authority; all byte,
 duplicate, and reduction limits remain unchanged.
+
+The ARM-207 native robot/key increment also adds no tracked path and keeps the
+reviewed tracked-file ceiling at 6,722. It extends the existing representative
+key-mechanics implementation and focused test module. The plan and native
+receipts remain external and hash-bound. The executor opens Isaac simulation
+only; it emits no hardware or controller commands and grants no physical,
+installed-collision, continuous-clearance, or dataset authority. All byte,
+duplicate, and reduction limits remain unchanged.

@@ -1554,6 +1554,34 @@ The next bounded action is a drive-controlled native robot-to-`H` replay for
 the selected baseline. ARM-206 does not prove native contact, continuous
 clearance, installed collision qualification, or physical authority.
 
+ARM-207 implements that boundary without changing the selected route or the
+shared key acceptance contract. A strict compiler binds the ARM-206 selection,
+133-sample Cartesian and IK evidence, ARM-205 fixed-base result, placement
+selection, representative-key profile, passing isolated native-key receipt,
+provisional drive profile, normalized import receipt, and exact robot USD. The
+retained plan is
+`C:\IsaacSim\artifacts\issue190\arm207-drive-controlled-robot-h-replay-plan-001\plan.json`
+with canonical SHA-256
+`04354ee380a73fcead903b24419d2d1ac44429e11eb4a04204a00b8ae087072b`.
+It admits only `DIRECT_LINEAR/90`, preserves the two `H` endpoints at
+sequences 35 and 38, permits one initialization placement, and requires all
+subsequent robot motion to use articulation position targets.
+
+The first native run retained a blocked tool-frame diagnostic. The corrected
+hand-TCP-composed run is
+`C:\IsaacSim\artifacts\issue190\arm207-drive-controlled-robot-h-replay-002\receipt.json`
+with receipt SHA-256
+`1da693f8a8ce79d6792cddb9d4bd17fd988f9e7c67892e57d0bcb0dee8cdaba7`.
+The robot reaches and physically depresses the native `H` key, and all 133
+fixed-root observations pass. The unchanged mechanics evaluator rejects the
+route: provisional drive tracking overshoots to about `3.78 mm`, and the key
+has not completed release before the immediate second action. This is a useful
+drive/timing blocker, not a contact pass. No hardware access, controller
+command, physical movement, gate promotion, or post-initialization state
+teleport occurred. The next bounded action is to produce a simulation-only
+drive/timing adaptation that adds a verified release dwell and limits contact
+overshoot, then replay it through this same admission and evaluator.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

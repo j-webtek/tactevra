@@ -9222,3 +9222,28 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: drive the selected route through native robot-to-`H`
   contact physics and retain tracking, activation, release, and collision
   evidence before any dataset-generation claim.
+
+### E-20261103-ARM-207 — native contact exposes drive/timing blocker
+
+- Stage: LM1 drive-controlled native robot/key replay.
+- Lane: ARM / Isaac simulation and AI/model preparation.
+- Change: compiles only the ARM-206-selected route into 133 exact articulation
+  targets, binds every upstream receipt and the normalized robot USD, authors
+  the fixed-base invariant and representative `H` mechanism, and permits one
+  initialization placement followed only by drive position targets.
+- Result: the corrected hand-TCP-composed tool reaches and depresses the native
+  `H` key. All 133 root observations pass. The unchanged mechanics evaluator
+  rejects the run because the provisional drive response reaches about
+  `3.78 mm` compression and does not complete release before the immediate
+  second press.
+- External evidence: plan canonical SHA-256
+  `04354ee380a73fcead903b24419d2d1ac44429e11eb4a04204a00b8ae087072b`;
+  corrected replay receipt SHA-256
+  `1da693f8a8ce79d6792cddb9d4bd17fd988f9e7c67892e57d0bcb0dee8cdaba7`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: the drive and key parameters remain provisional; this is one
+  representative key, not continuous clearance, installed qualification, or
+  physical motion authority.
+- Next dependency: adapt approach and release timing in simulation, preserving
+  the selected spatial route and unchanged native mechanics gate, then replay
+  before dataset generation.
