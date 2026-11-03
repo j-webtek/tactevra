@@ -8926,3 +8926,36 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: generate the proposed 70 mm transit route variant, rerun IK
   and native collision diagnostics, and compare transit blockers while keeping
   endpoint qualification separate.
+
+### E-20261102-ARM-198B — plan-bound transit lift is reachable but does not clear full-link blockers
+
+- Stage: LM1 zero-authority route correction experiment.
+- Lane: ARM / Isaac simulation.
+- Change: added deterministic route-variant generation that admits only the
+  exact governed Cartesian request plus the exact ARM-198 plan. It modifies Z
+  for exactly the 71 selected `TRANSIT` samples and preserves X/Y, timing,
+  semantics, endpoints, and collision geometry. Canonical IK admission now
+  reproduces and verifies this two-document lineage before solving.
+- Result: all 133 Cartesian samples pass canonical IK. The resulting 179-sample
+  policy-bound native replay still reports seven physical board/keyboard
+  blocker pairs, zero station-envelope blockers, five policy-excluded adjacent
+  pairs, and zero unreviewed pairs. The lift changes the collision distribution
+  but does not clear the route; endpoint phases remain implicated.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm198-transit-route-variant-001`.
+  Variant/IK/predicate/native/localization SHA-256 values are
+  `7f95dfb7d50d5b1f9789f8faf5d412ad34d254da8caf6c5bd473c5404d5d438d` /
+  `e93569d4226a64c35c5c1045f1ae8d88d3c566666958fcbd99c8c4d347bb67f6` /
+  `75a3a583b5e533f2ec4fedad02100d2a64985c673842e0f3d90666938de691d5` /
+  `f31a97dc341502199ddba7bd80ecad83d62cd49d8520382b1edaccb2e0c4be0b` /
+  `f421afd8335f18533970861bb978bd141a44e24bfe75a23229d2c3c593472327`.
+- Focused verification: 35 collision-contract tests pass; Ruff and native
+  Isaac admission/replay pass.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Limitations: source placement remains an unmeasured simulation overlay;
+  finite samples are not continuous collision proof; no installed geometry,
+  contact, controller, or physical authority is granted.
+- Next dependency: search bounded placement/TCP and full-link route hypotheses
+  through the same exact IK/collision evaluator instead of assuming TCP height
+  alone represents whole-arm clearance.
