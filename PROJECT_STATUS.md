@@ -1,7 +1,8 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-206 zero-authority key-mechanics
-comparison and learning-baseline selection, the ARM-205 corrected fixed-base
+Reviewed November 3, 2026 through the ARM-207 drive-controlled native
+robot-to-key replay, the ARM-206 zero-authority key-mechanics comparison and
+learning-baseline selection, the ARM-205 corrected fixed-base
 collision replay, the ARM-204 robot-root-drift diagnosis, the ARM-203 corrected
 v4 route-shape attempt and retained no-improvement comparison, the ARM-201 bounded
 route-shape campaign screen and native shortlist, the ARM-200 campaign plan, the ARM-198 plan-bound
@@ -173,7 +174,7 @@ completed capabilities.
 | Synthetic model-to-controller lineage | Exact synthetic review and epoch identities now bind through actual AI-assembler bytes, arm ingress and freshness checks, the measured planner blocker, a sealed synthetic trajectory, T=102 profile, and zero-write preview receipt | Crossed identities reject and one encoded command is reviewable, but the real planner stops for missing calibration, production dispatch remains explicitly blocked, and no bytes are sent |
 | Arm control research | Documented supervised noncontact movement and joint-feedback checks | Specific lab sequences were completed; controller feedback does not measure key-contact accuracy |
 | Hardware | RC03 workcell design and step-by-step assembly package | Design and print resources exist, with their own measurement and print-readiness requirements |
-| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-204 identifies robot-root drift in the earlier moving-base results, ARM-205 completes corrected fixed-base v5 replays, and ARM-206 selects `DIRECT_LINEAR/90` as the zero-authority learning baseline after equivalent projected `H` mechanics outcomes | This is advisory simulation evidence only. Both fixed-base candidates have zero discrete physical-solid blockers, and the selected baseline has lower commanded acceleration, joint discontinuity, joint travel, and Cartesian path length. Continuous clearance, native robot/key contact, installed collision qualification, and physical authority remain open |
+| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, and ARM-207 drives that baseline into the native `H` mechanism | This is advisory simulation evidence only. Native contact and all 133 fixed-root checks pass, but unchanged mechanics acceptance rejects about `3.78 mm` overshoot and incomplete inter-press release. Continuous clearance, installed collision qualification, and physical authority remain open |
 
 ### Recent progress, in plain language
 
@@ -187,7 +188,10 @@ same governed `H` mechanics contract. Both reproduce two centered accepted
 `2.7 mm` presses with complete release, so the deterministic kinematic ranking
 selects `DIRECT_LINEAR/90` for the next drive-controlled robot-to-key replay.
 This selection has zero hardware authority and is not continuous-clearance,
-native-contact, or installed-collision evidence.
+native-contact, or installed-collision evidence. ARM-207 now performs that
+native replay: contact and fixed-root behavior pass, while the unchanged key
+gate rejects drive overshoot and missing inter-press release. Bounded
+simulation timing adaptation is therefore the next dependency.
 
 The latest collision increments derive robot and attachment poses from exact
 accepted joint solutions, insert bounded joint-space samples, and build

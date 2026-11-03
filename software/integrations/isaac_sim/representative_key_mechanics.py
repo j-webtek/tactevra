@@ -86,6 +86,16 @@ ROUTE_SHAPE_NATIVE_SELECTION_SCHEMA = (
 ROUTE_SHAPE_V4_NATIVE_SELECTION_SCHEMA = (
     "tactevra.isaac_lm1_route_shape_v4_native_selection.v1"
 )
+KEY_MECHANICS_LEARNING_BASELINE_SELECTION_SCHEMA = (
+    "tactevra.isaac_lm1_key_mechanics_learning_baseline_selection.v1"
+)
+DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_drive_controlled_robot_h_replay_plan.v1"
+)
+DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_drive_controlled_robot_h_replay_receipt.v1"
+)
+GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
 NATIVE_H_PRESS_DEPTH_MM = 2.7
@@ -115,6 +125,15 @@ class MechanicsContractError(ValueError):
     """Raised when the layout or virtual trace violates the contract."""
 
 
+def _require_canonical_hash(document: dict[str, Any], field: str, label: str) -> str:
+    claimed = document.get(field)
+    unsigned = dict(document)
+    unsigned.pop(field, None)
+    if not isinstance(claimed, str) or claimed != _canonical_sha256(unsigned):
+        raise MechanicsContractError(f"{label} hash mismatch")
+    return claimed
+
+
 def _canonical_sha256(value: Any) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(payload).hexdigest()
@@ -127,6 +146,260 @@ def _finite_number(value: Any, name: str) -> float:
     if not math.isfinite(result):
         raise MechanicsContractError(f"{name} must be finite")
     return result
+
+
+def build_drive_controlled_robot_h_replay_plan(
+    selection: dict[str, Any],
+    cartesian_request: dict[str, Any],
+    ik_receipt: dict[str, Any],
+    fixed_base_receipt: dict[str, Any],
+    fixed_base_plan: dict[str, Any],
+    placement_selection: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+    native_h_receipt: dict[str, Any],
+    drive_profile: dict[str, Any],
+    drive_profile_bytes: bytes,
+    robot_usd_bytes: bytes,
+    import_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Compile the one selected ARM-206 route into a zero-authority replay plan."""
+
+    selection_hash = _require_canonical_hash(
+        selection, "selection_sha256", "learning-baseline selection"
+    )
+    request_hash = _require_canonical_hash(
+        cartesian_request, "request_sha256", "Cartesian request"
+    )
+    ik_hash = _require_canonical_hash(ik_receipt, "receipt_sha256", "IK receipt")
+    fixed_hash = _require_canonical_hash(
+        fixed_base_receipt, "receipt_sha256", "fixed-base receipt"
+    )
+    fixed_plan_hash = _require_canonical_hash(
+        fixed_base_plan, "plan_sha256", "fixed-base replay plan"
+    )
+    placement_hash = _require_canonical_hash(
+        placement_selection, "selection_sha256", "placement selection"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    native_h_hash = _require_canonical_hash(
+        native_h_receipt, "receipt_sha256", "native H receipt"
+    )
+    import_hash = _require_canonical_hash(
+        import_receipt, "receipt_sha256", "robot import receipt"
+    )
+
+    candidate_id = selection.get("selected_candidate_id")
+    ranked = selection.get("ranked_candidates")
+    selected_rows = [
+        row for row in ranked if row.get("candidate_id") == candidate_id
+    ] if isinstance(ranked, list) else []
+    if (
+        selection.get("schema")
+        != KEY_MECHANICS_LEARNING_BASELINE_SELECTION_SCHEMA
+        or selection.get("status")
+        != "SELECTED_ZERO_AUTHORITY_SIMULATION_LEARNING_BASELINE"
+        or selection.get("selection_scope") != "SIMULATION_LEARNING_BASELINE_ONLY"
+        or selection.get("next_action")
+        != "RUN_DRIVE_CONTROLLED_ROBOT_H_KEY_REPLAY_FOR_SELECTED_BASELINE"
+        or selection.get("selected_candidate_rank") != 1
+        or len(selected_rows) != 1
+        or any(selection.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError("learning-baseline selection boundary changed")
+    selected = selected_rows[0]
+    if (
+        selected.get("learning_baseline_rank") != 1
+        or selected.get("fixed_base_collision_passed") is not True
+        or selected.get("key_mechanics_passed") is not True
+        or selected.get("source_cartesian_request_sha256") != request_hash
+        or selected.get("source_ik_receipt_sha256") != ik_hash
+        or selected.get("source_fixed_base_v5_receipt_sha256") != fixed_hash
+    ):
+        raise MechanicsContractError("selected candidate lineage changed")
+
+    samples = cartesian_request.get("samples")
+    joint_results = ik_receipt.get("joint_results")
+    if (
+        cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or cartesian_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or cartesian_request.get("route_shape_candidate_id") != candidate_id
+        or cartesian_request.get("profile_sha256") != profile_hash
+        or not isinstance(samples, list)
+        or cartesian_request.get("sample_count") != len(samples)
+        or not samples
+        or ik_receipt.get("schema") != TCP_IK_SCREEN_SCHEMA
+        or ik_receipt.get("status") != "READY_FOR_COLLISION_QUALIFICATION"
+        or ik_receipt.get("source_request_sha256") != request_hash
+        or ik_receipt.get("route_shape_candidate_id") != candidate_id
+        or ik_receipt.get("sample_count") != len(samples)
+        or not isinstance(joint_results, list)
+        or len(joint_results) != len(samples)
+        or any(result.get("accepted") is not True for result in joint_results)
+        or cartesian_request.get("authority") != {
+            "hardware": False,
+            "motion": False,
+            "physical_keyboard_qualification": False,
+        }
+        or any(cartesian_request.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_movements",
+            "controller_commands",
+        ))
+        or any(ik_receipt.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands",
+        ))
+    ):
+        raise MechanicsContractError("selected request or IK boundary changed")
+
+    fixed_sources = fixed_base_receipt.get("source_bindings", {})
+    root_invariant = fixed_base_receipt.get("root_pose_invariant", {})
+    fixed_candidates = fixed_base_plan.get("candidates", [])
+    if (
+        fixed_base_receipt.get("schema")
+        != TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+        or fixed_base_receipt.get("fixed_base_mechanism")
+        != "USD_FIXED_JOINT_TO_WORLD"
+        or fixed_sources.get("ik_receipt_sha256") != ik_hash
+        or fixed_sources.get("fixed_base_replay_plan_sha256") != fixed_plan_hash
+        or not isinstance(root_invariant, dict)
+        or root_invariant.get("observation_count")
+        != root_invariant.get("expected_observation_count")
+        or root_invariant.get("observation_count")
+        != len(root_invariant.get("observations", []))
+        or any(not row.get("passed") for row in root_invariant.get("observations", []))
+        or fixed_base_plan.get("schema") != FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA
+        or fixed_base_plan.get("status")
+        != "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY"
+        or len([
+            row for row in fixed_candidates
+            if row.get("candidate_id") == candidate_id
+            and row.get("source_request_sha256") == request_hash
+        ]) != 1
+        or any(fixed_base_receipt.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError("fixed-base evidence boundary changed")
+
+    placement_id = ik_receipt.get("placement_tcp_candidate_id")
+    if (
+        placement_selection.get("schema") != PLACEMENT_TCP_NATIVE_SELECTION_SCHEMA
+        or placement_selection.get("selected_candidate_id") != placement_id
+        or placement_selection.get("control_candidate_id") != placement_id
+        or placement_selection.get("hardware_access") is not False
+        or placement_selection.get("physical_authority") is not False
+    ):
+        raise MechanicsContractError("placement selection boundary changed")
+    if (
+        mechanics_profile.get("schema") != PROFILE_SCHEMA
+        or selection.get("source_key_mechanics_profile_sha256") != profile_hash
+        or native_h_receipt.get("schema") != NATIVE_RECEIPT_SCHEMA
+        or native_h_receipt.get("status") != "PASS"
+        or native_h_receipt.get("profile_sha256") != profile_hash
+        or native_h_receipt.get("assessment", {}).get("resolved_key") != "H"
+        or native_h_receipt.get("assessment", {}).get("accepted") is not True
+        or native_h_receipt.get("assessment", {}).get("native_contact_observed") is not True
+    ):
+        raise MechanicsContractError("native H mechanism boundary changed")
+
+    robot_usd_hash = hashlib.sha256(robot_usd_bytes).hexdigest()
+    external = import_receipt.get("external_files")
+    normalization = import_receipt.get("articulation_root_normalization", {})
+    joint_order = [
+        "base_link_to_link1", "link1_to_link2", "link2_to_link3",
+        "link3_to_link4", "link4_to_link5", "link5_to_gripper_link",
+    ]
+    if (
+        drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
+        or drive_profile.get("status") != "PROVISIONAL_SIMULATION_ONLY"
+        or drive_profile.get("simulation_only") is not True
+        or drive_profile.get("physical_authority") is not False
+        or import_receipt.get("schema") != "tactevra.isaac_sim_urdf_import.v1"
+        or not isinstance(external, list) or len(external) != 1
+        or external[0].get("sha256") != robot_usd_hash
+        or external[0].get("size_bytes") != len(robot_usd_bytes)
+        or normalization.get("expected_live_dof_order") != joint_order
+        or fixed_sources.get("robot_import_receipt_sha256") != import_hash
+        or fixed_sources.get("robot_usd_sha256") != robot_usd_hash
+    ):
+        raise MechanicsContractError("drive profile or robot asset boundary changed")
+
+    targets = []
+    contact_endpoints = []
+    for sample, result in zip(samples, joint_results):
+        if result.get("phase") != sample.get("phase") \
+                or result.get("action_index") != sample.get("action_index"):
+            raise MechanicsContractError("IK result ordering changed")
+        solution = result.get("solution_arm_joint_positions_rad", {})
+        target = [_finite_number(solution.get(name), f"joint target {name}")
+                  for name in joint_order[:5]] + [0.0]
+        row = {
+            "sequence": sample.get("sequence"),
+            "time_from_start_ns": sample.get("time_from_start_ns"),
+            "phase": sample.get("phase"),
+            "target_id": sample.get("target_id"),
+            "action_index": sample.get("action_index"),
+            "phase_endpoint": sample.get("phase_endpoint"),
+            "joint_position_target_rad": target,
+        }
+        targets.append(row)
+        if row["target_id"] == "H" and row["phase"] == "CONTACT" \
+                and row["phase_endpoint"] is True:
+            contact_endpoints.append(row["sequence"])
+    if len(contact_endpoints) != 2:
+        raise MechanicsContractError("selected route must retain two H contact endpoints")
+
+    plan: dict[str, Any] = {
+        "schema": DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY",
+        "selected_candidate_id": candidate_id,
+        "joint_order": joint_order,
+        "sample_count": len(targets),
+        "h_contact_endpoint_sequences": contact_endpoints,
+        "joint_targets": targets,
+        "robot_placement_matrix_row_major": ik_receipt.get(
+            "robot_placement_matrix_row_major"
+        ),
+        "source_bindings": {
+            "learning_baseline_selection_sha256": selection_hash,
+            "cartesian_request_sha256": request_hash,
+            "ik_receipt_sha256": ik_hash,
+            "fixed_base_receipt_sha256": fixed_hash,
+            "fixed_base_replay_plan_sha256": fixed_plan_hash,
+            "placement_selection_sha256": placement_hash,
+            "key_mechanics_profile_sha256": profile_hash,
+            "native_h_receipt_sha256": native_h_hash,
+            "drive_profile_file_sha256": hashlib.sha256(drive_profile_bytes).hexdigest(),
+            "robot_import_receipt_sha256": import_hash,
+            "robot_usd_sha256": robot_usd_hash,
+        },
+        "execution_contract": {
+            "initial_joint_state_placement_count": 1,
+            "post_initialization_state_teleports": 0,
+            "subsequent_joint_commands": "ARTICULATION_POSITION_TARGETS_ONLY",
+            "key_motion_source": "NATIVE_CONTACT_ONLY",
+            "root_pose_invariant_required_after_every_sample": True,
+        },
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "simulation_only_provisional_drive_and_mechanics_parameters",
+            "no_continuous_collision_or_installed_profile_qualification",
+            "no_hardware_motion_timing_torque_or_safety_authority",
+        ],
+    }
+    plan["plan_sha256"] = _canonical_sha256(plan)
+    return plan
 
 
 def canonical_active_rotation_row_major_from_gf_rows(
@@ -6166,6 +6439,301 @@ def run_native_h_probe(
             app.close()
 
 
+def run_drive_controlled_robot_h_replay(
+    *,
+    replay_plan_path: Path,
+    layout_path: Path,
+    drive_profile_path: Path,
+    robot_usd_path: Path,
+    output_path: Path,
+    status_path: Path,
+) -> dict[str, Any]:
+    """Replay the selected joint targets against the native H key in Isaac."""
+
+    plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
+    plan_hash = _require_canonical_hash(plan, "plan_sha256", "ARM-207 replay plan")
+    profile = build_profile(layout_path.resolve(strict=True))
+    drive_raw = drive_profile_path.resolve(strict=True).read_bytes()
+    drive_profile = json.loads(drive_raw)
+    robot_usd = robot_usd_path.resolve(strict=True)
+    robot_usd_bytes = robot_usd.read_bytes()
+    bindings = plan.get("source_bindings", {})
+    if (
+        plan.get("schema") != DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        or plan.get("status") != "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY"
+        or plan.get("sample_count") != len(plan.get("joint_targets", []))
+        or plan.get("h_contact_endpoint_sequences") != [35, 38]
+        or bindings.get("key_mechanics_profile_sha256") != profile["profile_sha256"]
+        or bindings.get("drive_profile_file_sha256")
+        != hashlib.sha256(drive_raw).hexdigest()
+        or bindings.get("robot_usd_sha256")
+        != hashlib.sha256(robot_usd_bytes).hexdigest()
+        or plan.get("execution_contract", {}).get("post_initialization_state_teleports") != 0
+        or plan.get("execution_contract", {}).get("subsequent_joint_commands")
+        != "ARTICULATION_POSITION_TARGETS_ONLY"
+        or any(plan.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError("ARM-207 replay plan boundary changed")
+    dt = _finite_number(drive_profile.get("physics_dt_s"), "physics dt")
+    if (
+        drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
+        or drive_profile.get("simulation_only") is not True
+        or drive_profile.get("physical_authority") is not False
+        or dt <= 0.0
+    ):
+        raise MechanicsContractError("drive profile boundary changed")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    app = None
+    try:
+        from isaacsim import SimulationApp
+
+        app = SimulationApp({"headless": True, "multi_gpu": False})
+        import omni.timeline
+        import omni.usd
+        from isaacsim.core.experimental.prims import Articulation, RigidPrim
+        from isaacsim.core.simulation_manager import SimulationManager
+        from pxr import Gf, PhysxSchema, Sdf, UsdGeom, UsdPhysics
+
+        if not omni.usd.get_context().open_stage(str(robot_usd)):
+            raise RuntimeError("Isaac could not open the governed robot USD")
+        for _ in range(5):
+            app.update()
+        stage = omni.usd.get_context().get_stage()
+        scene = UsdPhysics.Scene.Define(stage, "/World/physicsScene")
+        scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, -1.0))
+        scene.CreateGravityMagnitudeAttr().Set(drive_profile["gravity_m_s2"])
+
+        for prim_path, row in drive_profile["rigid_body_properties"].items():
+            prim = stage.GetPrimAtPath(prim_path)
+            if not prim.IsValid():
+                raise RuntimeError(f"missing governed rigid body {prim_path}")
+            mass = UsdPhysics.MassAPI.Apply(prim)
+            mass.CreateMassAttr().Set(row["mass_kg"])
+            mass.CreateCenterOfMassAttr().Set(Gf.Vec3f(*row["center_of_mass_m"]))
+            mass.CreateDiagonalInertiaAttr().Set(Gf.Vec3f(*row["diagonal_inertia_kg_m2"]))
+            axes = row["principal_axes_wxyz"]
+            mass.CreatePrincipalAxesAttr().Set(
+                Gf.Quatf(axes[0], Gf.Vec3f(*axes[1:]))
+            )
+
+        base_prim = stage.GetPrimAtPath("/roarm_m3/Geometry/world/base_link")
+        root_prim = stage.GetPrimAtPath("/roarm_m3")
+        if not base_prim.IsValid() or not root_prim.IsValid():
+            raise RuntimeError("governed articulation root is unavailable")
+        matrix = plan["robot_placement_matrix_row_major"]
+        yaw = math.atan2(matrix[4], matrix[0])
+        base_translation = [matrix[3] / 1000.0, matrix[7] / 1000.0, matrix[11] / 1000.0]
+        base_quaternion = [math.cos(yaw / 2.0), 0.0, 0.0, math.sin(yaw / 2.0)]
+        before = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(0.0)
+        before_t = before.ExtractTranslation()
+        root_matrix = Gf.Matrix4d(1.0)
+        root_matrix.SetRotate(Gf.Rotation(Gf.Vec3d(0.0, 0.0, 1.0), math.degrees(yaw)))
+        root_matrix.SetTranslateOnly(Gf.Vec3d(*[
+            base_translation[index] - float(before_t[index]) for index in range(3)
+        ]))
+        UsdGeom.Xformable(root_prim).AddTransformOp().Set(root_matrix)
+        fixed = UsdPhysics.FixedJoint.Define(stage, "/roarm_m3/TactevraFixedBaseJoint")
+        fixed.CreateLocalPos0Attr().Set(Gf.Vec3f(*base_translation))
+        fixed.CreateLocalRot0Attr().Set(Gf.Quatf(base_quaternion[0], Gf.Vec3f(*base_quaternion[1:])))
+        fixed.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0))
+        fixed.CreateLocalRot1Attr().Set(Gf.Quatf(1.0))
+        fixed.CreateBody1Rel().SetTargets([base_prim.GetPath()])
+        PhysxSchema.PhysxArticulationAPI.Apply(root_prim).CreateSolverPositionIterationCountAttr(
+            FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+        )
+
+        h = profile["regions"]["H"]
+        prior = profile["mechanics_prior"]
+        key_half_z = 0.003
+        key_top = profile["target_plane_z_board_mm"] / 1000.0
+        key_center = key_top - key_half_z
+        key_path = "/World/HKey"
+        key = UsdGeom.Cube.Define(stage, key_path)
+        key.CreateSizeAttr(2.0)
+        key_xform = UsdGeom.Xformable(key.GetPrim())
+        key_xform.AddTranslateOp().Set(Gf.Vec3d(
+            h["center_board_xy_mm"][0] / 1000.0,
+            h["center_board_xy_mm"][1] / 1000.0,
+            key_center,
+        ))
+        key_xform.AddScaleOp().Set(Gf.Vec3f(
+            h["half_extent_mm"][0] / 1000.0,
+            h["half_extent_mm"][1] / 1000.0,
+            key_half_z,
+        ))
+        UsdPhysics.CollisionAPI.Apply(key.GetPrim())
+        UsdPhysics.RigidBodyAPI.Apply(key.GetPrim())
+        UsdPhysics.MassAPI.Apply(key.GetPrim()).CreateMassAttr().Set(
+            prior["keycap_mass_kg"]["nominal"]
+        )
+        PhysxSchema.PhysxRigidBodyAPI.Apply(key.GetPrim()).CreateDisableGravityAttr(True)
+        key_joint = UsdPhysics.PrismaticJoint.Define(stage, "/World/HKeyJoint")
+        key_joint.CreateBody1Rel().SetTargets([Sdf.Path(key_path)])
+        key_joint.CreateAxisAttr().Set(UsdPhysics.Tokens.z)
+        key_joint.CreateLocalPos0Attr().Set(Gf.Vec3f(
+            h["center_board_xy_mm"][0] / 1000.0,
+            h["center_board_xy_mm"][1] / 1000.0,
+            key_center,
+        ))
+        key_joint.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0))
+        key_joint.CreateLowerLimitAttr().Set(-prior["travel_mm"]["nominal"] / 1000.0)
+        key_joint.CreateUpperLimitAttr().Set(0.0)
+        key_drive = UsdPhysics.DriveAPI.Apply(key_joint.GetPrim(), "linear")
+        key_drive.CreateTypeAttr().Set("force")
+        key_drive.CreateTargetPositionAttr().Set(0.0)
+        key_drive.CreateStiffnessAttr().Set(prior["stiffness_n_per_mm"]["nominal"] * 1000.0)
+        key_drive.CreateDampingAttr().Set(prior["damping_n_s_per_mm"]["nominal"] * 1000.0)
+
+        link5_path = "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5"
+        tip_path = f"{link5_path}/TactevraToolTip"
+        tip = UsdGeom.Sphere.Define(stage, tip_path)
+        tip.CreateRadiusAttr().Set(prior["tip_radius_mm"] / 1000.0)
+        # The governed IK tool is hand_tcp_T_tip=(0, 0, -120 mm), not a
+        # link-5 +Z offset.  The imported hand_tcp transform maps that axis
+        # almost exactly to link-5 +Y.  Place the sphere center one radius
+        # back from the governed tip point so its surface is the IK endpoint.
+        hand_tcp = stage.GetPrimAtPath(f"{link5_path}/hand_tcp")
+        if not hand_tcp.IsValid():
+            raise RuntimeError("governed hand_tcp site is unavailable")
+        hand_matrix = UsdGeom.Xformable(hand_tcp).GetLocalTransformation()
+        center_in_hand = Gf.Vec3d(
+            0.0, 0.0, -(120.0 - prior["tip_radius_mm"]) / 1000.0
+        )
+        center_in_link5 = hand_matrix.Transform(center_in_hand)
+        UsdGeom.Xformable(tip.GetPrim()).AddTranslateOp().Set(center_in_link5)
+        UsdPhysics.CollisionAPI.Apply(tip.GetPrim())
+
+        SimulationManager.set_physics_dt(dt)
+        SimulationManager.initialize_physics()
+        for _ in range(10):
+            app.update()
+        articulation = Articulation("/roarm_m3")
+        if list(articulation.dof_names) != plan["joint_order"]:
+            raise RuntimeError("governed articulation DOF order changed")
+        dof = drive_profile["dof"]
+        articulation.set_dof_gains([[dof["stiffness"]] * 6], [[dof["damping"]] * 6])
+        articulation.set_dof_max_efforts([[dof["maximum_effort"]] * 6])
+        articulation.set_dof_max_velocities([[dof["maximum_velocity_rad_s"]] * 6])
+        targets = plan["joint_targets"]
+        initial = targets[0]["joint_position_target_rad"]
+        articulation.set_dof_positions([initial])
+        articulation.set_dof_velocities([[0.0] * 6])
+        articulation.set_dof_position_targets([initial])
+        timeline = omni.timeline.get_timeline_interface()
+        timeline.play()
+        SimulationManager.step(steps=drive_profile["initial_settle_steps"])
+        key_view = RigidPrim(key_path)
+        settled_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
+
+        root_records = []
+        tracking = []
+        native_trace = []
+        previous_ns = int(targets[0]["time_from_start_ns"])
+        elapsed_steps = 0
+        for target in targets:
+            desired = target["joint_position_target_rad"]
+            articulation.set_dof_position_targets([desired])
+            target_ns = int(target["time_from_start_ns"])
+            steps = max(1, round((target_ns - previous_ns) / 1e9 / dt))
+            previous_ns = target_ns
+            for _ in range(steps):
+                SimulationManager.step(steps=1)
+                elapsed_steps += 1
+                observed_key_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
+                tip_world = UsdGeom.Xformable(tip.GetPrim()).ComputeLocalToWorldTransform(0.0)
+                tip_center_z = float(tip_world.ExtractTranslation()[2])
+                separation = tip_center_z - prior["tip_radius_mm"] / 1000.0 - (observed_key_z + key_half_z)
+                native_trace.append({
+                    "time_s": elapsed_steps * dt,
+                    "key_center_z_m": observed_key_z,
+                    "tip_center_z_m": tip_center_z,
+                    "tip_key_separation_m": separation,
+                    "action_index": target["action_index"],
+                    "target_sequence": target["sequence"],
+                })
+            observed = articulation.get_dof_positions().numpy().tolist()[0]
+            tracking.append({
+                "sequence": target["sequence"],
+                "maximum_joint_error_rad": max(
+                    abs(observed[index] - desired[index]) for index in range(6)
+                ),
+            })
+            world = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(0.0)
+            observed_t = world.ExtractTranslation()
+            observed_q = world.RemoveScaleShear().ExtractRotationQuat()
+            imaginary = observed_q.GetImaginary()
+            root = evaluate_root_pose_invariant(
+                base_translation, base_quaternion,
+                [float(observed_t[index]) for index in range(3)],
+                [float(observed_q.GetReal()), float(imaginary[0]), float(imaginary[1]), float(imaginary[2])],
+                translation_tolerance_mm=0.05, orientation_tolerance_deg=0.1,
+            )
+            root["sequence"] = target["sequence"]
+            root_records.append(root)
+            if not root["passed"]:
+                raise RuntimeError(f"root invariant failed at sequence {target['sequence']}")
+        timeline.stop()
+
+        action_assessments = []
+        for action_index in (0, 1):
+            rows = [row for row in native_trace if row["action_index"] == action_index]
+            assessment = assess_native_key_trace(profile, rows, rest_key_z_m=settled_z)
+            action_assessments.append({"action_index": action_index, "assessment": assessment})
+        maximum_tracking_error = max(row["maximum_joint_error_rad"] for row in tracking)
+        passed = (
+            all(item["assessment"]["accepted"] for item in action_assessments)
+            and all(item["assessment"]["native_contact_observed"] for item in action_assessments)
+            and all(item["passed"] for item in root_records)
+        )
+        receipt: dict[str, Any] = {
+            "schema": DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA,
+            "status": "PASS" if passed else "BLOCKED_NATIVE_ROBOT_H_REPLAY",
+            "evidence_class": "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT",
+            "source_plan_sha256": plan_hash,
+            "physics_dt_s": dt,
+            "physics_steps": drive_profile["initial_settle_steps"] + elapsed_steps,
+            "state_teleports_after_initialization": 0,
+            "action_assessments": action_assessments,
+            "maximum_joint_tracking_error_rad": maximum_tracking_error,
+            "joint_tracking": tracking,
+            "root_pose_invariant": {
+                "observation_count": len(root_records),
+                "all_passed": all(item["passed"] for item in root_records),
+                "observations": root_records,
+            },
+            "native_trace": native_trace,
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "gate_promotions": [],
+            "limitations": plan["limitations"] + [
+                "single_representative_H_key_only",
+                "tool_tip_collision_surface_is_governed_hand_tcp_minus_120_mm_endpoint",
+            ],
+        }
+        receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        output_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        status_path.write_text(json.dumps({
+            "status": receipt["status"], "receipt_sha256": receipt["receipt_sha256"],
+        }, sort_keys=True) + "\n", encoding="utf-8")
+        return receipt
+    except BaseException as exc:
+        status_path.write_text(json.dumps({
+            "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
+        }, sort_keys=True) + "\n", encoding="utf-8")
+        raise
+    finally:
+        if app is not None:
+            app.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -6349,6 +6917,21 @@ def main() -> int:
         type=Path,
         help="ARM-205 fixed-base replay plan with per-sample root invariant",
     )
+    parser.add_argument(
+        "--build-drive-controlled-robot-h-replay-plan",
+        action="store_true",
+        help="compile the selected ARM-206 route into the strict ARM-207 replay plan",
+    )
+    parser.add_argument(
+        "--run-drive-controlled-robot-h-replay",
+        action="store_true",
+        help="execute the strict ARM-207 plan in native Isaac physics",
+    )
+    parser.add_argument("--replay-plan", type=Path)
+    parser.add_argument("--learning-baseline-selection", type=Path)
+    parser.add_argument("--fixed-base-receipt", type=Path)
+    parser.add_argument("--native-h-receipt", type=Path)
+    parser.add_argument("--drive-profile", type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -6376,6 +6959,7 @@ def main() -> int:
             and not args.screen_route_shape_campaign
             and not args.materialize_route_shape_shortlist
             and not args.retain_route_shape_native_results
+            and not args.build_drive_controlled_robot_h_replay_plan
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -6401,6 +6985,7 @@ def main() -> int:
             and not args.screen_route_shape_campaign
             and not args.materialize_route_shape_shortlist
             and not args.retain_route_shape_native_results
+            and not args.build_drive_controlled_robot_h_replay_plan
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -6409,6 +6994,7 @@ def main() -> int:
             )
         if (
             not args.localize_collision_blockers
+            and not args.build_drive_controlled_robot_h_replay_plan
             and args.cartesian_request is not None
             and (
                 args.native_h_probe
@@ -6419,7 +7005,55 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.retain_route_shape_native_results:
+        if args.run_drive_controlled_robot_h_replay:
+            required = (args.replay_plan, args.drive_profile, args.robot_usd)
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-207 execution requires --replay-plan, --drive-profile, and --robot-usd"
+                )
+            result = run_drive_controlled_robot_h_replay(
+                replay_plan_path=args.replay_plan,
+                layout_path=args.layout,
+                drive_profile_path=args.drive_profile,
+                robot_usd_path=args.robot_usd,
+                output_path=args.output,
+                status_path=args.status_output,
+            )
+        elif args.build_drive_controlled_robot_h_replay_plan:
+            required = (
+                args.learning_baseline_selection,
+                args.cartesian_request,
+                args.ik_receipt,
+                args.fixed_base_receipt,
+                args.fixed_base_replay_plan,
+                args.placement_tcp_native_selection,
+                args.native_h_receipt,
+                args.drive_profile,
+                args.robot_usd,
+                args.import_receipt,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-207 planning requires the selection, Cartesian and IK "
+                    "evidence, fixed-base receipt and plan, placement selection, "
+                    "native H receipt, drive profile, robot USD, and import receipt"
+                )
+            drive_profile_bytes = args.drive_profile.resolve(strict=True).read_bytes()
+            result = build_drive_controlled_robot_h_replay_plan(
+                json.loads(args.learning_baseline_selection.resolve(strict=True).read_bytes()),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.ik_receipt.resolve(strict=True).read_bytes()),
+                json.loads(args.fixed_base_receipt.resolve(strict=True).read_bytes()),
+                json.loads(args.fixed_base_replay_plan.resolve(strict=True).read_bytes()),
+                json.loads(args.placement_tcp_native_selection.resolve(strict=True).read_bytes()),
+                build_profile(args.layout.resolve(strict=True)),
+                json.loads(args.native_h_receipt.resolve(strict=True).read_bytes()),
+                json.loads(drive_profile_bytes),
+                drive_profile_bytes,
+                args.robot_usd.resolve(strict=True).read_bytes(),
+                json.loads(args.import_receipt.resolve(strict=True).read_bytes()),
+            )
+        elif args.retain_route_shape_native_results:
             required = (
                 args.route_shape_campaign_plan,
                 args.route_shape_campaign_screen,
