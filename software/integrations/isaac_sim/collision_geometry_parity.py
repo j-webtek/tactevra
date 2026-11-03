@@ -14,6 +14,15 @@ PLAN_SCHEMA = "tactevra.isaac_lm1_collision_geometry_parity_plan.v1"
 CAPTURE_SCHEMA = "tactevra.isaac_lm1_collision_geometry_capture.v1"
 REPORT_SCHEMA = "tactevra.isaac_lm1_collision_geometry_parity_report.v1"
 SELECTION_SCHEMA = "tactevra.isaac_lm1_route_shape_v4_native_selection.v1"
+FIXED_BASE_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_fixed_base_collision_replay_plan.v1"
+)
+FIXED_BASE_RESULT_SCHEMA = (
+    "tactevra.isaac_lm1_fixed_base_collision_replay_result.v1"
+)
+FIXED_BASE_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v5"
+)
 
 
 class ParityContractError(ValueError):
@@ -249,6 +258,250 @@ def build_capture_plan(
     }
     plan["plan_sha256"] = _canonical_sha256(plan)
     return plan
+
+
+def build_fixed_base_replay_plan(
+    selection: dict[str, Any],
+    parity_report: dict[str, Any],
+    parity_plan: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind the immutable v4 outcomes to a fail-closed fixed-base rerun."""
+
+    selection_hash = _verify_digest(selection, "selection_sha256", "selection")
+    report_hash = _verify_digest(parity_report, "report_sha256", "parity report")
+    parity_plan_hash = _verify_digest(parity_plan, "plan_sha256", "parity plan")
+    _require_zero_authority(selection, "selection")
+    _require_zero_authority(parity_report, "parity report")
+    _require_zero_authority(parity_plan, "parity plan")
+    conclusion = parity_report.get("diagnostic_conclusion")
+    if (
+        selection.get("schema") != SELECTION_SCHEMA
+        or selection.get("status")
+        != "INCOMPLETE_V4_NATIVE_REPLAY_NO_IMPROVEMENT_RETAINED"
+        or parity_report.get("schema") != REPORT_SCHEMA
+        or parity_report.get("status") != "PARITY_DISCREPANCY_CLASSIFIED"
+        or parity_plan.get("schema") != PLAN_SCHEMA
+        or parity_report.get("source_plan_sha256") != parity_plan_hash
+        or parity_plan.get("source_selection_sha256") != selection_hash
+        or not isinstance(conclusion, dict)
+        or conclusion.get("primary_classification")
+        != "NATIVE_ROBOT_ROOT_Z_DRIFT"
+        or conclusion.get("required_next_action")
+        != "REPLAY_WITH_FIXED_BASE_AND_ROOT_POSE_INVARIANT"
+        or conclusion.get(
+            "retained_native_collision_conclusion_usable_for_fixed_base_route_comparison"
+        )
+        is not False
+    ):
+        raise ParityContractError("ARM-204 fixed-base handoff changed")
+
+    results = selection.get("retained_results")
+    if not isinstance(results, list) or len(results) != 2:
+        raise ParityContractError("completed ARM-203 candidate coverage changed")
+    captures = {
+        item.get("candidate_id"): item
+        for item in parity_plan.get("candidate_captures", [])
+    }
+    candidates = []
+    for result in results:
+        candidate_id = result.get("candidate_id")
+        capture = captures.get(candidate_id)
+        if (
+            not isinstance(candidate_id, str)
+            or not candidate_id
+            or result.get("native_receipt_schema")
+            != "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v4"
+            or result.get("station_route_predicate_applied") is not True
+            or not isinstance(result.get("native_receipt_sha256"), str)
+            or not isinstance(capture, dict)
+            or capture.get("native_receipt_sha256")
+            != result.get("native_receipt_sha256")
+        ):
+            raise ParityContractError("fixed-base candidate binding changed")
+        candidates.append(
+            {
+                "candidate_id": candidate_id,
+                "source_request_sha256": capture.get("request_sha256"),
+                "source_v4_native_receipt_sha256": result["native_receipt_sha256"],
+                "source_v4_bounded_sample_count": result["bounded_sample_count"],
+            }
+        )
+    if any(
+        not isinstance(item["source_request_sha256"], str)
+        for item in candidates
+    ):
+        raise ParityContractError("fixed-base source request binding is absent")
+
+    plan: dict[str, Any] = {
+        "schema": FIXED_BASE_PLAN_SCHEMA,
+        "status": "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY",
+        "source_selection_sha256": selection_hash,
+        "source_parity_report_sha256": report_hash,
+        "source_parity_plan_sha256": parity_plan_hash,
+        "candidates": sorted(candidates, key=lambda item: item["candidate_id"]),
+        "fixed_base_contract": {
+            "mechanism": "USD_FIXED_JOINT_TO_WORLD",
+            "articulation_path": "/roarm_m3",
+            "base_body_name": "base_link",
+            "author_before_physics_initialization": True,
+            "requested_placement_is_world_anchor": True,
+        },
+        "root_pose_invariant": {
+            "translation_tolerance_mm": 0.05,
+            "orientation_tolerance_deg": 0.1,
+            "required_at_admission": True,
+            "required_after_every_sample": True,
+            "failure_behavior": "ERROR_NO_ACCEPTED_COLLISION_RECEIPT",
+        },
+        "rotation_serialization": {
+            "matrix_layout": "ROW_MAJOR_3X3",
+            "semantics": "RIGHT_HANDED_ACTIVE_COLUMN_VECTOR",
+            "gf_row_vector_storage_transposed": True,
+        },
+        "source_v4_receipts_mutated": False,
+        "geometry_mutated": False,
+        "route_mutated": False,
+        "placement_mutated": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    plan["plan_sha256"] = _canonical_sha256(plan)
+    return plan
+
+
+def retain_fixed_base_replay_results(
+    plan: dict[str, Any], receipts: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Retain complete v5 fixed-base evidence without promoting authority."""
+
+    plan_hash = _verify_digest(plan, "plan_sha256", "fixed-base plan")
+    _require_zero_authority(plan, "fixed-base plan")
+    if (
+        plan.get("schema") != FIXED_BASE_PLAN_SCHEMA
+        or plan.get("status")
+        != "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY"
+    ):
+        raise ParityContractError("fixed-base plan boundary changed")
+    candidates = {
+        item.get("source_v4_native_receipt_sha256"): item
+        for item in plan.get("candidates", [])
+        if isinstance(item, dict)
+    }
+    if len(candidates) != 2 or len(receipts) != len(candidates):
+        raise ParityContractError("fixed-base receipt coverage changed")
+
+    retained = []
+    seen: set[str] = set()
+    for receipt in receipts:
+        receipt_hash = _verify_digest(receipt, "receipt_sha256", "v5 receipt")
+        _require_zero_authority(receipt, "v5 receipt")
+        source_v4_hash = receipt.get("source_v4_native_receipt_sha256")
+        candidate = candidates.get(source_v4_hash)
+        root = receipt.get("root_pose_invariant")
+        bindings = receipt.get("source_bindings")
+        if (
+            receipt.get("schema") != FIXED_BASE_RECEIPT_SCHEMA
+            or receipt.get("fixed_base_replay_applied") is not True
+            or receipt.get("source_v4_receipt_mutated") is not False
+            or not isinstance(candidate, dict)
+            or source_v4_hash in seen
+            or receipt.get("bounded_sample_count")
+            != candidate.get("source_v4_bounded_sample_count")
+            or not isinstance(bindings, dict)
+            or bindings.get("fixed_base_replay_plan_sha256") != plan_hash
+            or not isinstance(root, dict)
+            or root.get("status") != "PASS"
+            or root.get("observation_count")
+            != receipt.get("bounded_sample_count") + 1
+            or root.get("expected_observation_count")
+            != root.get("observation_count")
+            or not isinstance(
+                root.get("maximum_translation_delta_mm"), (int, float)
+            )
+            or root.get("maximum_translation_delta_mm")
+            > plan["root_pose_invariant"]["translation_tolerance_mm"]
+            or not isinstance(
+                root.get("maximum_orientation_delta_deg"), (int, float)
+            )
+            or root.get("maximum_orientation_delta_deg")
+            > plan["root_pose_invariant"]["orientation_tolerance_deg"]
+            or any(
+                not isinstance(receipt.get(field), int)
+                or isinstance(receipt.get(field), bool)
+                or receipt.get(field) < 0
+                for field in (
+                    "physical_solid_blocker_pair_count",
+                    "planning_envelope_blocker_pair_count",
+                    "unreviewed_blocker_pair_count",
+                    "policy_excluded_pair_count",
+                )
+            )
+        ):
+            raise ParityContractError("fixed-base v5 receipt binding changed")
+        seen.add(source_v4_hash)
+        retained.append(
+            {
+                "candidate_id": candidate["candidate_id"],
+                "v5_receipt_sha256": receipt_hash,
+                "bounded_sample_count": receipt["bounded_sample_count"],
+                "root_pose_observation_count": root["observation_count"],
+                "maximum_root_translation_delta_mm": root[
+                    "maximum_translation_delta_mm"
+                ],
+                "maximum_root_orientation_delta_deg": root[
+                    "maximum_orientation_delta_deg"
+                ],
+                "physical_solid_blocker_pair_count": receipt.get(
+                    "physical_solid_blocker_pair_count"
+                ),
+                "planning_envelope_blocker_pair_count": receipt.get(
+                    "planning_envelope_blocker_pair_count"
+                ),
+                "unreviewed_blocker_pair_count": receipt.get(
+                    "unreviewed_blocker_pair_count"
+                ),
+                "policy_excluded_pair_count": receipt.get(
+                    "policy_excluded_pair_count"
+                ),
+                "diagnostic_status": receipt.get("status"),
+            }
+        )
+    retained.sort(key=lambda item: item["candidate_id"])
+    zero_physical = all(
+        item["physical_solid_blocker_pair_count"] == 0
+        and item["planning_envelope_blocker_pair_count"] == 0
+        and item["unreviewed_blocker_pair_count"] == 0
+        for item in retained
+    )
+    result: dict[str, Any] = {
+        "schema": FIXED_BASE_RESULT_SCHEMA,
+        "status": (
+            "FIXED_BASE_REPLAY_COMPLETE_NO_PHYSICAL_SOLID_BLOCKERS"
+            if zero_physical
+            else "FIXED_BASE_REPLAY_COMPLETE_BLOCKERS_RETAINED"
+        ),
+        "source_plan_sha256": plan_hash,
+        "retained_results": retained,
+        "fixed_base_root_invariant_passed_for_all_candidates": True,
+        "zero_physical_solid_blockers_for_all_candidates": zero_physical,
+        "next_action": (
+            "COMPARE_KEY_MECHANICS_AND_SELECT_LEARNING_BASELINE"
+            if zero_physical
+            else "REVIEW_RETAINED_PHYSICAL_BLOCKERS"
+        ),
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    result["result_sha256"] = _canonical_sha256(result)
+    return result
 
 
 def _capture_records(capture: dict[str, Any], source: str) -> dict[tuple[Any, ...], dict[str, Any]]:
@@ -705,6 +958,8 @@ def main() -> int:
     mode.add_argument("--compare", action="store_true")
     mode.add_argument("--merge-captures", action="store_true")
     mode.add_argument("--build-offline-capture", action="store_true")
+    mode.add_argument("--build-fixed-base-plan", action="store_true")
+    mode.add_argument("--retain-fixed-base-results", action="store_true")
     parser.add_argument("--selection", type=Path)
     parser.add_argument("--collision-candidate", type=Path)
     parser.add_argument("--request", action="append", type=Path, default=[])
@@ -713,10 +968,28 @@ def main() -> int:
     parser.add_argument("--plan", type=Path)
     parser.add_argument("--native-capture", type=Path)
     parser.add_argument("--offline-capture", type=Path)
+    parser.add_argument("--parity-report", type=Path)
+    parser.add_argument("--fixed-base-receipt", action="append", type=Path, default=[])
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
-    if args.build_plan:
+    if args.retain_fixed_base_results:
+        if args.plan is None or not args.fixed_base_receipt:
+            parser.error(
+                "--retain-fixed-base-results requires a plan and fixed-base receipts"
+            )
+        result = retain_fixed_base_replay_results(
+            _load(args.plan), [_load(path) for path in args.fixed_base_receipt]
+        )
+    elif args.build_fixed_base_plan:
+        if args.selection is None or args.parity_report is None or args.plan is None:
+            parser.error(
+                "--build-fixed-base-plan requires selection, parity plan, and parity report"
+            )
+        result = build_fixed_base_replay_plan(
+            _load(args.selection), _load(args.parity_report), _load(args.plan)
+        )
+    elif args.build_plan:
         if args.selection is None or args.collision_candidate is None or not args.request:
             parser.error("--build-plan requires selection, collision candidate, and requests")
         loaded_requests = [_load(path) for path in args.request]

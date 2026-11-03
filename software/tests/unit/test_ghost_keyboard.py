@@ -97,6 +97,41 @@ def test_representative_key_mechanics_derive_reviewed_layout_and_zero_authority(
     assert profile==mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
 
 
+def test_fixed_base_rotation_and_root_invariant_helpers():
+    mechanics=_load_key_mechanics()
+    canonical=mechanics.canonical_active_rotation_row_major_from_gf_rows([
+        [0.0,1.0,0.0],
+        [-1.0,0.0,0.0],
+        [0.0,0.0,1.0],
+    ])
+    assert canonical==[
+        0.0,-1.0,0.0,
+        1.0,0.0,0.0,
+        0.0,0.0,1.0,
+    ]
+
+    passed=mechanics.evaluate_root_pose_invariant(
+        [0.385,0.532,0.0701],
+        [1.0,0.0,0.0,0.0],
+        [0.38501,0.532,0.0701],
+        [-1.0,0.0,0.0,0.0],
+        translation_tolerance_mm=0.05,
+        orientation_tolerance_deg=0.01,
+    )
+    assert passed['passed'] is True
+    assert passed['translation_delta_mm']==pytest.approx(0.01)
+
+    failed=mechanics.evaluate_root_pose_invariant(
+        [0.0,0.0,0.0],
+        [1.0,0.0,0.0,0.0],
+        [0.0,0.0,-0.001],
+        [1.0,0.0,0.0,0.0],
+        translation_tolerance_mm=0.05,
+        orientation_tolerance_deg=0.01,
+    )
+    assert failed['passed'] is False
+
+
 def test_representative_key_mechanics_campaign_distinguishes_failure_classes():
     mechanics=_load_key_mechanics()
     receipt=mechanics.run_contract_campaign(ROOT/'software/config/nominal_target_profiles.json')
