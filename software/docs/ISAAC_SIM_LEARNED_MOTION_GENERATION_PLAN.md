@@ -561,8 +561,16 @@ ScheduleGen. Neither is a physical success rate.
    separate station-route-predicate input and overlap at every one of their
    169/170/165 bounded samples. Each retains the same seven physical blocker
    pairs as the ARM-199 control, so no route-shape improvement is selected.
-   A separately planned corrected route-predicate replay and installed
-   continuous geometry remain dependencies.
+   ARM-203 then performed the separately governed v4 route-predicate replay;
+   two candidates completed, but ARM-204 showed that their shared seven-pair
+   result came from a growing native robot-root Z drift rather than route
+   shape. ARM-205 now authors a fixed joint to world before physics and checks
+   the root at admission and after every sample. Both retained candidates pass
+   all 337 root observations and retain zero physical-solid,
+   planning-envelope, or unreviewed blockers. Five pairs per candidate remain
+   explicitly policy-excluded. The next bounded action is key-mechanics
+   comparison and learning-baseline selection; continuous-clearance and
+   physical-contact qualification remain separate dependencies.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

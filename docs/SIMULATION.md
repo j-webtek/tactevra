@@ -17,7 +17,7 @@ does not send commands to the arm.
 | Layer | How Tactevra uses it | Current evidence | Boundary |
 | --- | --- | --- | --- |
 | Deterministic Tactevra simulators | Exercise contracts, target order, trajectory generation, controller lifecycle, camera math, virtual device effects, faults, and replay in ordinary CI | Main-bound tests and retained receipts cover ordered typing, recovery, and fail-closed planning behavior | Simplified geometry and synthetic observations are not physical measurements |
-| NVIDIA Isaac Sim | Import the RoArm model into USD, verify kinematic parity, compose the RC03 workcell, overlay model proposals, replay source-bound schedules, and investigate collision geometry and route shape | Isaac Sim 6.1 launched headlessly; ARM-203 completed two governed v4 route-predicate diagnostics, and ARM-204 compared 288 native/portable primitive poses to localize their disagreement | ARM-204 found exact static-workcell parity but a shared, growing native robot-root Z drift across all 270 robot comparisons. The retained v4 collision conclusions are not valid fixed-base route comparisons; a corrected fixed-base replay with a root invariant is required. Installed geometry, continuous clearance, physical contact qualification, and physical authority remain open |
+| NVIDIA Isaac Sim | Import the RoArm model into USD, verify kinematic parity, compose the RC03 workcell, overlay model proposals, replay source-bound schedules, and investigate collision geometry and route shape | Isaac Sim 6.1 launched headlessly; ARM-204 isolated the prior native/portable disagreement to robot-root drift, and ARM-205 completed corrected fixed-base v5 replays for both retained candidates | All 337 admission/sample root checks pass; both candidates retain zero physical-solid blockers. Five overlaps per candidate are policy-excluded. Continuous clearance, key-mechanics comparison, physical contact qualification, and physical authority remain open |
 | MuJoCo Warp (MJWarp) | Planned complementary lane for high-throughput parallel physics: contact-parameter sweeps, recovery/fault populations, and later camera or mechanics campaigns on NVIDIA GPUs | No MJWarp physics replay is merged on `main`. Existing typing-twin receipts explicitly record `mujoco_replay_executed=false` | External workspace names are provenance, not proof that MJWarp ran; adoption requires pinned assets, parity tests, receipts, and comparison against the deterministic and Isaac lanes |
 
 MuJoCo Warp is the project maintained jointly by Google DeepMind and NVIDIA;
@@ -53,6 +53,11 @@ and testable before they become physical motion:
    seven-pair native result to articulation-root Z drift rather than route
    shape. That negative result now prevents more optimization against an
    invalid moving-base oracle.
+7. **Fixed-base collision replay.** The corrected v5 lane anchors the imported
+   articulation to world before physics, verifies the root after every sample,
+   and retains the solver settings and canonical rotation convention. Both
+   selected routes now complete with zero physical-solid blockers, providing a
+   valid discrete-collision basis for the next key-mechanics comparison.
 
 These results make Isaac Sim an **advisory oracle**: it can expose a mismatch,
 visualize a proposal, or add evidence for review. It cannot approve a physical

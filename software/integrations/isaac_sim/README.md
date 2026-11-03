@@ -1480,6 +1480,44 @@ Retained external ARM-204 evidence:
   canonical SHA-256
   `089d3f633d9103f7f7ae668f940e99f730b3d1450b89d5e1087869174aadf51e`.
 
+ARM-205 implements the corrected replay instead of optimizing against the
+moving-base v4 evidence. The v5 diagnostic authors a USD fixed joint from the
+robot base to world before physics initialization, uses explicit matching
+joint frames, canonicalizes Isaac `Gf` rotations, and checks the requested
+root pose at admission and after every bounded sample. Five deterministic
+physics updates and fixed solver iteration counts are retained in each
+receipt. The root contract permits `0.05 mm` translation and `0.1 degree`
+orientation error; the latter is above the observed single-precision
+quaternion floor without masking meaningful base motion.
+
+Both retained candidates completed: 165 and 170 samples, plus one admission
+observation each. All 337 root observations pass. Maximum translation drift is
+`0.006403 mm` and maximum orientation drift is `0.055953 degree`. Both v5
+receipts retain zero physical-solid, planning-envelope, and unreviewed blocker
+pairs; their five overlap pairs are all policy-excluded adjacent/mechanical
+pairs. This corrects the prior seven-pair conclusion but still does not prove
+continuous clearance or authorize hardware motion.
+
+Retained external ARM-205 evidence:
+
+- fixed-base plan:
+  `C:\IsaacSim\artifacts\issue190\arm205-fixed-base-collision-replay-plan-001\plan.json`,
+  canonical SHA-256
+  `1975d066fbd644095e60bb21cfcd4a190b6fbdf72dfe4e33ce258e0868fbbada`;
+- `route-shape-3261d2d2f56ade9a` v5 receipt SHA-256
+  `c7ae522b75d4754cf62c6ebf89bd289771985a9c7c314a6523b24d0d7e705d1d`;
+- `route-shape-89d6b94237805cfe` v5 receipt SHA-256
+  `98aa5b517aa76fb170ff087dbacec5a74137cb9432c226a619999734dbe4d6ed`;
+- retained result:
+  `C:\IsaacSim\artifacts\issue190\arm205-fixed-base-collision-replay-001\result.json`,
+  canonical SHA-256
+  `c968eda779c07a16efe38172b828dff270c84f20b8790b15962a5d8743ff395d`.
+
+The retained next action is to compare key-mechanics behavior for the two
+fixed-base candidates and select a simulation-learning baseline. That later
+selection remains zero-authority and separate from continuous-clearance and
+physical-contact qualification.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

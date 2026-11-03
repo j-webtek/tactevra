@@ -47,6 +47,7 @@ def _result(candidate_id, receipt_digest):
     robot_keyboard = ["robot:gripper", "workcell:keyboard"]
     return {
         "candidate_id": candidate_id,
+        "bounded_sample_count": 3,
         "native_receipt_schema": "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v4",
         "native_receipt_sha256": receipt_digest,
         "station_route_predicate_applied": True,
@@ -249,3 +250,138 @@ def test_systematic_findings_classify_shared_robot_z_drift():
         "retained_native_collision_conclusion_usable_for_fixed_base_route_comparison": False,
         "required_next_action": "REPLAY_WITH_FIXED_BASE_AND_ROOT_POSE_INVARIANT",
     }
+
+
+def test_build_fixed_base_plan_binds_v4_history_and_root_invariant():
+    selection = _selection()
+    parity_plan = parity.build_capture_plan(
+        selection,
+        _collision_candidate(),
+        {
+            candidate_id: _request(candidate_id)
+            for candidate_id in ("candidate-a", "candidate-b")
+        },
+    )
+    report = _sealed(
+        {
+            "schema": parity.REPORT_SCHEMA,
+            "status": "PARITY_DISCREPANCY_CLASSIFIED",
+            "source_plan_sha256": parity_plan["plan_sha256"],
+            "diagnostic_conclusion": {
+                "primary_classification": "NATIVE_ROBOT_ROOT_Z_DRIFT",
+                "retained_native_collision_conclusion_usable_for_fixed_base_route_comparison": False,
+                "required_next_action": "REPLAY_WITH_FIXED_BASE_AND_ROOT_POSE_INVARIANT",
+            },
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+        },
+        "report_sha256",
+    )
+
+    fixed = parity.build_fixed_base_replay_plan(
+        selection, report, parity_plan
+    )
+
+    assert fixed["schema"] == parity.FIXED_BASE_PLAN_SCHEMA
+    assert fixed["fixed_base_contract"]["mechanism"] == "USD_FIXED_JOINT_TO_WORLD"
+    assert fixed["root_pose_invariant"]["required_after_every_sample"] is True
+    assert fixed["root_pose_invariant"]["orientation_tolerance_deg"] == 0.1
+    assert fixed["root_pose_invariant"]["failure_behavior"] == (
+        "ERROR_NO_ACCEPTED_COLLISION_RECEIPT"
+    )
+    assert {item["source_request_sha256"] for item in fixed["candidates"]} == {
+        _request("candidate-a")["request_sha256"],
+        _request("candidate-b")["request_sha256"],
+    }
+    assert fixed["source_v4_receipts_mutated"] is False
+
+    report["diagnostic_conclusion"]["primary_classification"] = "MATCH"
+    with pytest.raises(parity.ParityContractError, match="parity report hash mismatch"):
+        parity.build_fixed_base_replay_plan(selection, report, parity_plan)
+
+
+def test_retain_fixed_base_results_requires_complete_invariant_passing_receipts():
+    selection = _selection()
+    parity_plan = parity.build_capture_plan(
+        selection,
+        _collision_candidate(),
+        {
+            candidate_id: _request(candidate_id)
+            for candidate_id in ("candidate-a", "candidate-b")
+        },
+    )
+    report = _sealed(
+        {
+            "schema": parity.REPORT_SCHEMA,
+            "status": "PARITY_DISCREPANCY_CLASSIFIED",
+            "source_plan_sha256": parity_plan["plan_sha256"],
+            "diagnostic_conclusion": {
+                "primary_classification": "NATIVE_ROBOT_ROOT_Z_DRIFT",
+                "retained_native_collision_conclusion_usable_for_fixed_base_route_comparison": False,
+                "required_next_action": "REPLAY_WITH_FIXED_BASE_AND_ROOT_POSE_INVARIANT",
+            },
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+        },
+        "report_sha256",
+    )
+    plan = parity.build_fixed_base_replay_plan(selection, report, parity_plan)
+
+    def receipt(candidate):
+        return _sealed(
+            {
+                "schema": parity.FIXED_BASE_RECEIPT_SCHEMA,
+                "status": "DIAGNOSTIC_OVERLAPS_OBSERVED",
+                "bounded_sample_count": candidate["source_v4_bounded_sample_count"],
+                "fixed_base_replay_applied": True,
+                "source_v4_native_receipt_sha256": candidate[
+                    "source_v4_native_receipt_sha256"
+                ],
+                "source_v4_receipt_mutated": False,
+                "source_bindings": {
+                    "fixed_base_replay_plan_sha256": plan["plan_sha256"]
+                },
+                "root_pose_invariant": {
+                    "status": "PASS",
+                    "observation_count": candidate["source_v4_bounded_sample_count"] + 1,
+                    "expected_observation_count": candidate[
+                        "source_v4_bounded_sample_count"
+                    ] + 1,
+                    "maximum_translation_delta_mm": 0.006,
+                    "maximum_orientation_delta_deg": 0.056,
+                },
+                "physical_solid_blocker_pair_count": 0,
+                "planning_envelope_blocker_pair_count": 0,
+                "unreviewed_blocker_pair_count": 0,
+                "policy_excluded_pair_count": 5,
+                "hardware_access": False,
+                "physical_authority": False,
+                "controller_commands": [],
+                "hardware_writes": 0,
+                "physical_movements": 0,
+            },
+            "receipt_sha256",
+        )
+
+    receipts = [receipt(candidate) for candidate in plan["candidates"]]
+    result = parity.retain_fixed_base_replay_results(plan, receipts)
+
+    assert result["schema"] == parity.FIXED_BASE_RESULT_SCHEMA
+    assert result["status"] == (
+        "FIXED_BASE_REPLAY_COMPLETE_NO_PHYSICAL_SOLID_BLOCKERS"
+    )
+    assert result["fixed_base_root_invariant_passed_for_all_candidates"] is True
+    assert result["zero_physical_solid_blockers_for_all_candidates"] is True
+    assert result["next_action"] == (
+        "COMPARE_KEY_MECHANICS_AND_SELECT_LEARNING_BASELINE"
+    )
+
+    receipts[0]["root_pose_invariant"]["status"] = "FAIL"
+    with pytest.raises(parity.ParityContractError, match="v5 receipt hash mismatch"):
+        parity.retain_fixed_base_replay_results(plan, receipts)

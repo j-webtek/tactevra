@@ -40,6 +40,15 @@ TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
 TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v4"
 )
+TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v5"
+)
+FIXED_BASE_SETTLE_UPDATE_COUNT = 5
+FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT = 64
+FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT = 8
+FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_fixed_base_collision_replay_plan.v1"
+)
 TCP_COLLISION_POLICY_SCHEMA = "tactevra.isaac_lm1_collision_pair_policy.v1"
 TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_replay_request.v2"
@@ -118,6 +127,88 @@ def _finite_number(value: Any, name: str) -> float:
     if not math.isfinite(result):
         raise MechanicsContractError(f"{name} must be finite")
     return result
+
+
+def canonical_active_rotation_row_major_from_gf_rows(
+    rows: list[list[float]],
+) -> list[float]:
+    """Convert Gf row-vector storage to active column-vector row-major form."""
+
+    if (
+        not isinstance(rows, list)
+        or len(rows) != 3
+        or any(not isinstance(row, list) or len(row) != 3 for row in rows)
+    ):
+        raise MechanicsContractError("Gf rotation rows must be a 3x3 matrix")
+    values = [
+        [_finite_number(value, "Gf rotation element") for value in row]
+        for row in rows
+    ]
+    return [values[column][row] for row in range(3) for column in range(3)]
+
+
+def evaluate_root_pose_invariant(
+    expected_position_m: list[float],
+    expected_quaternion_wxyz: list[float],
+    observed_position_m: list[float],
+    observed_quaternion_wxyz: list[float],
+    *,
+    translation_tolerance_mm: float,
+    orientation_tolerance_deg: float,
+) -> dict[str, Any]:
+    """Return a deterministic, quaternion-sign-invariant fixed-root check."""
+
+    vectors = (
+        (expected_position_m, 3, "expected root position"),
+        (expected_quaternion_wxyz, 4, "expected root quaternion"),
+        (observed_position_m, 3, "observed root position"),
+        (observed_quaternion_wxyz, 4, "observed root quaternion"),
+    )
+    normalized = []
+    for vector, size, label in vectors:
+        if not isinstance(vector, list) or len(vector) != size:
+            raise MechanicsContractError(f"{label} is invalid")
+        normalized.append([_finite_number(value, label) for value in vector])
+    expected_position, expected_quaternion, observed_position, observed_quaternion = (
+        normalized
+    )
+    expected_norm = math.sqrt(sum(value * value for value in expected_quaternion))
+    observed_norm = math.sqrt(sum(value * value for value in observed_quaternion))
+    if expected_norm <= 0.0 or observed_norm <= 0.0:
+        raise MechanicsContractError("root quaternion norm must be positive")
+    expected_quaternion = [value / expected_norm for value in expected_quaternion]
+    observed_quaternion = [value / observed_norm for value in observed_quaternion]
+    dot = abs(sum(
+        first * second
+        for first, second in zip(
+            expected_quaternion, observed_quaternion, strict=True
+        )
+    ))
+    orientation_delta_deg = math.degrees(2.0 * math.acos(min(1.0, dot)))
+    translation_delta_mm = 1000.0 * math.sqrt(sum(
+        (first - second) ** 2
+        for first, second in zip(
+            expected_position, observed_position, strict=True
+        )
+    ))
+    translation_tolerance = _finite_number(
+        translation_tolerance_mm, "root translation tolerance"
+    )
+    orientation_tolerance = _finite_number(
+        orientation_tolerance_deg, "root orientation tolerance"
+    )
+    if translation_tolerance < 0.0 or orientation_tolerance < 0.0:
+        raise MechanicsContractError("root-pose tolerances must be nonnegative")
+    return {
+        "translation_delta_mm": translation_delta_mm,
+        "orientation_delta_deg": orientation_delta_deg,
+        "translation_tolerance_mm": translation_tolerance,
+        "orientation_tolerance_deg": orientation_tolerance,
+        "passed": (
+            translation_delta_mm <= translation_tolerance
+            and orientation_delta_deg <= orientation_tolerance
+        ),
+    }
 
 
 def _validated_collision_candidate_partition(
@@ -4387,6 +4478,7 @@ def run_robot_tcp_collision_diagnostic(
     station_route_predicate_path: Path | None = None,
     geometry_capture_plan_path: Path | None = None,
     geometry_capture_output_path: Path | None = None,
+    fixed_base_replay_plan_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run discrete Isaac overlap queries with no controller or hardware authority."""
     request = json.loads(request_path.resolve(strict=True).read_bytes())
@@ -4461,6 +4553,55 @@ def run_robot_tcp_collision_diagnostic(
         }
         if not geometry_capture_sequences:
             raise MechanicsContractError("collision geometry capture samples are absent")
+    fixed_base_replay_plan = None
+    fixed_base_candidate = None
+    if fixed_base_replay_plan_path is not None:
+        fixed_base_replay_plan = json.loads(
+            fixed_base_replay_plan_path.resolve(strict=True).read_bytes()
+        )
+        claimed_plan_hash = fixed_base_replay_plan.get("plan_sha256")
+        unsigned_plan = dict(fixed_base_replay_plan)
+        unsigned_plan.pop("plan_sha256", None)
+        fixed_contract = fixed_base_replay_plan.get("fixed_base_contract")
+        root_contract = fixed_base_replay_plan.get("root_pose_invariant")
+        if (
+            fixed_base_replay_plan.get("schema")
+            != FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA
+            or claimed_plan_hash != _canonical_sha256(unsigned_plan)
+            or fixed_base_replay_plan.get("status")
+            != "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY"
+            or not isinstance(fixed_contract, dict)
+            or fixed_contract.get("mechanism") != "USD_FIXED_JOINT_TO_WORLD"
+            or fixed_contract.get("articulation_path") != "/roarm_m3"
+            or fixed_contract.get("base_body_name") != "base_link"
+            or not isinstance(root_contract, dict)
+            or root_contract.get("required_at_admission") is not True
+            or root_contract.get("required_after_every_sample") is not True
+            or root_contract.get("failure_behavior")
+            != "ERROR_NO_ACCEPTED_COLLISION_RECEIPT"
+            or fixed_base_replay_plan.get("hardware_access") is not False
+            or fixed_base_replay_plan.get("physical_authority") is not False
+            or fixed_base_replay_plan.get("controller_commands") != []
+            or fixed_base_replay_plan.get("hardware_writes") != 0
+            or fixed_base_replay_plan.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError("fixed-base collision replay plan is invalid")
+        matches = [
+            item
+            for item in fixed_base_replay_plan.get("candidates", [])
+            if item.get("source_request_sha256")
+            == request.get("source_request_sha256")
+        ]
+        if len(matches) != 1:
+            raise MechanicsContractError("fixed-base candidate binding is invalid")
+        fixed_base_candidate = matches[0]
+        if (
+            fixed_base_candidate.get("source_v4_bounded_sample_count")
+            != len(request.get("bounded_samples", []))
+            or accepted_pair_policy is None
+            or station_route_predicate is None
+        ):
+            raise MechanicsContractError("fixed-base replay source boundary changed")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
     app = None
@@ -4473,7 +4614,7 @@ def run_robot_tcp_collision_diagnostic(
         from isaacsim.core.experimental.prims import Articulation
         from isaacsim.core.simulation_manager import SimulationManager
         from omni.physx import get_physx_scene_query_interface
-        from pxr import Gf, PhysicsSchemaTools, UsdGeom, UsdPhysics
+        from pxr import Gf, PhysicsSchemaTools, PhysxSchema, UsdGeom, UsdPhysics
 
         if not omni.usd.get_context().open_stage(str(robot_usd)):
             raise RuntimeError("Isaac could not open the governed robot USD")
@@ -4543,6 +4684,64 @@ def run_robot_tcp_collision_diagnostic(
                 path = f"{root}/box_{primitive_index:02d}"
                 author_box(path, body["body_id"], primitive_index, primitive)
 
+        matrix = admission["robot_placement_matrix_row_major"]
+        yaw = math.atan2(matrix[4], matrix[0])
+        base_translation = [
+            matrix[3] / 1000.0,
+            matrix[7] / 1000.0,
+            matrix[11] / 1000.0,
+        ]
+        base_quaternion_wxyz = [
+            math.cos(yaw / 2.0),
+            0.0,
+            0.0,
+            math.sin(yaw / 2.0),
+        ]
+        base_prim = prim_by_name.get("base_link")
+        if base_prim is None or not base_prim.IsValid():
+            raise RuntimeError("Isaac articulation base body is unavailable")
+        if fixed_base_replay_plan is not None:
+            articulation_root_prim = stage.GetPrimAtPath("/roarm_m3")
+            if not articulation_root_prim.IsValid():
+                raise RuntimeError("Isaac articulation root prim is unavailable")
+            articulation_api = PhysxSchema.PhysxArticulationAPI.Apply(
+                articulation_root_prim
+            )
+            articulation_api.CreateSolverPositionIterationCountAttr(
+                FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+            )
+            articulation_api.CreateSolverVelocityIterationCountAttr(
+                FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+            )
+            base_before = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(
+                0.0
+            )
+            base_before_translation = base_before.ExtractTranslation()
+            root_matrix = Gf.Matrix4d(1.0)
+            root_matrix.SetRotate(
+                Gf.Rotation(Gf.Vec3d(0.0, 0.0, 1.0), math.degrees(yaw))
+            )
+            root_matrix.SetTranslateOnly(Gf.Vec3d(
+                base_translation[0] - float(base_before_translation[0]),
+                base_translation[1] - float(base_before_translation[1]),
+                base_translation[2] - float(base_before_translation[2]),
+            ))
+            UsdGeom.Xformable(articulation_root_prim).AddTransformOp().Set(
+                root_matrix
+            )
+            fixed_joint = UsdPhysics.FixedJoint.Define(
+                stage, "/roarm_m3/TactevraFixedBaseJoint"
+            )
+            fixed_joint.CreateLocalPos0Attr().Set(Gf.Vec3f(*base_translation))
+            fixed_joint.CreateLocalRot0Attr().Set(Gf.Quatf(
+                base_quaternion_wxyz[0],
+                Gf.Vec3f(*base_quaternion_wxyz[1:]),
+            ))
+            fixed_joint.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+            fixed_joint.CreateLocalRot1Attr().Set(Gf.Quatf(1.0))
+            fixed_joint.CreateBody1Rel().SetTargets([base_prim.GetPath()])
+            fixed_joint.CreateJointEnabledAttr().Set(True)
+
         SimulationManager.initialize_physics()
         for _ in range(10):
             app.update()
@@ -4553,13 +4752,58 @@ def run_robot_tcp_collision_diagnostic(
         if not articulation.is_physics_tensor_entity_valid():
             raise RuntimeError("Isaac physics articulation view is unavailable")
 
-        matrix = admission["robot_placement_matrix_row_major"]
-        yaw = math.atan2(matrix[4], matrix[0])
-        base_translation = [matrix[3] / 1000.0, matrix[7] / 1000.0, matrix[11] / 1000.0]
-        base_quaternion_wxyz = [math.cos(yaw / 2.0), 0.0, 0.0, math.sin(yaw / 2.0)]
         timeline = omni.timeline.get_timeline_interface()
         timeline.play()
         app.update()
+        root_invariant_records = []
+        root_contract = (
+            fixed_base_replay_plan["root_pose_invariant"]
+            if fixed_base_replay_plan is not None
+            else None
+        )
+
+        def observe_root_invariant(label: str) -> dict[str, Any]:
+            world = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(0.0)
+            translation = world.ExtractTranslation()
+            quaternion = world.RemoveScaleShear().ExtractRotationQuat()
+            imaginary = quaternion.GetImaginary()
+            observed_position = [float(translation[index]) for index in range(3)]
+            observed_quaternion = [
+                float(quaternion.GetReal()),
+                float(imaginary[0]),
+                float(imaginary[1]),
+                float(imaginary[2]),
+            ]
+            result = evaluate_root_pose_invariant(
+                base_translation,
+                base_quaternion_wxyz,
+                observed_position,
+                observed_quaternion,
+                translation_tolerance_mm=root_contract[
+                    "translation_tolerance_mm"
+                ],
+                orientation_tolerance_deg=root_contract[
+                    "orientation_tolerance_deg"
+                ],
+            )
+            result.update({
+                "observation": label,
+                "observed_position_m": observed_position,
+                "observed_quaternion_wxyz": observed_quaternion,
+            })
+            root_invariant_records.append(result)
+            if not result["passed"]:
+                raise RuntimeError(
+                    "fixed-base root invariant failed at "
+                    f"{label}: translation_delta_mm="
+                    f"{result['translation_delta_mm']:.9f}, "
+                    "orientation_delta_deg="
+                    f"{result['orientation_delta_deg']:.9f}"
+                )
+            return result
+
+        if fixed_base_replay_plan is not None:
+            observe_root_invariant("ADMISSION")
         scene_query = get_physx_scene_query_interface()
         observed_samples = []
         geometry_capture_samples = []
@@ -4571,9 +4815,22 @@ def run_robot_tcp_collision_diagnostic(
             desired = [
                 sample["joint_positions_rad"][name] for name in request["joint_order"]
             ] + [0.0]
-            articulation.set_world_poses([base_translation], [base_quaternion_wxyz])
+            if fixed_base_replay_plan is None:
+                articulation.set_world_poses(
+                    [base_translation], [base_quaternion_wxyz]
+                )
             articulation.set_dof_positions([desired])
-            app.update()
+            update_count = (
+                FIXED_BASE_SETTLE_UPDATE_COUNT
+                if fixed_base_replay_plan is not None
+                else 1
+            )
+            for _ in range(update_count):
+                app.update()
+            if fixed_base_replay_plan is not None:
+                observe_root_invariant(
+                    f"SAMPLE_{sample['sample_sequence']:04d}"
+                )
             if sample["sample_sequence"] in geometry_capture_sequences:
                 primitive_records = []
                 for key in sorted(geometry_path_by_primitive):
@@ -4585,6 +4842,12 @@ def run_robot_tcp_collision_diagnostic(
                     rigid_world = world.RemoveScaleShear()
                     translation = rigid_world.ExtractTranslation()
                     rotation = rigid_world.ExtractRotationMatrix()
+                    canonical_rotation = canonical_active_rotation_row_major_from_gf_rows(
+                        [
+                            [float(rotation[row][column]) for column in range(3)]
+                            for row in range(3)
+                        ]
+                    )
                     primitive_records.append({
                         "body_id": key[0],
                         "primitive_index": key[1],
@@ -4593,17 +4856,17 @@ def run_robot_tcp_collision_diagnostic(
                         "local_center_mm": primitive["center_mm"],
                         "local_rotation_row_major": primitive["rotation_row_major"],
                         "world_matrix_row_major": [
-                            float(rotation[0][0]),
-                            float(rotation[0][1]),
-                            float(rotation[0][2]),
+                            canonical_rotation[0],
+                            canonical_rotation[1],
+                            canonical_rotation[2],
                             float(translation[0]) * 1000.0,
-                            float(rotation[1][0]),
-                            float(rotation[1][1]),
-                            float(rotation[1][2]),
+                            canonical_rotation[3],
+                            canonical_rotation[4],
+                            canonical_rotation[5],
                             float(translation[1]) * 1000.0,
-                            float(rotation[2][0]),
-                            float(rotation[2][1]),
-                            float(rotation[2][2]),
+                            canonical_rotation[6],
+                            canonical_rotation[7],
+                            canonical_rotation[8],
                             float(translation[2]) * 1000.0,
                             0.0,
                             0.0,
@@ -4796,7 +5059,9 @@ def run_robot_tcp_collision_diagnostic(
 
         receipt: dict[str, Any] = {
             "schema": (
-                TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                if fixed_base_replay_plan is not None
+                else TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if station_route_predicate is not None
                 else TCP_PRIMITIVE_ATTRIBUTED_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if accepted_pair_policy is not None
@@ -4905,6 +5170,57 @@ def run_robot_tcp_collision_diagnostic(
                     "physical_workcell_body_ids"
                 ],
             })
+        if fixed_base_replay_plan is not None:
+            receipt["source_bindings"]["fixed_base_replay_plan_sha256"] = (
+                fixed_base_replay_plan["plan_sha256"]
+            )
+            receipt.update({
+                "fixed_base_replay_applied": True,
+                "fixed_base_mechanism": fixed_base_replay_plan[
+                    "fixed_base_contract"
+                ]["mechanism"],
+                "fixed_base_settle_update_count": (
+                    FIXED_BASE_SETTLE_UPDATE_COUNT
+                ),
+                "fixed_base_solver_position_iteration_count": (
+                    FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+                ),
+                "fixed_base_solver_velocity_iteration_count": (
+                    FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+                ),
+                "source_v4_native_receipt_sha256": fixed_base_candidate[
+                    "source_v4_native_receipt_sha256"
+                ],
+                "root_pose_invariant": {
+                    "status": "PASS",
+                    "observation_count": len(root_invariant_records),
+                    "expected_observation_count": len(observed_samples) + 1,
+                    "maximum_translation_delta_mm": max(
+                        item["translation_delta_mm"]
+                        for item in root_invariant_records
+                    ),
+                    "maximum_orientation_delta_deg": max(
+                        item["orientation_delta_deg"]
+                        for item in root_invariant_records
+                    ),
+                    "translation_tolerance_mm": root_contract[
+                        "translation_tolerance_mm"
+                    ],
+                    "orientation_tolerance_deg": root_contract[
+                        "orientation_tolerance_deg"
+                    ],
+                    "observations": root_invariant_records,
+                },
+                "rotation_serialization": fixed_base_replay_plan[
+                    "rotation_serialization"
+                ],
+                "source_v4_receipt_mutated": False,
+            })
+            if len(root_invariant_records) != len(observed_samples) + 1:
+                raise RuntimeError("fixed-base root invariant coverage changed")
+            receipt["limitations"].append(
+                "fixed_base_discrete_overlap_replay_is_not_continuous_clearance_proof"
+            )
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
         if geometry_capture_plan is not None:
             if (
@@ -6028,6 +6344,11 @@ def main() -> int:
         type=Path,
         help="zero-authority native primitive transform sidecar",
     )
+    parser.add_argument(
+        "--fixed-base-replay-plan",
+        type=Path,
+        help="ARM-205 fixed-base replay plan with per-sample root invariant",
+    )
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -6743,6 +7064,7 @@ def main() -> int:
                 station_route_predicate_path=args.station_route_predicate,
                 geometry_capture_plan_path=args.geometry_capture_plan,
                 geometry_capture_output_path=args.geometry_capture_output,
+                fixed_base_replay_plan_path=args.fixed_base_replay_plan,
             )
         elif args.ik_receipt is not None:
             if args.native_h_probe or args.robot_tcp_bundle is not None:
