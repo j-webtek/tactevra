@@ -568,9 +568,15 @@ ScheduleGen. Neither is a physical success rate.
    the root at admission and after every sample. Both retained candidates pass
    all 337 root observations and retain zero physical-solid,
    planning-envelope, or unreviewed blockers. Five pairs per candidate remain
-   explicitly policy-excluded. The next bounded action is key-mechanics
-   comparison and learning-baseline selection; continuous-clearance and
-   physical-contact qualification remain separate dependencies.
+   explicitly policy-excluded. ARM-206 then projects both candidates through
+   the governed `H` mechanics contract: both retain two centered accepted
+   `2.7 mm` presses with complete release. With mechanics outcomes equivalent,
+   the predeclared kinematic ranking selects `DIRECT_LINEAR/90` as the
+   simulation-learning baseline because it has lower commanded acceleration,
+   adjacent-joint delta, total joint travel, and Cartesian path length than
+   `Y_THEN_X/70`. This is a commanded-kinematics selection, not native robot/key
+   contact evidence. Continuous-clearance and physical-contact qualification
+   remain separate dependencies.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.

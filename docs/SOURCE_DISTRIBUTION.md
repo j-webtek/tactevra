@@ -1259,3 +1259,11 @@ zero-I/O checkpoint evidence and one pinned endpoint while requiring later
 pre/post-open live identity verification. It enumerates and opens no port and
 adds no endpoint, transport, execution, hardware, or physical authority;
 logical-byte, duplicate-byte, and reduction limits remain unchanged.
+
+The ARM-206 key-mechanics learning-baseline increment adds no tracked path and
+keeps the reviewed tracked-file ceiling at 6,722. It extends the existing
+collision-parity implementation, focused test module, simulation documentation,
+and evidence ledger. Full comparison receipts remain external and hash-bound.
+The selector performs no hardware access and grants no controller, contact,
+installed-collision, continuous-clearance, or physical authority; all byte,
+duplicate, and reduction limits remain unchanged.

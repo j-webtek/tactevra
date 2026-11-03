@@ -385,3 +385,179 @@ def test_retain_fixed_base_results_requires_complete_invariant_passing_receipts(
     receipts[0]["root_pose_invariant"]["status"] = "FAIL"
     with pytest.raises(parity.ParityContractError, match="v5 receipt hash mismatch"):
         parity.retain_fixed_base_replay_results(plan, receipts)
+
+
+def _learning_baseline_inputs():
+    profile = _sealed(
+        {
+            "schema": parity.KEY_MECHANICS_PROFILE_SCHEMA,
+            "target_plane_z_board_mm": 21.0,
+            "regions": {
+                "H": {
+                    "center_board_xy_mm": [10.0, 20.0],
+                    "half_extent_mm": [8.0, 8.0],
+                }
+            },
+            "mechanics_prior": {
+                "activation_mm": {"nominal": 2.0},
+                "release_mm": {"nominal": 1.0},
+                "travel_mm": {"nominal": 3.5},
+                "stiffness_n_per_mm": {"nominal": 0.45},
+                "damping_n_s_per_mm": {"nominal": 0.02},
+                "center_margin_mm": 2.0,
+            },
+            "authority": {
+                "hardware": False,
+                "motion": False,
+                "physical_keyboard_qualification": False,
+            },
+        },
+        "profile_sha256",
+    )
+    candidate_ids = ("candidate-a", "candidate-b")
+    requests = []
+    ik_receipts = []
+    v5_receipts = []
+    retained = []
+    phases = ("HOVER", "CONTACT", "RETRACT") * 2
+    action_indices = (0, 0, 0, 1, 1, 1)
+    z_values = (26.0, 18.3, 26.0, 26.0, 18.3, 26.0)
+    for candidate_index, candidate_id in enumerate(candidate_ids, start=1):
+        route = {
+            "candidate_id": candidate_id,
+            "xy_corridor_topology": "DIRECT_LINEAR" if candidate_index == 1 else "Y_THEN_X",
+            "corridor_height_board_mm": 90.0 if candidate_index == 1 else 70.0,
+        }
+        samples = [
+            {
+                "sequence": sequence,
+                "time_from_start_ns": sequence * 1_000_000_000,
+                "target_id": "H",
+                "action_index": action_indices[sequence],
+                "phase": phases[sequence],
+                "phase_endpoint": True,
+                "expected_tool_tip_board_mm": [10.0, 20.0, z_values[sequence]],
+            }
+            for sequence in range(6)
+        ]
+        request = _sealed(
+            {
+                "schema": parity.CARTESIAN_REQUEST_SCHEMA,
+                "status": "READY_FOR_IK_QUALIFICATION",
+                "route_shape_materialized": True,
+                "joint_positions_included": False,
+                "route_shape_candidate_id": candidate_id,
+                "route_shape_candidate": route,
+                "samples": samples,
+                "hardware_access": False,
+                "physical_authority": False,
+                "controller_commands": [],
+                "hardware_writes": 0,
+                "physical_movements": 0,
+            },
+            "request_sha256",
+        )
+        scale = 0.1 * candidate_index
+        joint_results = []
+        for sequence in range(6):
+            joint_results.append(
+                {
+                    "waypoint_sequence": sequence,
+                    "solution_arm_joint_positions_rad": {
+                        name: scale * sequence if index == 0 else 0.0
+                        for index, name in enumerate(parity.ARM_JOINT_ORDER)
+                    },
+                }
+            )
+        ik = _sealed(
+            {
+                "schema": parity.IK_RECEIPT_SCHEMA,
+                "status": "READY_FOR_COLLISION_QUALIFICATION",
+                "ik_all_samples_accepted": True,
+                "route_shape_candidate_id": candidate_id,
+                "route_shape_candidate": route,
+                "source_request_sha256": request["request_sha256"],
+                "joint_results": joint_results,
+                "metrics": {
+                    "maximum_adjacent_joint_delta_rad": scale,
+                    "maximum_position_error_mm": 0.01 * candidate_index,
+                    "minimum_normalized_arm_joint_margin": 0.2,
+                },
+                "hardware_access": False,
+                "physical_authority": False,
+                "controller_commands": [],
+                "hardware_writes": 0,
+                "physical_movements": 0,
+            },
+            "receipt_sha256",
+        )
+        v5 = _sealed(
+            {
+                "schema": parity.FIXED_BASE_RECEIPT_SCHEMA,
+                "status": "DIAGNOSTIC_OVERLAPS_OBSERVED",
+                "source_bindings": {"ik_receipt_sha256": ik["receipt_sha256"]},
+                "root_pose_invariant": {"status": "PASS"},
+                "hardware_access": False,
+                "physical_authority": False,
+                "controller_commands": [],
+                "hardware_writes": 0,
+                "physical_movements": 0,
+            },
+            "receipt_sha256",
+        )
+        requests.append(request)
+        ik_receipts.append(ik)
+        v5_receipts.append(v5)
+        retained.append(
+            {
+                "candidate_id": candidate_id,
+                "v5_receipt_sha256": v5["receipt_sha256"],
+                "bounded_sample_count": 6,
+                "maximum_root_translation_delta_mm": 0.006,
+                "maximum_root_orientation_delta_deg": 0.056,
+                "physical_solid_blocker_pair_count": 0,
+                "planning_envelope_blocker_pair_count": 0,
+                "unreviewed_blocker_pair_count": 0,
+            }
+        )
+    fixed = _sealed(
+        {
+            "schema": parity.FIXED_BASE_RESULT_SCHEMA,
+            "status": "FIXED_BASE_REPLAY_COMPLETE_NO_PHYSICAL_SOLID_BLOCKERS",
+            "fixed_base_root_invariant_passed_for_all_candidates": True,
+            "zero_physical_solid_blockers_for_all_candidates": True,
+            "next_action": "COMPARE_KEY_MECHANICS_AND_SELECT_LEARNING_BASELINE",
+            "retained_results": retained,
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+        },
+        "result_sha256",
+    )
+    return fixed, v5_receipts, requests, ik_receipts, profile
+
+
+def test_select_key_mechanics_learning_baseline_is_hash_bound_and_deterministic():
+    inputs = _learning_baseline_inputs()
+
+    result = parity.select_key_mechanics_learning_baseline(*inputs)
+
+    assert result["schema"] == parity.LEARNING_BASELINE_SELECTION_SCHEMA
+    assert result["selected_candidate_id"] == "candidate-a"
+    assert result["key_mechanics_equivalent_across_candidates"] is True
+    assert [item["learning_baseline_rank"] for item in result["ranked_candidates"]] == [1, 2]
+    assert all(
+        action["accepted"]
+        for candidate in result["ranked_candidates"]
+        for action in candidate["key_mechanics_actions"]
+    )
+    assert result["next_action"] == (
+        "RUN_DRIVE_CONTROLLED_ROBOT_H_KEY_REPLAY_FOR_SELECTED_BASELINE"
+    )
+    assert result["physical_authority"] is False
+
+    inputs[2][0]["samples"][1]["expected_tool_tip_board_mm"][2] = 21.0
+    with pytest.raises(parity.ParityContractError, match="Cartesian request hash mismatch"):
+        parity.select_key_mechanics_learning_baseline(*inputs)

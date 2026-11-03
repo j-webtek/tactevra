@@ -23,6 +23,23 @@ FIXED_BASE_RESULT_SCHEMA = (
 FIXED_BASE_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_robot_tcp_collision_diagnostic.v5"
 )
+LEARNING_BASELINE_SELECTION_SCHEMA = (
+    "tactevra.isaac_lm1_key_mechanics_learning_baseline_selection.v1"
+)
+KEY_MECHANICS_PROFILE_SCHEMA = (
+    "tactevra.isaac_lm1_representative_key_mechanics.v1"
+)
+IK_RECEIPT_SCHEMA = "tactevra.isaac_lm1_robot_tcp_cartesian_ik_screen.v1"
+CARTESIAN_REQUEST_SCHEMA = (
+    "tactevra.isaac_lm1_robot_tcp_cartesian_schedule_request.v1"
+)
+ARM_JOINT_ORDER = (
+    "base_link_to_link1",
+    "link1_to_link2",
+    "link2_to_link3",
+    "link3_to_link4",
+    "link4_to_link5",
+)
 
 
 class ParityContractError(ValueError):
@@ -504,6 +521,403 @@ def retain_fixed_base_replay_results(
     return result
 
 
+def _finite(value: Any, label: str) -> float:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise ParityContractError(f"{label} is not numeric")
+    result = float(value)
+    if not math.isfinite(result):
+        raise ParityContractError(f"{label} is not finite")
+    return result
+
+
+def _project_h_key_actions(
+    request: dict[str, Any], profile: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Project governed H endpoints through the existing mechanics thresholds."""
+
+    prior = profile.get("mechanics_prior")
+    region = profile.get("regions", {}).get("H")
+    if not isinstance(prior, dict) or not isinstance(region, dict):
+        raise ParityContractError("representative H mechanics are absent")
+    center = region.get("center_board_xy_mm")
+    half = region.get("half_extent_mm")
+    if (
+        not isinstance(center, list)
+        or len(center) != 2
+        or not isinstance(half, list)
+        or len(half) != 2
+    ):
+        raise ParityContractError("representative H geometry is invalid")
+    rest_z = _finite(profile.get("target_plane_z_board_mm"), "H rest plane")
+    activation = _finite(prior["activation_mm"]["nominal"], "activation")
+    release = _finite(prior["release_mm"]["nominal"], "release")
+    travel = _finite(prior["travel_mm"]["nominal"], "travel")
+    stiffness = _finite(
+        prior["stiffness_n_per_mm"]["nominal"], "key stiffness"
+    )
+    damping = _finite(
+        prior["damping_n_s_per_mm"]["nominal"], "key damping"
+    )
+    margin = _finite(prior["center_margin_mm"], "center margin")
+
+    grouped: dict[int, list[dict[str, Any]]] = {}
+    for sample in request.get("samples", []):
+        if sample.get("target_id") == "H" and sample.get("phase") in {
+            "HOVER",
+            "CONTACT",
+            "RETRACT",
+        }:
+            action = sample.get("action_index")
+            if not isinstance(action, int):
+                raise ParityContractError("H action index is invalid")
+            grouped.setdefault(action, []).append(sample)
+    if not grouped:
+        raise ParityContractError("candidate contains no H key action")
+
+    results = []
+    for action, samples in sorted(grouped.items()):
+        ordered = sorted(samples, key=lambda item: item.get("sequence", -1))
+        if [item.get("phase") for item in ordered] != [
+            "HOVER",
+            "CONTACT",
+            "RETRACT",
+        ] or not all(item.get("phase_endpoint") is True for item in ordered):
+            raise ParityContractError("H action endpoint schedule changed")
+        trace = []
+        for sample in ordered:
+            point = sample.get("expected_tool_tip_board_mm")
+            if not isinstance(point, list) or len(point) != 3:
+                raise ParityContractError("H endpoint position is invalid")
+            x, y, z = (_finite(value, "H endpoint") for value in point)
+            trace.append(
+                {
+                    "sequence": sample["sequence"],
+                    "phase": sample["phase"],
+                    "time_s": _finite(
+                        sample.get("time_from_start_ns"), "H endpoint time"
+                    )
+                    / 1_000_000_000.0,
+                    "tip_x_board_mm": x,
+                    "tip_y_board_mm": y,
+                    "compression_mm": max(0.0, rest_z - z),
+                }
+            )
+        if any(
+            trace[index]["time_s"] <= trace[index - 1]["time_s"]
+            for index in range(1, len(trace))
+        ):
+            raise ParityContractError("H endpoint time is not increasing")
+        contact = trace[1]
+        safe_center = all(
+            abs(contact[key] - center[index]) <= half[index] - margin
+            for index, key in enumerate(("tip_x_board_mm", "tip_y_board_mm"))
+        )
+        compression = contact["compression_mm"]
+        released = trace[0]["compression_mm"] <= release and trace[2][
+            "compression_mm"
+        ] <= release
+        activated = compression >= activation
+        within_travel = compression <= travel
+        velocity = compression / (contact["time_s"] - trace[0]["time_s"])
+        estimated_force = stiffness * compression + damping * max(velocity, 0.0)
+        accepted = safe_center and released and activated and within_travel
+        results.append(
+            {
+                "action_index": action,
+                "status": "ACCEPTED" if accepted else "BLOCKED_KEY_MECHANICS",
+                "accepted": accepted,
+                "resolved_key": "H" if safe_center and compression > 0.0 else None,
+                "activation_count": 1 if activated else 0,
+                "maximum_compression_mm": compression,
+                "final_compression_mm": trace[2]["compression_mm"],
+                "maximum_estimated_force_n": estimated_force,
+                "safe_center": safe_center,
+                "within_travel": within_travel,
+                "complete_release": released,
+                "trace": trace,
+            }
+        )
+    return results
+
+
+def _candidate_motion_metrics(
+    request: dict[str, Any], ik_receipt: dict[str, Any]
+) -> dict[str, float | int]:
+    samples = request.get("samples")
+    joints = ik_receipt.get("joint_results")
+    if (
+        not isinstance(samples, list)
+        or not isinstance(joints, list)
+        or len(samples) != len(joints)
+        or len(samples) < 3
+    ):
+        raise ParityContractError("candidate motion sample coverage changed")
+    times = [
+        _finite(sample.get("time_from_start_ns"), "candidate sample time")
+        / 1_000_000_000.0
+        for sample in samples
+    ]
+    if any(times[index] <= times[index - 1] for index in range(1, len(times))):
+        raise ParityContractError("candidate sample time is not increasing")
+    vectors = []
+    cartesian = []
+    for sample, joint in zip(samples, joints, strict=True):
+        if joint.get("waypoint_sequence") != sample.get("sequence"):
+            raise ParityContractError("candidate waypoint sequence changed")
+        positions = joint.get("solution_arm_joint_positions_rad")
+        point = sample.get("expected_tool_tip_board_mm")
+        if not isinstance(positions, dict) or not isinstance(point, list) or len(point) != 3:
+            raise ParityContractError("candidate motion vector is invalid")
+        vectors.append([_finite(positions[name], name) for name in ARM_JOINT_ORDER])
+        cartesian.append([_finite(value, "Cartesian point") for value in point])
+
+    velocities: list[list[float]] = []
+    total_joint_travel = 0.0
+    sum_squared_joint_delta = 0.0
+    cartesian_path = 0.0
+    for index in range(1, len(samples)):
+        dt = times[index] - times[index - 1]
+        delta = [
+            vectors[index][axis] - vectors[index - 1][axis]
+            for axis in range(len(ARM_JOINT_ORDER))
+        ]
+        velocities.append([value / dt for value in delta])
+        total_joint_travel += sum(abs(value) for value in delta)
+        sum_squared_joint_delta += sum(value * value for value in delta)
+        cartesian_path += math.dist(cartesian[index - 1], cartesian[index])
+    accelerations = []
+    for index in range(1, len(velocities)):
+        dt = (times[index + 1] - times[index - 1]) / 2.0
+        accelerations.extend(
+            abs((velocities[index][axis] - velocities[index - 1][axis]) / dt)
+            for axis in range(len(ARM_JOINT_ORDER))
+        )
+    metrics = ik_receipt.get("metrics")
+    if not isinstance(metrics, dict):
+        raise ParityContractError("candidate IK metrics are absent")
+    return {
+        "sample_count": len(samples),
+        "duration_s": times[-1] - times[0],
+        "cartesian_path_length_mm": cartesian_path,
+        "total_absolute_joint_travel_rad": total_joint_travel,
+        "sum_squared_joint_delta_rad2": sum_squared_joint_delta,
+        "maximum_commanded_joint_velocity_rad_s": max(
+            abs(value) for row in velocities for value in row
+        ),
+        "maximum_commanded_joint_acceleration_rad_s2": max(accelerations),
+        "maximum_adjacent_joint_delta_rad": _finite(
+            metrics.get("maximum_adjacent_joint_delta_rad"), "maximum joint delta"
+        ),
+        "maximum_position_error_mm": _finite(
+            metrics.get("maximum_position_error_mm"), "maximum position error"
+        ),
+        "minimum_normalized_arm_joint_margin": _finite(
+            metrics.get("minimum_normalized_arm_joint_margin"), "minimum joint margin"
+        ),
+    }
+
+
+def select_key_mechanics_learning_baseline(
+    fixed_result: dict[str, Any],
+    fixed_receipts: list[dict[str, Any]],
+    cartesian_requests: list[dict[str, Any]],
+    ik_receipts: list[dict[str, Any]],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Select one zero-authority baseline from complete ARM-205 evidence."""
+
+    fixed_hash = _verify_digest(fixed_result, "result_sha256", "fixed-base result")
+    _require_zero_authority(fixed_result, "fixed-base result")
+    if (
+        fixed_result.get("schema") != FIXED_BASE_RESULT_SCHEMA
+        or fixed_result.get("status")
+        != "FIXED_BASE_REPLAY_COMPLETE_NO_PHYSICAL_SOLID_BLOCKERS"
+        or fixed_result.get("fixed_base_root_invariant_passed_for_all_candidates")
+        is not True
+        or fixed_result.get("zero_physical_solid_blockers_for_all_candidates")
+        is not True
+        or fixed_result.get("next_action")
+        != "COMPARE_KEY_MECHANICS_AND_SELECT_LEARNING_BASELINE"
+    ):
+        raise ParityContractError("fixed-base result is not eligible for selection")
+    profile_hash = _verify_digest(
+        mechanics_profile, "profile_sha256", "key mechanics profile"
+    )
+    if mechanics_profile.get("schema") != KEY_MECHANICS_PROFILE_SCHEMA:
+        raise ParityContractError("key mechanics profile schema changed")
+    authority = mechanics_profile.get("authority")
+    if not isinstance(authority, dict) or not authority or not all(
+        value is False for value in authority.values()
+    ):
+        raise ParityContractError("key mechanics profile authority changed")
+
+    retained = fixed_result.get("retained_results")
+    if not isinstance(retained, list) or len(retained) != 2:
+        raise ParityContractError("fixed-base candidate coverage changed")
+    expected = {item.get("candidate_id"): item for item in retained}
+    if None in expected or len(expected) != len(retained):
+        raise ParityContractError("fixed-base candidate ids changed")
+
+    receipt_by_hash = {}
+    for receipt in fixed_receipts:
+        receipt_hash = _verify_digest(receipt, "receipt_sha256", "v5 receipt")
+        _require_zero_authority(receipt, "v5 receipt")
+        if receipt.get("schema") != FIXED_BASE_RECEIPT_SCHEMA:
+            raise ParityContractError("v5 receipt schema changed")
+        receipt_by_hash[receipt_hash] = receipt
+    request_by_candidate = {}
+    for request in cartesian_requests:
+        request_hash = _verify_digest(request, "request_sha256", "Cartesian request")
+        _require_zero_authority(request, "Cartesian request")
+        candidate_id = request.get("route_shape_candidate_id")
+        if (
+            request.get("schema") != CARTESIAN_REQUEST_SCHEMA
+            or request.get("status") != "READY_FOR_IK_QUALIFICATION"
+            or request.get("route_shape_materialized") is not True
+            or request.get("joint_positions_included") is not False
+            or candidate_id in request_by_candidate
+        ):
+            raise ParityContractError("Cartesian candidate boundary changed")
+        request_by_candidate[candidate_id] = (request_hash, request)
+    ik_by_candidate = {}
+    for receipt in ik_receipts:
+        receipt_hash = _verify_digest(receipt, "receipt_sha256", "IK receipt")
+        _require_zero_authority(receipt, "IK receipt")
+        candidate_id = receipt.get("route_shape_candidate_id")
+        if (
+            receipt.get("schema") != IK_RECEIPT_SCHEMA
+            or receipt.get("status") != "READY_FOR_COLLISION_QUALIFICATION"
+            or receipt.get("ik_all_samples_accepted") is not True
+            or candidate_id in ik_by_candidate
+        ):
+            raise ParityContractError("IK candidate boundary changed")
+        ik_by_candidate[candidate_id] = (receipt_hash, receipt)
+    if set(expected) != set(request_by_candidate) or set(expected) != set(ik_by_candidate):
+        raise ParityContractError("learning-baseline candidate coverage changed")
+
+    candidates = []
+    mechanics_signatures = []
+    for candidate_id in sorted(expected):
+        retained_row = expected[candidate_id]
+        v5_hash = retained_row.get("v5_receipt_sha256")
+        v5 = receipt_by_hash.get(v5_hash)
+        request_hash, request = request_by_candidate[candidate_id]
+        ik_hash, ik = ik_by_candidate[candidate_id]
+        if (
+            v5 is None
+            or v5.get("source_bindings", {}).get("ik_receipt_sha256") != ik_hash
+            or ik.get("source_request_sha256") != request_hash
+            or request.get("route_shape_candidate") != ik.get("route_shape_candidate")
+            or retained_row.get("physical_solid_blocker_pair_count") != 0
+            or retained_row.get("planning_envelope_blocker_pair_count") != 0
+            or retained_row.get("unreviewed_blocker_pair_count") != 0
+            or v5.get("root_pose_invariant", {}).get("status") != "PASS"
+        ):
+            raise ParityContractError("candidate evidence lineage changed")
+        actions = _project_h_key_actions(request, mechanics_profile)
+        mechanics_passed = all(item["accepted"] for item in actions)
+        signature = [
+            {
+                "action_index": item["action_index"],
+                "status": item["status"],
+                "resolved_key": item["resolved_key"],
+                "activation_count": item["activation_count"],
+                "maximum_compression_mm": item["maximum_compression_mm"],
+                "final_compression_mm": item["final_compression_mm"],
+            }
+            for item in actions
+        ]
+        mechanics_signatures.append(signature)
+        motion = _candidate_motion_metrics(request, ik)
+        candidates.append(
+            {
+                "candidate_id": candidate_id,
+                "route_shape_candidate": request["route_shape_candidate"],
+                "source_cartesian_request_sha256": request_hash,
+                "source_ik_receipt_sha256": ik_hash,
+                "source_fixed_base_v5_receipt_sha256": v5_hash,
+                "fixed_base_collision_passed": True,
+                "key_mechanics_passed": mechanics_passed,
+                "key_mechanics_actions": actions,
+                "motion_metrics": motion,
+                "fixed_base_metrics": {
+                    "bounded_sample_count": retained_row["bounded_sample_count"],
+                    "maximum_root_translation_delta_mm": retained_row[
+                        "maximum_root_translation_delta_mm"
+                    ],
+                    "maximum_root_orientation_delta_deg": retained_row[
+                        "maximum_root_orientation_delta_deg"
+                    ],
+                },
+            }
+        )
+    mechanics_equivalent = all(
+        signature == mechanics_signatures[0] for signature in mechanics_signatures[1:]
+    )
+    eligible = [
+        item
+        for item in candidates
+        if item["fixed_base_collision_passed"] and item["key_mechanics_passed"]
+    ]
+    if len(eligible) != len(candidates) or not mechanics_equivalent:
+        raise ParityContractError("candidate key mechanics are not selection-equivalent")
+
+    ranking_rule = [
+        "maximum_commanded_joint_acceleration_rad_s2 ASC",
+        "maximum_adjacent_joint_delta_rad ASC",
+        "total_absolute_joint_travel_rad ASC",
+        "maximum_commanded_joint_velocity_rad_s ASC",
+        "cartesian_path_length_mm ASC",
+        "maximum_position_error_mm ASC",
+        "candidate_id ASC",
+    ]
+    ranked = sorted(
+        eligible,
+        key=lambda item: (
+            item["motion_metrics"]["maximum_commanded_joint_acceleration_rad_s2"],
+            item["motion_metrics"]["maximum_adjacent_joint_delta_rad"],
+            item["motion_metrics"]["total_absolute_joint_travel_rad"],
+            item["motion_metrics"]["maximum_commanded_joint_velocity_rad_s"],
+            item["motion_metrics"]["cartesian_path_length_mm"],
+            item["motion_metrics"]["maximum_position_error_mm"],
+            item["candidate_id"],
+        ),
+    )
+    for rank, item in enumerate(ranked, start=1):
+        item["learning_baseline_rank"] = rank
+    result: dict[str, Any] = {
+        "schema": LEARNING_BASELINE_SELECTION_SCHEMA,
+        "status": "SELECTED_ZERO_AUTHORITY_SIMULATION_LEARNING_BASELINE",
+        "source_fixed_base_result_sha256": fixed_hash,
+        "source_key_mechanics_profile_sha256": profile_hash,
+        "candidate_count": len(candidates),
+        "key_mechanics_equivalent_across_candidates": mechanics_equivalent,
+        "ranking_rule": ranking_rule,
+        "ranked_candidates": ranked,
+        "selected_candidate_id": ranked[0]["candidate_id"],
+        "selected_candidate_rank": 1,
+        "selection_scope": "SIMULATION_LEARNING_BASELINE_ONLY",
+        "next_action": "RUN_DRIVE_CONTROLLED_ROBOT_H_KEY_REPLAY_FOR_SELECTED_BASELINE",
+        "continuous_collision_proven": False,
+        "native_robot_key_contact_proven": False,
+        "installed_collision_qualified": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "key_mechanics_projection_uses_synthetic_bounded_priors",
+            "ranking_uses_commanded_kinematics_not_drive_or_contact_dynamics",
+            "fixed_base_replay_is_discrete_not_continuous_clearance",
+            "selection_grants_no_hardware_motion_contact_or_release_authority",
+        ],
+    }
+    result["selection_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def _capture_records(capture: dict[str, Any], source: str) -> dict[tuple[Any, ...], dict[str, Any]]:
     _verify_digest(capture, "capture_sha256", f"{source} capture")
     if capture.get("schema") != CAPTURE_SCHEMA or capture.get("source") != source:
@@ -960,6 +1374,7 @@ def main() -> int:
     mode.add_argument("--build-offline-capture", action="store_true")
     mode.add_argument("--build-fixed-base-plan", action="store_true")
     mode.add_argument("--retain-fixed-base-results", action="store_true")
+    mode.add_argument("--select-learning-baseline", action="store_true")
     parser.add_argument("--selection", type=Path)
     parser.add_argument("--collision-candidate", type=Path)
     parser.add_argument("--request", action="append", type=Path, default=[])
@@ -970,10 +1385,35 @@ def main() -> int:
     parser.add_argument("--offline-capture", type=Path)
     parser.add_argument("--parity-report", type=Path)
     parser.add_argument("--fixed-base-receipt", action="append", type=Path, default=[])
+    parser.add_argument("--fixed-base-result", type=Path)
+    parser.add_argument("--cartesian-request", action="append", type=Path, default=[])
+    parser.add_argument("--ik-receipt", action="append", type=Path, default=[])
+    parser.add_argument("--layout", type=Path)
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
-    if args.retain_fixed_base_results:
+    if args.select_learning_baseline:
+        if (
+            args.fixed_base_result is None
+            or not args.fixed_base_receipt
+            or not args.cartesian_request
+            or not args.ik_receipt
+            or args.layout is None
+        ):
+            parser.error(
+                "--select-learning-baseline requires fixed-base result/receipts, "
+                "Cartesian requests, IK receipts, and layout"
+            )
+        from representative_key_mechanics import build_profile
+
+        result = select_key_mechanics_learning_baseline(
+            _load(args.fixed_base_result),
+            [_load(path) for path in args.fixed_base_receipt],
+            [_load(path) for path in args.cartesian_request],
+            [_load(path) for path in args.ik_receipt],
+            build_profile(args.layout.resolve(strict=True)),
+        )
+    elif args.retain_fixed_base_results:
         if args.plan is None or not args.fixed_base_receipt:
             parser.error(
                 "--retain-fixed-base-results requires a plan and fixed-base receipts"
