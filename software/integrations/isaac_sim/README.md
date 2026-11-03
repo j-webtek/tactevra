@@ -1630,6 +1630,37 @@ $env:OMNI_KIT_ACCEPT_EULA = 'YES'
   --status-output C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-001\status.json
 ```
 
+ARM-209 performs the trace-derived lift. It binds the exact ARM-208 plan and
+blocked receipt and reuses sequence 33 as the H no-contact anchor because the
+retained trace proves `0.9192380448754013 mm` minimum clearance and zero key
+compression there. Hover/retract sequences 34, 36, 37, and 39 reuse that
+qualified target; contact sequences 35 and 38 are bounded interpolations from
+the anchor. The retained plan is
+`C:\IsaacSim\artifacts\issue190\arm209-trace-lifted-robot-h-replay-plan-001\plan.json`
+with canonical SHA-256
+`27b72da14f3de704ec7bb191e3a11439f700c1540d725ec9bc3d8423db500f77`.
+
+The native receipt in the same directory has canonical SHA-256
+`09d0e3eeaa657747abf28abbd469551ee6c29adf8ccbcf031aa7587d94440ba5`.
+Both H actions now activate exactly once and completely release, every one of
+the 133 root checks passes, and maximum tracking error remains
+`0.037722640842437705 rad`. The result stays blocked because peak compression
+is about `3.542 mm`, roughly `0.043 mm` over the unchanged travel limit. The
+next bounded action is contact-depth refinement from this receipt; release
+timing and hover geometry are no longer the blocker.
+
+Compile the retained ARM-209 plan with:
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-trace-lifted-robot-h-replay-plan `
+  --replay-plan C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-plan-001\plan.json `
+  --source-replay-receipt C:\IsaacSim\artifacts\issue190\arm208-feedback-adapted-robot-h-replay-001\receipt.json `
+  --output C:\IsaacSim\artifacts\issue190\arm209-trace-lifted-robot-h-replay-plan-001\plan.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm209-trace-lifted-robot-h-replay-plan-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

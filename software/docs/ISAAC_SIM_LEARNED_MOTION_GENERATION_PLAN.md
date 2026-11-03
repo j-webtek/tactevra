@@ -289,6 +289,15 @@ error. The next LM1 increment must lift and requalify the H approach, hover,
 and retract targets from the retained native trace before another contact
 replay. It must not weaken mechanics limits or grant physical authority.
 
+ARM-209 supplies that lifted path. It reuses sequence 33, where the retained
+trace proves about `0.919 mm` of tool/key clearance and no compression, for the
+H hover and retract geometry. Both native H actions now activate once and
+release completely; all 133 root checks and the `0.05 rad` tracking gate pass.
+The unchanged mechanics evaluator still blocks peaks near `3.542 mm`, about
+`0.043 mm` beyond nominal travel. The next LM1 update is therefore a bounded
+contact-depth refinement from the ARM-209 receipt, not another release-timing
+or hover-geometry change.
+
 ARM-187 establishes the robot-TCP/mechanics handoff. The retained shared-emitter
 schedule terminates `H` CONTACT at the `21.0 mm` key rest plane, so it commands
 no mechanism compression. A hash-bound, zero-authority contract now rejects
@@ -602,7 +611,11 @@ ScheduleGen. Neither is a physical success rate.
    the key because the H hover/retract target itself remains in contact. The
    next learning input is now more precise: derive a lifted approach/hover/
    retract geometry from the native trace, then replay without changing
-   authority or weakening the evaluator.
+   authority or weakening the evaluator. ARM-209 completes that lift and
+   restores complete release plus one activation per action. Only a small
+   contact-depth overtravel remains, so the next bounded update must preserve
+   the lifted release geometry and refine the contact endpoint from retained
+   feedback.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.

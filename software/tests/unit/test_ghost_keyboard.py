@@ -450,6 +450,103 @@ def test_arm208_feedback_adapter_rejects_tampering_and_authority_escalation():
         mechanics.build_feedback_adapted_robot_h_replay_plan(plan,receipt,profile)
 
 
+def _arm209_trace_fixture(mechanics):
+    source,blocked,profile=_arm208_feedback_fixture(mechanics)
+    source['joint_targets'][33]['joint_position_target_rad']=[0.0,0.05,0.02,-0.08,0.0,0.0]
+    source['plan_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in source.items() if key!='plan_sha256'
+    })
+    blocked['source_plan_sha256']=source['plan_sha256']
+    blocked['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in blocked.items() if key!='receipt_sha256'
+    })
+    adapted=mechanics.build_feedback_adapted_robot_h_replay_plan(source,blocked,profile)
+    receipt={
+        'schema':mechanics.FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA,
+        'status':'BLOCKED_NATIVE_ROBOT_H_REPLAY',
+        'source_plan_sha256':adapted['plan_sha256'],
+        'state_teleports_after_initialization':0,
+        'action_assessments':[
+            {'action_index':0,'assessment':{
+                'profile_sha256':profile['profile_sha256'],
+                'disposition':'EXCESSIVE_TRAVEL','native_contact_observed':True,
+                'activation_count':1,'max_compression_mm':3.78,
+                'final_compression_mm':2.36,
+            }},
+            {'action_index':1,'assessment':{
+                'profile_sha256':profile['profile_sha256'],
+                'disposition':'EXCESSIVE_TRAVEL','native_contact_observed':True,
+                'activation_count':0,'max_compression_mm':3.75,
+                'final_compression_mm':2.37,
+            }},
+        ],
+        'native_trace':[
+            {'target_sequence':0,'key_center_z_m':0.018,
+             'tip_key_separation_m':0.010},
+            {'target_sequence':33,'key_center_z_m':0.018,
+             'tip_key_separation_m':0.00092},
+            {'target_sequence':33,'key_center_z_m':0.01799,
+             'tip_key_separation_m':0.00090},
+        ],
+        'hardware_access':False,'physical_authority':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,'gate_promotions':[],
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    return adapted,receipt,profile
+
+
+def test_arm209_trace_lift_reuses_clear_anchor_and_reduces_contact():
+    mechanics=_load_key_mechanics()
+    source,receipt,profile=_arm209_trace_fixture(mechanics)
+    plan=mechanics.build_trace_lifted_robot_h_replay_plan(source,receipt,profile)
+    assert plan['status']=='READY_FOR_ZERO_AUTHORITY_TRACE_LIFTED_NATIVE_H_REPLAY'
+    lift=plan['trace_lift_adaptation']
+    assert lift['no_contact_anchor_sequence']==33
+    assert lift['anchor_minimum_clearance_mm']==pytest.approx(0.9)
+    assert lift['anchor_maximum_compression_mm']==pytest.approx(0.01)
+    assert lift['lifted_hover_retract_sequences']==[34,36,37,39]
+    assert lift['contact_interpolation_ratio']==pytest.approx(2.7/3.78)
+    anchor=source['joint_targets'][33]['joint_position_target_rad']
+    for sequence in (34,36,37,39):
+        assert plan['joint_targets'][sequence]['joint_position_target_rad']==anchor
+    expected=[
+        anchor[index]+(2.7/3.78)*(
+            source['joint_targets'][35]['joint_position_target_rad'][index]-anchor[index]
+        )
+        for index in range(6)
+    ]
+    assert plan['joint_targets'][35]['joint_position_target_rad']==pytest.approx(expected)
+    assert plan['joint_targets'][38]['joint_position_target_rad']==pytest.approx(expected)
+    assert lift['adapted_maximum_adjacent_joint_delta_rad'] <= (
+        lift['source_maximum_adjacent_joint_delta_rad']
+    )
+    assert plan['hardware_access'] is False and plan['controller_commands']==[]
+
+
+def test_arm209_trace_lift_rejects_missing_clearance_and_authority():
+    mechanics=_load_key_mechanics()
+    source,receipt,profile=_arm209_trace_fixture(mechanics)
+    receipt['native_trace'][1]['tip_key_separation_m']=0.0001
+    receipt['native_trace'][2]['tip_key_separation_m']=0.0001
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='no-contact anchor'):
+        mechanics.build_trace_lifted_robot_h_replay_plan(source,receipt,profile)
+
+    source,receipt,profile=_arm209_trace_fixture(mechanics)
+    source['physical_authority']=True
+    source['plan_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in source.items() if key!='plan_sha256'
+    })
+    receipt['source_plan_sha256']=source['plan_sha256']
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='trace-lift boundary'):
+        mechanics.build_trace_lifted_robot_h_replay_plan(source,receipt,profile)
+
+
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')

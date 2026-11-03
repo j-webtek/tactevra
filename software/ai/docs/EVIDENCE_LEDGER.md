@@ -9275,3 +9275,31 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: derive a hash-bound lifted H approach/hover/retract path
   from the retained native trace, re-run canonical IK/collision admission as
   needed, and replay through the same native evaluator and tracking/root gates.
+
+### E-20261103-ARM-209 — trace lift restores complete H release
+
+- Stage: LM1 trace-lifted drive-controlled native robot/key replay.
+- Lane: ARM / Isaac simulation and AI/model preparation.
+- Change: binds the exact ARM-208 plan and blocked receipt, reuses sequence 33
+  as a trace-proven no-contact anchor, lifts H hover/retract sequences 34, 36,
+  37, and 39 to that anchor, and interpolates both contact targets from the
+  anchor using retained compression feedback. The source maximum adjacent
+  joint delta is not increased and all mechanics/tracking limits remain fixed.
+- Result: fail-closed native evidence with a narrowed blocker. The anchor has
+  `0.9192380448754013 mm` minimum clearance and zero observed compression.
+  Both actions now activate exactly once and finish within approximately
+  `0.000002 mm` of full release. All 133 root checks pass and maximum tracking
+  error remains `0.037722640842437705 rad`. Peak compression is still
+  `3.542671911418438 mm` and `3.5413866862654686 mm`, so the unchanged travel
+  gate correctly reports `EXCESSIVE_TRAVEL` by about `0.043 mm`.
+- External evidence: plan canonical SHA-256
+  `27b72da14f3de704ec7bb191e3a11439f700c1540d725ec9bc3d8423db500f77`;
+  native receipt canonical SHA-256
+  `09d0e3eeaa657747abf28abbd469551ee6c29adf8ccbcf031aa7587d94440ba5`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: provisional drive/key parameters, one representative key, and
+  discrete route evidence do not prove continuous clearance or physical
+  qualification. This blocked replay grants no hardware authority.
+- Next dependency: apply one bounded contact-depth refinement from the ARM-209
+  receipt while preserving the now-passing release geometry and every existing
+  mechanics, tracking, root, and zero-authority gate.

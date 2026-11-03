@@ -101,6 +101,12 @@ FEEDBACK_ADAPTED_ROBOT_H_REPLAY_PLAN_SCHEMA = (
 FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_feedback_adapted_robot_h_replay_receipt.v1"
 )
+TRACE_LIFTED_ROBOT_H_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm1_trace_lifted_robot_h_replay_plan.v1"
+)
+TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm1_trace_lifted_robot_h_replay_receipt.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -572,6 +578,199 @@ def build_feedback_adapted_robot_h_replay_plan(
     plan["execution_contract"].update({
         "feedback_adaptation_applied": True,
         "additional_release_dwell_allowed_only_at_sequences": [36, 39],
+        "maximum_joint_tracking_error_rad": 0.05,
+    })
+    plan["plan_sha256"] = _canonical_sha256(plan)
+    return plan
+
+
+def build_trace_lifted_robot_h_replay_plan(
+    source_plan: dict[str, Any],
+    source_receipt: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Lift the H hover/retract path from the retained ARM-208 native trace."""
+
+    source_plan_hash = _require_canonical_hash(
+        source_plan, "plan_sha256", "ARM-208 replay plan"
+    )
+    source_receipt_hash = _require_canonical_hash(
+        source_receipt, "receipt_sha256", "ARM-208 replay receipt"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    targets = source_plan.get("joint_targets")
+    assessments = source_receipt.get("action_assessments")
+    native_trace = source_receipt.get("native_trace")
+    if (
+        source_plan.get("schema") != FEEDBACK_ADAPTED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        or source_plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY"
+        or source_plan.get("h_contact_endpoint_sequences") != [35, 38]
+        or not isinstance(targets, list)
+        or len(targets) != source_plan.get("sample_count")
+        or source_plan.get("source_bindings", {}).get(
+            "key_mechanics_profile_sha256"
+        )
+        != profile_hash
+        or source_plan.get("feedback_adaptation", {}).get("method")
+        != "ADDITIVE_COMPRESSION_ERROR_AND_RELEASE_DWELL"
+        or source_receipt.get("schema")
+        != FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+        or source_receipt.get("status") != "BLOCKED_NATIVE_ROBOT_H_REPLAY"
+        or source_receipt.get("source_plan_sha256") != source_plan_hash
+        or source_receipt.get("state_teleports_after_initialization") != 0
+        or not isinstance(assessments, list)
+        or len(assessments) != 2
+        or not isinstance(native_trace, list)
+        or not native_trace
+        or any(source_plan.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+        or any(source_receipt.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError("ARM-208 trace-lift boundary changed")
+
+    by_action = {row.get("action_index"): row.get("assessment") for row in assessments}
+    if (
+        set(by_action) != {0, 1}
+        or any(not isinstance(row, dict) for row in by_action.values())
+        or any(row.get("profile_sha256") != profile_hash for row in by_action.values())
+        or any(row.get("disposition") != "EXCESSIVE_TRAVEL" for row in by_action.values())
+        or any(row.get("native_contact_observed") is not True for row in by_action.values())
+    ):
+        raise MechanicsContractError("ARM-208 blocked action evidence changed")
+
+    anchor_sequence = 33
+    anchor_trace = [
+        row for row in native_trace if row.get("target_sequence") == anchor_sequence
+    ]
+    if not anchor_trace:
+        raise MechanicsContractError("ARM-208 no-contact anchor trace is missing")
+    rest_key_z_m = max(
+        _finite_number(row.get("key_center_z_m"), "trace key center")
+        for row in native_trace
+    )
+    anchor_max_compression_mm = max(
+        (rest_key_z_m - _finite_number(row.get("key_center_z_m"), "anchor key center"))
+        * 1000.0
+        for row in anchor_trace
+    )
+    anchor_minimum_clearance_mm = min(
+        _finite_number(row.get("tip_key_separation_m"), "anchor separation")
+        * 1000.0
+        for row in anchor_trace
+    )
+    required_clearance_mm = 0.5
+    maximum_anchor_compression_mm = 0.05
+    if (
+        anchor_minimum_clearance_mm < required_clearance_mm
+        or anchor_max_compression_mm > maximum_anchor_compression_mm
+    ):
+        raise MechanicsContractError("ARM-208 trace does not prove a no-contact anchor")
+
+    observed_max_compression_mm = max(
+        _finite_number(row.get("max_compression_mm"), "maximum compression")
+        for row in by_action.values()
+    )
+    target_compression_mm = NATIVE_H_PRESS_DEPTH_MM
+    contact_interpolation_ratio = target_compression_mm / observed_max_compression_mm
+    if not 0.0 < contact_interpolation_ratio < 1.0:
+        raise MechanicsContractError("ARM-208 trace does not support bounded contact interpolation")
+
+    adapted_targets = json.loads(json.dumps(targets))
+    if len(adapted_targets) <= 39 or adapted_targets[anchor_sequence].get("sequence") != anchor_sequence:
+        raise MechanicsContractError("ARM-208 target ordering changed")
+    anchor_target = adapted_targets[anchor_sequence].get("joint_position_target_rad")
+    if not isinstance(anchor_target, list) or len(anchor_target) != 6:
+        raise MechanicsContractError("ARM-208 no-contact anchor target changed")
+    lifted_sequences = [34, 36, 37, 39]
+    contact_sequences = [35, 38]
+    expected_phases = {
+        34: ("HOVER", 0), 35: ("CONTACT", 0), 36: ("RETRACT", 0),
+        37: ("HOVER", 1), 38: ("CONTACT", 1), 39: ("RETRACT", 1),
+    }
+    for sequence, (phase, action_index) in expected_phases.items():
+        row = adapted_targets[sequence]
+        if (
+            row.get("sequence") != sequence
+            or row.get("phase") != phase
+            or row.get("action_index") != action_index
+            or row.get("target_id") != "H"
+        ):
+            raise MechanicsContractError("ARM-208 H phase ordering changed")
+    for sequence in lifted_sequences:
+        adapted_targets[sequence]["joint_position_target_rad"] = list(anchor_target)
+    for sequence in contact_sequences:
+        source_contact = adapted_targets[sequence].get("joint_position_target_rad")
+        if not isinstance(source_contact, list) or len(source_contact) != 6:
+            raise MechanicsContractError("ARM-208 H contact target changed")
+        adapted_targets[sequence]["joint_position_target_rad"] = [
+            float(anchor_target[index])
+            + contact_interpolation_ratio
+            * (float(source_contact[index]) - float(anchor_target[index]))
+            for index in range(6)
+        ]
+
+    def maximum_adjacent_delta(rows: list[dict[str, Any]]) -> float:
+        maximum = 0.0
+        for previous, current in zip(rows, rows[1:]):
+            left = previous.get("joint_position_target_rad")
+            right = current.get("joint_position_target_rad")
+            if not isinstance(left, list) or not isinstance(right, list) \
+                    or len(left) != 6 or len(right) != 6:
+                raise MechanicsContractError("ARM-208 joint target shape changed")
+            maximum = max(maximum, *(
+                abs(float(right[index]) - float(left[index])) for index in range(6)
+            ))
+        return maximum
+
+    source_maximum_delta = maximum_adjacent_delta(targets)
+    adapted_maximum_delta = maximum_adjacent_delta(adapted_targets)
+    if adapted_maximum_delta > source_maximum_delta + 1e-12:
+        raise MechanicsContractError("trace-lifted path exceeds source joint continuity")
+
+    plan = json.loads(json.dumps(source_plan))
+    plan.pop("plan_sha256", None)
+    plan.update({
+        "schema": TRACE_LIFTED_ROBOT_H_REPLAY_PLAN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_TRACE_LIFTED_NATIVE_H_REPLAY",
+        "joint_targets": adapted_targets,
+        "source_bindings": {
+            **source_plan["source_bindings"],
+            "arm208_replay_plan_sha256": source_plan_hash,
+            "arm208_replay_receipt_sha256": source_receipt_hash,
+        },
+        "trace_lift_adaptation": {
+            "method": "TRACE_DERIVED_NO_CONTACT_ANCHOR_AND_COMPRESSION_INTERPOLATION",
+            "no_contact_anchor_sequence": anchor_sequence,
+            "anchor_minimum_clearance_mm": anchor_minimum_clearance_mm,
+            "required_minimum_clearance_mm": required_clearance_mm,
+            "anchor_maximum_compression_mm": anchor_max_compression_mm,
+            "maximum_anchor_compression_mm": maximum_anchor_compression_mm,
+            "observed_max_compression_mm": observed_max_compression_mm,
+            "target_compression_mm": target_compression_mm,
+            "contact_interpolation_ratio": contact_interpolation_ratio,
+            "lifted_hover_retract_sequences": lifted_sequences,
+            "adapted_contact_sequences": contact_sequences,
+            "source_maximum_adjacent_joint_delta_rad": source_maximum_delta,
+            "adapted_maximum_adjacent_joint_delta_rad": adapted_maximum_delta,
+            "source_qualified_anchor_reused": True,
+            "mechanics_thresholds_changed": False,
+            "maximum_joint_tracking_error_rad": 0.05,
+        },
+        "limitations": source_plan["limitations"] + [
+            "trace_lift_is_a_single_bounded_simulation_only_update",
+            "no_contact_anchor_is_reused_from_the_canonical_qualified_route",
+        ],
+    })
+    plan["execution_contract"].update({
+        "trace_lift_adaptation_applied": True,
         "maximum_joint_tracking_error_rad": 0.05,
     })
     plan["plan_sha256"] = _canonical_sha256(plan)
@@ -6643,8 +6842,13 @@ def run_drive_controlled_robot_h_replay(
         and plan.get("status")
         == "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY"
     )
+    trace_lifted_plan = (
+        plan.get("schema") == TRACE_LIFTED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        and plan.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_TRACE_LIFTED_NATIVE_H_REPLAY"
+    )
     if (
-        not (source_plan or adapted_plan)
+        not (source_plan or adapted_plan or trace_lifted_plan)
         or plan.get("sample_count") != len(plan.get("joint_targets", []))
         or plan.get("h_contact_endpoint_sequences") != [35, 38]
         or bindings.get("key_mechanics_profile_sha256") != profile["profile_sha256"]
@@ -6687,6 +6891,21 @@ def run_drive_controlled_robot_h_replay(
             )
         ):
             raise MechanicsContractError("feedback adaptation boundary changed")
+    if trace_lifted_plan:
+        lift = plan.get("trace_lift_adaptation", {})
+        if (
+            lift.get("method")
+            != "TRACE_DERIVED_NO_CONTACT_ANCHOR_AND_COMPRESSION_INTERPOLATION"
+            or lift.get("no_contact_anchor_sequence") != 33
+            or lift.get("lifted_hover_retract_sequences") != [34, 36, 37, 39]
+            or lift.get("adapted_contact_sequences") != [35, 38]
+            or lift.get("source_qualified_anchor_reused") is not True
+            or lift.get("mechanics_thresholds_changed") is not False
+            or plan.get("execution_contract", {}).get(
+                "trace_lift_adaptation_applied"
+            ) is not True
+        ):
+            raise MechanicsContractError("trace-lift adaptation boundary changed")
     dt = _finite_number(drive_profile.get("physics_dt_s"), "physics dt")
     if (
         drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
@@ -6908,7 +7127,7 @@ def run_drive_controlled_robot_h_replay(
                 plan["execution_contract"].get("maximum_joint_tracking_error_rad"),
                 "maximum joint tracking error",
             )
-            if adapted_plan
+            if adapted_plan or trace_lifted_plan
             else None
         )
         passed = (
@@ -6922,9 +7141,13 @@ def run_drive_controlled_robot_h_replay(
         )
         receipt: dict[str, Any] = {
             "schema": (
-                FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                if adapted_plan
-                else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                if trace_lifted_plan
+                else (
+                    FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                    if adapted_plan
+                    else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                )
             ),
             "status": "PASS" if passed else "BLOCKED_NATIVE_ROBOT_H_REPLAY",
             "evidence_class": "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT",
@@ -6957,6 +7180,11 @@ def run_drive_controlled_robot_h_replay(
                 maximum_tracking_error_allowed
             )
             receipt["feedback_adaptation"] = plan["feedback_adaptation"]
+        if trace_lifted_plan:
+            receipt["maximum_joint_tracking_error_allowed_rad"] = (
+                maximum_tracking_error_allowed
+            )
+            receipt["trace_lift_adaptation"] = plan["trace_lift_adaptation"]
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
         output_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         status_path.write_text(json.dumps({
@@ -7167,6 +7395,11 @@ def main() -> int:
         help="adapt ARM-207 H depth and release dwell from its retained native trace",
     )
     parser.add_argument(
+        "--build-trace-lifted-robot-h-replay-plan",
+        action="store_true",
+        help="lift ARM-208 H hover/retract geometry from its retained native trace",
+    )
+    parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
         action="store_true",
         help="execute the strict ARM-207 plan in native Isaac physics",
@@ -7206,6 +7439,7 @@ def main() -> int:
             and not args.retain_route_shape_native_results
             and not args.build_drive_controlled_robot_h_replay_plan
             and not args.build_feedback_adapted_robot_h_replay_plan
+            and not args.build_trace_lifted_robot_h_replay_plan
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -7233,6 +7467,7 @@ def main() -> int:
             and not args.retain_route_shape_native_results
             and not args.build_drive_controlled_robot_h_replay_plan
             and not args.build_feedback_adapted_robot_h_replay_plan
+            and not args.build_trace_lifted_robot_h_replay_plan
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -7243,6 +7478,7 @@ def main() -> int:
             not args.localize_collision_blockers
             and not args.build_drive_controlled_robot_h_replay_plan
             and not args.build_feedback_adapted_robot_h_replay_plan
+            and not args.build_trace_lifted_robot_h_replay_plan
             and args.cartesian_request is not None
             and (
                 args.native_h_probe
@@ -7266,6 +7502,16 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.build_trace_lifted_robot_h_replay_plan:
+            if args.replay_plan is None or args.source_replay_receipt is None:
+                raise MechanicsContractError(
+                    "ARM-209 planning requires --replay-plan and --source-replay-receipt"
+                )
+            result = build_trace_lifted_robot_h_replay_plan(
+                json.loads(args.replay_plan.resolve(strict=True).read_bytes()),
+                json.loads(args.source_replay_receipt.resolve(strict=True).read_bytes()),
+                build_profile(args.layout.resolve(strict=True)),
             )
         elif args.build_feedback_adapted_robot_h_replay_plan:
             if args.replay_plan is None or args.source_replay_receipt is None:
