@@ -1513,10 +1513,46 @@ Retained external ARM-205 evidence:
   canonical SHA-256
   `c968eda779c07a16efe38172b828dff270c84f20b8790b15962a5d8743ff395d`.
 
-The retained next action is to compare key-mechanics behavior for the two
-fixed-base candidates and select a simulation-learning baseline. That later
-selection remains zero-authority and separate from continuous-clearance and
-physical-contact qualification.
+ARM-206 performs that comparison without treating commanded kinematics as
+drive/contact evidence. Both candidates reproduce the two governed centered
+`H` actions at `2.7 mm` compression, complete release, and one activation per
+action under the existing synthetic mechanics profile. Their projected key
+outcomes are therefore equivalent. The fixed ranking then compares commanded
+joint acceleration, adjacent-joint delta, total joint travel, velocity,
+Cartesian path length, and IK error.
+
+`route-shape-3261d2d2f56ade9a` (`DIRECT_LINEAR/90`) is selected as the
+zero-authority simulation-learning baseline. Relative to `Y_THEN_X/70`, it
+retains lower maximum commanded acceleration (`2.775694` versus `4.529937
+rad/s^2`), lower maximum adjacent-joint delta (`0.072975` versus `0.118004
+rad`), lower total joint travel (`9.962121` versus `11.551166 rad`), and a
+shorter Cartesian path (`870.360394` versus `889.377367 mm`). Its slightly
+higher maximum commanded velocity and IK error remain explicit. The external
+selection is retained at
+`C:\IsaacSim\artifacts\issue190\arm206-key-mechanics-learning-baseline-001\selection.json`,
+canonical SHA-256
+`36f5c7bdaaee9541ec2132f497285abcf3fd88b0722f91a9a4a4619dc063c050`.
+
+Reproduce the comparison without starting Isaac or touching hardware:
+
+```powershell
+$root = 'C:\IsaacSim\artifacts\issue190'
+python software\integrations\isaac_sim\collision_geometry_parity.py `
+  --select-learning-baseline `
+  --fixed-base-result "$root\arm205-fixed-base-collision-replay-001\result.json" `
+  --fixed-base-receipt "$root\arm205-fixed-base-collision-replay-001\route-shape-3261d2d2f56ade9a\receipt.json" `
+  --fixed-base-receipt "$root\arm205-fixed-base-collision-replay-001\route-shape-89d6b94237805cfe\receipt.json" `
+  --cartesian-request "$root\arm201-route-shape-materialization-001\route-shape-3261d2d2f56ade9a\request.json" `
+  --cartesian-request "$root\arm201-route-shape-materialization-001\route-shape-89d6b94237805cfe\request.json" `
+  --ik-receipt "$root\arm201-route-shape-materialization-001\route-shape-3261d2d2f56ade9a\ik_receipt.json" `
+  --ik-receipt "$root\arm201-route-shape-materialization-001\route-shape-89d6b94237805cfe\ik_receipt.json" `
+  --layout software\config\nominal_target_profiles.json `
+  --output "$root\arm206-key-mechanics-learning-baseline-001\selection.json"
+```
+
+The next bounded action is a drive-controlled native robot-to-`H` replay for
+the selected baseline. ARM-206 does not prove native contact, continuous
+clearance, installed collision qualification, or physical authority.
 
 ### Native H-key contact replay
 

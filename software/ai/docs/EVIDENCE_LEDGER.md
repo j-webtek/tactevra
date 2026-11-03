@@ -9165,3 +9165,60 @@ rewriting history. New entries must use a unique evidence ID.
   is installed or granted.
 - Next dependency: preserve this outcome and design a new, independently
   governed route/placement correction before any further native execution.
+
+### E-20261103-ARM-204 — native/portable discrepancy is robot-root drift
+
+- Stage: LM1 collision-geometry parity diagnosis.
+- Lane: ARM / Isaac simulation.
+- Result: matched static-workcell primitives and coherent sample-dependent
+  robot offsets isolate the v4 blocker result to native robot-root Z drift,
+  not route geometry. The moving-base v4 conclusions are not accepted for
+  candidate comparison.
+- External evidence: parity report canonical SHA-256
+  `089d3f633d9103f7f7ae668f940e99f730b3d1450b89d5e1087869174aadf51e`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Next dependency: fixed-base replay with a root invariant at admission and
+  every sample.
+
+### E-20261103-ARM-205 — fixed-base replay clears discrete physical blockers
+
+- Stage: LM1 corrected fixed-base collision replay.
+- Lane: ARM / Isaac simulation.
+- Result: both retained candidates complete under an authored world fixed
+  joint. All 337 root observations pass; maximum translation and orientation
+  deltas are `0.006403 mm` and `0.055953 degree`. Both candidates retain zero
+  physical-solid, planning-envelope, and unreviewed blocker pairs; five pairs
+  per candidate are policy-excluded.
+- External evidence: retained result canonical SHA-256
+  `c968eda779c07a16efe38172b828dff270c84f20b8790b15962a5d8743ff395d`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: discrete replay is not continuous clearance, and no native key
+  contact or installed collision qualification is claimed.
+- Next dependency: compare governed key mechanics and select one learning
+  baseline.
+
+### E-20261103-ARM-206 — key-equivalent candidates yield one learning baseline
+
+- Stage: LM1 zero-authority key-mechanics comparison and baseline selection.
+- Lane: ARM / Isaac simulation and AI/model preparation.
+- Change: binds the ARM-205 result and both v5 receipts to the exact Cartesian
+  requests, canonical IK receipts, and representative-key profile. Each
+  candidate must reproduce both centered `H` actions as accepted `2.7 mm`
+  presses with complete release before ranking is allowed.
+- Result: key-mechanics projections are equivalent. The deterministic ranking
+  selects `route-shape-3261d2d2f56ade9a` (`DIRECT_LINEAR/90`). It retains lower
+  maximum commanded acceleration (`2.775694` versus `4.529937 rad/s^2`),
+  adjacent-joint delta (`0.072975` versus `0.118004 rad`), total joint travel
+  (`9.962121` versus `11.551166 rad`), and Cartesian path length (`870.360394`
+  versus `889.377367 mm`).
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm206-key-mechanics-learning-baseline-001\selection.json`,
+  canonical SHA-256
+  `36f5c7bdaaee9541ec2132f497285abcf3fd88b0722f91a9a4a4619dc063c050`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: mechanics are synthetic bounded priors; ranking uses commanded
+  kinematics rather than drive/contact dynamics; continuous clearance and
+  installed collision qualification remain open.
+- Next dependency: drive the selected route through native robot-to-`H`
+  contact physics and retain tracking, activation, release, and collision
+  evidence before any dataset-generation claim.
