@@ -1308,6 +1308,46 @@ Its next dependency is a separately planned, source-bound full-link route-shape
 campaign; repeating this coarse placement/TCP grid is not justified by the
 retained evidence.
 
+ARM-200 fixes that route-shape campaign before any new candidate is screened.
+The plan binds the exact ARM-199 search plan, its retained
+`NO_NATIVE_IMPROVEMENT_RETAINED` selection, and the exact ARM-198 Cartesian
+route. It preserves the selected control placement/TCP, physical board and
+keyboard solids, collision-pair policy, station predicate, toolchain identity,
+all 14 non-transit endpoints, sample count, and timing.
+
+The campaign contains nine candidates: the exact direct/70 mm control plus the
+remaining combinations of `DIRECT_LINEAR`, `X_THEN_Y`, and `Y_THEN_X` XY
+corridors at `70/90/110 mm`. Variants use deterministic arc-length piecewise
+linear resampling with symmetric 25% Z ramps over the existing 119 TRANSIT
+sequences. Endpoint blockers are ranked separately and cannot be waived by a
+transit improvement. No more than four deterministically ranked candidates may
+enter native Isaac replay.
+
+The retained plan is
+`C:\IsaacSim\artifacts\issue190\arm200-route-shape-campaign-plan-001\plan.json`.
+Its canonical plan SHA-256 is
+`f759191e9bed351c0e374bf034526aa46a85196b641e1c13590c62a99fec2ac6`
+and its file SHA-256 is
+`07ae8eadfdab85d4bca0c5979847e5650278b917f491c28f4f65d36698cdd884`.
+
+Reproduce the plan with:
+
+```powershell
+$artifactDir = 'C:\IsaacSim\artifacts\issue190\arm200-route-shape-campaign-plan-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --plan-route-shape-campaign `
+  --placement-tcp-search-plan C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-search-plan-001\plan.json `
+  --placement-tcp-native-selection C:\IsaacSim\artifacts\issue190\arm199-placement-tcp-native-selection-001\selection.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\arm198-transit-route-variant-001\request.json `
+  --output "$artifactDir\plan.json" `
+  --status-output "$artifactDir\status.json"
+```
+
+This is a zero-authority plan, not a route result. Candidate materialization,
+fresh canonical IK, exact full-link collision screening, native replay, and
+separate continuous-clearance qualification remain required.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

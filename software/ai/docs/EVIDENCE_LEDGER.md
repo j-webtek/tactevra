@@ -9024,3 +9024,33 @@ rewriting history. New entries must use a unique evidence ID.
   collision proof, and all native candidates remain blocked.
 - Next dependency: plan a separately hash-bound full-link route-shape campaign
   that preserves the physical solids and endpoint qualification boundary.
+
+### E-20261103-ARM-200 — full-link route-shape campaign is fixed before screening
+
+- Stage: LM1 zero-authority route-shape planning.
+- Lane: ARM / Isaac simulation.
+- Change: added a fail-closed planner that binds the exact ARM-199 search plan,
+  its retained negative native selection, and the exact ARM-198 Cartesian
+  route. It predeclares one exact control plus eight direct/orthogonal XY
+  corridor variants at 70/90/110 mm before seeing any new candidate result.
+- Preserved boundary: selected placement/TCP, all physical solids, collision
+  pair policy, station predicate, toolchain, 133 samples, timing, and all 14
+  non-transit endpoints remain unchanged. The 119 TRANSIT samples are the only
+  route-shape domain, and endpoint blockers must be scored separately.
+- Native bound: complete rejection recording is mandatory and at most four
+  deterministically ranked candidates may enter native Isaac replay.
+- External evidence:
+  `C:\IsaacSim\artifacts\issue190\arm200-route-shape-campaign-plan-001`.
+  Canonical plan SHA-256:
+  `f759191e9bed351c0e374bf034526aa46a85196b641e1c13590c62a99fec2ac6`.
+  File SHA-256:
+  `07ae8eadfdab85d4bca0c5979847e5650278b917f491c28f4f65d36698cdd884`.
+- Hardware writes: 0.
+- Physical movements: 0.
+- Gate promotions: 0.
+- Limitations: this is a plan, not a screened or native route result; discrete
+  screening cannot establish continuous clearance; unchanged endpoint blockers
+  cannot be waived by a transit improvement.
+- Next dependency: deterministically materialize all nine routes, execute fresh
+  canonical IK and exact full-link collision scoring, retain every rejection,
+  and replay only the predeclared shortlist in native Isaac.

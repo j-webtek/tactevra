@@ -542,10 +542,15 @@ ScheduleGen. Neither is a physical success rate.
    at all 179 control samples; both alternatives were worse, adding an eighth
    blocker while overlapping at all 188 or 189 samples. The retained result is
    `NO_NATIVE_IMPROVEMENT_RETAINED`, so coarse placement/TCP sensitivity is not
-   the next correction. Plan a separately hash-bound full-link route-shape
-   campaign through the same native collision boundary. Preserve endpoint
-   qualification as a separate objective; installed continuous geometry remains
-   a separate dependency.
+   the next correction. ARM-200 now fixes the separately hash-bound full-link
+   route-shape campaign before screening: one exact control plus eight
+   predeclared direct/orthogonal XY corridor variants at bounded 70/90/110 mm
+   heights. It preserves all 14 non-transit endpoints, physical solids,
+   placement/TCP, timing, and policy/toolchain bindings, and limits native
+   replay to four deterministic finalists. Next, materialize and screen all
+   nine candidates through canonical IK and exact full-link collision scoring,
+   retaining transit and endpoint blockers separately. Installed continuous
+   geometry remains a separate dependency.
 4. **LM1 robot/key replay:** after collision qualification, bind the
    drive-controlled robot TCP to the same native `H` mechanism and evaluator.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.
