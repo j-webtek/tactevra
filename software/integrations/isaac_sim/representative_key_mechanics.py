@@ -122,6 +122,9 @@ REPRESENTATIVE_KEY_ADAPTATION_CAMPAIGN_SCHEMA = (
 REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm2_representative_key_park_route_campaign.v1"
 )
+REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_ik_campaign.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -1549,6 +1552,300 @@ def build_representative_key_park_route_campaign(
             "fresh_target_specific_ik_is_required",
             "fresh_collision_fixed_root_and_native_contact_qualification_are_required",
             "no_multi_key_dataset_or_physical_execution_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def qualify_representative_key_park_routes_ik(
+    route_campaign: dict[str, Any],
+    h_source_request: dict[str, Any],
+    source_bundle: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+    *,
+    workspace: Path,
+) -> dict[str, Any]:
+    """Run fresh canonical IK for every ARM-213 target route."""
+
+    campaign_hash = _require_canonical_hash(
+        route_campaign, "campaign_sha256", "ARM-213 route campaign"
+    )
+    request_hash = _require_canonical_hash(
+        h_source_request, "request_sha256", "H Cartesian source request"
+    )
+    bundle_hash = _require_canonical_hash(
+        source_bundle, "bundle_sha256", "canonical IK source bundle"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    if (
+        route_campaign.get("schema") != REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA
+        or route_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION"
+        or route_campaign.get("source_bindings", {}).get(
+            "h_cartesian_source_request_sha256"
+        ) != request_hash
+        or h_source_request.get("profile_sha256") != profile_hash
+        or route_campaign.get("pending_targets")
+        != ["1", "SPACE", "ENTER", "PERIOD"]
+    ):
+        raise MechanicsContractError("representative IK campaign lineage changed")
+    for document, label in (
+        (route_campaign, "ARM-213 route campaign"),
+        (h_source_request, "H Cartesian source request"),
+        (source_bundle, "canonical IK source bundle"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    try:
+        from rocell.application._pinned_model import load_pinned_urdf
+        from rocell.application.context import load_simulation_context
+        from rocell.application.trajectory_simulation import (
+            CartesianRouteWaypoint,
+            TrajectorySimulationPolicy,
+            evaluate_joint_trajectory_solution,
+        )
+        from rocell.application.typing_trajectory_ik_screen_v1 import (
+            canonicalize_typing_ik_evidence_v1,
+        )
+        from rocell.geometry import JointPosition, Point3Mm
+        from rocell.kinematics import (
+            ARM_JOINT_NAMES,
+            BoardToolTipTarget,
+            IkOptions,
+            RoArmM3NumericalIk,
+        )
+        from rocell.motion import MotionPhase
+        from rocell.simulation.virtual_profile import load_virtual_commissioning_profile
+    except ImportError as exc:
+        raise MechanicsContractError(
+            "canonical IK runtime is unavailable; include software/src on PYTHONPATH"
+        ) from exc
+
+    root = workspace.resolve(strict=True)
+    context = load_simulation_context(
+        root, root / "software/config/system_manifest.json"
+    )
+    virtual_profile = load_virtual_commissioning_profile(context)
+    if (
+        virtual_profile.source_sha256
+        != source_bundle.get("source", {}).get("virtual_profile_sha256")
+    ):
+        raise MechanicsContractError("virtual commissioning profile lineage changed")
+    scenario = context.scenario
+    model = load_pinned_urdf(scenario.model_path, scenario.model_sha256).model
+    source_samples = source_bundle.get("samples")
+    initial_seed = (
+        source_samples[0].get("joint_positions_rad")
+        if isinstance(source_samples, list) and source_samples
+        else None
+    )
+    if not isinstance(initial_seed, dict) or tuple(initial_seed) != ARM_JOINT_NAMES:
+        raise MechanicsContractError("source bundle lacks the canonical initial joint seed")
+    initial_seed = {
+        name: _finite_number(initial_seed[name], f"initial seed {name}")
+        for name in ARM_JOINT_NAMES
+    }
+    bounds = scenario.controller_joint_intersection_rad
+    policy = TrajectorySimulationPolicy(
+        maximum_cartesian_step_mm=30.0,
+        maximum_joint_step_rad=0.35,
+        minimum_normalized_arm_joint_margin=0.01,
+        maximum_refinement_rounds=0,
+        maximum_waypoints_per_round=256,
+        maximum_total_ik_solves=256,
+        maximum_route_targets=2,
+    )
+
+    results = []
+    requests = route_campaign.get("requests")
+    if not isinstance(requests, list) or len(requests) != 4:
+        raise MechanicsContractError("representative route request inventory changed")
+    for target_id, request in zip(
+        route_campaign["pending_targets"], requests, strict=True
+    ):
+        claimed_request_hash = _require_canonical_hash(
+            request, "request_sha256", f"ARM-213 {target_id} request"
+        )
+        samples = request.get("samples")
+        if (
+            request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+            or request.get("status") != "READY_FOR_TARGET_SPECIFIC_IK_QUALIFICATION"
+            or request.get("key_id") != target_id
+            or request.get("source_joint_positions_reused") is not False
+            or request.get("joint_positions_included") is not False
+            or request.get("hardware_access") is not False
+            or request.get("hardware_writes") != 0
+            or request.get("physical_movements") != 0
+            or request.get("controller_commands") != []
+            or not isinstance(samples, list)
+            or len(samples) != 40
+            or any(sample.get("sequence") != sequence for sequence, sample in enumerate(samples))
+        ):
+            raise MechanicsContractError(f"ARM-213 {target_id} request changed")
+
+        previous = dict(initial_seed)
+        solver = RoArmM3NumericalIk(
+            model=model,
+            board_T_world=virtual_profile.study_input.board_T_vendor_world,
+            hand_tcp_to_tip_z_mm=-float(
+                virtual_profile.study_input.keyboard_tool_length_mm
+            ),
+            fixed_gripper_position=scenario.fixed_gripper_position,
+            ready_arm_joint_positions={
+                name: JointPosition.radians(value)
+                for name, value in previous.items()
+            },
+            gripper_bounds_rad=scenario.controller_gripper_intersection_rad,
+            options=IkOptions(
+                max_attempts=scenario.ik_policy.max_attempts,
+                max_iterations_per_attempt=scenario.ik_policy.max_iterations_per_attempt,
+            ),
+            joint_bounds_rad=bounds,
+        )
+        joint_results = []
+        previous_point = None
+        for sample in samples:
+            coordinates = sample.get("expected_tool_tip_board_mm")
+            if not isinstance(coordinates, list) or len(coordinates) != 3:
+                raise MechanicsContractError(
+                    f"ARM-213 {target_id} request lacks a Cartesian point"
+                )
+            point = Point3Mm(
+                "board",
+                *[
+                    _finite_number(value, "representative route coordinate")
+                    for value in coordinates
+                ],
+            )
+            distance = (
+                0.0
+                if previous_point is None
+                else math.dist(
+                    (previous_point.x, previous_point.y, previous_point.z),
+                    (point.x, point.y, point.z),
+                )
+            )
+            waypoint = CartesianRouteWaypoint(
+                sequence=sample["sequence"],
+                phase=MotionPhase(sample["phase"]),
+                action_index=sample["action_index"],
+                semantic_target=sample["target_id"],
+                point_board=point,
+                distance_from_previous_mm=distance,
+                source_geometric_sequence=sample["sequence"],
+                source_check_id=claimed_request_hash,
+                source_path_check_passed=True,
+                inherited_collision_ids=(),
+                phase_endpoint=sample["phase_endpoint"],
+            )
+            solved = solver.solve(
+                BoardToolTipTarget(point),
+                seed_joint_positions=({
+                    name: JointPosition.radians(value)
+                    for name, value in previous.items()
+                },),
+            )
+            evaluated = evaluate_joint_trajectory_solution(
+                waypoint, solved, solver, bounds, previous, policy
+            )
+            canonical = canonicalize_typing_ik_evidence_v1(evaluated.to_dict())
+            joint_results.append(canonical)
+            if not evaluated.accepted:
+                break
+            previous = dict(evaluated.solution_arm_joint_positions_rad)
+            previous_point = point
+
+        all_accepted = len(joint_results) == len(samples) and all(
+            row["accepted"] for row in joint_results
+        )
+        accepted = [row for row in joint_results if row["accepted"]]
+        target_result = {
+            "target_id": target_id,
+            "source_request_sha256": claimed_request_hash,
+            "status": (
+                "READY_FOR_COLLISION_AND_FIXED_ROOT_QUALIFICATION"
+                if all_accepted
+                else "BLOCKED_CANONICAL_IK_OR_CONTINUITY"
+            ),
+            "sample_count": len(samples),
+            "evaluated_sample_count": len(joint_results),
+            "ik_all_samples_accepted": all_accepted,
+            "first_rejected_sequence": next(
+                (
+                    row.get("sequence")
+                    for row in joint_results
+                    if not row.get("accepted")
+                ),
+                None,
+            ),
+            "joint_results": joint_results,
+            "metrics": {
+                "maximum_position_error_mm": max(
+                    (row["position_error_mm"] for row in accepted), default=None
+                ),
+                "minimum_normalized_arm_joint_margin": min(
+                    (
+                        row["minimum_normalized_arm_joint_margin"]
+                        for row in accepted
+                    ),
+                    default=None,
+                ),
+                "maximum_adjacent_joint_delta_rad": max(
+                    (
+                        row["maximum_joint_delta_rad"]
+                        for row in accepted
+                    ),
+                    default=None,
+                ),
+            },
+        }
+        target_result["result_sha256"] = _canonical_sha256(target_result)
+        results.append(target_result)
+
+    all_accepted = all(result["ik_all_samples_accepted"] for result in results)
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA,
+        "status": (
+            "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION"
+            if all_accepted
+            else "BLOCKED_REPRESENTATIVE_IK_OR_CONTINUITY"
+        ),
+        "source_bindings": {
+            "arm213_route_campaign_sha256": campaign_hash,
+            "h_cartesian_source_request_sha256": request_hash,
+            "canonical_ik_source_bundle_sha256": bundle_hash,
+            "key_mechanics_profile_sha256": profile_hash,
+            "virtual_profile_sha256": virtual_profile.source_sha256,
+            "kinematic_model_sha256": scenario.model_sha256,
+        },
+        "initial_seed_source": "SOURCE_BUNDLE_SAMPLE_0_ONLY",
+        "source_h_joint_solutions_reused": False,
+        "policy": policy.to_dict(),
+        "target_count": len(results),
+        "accepted_target_count": sum(
+            result["ik_all_samples_accepted"] for result in results
+        ),
+        "results": results,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "ik_and_discrete_continuity_do_not_prove_collision_clearance",
+            "collision_fixed_root_and_native_contact_qualification_remain_separate",
+            "source_bundle_contributes_only_initial_seed_and_model_lineage",
+            "no_hardware_motion_or_physical_keyboard_authority",
         ],
     }
     campaign["campaign_sha256"] = _canonical_sha256(campaign)
@@ -8227,6 +8524,12 @@ def main() -> int:
         help="connect ARM-212 target skills to the selected zero-authority park route",
     )
     parser.add_argument("--representative-key-adaptation-campaign", type=Path)
+    parser.add_argument(
+        "--qualify-representative-key-park-routes-ik",
+        action="store_true",
+        help="run fresh canonical IK over every ARM-213 representative route",
+    )
+    parser.add_argument("--representative-key-park-route-campaign", type=Path)
     parser.add_argument("--governed-demonstration", type=Path)
     parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
@@ -8272,6 +8575,7 @@ def main() -> int:
             and not args.build_contact_refined_robot_h_replay_plan
             and not args.build_representative_key_adaptation_campaign
             and not args.build_representative_key_park_route_campaign
+            and not args.qualify_representative_key_park_routes_ik
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -8336,6 +8640,28 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.qualify_representative_key_park_routes_ik:
+            required = (
+                args.representative_key_park_route_campaign,
+                args.cartesian_request,
+                args.ik_source_bundle,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-214 requires --representative-key-park-route-campaign, "
+                    "--cartesian-request, and --ik-source-bundle"
+                )
+            result = qualify_representative_key_park_routes_ik(
+                json.loads(
+                    args.representative_key_park_route_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
+                build_profile(args.layout.resolve(strict=True)),
+                workspace=args.workspace,
             )
         elif args.build_representative_key_park_route_campaign:
             required = (
@@ -9247,6 +9573,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION",
             "READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION",
+            "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

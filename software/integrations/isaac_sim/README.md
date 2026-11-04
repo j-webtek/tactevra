@@ -1758,6 +1758,30 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output C:\IsaacSim\artifacts\issue190\arm213-representative-key-park-route-campaign-001\status.json
 ```
 
+ARM-214 runs fresh canonical IK and continuity qualification over every ARM-213
+request. All 40 samples pass for all four targets. The campaign is retained at
+`C:\IsaacSim\artifacts\issue190\arm214-representative-key-ik-campaign-001\campaign.json`
+with canonical SHA-256
+`81402e904b62e8edcaf82b5d68611e0212f3a4f43988c845824395b4e57e0e3d`.
+The governed source bundle contributes only its initial joint seed and model
+lineage; no H route joint solution is reused. Maximum Cartesian errors are
+`0.055104`, `0.047272`, `0.076015`, and `0.061618 mm` for `1`, `SPACE`,
+`ENTER`, and `PERIOD`, respectively. Collision/fixed-root and native contact
+qualification remain separate required gates.
+
+```powershell
+$env:PYTHONPATH = 'software/src'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --qualify-representative-key-park-routes-ik `
+  --representative-key-park-route-campaign C:\IsaacSim\artifacts\issue190\arm213-representative-key-park-route-campaign-001\campaign.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --ik-source-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --workspace C:\icq7 `
+  --output C:\IsaacSim\artifacts\issue190\arm214-representative-key-ik-campaign-001\campaign.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm214-representative-key-ik-campaign-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
