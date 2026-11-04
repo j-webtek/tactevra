@@ -1717,6 +1717,26 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output C:\IsaacSim\artifacts\issue190\arm211-governed-h-demonstration-001\status.json
 ```
 
+ARM-212 compiles that seed into four target-specific Cartesian skill requests.
+The external campaign at
+`C:\IsaacSim\artifacts\issue190\arm212-representative-key-adaptation-campaign-001\campaign.json`
+has canonical SHA-256
+`dc25b88b31c200f5e2b9105473a4fe36c820927f41fb7cecddbbe02c3ee16afe`.
+Each request uses its governed board-frame key center, the transferred `2.7 mm`
+contact policy, and the lifted anchor semantics. No H joint angle is copied.
+All four requests still require a park-to-skill route connection, fresh IK,
+collision/fixed-root qualification, and native mechanics replay.
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-representative-key-adaptation-campaign `
+  --governed-demonstration C:\IsaacSim\artifacts\issue190\arm211-governed-h-demonstration-001\demonstration.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --output C:\IsaacSim\artifacts\issue190\arm212-representative-key-adaptation-campaign-001\campaign.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm212-representative-key-adaptation-campaign-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

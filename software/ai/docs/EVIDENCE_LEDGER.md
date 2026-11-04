@@ -9355,3 +9355,17 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: derive target-specific Cartesian adaptation requests for
   the four pending keys, then run each through the existing qualification
   chain before LM3 dataset smoke.
+
+### E-20261103-ARM-212 — representative-key Cartesian adaptation campaign
+
+- Stage: LM2 target-specific Cartesian adaptation.
+- Result: four hash-bound requests for `1`, `SPACE`, `ENTER`, and `PERIOD`,
+  each centered from governed board geometry with `2.7 mm` contact depth and
+  no source joint-position reuse.
+- External evidence: campaign SHA-256
+  `dc25b88b31c200f5e2b9105473a4fe36c820927f41fb7cecddbbe02c3ee16afe`
+  at `C:\IsaacSim\artifacts\issue190\arm212-representative-key-adaptation-campaign-001\campaign.json`.
+- Authority: zero hardware writes, physical movements, controller commands,
+  and gate promotions.
+- Next dependency: connect each skill to a governed route and run fresh IK,
+  collision/fixed-root, and native key-mechanics qualification.

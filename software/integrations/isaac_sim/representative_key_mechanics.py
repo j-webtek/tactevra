@@ -116,6 +116,9 @@ CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
 GOVERNED_H_DEMONSTRATION_SCHEMA = (
     "tactevra.isaac_lm2_governed_h_demonstration.v1"
 )
+REPRESENTATIVE_KEY_ADAPTATION_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_cartesian_adaptation_campaign.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -1200,6 +1203,148 @@ def retain_governed_h_demonstration(
     }
     demonstration["demonstration_sha256"] = _canonical_sha256(demonstration)
     return demonstration
+
+
+def build_representative_key_adaptation_campaign(
+    demonstration: dict[str, Any],
+    source_request: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Translate the governed H skill into per-target Cartesian requests."""
+
+    demonstration_hash = _require_canonical_hash(
+        demonstration, "demonstration_sha256", "ARM-211 demonstration"
+    )
+    request_hash = _require_canonical_hash(
+        source_request, "request_sha256", "H Cartesian source request"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    transfer = demonstration.get("transfer_contract", {})
+    skill = demonstration.get("source_skill", {})
+    if (
+        demonstration.get("schema") != GOVERNED_H_DEMONSTRATION_SCHEMA
+        or demonstration.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION"
+        or demonstration.get("source_bindings", {}).get(
+            "key_mechanics_profile_sha256"
+        ) != profile_hash
+        or transfer.get("joint_space_reuse_for_other_keys_permitted") is not False
+        or transfer.get("pending_targets") != ["1", "SPACE", "ENTER", "PERIOD"]
+        or skill.get("target_id") != "H"
+        or skill.get("skill_window_sequences") != list(range(33, 40))
+        or source_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or source_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or source_request.get("key_id") != "H"
+        or source_request.get("profile_sha256") != profile_hash
+        or source_request.get("source_joint_positions_reused") is not False
+    ):
+        raise MechanicsContractError("representative adaptation source boundary changed")
+
+    joint_samples = skill.get("joint_space_samples")
+    cartesian_samples = source_request.get("samples")
+    if (
+        not isinstance(joint_samples, list)
+        or len(joint_samples) != 7
+        or not isinstance(cartesian_samples, list)
+        or len(cartesian_samples) <= 39
+    ):
+        raise MechanicsContractError("representative adaptation skill window changed")
+    by_sequence = {row.get("sequence"): row for row in cartesian_samples}
+    anchor = by_sequence.get(33, {}).get("expected_tool_tip_board_mm")
+    h_center = mechanics_profile["regions"]["H"]["center_board_xy_mm"]
+    if not isinstance(anchor, list) or len(anchor) != 3:
+        raise MechanicsContractError("H Cartesian anchor is missing")
+    anchor = [_finite_number(value, "H anchor coordinate") for value in anchor]
+    anchor_offset = [anchor[0] - h_center[0], anchor[1] - h_center[1]]
+    anchor_joint = joint_samples[0].get("joint_position_target_rad")
+    if any(
+        row.get("sequence") != sequence
+        or row.get("target_id") != "H"
+        or (
+            sequence in (34, 36, 37, 39)
+            and row.get("joint_position_target_rad") != anchor_joint
+        )
+        for sequence, row in zip(range(33, 40), joint_samples)
+    ):
+        raise MechanicsContractError("lifted H skill semantics changed")
+
+    first_time = _finite_number(joint_samples[0].get("time_from_start_ns"), "skill time")
+    target_plane = mechanics_profile["target_plane_z_board_mm"]
+    pending = transfer["pending_targets"]
+    requests = []
+    for target_id in pending:
+        region = mechanics_profile["regions"][target_id]
+        center = region["center_board_xy_mm"]
+        samples = []
+        for local_sequence, source in enumerate(joint_samples):
+            phase = source["phase"]
+            if phase == "CONTACT":
+                point = [center[0], center[1], target_plane - NATIVE_H_PRESS_DEPTH_MM]
+            else:
+                point = [
+                    center[0] + anchor_offset[0],
+                    center[1] + anchor_offset[1],
+                    anchor[2],
+                ]
+            samples.append({
+                "sequence": local_sequence,
+                "source_sequence": source["sequence"],
+                "time_from_start_ns": int(
+                    _finite_number(source["time_from_start_ns"], "skill time") - first_time
+                ),
+                "phase": phase,
+                "phase_endpoint": source["phase_endpoint"],
+                "action_index": source["action_index"],
+                "target_id": target_id,
+                "expected_tool_tip_board_mm": point,
+            })
+        request = {
+            "target_id": target_id,
+            "target_center_board_xy_mm": list(center),
+            "target_half_extent_mm": list(region["half_extent_mm"]),
+            "sample_count": len(samples),
+            "samples": samples,
+            "source_joint_positions_reused": False,
+            "route_connection_required": True,
+            "ik_qualification_required": True,
+            "collision_and_fixed_root_qualification_required": True,
+            "native_key_mechanics_qualification_required": True,
+        }
+        request["request_sha256"] = _canonical_sha256(request)
+        requests.append(request)
+
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_ADAPTATION_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION",
+        "source_bindings": {
+            "arm211_demonstration_sha256": demonstration_hash,
+            "h_cartesian_source_request_sha256": request_hash,
+            "key_mechanics_profile_sha256": profile_hash,
+        },
+        "coordinate_frame": "board",
+        "source_target_id": "H",
+        "pending_targets": list(pending),
+        "contact_depth_mm": NATIVE_H_PRESS_DEPTH_MM,
+        "lifted_anchor_offset_from_key_center_xy_mm": anchor_offset,
+        "requests": requests,
+        "multi_key_dataset_ready": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "requests_are_cartesian_skill_inputs_not_ik_solutions",
+            "park_to_skill_route_connections_are_not_yet_generated",
+            "collision_fixed_root_and_native_contact_are_not_yet_qualified",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
 
 
 def canonical_active_rotation_row_major_from_gf_rows(
@@ -7864,6 +8009,12 @@ def main() -> int:
         help="retain the passing ARM-210 H skill as a zero-authority LM2 adaptation seed",
     )
     parser.add_argument(
+        "--build-representative-key-adaptation-campaign",
+        action="store_true",
+        help="compile ARM-211 into target-specific zero-authority Cartesian requests",
+    )
+    parser.add_argument("--governed-demonstration", type=Path)
+    parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
         action="store_true",
         help="execute the strict ARM-207 plan in native Isaac physics",
@@ -7905,6 +8056,7 @@ def main() -> int:
             and not args.build_feedback_adapted_robot_h_replay_plan
             and not args.build_trace_lifted_robot_h_replay_plan
             and not args.build_contact_refined_robot_h_replay_plan
+            and not args.build_representative_key_adaptation_campaign
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -7969,6 +8121,16 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.build_representative_key_adaptation_campaign:
+            if args.governed_demonstration is None or args.cartesian_request is None:
+                raise MechanicsContractError(
+                    "ARM-212 requires --governed-demonstration and --cartesian-request"
+                )
+            result = build_representative_key_adaptation_campaign(
+                json.loads(args.governed_demonstration.resolve(strict=True).read_bytes()),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                build_profile(args.layout.resolve(strict=True)),
             )
         elif args.retain_governed_h_demonstration:
             if args.replay_plan is None or args.source_replay_receipt is None:
@@ -8790,7 +8952,10 @@ def main() -> int:
                                             "manifest_sha256",
                                             result.get(
                                                 "selection_sha256",
-                                                result.get("demonstration_sha256"),
+                                                result.get(
+                                                    "demonstration_sha256",
+                                                    result.get("campaign_sha256"),
+                                                ),
                                             ),
                                         ),
                                     ),
@@ -8823,6 +8988,8 @@ def main() -> int:
             status_record["selection_sha256"] = result["selection_sha256"]
         if "demonstration_sha256" in result:
             status_record["demonstration_sha256"] = result["demonstration_sha256"]
+        if "campaign_sha256" in result:
+            status_record["campaign_sha256"] = result["campaign_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -8841,6 +9008,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY",
             "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY",
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION",
+            "READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
