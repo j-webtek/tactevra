@@ -140,6 +140,30 @@ REPRESENTATIVE_KEY_NATIVE_COLLISION_MANIFEST_SCHEMA = (
 REPRESENTATIVE_KEY_NATIVE_COLLISION_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm2_representative_key_native_collision_campaign.v1"
 )
+REPRESENTATIVE_KEY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_mechanics_replay_plan.v1"
+)
+REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_mechanics_receipt.v1"
+)
+REPRESENTATIVE_KEY_NATIVE_MECHANICS_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_mechanics_campaign.v1"
+)
+REPRESENTATIVE_KEY_NATIVE_MECHANICS_RESULT_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_mechanics_result_campaign.v1"
+)
+REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_feedback_adapted_mechanics_replay_plan.v1"
+)
+REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_feedback_adapted_mechanics_campaign.v1"
+)
+REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_contact_refined_mechanics_replay_plan.v1"
+)
+REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_contact_refined_mechanics_campaign.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -2492,6 +2516,980 @@ def aggregate_representative_key_native_collision_campaign(
         "hardware_writes": 0,
         "physical_movements": 0,
         "gate_promotions": [],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def build_representative_key_native_mechanics_campaign(
+    route_campaign: dict[str, Any],
+    ik_campaign: dict[str, Any],
+    native_collision_manifest: dict[str, Any],
+    native_collision_receipts: list[dict[str, Any]],
+    mechanics_profile: dict[str, Any],
+    virtual_profile_bytes: bytes,
+    drive_profile: dict[str, Any],
+    drive_profile_bytes: bytes,
+    robot_usd_bytes: bytes,
+    import_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Compile four collision-admitted routes into native mechanics replays."""
+
+    route_hash = _require_canonical_hash(
+        route_campaign, "campaign_sha256", "ARM-213 route campaign"
+    )
+    ik_hash = _require_canonical_hash(
+        ik_campaign, "campaign_sha256", "ARM-214 IK campaign"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    import_hash = _require_canonical_hash(
+        import_receipt, "receipt_sha256", "robot import receipt"
+    )
+    native_collision = aggregate_representative_key_native_collision_campaign(
+        native_collision_manifest, native_collision_receipts
+    )
+    native_hash = native_collision["campaign_sha256"]
+    manifest_hash = native_collision["source_manifest_sha256"]
+    virtual_hash = hashlib.sha256(virtual_profile_bytes).hexdigest()
+    drive_hash = hashlib.sha256(drive_profile_bytes).hexdigest()
+    robot_hash = hashlib.sha256(robot_usd_bytes).hexdigest()
+    bindings = native_collision_manifest.get("source_bindings", {})
+    ik_bindings = ik_campaign.get("source_bindings", {})
+    if (
+        route_campaign.get("schema") != REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA
+        or route_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION"
+        or route_campaign.get("pending_targets") != ["1", "SPACE", "ENTER", "PERIOD"]
+        or ik_campaign.get("schema") != REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA
+        or ik_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION"
+        or ik_campaign.get("accepted_target_count") != 4
+        or ik_campaign.get("source_h_joint_solutions_reused") is not False
+        or ik_bindings.get("arm213_route_campaign_sha256") != route_hash
+        or ik_bindings.get("key_mechanics_profile_sha256") != profile_hash
+        or ik_bindings.get("virtual_profile_sha256") != virtual_hash
+        or bindings.get("arm213_route_campaign_sha256") != route_hash
+        or bindings.get("arm214_ik_campaign_sha256") != ik_hash
+        or native_collision.get("status")
+        != "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN"
+        or native_collision.get("fixed_root_invariant_passed") is not True
+    ):
+        raise MechanicsContractError("representative native mechanics lineage changed")
+    for document, label in (
+        (route_campaign, "ARM-213 route campaign"),
+        (ik_campaign, "ARM-214 IK campaign"),
+        (native_collision, "ARM-216 native collision campaign"),
+        (mechanics_profile, "key-mechanics profile"),
+    ):
+        if (
+            document.get("hardware_access", False) is not False
+            or document.get("physical_authority", False) is not False
+            or document.get("hardware_writes", 0) != 0
+            or document.get("physical_movements", 0) != 0
+            or document.get("controller_commands", []) != []
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    try:
+        virtual_profile = json.loads(virtual_profile_bytes)
+    except (TypeError, ValueError) as exc:
+        raise MechanicsContractError("virtual profile is not valid JSON") from exc
+    placement = virtual_profile.get("study_input", {}).get(
+        "physical_placement_input", {}
+    )
+    placement_matrix = placement.get("matrix_row_major")
+    if not isinstance(placement_matrix, list) or len(placement_matrix) != 16:
+        raise MechanicsContractError("virtual profile lacks governed robot placement")
+    placement_matrix = [
+        _finite_number(value, "robot placement matrix value")
+        for value in placement_matrix
+    ]
+
+    external = import_receipt.get("external_files")
+    normalization = import_receipt.get("articulation_root_normalization", {})
+    joint_order = [
+        "base_link_to_link1",
+        "link1_to_link2",
+        "link2_to_link3",
+        "link3_to_link4",
+        "link4_to_link5",
+        "link5_to_gripper_link",
+    ]
+    if (
+        mechanics_profile.get("schema") != PROFILE_SCHEMA
+        or drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
+        or drive_profile.get("status") != "PROVISIONAL_SIMULATION_ONLY"
+        or drive_profile.get("simulation_only") is not True
+        or drive_profile.get("physical_authority") is not False
+        or import_receipt.get("schema") != "tactevra.isaac_sim_urdf_import.v1"
+        or not isinstance(external, list)
+        or len(external) != 1
+        or external[0].get("sha256") != robot_hash
+        or external[0].get("size_bytes") != len(robot_usd_bytes)
+        or normalization.get("expected_live_dof_order") != joint_order
+    ):
+        raise MechanicsContractError("native mechanics asset boundary changed")
+
+    requests = route_campaign.get("requests")
+    results = ik_campaign.get("results")
+    manifest_entries = native_collision_manifest.get("entries")
+    collision_results = native_collision.get("results")
+    if not all(
+        isinstance(rows, list) and len(rows) == 4
+        for rows in (requests, results, manifest_entries, collision_results)
+    ):
+        raise MechanicsContractError("representative native mechanics coverage changed")
+
+    plans = []
+    for expected, request, result, entry, collision_result in zip(
+        ("1", "SPACE", "ENTER", "PERIOD"),
+        requests,
+        results,
+        manifest_entries,
+        collision_results,
+        strict=True,
+    ):
+        request_hash = _require_canonical_hash(
+            request, "request_sha256", f"ARM-213 {expected} request"
+        )
+        result_hash = _require_canonical_hash(
+            result, "result_sha256", f"ARM-214 {expected} result"
+        )
+        samples = request.get("samples")
+        joint_results = result.get("joint_results")
+        region = mechanics_profile.get("regions", {}).get(expected)
+        if (
+            request.get("key_id") != expected
+            or result.get("target_id") != expected
+            or result.get("source_request_sha256") != request_hash
+            or result.get("status")
+            != "READY_FOR_COLLISION_AND_FIXED_ROOT_QUALIFICATION"
+            or result.get("ik_all_samples_accepted") is not True
+            or entry.get("target_id") != expected
+            or collision_result.get("target_id") != expected
+            or collision_result.get("source_arm215_target_plan_sha256")
+            != entry.get("source_arm215_target_plan_sha256")
+            or collision_result.get("root_pose_invariant_status") != "PASS"
+            or not isinstance(samples, list)
+            or not isinstance(joint_results, list)
+            or len(samples) != 40
+            or len(joint_results) != len(samples)
+            or not isinstance(region, dict)
+        ):
+            raise MechanicsContractError(
+                f"representative {expected} mechanics source changed"
+            )
+        targets = []
+        contact_endpoints = []
+        action_indices = set()
+        for sequence, (sample, joint_result) in enumerate(
+            zip(samples, joint_results, strict=True)
+        ):
+            if (
+                sample.get("sequence") != sequence
+                or joint_result.get("waypoint_sequence") != sequence
+                or joint_result.get("accepted") is not True
+                or joint_result.get("phase") != sample.get("phase")
+                or joint_result.get("action_index") != sample.get("action_index")
+                or joint_result.get("semantic_target") != sample.get("target_id")
+            ):
+                raise MechanicsContractError(
+                    f"representative {expected} joint schedule changed"
+                )
+            solution = joint_result.get("solution_arm_joint_positions_rad", {})
+            targets.append({
+                "sequence": sequence,
+                "time_from_start_ns": int(_finite_number(
+                    sample.get("time_from_start_ns"), "target time"
+                )),
+                "phase": sample.get("phase"),
+                "target_id": expected,
+                "action_index": sample.get("action_index"),
+                "phase_endpoint": sample.get("phase_endpoint"),
+                "joint_position_target_rad": [
+                    *[
+                        _finite_number(solution.get(name), f"joint target {name}")
+                        for name in joint_order[:5]
+                    ],
+                    0.0,
+                ],
+            })
+            if sample.get("action_index") is not None:
+                action_indices.add(sample.get("action_index"))
+            if sample.get("phase") == "CONTACT" and sample.get("phase_endpoint") is True:
+                contact_endpoints.append(sequence)
+        if len(contact_endpoints) != 2 or action_indices != {0, 1}:
+            raise MechanicsContractError(
+                f"representative {expected} action semantics changed"
+            )
+        plan = {
+            "schema": REPRESENTATIVE_KEY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA,
+            "status": "READY_FOR_ZERO_AUTHORITY_NATIVE_KEY_MECHANICS_REPLAY",
+            "target_id": expected,
+            "joint_order": joint_order,
+            "sample_count": len(targets),
+            "contact_endpoint_sequences": contact_endpoints,
+            "joint_targets": targets,
+            "target_region": {
+                "center_board_xy_mm": list(region["center_board_xy_mm"]),
+                "half_extent_mm": list(region["half_extent_mm"]),
+            },
+            "robot_placement_matrix_row_major": placement_matrix,
+            "source_bindings": {
+                "arm213_route_campaign_sha256": route_hash,
+                "arm213_request_sha256": request_hash,
+                "arm214_ik_campaign_sha256": ik_hash,
+                "arm214_result_sha256": result_hash,
+                "arm216_manifest_sha256": manifest_hash,
+                "arm216_campaign_sha256": native_hash,
+                "arm216_receipt_sha256": collision_result["receipt_sha256"],
+                "key_mechanics_profile_sha256": profile_hash,
+                "virtual_profile_sha256": virtual_hash,
+                "drive_profile_file_sha256": drive_hash,
+                "robot_import_receipt_sha256": import_hash,
+                "robot_usd_sha256": robot_hash,
+            },
+            "execution_contract": {
+                "initial_joint_state_placement_count": 1,
+                "post_initialization_state_teleports": 0,
+                "subsequent_joint_commands": "ARTICULATION_POSITION_TARGETS_ONLY",
+                "key_motion_source": "NATIVE_CONTACT_ONLY",
+                "root_pose_invariant_required_after_every_sample": True,
+                "maximum_joint_tracking_error_rad": 0.05,
+            },
+            "limitations": [
+                "simulation_only_provisional_drive_and_mechanics_parameters",
+                "source_collision_admission_is_discrete_not_continuous_clearance",
+                "no_hardware_motion_timing_torque_or_safety_authority",
+            ],
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "gate_promotions": [],
+        }
+        plan["plan_sha256"] = _canonical_sha256(plan)
+        plans.append(plan)
+
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_NATIVE_MECHANICS_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY",
+        "source_bindings": {
+            "arm213_route_campaign_sha256": route_hash,
+            "arm214_ik_campaign_sha256": ik_hash,
+            "arm216_manifest_sha256": manifest_hash,
+            "arm216_campaign_sha256": native_hash,
+            "key_mechanics_profile_sha256": profile_hash,
+            "virtual_profile_sha256": virtual_hash,
+            "drive_profile_file_sha256": drive_hash,
+            "robot_import_receipt_sha256": import_hash,
+            "robot_usd_sha256": robot_hash,
+        },
+        "target_count": len(plans),
+        "plans": plans,
+        "native_mechanics_replay_executed": False,
+        "multi_key_dataset_ready": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "compiled_campaign_does_not_execute_native_key_mechanics",
+            "mechanics_and_drive_values_remain_provisional_simulation_priors",
+            "collision_admission_is_discrete_not_continuous_clearance",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def aggregate_representative_key_native_mechanics_campaign(
+    replay_campaign: dict[str, Any],
+    receipts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Verify four native mechanics receipts as one simulation dataset."""
+
+    campaign_hash = _require_canonical_hash(
+        replay_campaign,
+        "campaign_sha256",
+        "representative native mechanics replay campaign",
+    )
+    plans = replay_campaign.get("plans")
+    expected_targets = ["1", "SPACE", "ENTER", "PERIOD"]
+    source_campaign = (
+        replay_campaign.get("schema")
+        == REPRESENTATIVE_KEY_NATIVE_MECHANICS_CAMPAIGN_SCHEMA
+        and replay_campaign.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY"
+    )
+    adapted_campaign = (
+        replay_campaign.get("schema")
+        == REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_CAMPAIGN_SCHEMA
+        and replay_campaign.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_MECHANICS_REPLAY"
+    )
+    refined_campaign = (
+        replay_campaign.get("schema")
+        == REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA
+        and replay_campaign.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_MECHANICS_REPLAY"
+    )
+    if (
+        not (source_campaign or adapted_campaign or refined_campaign)
+        or replay_campaign.get("target_count") != 4
+        or not isinstance(plans, list)
+        or len(plans) != 4
+        or [plan.get("target_id") for plan in plans] != expected_targets
+        or replay_campaign.get("native_mechanics_replay_executed") is not False
+        or replay_campaign.get("hardware_access") is not False
+        or replay_campaign.get("physical_authority") is not False
+        or replay_campaign.get("hardware_writes") != 0
+        or replay_campaign.get("physical_movements") != 0
+        or replay_campaign.get("controller_commands") != []
+    ):
+        raise MechanicsContractError("native mechanics replay campaign boundary changed")
+    receipt_by_target = {receipt.get("target_id"): receipt for receipt in receipts}
+    if (
+        len(receipts) != 4
+        or len(receipt_by_target) != 4
+        or list(receipt_by_target) != expected_targets
+    ):
+        raise MechanicsContractError("native mechanics receipt coverage changed")
+
+    results = []
+    total_samples = 0
+    total_native_trace_samples = 0
+    for plan in plans:
+        target_id = plan["target_id"]
+        plan_hash = _require_canonical_hash(
+            plan, "plan_sha256", f"representative {target_id} mechanics plan"
+        )
+        receipt = receipt_by_target[target_id]
+        receipt_hash = _require_canonical_hash(
+            receipt,
+            "receipt_sha256",
+            f"representative {target_id} mechanics receipt",
+        )
+        assessments = receipt.get("action_assessments")
+        root = receipt.get("root_pose_invariant")
+        tracking_limit = plan.get("execution_contract", {}).get(
+            "maximum_joint_tracking_error_rad"
+        )
+        if (
+            receipt.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+            or receipt.get("status") != "PASS"
+            or receipt.get("source_plan_sha256") != plan_hash
+            or receipt.get("source_arm216_receipt_sha256")
+            != plan.get("source_bindings", {}).get("arm216_receipt_sha256")
+            or receipt.get("state_teleports_after_initialization") != 0
+            or not isinstance(assessments, list)
+            or len(assessments) != 2
+            or [item.get("action_index") for item in assessments] != [0, 1]
+            or any(
+                item.get("assessment", {}).get("accepted") is not True
+                or item.get("assessment", {}).get("resolved_key") != target_id
+                or item.get("assessment", {}).get("commanded_key") != target_id
+                or item.get("assessment", {}).get("native_contact_observed") is not True
+                for item in assessments
+            )
+            or not isinstance(root, dict)
+            or root.get("all_passed") is not True
+            or root.get("observation_count") != plan.get("sample_count")
+            or receipt.get("maximum_joint_tracking_error_rad") is None
+            or receipt.get("maximum_joint_tracking_error_rad") > tracking_limit
+            or receipt.get("maximum_joint_tracking_error_allowed_rad") != tracking_limit
+            or receipt.get("hardware_access") is not False
+            or receipt.get("physical_authority") is not False
+            or receipt.get("hardware_writes") != 0
+            or receipt.get("physical_movements") != 0
+            or receipt.get("controller_commands") != []
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} mechanics receipt boundary changed"
+            )
+        native_trace = receipt.get("native_trace")
+        if not isinstance(native_trace, list) or not native_trace:
+            raise MechanicsContractError(
+                f"representative {target_id} native trace is absent"
+            )
+        total_samples += plan["sample_count"]
+        total_native_trace_samples += len(native_trace)
+        results.append({
+            "target_id": target_id,
+            "plan_sha256": plan_hash,
+            "receipt_sha256": receipt_hash,
+            "action_count": 2,
+            "native_trace_sample_count": len(native_trace),
+            "maximum_joint_tracking_error_rad": receipt[
+                "maximum_joint_tracking_error_rad"
+            ],
+            "root_pose_invariant_passed": True,
+        })
+
+    result = {
+        "schema": REPRESENTATIVE_KEY_NATIVE_MECHANICS_RESULT_CAMPAIGN_SCHEMA,
+        "status": "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN",
+        "source_replay_campaign_sha256": campaign_hash,
+        "source_bindings": dict(replay_campaign["source_bindings"]),
+        "target_count": 4,
+        "accepted_action_count": 8,
+        "total_joint_target_count": total_samples,
+        "total_native_trace_sample_count": total_native_trace_samples,
+        "results": results,
+        "native_mechanics_replay_executed": True,
+        "multi_key_dataset_ready": True,
+        "dataset_scope": "ZERO_AUTHORITY_SIMULATION_LEARNING_ONLY",
+        "continuous_collision_proven": False,
+        "physical_keyboard_qualified": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "dataset_contains_provisional_simulated_mechanics_not_measurements",
+            "collision_admission_is_discrete_not_continuous_clearance",
+            "dataset_does_not_authorize_physical_motion",
+        ],
+    }
+    result["campaign_sha256"] = _canonical_sha256(result)
+    return result
+
+
+def build_feedback_adapted_representative_key_mechanics_campaign(
+    replay_campaign: dict[str, Any],
+    receipts: list[dict[str, Any]],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Turn four blocked native traces into bounded target-specific replays."""
+
+    campaign_hash = _require_canonical_hash(
+        replay_campaign,
+        "campaign_sha256",
+        "representative native mechanics replay campaign",
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    plans = replay_campaign.get("plans")
+    expected_targets = ["1", "SPACE", "ENTER", "PERIOD"]
+    if (
+        replay_campaign.get("schema")
+        != REPRESENTATIVE_KEY_NATIVE_MECHANICS_CAMPAIGN_SCHEMA
+        or replay_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY"
+        or replay_campaign.get("target_count") != 4
+        or not isinstance(plans, list)
+        or [plan.get("target_id") for plan in plans] != expected_targets
+        or replay_campaign.get("source_bindings", {}).get(
+            "key_mechanics_profile_sha256"
+        )
+        != profile_hash
+        or any(replay_campaign.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError(
+            "representative feedback adaptation campaign boundary changed"
+        )
+    receipt_by_target = {receipt.get("target_id"): receipt for receipt in receipts}
+    if (
+        len(receipts) != 4
+        or len(receipt_by_target) != 4
+        or list(receipt_by_target) != expected_targets
+    ):
+        raise MechanicsContractError(
+            "representative feedback receipt coverage changed"
+        )
+
+    release_anchor_sequence = 32
+    lifted_sequences = [33, 34, 36, 37, 39]
+    contact_sequences = [35, 38]
+    target_compression_mm = NATIVE_H_PRESS_DEPTH_MM
+    release_limit_mm = _finite_number(
+        mechanics_profile["mechanics_prior"]["release_mm"]["nominal"],
+        "release threshold",
+    )
+    adapted_plans = []
+    for source_plan in plans:
+        target_id = source_plan["target_id"]
+        source_plan_hash = _require_canonical_hash(
+            source_plan, "plan_sha256", f"representative {target_id} mechanics plan"
+        )
+        receipt = receipt_by_target[target_id]
+        receipt_hash = _require_canonical_hash(
+            receipt,
+            "receipt_sha256",
+            f"representative {target_id} mechanics receipt",
+        )
+        assessments = receipt.get("action_assessments")
+        native_trace = receipt.get("native_trace")
+        root = receipt.get("root_pose_invariant")
+        tracking_limit = source_plan.get("execution_contract", {}).get(
+            "maximum_joint_tracking_error_rad"
+        )
+        if (
+            source_plan.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+            or source_plan.get("status")
+            != "READY_FOR_ZERO_AUTHORITY_NATIVE_KEY_MECHANICS_REPLAY"
+            or source_plan.get("contact_endpoint_sequences") != contact_sequences
+            or source_plan.get("sample_count") != 40
+            or receipt.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+            or receipt.get("status")
+            != "BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY"
+            or receipt.get("source_plan_sha256") != source_plan_hash
+            or receipt.get("target_id") != target_id
+            or receipt.get("state_teleports_after_initialization") != 0
+            or not isinstance(assessments, list)
+            or len(assessments) != 2
+            or not isinstance(native_trace, list)
+            or not native_trace
+            or not isinstance(root, dict)
+            or root.get("all_passed") is not True
+            or root.get("observation_count") != 40
+            or receipt.get("maximum_joint_tracking_error_rad") is None
+            or receipt.get("maximum_joint_tracking_error_rad") > tracking_limit
+            or any(receipt.get(name) not in (False, 0, []) for name in (
+                "hardware_access", "hardware_writes", "physical_authority",
+                "physical_movements", "controller_commands", "gate_promotions",
+            ))
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} feedback boundary changed"
+            )
+        by_action = {
+            row.get("action_index"): row.get("assessment") for row in assessments
+        }
+        if (
+            set(by_action) != {0, 1}
+            or any(not isinstance(row, dict) for row in by_action.values())
+            or any(row.get("profile_sha256") != profile_hash for row in by_action.values())
+            or any(row.get("disposition") != "EXCESSIVE_TRAVEL" for row in by_action.values())
+            or any(row.get("native_contact_observed") is not True for row in by_action.values())
+            or any(row.get("resolved_key") != target_id for row in by_action.values())
+            or any(row.get("commanded_key") != target_id for row in by_action.values())
+            or by_action[0].get("activation_count") != 1
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} failure evidence changed"
+            )
+
+        anchor_trace = [
+            row for row in native_trace
+            if row.get("target_sequence") == release_anchor_sequence
+        ]
+        rest_key_z_m = max(
+            _finite_number(row.get("key_center_z_m"), "trace key center")
+            for row in native_trace
+        )
+        anchor_max_compression_mm = max(
+            (rest_key_z_m - _finite_number(row.get("key_center_z_m"), "anchor key center"))
+            * 1000.0
+            for row in anchor_trace
+        ) if anchor_trace else math.inf
+        anchor_minimum_clearance_mm = min(
+            _finite_number(row.get("tip_key_separation_m"), "anchor separation")
+            * 1000.0
+            for row in anchor_trace
+        ) if anchor_trace else -math.inf
+        if (
+            anchor_minimum_clearance_mm < 0.0
+            or anchor_max_compression_mm > release_limit_mm
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} trace lacks a released anchor"
+            )
+        observed_max_compression_mm = max(
+            _finite_number(row.get("max_compression_mm"), "maximum compression")
+            for row in by_action.values()
+        )
+        contact_ratio = target_compression_mm / observed_max_compression_mm
+        if not 0.0 < contact_ratio < 1.0:
+            raise MechanicsContractError(
+                f"representative {target_id} feedback does not support adaptation"
+            )
+
+        source_targets = source_plan.get("joint_targets")
+        if (
+            not isinstance(source_targets, list)
+            or len(source_targets) != 40
+            or source_targets[release_anchor_sequence].get("sequence")
+            != release_anchor_sequence
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} target ordering changed"
+            )
+        anchor_target = source_targets[release_anchor_sequence].get(
+            "joint_position_target_rad"
+        )
+        if not isinstance(anchor_target, list) or len(anchor_target) != 6:
+            raise MechanicsContractError(
+                f"representative {target_id} release anchor changed"
+            )
+        adapted_targets = json.loads(json.dumps(source_targets))
+        for sequence in lifted_sequences:
+            adapted_targets[sequence]["joint_position_target_rad"] = list(anchor_target)
+        for sequence in contact_sequences:
+            row = adapted_targets[sequence]
+            source_contact = row.get("joint_position_target_rad")
+            if (
+                row.get("sequence") != sequence
+                or row.get("phase") != "CONTACT"
+                or row.get("target_id") != target_id
+                or row.get("action_index") not in (0, 1)
+                or not isinstance(source_contact, list)
+                or len(source_contact) != 6
+            ):
+                raise MechanicsContractError(
+                    f"representative {target_id} contact target changed"
+                )
+            row["joint_position_target_rad"] = [
+                float(anchor_target[index])
+                + contact_ratio
+                * (float(source_contact[index]) - float(anchor_target[index]))
+                for index in range(6)
+            ]
+
+        adapted_maximum_delta = max(
+            abs(
+                float(current["joint_position_target_rad"][index])
+                - float(previous["joint_position_target_rad"][index])
+            )
+            for previous, current in zip(adapted_targets, adapted_targets[1:])
+            for index in range(6)
+        )
+        maximum_adapted_delta = 0.11
+        if adapted_maximum_delta > maximum_adapted_delta:
+            raise MechanicsContractError(
+                f"representative {target_id} adaptation exceeds joint continuity bound"
+            )
+
+        plan = json.loads(json.dumps(source_plan))
+        plan.pop("plan_sha256", None)
+        plan.update({
+            "schema": REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_REPLAY_PLAN_SCHEMA,
+            "status": "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_KEY_MECHANICS_REPLAY",
+            "joint_targets": adapted_targets,
+            "source_bindings": {
+                **source_plan["source_bindings"],
+                "arm217_source_plan_sha256": source_plan_hash,
+                "arm217_source_receipt_sha256": receipt_hash,
+            },
+            "feedback_adaptation": {
+                "method": "TRACE_RELEASE_ANCHOR_AND_COMPRESSION_INTERPOLATION",
+                "release_anchor_sequence": release_anchor_sequence,
+                "anchor_minimum_clearance_mm": anchor_minimum_clearance_mm,
+                "anchor_maximum_compression_mm": anchor_max_compression_mm,
+                "release_threshold_mm": release_limit_mm,
+                "observed_max_compression_mm": observed_max_compression_mm,
+                "target_compression_mm": target_compression_mm,
+                "contact_interpolation_ratio": contact_ratio,
+                "lifted_hover_retract_sequences": lifted_sequences,
+                "adapted_contact_sequences": contact_sequences,
+                "adapted_maximum_adjacent_joint_delta_rad": adapted_maximum_delta,
+                "maximum_adjacent_joint_delta_allowed_rad": maximum_adapted_delta,
+                "mechanics_thresholds_changed": False,
+                "target_region_changed": False,
+            },
+            "limitations": source_plan["limitations"] + [
+                "feedback_adaptation_is_one_bounded_simulation_only_update",
+                "release_anchor_and_contact_ratio_are_derived_from_native_trace",
+            ],
+        })
+        plan["execution_contract"]["feedback_adaptation_applied"] = True
+        plan["plan_sha256"] = _canonical_sha256(plan)
+        adapted_plans.append(plan)
+
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_MECHANICS_REPLAY",
+        "source_replay_campaign_sha256": campaign_hash,
+        "source_bindings": dict(replay_campaign["source_bindings"]),
+        "target_count": 4,
+        "plans": adapted_plans,
+        "native_mechanics_replay_executed": False,
+        "multi_key_dataset_ready": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "feedback_adaptation_remains_simulation_only",
+            "mechanics_thresholds_and_target_regions_are_unchanged",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def build_contact_refined_representative_key_mechanics_campaign(
+    adapted_campaign: dict[str, Any],
+    receipts: list[dict[str, Any]],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Refine only contacts still excessive after the released-path replay."""
+
+    campaign_hash = _require_canonical_hash(
+        adapted_campaign,
+        "campaign_sha256",
+        "feedback-adapted representative mechanics campaign",
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    plans = adapted_campaign.get("plans")
+    expected_targets = ["1", "SPACE", "ENTER", "PERIOD"]
+    source_is_adapted = (
+        adapted_campaign.get("schema")
+        == REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_CAMPAIGN_SCHEMA
+        and adapted_campaign.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_MECHANICS_REPLAY"
+    )
+    source_is_refined = (
+        adapted_campaign.get("schema")
+        == REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA
+        and adapted_campaign.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_MECHANICS_REPLAY"
+    )
+    if (
+        not (source_is_adapted or source_is_refined)
+        or adapted_campaign.get("source_bindings", {}).get(
+            "key_mechanics_profile_sha256"
+        )
+        != profile_hash
+        or not isinstance(plans, list)
+        or [plan.get("target_id") for plan in plans] != expected_targets
+        or any(adapted_campaign.get(name) not in (False, 0, []) for name in (
+            "hardware_access", "hardware_writes", "physical_authority",
+            "physical_movements", "controller_commands", "gate_promotions",
+        ))
+    ):
+        raise MechanicsContractError(
+            "representative contact refinement campaign boundary changed"
+        )
+    receipt_by_target = {receipt.get("target_id"): receipt for receipt in receipts}
+    if (
+        len(receipts) != 4
+        or len(receipt_by_target) != 4
+        or list(receipt_by_target) != expected_targets
+    ):
+        raise MechanicsContractError(
+            "representative contact refinement receipt coverage changed"
+        )
+
+    release_anchor_sequence = 32
+    contact_sequences = [35, 38]
+    release_limit_mm = _finite_number(
+        mechanics_profile["mechanics_prior"]["release_mm"]["nominal"],
+        "release threshold",
+    )
+    refined_plans = []
+    preserved_targets = []
+    refined_targets = []
+    for source_plan in plans:
+        target_id = source_plan["target_id"]
+        source_plan_hash = _require_canonical_hash(
+            source_plan, "plan_sha256", f"adapted {target_id} mechanics plan"
+        )
+        receipt = receipt_by_target[target_id]
+        receipt_hash = _require_canonical_hash(
+            receipt, "receipt_sha256", f"adapted {target_id} mechanics receipt"
+        )
+        assessments = receipt.get("action_assessments")
+        root = receipt.get("root_pose_invariant")
+        tracking_limit = source_plan.get("execution_contract", {}).get(
+            "maximum_joint_tracking_error_rad"
+        )
+        source_plan_is_adapted = (
+            source_plan.get("schema")
+            == REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_REPLAY_PLAN_SCHEMA
+            and source_plan.get("status")
+            == "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_KEY_MECHANICS_REPLAY"
+        )
+        source_plan_is_refined = (
+            source_plan.get("schema")
+            == REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA
+            and source_plan.get("status")
+            == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY"
+        )
+        if (
+            not (source_plan_is_adapted or source_plan_is_refined)
+            or receipt.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+            or receipt.get("source_plan_sha256") != source_plan_hash
+            or receipt.get("target_id") != target_id
+            or receipt.get("state_teleports_after_initialization") != 0
+            or not isinstance(assessments, list)
+            or len(assessments) != 2
+            or not isinstance(root, dict)
+            or root.get("all_passed") is not True
+            or root.get("observation_count") != 40
+            or receipt.get("maximum_joint_tracking_error_rad") is None
+            or receipt.get("maximum_joint_tracking_error_rad") > tracking_limit
+            or any(receipt.get(name) not in (False, 0, []) for name in (
+                "hardware_access", "hardware_writes", "physical_authority",
+                "physical_movements", "controller_commands", "gate_promotions",
+            ))
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} refinement boundary changed"
+            )
+        by_action = {
+            row.get("action_index"): row.get("assessment") for row in assessments
+        }
+        if (
+            set(by_action) != {0, 1}
+            or any(not isinstance(row, dict) for row in by_action.values())
+            or any(row.get("profile_sha256") != profile_hash for row in by_action.values())
+            or any(row.get("resolved_key") != target_id for row in by_action.values())
+            or any(row.get("commanded_key") != target_id for row in by_action.values())
+            or any(row.get("native_contact_observed") is not True for row in by_action.values())
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} refinement evidence changed"
+            )
+        if receipt.get("status") == "PASS":
+            if any(
+                row.get("accepted") is not True
+                or row.get("disposition") != "ACCEPTED"
+                for row in by_action.values()
+            ):
+                raise MechanicsContractError(
+                    f"representative {target_id} passing evidence changed"
+                )
+            refined_plans.append(json.loads(json.dumps(source_plan)))
+            preserved_targets.append(target_id)
+            continue
+        if (
+            receipt.get("status")
+            != "BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY"
+            or any(
+                row.get("disposition") not in {"ACCEPTED", "EXCESSIVE_TRAVEL"}
+                for row in by_action.values()
+            )
+            or not any(
+                row.get("disposition") == "EXCESSIVE_TRAVEL"
+                for row in by_action.values()
+            )
+            or any(row.get("activation_count") != 1 for row in by_action.values())
+            or any(
+                _finite_number(row.get("final_compression_mm"), "final compression")
+                > release_limit_mm
+                for row in by_action.values()
+            )
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} is not eligible for contact refinement"
+            )
+        observed_max_compression_mm = max(
+            _finite_number(row.get("max_compression_mm"), "maximum compression")
+            for row in by_action.values()
+        )
+        refinement_ratio = NATIVE_H_PRESS_DEPTH_MM / observed_max_compression_mm
+        if not 0.0 < refinement_ratio < 1.0:
+            raise MechanicsContractError(
+                f"representative {target_id} feedback does not support refinement"
+            )
+        source_targets = source_plan.get("joint_targets")
+        if not isinstance(source_targets, list) or len(source_targets) != 40:
+            raise MechanicsContractError(
+                f"representative {target_id} refined target schedule changed"
+            )
+        anchor_target = source_targets[release_anchor_sequence].get(
+            "joint_position_target_rad"
+        )
+        if not isinstance(anchor_target, list) or len(anchor_target) != 6:
+            raise MechanicsContractError(
+                f"representative {target_id} refinement anchor changed"
+            )
+        refined_joint_targets = json.loads(json.dumps(source_targets))
+        for sequence in contact_sequences:
+            row = refined_joint_targets[sequence]
+            source_contact = row.get("joint_position_target_rad")
+            if (
+                row.get("sequence") != sequence
+                or row.get("phase") != "CONTACT"
+                or row.get("target_id") != target_id
+                or not isinstance(source_contact, list)
+                or len(source_contact) != 6
+            ):
+                raise MechanicsContractError(
+                    f"representative {target_id} refinement contact changed"
+                )
+            row["joint_position_target_rad"] = [
+                float(anchor_target[index])
+                + refinement_ratio
+                * (float(source_contact[index]) - float(anchor_target[index]))
+                for index in range(6)
+            ]
+        plan = json.loads(json.dumps(source_plan))
+        plan.pop("plan_sha256", None)
+        plan.update({
+            "schema": REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA,
+            "status": "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY",
+            "joint_targets": refined_joint_targets,
+            "source_bindings": {
+                **source_plan["source_bindings"],
+                "arm217_prior_plan_sha256": source_plan_hash,
+                "arm217_prior_receipt_sha256": receipt_hash,
+            },
+            "contact_refinement": {
+                "method": "MULTIPLICATIVE_CONTACT_ERROR_FROM_RELEASED_ANCHOR",
+                "release_anchor_sequence": release_anchor_sequence,
+                "preserved_hover_retract_sequences": [33, 34, 36, 37, 39],
+                "refined_contact_sequences": contact_sequences,
+                "observed_max_compression_mm": observed_max_compression_mm,
+                "target_compression_mm": NATIVE_H_PRESS_DEPTH_MM,
+                "contact_refinement_ratio": refinement_ratio,
+                "mechanics_thresholds_changed": False,
+                "target_region_changed": False,
+            },
+            "limitations": source_plan["limitations"] + [
+                "contact_refinement_is_one_bounded_simulation_only_update",
+                "previously_learned_release_path_is_preserved",
+            ],
+        })
+        plan["execution_contract"]["contact_refinement_applied"] = True
+        plan["plan_sha256"] = _canonical_sha256(plan)
+        refined_plans.append(plan)
+        refined_targets.append(target_id)
+
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_MECHANICS_REPLAY",
+        "source_prior_campaign_sha256": campaign_hash,
+        "source_bindings": dict(adapted_campaign["source_bindings"]),
+        "target_count": 4,
+        "plans": refined_plans,
+        "preserved_passing_targets": preserved_targets,
+        "contact_refined_targets": refined_targets,
+        "native_mechanics_replay_executed": False,
+        "multi_key_dataset_ready": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "contact_refinement_remains_simulation_only",
+            "passing_target_plans_are_preserved_without_mutation",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
     }
     campaign["campaign_sha256"] = _canonical_sha256(campaign)
     return campaign
@@ -8384,16 +9382,20 @@ def assess_native_key_trace(
     native_samples: Iterable[dict[str, Any]],
     *,
     rest_key_z_m: float | None = None,
+    target_id: str = "H",
 ) -> dict[str, Any]:
     """Convert native key displacement into the shared mechanism-state contract."""
     rows = list(native_samples)
     if len(rows) < 2:
         raise MechanicsContractError("native trace must contain at least two samples")
+    regions = profile.get("regions", {})
+    if target_id not in regions:
+        raise MechanicsContractError(f"native trace target {target_id!r} is unavailable")
     rest_z = _finite_number(
         rows[0].get("key_center_z_m") if rest_key_z_m is None else rest_key_z_m,
         "native rest key z",
     )
-    h_center = profile["regions"]["H"]["center_board_xy_mm"]
+    target_center = regions[target_id]["center_board_xy_mm"]
     contract_trace = []
     native_contact_steps = 0
     for index, row in enumerate(rows):
@@ -8403,11 +9405,12 @@ def assess_native_key_trace(
             native_contact_steps += 1
         contract_trace.append({
             "time_s": _finite_number(row.get("time_s"), f"native sample {index} time"),
-            "tip_x_board_mm": h_center[0],
-            "tip_y_board_mm": h_center[1],
+            "tip_x_board_mm": target_center[0],
+            "tip_y_board_mm": target_center[1],
             "compression_mm": max(0.0, (rest_z - key_z) * 1000.0),
         })
     result = evaluate_trace(profile, contract_trace)
+    result["commanded_key"] = target_id
     result["native_contact_step_count"] = native_contact_steps
     result["native_contact_observed"] = native_contact_steps > 0
     result["native_trace_sample_count"] = len(rows)
@@ -8594,7 +9597,7 @@ def run_drive_controlled_robot_h_replay(
     output_path: Path,
     status_path: Path,
 ) -> dict[str, Any]:
-    """Replay the selected joint targets against the native H key in Isaac."""
+    """Replay selected joint targets against one native key in Isaac."""
 
     plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
     plan_hash = _require_canonical_hash(plan, "plan_sha256", "robot H replay plan")
@@ -8623,10 +9626,48 @@ def run_drive_controlled_robot_h_replay(
         and plan.get("status")
         == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_NATIVE_H_REPLAY"
     )
+    representative_plan = (
+        plan.get("schema") == REPRESENTATIVE_KEY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+        and plan.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_NATIVE_KEY_MECHANICS_REPLAY"
+    )
+    representative_adapted_plan = (
+        plan.get("schema")
+        == REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_REPLAY_PLAN_SCHEMA
+        and plan.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_KEY_MECHANICS_REPLAY"
+    )
+    representative_refined_plan = (
+        plan.get("schema")
+        == REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA
+        and plan.get("status")
+        == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY"
+    )
+    target_id = (
+        plan.get("target_id")
+        if representative_plan or representative_adapted_plan or representative_refined_plan
+        else "H"
+    )
+    contact_endpoint_sequences = (
+        plan.get("contact_endpoint_sequences")
+        if representative_plan or representative_adapted_plan or representative_refined_plan
+        else plan.get("h_contact_endpoint_sequences")
+    )
+    target_region = profile.get("regions", {}).get(target_id)
     if (
-        not (source_plan or adapted_plan or trace_lifted_plan or contact_refined_plan)
+        not (
+            source_plan
+            or adapted_plan
+            or trace_lifted_plan
+            or contact_refined_plan
+            or representative_plan
+            or representative_adapted_plan
+            or representative_refined_plan
+        )
         or plan.get("sample_count") != len(plan.get("joint_targets", []))
-        or plan.get("h_contact_endpoint_sequences") != [35, 38]
+        or not isinstance(contact_endpoint_sequences, list)
+        or len(contact_endpoint_sequences) != 2
+        or not isinstance(target_region, dict)
         or bindings.get("key_mechanics_profile_sha256") != profile["profile_sha256"]
         or bindings.get("drive_profile_file_sha256")
         != hashlib.sha256(drive_raw).hexdigest()
@@ -8641,6 +9682,65 @@ def run_drive_controlled_robot_h_replay(
         ))
     ):
         raise MechanicsContractError("robot H replay plan boundary changed")
+    if representative_plan or representative_adapted_plan or representative_refined_plan:
+        derived_contact_endpoints = [
+            row.get("sequence")
+            for row in plan["joint_targets"]
+            if row.get("target_id") == target_id
+            and row.get("phase") == "CONTACT"
+            and row.get("phase_endpoint") is True
+        ]
+        if (
+            target_id not in {"1", "SPACE", "ENTER", "PERIOD"}
+            or plan.get("sample_count") != 40
+            or contact_endpoint_sequences != derived_contact_endpoints
+            or plan.get("target_region") != {
+                "center_board_xy_mm": list(target_region["center_board_xy_mm"]),
+                "half_extent_mm": list(target_region["half_extent_mm"]),
+            }
+            or plan.get("execution_contract", {}).get(
+                "maximum_joint_tracking_error_rad"
+            ) != 0.05
+        ):
+            raise MechanicsContractError(
+                "representative native mechanics replay boundary changed"
+            )
+    if representative_adapted_plan:
+        adaptation = plan.get("feedback_adaptation", {})
+        if (
+            adaptation.get("method")
+            != "TRACE_RELEASE_ANCHOR_AND_COMPRESSION_INTERPOLATION"
+            or adaptation.get("release_anchor_sequence") != 32
+            or adaptation.get("lifted_hover_retract_sequences")
+            != [33, 34, 36, 37, 39]
+            or adaptation.get("adapted_contact_sequences") != [35, 38]
+            or adaptation.get("mechanics_thresholds_changed") is not False
+            or adaptation.get("target_region_changed") is not False
+            or plan.get("execution_contract", {}).get(
+                "feedback_adaptation_applied"
+            ) is not True
+        ):
+            raise MechanicsContractError(
+                "representative feedback adaptation boundary changed"
+            )
+    if representative_refined_plan:
+        refinement = plan.get("contact_refinement", {})
+        if (
+            refinement.get("method")
+            != "MULTIPLICATIVE_CONTACT_ERROR_FROM_RELEASED_ANCHOR"
+            or refinement.get("release_anchor_sequence") != 32
+            or refinement.get("preserved_hover_retract_sequences")
+            != [33, 34, 36, 37, 39]
+            or refinement.get("refined_contact_sequences") != [35, 38]
+            or refinement.get("mechanics_thresholds_changed") is not False
+            or refinement.get("target_region_changed") is not False
+            or plan.get("execution_contract", {}).get(
+                "contact_refinement_applied"
+            ) is not True
+        ):
+            raise MechanicsContractError(
+                "representative contact refinement boundary changed"
+            )
     if adapted_plan:
         feedback = plan.get("feedback_adaptation", {})
         allowed_dwell = plan.get("execution_contract", {}).get(
@@ -8767,23 +9867,23 @@ def run_drive_controlled_robot_h_replay(
             FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
         )
 
-        h = profile["regions"]["H"]
+        key_region = profile["regions"][target_id]
         prior = profile["mechanics_prior"]
         key_half_z = 0.003
         key_top = profile["target_plane_z_board_mm"] / 1000.0
         key_center = key_top - key_half_z
-        key_path = "/World/HKey"
+        key_path = "/World/TargetKey"
         key = UsdGeom.Cube.Define(stage, key_path)
         key.CreateSizeAttr(2.0)
         key_xform = UsdGeom.Xformable(key.GetPrim())
         key_xform.AddTranslateOp().Set(Gf.Vec3d(
-            h["center_board_xy_mm"][0] / 1000.0,
-            h["center_board_xy_mm"][1] / 1000.0,
+            key_region["center_board_xy_mm"][0] / 1000.0,
+            key_region["center_board_xy_mm"][1] / 1000.0,
             key_center,
         ))
         key_xform.AddScaleOp().Set(Gf.Vec3f(
-            h["half_extent_mm"][0] / 1000.0,
-            h["half_extent_mm"][1] / 1000.0,
+            key_region["half_extent_mm"][0] / 1000.0,
+            key_region["half_extent_mm"][1] / 1000.0,
             key_half_z,
         ))
         UsdPhysics.CollisionAPI.Apply(key.GetPrim())
@@ -8792,12 +9892,12 @@ def run_drive_controlled_robot_h_replay(
             prior["keycap_mass_kg"]["nominal"]
         )
         PhysxSchema.PhysxRigidBodyAPI.Apply(key.GetPrim()).CreateDisableGravityAttr(True)
-        key_joint = UsdPhysics.PrismaticJoint.Define(stage, "/World/HKeyJoint")
+        key_joint = UsdPhysics.PrismaticJoint.Define(stage, "/World/TargetKeyJoint")
         key_joint.CreateBody1Rel().SetTargets([Sdf.Path(key_path)])
         key_joint.CreateAxisAttr().Set(UsdPhysics.Tokens.z)
         key_joint.CreateLocalPos0Attr().Set(Gf.Vec3f(
-            h["center_board_xy_mm"][0] / 1000.0,
-            h["center_board_xy_mm"][1] / 1000.0,
+            key_region["center_board_xy_mm"][0] / 1000.0,
+            key_region["center_board_xy_mm"][1] / 1000.0,
             key_center,
         ))
         key_joint.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0))
@@ -8910,7 +10010,12 @@ def run_drive_controlled_robot_h_replay(
         action_assessments = []
         for action_index in (0, 1):
             rows = [row for row in native_trace if row["action_index"] == action_index]
-            assessment = assess_native_key_trace(profile, rows, rest_key_z_m=settled_z)
+            assessment = assess_native_key_trace(
+                profile,
+                rows,
+                rest_key_z_m=settled_z,
+                target_id=target_id,
+            )
             action_assessments.append({"action_index": action_index, "assessment": assessment})
         maximum_tracking_error = max(row["maximum_joint_error_rad"] for row in tracking)
         maximum_tracking_error_allowed = (
@@ -8918,11 +10023,22 @@ def run_drive_controlled_robot_h_replay(
                 plan["execution_contract"].get("maximum_joint_tracking_error_rad"),
                 "maximum joint tracking error",
             )
-            if adapted_plan or trace_lifted_plan or contact_refined_plan
+            if (
+                adapted_plan
+                or trace_lifted_plan
+                or contact_refined_plan
+                or representative_plan
+                or representative_adapted_plan
+                or representative_refined_plan
+            )
             else None
         )
         passed = (
             all(item["assessment"]["accepted"] for item in action_assessments)
+            and all(
+                item["assessment"]["resolved_key"] == target_id
+                for item in action_assessments
+            )
             and all(item["assessment"]["native_contact_observed"] for item in action_assessments)
             and all(item["passed"] for item in root_records)
             and (
@@ -8932,21 +10048,42 @@ def run_drive_controlled_robot_h_replay(
         )
         receipt: dict[str, Any] = {
             "schema": (
-                CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                if contact_refined_plan
+                REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+                if (
+                    representative_plan
+                    or representative_adapted_plan
+                    or representative_refined_plan
+                )
                 else (
-                    TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                    if trace_lifted_plan
+                    CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                    if contact_refined_plan
                     else (
-                        FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                        if adapted_plan
-                        else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                        TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                        if trace_lifted_plan
+                        else (
+                            FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                            if adapted_plan
+                            else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                        )
                     )
                 )
             ),
-            "status": "PASS" if passed else "BLOCKED_NATIVE_ROBOT_H_REPLAY",
+            "status": (
+                "PASS"
+                if passed
+                else (
+                    "BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY"
+                    if (
+                        representative_plan
+                        or representative_adapted_plan
+                        or representative_refined_plan
+                    )
+                    else "BLOCKED_NATIVE_ROBOT_H_REPLAY"
+                )
+            ),
             "evidence_class": "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT",
             "source_plan_sha256": plan_hash,
+            "target_id": target_id,
             "physics_dt_s": dt,
             "physics_steps": drive_profile["initial_settle_steps"] + elapsed_steps,
             "state_teleports_after_initialization": 0,
@@ -8966,10 +10103,29 @@ def run_drive_controlled_robot_h_replay(
             "physical_movements": 0,
             "gate_promotions": [],
             "limitations": plan["limitations"] + [
-                "single_representative_H_key_only",
+                (
+                    "single_target_key_mechanism_per_replay"
+                    if (
+                        representative_plan
+                        or representative_adapted_plan
+                        or representative_refined_plan
+                    )
+                    else "single_representative_H_key_only"
+                ),
                 "tool_tip_collision_surface_is_governed_hand_tcp_minus_120_mm_endpoint",
             ],
         }
+        if representative_plan or representative_adapted_plan or representative_refined_plan:
+            receipt["maximum_joint_tracking_error_allowed_rad"] = (
+                maximum_tracking_error_allowed
+            )
+            receipt["source_arm216_receipt_sha256"] = bindings[
+                "arm216_receipt_sha256"
+            ]
+        if representative_adapted_plan:
+            receipt["feedback_adaptation"] = plan["feedback_adaptation"]
+        if representative_refined_plan:
+            receipt["contact_refinement"] = plan["contact_refinement"]
         if adapted_plan:
             receipt["maximum_joint_tracking_error_allowed_rad"] = (
                 maximum_tracking_error_allowed
@@ -9244,9 +10400,34 @@ def main() -> int:
     )
     parser.add_argument("--representative-key-collision-replay-campaign", type=Path)
     parser.add_argument("--representative-native-output-dir", type=Path)
+    parser.add_argument(
+        "--build-representative-key-native-mechanics-campaign",
+        action="store_true",
+        help="compile ARM-216 evidence into four target-specific native mechanics plans",
+    )
+    parser.add_argument(
+        "--aggregate-representative-key-native-mechanics-campaign",
+        action="store_true",
+        help="aggregate four completed ARM-217 mechanics receipts",
+    )
+    parser.add_argument(
+        "--build-feedback-adapted-representative-key-mechanics-campaign",
+        action="store_true",
+        help="adapt four blocked ARM-217 traces into bounded native replays",
+    )
+    parser.add_argument(
+        "--build-contact-refined-representative-key-mechanics-campaign",
+        action="store_true",
+        help="refine excessive contacts while preserving passing ARM-217 plans",
+    )
+    parser.add_argument("--representative-native-mechanics-campaign", type=Path)
+    parser.add_argument("--representative-native-mechanics-output-dir", type=Path)
+    parser.add_argument("--feedback-adapted-mechanics-output-dir", type=Path)
+    parser.add_argument("--contact-refined-mechanics-output-dir", type=Path)
     parser.add_argument("--governed-demonstration", type=Path)
     parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
+        "--run-drive-controlled-key-replay",
         action="store_true",
         help="execute the strict ARM-207 plan in native Isaac physics",
     )
@@ -9359,6 +10540,180 @@ def main() -> int:
                 output_path=args.output,
                 status_path=args.status_output,
             )
+        elif args.build_contact_refined_representative_key_mechanics_campaign:
+            required = (
+                args.representative_native_mechanics_campaign,
+                args.representative_native_mechanics_output_dir,
+                args.contact_refined_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-217 contact refinement requires its campaign and output directory"
+                )
+            source_campaign = json.loads(
+                args.representative_native_mechanics_campaign.resolve(
+                    strict=True
+                ).read_bytes()
+            )
+            source_root = args.representative_native_mechanics_output_dir.resolve(
+                strict=True
+            )
+            source_receipts = [
+                json.loads(
+                    (
+                        source_root
+                        / plan["target_id"].lower()
+                        / "native_mechanics_receipt.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for plan in source_campaign.get("plans", [])
+            ]
+            result = build_contact_refined_representative_key_mechanics_campaign(
+                source_campaign,
+                source_receipts,
+                build_profile(args.layout.resolve(strict=True)),
+            )
+            refined_root = args.contact_refined_mechanics_output_dir.resolve()
+            refined_root.mkdir(parents=True, exist_ok=True)
+            for plan in result["plans"]:
+                target_root = refined_root / plan["target_id"].lower()
+                target_root.mkdir(parents=True, exist_ok=True)
+                (target_root / "native_mechanics_plan.json").write_text(
+                    json.dumps(plan, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.build_feedback_adapted_representative_key_mechanics_campaign:
+            required = (
+                args.representative_native_mechanics_campaign,
+                args.representative_native_mechanics_output_dir,
+                args.feedback_adapted_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-217 feedback adaptation requires its campaign and output directory"
+                )
+            source_campaign = json.loads(
+                args.representative_native_mechanics_campaign.resolve(
+                    strict=True
+                ).read_bytes()
+            )
+            source_root = args.representative_native_mechanics_output_dir.resolve(
+                strict=True
+            )
+            source_receipts = [
+                json.loads(
+                    (
+                        source_root
+                        / plan["target_id"].lower()
+                        / "native_mechanics_receipt.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for plan in source_campaign.get("plans", [])
+            ]
+            result = build_feedback_adapted_representative_key_mechanics_campaign(
+                source_campaign,
+                source_receipts,
+                build_profile(args.layout.resolve(strict=True)),
+            )
+            adapted_root = args.feedback_adapted_mechanics_output_dir.resolve()
+            adapted_root.mkdir(parents=True, exist_ok=True)
+            for plan in result["plans"]:
+                target_root = adapted_root / plan["target_id"].lower()
+                target_root.mkdir(parents=True, exist_ok=True)
+                (target_root / "native_mechanics_plan.json").write_text(
+                    json.dumps(plan, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.aggregate_representative_key_native_mechanics_campaign:
+            required = (
+                args.representative_native_mechanics_campaign,
+                args.representative_native_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-217 aggregation requires its campaign and output directory"
+                )
+            mechanics_campaign = json.loads(
+                args.representative_native_mechanics_campaign.resolve(
+                    strict=True
+                ).read_bytes()
+            )
+            mechanics_root = args.representative_native_mechanics_output_dir.resolve(
+                strict=True
+            )
+            mechanics_receipts = [
+                json.loads(
+                    (
+                        mechanics_root
+                        / plan["target_id"].lower()
+                        / "native_mechanics_receipt.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for plan in mechanics_campaign.get("plans", [])
+            ]
+            result = aggregate_representative_key_native_mechanics_campaign(
+                mechanics_campaign, mechanics_receipts
+            )
+        elif args.build_representative_key_native_mechanics_campaign:
+            required = (
+                args.representative_key_park_route_campaign,
+                args.representative_key_ik_campaign,
+                args.representative_native_output_dir,
+                args.virtual_profile,
+                args.drive_profile,
+                args.robot_usd,
+                args.import_receipt,
+                args.representative_native_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-217 planning requires the ARM-213/214 campaigns, ARM-216 "
+                    "output directory, virtual and mechanics profiles, drive profile, "
+                    "robot USD, import receipt, and mechanics output directory"
+                )
+            native_root = args.representative_native_output_dir.resolve(strict=True)
+            manifest = json.loads((native_root / "manifest.json").read_bytes())
+            native_receipts = [
+                json.loads(
+                    (
+                        native_root
+                        / str(entry.get("directory"))
+                        / "native_receipt.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for entry in manifest.get("entries", [])
+            ]
+            virtual_bytes = args.virtual_profile.resolve(strict=True).read_bytes()
+            drive_bytes = args.drive_profile.resolve(strict=True).read_bytes()
+            result = build_representative_key_native_mechanics_campaign(
+                json.loads(
+                    args.representative_key_park_route_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.representative_key_ik_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                manifest,
+                native_receipts,
+                build_profile(args.layout.resolve(strict=True)),
+                virtual_bytes,
+                json.loads(drive_bytes),
+                drive_bytes,
+                args.robot_usd.resolve(strict=True).read_bytes(),
+                json.loads(args.import_receipt.resolve(strict=True).read_bytes()),
+            )
+            mechanics_root = args.representative_native_mechanics_output_dir.resolve()
+            mechanics_root.mkdir(parents=True, exist_ok=True)
+            for plan in result["plans"]:
+                target_root = mechanics_root / plan["target_id"].lower()
+                target_root.mkdir(parents=True, exist_ok=True)
+                (target_root / "native_mechanics_plan.json").write_text(
+                    json.dumps(plan, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
         elif args.aggregate_representative_key_native_collision_campaign:
             if args.representative_native_output_dir is None:
                 raise MechanicsContractError(
@@ -10383,6 +11738,8 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_FIXED_ROOT_NATIVE_COLLISION_REPLAY",
             "READY_FOR_SELECTED_ZERO_AUTHORITY_NATIVE_REPLAY",
             "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN",
+            "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY",
+            "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

@@ -1823,6 +1823,28 @@ materializer and post-run aggregator are invoked with
 `--aggregate-representative-key-native-collision-campaign`, respectively;
 both use `--representative-native-output-dir` as the four-target artifact root.
 
+ARM-217 closes the representative native-mechanics step. It compiles the
+target-specific ARM-214 joint schedules and ARM-216 admissions into native key
+replays for `1`, `SPACE`, `ENTER`, and `PERIOD`. The untouched baseline proves
+correct target resolution and bounded tracking but is rejected for excessive
+travel. The retained feedback path then derives a released anchor from each
+native trace, preserves the target region and evaluator thresholds, and
+refines only excessive contact endpoints. The final aggregate passes all eight
+actions with complete release, fixed roots, and maximum joint tracking errors
+between `0.037469` and `0.037922 rad`. Its canonical SHA-256 is
+`3f8e7c9f70efddd7cc2495e1947ba6cafb900eddbab11c29f17ad4f50c1b1c30`.
+
+The retained final artifact root is
+`C:\IsaacSim\artifacts\issue190\arm217-representative-native-mechanics-refined-002`.
+Use `--build-representative-key-native-mechanics-campaign` for the baseline,
+`--build-feedback-adapted-representative-key-mechanics-campaign` for the
+trace-derived release path, and
+`--build-contact-refined-representative-key-mechanics-campaign` for bounded
+contact-only iterations. `--aggregate-representative-key-native-mechanics-campaign`
+admits only four hash-bound PASS receipts. This creates a provisional
+zero-authority multi-key simulation dataset; it does not install collision
+geometry, prove continuous clearance, or authorize physical motion.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

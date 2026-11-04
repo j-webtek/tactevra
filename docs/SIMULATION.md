@@ -17,7 +17,7 @@ does not send commands to the arm.
 | Layer | How Tactevra uses it | Current evidence | Boundary |
 | --- | --- | --- | --- |
 | Deterministic Tactevra simulators | Exercise contracts, target order, trajectory generation, controller lifecycle, camera math, virtual device effects, faults, and replay in ordinary CI | Main-bound tests and retained receipts cover ordered typing, recovery, and fail-closed planning behavior | Simplified geometry and synthetic observations are not physical measurements |
-| NVIDIA Isaac Sim | Import the RoArm model into USD, verify kinematic parity, compose the RC03 workcell, overlay model proposals, replay source-bound schedules, and investigate collision geometry, route shape, and native key contact | Isaac Sim 6.1 launched headlessly; ARM-210 passed native H mechanics, ARM-212 through ARM-215 adapted four target-specific skills through fresh IK and bounded replay compilation, and ARM-216 replayed all 208 representative collision samples in native PhysX | ARM-216 passes the fixed-root invariant with zero physical-solid, planning-envelope, or unreviewed blocker pairs for `1`, `SPACE`, `ENTER`, and `PERIOD`. The collision candidate remains uninstalled, discrete samples do not prove continuous clearance, the four new keys still require native key-mechanics acceptance, and no result grants physical authority |
+| NVIDIA Isaac Sim | Import the RoArm model into USD, verify kinematic parity, compose the RC03 workcell, overlay model proposals, replay source-bound schedules, and investigate collision geometry, route shape, and native key contact | Isaac Sim 6.1 launched headlessly; ARM-210 passed native H mechanics, ARM-212 through ARM-216 carried four target-specific skills through fresh IK and native collision replay, and ARM-217 passed eight native key actions after bounded trace-derived adaptation | ARM-217 admits `1`, `SPACE`, `ENTER`, and `PERIOD` to a zero-authority simulation-learning dataset with fixed-root and tracking gates intact. The mechanics remain provisional, the collision candidate remains uninstalled, discrete samples do not prove continuous clearance, and no result grants physical authority |
 | MuJoCo Warp (MJWarp) | Planned complementary lane for high-throughput parallel physics: contact-parameter sweeps, recovery/fault populations, and later camera or mechanics campaigns on NVIDIA GPUs | No MJWarp physics replay is merged on `main`. Existing typing-twin receipts explicitly record `mujoco_replay_executed=false` | External workspace names are provenance, not proof that MJWarp ran; adoption requires pinned assets, parity tests, receipts, and comparison against the deterministic and Isaac lanes |
 
 MuJoCo Warp is the project maintained jointly by Google DeepMind and NVIDIA;
@@ -64,6 +64,14 @@ and testable before they become physical motion:
    `PERIOD` over 208 bounded samples; every root check passes and every raw
    overlap is accounted for by the reviewed diagnostic-only pair policy.
    This advances the skills to native mechanics testing, not to hardware.
+9. **Representative native mechanics learning.** ARM-217 instantiates each
+   admitted target as a native prismatic key and replays the target-specific
+   robot schedule twice. The untouched baselines correctly fail excessive
+   travel. A trace-derived released anchor fixes hover/retract behavior, then
+   bounded contact-only refinements converge without changing key regions,
+   mechanics thresholds, or authority. All eight final actions pass; maximum
+   joint tracking error remains below `0.038 rad`, and every root observation
+   passes. The resulting dataset is simulation-learning evidence only.
 
 These results make Isaac Sim an **advisory oracle**: it can expose a mismatch,
 visualize a proposal, or add evidence for review. It cannot approve a physical
