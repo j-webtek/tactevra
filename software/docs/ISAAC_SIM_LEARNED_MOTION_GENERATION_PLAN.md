@@ -646,8 +646,14 @@ ScheduleGen. Neither is a physical success rate.
    physical-solid, planning-envelope, or unreviewed blocker pairs. The five
    raw overlap pairs observed on each route are the already reviewed
    diagnostic-only exclusions; they do not promote the uninstalled collision
-   candidate. Native key-mechanics acceptance for `1`, `SPACE`, `ENTER`, and
-   `PERIOD` remains next before any route enters a multi-key dataset.
+   candidate. ARM-217 now carries `1`, `SPACE`, `ENTER`, and `PERIOD` through
+   native key mechanics. Untouched schedules first expose excessive travel;
+   trace-derived release anchors and bounded contact-only refinements then
+   produce two accepted actions per target without changing regions,
+   thresholds, fixed-root requirements, or authority. The final hash-bound
+   aggregate contains eight accepted actions and `5,664` native trace samples,
+   so the representative routes now form a provisional zero-authority
+   multi-key simulation dataset.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.

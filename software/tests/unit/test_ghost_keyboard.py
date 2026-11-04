@@ -1053,7 +1053,7 @@ def test_arm216_materializes_and_aggregates_representative_native_admissions(
     tmp_path,
 ):
     mechanics=_load_key_mechanics()
-    adaptation,source,selection,_profile=_arm213_campaign_fixture(mechanics)
+    adaptation,source,selection,profile=_arm213_campaign_fixture(mechanics)
     routes=mechanics.build_representative_key_park_route_campaign(
         adaptation,source,selection
     )
@@ -1068,9 +1068,13 @@ def test_arm216_materializes_and_aggregates_representative_native_admissions(
     )):
         joint_results=[]
         for sequence in range(40):
+            sample=request['samples'][sequence]
             joint_results.append({
                 'waypoint_sequence':sequence,
                 'accepted':True,
+                'phase':sample['phase'],
+                'action_index':sample['action_index'],
+                'semantic_target':sample.get('target_id'),
                 'solution_arm_joint_positions_rad':{
                     name:value+(target_index+1)*0.002+sequence*0.001
                     for name,value in seed.items()
@@ -1085,13 +1089,23 @@ def test_arm216_materializes_and_aggregates_representative_native_admissions(
         }
         result['result_sha256']=mechanics._canonical_sha256(result)
         results.append(result)
+    placement=[
+        1.0,0.0,0.0,385.0,
+        0.0,1.0,0.0,532.0,
+        0.0,0.0,1.0,70.1,
+        0.0,0.0,0.0,1.0,
+    ]
+    virtual_bytes=json.dumps({
+        'study_input':{'physical_placement_input':{'matrix_row_major':placement}}
+    },sort_keys=True).encode()
     ik_campaign={
         'schema':mechanics.REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA,
         'status':'READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION',
         'source_bindings':{
             'arm213_route_campaign_sha256':routes['campaign_sha256'],
             'canonical_ik_source_bundle_sha256':bundle['bundle_sha256'],
-            'virtual_profile_sha256':'a'*64,
+            'virtual_profile_sha256':hashlib.sha256(virtual_bytes).hexdigest(),
+            'key_mechanics_profile_sha256':profile['profile_sha256'],
         },
         'source_h_joint_solutions_reused':False,
         'target_count':4,'accepted_target_count':4,'results':results,
@@ -1189,6 +1203,235 @@ def test_arm216_materializes_and_aggregates_representative_native_admissions(
     )
     assert campaign['fixed_root_invariant_passed'] is True
     assert campaign['installed_collision_qualified'] is False
+
+    drive_path=ROOT/'software/config/isaac_lm0b_geometry_prior_profile.json'
+    drive_bytes=drive_path.read_bytes()
+    drive=json.loads(drive_bytes)
+    robot_bytes=b'#usda 1.0\n'
+    joint_order=[
+        'base_link_to_link1','link1_to_link2','link2_to_link3',
+        'link3_to_link4','link4_to_link5','link5_to_gripper_link',
+    ]
+    import_receipt={
+        'schema':'tactevra.isaac_sim_urdf_import.v1',
+        'external_files':[{
+            'sha256':hashlib.sha256(robot_bytes).hexdigest(),
+            'size_bytes':len(robot_bytes),
+        }],
+        'articulation_root_normalization':{
+            'expected_live_dof_order':joint_order,
+        },
+    }
+    import_receipt['receipt_sha256']=mechanics._canonical_sha256(import_receipt)
+    mechanics_campaign=mechanics.build_representative_key_native_mechanics_campaign(
+        routes,ik_campaign,manifest,receipts,profile,virtual_bytes,
+        drive,drive_bytes,robot_bytes,import_receipt,
+    )
+    assert mechanics_campaign['status']==(
+        'READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY'
+    )
+    assert [plan['target_id'] for plan in mechanics_campaign['plans']]==[
+        '1','SPACE','ENTER','PERIOD'
+    ]
+    assert all(plan['sample_count']==40 for plan in mechanics_campaign['plans'])
+    assert all(
+        len(plan['contact_endpoint_sequences'])==2
+        for plan in mechanics_campaign['plans']
+    )
+    assert mechanics_campaign['native_mechanics_replay_executed'] is False
+    assert mechanics_campaign['hardware_access'] is False
+
+    mechanics_receipts=[]
+    for plan in mechanics_campaign['plans']:
+        target_id=plan['target_id']
+        action_assessments=[{
+            'action_index':action_index,
+            'assessment':{
+                'accepted':True,'resolved_key':target_id,
+                'commanded_key':target_id,'native_contact_observed':True,
+            },
+        } for action_index in (0,1)]
+        receipt={
+            'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+            'status':'PASS','target_id':target_id,
+            'source_plan_sha256':plan['plan_sha256'],
+            'source_arm216_receipt_sha256':plan['source_bindings'][
+                'arm216_receipt_sha256'
+            ],
+            'state_teleports_after_initialization':0,
+            'action_assessments':action_assessments,
+            'maximum_joint_tracking_error_rad':0.01,
+            'maximum_joint_tracking_error_allowed_rad':0.05,
+            'root_pose_invariant':{
+                'all_passed':True,'observation_count':plan['sample_count'],
+            },
+            'native_trace':[{'time_s':0.0},{'time_s':0.01}],
+            'hardware_access':False,'physical_authority':False,
+            'hardware_writes':0,'physical_movements':0,'controller_commands':[],
+        }
+        receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+        mechanics_receipts.append(receipt)
+    mechanics_result=(
+        mechanics.aggregate_representative_key_native_mechanics_campaign(
+            mechanics_campaign,mechanics_receipts
+        )
+    )
+    assert mechanics_result['status']==(
+        'PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN'
+    )
+    assert mechanics_result['accepted_action_count']==8
+    assert mechanics_result['multi_key_dataset_ready'] is True
+    assert mechanics_result['physical_keyboard_qualified'] is False
+
+    blocked_receipts=[]
+    for plan in mechanics_campaign['plans']:
+        target_id=plan['target_id']
+        action_assessments=[{
+            'action_index':action_index,
+            'assessment':{
+                'accepted':False,'resolved_key':target_id,
+                'commanded_key':target_id,'native_contact_observed':True,
+                'profile_sha256':profile['profile_sha256'],
+                'disposition':'EXCESSIVE_TRAVEL',
+                'activation_count':1 if action_index==0 else 0,
+                'max_compression_mm':3.7,
+                'final_compression_mm':2.1,
+            },
+        } for action_index in (0,1)]
+        receipt={
+            'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+            'status':'BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY',
+            'target_id':target_id,
+            'source_plan_sha256':plan['plan_sha256'],
+            'source_arm216_receipt_sha256':plan['source_bindings'][
+                'arm216_receipt_sha256'
+            ],
+            'state_teleports_after_initialization':0,
+            'action_assessments':action_assessments,
+            'maximum_joint_tracking_error_rad':0.04,
+            'maximum_joint_tracking_error_allowed_rad':0.05,
+            'root_pose_invariant':{
+                'all_passed':True,'observation_count':plan['sample_count'],
+            },
+            'native_trace':[
+                {
+                    'target_sequence':32,'key_center_z_m':0.018,
+                    'tip_key_separation_m':0.001,
+                },
+                {
+                    'target_sequence':35,'key_center_z_m':0.0143,
+                    'tip_key_separation_m':-0.001,
+                },
+            ],
+            'hardware_access':False,'physical_authority':False,
+            'hardware_writes':0,'physical_movements':0,
+            'controller_commands':[],'gate_promotions':[],
+        }
+        receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+        blocked_receipts.append(receipt)
+    adapted_campaign=(
+        mechanics.build_feedback_adapted_representative_key_mechanics_campaign(
+            mechanics_campaign,blocked_receipts,profile
+        )
+    )
+    assert adapted_campaign['status']==(
+        'READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_MECHANICS_REPLAY'
+    )
+    assert [plan['target_id'] for plan in adapted_campaign['plans']]==[
+        '1','SPACE','ENTER','PERIOD'
+    ]
+    assert all(
+        plan['feedback_adaptation']['release_anchor_sequence']==32
+        and plan['feedback_adaptation']['mechanics_thresholds_changed'] is False
+        and plan['feedback_adaptation']['target_region_changed'] is False
+        and plan['hardware_access'] is False
+        for plan in adapted_campaign['plans']
+    )
+    bad_blocked=json.loads(json.dumps(blocked_receipts))
+    bad_blocked[0]['native_trace'][0]['tip_key_separation_m']=-0.001
+    bad_blocked[0]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in bad_blocked[0].items()
+        if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='released anchor'):
+        mechanics.build_feedback_adapted_representative_key_mechanics_campaign(
+            mechanics_campaign,bad_blocked,profile
+        )
+
+    adapted_receipts=[]
+    for plan in adapted_campaign['plans']:
+        target_id=plan['target_id']
+        passed=target_id=='ENTER'
+        action_assessments=[{
+            'action_index':action_index,
+            'assessment':{
+                'accepted':passed,'resolved_key':target_id,
+                'commanded_key':target_id,'native_contact_observed':True,
+                'profile_sha256':profile['profile_sha256'],
+                'disposition':'ACCEPTED' if passed else 'EXCESSIVE_TRAVEL',
+                'activation_count':1,'max_compression_mm':3.25 if passed else 3.6,
+                'final_compression_mm':0.0,
+            },
+        } for action_index in (0,1)]
+        receipt={
+            'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+            'status':'PASS' if passed else (
+                'BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY'
+            ),
+            'target_id':target_id,'source_plan_sha256':plan['plan_sha256'],
+            'state_teleports_after_initialization':0,
+            'action_assessments':action_assessments,
+            'maximum_joint_tracking_error_rad':0.04,
+            'root_pose_invariant':{
+                'all_passed':True,'observation_count':plan['sample_count'],
+            },
+            'hardware_access':False,'physical_authority':False,
+            'hardware_writes':0,'physical_movements':0,
+            'controller_commands':[],'gate_promotions':[],
+        }
+        receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+        adapted_receipts.append(receipt)
+    refined_campaign=(
+        mechanics.build_contact_refined_representative_key_mechanics_campaign(
+            adapted_campaign,adapted_receipts,profile
+        )
+    )
+    assert refined_campaign['preserved_passing_targets']==['ENTER']
+    assert refined_campaign['contact_refined_targets']==['1','SPACE','PERIOD']
+    enter_index=refined_campaign['preserved_passing_targets'].index('ENTER')
+    assert refined_campaign['plans'][2]['plan_sha256']==(
+        adapted_campaign['plans'][2]['plan_sha256']
+    )
+    assert enter_index==0
+    assert all(
+        plan['contact_refinement']['mechanics_thresholds_changed'] is False
+        for plan in refined_campaign['plans'] if plan['target_id']!='ENTER'
+    )
+
+    mechanics_receipts[0]['maximum_joint_tracking_error_rad']=0.06
+    mechanics_receipts[0]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in mechanics_receipts[0].items()
+        if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='boundary changed'):
+        mechanics.aggregate_representative_key_native_mechanics_campaign(
+            mechanics_campaign,mechanics_receipts
+        )
+
+    receipts[0]['root_pose_invariant']['status']='FAIL'
+    receipts[0]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipts[0].items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='boundary changed'):
+        mechanics.build_representative_key_native_mechanics_campaign(
+            routes,ik_campaign,manifest,receipts,profile,virtual_bytes,
+            drive,drive_bytes,robot_bytes,import_receipt,
+        )
+
+    receipts[0]['root_pose_invariant']['status']='PASS'
+    receipts[0]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipts[0].items() if key!='receipt_sha256'
+    })
     receipts[0]['physical_solid_blocker_pair_count']=1
     receipts[0]['receipt_sha256']=mechanics._canonical_sha256({
         key:value for key,value in receipts[0].items() if key!='receipt_sha256'
