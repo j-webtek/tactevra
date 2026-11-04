@@ -1024,6 +1024,156 @@ def test_arm215_compiles_bounded_fixed_root_replays_and_rejects_tampering():
             campaign,bundle,candidate,toolchain
         )
 
+
+def test_arm216_materializes_and_aggregates_representative_native_admissions(
+    tmp_path,
+):
+    mechanics=_load_key_mechanics()
+    adaptation,source,selection,_profile=_arm213_campaign_fixture(mechanics)
+    routes=mechanics.build_representative_key_park_route_campaign(
+        adaptation,source,selection
+    )
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    seed=bundle['samples'][0]['joint_positions_rad']
+    results=[]
+    for target_index,(target_id,request) in enumerate(zip(
+        ('1','SPACE','ENTER','PERIOD'),routes['requests'],strict=True
+    )):
+        joint_results=[]
+        for sequence in range(40):
+            joint_results.append({
+                'waypoint_sequence':sequence,
+                'accepted':True,
+                'solution_arm_joint_positions_rad':{
+                    name:value+(target_index+1)*0.002+sequence*0.001
+                    for name,value in seed.items()
+                },
+            })
+        result={
+            'target_id':target_id,
+            'source_request_sha256':request['request_sha256'],
+            'status':'READY_FOR_COLLISION_AND_FIXED_ROOT_QUALIFICATION',
+            'sample_count':40,'evaluated_sample_count':40,
+            'ik_all_samples_accepted':True,'joint_results':joint_results,
+        }
+        result['result_sha256']=mechanics._canonical_sha256(result)
+        results.append(result)
+    ik_campaign={
+        'schema':mechanics.REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION',
+        'source_bindings':{
+            'arm213_route_campaign_sha256':routes['campaign_sha256'],
+            'canonical_ik_source_bundle_sha256':bundle['bundle_sha256'],
+            'virtual_profile_sha256':'a'*64,
+        },
+        'source_h_joint_solutions_reused':False,
+        'target_count':4,'accepted_target_count':4,'results':results,
+        'hardware_access':False,'physical_authority':False,
+        'hardware_writes':0,'physical_movements':0,
+        'controller_commands':[],'gate_promotions':[],
+    }
+    ik_campaign['campaign_sha256']=mechanics._canonical_sha256(ik_campaign)
+    identity=[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]
+    def body(body_id,center,half):
+        return {'body_id':body_id,'parent_frame':'board','primitives':[{
+            'kind':'oriented_box','center_mm':center,'half_extents_mm':half,
+            'rotation_row_major':identity,
+        }]}
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'scope':'SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY',
+        'status':'EXPLORATORY_UNINSTALLED_COLLISION_CANDIDATE_FAMILY',
+        'installed':False,'installed_profile_eligible':False,
+        'blockers':['exploratory_geometry_is_uninstalled'],
+        'robot_bodies':[{'body_id':'robot:base_link'}],
+        'workcell_bodies':[
+            body('workcell:board_solid',[305.0,228.5,-9.0],[305.0,228.5,9.0]),
+            body('workcell:keyboard',[242.5,158.5,10.5],[157.5,73.5,10.5]),
+            body('workcell:phone',[538.15,166.4,7.95],[38.95,82.2,3.95]),
+            body('workcell:station:keyboard_left',[172.25,168.0,17.5],[92.25,96.0,17.5]),
+            body('workcell:station:keyboard_right',[323.75,168.0,17.5],[81.25,96.0,17.5]),
+        ],
+        'hardware_access':False,'physical_authority':False,
+        'hardware_write_count':0,'physical_movement_count':0,'commands':[],
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    toolchain=json.loads((
+        ROOT/'software/config/isaac_sim_toolchain_lock.json'
+    ).read_bytes())
+    collision=mechanics.build_representative_key_collision_replay_campaign(
+        ik_campaign,bundle,candidate,toolchain
+    )
+    policy={
+        'schema':mechanics.TCP_COLLISION_POLICY_SCHEMA,
+        'status':'ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY',
+        'collision_candidate_sha256':candidate['candidate_sha256'],
+        'diagnostic_policy_active':True,'installed_profile_active':False,
+        'installed_profile_eligible':False,'accepted_exclusion_count':0,
+        'accepted_exclusions':[],'physical_solid_pairs_excluded':[],
+        'planning_envelope_pairs_excluded':[],'gate_promotions':[],
+        'hardware_access':False,'physical_authority':False,
+        'hardware_writes':0,'physical_movements':0,'controller_commands':[],
+    }
+    policy['policy_sha256']=mechanics._canonical_sha256(policy)
+    manifest=mechanics.materialize_representative_key_native_collision_inputs(
+        routes,ik_campaign,collision,bundle,candidate,toolchain,policy,
+        output_dir=tmp_path,
+    )
+    assert [row['station_region_id'] for row in manifest['entries']]==[
+        'workcell:station:keyboard_left','workcell:station:keyboard_left',
+        'workcell:station:keyboard_right','workcell:station:keyboard_right',
+    ]
+    assert all((tmp_path/row['directory']/'fixed_base_replay_plan.json').is_file()
+               for row in manifest['entries'])
+
+    receipts=[]
+    for entry in manifest['entries']:
+        receipt={
+            'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA,
+            'status':'DIAGNOSTIC_OVERLAPS_OBSERVED',
+            'representative_target_id':entry['target_id'],
+            'source_arm215_campaign_sha256':collision['campaign_sha256'],
+            'source_arm215_target_plan_sha256':entry[
+                'source_arm215_target_plan_sha256'
+            ],
+            'source_representative_plan_mutated':False,
+            'bounded_sample_count':entry['bounded_sample_count'],
+            'unique_collision_pair_count':5,'policy_excluded_pair_count':5,
+            'physical_solid_blocker_pair_count':0,
+            'planning_envelope_blocker_pair_count':0,
+            'unreviewed_blocker_pair_count':0,
+            'root_pose_invariant':{
+                'status':'PASS',
+                'observation_count':entry['bounded_sample_count']+1,
+            },
+            'hardware_access':False,'physical_authority':False,
+            'hardware_writes':0,'physical_movements':0,'controller_commands':[],
+        }
+        receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+        receipts.append(receipt)
+    campaign=mechanics.aggregate_representative_key_native_collision_campaign(
+        manifest,receipts
+    )
+    assert campaign['status']==(
+        'PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN'
+    )
+    assert campaign['total_bounded_sample_count']==sum(
+        row['bounded_sample_count'] for row in manifest['entries']
+    )
+    assert campaign['fixed_root_invariant_passed'] is True
+    assert campaign['installed_collision_qualified'] is False
+    receipts[0]['physical_solid_blocker_pair_count']=1
+    receipts[0]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipts[0].items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='boundary changed'):
+        mechanics.aggregate_representative_key_native_collision_campaign(
+            manifest,receipts
+        )
+
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
