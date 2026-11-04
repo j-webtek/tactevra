@@ -484,6 +484,22 @@ under the external-artifact policy.
 - failure rates are reported by reason and parameter region; and
 - a campaign cannot hide broad failure behind successful-sample filtering.
 
+ARM-218 begins this boundary with a pre-execution smoke contract. The compiler
+consumes the hash-verified ARM-217 four-key result and emits `24` deterministic
+episodes: `12` train, `8` validation, and `4` test. Every episode has a unique
+seed and scene identity, binds one admitted plan and native receipt, and records
+all provisional mechanics and placement parameters inside declared ranges.
+The strict aggregator requires one complete receipt for every attempted
+episode, retains failures, and reports them by reason and stiffness region.
+Missing, extra, incomplete, relabelled, tampered, or undeclared inputs fail
+closed. The retained pre-execution manifest is external at
+`C:\IsaacSim\artifacts\issue190\arm218-randomized-demonstration-smoke-001\campaign.json`
+with canonical SHA-256
+`6b38bbc2e0625e83283666c2d94b90ebe05ec5e442426f7b09c3245fc84c22f1`.
+It grants no execution or hardware authority. Native randomized execution and
+complete result aggregation remain required before the LM3 smoke exit gate is
+closed.
+
 ### LM4 - state-policy training
 
 Train a behavior-cloning baseline from joint/proprioceptive observations,
@@ -654,7 +670,10 @@ ScheduleGen. Neither is a physical success rate.
    aggregate contains eight accepted actions and `5,664` native trace samples,
    so the representative routes now form a provisional zero-authority
    multi-key simulation dataset.
-6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
+6. **LM3 dataset smoke:** ARM-218 now precommits the reproducible `24`-episode
+   manifest and fail-closed aggregation rules. Next, execute those episodes in
+   bounded Isaac workers, content-address every trajectory, and aggregate all
+   passes and failures without changing the attempted denominator.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.
 
