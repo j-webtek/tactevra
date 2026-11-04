@@ -547,6 +547,83 @@ def test_arm209_trace_lift_rejects_missing_clearance_and_authority():
         mechanics.build_trace_lifted_robot_h_replay_plan(source,receipt,profile)
 
 
+def _arm210_contact_fixture(mechanics):
+    arm208,arm208_receipt,profile=_arm209_trace_fixture(mechanics)
+    source=mechanics.build_trace_lifted_robot_h_replay_plan(
+        arm208,arm208_receipt,profile
+    )
+    receipt={
+        'schema':mechanics.TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA,
+        'status':'BLOCKED_NATIVE_ROBOT_H_REPLAY',
+        'source_plan_sha256':source['plan_sha256'],
+        'state_teleports_after_initialization':0,
+        'action_assessments':[
+            {'action_index':0,'assessment':{
+                'profile_sha256':profile['profile_sha256'],
+                'disposition':'EXCESSIVE_TRAVEL','native_contact_observed':True,
+                'activation_count':1,'max_compression_mm':3.542,
+                'final_compression_mm':0.0,
+            }},
+            {'action_index':1,'assessment':{
+                'profile_sha256':profile['profile_sha256'],
+                'disposition':'EXCESSIVE_TRAVEL','native_contact_observed':True,
+                'activation_count':1,'max_compression_mm':3.541,
+                'final_compression_mm':0.0,
+            }},
+        ],
+        'hardware_access':False,'physical_authority':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,'gate_promotions':[],
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    return source,receipt,profile
+
+
+def test_arm210_contact_refinement_preserves_lift_and_changes_only_contacts():
+    mechanics=_load_key_mechanics()
+    source,receipt,profile=_arm210_contact_fixture(mechanics)
+    plan=mechanics.build_contact_refined_robot_h_replay_plan(source,receipt,profile)
+    assert plan['status']=='READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_NATIVE_H_REPLAY'
+    refinement=plan['contact_refinement']
+    assert refinement['preserved_hover_retract_sequences']==[34,36,37,39]
+    assert refinement['adapted_contact_sequences']==[35,38]
+    assert refinement['contact_refinement_ratio']==pytest.approx(2.7/3.542)
+    anchor=source['joint_targets'][33]['joint_position_target_rad']
+    for sequence in (34,36,37,39):
+        assert plan['joint_targets'][sequence]==source['joint_targets'][sequence]
+        assert plan['joint_targets'][sequence]['joint_position_target_rad']==anchor
+    expected=[
+        anchor[index]+(2.7/3.542)*(
+            source['joint_targets'][35]['joint_position_target_rad'][index]-anchor[index]
+        )
+        for index in range(6)
+    ]
+    assert plan['joint_targets'][35]['joint_position_target_rad']==pytest.approx(expected)
+    assert all(
+        plan['joint_targets'][index]==source['joint_targets'][index]
+        for index in range(len(source['joint_targets'])) if index not in (35,38)
+    )
+    assert plan['hardware_access'] is False and plan['physical_movements']==0
+
+
+def test_arm210_contact_refinement_rejects_release_or_authority_tampering():
+    mechanics=_load_key_mechanics()
+    source,receipt,profile=_arm210_contact_fixture(mechanics)
+    receipt['action_assessments'][0]['assessment']['final_compression_mm']=1.3
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='contact-only'):
+        mechanics.build_contact_refined_robot_h_replay_plan(source,receipt,profile)
+
+    source,receipt,profile=_arm210_contact_fixture(mechanics)
+    receipt['hardware_access']=True
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='contact-refinement boundary'):
+        mechanics.build_contact_refined_robot_h_replay_plan(source,receipt,profile)
+
+
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')

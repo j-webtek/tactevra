@@ -298,6 +298,15 @@ The unchanged mechanics evaluator still blocks peaks near `3.542 mm`, about
 contact-depth refinement from the ARM-209 receipt, not another release-timing
 or hover-geometry change.
 
+ARM-210 applies that contact-only refinement and passes. The lifted geometry
+is unchanged; only contact sequences 35 and 38 are interpolated from the
+no-contact anchor. Both H actions activate exactly once, peak at about
+`2.744` and `2.731 mm`, and fully release. All 133 fixed-root checks pass and
+tracking remains below `0.05 rad`. This closes the representative H replay
+loop in simulation. LM2 must now retain this skill as a governed demonstration
+and generalize it to the representative target set without granting physical
+authority or treating one-key success as installed qualification.
+
 ARM-187 establishes the robot-TCP/mechanics handoff. The retained shared-emitter
 schedule terminates `H` CONTACT at the `21.0 mm` key rest plane, so it commands
 no mechanism compression. A hash-bound, zero-authority contract now rejects
@@ -615,7 +624,9 @@ ScheduleGen. Neither is a physical success rate.
    restores complete release plus one activation per action. Only a small
    contact-depth overtravel remains, so the next bounded update must preserve
    the lifted release geometry and refine the contact endpoint from retained
-   feedback.
+   feedback. ARM-210 completes that update and passes the unchanged evaluator.
+   The next stage is governed representative-target skill adaptation, followed
+   by the LM3 dataset smoke only after that broader simulation boundary passes.
 5. **LM2 generator:** adapt the `H` skill to the representative target set.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.

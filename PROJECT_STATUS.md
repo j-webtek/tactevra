@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-209 trace-lifted native
+Reviewed November 3, 2026 through the ARM-210 contact-refined native
 robot-to-key replay, the ARM-207 drive-controlled native replay, the ARM-206 zero-authority key-mechanics comparison and
 learning-baseline selection, the ARM-205 corrected fixed-base
 collision replay, the ARM-204 robot-root-drift diagnosis, the ARM-203 corrected
@@ -174,7 +174,7 @@ completed capabilities.
 | Synthetic model-to-controller lineage | Exact synthetic review and epoch identities now bind through actual AI-assembler bytes, arm ingress and freshness checks, the measured planner blocker, a sealed synthetic trajectory, T=102 profile, and zero-write preview receipt | Crossed identities reject and one encoded command is reviewable, but the real planner stops for missing calibration, production dispatch remains explicitly blocked, and no bytes are sent |
 | Arm control research | Documented supervised noncontact movement and joint-feedback checks | Specific lab sequences were completed; controller feedback does not measure key-contact accuracy |
 | Hardware | RC03 workcell design and step-by-step assembly package | Design and print resources exist, with their own measurement and print-readiness requirements |
-| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, ARM-207 drives that baseline into the native `H` mechanism, ARM-208 performs one feedback-derived depth/dwell replay, and ARM-209 tests a trace-derived no-contact H anchor | This is advisory simulation evidence only. ARM-209 fully releases the key after both actions, produces exactly one activation per action, preserves all 133 fixed-root checks, and stays within the `0.05 rad` tracking bound. It remains blocked because about `3.542 mm` peak compression is roughly `0.043 mm` over the unchanged travel limit. The next simulation change is a bounded contact-depth refinement from this retained trace. Continuous clearance, installed collision qualification, and physical authority remain open |
+| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, ARM-207 drives that baseline into the native `H` mechanism, ARM-208 performs one feedback-derived depth/dwell replay, ARM-209 restores release with a trace-derived lift, and ARM-210 refines only H contact depth | This is advisory simulation evidence only. ARM-210 passes the unchanged native H evaluator: both actions activate exactly once, peak at about `2.744` and `2.731 mm`, fully release, preserve all 133 fixed-root checks, and stay within the `0.05 rad` tracking bound. This is a representative simulated H skill, not continuous-clearance, installed collision, generalized keyboard, or physical qualification, and it grants no physical authority |
 
 ### Recent progress, in plain language
 
@@ -203,7 +203,12 @@ clearance and no key compression. Both presses now activate exactly once and
 both retracts completely release. Peak compression is still about `3.542 mm`,
 so the unchanged evaluator blocks the result by roughly `0.043 mm`. The next
 bounded correction is contact-depth refinement; the release geometry is no
-longer the blocker.
+longer the blocker. ARM-210 applies that contact-only update and passes the
+unchanged evaluator. The two actions peak at about `2.744` and `2.731 mm`,
+activate exactly once, and return to full release while all root and tracking
+checks remain satisfied. The next learning milestone is to retain this H skill
+as a governed demonstration and begin representative-target generalization;
+physical authority remains absent.
 
 The latest collision increments derive robot and attachment poses from exact
 accepted joint solutions, insert bounded joint-space samples, and build
