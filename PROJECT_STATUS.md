@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-211 governed H demonstration, the ARM-210 contact-refined native
+Reviewed November 3, 2026 through the ARM-212 representative-key Cartesian adaptation campaign, the ARM-211 governed H demonstration, the ARM-210 contact-refined native
 robot-to-key replay, the ARM-207 drive-controlled native replay, the ARM-206 zero-authority key-mechanics comparison and
 learning-baseline selection, the ARM-205 corrected fixed-base
 collision replay, the ARM-204 robot-root-drift diagnosis, the ARM-203 corrected
@@ -212,6 +212,10 @@ retains only the H skill window as joint-space evidence; and explicitly marks
 `1`, `SPACE`, `ENTER`, and `PERIOD` as pending fresh board-frame, IK, collision,
 fixed-root, and native-mechanics qualification. Direct H joint-space reuse is
 forbidden and physical authority remains absent.
+ARM-212 translates those semantics into separate board-frame requests for the
+four pending keys. The requests contain no joint positions and remain blocked
+on route connection, fresh IK, collision/fixed-root, and native mechanics
+qualification; they are not yet a multi-key dataset.
 
 The latest collision increments derive robot and attachment poses from exact
 accepted joint solutions, insert bounded joint-space samples, and build

@@ -354,6 +354,17 @@ def _arm208_feedback_fixture(mechanics):
             'hardware':False,'motion':False,
             'physical_keyboard_qualification':False,
         },
+        'target_plane_z_board_mm':21.0,
+        'regions':{
+            key:{'center_board_xy_mm':center,'half_extent_mm':half}
+            for key,center,half in (
+                ('H',[216.55,154.0],[7.0,7.0]),
+                ('1',[107.0,196.0],[7.0,7.0]),
+                ('SPACE',[224.0,112.0],[48.0,7.0]),
+                ('ENTER',[335.5,154.0],[13.0,7.0]),
+                ('PERIOD',[283.2,133.0],[7.0,7.0]),
+            )
+        },
     },'profile_sha256')
     targets=[]
     for sequence in range(40):
@@ -732,6 +743,70 @@ def test_arm211_rejects_tampering_nested_authority_and_failed_quality():
     })
     with pytest.raises(mechanics.MechanicsContractError,match='quality evidence'):
         mechanics.retain_governed_h_demonstration(plan,receipt,profile)
+
+
+def _arm212_campaign_fixture(mechanics):
+    plan,receipt,profile=_arm211_demonstration_fixture(mechanics)
+    demonstration=mechanics.retain_governed_h_demonstration(plan,receipt,profile)
+    samples=[]
+    for sequence in range(40):
+        samples.append({
+            'sequence':sequence,'time_from_start_ns':sequence*100_000_000,
+            'phase':'TRANSIT','phase_endpoint':False,'action_index':None,
+            'target_id':None,'expected_tool_tip_board_mm':[0.0,0.0,30.0],
+        })
+    for sequence,phase,action in (
+        (33,'TRANSIT',0),(34,'HOVER',0),(35,'CONTACT',0),(36,'RETRACT',0),
+        (37,'HOVER',1),(38,'CONTACT',1),(39,'RETRACT',1),
+    ):
+        samples[sequence].update({
+            'phase':phase,'phase_endpoint':sequence!=33,'action_index':action,
+            'target_id':'H','expected_tool_tip_board_mm':[
+                218.71,149.76,27.29
+            ],
+        })
+    source={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,
+        'status':'READY_FOR_IK_QUALIFICATION','key_id':'H',
+        'profile_sha256':profile['profile_sha256'],'samples':samples,
+        'source_joint_positions_reused':False,
+    }
+    source['request_sha256']=mechanics._canonical_sha256(source)
+    return demonstration,source,profile
+
+
+def test_arm212_builds_target_specific_cartesian_requests_without_joint_reuse():
+    mechanics=_load_key_mechanics()
+    demonstration,source,profile=_arm212_campaign_fixture(mechanics)
+    campaign=mechanics.build_representative_key_adaptation_campaign(
+        demonstration,source,profile
+    )
+    assert campaign['status']=='READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION'
+    assert [row['target_id'] for row in campaign['requests']]==[
+        '1','SPACE','ENTER','PERIOD'
+    ]
+    for request in campaign['requests']:
+        assert request['source_joint_positions_reused'] is False
+        assert request['route_connection_required'] is True
+        contacts=[row for row in request['samples'] if row['phase']=='CONTACT']
+        assert len(contacts)==2
+        assert all(row['expected_tool_tip_board_mm'][:2]==request['target_center_board_xy_mm'] for row in contacts)
+        assert all(row['expected_tool_tip_board_mm'][2]==pytest.approx(18.3) for row in contacts)
+    assert campaign['multi_key_dataset_ready'] is False
+    assert campaign['physical_movements']==0 and campaign['controller_commands']==[]
+
+
+def test_arm212_rejects_joint_reuse_or_tampered_demonstration():
+    mechanics=_load_key_mechanics()
+    demonstration,source,profile=_arm212_campaign_fixture(mechanics)
+    source['source_joint_positions_reused']=True
+    source['request_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in source.items() if key!='request_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='source boundary'):
+        mechanics.build_representative_key_adaptation_campaign(
+            demonstration,source,profile
+        )
 
 
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
