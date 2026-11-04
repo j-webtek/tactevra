@@ -9303,3 +9303,29 @@ rewriting history. New entries must use a unique evidence ID.
 - Next dependency: apply one bounded contact-depth refinement from the ARM-209
   receipt while preserving the now-passing release geometry and every existing
   mechanics, tracking, root, and zero-authority gate.
+
+### E-20261103-ARM-210 — contact-only refinement passes native H replay
+
+- Stage: LM1 contact-refined drive-controlled native robot/key replay.
+- Lane: ARM / Isaac simulation and AI/model preparation.
+- Change: binds the exact ARM-209 plan and blocked receipt, preserves the
+  trace-lifted hover/retract and every non-contact target exactly, and adapts
+  only contact sequences 35 and 38 by a `0.7621366210338559` interpolation
+  from the retained no-contact anchor. Mechanics and tracking limits are
+  unchanged and maximum adjacent joint motion does not increase.
+- Result: pass. Both H actions are `ACCEPTED`, each records exactly one native
+  activation, peaks at `2.744280733168125 mm` and `2.731158398091793 mm`, and
+  finishes within approximately `0.000002 mm` of full release. All 133 root
+  checks pass and maximum tracking error remains `0.037722640842437705 rad`
+  against the `0.05 rad` limit.
+- External evidence: plan canonical SHA-256
+  `41f216b1828ed476679a49060368ca0bda4494856ad107659264ebe24aafa81f`;
+  native receipt canonical SHA-256
+  `618a7146b623c39650e5945ee774b2427d1333f7bb360e76746410abf7bf2e60`.
+- Hardware writes: 0. Physical movements: 0. Gate promotions: 0.
+- Limitations: this is one representative H key with provisional simulation
+  parameters and discrete route evidence. It does not prove continuous
+  clearance, installed collision safety, cross-key generalization, or physical
+  execution authority.
+- Next dependency: retain the passing H replay as a governed demonstration and
+  begin bounded representative-target generalization before dataset smoke.

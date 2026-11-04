@@ -1661,6 +1661,33 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output C:\IsaacSim\artifacts\issue190\arm209-trace-lifted-robot-h-replay-plan-001\status.json
 ```
 
+ARM-210 preserves that lifted release path and refines only contact sequences
+35 and 38 from the ARM-209 receipt. The retained plan is
+`C:\IsaacSim\artifacts\issue190\arm210-contact-refined-robot-h-replay-plan-001\plan.json`
+with canonical SHA-256
+`41f216b1828ed476679a49060368ca0bda4494856ad107659264ebe24aafa81f`.
+Its bounded native replay passes the unchanged evaluator. Both actions activate
+exactly once, peak at `2.744280733168125 mm` and `2.731158398091793 mm`, and
+fully release. All 133 root checks pass, maximum tracking error remains
+`0.037722640842437705 rad`, and the receipt canonical SHA-256 is
+`618a7146b623c39650e5945ee774b2427d1333f7bb360e76746410abf7bf2e60`.
+Hardware access, writes, physical motion, controller commands, and gate
+promotions remain zero. This is a passing representative simulated H skill,
+not continuous-clearance, installed-collision, generalized-keyboard, or
+physical qualification.
+
+Compile the ARM-210 plan with:
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-contact-refined-robot-h-replay-plan `
+  --replay-plan C:\IsaacSim\artifacts\issue190\arm209-trace-lifted-robot-h-replay-plan-001\plan.json `
+  --source-replay-receipt C:\IsaacSim\artifacts\issue190\arm209-trace-lifted-robot-h-replay-001\receipt.json `
+  --output C:\IsaacSim\artifacts\issue190\arm210-contact-refined-robot-h-replay-plan-001\plan.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm210-contact-refined-robot-h-replay-plan-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
