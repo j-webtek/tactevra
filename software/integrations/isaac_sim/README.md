@@ -1737,6 +1737,27 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output C:\IsaacSim\artifacts\issue190\arm212-representative-key-adaptation-campaign-001\status.json
 ```
 
+ARM-213 materializes those four park-to-skill connections. It preserves the
+governed `[290, 10, 70] mm` park endpoint and each seven-sample ARM-212 skill,
+inserting 32 target-specific samples under the selected ARM-206
+`DIRECT_LINEAR` / `90 mm` corridor policy. The external campaign is
+`C:\IsaacSim\artifacts\issue190\arm213-representative-key-park-route-campaign-001\campaign.json`
+with canonical SHA-256
+`9ae576abe4fe8d748602ad24c3744e6a0c982a9155e9d1c4f67c36d1ed4f106e`.
+These requests contain no joint positions and still require fresh target IK,
+collision/fixed-root checks, and native mechanics replay.
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-representative-key-park-route-campaign `
+  --representative-key-adaptation-campaign C:\IsaacSim\artifacts\issue190\arm212-representative-key-adaptation-campaign-001\campaign.json `
+  --cartesian-request C:\IsaacSim\artifacts\issue190\lm1-h-cartesian-schedule-001\request.json `
+  --learning-baseline-selection C:\IsaacSim\artifacts\issue190\arm206-key-mechanics-learning-baseline-001\selection.json `
+  --output C:\IsaacSim\artifacts\issue190\arm213-representative-key-park-route-campaign-001\campaign.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm213-representative-key-park-route-campaign-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

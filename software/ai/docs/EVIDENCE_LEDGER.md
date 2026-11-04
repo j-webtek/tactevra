@@ -9369,3 +9369,21 @@ rewriting history. New entries must use a unique evidence ID.
   and gate promotions.
 - Next dependency: connect each skill to a governed route and run fresh IK,
   collision/fixed-root, and native key-mechanics qualification.
+
+### E-20261103-ARM-213 — representative-key park routes materialized
+
+- Stage: LM2 target-specific Cartesian route connection.
+- Result: four hash-bound 40-sample requests for `1`, `SPACE`, `ENTER`, and
+  `PERIOD`. Each preserves the governed `[290, 10, 70] mm` park endpoint and
+  its complete ARM-212 seven-sample skill, with 32 inserted samples from the
+  selected ARM-206 `DIRECT_LINEAR` / `90 mm` corridor policy.
+- External evidence: campaign SHA-256
+  `9ae576abe4fe8d748602ad24c3744e6a0c982a9155e9d1c4f67c36d1ed4f106e`
+  at `C:\IsaacSim\artifacts\issue190\arm213-representative-key-park-route-campaign-001\campaign.json`.
+- Authority: no joint positions, hardware writes, physical movements,
+  controller commands, or gate promotions.
+- Limitations: route policy transfer is not an IK solution and does not prove
+  continuous clearance or native contact. Each target still needs fresh IK,
+  collision/fixed-root, and native key-mechanics qualification.
+- Next dependency: run bounded target-specific IK qualification for the four
+  connected Cartesian requests.

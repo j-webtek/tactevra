@@ -119,6 +119,9 @@ GOVERNED_H_DEMONSTRATION_SCHEMA = (
 REPRESENTATIVE_KEY_ADAPTATION_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm2_representative_key_cartesian_adaptation_campaign.v1"
 )
+REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_park_route_campaign.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -1341,6 +1344,211 @@ def build_representative_key_adaptation_campaign(
             "park_to_skill_route_connections_are_not_yet_generated",
             "collision_fixed_root_and_native_contact_are_not_yet_qualified",
             "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def build_representative_key_park_route_campaign(
+    adaptation_campaign: dict[str, Any],
+    source_request: dict[str, Any],
+    baseline_selection: dict[str, Any],
+) -> dict[str, Any]:
+    """Connect each ARM-212 Cartesian skill to the retained park endpoint."""
+
+    adaptation_hash = _require_canonical_hash(
+        adaptation_campaign, "campaign_sha256", "ARM-212 adaptation campaign"
+    )
+    source_hash = _require_canonical_hash(
+        source_request, "request_sha256", "H Cartesian source request"
+    )
+    selection_hash = _require_canonical_hash(
+        baseline_selection, "selection_sha256", "ARM-206 baseline selection"
+    )
+    selected_id = baseline_selection.get("selected_candidate_id")
+    selected = [
+        item
+        for item in baseline_selection.get("ranked_candidates", [])
+        if item.get("candidate_id") == selected_id
+    ]
+    if (
+        adaptation_campaign.get("schema")
+        != REPRESENTATIVE_KEY_ADAPTATION_CAMPAIGN_SCHEMA
+        or adaptation_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION"
+        or adaptation_campaign.get("source_bindings", {}).get(
+            "h_cartesian_source_request_sha256"
+        ) != source_hash
+        or adaptation_campaign.get("pending_targets")
+        != ["1", "SPACE", "ENTER", "PERIOD"]
+        or baseline_selection.get("schema")
+        != KEY_MECHANICS_LEARNING_BASELINE_SELECTION_SCHEMA
+        or baseline_selection.get("status")
+        != "SELECTED_ZERO_AUTHORITY_SIMULATION_LEARNING_BASELINE"
+        or len(selected) != 1
+    ):
+        raise MechanicsContractError("representative park-route lineage changed")
+    route_policy = selected[0].get("route_shape_candidate", {})
+    if (
+        route_policy.get("xy_corridor_topology") != "DIRECT_LINEAR"
+        or route_policy.get("corridor_height_board_mm") != 90.0
+        or route_policy.get("corridor_height_ramp_fraction") != 0.25
+        or route_policy.get("transit_resampling")
+        != "ARC_LENGTH_PIECEWISE_LINEAR_WITH_SYMMETRIC_Z_RAMPS"
+    ):
+        raise MechanicsContractError("retained park-route policy changed")
+    for document, label in (
+        (adaptation_campaign, "ARM-212 adaptation campaign"),
+        (source_request, "H Cartesian source request"),
+        (baseline_selection, "ARM-206 baseline selection"),
+    ):
+        if (
+            document.get("hardware_access") is not False
+            or document.get("controller_commands") != []
+            or document.get("hardware_writes") != 0
+            or document.get("physical_movements") != 0
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    source_samples = source_request.get("samples")
+    if (
+        source_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or not isinstance(source_samples, list)
+        or len(source_samples) <= 33
+        or any(
+            not isinstance(sample, dict) or sample.get("sequence") != sequence
+            for sequence, sample in enumerate(source_samples)
+        )
+        or source_samples[0].get("phase") != "PARK"
+        or any(source_samples[index].get("phase") != "TRANSIT" for index in range(1, 34))
+    ):
+        raise MechanicsContractError("governed park-to-H timing domain changed")
+    park = source_samples[0].get("expected_tool_tip_board_mm")
+    if not isinstance(park, list) or len(park) != 3:
+        raise MechanicsContractError("governed park endpoint is missing")
+    park = [_finite_number(value, "park endpoint coordinate") for value in park]
+    anchor_time = int(
+        _finite_number(source_samples[33].get("time_from_start_ns"), "anchor time")
+    )
+
+    connected_requests = []
+    arm212_requests = adaptation_campaign.get("requests")
+    if not isinstance(arm212_requests, list) or len(arm212_requests) != 4:
+        raise MechanicsContractError("ARM-212 request inventory changed")
+    for target_id, skill_request in zip(
+        adaptation_campaign["pending_targets"], arm212_requests, strict=True
+    ):
+        skill_hash = _require_canonical_hash(
+            skill_request, "request_sha256", f"ARM-212 {target_id} request"
+        )
+        skill_samples = skill_request.get("samples")
+        if (
+            skill_request.get("target_id") != target_id
+            or skill_request.get("source_joint_positions_reused") is not False
+            or not isinstance(skill_samples, list)
+            or len(skill_samples) != 7
+            or any(sample.get("sequence") != sequence for sequence, sample in enumerate(skill_samples))
+            or skill_samples[0].get("phase") != "TRANSIT"
+        ):
+            raise MechanicsContractError(f"ARM-212 {target_id} skill changed")
+        anchor = skill_samples[0].get("expected_tool_tip_board_mm")
+        if not isinstance(anchor, list) or len(anchor) != 3:
+            raise MechanicsContractError(f"ARM-212 {target_id} anchor is missing")
+        anchor = [_finite_number(value, "target anchor coordinate") for value in anchor]
+
+        samples = [json.loads(json.dumps(source_samples[0]))]
+        for sequence in range(1, 33):
+            progress = sequence / 33.0
+            if progress <= 0.25:
+                z = park[2] + progress / 0.25 * (90.0 - park[2])
+            elif progress >= 0.75:
+                z = 90.0 + (progress - 0.75) / 0.25 * (anchor[2] - 90.0)
+            else:
+                z = 90.0
+            samples.append({
+                "sequence": sequence,
+                "source_sequence": sequence,
+                "time_from_start_ns": source_samples[sequence]["time_from_start_ns"],
+                "phase": "TRANSIT",
+                "phase_endpoint": False,
+                "action_index": 0,
+                "target_id": target_id,
+                "expected_tool_tip_board_mm": [
+                    park[0] + progress * (anchor[0] - park[0]),
+                    park[1] + progress * (anchor[1] - park[1]),
+                    z,
+                ],
+            })
+        for offset, sample in enumerate(skill_samples):
+            connected = json.loads(json.dumps(sample))
+            connected["sequence"] = 33 + offset
+            connected["time_from_start_ns"] = anchor_time + int(
+                _finite_number(sample["time_from_start_ns"], "skill time")
+            )
+            samples.append(connected)
+
+        request = {
+            "schema": TCP_CARTESIAN_SCHEDULE_SCHEMA,
+            "status": "READY_FOR_TARGET_SPECIFIC_IK_QUALIFICATION",
+            "key_id": target_id,
+            "coordinate_frame": "board",
+            "source_arm212_request_sha256": skill_hash,
+            "source_h_cartesian_request_sha256": source_hash,
+            "source_arm206_baseline_selection_sha256": selection_hash,
+            "route_shape_candidate_id": selected_id,
+            "route_shape_candidate": route_policy,
+            "park_endpoint_preserved": True,
+            "skill_samples_preserved": True,
+            "route_connection_materialized": True,
+            "source_joint_positions_reused": False,
+            "joint_positions_included": False,
+            "ik_qualification_required": True,
+            "collision_and_fixed_root_qualification_required": True,
+            "native_key_mechanics_qualification_required": True,
+            "sample_count": len(samples),
+            "total_time_ns": samples[-1]["time_from_start_ns"],
+            "route_domain_sequences": list(range(1, 33)),
+            "skill_domain_sequences": list(range(33, 40)),
+            "samples": samples,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "limitations": [
+                "connected_cartesian_request_is_not_an_ik_solution",
+                "route_is_a_selected_policy_transfer_requiring_fresh_target_qualification",
+                "continuous_collision_clearance_and_native_contact_are_not_proven",
+                "no_hardware_motion_or_physical_keyboard_authority",
+            ],
+        }
+        request["request_sha256"] = _canonical_sha256(request)
+        connected_requests.append(request)
+
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION",
+        "source_bindings": {
+            "arm212_adaptation_campaign_sha256": adaptation_hash,
+            "h_cartesian_source_request_sha256": source_hash,
+            "arm206_baseline_selection_sha256": selection_hash,
+        },
+        "selected_route_policy": route_policy,
+        "park_endpoint_board_mm": park,
+        "pending_targets": list(adaptation_campaign["pending_targets"]),
+        "requests": connected_requests,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "fresh_target_specific_ik_is_required",
+            "fresh_collision_fixed_root_and_native_contact_qualification_are_required",
+            "no_multi_key_dataset_or_physical_execution_authority",
         ],
     }
     campaign["campaign_sha256"] = _canonical_sha256(campaign)
@@ -8013,6 +8221,12 @@ def main() -> int:
         action="store_true",
         help="compile ARM-211 into target-specific zero-authority Cartesian requests",
     )
+    parser.add_argument(
+        "--build-representative-key-park-route-campaign",
+        action="store_true",
+        help="connect ARM-212 target skills to the selected zero-authority park route",
+    )
+    parser.add_argument("--representative-key-adaptation-campaign", type=Path)
     parser.add_argument("--governed-demonstration", type=Path)
     parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
@@ -8057,6 +8271,7 @@ def main() -> int:
             and not args.build_trace_lifted_robot_h_replay_plan
             and not args.build_contact_refined_robot_h_replay_plan
             and not args.build_representative_key_adaptation_campaign
+            and not args.build_representative_key_park_route_campaign
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -8121,6 +8336,28 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.build_representative_key_park_route_campaign:
+            required = (
+                args.representative_key_adaptation_campaign,
+                args.cartesian_request,
+                args.learning_baseline_selection,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-213 requires --representative-key-adaptation-campaign, "
+                    "--cartesian-request, and --learning-baseline-selection"
+                )
+            result = build_representative_key_park_route_campaign(
+                json.loads(
+                    args.representative_key_adaptation_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.cartesian_request.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.learning_baseline_selection.resolve(strict=True).read_bytes()
+                ),
             )
         elif args.build_representative_key_adaptation_campaign:
             if args.governed_demonstration is None or args.cartesian_request is None:
@@ -9009,6 +9246,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY",
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION",
             "READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION",
+            "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
