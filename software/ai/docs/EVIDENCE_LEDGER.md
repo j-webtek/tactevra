@@ -9387,3 +9387,21 @@ rewriting history. New entries must use a unique evidence ID.
   collision/fixed-root, and native key-mechanics qualification.
 - Next dependency: run bounded target-specific IK qualification for the four
   connected Cartesian requests.
+
+### E-20261103-ARM-214 — representative-key routes pass fresh IK
+
+- Stage: LM2 target-specific canonical IK and continuity qualification.
+- Result: all 40 samples pass independently for `1`, `SPACE`, `ENTER`, and
+  `PERIOD`. Maximum Cartesian errors are `0.055104`, `0.047272`, `0.076015`,
+  and `0.061618 mm`; minimum normalized joint margins are `0.174774`,
+  `0.174774`, `0.097868`, and `0.150182`, respectively.
+- Lineage: the canonical source bundle contributes only its initial seed and
+  model/workcell bindings. No H route joint solution is reused.
+- External evidence: campaign SHA-256
+  `81402e904b62e8edcaf82b5d68611e0212f3a4f43988c845824395b4e57e0e3d`
+  at `C:\IsaacSim\artifacts\issue190\arm214-representative-key-ik-campaign-001\campaign.json`.
+- Authority: zero hardware writes, physical movements, controller commands,
+  and gate promotions.
+- Limitations: discrete IK and continuity do not prove collision clearance,
+  fixed-root stability, native key contact, or physical execution authority.
+- Next dependency: collision/fixed-root qualification for each accepted route.
