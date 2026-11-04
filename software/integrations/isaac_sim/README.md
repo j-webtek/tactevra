@@ -1782,6 +1782,30 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output C:\IsaacSim\artifacts\issue190\arm214-representative-key-ik-campaign-001\status.json
 ```
 
+ARM-215 converts those accepted joint routes into deterministic native replay
+inputs without launching Isaac. The retained campaign contains `49`, `46`,
+`58`, and `55` bounded configurations for `1`, `SPACE`, `ENTER`, and `PERIOD`,
+respectively, plus the fixed-joint-to-world and per-sample root-pose invariant.
+Its canonical SHA-256 is
+`dfd20006fcd85958747b3b380d3912ca84f289b9cbbe354065d1261e891ddcf2`.
+
+```powershell
+$env:PYTHONPATH = 'software/src'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-representative-key-collision-replay-campaign `
+  --representative-key-ik-campaign C:\IsaacSim\artifacts\issue190\arm214-representative-key-ik-campaign-001\campaign.json `
+  --ik-source-bundle software\integrations\isaac_sim\evidence\actual_emitter_joint_schedule_bundle_9e5c878_20260929.json `
+  --collision-candidate C:\IsaacSim\artifacts\issue190\arm196-link5-components-obb-32\collision_candidate.json `
+  --toolchain-lock software\config\isaac_sim_toolchain_lock.json `
+  --output C:\IsaacSim\artifacts\issue190\arm215-representative-key-collision-replay-campaign-001\campaign.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm215-representative-key-collision-replay-campaign-001\status.json
+```
+
+This campaign only makes the native work reproducible. It does not claim that
+overlap queries ran, that any route has continuous clearance, or that contact
+or physical execution is authorized.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

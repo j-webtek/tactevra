@@ -933,6 +933,97 @@ def test_arm214_rejects_tampered_route_campaign_before_ik():
             routes,source,bundle,profile,workspace=ROOT
         )
 
+
+def test_arm215_compiles_bounded_fixed_root_replays_and_rejects_tampering():
+    mechanics=_load_key_mechanics()
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    names=list(bundle['samples'][0]['joint_positions_rad'])
+    results=[]
+    for target_index,target_id in enumerate(('1','SPACE','ENTER','PERIOD')):
+        joint_results=[]
+        for sequence in range(40):
+            endpoint={
+                name:bundle['samples'][0]['joint_positions_rad'][name]
+                + (target_index+1)*0.002 + sequence*0.001
+                for name in names
+            }
+            joint_results.append({
+                'waypoint_sequence':sequence,
+                'accepted':True,
+                'solution_arm_joint_positions_rad':endpoint,
+            })
+        result={
+            'target_id':target_id,
+            'source_request_sha256':str(target_index+1)*64,
+            'status':'READY_FOR_COLLISION_AND_FIXED_ROOT_QUALIFICATION',
+            'sample_count':40,'evaluated_sample_count':40,
+            'ik_all_samples_accepted':True,'joint_results':joint_results,
+        }
+        result['result_sha256']=mechanics._canonical_sha256(result)
+        results.append(result)
+    campaign={
+        'schema':mechanics.REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION',
+        'source_bindings':{
+            'canonical_ik_source_bundle_sha256':bundle['bundle_sha256'],
+        },
+        'source_h_joint_solutions_reused':False,
+        'target_count':4,'accepted_target_count':4,'results':results,
+        'hardware_access':False,'hardware_writes':0,
+        'physical_authority':False,'physical_movements':0,
+        'controller_commands':[],'gate_promotions':[],
+    }
+    campaign['campaign_sha256']=mechanics._canonical_sha256(campaign)
+    candidate={
+        'schema':'tactevra.simulation_collision_candidate.v1',
+        'scope':'SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY',
+        'installed':False,'installed_profile_eligible':False,
+        'blockers':['exploratory_geometry_is_uninstalled'],
+        'robot_bodies':[{'body_id':'robot:base_link'}],
+        'workcell_bodies':[{'body_id':'workcell:keyboard'}],
+        'hardware_access':False,'physical_authority':False,
+        'hardware_write_count':0,'physical_movement_count':0,'commands':[],
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    toolchain=json.loads((
+        ROOT/'software/config/isaac_sim_toolchain_lock.json'
+    ).read_bytes())
+
+    compiled=mechanics.build_representative_key_collision_replay_campaign(
+        campaign,bundle,candidate,toolchain
+    )
+    assert compiled['status']==(
+        'READY_FOR_ZERO_AUTHORITY_FIXED_ROOT_NATIVE_COLLISION_REPLAY'
+    )
+    assert compiled['target_count']==4
+    assert [row['target_id'] for row in compiled['target_plans']]==[
+        '1','SPACE','ENTER','PERIOD'
+    ]
+    assert all(40 <= row['bounded_sample_count'] <= 256
+               for row in compiled['target_plans'])
+    assert all(row['fixed_base_contract']['mechanism']=='USD_FIXED_JOINT_TO_WORLD'
+               for row in compiled['target_plans'])
+    assert all(row['root_pose_invariant']['required_after_every_sample'] is True
+               for row in compiled['target_plans'])
+    assert compiled['native_replay_executed'] is False
+    assert compiled['installed_collision_qualified'] is False
+    assert compiled['hardware_access'] is False
+    assert compiled['controller_commands']==[]
+
+    campaign['results'][0]['joint_results'][1][
+        'solution_arm_joint_positions_rad'
+    ][names[0]]+=0.1
+    campaign['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in campaign.items() if key!='campaign_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='result hash'):
+        mechanics.build_representative_key_collision_replay_campaign(
+            campaign,bundle,candidate,toolchain
+        )
+
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
     mechanics=_load_key_mechanics()
     profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')

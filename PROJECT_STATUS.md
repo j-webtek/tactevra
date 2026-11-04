@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-214 representative-key IK campaign, the ARM-213 representative-key park-route campaign, the ARM-212 representative-key Cartesian adaptation campaign, the ARM-211 governed H demonstration, the ARM-210 contact-refined native
+Reviewed November 3, 2026 through the ARM-215 representative-key collision replay campaign, the ARM-214 representative-key IK campaign, the ARM-213 representative-key park-route campaign, the ARM-212 representative-key Cartesian adaptation campaign, the ARM-211 governed H demonstration, the ARM-210 contact-refined native
 robot-to-key replay, the ARM-207 drive-controlled native replay, the ARM-206 zero-authority key-mechanics comparison and
 learning-baseline selection, the ARM-205 corrected fixed-base
 collision replay, the ARM-204 robot-root-drift diagnosis, the ARM-203 corrected
@@ -226,6 +226,12 @@ ARM-214 performs that fresh target-specific IK. All 40 samples pass for each of
 `0.077 mm`, and no H joint solution is reused. The four routes now advance to
 collision/fixed-root qualification, while native contact and hardware authority
 remain deliberately absent.
+ARM-215 compiles that next gate without executing it. The four accepted routes
+expand to `49`, `46`, `58`, and `55` deterministic joint configurations under
+the existing `0.05 rad` bounded-sampling policy. Every target is hash-bound to
+the retained collision candidate and selected Isaac toolchain and carries an
+unchanged fixed-joint-to-world/root-pose invariant. Native overlap queries,
+clearance conclusions, contact mechanics, and physical authority remain absent.
 
 The latest collision increments derive robot and attachment poses from exact
 accepted joint solutions, insert bounded joint-space samples, and build

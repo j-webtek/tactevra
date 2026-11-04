@@ -638,7 +638,10 @@ ScheduleGen. Neither is a physical success rate.
    retained `DIRECT_LINEAR` / `90 mm` corridor policy while preserving every
    target skill sample. ARM-214 then solves all 40 samples for every target with
    fresh canonical IK and continuity gates, without reusing H joint solutions.
-   Collision/fixed-root and native-mechanics qualification remain next.
+   ARM-215 compiles those accepted routes into bounded collision replay plans
+   with `49`, `46`, `58`, and `55` joint configurations and the governed
+   fixed-world root invariant. Native collision execution and native-mechanics
+   qualification remain next.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.
