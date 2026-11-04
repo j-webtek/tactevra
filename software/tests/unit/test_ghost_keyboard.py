@@ -209,9 +209,33 @@ def test_native_h_displacement_is_assessed_by_shared_contract():
     rows[0]['key_center_z_m']=0.0179
     result=mechanics.assess_native_key_trace(profile,rows,rest_key_z_m=0.018)
     assert result['accepted']
+    assert result['commanded_key']=='H'
     assert result['resolved_key']=='H'
     assert result['native_contact_observed']
     assert result['native_contact_step_count']==4
+
+
+def test_native_displacement_uses_the_requested_representative_key_region():
+    mechanics=_load_key_mechanics()
+    profile=mechanics.build_profile(ROOT/'software/config/nominal_target_profiles.json')
+    compressions=[0.0,1.0,2.2,3.0,1.2,0.0]
+    rows=[{
+        'time_s':index*0.02,
+        'key_center_z_m':0.018-compression/1000,
+        'tip_key_separation_m':-0.0001 if compression else 0.001,
+    } for index,compression in enumerate(compressions)]
+    result=mechanics.assess_native_key_trace(
+        profile,rows,rest_key_z_m=0.018,target_id='PERIOD'
+    )
+    assert result['accepted']
+    assert result['commanded_key']=='PERIOD'
+    assert result['resolved_key']=='PERIOD'
+    assert result['native_contact_observed']
+
+    with pytest.raises(mechanics.MechanicsContractError,match='is unavailable'):
+        mechanics.assess_native_key_trace(
+            profile,rows,rest_key_z_m=0.018,target_id='NOT_A_KEY'
+        )
 
 
 def _arm207_plan_fixture(mechanics):

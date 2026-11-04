@@ -8384,16 +8384,20 @@ def assess_native_key_trace(
     native_samples: Iterable[dict[str, Any]],
     *,
     rest_key_z_m: float | None = None,
+    target_id: str = "H",
 ) -> dict[str, Any]:
     """Convert native key displacement into the shared mechanism-state contract."""
     rows = list(native_samples)
     if len(rows) < 2:
         raise MechanicsContractError("native trace must contain at least two samples")
+    regions = profile.get("regions", {})
+    if target_id not in regions:
+        raise MechanicsContractError(f"native trace target {target_id!r} is unavailable")
     rest_z = _finite_number(
         rows[0].get("key_center_z_m") if rest_key_z_m is None else rest_key_z_m,
         "native rest key z",
     )
-    h_center = profile["regions"]["H"]["center_board_xy_mm"]
+    target_center = regions[target_id]["center_board_xy_mm"]
     contract_trace = []
     native_contact_steps = 0
     for index, row in enumerate(rows):
@@ -8403,11 +8407,12 @@ def assess_native_key_trace(
             native_contact_steps += 1
         contract_trace.append({
             "time_s": _finite_number(row.get("time_s"), f"native sample {index} time"),
-            "tip_x_board_mm": h_center[0],
-            "tip_y_board_mm": h_center[1],
+            "tip_x_board_mm": target_center[0],
+            "tip_y_board_mm": target_center[1],
             "compression_mm": max(0.0, (rest_z - key_z) * 1000.0),
         })
     result = evaluate_trace(profile, contract_trace)
+    result["commanded_key"] = target_id
     result["native_contact_step_count"] = native_contact_steps
     result["native_contact_observed"] = native_contact_steps > 0
     result["native_trace_sample_count"] = len(rows)
