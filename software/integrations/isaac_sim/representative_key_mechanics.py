@@ -125,6 +125,9 @@ REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA = (
 REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm2_representative_key_ik_campaign.v1"
 )
+REPRESENTATIVE_KEY_COLLISION_REPLAY_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_collision_replay_campaign.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -1846,6 +1849,220 @@ def qualify_representative_key_park_routes_ik(
             "collision_fixed_root_and_native_contact_qualification_remain_separate",
             "source_bundle_contributes_only_initial_seed_and_model_lineage",
             "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def build_representative_key_collision_replay_campaign(
+    ik_campaign: dict[str, Any],
+    source_bundle: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    toolchain_lock: dict[str, Any],
+) -> dict[str, Any]:
+    """Compile ARM-214 routes into bounded fixed-root collision replays."""
+
+    campaign_hash = _require_canonical_hash(
+        ik_campaign, "campaign_sha256", "ARM-214 IK campaign"
+    )
+    bundle_hash = _require_canonical_hash(
+        source_bundle, "bundle_sha256", "canonical IK source bundle"
+    )
+    candidate_hash = _require_canonical_hash(
+        collision_candidate, "candidate_sha256", "collision candidate"
+    )
+    toolchain_hash = _canonical_sha256(toolchain_lock)
+    if (
+        ik_campaign.get("schema") != REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA
+        or ik_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION"
+        or ik_campaign.get("accepted_target_count") != 4
+        or ik_campaign.get("target_count") != 4
+        or ik_campaign.get("source_h_joint_solutions_reused") is not False
+        or ik_campaign.get("source_bindings", {}).get(
+            "canonical_ik_source_bundle_sha256"
+        )
+        != bundle_hash
+    ):
+        raise MechanicsContractError("representative collision campaign lineage changed")
+    if (
+        collision_candidate.get("schema")
+        != "tactevra.simulation_collision_candidate.v1"
+        or collision_candidate.get("scope")
+        != "SIMULATION_ONLY_EXPLORATORY_ZERO_AUTHORITY"
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+    ):
+        raise MechanicsContractError("collision candidate boundary changed")
+    blockers = collision_candidate.get("blockers")
+    robot_bodies = collision_candidate.get("robot_bodies")
+    workcell_bodies = collision_candidate.get("workcell_bodies")
+    if (
+        not isinstance(blockers, list)
+        or not blockers
+        or not all(isinstance(item, str) and item for item in blockers)
+        or not isinstance(robot_bodies, list)
+        or not robot_bodies
+        or not isinstance(workcell_bodies, list)
+        or not workcell_bodies
+    ):
+        raise MechanicsContractError("collision candidate coverage is absent")
+    if (
+        toolchain_lock.get("schema") != "rocell.isaac_sim_toolchain_lock.v1"
+        or toolchain_lock.get("selection_status") != "SELECTED"
+        or toolchain_lock.get("hardware_access") is not False
+        or toolchain_lock.get("physical_authority") is not False
+        or toolchain_lock.get("wire_commands") != []
+    ):
+        raise MechanicsContractError("Isaac toolchain lock is not selected zero-authority")
+    for document, label in (
+        (ik_campaign, "ARM-214 IK campaign"),
+        (source_bundle, "canonical IK source bundle"),
+        (collision_candidate, "collision candidate"),
+    ):
+        if (
+            document.get("hardware_access", False) is not False
+            or document.get("physical_authority") is not False
+            or document.get(
+                "hardware_write_count", document.get("hardware_writes")
+            )
+            != 0
+            or document.get(
+                "physical_movement_count", document.get("physical_movements")
+            )
+            != 0
+            or document.get("commands", document.get("controller_commands")) != []
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    try:
+        from rocell.application.bounded_segment_collision_qualification import (
+            BoundedSegmentSamplingPolicy,
+            build_bounded_joint_sample_plan_from_results,
+        )
+        from rocell.kinematics import ARM_JOINT_NAMES
+    except ImportError as exc:
+        raise MechanicsContractError(
+            "bounded collision runtime is unavailable; include software/src on PYTHONPATH"
+        ) from exc
+
+    samples = source_bundle.get("samples")
+    initial_seed = (
+        samples[0].get("joint_positions_rad")
+        if isinstance(samples, list) and samples
+        else None
+    )
+    if not isinstance(initial_seed, dict) or tuple(initial_seed) != ARM_JOINT_NAMES:
+        raise MechanicsContractError("source bundle lacks the canonical initial joint seed")
+    initial_seed = {
+        name: _finite_number(initial_seed[name], f"initial seed {name}")
+        for name in ARM_JOINT_NAMES
+    }
+    policy = BoundedSegmentSamplingPolicy(
+        maximum_joint_step_rad=0.05,
+        maximum_samples=256,
+    )
+    fixed_base_contract = {
+        "mechanism": "USD_FIXED_JOINT_TO_WORLD",
+        "articulation_path": "/roarm_m3",
+        "base_body_name": "base_link",
+        "author_before_physics_initialization": True,
+        "requested_placement_is_world_anchor": True,
+    }
+    root_pose_invariant = {
+        "translation_tolerance_mm": 0.05,
+        "orientation_tolerance_deg": 0.1,
+        "required_at_admission": True,
+        "required_after_every_sample": True,
+        "failure_behavior": "ERROR_NO_ACCEPTED_COLLISION_RECEIPT",
+    }
+    results = ik_campaign.get("results")
+    if not isinstance(results, list) or len(results) != 4:
+        raise MechanicsContractError("representative IK target coverage changed")
+    target_plans = []
+    for expected_target, result in zip(
+        ("1", "SPACE", "ENTER", "PERIOD"), results, strict=True
+    ):
+        result_hash = _require_canonical_hash(
+            result, "result_sha256", f"ARM-214 {expected_target} result"
+        )
+        joint_results = result.get("joint_results")
+        if (
+            result.get("target_id") != expected_target
+            or result.get("status")
+            != "READY_FOR_COLLISION_AND_FIXED_ROOT_QUALIFICATION"
+            or result.get("sample_count") != 40
+            or result.get("evaluated_sample_count") != 40
+            or result.get("ik_all_samples_accepted") is not True
+            or not isinstance(joint_results, list)
+            or len(joint_results) != 40
+        ):
+            raise MechanicsContractError(
+                f"ARM-214 {expected_target} result is not collision-ready"
+            )
+        bounded = build_bounded_joint_sample_plan_from_results(
+            initial_seed, joint_results, policy
+        )
+        target_plan = {
+            "target_id": expected_target,
+            "status": "READY_FOR_FIXED_ROOT_NATIVE_COLLISION_REPLAY",
+            "source_ik_result_sha256": result_hash,
+            "source_request_sha256": result["source_request_sha256"],
+            "source_joint_result_count": len(joint_results),
+            "joint_order": list(ARM_JOINT_NAMES),
+            "bounded_sample_count": len(bounded),
+            "bounded_samples": [item.to_dict() for item in bounded],
+            "fixed_base_contract": dict(fixed_base_contract),
+            "root_pose_invariant": dict(root_pose_invariant),
+            "collision_scopes": [
+                "ROBOT_SELF_COLLISION",
+                "ROBOT_TO_WORKCELL",
+                "ROBOT_TOOL_CAMERA_SUPPORT_DIAGNOSTIC_WHERE_BOUND",
+            ],
+            "diagnostic_only": True,
+            "installed_collision_qualified": False,
+            "continuous_collision_proven": False,
+            "native_contact_replay_authorized": False,
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "gate_promotions": [],
+        }
+        target_plan["plan_sha256"] = _canonical_sha256(target_plan)
+        target_plans.append(target_plan)
+
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_COLLISION_REPLAY_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_FIXED_ROOT_NATIVE_COLLISION_REPLAY",
+        "source_bindings": {
+            "arm214_ik_campaign_sha256": campaign_hash,
+            "canonical_ik_source_bundle_sha256": bundle_hash,
+            "collision_candidate_sha256": candidate_hash,
+            "isaac_toolchain_lock_sha256": toolchain_hash,
+        },
+        "bounded_sampling_policy": policy.to_dict(),
+        "fixed_base_contract": fixed_base_contract,
+        "root_pose_invariant": root_pose_invariant,
+        "collision_candidate_blockers": list(blockers),
+        "target_count": len(target_plans),
+        "target_plans": target_plans,
+        "native_replay_executed": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": [
+            "campaign_compilation_does_not_execute_native_collision_queries",
+            "bounded_sampling_is_not_continuous_swept_volume_proof",
+            "exploratory_collision_candidate_is_uninstalled",
+            "native_contact_and_physical_keyboard_authority_remain_separate",
         ],
     }
     campaign["campaign_sha256"] = _canonical_sha256(campaign)
@@ -8530,6 +8747,12 @@ def main() -> int:
         help="run fresh canonical IK over every ARM-213 representative route",
     )
     parser.add_argument("--representative-key-park-route-campaign", type=Path)
+    parser.add_argument(
+        "--build-representative-key-collision-replay-campaign",
+        action="store_true",
+        help="compile ARM-214 routes into bounded fixed-root collision replays",
+    )
+    parser.add_argument("--representative-key-ik-campaign", type=Path)
     parser.add_argument("--governed-demonstration", type=Path)
     parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
@@ -8576,6 +8799,7 @@ def main() -> int:
             and not args.build_representative_key_adaptation_campaign
             and not args.build_representative_key_park_route_campaign
             and not args.qualify_representative_key_park_routes_ik
+            and not args.build_representative_key_collision_replay_campaign
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -8605,6 +8829,7 @@ def main() -> int:
             and not args.build_feedback_adapted_robot_h_replay_plan
             and not args.build_trace_lifted_robot_h_replay_plan
             and not args.build_contact_refined_robot_h_replay_plan
+            and not args.build_representative_key_collision_replay_campaign
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -8640,6 +8865,28 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.build_representative_key_collision_replay_campaign:
+            required = (
+                args.representative_key_ik_campaign,
+                args.ik_source_bundle,
+                args.collision_candidate,
+                args.toolchain_lock,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-215 requires --representative-key-ik-campaign, "
+                    "--ik-source-bundle, --collision-candidate, and --toolchain-lock"
+                )
+            result = build_representative_key_collision_replay_campaign(
+                json.loads(
+                    args.representative_key_ik_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(args.toolchain_lock.resolve(strict=True).read_bytes()),
             )
         elif args.qualify_representative_key_park_routes_ik:
             required = (

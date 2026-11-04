@@ -9405,3 +9405,24 @@ rewriting history. New entries must use a unique evidence ID.
 - Limitations: discrete IK and continuity do not prove collision clearance,
   fixed-root stability, native key contact, or physical execution authority.
 - Next dependency: collision/fixed-root qualification for each accepted route.
+
+### E-20261103-ARM-215 — representative collision/fixed-root replays compiled
+
+- Stage: LM2 bounded collision and fixed-root replay planning.
+- Result: the accepted `1`, `SPACE`, `ENTER`, and `PERIOD` routes expand to
+  `49`, `46`, `58`, and `55` deterministic joint configurations under the
+  existing `0.05 rad` maximum-step and 256-sample resource policy.
+- Lineage: each target plan binds its ARM-214 result, the canonical initial
+  seed, retained exploratory collision candidate, and selected Isaac toolchain.
+  Each requires `USD_FIXED_JOINT_TO_WORLD` and root-pose observations at
+  admission and after every sample.
+- External evidence: campaign SHA-256
+  `dfd20006fcd85958747b3b380d3912ca84f289b9cbbe354065d1261e891ddcf2`
+  at `C:\IsaacSim\artifacts\issue190\arm215-representative-key-collision-replay-campaign-001\campaign.json`.
+- Authority: zero hardware writes, physical movements, controller commands,
+  and gate promotions.
+- Limitations: this is a replay plan, not a native collision result. Bounded
+  samples do not prove continuous swept-volume clearance, installed collision
+  safety, native key contact, or physical execution authority.
+- Next dependency: execute the four selected native Isaac fixed-root collision
+  diagnostics and retain complete per-target receipts.
