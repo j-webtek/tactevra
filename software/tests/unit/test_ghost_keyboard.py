@@ -838,12 +838,12 @@ def _arm213_campaign_fixture(mechanics):
         'controller_commands':[],
     }
     selection['selection_sha256']=mechanics._canonical_sha256(selection)
-    return adaptation,source,selection
+    return adaptation,source,selection,profile
 
 
 def test_arm213_connects_each_skill_to_park_without_joint_reuse():
     mechanics=_load_key_mechanics()
-    adaptation,source,selection=_arm213_campaign_fixture(mechanics)
+    adaptation,source,selection,_profile=_arm213_campaign_fixture(mechanics)
     campaign=mechanics.build_representative_key_park_route_campaign(
         adaptation,source,selection
     )
@@ -870,7 +870,7 @@ def test_arm213_connects_each_skill_to_park_without_joint_reuse():
 
 def test_arm213_rejects_tampered_skill_and_route_policy():
     mechanics=_load_key_mechanics()
-    adaptation,source,selection=_arm213_campaign_fixture(mechanics)
+    adaptation,source,selection,_profile=_arm213_campaign_fixture(mechanics)
     adaptation['requests'][0]['samples'][0]['expected_tool_tip_board_mm'][0]+=1.0
     adaptation['campaign_sha256']=mechanics._canonical_sha256({
         key:value for key,value in adaptation.items() if key!='campaign_sha256'
@@ -880,7 +880,7 @@ def test_arm213_rejects_tampered_skill_and_route_policy():
             adaptation,source,selection
         )
 
-    adaptation,source,selection=_arm213_campaign_fixture(mechanics)
+    adaptation,source,selection,_profile=_arm213_campaign_fixture(mechanics)
     selection['ranked_candidates'][0]['route_shape_candidate'][
         'corridor_height_board_mm'
     ]=70.0
@@ -892,6 +892,46 @@ def test_arm213_rejects_tampered_skill_and_route_policy():
             adaptation,source,selection
         )
 
+
+def test_arm214_fresh_ik_accepts_all_representative_routes():
+    mechanics=_load_key_mechanics()
+    adaptation,source,selection,profile=_arm213_campaign_fixture(mechanics)
+    routes=mechanics.build_representative_key_park_route_campaign(
+        adaptation,source,selection
+    )
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    campaign=mechanics.qualify_representative_key_park_routes_ik(
+        routes,source,bundle,profile,workspace=ROOT
+    )
+    assert campaign['status']=='READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION'
+    assert campaign['accepted_target_count']==4
+    assert campaign['source_h_joint_solutions_reused'] is False
+    assert [result['target_id'] for result in campaign['results']]==[
+        '1','SPACE','ENTER','PERIOD'
+    ]
+    assert all(result['ik_all_samples_accepted'] for result in campaign['results'])
+    assert all(result['evaluated_sample_count']==40 for result in campaign['results'])
+    assert campaign['hardware_access'] is False and campaign['controller_commands']==[]
+
+
+def test_arm214_rejects_tampered_route_campaign_before_ik():
+    mechanics=_load_key_mechanics()
+    adaptation,source,selection,profile=_arm213_campaign_fixture(mechanics)
+    routes=mechanics.build_representative_key_park_route_campaign(
+        adaptation,source,selection
+    )
+    routes['requests'][0]['samples'][1]['expected_tool_tip_board_mm'][0]+=1.0
+    bundle=json.loads((
+        ROOT/'software/integrations/isaac_sim/evidence/'
+        'actual_emitter_joint_schedule_bundle_9e5c878_20260929.json'
+    ).read_bytes())
+    with pytest.raises(mechanics.MechanicsContractError,match='campaign hash'):
+        mechanics.qualify_representative_key_park_routes_ik(
+            routes,source,bundle,profile,workspace=ROOT
+        )
 
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
     mechanics=_load_key_mechanics()
