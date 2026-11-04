@@ -128,6 +128,18 @@ REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA = (
 REPRESENTATIVE_KEY_COLLISION_REPLAY_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm2_representative_key_collision_replay_campaign.v1"
 )
+REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_collision_replay_plan.v1"
+)
+REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_collision_receipt.v1"
+)
+REPRESENTATIVE_KEY_NATIVE_COLLISION_MANIFEST_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_collision_manifest.v1"
+)
+REPRESENTATIVE_KEY_NATIVE_COLLISION_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm2_representative_key_native_collision_campaign.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -259,7 +271,10 @@ def build_drive_controlled_robot_h_replay_plan(
     joint_results = ik_receipt.get("joint_results")
     if (
         cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
-        or cartesian_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or cartesian_request.get("status") not in {
+            "READY_FOR_IK_QUALIFICATION",
+            "READY_FOR_TARGET_SPECIFIC_IK_QUALIFICATION",
+        }
         or cartesian_request.get("route_shape_candidate_id") != candidate_id
         or cartesian_request.get("profile_sha256") != profile_hash
         or not isinstance(samples, list)
@@ -2069,6 +2084,419 @@ def build_representative_key_collision_replay_campaign(
     return campaign
 
 
+def materialize_representative_key_native_collision_inputs(
+    route_campaign: dict[str, Any],
+    ik_campaign: dict[str, Any],
+    collision_campaign: dict[str, Any],
+    source_bundle: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    toolchain_lock: dict[str, Any],
+    accepted_pair_policy: dict[str, Any],
+    *,
+    output_dir: Path,
+) -> dict[str, Any]:
+    """Materialize truthful per-target inputs for direct LM2 native replay."""
+
+    route_hash = _require_canonical_hash(
+        route_campaign, "campaign_sha256", "ARM-213 route campaign"
+    )
+    ik_hash = _require_canonical_hash(
+        ik_campaign, "campaign_sha256", "ARM-214 IK campaign"
+    )
+    collision_hash = _require_canonical_hash(
+        collision_campaign, "campaign_sha256", "ARM-215 collision campaign"
+    )
+    bundle_hash = _require_canonical_hash(
+        source_bundle, "bundle_sha256", "canonical IK source bundle"
+    )
+    candidate_hash = _require_canonical_hash(
+        collision_candidate, "candidate_sha256", "collision candidate"
+    )
+    policy_hash = _require_canonical_hash(
+        accepted_pair_policy, "policy_sha256", "accepted collision pair policy"
+    )
+    toolchain_hash = _canonical_sha256(toolchain_lock)
+    if (
+        route_campaign.get("schema") != REPRESENTATIVE_KEY_PARK_ROUTE_CAMPAIGN_SCHEMA
+        or ik_campaign.get("schema") != REPRESENTATIVE_KEY_IK_CAMPAIGN_SCHEMA
+        or collision_campaign.get("schema")
+        != REPRESENTATIVE_KEY_COLLISION_REPLAY_CAMPAIGN_SCHEMA
+        or collision_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_FIXED_ROOT_NATIVE_COLLISION_REPLAY"
+        or ik_campaign.get("source_bindings", {}).get(
+            "arm213_route_campaign_sha256"
+        )
+        != route_hash
+        or collision_campaign.get("source_bindings", {}).get(
+            "arm214_ik_campaign_sha256"
+        )
+        != ik_hash
+        or collision_campaign.get("source_bindings", {}).get(
+            "canonical_ik_source_bundle_sha256"
+        )
+        != bundle_hash
+        or collision_campaign.get("source_bindings", {}).get(
+            "collision_candidate_sha256"
+        )
+        != candidate_hash
+        or collision_campaign.get("source_bindings", {}).get(
+            "isaac_toolchain_lock_sha256"
+        )
+        != toolchain_hash
+        or accepted_pair_policy.get("collision_candidate_sha256") != candidate_hash
+        or accepted_pair_policy.get("status")
+        != "ACCEPTED_FOR_ZERO_AUTHORITY_DIAGNOSTIC_ONLY"
+    ):
+        raise MechanicsContractError("representative native admission lineage changed")
+    for document, label in (
+        (route_campaign, "ARM-213 route campaign"),
+        (ik_campaign, "ARM-214 IK campaign"),
+        (collision_campaign, "ARM-215 collision campaign"),
+        (source_bundle, "canonical IK source bundle"),
+        (accepted_pair_policy, "accepted pair policy"),
+    ):
+        if (
+            document.get("hardware_access", False) is not False
+            or document.get("physical_authority", False) is not False
+            or document.get("hardware_writes", 0) != 0
+            or document.get("physical_movements", 0) != 0
+            or document.get("controller_commands", []) != []
+        ):
+            raise MechanicsContractError(f"{label} crossed zero authority")
+
+    source_samples = source_bundle.get("samples")
+    initial_seed = (
+        source_samples[0].get("joint_positions_rad")
+        if isinstance(source_samples, list) and source_samples
+        else None
+    )
+    if not isinstance(initial_seed, dict):
+        raise MechanicsContractError("canonical IK source seed is absent")
+    route_requests = route_campaign.get("requests")
+    ik_results = ik_campaign.get("results")
+    target_plans = collision_campaign.get("target_plans")
+    if not all(isinstance(items, list) and len(items) == 4 for items in (
+        route_requests, ik_results, target_plans
+    )):
+        raise MechanicsContractError("representative target coverage changed")
+
+    station_bodies = [
+        body for body in collision_candidate.get("workcell_bodies", [])
+        if isinstance(body, dict)
+        and str(body.get("body_id", "")).startswith("workcell:station:")
+    ]
+    if not station_bodies:
+        raise MechanicsContractError("station planning regions are absent")
+    root = output_dir.resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    entries = []
+    for expected_target, cartesian, ik_result, target_plan in zip(
+        ("1", "SPACE", "ENTER", "PERIOD"),
+        route_requests,
+        ik_results,
+        target_plans,
+        strict=True,
+    ):
+        request_hash = _require_canonical_hash(
+            cartesian, "request_sha256", f"ARM-213 {expected_target} request"
+        )
+        result_hash = _require_canonical_hash(
+            ik_result, "result_sha256", f"ARM-214 {expected_target} result"
+        )
+        plan_hash = _require_canonical_hash(
+            target_plan, "plan_sha256", f"ARM-215 {expected_target} plan"
+        )
+        if (
+            cartesian.get("key_id") != expected_target
+            or ik_result.get("target_id") != expected_target
+            or target_plan.get("target_id") != expected_target
+            or ik_result.get("source_request_sha256") != request_hash
+            or target_plan.get("source_request_sha256") != request_hash
+            or target_plan.get("source_ik_result_sha256") != result_hash
+            or target_plan.get("status")
+            != "READY_FOR_FIXED_ROOT_NATIVE_COLLISION_REPLAY"
+        ):
+            raise MechanicsContractError(
+                f"representative {expected_target} target lineage changed"
+            )
+        ik_receipt = {
+            "schema": TCP_IK_SCREEN_SCHEMA,
+            "status": "READY_FOR_COLLISION_QUALIFICATION",
+            "source_request_sha256": request_hash,
+            "source_bundle_sha256": bundle_hash,
+            "virtual_profile_sha256": ik_campaign["source_bindings"][
+                "virtual_profile_sha256"
+            ],
+            "initial_seed_joint_positions_rad": dict(initial_seed),
+            "sample_count": ik_result["sample_count"],
+            "evaluated_sample_count": ik_result["evaluated_sample_count"],
+            "ik_all_samples_accepted": ik_result["ik_all_samples_accepted"],
+            "joint_results": ik_result["joint_results"],
+            "source_arm214_result_sha256": result_hash,
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "gate_promotions": [],
+        }
+        ik_receipt["receipt_sha256"] = _canonical_sha256(ik_receipt)
+        raw_request = build_robot_tcp_collision_replay_request(
+            ik_receipt, collision_candidate, toolchain_lock
+        )
+        if (
+            raw_request.get("bounded_samples") != target_plan.get("bounded_samples")
+            or raw_request.get("bounded_sample_count")
+            != target_plan.get("bounded_sample_count")
+        ):
+            raise MechanicsContractError(
+                f"representative {expected_target} bounded replay changed"
+            )
+        policy_request = bind_collision_pair_policy_request(
+            raw_request, accepted_pair_policy
+        )
+        contact_samples = [
+            sample for sample in cartesian.get("samples", [])
+            if sample.get("phase") == "CONTACT"
+            and sample.get("phase_endpoint") is True
+        ]
+        if not contact_samples:
+            raise MechanicsContractError(
+                f"representative {expected_target} contact endpoint is absent"
+            )
+        contact_point = contact_samples[0].get("expected_tool_tip_board_mm")
+        occupied = [
+            body["body_id"] for body in station_bodies
+            if any(
+                _point_inside_oriented_box(
+                    contact_point,
+                    primitive,
+                    label=f"station region {body['body_id']}",
+                )
+                for primitive in body.get("primitives", [])
+            )
+        ]
+        if len(occupied) != 1:
+            raise MechanicsContractError(
+                f"representative {expected_target} station binding is ambiguous"
+            )
+        station_predicate = build_station_route_predicate(
+            cartesian, collision_candidate, {expected_target: occupied}
+        )
+        if station_predicate.get("status") != "PASS":
+            raise MechanicsContractError(
+                f"representative {expected_target} station predicate failed"
+            )
+        replay_plan = {
+            "schema": REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
+            "status": "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY",
+            "target_id": expected_target,
+            "source_arm215_campaign_sha256": collision_hash,
+            "source_arm215_target_plan_sha256": plan_hash,
+            "source_request_sha256": request_hash,
+            "source_ik_receipt_sha256": ik_receipt["receipt_sha256"],
+            "source_collision_request_sha256": policy_request["request_sha256"],
+            "source_station_route_predicate_sha256": station_predicate[
+                "predicate_sha256"
+            ],
+            "source_bounded_sample_count": target_plan["bounded_sample_count"],
+            "fixed_base_contract": target_plan["fixed_base_contract"],
+            "root_pose_invariant": target_plan["root_pose_invariant"],
+            "rotation_serialization": {
+                "matrix_layout": "ROW_MAJOR_3X3",
+                "semantics": "RIGHT_HANDED_ACTIVE_COLUMN_VECTOR",
+                "gf_row_vector_storage_transposed": True,
+            },
+            "hardware_access": False,
+            "physical_authority": False,
+            "controller_commands": [],
+            "hardware_writes": 0,
+            "physical_movements": 0,
+            "gate_promotions": [],
+        }
+        replay_plan["plan_sha256"] = _canonical_sha256(replay_plan)
+        target_dir = root / expected_target.lower()
+        target_dir.mkdir(parents=True, exist_ok=True)
+        documents = {
+            "cartesian_request.json": cartesian,
+            "ik_receipt.json": ik_receipt,
+            "collision_request.json": policy_request,
+            "station_route_predicate.json": station_predicate,
+            "fixed_base_replay_plan.json": replay_plan,
+        }
+        for name, document in documents.items():
+            (target_dir / name).write_text(
+                json.dumps(document, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+        entries.append({
+            "target_id": expected_target,
+            "directory": expected_target.lower(),
+            "source_arm215_target_plan_sha256": plan_hash,
+            "document_hashes": {
+                "cartesian_request.json": request_hash,
+                "ik_receipt.json": ik_receipt["receipt_sha256"],
+                "collision_request.json": policy_request["request_sha256"],
+                "station_route_predicate.json": station_predicate[
+                    "predicate_sha256"
+                ],
+                "fixed_base_replay_plan.json": replay_plan["plan_sha256"],
+            },
+            "bounded_sample_count": target_plan["bounded_sample_count"],
+            "station_region_id": occupied[0],
+        })
+    manifest = {
+        "schema": REPRESENTATIVE_KEY_NATIVE_COLLISION_MANIFEST_SCHEMA,
+        "status": "READY_FOR_SELECTED_ZERO_AUTHORITY_NATIVE_REPLAY",
+        "source_bindings": {
+            "arm213_route_campaign_sha256": route_hash,
+            "arm214_ik_campaign_sha256": ik_hash,
+            "arm215_collision_campaign_sha256": collision_hash,
+            "canonical_ik_source_bundle_sha256": bundle_hash,
+            "collision_candidate_sha256": candidate_hash,
+            "accepted_collision_pair_policy_sha256": policy_hash,
+            "isaac_toolchain_lock_sha256": toolchain_hash,
+        },
+        "target_count": len(entries),
+        "entries": entries,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    manifest["manifest_sha256"] = _canonical_sha256(manifest)
+    (root / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
+def aggregate_representative_key_native_collision_campaign(
+    manifest: dict[str, Any],
+    receipts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Verify and aggregate all representative native collision receipts."""
+
+    manifest_hash = _require_canonical_hash(
+        manifest, "manifest_sha256", "representative native collision manifest"
+    )
+    entries = manifest.get("entries")
+    if (
+        manifest.get("schema") != REPRESENTATIVE_KEY_NATIVE_COLLISION_MANIFEST_SCHEMA
+        or manifest.get("status") != "READY_FOR_SELECTED_ZERO_AUTHORITY_NATIVE_REPLAY"
+        or manifest.get("target_count") != 4
+        or not isinstance(entries, list)
+        or len(entries) != 4
+        or manifest.get("hardware_access") is not False
+        or manifest.get("physical_authority") is not False
+        or manifest.get("hardware_writes") != 0
+        or manifest.get("physical_movements") != 0
+        or manifest.get("controller_commands") != []
+    ):
+        raise MechanicsContractError("representative native manifest boundary changed")
+    receipt_by_target = {
+        receipt.get("representative_target_id"): receipt for receipt in receipts
+    }
+    expected_targets = ["1", "SPACE", "ENTER", "PERIOD"]
+    if (
+        len(receipts) != 4
+        or len(receipt_by_target) != 4
+        or list(receipt_by_target) != expected_targets
+        or [entry.get("target_id") for entry in entries] != expected_targets
+    ):
+        raise MechanicsContractError("representative native receipt coverage changed")
+
+    results = []
+    total_samples = 0
+    for entry in entries:
+        target_id = entry["target_id"]
+        receipt = receipt_by_target[target_id]
+        receipt_hash = _require_canonical_hash(
+            receipt, "receipt_sha256", f"representative {target_id} native receipt"
+        )
+        document_hashes = entry.get("document_hashes")
+        root_invariant = receipt.get("root_pose_invariant")
+        if (
+            receipt.get("schema") != REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA
+            or receipt.get("status") != "DIAGNOSTIC_OVERLAPS_OBSERVED"
+            or receipt.get("source_arm215_campaign_sha256")
+            != manifest.get("source_bindings", {}).get(
+                "arm215_collision_campaign_sha256"
+            )
+            or not isinstance(document_hashes, dict)
+            or receipt.get("source_arm215_target_plan_sha256")
+            != entry.get("source_arm215_target_plan_sha256")
+            or receipt.get("source_representative_plan_mutated") is not False
+            or receipt.get("bounded_sample_count")
+            != entry.get("bounded_sample_count")
+            or receipt.get("physical_solid_blocker_pair_count") != 0
+            or receipt.get("planning_envelope_blocker_pair_count") != 0
+            or receipt.get("unreviewed_blocker_pair_count") != 0
+            or not isinstance(root_invariant, dict)
+            or root_invariant.get("status") != "PASS"
+            or root_invariant.get("observation_count")
+            != receipt.get("bounded_sample_count") + 1
+            or receipt.get("hardware_access") is not False
+            or receipt.get("physical_authority") is not False
+            or receipt.get("hardware_writes") != 0
+            or receipt.get("physical_movements") != 0
+            or receipt.get("controller_commands") != []
+        ):
+            raise MechanicsContractError(
+                f"representative {target_id} native receipt boundary changed"
+            )
+        total_samples += receipt["bounded_sample_count"]
+        results.append({
+            "target_id": target_id,
+            "receipt_sha256": receipt_hash,
+            "source_arm215_target_plan_sha256": receipt[
+                "source_arm215_target_plan_sha256"
+            ],
+            "bounded_sample_count": receipt["bounded_sample_count"],
+            "unique_collision_pair_count": receipt["unique_collision_pair_count"],
+            "policy_excluded_pair_count": receipt[
+                "policy_excluded_pair_count"
+            ],
+            "physical_solid_blocker_pair_count": 0,
+            "planning_envelope_blocker_pair_count": 0,
+            "unreviewed_blocker_pair_count": 0,
+            "root_pose_invariant_status": "PASS",
+        })
+    campaign = {
+        "schema": REPRESENTATIVE_KEY_NATIVE_COLLISION_CAMPAIGN_SCHEMA,
+        "status": "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN",
+        "source_manifest_sha256": manifest_hash,
+        "source_bindings": dict(manifest["source_bindings"]),
+        "target_count": 4,
+        "total_bounded_sample_count": total_samples,
+        "results": results,
+        "native_replay_executed": True,
+        "fixed_root_invariant_passed": True,
+        "physical_solid_blocker_pair_count": 0,
+        "planning_envelope_blocker_pair_count": 0,
+        "unreviewed_blocker_pair_count": 0,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "physical_keyboard_qualified": False,
+        "limitations": [
+            "discrete_replay_does_not_prove_continuous_clearance",
+            "exploratory_collision_candidate_is_uninstalled",
+            "simulation_does_not_authorize_physical_motion",
+        ],
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
 def canonical_active_rotation_row_major_from_gf_rows(
     rows: list[list[float]],
 ) -> list[float]:
@@ -2272,7 +2700,10 @@ def build_station_route_predicate(
         raise MechanicsContractError("Cartesian request hash mismatch")
     if (
         cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
-        or cartesian_request.get("status") != "READY_FOR_IK_QUALIFICATION"
+        or cartesian_request.get("status") not in {
+            "READY_FOR_IK_QUALIFICATION",
+            "READY_FOR_TARGET_SPECIFIC_IK_QUALIFICATION",
+        }
         or cartesian_request.get("hardware_access") is not False
         or cartesian_request.get("controller_commands") != []
         or cartesian_request.get("hardware_writes") != 0
@@ -6495,6 +6926,7 @@ def run_robot_tcp_collision_diagnostic(
             raise MechanicsContractError("collision geometry capture samples are absent")
     fixed_base_replay_plan = None
     fixed_base_candidate = None
+    representative_fixed_base = False
     if fixed_base_replay_plan_path is not None:
         fixed_base_replay_plan = json.loads(
             fixed_base_replay_plan_path.resolve(strict=True).read_bytes()
@@ -6504,9 +6936,15 @@ def run_robot_tcp_collision_diagnostic(
         unsigned_plan.pop("plan_sha256", None)
         fixed_contract = fixed_base_replay_plan.get("fixed_base_contract")
         root_contract = fixed_base_replay_plan.get("root_pose_invariant")
+        plan_schema = fixed_base_replay_plan.get("schema")
+        representative_fixed_base = (
+            plan_schema == REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA
+        )
         if (
-            fixed_base_replay_plan.get("schema")
-            != FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA
+            plan_schema not in {
+                FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA,
+                REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
+            }
             or claimed_plan_hash != _canonical_sha256(unsigned_plan)
             or fixed_base_replay_plan.get("status")
             != "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY"
@@ -6526,21 +6964,44 @@ def run_robot_tcp_collision_diagnostic(
             or fixed_base_replay_plan.get("physical_movements") != 0
         ):
             raise MechanicsContractError("fixed-base collision replay plan is invalid")
-        matches = [
-            item
-            for item in fixed_base_replay_plan.get("candidates", [])
-            if item.get("source_request_sha256")
-            == request.get("source_request_sha256")
-        ]
-        if len(matches) != 1:
-            raise MechanicsContractError("fixed-base candidate binding is invalid")
-        fixed_base_candidate = matches[0]
-        if (
-            fixed_base_candidate.get("source_v4_bounded_sample_count")
-            != len(request.get("bounded_samples", []))
-            or accepted_pair_policy is None
-            or station_route_predicate is None
-        ):
+        if representative_fixed_base:
+            if (
+                fixed_base_replay_plan.get("source_request_sha256")
+                != request.get("source_request_sha256")
+                or fixed_base_replay_plan.get("source_ik_receipt_sha256")
+                != ik_receipt.get("receipt_sha256")
+                or fixed_base_replay_plan.get("source_collision_request_sha256")
+                != request.get("request_sha256")
+                or fixed_base_replay_plan.get(
+                    "source_station_route_predicate_sha256"
+                )
+                != (station_route_predicate or {}).get("predicate_sha256")
+                or fixed_base_replay_plan.get("source_bounded_sample_count")
+                != len(request.get("bounded_samples", []))
+            ):
+                raise MechanicsContractError(
+                    "representative fixed-base replay binding changed"
+                )
+            fixed_base_candidate = {
+                "source_arm215_target_plan_sha256": fixed_base_replay_plan[
+                    "source_arm215_target_plan_sha256"
+                ]
+            }
+        else:
+            matches = [
+                item
+                for item in fixed_base_replay_plan.get("candidates", [])
+                if item.get("source_request_sha256")
+                == request.get("source_request_sha256")
+            ]
+            if len(matches) != 1:
+                raise MechanicsContractError("fixed-base candidate binding is invalid")
+            fixed_base_candidate = matches[0]
+            if fixed_base_candidate.get("source_v4_bounded_sample_count") != len(
+                request.get("bounded_samples", [])
+            ):
+                raise MechanicsContractError("fixed-base replay source boundary changed")
+        if accepted_pair_policy is None or station_route_predicate is None:
             raise MechanicsContractError("fixed-base replay source boundary changed")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
@@ -6999,7 +7460,9 @@ def run_robot_tcp_collision_diagnostic(
 
         receipt: dict[str, Any] = {
             "schema": (
-                TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
+                REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA
+                if representative_fixed_base
+                else TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if fixed_base_replay_plan is not None
                 else TCP_ROUTE_PREDICATE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if station_route_predicate is not None
@@ -7128,9 +7591,6 @@ def run_robot_tcp_collision_diagnostic(
                 "fixed_base_solver_velocity_iteration_count": (
                     FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
                 ),
-                "source_v4_native_receipt_sha256": fixed_base_candidate[
-                    "source_v4_native_receipt_sha256"
-                ],
                 "root_pose_invariant": {
                     "status": "PASS",
                     "observation_count": len(root_invariant_records),
@@ -7154,8 +7614,27 @@ def run_robot_tcp_collision_diagnostic(
                 "rotation_serialization": fixed_base_replay_plan[
                     "rotation_serialization"
                 ],
-                "source_v4_receipt_mutated": False,
             })
+            if representative_fixed_base:
+                receipt.update({
+                    "representative_target_id": fixed_base_replay_plan[
+                        "target_id"
+                    ],
+                    "source_arm215_campaign_sha256": fixed_base_replay_plan[
+                        "source_arm215_campaign_sha256"
+                    ],
+                    "source_arm215_target_plan_sha256": fixed_base_candidate[
+                        "source_arm215_target_plan_sha256"
+                    ],
+                    "source_representative_plan_mutated": False,
+                })
+            else:
+                receipt.update({
+                    "source_v4_native_receipt_sha256": fixed_base_candidate[
+                        "source_v4_native_receipt_sha256"
+                    ],
+                    "source_v4_receipt_mutated": False,
+                })
             if len(root_invariant_records) != len(observed_samples) + 1:
                 raise RuntimeError("fixed-base root invariant coverage changed")
             receipt["limitations"].append(
@@ -8753,6 +9232,18 @@ def main() -> int:
         help="compile ARM-214 routes into bounded fixed-root collision replays",
     )
     parser.add_argument("--representative-key-ik-campaign", type=Path)
+    parser.add_argument(
+        "--materialize-representative-key-native-collision-inputs",
+        action="store_true",
+        help="materialize truthful per-target ARM-216 native replay admissions",
+    )
+    parser.add_argument(
+        "--aggregate-representative-key-native-collision-campaign",
+        action="store_true",
+        help="verify and aggregate the four completed ARM-216 native receipts",
+    )
+    parser.add_argument("--representative-key-collision-replay-campaign", type=Path)
+    parser.add_argument("--representative-native-output-dir", type=Path)
     parser.add_argument("--governed-demonstration", type=Path)
     parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
@@ -8800,6 +9291,7 @@ def main() -> int:
             and not args.build_representative_key_park_route_campaign
             and not args.qualify_representative_key_park_routes_ik
             and not args.build_representative_key_collision_replay_campaign
+            and not args.materialize_representative_key_native_collision_inputs
             and (
                 (args.cartesian_request is None)
                 != (args.ik_source_bundle is None)
@@ -8830,6 +9322,7 @@ def main() -> int:
             and not args.build_trace_lifted_robot_h_replay_plan
             and not args.build_contact_refined_robot_h_replay_plan
             and not args.build_representative_key_collision_replay_campaign
+            and not args.materialize_representative_key_native_collision_inputs
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -8865,6 +9358,72 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.aggregate_representative_key_native_collision_campaign:
+            if args.representative_native_output_dir is None:
+                raise MechanicsContractError(
+                    "ARM-216 aggregation requires --representative-native-output-dir"
+                )
+            native_root = args.representative_native_output_dir.resolve(strict=True)
+            manifest = json.loads(
+                (native_root / "manifest.json").resolve(strict=True).read_bytes()
+            )
+            entries = manifest.get("entries")
+            if not isinstance(entries, list):
+                raise MechanicsContractError("ARM-216 manifest entries are absent")
+            receipts = [
+                json.loads(
+                    (
+                        native_root / str(entry.get("directory")) / "native_receipt.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for entry in entries
+            ]
+            result = aggregate_representative_key_native_collision_campaign(
+                manifest, receipts
+            )
+        elif args.materialize_representative_key_native_collision_inputs:
+            required = (
+                args.representative_key_park_route_campaign,
+                args.representative_key_ik_campaign,
+                args.representative_key_collision_replay_campaign,
+                args.ik_source_bundle,
+                args.collision_candidate,
+                args.toolchain_lock,
+                args.accepted_collision_pair_policy,
+                args.representative_native_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-216 requires the ARM-213/214/215 campaigns, source "
+                    "bundle, collision candidate, toolchain lock, accepted pair "
+                    "policy, and native output directory"
+                )
+            result = materialize_representative_key_native_collision_inputs(
+                json.loads(
+                    args.representative_key_park_route_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.representative_key_ik_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.representative_key_collision_replay_campaign.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.ik_source_bundle.resolve(strict=True).read_bytes()),
+                json.loads(args.collision_candidate.resolve(strict=True).read_bytes()),
+                json.loads(args.toolchain_lock.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.accepted_collision_pair_policy.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                output_dir=args.representative_native_output_dir,
             )
         elif args.build_representative_key_collision_replay_campaign:
             required = (
@@ -9821,6 +10380,9 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_TARGET_SPECIFIC_IK_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_COLLISION_QUALIFICATION",
+            "READY_FOR_ZERO_AUTHORITY_FIXED_ROOT_NATIVE_COLLISION_REPLAY",
+            "READY_FOR_SELECTED_ZERO_AUTHORITY_NATIVE_REPLAY",
+            "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

@@ -1806,6 +1806,23 @@ This campaign only makes the native work reproducible. It does not claim that
 overlap queries ran, that any route has continuous clearance, or that contact
 or physical execution is authorized.
 
+ARM-216 closes that discrete native-collision step. It materializes one
+policy-bound admission per representative target, derives the left/right
+station region from each governed contact point, runs the existing fixed-base
+Isaac/PhysX diagnostic, and aggregates the four hash-verified receipts. The
+retained campaign covers all `208` bounded samples. Every per-sample root check
+passes and the aggregate reports zero physical-solid, planning-envelope, and
+unreviewed blocker pairs. Its canonical SHA-256 is
+`e5a125adbbe5f0233ddf79323eaaeb2b519eee4503e12739581483cb4aedbedb`.
+
+The aggregate remains diagnostic-only: the candidate geometry is uninstalled,
+discrete overlap queries do not prove continuous clearance, and the four keys
+still need the native mechanics evaluator before dataset admission. The
+materializer and post-run aggregator are invoked with
+`--materialize-representative-key-native-collision-inputs` and
+`--aggregate-representative-key-native-collision-campaign`, respectively;
+both use `--representative-native-output-dir` as the four-target artifact root.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

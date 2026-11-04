@@ -640,8 +640,14 @@ ScheduleGen. Neither is a physical success rate.
    fresh canonical IK and continuity gates, without reusing H joint solutions.
    ARM-215 compiles those accepted routes into bounded collision replay plans
    with `49`, `46`, `58`, and `55` joint configurations and the governed
-   fixed-world root invariant. Native collision execution and native-mechanics
-   qualification remain next.
+   fixed-world root invariant. ARM-216 now materializes those four plans as
+   direct, hash-bound native admissions and replays all `208` configurations
+   through Isaac/PhysX. Every route passes its fixed-root invariant with zero
+   physical-solid, planning-envelope, or unreviewed blocker pairs. The five
+   raw overlap pairs observed on each route are the already reviewed
+   diagnostic-only exclusions; they do not promote the uninstalled collision
+   candidate. Native key-mechanics acceptance for `1`, `SPACE`, `ENTER`, and
+   `PERIOD` remains next before any route enters a multi-key dataset.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.
