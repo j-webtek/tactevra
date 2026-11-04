@@ -634,7 +634,10 @@ ScheduleGen. Neither is a physical success rate.
    qualification, and native mechanics acceptance before they can enter a
    multi-key dataset.
    ARM-212 now emits the four hash-bound Cartesian skill requests without joint
-   reuse. Route connection and the declared qualification chain remain next.
+   reuse. ARM-213 connects each request to the governed park endpoint with the
+   retained `DIRECT_LINEAR` / `90 mm` corridor policy while preserving every
+   target skill sample. Fresh target-specific IK and the declared collision,
+   fixed-root, and native-mechanics qualification chain remain next.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.

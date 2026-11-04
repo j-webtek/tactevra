@@ -755,6 +755,10 @@ def _arm212_campaign_fixture(mechanics):
             'phase':'TRANSIT','phase_endpoint':False,'action_index':None,
             'target_id':None,'expected_tool_tip_board_mm':[0.0,0.0,30.0],
         })
+    samples[0].update({
+        'phase':'PARK','phase_endpoint':True,
+        'expected_tool_tip_board_mm':[290.0,10.0,70.0],
+    })
     for sequence,phase,action in (
         (33,'TRANSIT',0),(34,'HOVER',0),(35,'CONTACT',0),(36,'RETRACT',0),
         (37,'HOVER',1),(38,'CONTACT',1),(39,'RETRACT',1),
@@ -770,6 +774,8 @@ def _arm212_campaign_fixture(mechanics):
         'status':'READY_FOR_IK_QUALIFICATION','key_id':'H',
         'profile_sha256':profile['profile_sha256'],'samples':samples,
         'source_joint_positions_reused':False,
+        'hardware_access':False,'hardware_writes':0,'physical_movements':0,
+        'controller_commands':[],
     }
     source['request_sha256']=mechanics._canonical_sha256(source)
     return demonstration,source,profile
@@ -806,6 +812,84 @@ def test_arm212_rejects_joint_reuse_or_tampered_demonstration():
     with pytest.raises(mechanics.MechanicsContractError,match='source boundary'):
         mechanics.build_representative_key_adaptation_campaign(
             demonstration,source,profile
+        )
+
+
+def _arm213_campaign_fixture(mechanics):
+    demonstration,source,profile=_arm212_campaign_fixture(mechanics)
+    adaptation=mechanics.build_representative_key_adaptation_campaign(
+        demonstration,source,profile
+    )
+    route={
+        'candidate_id':'route-shape-selected',
+        'xy_corridor_topology':'DIRECT_LINEAR',
+        'corridor_height_board_mm':90.0,
+        'corridor_height_ramp_fraction':0.25,
+        'transit_resampling':'ARC_LENGTH_PIECEWISE_LINEAR_WITH_SYMMETRIC_Z_RAMPS',
+    }
+    selection={
+        'schema':mechanics.KEY_MECHANICS_LEARNING_BASELINE_SELECTION_SCHEMA,
+        'status':'SELECTED_ZERO_AUTHORITY_SIMULATION_LEARNING_BASELINE',
+        'selected_candidate_id':'route-shape-selected',
+        'ranked_candidates':[{
+            'candidate_id':'route-shape-selected','route_shape_candidate':route,
+        }],
+        'hardware_access':False,'hardware_writes':0,'physical_movements':0,
+        'controller_commands':[],
+    }
+    selection['selection_sha256']=mechanics._canonical_sha256(selection)
+    return adaptation,source,selection
+
+
+def test_arm213_connects_each_skill_to_park_without_joint_reuse():
+    mechanics=_load_key_mechanics()
+    adaptation,source,selection=_arm213_campaign_fixture(mechanics)
+    campaign=mechanics.build_representative_key_park_route_campaign(
+        adaptation,source,selection
+    )
+    assert campaign['status']=='READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_ROUTE_IK_QUALIFICATION'
+    assert campaign['park_endpoint_board_mm']==[290.0,10.0,70.0]
+    assert [request['key_id'] for request in campaign['requests']]==[
+        '1','SPACE','ENTER','PERIOD'
+    ]
+    for source_skill,request in zip(
+        adaptation['requests'],campaign['requests'],strict=True
+    ):
+        assert request['sample_count']==40
+        assert request['samples'][0]['expected_tool_tip_board_mm']==[290.0,10.0,70.0]
+        assert request['route_domain_sequences']==list(range(1,33))
+        assert request['skill_domain_sequences']==list(range(33,40))
+        assert [row['expected_tool_tip_board_mm'] for row in request['samples'][33:]]==[
+            row['expected_tool_tip_board_mm'] for row in source_skill['samples']
+        ]
+        assert all(row['expected_tool_tip_board_mm'][2]==90.0 for row in request['samples'][9:25])
+        assert request['source_joint_positions_reused'] is False
+        assert request['joint_positions_included'] is False
+        assert request['hardware_access'] is False and request['controller_commands']==[]
+
+
+def test_arm213_rejects_tampered_skill_and_route_policy():
+    mechanics=_load_key_mechanics()
+    adaptation,source,selection=_arm213_campaign_fixture(mechanics)
+    adaptation['requests'][0]['samples'][0]['expected_tool_tip_board_mm'][0]+=1.0
+    adaptation['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in adaptation.items() if key!='campaign_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='request hash'):
+        mechanics.build_representative_key_park_route_campaign(
+            adaptation,source,selection
+        )
+
+    adaptation,source,selection=_arm213_campaign_fixture(mechanics)
+    selection['ranked_candidates'][0]['route_shape_candidate'][
+        'corridor_height_board_mm'
+    ]=70.0
+    selection['selection_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in selection.items() if key!='selection_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='policy changed'):
+        mechanics.build_representative_key_park_route_campaign(
+            adaptation,source,selection
         )
 
 
