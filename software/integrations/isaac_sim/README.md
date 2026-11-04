@@ -1688,6 +1688,35 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
   --status-output C:\IsaacSim\artifacts\issue190\arm210-contact-refined-robot-h-replay-plan-001\status.json
 ```
 
+ARM-211 retains the passing ARM-210 result as a governed LM2 adaptation seed.
+The record binds the exact plan, native receipt, and mechanics-profile hashes;
+keeps sequences 33 through 39 as the H source-skill window; and records the
+two accepted native actions, all 133 fixed-root observations, and the
+`0.037722640842437705 rad` maximum tracking error. It is deliberately not a
+multi-key dataset. `1`, `SPACE`, `ENTER`, and `PERIOD` remain pending, and the
+contract forbids reusing H joint angles for them. Each must start from its
+governed board-frame geometry and pass fresh IK, collision/fixed-root, and
+native key-mechanics qualification.
+
+The retained external demonstration is
+`C:\IsaacSim\artifacts\issue190\arm211-governed-h-demonstration-001\demonstration.json`
+with canonical SHA-256
+`27d7d77bac289b1e8f3081d7e2bac11e3279c7775c685c25e80e11a68e58d1ee`.
+It grants no hardware, controller, physical-motion, or physical-keyboard
+authority.
+
+Reproduce it with:
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --retain-governed-h-demonstration `
+  --replay-plan C:\IsaacSim\artifacts\issue190\arm210-contact-refined-robot-h-replay-plan-001\plan.json `
+  --source-replay-receipt C:\IsaacSim\artifacts\issue190\arm210-contact-refined-robot-h-replay-001\receipt.json `
+  --output C:\IsaacSim\artifacts\issue190\arm211-governed-h-demonstration-001\demonstration.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm211-governed-h-demonstration-001\status.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

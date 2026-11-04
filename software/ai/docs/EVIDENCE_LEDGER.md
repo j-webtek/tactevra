@@ -9329,3 +9329,29 @@ rewriting history. New entries must use a unique evidence ID.
   execution authority.
 - Next dependency: retain the passing H replay as a governed demonstration and
   begin bounded representative-target generalization before dataset smoke.
+
+### E-20261103-ARM-211 — governed H demonstration retained
+
+- Stage: LM2 governed source-skill retention.
+- Lane: ARM / Isaac simulation and AI/model preparation.
+- Change: validates and binds the canonical ARM-210 plan, passing native
+  receipt, and provisional mechanics profile. It retains sequences 33 through
+  39 as the H source-skill window and records the two accepted actions, 133
+  passing root observations, and bounded tracking result.
+- Result: `READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION`. H is the
+  only native-qualified representative target. `1`, `SPACE`, `ENTER`, and
+  `PERIOD` remain pending. Direct H joint-space reuse is forbidden; each target
+  requires fresh board-frame geometry, IK, collision/fixed-root, and native
+  key-mechanics qualification.
+- External evidence: demonstration canonical SHA-256
+  `27d7d77bac289b1e8f3081d7e2bac11e3279c7775c685c25e80e11a68e58d1ee`
+  at
+  `C:\IsaacSim\artifacts\issue190\arm211-governed-h-demonstration-001\demonstration.json`.
+- Hardware writes: 0. Physical movements: 0. Controller commands: 0. Gate
+  promotions: 0.
+- Limitations: one simulated source key, one retained workcell configuration,
+  and synthetic bounded mechanics priors are not a generalized dataset or
+  physical qualification.
+- Next dependency: derive target-specific Cartesian adaptation requests for
+  the four pending keys, then run each through the existing qualification
+  chain before LM3 dataset smoke.
