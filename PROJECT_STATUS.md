@@ -1,6 +1,6 @@
 # Tactevra project status
 
-Reviewed November 3, 2026 through the ARM-210 contact-refined native
+Reviewed November 3, 2026 through the ARM-211 governed H demonstration, the ARM-210 contact-refined native
 robot-to-key replay, the ARM-207 drive-controlled native replay, the ARM-206 zero-authority key-mechanics comparison and
 learning-baseline selection, the ARM-205 corrected fixed-base
 collision replay, the ARM-204 robot-root-drift diagnosis, the ARM-203 corrected
@@ -174,7 +174,7 @@ completed capabilities.
 | Synthetic model-to-controller lineage | Exact synthetic review and epoch identities now bind through actual AI-assembler bytes, arm ingress and freshness checks, the measured planner blocker, a sealed synthetic trajectory, T=102 profile, and zero-write preview receipt | Crossed identities reject and one encoded command is reviewable, but the real planner stops for missing calibration, production dispatch remains explicitly blocked, and no bytes are sent |
 | Arm control research | Documented supervised noncontact movement and joint-feedback checks | Specific lab sequences were completed; controller feedback does not measure key-contact accuracy |
 | Hardware | RC03 workcell design and step-by-step assembly package | Design and print resources exist, with their own measurement and print-readiness requirements |
-| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, ARM-207 drives that baseline into the native `H` mechanism, ARM-208 performs one feedback-derived depth/dwell replay, ARM-209 restores release with a trace-derived lift, and ARM-210 refines only H contact depth | This is advisory simulation evidence only. ARM-210 passes the unchanged native H evaluator: both actions activate exactly once, peak at about `2.744` and `2.731 mm`, fully release, preserve all 133 fixed-root checks, and stay within the `0.05 rad` tracking bound. This is a representative simulated H skill, not continuous-clearance, installed collision, generalized keyboard, or physical qualification, and it grants no physical authority |
+| Higher-fidelity simulation | Isaac Sim 6.1 headless launch, governed RoArm import/FK parity, RC03 scene composition, model-target overlay, source-bound schedule replay, native representative-key contact, and finite collision differentials are retained on `main`; ARM-205 completes corrected fixed-base v5 replays, ARM-206 selects `DIRECT_LINEAR/90`, ARM-207 drives that baseline into the native `H` mechanism, ARM-208 performs one feedback-derived depth/dwell replay, ARM-209 restores release with a trace-derived lift, ARM-210 refines only H contact depth, and ARM-211 retains the passing result as a governed LM2 seed | This is advisory simulation evidence only. ARM-210 passes the unchanged native H evaluator: both actions activate exactly once, peak at about `2.744` and `2.731 mm`, fully release, preserve all 133 fixed-root checks, and stay within the `0.05 rad` tracking bound. ARM-211 forbids copying H joint angles to other keys; `1`, `SPACE`, `ENTER`, and `PERIOD` remain pending fresh geometry, IK, collision/fixed-root, and native-mechanics qualification. No physical authority is granted |
 
 ### Recent progress, in plain language
 
@@ -206,9 +206,12 @@ bounded correction is contact-depth refinement; the release geometry is no
 longer the blocker. ARM-210 applies that contact-only update and passes the
 unchanged evaluator. The two actions peak at about `2.744` and `2.731 mm`,
 activate exactly once, and return to full release while all root and tracking
-checks remain satisfied. The next learning milestone is to retain this H skill
-as a governed demonstration and begin representative-target generalization;
-physical authority remains absent.
+checks remain satisfied. ARM-211 retains that exact result as a canonical LM2
+adaptation seed. It binds the ARM-210 plan, receipt, and mechanics hashes;
+retains only the H skill window as joint-space evidence; and explicitly marks
+`1`, `SPACE`, `ENTER`, and `PERIOD` as pending fresh board-frame, IK, collision,
+fixed-root, and native-mechanics qualification. Direct H joint-space reuse is
+forbidden and physical authority remains absent.
 
 The latest collision increments derive robot and attachment poses from exact
 accepted joint solutions, insert bounded joint-space samples, and build

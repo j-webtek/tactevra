@@ -625,9 +625,14 @@ ScheduleGen. Neither is a physical success rate.
    contact-depth overtravel remains, so the next bounded update must preserve
    the lifted release geometry and refine the contact endpoint from retained
    feedback. ARM-210 completes that update and passes the unchanged evaluator.
-   The next stage is governed representative-target skill adaptation, followed
-   by the LM3 dataset smoke only after that broader simulation boundary passes.
-5. **LM2 generator:** adapt the `H` skill to the representative target set.
+   ARM-211 retains the exact passing H result as a canonical LM2 adaptation
+   seed, with its plan/receipt/profile lineage and native quality gates intact.
+   It explicitly forbids direct H joint-space reuse for other keys.
+5. **LM2 generator:** adapt the `H` skill semantics and contact policy to the
+   representative target set. `1`, `SPACE`, `ENTER`, and `PERIOD` each require
+   target-specific board-frame geometry, fresh IK, collision/fixed-root
+   qualification, and native mechanics acceptance before they can enter a
+   multi-key dataset.
 6. **LM3 dataset smoke:** generate a small, reproducible randomized dataset.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.

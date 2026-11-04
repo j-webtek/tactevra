@@ -113,6 +113,9 @@ CONTACT_REFINED_ROBOT_H_REPLAY_PLAN_SCHEMA = (
 CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm1_contact_refined_robot_h_replay_receipt.v1"
 )
+GOVERNED_H_DEMONSTRATION_SCHEMA = (
+    "tactevra.isaac_lm2_governed_h_demonstration.v1"
+)
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
 PROVISIONAL_STATUS = "PROVISIONAL_SIMULATION_ONLY"
@@ -955,6 +958,248 @@ def build_contact_refined_robot_h_replay_plan(
     })
     plan["plan_sha256"] = _canonical_sha256(plan)
     return plan
+
+
+def retain_governed_h_demonstration(
+    plan: dict[str, Any],
+    receipt: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Retain the passing ARM-210 H skill without granting transfer authority.
+
+    The demonstration is an LM2 adaptation seed, not a multi-key trajectory.
+    Joint-space samples are retained only for the source H skill window.  Every
+    other representative key must be solved again from board-frame geometry and
+    pass the existing IK, collision, and native mechanics boundaries.
+    """
+
+    plan_hash = _require_canonical_hash(
+        plan, "plan_sha256", "ARM-210 replay plan"
+    )
+    receipt_hash = _require_canonical_hash(
+        receipt, "receipt_sha256", "ARM-210 replay receipt"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "key-mechanics profile"
+    )
+    zero_authority_fields = (
+        "hardware_access", "hardware_writes", "physical_authority",
+        "physical_movements", "controller_commands", "gate_promotions",
+    )
+    if (
+        plan.get("schema") != CONTACT_REFINED_ROBOT_H_REPLAY_PLAN_SCHEMA
+        or plan.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_NATIVE_H_REPLAY"
+        or receipt.get("schema")
+        != CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+        or receipt.get("status") != "PASS"
+        or receipt.get("evidence_class")
+        != "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT"
+        or receipt.get("source_plan_sha256") != plan_hash
+        or plan.get("source_bindings", {}).get(
+            "key_mechanics_profile_sha256"
+        ) != profile_hash
+        or receipt.get("state_teleports_after_initialization") != 0
+        or any(plan.get(name) not in (False, 0, []) for name in zero_authority_fields)
+        or any(
+            receipt.get(name) not in (False, 0, [])
+            for name in zero_authority_fields
+        )
+    ):
+        raise MechanicsContractError("ARM-210 demonstration boundary changed")
+
+    joint_order = plan.get("joint_order")
+    targets = plan.get("joint_targets")
+    if (
+        not isinstance(joint_order, list)
+        or len(joint_order) != 6
+        or len(set(joint_order)) != 6
+        or not all(isinstance(name, str) and name for name in joint_order)
+        or not isinstance(targets, list)
+        or len(targets) != plan.get("sample_count")
+        or len(targets) <= 39
+        or any(row.get("sequence") != index for index, row in enumerate(targets))
+    ):
+        raise MechanicsContractError("ARM-210 demonstration trajectory changed")
+
+    skill_sequences = list(range(33, 40))
+    expected_phases = [
+        "TRANSIT", "HOVER", "CONTACT", "RETRACT", "HOVER", "CONTACT",
+        "RETRACT",
+    ]
+    expected_actions = [0, 0, 0, 0, 1, 1, 1]
+    skill_window = [json.loads(json.dumps(targets[index])) for index in skill_sequences]
+    if any(
+        row.get("target_id") != "H"
+        or row.get("phase") != expected_phases[index]
+        or row.get("action_index") != expected_actions[index]
+        or not isinstance(row.get("joint_position_target_rad"), list)
+        or len(row["joint_position_target_rad"]) != 6
+        for index, row in enumerate(skill_window)
+    ):
+        raise MechanicsContractError("ARM-210 H skill window changed")
+
+    assessments = receipt.get("action_assessments")
+    if not isinstance(assessments, list) or len(assessments) != 2:
+        raise MechanicsContractError("ARM-210 action evidence changed")
+    by_action = {row.get("action_index"): row.get("assessment") for row in assessments}
+    if set(by_action) != {0, 1} or any(
+        not isinstance(row, dict) for row in by_action.values()
+    ):
+        raise MechanicsContractError("ARM-210 action evidence changed")
+    for action_index, assessment in by_action.items():
+        _require_canonical_hash(
+            assessment, "result_sha256", f"ARM-210 action {action_index} result"
+        )
+    activation_mm = _finite_number(
+        mechanics_profile["mechanics_prior"]["activation_mm"]["nominal"],
+        "activation threshold",
+    )
+    release_mm = _finite_number(
+        mechanics_profile["mechanics_prior"]["release_mm"]["nominal"],
+        "release threshold",
+    )
+    travel_mm = _finite_number(
+        mechanics_profile["mechanics_prior"]["travel_mm"]["nominal"],
+        "travel threshold",
+    )
+    if (
+        any(row.get("accepted") is not True for row in by_action.values())
+        or any(row.get("disposition") != "ACCEPTED" for row in by_action.values())
+        or any(row.get("resolved_key") != "H" for row in by_action.values())
+        or any(row.get("native_contact_observed") is not True for row in by_action.values())
+        or any(row.get("activation_count") != 1 for row in by_action.values())
+        or any(row.get("profile_sha256") != profile_hash for row in by_action.values())
+        or any(row.get("authority") != mechanics_profile["authority"] for row in by_action.values())
+        or any(
+            not activation_mm <= _finite_number(
+                row.get("max_compression_mm"), "maximum compression"
+            ) <= travel_mm
+            for row in by_action.values()
+        )
+        or any(
+            _finite_number(row.get("final_compression_mm"), "final compression")
+            > release_mm
+            for row in by_action.values()
+        )
+    ):
+        raise MechanicsContractError("ARM-210 accepted H evidence changed")
+
+    root = receipt.get("root_pose_invariant")
+    tracking = receipt.get("joint_tracking")
+    tracking_limit = _finite_number(
+        receipt.get("maximum_joint_tracking_error_allowed_rad"),
+        "tracking limit",
+    )
+    tracking_maximum = _finite_number(
+        receipt.get("maximum_joint_tracking_error_rad"),
+        "maximum tracking error",
+    )
+    if (
+        not isinstance(root, dict)
+        or root.get("all_passed") is not True
+        or root.get("observation_count") != len(targets)
+        or not isinstance(root.get("observations"), list)
+        or len(root["observations"]) != len(targets)
+        or not all(row.get("passed") is True for row in root["observations"])
+        or not isinstance(tracking, list)
+        or len(tracking) != len(targets)
+        or any(row.get("sequence") != index for index, row in enumerate(tracking))
+        or tracking_maximum > tracking_limit
+        or abs(
+            tracking_maximum
+            - max(
+                _finite_number(row.get("maximum_joint_error_rad"), "tracking error")
+                for row in tracking
+            )
+        ) > 1e-12
+    ):
+        raise MechanicsContractError("ARM-210 native quality evidence changed")
+
+    outcomes = []
+    for action_index in (0, 1):
+        assessment = by_action[action_index]
+        outcomes.append({
+            "action_index": action_index,
+            "resolved_key": "H",
+            "disposition": "ACCEPTED",
+            "activation_count": 1,
+            "max_compression_mm": _finite_number(
+                assessment["max_compression_mm"], "maximum compression"
+            ),
+            "final_compression_mm": _finite_number(
+                assessment["final_compression_mm"], "final compression"
+            ),
+            "result_sha256": assessment.get("result_sha256"),
+        })
+
+    demonstration = {
+        "schema": GOVERNED_H_DEMONSTRATION_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION",
+        "demonstration_id": "arm210-native-contact-refined-h",
+        "source_bindings": {
+            "arm210_replay_plan_sha256": plan_hash,
+            "arm210_replay_receipt_sha256": receipt_hash,
+            "key_mechanics_profile_sha256": profile_hash,
+        },
+        "source_skill": {
+            "target_id": "H",
+            "coordinate_frame": "board",
+            "joint_order": list(joint_order),
+            "skill_window_sequences": skill_sequences,
+            "joint_space_samples": skill_window,
+            "native_outcomes": outcomes,
+        },
+        "quality_gate": {
+            "all_root_pose_invariants_passed": True,
+            "root_pose_observation_count": len(targets),
+            "maximum_joint_tracking_error_rad": tracking_maximum,
+            "maximum_joint_tracking_error_allowed_rad": tracking_limit,
+            "accepted_native_action_count": 2,
+            "complete_release_action_count": 2,
+        },
+        "transfer_contract": {
+            "representative_targets": list(REPRESENTATIVE_KEYS),
+            "native_qualified_targets": ["H"],
+            "pending_targets": [key for key in REPRESENTATIVE_KEYS if key != "H"],
+            "transferable_components": [
+                "board_frame_approach_hover_contact_retract_semantics",
+                "provisional_contact_depth_and_release_policy",
+                "quality_gate_structure",
+            ],
+            "joint_space_reuse_for_other_keys_permitted": False,
+            "required_per_pending_target": [
+                "derive_target_from_governed_board_frame_geometry",
+                "solve_and_screen_fresh_inverse_kinematics",
+                "qualify_collision_and_fixed_root_invariants",
+                "pass_native_key_mechanics_evaluation",
+            ],
+        },
+        "dataset_eligibility": {
+            "eligible_as_skill_adaptation_seed": True,
+            "eligible_as_multi_key_dataset": False,
+            "eligible_for_physical_execution": False,
+        },
+        "authority": {
+            "hardware": False,
+            "motion": False,
+            "physical_keyboard_qualification": False,
+        },
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "single_simulated_source_key_and_single_retained_workcell_configuration",
+            "mechanics_values_remain_synthetic_bounded_priors",
+            "no_other_representative_key_has_native_contact_qualification",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    demonstration["demonstration_sha256"] = _canonical_sha256(demonstration)
+    return demonstration
 
 
 def canonical_active_rotation_row_major_from_gf_rows(
@@ -7614,6 +7859,11 @@ def main() -> int:
         help="refine ARM-209 H contact depth while preserving its lifted release path",
     )
     parser.add_argument(
+        "--retain-governed-h-demonstration",
+        action="store_true",
+        help="retain the passing ARM-210 H skill as a zero-authority LM2 adaptation seed",
+    )
+    parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
         action="store_true",
         help="execute the strict ARM-207 plan in native Isaac physics",
@@ -7719,6 +7969,16 @@ def main() -> int:
                 robot_usd_path=args.robot_usd,
                 output_path=args.output,
                 status_path=args.status_output,
+            )
+        elif args.retain_governed_h_demonstration:
+            if args.replay_plan is None or args.source_replay_receipt is None:
+                raise MechanicsContractError(
+                    "ARM-211 retention requires --replay-plan and --source-replay-receipt"
+                )
+            result = retain_governed_h_demonstration(
+                json.loads(args.replay_plan.resolve(strict=True).read_bytes()),
+                json.loads(args.source_replay_receipt.resolve(strict=True).read_bytes()),
+                build_profile(args.layout.resolve(strict=True)),
             )
         elif args.build_contact_refined_robot_h_replay_plan:
             if args.replay_plan is None or args.source_replay_receipt is None:
@@ -8528,7 +8788,10 @@ def main() -> int:
                                         "screen_sha256",
                                         result.get(
                                             "manifest_sha256",
-                                            result.get("selection_sha256"),
+                                            result.get(
+                                                "selection_sha256",
+                                                result.get("demonstration_sha256"),
+                                            ),
                                         ),
                                     ),
                                 ),
@@ -8558,6 +8821,8 @@ def main() -> int:
             status_record["manifest_sha256"] = result["manifest_sha256"]
         if "selection_sha256" in result:
             status_record["selection_sha256"] = result["selection_sha256"]
+        if "demonstration_sha256" in result:
+            status_record["demonstration_sha256"] = result["demonstration_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -8575,6 +8840,7 @@ def main() -> int:
             "READY_FOR_SELECTED_NATIVE_ISAAC_REPLAY",
             "READY_FOR_ZERO_AUTHORITY_NATIVE_ROBOT_H_REPLAY",
             "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_NATIVE_H_REPLAY",
+            "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

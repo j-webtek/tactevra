@@ -345,7 +345,15 @@ def _arm208_feedback_fixture(mechanics):
 
     profile=signed({
         'schema':mechanics.PROFILE_SCHEMA,
-        'mechanics_prior':{'release_mm':{'nominal':1.2}},
+        'mechanics_prior':{
+            'activation_mm':{'nominal':2.0},
+            'release_mm':{'nominal':1.2},
+            'travel_mm':{'nominal':3.5},
+        },
+        'authority':{
+            'hardware':False,'motion':False,
+            'physical_keyboard_qualification':False,
+        },
     },'profile_sha256')
     targets=[]
     for sequence in range(40):
@@ -452,7 +460,10 @@ def test_arm208_feedback_adapter_rejects_tampering_and_authority_escalation():
 
 def _arm209_trace_fixture(mechanics):
     source,blocked,profile=_arm208_feedback_fixture(mechanics)
-    source['joint_targets'][33]['joint_position_target_rad']=[0.0,0.05,0.02,-0.08,0.0,0.0]
+    source['joint_targets'][33].update({
+        'joint_position_target_rad':[0.0,0.05,0.02,-0.08,0.0,0.0],
+        'target_id':'H','action_index':0,
+    })
     source['plan_sha256']=mechanics._canonical_sha256({
         key:value for key,value in source.items() if key!='plan_sha256'
     })
@@ -622,6 +633,105 @@ def test_arm210_contact_refinement_rejects_release_or_authority_tampering():
     })
     with pytest.raises(mechanics.MechanicsContractError,match='contact-refinement boundary'):
         mechanics.build_contact_refined_robot_h_replay_plan(source,receipt,profile)
+
+
+def _arm211_demonstration_fixture(mechanics):
+    arm209,arm209_receipt,profile=_arm210_contact_fixture(mechanics)
+    plan=mechanics.build_contact_refined_robot_h_replay_plan(
+        arm209,arm209_receipt,profile
+    )
+    sample_count=plan['sample_count']
+    assessments=[]
+    for action_index,compression in ((0,2.744),(1,2.731)):
+        result={
+            'accepted':True,'activation_count':1,
+            'authority':dict(profile['authority']),'disposition':'ACCEPTED',
+            'final_compression_mm':0.0,'max_compression_mm':compression,
+            'native_contact_observed':True,'profile_sha256':profile['profile_sha256'],
+            'resolved_key':'H',
+        }
+        result['result_sha256']=mechanics._canonical_sha256(result)
+        assessments.append({'action_index':action_index,'assessment':result})
+    receipt={
+        'schema':mechanics.CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA,
+        'status':'PASS','source_plan_sha256':plan['plan_sha256'],
+        'evidence_class':'PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT',
+        'state_teleports_after_initialization':0,
+        'action_assessments':assessments,
+        'root_pose_invariant':{
+            'all_passed':True,'observation_count':sample_count,
+            'observations':[
+                {'sequence':index,'passed':True} for index in range(sample_count)
+            ],
+        },
+        'joint_tracking':[
+            {'sequence':index,'maximum_joint_error_rad':0.03}
+            for index in range(sample_count)
+        ],
+        'maximum_joint_tracking_error_rad':0.03,
+        'maximum_joint_tracking_error_allowed_rad':0.05,
+        'hardware_access':False,'physical_authority':False,'controller_commands':[],
+        'hardware_writes':0,'physical_movements':0,'gate_promotions':[],
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    return plan,receipt,profile
+
+
+def test_arm211_retains_h_as_governed_adaptation_seed():
+    mechanics=_load_key_mechanics()
+    plan,receipt,profile=_arm211_demonstration_fixture(mechanics)
+    demonstration=mechanics.retain_governed_h_demonstration(plan,receipt,profile)
+    assert demonstration['status']=='READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_KEY_ADAPTATION'
+    assert demonstration['source_skill']['target_id']=='H'
+    assert demonstration['source_skill']['skill_window_sequences']==list(range(33,40))
+    assert [
+        row['phase'] for row in demonstration['source_skill']['joint_space_samples']
+    ]==['TRANSIT','HOVER','CONTACT','RETRACT','HOVER','CONTACT','RETRACT']
+    transfer=demonstration['transfer_contract']
+    assert transfer['native_qualified_targets']==['H']
+    assert transfer['pending_targets']==['1','SPACE','ENTER','PERIOD']
+    assert transfer['joint_space_reuse_for_other_keys_permitted'] is False
+    assert demonstration['dataset_eligibility']=={
+        'eligible_as_skill_adaptation_seed':True,
+        'eligible_as_multi_key_dataset':False,
+        'eligible_for_physical_execution':False,
+    }
+    assert demonstration['quality_gate']['accepted_native_action_count']==2
+    assert demonstration['quality_gate']['root_pose_observation_count']==plan['sample_count']
+    assert demonstration['hardware_access'] is False
+    assert demonstration['controller_commands']==[]
+    assert demonstration['demonstration_sha256']==mechanics._canonical_sha256({
+        key:value for key,value in demonstration.items()
+        if key!='demonstration_sha256'
+    })
+
+
+def test_arm211_rejects_tampering_nested_authority_and_failed_quality():
+    mechanics=_load_key_mechanics()
+    plan,receipt,profile=_arm211_demonstration_fixture(mechanics)
+    plan['joint_targets'][35]['joint_position_target_rad'][1]+=0.1
+    with pytest.raises(mechanics.MechanicsContractError,match='plan hash'):
+        mechanics.retain_governed_h_demonstration(plan,receipt,profile)
+
+    plan,receipt,profile=_arm211_demonstration_fixture(mechanics)
+    assessment=receipt['action_assessments'][0]['assessment']
+    assessment['authority']['motion']=True
+    assessment['result_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in assessment.items() if key!='result_sha256'
+    })
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='accepted H evidence'):
+        mechanics.retain_governed_h_demonstration(plan,receipt,profile)
+
+    plan,receipt,profile=_arm211_demonstration_fixture(mechanics)
+    receipt['root_pose_invariant']['observations'][0]['passed']=False
+    receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipt.items() if key!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='quality evidence'):
+        mechanics.retain_governed_h_demonstration(plan,receipt,profile)
 
 
 def test_robot_tcp_binding_rejects_surface_only_endpoint_and_derives_overtravel():
