@@ -1845,6 +1845,31 @@ admits only four hash-bound PASS receipts. This creates a provisional
 zero-authority multi-key simulation dataset; it does not install collision
 geometry, prove continuous clearance, or authorize physical motion.
 
+ARM-218 starts the randomized LM3 dataset boundary by compiling the admitted
+ARM-217 result into a deterministic `24`-episode manifest (`12` train, `8`
+validation, `4` test). Seeds and scene identities are unique across all splits;
+each episode binds its source plan and receipt and records declared provisional
+mechanics and placement parameters. Its aggregator requires a complete receipt
+for every attempted episode, including classified failures, so successful-only
+filtering cannot change the denominator.
+
+```powershell
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --build-randomized-demonstration-campaign `
+  --source-result-campaign C:\IsaacSim\artifacts\issue190\arm217-representative-native-mechanics-refined-002\result_campaign.json `
+  --source-artifact-root C:\IsaacSim\artifacts\issue190\arm217-representative-native-mechanics-refined-002 `
+  --master-seed 218 `
+  --output C:\IsaacSim\artifacts\issue190\arm218-randomized-demonstration-smoke-001\campaign.json `
+  --status-output C:\IsaacSim\artifacts\issue190\arm218-randomized-demonstration-smoke-001\status.json
+```
+
+The retained manifest has canonical SHA-256
+`6b38bbc2e0625e83283666c2d94b90ebe05ec5e442426f7b09c3245fc84c22f1`.
+It is a pre-execution, simulation-only contract: randomized native execution,
+trajectory retention, and full result aggregation are still outstanding, and
+no physical motion or hardware authority is granted.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

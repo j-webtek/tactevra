@@ -3033,3 +3033,176 @@ def test_collision_blockers_localize_to_retained_cartesian_context():
     })
     with pytest.raises(mechanics.MechanicsContractError,match='sample lineage'):
         mechanics.build_collision_blocker_localization(receipt,request,cartesian)
+
+
+@pytest.fixture
+def arm218_contract():
+    mechanics=_load_key_mechanics()
+    def signed(value,field):
+        value[field]=mechanics._canonical_sha256(value)
+        return value
+    plans={}
+    receipts={}
+    results=[]
+    for target in mechanics.REPRESENTATIVE_KEYS[1:]:
+        plans[target]=signed({
+            'schema':'test.plan.v1','target_id':target,'hardware_access':False,
+            'physical_authority':False,'controller_commands':[],
+        },'plan_sha256')
+        receipts[target]=signed({
+            'schema':'test.receipt.v1','target_id':target,'hardware_access':False,
+            'hardware_writes':0,'physical_authority':False,
+            'physical_movements':0,'controller_commands':[],
+        },'receipt_sha256')
+        results.append({
+            'target_id':target,'plan_sha256':plans[target]['plan_sha256'],
+            'receipt_sha256':receipts[target]['receipt_sha256'],
+            'native_trace_sample_count':1416,'root_pose_invariant_passed':True,
+        })
+    source=signed({
+        'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_MECHANICS_RESULT_CAMPAIGN_SCHEMA,
+        'status':'PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN',
+        'results':results,'hardware_access':False,'hardware_writes':0,
+        'physical_authority':False,'physical_movements':0,
+        'controller_commands':[],'gate_promotions':[],
+    },'campaign_sha256')
+    return mechanics,source,plans,receipts
+
+
+def _arm218_receipts(mechanics,campaign):
+    receipts={}
+    for index,episode in enumerate(campaign['episodes']):
+        failed=index in {5,19}
+        value={
+            'schema':mechanics.RANDOMIZED_DEMONSTRATION_EPISODE_RECEIPT_SCHEMA,
+            'source_campaign_sha256':campaign['campaign_sha256'],
+            'episode_id':episode['episode_id'],'partition':episode['partition'],
+            'seed':episode['seed'],'scene_id':episode['scene_id'],
+            'target_id':episode['target_id'],
+            'parameter_region':episode['parameter_region'],
+            'randomized_parameters':episode['randomized_parameters'],
+            'source_plan_sha256':episode['source_plan_sha256'],
+            'source_receipt_sha256':episode['source_receipt_sha256'],
+            'complete':True,'disposition':'FAIL' if failed else 'PASS',
+            'failure_reason':'TRACKING_ERROR' if failed else None,
+            'trajectory_sha256':f'{index:064x}','hardware_access':False,
+            'hardware_writes':0,'physical_authority':False,
+            'physical_movements':0,'controller_commands':[],'gate_promotions':[],
+        }
+        value['receipt_sha256']=mechanics._canonical_sha256(value)
+        receipts[episode['episode_id']]=value
+    return receipts
+
+
+def test_arm218_campaign_is_deterministic_disjoint_and_balanced(arm218_contract):
+    mechanics,source,plans,receipts=arm218_contract
+    first=mechanics.build_randomized_demonstration_campaign(
+        source,plans,receipts,master_seed=218
+    )
+    second=mechanics.build_randomized_demonstration_campaign(
+        source,plans,receipts,master_seed=218
+    )
+    assert first==second
+    assert first['partition_counts']=={'train':12,'validation':8,'test':4}
+    assert first['attempted_episode_count']==24
+    assert len({item['seed'] for item in first['episodes']})==24
+    assert len({item['scene_id'] for item in first['episodes']})==24
+    assert {item['target_id'] for item in first['episodes']}==set(
+        mechanics.REPRESENTATIVE_KEYS[1:]
+    )
+    assert first['hardware_access'] is first['physical_authority'] is False
+    mechanics.validate_randomized_demonstration_campaign(first)
+
+
+def test_arm218_campaign_rejects_tampered_lineage_and_authority(arm218_contract):
+    mechanics,source,plans,receipts=arm218_contract
+    tampered=json.loads(json.dumps(source))
+    tampered['results'][0]['receipt_sha256']='0'*64
+    tampered['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in tampered.items() if key!='campaign_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='binding mismatch'):
+        mechanics.build_randomized_demonstration_campaign(
+            tampered,plans,receipts,master_seed=218
+        )
+    plans['1']['physical_authority']=True
+    plans['1']['plan_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in plans['1'].items() if key!='plan_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='zero-authority'):
+        mechanics.build_randomized_demonstration_campaign(
+            source,plans,receipts,master_seed=218
+        )
+
+
+def test_arm218_aggregate_retains_failures_and_denominator(arm218_contract):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,source_receipts,master_seed=218
+    )
+    result=mechanics.aggregate_randomized_demonstration_campaign(
+        campaign,_arm218_receipts(mechanics,campaign)
+    )
+    assert result['attempted_episode_count']==result['completed_episode_count']==24
+    assert result['passed_episode_count']==22
+    assert result['failed_episode_count']==2
+    assert result['failure_counts_by_reason']=={'TRACKING_ERROR':2}
+    assert len(result['retained_episodes'])==24
+
+
+def test_arm218_aggregate_rejects_incomplete_or_filtered_shards(arm218_contract):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,source_receipts,master_seed=218
+    )
+    receipts=_arm218_receipts(mechanics,campaign)
+    receipts.pop(next(iter(receipts)))
+    with pytest.raises(mechanics.MechanicsContractError,match='attempted denominator'):
+        mechanics.aggregate_randomized_demonstration_campaign(campaign,receipts)
+    receipts=_arm218_receipts(mechanics,campaign)
+    key=next(iter(receipts))
+    receipts[key]['complete']=False
+    receipts[key]['receipt_sha256']=mechanics._canonical_sha256({
+        field:value for field,value in receipts[key].items()
+        if field!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='incomplete'):
+        mechanics.aggregate_randomized_demonstration_campaign(campaign,receipts)
+
+
+def test_arm218_aggregate_rejects_partition_relabeling(arm218_contract):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,source_receipts,master_seed=218
+    )
+    receipts=_arm218_receipts(mechanics,campaign)
+    key=next(iter(receipts))
+    receipts[key]['partition']='test'
+    receipts[key]['receipt_sha256']=mechanics._canonical_sha256({
+        field:value for field,value in receipts[key].items()
+        if field!='receipt_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='partition'):
+        mechanics.aggregate_randomized_demonstration_campaign(campaign,receipts)
+
+
+def test_arm218_rejects_undeclared_or_out_of_range_parameters(arm218_contract):
+    mechanics,source,plans,receipts=arm218_contract
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,receipts,master_seed=218
+    )
+    campaign['episodes'][0]['randomized_parameters']['hidden_parameter']=1.0
+    campaign['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in campaign.items() if key!='campaign_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='declared'):
+        mechanics.validate_randomized_demonstration_campaign(campaign)
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,receipts,master_seed=218
+    )
+    campaign['episodes'][0]['randomized_parameters']['key_stiffness_n_per_m']=700.0
+    campaign['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in campaign.items() if key!='campaign_sha256'
+    })
+    with pytest.raises(mechanics.MechanicsContractError,match='outside'):
+        mechanics.validate_randomized_demonstration_campaign(campaign)

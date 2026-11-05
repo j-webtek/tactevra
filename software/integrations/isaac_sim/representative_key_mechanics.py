@@ -9,6 +9,7 @@ they are not measurements or product specifications.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 from itertools import product
 import json
@@ -163,6 +164,28 @@ REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA = (
 )
 REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm2_representative_key_contact_refined_mechanics_campaign.v1"
+)
+RANDOMIZED_DEMONSTRATION_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm3_randomized_demonstration_campaign.v1"
+)
+RANDOMIZED_DEMONSTRATION_EPISODE_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm3_randomized_demonstration_episode_receipt.v1"
+)
+RANDOMIZED_DEMONSTRATION_RESULT_SCHEMA = (
+    "tactevra.isaac_lm3_randomized_demonstration_result.v1"
+)
+RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
+    "train": 3,
+    "validation": 2,
+    "test": 1,
+}
+RANDOMIZED_DEMONSTRATION_FAILURE_REASONS = (
+    "COLLISION_BLOCKER",
+    "IK_OR_CONTINUITY",
+    "MECHANICS_REJECTION",
+    "ROOT_INVARIANT",
+    "TRACKING_ERROR",
+    "UNEXPECTED_RUNTIME_ERROR",
 )
 GEOMETRY_PRIOR_PROFILE_SCHEMA = "tactevra.isaac_lm0b_geometry_prior_profile.v1"
 REPRESENTATIVE_KEYS = ("H", "1", "SPACE", "ENTER", "PERIOD")
@@ -10157,6 +10180,359 @@ def run_drive_controlled_robot_h_replay(
             app.close()
 
 
+def _verify_lm3_digest(
+    document: dict[str, Any], digest_field: str, label: str
+) -> None:
+    digest = document.get(digest_field)
+    unsigned = {key: value for key, value in document.items() if key != digest_field}
+    if (
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or digest != _canonical_sha256(unsigned)
+    ):
+        raise MechanicsContractError(f"{label} {digest_field} mismatch")
+
+
+def _require_lm3_zero_authority(document: dict[str, Any], label: str) -> None:
+    expected = {
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+    }
+    for field, value in expected.items():
+        if field in document and document[field] != value:
+            raise MechanicsContractError(
+                f"{label} escalates zero-authority field {field}"
+            )
+
+
+def _derive_lm3_bytes(master_seed: int, *parts: object) -> bytes:
+    material = ":".join((str(master_seed), *(str(part) for part in parts)))
+    return hashlib.sha256(material.encode("ascii")).digest()
+
+
+def _lm3_uniform(raw: bytes, offset: int, low: float, high: float) -> float:
+    integer = int.from_bytes(raw[offset : offset + 8], "big")
+    ratio = integer / ((1 << 64) - 1)
+    return round(low + ratio * (high - low), 9)
+
+
+def _lm3_region(value: float, low: float, high: float) -> str:
+    third = (high - low) / 3
+    if value < low + third:
+        return "LOW"
+    if value < low + 2 * third:
+        return "MID"
+    return "HIGH"
+
+
+def _validate_lm3_source(
+    source: dict[str, Any],
+    plans: dict[str, dict[str, Any]],
+    receipts: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    if (
+        source.get("schema")
+        != REPRESENTATIVE_KEY_NATIVE_MECHANICS_RESULT_CAMPAIGN_SCHEMA
+        or source.get("status")
+        != "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN"
+    ):
+        raise MechanicsContractError(
+            "source campaign is not an admitted ARM-217 result"
+        )
+    _verify_lm3_digest(source, "campaign_sha256", "source campaign")
+    _require_lm3_zero_authority(source, "source campaign")
+    results = source.get("results")
+    expected_targets = set(REPRESENTATIVE_KEYS[1:])
+    if not isinstance(results, list) or len(results) != len(expected_targets):
+        raise MechanicsContractError("source campaign must contain four results")
+    indexed = {}
+    for result in results:
+        target = result.get("target_id")
+        if target not in expected_targets or target in indexed:
+            raise MechanicsContractError("source targets are incomplete or duplicated")
+        if result.get("root_pose_invariant_passed") is not True:
+            raise MechanicsContractError(f"source target {target} failed root invariant")
+        plan = plans.get(target)
+        receipt = receipts.get(target)
+        if plan is None or receipt is None:
+            raise MechanicsContractError(f"source target {target} lacks plan or receipt")
+        _verify_lm3_digest(plan, "plan_sha256", f"{target} plan")
+        _verify_lm3_digest(receipt, "receipt_sha256", f"{target} receipt")
+        _require_lm3_zero_authority(plan, f"{target} plan")
+        _require_lm3_zero_authority(receipt, f"{target} receipt")
+        if result.get("plan_sha256") != plan["plan_sha256"]:
+            raise MechanicsContractError(f"source target {target} plan binding mismatch")
+        if result.get("receipt_sha256") != receipt["receipt_sha256"]:
+            raise MechanicsContractError(
+                f"source target {target} receipt binding mismatch"
+            )
+        indexed[target] = result
+    if set(indexed) != expected_targets:
+        raise MechanicsContractError("source campaign target set is incomplete")
+    return indexed
+
+
+def build_randomized_demonstration_campaign(
+    source: dict[str, Any],
+    plans: dict[str, dict[str, Any]],
+    receipts: dict[str, dict[str, Any]],
+    *,
+    master_seed: int,
+) -> dict[str, Any]:
+    """Precommit the deterministic 24-episode ARM-218 LM3 smoke campaign."""
+    if not isinstance(master_seed, int) or not 0 <= master_seed < 1 << 64:
+        raise MechanicsContractError(
+            "master_seed must be an unsigned 64-bit integer"
+        )
+    indexed = _validate_lm3_source(source, plans, receipts)
+    ranges = {
+        "key_stiffness_n_per_m": {"min": 450.0, "max": 650.0},
+        "key_damping_n_s_per_m": {"min": 2.0, "max": 4.0},
+        "key_mass_kg": {"min": 0.008, "max": 0.014},
+        "keyboard_offset_x_mm": {"min": -1.5, "max": 1.5},
+        "keyboard_offset_y_mm": {"min": -1.5, "max": 1.5},
+        "keyboard_yaw_deg": {"min": -0.5, "max": 0.5},
+    }
+    episodes = []
+    targets = REPRESENTATIVE_KEYS[1:]
+    for partition, repetitions in RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS.items():
+        for target in targets:
+            for repetition in range(repetitions):
+                raw = _derive_lm3_bytes(master_seed, partition, target, repetition)
+                seed = int.from_bytes(raw[:8], "big")
+                scene_id = hashlib.sha256(b"scene:" + raw).hexdigest()[:24]
+                values = {
+                    name: _lm3_uniform(
+                        raw, (index * 4) % 24, bounds["min"], bounds["max"]
+                    )
+                    for index, (name, bounds) in enumerate(ranges.items())
+                }
+                region = "STIFFNESS_" + _lm3_region(
+                    values["key_stiffness_n_per_m"], 450.0, 650.0
+                )
+                identity = {
+                    "partition": partition,
+                    "target_id": target,
+                    "repetition": repetition,
+                    "seed": seed,
+                    "scene_id": scene_id,
+                }
+                episodes.append({
+                    "episode_id": "episode-" + _canonical_sha256(identity)[:20],
+                    **identity,
+                    "parameter_region": region,
+                    "randomized_parameters": values,
+                    "source_plan_sha256": plans[target]["plan_sha256"],
+                    "source_receipt_sha256": receipts[target]["receipt_sha256"],
+                    "source_native_trace_sample_count": indexed[target][
+                        "native_trace_sample_count"
+                    ],
+                    "expected_external_artifacts": [
+                        "episode_receipt.json",
+                        "trajectory.jsonl",
+                    ],
+                })
+    seeds = [episode["seed"] for episode in episodes]
+    scenes = [episode["scene_id"] for episode in episodes]
+    if len(seeds) != len(set(seeds)) or len(scenes) != len(set(scenes)):
+        raise MechanicsContractError("derived seeds or scene identities collide")
+    campaign = {
+        "schema": RANDOMIZED_DEMONSTRATION_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_RANDOMIZED_DEMONSTRATION_SMOKE",
+        "master_seed": master_seed,
+        "source_campaign_sha256": source["campaign_sha256"],
+        "randomization_contract": {
+            "provenance": "PROVISIONAL_RANGE",
+            "sampler": "SHA256_DERIVED_UNIFORM_V1",
+            "ranges": ranges,
+        },
+        "partition_counts": {
+            partition: len(targets) * count
+            for partition, count in RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS.items()
+        },
+        "attempted_episode_count": len(episodes),
+        "episodes": episodes,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "small_simulation_only_smoke_not_statistical_coverage",
+            "randomization_ranges_are_provisional_not_measured_distributions",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
+def validate_randomized_demonstration_campaign(campaign: dict[str, Any]) -> None:
+    if campaign.get("schema") != RANDOMIZED_DEMONSTRATION_CAMPAIGN_SCHEMA:
+        raise MechanicsContractError("campaign schema mismatch")
+    _verify_lm3_digest(campaign, "campaign_sha256", "campaign")
+    _require_lm3_zero_authority(campaign, "campaign")
+    episodes = campaign.get("episodes")
+    if not isinstance(episodes, list) or len(episodes) != 24:
+        raise MechanicsContractError("campaign must precommit exactly 24 episodes")
+    if campaign.get("attempted_episode_count") != len(episodes):
+        raise MechanicsContractError("attempted denominator mismatch")
+    identifiers = (
+        [episode.get("episode_id") for episode in episodes],
+        [episode.get("seed") for episode in episodes],
+        [episode.get("scene_id") for episode in episodes],
+    )
+    if any(len(values) != len(set(values)) for values in identifiers):
+        raise MechanicsContractError("duplicate episode, seed, or scene identity")
+    partition_counts = Counter(episode.get("partition") for episode in episodes)
+    if dict(partition_counts) != campaign.get("partition_counts"):
+        raise MechanicsContractError("partition counts do not match episodes")
+    ranges = campaign.get("randomization_contract", {}).get("ranges")
+    if not isinstance(ranges, dict) or not ranges:
+        raise MechanicsContractError("campaign lacks declared randomization ranges")
+    coverage = Counter()
+    targets = set(REPRESENTATIVE_KEYS[1:])
+    for episode in episodes:
+        partition = episode.get("partition")
+        target = episode.get("target_id")
+        if (
+            partition not in RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS
+            or target not in targets
+        ):
+            raise MechanicsContractError("episode has undeclared partition or target")
+        coverage[(partition, target)] += 1
+        parameters = episode.get("randomized_parameters")
+        if not isinstance(parameters, dict) or set(parameters) != set(ranges):
+            raise MechanicsContractError(
+                "episode parameters do not match declared randomization ranges"
+            )
+        for name, bounds in ranges.items():
+            value = parameters[name]
+            if (
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or not bounds["min"] <= value <= bounds["max"]
+            ):
+                raise MechanicsContractError(
+                    f"episode parameter {name} is outside its declared range"
+                )
+        identity = {
+            field: episode[field]
+            for field in ("partition", "target_id", "repetition", "seed", "scene_id")
+        }
+        if episode.get("episode_id") != "episode-" + _canonical_sha256(identity)[:20]:
+            raise MechanicsContractError("episode identity is not canonical")
+    required_coverage = Counter({
+        (partition, target): repetitions
+        for partition, repetitions in RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS.items()
+        for target in targets
+    })
+    if coverage != required_coverage:
+        raise MechanicsContractError("partition target coverage is incomplete")
+
+
+def aggregate_randomized_demonstration_campaign(
+    campaign: dict[str, Any],
+    receipts: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Aggregate one complete receipt per attempted episode, including failures."""
+    validate_randomized_demonstration_campaign(campaign)
+    episodes = {episode["episode_id"]: episode for episode in campaign["episodes"]}
+    if set(receipts) != set(episodes):
+        missing = sorted(set(episodes) - set(receipts))
+        extra = sorted(set(receipts) - set(episodes))
+        raise MechanicsContractError(
+            f"receipt set must equal attempted denominator; missing={missing}, extra={extra}"
+        )
+    retained = []
+    failures = Counter()
+    failure_regions = Counter()
+    partition_results = {
+        partition: Counter()
+        for partition in RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS
+    }
+    for episode_id, episode in episodes.items():
+        receipt = receipts[episode_id]
+        if receipt.get("schema") != RANDOMIZED_DEMONSTRATION_EPISODE_RECEIPT_SCHEMA:
+            raise MechanicsContractError(f"{episode_id} receipt schema mismatch")
+        _verify_lm3_digest(receipt, "receipt_sha256", f"{episode_id} receipt")
+        _require_lm3_zero_authority(receipt, f"{episode_id} receipt")
+        bindings = {
+            "source_campaign_sha256": campaign["campaign_sha256"],
+            "episode_id": episode_id,
+            "partition": episode["partition"],
+            "seed": episode["seed"],
+            "scene_id": episode["scene_id"],
+            "target_id": episode["target_id"],
+            "parameter_region": episode["parameter_region"],
+            "randomized_parameters": episode["randomized_parameters"],
+            "source_plan_sha256": episode["source_plan_sha256"],
+            "source_receipt_sha256": episode["source_receipt_sha256"],
+        }
+        for field, expected in bindings.items():
+            if receipt.get(field) != expected:
+                raise MechanicsContractError(
+                    f"{episode_id} receipt binding mismatch for {field}"
+                )
+        disposition = receipt.get("disposition")
+        if disposition not in {"PASS", "FAIL"} or receipt.get("complete") is not True:
+            raise MechanicsContractError(f"{episode_id} receipt is incomplete")
+        reason = receipt.get("failure_reason")
+        if disposition == "PASS" and reason is not None:
+            raise MechanicsContractError(f"{episode_id} passing receipt has failure")
+        if (
+            disposition == "FAIL"
+            and reason not in RANDOMIZED_DEMONSTRATION_FAILURE_REASONS
+        ):
+            raise MechanicsContractError(f"{episode_id} failure reason is undeclared")
+        trajectory_sha256 = receipt.get("trajectory_sha256")
+        if not isinstance(trajectory_sha256, str) or len(trajectory_sha256) != 64:
+            raise MechanicsContractError(
+                f"{episode_id} lacks content-addressed trajectory"
+            )
+        partition_results[episode["partition"]][disposition] += 1
+        if disposition == "FAIL":
+            failures[reason] += 1
+            failure_regions[f"{reason}:{episode['parameter_region']}"] += 1
+        retained.append({
+            "episode_id": episode_id,
+            "disposition": disposition,
+            "failure_reason": reason,
+            "receipt_sha256": receipt["receipt_sha256"],
+            "trajectory_sha256": trajectory_sha256,
+        })
+    passed = sum(item["disposition"] == "PASS" for item in retained)
+    result = {
+        "schema": RANDOMIZED_DEMONSTRATION_RESULT_SCHEMA,
+        "status": "COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE",
+        "source_campaign_sha256": campaign["campaign_sha256"],
+        "attempted_episode_count": len(episodes),
+        "completed_episode_count": len(retained),
+        "passed_episode_count": passed,
+        "failed_episode_count": len(retained) - passed,
+        "partition_results": {
+            partition: dict(counts)
+            for partition, counts in partition_results.items()
+        },
+        "failure_counts_by_reason": dict(sorted(failures.items())),
+        "failure_counts_by_reason_and_region": dict(sorted(failure_regions.items())),
+        "retained_episodes": retained,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+    }
+    result["result_sha256"] = _canonical_sha256(result)
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -10424,6 +10800,14 @@ def main() -> int:
     parser.add_argument("--representative-native-mechanics-output-dir", type=Path)
     parser.add_argument("--feedback-adapted-mechanics-output-dir", type=Path)
     parser.add_argument("--contact-refined-mechanics-output-dir", type=Path)
+    parser.add_argument(
+        "--build-randomized-demonstration-campaign",
+        action="store_true",
+        help="precommit the deterministic ARM-218 LM3 smoke manifest",
+    )
+    parser.add_argument("--source-result-campaign", type=Path)
+    parser.add_argument("--source-artifact-root", type=Path)
+    parser.add_argument("--master-seed", type=int, default=218)
     parser.add_argument("--governed-demonstration", type=Path)
     parser.add_argument(
         "--run-drive-controlled-robot-h-replay",
@@ -10526,7 +10910,34 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.run_drive_controlled_robot_h_replay:
+        if args.build_randomized_demonstration_campaign:
+            required = (args.source_result_campaign, args.source_artifact_root)
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-218 compilation requires its source result and artifact root"
+                )
+            source_root = args.source_artifact_root.resolve(strict=True)
+            source = json.loads(
+                args.source_result_campaign.resolve(strict=True).read_bytes()
+            )
+            plans = {}
+            receipts = {}
+            for target in REPRESENTATIVE_KEYS[1:]:
+                target_root = source_root / target.lower()
+                plans[target] = json.loads(
+                    (target_root / "native_mechanics_plan.json")
+                    .resolve(strict=True)
+                    .read_bytes()
+                )
+                receipts[target] = json.loads(
+                    (target_root / "native_mechanics_receipt.json")
+                    .resolve(strict=True)
+                    .read_bytes()
+                )
+            result = build_randomized_demonstration_campaign(
+                source, plans, receipts, master_seed=args.master_seed
+            )
+        elif args.run_drive_controlled_robot_h_replay:
             required = (args.replay_plan, args.drive_profile, args.robot_usd)
             if any(item is None for item in required):
                 raise MechanicsContractError(
