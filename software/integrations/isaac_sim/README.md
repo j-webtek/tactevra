@@ -2013,6 +2013,36 @@ toolchain still require immediate file-level revalidation. The record therefore
 contains nine admissions and 523 samples, but zero Isaac/GPU starts and zero
 fresh collision diagnostics.
 
+The file-level revalidation stage is now retained at
+`C:\IsaacSim\artifacts\issue190\arm219-state-policy-collision-runtime-revalidation-001`.
+Its campaign SHA-256 is
+`36f6f1221666f1cbbf092fb2858623d61d60de007c7c2b41e20bd8d278b462da`.
+It distinguishes raw-byte hashes for the virtual profile and USD from the
+canonical document hashes used by the import receipt and toolchain lock, and
+also proves that the USD byte length/hash matches the receipt's sole external
+file. All nine admissions and `523` samples are preserved. The result is
+`READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START`, with
+`runtime_files_revalidated=true`, while `isaac_started`, `gpu_started`, and
+the diagnostic count remain false/zero. No collision or replay authority is
+implied.
+
+Reproduce only this non-starting boundary with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/ghost_keyboard_v1.json `
+  --output C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-revalidation-001/campaign.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-revalidation-001/status.json `
+  --revalidate-state-policy-collision-runtime-inputs `
+  --state-policy-runtime-admission-campaign C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-admission-001/campaign.json `
+  --collision-runtime-admission-root C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-admission-001 `
+  --collision-runtime-revalidation-output-dir C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-revalidation-001 `
+  --virtual-profile software/config/virtual_commissioning_profile.json `
+  --robot-usd C:/IsaacSim/artifacts/issue190/wp1-import-003/roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda `
+  --import-receipt C:/IsaacSim/evidence/urdf_import_003.json `
+  --toolchain-lock software/config/isaac_sim_toolchain_lock.json
+```
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

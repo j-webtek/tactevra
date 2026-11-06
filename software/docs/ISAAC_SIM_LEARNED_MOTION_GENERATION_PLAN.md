@@ -593,6 +593,20 @@ Isaac starts. The campaign records zero runtime-file revalidations, Isaac/GPU
 starts, and collision diagnostics, so no earlier planner result is presented
 as learned-policy clearance.
 
+The immediate runtime-file revalidation is now retained separately with
+campaign SHA-256
+`36f6f1221666f1cbbf092fb2858623d61d60de007c7c2b41e20bd8d278b462da`.
+It reloads the virtual profile and robot USD as raw bytes, verifies the robot
+USD against the canonical import receipt, and hashes the selected toolchain as
+canonical JSON. All four hashes match every one of the nine admissions. The
+artifact contains `9` per-episode receipts and preserves all `523` bounded
+samples. Status
+`READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START` means the
+runtime inputs are exact and fresh enough to start the next diagnostic stage;
+it is not collision clearance. The receipt explicitly records zero Isaac/GPU
+starts, zero diagnostics, zero reused results, and no native or physical
+authority.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -767,7 +781,11 @@ ScheduleGen. Neither is a physical success rate.
 8. **LM4 baseline:** the first deterministic linear policy is fit and its
    train/held-out action-imitation error is retained. Replay its proposals on
    identical held-out resets through the unchanged simulation gates next.
-9. Expand only after each predecessor produces reviewable evidence.
+9. **LM4 runtime admission:** all nine learned-policy collision requests are
+   bound to their ARM-216 environments and the four governed runtime files are
+   reloaded and rehashed. Isaac and the GPU remain stopped; nine fresh
+   diagnostics are the next boundary.
+10. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

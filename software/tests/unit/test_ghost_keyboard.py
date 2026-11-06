@@ -3502,10 +3502,10 @@ def _arm219_collision_sources(mechanics,proposal_campaign):
     return campaign,inputs
 
 
-def _arm219_runtime_admission_sources(mechanics,proposal_campaign):
+def _arm219_runtime_admission_sources(mechanics,proposal_campaign,runtime_hashes=None):
     native,inputs=_arm219_collision_sources(mechanics,proposal_campaign)
     entries=[]
-    common={
+    common=runtime_hashes or {
         'virtual_profile_sha256':'v'*64,
         'robot_import_receipt_sha256':'i'*64,
         'robot_usd_sha256':'u'*64,
@@ -3515,6 +3515,16 @@ def _arm219_runtime_admission_sources(mechanics,proposal_campaign):
         collision=target_inputs['collision_request']
         fixed=target_inputs['fixed_base_replay_plan']
         predicate=target_inputs['station_route_predicate']
+        if runtime_hashes is not None:
+            collision['toolchain_lock_sha256']=common['toolchain_lock_sha256']
+            collision['request_sha256']=mechanics._canonical_sha256({
+                key:value for key,value in collision.items()
+                if key!='request_sha256'
+            })
+            fixed['source_collision_request_sha256']=collision['request_sha256']
+            fixed['plan_sha256']=mechanics._canonical_sha256({
+                key:value for key,value in fixed.items() if key!='plan_sha256'
+            })
         receipt={
             'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA,
             'status':'DIAGNOSTIC_OVERLAPS_OBSERVED',
@@ -3572,6 +3582,42 @@ def _arm219_runtime_admission_sources(mechanics,proposal_campaign):
         key:value for key,value in native.items() if key!='campaign_sha256'
     })
     return manifest,native,inputs
+
+
+def _arm219_runtime_files(mechanics):
+    virtual_bytes=json.dumps({
+        'schema':'rocell.virtual_commissioning_profile.v1',
+        'status':'UNMEASURED_SENSITIVITY_OVERLAY',
+        'simulation_only':True,
+        'physical_release_effect':'NONE',
+    },sort_keys=True).encode()
+    robot_usd=b'#usda 1.0\ndef Xform "robot" {}\n'
+    import_receipt={
+        'schema':'tactevra.isaac_sim_urdf_import.v1',
+        'external_files':[{
+            'path':'robot.usda',
+            'sha256':hashlib.sha256(robot_usd).hexdigest(),
+            'size_bytes':len(robot_usd),
+        }],
+        'hardware_access':False,'hardware_writes':0,
+        'physical_authority':False,'physical_movements':0,
+        'wire_commands':[],
+    }
+    import_receipt['receipt_sha256']=mechanics._canonical_sha256(import_receipt)
+    toolchain={
+        'schema':'rocell.isaac_sim_toolchain_lock.v1',
+        'selection_status':'SELECTED',
+        'hardware_access':False,
+        'physical_authority':False,
+        'wire_commands':[],
+    }
+    hashes={
+        'virtual_profile_sha256':hashlib.sha256(virtual_bytes).hexdigest(),
+        'robot_import_receipt_sha256':import_receipt['receipt_sha256'],
+        'robot_usd_sha256':hashlib.sha256(robot_usd).hexdigest(),
+        'toolchain_lock_sha256':mechanics._canonical_sha256(toolchain),
+    }
+    return virtual_bytes,import_receipt,robot_usd,toolchain,hashes
 
 
 def test_arm219_collision_samples_interpolate_jumps_and_preserve_phase():
@@ -3745,6 +3791,101 @@ def test_arm219_collision_runtime_admission_rejects_tampered_model(
         mechanics.admit_state_policy_collision_request_campaign(
             dataset,model,proposal,request_campaign,requests,
             native_manifest,native,native_inputs
+        )
+
+
+def test_arm219_runtime_revalidation_is_deterministic_and_stops_before_isaac(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    dataset=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    model=mechanics.fit_state_policy_baseline(dataset,trajectories)
+    evaluation={
+        episode['episode_id']:trajectories[episode['episode_id']]
+        for episode in dataset['episodes'] if episode['role']=='EVALUATION'
+    }
+    proposal,payloads=mechanics.build_state_policy_proposal_replay_campaign(
+        dataset,model,evaluation
+    )
+    virtual,import_receipt,usd,toolchain,hashes=_arm219_runtime_files(mechanics)
+    native_manifest,native,native_inputs=_arm219_runtime_admission_sources(
+        mechanics,proposal,hashes
+    )
+    request_campaign,requests=mechanics.build_state_policy_collision_request_campaign(
+        proposal,payloads,native,native_inputs
+    )
+    admission,admissions=mechanics.admit_state_policy_collision_request_campaign(
+        dataset,model,proposal,request_campaign,requests,
+        native_manifest,native,native_inputs
+    )
+    first,first_receipts=mechanics.revalidate_state_policy_collision_runtime_inputs(
+        admission,admissions,virtual,import_receipt,usd,toolchain
+    )
+    second,second_receipts=mechanics.revalidate_state_policy_collision_runtime_inputs(
+        admission,admissions,virtual,import_receipt,usd,toolchain
+    )
+    assert first==second and first_receipts==second_receipts
+    assert first['schema']==(
+        mechanics.STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_CAMPAIGN_SCHEMA
+    )
+    assert first['runtime_files_revalidated'] is True
+    assert first['revalidated_file_count']==4
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['collision_diagnostics_executed']==0
+    assert first['fresh_collision_diagnostics_required']==len(admissions)
+    assert first['runtime_files']['virtual_profile']['hash_mode']=='RAW_FILE_BYTES'
+    assert first['runtime_files']['toolchain_lock']['hash_mode']==(
+        'CANONICAL_JSON_DOCUMENT'
+    )
+    assert set(first_receipts)==set(admissions)
+    for receipt in first_receipts.values():
+        assert receipt['runtime_files_revalidated'] is True
+        assert receipt['collision_diagnostic_executed'] is False
+        assert receipt['hardware_access'] is receipt['physical_authority'] is False
+
+
+def test_arm219_runtime_revalidation_rejects_changed_runtime_files(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    dataset=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    model=mechanics.fit_state_policy_baseline(dataset,trajectories)
+    evaluation={
+        episode['episode_id']:trajectories[episode['episode_id']]
+        for episode in dataset['episodes'] if episode['role']=='EVALUATION'
+    }
+    proposal,payloads=mechanics.build_state_policy_proposal_replay_campaign(
+        dataset,model,evaluation
+    )
+    virtual,import_receipt,usd,toolchain,hashes=_arm219_runtime_files(mechanics)
+    native_manifest,native,native_inputs=_arm219_runtime_admission_sources(
+        mechanics,proposal,hashes
+    )
+    request_campaign,requests=mechanics.build_state_policy_collision_request_campaign(
+        proposal,payloads,native,native_inputs
+    )
+    admission,admissions=mechanics.admit_state_policy_collision_request_campaign(
+        dataset,model,proposal,request_campaign,requests,
+        native_manifest,native,native_inputs
+    )
+    with pytest.raises(mechanics.MechanicsContractError,match='robot USD'):
+        mechanics.revalidate_state_policy_collision_runtime_inputs(
+            admission,admissions,virtual,import_receipt,usd+b'changed',toolchain
+        )
+    changed_toolchain=dict(toolchain,isaac_sim_version='changed')
+    with pytest.raises(mechanics.MechanicsContractError,match='toolchain_lock_sha256'):
+        mechanics.revalidate_state_policy_collision_runtime_inputs(
+            admission,admissions,virtual,import_receipt,usd,changed_toolchain
         )
 
 
