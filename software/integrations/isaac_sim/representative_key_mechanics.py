@@ -205,6 +205,18 @@ STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_SCHEMA = (
 STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_collision_runtime_revalidation_campaign.v1"
 )
+STATE_POLICY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_collision_replay_plan.v1"
+)
+STATE_POLICY_NATIVE_COLLISION_MANIFEST_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_collision_manifest.v1"
+)
+STATE_POLICY_NATIVE_COLLISION_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_collision_receipt.v1"
+)
+STATE_POLICY_NATIVE_COLLISION_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_collision_campaign.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -7981,6 +7993,7 @@ def run_robot_tcp_collision_diagnostic(
     fixed_base_replay_plan = None
     fixed_base_candidate = None
     representative_fixed_base = False
+    state_policy_fixed_base = False
     if fixed_base_replay_plan_path is not None:
         fixed_base_replay_plan = json.loads(
             fixed_base_replay_plan_path.resolve(strict=True).read_bytes()
@@ -7991,13 +8004,18 @@ def run_robot_tcp_collision_diagnostic(
         fixed_contract = fixed_base_replay_plan.get("fixed_base_contract")
         root_contract = fixed_base_replay_plan.get("root_pose_invariant")
         plan_schema = fixed_base_replay_plan.get("schema")
-        representative_fixed_base = (
-            plan_schema == REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA
+        state_policy_fixed_base = (
+            plan_schema == STATE_POLICY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA
         )
+        representative_fixed_base = plan_schema in {
+            REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
+            STATE_POLICY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
+        }
         if (
             plan_schema not in {
                 FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA,
                 REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
+                STATE_POLICY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
             }
             or claimed_plan_hash != _canonical_sha256(unsigned_plan)
             or fixed_base_replay_plan.get("status")
@@ -8035,6 +8053,17 @@ def run_robot_tcp_collision_diagnostic(
             ):
                 raise MechanicsContractError(
                     "representative fixed-base replay binding changed"
+                )
+            if state_policy_fixed_base and (
+                fixed_base_replay_plan.get("source_state_policy_request_sha256")
+                != request.get("source_state_policy_request_sha256")
+                or fixed_base_replay_plan.get(
+                    "source_runtime_revalidation_receipt_sha256"
+                )
+                != request.get("source_runtime_revalidation_receipt_sha256")
+            ):
+                raise MechanicsContractError(
+                    "state-policy fixed-base replay binding changed"
                 )
             fixed_base_candidate = {
                 "source_arm215_target_plan_sha256": fixed_base_replay_plan[
@@ -8514,7 +8543,9 @@ def run_robot_tcp_collision_diagnostic(
 
         receipt: dict[str, Any] = {
             "schema": (
-                REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA
+                STATE_POLICY_NATIVE_COLLISION_RECEIPT_SCHEMA
+                if state_policy_fixed_base
+                else REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA
                 if representative_fixed_base
                 else TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA
                 if fixed_base_replay_plan is not None
@@ -8682,6 +8713,21 @@ def run_robot_tcp_collision_diagnostic(
                     ],
                     "source_representative_plan_mutated": False,
                 })
+                if state_policy_fixed_base:
+                    receipt.update({
+                        "state_policy_episode_id": request[
+                            "state_policy_episode_id"
+                        ],
+                        "state_policy_target_id": request[
+                            "state_policy_target_id"
+                        ],
+                        "source_state_policy_request_sha256": request[
+                            "source_state_policy_request_sha256"
+                        ],
+                        "source_runtime_revalidation_receipt_sha256": request[
+                            "source_runtime_revalidation_receipt_sha256"
+                        ],
+                    })
             else:
                 receipt.update({
                     "source_v4_native_receipt_sha256": fixed_base_candidate[
@@ -12892,6 +12938,354 @@ def revalidate_state_policy_collision_runtime_inputs(
     return campaign, receipts
 
 
+def materialize_state_policy_native_collision_inputs(
+    revalidation_campaign: dict[str, Any],
+    revalidation_receipts: dict[str, dict[str, Any]],
+    state_policy_requests: dict[str, dict[str, Any]],
+    representative_inputs: dict[str, dict[str, dict[str, Any]]],
+) -> tuple[dict[str, Any], dict[str, dict[str, dict[str, Any]]]]:
+    """Bind learned-policy samples into the existing zero-authority Isaac runner."""
+    _verify_lm3_digest(
+        revalidation_campaign,
+        "campaign_sha256",
+        "runtime revalidation campaign",
+    )
+    _require_lm3_zero_authority(
+        revalidation_campaign, "runtime revalidation campaign"
+    )
+    rows = revalidation_campaign.get("revalidations")
+    if (
+        revalidation_campaign.get("schema")
+        != STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_CAMPAIGN_SCHEMA
+        or revalidation_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START"
+        or revalidation_campaign.get("runtime_files_revalidated") is not True
+        or revalidation_campaign.get("isaac_started") is not False
+        or revalidation_campaign.get("gpu_started") is not False
+        or revalidation_campaign.get("collision_diagnostics_executed") != 0
+        or not isinstance(rows, list)
+        or not rows
+    ):
+        raise MechanicsContractError("native collision start boundary changed")
+    rows_by_id = {row.get("episode_id"): row for row in rows if isinstance(row, dict)}
+    if (
+        None in rows_by_id
+        or len(rows_by_id) != len(rows)
+        or set(revalidation_receipts) != set(rows_by_id)
+        or set(state_policy_requests) != set(rows_by_id)
+    ):
+        raise MechanicsContractError("native collision denominator changed")
+
+    bundles: dict[str, dict[str, dict[str, Any]]] = {}
+    entries = []
+    total_samples = 0
+    for episode_id, row in rows_by_id.items():
+        revalidation = revalidation_receipts[episode_id]
+        state_request = state_policy_requests[episode_id]
+        target_id = row.get("target_id")
+        target_inputs = representative_inputs.get(target_id)
+        if not isinstance(target_inputs, dict):
+            raise MechanicsContractError(
+                f"{episode_id} representative target inputs are absent"
+            )
+        source_request = target_inputs.get("collision_request")
+        source_plan = target_inputs.get("fixed_base_replay_plan")
+        route_predicate = target_inputs.get("station_route_predicate")
+        for document, digest_key, label in (
+            (revalidation, "receipt_sha256", "runtime revalidation"),
+            (state_request, "request_sha256", "state-policy request"),
+            (source_request, "request_sha256", "representative collision request"),
+            (source_plan, "plan_sha256", "representative fixed-base plan"),
+            (route_predicate, "predicate_sha256", "station route predicate"),
+        ):
+            if not isinstance(document, dict):
+                raise MechanicsContractError(f"{episode_id} {label} is absent")
+            _verify_lm3_digest(document, digest_key, f"{episode_id} {label}")
+            _require_lm3_zero_authority(document, f"{episode_id} {label}")
+        if (
+            revalidation.get("schema")
+            != STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_SCHEMA
+            or revalidation.get("status")
+            != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START"
+            or revalidation.get("receipt_sha256") != row.get("receipt_sha256")
+            or revalidation.get("request_sha256") != state_request.get("request_sha256")
+            or state_request.get("schema") != STATE_POLICY_COLLISION_REQUEST_SCHEMA
+            or state_request.get("episode_id") != episode_id
+            or state_request.get("target_id") != target_id
+            or state_request.get("source_collision_request_sha256")
+            != source_request.get("request_sha256")
+            or state_request.get("source_fixed_base_replay_plan_sha256")
+            != source_plan.get("plan_sha256")
+            or state_request.get("source_station_route_predicate_sha256")
+            != route_predicate.get("predicate_sha256")
+            or source_request.get("schema") != TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA
+            or source_plan.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} native collision lineage changed"
+            )
+        state_samples = state_request.get("bounded_samples")
+        if (
+            not isinstance(state_samples, list)
+            or not state_samples
+            or len(state_samples) != state_request.get("bounded_sample_count")
+            or len(state_samples) != revalidation.get("bounded_sample_count")
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} native collision samples changed"
+            )
+        native_samples = []
+        for sequence, sample in enumerate(state_samples):
+            if sample.get("sample_sequence") != sequence:
+                raise MechanicsContractError(
+                    f"{episode_id} native collision sample order changed"
+                )
+            native_sample = dict(sample)
+            native_sample["source_segment_index"] = sample.get(
+                "source_left_row_index", sequence
+            )
+            native_samples.append(native_sample)
+
+        native_request = {
+            key: value
+            for key, value in source_request.items()
+            if key != "request_sha256"
+        }
+        native_request.update({
+            "bounded_sample_count": len(native_samples),
+            "bounded_samples": native_samples,
+            "bounded_sampling_policy": state_request["bounded_sampling_policy"],
+            "state_policy_episode_id": episode_id,
+            "state_policy_target_id": target_id,
+            "source_state_policy_request_sha256": state_request["request_sha256"],
+            "source_runtime_revalidation_receipt_sha256": revalidation[
+                "receipt_sha256"
+            ],
+            "prior_collision_result_reused": False,
+            "next_required_stage": "RUN_FRESH_ZERO_AUTHORITY_ISAAC_COLLISION_DIAGNOSTIC",
+        })
+        native_request["limitations"] = list(source_request.get("limitations", [])) + [
+            "samples_are_fresh_learned_policy_proposals_not_representative_results",
+            "native_result_cannot_authorize_contact_or_physical_motion",
+        ]
+        native_request["request_sha256"] = _canonical_sha256(native_request)
+
+        native_plan = {
+            key: value for key, value in source_plan.items() if key != "plan_sha256"
+        }
+        native_plan.update({
+            "schema": STATE_POLICY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA,
+            "source_collision_request_sha256": native_request["request_sha256"],
+            "source_bounded_sample_count": len(native_samples),
+            "source_state_policy_request_sha256": state_request["request_sha256"],
+            "source_runtime_revalidation_campaign_sha256": revalidation_campaign[
+                "campaign_sha256"
+            ],
+            "source_runtime_revalidation_receipt_sha256": revalidation[
+                "receipt_sha256"
+            ],
+        })
+        native_plan["plan_sha256"] = _canonical_sha256(native_plan)
+        bundles[episode_id] = {
+            "collision_request": native_request,
+            "fixed_base_replay_plan": native_plan,
+        }
+        total_samples += len(native_samples)
+        entries.append({
+            "episode_id": episode_id,
+            "target_id": target_id,
+            "bounded_sample_count": len(native_samples),
+            "state_policy_request_sha256": state_request["request_sha256"],
+            "runtime_revalidation_receipt_sha256": revalidation["receipt_sha256"],
+            "native_collision_request_sha256": native_request["request_sha256"],
+            "native_fixed_base_replay_plan_sha256": native_plan["plan_sha256"],
+        })
+    if total_samples != revalidation_campaign.get("total_bounded_sample_count"):
+        raise MechanicsContractError("native collision sample denominator changed")
+    manifest: dict[str, Any] = {
+        "schema": STATE_POLICY_NATIVE_COLLISION_MANIFEST_SCHEMA,
+        "status": "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_COLLISION_DIAGNOSTICS",
+        "source_runtime_revalidation_campaign_sha256": revalidation_campaign[
+            "campaign_sha256"
+        ],
+        "source_dataset_sha256": revalidation_campaign["source_dataset_sha256"],
+        "source_model_sha256": revalidation_campaign["source_model_sha256"],
+        "episode_count": len(entries),
+        "total_bounded_sample_count": total_samples,
+        "entries": entries,
+        "isaac_started": False,
+        "gpu_started": False,
+        "collision_diagnostics_executed": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "manifest_materialization_does_not_start_isaac_or_a_gpu",
+            "all_nine_fresh_collision_diagnostics_remain_pending",
+            "no_native_contact_or_physical_replay_authority",
+        ],
+    }
+    manifest["manifest_sha256"] = _canonical_sha256(manifest)
+    return manifest, bundles
+
+
+def aggregate_state_policy_native_collision_campaign(
+    manifest: dict[str, Any],
+    receipts: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Verify and aggregate the complete learned-policy native diagnostic set."""
+    _verify_lm3_digest(manifest, "manifest_sha256", "native collision manifest")
+    _require_lm3_zero_authority(manifest, "native collision manifest")
+    entries = manifest.get("entries")
+    if (
+        manifest.get("schema") != STATE_POLICY_NATIVE_COLLISION_MANIFEST_SCHEMA
+        or manifest.get("status")
+        != "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_COLLISION_DIAGNOSTICS"
+        or not isinstance(entries, list)
+        or not entries
+    ):
+        raise MechanicsContractError("native collision manifest boundary changed")
+    entries_by_id = {
+        entry.get("episode_id"): entry for entry in entries if isinstance(entry, dict)
+    }
+    if (
+        None in entries_by_id
+        or len(entries_by_id) != len(entries)
+        or set(receipts) != set(entries_by_id)
+    ):
+        raise MechanicsContractError("native collision result denominator changed")
+    results = []
+    total_samples = 0
+    total_samples_with_overlaps = 0
+    blocker_episode_count = 0
+    for episode_id, entry in entries_by_id.items():
+        receipt = receipts[episode_id]
+        _verify_lm3_digest(receipt, "receipt_sha256", f"{episode_id} native receipt")
+        _require_lm3_zero_authority(receipt, f"{episode_id} native receipt")
+        bindings = receipt.get("source_bindings")
+        classification_counts = [
+            receipt.get(key)
+            for key in (
+                "policy_excluded_pair_count",
+                "physical_solid_blocker_pair_count",
+                "planning_envelope_blocker_pair_count",
+                "unreviewed_blocker_pair_count",
+            )
+        ]
+        if any(
+            not isinstance(value, int) or isinstance(value, bool) or value < 0
+            for value in classification_counts
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} native collision classification is incomplete"
+            )
+        blocker_count = sum(classification_counts[1:])
+        root_invariant = receipt.get("root_pose_invariant")
+        if not isinstance(root_invariant, dict):
+            raise MechanicsContractError(
+                f"{episode_id} native root invariant is absent"
+            )
+        root_translation = _finite_number(
+            root_invariant.get("maximum_translation_delta_mm"),
+            f"{episode_id} root translation delta",
+        )
+        root_orientation = _finite_number(
+            root_invariant.get("maximum_orientation_delta_deg"),
+            f"{episode_id} root orientation delta",
+        )
+        root_translation_tolerance = _finite_number(
+            root_invariant.get("translation_tolerance_mm"),
+            f"{episode_id} root translation tolerance",
+        )
+        root_orientation_tolerance = _finite_number(
+            root_invariant.get("orientation_tolerance_deg"),
+            f"{episode_id} root orientation tolerance",
+        )
+        if (
+            receipt.get("schema") != STATE_POLICY_NATIVE_COLLISION_RECEIPT_SCHEMA
+            or receipt.get("state_policy_episode_id") != episode_id
+            or receipt.get("state_policy_target_id") != entry.get("target_id")
+            or receipt.get("source_state_policy_request_sha256")
+            != entry.get("state_policy_request_sha256")
+            or receipt.get("source_runtime_revalidation_receipt_sha256")
+            != entry.get("runtime_revalidation_receipt_sha256")
+            or receipt.get("collision_screening_executed") is not True
+            or receipt.get("fixed_base_replay_applied") is not True
+            or root_invariant.get("status") != "PASS"
+            or root_translation > root_translation_tolerance
+            or root_orientation > root_orientation_tolerance
+            or receipt.get("bounded_sample_count") != entry.get("bounded_sample_count")
+            or receipt.get("status") not in {
+                "DIAGNOSTIC_BLOCKERS_OBSERVED",
+                "DIAGNOSTIC_OVERLAPS_OBSERVED",
+                "DIAGNOSTIC_NO_OVERLAPS_OBSERVED",
+            }
+            or sum(classification_counts)
+            != receipt.get("unique_collision_pair_count")
+            or not isinstance(bindings, dict)
+            or bindings.get("request_sha256")
+            != entry.get("native_collision_request_sha256")
+            or bindings.get("fixed_base_replay_plan_sha256")
+            != entry.get("native_fixed_base_replay_plan_sha256")
+        ):
+            raise MechanicsContractError(f"{episode_id} native receipt boundary changed")
+        total_samples += receipt["bounded_sample_count"]
+        total_samples_with_overlaps += receipt["samples_with_overlaps"]
+        blocker_episode_count += blocker_count > 0
+        results.append({
+            "episode_id": episode_id,
+            "target_id": entry["target_id"],
+            "receipt_sha256": receipt["receipt_sha256"],
+            "status": receipt["status"],
+            "bounded_sample_count": receipt["bounded_sample_count"],
+            "samples_with_overlaps": receipt["samples_with_overlaps"],
+            "blocker_pair_count": blocker_count,
+        })
+    if total_samples != manifest.get("total_bounded_sample_count"):
+        raise MechanicsContractError("native collision result sample denominator changed")
+    campaign: dict[str, Any] = {
+        "schema": STATE_POLICY_NATIVE_COLLISION_CAMPAIGN_SCHEMA,
+        "status": "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_WITH_BLOCKERS"
+        if blocker_episode_count
+        else "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_NO_BLOCKERS_OBSERVED",
+        "source_manifest_sha256": manifest["manifest_sha256"],
+        "source_runtime_revalidation_campaign_sha256": manifest[
+            "source_runtime_revalidation_campaign_sha256"
+        ],
+        "source_dataset_sha256": manifest["source_dataset_sha256"],
+        "source_model_sha256": manifest["source_model_sha256"],
+        "episode_count": len(results),
+        "collision_diagnostics_executed": len(results),
+        "total_bounded_sample_count": total_samples,
+        "total_samples_with_overlaps": total_samples_with_overlaps,
+        "blocker_episode_count": blocker_episode_count,
+        "results": results,
+        "isaac_started": True,
+        "gpu_started": True,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "native_replay_authorized": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": "REVIEW_LM4_COLLISION_DIAGNOSTIC_RESULTS",
+        "limitations": [
+            "discrete_overlap_queries_are_not_continuous_collision_proof",
+            "exploratory_uninstalled_geometry_cannot_promote_installed_clearance",
+            "no_native_contact_or_physical_replay_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -13204,6 +13598,16 @@ def main() -> int:
         action="store_true",
         help="reload and hash LM4 runtime files without starting Isaac or a GPU",
     )
+    parser.add_argument(
+        "--materialize-state-policy-native-collision-inputs",
+        action="store_true",
+        help="bind LM4 samples into fresh fixed-base native diagnostic inputs",
+    )
+    parser.add_argument(
+        "--aggregate-state-policy-native-collision-campaign",
+        action="store_true",
+        help="verify the complete LM4 native collision diagnostic denominator",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -13218,6 +13622,10 @@ def main() -> int:
     parser.add_argument("--state-policy-runtime-admission-campaign", type=Path)
     parser.add_argument("--collision-runtime-admission-root", type=Path)
     parser.add_argument("--collision-runtime-revalidation-output-dir", type=Path)
+    parser.add_argument("--state-policy-runtime-revalidation-campaign", type=Path)
+    parser.add_argument("--state-policy-runtime-revalidation-root", type=Path)
+    parser.add_argument("--state-policy-native-manifest", type=Path)
+    parser.add_argument("--state-policy-native-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -13328,7 +13736,108 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.revalidate_state_policy_collision_runtime_inputs:
+        if args.materialize_state_policy_native_collision_inputs:
+            required = (
+                args.state_policy_runtime_revalidation_campaign,
+                args.state_policy_runtime_revalidation_root,
+                args.collision_request_output_dir,
+                args.representative_native_admission_root,
+                args.state_policy_native_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-220 native input materialization requires the runtime "
+                    "revalidation campaign/root, state-policy request root, "
+                    "representative native root, and native output directory"
+                )
+            revalidation_campaign = json.loads(
+                args.state_policy_runtime_revalidation_campaign
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            revalidation_root = args.state_policy_runtime_revalidation_root.resolve(
+                strict=True
+            )
+            request_root = args.collision_request_output_dir.resolve(strict=True)
+            native_root = args.representative_native_admission_root.resolve(
+                strict=True
+            )
+            revalidations = {
+                row["episode_id"]: json.loads((
+                    revalidation_root
+                    / row["episode_id"]
+                    / "runtime_revalidation.json"
+                ).resolve(strict=True).read_bytes())
+                for row in revalidation_campaign.get("revalidations", [])
+            }
+            state_requests = {
+                row["episode_id"]: json.loads((
+                    request_root / row["episode_id"] / "collision_request.json"
+                ).resolve(strict=True).read_bytes())
+                for row in revalidation_campaign.get("revalidations", [])
+            }
+            targets = {
+                row["target_id"]
+                for row in revalidation_campaign.get("revalidations", [])
+            }
+            representative_inputs = {}
+            for target_id in targets:
+                target_root = native_root / target_id.lower()
+                representative_inputs[target_id] = {
+                    "collision_request": json.loads((
+                        target_root / "collision_request.json"
+                    ).resolve(strict=True).read_bytes()),
+                    "fixed_base_replay_plan": json.loads((
+                        target_root / "fixed_base_replay_plan.json"
+                    ).resolve(strict=True).read_bytes()),
+                    "station_route_predicate": json.loads((
+                        target_root / "station_route_predicate.json"
+                    ).resolve(strict=True).read_bytes()),
+                }
+            result, native_bundles = materialize_state_policy_native_collision_inputs(
+                revalidation_campaign,
+                revalidations,
+                state_requests,
+                representative_inputs,
+            )
+            output_root = args.state_policy_native_output_dir.resolve()
+            output_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, bundle in native_bundles.items():
+                episode_root = output_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                for filename, document in (
+                    ("native_collision_request.json", bundle["collision_request"]),
+                    ("native_fixed_base_replay_plan.json", bundle[
+                        "fixed_base_replay_plan"
+                    ]),
+                ):
+                    (episode_root / filename).write_text(
+                        json.dumps(document, indent=2, sort_keys=True) + "\n",
+                        encoding="utf-8",
+                    )
+        elif args.aggregate_state_policy_native_collision_campaign:
+            required = (
+                args.state_policy_native_manifest,
+                args.state_policy_native_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-220 native aggregation requires its manifest and receipt root"
+                )
+            manifest = json.loads(
+                args.state_policy_native_manifest.resolve(strict=True).read_bytes()
+            )
+            native_root = args.state_policy_native_output_dir.resolve(strict=True)
+            receipts = {
+                row["episode_id"]: json.loads((
+                    native_root / row["episode_id"] / "native_receipt.json"
+                ).resolve(strict=True).read_bytes())
+                for row in manifest.get("entries", [])
+            }
+            result = aggregate_state_policy_native_collision_campaign(
+                manifest, receipts
+            )
+        elif args.revalidate_state_policy_collision_runtime_inputs:
             required = (
                 args.state_policy_runtime_admission_campaign,
                 args.collision_runtime_admission_root,
@@ -14961,6 +15470,9 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_RUNTIME_INPUT_REVALIDATION",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START",
+            "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_COLLISION_DIAGNOSTICS",
+            "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_WITH_BLOCKERS",
+            "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_NO_BLOCKERS_OBSERVED",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

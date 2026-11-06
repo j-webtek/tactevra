@@ -2026,7 +2026,51 @@ file. All nine admissions and `523` samples are preserved. The result is
 the diagnostic count remain false/zero. No collision or replay authority is
 implied.
 
-Reproduce only this non-starting boundary with:
+ARM-220 then materializes each learned-policy request into a fresh fixed-base
+native diagnostic input without copying the representative collision result.
+The retained manifest at
+`C:\IsaacSim\artifacts\issue190\arm220-state-policy-native-collision-001\manifest.json`
+has SHA-256
+`cd4b7a70632d84b1e28bf6cdce23d3013659dfbebbce1913e351154bd6eee85b`.
+Nine separate Isaac/PhysX runs evaluate the complete `523`-sample denominator.
+The aggregated campaign SHA-256 is
+`01acc93bd8da33dfab4ca5a69ae20cec7459ed9f0d97fe5e730830960576d7ca`.
+All samples contain only the five accepted adjacent-link diagnostic reporting
+exclusions, with zero physical-solid, planning-envelope, or unreviewed blocker
+pairs. Fixed-base root invariants pass for every episode. The result remains
+zero hardware authority and explicitly leaves installed qualification,
+continuous collision proof, contact replay, and physical replay blocked.
+
+Recreate the non-starting native input manifest with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/ghost_keyboard_v1.json `
+  --output C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/manifest.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/status.json `
+  --materialize-state-policy-native-collision-inputs `
+  --state-policy-runtime-revalidation-campaign C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-revalidation-001/campaign.json `
+  --state-policy-runtime-revalidation-root C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-runtime-revalidation-001 `
+  --collision-request-output-dir C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-request-001 `
+  --representative-native-admission-root C:/IsaacSim/artifacts/issue190/arm216-representative-native-admission-001 `
+  --state-policy-native-output-dir C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001
+```
+
+After all nine entry-specific native receipts have been produced by the
+existing `--run-collision-diagnostic` command, verify the exact denominator
+with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/ghost_keyboard_v1.json `
+  --output C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/campaign.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/campaign_status.json `
+  --aggregate-state-policy-native-collision-campaign `
+  --state-policy-native-manifest C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/manifest.json `
+  --state-policy-native-output-dir C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001
+```
+
+Reproduce the preceding ARM-219 non-starting boundary with:
 
 ```powershell
 python software/integrations/isaac_sim/representative_key_mechanics.py `
