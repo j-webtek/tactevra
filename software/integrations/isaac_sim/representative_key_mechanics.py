@@ -181,7 +181,14 @@ STATE_POLICY_DATASET_MANIFEST_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_dataset_manifest.v1"
 )
 STATE_POLICY_BASELINE_SCHEMA = "tactevra.isaac_lm4_state_policy_baseline.v1"
+STATE_POLICY_PROPOSAL_ROW_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_proposal_row.v1"
+)
+STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_proposal_replay_campaign.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
+STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
     "train": 3,
     "validation": 2,
@@ -11503,6 +11510,281 @@ def fit_state_policy_baseline(
     return model
 
 
+def _predict_state_policy_action(
+    manifest: dict[str, Any],
+    model: dict[str, Any],
+    episode: dict[str, Any],
+    row: dict[str, Any],
+) -> list[float]:
+    statistics = manifest["normalization"]["statistics"]
+    numeric_names = manifest["feature_contract"]["numeric_inputs"]
+    parameter_names = [
+        name.removeprefix("randomized_parameters.")
+        for name in numeric_names
+        if name.startswith("randomized_parameters.")
+    ]
+    raw_numeric = [
+        *row.get("joint_position_observed_rad", []),
+        *row.get("joint_velocity_observed_rad_s", []),
+        row.get("key_center_z_m"),
+        row.get("tip_center_z_m"),
+        row.get("tip_key_separation_m"),
+        *[episode["randomized_parameters"].get(name) for name in parameter_names],
+        *episode["randomized_key_center_board_xy_mm"],
+    ]
+    if len(raw_numeric) != len(statistics):
+        raise MechanicsContractError("proposal feature shape mismatch")
+    normalized = [
+        (
+            _finite_number(value, "proposal numeric feature")
+            - _finite_number(statistic["mean"], "proposal normalization mean")
+        )
+        / _finite_number(statistic["scale"], "proposal normalization scale")
+        for value, statistic in zip(raw_numeric, statistics, strict=True)
+    ]
+    encoding = model["feature_encoding"]
+    target_id = row.get("target_id")
+    phase = row.get("phase")
+    action_index = row.get("action_index")
+    features = [
+        1.0,
+        *normalized,
+        *[float(target_id == value) for value in encoding["target_vocabulary"]],
+        *[float(phase == value) for value in encoding["phase_vocabulary"]],
+        *[
+            float(action_index == value)
+            for value in encoding["action_index_vocabulary"]
+        ],
+    ]
+    if len(features) != len(encoding["encoded_features"]):
+        raise MechanicsContractError("proposal encoded feature shape mismatch")
+    weights = model.get("weights_by_output_joint")
+    if (
+        not isinstance(weights, list)
+        or len(weights) != 6
+        or any(not isinstance(output, list) or len(output) != len(features) for output in weights)
+    ):
+        raise MechanicsContractError("proposal model weight shape mismatch")
+    return [
+        math.fsum(
+            _finite_number(weight, "proposal weight") * value
+            for weight, value in zip(output, features, strict=True)
+        )
+        for output in weights
+    ]
+
+
+def _state_policy_proposal_continuity(
+    rows: list[dict[str, Any]],
+    maximum_step_rad: float = STATE_POLICY_MAX_ADJACENT_STEP_RAD,
+) -> dict[str, Any]:
+    maximum_step_rad = _finite_number(maximum_step_rad, "proposal step bound")
+    if maximum_step_rad <= 0.0:
+        raise MechanicsContractError("proposal step bound must be positive")
+    observed_maximum = 0.0
+    violations = []
+    for left_index, (left, right) in enumerate(zip(rows, rows[1:])):
+        left_values = left.get("joint_position_proposal_rad")
+        right_values = right.get("joint_position_proposal_rad")
+        if (
+            not isinstance(left_values, list)
+            or not isinstance(right_values, list)
+            or len(left_values) != 6
+            or len(right_values) != 6
+        ):
+            raise MechanicsContractError("proposal continuity row shape mismatch")
+        step = max(
+            abs(
+                _finite_number(right_value, "proposal right joint")
+                - _finite_number(left_value, "proposal left joint")
+            )
+            for left_value, right_value in zip(
+                left_values, right_values, strict=True
+            )
+        )
+        observed_maximum = max(observed_maximum, step)
+        if step > maximum_step_rad:
+            violations.append({
+                "left_row_index": left_index,
+                "right_row_index": left_index + 1,
+                "left_phase": left.get("phase"),
+                "right_phase": right.get("phase"),
+                "left_target_sequence": left.get("target_sequence"),
+                "right_target_sequence": right.get("target_sequence"),
+                "maximum_joint_step_rad": step,
+            })
+    return {
+        "maximum_allowed_adjacent_joint_step_rad": maximum_step_rad,
+        "maximum_observed_adjacent_joint_step_rad": observed_maximum,
+        "violation_count": len(violations),
+        "violations": violations,
+    }
+
+
+def build_state_policy_proposal_replay_campaign(
+    manifest: dict[str, Any],
+    model: dict[str, Any],
+    trajectory_payloads: dict[str, bytes],
+) -> tuple[dict[str, Any], dict[str, bytes]]:
+    """Precommit held-out LM4 policy proposals for native physics replay."""
+    _verify_lm3_digest(manifest, "dataset_sha256", "state-policy dataset")
+    _require_lm3_zero_authority(manifest, "state-policy dataset")
+    _verify_lm3_digest(model, "model_sha256", "state-policy model")
+    _require_lm3_zero_authority(model, "state-policy model")
+    if (
+        manifest.get("schema") != STATE_POLICY_DATASET_MANIFEST_SCHEMA
+        or manifest.get("status") != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET"
+        or model.get("schema") != STATE_POLICY_BASELINE_SCHEMA
+        or model.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY"
+        or model.get("source_dataset_sha256") != manifest["dataset_sha256"]
+        or model.get("proposal_replay_status") != "NOT_RUN"
+    ):
+        raise MechanicsContractError(
+            "proposal replay sources are not an admitted dataset/model pair"
+        )
+    evaluation = [
+        episode
+        for episode in manifest.get("episodes", [])
+        if episode.get("role") == "EVALUATION"
+    ]
+    expected_ids = {episode["episode_id"] for episode in evaluation}
+    if set(trajectory_payloads) != expected_ids or not evaluation:
+        raise MechanicsContractError(
+            "proposal trajectories must equal the held-out evaluation denominator"
+        )
+    proposals = {}
+    campaign_episodes = []
+    total_rows = 0
+    maximum_deviation = 0.0
+    total_continuity_violations = 0
+    maximum_adjacent_step = 0.0
+    for episode in evaluation:
+        episode_id = episode["episode_id"]
+        source_payload = trajectory_payloads[episode_id]
+        if hashlib.sha256(source_payload).hexdigest() != episode["trajectory_sha256"]:
+            raise MechanicsContractError(
+                f"{episode_id} proposal source trajectory digest mismatch"
+            )
+        source_lines = source_payload.decode("utf-8").splitlines()
+        if len(source_lines) != episode["sample_count"]:
+            raise MechanicsContractError(
+                f"{episode_id} proposal source row count mismatch"
+            )
+        proposal_lines = []
+        proposal_rows = []
+        episode_maximum = 0.0
+        for row_index, line in enumerate(source_lines):
+            row = json.loads(line)
+            if (
+                row.get("schema") != STATE_POLICY_TRAJECTORY_SCHEMA
+                or row.get("target_id") != episode["target_id"]
+            ):
+                raise MechanicsContractError(
+                    f"{episode_id} proposal source row {row_index} context mismatch"
+                )
+            source_target = row.get("joint_position_target_rad")
+            if not isinstance(source_target, list) or len(source_target) != 6:
+                raise MechanicsContractError(
+                    f"{episode_id} proposal source row {row_index} action mismatch"
+                )
+            predicted = _predict_state_policy_action(
+                manifest, model, episode, row
+            )
+            deviation = max(
+                abs(predicted_value - _finite_number(source_value, "source action"))
+                for predicted_value, source_value in zip(
+                    predicted, source_target, strict=True
+                )
+            )
+            episode_maximum = max(episode_maximum, deviation)
+            proposal_row = {
+                "schema": STATE_POLICY_PROPOSAL_ROW_SCHEMA,
+                "source_episode_id": episode_id,
+                "source_row_index": row_index,
+                "time_s": row["time_s"],
+                "target_id": row["target_id"],
+                "phase": row["phase"],
+                "action_index": row["action_index"],
+                "target_sequence": row["target_sequence"],
+                "joint_position_proposal_rad": predicted,
+                "source_planner_target_rad": source_target,
+                "maximum_planner_deviation_rad": deviation,
+            }
+            proposal_rows.append(proposal_row)
+            proposal_lines.append(
+                json.dumps(proposal_row, sort_keys=True, separators=(",", ":"))
+            )
+        payload = ("\n".join(proposal_lines) + "\n").encode("utf-8")
+        proposals[episode_id] = payload
+        total_rows += len(proposal_lines)
+        maximum_deviation = max(maximum_deviation, episode_maximum)
+        continuity = _state_policy_proposal_continuity(proposal_rows)
+        total_continuity_violations += continuity["violation_count"]
+        maximum_adjacent_step = max(
+            maximum_adjacent_step,
+            continuity["maximum_observed_adjacent_joint_step_rad"],
+        )
+        campaign_episodes.append({
+            "episode_id": episode_id,
+            "partition": episode["partition"],
+            "target_id": episode["target_id"],
+            "seed": episode["seed"],
+            "scene_id": episode["scene_id"],
+            "source_receipt_sha256": episode["receipt_sha256"],
+            "source_trajectory_sha256": episode["trajectory_sha256"],
+            "proposal_trajectory_sha256": hashlib.sha256(payload).hexdigest(),
+            "proposal_sample_count": len(proposal_lines),
+            "maximum_planner_deviation_rad": episode_maximum,
+            "continuity": continuity,
+        })
+    campaign = {
+        "schema": STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION",
+        "source_dataset_sha256": manifest["dataset_sha256"],
+        "source_model_sha256": model["model_sha256"],
+        "proposal_schema": STATE_POLICY_PROPOSAL_ROW_SCHEMA,
+        "held_out_episode_count": len(campaign_episodes),
+        "proposal_sample_count": total_rows,
+        "maximum_planner_deviation_rad": maximum_deviation,
+        "continuity_diagnostic": {
+            "maximum_allowed_adjacent_joint_step_rad": (
+                STATE_POLICY_MAX_ADJACENT_STEP_RAD
+            ),
+            "maximum_observed_adjacent_joint_step_rad": maximum_adjacent_step,
+            "violation_count": total_continuity_violations,
+            "requires_bounded_collision_interpolation": (
+                total_continuity_violations > 0
+            ),
+            "admission_effect": "REQUIRES_FRESH_BOUNDED_COLLISION_QUALIFICATION",
+        },
+        "episodes": campaign_episodes,
+        "required_replay_gates": [
+            "FIXED_ROOT",
+            "JOINT_TRACKING",
+            "COLLISION",
+            "CONTACT",
+            "RELEASE",
+            "SETTLING",
+        ],
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "proposal_trajectories_are_precommitted_but_not_replayed",
+            "planner_deviation_is_not_physics_acceptance",
+            "adjacent_step_violations_require_bounded_collision_interpolation",
+            "native_replay_remains_blocked_until_fresh_collision_qualification",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign, proposals
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -11795,10 +12077,17 @@ def main() -> int:
         action="store_true",
         help="fit the deterministic ARM-219 LM4 ridge baseline",
     )
+    parser.add_argument(
+        "--build-state-policy-proposal-replay-campaign",
+        action="store_true",
+        help="precommit held-out LM4 policy proposals for native replay",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
     parser.add_argument("--state-policy-dataset-manifest", type=Path)
+    parser.add_argument("--state-policy-model", type=Path)
+    parser.add_argument("--proposal-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -11908,7 +12197,46 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.fit_state_policy_baseline:
+        if args.build_state_policy_proposal_replay_campaign:
+            required = (
+                args.state_policy_dataset_manifest,
+                args.state_policy_model,
+                args.randomized_receipt_root,
+                args.proposal_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-219 proposal compilation requires its dataset, model, "
+                    "trajectory root, and proposal output directory"
+                )
+            manifest = json.loads(
+                args.state_policy_dataset_manifest.resolve(strict=True).read_bytes()
+            )
+            model = json.loads(
+                args.state_policy_model.resolve(strict=True).read_bytes()
+            )
+            receipt_root = args.randomized_receipt_root.resolve(strict=True)
+            evaluation = [
+                episode
+                for episode in manifest.get("episodes", [])
+                if episode.get("role") == "EVALUATION"
+            ]
+            trajectory_payloads = {
+                episode["episode_id"]: (
+                    receipt_root / episode["episode_id"] / "trajectory.jsonl"
+                ).resolve(strict=True).read_bytes()
+                for episode in evaluation
+            }
+            result, proposal_payloads = build_state_policy_proposal_replay_campaign(
+                manifest, model, trajectory_payloads
+            )
+            proposal_root = args.proposal_output_dir.resolve()
+            proposal_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, payload in proposal_payloads.items():
+                episode_root = proposal_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                (episode_root / "policy_proposal.jsonl").write_bytes(payload)
+        elif args.fit_state_policy_baseline:
             required = (
                 args.state_policy_dataset_manifest,
                 args.randomized_receipt_root,
@@ -13274,6 +13602,8 @@ def main() -> int:
             "COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

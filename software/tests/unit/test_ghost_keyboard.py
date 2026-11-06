@@ -3350,6 +3350,99 @@ def test_arm219_state_policy_baseline_rejects_tampered_inputs(arm218_contract):
         )
 
 
+def test_arm219_proposal_replay_campaign_is_deterministic_and_held_out(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    manifest=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    model=mechanics.fit_state_policy_baseline(manifest,trajectories)
+    evaluation_ids={
+        episode['episode_id'] for episode in manifest['episodes']
+        if episode['role']=='EVALUATION'
+    }
+    evaluation={key:trajectories[key] for key in evaluation_ids}
+    first,first_payloads=mechanics.build_state_policy_proposal_replay_campaign(
+        manifest,model,evaluation
+    )
+    second,second_payloads=mechanics.build_state_policy_proposal_replay_campaign(
+        manifest,model,evaluation
+    )
+    assert first==second
+    assert first_payloads==second_payloads
+    assert first['schema']==mechanics.STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA
+    assert first['held_out_episode_count']==11
+    assert first['proposal_sample_count']==11
+    assert set(first_payloads)==evaluation_ids
+    assert all(
+        hashlib.sha256(first_payloads[episode['episode_id']]).hexdigest()
+        ==episode['proposal_trajectory_sha256']
+        for episode in first['episodes']
+    )
+    assert first['required_replay_gates']==[
+        'FIXED_ROOT','JOINT_TRACKING','COLLISION','CONTACT','RELEASE','SETTLING',
+    ]
+    assert first['continuity_diagnostic'][
+        'requires_bounded_collision_interpolation'
+    ] is False
+    assert first['hardware_access'] is first['physical_authority'] is False
+
+
+def test_arm219_proposal_replay_campaign_rejects_training_or_tampered_rows(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    manifest=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    model=mechanics.fit_state_policy_baseline(manifest,trajectories)
+    evaluation_ids={
+        episode['episode_id'] for episode in manifest['episodes']
+        if episode['role']=='EVALUATION'
+    }
+    evaluation={key:trajectories[key] for key in evaluation_ids}
+    evaluation[next(iter(evaluation_ids))]+=b'{}\n'
+    with pytest.raises(mechanics.MechanicsContractError,match='digest'):
+        mechanics.build_state_policy_proposal_replay_campaign(
+            manifest,model,evaluation
+        )
+    training_id=next(
+        episode['episode_id'] for episode in manifest['episodes']
+        if episode['role']=='TRAINING'
+    )
+    evaluation[training_id]=trajectories[training_id]
+    with pytest.raises(mechanics.MechanicsContractError,match='held-out'):
+        mechanics.build_state_policy_proposal_replay_campaign(
+            manifest,model,evaluation
+        )
+
+
+def test_arm219_proposal_continuity_blocks_large_adjacent_steps(arm218_contract):
+    mechanics,*_=arm218_contract
+    rows=[
+        {
+            'phase':'HOVER','target_sequence':34,
+            'joint_position_proposal_rad':[0.0]*6,
+        },
+        {
+            'phase':'CONTACT','target_sequence':35,
+            'joint_position_proposal_rad':[0.0,0.0,0.051,0.0,0.0,0.0],
+        },
+    ]
+    result=mechanics._state_policy_proposal_continuity(rows)
+    assert result['violation_count']==1
+    assert result['maximum_observed_adjacent_joint_step_rad']==pytest.approx(0.051)
+    assert result['violations'][0]['left_phase']=='HOVER'
+    assert result['violations'][0]['right_phase']=='CONTACT'
+
+
 def test_arm218_rejects_undeclared_or_out_of_range_parameters(arm218_contract):
     mechanics,source,plans,receipts=arm218_contract
     campaign=mechanics.build_randomized_demonstration_campaign(

@@ -555,6 +555,17 @@ action-imitation result, not a physics success claim: proposal replay through
 the unchanged collision, mechanics, tracking, and fixed-root gates remains the
 next boundary.
 
+The held-out proposal campaign is now retained with campaign SHA-256
+`40399470984761de4677f3b65a398a648178bda14c83bf180c9840b4f4e182dd`.
+It contains all `9` evaluation episodes and `12,744` content-addressed proposal
+rows; its maximum learned/planner joint-target deviation is `0.0753160568 rad`.
+The continuity diagnostic finds `78` adjacent-step transitions and a maximum
+`0.1055636794 rad` step above the existing `0.05 rad` bounded-collision sample
+step. The source planner has the same schedule-boundary pattern and reaches
+`0.10115 rad`, so the correct next boundary is fresh bounded interpolation and
+collision qualification, not silent direct replay or rejection based only on
+raw command adjacency. Native replay remains blocked until that screen passes.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
