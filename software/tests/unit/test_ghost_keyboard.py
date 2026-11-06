@@ -3216,6 +3216,46 @@ def test_arm218_keyboard_pose_transform_is_deterministic(arm218_contract):
     assert point==pytest.approx([1.0,8.0])
 
 
+def test_arm219_state_policy_row_binds_observation_action_and_phase(
+    arm218_contract,
+):
+    mechanics,*_=arm218_contract
+    target={
+        'action_index':0,'sequence':7,'phase':'CONTACT','target_id':'1',
+        'joint_position_target_rad':[0.1,0.2,0.3,0.4,0.5,0.6],
+    }
+    row=mechanics._state_policy_trajectory_row(
+        time_s=0.125,target=target,
+        observed_joint_positions_rad=[0.11,0.21,0.31,0.41,0.51,0.61],
+        observed_joint_velocities_rad_s=[1.0,2.0,3.0,4.0,5.0,6.0],
+        key_center_z_m=0.018,tip_center_z_m=0.021,
+        tip_key_separation_m=0.001,
+    )
+    assert row['schema']==mechanics.STATE_POLICY_TRAJECTORY_SCHEMA
+    assert row['phase']=='CONTACT'
+    assert row['target_id']=='1'
+    assert row['target_sequence']==7
+    assert row['joint_position_target_rad']==target['joint_position_target_rad']
+    assert row['joint_position_observed_rad'][0]==pytest.approx(0.11)
+    assert row['joint_velocity_observed_rad_s'][-1]==pytest.approx(6.0)
+
+
+def test_arm219_state_policy_row_rejects_incomplete_joint_state(arm218_contract):
+    mechanics,*_=arm218_contract
+    with pytest.raises(mechanics.MechanicsContractError,match='six commanded'):
+        mechanics._state_policy_trajectory_row(
+            time_s=0.125,
+            target={
+                'action_index':0,'sequence':7,'phase':'CONTACT','target_id':'1',
+                'joint_position_target_rad':[0.1]*6,
+            },
+            observed_joint_positions_rad=[0.1]*5,
+            observed_joint_velocities_rad_s=[0.0]*6,
+            key_center_z_m=0.018,tip_center_z_m=0.021,
+            tip_key_separation_m=0.001,
+        )
+
+
 def test_arm218_episode_worker_retains_trace_and_complete_receipt(
     arm218_contract,tmp_path,monkeypatch
 ):
@@ -3250,6 +3290,8 @@ def test_arm218_episode_worker_retains_trace_and_complete_receipt(
         captured.update(kwargs)
         return {
             'status':'PASS','receipt_sha256':'a'*64,'native_trace':native_trace,
+            'trajectory_schema':mechanics.STATE_POLICY_TRAJECTORY_SCHEMA,
+            'joint_order':['j1','j2','j3','j4','j5','j6'],
             'action_assessments':[],'maximum_joint_tracking_error_rad':0.01,
             'root_pose_invariant':{'all_passed':True},
             'randomized_key_center_board_xy_mm':[1.0,2.0],
@@ -3269,6 +3311,8 @@ def test_arm218_episode_worker_retains_trace_and_complete_receipt(
     assert result['complete'] is True
     assert result['disposition']=='PASS'
     assert result['failure_reason'] is None
+    assert result['trajectory_schema']==mechanics.STATE_POLICY_TRAJECTORY_SCHEMA
+    assert result['joint_order']==['j1','j2','j3','j4','j5','j6']
     assert result['trajectory_sha256']==hashlib.sha256(
         trajectory.read_bytes()
     ).hexdigest()

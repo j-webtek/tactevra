@@ -1929,6 +1929,26 @@ trajectory SHA-256 is
 This closes only the small LM3 simulation smoke gate. It is not statistical
 coverage, a trained policy, physical qualification, or hardware authority.
 
+### LM4 state-policy trajectory capture
+
+The completed ARM-218 artifacts remain valid LM3 mechanics evidence, but their
+trajectory rows do not contain per-step joint observations and must not be used
+as behavior-cloning input. ARM-219 adds the versioned
+`tactevra.isaac_lm4_state_policy_trajectory_row.v1` capture contract to fresh
+randomized native replays. Each physics-step row binds:
+
+- observed six-joint positions and velocities;
+- the commanded six-joint position target;
+- governed joint order through the episode receipt;
+- target, phase, action, sequence, and simulation time; and
+- key center, tool-tip center, and tip/key separation.
+
+This is a recorder prerequisite, not a trained policy. The 24-episode smoke
+must be regenerated under the new row schema before compiling normalization
+statistics or an LM4 dataset manifest. Existing ARM-218 evidence is not
+silently relabelled or inferred, and the recorder adds no hardware interface or
+physical authority.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
