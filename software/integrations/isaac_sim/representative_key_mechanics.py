@@ -180,6 +180,8 @@ STATE_POLICY_TRAJECTORY_SCHEMA = (
 STATE_POLICY_DATASET_MANIFEST_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_dataset_manifest.v1"
 )
+STATE_POLICY_BASELINE_SCHEMA = "tactevra.isaac_lm4_state_policy_baseline.v1"
+STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
     "train": 3,
     "validation": 2,
@@ -11219,6 +11221,288 @@ def build_state_policy_dataset_manifest(
     return manifest
 
 
+def _solve_state_policy_ridge(
+    normal_matrix: list[list[float]],
+    cross_products: list[list[float]],
+    ridge_lambda: float,
+) -> list[list[float]]:
+    """Solve the small deterministic multi-output ridge system."""
+    size = len(normal_matrix)
+    outputs = len(cross_products[0])
+    matrix = [
+        [*row, *cross]
+        for row, cross in zip(normal_matrix, cross_products, strict=True)
+    ]
+    for index in range(size):
+        matrix[index][index] += ridge_lambda
+    for column in range(size):
+        pivot = max(range(column, size), key=lambda row: abs(matrix[row][column]))
+        if abs(matrix[pivot][column]) < 1e-12:
+            raise MechanicsContractError("state-policy ridge system is singular")
+        if pivot != column:
+            matrix[column], matrix[pivot] = matrix[pivot], matrix[column]
+        divisor = matrix[column][column]
+        for item in range(column, size + outputs):
+            matrix[column][item] /= divisor
+        for row in range(size):
+            if row == column:
+                continue
+            factor = matrix[row][column]
+            if factor == 0.0:
+                continue
+            for item in range(column, size + outputs):
+                matrix[row][item] -= factor * matrix[column][item]
+    return [
+        [round(matrix[feature][size + output], 15) for feature in range(size)]
+        for output in range(outputs)
+    ]
+
+
+def fit_state_policy_baseline(
+    manifest: dict[str, Any],
+    trajectory_payloads: dict[str, bytes],
+    *,
+    ridge_lambda: float = 0.001,
+) -> dict[str, Any]:
+    """Fit a deterministic LM4 linear behavior-cloning proposal baseline."""
+    _verify_lm3_digest(manifest, "dataset_sha256", "state-policy dataset")
+    _require_lm3_zero_authority(manifest, "state-policy dataset")
+    if (
+        manifest.get("schema") != STATE_POLICY_DATASET_MANIFEST_SCHEMA
+        or manifest.get("status") != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET"
+        or manifest.get("trajectory_schema") != STATE_POLICY_TRAJECTORY_SCHEMA
+    ):
+        raise MechanicsContractError("state-policy dataset manifest is not admitted")
+    ridge_lambda = _finite_number(ridge_lambda, "ridge lambda")
+    if ridge_lambda <= 0.0:
+        raise MechanicsContractError("ridge lambda must be positive")
+    entries = manifest.get("episodes")
+    if not isinstance(entries, list) or len(entries) != manifest.get(
+        "attempted_episode_count"
+    ):
+        raise MechanicsContractError("state-policy dataset episode denominator is invalid")
+    indexed = {entry.get("episode_id"): entry for entry in entries}
+    if None in indexed or len(indexed) != len(entries):
+        raise MechanicsContractError("state-policy dataset episode identities are invalid")
+    if set(trajectory_payloads) != set(indexed):
+        raise MechanicsContractError(
+            "baseline trajectory set must equal the dataset denominator"
+        )
+    statistics = manifest.get("normalization", {}).get("statistics")
+    numeric_names = manifest.get("feature_contract", {}).get("numeric_inputs")
+    if (
+        not isinstance(statistics, list)
+        or not isinstance(numeric_names, list)
+        or len(statistics) != len(numeric_names)
+        or [item.get("feature") for item in statistics] != numeric_names
+    ):
+        raise MechanicsContractError("dataset normalization contract is inconsistent")
+    means = [
+        _finite_number(item.get("mean"), f"normalization mean {index}")
+        for index, item in enumerate(statistics)
+    ]
+    scales = [
+        _finite_number(item.get("scale"), f"normalization scale {index}")
+        for index, item in enumerate(statistics)
+    ]
+    if any(scale <= 0.0 for scale in scales):
+        raise MechanicsContractError("normalization scales must be positive")
+    parameter_names = [
+        name.removeprefix("randomized_parameters.")
+        for name in numeric_names
+        if name.startswith("randomized_parameters.")
+    ]
+    target_vocabulary = list(REPRESENTATIVE_KEYS[1:])
+    action_vocabulary = (None, 0, 1)
+    encoded_names = [
+        "intercept",
+        *numeric_names,
+        *[f"target_id={value}" for value in target_vocabulary],
+        *[f"phase={value}" for value in STATE_POLICY_PHASES],
+        "action_index=null",
+        "action_index=0",
+        "action_index=1",
+    ]
+    records: dict[str, list[tuple[list[float], list[float]]]] = {
+        "TRAINING": [],
+        "EVALUATION": [],
+        "REJECTION_EVIDENCE": [],
+    }
+
+    for episode_id, entry in indexed.items():
+        role = entry.get("role")
+        if role not in records:
+            raise MechanicsContractError(f"{episode_id} has an undeclared dataset role")
+        payload = trajectory_payloads[episode_id]
+        if (
+            not isinstance(payload, bytes)
+            or hashlib.sha256(payload).hexdigest() != entry.get("trajectory_sha256")
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} baseline trajectory digest mismatch"
+            )
+        lines = payload.decode("utf-8").splitlines()
+        if len(lines) != entry.get("sample_count"):
+            raise MechanicsContractError(
+                f"{episode_id} baseline trajectory row count mismatch"
+            )
+        parameters = entry.get("randomized_parameters")
+        key_center_xy = entry.get("randomized_key_center_board_xy_mm")
+        if (
+            not isinstance(parameters, dict)
+            or not isinstance(key_center_xy, list)
+            or len(key_center_xy) != 2
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} lacks self-contained model feature context"
+            )
+        for row_index, line in enumerate(lines):
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise MechanicsContractError(
+                    f"{episode_id} baseline row {row_index} is invalid JSON"
+                ) from exc
+            target_id = row.get("target_id")
+            phase = row.get("phase")
+            action_index = row.get("action_index")
+            if (
+                row.get("schema") != STATE_POLICY_TRAJECTORY_SCHEMA
+                or target_id != entry.get("target_id")
+                or target_id not in target_vocabulary
+                or phase not in STATE_POLICY_PHASES
+                or action_index not in action_vocabulary
+            ):
+                raise MechanicsContractError(
+                    f"{episode_id} baseline row {row_index} context mismatch"
+                )
+            raw_numeric = [
+                *row.get("joint_position_observed_rad", []),
+                *row.get("joint_velocity_observed_rad_s", []),
+                row.get("key_center_z_m"),
+                row.get("tip_center_z_m"),
+                row.get("tip_key_separation_m"),
+                *[parameters.get(name) for name in parameter_names],
+                *key_center_xy,
+            ]
+            action = row.get("joint_position_target_rad")
+            if len(raw_numeric) != len(numeric_names) or not isinstance(action, list) or len(action) != 6:
+                raise MechanicsContractError(
+                    f"{episode_id} baseline row {row_index} feature shape mismatch"
+                )
+            normalized = [
+                (
+                    _finite_number(value, f"{episode_id} baseline feature") - mean
+                ) / scale
+                for value, mean, scale in zip(
+                    raw_numeric, means, scales, strict=True
+                )
+            ]
+            encoded = [
+                1.0,
+                *normalized,
+                *[float(target_id == value) for value in target_vocabulary],
+                *[float(phase == value) for value in STATE_POLICY_PHASES],
+                *[float(action_index == value) for value in action_vocabulary],
+            ]
+            records[role].append((encoded, [
+                _finite_number(value, f"{episode_id} baseline action")
+                for value in action
+            ]))
+
+    training = records["TRAINING"]
+    if len(training) != manifest.get("training_row_count") or not training:
+        raise MechanicsContractError("baseline training denominator mismatch")
+    dimension = len(encoded_names)
+    normal_matrix = [[0.0] * dimension for _ in range(dimension)]
+    cross_products = [[0.0] * 6 for _ in range(dimension)]
+    for features, action in training:
+        for left in range(dimension):
+            left_value = features[left]
+            for right in range(left, dimension):
+                value = left_value * features[right]
+                normal_matrix[left][right] += value
+                if left != right:
+                    normal_matrix[right][left] += value
+            for output in range(6):
+                cross_products[left][output] += left_value * action[output]
+    weights = _solve_state_policy_ridge(
+        normal_matrix, cross_products, ridge_lambda
+    )
+
+    def metrics(rows: list[tuple[list[float], list[float]]]) -> dict[str, Any]:
+        absolute = [0.0] * 6
+        squared = [0.0] * 6
+        maximum = [0.0] * 6
+        for features, action in rows:
+            prediction = [
+                math.fsum(weight * value for weight, value in zip(output, features, strict=True))
+                for output in weights
+            ]
+            for joint, (predicted, expected) in enumerate(
+                zip(prediction, action, strict=True)
+            ):
+                error = abs(predicted - expected)
+                absolute[joint] += error
+                squared[joint] += error * error
+                maximum[joint] = max(maximum[joint], error)
+        count = len(rows)
+        return {
+            "sample_count": count,
+            "mean_absolute_error_rad": [value / count for value in absolute],
+            "root_mean_squared_error_rad": [
+                math.sqrt(value / count) for value in squared
+            ],
+            "maximum_absolute_error_rad": maximum,
+            "aggregate_mean_absolute_error_rad": math.fsum(absolute) / (count * 6),
+            "aggregate_root_mean_squared_error_rad": math.sqrt(
+                math.fsum(squared) / (count * 6)
+            ),
+        }
+
+    model = {
+        "schema": STATE_POLICY_BASELINE_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY",
+        "source_dataset_sha256": manifest["dataset_sha256"],
+        "algorithm": "RIDGE_LINEAR_BEHAVIOR_CLONING_V1",
+        "hyperparameters": {
+            "ridge_lambda": ridge_lambda,
+            "random_seed": None,
+            "stochastic_operations": False,
+        },
+        "feature_encoding": {
+            "encoded_features": encoded_names,
+            "target_vocabulary": target_vocabulary,
+            "phase_vocabulary": list(STATE_POLICY_PHASES),
+            "action_index_vocabulary": [None, 0, 1],
+        },
+        "joint_order": manifest["joint_order"],
+        "weights_by_output_joint": weights,
+        "metrics": {
+            "training": metrics(records["TRAINING"]),
+            "held_out_evaluation": metrics(records["EVALUATION"]),
+            "rejection_evidence_sample_count": len(
+                records["REJECTION_EVIDENCE"]
+            ),
+        },
+        "proposal_replay_status": "NOT_RUN",
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "simulation_only_linear_behavior_cloning_baseline",
+            "held_out_action_imitation_is_not_physics_replay",
+            "policy_proposals_have_not_passed_collision_or_mechanics_gates",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    model["model_sha256"] = _canonical_sha256(model)
+    return model
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -11506,9 +11790,16 @@ def main() -> int:
         action="store_true",
         help="compile the content-addressed ARM-219 LM4 dataset contract",
     )
+    parser.add_argument(
+        "--fit-state-policy-baseline",
+        action="store_true",
+        help="fit the deterministic ARM-219 LM4 ridge baseline",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
+    parser.add_argument("--state-policy-dataset-manifest", type=Path)
+    parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
     parser.add_argument("--trajectory-output", type=Path)
@@ -11617,7 +11908,32 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.build_state_policy_dataset_manifest:
+        if args.fit_state_policy_baseline:
+            required = (
+                args.state_policy_dataset_manifest,
+                args.randomized_receipt_root,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-219 baseline fitting requires its dataset manifest and "
+                    "trajectory root"
+                )
+            manifest = json.loads(
+                args.state_policy_dataset_manifest.resolve(strict=True).read_bytes()
+            )
+            receipt_root = args.randomized_receipt_root.resolve(strict=True)
+            trajectory_payloads = {
+                episode["episode_id"]: (
+                    receipt_root / episode["episode_id"] / "trajectory.jsonl"
+                ).resolve(strict=True).read_bytes()
+                for episode in manifest.get("episodes", [])
+            }
+            result = fit_state_policy_baseline(
+                manifest,
+                trajectory_payloads,
+                ridge_lambda=args.ridge_lambda,
+            )
+        elif args.build_state_policy_dataset_manifest:
             required = (
                 args.randomized_campaign,
                 args.randomized_result,
@@ -12859,32 +13175,35 @@ def main() -> int:
             result = run_contract_campaign(args.layout.resolve(strict=True))
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         evidence_sha256 = result.get(
-            "dataset_sha256",
+            "model_sha256",
             result.get(
-                "result_sha256",
+                "dataset_sha256",
                 result.get(
-                    "receipt_sha256",
+                    "result_sha256",
                     result.get(
-                        "binding_sha256",
+                        "receipt_sha256",
                         result.get(
-                            "request_sha256",
+                            "binding_sha256",
                             result.get(
-                                "proposal_sha256",
+                                "request_sha256",
                                 result.get(
-                                    "policy_sha256",
+                                    "proposal_sha256",
                                     result.get(
-                                        "predicate_sha256",
+                                        "policy_sha256",
                                         result.get(
-                                            "plan_sha256",
+                                            "predicate_sha256",
                                             result.get(
-                                                "screen_sha256",
+                                                "plan_sha256",
                                                 result.get(
-                                                    "manifest_sha256",
+                                                    "screen_sha256",
                                                     result.get(
-                                                        "selection_sha256",
+                                                        "manifest_sha256",
                                                         result.get(
-                                                            "demonstration_sha256",
-                                                            result.get("campaign_sha256"),
+                                                            "selection_sha256",
+                                                            result.get(
+                                                                "demonstration_sha256",
+                                                                result.get("campaign_sha256"),
+                                                            ),
                                                         ),
                                                     ),
                                                 ),
@@ -12904,6 +13223,8 @@ def main() -> int:
             "status": result["status"],
             "receipt_sha256": evidence_sha256,
         }
+        if "model_sha256" in result:
+            status_record["model_sha256"] = result["model_sha256"]
         if "dataset_sha256" in result:
             status_record["dataset_sha256"] = result["dataset_sha256"]
         if "proposal_sha256" in result:
@@ -12952,6 +13273,7 @@ def main() -> int:
             "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN",
             "COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
