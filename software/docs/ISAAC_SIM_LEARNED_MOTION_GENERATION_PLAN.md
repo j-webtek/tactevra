@@ -542,8 +542,18 @@ failed episodes as rejection evidence, reserves passing validation/test rows
 for evaluation, and fits 23-feature normalization only from the `12,744`
 passing training rows. The manifest hash is
 `a5870894ce6e734542ea2cef5bef079b8ee73a147c3a1d528eff5e0e521479f1`.
-This closes dataset assembly only; baseline fitting and held-out comparison are
-still required.
+This closes dataset assembly only; it does not by itself establish a learned
+baseline or held-out performance.
+
+The first deterministic linear ridge baseline is now fit with
+`ridge_lambda=0.001`, no random initialization, and no stochastic operations.
+Two complete fits produced identical model SHA-256
+`e281114e62fdaca603dbabbb8b0ca00891648bf6929c141fa100fe3919b5d45c`.
+It reports `0.0002683071 rad` training aggregate MAE and `0.0143845465 rad`
+held-out aggregate MAE across `12,744` rows in each role. This is an honest
+action-imitation result, not a physics success claim: proposal replay through
+the unchanged collision, mechanics, tracking, and fixed-root gates remains the
+next boundary.
 
 **Exit gate**
 
@@ -716,7 +726,9 @@ ScheduleGen. Neither is a physical success rate.
 7. **LM4 dataset:** ARM-219 regenerated all `24` episodes with per-step state
    and action capture, compiled `33,984` content-addressed rows without leakage,
    and retained failures separately from `12,744` passing training rows.
-8. **LM4 baseline:** train and evaluate a state-based imitation policy.
+8. **LM4 baseline:** the first deterministic linear policy is fit and its
+   train/held-out action-imitation error is retained. Replay its proposals on
+   identical held-out resets through the unchanged simulation gates next.
 9. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
