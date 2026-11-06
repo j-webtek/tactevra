@@ -2000,6 +2000,19 @@ station-route, and toolchain lineage. The campaign is only
 still require fresh Isaac diagnostics, and no native or physical replay is
 authorized.
 
+The runtime admission layer then reloads the exact LM4 dataset, model,
+proposal campaign, request campaign, all nine requests, and the four ARM-216
+source environments. It checks content hashes, complete denominators, bounded
+sample provenance, fixed-root plans, station predicates, native receipts, and
+the hashes that the runtime must reload. The retained campaign SHA-256 is
+`5fd06ed3000934c49ac9b77e4db9bf8187e60dd96b2f88282d4a3553a1a3e883`.
+Status
+`READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_RUNTIME_INPUT_REVALIDATION`
+does not start Isaac: the virtual profile, robot import receipt, robot USD, and
+toolchain still require immediate file-level revalidation. The record therefore
+contains nine admissions and 523 samples, but zero Isaac/GPU starts and zero
+fresh collision diagnostics.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

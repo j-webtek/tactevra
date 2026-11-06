@@ -579,6 +579,20 @@ result. Status `READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION`
 means fresh Isaac collision diagnostics are the next step; it is not collision
 clearance or native replay authority.
 
+The runtime-admission validator now reloads the exact dataset, model, proposal
+campaign, nine collision requests, and four ARM-216 target environments. It
+also revalidates each source manifest entry, collision request, fixed-root
+plan, station predicate, native receipt, bounded sample, and required runtime
+file hash. The retained admission campaign has SHA-256
+`5fd06ed3000934c49ac9b77e4db9bf8187e60dd96b2f88282d4a3553a1a3e883`.
+Its status
+`READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_RUNTIME_INPUT_REVALIDATION`
+is intentionally one gate short of execution: the virtual profile, robot USD,
+import receipt, and toolchain must be reloaded and matched immediately before
+Isaac starts. The campaign records zero runtime-file revalidations, Isaac/GPU
+starts, and collision diagnostics, so no earlier planner result is presented
+as learned-policy clearance.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
