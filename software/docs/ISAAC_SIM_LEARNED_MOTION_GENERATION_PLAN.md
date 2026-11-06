@@ -566,6 +566,19 @@ step. The source planner has the same schedule-boundary pattern and reaches
 collision qualification, not silent direct replay or rejection based only on
 raw command adjacency. Native replay remains blocked until that screen passes.
 
+The bounded collision-request compiler now turns those nine proposal traces
+into `523` discrete arm configurations, including `90` inserted interpolation
+samples. Each episode remains between `40` and `75` samples, below the existing
+`256`-sample admission ceiling, and the maximum adjacent arm-joint step is
+`0.0499945099 rad`. Campaign SHA-256
+`d4216d68e351335a6611cfc4ea0796cb8578c7dd01bc846e5a793f9ddee13d4d`
+binds every request to the model, dataset, proposal trajectory, and the
+target-specific ARM-216 geometry, placement, pair-policy, fixed-root, route,
+and toolchain lineage. It explicitly does not reuse the earlier collision
+result. Status `READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION`
+means fresh Isaac collision diagnostics are the next step; it is not collision
+clearance or native replay authority.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;

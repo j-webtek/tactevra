@@ -187,6 +187,12 @@ STATE_POLICY_PROPOSAL_ROW_SCHEMA = (
 STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_proposal_replay_campaign.v1"
 )
+STATE_POLICY_COLLISION_REQUEST_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_collision_request.v1"
+)
+STATE_POLICY_COLLISION_REQUEST_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_collision_request_campaign.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -11785,6 +11791,420 @@ def build_state_policy_proposal_replay_campaign(
     return campaign, proposals
 
 
+def _state_policy_bounded_collision_samples(
+    rows: list[dict[str, Any]],
+    *,
+    maximum_step_rad: float = STATE_POLICY_MAX_ADJACENT_STEP_RAD,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Compress one proposal trace while preserving bounded phase transitions."""
+    from rocell.kinematics import ARM_JOINT_NAMES
+
+    maximum_step_rad = _finite_number(maximum_step_rad, "collision sample step bound")
+    if maximum_step_rad <= 0.0 or not rows:
+        raise MechanicsContractError("collision sampling requires rows and a positive bound")
+
+    arm_rows: list[list[float]] = []
+    gripper_positions: list[float] = []
+    for index, row in enumerate(rows):
+        values = row.get("joint_position_proposal_rad")
+        if (
+            row.get("schema") != STATE_POLICY_PROPOSAL_ROW_SCHEMA
+            or not isinstance(values, list)
+            or len(values) != 6
+        ):
+            raise MechanicsContractError(
+                f"proposal collision row {index} has an invalid action"
+            )
+        arm_rows.append([
+            _finite_number(value, f"proposal collision row {index} arm joint")
+            for value in values[:5]
+        ])
+        gripper_positions.append(
+            _finite_number(values[5], f"proposal collision row {index} gripper")
+        )
+    if max(gripper_positions) - min(gripper_positions) > 1e-12:
+        raise MechanicsContractError(
+            "proposal collision compilation requires a fixed gripper position"
+        )
+
+    samples: list[dict[str, Any]] = []
+    maximum_source_distance = 0.0
+    interpolated_sample_count = 0
+    preserved_phase_boundary_count = 0
+
+    def append_sample(
+        positions: list[float],
+        *,
+        left_index: int,
+        right_index: int,
+        ratio: float,
+        subdivision_index: int,
+        subdivision_count: int,
+    ) -> None:
+        nonlocal interpolated_sample_count
+        sequence = len(samples)
+        if 0.0 < ratio < 1.0:
+            interpolated_sample_count += 1
+        samples.append({
+            "sample_id": f"proposal-sample-{sequence:04d}",
+            "sample_sequence": sequence,
+            "source_left_row_index": left_index,
+            "source_right_row_index": right_index,
+            "interpolation_ratio": ratio,
+            "subdivision_index": subdivision_index,
+            "subdivision_count": subdivision_count,
+            "joint_positions_rad": {
+                name: value
+                for name, value in zip(ARM_JOINT_NAMES, positions, strict=True)
+            },
+        })
+
+    append_sample(
+        arm_rows[0],
+        left_index=0,
+        right_index=0,
+        ratio=0.0,
+        subdivision_index=0,
+        subdivision_count=1,
+    )
+    last_exact_index = 0
+
+    def append_exact(right_index: int, *, preserve_duplicate: bool = False) -> None:
+        nonlocal last_exact_index
+        left_positions = [
+            samples[-1]["joint_positions_rad"][name] for name in ARM_JOINT_NAMES
+        ]
+        right_positions = arm_rows[right_index]
+        maximum_delta = max(
+            abs(right - left)
+            for left, right in zip(left_positions, right_positions, strict=True)
+        )
+        if maximum_delta == 0.0 and not preserve_duplicate:
+            last_exact_index = right_index
+            return
+        subdivision_count = max(1, math.ceil(maximum_delta / maximum_step_rad))
+        source_left_index = last_exact_index
+        for subdivision_index in range(1, subdivision_count + 1):
+            ratio = subdivision_index / subdivision_count
+            append_sample(
+                [
+                    left + (right - left) * ratio
+                    for left, right in zip(
+                        left_positions, right_positions, strict=True
+                    )
+                ],
+                left_index=source_left_index,
+                right_index=right_index,
+                ratio=ratio,
+                subdivision_index=subdivision_index,
+                subdivision_count=subdivision_count,
+            )
+        last_exact_index = right_index
+
+    for index in range(1, len(rows)):
+        previous_bounded = [
+            samples[-1]["joint_positions_rad"][name] for name in ARM_JOINT_NAMES
+        ]
+        distance = max(
+            abs(value - bounded)
+            for value, bounded in zip(arm_rows[index], previous_bounded, strict=True)
+        )
+        phase_changed = rows[index].get("phase") != rows[index - 1].get("phase")
+        if distance <= maximum_step_rad and not phase_changed:
+            maximum_source_distance = max(maximum_source_distance, distance)
+            continue
+        previous_index = index - 1
+        if previous_index > last_exact_index:
+            append_exact(previous_index)
+        remaining = max(
+            abs(
+                arm_rows[index][joint_index]
+                - samples[-1]["joint_positions_rad"][joint_name]
+            )
+            for joint_index, joint_name in enumerate(ARM_JOINT_NAMES)
+        )
+        if remaining > maximum_step_rad or phase_changed:
+            append_exact(index, preserve_duplicate=phase_changed)
+            if phase_changed:
+                preserved_phase_boundary_count += 1
+        retained_distance = max(
+            abs(
+                arm_rows[index][joint_index]
+                - samples[-1]["joint_positions_rad"][joint_name]
+            )
+            for joint_index, joint_name in enumerate(ARM_JOINT_NAMES)
+        )
+        maximum_source_distance = max(maximum_source_distance, retained_distance)
+    if last_exact_index != len(rows) - 1:
+        append_exact(len(rows) - 1)
+
+    maximum_bounded_step = max(
+        (
+            max(
+                abs(
+                    right["joint_positions_rad"][name]
+                    - left["joint_positions_rad"][name]
+                )
+                for name in ARM_JOINT_NAMES
+            )
+            for left, right in zip(samples, samples[1:])
+        ),
+        default=0.0,
+    )
+    if (
+        maximum_bounded_step > maximum_step_rad + 1e-12
+        or maximum_source_distance > maximum_step_rad + 1e-12
+        or len(samples) > 256
+    ):
+        raise MechanicsContractError(
+            "proposal collision samples exceed the bounded diagnostic contract"
+        )
+    return samples, {
+        "maximum_allowed_adjacent_joint_step_rad": maximum_step_rad,
+        "maximum_observed_bounded_joint_step_rad": maximum_bounded_step,
+        "maximum_source_row_distance_to_retained_sample_rad": (
+            maximum_source_distance
+        ),
+        "source_sample_count": len(rows),
+        "bounded_sample_count": len(samples),
+        "interpolated_sample_count": interpolated_sample_count,
+        "preserved_phase_boundary_count": preserved_phase_boundary_count,
+        "fixed_gripper_position_rad": gripper_positions[0],
+    }
+
+
+def build_state_policy_collision_request_campaign(
+    proposal_campaign: dict[str, Any],
+    proposal_payloads: dict[str, bytes],
+    representative_native_campaign: dict[str, Any],
+    representative_native_inputs: dict[str, dict[str, dict[str, Any]]],
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Compile model proposals into fresh, zero-authority collision requests."""
+    from rocell.kinematics import ARM_JOINT_NAMES
+
+    _verify_lm3_digest(proposal_campaign, "campaign_sha256", "proposal campaign")
+    _require_lm3_zero_authority(proposal_campaign, "proposal campaign")
+    _verify_lm3_digest(
+        representative_native_campaign,
+        "campaign_sha256",
+        "representative native campaign",
+    )
+    _require_lm3_zero_authority(
+        representative_native_campaign, "representative native campaign"
+    )
+    if (
+        proposal_campaign.get("schema")
+        != STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA
+        or proposal_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION"
+        or representative_native_campaign.get("schema")
+        != REPRESENTATIVE_KEY_NATIVE_COLLISION_CAMPAIGN_SCHEMA
+        or representative_native_campaign.get("status")
+        != "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN"
+    ):
+        raise MechanicsContractError(
+            "state-policy collision sources are not admitted campaigns"
+        )
+    episode_rows = proposal_campaign.get("episodes")
+    if not isinstance(episode_rows, list) or not episode_rows:
+        raise MechanicsContractError("proposal campaign lacks episodes")
+    expected_episode_ids = {row.get("episode_id") for row in episode_rows}
+    if set(proposal_payloads) != expected_episode_ids:
+        raise MechanicsContractError(
+            "proposal collision payloads must equal the campaign denominator"
+        )
+    native_results = {
+        row.get("target_id"): row
+        for row in representative_native_campaign.get("results", [])
+        if isinstance(row, dict)
+    }
+    expected_targets = {row.get("target_id") for row in episode_rows}
+    if set(representative_native_inputs) != expected_targets:
+        raise MechanicsContractError(
+            "proposal collision inputs must equal the evaluated target set"
+        )
+
+    requests: dict[str, dict[str, Any]] = {}
+    request_rows = []
+    total_bounded_samples = 0
+    total_interpolated_samples = 0
+    maximum_bounded_step = 0.0
+    for episode in episode_rows:
+        episode_id = episode["episode_id"]
+        target_id = episode["target_id"]
+        payload = proposal_payloads[episode_id]
+        if (
+            hashlib.sha256(payload).hexdigest()
+            != episode.get("proposal_trajectory_sha256")
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} proposal collision payload digest mismatch"
+            )
+        rows = [json.loads(line) for line in payload.decode("utf-8").splitlines()]
+        if len(rows) != episode.get("proposal_sample_count") or any(
+            row.get("source_episode_id") != episode_id
+            or row.get("target_id") != target_id
+            or row.get("source_row_index") != index
+            for index, row in enumerate(rows)
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} proposal collision row lineage changed"
+            )
+        target_inputs = representative_native_inputs[target_id]
+        collision_request = target_inputs.get("collision_request")
+        fixed_plan = target_inputs.get("fixed_base_replay_plan")
+        route_predicate = target_inputs.get("station_route_predicate")
+        if not all(
+            isinstance(item, dict)
+            for item in (collision_request, fixed_plan, route_predicate)
+        ):
+            raise MechanicsContractError(
+                f"{target_id} representative collision inputs are incomplete"
+            )
+        for document, digest_key, label in (
+            (collision_request, "request_sha256", "collision request"),
+            (fixed_plan, "plan_sha256", "fixed-base replay plan"),
+            (route_predicate, "predicate_sha256", "station route predicate"),
+        ):
+            _verify_lm3_digest(document, digest_key, f"{target_id} {label}")
+            _require_lm3_zero_authority(document, f"{target_id} {label}")
+        native_result = native_results.get(target_id)
+        if (
+            native_result is None
+            or collision_request.get("schema")
+            != TCP_POLICY_BOUND_COLLISION_REQUEST_SCHEMA
+            or collision_request.get("status")
+            != "READY_FOR_ZERO_AUTHORITY_COLLISION_DIAGNOSTIC"
+            or fixed_plan.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_COLLISION_REPLAY_PLAN_SCHEMA
+            or fixed_plan.get("status")
+            != "READY_FOR_FIXED_BASE_ZERO_AUTHORITY_NATIVE_REPLAY"
+            or fixed_plan.get("target_id") != target_id
+            or fixed_plan.get("source_collision_request_sha256")
+            != collision_request["request_sha256"]
+            or route_predicate.get("schema") != STATION_ROUTE_PREDICATE_SCHEMA
+            or route_predicate.get("status") != "PASS"
+            or route_predicate.get("source_cartesian_request_sha256")
+            != collision_request.get("source_request_sha256")
+            or native_result.get("source_arm215_target_plan_sha256")
+            != fixed_plan.get("source_arm215_target_plan_sha256")
+        ):
+            raise MechanicsContractError(
+                f"{target_id} representative collision lineage changed"
+            )
+
+        samples, sampling = _state_policy_bounded_collision_samples(rows)
+        request: dict[str, Any] = {
+            "schema": STATE_POLICY_COLLISION_REQUEST_SCHEMA,
+            "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION",
+            "episode_id": episode_id,
+            "target_id": target_id,
+            "source_dataset_sha256": proposal_campaign["source_dataset_sha256"],
+            "source_model_sha256": proposal_campaign["source_model_sha256"],
+            "source_proposal_campaign_sha256": proposal_campaign["campaign_sha256"],
+            "source_proposal_trajectory_sha256": episode[
+                "proposal_trajectory_sha256"
+            ],
+            "source_representative_native_campaign_sha256": (
+                representative_native_campaign["campaign_sha256"]
+            ),
+            "source_collision_request_sha256": collision_request["request_sha256"],
+            "source_fixed_base_replay_plan_sha256": fixed_plan["plan_sha256"],
+            "source_station_route_predicate_sha256": route_predicate[
+                "predicate_sha256"
+            ],
+            "source_collision_candidate_sha256": collision_request[
+                "collision_candidate_sha256"
+            ],
+            "source_collision_pair_policy_sha256": collision_request[
+                "collision_pair_policy_sha256"
+            ],
+            "source_toolchain_lock_sha256": collision_request[
+                "toolchain_lock_sha256"
+            ],
+            "source_arm215_target_plan_sha256": fixed_plan[
+                "source_arm215_target_plan_sha256"
+            ],
+            "joint_order": list(ARM_JOINT_NAMES),
+            "bounded_sample_count": len(samples),
+            "bounded_sampling_policy": sampling,
+            "bounded_samples": samples,
+            "geometry_reuse_scope": (
+                "TARGET_COLLISION_GEOMETRY_PAIR_POLICY_PLACEMENT_AND_TOOLCHAIN_ONLY"
+            ),
+            "prior_collision_result_reused": False,
+            "fresh_collision_diagnostic_required": True,
+            "diagnostic_only": True,
+            "installed_collision_qualified": False,
+            "continuous_collision_proven": False,
+            "native_replay_authorized": False,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "limitations": [
+                "representative_geometry_lineage_is_reused_but_clearance_is_not",
+                "bounded_samples_are_discrete_not_continuous_clearance_proof",
+                "request_requires_fresh_model_proposal_collision_diagnostic",
+                "native_and_physical_replay_remain_blocked",
+            ],
+        }
+        request["request_sha256"] = _canonical_sha256(request)
+        requests[episode_id] = request
+        total_bounded_samples += len(samples)
+        total_interpolated_samples += sampling["interpolated_sample_count"]
+        maximum_bounded_step = max(
+            maximum_bounded_step,
+            sampling["maximum_observed_bounded_joint_step_rad"],
+        )
+        request_rows.append({
+            "episode_id": episode_id,
+            "target_id": target_id,
+            "request_sha256": request["request_sha256"],
+            "source_proposal_trajectory_sha256": episode[
+                "proposal_trajectory_sha256"
+            ],
+            "bounded_sample_count": len(samples),
+            "interpolated_sample_count": sampling["interpolated_sample_count"],
+            "maximum_observed_bounded_joint_step_rad": sampling[
+                "maximum_observed_bounded_joint_step_rad"
+            ],
+        })
+
+    campaign: dict[str, Any] = {
+        "schema": STATE_POLICY_COLLISION_REQUEST_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION",
+        "source_dataset_sha256": proposal_campaign["source_dataset_sha256"],
+        "source_model_sha256": proposal_campaign["source_model_sha256"],
+        "source_proposal_campaign_sha256": proposal_campaign["campaign_sha256"],
+        "source_representative_native_campaign_sha256": (
+            representative_native_campaign["campaign_sha256"]
+        ),
+        "episode_count": len(request_rows),
+        "total_bounded_sample_count": total_bounded_samples,
+        "total_interpolated_sample_count": total_interpolated_samples,
+        "maximum_observed_bounded_joint_step_rad": maximum_bounded_step,
+        "requests": request_rows,
+        "prior_collision_results_reused": False,
+        "fresh_collision_diagnostics_required": len(request_rows),
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "collision_requests_are_compiled_but_not_admitted_or_executed",
+            "all_episodes_require_fresh_discrete_collision_diagnostics",
+            "no_native_or_physical_replay_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign, requests
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -12082,12 +12502,20 @@ def main() -> int:
         action="store_true",
         help="precommit held-out LM4 policy proposals for native replay",
     )
+    parser.add_argument(
+        "--build-state-policy-collision-request-campaign",
+        action="store_true",
+        help="compile held-out LM4 proposals into fresh bounded collision requests",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
     parser.add_argument("--state-policy-dataset-manifest", type=Path)
     parser.add_argument("--state-policy-model", type=Path)
+    parser.add_argument("--state-policy-proposal-campaign", type=Path)
     parser.add_argument("--proposal-output-dir", type=Path)
+    parser.add_argument("--representative-native-admission-root", type=Path)
+    parser.add_argument("--collision-request-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -12197,7 +12625,76 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.build_state_policy_proposal_replay_campaign:
+        if args.build_state_policy_collision_request_campaign:
+            required = (
+                args.state_policy_proposal_campaign,
+                args.proposal_output_dir,
+                args.representative_native_admission_root,
+                args.collision_request_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-219 collision request compilation requires its proposal "
+                    "campaign, proposal root, representative native admission "
+                    "root, and collision request output directory"
+                )
+            proposal_campaign = json.loads(
+                args.state_policy_proposal_campaign.resolve(strict=True).read_bytes()
+            )
+            proposal_root = args.proposal_output_dir.resolve(strict=True)
+            proposal_payloads = {
+                episode["episode_id"]: (
+                    proposal_root
+                    / episode["episode_id"]
+                    / "policy_proposal.jsonl"
+                ).resolve(strict=True).read_bytes()
+                for episode in proposal_campaign.get("episodes", [])
+            }
+            native_root = args.representative_native_admission_root.resolve(
+                strict=True
+            )
+            native_campaign = json.loads(
+                (native_root / "campaign.json").resolve(strict=True).read_bytes()
+            )
+            representative_inputs = {}
+            for target_id in {
+                episode["target_id"]
+                for episode in proposal_campaign.get("episodes", [])
+            }:
+                target_root = native_root / target_id.lower()
+                representative_inputs[target_id] = {
+                    "collision_request": json.loads(
+                        (target_root / "collision_request.json")
+                        .resolve(strict=True)
+                        .read_bytes()
+                    ),
+                    "fixed_base_replay_plan": json.loads(
+                        (target_root / "fixed_base_replay_plan.json")
+                        .resolve(strict=True)
+                        .read_bytes()
+                    ),
+                    "station_route_predicate": json.loads(
+                        (target_root / "station_route_predicate.json")
+                        .resolve(strict=True)
+                        .read_bytes()
+                    ),
+                }
+            result, collision_requests = build_state_policy_collision_request_campaign(
+                proposal_campaign,
+                proposal_payloads,
+                native_campaign,
+                representative_inputs,
+            )
+            collision_root = args.collision_request_output_dir.resolve()
+            collision_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, request in collision_requests.items():
+                episode_root = collision_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                (episode_root / "collision_request.json").write_text(
+                    json.dumps(request, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.build_state_policy_proposal_replay_campaign:
             required = (
                 args.state_policy_dataset_manifest,
                 args.state_policy_model,
@@ -13604,6 +14101,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
