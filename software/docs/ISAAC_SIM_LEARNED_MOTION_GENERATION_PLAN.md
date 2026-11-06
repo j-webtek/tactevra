@@ -607,6 +607,23 @@ it is not collision clearance. The receipt explicitly records zero Isaac/GPU
 starts, zero diagnostics, zero reused results, and no native or physical
 authority.
 
+The fresh ARM-220 native diagnostic campaign is now retained at
+`C:\IsaacSim\artifacts\issue190\arm220-state-policy-native-collision-001`.
+Its manifest SHA-256 is
+`cd4b7a70632d84b1e28bf6cdce23d3013659dfbebbce1913e351154bd6eee85b`
+and its completed campaign SHA-256 is
+`01acc93bd8da33dfab4ca5a69ae20cec7459ed9f0d97fe5e730830960576d7ca`.
+All `9` held-out episodes and all `523` bounded samples ran as fresh native
+PhysX overlap diagnostics. Every fixed-base observation stayed within the
+governed root invariant. All samples reported the same five raw adjacent-link
+body pairs, and all five are the already accepted diagnostic-only reporting
+exclusions; the campaign reports zero physical-solid, planning-envelope, or
+unreviewed blocker pairs in every episode. This closes the discrete LM4
+collision-diagnostic denominator, but it is not continuous collision proof,
+installed-geometry qualification, contact replay authority, or physical
+motion authority. The next stage is review of this LM4 result before any
+mechanics replay is proposed.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
