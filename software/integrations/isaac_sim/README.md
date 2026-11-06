@@ -1972,6 +1972,19 @@ reported rather than concealed. The artifact is only
 `READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY`: collision, mechanics,
 tracking, and fixed-root replay gates have not yet run.
 
+The next boundary is retained as the zero-authority proposal-replay campaign
+with SHA-256
+`40399470984761de4677f3b65a398a648178bda14c83bf180c9840b4f4e182dd`.
+It binds all `9` held-out episodes and `12,744` proposal rows to their source
+dataset, model, receipts, and trajectories. The maximum learned/planner joint
+target deviation is `0.0753160568 rad`. Its continuity diagnostic finds `78`
+adjacent-step transitions above the `0.05 rad` bounded-collision sampling
+step, with a `0.1055636794 rad` maximum. The source planner contains the same
+schedule-boundary pattern and reaches `0.10115 rad`; these transitions require
+bounded interpolation rather than silent direct replay. Campaign status is
+therefore `READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION`.
+Native replay remains blocked until that fresh screen passes.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
