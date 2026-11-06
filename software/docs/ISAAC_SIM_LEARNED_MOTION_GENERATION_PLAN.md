@@ -527,6 +527,16 @@ Train a behavior-cloning baseline from joint/proprioceptive observations,
 target pose, and phase. Compare it with the deterministic planner on identical
 held-out resets.
 
+The ARM-218 smoke trajectories prove mechanics and denominator handling, but
+their retained rows contain contact geometry rather than per-step
+proprioception. They must not be presented as behavior-cloning input. ARM-219
+therefore begins by versioning an LM4 trajectory row and recording, at every
+physics step, the observed six-joint positions and velocities, commanded
+six-joint target, target identity, motion phase, action/sequence identity, and
+existing tip/key contact geometry. The episode receipt binds that trajectory
+schema and governed joint order. A fresh simulation-only corpus using this
+schema is required before dataset normalization or training.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;

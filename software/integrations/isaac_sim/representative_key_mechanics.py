@@ -174,6 +174,9 @@ RANDOMIZED_DEMONSTRATION_EPISODE_RECEIPT_SCHEMA = (
 RANDOMIZED_DEMONSTRATION_RESULT_SCHEMA = (
     "tactevra.isaac_lm3_randomized_demonstration_result.v1"
 )
+STATE_POLICY_TRAJECTORY_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_trajectory_row.v1"
+)
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
     "train": 3,
     "validation": 2,
@@ -9651,6 +9654,55 @@ def _randomized_keyboard_point_mm(
     ]
 
 
+def _state_policy_trajectory_row(
+    *,
+    time_s: float,
+    target: dict[str, Any],
+    observed_joint_positions_rad: list[float],
+    observed_joint_velocities_rad_s: list[float],
+    key_center_z_m: float,
+    tip_center_z_m: float,
+    tip_key_separation_m: float,
+) -> dict[str, Any]:
+    """Build one self-describing LM4-ready simulation state/action row."""
+    desired = target.get("joint_position_target_rad")
+    if any(
+        not isinstance(values, list) or len(values) != 6
+        for values in (
+            desired,
+            observed_joint_positions_rad,
+            observed_joint_velocities_rad_s,
+        )
+    ):
+        raise MechanicsContractError(
+            "state-policy rows require six commanded, observed, and velocity joints"
+        )
+    phase = target.get("phase")
+    target_id = target.get("target_id")
+    if not isinstance(phase, str) or not phase:
+        raise MechanicsContractError("state-policy row phase is missing")
+    if target_id not in REPRESENTATIVE_KEYS:
+        raise MechanicsContractError("state-policy row target is undeclared")
+    return {
+        "schema": STATE_POLICY_TRAJECTORY_SCHEMA,
+        "time_s": float(time_s),
+        "target_id": target_id,
+        "phase": phase,
+        "action_index": target.get("action_index"),
+        "target_sequence": target.get("sequence"),
+        "joint_position_observed_rad": [
+            float(value) for value in observed_joint_positions_rad
+        ],
+        "joint_velocity_observed_rad_s": [
+            float(value) for value in observed_joint_velocities_rad_s
+        ],
+        "joint_position_target_rad": [float(value) for value in desired],
+        "key_center_z_m": float(key_center_z_m),
+        "tip_center_z_m": float(tip_center_z_m),
+        "tip_key_separation_m": float(tip_key_separation_m),
+    }
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
@@ -10082,14 +10134,25 @@ def run_drive_controlled_robot_h_replay(
                 tip_world = UsdGeom.Xformable(tip.GetPrim()).ComputeLocalToWorldTransform(0.0)
                 tip_center_z = float(tip_world.ExtractTranslation()[2])
                 separation = tip_center_z - prior["tip_radius_mm"] / 1000.0 - (observed_key_z + key_half_z)
-                native_trace.append({
-                    "time_s": elapsed_steps * dt,
-                    "key_center_z_m": observed_key_z,
-                    "tip_center_z_m": tip_center_z,
-                    "tip_key_separation_m": separation,
-                    "action_index": target["action_index"],
-                    "target_sequence": target["sequence"],
-                })
+                observed_positions = [
+                    float(value)
+                    for value in articulation.get_dof_positions().numpy().tolist()[0]
+                ]
+                observed_velocities = [
+                    float(value)
+                    for value in articulation.get_dof_velocities().numpy().tolist()[0]
+                ]
+                native_trace.append(
+                    _state_policy_trajectory_row(
+                        time_s=elapsed_steps * dt,
+                        target=target,
+                        observed_joint_positions_rad=observed_positions,
+                        observed_joint_velocities_rad_s=observed_velocities,
+                        key_center_z_m=observed_key_z,
+                        tip_center_z_m=tip_center_z,
+                        tip_key_separation_m=separation,
+                    )
+                )
             observed = articulation.get_dof_positions().numpy().tolist()[0]
             tracking.append({
                 "sequence": target["sequence"],
@@ -10192,6 +10255,8 @@ def run_drive_controlled_robot_h_replay(
             "target_id": target_id,
             "physics_dt_s": dt,
             "physics_steps": drive_profile["initial_settle_steps"] + elapsed_steps,
+            "joint_order": list(plan["joint_order"]),
+            "trajectory_schema": STATE_POLICY_TRAJECTORY_SCHEMA,
             "state_teleports_after_initialization": 0,
             "action_assessments": action_assessments,
             "maximum_joint_tracking_error_rad": maximum_tracking_error,
@@ -10388,6 +10453,8 @@ def _build_randomized_episode_receipt(
         receipt["native_trace_sample_count"] = len(
             native_receipt.get("native_trace", [])
         )
+        receipt["trajectory_schema"] = native_receipt.get("trajectory_schema")
+        receipt["joint_order"] = native_receipt.get("joint_order")
         receipt["action_assessments"] = native_receipt.get(
             "action_assessments", []
         )
