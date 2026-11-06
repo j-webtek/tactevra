@@ -484,7 +484,7 @@ under the external-artifact policy.
 - failure rates are reported by reason and parameter region; and
 - a campaign cannot hide broad failure behind successful-sample filtering.
 
-ARM-218 begins this boundary with a pre-execution smoke contract. The compiler
+ARM-218 implements this boundary as a small simulation smoke contract. The compiler
 consumes the hash-verified ARM-217 four-key result and emits `24` deterministic
 episodes: `12` train, `8` validation, and `4` test. Every episode has a unique
 seed and scene identity, binds one admitted plan and native receipt, and records
@@ -496,9 +496,30 @@ closed. The retained pre-execution manifest is external at
 `C:\IsaacSim\artifacts\issue190\arm218-randomized-demonstration-smoke-001\campaign.json`
 with canonical SHA-256
 `6b38bbc2e0625e83283666c2d94b90ebe05ec5e442426f7b09c3245fc84c22f1`.
-It grants no execution or hardware authority. Native randomized execution and
-complete result aggregation remain required before the LM3 smoke exit gate is
-closed.
+It grants no hardware authority. A single-episode native worker validates
+the selected episode against that campaign and its ARM-217 plan/receipt lineage,
+reuses the existing drive-controlled robot/key replay, applies all six declared
+mechanics and keyboard-pose perturbations, content-addresses the retained JSONL
+trajectory, and emits one complete PASS/FAIL receipt without automatic retry.
+Process interruption remains incomplete by construction.
+
+All `24` precommitted episodes completed exactly once and retained `1,416`
+native samples each. The strict aggregate is
+`COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE`, with `18` passes and `6` completed
+`MECHANICS_REJECTION` failures. Train reports `9` pass / `3` fail, validation
+`6` / `2`, and test `3` / `1`. Four failures occur in the high-stiffness region
+and two in the mid-stiffness region; none is an execution, fixed-root, tracking,
+IK, or collision-infrastructure failure. The canonical result SHA-256 is
+`6966084caa88cd5397dc851c4892d4ffa4acc7b5923192756e01d0fdf9bc3e3f`.
+
+The first retained worker failure demonstrates why failures stay in the dataset.
+`episode-edda9b249c011866102b` completed with `1,416` content-addressed native
+samples, a passing fixed-root invariant, and acceptable joint tracking, but the
+randomized target interaction failed unchanged mechanics acceptance. Its
+`MECHANICS_REJECTION` receipt is therefore retained as a completed failed
+attempt rather than discarded or retried. This closes the small LM3 smoke gate,
+not statistical coverage, policy training, physical qualification, or hardware
+authority. LM4 state-policy dataset assembly and baseline training are next.
 
 ### LM4 - state-policy training
 
@@ -670,10 +691,10 @@ ScheduleGen. Neither is a physical success rate.
    aggregate contains eight accepted actions and `5,664` native trace samples,
    so the representative routes now form a provisional zero-authority
    multi-key simulation dataset.
-6. **LM3 dataset smoke:** ARM-218 now precommits the reproducible `24`-episode
-   manifest and fail-closed aggregation rules. Next, execute those episodes in
-   bounded Isaac workers, content-address every trajectory, and aggregate all
-   passes and failures without changing the attempted denominator.
+6. **LM3 dataset smoke:** ARM-218 completed the reproducible `24`-episode
+   manifest, bounded native execution, content-addressed trajectory retention,
+   and fail-closed aggregation of all `18` passes and `6` failures without
+   changing the attempted denominator.
 7. **LM4 baseline:** train and evaluate a state-based imitation policy.
 8. Expand only after each predecessor produces reviewable evidence.
 

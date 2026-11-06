@@ -1866,9 +1866,68 @@ python software\integrations\isaac_sim\representative_key_mechanics.py `
 
 The retained manifest has canonical SHA-256
 `6b38bbc2e0625e83283666c2d94b90ebe05ec5e442426f7b09c3245fc84c22f1`.
-It is a pre-execution, simulation-only contract: randomized native execution,
-trajectory retention, and full result aggregation are still outstanding, and
-no physical motion or hardware authority is granted.
+The bounded episode worker consumes exactly one manifest episode, verifies its
+plan and prior native receipt, applies the precommitted key stiffness, damping,
+mass, keyboard XY offset, and keyboard yaw to the existing native robot/key
+replay, and writes a canonical JSONL trajectory plus one complete PASS/FAIL
+receipt. It performs no automatic retry. An interrupted process therefore does
+not create a completed receipt and cannot enter the strict aggregator.
+
+```powershell
+$campaignRoot = 'C:\IsaacSim\artifacts\issue190\arm218-randomized-demonstration-smoke-001'
+$sourceRoot = 'C:\IsaacSim\artifacts\issue190\arm217-representative-native-mechanics-refined-002'
+$episodeId = '<episode id from campaign.json>'
+$target = '<lowercase target id from that episode>'
+$episodeRoot = Join-Path $campaignRoot $episodeId
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --run-randomized-demonstration-episode `
+  --randomized-campaign "$campaignRoot\campaign.json" `
+  --episode-id $episodeId `
+  --replay-plan "$sourceRoot\$target\native_mechanics_plan.json" `
+  --source-native-receipt "$sourceRoot\$target\native_mechanics_receipt.json" `
+  --drive-profile <governed-drive-profile.json> `
+  --robot-usd <governed-robot.usd> `
+  --trajectory-output "$episodeRoot\trajectory.jsonl" `
+  --output "$episodeRoot\episode_receipt.json" `
+  --status-output "$episodeRoot\status.json"
+```
+
+After all workers have completed, reproduce the fail-closed aggregate with:
+
+```powershell
+$campaignRoot = 'C:\IsaacSim\artifacts\issue190\arm218-randomized-demonstration-smoke-001'
+python software\integrations\isaac_sim\representative_key_mechanics.py `
+  --layout software\config\nominal_target_profiles.json `
+  --aggregate-randomized-demonstration-campaign `
+  --randomized-campaign "$campaignRoot\campaign.json" `
+  --randomized-receipt-root $campaignRoot `
+  --output "$campaignRoot\result_campaign.json" `
+  --status-output "$campaignRoot\result_status.json"
+```
+
+The retained smoke result is
+`COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE`: all `24` attempted episodes completed
+exactly once and retained `1,416` content-addressed native samples apiece. The
+aggregate reports `18` passes and `6` completed `MECHANICS_REJECTION` failures.
+The split results are `9` pass / `3` fail for train, `6` / `2` for validation,
+and `3` / `1` for test. Four failures occur in the declared high-stiffness
+region and two in the mid-stiffness region. No episode failed from execution,
+fixed-root, tracking, IK, or collision infrastructure. The canonical result
+SHA-256 is
+`6966084caa88cd5397dc851c4892d4ffa4acc7b5923192756e01d0fdf9bc3e3f`.
+
+The first retained failure, `episode-edda9b249c011866102b`, illustrates the
+denominator rule. It completed with a passing fixed-root invariant and joint
+tracking inside its `0.05 rad` limit, so its
+`FAIL / MECHANICS_REJECTION` receipt and all samples remain part of the result
+rather than being discarded or retried. Its episode-receipt SHA-256 is
+`0e218e40400c159259acb38da81998de90ff76edbf07e1eb7f307671ef9751fa` and
+trajectory SHA-256 is
+`c461d4cb4a736a9b4a30917415e3b2a04a81708cc6590e1cfcd42b20ae5f673d`.
+This closes only the small LM3 simulation smoke gate. It is not statistical
+coverage, a trained policy, physical qualification, or hardware authority.
 
 ### Native H-key contact replay
 

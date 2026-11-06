@@ -9611,6 +9611,46 @@ def run_native_h_probe(
             app.close()
 
 
+def _validate_randomized_replay_parameters(value: object) -> dict[str, float]:
+    expected = {
+        "key_stiffness_n_per_m",
+        "key_damping_n_s_per_m",
+        "key_mass_kg",
+        "keyboard_offset_x_mm",
+        "keyboard_offset_y_mm",
+        "keyboard_yaw_deg",
+    }
+    if not isinstance(value, dict) or set(value) != expected:
+        raise MechanicsContractError(
+            "randomized replay parameters differ from the LM3 contract"
+        )
+    return {
+        name: _finite_number(value[name], f"randomized parameter {name}")
+        for name in sorted(expected)
+    }
+
+
+def _randomized_keyboard_point_mm(
+    point_xy_mm: list[float],
+    *,
+    offset_x_mm: float,
+    offset_y_mm: float,
+    yaw_deg: float,
+) -> list[float]:
+    """Apply the precommitted keyboard pose about the board-frame origin."""
+    if len(point_xy_mm) != 2:
+        raise MechanicsContractError("keyboard point must contain x and y")
+    x = _finite_number(point_xy_mm[0], "keyboard point x")
+    y = _finite_number(point_xy_mm[1], "keyboard point y")
+    angle = math.radians(_finite_number(yaw_deg, "keyboard yaw"))
+    cosine = math.cos(angle)
+    sine = math.sin(angle)
+    return [
+        cosine * x - sine * y + _finite_number(offset_x_mm, "keyboard x offset"),
+        sine * x + cosine * y + _finite_number(offset_y_mm, "keyboard y offset"),
+    ]
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
@@ -9619,6 +9659,10 @@ def run_drive_controlled_robot_h_replay(
     robot_usd_path: Path,
     output_path: Path,
     status_path: Path,
+    randomized_episode: dict[str, Any] | None = None,
+    randomized_campaign_sha256: str | None = None,
+    randomized_source_receipt_sha256: str | None = None,
+    randomized_trajectory_path: Path | None = None,
 ) -> dict[str, Any]:
     """Replay selected joint targets against one native key in Isaac."""
 
@@ -9671,6 +9715,25 @@ def run_drive_controlled_robot_h_replay(
         if representative_plan or representative_adapted_plan or representative_refined_plan
         else "H"
     )
+    randomized_parameters = None
+    if randomized_episode is not None:
+        if randomized_episode.get("target_id") != target_id:
+            raise MechanicsContractError(
+                "randomized episode target differs from replay plan"
+            )
+        randomized_parameters = _validate_randomized_replay_parameters(
+            randomized_episode.get("randomized_parameters")
+        )
+        if (
+            not isinstance(randomized_campaign_sha256, str)
+            or len(randomized_campaign_sha256) != 64
+            or randomized_source_receipt_sha256
+            != randomized_episode.get("source_receipt_sha256")
+            or randomized_trajectory_path is None
+        ):
+            raise MechanicsContractError(
+                "randomized replay lacks its campaign, receipt, or trajectory binding"
+            )
     contact_endpoint_sequences = (
         plan.get("contact_endpoint_sequences")
         if representative_plan or representative_adapted_plan or representative_refined_plan
@@ -9892,6 +9955,14 @@ def run_drive_controlled_robot_h_replay(
 
         key_region = profile["regions"][target_id]
         prior = profile["mechanics_prior"]
+        key_center_xy_mm = list(key_region["center_board_xy_mm"])
+        if randomized_parameters is not None:
+            key_center_xy_mm = _randomized_keyboard_point_mm(
+                key_center_xy_mm,
+                offset_x_mm=randomized_parameters["keyboard_offset_x_mm"],
+                offset_y_mm=randomized_parameters["keyboard_offset_y_mm"],
+                yaw_deg=randomized_parameters["keyboard_yaw_deg"],
+            )
         key_half_z = 0.003
         key_top = profile["target_plane_z_board_mm"] / 1000.0
         key_center = key_top - key_half_z
@@ -9900,8 +9971,8 @@ def run_drive_controlled_robot_h_replay(
         key.CreateSizeAttr(2.0)
         key_xform = UsdGeom.Xformable(key.GetPrim())
         key_xform.AddTranslateOp().Set(Gf.Vec3d(
-            key_region["center_board_xy_mm"][0] / 1000.0,
-            key_region["center_board_xy_mm"][1] / 1000.0,
+            key_center_xy_mm[0] / 1000.0,
+            key_center_xy_mm[1] / 1000.0,
             key_center,
         ))
         key_xform.AddScaleOp().Set(Gf.Vec3f(
@@ -9912,15 +9983,19 @@ def run_drive_controlled_robot_h_replay(
         UsdPhysics.CollisionAPI.Apply(key.GetPrim())
         UsdPhysics.RigidBodyAPI.Apply(key.GetPrim())
         UsdPhysics.MassAPI.Apply(key.GetPrim()).CreateMassAttr().Set(
-            prior["keycap_mass_kg"]["nominal"]
+            (
+                randomized_parameters["key_mass_kg"]
+                if randomized_parameters is not None
+                else prior["keycap_mass_kg"]["nominal"]
+            )
         )
         PhysxSchema.PhysxRigidBodyAPI.Apply(key.GetPrim()).CreateDisableGravityAttr(True)
         key_joint = UsdPhysics.PrismaticJoint.Define(stage, "/World/TargetKeyJoint")
         key_joint.CreateBody1Rel().SetTargets([Sdf.Path(key_path)])
         key_joint.CreateAxisAttr().Set(UsdPhysics.Tokens.z)
         key_joint.CreateLocalPos0Attr().Set(Gf.Vec3f(
-            key_region["center_board_xy_mm"][0] / 1000.0,
-            key_region["center_board_xy_mm"][1] / 1000.0,
+            key_center_xy_mm[0] / 1000.0,
+            key_center_xy_mm[1] / 1000.0,
             key_center,
         ))
         key_joint.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0))
@@ -9929,8 +10004,16 @@ def run_drive_controlled_robot_h_replay(
         key_drive = UsdPhysics.DriveAPI.Apply(key_joint.GetPrim(), "linear")
         key_drive.CreateTypeAttr().Set("force")
         key_drive.CreateTargetPositionAttr().Set(0.0)
-        key_drive.CreateStiffnessAttr().Set(prior["stiffness_n_per_mm"]["nominal"] * 1000.0)
-        key_drive.CreateDampingAttr().Set(prior["damping_n_s_per_mm"]["nominal"] * 1000.0)
+        key_drive.CreateStiffnessAttr().Set(
+            randomized_parameters["key_stiffness_n_per_m"]
+            if randomized_parameters is not None
+            else prior["stiffness_n_per_mm"]["nominal"] * 1000.0
+        )
+        key_drive.CreateDampingAttr().Set(
+            randomized_parameters["key_damping_n_s_per_m"]
+            if randomized_parameters is not None
+            else prior["damping_n_s_per_mm"]["nominal"] * 1000.0
+        )
 
         link5_path = "/roarm_m3/Geometry/world/base_link/link1/link2/link3/link4/link5"
         tip_path = f"{link5_path}/TactevraToolTip"
@@ -10145,6 +10228,10 @@ def run_drive_controlled_robot_h_replay(
             receipt["source_arm216_receipt_sha256"] = bindings[
                 "arm216_receipt_sha256"
             ]
+        if randomized_episode is not None:
+            receipt["randomized_episode_id"] = randomized_episode["episode_id"]
+            receipt["randomized_parameters"] = dict(randomized_parameters)
+            receipt["randomized_key_center_board_xy_mm"] = key_center_xy_mm
         if representative_adapted_plan:
             receipt["feedback_adaptation"] = plan["feedback_adaptation"]
         if representative_refined_plan:
@@ -10165,12 +10252,63 @@ def run_drive_controlled_robot_h_replay(
             )
             receipt["contact_refinement"] = plan["contact_refinement"]
         receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        if randomized_episode is not None:
+            trajectory_sha256 = _write_randomized_trajectory(
+                randomized_trajectory_path, receipt["native_trace"]
+            )
+            receipt = _build_randomized_episode_receipt(
+                campaign_sha256=randomized_campaign_sha256,
+                episode=randomized_episode,
+                trajectory_sha256=trajectory_sha256,
+                native_receipt=receipt,
+                failure_reason=(
+                    None
+                    if receipt["status"] == "PASS"
+                    else _randomized_native_failure_reason(receipt)
+                ),
+            )
         output_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         status_path.write_text(json.dumps({
-            "status": receipt["status"], "receipt_sha256": receipt["receipt_sha256"],
+            "status": receipt.get("status", receipt.get("disposition")),
+            "receipt_sha256": receipt["receipt_sha256"],
         }, sort_keys=True) + "\n", encoding="utf-8")
         return receipt
     except BaseException as exc:
+        if (
+            randomized_episode is not None
+            and not isinstance(exc, (MechanicsContractError, KeyboardInterrupt, SystemExit))
+        ):
+            trajectory_sha256 = _write_randomized_trajectory(
+                randomized_trajectory_path, []
+            )
+            receipt = _build_randomized_episode_receipt(
+                campaign_sha256=randomized_campaign_sha256,
+                episode=randomized_episode,
+                trajectory_sha256=trajectory_sha256,
+                native_receipt=None,
+                failure_reason=(
+                    "ROOT_INVARIANT"
+                    if "root invariant failed" in str(exc).lower()
+                    else "UNEXPECTED_RUNTIME_ERROR"
+                ),
+                execution_error={"type": type(exc).__name__, "message": str(exc)},
+            )
+            output_path.write_text(
+                json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            status_path.write_text(
+                json.dumps(
+                    {
+                        "status": receipt["disposition"],
+                        "receipt_sha256": receipt["receipt_sha256"],
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            return receipt
         status_path.write_text(json.dumps({
             "status": "ERROR", "type": type(exc).__name__, "message": str(exc),
         }, sort_keys=True) + "\n", encoding="utf-8")
@@ -10178,6 +10316,202 @@ def run_drive_controlled_robot_h_replay(
     finally:
         if app is not None:
             app.close()
+
+
+def _write_randomized_trajectory(
+    trajectory_path: Path, rows: list[dict[str, Any]]
+) -> str:
+    payload = "".join(
+        json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+        for row in rows
+    ).encode("utf-8")
+    trajectory_path.parent.mkdir(parents=True, exist_ok=True)
+    trajectory_path.write_bytes(payload)
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _randomized_native_failure_reason(native_receipt: dict[str, Any]) -> str:
+    if native_receipt.get("root_pose_invariant", {}).get("all_passed") is not True:
+        return "ROOT_INVARIANT"
+    observed = native_receipt.get("maximum_joint_tracking_error_rad")
+    allowed = native_receipt.get("maximum_joint_tracking_error_allowed_rad")
+    if (
+        isinstance(observed, (int, float))
+        and not isinstance(observed, bool)
+        and isinstance(allowed, (int, float))
+        and not isinstance(allowed, bool)
+        and observed > allowed
+    ):
+        return "TRACKING_ERROR"
+    return "MECHANICS_REJECTION"
+
+
+def _build_randomized_episode_receipt(
+    *,
+    campaign_sha256: str,
+    episode: dict[str, Any],
+    trajectory_sha256: str,
+    native_receipt: dict[str, Any] | None,
+    failure_reason: str | None,
+    execution_error: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    receipt: dict[str, Any] = {
+        "schema": RANDOMIZED_DEMONSTRATION_EPISODE_RECEIPT_SCHEMA,
+        "source_campaign_sha256": campaign_sha256,
+        "episode_id": episode["episode_id"],
+        "partition": episode["partition"],
+        "seed": episode["seed"],
+        "scene_id": episode["scene_id"],
+        "target_id": episode["target_id"],
+        "parameter_region": episode["parameter_region"],
+        "randomized_parameters": episode["randomized_parameters"],
+        "source_plan_sha256": episode["source_plan_sha256"],
+        "source_receipt_sha256": episode["source_receipt_sha256"],
+        "complete": True,
+        "disposition": "PASS" if failure_reason is None else "FAIL",
+        "failure_reason": failure_reason,
+        "trajectory_sha256": trajectory_sha256,
+        "native_receipt_sha256": (
+            native_receipt.get("receipt_sha256")
+            if native_receipt is not None
+            else None
+        ),
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+    }
+    if native_receipt is not None:
+        receipt["native_status"] = native_receipt.get("status")
+        receipt["native_trace_sample_count"] = len(
+            native_receipt.get("native_trace", [])
+        )
+        receipt["action_assessments"] = native_receipt.get(
+            "action_assessments", []
+        )
+        receipt["maximum_joint_tracking_error_rad"] = native_receipt.get(
+            "maximum_joint_tracking_error_rad"
+        )
+        receipt["root_pose_invariant_all_passed"] = native_receipt.get(
+            "root_pose_invariant", {}
+        ).get("all_passed")
+        receipt["randomized_key_center_board_xy_mm"] = native_receipt.get(
+            "randomized_key_center_board_xy_mm"
+        )
+    if execution_error is not None:
+        receipt["execution_error"] = execution_error
+    receipt["receipt_sha256"] = _canonical_sha256(receipt)
+    return receipt
+
+
+def run_randomized_demonstration_episode(
+    *,
+    campaign_path: Path,
+    episode_id: str,
+    replay_plan_path: Path,
+    source_receipt_path: Path,
+    layout_path: Path,
+    drive_profile_path: Path,
+    robot_usd_path: Path,
+    output_path: Path,
+    trajectory_path: Path,
+    status_path: Path,
+) -> dict[str, Any]:
+    """Execute exactly one precommitted LM3 episode without retry."""
+    campaign = json.loads(campaign_path.resolve(strict=True).read_bytes())
+    validate_randomized_demonstration_campaign(campaign)
+    matches = [
+        row for row in campaign["episodes"] if row.get("episode_id") == episode_id
+    ]
+    if len(matches) != 1:
+        raise MechanicsContractError("episode id is not unique in the campaign")
+    episode = matches[0]
+    plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
+    source_receipt = json.loads(source_receipt_path.resolve(strict=True).read_bytes())
+    _verify_lm3_digest(plan, "plan_sha256", "randomized source plan")
+    _verify_lm3_digest(
+        source_receipt, "receipt_sha256", "randomized source receipt"
+    )
+    _require_lm3_zero_authority(plan, "randomized source plan")
+    _require_lm3_zero_authority(source_receipt, "randomized source receipt")
+    if (
+        episode.get("source_plan_sha256") != plan["plan_sha256"]
+        or episode.get("source_receipt_sha256")
+        != source_receipt["receipt_sha256"]
+        or episode.get("target_id") != plan.get("target_id")
+        or source_receipt.get("source_plan_sha256") != plan["plan_sha256"]
+        or source_receipt.get("target_id") != episode.get("target_id")
+    ):
+        raise MechanicsContractError(
+            "randomized episode, plan, and source receipt lineage differ"
+        )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    native_receipt: dict[str, Any] | None = None
+    execution_error: dict[str, str] | None = None
+    try:
+        native_receipt = run_drive_controlled_robot_h_replay(
+            replay_plan_path=replay_plan_path,
+            layout_path=layout_path,
+            drive_profile_path=drive_profile_path,
+            robot_usd_path=robot_usd_path,
+            output_path=output_path,
+            status_path=status_path,
+            randomized_episode=episode,
+            randomized_campaign_sha256=campaign["campaign_sha256"],
+            randomized_source_receipt_sha256=source_receipt["receipt_sha256"],
+            randomized_trajectory_path=trajectory_path,
+        )
+        if (
+            native_receipt.get("schema")
+            == RANDOMIZED_DEMONSTRATION_EPISODE_RECEIPT_SCHEMA
+        ):
+            return native_receipt
+        rows = native_receipt.get("native_trace")
+        if not isinstance(rows, list):
+            raise MechanicsContractError("native replay did not retain a trajectory")
+        trajectory_sha256 = _write_randomized_trajectory(trajectory_path, rows)
+        passed = native_receipt.get("status") == "PASS"
+        failure_reason = (
+            None if passed else _randomized_native_failure_reason(native_receipt)
+        )
+    except MechanicsContractError:
+        raise
+    except Exception as exc:
+        trajectory_sha256 = _write_randomized_trajectory(trajectory_path, [])
+        passed = False
+        failure_reason = (
+            "ROOT_INVARIANT"
+            if "root invariant failed" in str(exc).lower()
+            else "UNEXPECTED_RUNTIME_ERROR"
+        )
+        execution_error = {"type": type(exc).__name__, "message": str(exc)}
+
+    receipt = _build_randomized_episode_receipt(
+        campaign_sha256=campaign["campaign_sha256"],
+        episode=episode,
+        trajectory_sha256=trajectory_sha256,
+        native_receipt=native_receipt,
+        failure_reason=failure_reason,
+        execution_error=execution_error,
+    )
+    output_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    status_path.write_text(
+        json.dumps(
+            {
+                "status": receipt["disposition"],
+                "receipt_sha256": receipt["receipt_sha256"],
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return receipt
 
 
 def _verify_lm3_digest(
@@ -10805,6 +11139,21 @@ def main() -> int:
         action="store_true",
         help="precommit the deterministic ARM-218 LM3 smoke manifest",
     )
+    parser.add_argument(
+        "--run-randomized-demonstration-episode",
+        action="store_true",
+        help="execute exactly one precommitted ARM-218 episode without retry",
+    )
+    parser.add_argument(
+        "--aggregate-randomized-demonstration-campaign",
+        action="store_true",
+        help="aggregate the complete ARM-218 attempted denominator",
+    )
+    parser.add_argument("--randomized-campaign", type=Path)
+    parser.add_argument("--randomized-receipt-root", type=Path)
+    parser.add_argument("--episode-id")
+    parser.add_argument("--source-native-receipt", type=Path)
+    parser.add_argument("--trajectory-output", type=Path)
     parser.add_argument("--source-result-campaign", type=Path)
     parser.add_argument("--source-artifact-root", type=Path)
     parser.add_argument("--master-seed", type=int, default=218)
@@ -10936,6 +11285,56 @@ def main() -> int:
                 )
             result = build_randomized_demonstration_campaign(
                 source, plans, receipts, master_seed=args.master_seed
+            )
+        elif args.aggregate_randomized_demonstration_campaign:
+            required = (args.randomized_campaign, args.randomized_receipt_root)
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-218 aggregation requires its campaign and receipt root"
+                )
+            campaign = json.loads(
+                args.randomized_campaign.resolve(strict=True).read_bytes()
+            )
+            receipt_root = args.randomized_receipt_root.resolve(strict=True)
+            receipts = {
+                episode["episode_id"]: json.loads(
+                    (
+                        receipt_root
+                        / episode["episode_id"]
+                        / "episode_receipt.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for episode in campaign.get("episodes", [])
+            }
+            result = aggregate_randomized_demonstration_campaign(
+                campaign, receipts
+            )
+        elif args.run_randomized_demonstration_episode:
+            required = (
+                args.randomized_campaign,
+                args.episode_id,
+                args.replay_plan,
+                args.source_native_receipt,
+                args.drive_profile,
+                args.robot_usd,
+                args.trajectory_output,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-218 episode execution requires its campaign, episode id, "
+                    "plan, source receipt, drive profile, robot USD, and trajectory output"
+                )
+            result = run_randomized_demonstration_episode(
+                campaign_path=args.randomized_campaign,
+                episode_id=args.episode_id,
+                replay_plan_path=args.replay_plan,
+                source_receipt_path=args.source_native_receipt,
+                layout_path=args.layout,
+                drive_profile_path=args.drive_profile,
+                robot_usd_path=args.robot_usd,
+                output_path=args.output,
+                trajectory_path=args.trajectory_output,
+                status_path=args.status_output,
             )
         elif args.run_drive_controlled_robot_h_replay:
             required = (args.replay_plan, args.drive_profile, args.robot_usd)
@@ -12068,28 +12467,31 @@ def main() -> int:
             result = run_contract_campaign(args.layout.resolve(strict=True))
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         evidence_sha256 = result.get(
-            "receipt_sha256",
+            "result_sha256",
             result.get(
-                "binding_sha256",
+                "receipt_sha256",
                 result.get(
-                    "request_sha256",
+                    "binding_sha256",
                     result.get(
-                        "proposal_sha256",
+                        "request_sha256",
                         result.get(
-                            "policy_sha256",
+                            "proposal_sha256",
                             result.get(
-                                "predicate_sha256",
+                                "policy_sha256",
                                 result.get(
-                                    "plan_sha256",
+                                    "predicate_sha256",
                                     result.get(
-                                        "screen_sha256",
+                                        "plan_sha256",
                                         result.get(
-                                            "manifest_sha256",
+                                            "screen_sha256",
                                             result.get(
-                                                "selection_sha256",
+                                                "manifest_sha256",
                                                 result.get(
-                                                    "demonstration_sha256",
-                                                    result.get("campaign_sha256"),
+                                                    "selection_sha256",
+                                                    result.get(
+                                                        "demonstration_sha256",
+                                                        result.get("campaign_sha256"),
+                                                    ),
                                                 ),
                                             ),
                                         ),
@@ -12151,6 +12553,7 @@ def main() -> int:
             "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_COLLISION_CAMPAIGN",
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY",
             "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN",
+            "COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

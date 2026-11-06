@@ -3206,3 +3206,116 @@ def test_arm218_rejects_undeclared_or_out_of_range_parameters(arm218_contract):
     })
     with pytest.raises(mechanics.MechanicsContractError,match='outside'):
         mechanics.validate_randomized_demonstration_campaign(campaign)
+
+
+def test_arm218_keyboard_pose_transform_is_deterministic(arm218_contract):
+    mechanics,*_=arm218_contract
+    point=mechanics._randomized_keyboard_point_mm(
+        [10.0,0.0],offset_x_mm=1.0,offset_y_mm=-2.0,yaw_deg=90.0
+    )
+    assert point==pytest.approx([1.0,8.0])
+
+
+def test_arm218_episode_worker_retains_trace_and_complete_receipt(
+    arm218_contract,tmp_path,monkeypatch
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,source_receipts,master_seed=218
+    )
+    episode=campaign['episodes'][0]
+    target=episode['target_id']
+    source_receipt=dict(source_receipts[target])
+    source_receipt['source_plan_sha256']=plans[target]['plan_sha256']
+    source_receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in source_receipt.items()
+        if key!='receipt_sha256'
+    })
+    episode['source_receipt_sha256']=source_receipt['receipt_sha256']
+    campaign['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in campaign.items() if key!='campaign_sha256'
+    })
+    campaign_path=tmp_path/'campaign.json'
+    plan_path=tmp_path/'plan.json'
+    source_receipt_path=tmp_path/'source-receipt.json'
+    campaign_path.write_text(json.dumps(campaign),encoding='utf-8')
+    plan_path.write_text(json.dumps(plans[target]),encoding='utf-8')
+    source_receipt_path.write_text(json.dumps(source_receipt),encoding='utf-8')
+    captured={}
+    native_trace=[{
+        'time_s':0.1,'key_center_z_m':0.01,'tip_center_z_m':0.02,
+        'tip_key_separation_m':0.0,'action_index':0,'target_sequence':1,
+    }]
+    def replay(**kwargs):
+        captured.update(kwargs)
+        return {
+            'status':'PASS','receipt_sha256':'a'*64,'native_trace':native_trace,
+            'action_assessments':[],'maximum_joint_tracking_error_rad':0.01,
+            'root_pose_invariant':{'all_passed':True},
+            'randomized_key_center_board_xy_mm':[1.0,2.0],
+        }
+    monkeypatch.setattr(mechanics,'run_drive_controlled_robot_h_replay',replay)
+    output=tmp_path/'episode-receipt.json'
+    trajectory=tmp_path/'trajectory.jsonl'
+    status=tmp_path/'status.json'
+    result=mechanics.run_randomized_demonstration_episode(
+        campaign_path=campaign_path,episode_id=episode['episode_id'],
+        replay_plan_path=plan_path,source_receipt_path=source_receipt_path,
+        layout_path=tmp_path/'layout.json',drive_profile_path=tmp_path/'drive.json',
+        robot_usd_path=tmp_path/'robot.usd',output_path=output,
+        trajectory_path=trajectory,status_path=status,
+    )
+    assert captured['randomized_episode']==episode
+    assert result['complete'] is True
+    assert result['disposition']=='PASS'
+    assert result['failure_reason'] is None
+    assert result['trajectory_sha256']==hashlib.sha256(
+        trajectory.read_bytes()
+    ).hexdigest()
+    assert json.loads(output.read_text(encoding='utf-8'))==result
+
+
+def test_arm218_episode_worker_records_runtime_failure_without_retry(
+    arm218_contract,tmp_path,monkeypatch
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,source_receipts,master_seed=218
+    )
+    episode=campaign['episodes'][0]
+    target=episode['target_id']
+    source_receipt=dict(source_receipts[target])
+    source_receipt['source_plan_sha256']=plans[target]['plan_sha256']
+    source_receipt['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in source_receipt.items()
+        if key!='receipt_sha256'
+    })
+    episode['source_receipt_sha256']=source_receipt['receipt_sha256']
+    campaign['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in campaign.items() if key!='campaign_sha256'
+    })
+    paths={
+        'campaign':tmp_path/'campaign.json','plan':tmp_path/'plan.json',
+        'source':tmp_path/'source.json',
+    }
+    paths['campaign'].write_text(json.dumps(campaign),encoding='utf-8')
+    paths['plan'].write_text(json.dumps(plans[target]),encoding='utf-8')
+    paths['source'].write_text(json.dumps(source_receipt),encoding='utf-8')
+    calls=[]
+    def fail(**kwargs):
+        calls.append(kwargs)
+        raise RuntimeError('simulator unavailable')
+    monkeypatch.setattr(mechanics,'run_drive_controlled_robot_h_replay',fail)
+    trajectory=tmp_path/'trajectory.jsonl'
+    result=mechanics.run_randomized_demonstration_episode(
+        campaign_path=paths['campaign'],episode_id=episode['episode_id'],
+        replay_plan_path=paths['plan'],source_receipt_path=paths['source'],
+        layout_path=tmp_path/'layout.json',drive_profile_path=tmp_path/'drive.json',
+        robot_usd_path=tmp_path/'robot.usd',output_path=tmp_path/'receipt.json',
+        trajectory_path=trajectory,status_path=tmp_path/'status.json',
+    )
+    assert len(calls)==1
+    assert result['complete'] is True
+    assert result['disposition']=='FAIL'
+    assert result['failure_reason']=='UNEXPECTED_RUNTIME_ERROR'
+    assert trajectory.read_bytes()==b''
