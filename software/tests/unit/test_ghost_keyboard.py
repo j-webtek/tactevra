@@ -3244,6 +3244,13 @@ def test_arm219_dataset_manifest_is_deterministic_and_leakage_safe(
     assert len(first['feature_contract']['numeric_inputs'])==23
     assert len(first['normalization']['statistics'])==23
     assert all(
+        set(episode['randomized_parameters'])==set(
+            inputs[0]['randomization_contract']['ranges']
+        )
+        and len(episode['randomized_key_center_board_xy_mm'])==2
+        for episode in first['episodes']
+    )
+    assert all(
         episode['role']=='TRAINING'
         for episode in first['episodes']
         if episode['role']=='TRAINING'

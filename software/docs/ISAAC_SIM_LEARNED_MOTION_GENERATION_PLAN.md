@@ -541,7 +541,7 @@ The fresh state-policy corpus now contains all `24` attempted episodes and
 failed episodes as rejection evidence, reserves passing validation/test rows
 for evaluation, and fits 23-feature normalization only from the `12,744`
 passing training rows. The manifest hash is
-`65d5b1f12a392a296ed484c0286d62ba6256d3c8c23bc6d98e952da4b0dc4a84`.
+`a5870894ce6e734542ea2cef5bef079b8ee73a147c3a1d528eff5e0e521479f1`.
 This closes dataset assembly only; baseline fitting and held-out comparison are
 still required.
 

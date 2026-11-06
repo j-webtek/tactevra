@@ -1956,7 +1956,7 @@ all failed episodes to `REJECTION_EVIDENCE`. It fits its 23-feature
 normalization exclusively on passing training rows, verifies the six-joint
 order across every receipt, and binds every trajectory by SHA-256. The retained
 smoke manifest contains `12,744` training rows and has dataset SHA-256
-`65d5b1f12a392a296ed484c0286d62ba6256d3c8c23bc6d98e952da4b0dc4a84`.
+`a5870894ce6e734542ea2cef5bef079b8ee73a147c3a1d528eff5e0e521479f1`.
 Existing ARM-218 evidence is not silently relabelled or inferred, and neither
 the recorder nor compiler adds a hardware interface or physical authority.
 
