@@ -1960,6 +1960,18 @@ smoke manifest contains `12,744` training rows and has dataset SHA-256
 Existing ARM-218 evidence is not silently relabelled or inferred, and neither
 the recorder nor compiler adds a hardware interface or physical authority.
 
+The first bounded baseline uses deterministic closed-form ridge regression
+with `ridge_lambda=0.001` and no stochastic operations. It encodes the 23
+normalized numeric inputs plus fixed target, phase, and action-index context,
+then predicts the six-joint position proposal. Repeated fits over the retained
+corpus produce model SHA-256
+`e281114e62fdaca603dbabbb8b0ca00891648bf6929c141fa100fe3919b5d45c`.
+Training aggregate MAE/RMSE are `0.0002683071`/`0.0005495514 rad`; held-out
+aggregate MAE/RMSE are `0.0143845465`/`0.0242957649 rad`. The held-out gap is
+reported rather than concealed. The artifact is only
+`READY_FOR_ZERO_AUTHORITY_STATE_POLICY_PROPOSAL_REPLAY`: collision, mechanics,
+tracking, and fixed-root replay gates have not yet run.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed

@@ -3303,6 +3303,53 @@ def test_arm219_dataset_manifest_rejects_schema_and_joint_order_drift(
         )
 
 
+def test_arm219_state_policy_baseline_is_deterministic_and_partitioned(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    manifest=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    first=mechanics.fit_state_policy_baseline(manifest,trajectories)
+    second=mechanics.fit_state_policy_baseline(manifest,trajectories)
+    assert first==second
+    assert first['schema']==mechanics.STATE_POLICY_BASELINE_SCHEMA
+    assert first['source_dataset_sha256']==manifest['dataset_sha256']
+    assert first['hyperparameters']=={
+        'ridge_lambda':0.001,'random_seed':None,'stochastic_operations':False,
+    }
+    assert first['metrics']['training']['sample_count']==11
+    assert first['metrics']['held_out_evaluation']['sample_count']==11
+    assert first['metrics']['rejection_evidence_sample_count']==2
+    assert len(first['feature_encoding']['encoded_features'])==36
+    assert len(first['weights_by_output_joint'])==6
+    assert all(len(weights)==36 for weights in first['weights_by_output_joint'])
+    assert first['proposal_replay_status']=='NOT_RUN'
+    assert first['hardware_access'] is first['physical_authority'] is False
+
+
+def test_arm219_state_policy_baseline_rejects_tampered_inputs(arm218_contract):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    manifest=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    episode_id=campaign['episodes'][0]['episode_id']
+    trajectories[episode_id]+=b'{}\n'
+    with pytest.raises(mechanics.MechanicsContractError,match='digest'):
+        mechanics.fit_state_policy_baseline(manifest,trajectories)
+    with pytest.raises(mechanics.MechanicsContractError,match='positive'):
+        mechanics.fit_state_policy_baseline(
+            manifest,{key:value for key,value in trajectories.items() if key!=episode_id}
+            | {episode_id:trajectories[episode_id][:-3]},ridge_lambda=0.0
+        )
+
+
 def test_arm218_rejects_undeclared_or_out_of_range_parameters(arm218_contract):
     mechanics,source,plans,receipts=arm218_contract
     campaign=mechanics.build_randomized_demonstration_campaign(
